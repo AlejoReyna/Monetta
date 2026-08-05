@@ -112,7 +112,8 @@ class Explainer {
 
     // Only shout about a discount worth noticing. Below ~10% the badge reads as
     // noise and trains people to ignore it.
-    if (scored.signals.contains(RecoSignal.onSale) && discountFraction >= 0.10) {
+    if (scored.signals.contains(RecoSignal.onSale) &&
+        discountFraction >= 0.10) {
       final percent = (discountFraction * 100).round();
       return RecoReason(ReasonKind.priceDrop, 'Bajó de precio · -$percent%');
     }
@@ -120,7 +121,10 @@ class Explainer {
     if (scored.signals.contains(RecoSignal.newArrival) &&
         brand != null &&
         topBrands.contains(brand)) {
-      return RecoReason(ReasonKind.newFromBrand, 'Nuevo de ${brandLabel(brand)}');
+      return RecoReason(
+        ReasonKind.newFromBrand,
+        'Nuevo de ${brandLabel(brand)}',
+      );
     }
 
     final matchesBrand = brand != null && topBrands.contains(brand);

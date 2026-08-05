@@ -67,7 +67,11 @@ class NormalizationRules {
   /// every pale pink bag collapses into plain pink.
   static Map<String, List<String>> _foldAliases(Map<String, List<String>> raw) {
     return raw.map((canonical, aliases) {
-      final folded = aliases.map(fold).where((a) => a.isNotEmpty).toSet().toList()
+      final folded = aliases
+          .map(fold)
+          .where((a) => a.isNotEmpty)
+          .toSet()
+          .toList()
         ..sort((a, b) => b.length.compareTo(a.length));
       return MapEntry(canonical, folded);
     });

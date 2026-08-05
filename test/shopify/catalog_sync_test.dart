@@ -188,7 +188,8 @@ void main() {
       expect(transport.requestedVariables[1]['after'], 'cursor-1');
     });
 
-    test('stops rather than looping when hasNextPage lies about a cursor', () async {
+    test('stops rather than looping when hasNextPage lies about a cursor',
+        () async {
       // hasNextPage true with a null endCursor would otherwise spin forever.
       final transport = FakeTransport([
         page(
@@ -224,8 +225,11 @@ void main() {
 
   group('StorefrontClient', () {
     test('treats HTTP 200 with an errors array as a failure', () async {
-      Future<Map<String, dynamic>> transport(Uri _, Map<String, String> __,
-              String ___) async =>
+      Future<Map<String, dynamic>> transport(
+        Uri _,
+        Map<String, String> __,
+        String ___,
+      ) async =>
           {
             'errors': [
               {'message': 'Field does not exist'},
@@ -250,8 +254,11 @@ void main() {
     });
 
     test('marks throttling as retryable', () async {
-      Future<Map<String, dynamic>> transport(Uri _, Map<String, String> __,
-              String ___) async =>
+      Future<Map<String, dynamic>> transport(
+        Uri _,
+        Map<String, String> __,
+        String ___,
+      ) async =>
           {
             'errors': [
               {'message': 'Throttled: too many requests'},

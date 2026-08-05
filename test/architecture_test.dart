@@ -48,7 +48,8 @@ void main() {
         expect(
           offenders,
           isEmpty,
-          reason: 'These files must stay Flutter-free (see docs/ARCHITECTURE.md '
+          reason:
+              'These files must stay Flutter-free (see docs/ARCHITECTURE.md '
               '§ "The two rules"):\n${offenders.join('\n')}',
         );
       });

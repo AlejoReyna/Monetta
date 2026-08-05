@@ -8,7 +8,6 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monetta_app/data/normalize/facets.dart';
 import 'package:monetta_app/data/normalize/normalizer.dart';
 import 'package:monetta_app/data/normalize/rules.dart';
 import 'package:monetta_app/reco/profile.dart';
@@ -23,9 +22,8 @@ void main() {
   );
   final products = loadCatalogFixture();
   final normalizer = Normalizer(rules);
-  final facets = products
-      .map((p) => normalizer.normalize(p, now: kSnapshotDate))
-      .toList();
+  final facets =
+      products.map((p) => normalizer.normalize(p, now: kSnapshotDate)).toList();
 
   final recommender = Recommender(facetWeights: rules.facetWeights);
 

@@ -181,11 +181,19 @@ class Recommender {
       var pickedIndex = 0;
 
       if (runLength >= weights.maxConsecutiveSameBrand) {
-        // Find the best-scoring candidate that breaks the run. Bounded lookahead
-        // keeps this O(n·k) rather than O(n²) on a long tail of one brand.
-        const lookahead = 40;
-        final end = pending.length < lookahead ? pending.length : lookahead;
-        for (var i = 0; i < end; i++) {
+        // Scan the whole remaining list for the best-scoring candidate that
+        // breaks the run.
+        //
+        // This deliberately does NOT use a bounded lookahead window. An earlier
+        // version capped the scan at 40 and silently did nothing on this
+        // catalog: 147 of 271 products are Guess, so the top 40 candidates for
+        // a Guess-affinity profile are *all* Guess and no alternative is ever
+        // found. The cost is O(limit × pending), which is microseconds at
+        // catalog sizes this app will ever see.
+        //
+        // If nothing breaks the run, pickedIndex stays 0 — only one brand is
+        // left, and returning fewer results would be worse than repeating.
+        for (var i = 0; i < pending.length; i++) {
           if ((pending[i].facets.brand?.value ?? '') != runBrand) {
             pickedIndex = i;
             break;

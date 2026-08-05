@@ -146,12 +146,11 @@ class CatalogSync {
       }
 
       final pageInfo = connection is Map ? connection['pageInfo'] : null;
-      final hasNext = pageInfo is Map && pageInfo['hasNextPage'] == true;
-      if (!hasNext) break;
+      if (pageInfo is! Map || pageInfo['hasNextPage'] != true) break;
 
-      final endCursor = pageInfo is Map ? pageInfo['endCursor'] as String? : null;
       // Defensive: hasNextPage true with no cursor would spin forever.
-      if (endCursor == null) break;
+      final endCursor = pageInfo['endCursor'];
+      if (endCursor is! String) break;
       after = endCursor;
     }
 

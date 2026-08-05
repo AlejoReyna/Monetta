@@ -27,6 +27,9 @@ test: ## Run all tests
 test-core: ## Run only the pure-Dart core tests (fast: no widget pump)
 	$(FLUTTER) test test/normalize test/reco
 
+report: ## Print the catalog health report the owner acts on
+	$(DART) run bin/catalog_report.dart
+
 analyze: ## Static analysis
 	$(FLUTTER) analyze
 

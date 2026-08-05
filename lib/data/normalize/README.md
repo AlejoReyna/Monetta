@@ -119,8 +119,8 @@ colours      negro 79 · cafe 65 · blanco 57 · beige 35 · rosa 29 · gris 20
 The brand jump from 86.7% → 99.6% is the whole point of the module: the title fallback
 rescues exactly the 35 products whose `vendor` is the store name.
 
-**The known misses are correct behaviour, not bugs** — each is a genuine data gap that
-lands in the health report:
+**The known misses are correct behaviour, not bugs** — each is a genuine gap in the source
+data, not a rule failure:
 
 - `Bolsa Tote Blanco Monograma` — no brand anywhere in tags or title.
 - `Bolsa Steve Madden CrossbodyBlanco Hueso…` — missing space in the source title, so
@@ -128,6 +128,11 @@ lands in the health report:
 - `Bolso Guess de Rayas Azul Marino y Crema` — no silhouette word at all.
 - Four products with no colour word (`…Serpiente`, `…Rayas Zebra` are patterns, not
   colours; `Marilyn Medium Tote` and `Long Zip Around Wallet` are model names).
+
+Only the **first two reach the health report** (`dart run bin/catalog_report.dart`). The
+others are classified confidently enough on brand and category that they still recommend
+well, and `needsAttention` is deliberately tuned to surface work that changes outcomes
+rather than every imperfection — a report the owner cannot finish is a report they ignore.
 
 ## 6. Gotchas
 

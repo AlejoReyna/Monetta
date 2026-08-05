@@ -132,8 +132,8 @@ class Normalizer {
   FacetValue? _resolveCategory(Product product, List<_Signal> signals) {
     final override = product.categoryOverride;
     if (override != null && override.trim().isNotEmpty) {
-      final canonical = _canonicalFor(rules.categories, fold(override)) ??
-          fold(override);
+      final canonical =
+          _canonicalFor(rules.categories, fold(override)) ?? fold(override);
       return FacetValue(
         canonical,
         FacetSource.metafieldOverride,

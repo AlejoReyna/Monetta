@@ -118,15 +118,15 @@ class CanonicalFacets {
         (category?.confidence ?? 0) * categoryWeight +
         (silhouette?.confidence ?? 0) * silhouetteWeight;
     // Silhouette is only expected for bags; don't punish a wallet for lacking one.
-    final applicable = category?.value == 'bolsa'
-        ? 1.0
-        : brandWeight + categoryWeight;
+    final applicable =
+        category?.value == 'bolsa' ? 1.0 : brandWeight + categoryWeight;
     return (score / applicable).clamp(0.0, 1.0);
   }
 
   /// True when this product is too poorly classified to recommend confidently.
   /// These surface in the catalog health report.
-  bool get needsAttention => brand == null || category == null || confidence < 0.5;
+  bool get needsAttention =>
+      brand == null || category == null || confidence < 0.5;
 
   /// Sparse facet vector consumed by `reco/`.
   ///

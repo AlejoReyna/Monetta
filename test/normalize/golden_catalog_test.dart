@@ -25,9 +25,8 @@ NormalizationRules loadBundledRules() {
 void main() {
   final products = loadCatalogFixture();
   final normalizer = Normalizer(loadBundledRules());
-  final facets = products
-      .map((p) => normalizer.normalize(p, now: kSnapshotDate))
-      .toList();
+  final facets =
+      products.map((p) => normalizer.normalize(p, now: kSnapshotDate)).toList();
 
   double rateOf(bool Function(int index) predicate) {
     var hits = 0;
@@ -48,7 +47,8 @@ void main() {
       expect(
         rate,
         greaterThanOrEqualTo(0.95),
-        reason: 'brand resolution regressed to ${(rate * 100).toStringAsFixed(1)}%',
+        reason:
+            'brand resolution regressed to ${(rate * 100).toStringAsFixed(1)}%',
       );
     });
 
@@ -57,8 +57,7 @@ void main() {
       var vendorOnly = 0;
       for (final product in products) {
         final vendor = product.vendor.trim().toLowerCase();
-        if (vendor.isNotEmpty &&
-            !rules.storeVendorAliases.contains(vendor)) {
+        if (vendor.isNotEmpty && !rules.storeVendorAliases.contains(vendor)) {
           vendorOnly++;
         }
       }
@@ -84,13 +83,17 @@ void main() {
 
     test('every category collapses to the canonical vocabulary', () {
       const canonical = {
-        'bolsa', 'cartera', 'tarjetero', 'monedero', 'reloj',
-        'cosmetiquera', 'set', 'accesorio',
+        'bolsa',
+        'cartera',
+        'tarjetero',
+        'monedero',
+        'reloj',
+        'cosmetiquera',
+        'set',
+        'accesorio',
       };
-      final seen = facets
-          .map((f) => f.category?.value)
-          .whereType<String>()
-          .toSet();
+      final seen =
+          facets.map((f) => f.category?.value).whereType<String>().toSet();
       expect(seen.difference(canonical), isEmpty);
     });
 

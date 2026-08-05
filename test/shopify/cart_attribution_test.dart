@@ -97,8 +97,11 @@ void main() {
         expect(code, startsWith('MN-'));
         expect(code, hasLength(7));
         final body = code.substring(3);
-        expect(RegExp('[AEIOU01OI]').hasMatch(body), isFalse,
-            reason: '$code contains an ambiguous character');
+        expect(
+          RegExp('[AEIOU01OI]').hasMatch(body),
+          isFalse,
+          reason: '$code contains an ambiguous character',
+        );
       }
     });
 

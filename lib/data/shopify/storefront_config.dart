@@ -32,8 +32,7 @@ class StorefrontConfig {
   /// `unstable`.
   static const String defaultApiVersion = '2026-07';
 
-  Uri get endpoint =>
-      Uri.https(shopDomain, '/api/$apiVersion/graphql.json');
+  Uri get endpoint => Uri.https(shopDomain, '/api/$apiVersion/graphql.json');
 
   Map<String, String> get headers => <String, String>{
         'Content-Type': 'application/json',

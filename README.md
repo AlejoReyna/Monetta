@@ -13,8 +13,9 @@ Two things make this more than a storefront wrapper:
 
 ## Status
 
-Phase 0 — pure-Dart core is in place. Toolchain install and the Flutter platform scaffold
-are the next step; see `docs/ARCHITECTURE.md` and the plan.
+Phase 0 — pure-Dart core is in place and **green**: `flutter analyze` reports no issues and
+**52 tests pass** (Flutter 3.44.8 / Dart 3.12.2). The Flutter platform scaffold
+(`flutter create` for the iOS/Android folders) is the next step; see `docs/ARCHITECTURE.md`.
 
 | Module | State |
 |---|---|
@@ -28,16 +29,15 @@ are the next step; see `docs/ARCHITECTURE.md` and the plan.
 
 ## Getting started
 
-Flutter is not yet installed on the build machine. Once it is:
-
 ```bash
-make doctor     # verify the toolchain
 make setup      # flutter pub get
-make gen        # build_runner: freezed, drift, ferry, riverpod
-make test-core  # pure-Dart core only — fast
-make test       # everything
-make run-dev
+make test       # 52 tests, ~1s
+make report     # catalog health report — the list Monetta acts on
+make analyze
 ```
+
+`make report` prints coverage, facet distribution, and the exact products to fix in
+Shopify, in Spanish, with the action to take.
 
 The pure-Dart core (`domain`, `data/normalize`, `reco`) is hand-written with **no codegen**
 on purpose, so it compiles and tests before `build_runner` has ever run.

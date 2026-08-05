@@ -15,7 +15,7 @@ List<Map<String, dynamic>> edgeNodes(Object? connection) {
   final edges = connection['edges'];
   if (edges is! List) return const [];
   return edges
-      .whereType<Map>()
+      .whereType<Map<String, dynamic>>()
       .map((e) => e['node'])
       .whereType<Map<String, dynamic>>()
       .toList();
@@ -148,8 +148,7 @@ Cart cartFromJson(Map<String, dynamic> json) {
       title: product is Map ? '${product['title'] ?? ''}' : '',
       variantTitle: merchandise is Map ? '${merchandise['title'] ?? ''}' : '',
       quantity: (line['quantity'] as num?)?.toInt() ?? 0,
-      unitPrice:
-          cost is Map ? money(cost['amountPerQuantity']) ?? 0 : 0,
+      unitPrice: cost is Map ? money(cost['amountPerQuantity']) ?? 0 : 0,
       imageUrl: image is Map ? image['url'] as String? : null,
     );
   }).toList();
