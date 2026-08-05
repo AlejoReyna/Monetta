@@ -13,6 +13,7 @@ import 'package:flutter_test/flutter_test.dart';
 const List<String> _pureDartDirectories = <String>[
   'lib/reco',
   'lib/data/normalize',
+  'lib/data/shopify',
   'lib/domain',
 ];
 

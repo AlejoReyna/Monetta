@@ -20,10 +20,9 @@ dependencies:
   # Routing / deep links
   go_router: ^14.6.2
 
-  # Shopify Storefront API (GraphQL)
-  ferry: ^0.16.1
-  ferry_flutter: ^0.9.1
-  gql_http_link: ^1.0.1
+  # Shopify Storefront API (GraphQL over plain HTTP).
+  # Deliberately no ferry/codegen — see lib/data/shopify/README.md § 3.
+  http: ^1.2.2
 
   # Local persistence
   drift: ^2.22.0
@@ -65,7 +64,6 @@ dev_dependencies:
   freezed: ^2.5.7
   json_serializable: ^6.9.0
   drift_dev: ^2.22.0
-  ferry_generator: ^0.13.0
   riverpod_generator: ^2.6.3
   custom_lint: ^0.7.0
   riverpod_lint: ^2.6.3

@@ -21,8 +21,8 @@ are the next step; see `docs/ARCHITECTURE.md` and the plan.
 | `lib/domain` | ✅ entities |
 | `lib/data/normalize` | ✅ built + validated against the live catalog |
 | `lib/reco` | ✅ built + validated |
-| `lib/data/shopify` | ⬜ next |
-| `lib/data/local` | ⬜ |
+| `lib/data/shopify` | ✅ queries, delta sync, mappers, attribution |
+| `lib/data/local` | ⬜ next — drift cache, event log, wishlist |
 | `lib/features/*` | ⬜ |
 | iOS/Android platform folders | ⬜ needs `flutter create` |
 

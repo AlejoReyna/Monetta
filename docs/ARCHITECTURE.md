@@ -44,7 +44,7 @@ Shopify so we never touch payment data.
 | Module | Responsibility | Flutter-free? | Doc |
 |---|---|---|---|
 | `core/` | Config, Remote Config, theme, l10n, errors | no | [README](../lib/core/README.md) |
-| `data/shopify/` | Storefront API client, queries, delta sync | yes | [README](../lib/data/shopify/README.md) |
+| `data/shopify/` | Storefront API client, queries, delta sync | **yes** | [README](../lib/data/shopify/README.md) |
 | `data/normalize/` | Raw Shopify product → canonical facets | **yes** | [README](../lib/data/normalize/README.md) |
 | `data/local/` | Drift database: cache, events, wishlist | yes | [README](../lib/data/local/README.md) |
 | `data/repositories/` | Wire shopify + local + normalize together | yes | — |
@@ -54,12 +54,16 @@ Shopify so we never touch payment data.
 
 ## The two rules that keep this maintainable
 
-**1. `reco/`, `data/normalize/` and `domain/` must not import Flutter.**
+**1. `reco/`, `data/normalize/`, `data/shopify/` and `domain/` must not import Flutter.**
 
 These are the parts most worth testing and least likely to change for UI reasons. Keeping
 them framework-free means their tests run in milliseconds with no widget pump, and it makes
 the scoring logic portable if any of it ever needs to move server-side in Phase 2 (which it
 will, for collaborative filtering).
+
+`data/shopify/` stays in this set because its HTTP call is *injected* as a
+`GraphQLTransport` rather than owned — which is also what lets the entire sync contract be
+tested against a fake transport with no network.
 
 This is enforced by a test, not by convention — see `test/architecture_test.dart`. It fails
 the build if a `package:flutter` import appears in those directories.
@@ -104,9 +108,18 @@ the revenue-share arrangement auditable.
 
 ## Codegen
 
-`build_runner` drives freezed, json_serializable, drift, ferry and riverpod_generator.
-Run `make gen`. **Generated files are committed** — CI then builds without a codegen step,
-which keeps PR runs fast and makes generated-output diffs reviewable.
+`build_runner` drives freezed, json_serializable, drift and riverpod_generator. Run
+`make gen`. **Generated files are committed** — CI then builds without a codegen step, which
+keeps PR runs fast and makes generated-output diffs reviewable.
+
+**GraphQL is deliberately *not* code-generated.** The original plan specified `ferry`; the
+Storefront surface turned out to be ~10 documents over 4 entity shapes, which hand-written
+tested mappers cover with less machinery and no `build_runner` dependency for the data layer
+to compile. Rationale and the path back: [`lib/data/shopify/README.md`](../lib/data/shopify/README.md) § 3.
+
+`domain/`, `data/normalize/`, `data/shopify/` and `reco/` therefore all compile and test
+**before `build_runner` has ever run** — which is why the core could be built and validated
+ahead of the toolchain install.
 
 ## What lives where — decision log
 
