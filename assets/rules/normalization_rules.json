@@ -1,0 +1,114 @@
+{
+  "_comment": [
+    "Canonical facet vocabulary for the Monetta catalog.",
+    "Aliases are matched after folding (lowercase + accent-stripped), so you do",
+    "NOT need to list 'Café' and 'Cafe' separately — but you DO need to list",
+    "gender variants ('negro'/'negra') and English/Spanish pairs ('black'/'negro').",
+    "This file is bundled as a fallback; Firebase Remote Config key",
+    "'normalization_rules' overrides it at runtime. Bump 'version' on every edit.",
+    "Seeded from the live catalog on 2026-08-05: 271 products, 174 distinct tags."
+  ],
+  "version": 1,
+  "newArrivalDays": 30,
+
+  "storeVendorAliases": ["Monetta", "Monetta Wholesale", "Monetta Wholesale LLC"],
+
+  "brands": {
+    "guess": ["Guess", "GUESS"],
+    "coach": ["Coach", "COACH"],
+    "michael_kors": ["Michael Kors", "MICHAEL KORS", "MK", "Michael Kors Collection"],
+    "steve_madden": ["Steve Madden", "SteveMadden", "Madden"],
+    "tommy_hilfiger": ["Tommy Hilfiger", "Tommy"],
+    "anne_klein": ["Anne Klein", "AK Anne Klein"],
+    "christian_dior": ["Christian Dior", "Dior"],
+    "olaplex": ["Olaplex", "Olalplex"],
+    "the_ordinary": ["The Ordinary"],
+    "summer_fridays": ["Summer Fridays"],
+    "laneige": ["Laneige"],
+    "rhode": ["Rhode"]
+  },
+
+  "categories": {
+    "bolsa": [
+      "Bolsa", "Bolso", "Bolsas", "Bolsos", "Bag", "Handbag",
+      "Bolso mujer", "Bolsa de mano", "Bolsa Crossbody", "Bolso Tote",
+      "Bolsa Hobo", "Bolsa Shoulder Bag", "Crossbody", "Crossbody Bag",
+      "Tote", "Satchel", "Shoulder", "Shoulder Bag", "Mini Bag", "Clutch", "Hobo"
+    ],
+    "cartera": ["Cartera", "Carteras", "Wallet", "Billetera", "Bifold", "Tipo sobre"],
+    "tarjetero": ["Tarjetero", "Tarjeteros", "Card holder", "Cardholder", "Porta tarjetas"],
+    "monedero": ["Monedero", "Coin purse", "Portamonedas"],
+    "reloj": ["Reloj", "Relojes", "Watch"],
+    "cosmetiquera": ["Cosmetiquera", "Neceser", "Makeup bag", "Pouch"],
+    "set": ["Set de Regalo", "Set", "Kit", "Caja de regalo", "Gift set"],
+    "accesorio": ["Accesorio", "Accesorios", "Pañuelo", "Wristlet", "Llavero"]
+  },
+
+  "silhouettes": {
+    "tote": ["Tote", "Bolso Tote", "Mini tote", "Shopper"],
+    "crossbody": ["Crossbody", "Crossbody Bag", "Bolsa Crossbody", "Bandolera", "Incluye correa crossbody"],
+    "shoulder": ["Shoulder", "Shoulder Bag", "Bolsa Shoulder Bag", "Hombro", "De Hombro", "Asa de Hombro"],
+    "satchel": ["Satchel", "Asa de Mano"],
+    "hobo": ["Hobo", "Bolsa Hobo"],
+    "clutch": ["Clutch", "Tipo sobre", "Sobre"],
+    "mini": ["Mini Bag", "Mini", "Micro"],
+    "wristlet": ["Wristlet", "Muñequera"]
+  },
+
+  "colors": {
+    "negro": ["Negro", "Negra", "Black", "Jet"],
+    "blanco": ["Blanco", "Blanca", "White", "Vanilla", "Crema", "Cream"],
+    "cafe": ["Café", "Cafe", "Brown", "Chocolate", "Camel", "Taupe", "Natural", "Coñac", "Yute", "Saddle", "Miel", "Tan"],
+    "beige": ["Beige", "Nude", "Arena", "Hueso"],
+    "gris": ["Gris", "Grey", "Gray", "Plata", "Silver"],
+    "rosa": ["Rosa", "Rosado", "Pink", "Rosa Claro", "Rose", "Fiusha", "Fucsia", "Fuchsia", "Palo de rosa"],
+    "azul": ["Azul", "Blue", "Azul marino", "Marino", "Navy", "Denim", "Mezclilla", "Celeste"],
+    "rojo": ["Rojo", "Roja", "Red", "Vino", "Burgundy", "Wine"],
+    "dorado": ["Dorado", "Dorada", "Gold", "Oro", "Rose Gold", "Cadena dorada"],
+    "verde": ["Verde", "Green", "Olivo", "Militar"],
+    "morado": ["Morado", "Lila", "Purple", "Iris"],
+    "amarillo": ["Amarillo", "Yellow", "Mostaza"],
+    "multicolor": ["Multicolor", "Multi"]
+  },
+
+  "patterns": {
+    "monograma": ["Monograma", "Monogram", "Signature", "Logo"],
+    "floral": ["Floral", "Flores", "Flower"],
+    "cerezas": ["Cerezas", "Cherry", "Cereza"],
+    "limones": ["Limones", "Limon", "Lemon"],
+    "rayas": ["Rayas", "Stripes", "Striped"],
+    "animal_print": ["Animal print", "Serpiente", "Snake", "Pitón", "Piton", "Zebra", "Cebra", "Leopardo", "Leopard"],
+    "relieve": ["Relieve", "Embossed", "Texturizado"],
+    "acolchado": ["Acolchado", "Quilted", "Matelassé"],
+    "liso": ["Liso", "Lisa", "Plain", "Solid"]
+  },
+
+  "_priceBandsComment": [
+    "Derived from the live price distribution on 2026-08-05:",
+    "min 549, q1 1279, median 1429, q3 1599, max 11624 MXN.",
+    "The quartiles are tightly clustered (1279-1599), so raw quartile cuts would",
+    "be meaningless to a shopper. These bands are rounded to numbers a customer",
+    "would recognise while still splitting the catalog usefully."
+  ],
+  "priceBands": [
+    { "id": "accesible", "maxExclusive": 1000 },
+    { "id": "medio", "maxExclusive": 1600 },
+    { "id": "alto", "maxExclusive": 2500 },
+    { "id": "premium", "maxExclusive": null }
+  ],
+
+  "_facetWeightsComment": [
+    "Relative pull of each facet kind on the recommendation vector.",
+    "Brand and silhouette dominate because that is how this category is actually",
+    "shopped ('quiero una Guess crossbody'); colour is a real but weaker",
+    "preference; price band anchors affordability. Tune once CTR data exists."
+  ],
+  "facetWeights": {
+    "brand": 1.0,
+    "silhouette": 0.85,
+    "category": 0.8,
+    "color": 0.5,
+    "pattern": 0.35,
+    "price_band": 0.6
+  }
+}

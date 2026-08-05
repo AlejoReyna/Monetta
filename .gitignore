@@ -1,0 +1,44 @@
+# Flutter/Dart
+.dart_tool/
+.packages
+build/
+.flutter-plugins
+.flutter-plugins-dependencies
+.fvm/flutter_sdk
+coverage/
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.swp
+.DS_Store
+
+# iOS
+ios/Pods/
+ios/.symlinks/
+ios/Flutter/Flutter.framework
+ios/Flutter/Flutter.podspec
+ios/Flutter/flutter_export_environment.sh
+ios/Runner/GeneratedPluginRegistrant.*
+
+# Android
+android/.gradle/
+android/local.properties
+android/key.properties
+android/app/google-services.json
+**/*.keystore
+**/*.jks
+
+# Firebase / secrets — never commit these
+ios/Runner/GoogleService-Info.plist
+lib/firebase_options.dart
+*.p8
+*.p12
+.env
+.env.*
+fastlane/report.xml
+fastlane/Preview.html
+
+# Generated code is COMMITTED on purpose (see docs/ARCHITECTURE.md § Codegen),
+# so no *.g.dart / *.freezed.dart ignores here.
