@@ -1,0 +1,37 @@
+PODS:
+  - checkout_sheet_kit_flutter (0.0.1):
+    - Flutter
+    - ShopifyCheckoutSheetKit (~> 3.0)
+  - Flutter (1.0.0)
+  - flutter_secure_storage (6.0.0):
+    - Flutter
+  - ShopifyCheckoutSheetKit (3.8.1):
+    - ShopifyCheckoutSheetKit/Core (= 3.8.1)
+  - ShopifyCheckoutSheetKit/Core (3.8.1)
+
+DEPENDENCIES:
+  - checkout_sheet_kit_flutter (from `.symlinks/plugins/checkout_sheet_kit_flutter/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_secure_storage (from `.symlinks/plugins/flutter_secure_storage/ios`)
+
+SPEC REPOS:
+  trunk:
+    - ShopifyCheckoutSheetKit
+
+EXTERNAL SOURCES:
+  checkout_sheet_kit_flutter:
+    :path: ".symlinks/plugins/checkout_sheet_kit_flutter/ios"
+  Flutter:
+    :path: Flutter
+  flutter_secure_storage:
+    :path: ".symlinks/plugins/flutter_secure_storage/ios"
+
+SPEC CHECKSUMS:
+  checkout_sheet_kit_flutter: 1923a32808a924e722e7afa30078d60885abcd16
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_secure_storage: 1ed9476fba7e7a782b22888f956cce43e2c62f13
+  ShopifyCheckoutSheetKit: f3bddd39ab853667aaae0fa324eec301ff1c751a
+
+PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+
+COCOAPODS: 1.17.0

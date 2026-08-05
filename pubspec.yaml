@@ -77,3 +77,4 @@ flutter:
   assets:
     - assets/rules/
     - assets/images/
+    - assets/catalog/
