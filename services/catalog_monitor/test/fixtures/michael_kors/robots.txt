@@ -1,0 +1,22 @@
+# US File
+# Sanitized copy of the public https://www.michaelkors.com/robots.txt, fetched
+# 2026-08-10, trimmed to the rules relevant to this crawler's paths.
+
+User-agent: *
+Disallow: /account/
+Disallow: /Product-ShowQuickView
+Disallow: /cart/
+Disallow: /wishlist/
+Disallow: /*?start*
+Disallow: /*pmin*
+Disallow: /*pmax*
+Disallow: /*prefn*
+Disallow: /*prefv*
+Disallow: /*srule*
+Disallow: /*demandware.store*
+Disallow: /*spangle*
+
+User-agent: botify
+Disallow: /product/
+
+Sitemap: https://www.michaelkors.com/sitemap_index.xml

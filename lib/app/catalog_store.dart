@@ -18,11 +18,15 @@ import 'package:flutter/services.dart' show rootBundle;
 import '../data/normalize/facets.dart';
 import '../data/normalize/normalizer.dart';
 import '../data/normalize/rules.dart';
+import '../data/shopify/catalog_item_mapper.dart';
+import '../domain/catalog_item.dart';
+import '../domain/bag_line.dart';
 import '../domain/product.dart';
 import '../reco/events.dart';
 import '../reco/explainer.dart';
 import '../reco/profile.dart';
 import '../reco/scorer.dart';
+import 'mixed_feed.dart';
 
 class Recommendation {
   const Recommendation({
@@ -39,9 +43,13 @@ class Recommendation {
 class CatalogStore extends ChangeNotifier {
   CatalogStore();
 
+  static String? _rulesAsset;
+  static String? _catalogAsset;
+
   final List<InteractionEvent> _events = [];
   final Set<String> _viewed = {};
   final Set<String> _wishlist = {};
+  final Map<String, int> _bagQuantities = {};
 
   List<Product> products = const [];
   Map<String, CanonicalFacets> facetsById = const {};
@@ -57,16 +65,40 @@ class CatalogStore extends ChangeNotifier {
   Set<String> get wishlist => _wishlist;
   int get eventCount => _events.length;
 
+  /// The bag remains local until the shopper commits to secure checkout.
+  /// At that boundary these variant ids and quantities become Shopify Cart
+  /// lines and Shopify owns address and payment collection.
+  List<BagLine> get bagLines => [
+        for (final entry in _bagQuantities.entries)
+          if (_productById(entry.key) case final product?)
+            if (_availableVariant(product) case final variant?)
+              BagLine(
+                product: product,
+                variant: variant,
+                quantity: entry.value,
+              ),
+      ];
+
+  int get bagQuantity =>
+      _bagQuantities.values.fold(0, (sum, quantity) => sum + quantity);
+
+  double get bagSubtotal =>
+      bagLines.fold(0, (sum, line) => sum + line.lineTotal);
+
   Future<void> loadFromAsset() async {
-    final rulesRaw = await rootBundle.loadString(
-      'assets/rules/normalization_rules.json',
-    );
+    final rulesRaw = _rulesAsset ??=
+        await rootBundle.loadString('assets/rules/normalization_rules.json');
     rules = NormalizationRules.fromJson(
       jsonDecode(rulesRaw) as Map<String, dynamic>,
     );
     _recommender = Recommender(facetWeights: rules.facetWeights);
 
-    final catalogRaw = await rootBundle.loadString('assets/catalog/catalog.json');
+    // `AssetBundle.loadString` moves files over 50 KB to a helper isolate.
+    // The catalog is larger than that and helper isolates are not available
+    // in every Flutter test/runtime surface, so decode the already-loaded
+    // bytes directly. At ~235 KB this remains comfortably below a frame's
+    // worth of work on supported devices and avoids a startup deadlock.
+    final catalogRaw = _catalogAsset ??= await _loadCatalogAsset();
     final catalog = jsonDecode(catalogRaw) as Map<String, dynamic>;
     products = (catalog['products'] as List<dynamic>)
         .map((e) => _productFromSnapshot(e as Map<String, dynamic>))
@@ -83,9 +115,19 @@ class CatalogStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  static Future<String> _loadCatalogAsset() async {
+    final data = await rootBundle.load('assets/catalog/catalog.json');
+    return utf8.decode(
+      data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
+    );
+  }
+
   /// Seeds the profile from the onboarding taps so the very first feed is
   /// already personalized, with zero browsing history.
-  void seedFrom({required List<String> brands, required List<String> categories}) {
+  void seedFrom({
+    required List<String> brands,
+    required List<String> categories,
+  }) {
     profile = seedProfileFromOnboarding(
       brands: brands,
       categories: categories,
@@ -123,6 +165,48 @@ class CatalogStore extends ChangeNotifier {
       _wishlist.add(productId);
       record(EventType.wishlistAdd, productId: productId);
     }
+  }
+
+  void addToBag(Product product) {
+    if (_availableVariant(product) == null) return;
+    _bagQuantities.update(
+      product.id,
+      (quantity) => quantity + 1,
+      ifAbsent: () => 1,
+    );
+    record(EventType.addToCart, productId: product.id);
+  }
+
+  void updateBagQuantity(String productId, int quantity) {
+    if (quantity <= 0) {
+      removeFromBag(productId);
+      return;
+    }
+    if (!_bagQuantities.containsKey(productId)) return;
+    _bagQuantities[productId] = quantity.clamp(1, 10);
+    notifyListeners();
+  }
+
+  void removeFromBag(String productId) {
+    if (_bagQuantities.remove(productId) != null) notifyListeners();
+  }
+
+  Product? _productById(String id) {
+    for (final product in products) {
+      if (product.id == id) return product;
+    }
+    return null;
+  }
+
+  ProductVariant? _availableVariant(Product product) {
+    ProductVariant? cheapest;
+    for (final variant in product.variants) {
+      if (!variant.available) continue;
+      if (cheapest == null || variant.price < cheapest.price) {
+        cheapest = variant;
+      }
+    }
+    return cheapest;
   }
 
   void _rebuildProfile() {
@@ -180,7 +264,51 @@ class CatalogStore extends ChangeNotifier {
         .toList();
   }
 
+  /// The unified feed: Monetta products and external research items ranked
+  /// through the same [Recommender], deduplicated (Monetta preferred on an
+  /// exact brand+title match), so an external item can appear naturally
+  /// interleaved among Monetta recommendations rather than only in a
+  /// separate rail. See `app/mixed_feed.dart#unifiedRecommendations`.
+  List<MixedRecommendation> mixedFeed({
+    required List<CatalogItem> external,
+    int limit = 40,
+  }) {
+    if (!ready) return const [];
+
+    final discounts = <String, double>{
+      for (final p in products)
+        if (p.isOnSale) p.id: p.discountFraction,
+    };
+
+    return unifiedRecommendations(
+      recommender: _recommender,
+      explainer: _explainer,
+      profile: profile,
+      monettaProducts: products,
+      monettaFacetsById: facetsById,
+      externalItems: external,
+      context: ScoringContext(
+        viewedProductIds: _viewed,
+        wishlistedProductIds: _wishlist,
+        discountByProductId: discounts,
+      ),
+      limit: limit,
+    );
+  }
+
   CanonicalFacets? facetsFor(String productId) => facetsById[productId];
+
+  /// Every Monetta product mapped into the source-independent [CatalogItem]
+  /// shape. Used by the mixed-feed dedupe rule (`app/mixed_feed.dart`) — the
+  /// external section must know Monetta's brand+title set even though it
+  /// never re-ranks Monetta items through this list.
+  List<CatalogItem> get catalogItems => [
+        for (final product in products)
+          catalogItemFromShopifyProduct(
+            product,
+            facets: facetsById[product.id],
+          ),
+      ];
 
   /// Brands present in the catalog, most stocked first — drives onboarding.
   List<String> get availableBrands {
