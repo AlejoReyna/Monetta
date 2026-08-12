@@ -5,6 +5,11 @@ analyzer:
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "lib/data/shopify/generated/**"
+    # `flutter build ios` vendors the whole FlutterFire repo — its own tests
+    # included — into build/ios/SourcePackages. That is third-party source
+    # which does not resolve against this app's pubspec, and it buries
+    # `flutter analyze` under ~12k errors belonging to nobody.
+    - "build/**"
   language:
     strict-casts: true
     strict-inference: true

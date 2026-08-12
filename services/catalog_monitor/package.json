@@ -1,0 +1,39 @@
+{
+  "name": "@monetta/catalog-monitor",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Internal prototype: monitors public US Coach, Michael Kors, GUESS, and Steve Madden catalogs once daily and serves owner-procurement candidates. No supplier-authorization gate, affiliate tracking, checkout, or fulfillment.",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "migrate": "tsx --env-file-if-exists=.env src/db/migrate.ts",
+    "start": "tsx --env-file-if-exists=.env src/api/server.ts",
+    "monitor": "tsx --env-file-if-exists=.env src/monitor/scheduler.ts",
+    "crawl": "tsx --env-file-if-exists=.env src/cli/manualCrawl.ts",
+    "seed-demo": "tsx --env-file-if-exists=.env src/cli/seedDemoData.ts",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "compression": "^1.7.5",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "pg": "^8.13.1",
+    "playwright": "1.62.1"
+  },
+  "devDependencies": {
+    "@types/compression": "^1.7.5",
+    "@types/express": "^4.17.21",
+    "@types/node": "^22.10.5",
+    "@types/node-cron": "^3.0.11",
+    "@types/pg": "^8.11.10",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.2",
+    "vitest": "^2.1.8"
+  }
+}

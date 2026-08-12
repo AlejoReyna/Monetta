@@ -1,0 +1,70 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: catalog_monitor
+      POSTGRES_PASSWORD: catalog_monitor
+      POSTGRES_DB: catalog_monitor
+    ports:
+      - "5433:5432"
+    volumes:
+      - catalog_monitor_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U catalog_monitor"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: applies pending SQL migrations and exits. `api` and `monitor`
+  # both wait for this to exit 0 before they start — see their `depends_on`.
+  migrate:
+    build: .
+    command: ["node", "dist/db/migrate.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://catalog_monitor:catalog_monitor@postgres:5432/catalog_monitor
+
+  api:
+    build: .
+    command: ["node", "dist/api/server.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://catalog_monitor:catalog_monitor@postgres:5432/catalog_monitor
+      PORT: 8081
+      # Everything below is deliberately explicit rather than inherited from
+      # a shell environment, so `docker compose up` never accidentally
+      # starts a live crawl.
+      LIVE_CRAWL_ENABLED: "false"
+      PLAYWRIGHT_FALLBACK_ENABLED: "false"
+    ports:
+      - "8081:8081"
+
+  # Runs `dist/monitor/scheduler.js` — the process that registers the daily
+  # cron job. With LIVE_CRAWL_ENABLED=false (the default below) it logs once
+  # and exits without scheduling anything; see README.md § "Enabling
+  # scheduled research crawling" for the explicit change required to turn it
+  # on for real.
+  monitor:
+    build: .
+    command: ["node", "dist/monitor/scheduler.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://catalog_monitor:catalog_monitor@postgres:5432/catalog_monitor
+      LIVE_CRAWL_ENABLED: "false"
+      CATALOG_CRON: "17 3 * * *"
+      USER_AGENT: "MonettaCatalogMonitor/0.1 (+https://monetta.mx; internal research prototype; contact: crawler-contact@example.invalid)"
+      REQUEST_DELAY_MS: "1000"
+      PLAYWRIGHT_FALLBACK_ENABLED: "false"
+
+volumes:
+  catalog_monitor_pgdata:

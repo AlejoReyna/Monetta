@@ -37,6 +37,7 @@ lib/firebase_options.dart
 *.p12
 .env
 .env.*
+!.env.example
 fastlane/report.xml
 fastlane/Preview.html
 

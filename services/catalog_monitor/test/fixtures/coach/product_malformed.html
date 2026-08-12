@@ -1,0 +1,23 @@
+<!doctype html>
+<html>
+<head>
+<title>Malformed JSON-LD Bag | Coach</title>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "Malformed JSON-LD Bag",
+  "brand": { "@type": "Brand", "name": "Coach" },
+  "offers": { "price": "199.00", "priceCurrency": "USD", }
+}
+</script>
+<meta property="og:title" content="Malformed JSON-LD Bag" />
+<meta property="product:price:amount" content="199.00" />
+<meta property="product:price:currency" content="USD" />
+<meta property="og:image" content="https://coach.com/images/malformed.jpg" />
+</head>
+<body>
+  <p>The JSON-LD block above has a trailing comma and is not valid JSON.
+  Extraction must not crash, and must fall through to the metadata tier.</p>
+</body>
+</html>

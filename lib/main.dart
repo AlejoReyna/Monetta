@@ -6,9 +6,13 @@
 /// from `data/normalize` and `reco`, running on the real 271-product catalog.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import 'app/catalog_store.dart';
+import 'app/external_catalog_config.dart';
+import 'app/external_catalog_controller.dart';
 import 'app/theme.dart';
 import 'features/home/home_screen.dart';
 
@@ -35,6 +39,30 @@ class StoreScope extends InheritedNotifier<CatalogStore> {
   }
 }
 
+/// Exposes the external-catalog prototype to the widget tree. Present in
+/// every build, but inert — `ExternalCatalogController.items` is always
+/// empty — unless the app was built with
+/// `--dart-define=ENABLE_EXTERNAL_CATALOG=true` and a base URL. See
+/// `app/external_catalog_config.dart`.
+class ExternalCatalogScope
+    extends InheritedNotifier<ExternalCatalogController> {
+  const ExternalCatalogScope({
+    required ExternalCatalogController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  static ExternalCatalogController of(BuildContext context) {
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<ExternalCatalogScope>();
+    assert(
+      scope?.notifier != null,
+      'ExternalCatalogScope is missing from the tree',
+    );
+    return scope!.notifier!;
+  }
+}
+
 class MonettaApp extends StatefulWidget {
   const MonettaApp({super.key});
 
@@ -44,11 +72,24 @@ class MonettaApp extends StatefulWidget {
 
 class _MonettaAppState extends State<MonettaApp> {
   final CatalogStore _store = CatalogStore();
+  final ExternalCatalogController _externalCatalog = ExternalCatalogController(
+    config: ExternalCatalogConfig.fromEnvironment(),
+  );
   late final Future<void> _loading = _store.loadFromAsset();
+
+  @override
+  void initState() {
+    super.initState();
+    // Fire-and-forget: cache-first load, then a best-effort background
+    // refresh. A failed or slow external fetch must never block or affect
+    // the Monetta home screen — see ExternalCatalogRepository's contract.
+    unawaited(_externalCatalog.loadAndRefresh());
+  }
 
   @override
   void dispose() {
     _store.dispose();
+    _externalCatalog.dispose();
     super.dispose();
   }
 
@@ -60,46 +101,50 @@ class _MonettaAppState extends State<MonettaApp> {
       theme: buildTheme(),
       home: StoreScope(
         notifier: _store,
-        child: FutureBuilder<void>(
-          future: _loading,
-          builder: (context, snapshot) {
-            if (snapshot.hasError) {
-              return _ErrorScreen(error: '${snapshot.error}');
-            }
-            if (snapshot.connectionState != ConnectionState.done) {
-              return const _SplashScreen();
-            }
-            return const HomeScreen();
-          },
+        child: ExternalCatalogScope(
+          notifier: _externalCatalog,
+          child: FutureBuilder<void>(
+            future: _loading,
+            builder: (context, snapshot) {
+              if (snapshot.hasError) {
+                return _ErrorScreen(error: '${snapshot.error}');
+              }
+              if (snapshot.connectionState != ConnectionState.done) {
+                return const _SplashScreen();
+              }
+              return const HomeScreen();
+            },
+          ),
         ),
       ),
     );
   }
 }
 
+/// Wordmark centred over a thin gold rule instead of a spinner. A Material
+/// spinner is the loudest possible "this is an app" signal, and this is the
+/// first frame the shopper ever sees.
 class _SplashScreen extends StatelessWidget {
   const _SplashScreen();
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
+    return Scaffold(
       body: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Text(
-              'MONETTA',
-              style: TextStyle(
-                fontSize: 26,
-                letterSpacing: 8,
-                fontWeight: FontWeight.w300,
+            const MonettaWordmark(height: 34),
+            const SizedBox(height: 18),
+            Text('Originales importados'.toUpperCase(), style: eyebrow()),
+            const SizedBox(height: 36),
+            const SizedBox(
+              width: 64,
+              child: LinearProgressIndicator(
+                minHeight: 1,
+                color: kGold,
+                backgroundColor: kLine,
               ),
-            ),
-            SizedBox(height: 24),
-            SizedBox(
-              width: 18,
-              height: 18,
-              child: CircularProgressIndicator(strokeWidth: 1.5, color: kGold),
             ),
           ],
         ),
@@ -118,7 +163,20 @@ class _ErrorScreen extends StatelessWidget {
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
-        child: Center(child: Text('No se pudo cargar el catálogo.\n\n$error')),
+        child: Center(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('No se pudo cargar el catálogo.', style: display(20)),
+              const SizedBox(height: 12),
+              Text(
+                error,
+                textAlign: TextAlign.center,
+                style: sans(size: 12, color: kInkMuted),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

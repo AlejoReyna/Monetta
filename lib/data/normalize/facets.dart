@@ -97,8 +97,10 @@ class CanonicalFacets {
   final List<FacetValue> colors;
   final List<FacetValue> patterns;
 
-  /// `accesible`, `medio`, `alto`, `premium`.
-  final String priceBand;
+  /// `accesible`, `medio`, `alto`, `premium`. Null when there is no price to
+  /// band from at all (an external item with an unknown price, see
+  /// `reco/external_facets.dart`) — never a fabricated band.
+  final String? priceBand;
 
   final bool onSale;
   final bool inStock;
@@ -153,8 +155,11 @@ class CanonicalFacets {
       put('pattern', pattern);
     }
 
-    final priceWeight = facetWeights['price_band'] ?? 1.0;
-    vector['price_band:$priceBand'] = priceWeight;
+    final band = priceBand;
+    if (band != null) {
+      final priceWeight = facetWeights['price_band'] ?? 1.0;
+      vector['price_band:$band'] = priceWeight;
+    }
 
     return vector;
   }

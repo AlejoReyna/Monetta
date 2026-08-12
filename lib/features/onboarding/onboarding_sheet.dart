@@ -2,6 +2,16 @@
 ///
 /// Optional by design — skipping it falls back to trending, never an empty
 /// screen. See `lib/reco/README.md` § 5.
+///
+/// Styled as a full menu panel — the same header chrome as [_MainDrawer] in
+/// `features/home/home_screen.dart` (wordmark, close, hairline) — rather than
+/// the small rounded card a `showModalBottomSheet` gives by default. It still
+/// arrives *through* that same call (`isScrollControlled: true`, and
+/// `bottomSheetTheme` already squares the corners — see `app/theme.dart`), it
+/// just requests the full viewport height so nothing peeks up from the
+/// bottom: the shopper sees one continuous panel, not a sheet over a page.
+/// No gender split — the catalog is effectively single-audience, unlike the
+/// reference this was modeled on.
 library;
 
 import 'package:flutter/material.dart';
@@ -32,105 +42,134 @@ class _OnboardingSheetState extends State<OnboardingSheet> {
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
+    // `showModalBottomSheet` strips `MediaQuery.padding.top` from the
+    // ambient MediaQuery it hands to its builder — a sheet is expected to
+    // leave the status bar exposed, not to need a top inset. But this panel
+    // asks for the *full* screen height (see the class doc), so with the
+    // ambient value zeroed, `SafeArea` has nothing left to pad by and the
+    // header ends up drawn underneath the status bar. Reading the real
+    // device inset straight from the view sidesteps that stripped value.
+    final viewPadding = MediaQueryData.fromView(View.of(context)).padding;
 
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 20, 20, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              '¿Qué te gusta?',
-              style: TextStyle(fontSize: 22, fontWeight: FontWeight.w300),
-            ),
-            const SizedBox(height: 4),
-            Text(
-              'Para mostrarte lo tuyo primero. Puedes cambiarlo cuando quieras.',
-              style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-            ),
-            const SizedBox(height: 20),
-            const _SectionLabel('MARCAS'),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: store.availableBrands
-                  .map(
-                    (brand) => _Choice(
-                      label: brandLabel(brand),
-                      selected: _brands.contains(brand),
-                      onTap: () => setState(
-                        () => _brands.contains(brand)
-                            ? _brands.remove(brand)
-                            : _brands.add(brand),
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).height,
+      child: Material(
+        color: Colors.white,
+        child: Padding(
+          padding: EdgeInsets.only(
+            top: viewPadding.top,
+            bottom: viewPadding.bottom,
+          ),
+          child: Column(
+            children: [
+              _Header(onClose: () => Navigator.of(context).pop()),
+              const Divider(height: 0.5),
+              Expanded(
+                child: ListView(
+                  padding: EdgeInsets.zero,
+                  children: [
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 26, 20, 0),
+                      child: Text(
+                        '¿Qué le gusta?',
+                        style: display(27, weight: FontWeight.w500),
                       ),
                     ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: 20),
-            const _SectionLabel('CATEGORÍAS'),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: _categoryLabels.entries
-                  .map(
-                    (entry) => _Choice(
-                      label: entry.value,
-                      selected: _categories.contains(entry.key),
-                      onTap: () => setState(
-                        () => _categories.contains(entry.key)
-                            ? _categories.remove(entry.key)
-                            : _categories.add(entry.key),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
+                      child: Text(
+                        'Para mostrarle lo suyo primero. Puede cambiarlo cuando quiera.',
+                        style: sans(size: 12.5, color: kInkMuted),
                       ),
                     ),
-                  )
-                  .toList(),
-            ),
-            const SizedBox(height: 24),
-            FilledButton(
-              onPressed: () {
-                store.seedFrom(
-                  brands: _brands.toList(),
-                  categories: _categories.toList(),
-                );
-                Navigator.of(context).pop();
-              },
-              child: Text(
-                _brands.isEmpty && _categories.isEmpty
-                    ? 'Ver todo'
-                    : 'Ver mis recomendaciones',
+                    for (final entry in _categoryLabels.entries)
+                      _CategoryRow(
+                        label: entry.value,
+                        selected: _categories.contains(entry.key),
+                        onTap: () => setState(
+                          () => _categories.contains(entry.key)
+                              ? _categories.remove(entry.key)
+                              : _categories.add(entry.key),
+                        ),
+                      ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 14),
+                      child: Text('Marcas'.toUpperCase(), style: eyebrow()),
+                    ),
+                    for (final brand in store.availableBrands)
+                      _LinkRow(
+                        label: brandLabel(brand),
+                        selected: _brands.contains(brand),
+                        onTap: () => setState(
+                          () => _brands.contains(brand)
+                              ? _brands.remove(brand)
+                              : _brands.add(brand),
+                        ),
+                      ),
+                    const SizedBox(height: 12),
+                  ],
+                ),
               ),
-            ),
-          ],
+              const Divider(height: 0.5),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+                child: FilledButton(
+                  onPressed: () {
+                    store.seedFrom(
+                      brands: _brands.toList(),
+                      categories: _categories.toList(),
+                    );
+                    Navigator.of(context).pop();
+                  },
+                  child: Text(
+                    (_brands.isEmpty && _categories.isEmpty
+                            ? 'Ver todo'
+                            : 'Ver mi selección')
+                        .toUpperCase(),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _SectionLabel extends StatelessWidget {
-  const _SectionLabel(this.text);
+/// Wordmark left, close right — identical row to [_MainDrawer]'s header, so
+/// the panel this opens into reads as the same system as the hamburger menu
+/// rather than a one-off modal.
+class _Header extends StatelessWidget {
+  const _Header({required this.onClose});
 
-  final String text;
+  final VoidCallback onClose;
 
   @override
-  Widget build(BuildContext context) => Padding(
-        padding: const EdgeInsets.only(bottom: 10),
-        child: Text(
-          text,
-          style: TextStyle(
-            fontSize: 10,
-            letterSpacing: 1.6,
-            fontWeight: FontWeight.w600,
-            color: Colors.grey.shade500,
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(20, 16, 12, 20),
+      child: Row(
+        children: [
+          const Expanded(child: MonettaWordmark(height: 19)),
+          IconButton(
+            tooltip: 'Cerrar',
+            onPressed: onClose,
+            icon: const Icon(Icons.close, size: 20),
           ),
-        ),
-      );
+        ],
+      ),
+    );
+  }
 }
 
-class _Choice extends StatelessWidget {
-  const _Choice({
+/// A product section — serif, with a trailing chevron that flips to a gold
+/// check once selected. The chevron is repurposed rather than dropped: on
+/// the reference this app's panel borrows from, it means "drill in"; here,
+/// with no sub-pages to drill into, it doubles as the unselected state of a
+/// toggle, so the row never needs a second visual language for "tap me."
+class _CategoryRow extends StatelessWidget {
+  const _CategoryRow({
     required this.label,
     required this.selected,
     required this.onTap,
@@ -144,22 +183,61 @@ class _Choice extends StatelessWidget {
   Widget build(BuildContext context) {
     return GestureDetector(
       onTap: onTap,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 140),
-        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
-        decoration: BoxDecoration(
-          color: selected ? kGold : Colors.transparent,
-          border: Border.all(
-            color: selected ? kGold : Colors.grey.shade300,
-          ),
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        decoration: const BoxDecoration(border: Border(bottom: kHairline)),
+        child: Row(
+          children: [
+            Expanded(child: Text(label, style: display(18))),
+            Icon(
+              selected ? Icons.check : Icons.chevron_right,
+              size: 18,
+              color: selected ? kGold : kInkMuted,
+            ),
+          ],
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            fontSize: 12.5,
-            color: selected ? Colors.white : kInk,
-            fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-          ),
+      ),
+    );
+  }
+}
+
+/// A plain toggleable link — the register of the secondary block on the
+/// reference (Mi Cuenta, Ayuda…): no chevron, just weight and colour to show
+/// state.
+class _LinkRow extends StatelessWidget {
+  const _LinkRow({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Container(
+        padding: const EdgeInsets.fromLTRB(20, 13, 20, 13),
+        decoration: const BoxDecoration(border: Border(bottom: kHairline)),
+        child: Row(
+          children: [
+            Expanded(
+              child: Text(
+                label,
+                style: sans(
+                  size: 14,
+                  color: selected ? kInk : kInkMuted,
+                  weight: selected ? FontWeight.w500 : FontWeight.w400,
+                ),
+              ),
+            ),
+            if (selected) const Icon(Icons.check, size: 15, color: kGold),
+          ],
         ),
       ),
     );
