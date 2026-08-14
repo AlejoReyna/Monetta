@@ -17,7 +17,7 @@ describe('coachAdapter.isProductUrl', () => {
     expect(() => coachAdapter.isProductUrl(url)).not.toThrow();
     expect(coachAdapter.isProductUrl(url)).toBe(true);
     expect(() => coachAdapter.externalIdFromUrl(url)).not.toThrow();
-    expect(coachAdapter.externalIdFromUrl(url)).toBe('CEN52-B4-YDT');
+    expect(coachAdapter.externalIdFromUrl(url)).toBe('CEN52');
   });
 
   it.each([
@@ -50,7 +50,7 @@ describe('coachAdapter.isProductUrl', () => {
     ).toBe(false);
   });
 
-  it('derives a stable, normalized source identifier from the final .html path segment', () => {
+  it('derives a stable parent style identifier shared by every color URL', () => {
     expect(
       coachAdapter.externalIdFromUrl('https://www.coach.com/products/tabby-shoulder-bag-26/CEN52.html'),
     ).toBe('CEN52');
@@ -58,7 +58,7 @@ describe('coachAdapter.isProductUrl', () => {
       coachAdapter.externalIdFromUrl(
         'https://www.coach.com/products/tabby-shoulder-bag-26/CI032-B4YDT.html',
       ),
-    ).toBe('CI032-B4YDT');
+    ).toBe('CI032');
   });
 
   it('returns null for a URL on a different domain', () => {

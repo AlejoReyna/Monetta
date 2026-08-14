@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/home/external_catalog_section.dart';
+import 'package:monetta_app/features/product/external_product_screen.dart';
 
 CatalogItem _coachItem() => CatalogItem(
       sourceScopedId: 'coach_us:C1',
@@ -33,6 +34,47 @@ CatalogItem _mkItem() => CatalogItem(
       marketRestriction: MarketRestriction.unitedStates,
       lastObservedAt: DateTime.utc(2026, 8, 10, 9),
       purchaseMode: PurchaseMode.externalResearch,
+    );
+
+CatalogItem _coachItemWithVariants() => CatalogItem(
+      sourceScopedId: 'coach_us:CU068',
+      source: CatalogSourceType.coachUs,
+      merchant: 'Coach',
+      title: 'Brooklyn Shoulder Bag 28',
+      brand: 'Coach',
+      category: 'Handbags',
+      imageUrl: null,
+      price: const Money(amount: 295, currency: Currency.usd),
+      availability: CatalogAvailability.inStock,
+      detailUrl:
+          'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068.html',
+      marketRestriction: MarketRestriction.unitedStates,
+      lastObservedAt: DateTime.utc(2026, 8, 12),
+      purchaseMode: PurchaseMode.ownerProcurement,
+      variants: const [
+        CatalogVariant(
+          variantId: 'CU068:B4BK',
+          sku: 'CU068 B4/BK',
+          colorName: 'Brass/Black',
+          colorCode: 'B4BK',
+          imageUrl: null,
+          price: Money(amount: 295, currency: Currency.usd),
+          availability: CatalogAvailability.inStock,
+          detailUrl:
+              'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068-B4%2FBK.html',
+        ),
+        CatalogVariant(
+          variantId: 'CU068:B4TF',
+          sku: 'CU068 B4/TF',
+          colorName: 'Brass/Toffee',
+          colorCode: 'B4TF',
+          imageUrl: null,
+          price: Money(amount: 206.5, currency: Currency.usd),
+          availability: CatalogAvailability.inStock,
+          detailUrl:
+              'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068%20B4%2FTF.html',
+        ),
+      ],
     );
 
 Future<void> _pump(WidgetTester tester, Widget child) {
@@ -81,6 +123,7 @@ void main() {
     expect(find.text('\$228 USD'), findsOneWidget);
     expect(find.text('Ver en Coach'), findsOneWidget);
     expect(find.text('Ver en Michael Kors'), findsOneWidget);
+    expect(find.text('extracted'), findsNWidgets(2));
   });
 
   testWidgets('shows the owner-procurement and internal-prototype disclosures',
@@ -113,8 +156,7 @@ void main() {
     expect(find.textContaining('WHATSAPP'), findsNothing);
   });
 
-  testWidgets(
-      'tapping a card opens the merchant URL via the injected opener, not in-app',
+  testWidgets('the explicit merchant CTA opens the validated source URL',
       (tester) async {
     Uri? openedUri;
     await _pump(
@@ -168,7 +210,7 @@ void main() {
   });
 
   testWidgets(
-      'refuses to open an invalid detail URL (wrong host for the declared source)',
+      'card opens the in-app description and the merchant CTA still rejects an invalid URL',
       (tester) async {
     final spoofedItem = CatalogItem(
       sourceScopedId: 'coach_us:C3',
@@ -204,12 +246,18 @@ void main() {
     await tester.tap(find.text('Spoofed Item'));
     await tester.pumpAndSettle();
 
+    expect(find.byType(ExternalProductScreen), findsOneWidget);
+    expect(openCalled, isFalse);
+
+    await tester.tap(find.text('VER EN COACH'));
+    await tester.pumpAndSettle();
+
     expect(openCalled, isFalse);
     expect(find.textContaining('Enlace no válido'), findsOneWidget);
   });
 
   testWidgets(
-      'tapping anywhere on the card (not just the CTA) also opens the link',
+      'tapping the card opens its in-app product description, not the merchant site',
       (tester) async {
     var openCount = 0;
     await _pump(
@@ -228,6 +276,52 @@ void main() {
     await tester.tap(find.text('Tabby Shoulder Bag 26'));
     await tester.pumpAndSettle();
 
-    expect(openCount, 1);
+    expect(openCount, 0);
+    expect(find.byType(ExternalProductScreen), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('DESCRIPCIÓN DEL PRODUCTO'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('DESCRIPCIÓN DEL PRODUCTO'), findsOneWidget);
+    expect(find.text('VER EN COACH'), findsOneWidget);
+  });
+
+  testWidgets(
+      'selecting a color variant updates its label, price and merchant URL',
+      (tester) async {
+    Uri? openedUri;
+    await _pump(
+      tester,
+      ExternalCatalogSection(
+        items: [_coachItemWithVariants()],
+        generatedAt: null,
+        openLink: (uri) async {
+          openedUri = uri;
+          return true;
+        },
+      ),
+    );
+
+    expect(find.text('Color: Brass/Black'), findsOneWidget);
+    expect(find.text('\$295 USD'), findsOneWidget);
+
+    await tester.ensureVisible(find.text('Brass/Toffee'));
+    await tester.tap(find.text('Brass/Toffee'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Color: Brass/Toffee'), findsOneWidget);
+    expect(find.text('\$206.50 USD'), findsOneWidget);
+    expect(openedUri, isNull);
+
+    await tester.ensureVisible(find.text('Ver en Coach'));
+    await tester.tap(find.text('Ver en Coach'));
+    await tester.pumpAndSettle();
+    expect(
+      openedUri,
+      Uri.parse(
+        'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068%20B4%2FTF.html',
+      ),
+    );
   });
 }

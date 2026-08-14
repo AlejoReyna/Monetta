@@ -2,19 +2,20 @@
 /// alongside Monetta's own feed.
 ///
 /// Everything here is deliberately inert with respect to the revenue path —
-/// no wishlist heart, no add-to-bag, no WhatsApp apartado. A tap anywhere on
-/// a card, or the CTA specifically, opens the merchant's own page outside
-/// the app (`LaunchMode.externalApplication`). See `domain/catalog_item.dart`
+/// no wishlist heart, no add-to-bag, no WhatsApp apartado. A card opens an
+/// in-app description; only its explicit merchant CTA leaves the app via
+/// `LaunchMode.externalApplication`. See `domain/catalog_item.dart`
 /// (`PurchaseMode.ownerProcurement`) and `docs/ARCHITECTURE.md` §
 /// "External catalog prototype" for why this boundary exists.
 library;
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
+import '../catalog/extracted_badge.dart';
+import '../product/external_product_screen.dart';
 
 String externalSourceBadge(CatalogSourceType source) {
   switch (source) {
@@ -46,14 +47,6 @@ String externalCtaLabel(CatalogSourceType source) {
   }
 }
 
-/// Opens an external product's page outside the app. Exposed so it can be
-/// swapped in tests (see `test/features/home/external_catalog_section_test.dart`).
-typedef ExternalLinkOpener = Future<bool> Function(Uri uri);
-
-Future<bool> defaultExternalLinkOpener(Uri uri) {
-  return launchUrl(uri, mode: LaunchMode.externalApplication);
-}
-
 class ExternalCatalogSection extends StatelessWidget {
   const ExternalCatalogSection({
     required this.items,
@@ -69,6 +62,12 @@ class ExternalCatalogSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (items.isEmpty) return const SizedBox.shrink();
+    final displayItems = [...items]..sort((a, b) {
+        final aHasColors = a.variants.length > 1;
+        final bHasColors = b.variants.length > 1;
+        if (aHasColors == bHasColors) return 0;
+        return aHasColors ? -1 : 1;
+      });
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -77,7 +76,7 @@ class ExternalCatalogSection extends StatelessWidget {
           kicker: 'Investigación · Estados Unidos',
           title: 'También en marcas de Estados Unidos',
         ),
-        _ExternalRail(items: items, openLink: openLink),
+        _ExternalRail(items: displayItems, openLink: openLink),
         const SizedBox(height: 16),
         _Disclosure(generatedAt: generatedAt),
         const SizedBox(height: kSectionGap),
@@ -97,9 +96,8 @@ class _ExternalRail extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width * 0.56;
 
     return SizedBox(
-      // +156 (was +130): the extra 26px fits the source-link line added
-      // below the delivery note.
-      height: width / 0.75 + 156,
+      // Room for source provenance plus the optional color-variant rail.
+      height: width / 0.75 + 218,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -114,29 +112,55 @@ class _ExternalRail extends StatelessWidget {
   }
 }
 
-class _ExternalCard extends StatelessWidget {
+class _ExternalCard extends StatefulWidget {
   const _ExternalCard({required this.item, required this.openLink});
 
   final CatalogItem item;
   final ExternalLinkOpener openLink;
 
-  Future<void> _open(BuildContext context) async {
+  @override
+  State<_ExternalCard> createState() => _ExternalCardState();
+}
+
+class _ExternalCardState extends State<_ExternalCard> {
+  int _selectedVariantIndex = 0;
+
+  CatalogVariant? get _selectedVariant => widget.item.variants.isEmpty
+      ? null
+      : widget.item.variants[_selectedVariantIndex];
+
+  String get _detailUrl => _selectedVariant?.detailUrl ?? widget.item.detailUrl;
+  String? get _imageUrl => _selectedVariant?.imageUrl ?? widget.item.imageUrl;
+  Money? get _price => _selectedVariant?.price ?? widget.item.price;
+
+  void _openDetail(BuildContext context) {
+    showExternalProductDetail(
+      context,
+      item: widget.item,
+      openLink: widget.openLink,
+      initialVariantIndex: _selectedVariantIndex,
+    );
+  }
+
+  Future<void> _openMerchant(BuildContext context) async {
     // Re-validated here, independent of whatever the backend already
     // checked — scheme must be HTTPS and the host must actually belong to
     // this item's declared source. See `domain/catalog_item.dart`.
-    if (!isValidExternalDetailUrl(item)) {
+    if (!isValidExternalDetailUrlForSource(widget.item.source, _detailUrl)) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Enlace no válido para ${item.merchant}')),
+          SnackBar(
+            content: Text('Enlace no válido para ${widget.item.merchant}'),
+          ),
         );
       }
       return;
     }
-    final uri = Uri.parse(item.detailUrl);
-    final launched = await openLink(uri);
+    final uri = Uri.parse(_detailUrl);
+    final launched = await widget.openLink(uri);
     if (!launched && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo abrir ${item.merchant}')),
+        SnackBar(content: Text('No se pudo abrir ${widget.item.merchant}')),
       );
     }
   }
@@ -144,56 +168,108 @@ class _ExternalCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () => _open(context),
+      onTap: () => _openDetail(context),
       // Deliberately no favorite icon, no "add to bag" affordance — this
-      // card can only ever lead outside the app, never into Monetta's cart.
+      // This card only opens a read-only detail; it can never enter cart.
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AspectRatio(
             aspectRatio: 3 / 4,
-            child: ColoredBox(
-              color: kMist,
-              child: item.imageUrl == null
-                  ? const Center(
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 18,
-                        color: kInkMuted,
-                      ),
-                    )
-                  : CachedNetworkImage(
-                      imageUrl: item.imageUrl!,
-                      fit: BoxFit.cover,
-                      fadeInDuration: const Duration(milliseconds: 240),
-                      placeholder: (_, __) => const ColoredBox(color: kMist),
-                      errorWidget: (_, __, ___) => const Center(
-                        child: Icon(
-                          Icons.broken_image_outlined,
-                          size: 18,
-                          color: kInkMuted,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ColoredBox(
+                  color: kMist,
+                  child: _imageUrl == null
+                      ? const Center(
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 18,
+                            color: kInkMuted,
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          key: ValueKey(_imageUrl),
+                          imageUrl: _imageUrl!,
+                          fit: BoxFit.cover,
+                          fadeInDuration: const Duration(milliseconds: 240),
+                          placeholder: (_, __) =>
+                              const ColoredBox(color: kMist),
+                          errorWidget: (_, __, ___) => const Center(
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              size: 18,
+                              color: kInkMuted,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                ),
+                const Positioned(
+                  top: 8,
+                  left: 8,
+                  child: ExtractedBadge(),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 10),
           Text(
-            externalSourceBadge(item.source).toUpperCase(),
+            externalSourceBadge(widget.item.source).toUpperCase(),
             style: eyebrow(size: 9.5),
           ),
           const SizedBox(height: 6),
           Text(
-            item.title,
+            widget.item.title,
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: display(14, weight: FontWeight.w400, height: 1.35),
           ),
           const SizedBox(height: 6),
           Text(
-            formatCatalogMoney(item.price),
+            formatCatalogMoney(_price),
             style: sans(size: 12.5, weight: FontWeight.w500),
           ),
+          if (widget.item.variants.length > 1) ...[
+            const SizedBox(height: 7),
+            Text(
+              'Color: ${_selectedVariant!.displayName}',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: sans(size: 10.5, weight: FontWeight.w500),
+            ),
+            const SizedBox(height: 5),
+            SizedBox(
+              height: 30,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: widget.item.variants.length,
+                separatorBuilder: (_, __) => const SizedBox(width: 5),
+                itemBuilder: (context, index) {
+                  final variant = widget.item.variants[index];
+                  return ChoiceChip(
+                    key: ValueKey(variant.variantId),
+                    label: Text(variant.displayName),
+                    selected: index == _selectedVariantIndex,
+                    onSelected: (_) {
+                      setState(() => _selectedVariantIndex = index);
+                    },
+                    labelStyle: sans(
+                      size: 9.5,
+                      color:
+                          index == _selectedVariantIndex ? Colors.white : kInk,
+                    ),
+                    selectedColor: kInk,
+                    backgroundColor: kMist,
+                    side: BorderSide.none,
+                    padding: const EdgeInsets.symmetric(horizontal: 5),
+                    visualDensity: VisualDensity.compact,
+                    showCheckmark: false,
+                  );
+                },
+              ),
+            ),
+          ],
           const SizedBox(height: 4),
           Text(
             'Candidato de compra · origen EE. UU.',
@@ -203,21 +279,27 @@ class _ExternalCard extends StatelessWidget {
           // Where this listing's data actually came from — shown as text in
           // the description itself, not only reachable by tapping the CTA.
           Text(
-            sourceLinkLabel(item),
+            _sourceLabel(_detailUrl),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
             style: sans(size: 10, color: kInkMuted),
           ),
           const SizedBox(height: 6),
           UnderlineLink(
-            label: externalCtaLabel(item.source),
-            onTap: () => _open(context),
+            label: externalCtaLabel(widget.item.source),
+            onTap: () => _openMerchant(context),
             size: 11,
           ),
         ],
       ),
     );
   }
+}
+
+String _sourceLabel(String detailUrl) {
+  final uri = Uri.tryParse(detailUrl);
+  if (uri == null || uri.host.isEmpty) return detailUrl;
+  return '${uri.host}${uri.path}';
 }
 
 class _Disclosure extends StatelessWidget {

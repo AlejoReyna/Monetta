@@ -48,6 +48,7 @@ class CatalogStore extends ChangeNotifier {
 
   final List<InteractionEvent> _events = [];
   final Set<String> _viewed = {};
+  final List<String> _recentIds = [];
   final Set<String> _wishlist = {};
   final Map<String, int> _bagQuantities = {};
 
@@ -152,8 +153,48 @@ class CatalogStore extends ChangeNotifier {
     );
     if (productId != null && type == EventType.productView) {
       _viewed.add(productId);
+      markRecentlyViewed(productId);
     }
     _rebuildProfile();
+  }
+
+  /// Newest first, capped. Survives only for the session (this store is
+  /// still the in-memory stand-in for `data/local`).
+  void markRecentlyViewed(String productId) {
+    _recentIds.remove(productId);
+    _recentIds.insert(0, productId);
+    if (_recentIds.length > 12) _recentIds.removeLast();
+  }
+
+  List<Product> recentlyViewed({String? excluding, int limit = 8}) {
+    final out = <Product>[];
+    for (final id in _recentIds) {
+      if (id == excluding) continue;
+      final product = _productById(id);
+      if (product == null) continue;
+      out.add(product);
+      if (out.length >= limit) break;
+    }
+    return out;
+  }
+
+  List<Product> moreFromBrand(String brandSlug, {String? excluding, int limit = 8}) {
+    final out = <Product>[];
+    for (final product in products) {
+      if (product.id == excluding) continue;
+      if (facetsById[product.id]?.brand?.value != brandSlug) continue;
+      out.add(product);
+      if (out.length >= limit) break;
+    }
+    return out;
+  }
+
+  Product? firstInStockWhere(bool Function(Product product, CanonicalFacets? facets) test) {
+    for (final product in products) {
+      if (!product.isInStock || product.primaryImage == null) continue;
+      if (test(product, facetsById[product.id])) return product;
+    }
+    return null;
   }
 
   void toggleWishlist(String productId) {

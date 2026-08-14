@@ -25,7 +25,7 @@ void main() {
     await tester.pumpWidget(_app(store, const BagScreen()));
 
     expect(find.text('Tu bolsa está vacía'), findsOneWidget);
-    expect(find.text('SEGUIR DESCUBRIENDO'), findsOneWidget);
+    expect(find.text('VOLVER A LA TIENDA'), findsOneWidget);
   });
 
   testWidgets('bag quantities stay editable and update the order total',

@@ -46,6 +46,7 @@ dependencies:
   shimmer: ^3.0.0
   share_plus: ^10.1.2
   url_launcher: ^6.3.1
+  video_player: ^2.9.2
 
   # Models & formatting
   freezed_annotation: ^2.4.4
@@ -72,6 +73,13 @@ dev_dependencies:
   mocktail: ^1.0.4
 
 flutter:
+  # Keep iOS plugins on CocoaPods for this mixed plugin set. With Xcode 26,
+  # Flutter's generated SwiftPM resources are emitted under Debug-iphoneos
+  # while the device runner looks in iphoneos, producing missing .bundle
+  # errors for Firebase, GoogleUtilities, share_plus, sqflite, and
+  # url_launcher. CocoaPods provides one consistent products directory.
+  config:
+    enable-swift-package-manager: false
   uses-material-design: true
   generate: true
   assets:

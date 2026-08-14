@@ -335,7 +335,19 @@ FROM crawl_runs ORDER BY started_at DESC LIMIT 10;
       "availability": "inStock",
       "detailUrl": "https://www.coach.com/products/tabby-shoulder-bag-26/CEN52.html",
       "lastObservedAt": "2026-08-10T03:19:41.000Z",
-      "dataOrigin": "live_crawl"
+      "dataOrigin": "live_crawl",
+      "variants": [
+        {
+          "variantId": "C8879:B4BK",
+          "sku": "C8879 B4/BK",
+          "colorName": "Brass/Black",
+          "colorCode": "B4BK",
+          "imageUrl": "https://coach.com/images/c8879-black.jpg",
+          "price": { "amount": 350.0, "currency": "USD" },
+          "availability": "inStock",
+          "detailUrl": "https://www.coach.com/products/tabby-shoulder-bag-26/C8879-B4%2FBK.html"
+        }
+      ]
     }
   ]
 }
@@ -381,6 +393,12 @@ guard.
 - CSS selectors in the "selectors" extraction tier are similarly unverified
   against live markup — they exist as the documented third tier and are
   covered by unit tests against synthetic fixtures, not real pages.
+- Color variants are persisted per parent model and participate in the
+  fingerprint used for price/stock change detection. The parser supports
+  embedded JSON variation arrays and SFCC-style swatches; Coach color URLs
+  are grouped by parent style before snapshot diffing. As with the base
+  selectors, validate variant coverage with a capped US crawl before relying
+  on it operationally.
 - Operational acceptance (per the spec this was built against) requires two
   later full daily runs with ≥98% required-field coverage. That has not
   happened — this prototype has run zero live full crawls.

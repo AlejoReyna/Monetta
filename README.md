@@ -1,4 +1,4 @@
-# Monetta App
+# Monetta
 
 iOS + Android Flutter client for [monetta.mx](https://monetta.mx) — bolsas, carteras y
 relojes importados originales.

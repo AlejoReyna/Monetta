@@ -10,6 +10,18 @@ export function fingerprintOf(product: ExtractedProduct): string {
     imageUrl: product.imageUrl,
     priceUsd: product.priceUsd,
     availability: product.availability,
+    variants: [...(product.variants ?? [])]
+      .sort((a, b) => a.variantId.localeCompare(b.variantId))
+      .map((variant) => ({
+        variantId: variant.variantId,
+        sku: variant.sku,
+        colorName: variant.colorName,
+        colorCode: variant.colorCode,
+        imageUrl: variant.imageUrl,
+        priceUsd: variant.priceUsd,
+        availability: variant.availability,
+        detailUrl: variant.detailUrl,
+      })),
   });
   return createHash('sha256').update(material).digest('hex');
 }

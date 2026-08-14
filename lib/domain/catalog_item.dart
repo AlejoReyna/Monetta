@@ -49,6 +49,33 @@ class Money {
   String get currencyCode => currency == Currency.mxn ? 'MXN' : 'USD';
 }
 
+/// A merchant-specific purchasable color belonging to an external product.
+/// Monetta/Shopify variants continue to use [ProductVariant] in product.dart;
+/// this type cannot enter the local checkout flow.
+class CatalogVariant {
+  const CatalogVariant({
+    required this.variantId,
+    required this.sku,
+    required this.colorName,
+    required this.colorCode,
+    required this.imageUrl,
+    required this.price,
+    required this.availability,
+    required this.detailUrl,
+  });
+
+  final String variantId;
+  final String? sku;
+  final String? colorName;
+  final String? colorCode;
+  final String? imageUrl;
+  final Money? price;
+  final CatalogAvailability availability;
+  final String detailUrl;
+
+  String get displayName => colorName ?? colorCode ?? 'Color';
+}
+
 class CatalogItem {
   const CatalogItem({
     required this.sourceScopedId,
@@ -65,6 +92,7 @@ class CatalogItem {
     required this.lastObservedAt,
     required this.purchaseMode,
     this.shopifyProductId,
+    this.variants = const [],
   });
 
   /// Unique within [source]; never assumed unique across sources. Monetta
@@ -98,6 +126,10 @@ class CatalogItem {
   /// back into the existing Shopify-backed product screen without the
   /// mixed-feed layer needing to know anything about Shopify.
   final String? shopifyProductId;
+
+  /// Color-level merchant records. Empty for Monetta items and legacy
+  /// external responses; external UI falls back to the parent fields.
+  final List<CatalogVariant> variants;
 
   /// True for any item that must not enter Monetta's checkout path.
   bool get isExternal => purchaseMode != PurchaseMode.monettaCheckout;
@@ -136,9 +168,18 @@ const Map<CatalogSourceType, Set<String>> kAllowedExternalDetailHosts = {
 /// Always false for a Monetta item — that path never goes through this
 /// check, see [PurchaseMode].
 bool isValidExternalDetailUrl(CatalogItem item) {
-  final allowedHosts = kAllowedExternalDetailHosts[item.source];
+  return isValidExternalDetailUrlForSource(item.source, item.detailUrl);
+}
+
+/// Variant equivalent of [isValidExternalDetailUrl]. Kept source-scoped so a
+/// malformed backend response cannot use a color choice to open another host.
+bool isValidExternalDetailUrlForSource(
+  CatalogSourceType source,
+  String detailUrl,
+) {
+  final allowedHosts = kAllowedExternalDetailHosts[source];
   if (allowedHosts == null) return false;
-  final uri = Uri.tryParse(item.detailUrl);
+  final uri = Uri.tryParse(detailUrl);
   if (uri == null) return false;
   if (uri.scheme != 'https') return false;
   return allowedHosts.contains(uri.host.toLowerCase());

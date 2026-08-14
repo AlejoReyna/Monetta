@@ -14,6 +14,19 @@ Map<String, dynamic> _coachItemJson({Map<String, dynamic>? overrides}) => {
       'availability': 'inStock',
       'detailUrl': 'https://www.coach.com/tabby-shoulder-bag-26/C8879.html',
       'lastObservedAt': '2026-08-10T03:19:41.000Z',
+      'variants': [
+        {
+          'variantId': 'C8879:B4BK',
+          'sku': 'C8879 B4/BK',
+          'colorName': 'Brass/Black',
+          'colorCode': 'B4BK',
+          'imageUrl': 'https://coach.com/images/c8879-black.jpg',
+          'price': {'amount': 320.0, 'currency': 'USD'},
+          'availability': 'outOfStock',
+          'detailUrl':
+              'https://www.coach.com/products/tabby/C8879-B4%2FBK.html',
+        },
+      ],
       ...?overrides,
     };
 
@@ -31,6 +44,13 @@ void main() {
       expect(item.price!.amount, 350.0);
       expect(item.availability, CatalogAvailability.inStock);
       expect(item.shopifyProductId, isNull);
+      expect(item.variants, hasLength(1));
+      expect(item.variants.single.colorName, 'Brass/Black');
+      expect(item.variants.single.price!.amount, 320);
+      expect(
+        item.variants.single.availability,
+        CatalogAvailability.outOfStock,
+      );
       expect(
         item.detailUrl,
         'https://www.coach.com/tabby-shoulder-bag-26/C8879.html',

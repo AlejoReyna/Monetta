@@ -45,6 +45,41 @@ const LISTINGS: readonly CuratedListing[] = [
       imageUrl: `${COACH_IMAGE_BASE}/cu068_b4bk_a0`,
       priceUsd: 295,
       availability: 'unknown',
+      variants: [
+        {
+          variantId: 'CU068:B4MPL',
+          sku: 'CU068 B4MPL',
+          colorName: 'Brass/Maple',
+          colorCode: 'B4MPL',
+          imageUrl: `${COACH_IMAGE_BASE}/cu068_b4mpl_a0`,
+          priceUsd: 295,
+          availability: 'inStock',
+          detailUrl:
+            'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068-B4MPL.html',
+        },
+        {
+          variantId: 'CU068:B4BK',
+          sku: 'CU068 B4/BK',
+          colorName: 'Brass/Black',
+          colorCode: 'B4BK',
+          imageUrl: `${COACH_IMAGE_BASE}/cu068_b4bk_a0`,
+          priceUsd: 295,
+          availability: 'inStock',
+          detailUrl:
+            'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068-B4%2FBK.html',
+        },
+        {
+          variantId: 'CU068:B4TF',
+          sku: 'CU068 B4/TF',
+          colorName: 'Brass/Toffee',
+          colorCode: 'B4TF',
+          imageUrl: `${COACH_IMAGE_BASE}/cu068_b4tf_a0`,
+          priceUsd: 206.5,
+          availability: 'inStock',
+          detailUrl:
+            'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068%20B4%2FTF.html',
+        },
+      ],
     },
   },
   {
@@ -178,6 +213,30 @@ const LISTINGS: readonly CuratedListing[] = [
       imageUrl: `${MICHAEL_KORS_IMAGE_BASE}/30F5GNXT0B-1335_1?$large$`,
       priceUsd: 279.5,
       availability: 'unknown',
+      variants: [
+        {
+          variantId: '30F5GNXT0B:1546',
+          sku: '30F5GNXT0B-1546',
+          colorName: 'Vanilla/Acorn',
+          colorCode: '1546',
+          imageUrl: `${MICHAEL_KORS_IMAGE_BASE}/30F5GNXT0B-1546_1?$large$`,
+          priceUsd: 279.5,
+          availability: 'inStock',
+          detailUrl:
+            'https://www.michaelkors.com/hamilton-moderne-small-signature-logo-satchel/30F5GNXT0B.html?dwvar_30F5GNXT0B_color=1546',
+        },
+        {
+          variantId: '30F5GNXT0B:1335',
+          sku: '30F5GNXT0B-1335',
+          colorName: 'Brown/Acorn',
+          colorCode: '1335',
+          imageUrl: `${MICHAEL_KORS_IMAGE_BASE}/30F5GNXT0B-1335_1?$large$`,
+          priceUsd: 279.5,
+          availability: 'inStock',
+          detailUrl:
+            'https://www.michaelkors.com/hamilton-moderne-small-signature-logo-satchel/30F5GNXT0B.html?dwvar_30F5GNXT0B_color=1335',
+        },
+      ],
     },
   },
   {

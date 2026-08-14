@@ -2,6 +2,7 @@ import { extractProductFromJsonLd } from './jsonld.js';
 import { extractProductFromMetadata } from './metadata.js';
 import { extractProductFromSelectors, type ProductSelectors } from './selectors.js';
 import { hasAllRequiredFields, type ExtractedProduct } from '../domain/types.js';
+import { extractProductVariants } from './variants.js';
 
 export type ExtractionMethod = 'jsonld' | 'metadata' | 'selectors' | 'none';
 
@@ -54,6 +55,13 @@ export function extractProduct(
       externalId: params.externalId,
       canonicalUrl: params.canonicalUrl,
       ...partial,
+      variants: extractProductVariants(html, {
+        externalId: params.externalId,
+        canonicalUrl: params.canonicalUrl,
+        imageUrl: partial.imageUrl,
+        priceUsd: partial.priceUsd,
+        availability: partial.availability,
+      }),
     };
     if (hasAllRequiredFields(candidate)) {
       return { product: candidate, method: tier.method, complete: true };

@@ -27,6 +27,12 @@ function normalizeIdentifier(raw: string): string {
   return decoded.trim().replace(/[+\s]+/g, '-').toUpperCase();
 }
 
+/** Coach appends a color/material qualifier to some sitemap identifiers. */
+function parentStyleIdentifier(raw: string): string {
+  const normalized = normalizeIdentifier(raw);
+  return normalized.match(/^[A-Z0-9]+/)?.[0] ?? normalized;
+}
+
 function parseHttpsUrl(url: string): URL | null {
   let parsed: URL;
   try {
@@ -63,6 +69,6 @@ export const coachAdapter: BrandAdapter = {
     if (!parsed) return null;
     const match = COACH_PRODUCT_PATH_RE.exec(parsed.pathname);
     if (!match) return null;
-    return normalizeIdentifier(match[2]!);
+    return parentStyleIdentifier(match[2]!);
   },
 };

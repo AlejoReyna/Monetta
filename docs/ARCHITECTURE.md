@@ -161,12 +161,14 @@ source-independent type both Monetta and external listings map into for
 
 | | `PurchaseMode.monettaCheckout` | `PurchaseMode.ownerProcurement` |
 |---|---|---|
-| Source | Monetta's Shopify catalog | Coach US / Michael Kors US |
+| Source | Monetta's Shopify catalog | Coach US / Michael Kors US / GUESS US / Steve Madden US |
 | Currency | MXN | USD |
 | Price | Always known (`Money`, never null) | Nullable (`Money?`) — a missing/malformed/unexpected-currency price renders `Consultar precio`, never a fabricated `$0`, see `app/theme.dart#formatCatalogMoney` |
+| Variants | Shopify `ProductVariant` | External `CatalogVariant`: SKU, color name/code, image, USD price, availability and merchant URL; selecting a color never enters checkout |
 | Mapper | `data/shopify/catalog_item_mapper.dart` | `data/external_catalog/external_catalog_mapper.dart` |
-| Detail URL opens | In-app `ProductScreen` (via `shopifyProductId`) | Merchant's own site, `LaunchMode.externalApplication`, only after re-validating the URL client-side (`domain/catalog_item.dart#isValidExternalDetailUrl`: HTTPS + a host that actually belongs to the declared source) |
-| Add to bag / WhatsApp apartado | Yes — unchanged, see `features/product/product_screen.dart` | Never — owner-managed candidates open the source page only; no such control exists anywhere an external item is rendered |
+| Product tap | In-app `ProductScreen` (via `shopifyProductId`) | In-app read-only `ExternalProductScreen` with description, source, availability and color/SKU details |
+| Merchant CTA | N/A | Opens the selected variant on the merchant's site via `LaunchMode.externalApplication`, only after re-validating HTTPS and the source-owned host |
+| Add to bag / WhatsApp apartado | Yes — unchanged, see `features/product/product_screen.dart` | Never — owner-managed candidates remain outside every Monetta checkout path |
 
 The two mappers are intentionally separate functions with no shared code
 path, so an external record can never be silently mapped through the
