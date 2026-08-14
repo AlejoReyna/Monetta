@@ -7,11 +7,13 @@ library;
 
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../app/media/monetta_image.dart';
+import '../../app/motion.dart';
 import '../../app/theme.dart';
+import '../../data/media/media_url.dart';
 import '../../domain/bag_line.dart';
 import '../../main.dart';
 
@@ -1257,13 +1259,7 @@ class _ProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (url == null) return const ColoredBox(color: kSearchFill);
-    return CachedNetworkImage(
-      imageUrl: url!,
-      fit: BoxFit.cover,
-      placeholder: (_, __) => const ColoredBox(color: kSearchFill),
-      errorWidget: (_, __, ___) => const ColoredBox(color: kSearchFill),
-    );
+    return MonettaImage(url: url, cacheWidth: MediaUrl.thumbWidth);
   }
 }
 
@@ -1292,7 +1288,7 @@ class _EmptyBag extends StatelessWidget {
               width: 260,
               child: FilledButton(
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('SEGUIR DESCUBRIENDO'),
+                child: const Text('VOLVER A LA TIENDA'),
               ),
             ),
           ],
@@ -1343,4 +1339,4 @@ class _SecureHandoffPreview extends StatelessWidget {
   }
 }
 
-double _shippingFor(double subtotal) => subtotal >= 1499 ? 0 : 149;
+double _shippingFor(double subtotal) => shippingFor(subtotal);

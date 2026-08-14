@@ -61,6 +61,22 @@ export const SOURCES: Record<SourceId, SourceDescriptor> = {
 export type Availability = 'inStock' | 'outOfStock' | 'unknown';
 
 /**
+ * One purchasable color of a merchant product. The parent product keeps the
+ * shared title/category while this record tracks the fields that can change
+ * independently per color (price, stock, image and destination URL).
+ */
+export interface ExtractedProductVariant {
+  readonly variantId: string;
+  readonly sku: string | null;
+  readonly colorName: string | null;
+  readonly colorCode: string | null;
+  readonly imageUrl: string | null;
+  readonly priceUsd: number | null;
+  readonly availability: Availability;
+  readonly detailUrl: string;
+}
+
+/**
  * One product as extracted from a single fetch. Not yet reconciled against
  * history — that is `SnapshotStore`'s job. `externalId` is scoped to the
  * source, never globally unique on its own.
@@ -74,6 +90,8 @@ export interface ExtractedProduct {
   readonly imageUrl: string | null;
   readonly priceUsd: number | null;
   readonly availability: Availability;
+  /** Empty/absent only for legacy rows created before variant tracking. */
+  readonly variants?: readonly ExtractedProductVariant[];
 }
 
 /** A stored product row, reconciled with crawl history. */

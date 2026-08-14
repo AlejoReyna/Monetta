@@ -93,3 +93,70 @@ describe('extractProductFromJsonLd currency guard', () => {
     expect(extractProductFromJsonLd('<html></html>', 'Coach')).toBeNull();
   });
 });
+
+describe('color variant extraction', () => {
+  it('extracts Coach/MK-style embedded color variations with independent commerce fields', () => {
+    const html = `
+      <script type="application/ld+json">${JSON.stringify({
+        '@type': 'Product',
+        name: 'Brooklyn Shoulder Bag 28',
+        brand: 'Coach',
+        category: 'Handbags',
+        image: 'https://coach.scene7.com/is/image/Coach/cu068_b4bk_a0',
+        offers: {
+          price: '295',
+          priceCurrency: 'USD',
+          availability: 'https://schema.org/InStock',
+        },
+      })}</script>
+      <script type="application/json">${JSON.stringify({
+        colorVariations: [
+          {
+            id: 'CU068:B4BK',
+            sku: 'CU068 B4/BK',
+            displayValue: 'Brass/Black',
+            value: 'B4BK',
+            image: { url: 'https://coach.scene7.com/is/image/Coach/cu068_b4bk_a0' },
+            price: { sales: { value: 295 } },
+            available: true,
+            url: '/products/brooklyn-shoulder-bag-28/CU068-B4%2FBK.html',
+          },
+          {
+            id: 'CU068:B4TF',
+            sku: 'CU068 B4/TF',
+            displayValue: 'Brass/Toffee',
+            value: 'B4TF',
+            price: { sales: { value: 206.5 } },
+            available: false,
+            url: '/products/brooklyn-shoulder-bag-28/CU068%20B4%2FTF.html',
+          },
+        ],
+      })}</script>`;
+
+    const result = extractProduct(html, {
+      ...base,
+      canonicalUrl: 'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068.html',
+      externalId: 'CU068',
+    });
+
+    expect(result.complete).toBe(true);
+    expect(result.product?.variants).toHaveLength(2);
+    expect(result.product?.variants).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          variantId: 'CU068:B4BK',
+          colorName: 'Brass/Black',
+          colorCode: 'B4BK',
+          priceUsd: 295,
+          availability: 'inStock',
+        }),
+        expect.objectContaining({
+          variantId: 'CU068:B4TF',
+          colorName: 'Brass/Toffee',
+          priceUsd: 206.5,
+          availability: 'outOfStock',
+        }),
+      ]),
+    );
+  });
+});

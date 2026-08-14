@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
+import 'package:monetta_app/features/product/external_product_screen.dart';
 
 CatalogItem _monetta(int i) => CatalogItem(
       sourceScopedId: 'monetta:$i',
@@ -79,6 +80,7 @@ void main() {
       find.text('También en marcas de Estados Unidos'),
       findsOneWidget,
     );
+    expect(find.text('extracted'), findsNWidgets(2));
 
     // The Monetta heading must appear before the external heading.
     final monettaHeadingY = tester.getTopLeft(find.text('Catálogo Monetta')).dy;
@@ -123,7 +125,8 @@ void main() {
     expect(find.text('External Item 29'), findsOneWidget);
   });
 
-  testWidgets('tapping an external tile validates the URL before opening it',
+  testWidgets(
+      'tapping an external tile opens its in-app description; only its CTA opens the merchant',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(800, 1600);
@@ -144,6 +147,13 @@ void main() {
     await tester.pump();
 
     await tester.tap(find.text('External Item 1'));
+    await tester.pumpAndSettle();
+
+    expect(openedUri, isNull);
+    expect(find.byType(ExternalProductScreen), findsOneWidget);
+    expect(find.text('DESCRIPCIÓN DEL PRODUCTO'), findsOneWidget);
+
+    await tester.tap(find.text('VER EN COACH'));
     await tester.pumpAndSettle();
 
     expect(

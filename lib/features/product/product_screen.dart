@@ -1,23 +1,23 @@
-/// Product detail, in the maison register.
-///
-/// Two things here are load-bearing for the business rather than the UI: the
-/// dwell timer (which weights the taste profile) and the WhatsApp apartado CTA,
-/// which is how a large share of this store's revenue actually closes. Both
-/// survived the restyle unchanged — the apartado in fact gained prominence,
-/// since it is now the only gold element on the screen.
+/// Product detail. The object first, then the facts that close the sale.
 library;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/media/monetta_image.dart';
+import '../../app/motion.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../data/media/media_url.dart';
 import '../../data/normalize/facets.dart';
 import '../../data/shopify/cart_attribution.dart';
+import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/events.dart';
 import '../../reco/explainer.dart';
+import '../catalog/product_card.dart';
 import '../checkout/checkout_screen.dart';
+import '../checkout/mini_cart.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({required this.productId, super.key});
@@ -32,6 +32,8 @@ class _ProductScreenState extends State<ProductScreen> {
   final Stopwatch _dwell = Stopwatch()..start();
   final PageController _gallery = PageController();
   int _page = 0;
+  int _variantIndex = 0;
+  final Set<String> _open = {'envio', 'apartado'};
 
   @override
   void dispose() {
@@ -40,8 +42,6 @@ class _ProductScreenState extends State<ProductScreen> {
     super.dispose();
   }
 
-  /// Record the dwell-weighted view on the way out — a 45-second read counts
-  /// for more than a 2-second bounce.
   void _recordDwellAndPop() {
     final store = StoreScope.of(context);
     store.record(
@@ -52,22 +52,41 @@ class _ProductScreenState extends State<ProductScreen> {
     Navigator.of(context).pop();
   }
 
-  Future<void> _openApartado() async {
+  ProductVariant? _selected(Product product) {
+    final selectable = product.variants.where((v) => !v.isDefault).toList();
+    if (selectable.isEmpty) {
+      return product.variants.isEmpty ? null : product.variants.first;
+    }
+    if (_variantIndex < 0 || _variantIndex >= selectable.length) {
+      return selectable.first;
+    }
+    return selectable[_variantIndex];
+  }
+
+  Future<void> _openApartado(Product product) async {
     final store = StoreScope.of(context);
-    final product = store.products.firstWhere((p) => p.id == widget.productId);
-
     store.record(EventType.whatsappApartado, productId: product.id);
-
     final request = ApartadoRequest(
       productTitle: product.title,
       productHandle: product.handle,
-      price: product.price,
+      price: _selected(product)?.price ?? product.price,
       attributionCode: const AttributionCodeGenerator()
           .generate(DateTime.now().microsecondsSinceEpoch),
     );
-
     final launched = await launchUrl(
       request.uri,
+      mode: LaunchMode.externalApplication,
+    );
+    if (!launched && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir WhatsApp')),
+      );
+    }
+  }
+
+  Future<void> _openConcierge(Product product) async {
+    final launched = await launchUrl(
+      conciergeWhatsAppUri(productTitle: product.title),
       mode: LaunchMode.externalApplication,
     );
     if (!launched && mounted) {
@@ -83,7 +102,31 @@ class _ProductScreenState extends State<ProductScreen> {
     final product = store.products.firstWhere((p) => p.id == widget.productId);
     final facets = store.facetsFor(product.id);
     final wishlisted = store.wishlist.contains(product.id);
+    final selectable = product.variants.where((v) => !v.isDefault).toList();
+    final selected = _selected(product);
+    final price = selected?.price ?? product.price;
+    final compare = selected?.compareAtPrice ?? product.compareAtPrice;
+    final onSale = compare != null && compare > price;
+    final inStock = selected?.available ?? product.isInStock;
     final images = product.images.isEmpty ? <String?>[null] : product.images;
+    final description = () {
+      final html = stripHtml(product.descriptionHtml);
+      if (html.isNotEmpty) return html;
+      return factualDescription(
+        title: product.title,
+        brandSlug: facets?.brand?.value,
+        categorySlug: facets?.category?.value,
+        silhouetteSlug: facets?.silhouette?.value,
+        colorSlug: facets?.colors.isEmpty == true ? null : facets!.colors.first.value,
+      );
+    }();
+    final recent = store.recentlyViewed(excluding: product.id);
+    final related = facets?.brand?.value == null
+        ? const <Product>[]
+        : store.moreFromBrand(
+            facets!.brand!.value,
+            excluding: product.id,
+          );
 
     return PopScope(
       canPop: false,
@@ -99,6 +142,7 @@ class _ProductScreenState extends State<ProductScreen> {
           title: const MonettaWordmark(),
           actions: [
             IconButton(
+              tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
               icon: Icon(
                 wishlisted ? Icons.favorite : Icons.favorite_border,
                 size: 20,
@@ -116,9 +160,6 @@ class _ProductScreenState extends State<ProductScreen> {
         body: ListView(
           padding: EdgeInsets.zero,
           children: [
-            // Full-bleed gallery at 4:5. Portrait, because every product here
-            // is a bag, a wallet or a watch — objects that are taller than
-            // they are wide once styled.
             AspectRatio(
               aspectRatio: 4 / 5,
               child: Stack(
@@ -127,7 +168,10 @@ class _ProductScreenState extends State<ProductScreen> {
                     controller: _gallery,
                     itemCount: images.length,
                     onPageChanged: (i) => setState(() => _page = i),
-                    itemBuilder: (_, i) => _Image(url: images[i]),
+                    itemBuilder: (_, i) => Hero(
+                      tag: i == 0 ? 'product-image-${product.id}' : 'p-$i',
+                      child: _ZoomImage(url: images[i]),
+                    ),
                   ),
                   if (images.length > 1)
                     Positioned(
@@ -154,29 +198,33 @@ class _ProductScreenState extends State<ProductScreen> {
                     ),
                     const SizedBox(height: 12),
                   ],
-                  Text(product.title, style: display(26)),
+                  Reveal(
+                    child: Text(
+                      product.title,
+                      maxLines: 3,
+                      overflow: TextOverflow.ellipsis,
+                      style: display(26),
+                    ),
+                  ),
                   const SizedBox(height: 20),
-                  Row(
-                    crossAxisAlignment: CrossAxisAlignment.baseline,
-                    textBaseline: TextBaseline.alphabetic,
+                  Wrap(
+                    spacing: 12,
+                    runSpacing: 6,
+                    crossAxisAlignment: WrapCrossAlignment.center,
                     children: [
                       Text(
-                        kMoney.format(product.price),
+                        kMoney.format(price),
                         style: sans(size: 17, weight: FontWeight.w500),
                       ),
-                      if (product.isOnSale) ...[
-                        const SizedBox(width: 12),
+                      if (onSale) ...[
                         Text(
-                          kMoney.format(product.compareAtPrice),
+                          kMoney.format(compare),
                           style: sans(
                             size: 13,
                             color: kInkMuted,
                             decoration: TextDecoration.lineThrough,
                           ),
                         ),
-                        const SizedBox(width: 12),
-                        // Outlined, not filled. A solid red discount flag is
-                        // the single loudest way to make a product look cheap.
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 7,
@@ -186,7 +234,7 @@ class _ProductScreenState extends State<ProductScreen> {
                             border: Border.all(color: kGold, width: 0.8),
                           ),
                           child: Text(
-                            '-${(product.discountFraction * 100).round()}%',
+                            '-${(((compare - price) / compare) * 100).round()}%',
                             style: eyebrow(
                               size: 9.5,
                               color: kGold,
@@ -198,41 +246,123 @@ class _ProductScreenState extends State<ProductScreen> {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Row(
-                    children: [
-                      Container(
-                        width: 5,
-                        height: 5,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: product.isInStock
-                              ? const Color(0xFF5C7E08)
-                              : kInkMuted,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        product.isInStock
-                            ? 'Disponible'.toUpperCase()
-                            : 'Agotado'.toUpperCase(),
-                        style: eyebrow(
-                          size: 9.5,
-                          color: product.isInStock
-                              ? const Color(0xFF5C7E08)
-                              : kInkMuted,
-                        ),
-                      ),
-                    ],
+                  Text(
+                    inStock
+                        ? 'Disponible · envío 3 a 5 días · gratis desde ${kMoney.format(kFreeShippingThreshold)}'
+                        : 'Agotado',
+                    style: sans(size: 12, color: inStock ? kInk : kInkMuted),
                   ),
+                  if (selectable.length > 1) ...[
+                    const SizedBox(height: 28),
+                    Text('Opción'.toUpperCase(), style: eyebrow()),
+                    const SizedBox(height: 10),
+                    Wrap(
+                      spacing: 8,
+                      runSpacing: 8,
+                      children: [
+                        for (var i = 0; i < selectable.length; i++)
+                          GestureDetector(
+                            onTap: () => setState(() => _variantIndex = i),
+                            child: AnimatedContainer(
+                              duration: reduceMotion(context)
+                                  ? Duration.zero
+                                  : kSwap,
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 12,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: i == _variantIndex ? kInk : Colors.white,
+                                border: Border.all(
+                                  color: i == _variantIndex ? kInk : kLine,
+                                  width: 0.5,
+                                ),
+                              ),
+                              child: Text(
+                                selectable[i].title.toUpperCase(),
+                                style: eyebrow(
+                                  size: 8.5,
+                                  color: i == _variantIndex
+                                      ? Colors.white
+                                      : kInk,
+                                ),
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
+                  if (description != null) ...[
+                    const SizedBox(height: 28),
+                    Text(description, style: sans(size: 13.5, height: 1.6)),
+                  ],
                 ],
               ),
             ),
-            const SizedBox(height: 36),
-            if (facets != null) _Specification(facets: facets),
+            const SizedBox(height: 28),
+            _Accordion(
+              title: 'Detalles',
+              open: _open.contains('detalles'),
+              onToggle: () => setState(() {
+                _open.contains('detalles')
+                    ? _open.remove('detalles')
+                    : _open.add('detalles');
+              }),
+              child: _Details(facets: facets),
+            ),
+            _Accordion(
+              title: 'Envío y cambios',
+              open: _open.contains('envio'),
+              onToggle: () => setState(() {
+                _open.contains('envio')
+                    ? _open.remove('envio')
+                    : _open.add('envio');
+              }),
+              child: Text(
+                'Envío a todo México en 3 a 5 días hábiles, por DHL, FedEx o Estafeta. '
+                'Gratis desde ${kMoney.format(kFreeShippingThreshold)}. '
+                'Si la pieza no es lo que esperabas, escríbenos por WhatsApp y lo resolvemos.',
+                style: sans(size: 13, height: 1.6),
+              ),
+            ),
+            _Accordion(
+              title: 'Apartado',
+              open: _open.contains('apartado'),
+              onToggle: () => setState(() {
+                _open.contains('apartado')
+                    ? _open.remove('apartado')
+                    : _open.add('apartado');
+              }),
+              child: Text(
+                'Aparta con \$400 MXN por WhatsApp. Tienes 20 días para liquidar. '
+                'Te confirmamos disponibilidad al momento.',
+                style: sans(size: 13, height: 1.6),
+              ),
+            ),
+            if (related.isNotEmpty) ...[
+              const SizedBox(height: 36),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: Text(
+                  facets?.brand == null
+                      ? 'Más piezas'
+                      : 'Más de ${brandLabel(facets!.brand!.value)}',
+                  style: display(22),
+                ),
+              ),
+              _Rail(products: related),
+            ],
+            if (recent.isNotEmpty) ...[
+              const SizedBox(height: 36),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                child: Text('Vistas hace un momento', style: display(22)),
+              ),
+              _Rail(products: recent),
+            ],
             const SizedBox(height: 40),
           ],
         ),
-        // Pinned, so the committing action never scrolls away on a long page.
         bottomNavigationBar: Container(
           decoration: const BoxDecoration(
             color: Colors.white,
@@ -244,28 +374,25 @@ class _ProductScreenState extends State<ProductScreen> {
               mainAxisSize: MainAxisSize.min,
               children: [
                 FilledButton(
-                  onPressed: product.isInStock
+                  onPressed: inStock
                       ? () {
                           store.addToBag(product);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Agregado a la bolsa'),
-                            ),
-                          );
+                          showMiniCart(context);
                         }
                       : null,
                   child: Text(
-                    product.isInStock
-                        ? 'Agregar a la bolsa'.toUpperCase()
-                        : 'Agotado'.toUpperCase(),
+                    (inStock ? 'Agregar a la bolsa' : 'Agotado').toUpperCase(),
                   ),
                 ),
                 const SizedBox(height: 10),
-                // The layaway flow. Not a secondary action on this store —
-                // deposit $400 MXN, 20 days to pay, arranged over WhatsApp.
                 OutlinedButton(
-                  onPressed: _openApartado,
-                  child: const Text('APARTAR POR WHATSAPP · ANTICIPO \$400'),
+                  onPressed: () => _openApartado(product),
+                  child: const Text('APARTAR · ANTICIPO \$400'),
+                ),
+                const SizedBox(height: 12),
+                UnderlineLink(
+                  label: 'Escribir por WhatsApp',
+                  onTap: () => _openConcierge(product),
                 ),
               ],
             ),
@@ -276,11 +403,124 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 }
 
-/// Gallery position as thin rules rather than dots.
-///
-/// Dots are a Material signature and read as an app; a set of hairline rules
-/// reads as print. Same information, and it survives on a light image because
-/// the inactive rule still has a visible edge.
+class _Rail extends StatelessWidget {
+  const _Rail({required this.products});
+
+  final List<Product> products;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: MediaQuery.sizeOf(context).width * 0.52 / 0.82 + 120,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: products.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 12),
+        itemBuilder: (context, index) => SizedBox(
+          width: MediaQuery.sizeOf(context).width * 0.52,
+          child: ProductCard(product: products[index]),
+        ),
+      ),
+    );
+  }
+}
+
+class _Accordion extends StatelessWidget {
+  const _Accordion({
+    required this.title,
+    required this.open,
+    required this.onToggle,
+    required this.child,
+  });
+
+  final String title;
+  final bool open;
+  final VoidCallback onToggle;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(border: Border(top: kHairline)),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          InkWell(
+            onTap: onToggle,
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(title.toUpperCase(), style: eyebrow()),
+                  ),
+                  Text(open ? '–' : '+', style: sans(size: 16)),
+                ],
+              ),
+            ),
+          ),
+          if (open)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
+              child: child,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _Details extends StatelessWidget {
+  const _Details({required this.facets});
+
+  final CanonicalFacets? facets;
+
+  @override
+  Widget build(BuildContext context) {
+    final rows = <(String, String)>[
+      if (facets?.category != null)
+        ('Tipo', categoryLabel(facets!.category!.value)),
+      if (facets?.silhouette != null)
+        ('Forma', silhouetteLabel(facets!.silhouette!.value)),
+      if (facets != null && facets!.colors.isNotEmpty)
+        (
+          'Color',
+          facets!.colors.map((c) => colorLabel(c.value)).join(', '),
+        ),
+      if (facets != null && facets!.patterns.isNotEmpty)
+        (
+          'Motivo',
+          facets!.patterns.map((p) => patternLabel(p.value)).join(', '),
+        ),
+    ];
+    if (rows.isEmpty) {
+      return Text(
+        'Pieza original importada de Estados Unidos.',
+        style: sans(size: 13, height: 1.6),
+      );
+    }
+    return Column(
+      children: [
+        for (final row in rows)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 10),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                SizedBox(
+                  width: 88,
+                  child: Text(row.$1, style: sans(size: 12, color: kInkMuted)),
+                ),
+                Expanded(child: Text(row.$2, style: sans(size: 12.5))),
+              ],
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 class _RuleIndicator extends StatelessWidget {
   const _RuleIndicator({required this.count, required this.active});
 
@@ -294,7 +534,7 @@ class _RuleIndicator extends StatelessWidget {
       children: List.generate(count, (i) {
         final on = i == active;
         return AnimatedContainer(
-          duration: const Duration(milliseconds: 180),
+          duration: reduceMotion(context) ? Duration.zero : kSnap,
           margin: const EdgeInsets.symmetric(horizontal: 3),
           width: on ? 22 : 12,
           height: 1.5,
@@ -305,67 +545,8 @@ class _RuleIndicator extends StatelessWidget {
   }
 }
 
-/// The normalized facets, presented as a specification table.
-///
-/// Still proves classification is working on products whose raw Shopify fields
-/// are empty or wrong — but a hairline-ruled table is how a maison lists
-/// composition and dimensions, so the debugging value now arrives disguised as
-/// product copy.
-class _Specification extends StatelessWidget {
-  const _Specification({required this.facets});
-
-  final CanonicalFacets facets;
-
-  @override
-  Widget build(BuildContext context) {
-    final rows = <(String, String)>[
-      if (facets.category != null) ('Categoría', facets.category!.value),
-      if (facets.silhouette != null) ('Silueta', facets.silhouette!.value),
-      if (facets.colors.isNotEmpty)
-        ('Color', facets.colors.map((c) => c.value).join(', ')),
-      if (facets.patterns.isNotEmpty)
-        ('Estampado', facets.patterns.map((p) => p.value).join(', ')),
-      if (facets.priceBand != null) ('Gama', facets.priceBand!),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-          child: Text('Detalles'.toUpperCase(), style: eyebrow()),
-        ),
-        for (final (label, value) in rows)
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: const BoxDecoration(border: Border(top: kHairline)),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                SizedBox(
-                  width: 108,
-                  child: Text(label, style: sans(size: 12, color: kInkMuted)),
-                ),
-                Expanded(
-                  child: Text(
-                    value,
-                    style: sans(size: 12.5),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        const DecoratedBox(
-          decoration: BoxDecoration(border: Border(top: kHairline)),
-          child: SizedBox(width: double.infinity),
-        ),
-      ],
-    );
-  }
-}
-
-class _Image extends StatelessWidget {
-  const _Image({required this.url});
+class _ZoomImage extends StatelessWidget {
+  const _ZoomImage({required this.url});
 
   final String? url;
 
@@ -381,17 +562,13 @@ class _Image extends StatelessWidget {
                 color: kInkMuted,
               ),
             )
-          : CachedNetworkImage(
-              imageUrl: url!,
-              fit: BoxFit.cover,
-              width: double.infinity,
-              placeholder: (_, __) => const ColoredBox(color: kMist),
-              errorWidget: (_, __, ___) => const Center(
-                child: Icon(
-                  Icons.broken_image_outlined,
-                  size: 20,
-                  color: kInkMuted,
-                ),
+          : InteractiveViewer(
+              minScale: 1,
+              maxScale: 2.2,
+              child: MonettaImage(
+                url: url,
+                fit: BoxFit.contain,
+                cacheWidth: MediaUrl.heroWidth,
               ),
             ),
     );

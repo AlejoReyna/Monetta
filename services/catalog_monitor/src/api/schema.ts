@@ -27,6 +27,18 @@ export interface ExternalCatalogItemV1 {
   readonly lastObservedAt: string;
   /** Distinguishes a current crawl row from the dated US display fallback. */
   readonly dataOrigin: CatalogDataOrigin;
+  readonly variants: readonly ExternalCatalogVariantV1[];
+}
+
+export interface ExternalCatalogVariantV1 {
+  readonly variantId: string;
+  readonly sku: string | null;
+  readonly colorName: string | null;
+  readonly colorCode: string | null;
+  readonly imageUrl: string | null;
+  readonly price: { readonly amount: number; readonly currency: 'USD' } | null;
+  readonly availability: Availability;
+  readonly detailUrl: string;
 }
 
 export interface ExternalCatalogSourceStatusV1 {
@@ -47,6 +59,38 @@ export interface ExternalCatalogResponseV1 {
 }
 
 function toItem(record: PresentedCatalogProduct): ExternalCatalogItemV1 {
+  const storedVariants = record.variants ?? [];
+  const variants = (
+    storedVariants.length > 0
+      ? storedVariants
+      : [
+          {
+            variantId: `${record.externalId}:default`,
+            sku: record.externalId,
+            colorName: null,
+            colorCode: null,
+            imageUrl: record.imageUrl,
+            priceUsd: record.priceUsd,
+            availability: record.availability,
+            detailUrl: record.canonicalUrl,
+          },
+        ]
+  )
+    .map((variant): ExternalCatalogVariantV1 => ({
+      variantId: variant.variantId,
+      sku: variant.sku,
+      colorName: variant.colorName,
+      colorCode: variant.colorCode,
+      imageUrl: variant.imageUrl,
+      price:
+        variant.priceUsd === null
+          ? null
+          : { amount: variant.priceUsd, currency: 'USD' },
+      availability: variant.availability,
+      detailUrl: variant.detailUrl,
+    }))
+    .sort((a, b) => a.variantId.localeCompare(b.variantId));
+
   return {
     sourceScopedId: `${record.sourceId}:${record.externalId}`,
     source: record.sourceId,
@@ -60,6 +104,7 @@ function toItem(record: PresentedCatalogProduct): ExternalCatalogItemV1 {
     detailUrl: record.canonicalUrl,
     lastObservedAt: record.lastSeenAt.toISOString(),
     dataOrigin: record.dataOrigin,
+    variants,
   };
 }
 

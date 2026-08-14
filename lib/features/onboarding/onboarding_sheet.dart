@@ -71,14 +71,14 @@ class _OnboardingSheetState extends State<OnboardingSheet> {
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 26, 20, 0),
                       child: Text(
-                        '¿Qué le gusta?',
+                        'Elige marcas',
                         style: display(27, weight: FontWeight.w500),
                       ),
                     ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
                       child: Text(
-                        'Para mostrarle lo suyo primero. Puede cambiarlo cuando quiera.',
+                        'Para mostrarte primero lo que te interesa. Puedes cambiarlo cuando quieras.',
                         style: sans(size: 12.5, color: kInkMuted),
                       ),
                     ),

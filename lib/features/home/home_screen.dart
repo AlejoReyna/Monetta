@@ -1,57 +1,29 @@
-/// Monetta's responsive storefront.
-///
-/// The page borrows the useful retail rhythms of a global accessories shop:
-/// a compact announcement, wordmark-led navigation, a prominent search field,
-/// campaign photography, category shortcuts, and a clean product grid. The
-/// campaign artwork is original placeholder material generated for Monetta;
-/// catalog, recommendation, wishlist, and external-research behavior remains
-/// driven by the existing application services.
+/// Monetta's shopper storefront. Desire first, then a way to buy.
 library;
 
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/catalog_store.dart';
-import '../../app/mixed_feed.dart';
+import '../../app/media/monetta_image.dart';
+import '../../app/media/monetta_video.dart';
+import '../../app/motion.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
-import '../../domain/catalog_item.dart';
+import '../../data/media/media_url.dart';
+import '../../domain/campaign.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
-import '../../reco/events.dart';
 import '../../reco/explainer.dart';
-import '../catalog/catalog_browse_screen.dart';
+import '../catalog/collection_screen.dart';
+import '../catalog/product_card.dart';
 import '../checkout/checkout_screen.dart';
 import '../onboarding/onboarding_sheet.dart';
-import '../product/product_screen.dart';
-import 'external_catalog_section.dart';
 
-const int _kEditorialCount = 6;
-
-const _campaigns = <_CampaignData>[
-  _CampaignData(
-    asset: 'assets/images/campaign_terracotta.jpg',
-    kicker: 'Edición solar',
-    title: 'Nueva luz, nuevas formas',
-    cta: 'Descubrir la colección',
-    searchQuery: 'bolsa',
-  ),
-  _CampaignData(
-    asset: 'assets/images/campaign_olive.jpg',
-    kicker: 'Texturas de temporada',
-    title: 'El nuevo verde',
-    cta: 'Ver bolsos de hombro',
-    searchQuery: 'hombro',
-  ),
-  _CampaignData(
-    asset: 'assets/images/campaign_coral.jpg',
-    kicker: 'Color en escena',
-    title: 'Pequeños, inolvidables',
-    cta: 'Ver bolsos mini',
-    searchQuery: 'mini',
-  ),
-];
+const int _kNewestCount = 8;
+const int _kGridCount = 12;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -60,28 +32,54 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _scaffoldKey = GlobalKey<ScaffoldState>();
-  final _campaignController = PageController();
-  bool _askedOnboarding = false;
-  int _campaignIndex = 0;
+  final _scroll = ScrollController();
+  double _collapse = 0;
+  bool _foreground = true;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_askedOnboarding) return;
-    _askedOnboarding = true;
-    WidgetsBinding.instance.addPostFrameCallback((_) => _openOnboarding());
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scroll.addListener(_onScroll);
+    WidgetsBinding.instance.addPostFrameCallback((_) => _precacheRail());
   }
 
   @override
   void dispose() {
-    _campaignController.dispose();
+    WidgetsBinding.instance.removeObserver(this);
+    _scroll.dispose();
     super.dispose();
   }
 
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final active = state == AppLifecycleState.resumed;
+    if (active == _foreground) return;
+    setState(() => _foreground = active);
+  }
+
+  void _onScroll() {
+    final next = (_scroll.offset / 80).clamp(0.0, 1.0);
+    if ((next - _collapse).abs() < 0.01) return;
+    setState(() => _collapse = next);
+  }
+
+  void _precacheRail() {
+    if (!mounted || inWidgetTest) return;
+    final store = StoreScope.of(context);
+    for (final item in store.feed().take(8)) {
+      final url = item.product.primaryImage;
+      if (url == null) continue;
+      precacheImage(
+        NetworkImage(MediaUrl.sized(url, width: MediaUrl.cardWidth)),
+        context,
+      );
+    }
+  }
+
   void _openOnboarding() {
-    if (!mounted) return;
     showModalBottomSheet<void>(
       context: context,
       useRootNavigator: true,
@@ -112,26 +110,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _openCatalogBrowse({required bool closeDrawer}) {
-    final store = StoreScope.of(context);
-    final externalCatalog = ExternalCatalogScope.of(context);
-    if (closeDrawer) Navigator.of(context).pop();
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => StoreScope(
-          notifier: store,
-          child: ExternalCatalogScope(
-            notifier: externalCatalog,
-            child: CatalogBrowseScreen(
-              items: fullDeduplicatedCatalog(
-                monettaItems: store.catalogItems,
-                externalItems: externalCatalog.items,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
+  void _openWhatsApp(Uri uri) {
+    unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
   }
 
   @override
@@ -142,86 +122,145 @@ class _HomeScreenState extends State<HomeScreen> {
     if (feed.isEmpty) {
       return Scaffold(
         key: _scaffoldKey,
-        appBar: _buildAppBar(),
+        appBar: _buildAppBar(24),
         body: Center(child: Text('Sin resultados', style: eyebrow())),
       );
     }
 
-    final topBrands = store.profile.topOf('brand');
-    final editorial = feed.take(_kEditorialCount).toList();
-    final externalCatalog = ExternalCatalogScope.of(context);
-    final featuredIds = editorial.map((item) => item.product.id).toSet();
-    // Home is an edited storefront, not the infinite catalog. Keeping the
-    // first 12 ranked candidates makes initial layout/image work bounded;
-    // every item remains reachable through “Ver todo el catálogo”.
-    final restMixed = store
-        .mixedFeed(external: externalCatalog.items, limit: 12)
-        .where((item) => !featuredIds.contains(item.product?.id))
+    final newest = [...store.products]
+      ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
+    final fresh = newest.take(_kNewestCount).toList();
+    final freshIds = fresh.map((p) => p.id).toSet();
+    final rest = feed
+        .map((item) => item.product)
+        .where((p) => !freshIds.contains(p.id))
+        .take(_kGridCount)
         .toList();
+
+    final bolsa = store.firstInStockWhere(
+      (p, f) => f?.category?.value == 'bolsa',
+    );
+    final cartera = store.firstInStockWhere(
+      (p, f) => f?.category?.value == 'cartera',
+    );
+    final reloj = store.firstInStockWhere(
+      (p, f) => f?.category?.value == 'reloj',
+    );
+
+    final media = MediaQuery.sizeOf(context);
+    final announcementH = 32 * (1 - _collapse);
+    final barH = 68 - 16 * _collapse;
+    final markH = 24 - 6 * _collapse;
+    final heroH = (media.height * 0.42).clamp(240.0, 360.0);
 
     return Scaffold(
       key: _scaffoldKey,
-      appBar: _buildAppBar(),
+      appBar: _buildAppBar(markH, height: barH),
       drawer: _MainDrawer(
-        onAdjustTaste: _openOnboardingFromDrawer,
-        onBrowseCatalog: () => _openCatalogBrowse(closeDrawer: true),
+        onChooseBrands: _openOnboardingFromDrawer,
+        onWhatsApp: () => _openWhatsApp(conciergeWhatsAppUri()),
+        onWholesale: () => _openWhatsApp(wholesaleWhatsAppUri()),
       ),
       body: ListView(
+        controller: _scroll,
         padding: EdgeInsets.zero,
         children: [
-          const _AnnouncementStrip(),
-          _SearchField(onTap: _openSearch),
-          _CampaignShowcase(
-            controller: _campaignController,
-            selectedIndex: _campaignIndex,
-            onPageChanged: (index) => setState(() => _campaignIndex = index),
-            onTap: (campaign) =>
-                _openSearch(initialQuery: campaign.searchQuery),
-          ),
-          const SizedBox(height: 44),
-          const _EditorialIntro(),
-          _CategoryRail(
-            onSelected: (query) => _openSearch(initialQuery: query),
-          ),
-          const SizedBox(height: 44),
-          SectionHeading(
-            kicker: topBrands.isEmpty ? 'Novedades' : 'Seleccionado para ti',
-            title: topBrands.isEmpty ? 'Lo más reciente' : 'Tu selección',
-            trailing: UnderlineLink(
-              label: topBrands.isEmpty ? 'Personalizar' : 'Ajustar',
-              onTap: _openOnboarding,
-              size: 11,
+          SizedBox(
+            height: announcementH,
+            child: ClipRect(
+              child: Opacity(
+                opacity: 1 - _collapse,
+                child: const _AnnouncementStrip(),
+              ),
             ),
           ),
-          _EditorialRail(items: editorial),
-          const SizedBox(height: 52),
-          const _ExternalCatalogRailBuilder(),
-          _CatalogHeader(
-            count: restMixed.length,
-            onViewAll: () => _openCatalogBrowse(closeDrawer: false),
+          _CampaignHero(
+            height: heroH,
+            playing: _foreground &&
+                (!_scroll.hasClients || _scroll.offset < heroH),
+            onOpenCatalog: () => openCollection(
+              context,
+              const CollectionScreen(title: 'El catálogo'),
+            ),
           ),
-          _CatalogGrid(items: restMixed),
-          const SizedBox(height: 52),
-          _ProfileFootnote(
-            topBrands: topBrands,
-            eventCount: store.eventCount,
-            productCount: store.products.length,
-            onAdjust: _openOnboarding,
+          const SizedBox(height: 28),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+            child: Text('Novedades', style: display(24)),
           ),
+          _CatalogGrid(products: fresh),
+          const SizedBox(height: 48),
+          _PhotoShopRow(
+            tiles: [
+              if (bolsa != null)
+                _ShopTileData(
+                  label: 'Bolsas',
+                  imageUrl: bolsa.primaryImage,
+                  screen: const CollectionScreen(
+                    title: 'Bolsas',
+                    filter: CollectionFilter(category: 'bolsa'),
+                  ),
+                ),
+              if (cartera != null)
+                _ShopTileData(
+                  label: 'Carteras',
+                  imageUrl: cartera.primaryImage,
+                  screen: const CollectionScreen(
+                    title: 'Carteras',
+                    filter: CollectionFilter(category: 'cartera'),
+                  ),
+                ),
+              if (reloj != null)
+                _ShopTileData(
+                  label: 'Relojes',
+                  imageUrl: reloj.primaryImage,
+                  screen: const CollectionScreen(
+                    title: 'Relojes',
+                    filter: CollectionFilter(category: 'reloj'),
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 48),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+            child: Text('Marcas', style: display(24)),
+          ),
+          _BrandRail(brands: store.availableBrands.take(8).toList()),
+          const SizedBox(height: 48),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
+            child: Text('Formas', style: display(24)),
+          ),
+          _SilhouetteRail(store: store),
+          const SizedBox(height: 48),
+          _CatalogGrid(products: rest),
+          const SizedBox(height: 20),
+          Center(
+            child: UnderlineLink(
+              label: 'Ver todo',
+              onTap: () => openCollection(
+                context,
+                const CollectionScreen(title: 'El catálogo'),
+              ),
+            ),
+          ),
+          const SizedBox(height: 52),
+          const _QuietFooter(),
         ],
       ),
     );
   }
 
-  AppBar _buildAppBar() {
+  PreferredSizeWidget _buildAppBar(double markHeight, {double height = 68}) {
     return AppBar(
       automaticallyImplyLeading: false,
-      toolbarHeight: 68,
+      toolbarHeight: height,
       centerTitle: false,
       titleSpacing: 20,
-      title: const Align(
+      title: Align(
         alignment: Alignment.centerLeft,
-        child: MonettaWordmark(height: 24),
+        child: MonettaWordmark(height: markHeight),
       ),
       actions: [
         IconButton(
@@ -256,7 +295,7 @@ class _AnnouncementStrip extends StatelessWidget {
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       child: Text(
-        'ENVÍO GRATIS EN COMPRAS DE \$1,499 · VER NOVEDADES',
+        'ENVÍO GRATIS DESDE \$1,499',
         maxLines: 1,
         overflow: TextOverflow.ellipsis,
         style: eyebrow(size: 9, color: Colors.white, weight: FontWeight.w500),
@@ -265,273 +304,184 @@ class _AnnouncementStrip extends StatelessWidget {
   }
 }
 
-class _SearchField extends StatelessWidget {
-  const _SearchField({required this.onTap});
+class _CampaignHero extends StatefulWidget {
+  const _CampaignHero({
+    required this.height,
+    required this.playing,
+    required this.onOpenCatalog,
+  });
 
-  final VoidCallback onTap;
+  final double height;
+  final bool playing;
+  final VoidCallback onOpenCatalog;
+
+  @override
+  State<_CampaignHero> createState() => _CampaignHeroState();
+}
+
+class _CampaignHeroState extends State<_CampaignHero> {
+  bool _showCta = false;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 18, 16, 18),
-      child: Semantics(
-        button: true,
-        label: 'Buscar en Monetta',
-        child: GestureDetector(
-          onTap: onTap,
-          behavior: HitTestBehavior.opaque,
-          child: Container(
-            height: 52,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            decoration: BoxDecoration(
-              color: kSearchFill,
-              borderRadius: BorderRadius.circular(28),
+    const campaign = CampaignMedia.monettaHome;
+    return SizedBox(
+      key: const Key('campaign-hero'),
+      height: widget.height,
+      child: GestureDetector(
+        onTap: widget.onOpenCatalog,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            MonettaVideo(
+              campaign: campaign,
+              playing: widget.playing,
+              onEnded: () {
+                if (!mounted || _showCta) return;
+                setState(() => _showCta = true);
+              },
             ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    'Buscar bolsas, carteras y relojes',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: sans(size: 15, color: kInkMuted),
+            if (_showCta)
+              ColoredBox(color: Colors.black.withValues(alpha: 0.18)),
+            if (_showCta)
+              Center(
+                child: Reveal(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        campaign.ctaLabel.toUpperCase(),
+                        style: sans(
+                          size: 13,
+                          color: kGold,
+                          weight: FontWeight.w600,
+                        ).copyWith(
+                          letterSpacing: 1.8,
+                          shadows: const [
+                            Shadow(color: Color(0x66000000), blurRadius: 10),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Container(height: 1, width: 108, color: kGold),
+                    ],
                   ),
                 ),
-                const Icon(Icons.search, size: 24, color: kInkMuted),
-              ],
-            ),
-          ),
+              ),
+          ],
         ),
       ),
     );
   }
 }
 
-class _CampaignData {
-  const _CampaignData({
-    required this.asset,
-    required this.kicker,
-    required this.title,
-    required this.cta,
-    required this.searchQuery,
+class _ShopTileData {
+  const _ShopTileData({
+    required this.label,
+    required this.imageUrl,
+    required this.screen,
   });
 
-  final String asset;
-  final String kicker;
-  final String title;
-  final String cta;
-  final String searchQuery;
+  final String label;
+  final String? imageUrl;
+  final CollectionScreen screen;
 }
 
-class _CampaignShowcase extends StatelessWidget {
-  const _CampaignShowcase({
-    required this.controller,
-    required this.selectedIndex,
-    required this.onPageChanged,
-    required this.onTap,
-  });
+class _PhotoShopRow extends StatelessWidget {
+  const _PhotoShopRow({required this.tiles});
 
-  final PageController controller;
-  final int selectedIndex;
-  final ValueChanged<int> onPageChanged;
-  final ValueChanged<_CampaignData> onTap;
+  final List<_ShopTileData> tiles;
 
   @override
   Widget build(BuildContext context) {
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        if (constraints.maxWidth >= 760) {
-          final tileWidth = (constraints.maxWidth - 72) / 3;
-          return Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 24),
-            child: SizedBox(
-              height: (tileWidth / .8).clamp(360, 590),
-              child: Row(
-                children: [
-                  for (var i = 0; i < _campaigns.length; i++) ...[
-                    if (i > 0) const SizedBox(width: 12),
-                    Expanded(
-                      child: _CampaignTile(
-                        data: _campaigns[i],
-                        onTap: () => onTap(_campaigns[i]),
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-          );
-        }
-
-        final height = (constraints.maxWidth - 32) / .8;
-        return Column(
-          children: [
-            SizedBox(
-              height: height,
-              child: PageView.builder(
-                controller: controller,
-                onPageChanged: onPageChanged,
-                itemCount: _campaigns.length,
-                itemBuilder: (context, index) => Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: _CampaignTile(
-                    data: _campaigns[index],
-                    onTap: () => onTap(_campaigns[index]),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                for (var i = 0; i < _campaigns.length; i++)
-                  AnimatedContainer(
-                    duration: const Duration(milliseconds: 180),
-                    width: i == selectedIndex ? 22 : 6,
-                    height: 2,
-                    margin: const EdgeInsets.symmetric(horizontal: 3),
-                    color: i == selectedIndex ? kInk : kLine,
-                  ),
-              ],
-            ),
+    if (tiles.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: Row(
+        children: [
+          for (var i = 0; i < tiles.length; i++) ...[
+            if (i > 0) const SizedBox(width: 8),
+            Expanded(child: _PhotoTile(data: tiles[i])),
           ],
-        );
-      },
+        ],
+      ),
     );
   }
 }
 
-class _CampaignTile extends StatelessWidget {
-  const _CampaignTile({required this.data, required this.onTap});
+class _PhotoTile extends StatefulWidget {
+  const _PhotoTile({required this.data});
 
-  final _CampaignData data;
-  final VoidCallback onTap;
+  final _ShopTileData data;
+
+  @override
+  State<_PhotoTile> createState() => _PhotoTileState();
+}
+
+class _PhotoTileState extends State<_PhotoTile> {
+  bool _pressed = false;
 
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: onTap,
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          Image.asset(data.asset, fit: BoxFit.cover),
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.transparent,
-                  Color(0x0A000000),
-                  Color(0xB8000000),
-                ],
-                stops: [0, .55, 1],
+      onTapDown: (_) => setState(() => _pressed = true),
+      onTapCancel: () => setState(() => _pressed = false),
+      onTapUp: (_) => setState(() => _pressed = false),
+      onTap: () => openCollection(context, widget.data.screen),
+      child: AnimatedScale(
+        scale: _pressed ? 0.985 : 1,
+        duration: reduceMotion(context) ? Duration.zero : kSnap,
+        child: Column(
+          children: [
+            AspectRatio(
+              aspectRatio: 3 / 4,
+              child: MonettaImage(
+                url: widget.data.imageUrl,
+                cacheWidth: MediaUrl.cardWidth,
               ),
             ),
-          ),
-          Align(
-            alignment: Alignment.bottomCenter,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 24, 24, 28),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Text(
-                    data.kicker.toUpperCase(),
-                    textAlign: TextAlign.center,
-                    style: eyebrow(size: 9.5, color: Colors.white70),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    data.title,
-                    maxLines: 2,
-                    textAlign: TextAlign.center,
-                    style: display(
-                      25,
-                      color: Colors.white,
-                      weight: FontWeight.w500,
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    data.cta.toUpperCase(),
-                    style: sans(
-                      size: 10.5,
-                      color: Colors.white,
-                      weight: FontWeight.w600,
-                    ).copyWith(letterSpacing: 1.25),
-                  ),
-                  const SizedBox(height: 5),
-                  Container(height: 1, width: 86, color: Colors.white),
-                ],
-              ),
-            ),
-          ),
-        ],
+            const SizedBox(height: 10),
+            Text(widget.data.label.toUpperCase(), style: eyebrow(size: 9)),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _EditorialIntro extends StatelessWidget {
-  const _EditorialIntro();
+class _BrandRail extends StatelessWidget {
+  const _BrandRail({required this.brands});
+
+  final List<String> brands;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 28),
-      child: Column(
-        children: [
-          Text(
-            'Conoce los accesorios que definen la temporada',
-            textAlign: TextAlign.center,
-            style: display(27, weight: FontWeight.w500),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            'Siluetas versátiles, texturas irresistibles y piezas originales para todos los días.',
-            textAlign: TextAlign.center,
-            style: sans(size: 13, color: kInkMuted),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CategoryRail extends StatelessWidget {
-  const _CategoryRail({required this.onSelected});
-
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    const entries = [
-      ('Bolsas', 'bolsa'),
-      ('Carteras', 'cartera'),
-      ('Relojes', 'reloj'),
-      ('Crossbody', 'crossbody'),
-    ];
     return SizedBox(
-      height: 74,
+      height: 52,
       child: ListView.separated(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 18),
         scrollDirection: Axis.horizontal,
-        itemCount: entries.length,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: brands.length,
         separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
-          final entry = entries[index];
-          return OutlinedButton(
-            onPressed: () => onSelected(entry.$2),
-            style: OutlinedButton.styleFrom(
-              minimumSize: Size.zero,
-              padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
-              foregroundColor: kInk,
-              side: kHairline,
-              shape: const StadiumBorder(),
+          final brand = brands[index];
+          return GestureDetector(
+            onTap: () => openCollection(
+              context,
+              CollectionScreen(
+                title: brandLabel(brand),
+                filter: CollectionFilter(brand: brand),
+              ),
             ),
-            child: Text(entry.$1.toUpperCase()),
+            child: Container(
+              alignment: Alignment.center,
+              padding: const EdgeInsets.symmetric(horizontal: 18),
+              decoration: BoxDecoration(border: Border.all(color: kLine, width: 0.5)),
+              child: Text(
+                brandLabel(brand).toUpperCase(),
+                style: eyebrow(size: 9, color: kInk),
+              ),
+            ),
           );
         },
       ),
@@ -539,20 +489,125 @@ class _CategoryRail extends StatelessWidget {
   }
 }
 
+class _SilhouetteRail extends StatelessWidget {
+  const _SilhouetteRail({required this.store});
+
+  final CatalogStore store;
+
+  @override
+  Widget build(BuildContext context) {
+    const shapes = <(String, String)>[
+      ('tote', 'Totes'),
+      ('crossbody', 'Crossbody'),
+      ('shoulder', 'De hombro'),
+    ];
+    final tiles = <_ShopTileData>[
+      for (final shape in shapes)
+        if (store.firstInStockWhere((p, f) => f?.silhouette?.value == shape.$1)
+            case final product?)
+          _ShopTileData(
+            label: shape.$2,
+            imageUrl: product.primaryImage,
+            screen: CollectionScreen(
+              title: shape.$2,
+              filter: CollectionFilter(category: 'bolsa', silhouette: shape.$1),
+            ),
+          ),
+    ];
+    if (tiles.isEmpty) return const SizedBox.shrink();
+    return SizedBox(
+      height: 220,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        itemCount: tiles.length,
+        separatorBuilder: (_, __) => const SizedBox(width: 10),
+        itemBuilder: (context, index) {
+          final tile = tiles[index];
+          return SizedBox(
+            width: 148,
+            child: _PhotoTile(data: tile),
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _CatalogGrid extends StatelessWidget {
+  const _CatalogGrid({required this.products});
+
+  final List<Product> products;
+
+  @override
+  Widget build(BuildContext context) {
+    if (products.isEmpty) return const SizedBox.shrink();
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final columns = constraints.maxWidth >= 1060
+            ? 4
+            : constraints.maxWidth >= 720
+                ? 3
+                : 2;
+        return GridView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            childAspectRatio: 0.52,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 32,
+          ),
+          itemCount: products.length,
+          itemBuilder: (context, index) =>
+              ProductCard(product: products[index]),
+        );
+      },
+    );
+  }
+}
+
+class _QuietFooter extends StatelessWidget {
+  const _QuietFooter();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      color: kMist,
+      padding: const EdgeInsets.fromLTRB(20, 34, 20, 38),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Originales importados de Estados Unidos', style: sans(size: 13)),
+          const SizedBox(height: 8),
+          Text(
+            'Envío a todo México · 3 a 5 días · WhatsApp $kWhatsAppNumberDisplay',
+            style: sans(size: 12.5, color: kInkMuted),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _MainDrawer extends StatelessWidget {
   const _MainDrawer({
-    required this.onAdjustTaste,
-    required this.onBrowseCatalog,
+    required this.onChooseBrands,
+    required this.onWhatsApp,
+    required this.onWholesale,
   });
 
-  final VoidCallback onAdjustTaste;
-  final VoidCallback onBrowseCatalog;
+  final VoidCallback onChooseBrands;
+  final VoidCallback onWhatsApp;
+  final VoidCallback onWholesale;
 
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     return Drawer(
-      width: width < 400 ? width * .88 : 360,
+      width: width < 400 ? width * 0.88 : 360,
       backgroundColor: Colors.white,
       elevation: 0,
       shape: const RoundedRectangleBorder(borderRadius: kSquare),
@@ -573,7 +628,7 @@ class _MainDrawer extends StatelessWidget {
                 ],
               ),
             ),
-            const Divider(height: .5),
+            const Divider(height: 0.5),
             _DrawerLink(
               label: 'Inicio',
               current: true,
@@ -583,25 +638,57 @@ class _MainDrawer extends StatelessWidget {
               label: 'Bolsas',
               onTap: () {
                 Navigator.of(context).pop();
-                showSearch<void>(
-                  context: context,
-                  query: 'bolsa',
-                  delegate: _CatalogSearchDelegate(StoreScope.of(context)),
+                openCollection(
+                  context,
+                  const CollectionScreen(
+                    title: 'Bolsas',
+                    filter: CollectionFilter(category: 'bolsa'),
+                  ),
                 );
               },
             ),
-            _DrawerLink(label: 'Ver todo el catálogo', onTap: onBrowseCatalog),
             _DrawerLink(
-              label: 'Ajustar mis gustos',
-              onTap: onAdjustTaste,
+              label: 'Carteras',
+              onTap: () {
+                Navigator.of(context).pop();
+                openCollection(
+                  context,
+                  const CollectionScreen(
+                    title: 'Carteras',
+                    filter: CollectionFilter(category: 'cartera'),
+                  ),
+                );
+              },
             ),
+            _DrawerLink(
+              label: 'Relojes',
+              onTap: () {
+                Navigator.of(context).pop();
+                openCollection(
+                  context,
+                  const CollectionScreen(
+                    title: 'Relojes',
+                    filter: CollectionFilter(category: 'reloj'),
+                  ),
+                );
+              },
+            ),
+            _DrawerLink(
+              label: 'Ver todo',
+              onTap: () {
+                Navigator.of(context).pop();
+                openCollection(
+                  context,
+                  const CollectionScreen(title: 'El catálogo'),
+                );
+              },
+            ),
+            _DrawerLink(label: 'Elige marcas', onTap: onChooseBrands),
             const Spacer(),
-            const Divider(height: .5),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 20, 20, 26),
-              child:
-                  Text('Originales importados'.toUpperCase(), style: eyebrow()),
-            ),
+            const Divider(height: 0.5),
+            _DrawerLink(label: 'WhatsApp', onTap: onWhatsApp),
+            _DrawerLink(label: 'Mayoreo', onTap: onWholesale),
+            const SizedBox(height: 12),
           ],
         ),
       ),
@@ -634,460 +721,6 @@ class _DrawerLink extends StatelessWidget {
             weight: current ? FontWeight.w400 : FontWeight.w500,
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _EditorialRail extends StatelessWidget {
-  const _EditorialRail({required this.items});
-
-  final List<Recommendation> items;
-
-  @override
-  Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    final width = screenWidth >= 760 ? 280.0 : screenWidth * .62;
-    return SizedBox(
-      height: width / .82 + 120,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 12),
-        itemBuilder: (context, index) => SizedBox(
-          width: width,
-          child: _ProductTile(item: items[index]),
-        ),
-      ),
-    );
-  }
-}
-
-class _CatalogHeader extends StatelessWidget {
-  const _CatalogHeader({required this.count, required this.onViewAll});
-
-  final int count;
-  final VoidCallback onViewAll;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('EL CATÁLOGO', style: eyebrow()),
-                    const SizedBox(height: 7),
-                    Text(
-                      'Descubre más',
-                      style: display(25, weight: FontWeight.w500),
-                    ),
-                  ],
-                ),
-              ),
-              Text('$count PIEZAS', style: eyebrow(size: 9)),
-            ],
-          ),
-          const SizedBox(height: 18),
-          DecoratedBox(
-            decoration: const BoxDecoration(
-              border: Border(top: kHairline, bottom: kHairline),
-            ),
-            child: Row(
-              children: [
-                Expanded(
-                  child: TextButton.icon(
-                    onPressed: onViewAll,
-                    icon: const Icon(Icons.tune, size: 17),
-                    label: const Text('FILTRAR'),
-                  ),
-                ),
-                const SizedBox(height: 44, child: VerticalDivider(width: .5)),
-                Expanded(
-                  child: TextButton.icon(
-                    onPressed: onViewAll,
-                    icon: const Icon(Icons.swap_vert, size: 18),
-                    label: const Text('ORDENAR'),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _CatalogGrid extends StatelessWidget {
-  const _CatalogGrid({required this.items});
-
-  final List<MixedRecommendation> items;
-
-  @override
-  Widget build(BuildContext context) {
-    if (items.isEmpty) return const SizedBox.shrink();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 1060
-            ? 4
-            : constraints.maxWidth >= 720
-                ? 3
-                : 2;
-        return GridView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            childAspectRatio: .49,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 32,
-          ),
-          itemCount: items.length,
-          itemBuilder: (context, index) => _MixedTile(rec: items[index]),
-        );
-      },
-    );
-  }
-}
-
-class _MixedTile extends StatelessWidget {
-  const _MixedTile({required this.rec});
-
-  final MixedRecommendation rec;
-
-  @override
-  Widget build(BuildContext context) {
-    return rec.isExternal
-        ? _ExternalMixedTile(rec: rec)
-        : _MonettaMixedTile(rec: rec);
-  }
-}
-
-class _MonettaMixedTile extends StatelessWidget {
-  const _MonettaMixedTile({required this.rec});
-
-  final MixedRecommendation rec;
-
-  @override
-  Widget build(BuildContext context) {
-    final store = StoreScope.of(context);
-    final product = rec.product!;
-    final facets = store.facetsFor(product.id);
-    return _RetailProductCard(
-      imageUrl: product.primaryImage,
-      brand: facets?.brand?.value == null
-          ? null
-          : brandLabel(facets!.brand!.value),
-      title: product.title,
-      price: kMoney.format(product.price),
-      compareAtPrice:
-          product.isOnSale ? kMoney.format(product.compareAtPrice) : null,
-      inStock: product.isInStock,
-      reason: rec.reason,
-      wishlisted: store.wishlist.contains(product.id),
-      onWishlist: () => store.toggleWishlist(product.id),
-      onTap: () => _openProduct(context, store, product),
-    );
-  }
-}
-
-class _ExternalMixedTile extends StatelessWidget {
-  const _ExternalMixedTile({required this.rec});
-
-  final MixedRecommendation rec;
-
-  Future<void> _open(BuildContext context) async {
-    final item = rec.item;
-    if (!isValidExternalDetailUrl(item)) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Enlace no válido para ${item.merchant}')),
-      );
-      return;
-    }
-    final launched = await defaultExternalLinkOpener(Uri.parse(item.detailUrl));
-    if (!launched && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo abrir ${item.merchant}')),
-      );
-    }
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final item = rec.item;
-    return _RetailProductCard(
-      imageUrl: item.imageUrl,
-      brand: item.brand,
-      title: item.title,
-      price: formatCatalogMoney(item.price),
-      inStock: item.availability != CatalogAvailability.outOfStock,
-      reason: rec.reason,
-      source: externalSourceBadge(item.source),
-      onTap: () => unawaited(_open(context)),
-    );
-  }
-}
-
-class _ProductTile extends StatelessWidget {
-  const _ProductTile({required this.item});
-
-  final Recommendation item;
-
-  @override
-  Widget build(BuildContext context) {
-    final store = StoreScope.of(context);
-    final product = item.product;
-    final facets = store.facetsFor(product.id);
-    return _RetailProductCard(
-      imageUrl: product.primaryImage,
-      brand: facets?.brand?.value == null
-          ? null
-          : brandLabel(facets!.brand!.value),
-      title: product.title,
-      price: kMoney.format(product.price),
-      compareAtPrice:
-          product.isOnSale ? kMoney.format(product.compareAtPrice) : null,
-      inStock: product.isInStock,
-      reason: item.reason,
-      wishlisted: store.wishlist.contains(product.id),
-      onWishlist: () => store.toggleWishlist(product.id),
-      onTap: () => _openProduct(context, store, product),
-    );
-  }
-}
-
-void _openProduct(BuildContext context, CatalogStore store, Product product) {
-  store.record(EventType.productView, productId: product.id);
-  Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => StoreScope(
-        notifier: store,
-        child: ProductScreen(productId: product.id),
-      ),
-    ),
-  );
-}
-
-class _RetailProductCard extends StatelessWidget {
-  const _RetailProductCard({
-    required this.imageUrl,
-    required this.brand,
-    required this.title,
-    required this.price,
-    required this.inStock,
-    required this.reason,
-    required this.onTap,
-    this.compareAtPrice,
-    this.wishlisted = false,
-    this.onWishlist,
-    this.source,
-  });
-
-  final String? imageUrl;
-  final String? brand;
-  final String title;
-  final String price;
-  final String? compareAtPrice;
-  final bool inStock;
-  final RecoReason reason;
-  final bool wishlisted;
-  final VoidCallback? onWishlist;
-  final VoidCallback onTap;
-  final String? source;
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: .82,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _ProductImage(url: imageUrl),
-                if (!inStock)
-                  ColoredBox(
-                    color: Colors.white.withValues(alpha: .68),
-                    child: Center(child: Text('AGOTADO', style: eyebrow())),
-                  ),
-                if (onWishlist != null)
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: IconButton(
-                      onPressed: onWishlist,
-                      constraints:
-                          const BoxConstraints.tightFor(width: 34, height: 34),
-                      padding: EdgeInsets.zero,
-                      icon: Icon(
-                        wishlisted ? Icons.favorite : Icons.favorite_border,
-                        size: 19,
-                        color: wishlisted ? kGold : kInk,
-                      ),
-                    ),
-                  ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 11),
-          Text(
-            reason.text.toUpperCase(),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: eyebrow(
-              size: 8.5,
-              color: reason.kind == ReasonKind.priceDrop ? kSale : kInkMuted,
-            ),
-          ),
-          const SizedBox(height: 6),
-          if (brand != null) ...[
-            Text(
-              brand!.toUpperCase(),
-              style: sans(size: 10.5, weight: FontWeight.w600),
-            ),
-            const SizedBox(height: 3),
-          ],
-          Text(
-            title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: sans(size: 12.5, height: 1.35),
-          ),
-          const SizedBox(height: 6),
-          Wrap(
-            spacing: 7,
-            runSpacing: 2,
-            children: [
-              Text(price, style: sans(size: 12, weight: FontWeight.w600)),
-              if (compareAtPrice != null)
-                Text(
-                  compareAtPrice!,
-                  style: sans(
-                    size: 11,
-                    color: kInkMuted,
-                    decoration: TextDecoration.lineThrough,
-                  ),
-                ),
-            ],
-          ),
-          if (source != null) ...[
-            const SizedBox(height: 4),
-            Text(source!, style: sans(size: 9.5, color: kInkMuted)),
-          ],
-        ],
-      ),
-    );
-  }
-}
-
-class _ProductImage extends StatelessWidget {
-  const _ProductImage({required this.url});
-
-  final String? url;
-
-  @override
-  Widget build(BuildContext context) {
-    return ColoredBox(
-      color: kMist,
-      child: url == null
-          ? const Center(
-              child: Icon(
-                Icons.image_not_supported_outlined,
-                size: 20,
-                color: kInkMuted,
-              ),
-            )
-          : CachedNetworkImage(
-              imageUrl: url!,
-              fit: BoxFit.cover,
-              fadeInDuration: const Duration(milliseconds: 220),
-              placeholder: (_, __) => const ColoredBox(color: kMist),
-              errorWidget: (_, __, ___) => const Center(
-                child: Icon(
-                  Icons.broken_image_outlined,
-                  size: 20,
-                  color: kInkMuted,
-                ),
-              ),
-            ),
-    );
-  }
-}
-
-class _ExternalCatalogRailBuilder extends StatelessWidget {
-  const _ExternalCatalogRailBuilder();
-
-  @override
-  Widget build(BuildContext context) {
-    final store = StoreScope.of(context);
-    final externalCatalog = ExternalCatalogScope.of(context);
-    return ListenableBuilder(
-      listenable: externalCatalog,
-      builder: (context, _) {
-        if (!externalCatalog.enabled) return const SizedBox.shrink();
-        return ExternalCatalogSection(
-          items: dedupeExternalAgainstMonetta(
-            external: externalCatalog.items,
-            monettaItems: store.catalogItems,
-          ),
-          generatedAt: externalCatalog.generatedAt,
-        );
-      },
-    );
-  }
-}
-
-class _ProfileFootnote extends StatelessWidget {
-  const _ProfileFootnote({
-    required this.topBrands,
-    required this.eventCount,
-    required this.productCount,
-    required this.onAdjust,
-  });
-
-  final List<String> topBrands;
-  final int eventCount;
-  final int productCount;
-  final VoidCallback onAdjust;
-
-  @override
-  Widget build(BuildContext context) {
-    final hasTaste = topBrands.isNotEmpty;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(20, 34, 20, 38),
-      color: kMist,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('TU EXPERIENCIA MONETTA', style: eyebrow()),
-          const SizedBox(height: 11),
-          Text(
-            hasTaste
-                ? 'Priorizamos ${topBrands.map(brandLabel).join(' · ')} a partir de $eventCount interacciones en este dispositivo.'
-                : '$productCount piezas originales listas para descubrir. Elige tus gustos para personalizar esta selección.',
-            style: sans(size: 12.5, color: kInkMuted),
-          ),
-          const SizedBox(height: 18),
-          UnderlineLink(
-            label: hasTaste ? 'Ajustar mis gustos' : 'Elegir mis gustos',
-            onTap: onAdjust,
-            size: 11.5,
-          ),
-        ],
       ),
     );
   }
@@ -1149,56 +782,25 @@ class _CatalogSearchDelegate extends SearchDelegate<void> {
     if (products.isEmpty) {
       return Center(
         child: Text(
-          'No encontramos resultados para “$query”.',
+          'No hay piezas para “$query”.',
           style: sans(color: kInkMuted),
         ),
       );
     }
 
-    return GridView.builder(
-      padding: const EdgeInsets.all(12),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        childAspectRatio: .55,
-        crossAxisSpacing: 8,
-        mainAxisSpacing: 28,
+    return StoreScope(
+      notifier: store,
+      child: GridView.builder(
+        padding: const EdgeInsets.all(12),
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 2,
+          childAspectRatio: 0.52,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 28,
+        ),
+        itemCount: products.length,
+        itemBuilder: (context, index) => ProductCard(product: products[index]),
       ),
-      itemCount: products.length,
-      itemBuilder: (context, index) {
-        final product = products[index];
-        final facets = store.facetsFor(product.id);
-        return GestureDetector(
-          onTap: () => _openProduct(context, store, product),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: .82,
-                child: _ProductImage(url: product.primaryImage),
-              ),
-              const SizedBox(height: 10),
-              if (facets?.brand?.value != null) ...[
-                Text(
-                  brandLabel(facets!.brand!.value).toUpperCase(),
-                  style: sans(size: 10, weight: FontWeight.w600),
-                ),
-                const SizedBox(height: 3),
-              ],
-              Text(
-                product.title,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-                style: sans(size: 12.5, height: 1.35),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                kMoney.format(product.price),
-                style: sans(size: 12, weight: FontWeight.w600),
-              ),
-            ],
-          ),
-        );
-      },
     );
   }
 }

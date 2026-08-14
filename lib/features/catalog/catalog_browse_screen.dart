@@ -17,8 +17,8 @@ import 'package:flutter/material.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
 import '../../main.dart';
-import '../home/external_catalog_section.dart'
-    show ExternalLinkOpener, defaultExternalLinkOpener;
+import 'extracted_badge.dart';
+import '../product/external_product_screen.dart';
 import '../product/product_screen.dart';
 
 class CatalogBrowseScreen extends StatelessWidget {
@@ -121,7 +121,7 @@ class _BrowseTile extends StatelessWidget {
   final CatalogItem item;
   final ExternalLinkOpener openExternalLink;
 
-  Future<void> _tap(BuildContext context) async {
+  void _tap(BuildContext context) {
     if (!item.isExternal) {
       final productId = item.shopifyProductId;
       if (productId == null) return;
@@ -138,20 +138,13 @@ class _BrowseTile extends StatelessWidget {
       return;
     }
 
-    if (!isValidExternalDetailUrl(item)) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Enlace no válido para ${item.merchant}')),
-        );
-      }
-      return;
-    }
-    final launched = await openExternalLink(Uri.parse(item.detailUrl));
-    if (!launched && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo abrir ${item.merchant}')),
-      );
-    }
+    unawaited(
+      showExternalProductDetail(
+        context,
+        item: item,
+        openLink: openExternalLink,
+      ),
+    );
   }
 
   @override
@@ -163,29 +156,41 @@ class _BrowseTile extends StatelessWidget {
         children: [
           AspectRatio(
             aspectRatio: 3 / 4,
-            child: ColoredBox(
-              color: kMist,
-              child: item.imageUrl == null
-                  ? const Center(
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 18,
-                        color: kInkMuted,
-                      ),
-                    )
-                  : CachedNetworkImage(
-                      imageUrl: item.imageUrl!,
-                      fit: BoxFit.cover,
-                      fadeInDuration: const Duration(milliseconds: 240),
-                      placeholder: (_, __) => const ColoredBox(color: kMist),
-                      errorWidget: (_, __, ___) => const Center(
-                        child: Icon(
-                          Icons.broken_image_outlined,
-                          size: 18,
-                          color: kInkMuted,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                ColoredBox(
+                  color: kMist,
+                  child: item.imageUrl == null
+                      ? const Center(
+                          child: Icon(
+                            Icons.image_not_supported_outlined,
+                            size: 18,
+                            color: kInkMuted,
+                          ),
+                        )
+                      : CachedNetworkImage(
+                          imageUrl: item.imageUrl!,
+                          fit: BoxFit.cover,
+                          fadeInDuration: const Duration(milliseconds: 240),
+                          placeholder: (_, __) =>
+                              const ColoredBox(color: kMist),
+                          errorWidget: (_, __, ___) => const Center(
+                            child: Icon(
+                              Icons.broken_image_outlined,
+                              size: 18,
+                              color: kInkMuted,
+                            ),
+                          ),
                         ),
-                      ),
-                    ),
+                ),
+                if (item.isExternal)
+                  const Positioned(
+                    top: 8,
+                    left: 8,
+                    child: ExtractedBadge(),
+                  ),
+              ],
             ),
           ),
           const SizedBox(height: 10),

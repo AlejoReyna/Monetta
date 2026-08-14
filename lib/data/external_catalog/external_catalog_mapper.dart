@@ -53,6 +53,24 @@ Money? _priceFromJson(Object? raw) {
   return Money(amount: amount.toDouble(), currency: Currency.usd);
 }
 
+List<CatalogVariant> _variantsFromJson(Object? raw) {
+  if (raw is! List<dynamic>) return const [];
+  return raw.whereType<Map<String, dynamic>>().map((json) {
+    return CatalogVariant(
+      variantId: '${json['variantId'] ?? ''}',
+      sku: json['sku'] as String?,
+      colorName: json['colorName'] as String?,
+      colorCode: json['colorCode'] as String?,
+      imageUrl: json['imageUrl'] as String?,
+      price: _priceFromJson(json['price']),
+      availability: _availabilityFromJson(json['availability']),
+      detailUrl: '${json['detailUrl'] ?? ''}',
+    );
+  }).where((variant) {
+    return variant.variantId.isNotEmpty && variant.detailUrl.isNotEmpty;
+  }).toList(growable: false);
+}
+
 /// Maps one `items[]` entry from `GET /v1/external-catalog`. Throws on a
 /// record missing a field the wire schema guarantees is required
 /// (`sourceScopedId`, `source`, `title`, `detailUrl`) — callers should treat
@@ -80,5 +98,6 @@ CatalogItem catalogItemFromExternalJson(Map<String, dynamic> json) {
     // procurement candidates: the owner verifies availability, shipping and
     // margin before buying and fulfilling them manually.
     purchaseMode: PurchaseMode.ownerProcurement,
+    variants: _variantsFromJson(json['variants']),
   );
 }

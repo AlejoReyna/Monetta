@@ -1,6 +1,11 @@
 import type pg from 'pg';
 import type { ProductRepository } from '../crawl/ports.js';
-import type { Availability, CatalogProductRecord, SourceId } from '../domain/types.js';
+import type {
+  Availability,
+  CatalogProductRecord,
+  ExtractedProductVariant,
+  SourceId,
+} from '../domain/types.js';
 
 interface ProductRow {
   source_id: string;
@@ -12,6 +17,7 @@ interface ProductRow {
   image_url: string | null;
   price_usd: string | null;
   availability: Availability;
+  variants: ExtractedProductVariant[] | null;
   fingerprint: string;
   first_seen_at: Date;
   last_seen_at: Date;
@@ -31,6 +37,7 @@ function fromRow(row: ProductRow): CatalogProductRecord {
     imageUrl: row.image_url,
     priceUsd: row.price_usd === null ? null : Number.parseFloat(row.price_usd),
     availability: row.availability,
+    variants: Array.isArray(row.variants) ? row.variants : [],
     fingerprint: row.fingerprint,
     firstSeenAt: row.first_seen_at,
     lastSeenAt: row.last_seen_at,
@@ -67,9 +74,9 @@ export class PgProductRepository implements ProductRepository {
         await client.query(
           `INSERT INTO products (
              source_id, external_id, canonical_url, title, brand, category, image_url,
-             price_usd, availability, fingerprint, first_seen_at, last_seen_at,
+             price_usd, availability, variants, fingerprint, first_seen_at, last_seen_at,
              last_changed_at, is_active, consecutive_missing_snapshots
-           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+           ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
            ON CONFLICT (source_id, external_id) DO UPDATE SET
              canonical_url = EXCLUDED.canonical_url,
              title = EXCLUDED.title,
@@ -78,6 +85,7 @@ export class PgProductRepository implements ProductRepository {
              image_url = EXCLUDED.image_url,
              price_usd = EXCLUDED.price_usd,
              availability = EXCLUDED.availability,
+             variants = EXCLUDED.variants,
              fingerprint = EXCLUDED.fingerprint,
              first_seen_at = EXCLUDED.first_seen_at,
              last_seen_at = EXCLUDED.last_seen_at,
@@ -94,6 +102,7 @@ export class PgProductRepository implements ProductRepository {
             r.imageUrl,
             r.priceUsd,
             r.availability,
+            JSON.stringify(r.variants ?? []),
             r.fingerprint,
             r.firstSeenAt,
             r.lastSeenAt,

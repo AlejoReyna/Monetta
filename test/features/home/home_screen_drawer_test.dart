@@ -28,55 +28,45 @@ Widget _app(CatalogStore store) {
 
 void main() {
   testWidgets(
-      'the hamburger opens a lateral drawer with "Inicio" and "Ajustar mis gustos"',
+      'the hamburger opens a lateral drawer with "Inicio" and "Elige marcas"',
       (tester) async {
     final store = await _loadedStore();
     await tester.pumpWidget(_app(store));
-    await tester.pumpAndSettle();
-
-    // The onboarding sheet opens on first frame; dismiss it before poking
-    // at the menu underneath.
-    await tester.tap(find.text('VER TODO'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     expect(find.byType(Drawer), findsNothing);
+    expect(find.text('Elige marcas'), findsNothing);
 
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsOneWidget);
     expect(find.text('Inicio'), findsOneWidget);
-    expect(find.text('Ajustar mis gustos'), findsOneWidget);
+    expect(find.text('Elige marcas'), findsOneWidget);
     expect(find.byIcon(Icons.close), findsOneWidget);
   });
 
   testWidgets(
-      'tapping "Ajustar mis gustos" closes the drawer and opens onboarding',
+      'tapping "Elige marcas" closes the drawer and opens onboarding',
       (tester) async {
     final store = await _loadedStore();
     await tester.pumpWidget(_app(store));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('VER TODO'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Ajustar mis gustos'));
+    await tester.tap(find.text('Elige marcas'));
     await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsNothing);
-    expect(find.text('¿Qué le gusta?'), findsOneWidget);
+    expect(find.text('Elige marcas'), findsWidgets);
   });
 
   testWidgets('tapping "Inicio" just closes the drawer', (tester) async {
     final store = await _loadedStore();
     await tester.pumpWidget(_app(store));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('VER TODO'));
-    await tester.pumpAndSettle();
+    await tester.pump();
 
     await tester.tap(find.byIcon(Icons.menu));
     await tester.pumpAndSettle();
@@ -85,6 +75,6 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(Drawer), findsNothing);
-    expect(find.text('¿Qué le gusta?'), findsNothing);
+    expect(find.text('Elige marcas'), findsNothing);
   });
 }

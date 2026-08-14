@@ -97,11 +97,49 @@ describe('GET /v1/external-catalog and /healthz', () => {
       price: { amount: 350, currency: 'USD' },
       detailUrl: 'https://www.coach.com/tabby-shoulder-bag-26/C8879.html',
       dataOrigin: 'live_crawl',
+      variants: [
+        expect.objectContaining({
+          variantId: 'C8879:default',
+          sku: 'C8879',
+          price: { amount: 350, currency: 'USD' },
+        }),
+      ],
     });
     // Never expose internal fields.
     expect(body.items[0]).not.toHaveProperty('fingerprint');
     expect(body.items[0]).not.toHaveProperty('consecutiveMissingSnapshots');
     expect(body).not.toHaveProperty('databaseUrl');
+  });
+
+  it('serves color variants without exposing internal history fields', async () => {
+    products.seed([
+      activeProduct({
+        variants: [
+          {
+            variantId: 'C8879:B4BK',
+            sku: 'C8879 B4/BK',
+            colorName: 'Brass/Black',
+            colorCode: 'B4BK',
+            imageUrl: 'https://coach.com/images/c8879-black.jpg',
+            priceUsd: 320,
+            availability: 'outOfStock',
+            detailUrl: 'https://www.coach.com/products/tabby/C8879-B4%2FBK.html',
+          },
+        ],
+      }),
+    ]);
+    const response = await fetch(`${baseUrl}/v1/external-catalog`);
+    const body = await response.json();
+    expect(body.items[0].variants).toEqual([
+      expect.objectContaining({
+        variantId: 'C8879:B4BK',
+        colorName: 'Brass/Black',
+        colorCode: 'B4BK',
+        price: { amount: 320, currency: 'USD' },
+        availability: 'outOfStock',
+      }),
+    ]);
+    expect(body.items[0].variants[0]).not.toHaveProperty('lastChangedAt');
   });
 
   it('only returns active listings', async () => {

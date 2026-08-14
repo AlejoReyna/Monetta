@@ -140,11 +140,8 @@ class _SplashScreen extends StatelessWidget {
             const SizedBox(height: 36),
             const SizedBox(
               width: 64,
-              child: LinearProgressIndicator(
-                minHeight: 1,
-                color: kGold,
-                backgroundColor: kLine,
-              ),
+              height: 1,
+              child: ColoredBox(color: kGold),
             ),
           ],
         ),

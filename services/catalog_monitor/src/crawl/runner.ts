@@ -9,7 +9,12 @@ import { MIN_REQUIRED_FIELD_COVERAGE } from '../monitor/health.js';
 import { validateFetchedMarket } from './marketGuard.js';
 import type { BrandAdapter } from '../adapters/types.js';
 import type { CrawlRunRepository, ProductRepository } from './ports.js';
-import type { CrawlRunStatus, ErrorType, ExtractedProduct } from '../domain/types.js';
+import type {
+  CrawlRunStatus,
+  ErrorType,
+  ExtractedProduct,
+  ExtractedProductVariant,
+} from '../domain/types.js';
 
 export interface PageFetchResult {
   readonly status: number;
@@ -57,6 +62,38 @@ export interface RunCrawlResult {
   readonly inactiveItems: number;
   readonly errorsByType: Partial<Record<ErrorType, number>>;
   readonly items: readonly ExtractedProduct[];
+}
+
+/**
+ * Coach can list one sitemap URL per color while MK usually exposes all
+ * swatches from one parent page. Reconcile both shapes into one parent
+ * product and a de-duplicated variant collection before snapshot diffing.
+ */
+function mergeProductVariants(
+  previous: ExtractedProduct,
+  next: ExtractedProduct,
+): ExtractedProduct {
+  const variants = new Map<string, ExtractedProductVariant>();
+  for (const variant of [...(previous.variants ?? []), ...(next.variants ?? [])]) {
+    variants.set(variant.variantId, variant);
+  }
+  const prices = [previous.priceUsd, next.priceUsd].filter(
+    (price): price is number => price !== null,
+  );
+  return {
+    ...previous,
+    imageUrl: previous.imageUrl ?? next.imageUrl,
+    priceUsd: prices.length === 0 ? null : Math.min(...prices),
+    availability:
+      previous.availability === 'inStock' || next.availability === 'inStock'
+        ? 'inStock'
+        : previous.availability === 'outOfStock' && next.availability === 'outOfStock'
+          ? 'outOfStock'
+          : 'unknown',
+    variants: [...variants.values()].sort((a, b) =>
+      a.variantId.localeCompare(b.variantId),
+    ),
+  };
 }
 
 /** Thrown internally so `withRetry` treats a 429/5xx response as a retryable failure. */
@@ -124,7 +161,7 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
     const limited = params.limit !== undefined && robotsAllowed.length > params.limit;
     const toFetch = params.limit !== undefined ? robotsAllowed.slice(0, params.limit) : robotsAllowed;
 
-    const items: ExtractedProduct[] = [];
+    const itemsById = new Map<string, ExtractedProduct>();
     let blocked = false;
 
     for (const url of toFetch) {
@@ -223,12 +260,19 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
 
       if (extraction.complete && extraction.product) {
         successfulParses++;
-        items.push(extraction.product);
+        const previous = itemsById.get(extraction.product.externalId);
+        itemsById.set(
+          extraction.product.externalId,
+          previous
+            ? mergeProductVariants(previous, extraction.product)
+            : extraction.product,
+        );
       } else {
         recordError('parse_missing_fields');
       }
     }
 
+    const items = [...itemsById.values()];
     const allAttempted = !blocked && pagesFetched === toFetch.length;
     const coverage = pagesFetched > 0 ? successfulParses / pagesFetched : 0;
     const coverageOk = pagesFetched > 0 && coverage >= MIN_REQUIRED_FIELD_COVERAGE;

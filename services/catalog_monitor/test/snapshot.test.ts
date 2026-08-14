@@ -51,6 +51,41 @@ describe('diffFullSnapshot', () => {
     expect(result.toUpsert[0]!.firstSeenAt).toEqual(earlier); // preserved
   });
 
+  it('detects a price or stock change isolated to one color variant', () => {
+    const original = extracted({
+      variants: [
+        {
+          variantId: 'A1:black',
+          sku: 'A1-BLK',
+          colorName: 'Black',
+          colorCode: 'BLK',
+          imageUrl: 'https://coach.com/a-black.jpg',
+          priceUsd: 100,
+          availability: 'inStock',
+          detailUrl: 'https://www.coach.com/a/A1-BLK.html',
+        },
+      ],
+    });
+    const previous = [
+      record({
+        ...original,
+        fingerprint: fingerprintOf(original),
+      }),
+    ];
+    const changed = extracted({
+      variants: [
+        {
+          ...original.variants![0]!,
+          availability: 'outOfStock',
+        },
+      ],
+    });
+
+    const result = diffFullSnapshot('coach_us', previous, [changed], now);
+    expect(result.changedItemCount).toBe(1);
+    expect(result.toUpsert[0]!.variants![0]!.availability).toBe('outOfStock');
+  });
+
   it('leaves lastChangedAt untouched for an unchanged item, but bumps lastSeenAt', () => {
     const previous = [record()];
     const result = diffFullSnapshot('coach_us', previous, [extracted()], now);
