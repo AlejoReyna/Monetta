@@ -304,7 +304,7 @@ class _AnnouncementStrip extends StatelessWidget {
   }
 }
 
-class _CampaignHero extends StatelessWidget {
+class _CampaignHero extends StatefulWidget {
   const _CampaignHero({
     required this.height,
     required this.playing,
@@ -316,33 +316,35 @@ class _CampaignHero extends StatelessWidget {
   final VoidCallback onOpenCatalog;
 
   @override
+  State<_CampaignHero> createState() => _CampaignHeroState();
+}
+
+class _CampaignHeroState extends State<_CampaignHero> {
+  bool _showCta = false;
+
+  @override
   Widget build(BuildContext context) {
     const campaign = CampaignMedia.monettaHome;
     return SizedBox(
-      height: height,
+      key: const Key('campaign-hero'),
+      height: widget.height,
       child: GestureDetector(
-        onTap: onOpenCatalog,
+        onTap: widget.onOpenCatalog,
         child: Stack(
           fit: StackFit.expand,
           children: [
-            MonettaVideo(campaign: campaign, playing: playing),
-            const DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [
-                    Colors.transparent,
-                    Color(0x66000000),
-                  ],
-                  stops: [0.55, 1],
-                ),
-              ),
+            MonettaVideo(
+              campaign: campaign,
+              playing: widget.playing,
+              onEnded: () {
+                if (!mounted || _showCta) return;
+                setState(() => _showCta = true);
+              },
             ),
-            Align(
-              alignment: Alignment.bottomCenter,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(28, 28, 28, 40),
+            if (_showCta)
+              ColoredBox(color: Colors.black.withValues(alpha: 0.18)),
+            if (_showCta)
+              Center(
                 child: Reveal(
                   child: Column(
                     mainAxisSize: MainAxisSize.min,
@@ -350,18 +352,22 @@ class _CampaignHero extends StatelessWidget {
                       Text(
                         campaign.ctaLabel.toUpperCase(),
                         style: sans(
-                          size: 11,
-                          color: Colors.white,
+                          size: 13,
+                          color: kGold,
                           weight: FontWeight.w600,
-                        ).copyWith(letterSpacing: 1.4),
+                        ).copyWith(
+                          letterSpacing: 1.8,
+                          shadows: const [
+                            Shadow(color: Color(0x66000000), blurRadius: 10),
+                          ],
+                        ),
                       ),
-                      const SizedBox(height: 6),
-                      Container(height: 1, width: 92, color: Colors.white),
+                      const SizedBox(height: 8),
+                      Container(height: 1, width: 108, color: kGold),
                     ],
                   ),
                 ),
               ),
-            ),
           ],
         ),
       ),

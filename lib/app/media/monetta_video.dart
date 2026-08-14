@@ -1,4 +1,4 @@
-/// Muted looping campaign film. Poster first; stream never leaves a grey void.
+/// Campaign film. Plays once, then holds the last frame. Poster first.
 library;
 
 import 'package:flutter/material.dart';
@@ -11,11 +11,13 @@ class MonettaVideo extends StatefulWidget {
   const MonettaVideo({
     required this.campaign,
     required this.playing,
+    this.onEnded,
     super.key,
   });
 
   final CampaignMedia campaign;
   final bool playing;
+  final VoidCallback? onEnded;
 
   @override
   State<MonettaVideo> createState() => _MonettaVideoState();
@@ -24,25 +26,40 @@ class MonettaVideo extends StatefulWidget {
 class _MonettaVideoState extends State<MonettaVideo> {
   VideoPlayerController? _controller;
   bool _ready = false;
+  bool _ended = false;
 
   @override
   void initState() {
     super.initState();
-    if (!inWidgetTest) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _start());
+    if (inWidgetTest) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _markEnded());
+      return;
     }
+    WidgetsBinding.instance.addPostFrameCallback((_) => _start());
+  }
+
+  void _markEnded() {
+    if (_ended) return;
+    _ended = true;
+    widget.onEnded?.call();
+    if (mounted) setState(() {});
   }
 
   Future<void> _start() async {
-    if (!mounted || reduceMotion(context)) return;
+    if (!mounted) return;
+    if (reduceMotion(context)) {
+      _markEnded();
+      return;
+    }
     final controller = VideoPlayerController.networkUrl(
       Uri.parse(widget.campaign.videoUrl),
       videoPlayerOptions: VideoPlayerOptions(mixWithOthers: true),
     );
     _controller = controller;
+    controller.addListener(_onTick);
     try {
       await controller.initialize();
-      await controller.setLooping(true);
+      await controller.setLooping(false);
       await controller.setVolume(0);
       if (!mounted) {
         await controller.dispose();
@@ -51,9 +68,22 @@ class _MonettaVideoState extends State<MonettaVideo> {
       setState(() => _ready = true);
       if (widget.playing) await controller.play();
     } catch (_) {
+      controller.removeListener(_onTick);
       await controller.dispose();
       if (_controller == controller) _controller = null;
       if (mounted) setState(() => _ready = false);
+      _markEnded();
+    }
+  }
+
+  void _onTick() {
+    final controller = _controller;
+    if (controller == null || !controller.value.isInitialized) return;
+    final duration = controller.value.duration;
+    final position = controller.value.position;
+    if (duration > Duration.zero &&
+        position >= duration - const Duration(milliseconds: 80)) {
+      _markEnded();
     }
   }
 
@@ -61,7 +91,9 @@ class _MonettaVideoState extends State<MonettaVideo> {
   void didUpdateWidget(covariant MonettaVideo oldWidget) {
     super.didUpdateWidget(oldWidget);
     final controller = _controller;
-    if (controller == null || !controller.value.isInitialized) return;
+    if (_ended || controller == null || !controller.value.isInitialized) {
+      return;
+    }
     if (widget.playing && !controller.value.isPlaying) {
       controller.play();
     } else if (!widget.playing && controller.value.isPlaying) {
@@ -71,6 +103,7 @@ class _MonettaVideoState extends State<MonettaVideo> {
 
   @override
   void dispose() {
+    _controller?.removeListener(_onTick);
     _controller?.dispose();
     super.dispose();
   }
@@ -88,7 +121,8 @@ class _MonettaVideoState extends State<MonettaVideo> {
           widget.campaign.posterAsset,
           fit: BoxFit.cover,
           filterQuality: FilterQuality.medium,
-          errorBuilder: (_, __, ___) => const ColoredBox(color: Color(0xFFF5F5F5)),
+          errorBuilder: (_, __, ___) =>
+              const ColoredBox(color: Color(0xFFF5F5F5)),
         ),
         if (showVideo)
           FittedBox(

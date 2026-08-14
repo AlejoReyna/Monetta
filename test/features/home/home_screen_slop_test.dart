@@ -38,6 +38,7 @@ void main() {
 
     expect(find.text('Elige marcas'), findsNothing);
     expect(find.text('¿Qué le gusta?'), findsNothing);
+    await tester.pump();
     expect(find.text('VER CATÁLOGOS'), findsOneWidget);
     expect(find.text('VER LA PIEZA'), findsNothing);
     expect(find.text('Novedades'), findsOneWidget);
@@ -74,12 +75,16 @@ void main() {
     await tester.pumpWidget(_app(store));
     await tester.pump();
 
+    await tester.pump();
     final newest = [...store.products]
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
-    final heroBottom = tester.getBottomLeft(find.text('VER CATÁLOGOS')).dy;
+    final heroBox = tester.getRect(find.byKey(const Key('campaign-hero')));
     final newsTop = tester.getTopLeft(find.text('Novedades')).dy;
-    expect(newsTop, greaterThan(heroBottom));
-    expect(newsTop - heroBottom, lessThan(80));
+    expect(newsTop, greaterThan(heroBox.bottom));
+    expect(newsTop - heroBox.bottom, lessThan(80));
     expect(find.text(newest.first.title), findsWidgets);
+    expect(find.text('VER CATÁLOGOS'), findsOneWidget);
+    final ctaCenter = tester.getCenter(find.text('VER CATÁLOGOS'));
+    expect((ctaCenter.dy - heroBox.center.dy).abs(), lessThan(24));
   });
 }
