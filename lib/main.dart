@@ -7,13 +7,27 @@
 library;
 
 import 'dart:async';
+import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
 
+import 'app/account_controller.dart';
 import 'app/catalog_store.dart';
 import 'app/external_catalog_config.dart';
 import 'app/external_catalog_controller.dart';
 import 'app/theme.dart';
+import 'data/accounts_orders/accounts_orders_config.dart';
+import 'data/customer_auth/customer_account_config.dart';
+import 'data/customer_auth/customer_auth_gateway.dart';
+import 'data/customer_auth/customer_session_repository.dart';
+import 'data/customer_auth/device_identity.dart';
+import 'data/customer_auth/secure_token_store.dart';
+import 'data/local/account_store.dart';
+import 'data/local/bag_store.dart';
+import 'data/local/database.dart';
+import 'data/local/order_summary_store.dart';
+import 'data/local/wishlist_store.dart';
+import 'data/repositories/order_history_repository.dart';
 import 'features/home/home_screen.dart';
 
 void main() {
@@ -63,6 +77,25 @@ class ExternalCatalogScope
   }
 }
 
+/// Exposes account state to the widget tree. See `app/account_controller.dart`
+/// — `account == null` is a normal, fully-functional state, not a loading
+/// gap. Only mounted once `_MonettaAppState._loading` has resolved, since
+/// [AccountController] needs an async-bootstrapped device id to exist at
+/// all — see `_MonettaAppState._load`.
+class AccountScope extends InheritedNotifier<AccountController> {
+  const AccountScope({
+    required AccountController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  static AccountController of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<AccountScope>();
+    assert(scope?.notifier != null, 'AccountScope is missing from the tree');
+    return scope!.notifier!;
+  }
+}
+
 class MonettaApp extends StatefulWidget {
   const MonettaApp({super.key});
 
@@ -71,15 +104,59 @@ class MonettaApp extends StatefulWidget {
 }
 
 class _MonettaAppState extends State<MonettaApp> {
-  final CatalogStore _store = CatalogStore();
+  final AppDatabase _database = AppDatabase.connect();
+  late final CatalogStore _store = CatalogStore(database: _database);
   final ExternalCatalogController _externalCatalog = ExternalCatalogController(
     config: ExternalCatalogConfig.fromEnvironment(),
   );
-  late final Future<void> _loading = _store.loadFromAsset();
 
-  @override
-  void initState() {
-    super.initState();
+  /// Built inside [_load], once the device id it depends on exists — see
+  /// there. Only ever read from [build]'s `FutureBuilder`, after `_loading`
+  /// has resolved, so it is always assigned by the time anything touches it.
+  late final AccountController _account;
+  late final Future<void> _loading = _load();
+
+  Future<void> _load() async {
+    // Seeds/hydrates the Drift database both `CatalogStore` and account
+    // state share, so nothing below races it.
+    await _store.loadFromAsset();
+
+    const secureStore = FlutterSecureTokenStore();
+    final deviceStore = DeviceStore(_database);
+    final deviceId = await ensureDeviceId(
+      secureStore: secureStore,
+      deviceStore: deviceStore,
+      platform: Platform.isIOS ? 'ios' : 'android',
+      // TODO(accounts): read from package_info_plus once that dependency
+      // exists — see `lib/data/shopify/cart_attribution.dart`'s
+      // `_app_version` attribute, which has the same gap.
+      appVersion: '0.1.0',
+    );
+
+    final config = CustomerAccountConfig.fromEnvironment();
+    _account = AccountController(
+      sessionRepository: CustomerSessionRepository(
+        authGateway: AppAuthCustomerGateway(config: config),
+        accountStore: AccountStore(_database),
+        sessionStore: SessionStore(_database),
+        deviceStore: deviceStore,
+        wishlistStore: WishlistStore(_database),
+        bagStore: BagStore(_database),
+        secureStore: secureStore,
+        deviceId: deviceId,
+      ),
+      accountStore: AccountStore(_database),
+      deviceStore: deviceStore,
+      orderHistoryRepository: OrderHistoryRepository(
+        store: OrderSummaryStore(_database),
+        config: AccountsOrdersConfig.fromEnvironment(),
+      ),
+      config: config,
+      deviceId: deviceId,
+    );
+    await _account.restore();
+    if (_account.isSignedIn) unawaited(_account.loadOrders());
+
     // Fire-and-forget: cache-first load, then a best-effort background
     // refresh. A failed or slow external fetch must never block or affect
     // the Monetta home screen — see ExternalCatalogRepository's contract.
@@ -112,7 +189,7 @@ class _MonettaAppState extends State<MonettaApp> {
               if (snapshot.connectionState != ConnectionState.done) {
                 return const _SplashScreen();
               }
-              return const HomeScreen();
+              return AccountScope(notifier: _account, child: const HomeScreen());
             },
           ),
         ),

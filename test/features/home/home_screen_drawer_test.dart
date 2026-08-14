@@ -1,13 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/external_catalog_config.dart';
 import 'package:monetta_app/app/external_catalog_controller.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
 
 Future<CatalogStore> _loadedStore() async {
-  final store = CatalogStore();
+  final store = CatalogStore(database: openTestDatabase());
   await store.loadFromAsset();
   return store;
 }

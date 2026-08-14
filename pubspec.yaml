@@ -14,8 +14,8 @@ dependencies:
     sdk: flutter
 
   # State management & DI
-  flutter_riverpod: ^2.6.1
-  riverpod_annotation: ^2.6.1
+  flutter_riverpod: ^3.1.0
+  riverpod_annotation: ^4.0.0
 
   # Routing / deep links
   go_router: ^14.6.2
@@ -30,6 +30,12 @@ dependencies:
   path_provider: ^2.1.5
   path: ^1.9.0
   flutter_secure_storage: ^9.2.2
+
+  # Accounts — Customer Account API OAuth 2.0 + PKCE login. AppAuth (via its
+  # native iOS/Android SDKs) owns the browser hand-off and PKCE generation
+  # end-to-end, so there is deliberately no hand-rolled crypto here — see
+  # `lib/data/customer_auth/README.md`.
+  flutter_appauth: ^12.0.2
 
   # Checkout — see lib/features/cart/README.md for the CheckoutLauncher seam.
   # Pinned deliberately: this is a pre-1.0 plugin on the revenue path.
@@ -49,7 +55,7 @@ dependencies:
   video_player: ^2.9.2
 
   # Models & formatting
-  freezed_annotation: ^2.4.4
+  freezed_annotation: ^3.1.0
   json_annotation: ^4.9.0
   intl: ^0.20.2 # pinned by flutter_localizations
   collection: ^1.19.0
@@ -62,12 +68,12 @@ dev_dependencies:
     sdk: flutter
 
   build_runner: ^2.4.13
-  freezed: ^2.5.7
+  freezed: ^3.2.3
   json_serializable: ^6.9.0
   drift_dev: ^2.22.0
-  riverpod_generator: ^2.6.3
-  custom_lint: ^0.7.0
-  riverpod_lint: ^2.6.3
+  riverpod_generator: ^4.0.0+1
+  custom_lint: ^0.8.1
+  riverpod_lint: ^3.1.0
 
   flutter_lints: ^5.0.0
   mocktail: ^1.0.4

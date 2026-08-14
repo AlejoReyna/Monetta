@@ -3,11 +3,15 @@
         android:label="Monetta"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- android:taskAffinity="" was removed here: flutter_appauth's own
+             troubleshooting docs identify it as a known cause of the OAuth
+             browser never returning to the app after Customer Account API
+             login (data/customer_auth) on some Android versions. Nothing
+             else in this app depended on a non-default task affinity. -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTop"
-            android:taskAffinity=""
             android:theme="@style/LaunchTheme"
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"

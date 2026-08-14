@@ -1,0 +1,48 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: accounts_orders
+      POSTGRES_PASSWORD: accounts_orders
+      POSTGRES_DB: accounts_orders
+    ports:
+      - "5434:5432"
+    volumes:
+      - accounts_orders_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U accounts_orders"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: applies pending SQL migrations and exits. `api` waits for this
+  # to exit 0 before it starts — see its `depends_on`.
+  migrate:
+    build: .
+    command: ["node", "dist/db/migrate.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: postgres://accounts_orders:accounts_orders@postgres:5432/accounts_orders
+
+  api:
+    build: .
+    command: ["node", "dist/api/server.js"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: postgres://accounts_orders:accounts_orders@postgres:5432/accounts_orders
+      PORT: 8082
+      # Deliberately not baked in here — set at deploy time from a real
+      # secret store, never committed. Webhook verification simply fails
+      # closed (every request 401s) until this is set; see config.ts.
+      SHOPIFY_APP_CLIENT_SECRET: ""
+    ports:
+      - "8082:8082"
+
+volumes:
+  accounts_orders_pgdata:

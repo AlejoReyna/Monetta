@@ -17,6 +17,7 @@ import '../../domain/campaign.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
+import '../account/account_screen.dart';
 import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
 import '../checkout/checkout_screen.dart';
@@ -158,6 +159,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       appBar: _buildAppBar(markH, height: barH),
       drawer: _MainDrawer(
         onChooseBrands: _openOnboardingFromDrawer,
+        onAccount: () {
+          final controller = AccountScope.of(context);
+          _scaffoldKey.currentState?.closeDrawer();
+          Navigator.of(context).push(
+            MaterialPageRoute<void>(
+              builder: (_) => AccountScreen(controller: controller),
+            ),
+          );
+        },
         onWhatsApp: () => _openWhatsApp(conciergeWhatsAppUri()),
         onWholesale: () => _openWhatsApp(wholesaleWhatsAppUri()),
       ),
@@ -342,29 +352,23 @@ class _CampaignHeroState extends State<_CampaignHero> {
               },
             ),
             if (_showCta)
-              ColoredBox(color: Colors.black.withValues(alpha: 0.18)),
-            if (_showCta)
-              Center(
-                child: Reveal(
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Text(
-                        campaign.ctaLabel.toUpperCase(),
-                        style: sans(
-                          size: 13,
-                          color: kGold,
-                          weight: FontWeight.w600,
-                        ).copyWith(
-                          letterSpacing: 1.8,
-                          shadows: const [
-                            Shadow(color: Color(0x66000000), blurRadius: 10),
-                          ],
-                        ),
+              Transform.translate(
+                offset: const Offset(0, -22),
+                child: Center(
+                  child: Reveal(
+                    child: Text(
+                      campaign.ctaLabel.toUpperCase(),
+                      style: sans(
+                        size: 13,
+                        color: kGold,
+                        weight: FontWeight.w600,
+                      ).copyWith(
+                        letterSpacing: 1.8,
+                        shadows: const [
+                          Shadow(color: Color(0x66000000), blurRadius: 10),
+                        ],
                       ),
-                      const SizedBox(height: 8),
-                      Container(height: 1, width: 108, color: kGold),
-                    ],
+                    ),
                   ),
                 ),
               ),
@@ -595,11 +599,13 @@ class _QuietFooter extends StatelessWidget {
 class _MainDrawer extends StatelessWidget {
   const _MainDrawer({
     required this.onChooseBrands,
+    required this.onAccount,
     required this.onWhatsApp,
     required this.onWholesale,
   });
 
   final VoidCallback onChooseBrands;
+  final VoidCallback onAccount;
   final VoidCallback onWhatsApp;
   final VoidCallback onWholesale;
 
@@ -612,84 +618,91 @@ class _MainDrawer extends StatelessWidget {
       elevation: 0,
       shape: const RoundedRectangleBorder(borderRadius: kSquare),
       child: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 18, 12, 22),
-              child: Row(
-                children: [
-                  const Expanded(child: MonettaWordmark(height: 22)),
-                  IconButton(
-                    tooltip: 'Cerrar',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close, size: 22),
-                  ),
-                ],
+        // A scrollable body rather than a fixed Column + Spacer: a fixed
+        // layout overflows once the link list grows past whatever screen it
+        // was last measured against — as happened the moment "Mi cuenta"
+        // was added below. Scrolling degrades gracefully at any screen size
+        // and any future link count instead.
+        child: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 18, 12, 22),
+                child: Row(
+                  children: [
+                    const Expanded(child: MonettaWordmark(height: 22)),
+                    IconButton(
+                      tooltip: 'Cerrar',
+                      onPressed: () => Navigator.of(context).pop(),
+                      icon: const Icon(Icons.close, size: 22),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            const Divider(height: 0.5),
-            _DrawerLink(
-              label: 'Inicio',
-              current: true,
-              onTap: () => Navigator.of(context).pop(),
-            ),
-            _DrawerLink(
-              label: 'Bolsas',
-              onTap: () {
-                Navigator.of(context).pop();
-                openCollection(
-                  context,
-                  const CollectionScreen(
-                    title: 'Bolsas',
-                    filter: CollectionFilter(category: 'bolsa'),
-                  ),
-                );
-              },
-            ),
-            _DrawerLink(
-              label: 'Carteras',
-              onTap: () {
-                Navigator.of(context).pop();
-                openCollection(
-                  context,
-                  const CollectionScreen(
-                    title: 'Carteras',
-                    filter: CollectionFilter(category: 'cartera'),
-                  ),
-                );
-              },
-            ),
-            _DrawerLink(
-              label: 'Relojes',
-              onTap: () {
-                Navigator.of(context).pop();
-                openCollection(
-                  context,
-                  const CollectionScreen(
-                    title: 'Relojes',
-                    filter: CollectionFilter(category: 'reloj'),
-                  ),
-                );
-              },
-            ),
-            _DrawerLink(
-              label: 'Ver todo',
-              onTap: () {
-                Navigator.of(context).pop();
-                openCollection(
-                  context,
-                  const CollectionScreen(title: 'El catálogo'),
-                );
-              },
-            ),
-            _DrawerLink(label: 'Elige marcas', onTap: onChooseBrands),
-            const Spacer(),
-            const Divider(height: 0.5),
-            _DrawerLink(label: 'WhatsApp', onTap: onWhatsApp),
-            _DrawerLink(label: 'Mayoreo', onTap: onWholesale),
-            const SizedBox(height: 12),
-          ],
+              const Divider(height: 0.5),
+              _DrawerLink(
+                label: 'Inicio',
+                current: true,
+                onTap: () => Navigator.of(context).pop(),
+              ),
+              _DrawerLink(
+                label: 'Bolsas',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  openCollection(
+                    context,
+                    const CollectionScreen(
+                      title: 'Bolsas',
+                      filter: CollectionFilter(category: 'bolsa'),
+                    ),
+                  );
+                },
+              ),
+              _DrawerLink(
+                label: 'Carteras',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  openCollection(
+                    context,
+                    const CollectionScreen(
+                      title: 'Carteras',
+                      filter: CollectionFilter(category: 'cartera'),
+                    ),
+                  );
+                },
+              ),
+              _DrawerLink(
+                label: 'Relojes',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  openCollection(
+                    context,
+                    const CollectionScreen(
+                      title: 'Relojes',
+                      filter: CollectionFilter(category: 'reloj'),
+                    ),
+                  );
+                },
+              ),
+              _DrawerLink(
+                label: 'Ver todo',
+                onTap: () {
+                  Navigator.of(context).pop();
+                  openCollection(
+                    context,
+                    const CollectionScreen(title: 'El catálogo'),
+                  );
+                },
+              ),
+              _DrawerLink(label: 'Elige marcas', onTap: onChooseBrands),
+              const Divider(height: 0.5),
+              _DrawerLink(label: 'Mi cuenta', onTap: onAccount),
+              _DrawerLink(label: 'WhatsApp', onTap: onWhatsApp),
+              _DrawerLink(label: 'Mayoreo', onTap: onWholesale),
+              const SizedBox(height: 12),
+            ],
+          ),
         ),
       ),
     );

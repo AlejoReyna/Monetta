@@ -23,6 +23,18 @@ android {
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+
+        // Customer Account API login callback (flutter_appauth /
+        // data/customer_auth). Shopify requires the mobile redirect scheme
+        // "shop.{shop_id}.*" — REPLACE_WITH_SHOP_ID must become the real
+        // shop id from the Partner-dashboard Customer Account API
+        // registration before login can work; see
+        // lib/data/customer_auth/README.md § 8. Must stay lowercase (see
+        // flutter_appauth's README) and in sync with
+        // CustomerAccountConfig.redirectUri and ios/Runner/Info.plist.
+        manifestPlaceholders += mapOf(
+            "appAuthRedirectScheme" to "shop.replace_with_shop_id.oauth"
+        )
     }
 
     buildTypes {

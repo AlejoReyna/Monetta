@@ -48,6 +48,8 @@ Shopify so we never touch payment data.
 | `data/normalize/` | Raw Shopify product → canonical facets | **yes** | [README](../lib/data/normalize/README.md) |
 | `data/local/` | Drift database: cache, events, wishlist | yes | [README](../lib/data/local/README.md) |
 | `data/repositories/` | Wire shopify + local + normalize together | yes | — |
+| `data/customer_auth/` | Customer Account API OAuth 2.0 + PKCE login | no (`flutter_appauth`) | [README](../lib/data/customer_auth/README.md) |
+| `data/accounts_orders/` | Client for `services/accounts_orders`'s order-history endpoint | yes | — |
 | `data/external_catalog/` | External-catalog client, ETag cache, mapper (internal prototype, off by default) | yes | see § "External catalog prototype" below |
 | `domain/` | Entities and repository interfaces | **yes** | — |
 | `reco/` | Profile building and product ranking | **yes** | [README](../lib/reco/README.md) |
@@ -259,6 +261,15 @@ stays outside Monetta checkout. The `CatalogItem`/mapper/repository boundary
 keeps this workflow separate so a future feed or supplier API can be added
 without rewriting `features/home` or the mixed-feed rules.
 
+## Accounts
+
+Customer Account API OAuth login (`data/customer_auth/`), the local account/device/session
+schema (`data/local/`), and a small sibling backend (`services/accounts_orders/`, alongside
+`services/catalog_monitor/`) for the two things a phone can't do itself — receive Shopify
+webhooks and hold the three mandatory compliance topics. Guest checkout stays the default;
+login is additive. Full investigation, phased rollout, and current implementation status:
+[`docs/ACCOUNTS_AND_SYNC_PLAN.md`](ACCOUNTS_AND_SYNC_PLAN.md).
+
 ## Codegen
 
 `build_runner` drives freezed, json_serializable, drift and riverpod_generator. Run
@@ -283,3 +294,5 @@ ahead of the toolchain install.
 | Where the user profile lives | On device, never uploaded (Phase 1) | Privacy by default under LFPDPPP, and no backend needed |
 | Payments | Delegated to Shopify checkout | Keeps PCI scope entirely out of this codebase |
 | Navigation structure | Shopify `main-menu` query | Owner controls app nav from Shopify → Navigation |
+| Account login flow | Customer Account API, Mobile client, `flutter_appauth` | Classic accounts + Multipass are deprecated (Feb 2026); public OAuth client needs no hand-rolled PKCE — see `docs/ACCOUNTS_AND_SYNC_PLAN.md` § 2 |
+| Where the account backend lives | New sibling service (`services/accounts_orders/`), not inside `catalog_monitor` | Compliance-bearing (GDPR-style redact webhooks) and unrelated in purpose to the scraper prototype it sits next to |

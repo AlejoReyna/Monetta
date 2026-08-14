@@ -1,24 +1,41 @@
-/// In-memory app state wiring normalize + reco together.
+/// In-memory app state wiring normalize + reco together, now backed by
+/// `data/local` for real persistence (`docs/ACCOUNTS_AND_SYNC_PLAN.md`
+/// Phase 0).
 ///
-/// **This is a Phase-1 stand-in for `data/local`.** It holds the catalog, the
-/// event log and the derived profile in memory, so nothing survives a restart.
-/// When the drift layer lands it replaces this class wholesale; the screens
-/// talk to this interface and should not need to change.
+/// The public surface is deliberately unchanged from the pre-Drift version:
+/// every getter here stays synchronous, because `features/*` and five widget
+/// test files read `.products`, `.bagLines`, `.wishlist` etc. off this store
+/// mid-frame with no `await`. Persistence is write-through: a mutation
+/// updates the in-memory field immediately (so the UI never waits on disk
+/// I/O) and fires an unawaited write to Drift alongside it, the same
+/// fire-and-forget shape `main.dart` already uses for
+/// `ExternalCatalogController.loadAndRefresh()`.
 ///
-/// The catalog is read from the bundled snapshot asset rather than the
-/// Storefront API, because we do not have an access token yet. Swapping in
-/// `CatalogSync` is a one-method change — see [loadFromAsset].
+/// The catalog itself still seeds from the bundled snapshot asset on a cold
+/// cache — there is still no Storefront access token configured anywhere in
+/// this app (see `lib/data/shopify/README.md` § 3) — but the seed now goes
+/// *through* `CatalogRepository` into Drift instead of living only in
+/// memory, and [syncWithShopify] is a real, tested delta-sync call that
+/// simply has nothing to do yet. See `docs/ACCOUNTS_AND_SYNC_PLAN.md` § 4.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
+import '../data/local/bag_store.dart';
+import '../data/local/catalog_cache_store.dart';
+import '../data/local/database.dart' hide BagLine, InteractionEvent;
+import '../data/local/interaction_event_store.dart';
+import '../data/local/sync_cursor_store.dart';
+import '../data/local/wishlist_store.dart';
 import '../data/normalize/facets.dart';
-import '../data/normalize/normalizer.dart';
 import '../data/normalize/rules.dart';
+import '../data/repositories/catalog_repository.dart';
 import '../data/shopify/catalog_item_mapper.dart';
+import '../data/shopify/catalog_sync.dart' as shopify;
 import '../domain/catalog_item.dart';
 import '../domain/bag_line.dart';
 import '../domain/product.dart';
@@ -41,10 +58,34 @@ class Recommendation {
 }
 
 class CatalogStore extends ChangeNotifier {
-  CatalogStore();
+  /// [database] is required explicitly rather than defaulted — production
+  /// call sites pass `AppDatabase.connect()` (real on-device file), test
+  /// call sites pass `openTestDatabase()` (in-memory). Neither should be
+  /// implicit: which one you get changes whether data survives a restart.
+  ///
+  /// [catalogSync] is the real `data/shopify` delta sync, null when no
+  /// usable `StorefrontConfig` exists — today's honest default. See
+  /// `lib/data/repositories/catalog_repository.dart`.
+  CatalogStore({required AppDatabase database, shopify.CatalogSync? catalogSync})
+      : _database = database,
+        _catalogSyncOverride = catalogSync,
+        _cacheStore = CatalogCacheStore(database),
+        _cursorStore = SyncCursorStore(database),
+        _wishlistStore = WishlistStore(database),
+        _bagStore = BagStore(database),
+        _eventStore = InteractionEventStore(database);
 
   static String? _rulesAsset;
   static String? _catalogAsset;
+
+  final AppDatabase _database;
+  final shopify.CatalogSync? _catalogSyncOverride;
+  final CatalogCacheStore _cacheStore;
+  final SyncCursorStore _cursorStore;
+  final WishlistStore _wishlistStore;
+  final BagStore _bagStore;
+  final InteractionEventStore _eventStore;
+  late final CatalogRepository _catalogRepository;
 
   final List<InteractionEvent> _events = [];
   final Set<String> _viewed = {};
@@ -94,26 +135,63 @@ class CatalogStore extends ChangeNotifier {
     );
     _recommender = Recommender(facetWeights: rules.facetWeights);
 
+    _catalogRepository = CatalogRepository(
+      cache: _cacheStore,
+      cursorStore: _cursorStore,
+      rules: rules,
+      catalogSync: _catalogSyncOverride,
+    );
+
     // `AssetBundle.loadString` moves files over 50 KB to a helper isolate.
     // The catalog is larger than that and helper isolates are not available
     // in every Flutter test/runtime surface, so decode the already-loaded
     // bytes directly. At ~235 KB this remains comfortably below a frame's
     // worth of work on supported devices and avoids a startup deadlock.
     final catalogRaw = _catalogAsset ??= await _loadCatalogAsset();
-    final catalog = jsonDecode(catalogRaw) as Map<String, dynamic>;
-    products = (catalog['products'] as List<dynamic>)
-        .map((e) => _productFromSnapshot(e as Map<String, dynamic>))
-        .toList();
+    final catalogJson = jsonDecode(catalogRaw) as Map<String, dynamic>;
 
-    final normalizer = Normalizer(rules);
-    final now = DateTime.now();
-    facetsById = {
-      for (final product in products)
-        product.id: normalizer.normalize(product, now: now),
-    };
+    // A no-op once the cache already has rows — the common case after the
+    // very first app open.
+    await _catalogRepository.seedFromAssetIfEmpty(catalogJson);
+
+    final snapshot = await _catalogRepository.loadCached();
+    products = snapshot.products;
+    facetsById = snapshot.facetsById;
+
+    await _hydrateFromDrift();
 
     ready = true;
     notifyListeners();
+
+    // Cache-first paint happens above; the sync below is background refresh
+    // and — with no Storefront token configured — a fast, safe no-op today.
+    // See `docs/ARCHITECTURE.md`'s "Data flow: opening the app".
+    unawaited(syncWithShopify());
+  }
+
+  Future<void> _hydrateFromDrift() async {
+    final wishlisted = await _wishlistStore.allProductIds();
+    _wishlist
+      ..clear()
+      ..addAll(wishlisted);
+
+    final bagRows = await _bagStore.all();
+    _bagQuantities
+      ..clear()
+      ..addEntries(
+        bagRows.entries.map((e) => MapEntry(e.key, e.value.$2)),
+      );
+
+    final events = await _eventStore.all();
+    _events
+      ..clear()
+      ..addAll(events);
+    for (final event in events) {
+      if (event.productId != null && event.type == EventType.productView) {
+        _viewed.add(event.productId!);
+      }
+    }
+    _rebuildProfile();
   }
 
   static Future<String> _loadCatalogAsset() async {
@@ -121,6 +199,21 @@ class CatalogStore extends ChangeNotifier {
     return utf8.decode(
       data.buffer.asUint8List(data.offsetInBytes, data.lengthInBytes),
     );
+  }
+
+  /// Runs a real Shopify delta sync (`data/repositories/catalog_repository.dart`)
+  /// and applies whatever changed to the in-memory catalog. Safe to call any
+  /// time — a `skippedNotConfigured` outcome (today's default, no token yet)
+  /// costs one cheap early return.
+  Future<CatalogSyncResult> syncWithShopify() async {
+    final result = await _catalogRepository.sync();
+    if (result.outcome == CatalogSyncOutcome.updated) {
+      final snapshot = await _catalogRepository.loadCached();
+      products = snapshot.products;
+      facetsById = snapshot.facetsById;
+      notifyListeners();
+    }
+    return result;
   }
 
   /// Seeds the profile from the onboarding taps so the very first feed is
@@ -143,14 +236,14 @@ class CatalogStore extends ChangeNotifier {
   /// learning visible in the demo: open two Coach watches, go back, and the
   /// feed has reordered.
   void record(EventType type, {String? productId, int? dwellMs}) {
-    _events.add(
-      InteractionEvent(
-        type: type,
-        timestamp: DateTime.now(),
-        productId: productId,
-        dwellMs: dwellMs,
-      ),
+    final event = InteractionEvent(
+      type: type,
+      timestamp: DateTime.now(),
+      productId: productId,
+      dwellMs: dwellMs,
     );
+    _events.add(event);
+    unawaited(_eventStore.record(event));
     if (productId != null && type == EventType.productView) {
       _viewed.add(productId);
       markRecentlyViewed(productId);
@@ -201,19 +294,29 @@ class CatalogStore extends ChangeNotifier {
     final removing = _wishlist.contains(productId);
     if (removing) {
       _wishlist.remove(productId);
+      unawaited(_wishlistStore.remove(productId));
       record(EventType.wishlistRemove, productId: productId);
     } else {
       _wishlist.add(productId);
+      unawaited(_wishlistStore.add(productId));
       record(EventType.wishlistAdd, productId: productId);
     }
   }
 
   void addToBag(Product product) {
-    if (_availableVariant(product) == null) return;
+    final variant = _availableVariant(product);
+    if (variant == null) return;
     _bagQuantities.update(
       product.id,
       (quantity) => quantity + 1,
       ifAbsent: () => 1,
+    );
+    unawaited(
+      _bagStore.upsert(
+        productId: product.id,
+        variantId: variant.id,
+        quantity: _bagQuantities[product.id]!,
+      ),
     );
     record(EventType.addToCart, productId: product.id);
   }
@@ -224,12 +327,27 @@ class CatalogStore extends ChangeNotifier {
       return;
     }
     if (!_bagQuantities.containsKey(productId)) return;
-    _bagQuantities[productId] = quantity.clamp(1, 10);
+    final clamped = quantity.clamp(1, 10);
+    _bagQuantities[productId] = clamped;
+    final product = _productById(productId);
+    final variant = product == null ? null : _availableVariant(product);
+    if (variant != null) {
+      unawaited(
+        _bagStore.upsert(
+          productId: productId,
+          variantId: variant.id,
+          quantity: clamped,
+        ),
+      );
+    }
     notifyListeners();
   }
 
   void removeFromBag(String productId) {
-    if (_bagQuantities.remove(productId) != null) notifyListeners();
+    if (_bagQuantities.remove(productId) != null) {
+      unawaited(_bagStore.remove(productId));
+      notifyListeners();
+    }
   }
 
   Product? _productById(String id) {
@@ -364,27 +482,9 @@ class CatalogStore extends ChangeNotifier {
     return sorted.map((e) => e.key).toList();
   }
 
-  Product _productFromSnapshot(Map<String, dynamic> json) => Product(
-        id: json['id'].toString(),
-        handle: json['handle'] as String,
-        title: json['title'] as String,
-        vendor: json['vendor'] as String,
-        productType: json['product_type'] as String,
-        tags: (json['tags'] as List<dynamic>).cast<String>(),
-        images: (json['images'] as List<dynamic>).cast<String>(),
-        createdAt: DateTime.parse(json['created_at'] as String),
-        updatedAt: DateTime.parse(json['updated_at'] as String),
-        variants: (json['variants'] as List<dynamic>).map((v) {
-          final variant = v as Map<String, dynamic>;
-          return ProductVariant(
-            id: variant['id'].toString(),
-            title: variant['title'] as String,
-            price: double.parse(variant['price'] as String),
-            available: variant['available'] as bool,
-            compareAtPrice: variant['compare_at_price'] == null
-                ? null
-                : double.parse(variant['compare_at_price'] as String),
-          );
-        }).toList(),
-      );
+  @override
+  void dispose() {
+    unawaited(_database.close());
+    super.dispose();
+  }
 }
