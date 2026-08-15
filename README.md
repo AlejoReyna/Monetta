@@ -48,6 +48,8 @@ Every module carries an explainable `README.md` next to its code — purpose, me
 decisions taken *and rejected*, gotchas, and how to extend it.
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the modules fit together
+- [`docs/US_SOURCING_DURABILITY.md`](docs/US_SOURCING_DURABILITY.md) — why the US
+  catalog stays research, not dropshipping
 - [`lib/data/normalize/README.md`](lib/data/normalize/README.md) — catalog repair, and the
   measured data problems it exists to solve
 - [`lib/reco/README.md`](lib/reco/README.md) — the scoring model, in business terms

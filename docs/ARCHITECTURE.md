@@ -120,6 +120,9 @@ automated supplier integration — there is no order placement, commissions, or
 fulfillment in this service. An external card shows a USD price and links out
 to the merchant's page; it cannot enter Monetta's cart, Shopify checkout, or
 the WhatsApp apartado flow until the owner separately imports it into Shopify.
+Why that boundary has to stay, and what a durable seller-commission model
+would actually look like:
+[`US_SOURCING_DURABILITY.md`](US_SOURCING_DURABILITY.md).
 
 ### Why scraping is isolated outside the mobile client
 
