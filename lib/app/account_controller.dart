@@ -9,6 +9,7 @@ library;
 
 import 'package:flutter/foundation.dart';
 
+import '../data/accounts_orders/system_account_session_repository.dart';
 import '../data/customer_auth/customer_account_config.dart';
 import '../data/customer_auth/customer_session_repository.dart';
 import '../data/local/account_store.dart';
@@ -17,24 +18,27 @@ import '../data/repositories/order_history_repository.dart';
 
 class AccountController extends ChangeNotifier {
   AccountController({
-    required CustomerSessionRepository sessionRepository,
+    CustomerSessionRepository? sessionRepository,
+    SystemAccountSessionRepository? systemSessionRepository,
     required AccountStore accountStore,
     required DeviceStore deviceStore,
     required OrderHistoryRepository orderHistoryRepository,
-    required CustomerAccountConfig config,
+    CustomerAccountConfig? config,
     required String deviceId,
   })  : _sessionRepository = sessionRepository,
+        _systemSessionRepository = systemSessionRepository,
         _accountStore = accountStore,
         _deviceStore = deviceStore,
         _orderHistoryRepository = orderHistoryRepository,
         _config = config,
         _deviceId = deviceId;
 
-  final CustomerSessionRepository _sessionRepository;
+  final CustomerSessionRepository? _sessionRepository;
+  final SystemAccountSessionRepository? _systemSessionRepository;
   final AccountStore _accountStore;
   final DeviceStore _deviceStore;
   final OrderHistoryRepository _orderHistoryRepository;
-  final CustomerAccountConfig _config;
+  final CustomerAccountConfig? _config;
   final String _deviceId;
 
   local.Account? account;
@@ -54,7 +58,12 @@ class AccountController extends ChangeNotifier {
   /// `CustomerAccountConfig.isUsable`. The login entry point should hide or
   /// disable itself when this is false rather than let the shopper start a
   /// flow that cannot finish.
-  bool get canLogin => _config.isUsable;
+  bool get canLogin => _sessionRepository != null && _config?.isUsable == true;
+
+  /// First-party registration is independent of Shopify and only needs the
+  /// Monetta accounts service to be configured.
+  bool get canRegister => _systemSessionRepository?.canRegister == true;
+  bool get canSystemLogin => _systemSessionRepository?.canLogin == true;
 
   /// Restores whichever account this device was last signed into, if any —
   /// call once at startup so "still logged in" survives a restart. Cheap:
@@ -63,17 +72,25 @@ class AccountController extends ChangeNotifier {
     final device = await _deviceStore.byId(_deviceId);
     final accountId = device?.accountId;
     if (accountId == null) return;
-    account = await _accountStore.byLocalId(accountId);
+    final restored = await _accountStore.byLocalId(accountId);
+    if (restored?.authProvider == 'monetta' &&
+        await _systemSessionRepository?.hasUsableLocalSession(accountId) !=
+            true) {
+      await _deviceStore.detachAccount(_deviceId);
+      return;
+    }
+    account = restored;
     notifyListeners();
   }
 
   Future<void> login() async {
     if (!canLogin || isLoading) return;
+    final sessionRepository = _sessionRepository!;
     isLoading = true;
     lastError = null;
     notifyListeners();
     try {
-      final session = await _sessionRepository.login();
+      final session = await sessionRepository.login();
       account = session.account;
     } catch (error) {
       // A cancelled system browser is the overwhelmingly common "failure"
@@ -96,13 +113,65 @@ class AccountController extends ChangeNotifier {
     if (isSignedIn) await loadOrders();
   }
 
+  Future<void> register({
+    required String email,
+    required String password,
+    String? displayName,
+  }) async {
+    final repository = _systemSessionRepository;
+    if (repository == null || !repository.canRegister || isLoading) return;
+    isLoading = true;
+    lastError = null;
+    notifyListeners();
+    try {
+      account = await repository.register(
+        email: email.trim(),
+        password: password,
+        displayName:
+            displayName?.trim().isEmpty == true ? null : displayName?.trim(),
+      );
+    } catch (error) {
+      lastError = '$error';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> loginWithSystemAccount({
+    required String email,
+    required String password,
+  }) async {
+    final repository = _systemSessionRepository;
+    if (repository == null || !repository.canLogin || isLoading) return;
+    isLoading = true;
+    lastError = null;
+    notifyListeners();
+    try {
+      account = await repository.login(
+        email: email.trim(),
+        password: password,
+      );
+    } catch (error) {
+      lastError = '$error';
+    } finally {
+      isLoading = false;
+      notifyListeners();
+    }
+    if (isSignedIn) await loadOrders();
+  }
+
   Future<void> logout() async {
     final current = account;
     if (current == null) return;
     isLoading = true;
     notifyListeners();
     try {
-      await _sessionRepository.logout(current.localAccountId);
+      if (current.authProvider == 'monetta') {
+        await _systemSessionRepository?.logout(current.localAccountId);
+      } else {
+        await _sessionRepository?.logout(current.localAccountId);
+      }
       account = null;
       orders = const [];
     } finally {

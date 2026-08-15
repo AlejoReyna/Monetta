@@ -3,6 +3,7 @@ import type { Server } from 'node:http';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createApp, type ServerDeps } from '../src/api/server.js';
 import {
+  InMemoryAppAccountsRepository,
   InMemoryCustomersRepository,
   InMemoryOrdersRepository,
   InMemoryPushTokensRepository,
@@ -19,16 +20,25 @@ describe('accounts_orders API', () => {
   let server: Server;
   let baseUrl: string;
   let customers: InMemoryCustomersRepository;
+  let appAccounts: InMemoryAppAccountsRepository;
   let orders: InMemoryOrdersRepository;
   let webhookEvents: InMemoryWebhookEventsRepository;
   let pushTokens: InMemoryPushTokensRepository;
 
   beforeEach(async () => {
     customers = new InMemoryCustomersRepository();
+    appAccounts = new InMemoryAppAccountsRepository();
     orders = new InMemoryOrdersRepository();
     webhookEvents = new InMemoryWebhookEventsRepository();
     pushTokens = new InMemoryPushTokensRepository();
-    const deps: ServerDeps = { customers, orders, webhookEvents, pushTokens, webhookSecret: secret };
+    const deps: ServerDeps = {
+      appAccounts,
+      customers,
+      orders,
+      webhookEvents,
+      pushTokens,
+      webhookSecret: secret,
+    };
     const app = createApp(deps);
     await new Promise<void>((resolve) => {
       server = app.listen(0, '127.0.0.1', resolve);
@@ -47,6 +57,81 @@ describe('accounts_orders API', () => {
   it('/livez and /healthz report ok', async () => {
     expect((await fetch(`${baseUrl}/livez`)).status).toBe(200);
     expect((await fetch(`${baseUrl}/healthz`)).status).toBe(200);
+  });
+
+  it('registers a first-party account and authenticates its opaque session', async () => {
+    const registration = await fetch(`${baseUrl}/accounts/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: ' Shopper@Example.com ',
+        password: 'correct horse battery staple',
+        displayName: 'Ana',
+        deviceId: 'dev-account-1',
+      }),
+    });
+    expect(registration.status).toBe(201);
+    const body = (await registration.json()) as {
+      account: { id: string; email: string; emailVerified: boolean };
+      session: { token: string };
+    };
+    expect(body.account.email).toBe('shopper@example.com');
+    expect(body.account.emailVerified).toBe(false);
+    expect(appAccounts.byId.get(body.account.id)?.email).toBe('shopper@example.com');
+
+    const me = await fetch(`${baseUrl}/accounts/me`, {
+      headers: { Authorization: `Bearer ${body.session.token}` },
+    });
+    expect(me.status).toBe(200);
+
+    const logout = await fetch(`${baseUrl}/accounts/logout`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${body.session.token}` },
+    });
+    expect(logout.status).toBe(200);
+    expect((await fetch(`${baseUrl}/accounts/me`, {
+      headers: { Authorization: `Bearer ${body.session.token}` },
+    })).status).toBe(401);
+
+    const badLogin = await fetch(`${baseUrl}/accounts/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'shopper@example.com',
+        password: 'wrong-password',
+        deviceId: 'dev-account-2',
+      }),
+    });
+    expect(badLogin.status).toBe(401);
+
+    const login = await fetch(`${baseUrl}/accounts/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'SHOPPER@EXAMPLE.COM',
+        password: 'correct horse battery staple',
+        deviceId: 'dev-account-2',
+      }),
+    });
+    expect(login.status).toBe(200);
+    const loginBody = (await login.json()) as {
+      account: { id: string; email: string };
+      session: { token: string };
+    };
+    expect(loginBody.account.id).toBe(body.account.id);
+    expect(loginBody.session.token).not.toBe(body.session.token);
+    expect((await fetch(`${baseUrl}/accounts/me`, {
+      headers: { Authorization: `Bearer ${loginBody.session.token}` },
+    })).status).toBe(200);
+  });
+
+  it('rejects malformed first-party registration data', async () => {
+    const response = await fetch(`${baseUrl}/accounts/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: 'not-an-email', password: 'password', deviceId: 'dev-1' }),
+    });
+    expect(response.status).toBe(400);
   });
 
   it('accepts a correctly signed orders/create webhook and mirrors the order', async () => {

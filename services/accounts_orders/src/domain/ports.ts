@@ -1,10 +1,30 @@
 import type {
+  AppAccountRecord,
+  AppAccountCredentials,
+  AppAccountRegistration,
+  AppSessionCreation,
   CustomerRecord,
   MirroredOrder,
   OrderRecord,
   PushTokenRecord,
   WebhookEventRecord,
 } from './types.js';
+
+export interface AppAccountsRepository {
+  /** Creates an account, or updates the account already bound to this device. */
+  register(record: AppAccountRegistration): Promise<AppAccountRecord>;
+
+  /** Reads the password verifier used by first-party email login. */
+  findCredentialsByEmail(email: string): Promise<AppAccountCredentials | null>;
+
+  /** Creates or replaces the session bound to a device. */
+  createSession(record: AppSessionCreation): Promise<void>;
+
+  /** Resolves a bearer session. Expired sessions must behave as missing. */
+  findByTokenHash(tokenHash: string): Promise<AppAccountRecord | null>;
+
+  revokeToken(tokenHash: string): Promise<void>;
+}
 
 export interface CustomersRepository {
   upsert(record: CustomerRecord): Promise<void>;

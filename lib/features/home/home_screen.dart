@@ -111,6 +111,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  void _openAccount() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => AccountScreen(controller: AccountScope.of(context)),
+      ),
+    );
+  }
+
   void _openWhatsApp(Uri uri) {
     unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
   }
@@ -160,13 +168,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       drawer: _MainDrawer(
         onChooseBrands: _openOnboardingFromDrawer,
         onAccount: () {
-          final controller = AccountScope.of(context);
           _scaffoldKey.currentState?.closeDrawer();
-          Navigator.of(context).push(
-            MaterialPageRoute<void>(
-              builder: (_) => AccountScreen(controller: controller),
-            ),
-          );
+          _openAccount();
         },
         onWhatsApp: () => _openWhatsApp(conciergeWhatsAppUri()),
         onWholesale: () => _openWhatsApp(wholesaleWhatsAppUri()),
@@ -186,8 +189,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           ),
           _CampaignHero(
             height: heroH,
-            playing: _foreground &&
-                (!_scroll.hasClients || _scroll.offset < heroH),
+            playing:
+                _foreground && (!_scroll.hasClients || _scroll.offset < heroH),
             onOpenCatalog: () => openCollection(
               context,
               const CollectionScreen(title: 'El catálogo'),
@@ -277,6 +280,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           tooltip: 'Buscar',
           onPressed: _openSearch,
           icon: const Icon(Icons.search, size: 23),
+        ),
+        IconButton(
+          tooltip: 'Mi cuenta',
+          onPressed: _openAccount,
+          icon: const Icon(Icons.person_outline, size: 23),
         ),
         const BagAction(),
         IconButton(
@@ -480,7 +488,8 @@ class _BrandRail extends StatelessWidget {
             child: Container(
               alignment: Alignment.center,
               padding: const EdgeInsets.symmetric(horizontal: 18),
-              decoration: BoxDecoration(border: Border.all(color: kLine, width: 0.5)),
+              decoration:
+                  BoxDecoration(border: Border.all(color: kLine, width: 0.5)),
               child: Text(
                 brandLabel(brand).toUpperCase(),
                 style: eyebrow(size: 9, color: kInk),
@@ -584,7 +593,10 @@ class _QuietFooter extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Originales importados de Estados Unidos', style: sans(size: 13)),
+          Text(
+            'Originales importados de Estados Unidos',
+            style: sans(size: 13),
+          ),
           const SizedBox(height: 8),
           Text(
             'Envío a todo México · 3 a 5 días · WhatsApp $kWhatsAppNumberDisplay',

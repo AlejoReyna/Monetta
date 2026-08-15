@@ -1,16 +1,90 @@
 import type {
+  AppAccountsRepository,
   CustomersRepository,
   OrdersRepository,
   PushTokensRepository,
   WebhookEventsRepository,
 } from '../../src/domain/ports.js';
 import type {
+  AppAccountRecord,
+  AppAccountCredentials,
+  AppAccountRegistration,
+  AppSessionCreation,
   CustomerRecord,
   MirroredOrder,
   OrderRecord,
   PushTokenRecord,
   WebhookEventRecord,
 } from '../../src/domain/types.js';
+
+export class InMemoryAppAccountsRepository implements AppAccountsRepository {
+  readonly byId = new Map<string, AppAccountRecord>();
+  readonly accountIdByTokenHash = new Map<string, string>();
+  private readonly accountIdByDeviceId = new Map<string, string>();
+  private readonly expiresAtByTokenHash = new Map<string, Date>();
+  private readonly tokenHashByDeviceId = new Map<string, string>();
+  private readonly passwordHashById = new Map<string, string>();
+
+  async register(record: AppAccountRegistration): Promise<AppAccountRecord> {
+    const existingId = this.accountIdByDeviceId.get(record.deviceId);
+    const id = existingId ?? record.accountId;
+    const existing = this.byId.get(id);
+    const now = new Date();
+    const account: AppAccountRecord = {
+      id,
+      email: record.email,
+      displayName: record.displayName,
+      emailVerified: existing?.emailVerified ?? false,
+      createdAt: existing?.createdAt ?? now,
+      updatedAt: now,
+    };
+    const oldTokenHash = this.tokenHashByDeviceId.get(record.deviceId);
+    if (oldTokenHash !== undefined) {
+      this.accountIdByTokenHash.delete(oldTokenHash);
+      this.expiresAtByTokenHash.delete(oldTokenHash);
+    }
+    this.byId.set(id, account);
+    this.passwordHashById.set(id, record.passwordHash);
+    this.accountIdByDeviceId.set(record.deviceId, id);
+    this.tokenHashByDeviceId.set(record.deviceId, record.tokenHash);
+    this.accountIdByTokenHash.set(record.tokenHash, id);
+    this.expiresAtByTokenHash.set(record.tokenHash, record.expiresAt);
+    return account;
+  }
+
+  async findCredentialsByEmail(email: string): Promise<AppAccountCredentials | null> {
+    const account = [...this.byId.values()].find(
+      (candidate) => candidate.email.toLowerCase() === email.toLowerCase(),
+    );
+    if (account === undefined) return null;
+    const passwordHash = this.passwordHashById.get(account.id);
+    return passwordHash === undefined ? null : { ...account, passwordHash };
+  }
+
+  async createSession(record: AppSessionCreation): Promise<void> {
+    const oldTokenHash = this.tokenHashByDeviceId.get(record.deviceId);
+    if (oldTokenHash !== undefined) {
+      this.accountIdByTokenHash.delete(oldTokenHash);
+      this.expiresAtByTokenHash.delete(oldTokenHash);
+    }
+    this.accountIdByDeviceId.set(record.deviceId, record.accountId);
+    this.tokenHashByDeviceId.set(record.deviceId, record.tokenHash);
+    this.accountIdByTokenHash.set(record.tokenHash, record.accountId);
+    this.expiresAtByTokenHash.set(record.tokenHash, record.expiresAt);
+  }
+
+  async findByTokenHash(tokenHash: string): Promise<AppAccountRecord | null> {
+    const expiresAt = this.expiresAtByTokenHash.get(tokenHash);
+    if (expiresAt === undefined || expiresAt <= new Date()) return null;
+    const id = this.accountIdByTokenHash.get(tokenHash);
+    return id === undefined ? null : (this.byId.get(id) ?? null);
+  }
+
+  async revokeToken(tokenHash: string): Promise<void> {
+    this.accountIdByTokenHash.delete(tokenHash);
+    this.expiresAtByTokenHash.delete(tokenHash);
+  }
+}
 
 export class InMemoryCustomersRepository implements CustomersRepository {
   readonly byId = new Map<string, CustomerRecord>();

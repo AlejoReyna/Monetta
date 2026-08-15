@@ -28,15 +28,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
   const nodeEnv = env.NODE_ENV ?? 'development';
   const webhookSecret = env.SHOPIFY_APP_CLIENT_SECRET ?? '';
 
-  // Fail fast in production rather than silently rejecting every webhook —
-  // an empty secret in dev/test just means verifyHmac() always returns
-  // false, which is the safe (closed) direction to fail in.
-  if (nodeEnv === 'production' && webhookSecret === '') {
-    throw new Error(
-      'SHOPIFY_APP_CLIENT_SECRET is required in production — webhook HMAC verification ' +
-        'cannot run without it. See .env.example.',
-    );
-  }
+  // Shopify integration is optional while first-party Monetta accounts are
+  // the active identity system. An empty secret keeps every Shopify webhook
+  // route closed (401) without preventing the accounts API from starting.
 
   return {
     databaseUrl:

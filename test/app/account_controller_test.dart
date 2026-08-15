@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
+import 'package:monetta_app/data/accounts_orders/system_account_client.dart';
+import 'package:monetta_app/data/accounts_orders/system_account_session_repository.dart';
 import 'package:monetta_app/data/customer_auth/customer_account_config.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_gateway.dart';
 import 'package:monetta_app/data/customer_auth/customer_session_repository.dart';
@@ -23,7 +25,14 @@ class _FakeGateway implements CustomerAuthGateway {
   Future<CustomerAuthResult> login() async {
     if (shouldThrow) throw StateError('user cancelled');
     final payload = base64Url
-        .encode(utf8.encode(jsonEncode({'sub': 'gid://shopify/Customer/1', 'email': 'a@b.com'})))
+        .encode(
+          utf8.encode(
+            jsonEncode({
+              'sub': 'gid://shopify/Customer/1',
+              'email': 'a@b.com',
+            }),
+          ),
+        )
         .replaceAll('=', '');
     return CustomerAuthResult(
       accessToken: 'access',
@@ -47,12 +56,52 @@ class _FakeSecureTokenStore implements SecureTokenStore {
   Future<void> delete(String key) async => values.remove(key);
 }
 
+class _FakeSystemClient implements SystemAccountClient {
+  bool shouldThrow = false;
+
+  @override
+  Future<SystemAccountRegistration> register({
+    required String email,
+    required String password,
+    required String? displayName,
+    required String deviceId,
+  }) async {
+    if (shouldThrow) throw StateError('offline');
+    return SystemAccountRegistration(
+      accountId: 'monetta-account-1',
+      email: email,
+      displayName: displayName,
+      sessionToken: 'session-token',
+      expiresAt: DateTime.utc(2027),
+    );
+  }
+
+  @override
+  Future<SystemAccountRegistration> login({
+    required String email,
+    required String password,
+    required String deviceId,
+  }) =>
+      register(
+        email: email,
+        password: password,
+        displayName: null,
+        deviceId: deviceId,
+      );
+
+  @override
+  Future<void> logout(String sessionToken) async {}
+}
+
 void main() {
   late AppDatabase db;
   late DeviceStore deviceStore;
   late AccountStore accountStore;
 
-  AccountController buildController({bool loginThrows = false, bool usable = true}) {
+  AccountController buildController({
+    bool loginThrows = false,
+    bool usable = true,
+  }) {
     final gateway = _FakeGateway(shouldThrow: loginThrows);
     final sessionRepo = CustomerSessionRepository(
       authGateway: gateway,
@@ -73,8 +122,34 @@ void main() {
         config: AccountsOrdersConfig.disabled,
       ),
       config: usable
-          ? const CustomerAccountConfig(shopId: '1', clientId: 'shp_x', redirectUri: 'shop.1.oauth://c')
+          ? const CustomerAccountConfig(
+              shopId: '1',
+              clientId: 'shp_x',
+              redirectUri: 'shop.1.oauth://c',
+            )
           : CustomerAccountConfig.fromEnvironment(),
+      deviceId: 'dev-1',
+    );
+  }
+
+  AccountController buildSystemController(_FakeSystemClient client) {
+    return AccountController(
+      systemSessionRepository: SystemAccountSessionRepository(
+        client: client,
+        accountStore: accountStore,
+        sessionStore: SessionStore(db),
+        deviceStore: deviceStore,
+        wishlistStore: WishlistStore(db),
+        bagStore: BagStore(db),
+        secureStore: _FakeSecureTokenStore(),
+        deviceId: 'dev-1',
+      ),
+      accountStore: accountStore,
+      deviceStore: deviceStore,
+      orderHistoryRepository: OrderHistoryRepository(
+        store: OrderSummaryStore(db),
+        config: AccountsOrdersConfig.disabled,
+      ),
       deviceId: 'dev-1',
     );
   }
@@ -83,7 +158,11 @@ void main() {
     db = openTestDatabase();
     deviceStore = DeviceStore(db);
     accountStore = AccountStore(db);
-    await deviceStore.upsert(deviceId: 'dev-1', platform: 'ios', appVersion: '1.0.0');
+    await deviceStore.upsert(
+      deviceId: 'dev-1',
+      platform: 'ios',
+      appVersion: '1.0.0',
+    );
   });
 
   tearDown(() => db.close());
@@ -107,7 +186,8 @@ void main() {
     expect(controller.lastError, isNull);
   });
 
-  test('login() surfaces a failure without throwing, and does not sign in', () async {
+  test('login() surfaces a failure without throwing, and does not sign in',
+      () async {
     final controller = buildController(loginThrows: true);
     await controller.login();
 
@@ -127,7 +207,9 @@ void main() {
     expect(controller.account, isNull);
   });
 
-  test('restore() re-hydrates account state from a previous login (e.g. app restart)', () async {
+  test(
+      'restore() re-hydrates account state from a previous login (e.g. app restart)',
+      () async {
     final controller = buildController();
     await controller.login();
     final localAccountId = controller.account!.localAccountId;
@@ -148,5 +230,22 @@ void main() {
     await controller.login();
     expect(controller.isSignedIn, isFalse);
     expect(controller.isLoading, isFalse);
+  });
+
+  test('register() creates and selects a first-party account without Shopify',
+      () async {
+    final controller = buildSystemController(_FakeSystemClient());
+    expect(controller.canRegister, isTrue);
+
+    await controller.register(
+      email: 'shopper@example.com',
+      password: 'password123',
+      displayName: 'Ana',
+    );
+
+    expect(controller.isSignedIn, isTrue);
+    expect(controller.account?.localAccountId, 'monetta-account-1');
+    expect(controller.account?.shopifyCustomerId, isNull);
+    expect(controller.account?.authProvider, 'monetta');
   });
 }

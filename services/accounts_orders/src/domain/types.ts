@@ -47,3 +47,34 @@ export interface PushTokenRecord {
   readonly fcmToken: string;
   readonly platform: Platform;
 }
+
+/** A first-party Monetta account. Shopify identity is attached later, if available. */
+export interface AppAccountRecord {
+  readonly id: string;
+  readonly email: string;
+  readonly displayName: string | null;
+  readonly emailVerified: boolean;
+  readonly createdAt: Date;
+  readonly updatedAt: Date;
+}
+
+export interface AppAccountRegistration {
+  readonly accountId: string;
+  readonly email: string;
+  readonly displayName: string | null;
+  readonly passwordHash: string;
+  readonly deviceId: string;
+  readonly tokenHash: string;
+  readonly expiresAt: Date;
+}
+
+export interface AppAccountCredentials extends AppAccountRecord {
+  readonly passwordHash: string;
+}
+
+export interface AppSessionCreation {
+  readonly accountId: string;
+  readonly deviceId: string;
+  readonly tokenHash: string;
+  readonly expiresAt: Date;
+}

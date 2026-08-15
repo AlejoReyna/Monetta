@@ -1,9 +1,8 @@
 /// Build-time switch for the `services/accounts_orders` client — same shape
 /// as `app/external_catalog_config.dart`'s `ExternalCatalogConfig`.
 ///
-/// Off by default: this backend is a new, unauthenticated-endpoint
-/// prototype (see `services/accounts_orders/README.md` § "Known
-/// limitations") that hasn't been deployed anywhere yet.
+/// The same base URL powers first-party Monetta account registration and
+/// order history. Off only when no service URL was supplied.
 ///
 /// ```
 /// flutter run \

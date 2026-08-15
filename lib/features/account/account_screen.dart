@@ -136,57 +136,182 @@ class _OrderRow extends StatelessWidget {
     // formatter for one field — this is the only place in the app that
     // renders a bare date without a time component.
     const months = [
-      'ene', 'feb', 'mar', 'abr', 'may', 'jun',
-      'jul', 'ago', 'sep', 'oct', 'nov', 'dic',
+      'ene',
+      'feb',
+      'mar',
+      'abr',
+      'may',
+      'jun',
+      'jul',
+      'ago',
+      'sep',
+      'oct',
+      'nov',
+      'dic',
     ];
     return '${placedAt.day} ${months[placedAt.month - 1]} ${placedAt.year}';
   }
 }
 
-class _SignedOut extends StatelessWidget {
+class _SignedOut extends StatefulWidget {
   const _SignedOut({required this.controller});
 
   final AccountController controller;
 
   @override
+  State<_SignedOut> createState() => _SignedOutState();
+}
+
+class _SignedOutState extends State<_SignedOut> {
+  final _formKey = GlobalKey<FormState>();
+  final _email = TextEditingController();
+  final _displayName = TextEditingController();
+  final _password = TextEditingController();
+  bool _isRegistering = false;
+
+  @override
+  void dispose() {
+    _email.dispose();
+    _displayName.dispose();
+    _password.dispose();
+    super.dispose();
+  }
+
+  void _register() {
+    if (_formKey.currentState?.validate() != true) return;
+    widget.controller.register(
+      email: _email.text,
+      password: _password.text,
+      displayName: _displayName.text,
+    );
+  }
+
+  void _login() {
+    if (_formKey.currentState?.validate() != true) return;
+    widget.controller.loginWithSystemAccount(
+      email: _email.text,
+      password: _password.text,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text('Inicia sesión', style: display(20)),
-        const SizedBox(height: 8),
-        Text(
-          'Guarda tu bolsa y tu lista de deseos entre dispositivos, y revisa '
-          'tu historial de pedidos. Nunca es necesario para comprar — '
-          'puedes seguir comprando como invitado.',
-          style: sans(size: 13, color: kInkMuted, height: 1.5),
-        ),
-        const SizedBox(height: 24),
-        if (controller.lastError != null) ...[
+    final controller = widget.controller;
+    final canSubmit =
+        _isRegistering ? controller.canRegister : controller.canSystemLogin;
+    return Form(
+      key: _formKey,
+      child: ListView(
+        children: [
           Text(
-            'No se pudo iniciar sesión. Intenta de nuevo.',
-            style: sans(size: 12, color: kInk),
+            _isRegistering ? 'Crea tu cuenta' : 'Inicia sesión',
+            style: display(20),
           ),
-          const SizedBox(height: 12),
-        ],
-        FilledButton(
-          onPressed: (!controller.canLogin || controller.isLoading) ? null : controller.login,
-          child: controller.isLoading
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('INICIAR SESIÓN'),
-        ),
-        if (!controller.canLogin) ...[
-          const SizedBox(height: 12),
+          const SizedBox(height: 8),
           Text(
-            'El inicio de sesión aún no está disponible en esta versión.',
-            style: sans(size: 11, color: kInkMuted),
+            _isRegistering
+                ? 'Regístrate directamente con Monetta. No necesitas una cuenta de Shopify.'
+                : 'Entra con el correo y contraseña de tu cuenta Monetta.',
+            style: sans(size: 13, color: kInkMuted, height: 1.5),
           ),
+          const SizedBox(height: 24),
+          SegmentedButton<bool>(
+            segments: const [
+              ButtonSegment(value: false, label: Text('INICIAR SESIÓN')),
+              ButtonSegment(value: true, label: Text('REGISTRARME')),
+            ],
+            selected: {_isRegistering},
+            onSelectionChanged: controller.isLoading
+                ? null
+                : (selection) => setState(() {
+                      _isRegistering = selection.single;
+                      _formKey.currentState?.reset();
+                    }),
+          ),
+          const SizedBox(height: 24),
+          if (_isRegistering) ...[
+            TextFormField(
+              controller: _displayName,
+              enabled: canSubmit && !controller.isLoading,
+              textCapitalization: TextCapitalization.words,
+              autofillHints: const [AutofillHints.name],
+              decoration: const InputDecoration(labelText: 'Nombre (opcional)'),
+            ),
+            const SizedBox(height: 14),
+          ],
+          TextFormField(
+            controller: _email,
+            enabled: canSubmit && !controller.isLoading,
+            keyboardType: TextInputType.emailAddress,
+            autofillHints: const [AutofillHints.email],
+            autocorrect: false,
+            decoration: const InputDecoration(labelText: 'Correo electrónico'),
+            validator: (value) {
+              final email = value?.trim() ?? '';
+              if (email.isEmpty ||
+                  !email.contains('@') ||
+                  !email.contains('.')) {
+                return 'Escribe un correo válido.';
+              }
+              return null;
+            },
+          ),
+          const SizedBox(height: 14),
+          TextFormField(
+            controller: _password,
+            enabled: canSubmit && !controller.isLoading,
+            obscureText: true,
+            enableSuggestions: false,
+            autocorrect: false,
+            autofillHints: _isRegistering
+                ? const [AutofillHints.newPassword]
+                : const [AutofillHints.password],
+            decoration: const InputDecoration(labelText: 'Contraseña'),
+            validator: (value) {
+              if ((value ?? '').length < 8) {
+                return 'Usa al menos 8 caracteres.';
+              }
+              return null;
+            },
+            onFieldSubmitted: (_) => _isRegistering ? _register() : _login(),
+          ),
+          const SizedBox(height: 24),
+          if (controller.lastError != null) ...[
+            Text(
+              _isRegistering
+                  ? 'No se pudo crear la cuenta. Revisa los datos o usa Iniciar sesión.'
+                  : 'Correo o contraseña incorrectos.',
+              style: sans(size: 12, color: kInk),
+            ),
+            const SizedBox(height: 12),
+          ],
+          FilledButton(
+            onPressed: (!canSubmit || controller.isLoading)
+                ? null
+                : (_isRegistering ? _register : _login),
+            child: controller.isLoading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : Text(_isRegistering ? 'CREAR CUENTA' : 'ENTRAR'),
+          ),
+          if (!canSubmit) ...[
+            const SizedBox(height: 12),
+            Text(
+              'El servicio de cuentas aún no está configurado en esta versión.',
+              style: sans(size: 11, color: kInkMuted),
+            ),
+          ] else ...[
+            const SizedBox(height: 12),
+            Text(
+              'Tu sesión se guarda de forma segura en este dispositivo.',
+              style: sans(size: 11, color: kInkMuted),
+            ),
+          ],
         ],
-      ],
+      ),
     );
   }
 }

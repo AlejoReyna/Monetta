@@ -1,12 +1,24 @@
 # accounts_orders
 
-Receives Shopify webhooks and mirrors order/customer state for the app's account features —
-the backend half of `docs/ACCOUNTS_AND_SYNC_PLAN.md` Phase 2. Sibling service to
+Owns first-party Monetta accounts and, when Shopify is linked later, receives its webhooks
+and mirrors order/customer state. Sibling service to
 `services/catalog_monitor`, same conventions (plain SQL migrations tracked in
 `schema_migrations`, `pg` directly, no ORM, structured JSON logging, `createApp(deps)`
 dependency injection so the whole HTTP layer is testable without a database).
 
-## 1. Why this exists
+## 1. First-party accounts
+
+`POST /accounts/register` creates an email/password account, and `POST /accounts/login`
+starts a session for a returning user. Passwords are stored as salted scrypt verifiers.
+Both endpoints return an opaque 256-bit session token; only its SHA-256 hash is stored in
+`app_sessions`, while Flutter keeps the token in Keychain/Keystore. `GET /accounts/me`
+validates it and `POST /accounts/logout` revokes it.
+
+Email is deliberately unverified metadata in this interim flow. It does not prove ownership
+and cannot yet recover an account on another device. Email verification or passkeys are the
+next identity layer; Shopify linkage remains nullable and independent.
+
+## 2. Why the Shopify mirror exists
 
 The Flutter app's Customer Account API login (`lib/data/customer_auth/`) needs no backend —
 it's a public OAuth client talking to Shopify directly. This service exists only for the two
@@ -22,7 +34,7 @@ things a phone structurally cannot do:
 It does not become a general API layer in front of Shopify. The Storefront API and Customer
 Account API stay directly reachable from the app, unchanged.
 
-## 2. Two credentials, do not confuse them
+## 3. Shopify credentials are optional
 
 | | Customer Account API "Mobile" client | This app's own Shopify app |
 |---|---|---|
@@ -31,10 +43,11 @@ Account API stay directly reachable from the app, unchanged.
 | Used for | Login | Verifying `X-Shopify-Hmac-Sha256` on every webhook |
 | Config | `CustomerAccountConfig` (Dart, `--dart-define`) | `SHOPIFY_APP_CLIENT_SECRET` (this service's `.env`) |
 
-Both come from the same Partner-dashboard app registration, but they are not
-interchangeable, and the client secret must never end up in the Flutter app or its binary.
+The first-party account flow needs neither credential. With
+`SHOPIFY_APP_CLIENT_SECRET` empty, webhook verification fails closed while `/accounts/*`
+continues to work. A Shopify client secret must never end up in the Flutter app or binary.
 
-## 3. Local development
+## 4. Local development
 
 ```bash
 cd services/accounts_orders
@@ -45,10 +58,10 @@ npm test                # in-memory repositories, no network, no database
 npm start                # API on :8082
 ```
 
-Without `SHOPIFY_APP_CLIENT_SECRET` set, every webhook 401s — verification fails closed
-(`src/webhooks/verifyHmac.ts`), never open.
+Without `SHOPIFY_APP_CLIENT_SECRET` set, every Shopify webhook 401s while account
+registration remains available.
 
-## 4. Registering the webhooks in Shopify
+## 5. Registering the webhooks in Shopify
 
 Each topic gets its own callback URL under this service's public address:
 
@@ -63,14 +76,14 @@ Each topic gets its own callback URL under this service's public address:
 Configure these as this app's webhook subscriptions in the Partner dashboard (or
 `shopify.app.toml`, if this app moves to the CLI-managed config flow later).
 
-## 5. Idempotency
+## 6. Idempotency
 
 Every webhook carries `X-Shopify-Webhook-Id`, stable across Shopify's retries of the *same*
 delivery. `webhook_events` is keyed by it: a retried delivery is a harmless duplicate insert
 attempt (`ON CONFLICT DO NOTHING`), never double-processed — see
 `src/webhooks/handlers.ts#claimDelivery`.
 
-## 6. Compliance topics: what actually happens
+## 7. Compliance topics: what actually happens
 
 - **`customers/data_request`** — Shopify does not require a synchronous data export in the
   webhook response, only an acknowledgment and action within 30 days. This logs the request
@@ -83,7 +96,7 @@ attempt (`ON CONFLICT DO NOTHING`), never double-processed — see
 - **`shop/redact`** — this service is single-tenant (one shop), so this wipes every mirrored
   row. Fires ~48h after app uninstall.
 
-## 7. Apartado orders
+## 8. Apartado orders
 
 A large share of this store's revenue is WhatsApp *apartado* (layaway), never touching
 Shopify checkout — see `lib/data/shopify/cart_attribution.dart`. When the owner manually
@@ -93,7 +106,12 @@ tags (matched against `AttributionCodeGenerator`'s actual alphabet, not just a `
 and mirrors it with `source = 'whatsapp_apartado'` instead of `'shopify_checkout'` — see
 `docs/ACCOUNTS_AND_SYNC_PLAN.md` Phase 3.
 
-## 8. Known limitations
+## 9. Known limitations
+
+- Email is not verified and password recovery is not implemented yet, so UI copy must not
+  promise either.
+- Deployments should rate-limit `POST /accounts/register` and `POST /accounts/login` at the
+  edge before public launch.
 
 - **`POST /push-tokens` has no request authentication yet.** It's internal/prototype status
   only, the same posture `services/catalog_monitor` ships its live-crawl gate with. Before
@@ -112,7 +130,7 @@ and mirrors it with `source = 'whatsapp_apartado'` instead of `'shopify_checkout
   cart (see `docs/CHECKOUT_DESIGN.md` § "Security and integration boundary"). That gap predates
   this plan and is out of scope here.
 
-## 9. Tests
+## 10. Tests
 
 ```bash
 npm test

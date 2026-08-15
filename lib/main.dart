@@ -17,9 +17,8 @@ import 'app/external_catalog_config.dart';
 import 'app/external_catalog_controller.dart';
 import 'app/theme.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
-import 'data/customer_auth/customer_account_config.dart';
-import 'data/customer_auth/customer_auth_gateway.dart';
-import 'data/customer_auth/customer_session_repository.dart';
+import 'data/accounts_orders/system_account_client.dart';
+import 'data/accounts_orders/system_account_session_repository.dart';
 import 'data/customer_auth/device_identity.dart';
 import 'data/customer_auth/secure_token_store.dart';
 import 'data/local/account_store.dart';
@@ -133,10 +132,13 @@ class _MonettaAppState extends State<MonettaApp> {
       appVersion: '0.1.0',
     );
 
-    final config = CustomerAccountConfig.fromEnvironment();
+    final accountsConfig = AccountsOrdersConfig.fromEnvironment();
+    final accountsBaseUrl = accountsConfig.baseUrl;
     _account = AccountController(
-      sessionRepository: CustomerSessionRepository(
-        authGateway: AppAuthCustomerGateway(config: config),
+      systemSessionRepository: SystemAccountSessionRepository(
+        client: accountsBaseUrl == null
+            ? null
+            : HttpSystemAccountClient(baseUrl: accountsBaseUrl),
         accountStore: AccountStore(_database),
         sessionStore: SessionStore(_database),
         deviceStore: deviceStore,
@@ -149,9 +151,8 @@ class _MonettaAppState extends State<MonettaApp> {
       deviceStore: deviceStore,
       orderHistoryRepository: OrderHistoryRepository(
         store: OrderSummaryStore(_database),
-        config: AccountsOrdersConfig.fromEnvironment(),
+        config: accountsConfig,
       ),
-      config: config,
       deviceId: deviceId,
     );
     await _account.restore();
@@ -189,7 +190,10 @@ class _MonettaAppState extends State<MonettaApp> {
               if (snapshot.connectionState != ConnectionState.done) {
                 return const _SplashScreen();
               }
-              return AccountScope(notifier: _account, child: const HomeScreen());
+              return AccountScope(
+                notifier: _account,
+                child: const HomeScreen(),
+              );
             },
           ),
         ),

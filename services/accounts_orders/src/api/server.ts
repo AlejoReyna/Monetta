@@ -1,8 +1,11 @@
 import { fileURLToPath } from 'node:url';
+import { createHash, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
+import { promisify } from 'node:util';
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import { loadConfig } from '../config.js';
 import { getPool, closePool } from '../db/pool.js';
 import { PgCustomersRepository } from '../db/pgCustomersRepository.js';
+import { PgAppAccountsRepository } from '../db/pgAppAccountsRepository.js';
 import { PgOrdersRepository } from '../db/pgOrdersRepository.js';
 import { PgPushTokensRepository } from '../db/pgPushTokensRepository.js';
 import { PgWebhookEventsRepository } from '../db/pgWebhookEventsRepository.js';
@@ -25,6 +28,39 @@ import type { Platform } from '../domain/types.js';
 
 export interface ServerDeps extends HandlerDeps {
   readonly webhookSecret: string;
+  readonly appAccounts: import('../domain/ports.js').AppAccountsRepository;
+}
+
+const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
+const scryptAsync = promisify(scrypt);
+
+function hashToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
+
+function bearerToken(req: Request): string | null {
+  const authorization = req.header('Authorization');
+  if (!authorization?.startsWith('Bearer ')) return null;
+  const token = authorization.slice('Bearer '.length).trim();
+  return token === '' ? null : token;
+}
+
+async function hashPassword(password: string): Promise<string> {
+  const salt = randomBytes(16);
+  const derived = await scryptAsync(password, salt, 64) as Buffer;
+  return `scrypt$${salt.toString('base64url')}$${derived.toString('base64url')}`;
+}
+
+async function passwordMatches(password: string, encoded: string): Promise<boolean> {
+  const [algorithm, saltText, hashText] = encoded.split('$');
+  if (algorithm !== 'scrypt' || !saltText || !hashText) return false;
+  try {
+    const expected = Buffer.from(hashText, 'base64url');
+    const actual = await scryptAsync(password, Buffer.from(saltText, 'base64url'), expected.length) as Buffer;
+    return expected.length === actual.length && timingSafeEqual(expected, actual);
+  } catch {
+    return false;
+  }
 }
 
 /**
@@ -121,6 +157,141 @@ export function createApp(deps: ServerDeps): Express {
   // README.md § "Known limitations". Internal/prototype status only, the
   // same posture services/catalog_monitor ships its live-crawl gate with.
   app.use(express.json());
+
+  // First-party, device-bound Monetta registration. Email is intentionally
+  // unverified and is profile metadata only: this endpoint does not claim
+  // email ownership or provide cross-device recovery. The opaque bearer
+  // token is the credential and only its SHA-256 hash is stored.
+  app.post('/accounts/register', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, password, displayName, deviceId } = req.body as {
+        email?: string;
+        password?: string;
+        displayName?: string | null;
+        deviceId?: string;
+      };
+      const normalizedEmail = email?.trim().toLowerCase() ?? '';
+      const normalizedName = displayName?.trim() || null;
+      const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
+      if (
+        !emailLooksValid || normalizedEmail.length > 254 ||
+        !password || password.length < 8 || password.length > 128 ||
+        !deviceId || deviceId.length > 200 ||
+        (normalizedName !== null && normalizedName.length > 120)
+      ) {
+        res.status(400).json({ error: 'invalid_request' });
+        return;
+      }
+
+      const token = randomBytes(32).toString('base64url');
+      const expiresAt = new Date(Date.now() + appSessionLifetimeMs);
+      const account = await deps.appAccounts.register({
+        accountId: randomUUID(),
+        email: normalizedEmail,
+        displayName: normalizedName,
+        passwordHash: await hashPassword(password),
+        deviceId,
+        tokenHash: hashToken(token),
+        expiresAt,
+      });
+      res.status(201).json({
+        account: {
+          id: account.id,
+          email: account.email,
+          displayName: account.displayName,
+          emailVerified: account.emailVerified,
+        },
+        session: { token, expiresAt: expiresAt.toISOString() },
+      });
+    } catch (error) {
+      if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
+        res.status(409).json({ error: 'email_already_registered' });
+        return;
+      }
+      next(error);
+    }
+  });
+
+  app.post('/accounts/login', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const { email, password, deviceId } = req.body as {
+        email?: string;
+        password?: string;
+        deviceId?: string;
+      };
+      const normalizedEmail = email?.trim().toLowerCase() ?? '';
+      if (!normalizedEmail || !password || password.length > 128 || !deviceId || deviceId.length > 200) {
+        res.status(400).json({ error: 'invalid_request' });
+        return;
+      }
+
+      const credentials = await deps.appAccounts.findCredentialsByEmail(normalizedEmail);
+      if (credentials === null || !await passwordMatches(password, credentials.passwordHash)) {
+        res.status(401).json({ error: 'invalid_credentials' });
+        return;
+      }
+
+      const token = randomBytes(32).toString('base64url');
+      const expiresAt = new Date(Date.now() + appSessionLifetimeMs);
+      await deps.appAccounts.createSession({
+        accountId: credentials.id,
+        deviceId,
+        tokenHash: hashToken(token),
+        expiresAt,
+      });
+      res.status(200).json({
+        account: {
+          id: credentials.id,
+          email: credentials.email,
+          displayName: credentials.displayName,
+          emailVerified: credentials.emailVerified,
+        },
+        session: { token, expiresAt: expiresAt.toISOString() },
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get('/accounts/me', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const token = bearerToken(req);
+      if (token === null) {
+        res.status(401).json({ error: 'unauthorized' });
+        return;
+      }
+      const account = await deps.appAccounts.findByTokenHash(hashToken(token));
+      if (account === null) {
+        res.status(401).json({ error: 'unauthorized' });
+        return;
+      }
+      res.status(200).json({
+        account: {
+          id: account.id,
+          email: account.email,
+          displayName: account.displayName,
+          emailVerified: account.emailVerified,
+        },
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post('/accounts/logout', async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const token = bearerToken(req);
+      if (token === null) {
+        res.status(401).json({ error: 'unauthorized' });
+        return;
+      }
+      await deps.appAccounts.revokeToken(hashToken(token));
+      res.status(200).json({ status: 'ok' });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.post('/push-tokens', async (req: Request, res: Response, next: NextFunction) => {
     try {
       const { deviceId, customerId, fcmToken, platform } = req.body as {
@@ -191,6 +362,7 @@ if (isMain) {
   const config = loadConfig();
   const pool = getPool();
   const app = createApp({
+    appAccounts: new PgAppAccountsRepository(pool),
     customers: new PgCustomersRepository(pool),
     orders: new PgOrdersRepository(pool),
     webhookEvents: new PgWebhookEventsRepository(pool),
