@@ -9,7 +9,9 @@ import '../../app/theme.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
+import '../account/account_screen.dart';
 import '../checkout/checkout_screen.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import 'product_card.dart';
 
 enum _Sort { newest, priceAsc, priceDesc }
@@ -90,6 +92,74 @@ class _CollectionScreenState extends State<CollectionScreen> {
     return items;
   }
 
+  void _handleBottomNavigation(MonettaBottomDestination destination) {
+    switch (destination) {
+      case MonettaBottomDestination.home:
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      case MonettaBottomDestination.shuffle:
+        setState(() {
+          _inStockOnly = false;
+          _sort = _Sort.newest;
+          _brand = widget.filter.brand;
+          _silhouette = widget.filter.silhouette;
+        });
+      case MonettaBottomDestination.menu:
+        _openMenu();
+      case MonettaBottomDestination.bag:
+        openBag(context);
+      case MonettaBottomDestination.account:
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => AccountScreen(
+              controller: AccountScope.of(context),
+            ),
+          ),
+        );
+    }
+  }
+
+  void _openMenu() {
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: Colors.white,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 18),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(width: 36, height: 2, color: kLine),
+              ),
+              const SizedBox(height: 18),
+              Text('Menú', style: display(24)),
+              const SizedBox(height: 8),
+              _SheetLink(
+                label: 'Inicio',
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  Navigator.of(context).popUntil((route) => route.isFirst);
+                },
+              ),
+              _SheetLink(
+                label: 'Ver todo el catálogo',
+                onTap: () => Navigator.of(sheetContext).pop(),
+              ),
+              _SheetLink(
+                label: 'Mi cuenta',
+                onTap: () {
+                  Navigator.of(sheetContext).pop();
+                  _handleBottomNavigation(MonettaBottomDestination.account);
+                },
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
@@ -105,7 +175,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title, style: display(16, weight: FontWeight.w500)),
-        actions: const [BagAction(), SizedBox(width: 8)],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(0.5),
           child: Divider(height: 0.5),
@@ -130,7 +199,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
                     label: brandLabel(brand),
                     selected: _brand == brand,
                     onTap: () => setState(
-                      () => _brand = _brand == brand ? widget.filter.brand : brand,
+                      () => _brand =
+                          _brand == brand ? widget.filter.brand : brand,
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -190,6 +260,29 @@ class _CollectionScreenState extends State<CollectionScreen> {
                   ),
           ),
         ],
+      ),
+      bottomNavigationBar: MonettaBottomNavigation(
+        current: MonettaBottomDestination.menu,
+        bagCount: store.bagQuantity,
+        onSelected: _handleBottomNavigation,
+      ),
+    );
+  }
+}
+
+class _SheetLink extends StatelessWidget {
+  const _SheetLink({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        child: Text(label, style: sans(size: 16)),
       ),
     );
   }

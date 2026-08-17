@@ -1,0 +1,50 @@
+# Fly.io deploy config for the staging accounts_orders service.
+#
+# Why Fly: this service's migrations only reach `dist/` through the
+# Dockerfile's explicit `COPY src/db/migrations ./dist/db/migrations` (tsc
+# does not copy .sql, and `npm run migrate` shells out to tsx, a
+# devDependency the runtime stage omits). Fly builds the existing Dockerfile
+# unchanged, so the image that ships is the image docker-compose already
+# runs; buildpack platforms would silently produce a container that cannot
+# migrate.
+#
+# Postgres lives on Neon, not here: managed, TLS required by default, and
+# node-postgres honours its `?sslmode=require` URL with no code change
+# (src/db/pool.ts passes the connection string straight to pg.Pool).
+#
+# Secrets are NEVER in this file. Set them with `fly secrets set` — see
+# README.md § Deploy.
+
+app = "monetta-accounts-staging"
+primary_region = "qro"
+
+[build]
+  dockerfile = "Dockerfile"
+
+# Runs on every deploy, before any new machine takes traffic. Uses the
+# compiled entrypoint rather than `npm run migrate`, because tsx is not in
+# the runtime image. Migrations are idempotent (schema_migrations).
+[deploy]
+  release_command = "node dist/db/migrate.js"
+
+[env]
+  PORT = "8082"
+  NODE_ENV = "production"
+
+[http_service]
+  internal_port = 8082
+  force_https = true
+
+  # Shopify retries a failed webhook, but a cold start still risks burning
+  # retries and delaying order mirroring, so keep one machine warm rather
+  # than scaling to zero.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [[http_service.checks]]
+    interval = "15s"
+    timeout = "3s"
+    grace_period = "10s"
+    method = "GET"
+    path = "/livez"

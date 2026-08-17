@@ -124,6 +124,15 @@ Why that boundary has to stay, and what a durable seller-commission model
 would actually look like:
 [`US_SOURCING_DURABILITY.md`](US_SOURCING_DURABILITY.md).
 
+How this prototype becomes a production, always-live service — deployed on the
+Atlantic.Net server behind Caddy, refreshing on a short cycle, and crawling only
+what a versioned, owner-editable **selection document** matches instead of a
+whole sitemap — is planned work package by work package in
+[`EXTERNAL_CATALOG_PRODUCTION_PLAN.md`](EXTERNAL_CATALOG_PRODUCTION_PLAN.md).
+That plan does not move the `ownerProcurement` boundary described here. Its
+companion [`CATALOG_DASHBOARD.md`](CATALOG_DASHBOARD.md) specifies the
+Vercel-hosted owner console that monitors the crawl and edits the selection.
+
 ### Why scraping is isolated outside the mobile client
 
 The crawler lives in `services/catalog_monitor/` — a separate Node.js/TypeScript

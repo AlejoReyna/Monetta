@@ -13,6 +13,7 @@ library;
 import 'package:flutter_appauth/flutter_appauth.dart';
 
 import 'customer_account_config.dart';
+import 'customer_auth_error.dart';
 
 /// The subset of a token response this app actually persists. `idToken` is
 /// kept only long enough to read claims from it
@@ -39,7 +40,9 @@ class CustomerAuthResult {
 abstract class CustomerAuthGateway {
   /// Opens Shopify's hosted login page and exchanges the resulting code for
   /// tokens. Throws on cancellation or failure — there is no "partial"
-  /// result to represent.
+  /// result to represent. Implementations throw [CustomerAuthException] so no
+  /// caller above this layer has to know what AppAuth or Shopify called the
+  /// problem.
   Future<CustomerAuthResult> login();
 
   Future<CustomerAuthResult> refresh(String refreshToken);
@@ -60,30 +63,57 @@ class AppAuthCustomerGateway implements CustomerAuthGateway {
 
   @override
   Future<CustomerAuthResult> login() async {
-    final response = await _appAuth.authorizeAndExchangeCode(
-      AuthorizationTokenRequest(
-        config.clientId,
-        config.redirectUri,
-        serviceConfiguration: _serviceConfiguration,
-        scopes: CustomerAccountConfig.scopes,
-      ),
-    );
+    if (!config.isUsable) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'CustomerAccountConfig is not usable',
+      );
+    }
+    final TokenResponse response;
+    try {
+      response = await _appAuth.authorizeAndExchangeCode(
+        AuthorizationTokenRequest(
+          config.clientId,
+          config.redirectUri,
+          serviceConfiguration: _serviceConfiguration,
+          scopes: CustomerAccountConfig.scopes,
+        ),
+      );
+    } catch (error) {
+      throw _classified(error);
+    }
     return _fromResponse(response);
   }
 
   @override
   Future<CustomerAuthResult> refresh(String refreshToken) async {
-    final response = await _appAuth.token(
-      TokenRequest(
-        config.clientId,
-        config.redirectUri,
-        serviceConfiguration: _serviceConfiguration,
-        refreshToken: refreshToken,
-        grantType: 'refresh_token',
-      ),
-    );
+    final TokenResponse response;
+    try {
+      response = await _appAuth.token(
+        TokenRequest(
+          config.clientId,
+          config.redirectUri,
+          serviceConfiguration: _serviceConfiguration,
+          refreshToken: refreshToken,
+          grantType: 'refresh_token',
+        ),
+      );
+    } catch (error) {
+      throw _classified(error);
+    }
     return _fromResponse(response, fallbackRefreshToken: refreshToken);
   }
+
+  /// Deliberately drops the original exception rather than chaining it: an
+  /// AppAuth `PlatformException`'s `message`/`details` can carry the
+  /// authorization request's own parameters, and this object ends up in
+  /// `AccountController.lastError` and from there potentially in a crash
+  /// report. [classifyCustomerAuthError] has already read everything from it
+  /// that anyone above needs.
+  CustomerAuthException _classified(Object error) => CustomerAuthException(
+        classifyCustomerAuthError(error),
+        debugDetail: 'appauth ${error.runtimeType}',
+      );
 
   CustomerAuthResult _fromResponse(
     TokenResponse response, {
@@ -91,7 +121,10 @@ class AppAuthCustomerGateway implements CustomerAuthGateway {
   }) {
     final accessToken = response.accessToken;
     if (accessToken == null) {
-      throw StateError('Shopify token response carried no access token');
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'token response carried no access token',
+      );
     }
     return CustomerAuthResult(
       accessToken: accessToken,

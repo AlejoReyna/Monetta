@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1b1b1a" />
+    <meta name="description" content="Monetta live product captures and current UI screen atlas." />
+    <link rel="icon" type="image/png" href="/images/monetta_favicon.png" />
+    <title>Monetta — Current UI</title>
+  </head>
+  <body>
+    <div class="viewer">
+      <header class="toolbar">
+        <a class="toolbar__brand" href="/" aria-label="Monetta current UI"><img src="/images/logo_monetta.png" alt="Monetta" /></a>
+        <span class="toolbar__file">Live capture / current UI</span>
+        <nav class="toolbar__tabs" aria-label="Live app captures and UI boards">
+          <button class="is-active" type="button" data-board="/live/01-home.png" data-kind="live" data-title="Home / initial load" data-meta="Flutter app · iPhone 17 Pro Max · captured 12:15">Live / Home</button>
+          <button type="button" data-board="/live/04-home-down.png" data-kind="live" data-title="Home / catalog scroll" data-meta="Real catalog state · sold-out and available inventory">Live / Catalog</button>
+          <button type="button" data-board="/guidelines/00-all-ui.svg" data-kind="svg" data-title="SVG guideline atlas" data-meta="Reference board · current UI sections">SVG atlas</button>
+        </nav>
+        <div class="toolbar__actions"><button type="button" data-fit>Fit</button><button type="button" data-zoom-out aria-label="Zoom out">−</button><span data-zoom-label>100%</span><button type="button" data-zoom-in aria-label="Zoom in">+</button><a data-open-board href="/live/01-home.png" target="_blank" aria-label="Open current capture">↗</a></div>
+      </header>
+      <main class="canvas" data-canvas>
+        <div class="canvas__backdrop"></div>
+        <div class="board-wrap is-live" data-board-wrap>
+          <div class="capture-head" data-capture-head>
+            <div><span class="capture-head__eyebrow" data-capture-eyebrow>RUNNING BUILD</span><h1 data-capture-title>Home / initial load</h1><p data-capture-meta>Flutter app · iPhone 17 Pro Max · captured 12:15</p></div>
+            <span class="capture-head__status" data-capture-status><i></i> LIVE CAPTURE</span>
+          </div>
+          <img data-board-image src="/live/01-home.png" alt="Monetta live app home screen" draggable="false" />
+        </div>
+        <div class="canvas__hint">Drag to pan · ⌘ + / − to zoom</div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

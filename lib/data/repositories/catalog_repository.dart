@@ -76,6 +76,21 @@ class CatalogRepository {
     await cache.upsertProducts(products);
   }
 
+  /// Repairs an older local cache without replacing rows that may have been
+  /// updated by a real Shopify sync. This matters for installs that were
+  /// seeded with an earlier snapshot: the cache is persistent, so the old
+  /// "seed only when empty" rule otherwise hides every product added later.
+  Future<void> addMissingFromAsset(Map<String, dynamic> catalogJson) async {
+    final cachedIds = (await cache.allProducts()).map((p) => p.id).toSet();
+    if (cachedIds.isEmpty) return;
+
+    final missing = (catalogJson['products'] as List<dynamic>)
+        .map((e) => productFromCatalogSnapshot(e as Map<String, dynamic>))
+        .where((product) => !cachedIds.contains(product.id))
+        .toList();
+    await cache.upsertProducts(missing);
+  }
+
   /// Cached products, normalized. Reads only — the UI should paint from
   /// this immediately, even offline, per `docs/ARCHITECTURE.md`'s "Data
   /// flow: opening the app".
@@ -88,7 +103,8 @@ class CatalogRepository {
     return CatalogSnapshot(
       products: products,
       facetsById: {
-        for (final product in products) product.id: normalizer.normalize(product, now: now),
+        for (final product in products)
+          product.id: normalizer.normalize(product, now: now),
       },
     );
   }
@@ -112,13 +128,18 @@ class CatalogRepository {
       }
       await cursorStore.save(result.cursor);
       return CatalogSyncResult(
-        outcome: result.hasChanges ? CatalogSyncOutcome.updated : CatalogSyncOutcome.upToDate,
+        outcome: result.hasChanges
+            ? CatalogSyncOutcome.updated
+            : CatalogSyncOutcome.upToDate,
         changedCount: result.products.length,
       );
     } catch (error) {
       // A failed sync must never clear or corrupt what's already cached —
       // same contract as `ExternalCatalogRepository.refresh`.
-      return CatalogSyncResult(outcome: CatalogSyncOutcome.failed, error: error);
+      return CatalogSyncResult(
+        outcome: CatalogSyncOutcome.failed,
+        error: error,
+      );
     }
   }
 }

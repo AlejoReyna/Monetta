@@ -12,6 +12,7 @@ class CustomerAccountConfig {
     required this.shopId,
     required this.clientId,
     required this.redirectUri,
+    this.apiVersion = defaultApiVersion,
   });
 
   /// The numeric shop id Shopify assigns per store — distinct from
@@ -19,10 +20,11 @@ class CustomerAccountConfig {
   /// and the required redirect URI scheme.
   final String shopId;
 
-  /// A `shp_`-prefixed UUID from the Customer Account API's Mobile client
-  /// registration in the Shopify Partner dashboard. There is no client
-  /// secret: a mobile client is a *public* OAuth client by design (a
-  /// compiled app cannot keep one), authenticated instead by PKCE.
+  /// The Customer Account API Mobile client's id, from the store's Headless
+  /// / Customer Accounts settings. A bare UUID today (older docs describe an
+  /// `shp_` prefix; Shopify issues both, and this app must not care which).
+  /// There is no client secret: a mobile client is a *public* OAuth client by
+  /// design (a compiled app cannot keep one), authenticated instead by PKCE.
   final String clientId;
 
   /// Must use the custom scheme `shop.{shopId}.*`, registered as this
@@ -30,6 +32,17 @@ class CustomerAccountConfig {
   /// native iOS/Android project — see `ios/Runner/Info.plist` and
   /// `android/app/build.gradle`.
   final String redirectUri;
+
+  /// Customer Account API version for [graphQlEndpoint]. Shopify releases the
+  /// Customer Account API on the same quarterly calendar as the Storefront
+  /// API and with the same version strings, so this reads the one
+  /// `SHOPIFY_API_VERSION` define the Storefront config already uses rather
+  /// than adding a second knob that can drift.
+  final String apiVersion;
+
+  /// Pinned, never `unstable` — see `StorefrontConfig.defaultApiVersion`,
+  /// which this deliberately mirrors.
+  static const String defaultApiVersion = '2026-07';
 
   /// `openid` + `email` for identity claims in the id token, plus the scope
   /// that actually unlocks Customer Account API data — without it, calls
@@ -46,6 +59,19 @@ class CustomerAccountConfig {
   String get tokenEndpoint =>
       'https://shopify.com/authentication/$shopId/oauth/token';
 
+  /// The Customer Account API GraphQL endpoint — a different host path shape
+  /// from the OAuth endpoints above, and unrelated to the Storefront API's
+  /// `/api/{version}/graphql.json` on the shop domain.
+  ///
+  /// Shopify recommends discovering this from
+  /// `/.well-known/customer-account-api` instead of composing it; that is
+  /// deliberately deferred (see `README.md` § 8) because discovery needs its
+  /// own caching and last-known-good handling to not become a new cold-start
+  /// failure mode, and the composed URL is stable and documented.
+  Uri get graphQlEndpoint => Uri.parse(
+        'https://shopify.com/$shopId/account/customer/api/$apiVersion/graphql',
+      );
+
   /// False until a Partner-dashboard registration exists — the honest
   /// default today. Callers must treat login as unavailable rather than
   /// attempting it, the same pattern as `StorefrontConfig.isUsable`.
@@ -53,6 +79,7 @@ class CustomerAccountConfig {
       shopId.isNotEmpty &&
       clientId.isNotEmpty &&
       redirectUri.isNotEmpty &&
+      apiVersion.isNotEmpty &&
       shopId != _placeholderShopId;
 
   /// Mirrors `ExternalCatalogConfig.fromEnvironment()`'s shape
@@ -60,27 +87,31 @@ class CustomerAccountConfig {
   /// values, empty string standing in for "not set".
   ///
   /// ```
-  /// flutter run \
-  ///   --dart-define=CUSTOMER_ACCOUNT_SHOP_ID=12345678 \
-  ///   --dart-define=CUSTOMER_ACCOUNT_CLIENT_ID=shp_...
+  /// flutter run --dart-define-from-file=config/dart_defines.staging.json
   /// ```
   ///
   /// The redirect URI is *derived* from the shop id rather than independently
   /// configurable — it must match `ios/Runner/Info.plist`'s
   /// `CFBundleURLTypes` and `android/app/build.gradle.kts`'s
   /// `appAuthRedirectScheme` exactly, and deriving it here is one fewer
-  /// place that pair can drift out of sync. All three currently carry the
-  /// same placeholder shop id; see `README.md` § 8.
+  /// place that pair can drift out of sync. Both native files now carry the
+  /// staging shop id, so a production build needs its own flavor before it
+  /// can log in — see `README.md` § 8.
   factory CustomerAccountConfig.fromEnvironment() {
     const shopId = String.fromEnvironment(
       'CUSTOMER_ACCOUNT_SHOP_ID',
       defaultValue: _placeholderShopId,
     );
     const clientId = String.fromEnvironment('CUSTOMER_ACCOUNT_CLIENT_ID');
+    const apiVersion = String.fromEnvironment(
+      'SHOPIFY_API_VERSION',
+      defaultValue: defaultApiVersion,
+    );
     return CustomerAccountConfig(
       shopId: shopId,
       clientId: clientId,
       redirectUri: 'shop.$shopId.oauth://callback',
+      apiVersion: apiVersion,
     );
   }
 

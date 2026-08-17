@@ -1,0 +1,55 @@
+# Monetta Shopify app — staging (linked).
+# client_id is public. Client secret lives only on the backend host as
+# SHOPIFY_APP_CLIENT_SECRET — never in this file, Flutter, or git.
+#
+# Every mutating CLI command MUST use: --config staging
+# Linked: 2026-08-16 as "monetta-staging"
+#
+# Target store for install/tests: monetta-staging.myshopify.com (dev store).
+# NEVER install this app on production monetta.mx / fakcei-n9 / monetta-2.
+
+client_id = "4a29ba522a35bd476f3d1f467749234f"
+name = "monetta-staging"
+# Placeholder until services/accounts_orders has a public HTTPS URL.
+application_url = "https://shopify.dev/apps/default-app-home"
+embedded = false
+handle = "monetta-staging"
+
+[access_scopes]
+scopes = "read_orders,read_customers"
+
+[auth]
+redirect_urls = [
+  "https://shopify.dev/apps/default-app-home/api/auth"
+]
+
+[webhooks]
+# Must match services/accounts_orders routes exactly (see src/api/server.ts).
+api_version = "2026-07"
+
+[[webhooks.subscriptions]]
+topics = ["orders/create"]
+uri = "https://REPLACE_STAGING_BACKEND_HOST/webhooks/orders/create"
+
+[[webhooks.subscriptions]]
+topics = ["orders/updated"]
+uri = "https://REPLACE_STAGING_BACKEND_HOST/webhooks/orders/updated"
+
+# Compliance topics must be separate absolute paths — the server has no
+# catch-all /webhooks route. app/uninstalled is intentionally omitted until
+# Phase 6 adds a handler (otherwise Shopify would POST to a 404).
+[[webhooks.subscriptions]]
+compliance_topics = ["customers/data_request"]
+uri = "https://REPLACE_STAGING_BACKEND_HOST/webhooks/customers/data_request"
+
+[[webhooks.subscriptions]]
+compliance_topics = ["customers/redact"]
+uri = "https://REPLACE_STAGING_BACKEND_HOST/webhooks/customers/redact"
+
+[[webhooks.subscriptions]]
+compliance_topics = ["shop/redact"]
+uri = "https://REPLACE_STAGING_BACKEND_HOST/webhooks/shop/redact"
+
+[build]
+include_config_on_deploy = true
+automatically_update_urls_on_dev = false

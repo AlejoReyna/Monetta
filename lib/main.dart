@@ -1,9 +1,10 @@
 /// App entry point.
 ///
-/// Phase 1 demo build: the catalog comes from the bundled snapshot asset rather
-/// than the Storefront API, because there is no access token yet. Everything
-/// else — normalization, profiling, ranking, explanations — is the real code
-/// from `data/normalize` and `reco`, running on the real 271-product catalog.
+/// Catalog cold-start still uses the bundled snapshot when Drift is empty.
+/// When public Storefront credentials are supplied via `--dart-define` /
+/// `--dart-define-from-file`, a background Shopify delta sync refreshes the
+/// cache after load. Without credentials the app behaves as before: asset +
+/// offline cache only.
 library;
 
 import 'dart:async';
@@ -19,6 +20,10 @@ import 'app/theme.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
 import 'data/accounts_orders/system_account_client.dart';
 import 'data/accounts_orders/system_account_session_repository.dart';
+import 'data/customer_auth/customer_account_config.dart';
+import 'data/customer_auth/customer_auth_gateway.dart';
+import 'data/customer_auth/customer_identity.dart';
+import 'data/customer_auth/customer_session_repository.dart';
 import 'data/customer_auth/device_identity.dart';
 import 'data/customer_auth/secure_token_store.dart';
 import 'data/local/account_store.dart';
@@ -27,6 +32,10 @@ import 'data/local/database.dart';
 import 'data/local/order_summary_store.dart';
 import 'data/local/wishlist_store.dart';
 import 'data/repositories/order_history_repository.dart';
+import 'data/shopify/catalog_sync.dart' as shopify;
+import 'data/shopify/http_storefront_transport.dart';
+import 'data/shopify/storefront_client.dart';
+import 'data/shopify/storefront_config.dart';
 import 'features/home/home_screen.dart';
 
 void main() {
@@ -104,7 +113,14 @@ class MonettaApp extends StatefulWidget {
 
 class _MonettaAppState extends State<MonettaApp> {
   final AppDatabase _database = AppDatabase.connect();
-  late final CatalogStore _store = CatalogStore(database: _database);
+
+  /// Null when no usable public Storefront credentials were compiled in.
+  final HttpStorefrontTransport? _storefrontTransport =
+      _maybeStorefrontTransport();
+  late final CatalogStore _store = CatalogStore(
+    database: _database,
+    catalogSync: _maybeCatalogSync(_storefrontTransport),
+  );
   final ExternalCatalogController _externalCatalog = ExternalCatalogController(
     config: ExternalCatalogConfig.fromEnvironment(),
   );
@@ -115,10 +131,38 @@ class _MonettaAppState extends State<MonettaApp> {
   late final AccountController _account;
   late final Future<void> _loading = _load();
 
+  /// Owns an HTTP client, so it needs closing — and it is built inside
+  /// [_load] (nullable rather than `late final`, since [dispose] can run
+  /// before that future completes, and since a build without Customer Account
+  /// credentials never creates one at all).
+  HttpCustomerIdentityService? _customerIdentityService;
+
+  static HttpStorefrontTransport? _maybeStorefrontTransport() {
+    final config = StorefrontConfig.fromEnvironment();
+    if (!config.isUsable) return null;
+    return HttpStorefrontTransport();
+  }
+
+  static shopify.CatalogSync? _maybeCatalogSync(
+    HttpStorefrontTransport? transport,
+  ) {
+    if (transport == null) return null;
+    final config = StorefrontConfig.fromEnvironment();
+    if (!config.isUsable) return null;
+    return shopify.CatalogSync(
+      client: StorefrontClient(config: config, transport: transport.send),
+    );
+  }
+
   Future<void> _load() async {
     // Seeds/hydrates the Drift database both `CatalogStore` and account
     // state share, so nothing below races it.
     await _store.loadFromAsset();
+
+    // Best-effort Shopify refresh. Offline / missing credentials / API
+    // errors must never block first paint — CatalogStore already has asset
+    // or cache data from loadFromAsset.
+    unawaited(_store.syncWithShopify());
 
     const secureStore = FlutterSecureTokenStore();
     final deviceStore = DeviceStore(_database);
@@ -132,9 +176,36 @@ class _MonettaAppState extends State<MonettaApp> {
       appVersion: '0.1.0',
     );
 
+    // Shopify Customer Account login. Deliberately independent of
+    // `AccountsOrdersConfig` below: OAuth talks to Shopify directly, so a
+    // missing or unreachable Monetta accounts service must not disable login.
+    // A build with no Customer Account credentials leaves both of these null,
+    // `canLogin` false, and the account screen honest about it.
+    final customerConfig = CustomerAccountConfig.fromEnvironment();
+    CustomerSessionRepository? customerSession;
+    if (customerConfig.isUsable) {
+      final identityService = HttpCustomerIdentityService(
+        config: customerConfig,
+      );
+      _customerIdentityService = identityService;
+      customerSession = CustomerSessionRepository(
+        authGateway: AppAuthCustomerGateway(config: customerConfig),
+        identityService: identityService,
+        accountStore: AccountStore(_database),
+        sessionStore: SessionStore(_database),
+        deviceStore: deviceStore,
+        wishlistStore: WishlistStore(_database),
+        bagStore: BagStore(_database),
+        secureStore: secureStore,
+        deviceId: deviceId,
+      );
+    }
+
     final accountsConfig = AccountsOrdersConfig.fromEnvironment();
     final accountsBaseUrl = accountsConfig.baseUrl;
     _account = AccountController(
+      sessionRepository: customerSession,
+      config: customerConfig.isUsable ? customerConfig : null,
       systemSessionRepository: SystemAccountSessionRepository(
         client: accountsBaseUrl == null
             ? null
@@ -156,16 +227,26 @@ class _MonettaAppState extends State<MonettaApp> {
       deviceId: deviceId,
     );
     await _account.restore();
-    if (_account.isSignedIn) unawaited(_account.loadOrders());
+    if (_account.isSignedIn) {
+      unawaited(_account.loadOrders());
+      // Best-effort, never awaited: confirms with Shopify that the restored
+      // refresh token still works, and drops to a clean guest state if it was
+      // revoked. Offline is explicitly not treated as signed out — see
+      // `AccountController.revalidateSession`.
+      unawaited(_account.revalidateSession());
+    }
 
     // Fire-and-forget: cache-first load, then a best-effort background
     // refresh. A failed or slow external fetch must never block or affect
     // the Monetta home screen — see ExternalCatalogRepository's contract.
+    // External catalog stays off in public builds unless explicitly enabled.
     unawaited(_externalCatalog.loadAndRefresh());
   }
 
   @override
   void dispose() {
+    _storefrontTransport?.close();
+    _customerIdentityService?.close();
     _store.dispose();
     _externalCatalog.dispose();
     super.dispose();

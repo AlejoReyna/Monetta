@@ -1,0 +1,9 @@
+{
+  "SHOPIFY_STORE_DOMAIN": "monetta.mx",
+  "SHOPIFY_STOREFRONT_ACCESS_TOKEN": "public_storefront_token_here",
+  "SHOPIFY_API_VERSION": "2026-07",
+  "CUSTOMER_ACCOUNT_SHOP_ID": "72391655575",
+  "CUSTOMER_ACCOUNT_CLIENT_ID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",
+  "ACCOUNTS_ORDERS_BASE_URL": "https://REPLACE_PRODUCTION_BACKEND_HOST",
+  "ENABLE_EXTERNAL_CATALOG": "false"
+}

@@ -41,5 +41,22 @@ lib/firebase_options.dart
 fastlane/report.xml
 fastlane/Preview.html
 
+# Filled dart-define files (public tokens still must not be committed as a
+# habit — rotate is easier when they only live in CI / local untracked files).
+config/dart_defines.staging.json
+config/dart_defines.production.json
+config/dart_defines.local.json
+
+# Shopify CLI local state / install cache
+shopify/node_modules/
+shopify/.shopify/
+.npm-cache/
+
+# Immersive web site: Vercel installs and builds from source (see
+# vercel.json), so neither the install cache nor the build output belongs
+# in git.
+web/node_modules/
+web/dist/
+
 # Generated code is COMMITTED on purpose (see docs/ARCHITECTURE.md § Codegen),
 # so no *.g.dart / *.freezed.dart ignores here.

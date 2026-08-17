@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/account_controller.dart';
 import '../../app/theme.dart';
+import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
 
 class AccountScreen extends StatelessWidget {
@@ -50,9 +51,13 @@ class _SignedIn extends StatelessWidget {
         Text('Sesión iniciada', style: display(20)),
         const SizedBox(height: 8),
         Text(
-          account.email ?? account.displayName ?? 'Tu cuenta',
+          account.displayName ?? account.email ?? 'Tu cuenta',
           style: sans(size: 14, color: kInkMuted),
         ),
+        if (account.displayName != null && account.email != null) ...[
+          const SizedBox(height: 2),
+          Text(account.email!, style: sans(size: 12, color: kInkMuted)),
+        ],
         const SizedBox(height: 28),
         FilledButton(
           onPressed: controller.isLoading ? null : controller.logout,
@@ -153,6 +158,12 @@ class _OrderRow extends StatelessWidget {
   }
 }
 
+/// Signed out, with Shopify's hosted flow as the one primary action.
+///
+/// The Monetta email/password form below it is legacy on purpose: real
+/// shoppers registered that way before Customer Account login existed
+/// (`docs/ACCOUNTS_AND_SYNC_PLAN.md`), so it stays reachable — collapsed when
+/// Shopify login is available, and the only thing on screen when it isn't.
 class _SignedOut extends StatefulWidget {
   const _SignedOut({required this.controller});
 
@@ -163,6 +174,121 @@ class _SignedOut extends StatefulWidget {
 }
 
 class _SignedOutState extends State<_SignedOut> {
+  bool _showLegacyForm = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = widget.controller;
+    final hasLegacy = controller.canSystemLogin || controller.canRegister;
+    // Nothing to collapse behind a toggle when it is the only way in.
+    final legacyExpanded = _showLegacyForm || !controller.canLogin;
+    final error = controller.lastError;
+
+    return ListView(
+      children: [
+        Text('Tu cuenta', style: display(20)),
+        const SizedBox(height: 8),
+        Text(
+          'Guarda tus favoritos, consulta tus pedidos y compra más rápido. '
+          'No necesitas cuenta para comprar.',
+          style: sans(size: 13, color: kInkMuted, height: 1.5),
+        ),
+        const SizedBox(height: 24),
+        if (controller.canLogin) ...[
+          if (error != null &&
+              error.flow == AccountAuthFlow.shopify &&
+              !error.isSilent) ...[
+            Text(_shopifyErrorMessage(error.kind), style: sans(size: 12)),
+            const SizedBox(height: 12),
+          ],
+          FilledButton(
+            onPressed: controller.isLoading ? null : controller.login,
+            child: controller.isLoading
+                ? const SizedBox(
+                    width: 18,
+                    height: 18,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  )
+                : const Text('INICIAR SESIÓN'),
+          ),
+          const SizedBox(height: 12),
+          Text(
+            'Se abre la página segura de Shopify. Si aún no tienes cuenta, '
+            'puedes crearla ahí mismo. Monetta nunca ve tu contraseña.',
+            style: sans(size: 11, color: kInkMuted, height: 1.5),
+          ),
+        ] else if (!hasLegacy)
+          Text(
+            'El inicio de sesión no está disponible en esta versión de la '
+            'app. Puedes seguir comprando como invitado.',
+            style: sans(size: 12, color: kInkMuted, height: 1.5),
+          ),
+        if (Navigator.of(context).canPop()) ...[
+          const SizedBox(height: 8),
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              onPressed: controller.isLoading
+                  ? null
+                  : () => Navigator.of(context).pop(),
+              child: const Text('SEGUIR COMO INVITADO'),
+            ),
+          ),
+        ],
+        if (hasLegacy) ...[
+          const SizedBox(height: 28),
+          const Divider(height: 0.5),
+          const SizedBox(height: 20),
+          Text('Cuenta Monetta (correo)'.toUpperCase(), style: eyebrow()),
+          const SizedBox(height: 12),
+          if (!legacyExpanded)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed: () => setState(() => _showLegacyForm = true),
+                child: const Text('USAR MI CUENTA MONETTA'),
+              ),
+            )
+          else
+            _MonettaPasswordForm(controller: controller),
+        ],
+      ],
+    );
+  }
+}
+
+/// Deliberately generic: the accounts service reports failures as status
+/// codes, so claiming "wrong password" when the service is down would be a
+/// lie. See `AccountController._monettaError`.
+String _shopifyErrorMessage(CustomerAuthErrorKind kind) {
+  switch (kind) {
+    case CustomerAuthErrorKind.cancelled:
+      // Never rendered — `AccountError.isSilent` filters this out before the
+      // UI asks for a sentence. Present so this switch stays exhaustive.
+      return '';
+    case CustomerAuthErrorKind.offline:
+      return 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
+    case CustomerAuthErrorKind.configuration:
+      return 'El inicio de sesión no está disponible en esta versión de la app.';
+    case CustomerAuthErrorKind.sessionExpired:
+      return 'Tu sesión terminó. Inicia sesión de nuevo.';
+    case CustomerAuthErrorKind.server:
+      return 'Shopify no pudo completar el inicio de sesión. Inténtalo en un momento.';
+    case CustomerAuthErrorKind.unknown:
+      return 'No se pudo iniciar sesión. Inténtalo de nuevo.';
+  }
+}
+
+class _MonettaPasswordForm extends StatefulWidget {
+  const _MonettaPasswordForm({required this.controller});
+
+  final AccountController controller;
+
+  @override
+  State<_MonettaPasswordForm> createState() => _MonettaPasswordFormState();
+}
+
+class _MonettaPasswordFormState extends State<_MonettaPasswordForm> {
   final _formKey = GlobalKey<FormState>();
   final _email = TextEditingController();
   final _displayName = TextEditingController();
@@ -201,20 +327,18 @@ class _SignedOutState extends State<_SignedOut> {
         _isRegistering ? controller.canRegister : controller.canSystemLogin;
     return Form(
       key: _formKey,
-      child: ListView(
+      // A Column, not a ListView: this sits inside the signed-out screen's
+      // own scroll view.
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           Text(
-            _isRegistering ? 'Crea tu cuenta' : 'Inicia sesión',
-            style: display(20),
-          ),
-          const SizedBox(height: 8),
-          Text(
             _isRegistering
-                ? 'Regístrate directamente con Monetta. No necesitas una cuenta de Shopify.'
+                ? 'Regístrate con tu correo y una contraseña Monetta.'
                 : 'Entra con el correo y contraseña de tu cuenta Monetta.',
             style: sans(size: 13, color: kInkMuted, height: 1.5),
           ),
-          const SizedBox(height: 24),
+          const SizedBox(height: 20),
           SegmentedButton<bool>(
             segments: const [
               ButtonSegment(value: false, label: Text('INICIAR SESIÓN')),
@@ -276,11 +400,11 @@ class _SignedOutState extends State<_SignedOut> {
             onFieldSubmitted: (_) => _isRegistering ? _register() : _login(),
           ),
           const SizedBox(height: 24),
-          if (controller.lastError != null) ...[
+          if (controller.lastError?.flow == AccountAuthFlow.monetta) ...[
             Text(
               _isRegistering
                   ? 'No se pudo crear la cuenta. Revisa los datos o usa Iniciar sesión.'
-                  : 'Correo o contraseña incorrectos.',
+                  : 'No pudimos entrar con esos datos. Revísalos e inténtalo de nuevo.',
               style: sans(size: 12, color: kInk),
             ),
             const SizedBox(height: 12),

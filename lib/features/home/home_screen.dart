@@ -10,6 +10,7 @@ import '../../app/catalog_store.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/media/monetta_video.dart';
 import '../../app/motion.dart';
+import '../../app/mixed_feed.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
@@ -18,9 +19,11 @@ import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../account/account_screen.dart';
+import '../catalog/catalog_browse_screen.dart';
 import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
 import '../checkout/checkout_screen.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import '../onboarding/onboarding_sheet.dart';
 
 const int _kNewestCount = 8;
@@ -38,6 +41,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _scroll = ScrollController();
   double _collapse = 0;
   bool _foreground = true;
+  bool _alternateHome = false;
 
   @override
   void initState() {
@@ -123,6 +127,50 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
   }
 
+  void _openFullCatalog() {
+    final store = StoreScope.of(context);
+    final external = ExternalCatalogScope.of(context).items;
+    openCatalogBrowse(
+      context,
+      items: fullDeduplicatedCatalog(
+        monettaItems: store.catalogItems,
+        externalItems: external,
+      ),
+    );
+  }
+
+  void _handleBottomNavigation(MonettaBottomDestination destination) {
+    switch (destination) {
+      case MonettaBottomDestination.home:
+        if (_scroll.hasClients) {
+          _scroll.animateTo(
+            0,
+            duration: reduceMotion(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 260),
+            curve: Curves.easeOut,
+          );
+        }
+      case MonettaBottomDestination.shuffle:
+        setState(() => _alternateHome = !_alternateHome);
+        if (_scroll.hasClients) {
+          _scroll.animateTo(
+            0,
+            duration: reduceMotion(context)
+                ? Duration.zero
+                : const Duration(milliseconds: 260),
+            curve: Curves.easeOut,
+          );
+        }
+      case MonettaBottomDestination.menu:
+        _scaffoldKey.currentState?.openDrawer();
+      case MonettaBottomDestination.bag:
+        unawaited(openBag(context));
+      case MonettaBottomDestination.account:
+        _openAccount();
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
@@ -133,6 +181,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         key: _scaffoldKey,
         appBar: _buildAppBar(24),
         body: Center(child: Text('Sin resultados', style: eyebrow())),
+        bottomNavigationBar: MonettaBottomNavigation(
+          current: _alternateHome
+              ? MonettaBottomDestination.shuffle
+              : MonettaBottomDestination.home,
+          bagCount: store.bagQuantity,
+          onSelected: _handleBottomNavigation,
+        ),
       );
     }
 
@@ -166,6 +221,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       key: _scaffoldKey,
       appBar: _buildAppBar(markH, height: barH),
       drawer: _MainDrawer(
+        onSearch: () {
+          _scaffoldKey.currentState?.closeDrawer();
+          _openSearch();
+        },
+        onFullCatalog: () {
+          _scaffoldKey.currentState?.closeDrawer();
+          _openFullCatalog();
+        },
         onChooseBrands: _openOnboardingFromDrawer,
         onAccount: () {
           _scaffoldKey.currentState?.closeDrawer();
@@ -187,15 +250,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
             ),
           ),
-          _CampaignHero(
-            height: heroH,
-            playing:
-                _foreground && (!_scroll.hasClients || _scroll.offset < heroH),
-            onOpenCatalog: () => openCollection(
-              context,
-              const CollectionScreen(title: 'El catálogo'),
+          if (_alternateHome)
+            _RotatingCampaignHero(
+              height: (heroH * 0.56).clamp(190.0, 300.0),
+              playing: _foreground &&
+                  (!_scroll.hasClients || _scroll.offset < heroH),
+              onOpenCatalog: _openFullCatalog,
+            )
+          else
+            _CampaignHero(
+              height: heroH,
+              playing: _foreground &&
+                  (!_scroll.hasClients || _scroll.offset < heroH),
+              onOpenCatalog: _openFullCatalog,
             ),
-          ),
           const SizedBox(height: 28),
           Padding(
             padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
@@ -252,15 +320,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           Center(
             child: UnderlineLink(
               label: 'Ver todo',
-              onTap: () => openCollection(
-                context,
-                const CollectionScreen(title: 'El catálogo'),
-              ),
+              onTap: _openFullCatalog,
             ),
           ),
           const SizedBox(height: 52),
           const _QuietFooter(),
         ],
+      ),
+      bottomNavigationBar: MonettaBottomNavigation(
+        current: _alternateHome
+            ? MonettaBottomDestination.shuffle
+            : MonettaBottomDestination.home,
+        bagCount: store.bagQuantity,
+        onSelected: _handleBottomNavigation,
       ),
     );
   }
@@ -275,18 +347,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         alignment: Alignment.centerLeft,
         child: MonettaWordmark(height: markHeight),
       ),
+      // Keep the drawer affordance in the header as a familiar shortcut;
+      // the full action set also remains available in the persistent bottom
+      // navigation.
       actions: [
-        IconButton(
-          tooltip: 'Buscar',
-          onPressed: _openSearch,
-          icon: const Icon(Icons.search, size: 23),
-        ),
-        IconButton(
-          tooltip: 'Mi cuenta',
-          onPressed: _openAccount,
-          icon: const Icon(Icons.person_outline, size: 23),
-        ),
-        const BagAction(),
         IconButton(
           tooltip: 'Menú',
           onPressed: () => _scaffoldKey.currentState?.openDrawer(),
@@ -380,6 +444,129 @@ class _CampaignHeroState extends State<_CampaignHero> {
                   ),
                 ),
               ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// A compact editorial alternative to the film hero. The media stays full
+/// width while the viewport intentionally crops the tall campaign artwork;
+/// the selected asset advances automatically every three seconds.
+class _RotatingCampaignHero extends StatefulWidget {
+  const _RotatingCampaignHero({
+    required this.height,
+    required this.playing,
+    required this.onOpenCatalog,
+  });
+
+  final double height;
+  final bool playing;
+  final VoidCallback onOpenCatalog;
+
+  @override
+  State<_RotatingCampaignHero> createState() => _RotatingCampaignHeroState();
+}
+
+class _RotatingCampaignHeroState extends State<_RotatingCampaignHero> {
+  static const _assets = <String>[
+    'assets/images/campaign_coral.jpg',
+    'assets/images/campaign_olive.jpg',
+    'assets/images/campaign_terracotta.jpg',
+  ];
+
+  Timer? _timer;
+  int _index = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    _timer = Timer.periodic(const Duration(seconds: 3), (_) {
+      if (!mounted || !widget.playing) return;
+      setState(() => _index = (_index + 1) % _assets.length);
+    });
+  }
+
+  @override
+  void dispose() {
+    _timer?.cancel();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final asset = _assets[_index];
+    return SizedBox(
+      key: const Key('rotating-campaign-hero'),
+      height: widget.height,
+      child: GestureDetector(
+        onTap: widget.onOpenCatalog,
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            AnimatedSwitcher(
+              duration: reduceMotion(context)
+                  ? Duration.zero
+                  : const Duration(milliseconds: 450),
+              child: Image.asset(
+                asset,
+                key: ValueKey(asset),
+                width: double.infinity,
+                height: widget.height,
+                fit: BoxFit.cover,
+                alignment: Alignment.center,
+                filterQuality: FilterQuality.medium,
+              ),
+            ),
+            DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.28),
+                  ],
+                ),
+              ),
+            ),
+            Center(
+              child: Text(
+                'VER CATÁLOGOS',
+                style: sans(
+                  size: 13,
+                  color: Colors.white,
+                  weight: FontWeight.w600,
+                ).copyWith(
+                  letterSpacing: 1.8,
+                  shadows: const [
+                    Shadow(color: Color(0x99000000), blurRadius: 10),
+                  ],
+                ),
+              ),
+            ),
+            Positioned(
+              right: 16,
+              bottom: 14,
+              child: Row(
+                children: [
+                  for (var i = 0; i < _assets.length; i++)
+                    Padding(
+                      padding: const EdgeInsets.only(left: 5),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        width: i == _index ? 18 : 5,
+                        height: 5,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(3),
+                        ),
+                      ),
+                    ),
+                ],
+              ),
+            ),
           ],
         ),
       ),
@@ -610,12 +797,16 @@ class _QuietFooter extends StatelessWidget {
 
 class _MainDrawer extends StatelessWidget {
   const _MainDrawer({
+    required this.onSearch,
+    required this.onFullCatalog,
     required this.onChooseBrands,
     required this.onAccount,
     required this.onWhatsApp,
     required this.onWholesale,
   });
 
+  final VoidCallback onSearch;
+  final VoidCallback onFullCatalog;
   final VoidCallback onChooseBrands;
   final VoidCallback onAccount;
   final VoidCallback onWhatsApp;
@@ -653,6 +844,7 @@ class _MainDrawer extends StatelessWidget {
                 ),
               ),
               const Divider(height: 0.5),
+              _DrawerLink(label: 'Buscar', onTap: onSearch),
               _DrawerLink(
                 label: 'Inicio',
                 current: true,
@@ -699,13 +891,7 @@ class _MainDrawer extends StatelessWidget {
               ),
               _DrawerLink(
                 label: 'Ver todo',
-                onTap: () {
-                  Navigator.of(context).pop();
-                  openCollection(
-                    context,
-                    const CollectionScreen(title: 'El catálogo'),
-                  );
-                },
+                onTap: onFullCatalog,
               ),
               _DrawerLink(label: 'Elige marcas', onTap: onChooseBrands),
               const Divider(height: 0.5),

@@ -95,12 +95,22 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(home: AccountScreen(controller: controller)),
       );
-      expect(find.text('Inicia sesión'), findsOneWidget);
+      expect(find.text('Tu cuenta'), findsOneWidget);
+      // No Shopify credentials in this build, so the Monetta form is the only
+      // way in and is shown expanded rather than behind the toggle.
+      expect(find.text('USAR MI CUENTA MONETTA'), findsNothing);
+      expect(
+        find.text('Entra con el correo y contraseña de tu cuenta Monetta.'),
+        findsOneWidget,
+      );
       expect(find.text('ENTRAR'), findsOneWidget);
 
       await tester.tap(find.text('REGISTRARME'));
       await tester.pumpAndSettle();
-      expect(find.text('Crea tu cuenta'), findsOneWidget);
+      expect(
+        find.text('Regístrate con tu correo y una contraseña Monetta.'),
+        findsOneWidget,
+      );
 
       await tester.enterText(find.byType(TextFormField).at(0), 'Ana');
       await tester.enterText(
@@ -111,6 +121,10 @@ void main() {
         find.byType(TextFormField).at(2),
         'password123',
       );
+      // The form runs past the bottom of the 800x600 test surface, and a tap
+      // whose target is off-screen only warns — it does not fail.
+      await tester.ensureVisible(find.text('CREAR CUENTA'));
+      await tester.pumpAndSettle();
       await tester.tap(find.text('CREAR CUENTA'));
       await tester.pumpAndSettle();
 

@@ -11,13 +11,17 @@ library;
 
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../app/media/monetta_image.dart';
+import '../../app/motion.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
 import '../../main.dart';
+import '../account/account_screen.dart';
+import '../checkout/checkout_screen.dart';
 import 'extracted_badge.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
 import '../product/product_screen.dart';
 
@@ -25,11 +29,13 @@ class CatalogBrowseScreen extends StatelessWidget {
   const CatalogBrowseScreen({
     required this.items,
     this.openExternalLink = defaultExternalLinkOpener,
+    this.bagCount = 0,
     super.key,
   });
 
   final List<CatalogItem> items;
   final ExternalLinkOpener openExternalLink;
+  final int bagCount;
 
   static const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: 2,
@@ -111,8 +117,50 @@ class CatalogBrowseScreen extends StatelessWidget {
                   const SliverToBoxAdapter(child: SizedBox(height: 40)),
               ],
             ),
+      bottomNavigationBar: MonettaBottomNavigation(
+        current: MonettaBottomDestination.menu,
+        bagCount: bagCount,
+        onSelected: (destination) {
+          switch (destination) {
+            case MonettaBottomDestination.home:
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            case MonettaBottomDestination.shuffle:
+              break;
+            case MonettaBottomDestination.menu:
+              break;
+            case MonettaBottomDestination.bag:
+              unawaited(openBag(context));
+            case MonettaBottomDestination.account:
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => AccountScreen(
+                    controller: AccountScope.of(context),
+                  ),
+                ),
+              );
+          }
+        },
+      ),
     );
   }
+}
+
+void openCatalogBrowse(
+  BuildContext context, {
+  required List<CatalogItem> items,
+}) {
+  final store = StoreScope.of(context);
+  Navigator.of(context).push(
+    monettaFadeRoute(
+      StoreScope(
+        notifier: store,
+        child: CatalogBrowseScreen(
+          items: items,
+          bagCount: store.bagQuantity,
+        ),
+      ),
+    ),
+  );
 }
 
 class _BrowseTile extends StatelessWidget {
@@ -161,28 +209,10 @@ class _BrowseTile extends StatelessWidget {
               children: [
                 ColoredBox(
                   color: kMist,
-                  child: item.imageUrl == null
-                      ? const Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 18,
-                            color: kInkMuted,
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: item.imageUrl!,
-                          fit: BoxFit.cover,
-                          fadeInDuration: const Duration(milliseconds: 240),
-                          placeholder: (_, __) =>
-                              const ColoredBox(color: kMist),
-                          errorWidget: (_, __, ___) => const Center(
-                            child: Icon(
-                              Icons.broken_image_outlined,
-                              size: 18,
-                              color: kInkMuted,
-                            ),
-                          ),
-                        ),
+                  child: MonettaImage(
+                    url: item.imageUrl,
+                    fallbackLabel: item.imageUrl == null ? null : item.title,
+                  ),
                 ),
                 if (item.isExternal)
                   const Positioned(

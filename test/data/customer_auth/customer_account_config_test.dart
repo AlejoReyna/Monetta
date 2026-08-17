@@ -27,6 +27,34 @@ void main() {
       expect(config.tokenEndpoint, 'https://shopify.com/authentication/12345/oauth/token');
     });
 
+    test('the GraphQL endpoint is the Customer Account API, not the Storefront one', () {
+      const config = CustomerAccountConfig(
+        shopId: '12345',
+        clientId: 'shp_abc',
+        redirectUri: 'shop.12345.oauth://callback',
+        apiVersion: '2026-07',
+      );
+      expect(
+        config.graphQlEndpoint.toString(),
+        'https://shopify.com/12345/account/customer/api/2026-07/graphql',
+      );
+    });
+
+    test('an empty API version is not usable — it would build a /api//graphql URL', () {
+      const config = CustomerAccountConfig(
+        shopId: '12345',
+        clientId: 'shp_abc',
+        redirectUri: 'shop.12345.oauth://callback',
+        apiVersion: '',
+      );
+      expect(config.isUsable, isFalse);
+    });
+
+    test('the API version is pinned, never unstable', () {
+      expect(CustomerAccountConfig.defaultApiVersion, isNot(contains('unstable')));
+      expect(CustomerAccountConfig.fromEnvironment().apiVersion, isNot(contains('unstable')));
+    });
+
     test('fromEnvironment() defaults to the placeholder shop id and is not usable', () {
       final config = CustomerAccountConfig.fromEnvironment();
       expect(config.isUsable, isFalse);
