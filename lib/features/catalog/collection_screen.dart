@@ -1,6 +1,8 @@
 /// A real destination: one category, brand, or silhouette. Filters work.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../app/mixed_feed.dart';
@@ -122,12 +124,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
       case MonettaBottomDestination.bag:
         openBag(context);
       case MonettaBottomDestination.account:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => AccountScreen(
-              controller: AccountScope.of(context),
-              openHostedLoginOnStart: true,
-            ),
+        unawaited(
+          openAccount(
+            context,
+            controller: AccountScope.of(context),
           ),
         );
     }

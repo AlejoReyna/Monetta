@@ -109,29 +109,27 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final admin = AdminScope.of(context);
     final catalogStore = StoreScope.of(context);
     final externalCatalog = ExternalCatalogScope.maybeOf(context);
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => AccountScreen(
-          controller: account,
-          openHostedLoginOnStart: true,
-          canOpenAdmin: () => admin.canAccess(
-            signedIn: account.isSignedIn,
-            email: account.account?.email,
-            authProvider: account.account?.authProvider,
-          ),
-          onOpenAdmin: externalCatalog == null
-              ? null
-              : () => Navigator.of(context).push(
-                    MaterialPageRoute<void>(
-                      builder: (_) => AdminScreen(
-                        controller: admin,
-                        catalogStore: catalogStore,
-                        externalCatalogController: externalCatalog,
-                      ),
+    unawaited(
+      openAccount(
+        context,
+        controller: account,
+        canOpenAdmin: () => admin.canAccess(
+          signedIn: account.isSignedIn,
+          email: account.account?.email,
+          authProvider: account.account?.authProvider,
+        ),
+        onOpenAdmin: externalCatalog == null
+            ? null
+            : () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => AdminScreen(
+                      controller: admin,
+                      catalogStore: catalogStore,
+                      externalCatalogController: externalCatalog,
                     ),
                   ),
-          onOpenPartner: _openPartner,
-        ),
+                ),
+        onOpenPartner: _openPartner,
       ),
     );
   }
@@ -248,112 +246,114 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       (p, f) => f?.category?.value == 'reloj',
     );
 
-    final media = MediaQuery.sizeOf(context);
     final announcementH = 32 * (1 - _collapse);
     final barH = 68 - 16 * _collapse;
     final markH = 24 - 6 * _collapse;
-    final heroCardWidth = (media.width - 32).clamp(0.0, 600.0);
-    final heroMediaH = heroCardWidth / 1.08;
-    final heroH = heroMediaH +
-        _CampaignHero.copyHeight +
-        _CampaignHero.outerVerticalPadding;
 
     return Scaffold(
       appBar: _buildAppBar(markH, height: barH),
-      body: ListView(
-        controller: _scroll,
-        padding: EdgeInsets.zero,
-        children: [
-          SizedBox(
-            height: announcementH,
-            child: ClipRect(
-              child: Opacity(
-                opacity: 1 - _collapse,
-                child: _AnnouncementStrip(text: announcement),
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          // Fill the first body viewport (plus a small scroll lead) so the
+          // next section cannot peek above the bottom navigation on load.
+          final heroH = constraints.maxHeight - announcementH + 12;
+          final heroMediaH = heroH - _CampaignHero.outerVerticalPadding;
+          return ListView(
+            controller: _scroll,
+            padding: EdgeInsets.zero,
+            children: [
+              SizedBox(
+                height: announcementH,
+                child: ClipRect(
+                  child: Opacity(
+                    opacity: 1 - _collapse,
+                    child: _AnnouncementStrip(text: announcement),
+                  ),
+                ),
               ),
-            ),
-          ),
-          if (showHero)
-            _CampaignHero(
-              mediaHeight: heroMediaH,
-              playing: _foreground &&
-                  (!_scroll.hasClients || _scroll.offset < heroH),
-              onOpenCatalog: _openFullCatalog,
-            ),
-          if (showExternalPicks && externalItems.isNotEmpty)
-            ExternalCatalogSection(
-              items: externalItems,
-              generatedAt: externalCatalog?.generatedAt,
-            ),
-          if (showNewest) ...[
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-              child: Text('Novedades', style: display(24)),
-            ),
-            _CatalogGrid(products: fresh),
-          ],
-          const SizedBox(height: 48),
-          _PhotoShopRow(
-            tiles: [
-              if (bolsa != null)
-                _ShopTileData(
-                  label: 'Bolsas',
-                  imageUrl: bolsa.primaryImage,
-                  screen: const CollectionScreen(
-                    title: 'Bolsas',
-                    filter: CollectionFilter(category: 'bolsa'),
-                  ),
+              if (showHero)
+                _CampaignHero(
+                  mediaHeight: heroMediaH,
+                  playing: _foreground &&
+                      (!_scroll.hasClients || _scroll.offset < heroH),
+                  onOpenCatalog: _openFullCatalog,
                 ),
-              if (cartera != null)
-                _ShopTileData(
-                  label: 'Carteras',
-                  imageUrl: cartera.primaryImage,
-                  screen: const CollectionScreen(
-                    title: 'Carteras',
-                    filter: CollectionFilter(category: 'cartera'),
-                  ),
+              if (showExternalPicks && externalItems.isNotEmpty)
+                ExternalCatalogSection(
+                  items: externalItems,
+                  generatedAt: externalCatalog?.generatedAt,
                 ),
-              if (reloj != null)
-                _ShopTileData(
-                  label: 'Relojes',
-                  imageUrl: reloj.primaryImage,
-                  screen: const CollectionScreen(
-                    title: 'Relojes',
-                    filter: CollectionFilter(category: 'reloj'),
-                  ),
+              if (showNewest) ...[
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
+                  child: Text('Novedades', style: display(24)),
                 ),
+                _CatalogGrid(products: fresh),
+              ],
+              const SizedBox(height: 48),
+              _PhotoShopRow(
+                tiles: [
+                  if (bolsa != null)
+                    _ShopTileData(
+                      label: 'Bolsas',
+                      imageUrl: bolsa.primaryImage,
+                      screen: const CollectionScreen(
+                        title: 'Bolsas',
+                        filter: CollectionFilter(category: 'bolsa'),
+                      ),
+                    ),
+                  if (cartera != null)
+                    _ShopTileData(
+                      label: 'Carteras',
+                      imageUrl: cartera.primaryImage,
+                      screen: const CollectionScreen(
+                        title: 'Carteras',
+                        filter: CollectionFilter(category: 'cartera'),
+                      ),
+                    ),
+                  if (reloj != null)
+                    _ShopTileData(
+                      label: 'Relojes',
+                      imageUrl: reloj.primaryImage,
+                      screen: const CollectionScreen(
+                        title: 'Relojes',
+                        filter: CollectionFilter(category: 'reloj'),
+                      ),
+                    ),
+                ],
+              ),
+              const SizedBox(height: 64),
+              _AboutMonettaSection(
+                content: editorial.about,
+                onOpen: _openAbout,
+              ),
+              const SizedBox(height: 12),
+              _PartnerTeaser(
+                content: editorial.partner,
+                onOpen: _openPartner,
+              ),
+              const SizedBox(height: 64),
+              _FinishedBrandBlock(store: store),
+              const SizedBox(height: 64),
+              _FinishedFormaBlock(store: store),
+              const SizedBox(height: 48),
+              _CatalogGrid(products: rest),
+              const SizedBox(height: 20),
+              Center(
+                child: UnderlineLink(
+                  label: 'Ver todo',
+                  onTap: _openFullCatalog,
+                ),
+              ),
+              const SizedBox(height: 52),
+              _QuietFooter(
+                onChooseBrands: _openOnboarding,
+                onWhatsApp: () => _openWhatsApp(conciergeWhatsAppUri()),
+                onWholesale: () => _openWhatsApp(wholesaleWhatsAppUri()),
+              ),
             ],
-          ),
-          const SizedBox(height: 64),
-          _AboutMonettaSection(
-            content: editorial.about,
-            onOpen: _openAbout,
-          ),
-          const SizedBox(height: 12),
-          _PartnerTeaser(
-            content: editorial.partner,
-            onOpen: _openPartner,
-          ),
-          const SizedBox(height: 64),
-          _FinishedBrandBlock(store: store),
-          const SizedBox(height: 64),
-          _FinishedFormaBlock(store: store),
-          const SizedBox(height: 48),
-          _CatalogGrid(products: rest),
-          const SizedBox(height: 20),
-          Center(
-            child: UnderlineLink(
-              label: 'Ver todo',
-              onTap: _openFullCatalog,
-            ),
-          ),
-          const SizedBox(height: 52),
-          _QuietFooter(
-            onChooseBrands: _openOnboarding,
-            onWhatsApp: () => _openWhatsApp(conciergeWhatsAppUri()),
-            onWholesale: () => _openWhatsApp(wholesaleWhatsAppUri()),
-          ),
-        ],
+          );
+        },
       ),
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.home,
@@ -418,8 +418,7 @@ class _CampaignHero extends StatefulWidget {
     required this.onOpenCatalog,
   });
 
-  static const double copyHeight = 172;
-  static const double outerVerticalPadding = 40;
+  static const double outerVerticalPadding = 24;
 
   final double mediaHeight;
   final bool playing;
@@ -433,19 +432,11 @@ class _CampaignHeroState extends State<_CampaignHero> {
   static const _interval = Duration(milliseconds: 3500);
   static const _initialPage = 3000;
   static const _slides = <_CampaignSlideData>[
+    _CampaignSlideData(isVideo: true),
     _CampaignSlideData(
-      headline: 'Piezas originales, elegidas una por una.',
-      ctaLabel: 'Ver el catálogo',
-      isVideo: true,
-    ),
-    _CampaignSlideData(
-      headline: 'Nuevas siluetas para todos los días.',
-      ctaLabel: 'Explorar bolsas',
       asset: 'assets/images/campaign_olive.jpg',
     ),
     _CampaignSlideData(
-      headline: 'Tus marcas favoritas, más cerca de ti.',
-      ctaLabel: 'Descubrir novedades',
       asset: 'assets/images/campaign_terracotta.jpg',
     ),
   ];
@@ -453,7 +444,6 @@ class _CampaignHeroState extends State<_CampaignHero> {
   final _pageController = PageController(initialPage: _initialPage);
   Timer? _advanceTimer;
   int _page = _initialPage;
-  int _index = 0;
 
   @override
   void initState() {
@@ -495,10 +485,7 @@ class _CampaignHeroState extends State<_CampaignHero> {
   }
 
   void _onPageChanged(int page) {
-    setState(() {
-      _page = page;
-      _index = page % _slides.length;
-    });
+    setState(() => _page = page);
     _scheduleAdvance();
   }
 
@@ -513,11 +500,9 @@ class _CampaignHeroState extends State<_CampaignHero> {
   Widget build(BuildContext context) {
     return SizedBox(
       key: const Key('campaign-hero'),
-      height: widget.mediaHeight +
-          _CampaignHero.copyHeight +
-          _CampaignHero.outerVerticalPadding,
+      height: widget.mediaHeight + _CampaignHero.outerVerticalPadding,
       child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 12, 16, 28),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         child: Semantics(
           label: 'Campañas destacadas, 3 tarjetas',
           child: PageView.builder(
@@ -531,7 +516,6 @@ class _CampaignHeroState extends State<_CampaignHero> {
                 mediaHeight: widget.mediaHeight,
                 active: page == _page,
                 playing: widget.playing,
-                selectedIndex: _index,
                 onOpenCatalog: widget.onOpenCatalog,
               );
             },
@@ -544,14 +528,10 @@ class _CampaignHeroState extends State<_CampaignHero> {
 
 class _CampaignSlideData {
   const _CampaignSlideData({
-    required this.headline,
-    required this.ctaLabel,
     this.asset,
     this.isVideo = false,
   });
 
-  final String headline;
-  final String ctaLabel;
   final String? asset;
   final bool isVideo;
 }
@@ -563,7 +543,6 @@ class _CampaignSlide extends StatelessWidget {
     required this.mediaHeight,
     required this.active,
     required this.playing,
-    required this.selectedIndex,
     required this.onOpenCatalog,
   });
 
@@ -572,7 +551,6 @@ class _CampaignSlide extends StatelessWidget {
   final double mediaHeight;
   final bool active;
   final bool playing;
-  final int selectedIndex;
   final VoidCallback onOpenCatalog;
 
   @override
@@ -581,102 +559,29 @@ class _CampaignSlide extends StatelessWidget {
       alignment: Alignment.topCenter,
       child: ConstrainedBox(
         constraints: const BoxConstraints(maxWidth: 600),
-        child: DecoratedBox(
-          decoration: const BoxDecoration(color: kMist),
-          child: Column(
-            children: [
-              GestureDetector(
-                key: ValueKey('campaign-slide-media-$index'),
-                onTap: onOpenCatalog,
-                child: SizedBox(
-                  width: double.infinity,
-                  height: mediaHeight,
-                  child: ClipRect(
-                    child: data.isVideo
-                        ? MonettaVideo(
-                            campaign: CampaignMedia.monettaHome,
-                            playing: playing && active,
-                          )
-                        : Image.asset(
-                            data.asset!,
-                            width: double.infinity,
-                            height: mediaHeight,
-                            fit: BoxFit.cover,
-                            filterQuality: FilterQuality.medium,
-                          ),
-                  ),
-                ),
-              ),
-              Container(
-                key: index == 0
-                    ? const Key('editorial-breath')
-                    : ValueKey('campaign-slide-copy-$index'),
-                width: double.infinity,
-                height: _CampaignHero.copyHeight,
-                padding: const EdgeInsets.fromLTRB(20, 24, 20, 18),
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: Center(
-                        child: Text(
-                          data.headline,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: display(22, height: 1.28),
-                        ),
-                      ),
+        child: GestureDetector(
+          key: ValueKey('campaign-slide-media-$index'),
+          onTap: onOpenCatalog,
+          child: SizedBox(
+            width: double.infinity,
+            height: mediaHeight,
+            child: ClipRect(
+              child: data.isVideo
+                  ? MonettaVideo(
+                      campaign: CampaignMedia.monettaHome,
+                      playing: playing && active,
+                    )
+                  : Image.asset(
+                      data.asset!,
+                      width: double.infinity,
+                      height: mediaHeight,
+                      fit: BoxFit.cover,
+                      filterQuality: FilterQuality.medium,
                     ),
-                    const SizedBox(height: 10),
-                    UnderlineLink(
-                      label: data.ctaLabel,
-                      onTap: onOpenCatalog,
-                      size: 14,
-                    ),
-                    const SizedBox(height: 20),
-                    _CampaignIndicators(
-                      count: _CampaignHeroState._slides.length,
-                      selectedIndex: selectedIndex,
-                    ),
-                  ],
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _CampaignIndicators extends StatelessWidget {
-  const _CampaignIndicators({
-    required this.count,
-    required this.selectedIndex,
-  });
-
-  final int count;
-  final int selectedIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        for (var i = 0; i < count; i++) ...[
-          if (i > 0) const SizedBox(width: 6),
-          AnimatedContainer(
-            key: ValueKey('campaign-indicator-$i'),
-            duration: reduceMotion(context) ? Duration.zero : kSnap,
-            width: i == selectedIndex ? 20 : 6,
-            height: 3,
-            decoration: BoxDecoration(
-              color: i == selectedIndex ? kInk : kLine,
-              borderRadius: BorderRadius.circular(2),
-            ),
-          ),
-        ],
-      ],
     );
   }
 }

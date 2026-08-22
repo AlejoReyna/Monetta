@@ -129,12 +129,10 @@ class CatalogBrowseScreen extends StatelessWidget {
             case MonettaBottomDestination.bag:
               unawaited(openBag(context));
             case MonettaBottomDestination.account:
-              Navigator.of(context).push(
-                MaterialPageRoute<void>(
-                  builder: (_) => AccountScreen(
-                    controller: AccountScope.of(context),
-                    openHostedLoginOnStart: true,
-                  ),
+              unawaited(
+                openAccount(
+                  context,
+                  controller: AccountScope.of(context),
                 ),
               );
           }
