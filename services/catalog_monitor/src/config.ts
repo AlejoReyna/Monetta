@@ -1,3 +1,5 @@
+import { SOURCE_IDS, type SourceId } from './domain/types.js';
+
 /**
  * All environment configuration in one place, parsed once and validated
  * eagerly so a misconfigured deploy fails at startup, not mid-crawl.
@@ -15,6 +17,16 @@ export interface CatalogMonitorConfig {
   readonly userAgent: string;
   readonly requestDelayMs: number;
   readonly playwrightFallbackEnabled: boolean;
+  readonly fashionItemsPerSource: number;
+  readonly perfumeItemsPerSource: number;
+  readonly maximumCatalogItems: number;
+  readonly usdToMxnRate: number | null;
+  readonly defaultCommissionBps: number;
+  readonly highValueThresholdMxn: number;
+  readonly highValueCommissionBps: number;
+  readonly sourceCommissionBps: Readonly<Record<string, number>>;
+  readonly productCommissionBps: Readonly<Record<string, number>>;
+  readonly enabledSourceIds: readonly SourceId[];
 }
 
 function bool(value: string | undefined, fallback: boolean): boolean {
@@ -26,6 +38,57 @@ function int(value: string | undefined, fallback: number): number {
   if (value === undefined || value === '') return fallback;
   const parsed = Number.parseInt(value, 10);
   return Number.isFinite(parsed) ? parsed : fallback;
+}
+
+function positiveNumber(value: string | undefined, fallback: number | null): number | null {
+  if (value === undefined || value.trim() === '') return fallback;
+  const parsed = Number(value);
+  if (!Number.isFinite(parsed) || parsed <= 0) {
+    throw new Error(`Expected a positive number, got "${value}"`);
+  }
+  return parsed;
+}
+
+function basisPoints(value: string | undefined, fallback: number): number {
+  const parsed = int(value, fallback);
+  if (parsed < 0 || parsed > 10_000) {
+    throw new Error(`Commission basis points must be between 0 and 10000, got "${value}"`);
+  }
+  return parsed;
+}
+
+function rateMap(value: string | undefined, name: string): Readonly<Record<string, number>> {
+  if (value === undefined || value.trim() === '') return {};
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(value);
+  } catch {
+    throw new Error(`${name} must be a JSON object`);
+  }
+  if (typeof parsed !== 'object' || parsed === null || Array.isArray(parsed)) {
+    throw new Error(`${name} must be a JSON object`);
+  }
+  const result: Record<string, number> = {};
+  for (const [key, raw] of Object.entries(parsed)) {
+    if (!Number.isInteger(raw) || (raw as number) < 0 || (raw as number) > 10_000) {
+      throw new Error(`${name}.${key} must be integer basis points between 0 and 10000`);
+    }
+    result[key] = raw as number;
+  }
+  return result;
+}
+
+function enabledSources(value: string | undefined): readonly SourceId[] {
+  const requested = (value ?? SOURCE_IDS.join(','))
+    .split(',')
+    .map((item) => item.trim())
+    .filter(Boolean);
+  const valid = new Set<string>(SOURCE_IDS);
+  const invalid = requested.filter((item) => !valid.has(item));
+  if (invalid.length > 0) {
+    throw new Error(`ENABLED_SOURCE_IDS contains unknown sources: ${invalid.join(', ')}`);
+  }
+  return [...new Set(requested)] as SourceId[];
 }
 
 // A placeholder domain (RFC 2606) so no real personal contact address ships
@@ -72,5 +135,15 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): CatalogMonitor
     userAgent,
     requestDelayMs: Math.max(int(env.REQUEST_DELAY_MS, 1000), 1000),
     playwrightFallbackEnabled: bool(env.PLAYWRIGHT_FALLBACK_ENABLED, false),
+    fashionItemsPerSource: Math.max(int(env.FASHION_ITEMS_PER_SOURCE, 8), 0),
+    perfumeItemsPerSource: Math.max(int(env.PERFUME_ITEMS_PER_SOURCE, 12), 0),
+    maximumCatalogItems: Math.max(int(env.MAXIMUM_CATALOG_ITEMS, 52), 0),
+    usdToMxnRate: positiveNumber(env.USD_TO_MXN_RATE, null),
+    defaultCommissionBps: basisPoints(env.COMMISSION_DEFAULT_BPS, 2200),
+    highValueThresholdMxn: positiveNumber(env.COMMISSION_HIGH_VALUE_THRESHOLD_MXN, 4000)!,
+    highValueCommissionBps: basisPoints(env.COMMISSION_HIGH_VALUE_BPS, 1400),
+    sourceCommissionBps: rateMap(env.COMMISSION_SOURCE_RATES_JSON, 'COMMISSION_SOURCE_RATES_JSON'),
+    productCommissionBps: rateMap(env.COMMISSION_PRODUCT_RATES_JSON, 'COMMISSION_PRODUCT_RATES_JSON'),
+    enabledSourceIds: enabledSources(env.ENABLED_SOURCE_IDS),
   };
 }

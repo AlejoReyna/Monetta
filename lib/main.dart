@@ -13,13 +13,17 @@ import 'dart:io' show Platform;
 import 'package:flutter/material.dart';
 
 import 'app/account_controller.dart';
+import 'app/admin_config.dart';
+import 'app/admin_controller.dart';
 import 'app/catalog_store.dart';
+import 'app/editorial_content_controller.dart';
 import 'app/external_catalog_config.dart';
 import 'app/external_catalog_controller.dart';
 import 'app/theme.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
 import 'data/accounts_orders/system_account_client.dart';
 import 'data/accounts_orders/system_account_session_repository.dart';
+import 'data/admin/admin_client.dart';
 import 'data/customer_auth/customer_account_config.dart';
 import 'data/customer_auth/customer_auth_gateway.dart';
 import 'data/customer_auth/customer_identity.dart';
@@ -33,6 +37,7 @@ import 'data/local/order_summary_store.dart';
 import 'data/local/wishlist_store.dart';
 import 'data/repositories/order_history_repository.dart';
 import 'data/shopify/catalog_sync.dart' as shopify;
+import 'data/shopify/editorial_content_repository.dart';
 import 'data/shopify/http_storefront_transport.dart';
 import 'data/shopify/storefront_client.dart';
 import 'data/shopify/storefront_config.dart';
@@ -83,6 +88,30 @@ class ExternalCatalogScope
     );
     return scope!.notifier!;
   }
+
+  static ExternalCatalogController? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<ExternalCatalogScope>()
+        ?.notifier;
+  }
+}
+
+/// Exposes owner-editable About and reseller content. The controller always
+/// contains a complete bundled fallback, so this scope never represents a
+/// loading gate.
+class EditorialContentScope
+    extends InheritedNotifier<EditorialContentController> {
+  const EditorialContentScope({
+    required EditorialContentController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  static EditorialContentController? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<EditorialContentScope>()
+        ?.notifier;
+  }
 }
 
 /// Exposes account state to the widget tree. See `app/account_controller.dart`
@@ -101,6 +130,28 @@ class AccountScope extends InheritedNotifier<AccountController> {
     final scope = context.dependOnInheritedWidgetOfExactType<AccountScope>();
     assert(scope?.notifier != null, 'AccountScope is missing from the tree');
     return scope!.notifier!;
+  }
+}
+
+/// Exposes owner administration alongside account and catalog state. The
+/// controller is always mounted, but its entry point remains hidden unless
+/// the signed-in email matches [AdminConfig.ownerEmails] (or an explicit
+/// preview build was requested).
+class AdminScope extends InheritedNotifier<AdminController> {
+  const AdminScope({
+    required AdminController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  static AdminController of(BuildContext context) {
+    final scope = context.dependOnInheritedWidgetOfExactType<AdminScope>();
+    assert(scope?.notifier != null, 'AdminScope is missing from the tree');
+    return scope!.notifier!;
+  }
+
+  static AdminController? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<AdminScope>()?.notifier;
   }
 }
 
@@ -124,11 +175,16 @@ class _MonettaAppState extends State<MonettaApp> {
   final ExternalCatalogController _externalCatalog = ExternalCatalogController(
     config: ExternalCatalogConfig.fromEnvironment(),
   );
+  late final EditorialContentController _editorialContent =
+      EditorialContentController(
+    repository: _maybeEditorialRepository(_storefrontTransport),
+  );
 
   /// Built inside [_load], once the device id it depends on exists — see
   /// there. Only ever read from [build]'s `FutureBuilder`, after `_loading`
   /// has resolved, so it is always assigned by the time anything touches it.
   late final AccountController _account;
+  AdminController? _admin;
   late final Future<void> _loading = _load();
 
   /// Owns an HTTP client, so it needs closing — and it is built inside
@@ -136,6 +192,7 @@ class _MonettaAppState extends State<MonettaApp> {
   /// before that future completes, and since a build without Customer Account
   /// credentials never creates one at all).
   HttpCustomerIdentityService? _customerIdentityService;
+  HttpAdminClient? _adminClient;
 
   static HttpStorefrontTransport? _maybeStorefrontTransport() {
     final config = StorefrontConfig.fromEnvironment();
@@ -150,6 +207,17 @@ class _MonettaAppState extends State<MonettaApp> {
     final config = StorefrontConfig.fromEnvironment();
     if (!config.isUsable) return null;
     return shopify.CatalogSync(
+      client: StorefrontClient(config: config, transport: transport.send),
+    );
+  }
+
+  static EditorialContentRepository? _maybeEditorialRepository(
+    HttpStorefrontTransport? transport,
+  ) {
+    if (transport == null) return null;
+    final config = StorefrontConfig.fromEnvironment();
+    if (!config.isUsable) return null;
+    return EditorialContentRepository(
       client: StorefrontClient(config: config, transport: transport.send),
     );
   }
@@ -226,6 +294,24 @@ class _MonettaAppState extends State<MonettaApp> {
       ),
       deviceId: deviceId,
     );
+
+    final adminConfig = AdminConfig.fromEnvironment();
+    final adminBaseUrl = adminConfig.baseUrl;
+    if (adminBaseUrl != null) {
+      _adminClient = HttpAdminClient(
+        baseUrl: adminBaseUrl,
+        accessTokenProvider: _account.accessTokenForAdmin,
+      );
+    }
+    _admin = AdminController(
+      config: adminConfig,
+      client: _adminClient,
+      refreshApp: () async {
+        await _store.syncWithShopify();
+        await _externalCatalog.loadAndRefresh();
+        await _editorialContent.refresh();
+      },
+    );
     await _account.restore();
     if (_account.isSignedIn) {
       unawaited(_account.loadOrders());
@@ -241,14 +327,18 @@ class _MonettaAppState extends State<MonettaApp> {
     // the Monetta home screen — see ExternalCatalogRepository's contract.
     // External catalog stays off in public builds unless explicitly enabled.
     unawaited(_externalCatalog.loadAndRefresh());
+    unawaited(_editorialContent.refresh());
   }
 
   @override
   void dispose() {
     _storefrontTransport?.close();
     _customerIdentityService?.close();
+    _adminClient?.close();
+    _admin?.dispose();
     _store.dispose();
     _externalCatalog.dispose();
+    _editorialContent.dispose();
     super.dispose();
   }
 
@@ -262,20 +352,26 @@ class _MonettaAppState extends State<MonettaApp> {
         notifier: _store,
         child: ExternalCatalogScope(
           notifier: _externalCatalog,
-          child: FutureBuilder<void>(
-            future: _loading,
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                return _ErrorScreen(error: '${snapshot.error}');
-              }
-              if (snapshot.connectionState != ConnectionState.done) {
-                return const _SplashScreen();
-              }
-              return AccountScope(
-                notifier: _account,
-                child: const HomeScreen(),
-              );
-            },
+          child: EditorialContentScope(
+            notifier: _editorialContent,
+            child: FutureBuilder<void>(
+              future: _loading,
+              builder: (context, snapshot) {
+                if (snapshot.hasError) {
+                  return _ErrorScreen(error: '${snapshot.error}');
+                }
+                if (snapshot.connectionState != ConnectionState.done) {
+                  return const _SplashScreen();
+                }
+                return AccountScope(
+                  notifier: _account,
+                  child: AdminScope(
+                    notifier: _admin!,
+                    child: const HomeScreen(),
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ),

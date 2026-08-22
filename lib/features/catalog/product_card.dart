@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../domain/product.dart';
@@ -87,31 +88,39 @@ class ProductCard extends StatelessWidget {
           if (brand != null) ...[
             Text(
               brandLabel(brand).toUpperCase(),
-              style: sans(size: 10.5, weight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: sans(size: 12, height: 1.3).copyWith(letterSpacing: 0.6),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
           ],
           Text(
-            product.title,
+            cardPieceName(
+              title: product.title,
+              colorSlug: facets?.colors.isEmpty == true
+                  ? null
+                  : facets!.colors.first.value,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: sans(size: 12.5, height: 1.35),
+            style: sans(size: 12, height: 1.35),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 2),
           Wrap(
             spacing: 7,
             runSpacing: 2,
             children: [
               Text(
                 kMoney.format(product.price),
-                style: sans(size: 12, weight: FontWeight.w600),
+                style: sans(size: 12, height: 1.3),
               ),
               if (product.isOnSale)
                 Text(
                   kMoney.format(product.compareAtPrice),
                   style: sans(
-                    size: 11,
+                    size: 12,
                     color: kInkMuted,
+                    height: 1.3,
                     decoration: TextDecoration.lineThrough,
                   ),
                 ),

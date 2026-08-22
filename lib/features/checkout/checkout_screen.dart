@@ -193,7 +193,6 @@ class _BagContents extends StatelessWidget {
                     store.updateBagQuantity(line.product.id, quantity),
                 onRemove: () => store.removeFromBag(line.product.id),
               ),
-            const _TrustBar(),
           ],
         );
 
@@ -213,7 +212,16 @@ class _BagContents extends StatelessWidget {
                 child: Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(flex: 7, child: list),
+                    Expanded(
+                      flex: 7,
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          list,
+                          const _TrustBar(),
+                        ],
+                      ),
+                    ),
                     const SizedBox(width: 52),
                     Expanded(
                       flex: 4,
@@ -234,6 +242,7 @@ class _BagContents extends StatelessWidget {
           children: [
             list,
             Padding(padding: const EdgeInsets.all(20), child: summary),
+            const _TrustBar(),
           ],
         );
       },
@@ -797,29 +806,14 @@ class _TrustBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const items = [
-      (Icons.verified_outlined, 'Originalidad garantizada'),
-      (Icons.local_shipping_outlined, 'Entrega de 3 a 5 días'),
-      (Icons.autorenew, 'Cambios fáciles'),
-    ];
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.fromLTRB(24, 22, 24, 6),
-      decoration: const BoxDecoration(border: Border(top: kHairline)),
-      child: Wrap(
-        spacing: 24,
-        runSpacing: 15,
-        children: [
-          for (final item in items)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(item.$1, size: 17),
-                const SizedBox(width: 8),
-                Text(item.$2, style: sans(size: 10.5)),
-              ],
-            ),
-        ],
+    return const Padding(
+      padding: EdgeInsets.fromLTRB(24, 22, 24, 6),
+      child: DecoratedBox(
+        decoration: BoxDecoration(border: Border(top: kHairline)),
+        child: Padding(
+          padding: EdgeInsets.only(top: 18),
+          child: MonettaTrustRows(),
+        ),
       ),
     );
   }

@@ -14,22 +14,49 @@ import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
 
 class AccountScreen extends StatelessWidget {
-  const AccountScreen({required this.controller, super.key});
+  const AccountScreen({
+    required this.controller,
+    this.openHostedLoginOnStart = false,
+    this.canOpenAdmin,
+    this.onOpenAdmin,
+    this.onOpenPartner,
+    super.key,
+  });
 
   final AccountController controller;
+
+  /// Starts Shopify's hosted sign-in as soon as this route is presented.
+  ///
+  /// Navigation entry points set this to true so tapping Account behaves like
+  /// a native shopping app: the secure web authentication sheet is the first
+  /// interactive surface. Keeping it opt-in makes this screen reusable after
+  /// cancellation and in widget tests without repeatedly opening a browser.
+  final bool openHostedLoginOnStart;
+
+  /// Owner administration remains an optional capability so account flows
+  /// stay reusable in tests and in builds without a configured control plane.
+  final bool Function()? canOpenAdmin;
+  final VoidCallback? onOpenAdmin;
+  final VoidCallback? onOpenPartner;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mi cuenta')),
+      appBar: AppBar(title: const MonettaWordmark(height: 20)),
       body: SafeArea(
         child: ListenableBuilder(
           listenable: controller,
           builder: (context, _) => controller.isSignedIn
-              ? _SignedIn(controller: controller)
-              : Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: _SignedOut(controller: controller),
+              ? _SignedIn(
+                  controller: controller,
+                  showAdmin: canOpenAdmin?.call() == true,
+                  onOpenAdmin: onOpenAdmin,
+                  onOpenPartner: onOpenPartner,
+                )
+              : _SignedOut(
+                  controller: controller,
+                  openHostedLoginOnStart: openHostedLoginOnStart,
+                  onOpenPartner: onOpenPartner,
                 ),
         ),
       ),
@@ -38,9 +65,17 @@ class AccountScreen extends StatelessWidget {
 }
 
 class _SignedIn extends StatelessWidget {
-  const _SignedIn({required this.controller});
+  const _SignedIn({
+    required this.controller,
+    required this.showAdmin,
+    required this.onOpenAdmin,
+    required this.onOpenPartner,
+  });
 
   final AccountController controller;
+  final bool showAdmin;
+  final VoidCallback? onOpenAdmin;
+  final VoidCallback? onOpenPartner;
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +92,62 @@ class _SignedIn extends StatelessWidget {
         if (account.displayName != null && account.email != null) ...[
           const SizedBox(height: 2),
           Text(account.email!, style: sans(size: 12, color: kInkMuted)),
+        ],
+        if (showAdmin && onOpenAdmin != null) ...[
+          const SizedBox(height: 24),
+          InkWell(
+            key: const ValueKey('open-owner-admin'),
+            onTap: onOpenAdmin,
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: kInk,
+                border: Border.all(color: kGold, width: .6),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.admin_panel_settings_outlined,
+                    color: kGold,
+                    size: 23,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ADMINISTRAR MONETTA',
+                          style: eyebrow(
+                            size: 9,
+                            color: kGold,
+                            weight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Productos, portada, fuentes y sincronización',
+                          style: sans(
+                            size: 11,
+                            color: const Color(0xFFD2D2D2),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.white,
+                    size: 19,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        if (onOpenPartner != null) ...[
+          const SizedBox(height: 18),
+          _PartnerAccountLink(onTap: onOpenPartner!),
         ],
         const SizedBox(height: 28),
         FilledButton(
@@ -165,9 +256,15 @@ class _OrderRow extends StatelessWidget {
 /// (`docs/ACCOUNTS_AND_SYNC_PLAN.md`), so it stays reachable — collapsed when
 /// Shopify login is available, and the only thing on screen when it isn't.
 class _SignedOut extends StatefulWidget {
-  const _SignedOut({required this.controller});
+  const _SignedOut({
+    required this.controller,
+    required this.openHostedLoginOnStart,
+    required this.onOpenPartner,
+  });
 
   final AccountController controller;
+  final bool openHostedLoginOnStart;
+  final VoidCallback? onOpenPartner;
 
   @override
   State<_SignedOut> createState() => _SignedOutState();
@@ -175,6 +272,42 @@ class _SignedOut extends StatefulWidget {
 
 class _SignedOutState extends State<_SignedOut> {
   bool _showLegacyForm = false;
+  bool _isShopLoginLoading = false;
+  bool _isRegistrationLoading = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.openHostedLoginOnStart && widget.controller.canLogin) {
+      // Wait until the route has painted before presenting AppAuth's native
+      // browser. Starting a platform presentation while Navigator is still
+      // pushing this route is racy on iOS and can be ignored by UIKit.
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) _loginWithShop();
+      });
+    }
+  }
+
+  Future<void> _loginWithShop() async {
+    setState(() => _isShopLoginLoading = true);
+    try {
+      await widget.controller.login();
+    } finally {
+      if (mounted) setState(() => _isShopLoginLoading = false);
+    }
+  }
+
+  Future<void> _registerWithShop() async {
+    setState(() => _isRegistrationLoading = true);
+    try {
+      // Shopify Customer Accounts uses the same hosted entry point for a
+      // returning shopper and somebody creating their account for the first
+      // time. The hosted page decides which path follows from their email.
+      await widget.controller.login();
+    } finally {
+      if (mounted) setState(() => _isRegistrationLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -184,75 +317,447 @@ class _SignedOutState extends State<_SignedOut> {
     final legacyExpanded = _showLegacyForm || !controller.canLogin;
     final error = controller.lastError;
 
-    return ListView(
-      children: [
-        Text('Tu cuenta', style: display(20)),
-        const SizedBox(height: 8),
-        Text(
-          'Guarda tus favoritos, consulta tus pedidos y compra más rápido. '
-          'No necesitas cuenta para comprar.',
-          style: sans(size: 13, color: kInkMuted, height: 1.5),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const topPadding = 26.0;
+        const bottomPadding = 28.0;
+        final availableWidth = constraints.maxWidth - 48;
+        final contentWidth = availableWidth > 460 ? 460.0 : availableWidth;
+        final horizontalPadding = (constraints.maxWidth - contentWidth) / 2;
+        final contentHeight = constraints.maxHeight > topPadding + bottomPadding
+            ? constraints.maxHeight - topPadding - bottomPadding
+            : 0.0;
+
+        return SingleChildScrollView(
+          padding: EdgeInsets.fromLTRB(
+            horizontalPadding,
+            topPadding,
+            horizontalPadding,
+            bottomPadding,
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(minHeight: contentHeight),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _AccountWelcome(),
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 30),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      if (controller.canLogin) ...[
+                        if (error != null &&
+                            error.flow == AccountAuthFlow.shopify &&
+                            !error.isSilent) ...[
+                          _LoginError(
+                            message: _shopifyErrorMessage(error.kind),
+                          ),
+                          const SizedBox(height: 14),
+                        ],
+                        _ShopSignInButton(
+                          onPressed:
+                              controller.isLoading ? null : _loginWithShop,
+                          isLoading: _isShopLoginLoading,
+                        ),
+                        const SizedBox(height: 12),
+                        const _ShopSecurityNote(),
+                      ] else if (!hasLegacy)
+                        Text(
+                          'El inicio de sesión no está disponible en esta '
+                          'versión de la app. Puedes seguir comprando como '
+                          'invitado.',
+                          textAlign: TextAlign.center,
+                          style: sans(
+                            size: 12,
+                            color: kInkMuted,
+                            height: 1.5,
+                          ),
+                        ),
+                      if (hasLegacy) ...[
+                        if (controller.canLogin) ...[
+                          const SizedBox(height: 26),
+                          const _LoginDivider(label: 'o continúa con'),
+                          const SizedBox(height: 20),
+                        ],
+                        if (!legacyExpanded)
+                          OutlinedButton.icon(
+                            onPressed: controller.isLoading
+                                ? null
+                                : () => setState(
+                                      () => _showLegacyForm = true,
+                                    ),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: kInk,
+                              side: kHairline,
+                            ),
+                            icon: const Icon(
+                              Icons.mail_outline_rounded,
+                              size: 18,
+                            ),
+                            label: const Text('CORREO Y CONTRASEÑA'),
+                          )
+                        else
+                          _LegacyLoginPanel(
+                            child: _MonettaPasswordForm(
+                              controller: controller,
+                            ),
+                          ),
+                      ],
+                    ],
+                  ),
+                ),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    if (controller.canLogin)
+                      _RegistrationPanel(
+                        onPressed:
+                            controller.isLoading ? null : _registerWithShop,
+                        isLoading: _isRegistrationLoading,
+                      ),
+                    if (widget.onOpenPartner != null) ...[
+                      const SizedBox(height: 16),
+                      _PartnerAccountLink(onTap: widget.onOpenPartner!),
+                    ],
+                    if (Navigator.of(context).canPop()) ...[
+                      const SizedBox(height: 18),
+                      Center(
+                        child: TextButton(
+                          onPressed: controller.isLoading
+                              ? null
+                              : () => Navigator.of(context).pop(),
+                          child: const Text('SEGUIR COMO INVITADO'),
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _PartnerAccountLink extends StatelessWidget {
+  const _PartnerAccountLink({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      key: const ValueKey('account-open-partner'),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: kMist,
+          border: Border.all(color: kLine),
         ),
-        const SizedBox(height: 24),
-        if (controller.canLogin) ...[
-          if (error != null &&
-              error.flow == AccountAuthFlow.shopify &&
-              !error.isSilent) ...[
-            Text(_shopifyErrorMessage(error.kind), style: sans(size: 12)),
-            const SizedBox(height: 12),
+        child: Row(
+          children: [
+            const Icon(Icons.storefront_outlined, size: 21, color: kGold),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('VENDE CON MONETTA', style: eyebrow(size: 9)),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Catálogos y cotizaciones para tu negocio',
+                    style: sans(size: 11.5, color: kInkMuted),
+                  ),
+                ],
+              ),
+            ),
+            const Icon(Icons.arrow_forward_rounded, size: 18),
           ],
-          FilledButton(
-            onPressed: controller.isLoading ? null : controller.login,
-            child: controller.isLoading
+        ),
+      ),
+    );
+  }
+}
+
+class _AccountWelcome extends StatelessWidget {
+  const _AccountWelcome();
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      children: [
+        Text('TU CUENTA MONETTA', style: eyebrow(color: kGold)),
+        const SizedBox(height: 8),
+        Text('Inicia sesión', textAlign: TextAlign.center, style: display(32)),
+        const SizedBox(height: 12),
+        Text(
+          'Consulta tus pedidos, guarda tus favoritos y disfruta una compra '
+          'más rápida.',
+          textAlign: TextAlign.center,
+          style: sans(size: 13.5, color: kInkMuted, height: 1.55),
+        ),
+        const SizedBox(height: 26),
+        const _AccountBenefits(),
+      ],
+    );
+  }
+}
+
+class _AccountBenefits extends StatelessWidget {
+  const _AccountBenefits();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 19),
+      decoration: const BoxDecoration(color: kMist),
+      child: const Row(
+        children: [
+          _AccountBenefit(
+            icon: Icons.favorite_border_rounded,
+            label: 'Favoritos',
+          ),
+          _AccountBenefit(
+            icon: Icons.local_shipping_outlined,
+            label: 'Tus pedidos',
+          ),
+          _AccountBenefit(
+            icon: Icons.bolt_outlined,
+            label: 'Compra ágil',
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AccountBenefit extends StatelessWidget {
+  const _AccountBenefit({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Expanded(
+      child: Column(
+        children: [
+          Icon(icon, size: 18, color: kInk),
+          const SizedBox(height: 6),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: sans(size: 10.5, weight: FontWeight.w500, height: 1.2),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shop's standard high-emphasis sign-in treatment: its official purple,
+/// white lock-up, rounded corners, and no extra decoration or shadow.
+class _ShopSignInButton extends StatelessWidget {
+  const _ShopSignInButton({required this.onPressed, required this.isLoading});
+
+  static const Color _shopPurple = Color(0xFF5A31F4);
+
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      excludeSemantics: true,
+      label: 'Iniciar sesión con Shop',
+      child: Material(
+        key: const ValueKey('shop-sign-in-button'),
+        color: onPressed == null
+            ? _shopPurple.withValues(alpha: 0.55)
+            : _shopPurple,
+        borderRadius: BorderRadius.circular(10),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          child: SizedBox(
+            height: 54,
+            child: Center(
+              child: isLoading
+                  ? const SizedBox(
+                      width: 19,
+                      height: 19,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: Colors.white,
+                      ),
+                    )
+                  : Text.rich(
+                      TextSpan(
+                        children: [
+                          const TextSpan(text: 'Iniciar sesión con '),
+                          TextSpan(
+                            text: 'shop',
+                            style: sans(
+                              size: 17,
+                              color: Colors.white,
+                              weight: FontWeight.w700,
+                              height: 1,
+                            ).copyWith(letterSpacing: -0.7),
+                          ),
+                        ],
+                      ),
+                      style: sans(
+                        size: 16,
+                        color: Colors.white,
+                        weight: FontWeight.w600,
+                        height: 1,
+                      ),
+                    ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ShopSecurityNote extends StatelessWidget {
+  const _ShopSecurityNote();
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        const Icon(Icons.lock_outline_rounded, size: 13, color: kInkMuted),
+        const SizedBox(width: 6),
+        Flexible(
+          child: Text(
+            'Acceso seguro. Shop completa tus datos al pagar.',
+            textAlign: TextAlign.center,
+            style: sans(size: 10.5, color: kInkMuted, height: 1.35),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _LoginDivider extends StatelessWidget {
+  const _LoginDivider({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      children: [
+        const Expanded(child: Divider()),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14),
+          child: Text(label, style: sans(size: 11, color: kInkMuted)),
+        ),
+        const Expanded(child: Divider()),
+      ],
+    );
+  }
+}
+
+class _LoginError extends StatelessWidget {
+  const _LoginError({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: const BoxDecoration(color: kMist),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.error_outline_rounded, size: 18, color: kInk),
+          const SizedBox(width: 10),
+          Expanded(child: Text(message, style: sans(size: 12, height: 1.4))),
+        ],
+      ),
+    );
+  }
+}
+
+class _RegistrationPanel extends StatelessWidget {
+  const _RegistrationPanel({
+    required this.onPressed,
+    required this.isLoading,
+  });
+
+  final VoidCallback? onPressed;
+  final bool isLoading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(color: kMist),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Text(
+            '¿Primera vez en Monetta?',
+            textAlign: TextAlign.center,
+            style: display(19, weight: FontWeight.w400),
+          ),
+          const SizedBox(height: 6),
+          Text(
+            'Crea tu cuenta para guardar tus piezas favoritas y consultar '
+            'todos tus pedidos.',
+            textAlign: TextAlign.center,
+            style: sans(size: 11.5, color: kInkMuted, height: 1.45),
+          ),
+          const SizedBox(height: 16),
+          OutlinedButton(
+            key: const ValueKey('shop-register-button'),
+            onPressed: onPressed,
+            style: OutlinedButton.styleFrom(
+              foregroundColor: kInk,
+              side: const BorderSide(color: kInk, width: 0.8),
+            ),
+            child: isLoading
                 ? const SizedBox(
                     width: 18,
                     height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: kInk,
+                    ),
                   )
-                : const Text('INICIAR SESIÓN'),
-          ),
-          const SizedBox(height: 12),
-          Text(
-            'Se abre la página segura de Shopify. Si aún no tienes cuenta, '
-            'puedes crearla ahí mismo. Monetta nunca ve tu contraseña.',
-            style: sans(size: 11, color: kInkMuted, height: 1.5),
-          ),
-        ] else if (!hasLegacy)
-          Text(
-            'El inicio de sesión no está disponible en esta versión de la '
-            'app. Puedes seguir comprando como invitado.',
-            style: sans(size: 12, color: kInkMuted, height: 1.5),
-          ),
-        if (Navigator.of(context).canPop()) ...[
-          const SizedBox(height: 8),
-          Align(
-            alignment: Alignment.centerLeft,
-            child: TextButton(
-              onPressed: controller.isLoading
-                  ? null
-                  : () => Navigator.of(context).pop(),
-              child: const Text('SEGUIR COMO INVITADO'),
-            ),
+                : const Text('CREAR CUENTA'),
           ),
         ],
-        if (hasLegacy) ...[
-          const SizedBox(height: 28),
-          const Divider(height: 0.5),
-          const SizedBox(height: 20),
-          Text('Cuenta Monetta (correo)'.toUpperCase(), style: eyebrow()),
-          const SizedBox(height: 12),
-          if (!legacyExpanded)
-            Align(
-              alignment: Alignment.centerLeft,
-              child: TextButton(
-                onPressed: () => setState(() => _showLegacyForm = true),
-                child: const Text('USAR MI CUENTA MONETTA'),
-              ),
-            )
-          else
-            _MonettaPasswordForm(controller: controller),
-        ],
-      ],
+      ),
+    );
+  }
+}
+
+class _LegacyLoginPanel extends StatelessWidget {
+  const _LegacyLoginPanel({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: const BoxDecoration(color: kMist),
+      child: child,
     );
   }
 }

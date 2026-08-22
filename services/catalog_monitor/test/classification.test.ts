@@ -3,6 +3,11 @@ import { coachAdapter } from '../src/adapters/coach.js';
 import { guessAdapter } from '../src/adapters/guess.js';
 import { michaelKorsAdapter } from '../src/adapters/michaelKors.js';
 import { steveMaddenAdapter } from '../src/adapters/steveMadden.js';
+import { marcJacobsAdapter } from '../src/adapters/marcJacobs.js';
+import { toryBurchAdapter } from '../src/adapters/toryBurch.js';
+import { kateSpadeAdapter } from '../src/adapters/kateSpade.js';
+import { guessFactoryAdapter } from '../src/adapters/guessFactory.js';
+import { gpMcallenAdapter } from '../src/adapters/gpMcallen.js';
 
 describe('coachAdapter.isProductUrl', () => {
   it.each([
@@ -183,5 +188,62 @@ describe('steveMaddenAdapter.isProductUrl', () => {
         'https://www.stevemadden.com/products/bjuliana-black-patent?variant=123',
       ),
     ).toBe('BJULIANA-BLACK-PATENT');
+  });
+});
+
+describe('new curated source adapters', () => {
+  it('accepts Marc Jacobs US bag pages and normalizes color SKUs to the parent style', () => {
+    const url = 'https://www.marcjacobs.com/us-en/the-leather-small-tote-bag/2F6HSH075H01-001.html';
+    expect(marcJacobsAdapter.isProductUrl(url)).toBe(true);
+    expect(marcJacobsAdapter.externalIdFromUrl(url)).toBe('2F6HSH075H01');
+    expect(
+      marcJacobsAdapter.isProductUrl(
+        'https://www.marcjacobs.com/us-en/the-fluted-denim-jacket/2F3RJC002D03.html',
+      ),
+    ).toBe(false);
+  });
+
+  it('accepts only Tory Burch US handbag/wallet product paths', () => {
+    const url = 'https://www.toryburch.com/en-us/handbags/shoulder-bags/romy-shoulder-bag/177364.html?color=001';
+    expect(toryBurchAdapter.isProductUrl(url)).toBe(true);
+    expect(toryBurchAdapter.externalIdFromUrl(url)).toBe('177364');
+    expect(
+      toryBurchAdapter.isProductUrl(
+        'https://www.toryburch.com/en-us/shoes/sandals/example/177364.html',
+      ),
+    ).toBe(false);
+  });
+
+  it('accepts Kate Spade bags and wallets but not shoes', () => {
+    expect(
+      kateSpadeAdapter.isProductUrl(
+        'https://www.katespade.com/products/slice-pizza-crossbody-bag/K5530.html',
+      ),
+    ).toBe(true);
+    expect(
+      kateSpadeAdapter.isProductUrl(
+        'https://www.katespade.com/products/marseille-pumps/K1037.html',
+      ),
+    ).toBe(false);
+  });
+
+  it('keeps GUESS Factory isolated from the main GUESS domain', () => {
+    const path = '/us/en/handbags/all-handbags/crossbody/caracara-zip-top-crossbody-pink/LE904712-POE.html';
+    expect(guessFactoryAdapter.isProductUrl(`https://www.guessfactory.com${path}`)).toBe(true);
+    expect(guessFactoryAdapter.externalIdFromUrl(`https://www.guessfactory.com${path}`)).toBe(
+      'LE904712-POE',
+    );
+    expect(guessFactoryAdapter.isProductUrl(`https://www.guess.com${path}`)).toBe(false);
+  });
+
+  it('accepts GP McAllen perfume product pages and rejects its category pages', () => {
+    const url = 'https://www.gpmcallen.com/212-vip-rose-28oz-edp-by-carolina-herrera.html';
+    expect(gpMcallenAdapter.isProductUrl(url)).toBe(true);
+    expect(gpMcallenAdapter.externalIdFromUrl(url)).toBe(
+      '212-VIP-ROSE-28OZ-EDP-BY-CAROLINA-HERRERA',
+    );
+    expect(gpMcallenAdapter.isProductUrl('https://www.gpmcallen.com/ladies-perfumes.html')).toBe(
+      false,
+    );
   });
 });

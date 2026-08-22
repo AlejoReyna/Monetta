@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../domain/catalog_item.dart' show Money;
+import 'shopper_copy.dart';
 
 // ---------------------------------------------------------------------------
 // Palette
@@ -212,6 +213,28 @@ class MonettaWordmark extends StatelessWidget {
       semanticLabel: 'Monetta',
       errorBuilder: (context, _, __) =>
           Text('MONETTA', style: wordmark(size: height * 0.82)),
+    );
+  }
+}
+
+/// Quiet service facts. Type only — no icons, no ticker.
+class MonettaTrustRows extends StatelessWidget {
+  const MonettaTrustRows({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < kTrustRows.length; i++) ...[
+          if (i > 0)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 0.5),
+            ),
+          Text(kTrustRows[i], style: sans(size: 13, height: 1.45)),
+        ],
+      ],
     );
   }
 }

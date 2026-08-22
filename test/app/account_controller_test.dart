@@ -175,6 +175,7 @@ void main() {
       ),
       config: usable
           ? const CustomerAccountConfig(
+              shopDomain: 'shop.example.com',
               shopId: '1',
               clientId: 'shp_x',
               redirectUri: 'shop.1.oauth://c',

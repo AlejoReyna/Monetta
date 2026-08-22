@@ -1,7 +1,9 @@
 # catalog_monitor
 
-Internal prototype. Monitors the **public US Coach, Michael Kors, GUESS, and
-Steve Madden catalogs** once a day and serves them as read-only
+Internal prototype. Monitors selected public US bag/wallet catalogs (Coach,
+Michael Kors, GUESS, Steve Madden, Marc Jacobs, Tory Burch, Kate Spade and
+GUESS Factory) plus the perfume categories at **gpmcallen.com** once a day and
+serves a compact, curated set as read-only
 owner-procurement candidates for the Monetta
 Flutter app's mixed feed — see `docs/ARCHITECTURE.md` at the repo root for how
 this fits into the rest of the system.
@@ -149,8 +151,10 @@ npm run migrate
 npm start            # API on :8081, talking to your local Postgres directly
 ```
 
-The built-in floor contains 10 Coach US and 10 Michael Kors US listings,
-checked against the public US storefronts on 2026-08-12. Its records are
+The built-in floor contains 10 reviewed listings for each of the original four
+sources (Coach, Michael Kors, GUESS and Steve Madden), checked against the
+public US storefronts on 2026-08-12. New sources never receive fabricated
+fallback rows. Floor records are
 served as `dataOrigin: "curated_us_snapshot"`, use USD, and deliberately set
 availability to `unknown`. Live crawl rows are `dataOrigin: "live_crawl"`
 and always replace a matching fallback record. The floor does not create a
@@ -207,10 +211,15 @@ npm run crawl -- --brand coach --limit 5 --dry-run
 npm run crawl -- --brand michael_kors --limit 5 --dry-run
 npm run crawl -- --brand guess --limit 5 --dry-run
 npm run crawl -- --brand steve_madden --limit 5 --dry-run
+npm run crawl -- --brand marc_jacobs --limit 5 --dry-run
+npm run crawl -- --brand tory_burch --limit 5 --dry-run
+npm run crawl -- --brand kate_spade --limit 5 --dry-run
+npm run crawl -- --brand guess_factory --limit 5 --dry-run
+npm run crawl -- --brand gp_mcallen --limit 5 --dry-run
 npm run crawl -- --brand all
 ```
 
-- `--brand coach|michael_kors|guess|steve_madden|all`
+- `--brand coach|michael_kors|guess|steve_madden|marc_jacobs|tory_burch|kate_spade|guess_factory|gp_mcallen|all`
 - `--limit N` — caps the number of product pages fetched. Also forces
   `isFullSnapshot: false` for that run, so a capped run can never trigger the
   "item missing → inactive" logic against a catalog it only partially saw.
@@ -220,6 +229,27 @@ npm run crawl -- --brand all
   inactive counts, since those require comparing against stored state. This
   is what makes `--dry-run --limit N` usable as a capped live smoke test
   with no database running at all.
+
+## Curated feed and commission pricing
+
+The API never exposes every crawled product. `src/catalog/curation.ts` removes
+out-of-stock and off-category rows, ranks candidates with valid price/image,
+caps each source, and interleaves brands before applying the global cap. The
+defaults are controlled by `FASHION_ITEMS_PER_SOURCE`,
+`PERFUME_ITEMS_PER_SOURCE`, and `MAXIMUM_CATALOG_ITEMS`.
+
+`ENABLED_SOURCE_IDS` controls which sources the scheduler crawls, `/healthz`
+evaluates, and the API presents. This makes it possible to stage only a subset
+of brands; an adapter whose sitemap is temporarily blocked can remain installed
+but disabled without degrading unrelated sources.
+
+Set `USD_TO_MXN_RATE` to enable suggested MXN retail prices. Commission values
+are integer basis points (`2200` = 22%). By default, converted source costs
+strictly above MXN 4,000 use 14%; product overrides, then the high-value rule,
+then source overrides, then the default rule determine the final rate. See
+`.env.example` for the exact variables and JSON override formats. Without an FX
+rate, inventory and source USD prices continue to work and pricing fields are
+`null` rather than guessed.
 
 ## The live-crawl gate
 
@@ -308,8 +338,9 @@ FROM crawl_runs ORDER BY started_at DESC LIMIT 10;
 
 - `GET /livez` — process liveness; independent of crawl freshness.
 - `GET /healthz` — crawl/data health; see above.
-- `GET /v1/external-catalog` — active live listings, filled to a minimum of
-  10 per source from the dated curated US snapshot when needed. Versioned
+- `GET /v1/external-catalog` — curated active listings. Reviewed fallback
+  rows exist only for the original four sources; output defaults to 8 items
+  per fashion source, 12 perfumes and 52 items overall. Versioned
   response (`schemaVersion: 1`, see `src/api/schema.ts`), gzip-compressed,
   ETag + `If-None-Match` (304 when unchanged). Never exposes raw HTML, stack
   traces, or database details — every error path returns
@@ -327,11 +358,20 @@ FROM crawl_runs ORDER BY started_at DESC LIMIT 10;
       "sourceScopedId": "coach_us:C8879",
       "source": "coach_us",
       "merchant": "Coach",
+      "vertical": "bags_wallets",
       "title": "Tabby Shoulder Bag 26",
       "brand": "Coach",
       "category": "Handbags",
       "imageUrl": "https://coach.com/images/c8879.jpg",
       "price": { "amount": 350.0, "currency": "USD" },
+      "suggestedRetailPrice": { "amount": 7980.0, "currency": "MXN" },
+      "commission": {
+        "sourceCost": { "amount": 7000.0, "currency": "MXN" },
+        "rate": 0.14,
+        "amount": { "amount": 980.0, "currency": "MXN" },
+        "usdToMxnRate": 20.0,
+        "rule": "high_value"
+      },
       "availability": "inStock",
       "detailUrl": "https://www.coach.com/products/tabby-shoulder-bag-26/CEN52.html",
       "lastObservedAt": "2026-08-10T03:19:41.000Z",
@@ -344,6 +384,7 @@ FROM crawl_runs ORDER BY started_at DESC LIMIT 10;
           "colorCode": "B4BK",
           "imageUrl": "https://coach.com/images/c8879-black.jpg",
           "price": { "amount": 350.0, "currency": "USD" },
+          "suggestedRetailPrice": { "amount": 7980.0, "currency": "MXN" },
           "availability": "inStock",
           "detailUrl": "https://www.coach.com/products/tabby-shoulder-bag-26/C8879-B4%2FBK.html"
         }
@@ -390,6 +431,12 @@ guard.
   `/products/{handle}` pages. Their curated records were checked against the
   public US storefronts, but their sitemap discovery and CSS selectors still
   require the same capped live-crawl validation before operational use.
+- Marc Jacobs, Tory Burch and Kate Spade are restricted to their US
+  bag/wallet URL shapes. GP McAllen uses bounded public perfume category pages
+  (including their `?p=N` pagination) because its robots-advertised Magento
+  sitemap currently returns 404. GUESS Factory currently redirects some
+  requests to GUESS; that source therefore fails safely until its own catalog
+  discovery endpoint is restored.
 - CSS selectors in the "selectors" extraction tier are similarly unverified
   against live markup — they exist as the documented third tier and are
   covered by unit tests against synthetic fixtures, not real pages.
@@ -403,7 +450,7 @@ guard.
   later full daily runs with ≥98% required-field coverage. That has not
   happened — this prototype has run zero live full crawls.
 - Because of the geo-redirect above, the API includes a 10-per-source
-  presentation floor checked against official US product pages on
+  presentation floor for the original four sources, checked against official US product pages on
   2026-08-12. It is **not live inventory**: records are explicitly marked
   `curated_us_snapshot`, availability is `unknown`, and `/healthz` does not
   become healthy because fallback records are present. A successful live US

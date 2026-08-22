@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 
-enum MonettaBottomDestination { home, shuffle, menu, bag, account }
+enum MonettaBottomDestination { home, catalog, bag, account }
 
-enum _MonettaNavIcon { home, shuffle, menu, bag, account }
+enum _MonettaNavIcon { home, catalog, bag, account }
 
 class MonettaBottomNavigation extends StatelessWidget {
   const MonettaBottomNavigation({
@@ -31,8 +31,6 @@ class MonettaBottomNavigation extends StatelessWidget {
           decoration: const BoxDecoration(
             border: Border(top: BorderSide(color: kLine, width: 0.5)),
           ),
-          // Keep the actions visually anchored to the lower edge, above
-          // only the iOS home-indicator safe area.
           padding: const EdgeInsets.fromLTRB(8, 2, 8, 0),
           child: Row(
             children: [
@@ -44,25 +42,17 @@ class MonettaBottomNavigation extends StatelessWidget {
                 onSelected: onSelected,
               ),
               _NavItem(
-                destination: MonettaBottomDestination.shuffle,
+                destination: MonettaBottomDestination.catalog,
                 current: current,
-                icon: _MonettaNavIcon.shuffle,
-                label: 'Shuffle',
-                showDot: true,
-                onSelected: onSelected,
-              ),
-              _NavItem(
-                destination: MonettaBottomDestination.menu,
-                current: current,
-                icon: _MonettaNavIcon.menu,
-                label: 'Menu',
+                icon: _MonettaNavIcon.catalog,
+                label: 'Catálogo',
                 onSelected: onSelected,
               ),
               _NavItem(
                 destination: MonettaBottomDestination.bag,
                 current: current,
                 icon: _MonettaNavIcon.bag,
-                label: 'Basket',
+                label: 'Bolsa',
                 badge: bagCount,
                 onSelected: onSelected,
               ),
@@ -70,7 +60,7 @@ class MonettaBottomNavigation extends StatelessWidget {
                 destination: MonettaBottomDestination.account,
                 current: current,
                 icon: _MonettaNavIcon.account,
-                label: 'Account',
+                label: 'Cuenta',
                 onSelected: onSelected,
               ),
             ],
@@ -89,7 +79,6 @@ class _NavItem extends StatelessWidget {
     required this.label,
     required this.onSelected,
     this.badge = 0,
-    this.showDot = false,
   });
 
   final MonettaBottomDestination destination;
@@ -97,7 +86,6 @@ class _NavItem extends StatelessWidget {
   final _MonettaNavIcon icon;
   final String label;
   final int badge;
-  final bool showDot;
   final ValueChanged<MonettaBottomDestination> onSelected;
 
   @override
@@ -125,12 +113,6 @@ class _NavItem extends StatelessWidget {
                     alignment: Alignment.center,
                     children: [
                       _NavGlyph(icon: icon, color: color),
-                      if (showDot)
-                        const Positioned(
-                          top: -1,
-                          right: 20,
-                          child: _BlueDot(),
-                        ),
                       if (badge > 0)
                         Positioned(
                           top: -4,
@@ -208,25 +190,11 @@ class _NavGlyphPainter extends CustomPainter {
         );
         canvas.drawLine(const Offset(12.5, 25), const Offset(12.5, 18), p);
         canvas.drawLine(const Offset(12.5, 18), const Offset(16.5, 18), p);
-      case _MonettaNavIcon.shuffle:
-        canvas.save();
-        canvas.translate(2.5, 1.5);
-        canvas.rotate(-0.18);
-        canvas.drawRect(const Rect.fromLTWH(2, 3, 15, 19), p);
-        canvas.restore();
-        canvas.drawRect(const Rect.fromLTWH(9, 7, 15, 19), p);
-        final play = Path()
-          ..moveTo(14, 13)
-          ..lineTo(14, 20)
-          ..lineTo(20, 16.5)
-          ..close();
-        canvas.drawPath(play, p);
-      case _MonettaNavIcon.menu:
-        canvas.drawLine(const Offset(2.5, 8), const Offset(8, 8), p);
-        canvas.drawLine(const Offset(2.5, 14), const Offset(8, 14), p);
-        canvas.drawLine(const Offset(2.5, 20), const Offset(8, 20), p);
-        canvas.drawCircle(const Offset(17, 13), 8, p);
-        canvas.drawLine(const Offset(22.5, 19), const Offset(26, 23), p);
+      case _MonettaNavIcon.catalog:
+        canvas.drawRect(const Rect.fromLTWH(5, 5, 7.5, 7.5), p);
+        canvas.drawRect(const Rect.fromLTWH(15.5, 5, 7.5, 7.5), p);
+        canvas.drawRect(const Rect.fromLTWH(5, 15.5, 7.5, 7.5), p);
+        canvas.drawRect(const Rect.fromLTWH(15.5, 15.5, 7.5, 7.5), p);
       case _MonettaNavIcon.bag:
         canvas.drawRRect(
           RRect.fromRectAndRadius(
@@ -264,22 +232,6 @@ class _NavGlyphPainter extends CustomPainter {
   @override
   bool shouldRepaint(covariant _NavGlyphPainter oldDelegate) =>
       oldDelegate.icon != icon || oldDelegate.color != color;
-}
-
-class _BlueDot extends StatelessWidget {
-  const _BlueDot();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: 8,
-      height: 8,
-      decoration: const BoxDecoration(
-        color: Color(0xFF3D72E5),
-        shape: BoxShape.circle,
-      ),
-    );
-  }
 }
 
 class _BagBadge extends StatelessWidget {

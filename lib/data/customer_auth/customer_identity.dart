@@ -56,6 +56,9 @@ class HttpCustomerIdentityService implements CustomerIdentityService {
   final bool _ownsClient;
   final Duration timeout;
 
+  Uri? _graphQlEndpoint;
+  Future<Uri>? _discoveryInFlight;
+
   /// Only what identity needs. Profile, addresses and orders are Phase 5
   /// (`docs/SHOPIFY_PRODUCTION_IMPLEMENTATION_PLAN.md`) and deliberately not
   /// requested here: this call sits on the login path, so every extra field
@@ -73,11 +76,12 @@ query MonettaCustomerIdentity {
 
   @override
   Future<CustomerIdentity> fetch(String accessToken) async {
+    final endpoint = await _resolveGraphQlEndpoint();
     final http.Response response;
     try {
       response = await _client
           .post(
-            config.graphQlEndpoint,
+            endpoint,
             headers: {
               'Content-Type': 'application/json',
               'Accept': 'application/json',
@@ -99,7 +103,8 @@ query MonettaCustomerIdentity {
       // would drag `dart:io` into a file that has no other reason to need it.
       throw CustomerAuthException(
         CustomerAuthErrorKind.offline,
-        debugDetail: 'customer identity transport failure: ${error.runtimeType}',
+        debugDetail:
+            'customer identity transport failure: ${error.runtimeType}',
       );
     }
 
@@ -123,6 +128,89 @@ query MonettaCustomerIdentity {
     }
 
     return parseIdentity(response.bodyBytes);
+  }
+
+  /// Discovers and caches Shopify's account API URL from the storefront
+  /// domain. The discovered URL can use a branded account domain, and Shopify
+  /// explicitly recommends discovery over composing a `shopify.com` path.
+  /// Failed attempts are not cached so a temporary offline state can recover
+  /// on the next login.
+  Future<Uri> _resolveGraphQlEndpoint() {
+    final cached = _graphQlEndpoint;
+    if (cached != null) return Future.value(cached);
+
+    final inFlight = _discoveryInFlight;
+    if (inFlight != null) return inFlight;
+
+    late final Future<Uri> future;
+    future = _discoverGraphQlEndpoint().then((endpoint) {
+      _graphQlEndpoint = endpoint;
+      return endpoint;
+    }).whenComplete(() {
+      if (identical(_discoveryInFlight, future)) {
+        _discoveryInFlight = null;
+      }
+    });
+    _discoveryInFlight = future;
+    return future;
+  }
+
+  Future<Uri> _discoverGraphQlEndpoint() async {
+    final http.Response response;
+    try {
+      response = await _client.get(
+        config.customerApiDiscoveryEndpoint,
+        headers: const {'Accept': 'application/json'},
+      ).timeout(timeout);
+    } on TimeoutException {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.offline,
+        debugDetail: 'customer API discovery timed out',
+      );
+    } catch (error) {
+      throw CustomerAuthException(
+        CustomerAuthErrorKind.offline,
+        debugDetail: 'customer API discovery transport failure: '
+            '${error.runtimeType}',
+      );
+    }
+
+    if (response.statusCode < 200 || response.statusCode >= 300) {
+      throw CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'customer API discovery HTTP ${response.statusCode}',
+      );
+    }
+    if (response.bodyBytes.length > kMaxCustomerApiResponseBytes) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'customer API discovery response exceeded size limit',
+      );
+    }
+
+    final Object? decoded;
+    try {
+      decoded = jsonDecode(utf8.decode(response.bodyBytes));
+    } catch (_) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'customer API discovery returned non-JSON',
+      );
+    }
+    final endpointValue =
+        decoded is Map<String, dynamic> ? decoded['graphql_api'] : null;
+    final endpoint =
+        endpointValue is String ? Uri.tryParse(endpointValue) : null;
+    if (endpoint == null ||
+        endpoint.scheme != 'https' ||
+        endpoint.host.isEmpty ||
+        endpoint.hasFragment) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'customer API discovery carried no valid graphql_api',
+      );
+    }
+    return endpoint;
   }
 
   /// Separated from the HTTP call so the parsing rules are testable on their

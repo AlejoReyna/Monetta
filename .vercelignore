@@ -1,0 +1,13 @@
+# The Vercel project only hosts the standalone guideline in web/.
+/*
+!/.vercelignore
+!/vercel.json
+!/web
+/web/*
+!/web/index.html
+!/web/package.json
+!/web/package-lock.json
+!/web/public
+!/web/public/**
+!/web/src
+!/web/src/**

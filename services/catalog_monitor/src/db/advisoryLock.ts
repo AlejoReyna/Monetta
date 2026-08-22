@@ -11,6 +11,11 @@ export const SOURCE_LOCK_KEYS: Record<SourceId, number> = {
   michael_kors_us: 84_201_002,
   guess_us: 84_201_003,
   steve_madden_us: 84_201_004,
+  marc_jacobs_us: 84_201_005,
+  tory_burch_us: 84_201_006,
+  kate_spade_us: 84_201_007,
+  guess_factory_us: 84_201_008,
+  gp_mcallen_perfumes: 84_201_009,
 };
 
 /**

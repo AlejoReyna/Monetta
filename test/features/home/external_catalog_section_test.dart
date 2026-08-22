@@ -77,6 +77,24 @@ CatalogItem _coachItemWithVariants() => CatalogItem(
       ],
     );
 
+CatalogItem _perfumeItem() => CatalogItem(
+      sourceScopedId: 'gp_mcallen_perfumes:P1',
+      source: CatalogSourceType.gpMcallenPerfumes,
+      merchant: 'Gold Palace McAllen',
+      title: 'Perfume Eau de Parfum',
+      brand: 'Perfumes',
+      category: 'Perfumes',
+      imageUrl: null,
+      price: const Money(amount: 1800, currency: Currency.mxn),
+      sourcePrice: const Money(amount: 90, currency: Currency.usd),
+      vertical: CatalogVertical.perfumes,
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://www.gpmcallen.com/perfume-eau-de-parfum.html',
+      marketRestriction: MarketRestriction.unitedStates,
+      lastObservedAt: DateTime.utc(2026, 8, 22),
+      purchaseMode: PurchaseMode.ownerProcurement,
+    );
+
 Future<void> _pump(WidgetTester tester, Widget child) {
   return tester.pumpWidget(
     MaterialApp(home: Scaffold(body: SingleChildScrollView(child: child))),
@@ -94,6 +112,46 @@ void main() {
     expect(
       externalCtaLabel(CatalogSourceType.steveMaddenUs),
       'Ver en Steve Madden',
+    );
+    expect(
+      externalSourceBadge(CatalogSourceType.marcJacobsUs),
+      'Marc Jacobs US · USD',
+    );
+    expect(
+      externalCtaLabel(CatalogSourceType.marcJacobsUs),
+      'Ver en Marc Jacobs',
+    );
+    expect(
+      externalSourceBadge(CatalogSourceType.toryBurchUs),
+      'Tory Burch US · USD',
+    );
+    expect(
+      externalCtaLabel(CatalogSourceType.toryBurchUs),
+      'Ver en Tory Burch',
+    );
+    expect(
+      externalSourceBadge(CatalogSourceType.kateSpadeUs),
+      'Kate Spade US · USD',
+    );
+    expect(
+      externalCtaLabel(CatalogSourceType.kateSpadeUs),
+      'Ver en Kate Spade',
+    );
+    expect(
+      externalSourceBadge(CatalogSourceType.guessFactoryUs),
+      'GUESS Factory US · USD',
+    );
+    expect(
+      externalCtaLabel(CatalogSourceType.guessFactoryUs),
+      'Ver en GUESS Factory',
+    );
+    expect(
+      externalSourceBadge(CatalogSourceType.gpMcallenPerfumes),
+      'GP McAllen · USD',
+    );
+    expect(
+      externalCtaLabel(CatalogSourceType.gpMcallenPerfumes),
+      'Ver en GP McAllen',
     );
   });
 
@@ -123,7 +181,6 @@ void main() {
     expect(find.text('\$228 USD'), findsOneWidget);
     expect(find.text('Ver en Coach'), findsOneWidget);
     expect(find.text('Ver en Michael Kors'), findsOneWidget);
-    expect(find.text('extracted'), findsNWidgets(2));
   });
 
   testWidgets('shows the owner-procurement and internal-prototype disclosures',
@@ -141,6 +198,21 @@ void main() {
       find.textContaining('Candidatos para compra manual del propietario'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('separates GP McAllen perfumes from bags and wallets',
+      (tester) async {
+    await _pump(
+      tester,
+      ExternalCatalogSection(
+        items: [_coachItem(), _perfumeItem()],
+        generatedAt: DateTime.utc(2026, 8, 22),
+      ),
+    );
+
+    expect(find.text('Selección de marcas originales'), findsOneWidget);
+    expect(find.text('Perfumes seleccionados'), findsOneWidget);
+    expect(find.textContaining('PERFUMERÍA · GP MCALLEN'), findsOneWidget);
   });
 
   testWidgets('never shows a wishlist heart or add-to-bag affordance',

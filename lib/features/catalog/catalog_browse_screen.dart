@@ -118,15 +118,13 @@ class CatalogBrowseScreen extends StatelessWidget {
               ],
             ),
       bottomNavigationBar: MonettaBottomNavigation(
-        current: MonettaBottomDestination.menu,
+        current: MonettaBottomDestination.catalog,
         bagCount: bagCount,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
               Navigator.of(context).popUntil((route) => route.isFirst);
-            case MonettaBottomDestination.shuffle:
-              break;
-            case MonettaBottomDestination.menu:
+            case MonettaBottomDestination.catalog:
               break;
             case MonettaBottomDestination.bag:
               unawaited(openBag(context));
@@ -135,6 +133,7 @@ class CatalogBrowseScreen extends StatelessWidget {
                 MaterialPageRoute<void>(
                   builder: (_) => AccountScreen(
                     controller: AccountScope.of(context),
+                    openHostedLoginOnStart: true,
                   ),
                 ),
               );

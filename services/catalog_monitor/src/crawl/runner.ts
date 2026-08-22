@@ -1,4 +1,5 @@
 import { discoverProductUrls, type SitemapFetcher } from '../discovery/sitemap.js';
+import { discoverProductUrlsFromCatalogPages } from '../discovery/catalogPages.js';
 import { isAllowedByRobots, type RobotsRules } from '../robots/robotsTxt.js';
 import { extractProduct } from '../parsing/productExtractor.js';
 import { looksLikeCaptchaOrBlock } from './blockDetection.js';
@@ -140,11 +141,18 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
     const fetchSitemapRateLimited: SitemapFetcher = (url) =>
       rateLimiter.schedule(domainOf(url), () => params.fetchSitemap(url));
 
-    const discovery = await discoverProductUrls(
-      params.adapter.source.sitemapIndexUrl,
-      fetchSitemapRateLimited,
-      { maxSitemaps: params.maxSitemaps },
-    );
+    const discovery = params.adapter.source.catalogPageUrls.length > 0
+      ? await discoverProductUrlsFromCatalogPages(
+          params.adapter.source.catalogPageUrls,
+          fetchSitemapRateLimited,
+          (url) => params.adapter.isProductUrl(url),
+          { maxPages: params.maxSitemaps },
+        )
+      : await discoverProductUrls(
+          params.adapter.source.sitemapIndexUrl!,
+          fetchSitemapRateLimited,
+          { maxSitemaps: params.maxSitemaps },
+        );
     // A sitemap that failed to fetch, returned a non-2xx status, or could not
     // be parsed must be visible in the run's metrics, not silently swallowed
     // into "0 URLs discovered" — those look identical otherwise, and only one

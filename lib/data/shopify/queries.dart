@@ -165,6 +165,35 @@ query PredictiveSearch($query: String!, $limit: Int!) {
 }
 ''';
 
+/// Optional owner-editable content for the two non-commerce experiences.
+///
+/// The app ships a complete offline fallback, so missing Metaobject
+/// definitions are harmless. To enable overrides, expose these definitions to
+/// the Storefront API:
+/// - `app_about` / handle `monetta`
+/// - `app_partner_program` / handle `vende-con-monetta`
+/// - any number of `reseller_catalog` entries
+const String kEditorialContentQuery = r'''
+query AppEditorialContent {
+  about: metaobject(handle: {type: "app_about", handle: "monetta"}) {
+    fields { key value }
+  }
+  partner: metaobject(
+    handle: {type: "app_partner_program", handle: "vende-con-monetta"}
+  ) {
+    fields { key value }
+  }
+  catalogs: metaobjects(type: "reseller_catalog", first: 50) {
+    edges {
+      node {
+        handle
+        fields { key value }
+      }
+    }
+  }
+}
+''';
+
 const String kCartFragment = r'''
 fragment CartFields on Cart {
   id

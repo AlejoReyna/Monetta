@@ -55,12 +55,6 @@ class AppAuthCustomerGateway implements CustomerAuthGateway {
   final CustomerAccountConfig config;
   final FlutterAppAuth _appAuth;
 
-  AuthorizationServiceConfiguration get _serviceConfiguration =>
-      AuthorizationServiceConfiguration(
-        authorizationEndpoint: config.authorizationEndpoint,
-        tokenEndpoint: config.tokenEndpoint,
-      );
-
   @override
   Future<CustomerAuthResult> login() async {
     if (!config.isUsable) {
@@ -75,7 +69,10 @@ class AppAuthCustomerGateway implements CustomerAuthGateway {
         AuthorizationTokenRequest(
           config.clientId,
           config.redirectUri,
-          serviceConfiguration: _serviceConfiguration,
+          // Shopify can advertise a branded customer-account host here
+          // (production Monetta uses clientes.monetta.mx). AppAuth performs
+          // and validates discovery before opening the system browser.
+          discoveryUrl: config.openIdConfigurationEndpoint.toString(),
           scopes: CustomerAccountConfig.scopes,
         ),
       );
@@ -93,7 +90,7 @@ class AppAuthCustomerGateway implements CustomerAuthGateway {
         TokenRequest(
           config.clientId,
           config.redirectUri,
-          serviceConfiguration: _serviceConfiguration,
+          discoveryUrl: config.openIdConfigurationEndpoint.toString(),
           refreshToken: refreshToken,
           grantType: 'refresh_token',
         ),

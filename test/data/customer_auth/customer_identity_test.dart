@@ -8,6 +8,7 @@ import 'package:monetta_app/data/customer_auth/customer_auth_error.dart';
 import 'package:monetta_app/data/customer_auth/customer_identity.dart';
 
 const CustomerAccountConfig _config = CustomerAccountConfig(
+  shopDomain: 'shop.example.com',
   shopId: '90228850722',
   clientId: 'client-id',
   redirectUri: 'shop.90228850722.oauth://callback',
@@ -19,7 +20,21 @@ HttpCustomerIdentityService _serviceReturning(
 ) {
   return HttpCustomerIdentityService(
     config: _config,
-    client: MockClient(handler),
+    client: MockClient((request) {
+      if (request.method == 'GET' &&
+          request.url == _config.customerApiDiscoveryEndpoint) {
+        return Future.value(
+          http.Response(
+            jsonEncode({
+              'graphql_api':
+                  'https://clientes.example.com/customer/api/2026-07/graphql',
+            }),
+            200,
+          ),
+        );
+      }
+      return handler(request);
+    }),
   );
 }
 
@@ -52,11 +67,51 @@ void main() {
       expect(authorization, 'shcat_abc123');
       expect(
         endpoint.toString(),
-        'https://shopify.com/90228850722/account/customer/api/2026-07/graphql',
+        'https://clientes.example.com/customer/api/2026-07/graphql',
       );
       expect(identity.shopifyCustomerId, 'gid://shopify/Customer/7');
       expect(identity.email, 'ana@example.com');
       expect(identity.displayName, 'Ana Ruiz');
+    });
+
+    test('discovers the branded GraphQL endpoint once and caches it', () async {
+      var discoveryRequests = 0;
+      var apiRequests = 0;
+      final service = HttpCustomerIdentityService(
+        config: _config,
+        client: MockClient((request) async {
+          if (request.method == 'GET') {
+            discoveryRequests += 1;
+            expect(request.url, _config.customerApiDiscoveryEndpoint);
+            return http.Response(
+              jsonEncode({
+                'graphql_api':
+                    'https://clientes.example.com/customer/api/2026-07/graphql',
+              }),
+              200,
+            );
+          }
+          apiRequests += 1;
+          expect(
+            request.url.toString(),
+            'https://clientes.example.com/customer/api/2026-07/graphql',
+          );
+          return http.Response(
+            jsonEncode({
+              'data': {
+                'customer': {'id': 'gid://shopify/Customer/7'},
+              },
+            }),
+            200,
+          );
+        }),
+      );
+
+      await service.fetch('first-token');
+      await service.fetch('second-token');
+
+      expect(discoveryRequests, 1);
+      expect(apiRequests, 2);
     });
 
     test('a customer with no name or email still yields an identity', () async {

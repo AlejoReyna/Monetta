@@ -4,7 +4,7 @@ import { logger } from '../logger.js';
 import { getPool, closePool } from '../db/pool.js';
 import { PgProductRepository } from '../db/pgProductRepository.js';
 import { PgCrawlRunRepository } from '../db/pgCrawlRunRepository.js';
-import { allAdapters } from '../adapters/registry.js';
+import { adapterFor } from '../adapters/registry.js';
 import { crawlSourceWithRobotsGate } from '../crawl/guardedCrawl.js';
 import { DomainRateLimiter } from '../crawl/rateLimiter.js';
 import { liveFetch } from '../crawl/httpFetcher.js';
@@ -36,7 +36,8 @@ export async function startScheduler(): Promise<void> {
     // A failure attempting one source (thrown exception, lock contention,
     // robots failure) must never prevent the other source from being
     // attempted — each source is fully isolated.
-    for (const adapter of allAdapters()) {
+    for (const sourceId of config.enabledSourceIds) {
+      const adapter = adapterFor(sourceId);
       try {
         await runOneSourceLocked(adapter, { pool, products, crawlRuns, rateLimiter, config });
       } catch (error) {

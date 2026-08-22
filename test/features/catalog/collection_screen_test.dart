@@ -13,7 +13,8 @@ Future<CatalogStore> _loadedStore() async {
 }
 
 void main() {
-  testWidgets('collection filters actually reduce the grid', (tester) async {
+  testWidgets('collection states a count and sort, and filters reduce the grid',
+      (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -34,12 +35,17 @@ void main() {
     await tester.pump();
 
     expect(find.text('Bolsas'), findsOneWidget);
-    expect(find.text('TODO'), findsOneWidget);
+    expect(find.textContaining('piezas ordenadas por'), findsOneWidget);
+    expect(find.text('Más nuevas'), findsOneWidget);
     expect(find.text('extracted'), findsNothing);
     expect(find.text('También en marcas de Estados Unidos'), findsNothing);
 
-    await tester.tap(find.text('TODO'));
-    await tester.pump();
+    await tester.tap(find.text('Más nuevas'));
+    await tester.pumpAndSettle();
     expect(find.text('EN STOCK'), findsOneWidget);
+
+    await tester.tap(find.text('EN STOCK'));
+    await tester.pump();
+    expect(find.text('En stock  ×'), findsOneWidget);
   });
 }

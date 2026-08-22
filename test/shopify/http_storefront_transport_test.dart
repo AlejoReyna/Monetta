@@ -22,12 +22,13 @@ void main() {
         expect(request.url, endpoint);
         expect(request.headers['X-Shopify-Storefront-Access-Token'], 'tok');
         return http.Response(
-            jsonEncode({
-              'data': {
-                'shop': {'name': 'M'}
-              }
-            }),
-            200);
+          jsonEncode({
+            'data': {
+              'shop': {'name': 'M'},
+            },
+          }),
+          200,
+        );
       }),
       maxAttempts: 1,
     );

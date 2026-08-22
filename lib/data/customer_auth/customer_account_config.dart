@@ -9,15 +9,24 @@ library;
 
 class CustomerAccountConfig {
   const CustomerAccountConfig({
+    required this.shopDomain,
     required this.shopId,
     required this.clientId,
     required this.redirectUri,
     this.apiVersion = defaultApiVersion,
   });
 
+  /// Public storefront host used for Shopify's discovery documents.
+  ///
+  /// This is intentionally the branded domain when the shop has one. For
+  /// example, production currently advertises its hosted authentication at
+  /// `clientes.monetta.mx`; deriving URLs from [shopId] would bypass that
+  /// domain and expose a generic `shopify.com` host in the browser sheet.
+  final String shopDomain;
+
   /// The numeric shop id Shopify assigns per store — distinct from
-  /// `StorefrontConfig.shopDomain`. Appears in both the OAuth endpoint URLs
-  /// and the required redirect URI scheme.
+  /// [shopDomain]. It appears in the required mobile redirect URI scheme;
+  /// endpoint hosts and paths come from discovery instead.
   final String shopId;
 
   /// The Customer Account API Mobile client's id, from the store's Headless
@@ -33,7 +42,7 @@ class CustomerAccountConfig {
   /// `android/app/build.gradle`.
   final String redirectUri;
 
-  /// Customer Account API version for [graphQlEndpoint]. Shopify releases the
+  /// Customer Account API version. Shopify releases the
   /// Customer Account API on the same quarterly calendar as the Storefront
   /// API and with the same version strings, so this reads the one
   /// `SHOPIFY_API_VERSION` define the Storefront config already uses rather
@@ -53,29 +62,20 @@ class CustomerAccountConfig {
     'customer-account-api:full',
   ];
 
-  String get authorizationEndpoint =>
-      'https://shopify.com/authentication/$shopId/oauth/authorize';
+  /// Standard OpenID Connect metadata. AppAuth reads the authorization and
+  /// token endpoints from here instead of hardcoding a Shopify host.
+  Uri get openIdConfigurationEndpoint =>
+      Uri.https(shopDomain, '/.well-known/openid-configuration');
 
-  String get tokenEndpoint =>
-      'https://shopify.com/authentication/$shopId/oauth/token';
-
-  /// The Customer Account API GraphQL endpoint — a different host path shape
-  /// from the OAuth endpoints above, and unrelated to the Storefront API's
-  /// `/api/{version}/graphql.json` on the shop domain.
-  ///
-  /// Shopify recommends discovering this from
-  /// `/.well-known/customer-account-api` instead of composing it; that is
-  /// deliberately deferred (see `README.md` § 8) because discovery needs its
-  /// own caching and last-known-good handling to not become a new cold-start
-  /// failure mode, and the composed URL is stable and documented.
-  Uri get graphQlEndpoint => Uri.parse(
-        'https://shopify.com/$shopId/account/customer/api/$apiVersion/graphql',
-      );
+  /// Shopify-specific metadata containing the Customer Account GraphQL URL.
+  Uri get customerApiDiscoveryEndpoint =>
+      Uri.https(shopDomain, '/.well-known/customer-account-api');
 
   /// False until a Partner-dashboard registration exists — the honest
   /// default today. Callers must treat login as unavailable rather than
   /// attempting it, the same pattern as `StorefrontConfig.isUsable`.
   bool get isUsable =>
+      _looksLikeHost(shopDomain) &&
       shopId.isNotEmpty &&
       clientId.isNotEmpty &&
       redirectUri.isNotEmpty &&
@@ -98,6 +98,7 @@ class CustomerAccountConfig {
   /// staging shop id, so a production build needs its own flavor before it
   /// can log in — see `README.md` § 8.
   factory CustomerAccountConfig.fromEnvironment() {
+    const shopDomain = String.fromEnvironment('SHOPIFY_STORE_DOMAIN');
     const shopId = String.fromEnvironment(
       'CUSTOMER_ACCOUNT_SHOP_ID',
       defaultValue: _placeholderShopId,
@@ -107,13 +108,22 @@ class CustomerAccountConfig {
       'SHOPIFY_API_VERSION',
       defaultValue: defaultApiVersion,
     );
+    final normalizedShopId = shopId.trim();
     return CustomerAccountConfig(
-      shopId: shopId,
-      clientId: clientId,
-      redirectUri: 'shop.$shopId.oauth://callback',
-      apiVersion: apiVersion,
+      shopDomain: shopDomain.trim(),
+      shopId: normalizedShopId,
+      clientId: clientId.trim(),
+      redirectUri: 'shop.$normalizedShopId.oauth://callback',
+      apiVersion: apiVersion.trim(),
     );
   }
+
+  static bool _looksLikeHost(String value) =>
+      value.isNotEmpty &&
+      value.contains('.') &&
+      !value.contains('://') &&
+      !value.contains('/') &&
+      !value.contains(' ');
 
   /// Matches the literal placeholder committed in `Info.plist` and
   /// `build.gradle.kts` — lowercase, since AppAuth's Android redirect

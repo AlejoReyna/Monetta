@@ -3,6 +3,7 @@ import { adapterFor } from '../src/adapters/registry.js';
 import {
   CURATED_US_CATALOG,
   CURATED_US_CATALOG_OBSERVED_AT,
+  CURATED_SOURCE_IDS,
   MINIMUM_PRODUCTS_PER_SOURCE,
   withMinimumUsCatalog,
 } from '../src/catalog/curatedUsCatalog.js';
@@ -32,9 +33,11 @@ function liveProduct(overrides: Partial<CatalogProductRecord> = {}): CatalogProd
 
 describe('curated US catalog floor', () => {
   it('contains ten valid, uniquely keyed official-US records per source', () => {
-    expect(CURATED_US_CATALOG).toHaveLength(SOURCE_IDS.length * MINIMUM_PRODUCTS_PER_SOURCE);
+    expect(CURATED_US_CATALOG).toHaveLength(
+      CURATED_SOURCE_IDS.length * MINIMUM_PRODUCTS_PER_SOURCE,
+    );
 
-    for (const sourceId of SOURCE_IDS) {
+    for (const sourceId of CURATED_SOURCE_IDS) {
       const records = CURATED_US_CATALOG.filter((record) => record.sourceId === sourceId);
       expect(records).toHaveLength(MINIMUM_PRODUCTS_PER_SOURCE);
       expect(new Set(records.map((record) => record.externalId)).size).toBe(records.length);
@@ -57,10 +60,18 @@ describe('curated US catalog floor', () => {
   it('fills an empty database to ten products from each brand', () => {
     const presented = withMinimumUsCatalog([]);
 
-    for (const sourceId of SOURCE_IDS) {
+    for (const sourceId of CURATED_SOURCE_IDS) {
       const records = presented.filter((record) => record.sourceId === sourceId);
       expect(records).toHaveLength(MINIMUM_PRODUCTS_PER_SOURCE);
       expect(records.every((record) => record.dataOrigin === 'curated_us_snapshot')).toBe(true);
+    }
+  });
+
+  it('does not fabricate fallback inventory for newly configured sources', () => {
+    const presented = withMinimumUsCatalog([]);
+    const newSourceIds = SOURCE_IDS.filter((id) => !CURATED_SOURCE_IDS.includes(id));
+    for (const sourceId of newSourceIds) {
+      expect(presented.filter((record) => record.sourceId === sourceId)).toHaveLength(0);
     }
   });
 
