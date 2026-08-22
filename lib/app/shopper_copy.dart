@@ -136,7 +136,61 @@ Uri conciergeWhatsAppUri({String? productTitle}) {
 
 Uri wholesaleWhatsAppUri() {
   return Uri.https('wa.me', '/$kWhatsAppE164', <String, String>{
-    'text':
-        '¡Hola Monetta! Quiero información de mayoreo (desde 3 piezas).',
+    'text': '¡Hola Monetta! Quiero información de mayoreo (desde 3 piezas).',
   });
+}
+
+/// Starts a reseller quote with the public mayoreo terms already understood.
+/// Product-level wholesale apartados use [ApartadoRequest] instead; this is
+/// the earlier catalog-to-quote handoff, before individual pieces are known.
+Uri partnerQuoteWhatsAppUri({String? category, String? catalogMode}) {
+  final details = <String>[
+    if (category != null && category.trim().isNotEmpty)
+      'Categoría: ${category.trim()}',
+    if (catalogMode != null && catalogMode.trim().isNotEmpty)
+      'Catálogo: ${catalogMode.trim()}',
+  ];
+  final text = <String>[
+    '¡Hola Monetta! Quiero cotizar un pedido para reventa.',
+    if (details.isNotEmpty) '',
+    ...details,
+    '',
+    'Entiendo que el mayoreo comienza desde 3 modelos, el anticipo es de '
+        '\$800 MXN y puedo liquidar en hasta 20 días.',
+    '',
+    'Origen: app · Vende con Monetta',
+  ].join('\n');
+  return Uri.https('wa.me', '/$kWhatsAppE164', <String, String>{'text': text});
+}
+
+/// Deposit and window for WhatsApp apartado. Keep these next to the price,
+/// never only inside an accordion.
+const int kApartadoDepositMxn = 400;
+const int kApartadoDays = 20;
+
+const String kApartadoSentence =
+    'Apártala con \$400 MXN. Tienes 20 días para liquidar.';
+
+const List<String> kTrustRows = [
+  'Piezas originales importadas de Estados Unidos',
+  'Envío a todo México · gratis desde \$1,499',
+  'Cambios por WhatsApp',
+  'Apartado con \$400 · 20 días',
+];
+
+/// Card title: Shopify name, with the colourway folded in when it is not
+/// already in the string. Hierarchy on the card is letter-case, not extra
+/// words.
+String cardPieceName({required String title, String? colorSlug}) {
+  final color = colorLabel(colorSlug);
+  if (color.isEmpty) return title;
+  final lower = title.toLowerCase();
+  final colour = color.toLowerCase();
+  if (lower.contains(colour)) return title;
+  final stem =
+      colour.length > 3 && (colour.endsWith('o') || colour.endsWith('a'))
+          ? colour.substring(0, colour.length - 1)
+          : colour;
+  if (stem.length >= 3 && lower.contains(stem)) return title;
+  return '$title $colour';
 }

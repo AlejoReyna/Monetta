@@ -1,7 +1,9 @@
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/data/customer_auth/customer_auth_error.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_gateway.dart';
+import 'package:monetta_app/data/customer_auth/customer_identity.dart';
 import 'package:monetta_app/data/customer_auth/customer_session_repository.dart';
 import 'package:monetta_app/data/customer_auth/secure_token_store.dart';
 import 'package:monetta_app/data/local/account_store.dart';
@@ -31,6 +33,25 @@ class FakeCustomerAuthGateway implements CustomerAuthGateway {
     refreshCalls++;
     lastRefreshTokenRequested = refreshToken;
     return refreshResult ?? loginResult;
+  }
+}
+
+/// Replays a canned `customer { id }` answer, or the failure of your choice.
+class FakeCustomerIdentityService implements CustomerIdentityService {
+  FakeCustomerIdentityService({this.identity, this.error});
+
+  CustomerIdentity? identity;
+  CustomerAuthException? error;
+  int calls = 0;
+  String? lastAccessToken;
+
+  @override
+  Future<CustomerIdentity> fetch(String accessToken) async {
+    calls++;
+    lastAccessToken = accessToken;
+    final failure = error;
+    if (failure != null) throw failure;
+    return identity!;
   }
 }
 
@@ -76,9 +97,13 @@ void main() {
 
   tearDown(() => db.close());
 
-  CustomerSessionRepository repoWith(CustomerAuthGateway gateway) {
+  CustomerSessionRepository repoWith(
+    CustomerAuthGateway gateway, {
+    CustomerIdentityService? identityService,
+  }) {
     return CustomerSessionRepository(
       authGateway: gateway,
+      identityService: identityService,
       accountStore: accounts,
       sessionStore: sessions,
       deviceStore: devices,
@@ -86,6 +111,23 @@ void main() {
       bagStore: bag,
       secureStore: secureStore,
       deviceId: 'dev-1',
+    );
+  }
+
+  FakeCustomerAuthGateway gatewayWith({
+    String accessToken = 'access-1',
+    String? refreshToken = 'refresh-1',
+    String sub = 'gid://shopify/Customer/1',
+    String? email,
+    DateTime? expiresAt,
+  }) {
+    return FakeCustomerAuthGateway(
+      loginResult: CustomerAuthResult(
+        accessToken: accessToken,
+        refreshToken: refreshToken,
+        idToken: _fakeIdToken(sub: sub, email: email),
+        accessTokenExpiresAt: expiresAt ?? DateTime.utc(2026, 1, 1, 1),
+      ),
     );
   }
 
@@ -153,6 +195,205 @@ void main() {
 
       final session = await repoWith(gateway).login();
       expect(await sessions.latestFor(session.account.localAccountId), isNull);
+    });
+  });
+
+  group('CustomerSessionRepository.login identity', () {
+    test('the Customer Account API answer wins over the id token claims',
+        () async {
+      // The id token is decoded without verifying its signature, so it is the
+      // fallback, not the source of truth — `customer_identity.dart`.
+      final gateway = gatewayWith(
+        sub: 'gid://shopify/Customer/claims',
+        email: 'stale@example.com',
+      );
+      final identityService = FakeCustomerIdentityService(
+        identity: const CustomerIdentity(
+          shopifyCustomerId: 'gid://shopify/Customer/api',
+          email: 'real@example.com',
+          displayName: 'Ana Ruiz',
+        ),
+      );
+
+      final session = await repoWith(
+        gateway,
+        identityService: identityService,
+      ).login();
+
+      expect(identityService.calls, 1);
+      expect(identityService.lastAccessToken, 'access-1');
+      expect(session.account.shopifyCustomerId, 'gid://shopify/Customer/api');
+      expect(session.account.email, 'real@example.com');
+      expect(session.account.displayName, 'Ana Ruiz');
+    });
+
+    test('an offline identity call still signs the shopper in, from claims',
+        () async {
+      final gateway = gatewayWith(
+        sub: 'gid://shopify/Customer/1',
+        email: 'shopper@example.com',
+      );
+      final identityService = FakeCustomerIdentityService(
+        error: const CustomerAuthException(CustomerAuthErrorKind.offline),
+      );
+
+      final session = await repoWith(
+        gateway,
+        identityService: identityService,
+      ).login();
+
+      expect(session.account.shopifyCustomerId, 'gid://shopify/Customer/1');
+      expect(session.account.email, 'shopper@example.com');
+    });
+
+    test('a rejected access token fails the login instead of creating an account',
+        () async {
+      final identityService = FakeCustomerIdentityService(
+        error: const CustomerAuthException(
+          CustomerAuthErrorKind.sessionExpired,
+        ),
+      );
+
+      await expectLater(
+        repoWith(gatewayWith(), identityService: identityService).login(),
+        throwsA(
+          isA<CustomerAuthException>().having(
+            (e) => e.kind,
+            'kind',
+            CustomerAuthErrorKind.sessionExpired,
+          ),
+        ),
+      );
+      expect(await db.select(db.accounts).get(), isEmpty);
+      final device = await devices.byId('dev-1');
+      expect(device?.accountId, isNull);
+    });
+
+    test('no identity service and no id token is a failure, not a null id',
+        () async {
+      final gateway = FakeCustomerAuthGateway(
+        loginResult: const CustomerAuthResult(
+          accessToken: 'access-1',
+          refreshToken: 'refresh-1',
+          idToken: null,
+          accessTokenExpiresAt: null,
+        ),
+      );
+
+      await expectLater(
+        repoWith(gateway).login(),
+        throwsA(isA<CustomerAuthException>()),
+      );
+    });
+  });
+
+  group('CustomerSessionRepository.accessTokenFor', () {
+    test('reuses the in-memory token from login instead of refreshing',
+        () async {
+      final gateway = gatewayWith(
+        expiresAt: DateTime.now().toUtc().add(const Duration(hours: 1)),
+      );
+      final repo = repoWith(gateway);
+      final session = await repo.login();
+
+      final token = await repo.accessTokenFor(session.account.localAccountId);
+
+      expect(token, 'access-1');
+      expect(gateway.refreshCalls, 0);
+    });
+
+    test('refreshes a token that is already inside the expiry headroom',
+        () async {
+      final gateway = gatewayWith(
+        expiresAt: DateTime.now().toUtc().add(const Duration(seconds: 30)),
+      );
+      final repo = repoWith(gateway);
+      final session = await repo.login();
+      gateway.refreshResult = CustomerAuthResult(
+        accessToken: 'access-2',
+        refreshToken: 'refresh-2',
+        idToken: null,
+        accessTokenExpiresAt: DateTime.now().toUtc().add(
+              const Duration(hours: 1),
+            ),
+      );
+
+      final token = await repo.accessTokenFor(session.account.localAccountId);
+
+      expect(token, 'access-2');
+      expect(gateway.refreshCalls, 1);
+    });
+
+    test('concurrent callers share one refresh (single-flight)', () async {
+      // Shopify rotates the refresh token on use, so a second parallel
+      // exchange would spend a token the first one already consumed and the
+      // loser would sign the shopper out for no reason.
+      final gateway = gatewayWith(
+        expiresAt: DateTime.now().toUtc().subtract(const Duration(minutes: 5)),
+      );
+      final repo = repoWith(gateway);
+      final session = await repo.login();
+      final accountId = session.account.localAccountId;
+
+      final tokens = await Future.wait([
+        repo.accessTokenFor(accountId),
+        repo.accessTokenFor(accountId),
+        repo.refreshAccessToken(accountId),
+      ]);
+
+      expect(gateway.refreshCalls, 1);
+      expect(tokens, everyElement('access-1'));
+
+      // The single-flight latch clears once it settles, so a later call still
+      // reaches Shopify.
+      await repo.refreshAccessToken(accountId);
+      expect(gateway.refreshCalls, 2);
+    });
+
+    test('a failed refresh does not wedge the latch shut', () async {
+      final gateway = gatewayWith(
+        expiresAt: DateTime.now().toUtc().subtract(const Duration(minutes: 5)),
+      );
+      final repo = repoWith(gateway);
+      final session = await repo.login();
+      final accountId = session.account.localAccountId;
+      await secureStore.delete('customer_auth/refresh_token/$accountId');
+
+      await expectLater(
+        repo.accessTokenFor(accountId),
+        throwsA(isA<NoActiveSessionException>()),
+      );
+
+      // The latch has to clear on failure too, or one lost refresh would
+      // leave the shopper permanently unable to get a token.
+      await secureStore.write(
+        'customer_auth/refresh_token/$accountId',
+        'refresh-restored',
+      );
+      expect(await repo.accessTokenFor(accountId), 'access-1');
+      expect(gateway.lastRefreshTokenRequested, 'refresh-restored');
+    });
+  });
+
+  group('CustomerSessionRepository.hasUsableLocalSession', () {
+    test('true after login, false once the refresh token is gone', () async {
+      final repo = repoWith(gatewayWith());
+      final session = await repo.login();
+      final accountId = session.account.localAccountId;
+
+      expect(await repo.hasUsableLocalSession(accountId), isTrue);
+
+      // What an OS-level credential reset or a reinstall looks like: the Drift
+      // rows survive, the Keychain entry does not.
+      secureStore.values.clear();
+      expect(await repo.hasUsableLocalSession(accountId), isFalse);
+    });
+
+    test('false for an account that never logged in', () async {
+      expect(
+        await repoWith(gatewayWith()).hasUsableLocalSession('nobody'),
+        isFalse,
+      );
     });
   });
 

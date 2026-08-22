@@ -16,6 +16,16 @@ CatalogSourceType _sourceTypeFromId(String source) {
       return CatalogSourceType.guessUs;
     case 'steve_madden_us':
       return CatalogSourceType.steveMaddenUs;
+    case 'marc_jacobs_us':
+      return CatalogSourceType.marcJacobsUs;
+    case 'tory_burch_us':
+      return CatalogSourceType.toryBurchUs;
+    case 'kate_spade_us':
+      return CatalogSourceType.kateSpadeUs;
+    case 'guess_factory_us':
+      return CatalogSourceType.guessFactoryUs;
+    case 'gp_mcallen_perfumes':
+      return CatalogSourceType.gpMcallenPerfumes;
     default:
       throw ArgumentError.value(
         source,
@@ -53,16 +63,36 @@ Money? _priceFromJson(Object? raw) {
   return Money(amount: amount.toDouble(), currency: Currency.usd);
 }
 
+Money? _retailPriceFromJson(Object? raw) {
+  if (raw is! Map<String, dynamic>) return null;
+  final amount = raw['amount'];
+  if (amount is! num || raw['currency'] != 'MXN') return null;
+  return Money(amount: amount.toDouble(), currency: Currency.mxn);
+}
+
+CatalogVertical _verticalFromJson(Object? raw) {
+  switch (raw) {
+    case 'bags_wallets':
+      return CatalogVertical.bagsWallets;
+    case 'perfumes':
+      return CatalogVertical.perfumes;
+    default:
+      return CatalogVertical.general;
+  }
+}
+
 List<CatalogVariant> _variantsFromJson(Object? raw) {
   if (raw is! List<dynamic>) return const [];
   return raw.whereType<Map<String, dynamic>>().map((json) {
+    final sourcePrice = _priceFromJson(json['price']);
     return CatalogVariant(
       variantId: '${json['variantId'] ?? ''}',
       sku: json['sku'] as String?,
       colorName: json['colorName'] as String?,
       colorCode: json['colorCode'] as String?,
       imageUrl: json['imageUrl'] as String?,
-      price: _priceFromJson(json['price']),
+      price: _retailPriceFromJson(json['suggestedRetailPrice']) ?? sourcePrice,
+      sourcePrice: sourcePrice,
       availability: _availabilityFromJson(json['availability']),
       detailUrl: '${json['detailUrl'] ?? ''}',
     );
@@ -77,6 +107,16 @@ List<CatalogVariant> _variantsFromJson(Object? raw) {
 /// that as a schema-version mismatch, not silently drop the field.
 CatalogItem catalogItemFromExternalJson(Map<String, dynamic> json) {
   final rawObservedAt = json['lastObservedAt'];
+  final sourcePrice = _priceFromJson(json['price']);
+  final commission = json['commission'];
+  final commissionRate =
+      commission is Map<String, dynamic> && commission['rate'] is num
+          ? (commission['rate'] as num).toDouble()
+          : null;
+  final commissionRule =
+      commission is Map<String, dynamic> && commission['rule'] is String
+          ? commission['rule'] as String
+          : null;
 
   return CatalogItem(
     sourceScopedId: json['sourceScopedId'] as String,
@@ -86,7 +126,11 @@ CatalogItem catalogItemFromExternalJson(Map<String, dynamic> json) {
     brand: '${json['brand'] ?? ''}',
     category: json['category'] as String?,
     imageUrl: json['imageUrl'] as String?,
-    price: _priceFromJson(json['price']),
+    price: _retailPriceFromJson(json['suggestedRetailPrice']) ?? sourcePrice,
+    sourcePrice: sourcePrice,
+    commissionRate: commissionRate,
+    commissionRule: commissionRule,
+    vertical: _verticalFromJson(json['vertical']),
     availability: _availabilityFromJson(json['availability']),
     detailUrl: json['detailUrl'] as String,
     marketRestriction: MarketRestriction.unitedStates,

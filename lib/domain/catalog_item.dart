@@ -3,8 +3,8 @@
 /// [Product] (`domain/product.dart`) stays a *raw Shopify entity* — see its
 /// own doc comment. [CatalogItem] is the type the mixed feed, the home
 /// screen and recommendations actually work with, whether the item came from
-/// Monetta's own Shopify catalog or from an owner-procurement source (the US
-/// Coach / Michael Kors / GUESS / Steve Madden catalog monitor — see
+/// Monetta's own Shopify catalog or from an owner-procurement source (the
+/// selected US bag, wallet and GP McAllen perfume catalog monitor — see
 /// `lib/data/external_catalog/README.md`). Keeping the two types distinct
 /// means a Shopify product and a scraped listing can never be silently
 /// confused with each other: there is no `CatalogItem.fromShopify()` that
@@ -22,9 +22,16 @@ enum CatalogSourceType {
   michaelKorsUs,
   guessUs,
   steveMaddenUs,
+  marcJacobsUs,
+  toryBurchUs,
+  kateSpadeUs,
+  guessFactoryUs,
+  gpMcallenPerfumes,
 }
 
 enum Currency { mxn, usd }
+
+enum CatalogVertical { general, bagsWallets, perfumes }
 
 enum CatalogAvailability { inStock, outOfStock, unknown }
 
@@ -62,6 +69,7 @@ class CatalogVariant {
     required this.price,
     required this.availability,
     required this.detailUrl,
+    this.sourcePrice,
   });
 
   final String variantId;
@@ -70,6 +78,10 @@ class CatalogVariant {
   final String? colorCode;
   final String? imageUrl;
   final Money? price;
+
+  /// Merchant-listed price before Monetta's commission. For external items
+  /// [price] may be the suggested MXN retail price while this remains USD.
+  final Money? sourcePrice;
   final CatalogAvailability availability;
   final String detailUrl;
 
@@ -93,6 +105,10 @@ class CatalogItem {
     required this.purchaseMode,
     this.shopifyProductId,
     this.variants = const [],
+    this.vertical = CatalogVertical.general,
+    this.sourcePrice,
+    this.commissionRate,
+    this.commissionRule,
   });
 
   /// Unique within [source]; never assumed unique across sources. Monetta
@@ -112,6 +128,10 @@ class CatalogItem {
   /// have a non-null price (`data/shopify/catalog_item_mapper.dart`); see
   /// `app/theme.dart#formatCatalogMoney` for how the UI renders the null case.
   final Money? price;
+  final Money? sourcePrice;
+  final double? commissionRate;
+  final String? commissionRule;
+  final CatalogVertical vertical;
   final CatalogAvailability availability;
 
   /// For a Monetta item this is the in-app product route; for an external
@@ -160,6 +180,17 @@ const Map<CatalogSourceType, Set<String>> kAllowedExternalDetailHosts = {
   CatalogSourceType.steveMaddenUs: {
     'stevemadden.com',
     'www.stevemadden.com',
+  },
+  CatalogSourceType.marcJacobsUs: {'marcjacobs.com', 'www.marcjacobs.com'},
+  CatalogSourceType.toryBurchUs: {'toryburch.com', 'www.toryburch.com'},
+  CatalogSourceType.kateSpadeUs: {'katespade.com', 'www.katespade.com'},
+  CatalogSourceType.guessFactoryUs: {
+    'guessfactory.com',
+    'www.guessfactory.com',
+  },
+  CatalogSourceType.gpMcallenPerfumes: {
+    'gpmcallen.com',
+    'www.gpmcallen.com',
   },
 };
 

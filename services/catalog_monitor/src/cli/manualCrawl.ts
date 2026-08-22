@@ -22,7 +22,7 @@ import { logger } from '../logger.js';
 import { getPool, closePool } from '../db/pool.js';
 import { PgProductRepository } from '../db/pgProductRepository.js';
 import { PgCrawlRunRepository } from '../db/pgCrawlRunRepository.js';
-import { allAdapters, adapterFor } from '../adapters/registry.js';
+import { adapterFor } from '../adapters/registry.js';
 import { crawlSourceWithRobotsGate } from '../crawl/guardedCrawl.js';
 import { DomainRateLimiter } from '../crawl/rateLimiter.js';
 import { liveFetch } from '../crawl/httpFetcher.js';
@@ -30,17 +30,35 @@ import { renderWithPlaywright } from '../crawl/playwrightFallback.js';
 import type { SourceId } from '../domain/types.js';
 
 interface CliArgs {
-  readonly brand: 'coach' | 'michael_kors' | 'guess' | 'steve_madden' | 'all';
+  readonly brand: BrandSlug | 'all';
   readonly limit: number | undefined;
   readonly dryRun: boolean;
 }
 
-const BRAND_TO_SOURCE: Record<Exclude<CliArgs['brand'], 'all'>, SourceId> = {
+type BrandSlug =
+  | 'coach'
+  | 'michael_kors'
+  | 'guess'
+  | 'steve_madden'
+  | 'marc_jacobs'
+  | 'tory_burch'
+  | 'kate_spade'
+  | 'guess_factory'
+  | 'gp_mcallen';
+
+const BRAND_TO_SOURCE: Record<BrandSlug, SourceId> = {
   coach: 'coach_us',
   michael_kors: 'michael_kors_us',
   guess: 'guess_us',
   steve_madden: 'steve_madden_us',
+  marc_jacobs: 'marc_jacobs_us',
+  tory_burch: 'tory_burch_us',
+  kate_spade: 'kate_spade_us',
+  guess_factory: 'guess_factory_us',
+  gp_mcallen: 'gp_mcallen_perfumes',
 };
+
+const VALID_BRANDS = new Set<string>([...Object.keys(BRAND_TO_SOURCE), 'all']);
 
 export function parseArgs(argv: readonly string[]): CliArgs {
   let brand: CliArgs['brand'] = 'all';
@@ -51,18 +69,12 @@ export function parseArgs(argv: readonly string[]): CliArgs {
     const arg = argv[i];
     if (arg === '--brand') {
       const value = argv[++i];
-      if (
-        value !== 'coach' &&
-        value !== 'michael_kors' &&
-        value !== 'guess' &&
-        value !== 'steve_madden' &&
-        value !== 'all'
-      ) {
+      if (value === undefined || !VALID_BRANDS.has(value)) {
         throw new Error(
-          `--brand must be coach|michael_kors|guess|steve_madden|all, got "${value}"`,
+          `--brand must be ${[...VALID_BRANDS].join('|')}, got "${value}"`,
         );
       }
-      brand = value;
+      brand = value as CliArgs['brand'];
     } else if (arg === '--limit') {
       const value = Number.parseInt(argv[++i] ?? '', 10);
       if (!Number.isFinite(value) || value <= 0) {
@@ -88,8 +100,9 @@ async function main(): Promise<void> {
   const args = parseArgs(process.argv.slice(2));
   const config = loadConfig();
 
-  const sourceIds: SourceId[] =
-    args.brand === 'all' ? allAdapters().map((a) => a.source.id) : [BRAND_TO_SOURCE[args.brand]];
+  const sourceIds: SourceId[] = args.brand === 'all'
+    ? [...config.enabledSourceIds]
+    : [BRAND_TO_SOURCE[args.brand]];
 
   const pool = getPool();
   const products = new PgProductRepository(pool);

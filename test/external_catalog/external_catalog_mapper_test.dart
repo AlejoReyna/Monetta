@@ -93,6 +93,65 @@ void main() {
       expect(item.source, CatalogSourceType.steveMaddenUs);
     });
 
+    test('maps the new fashion and perfume sources', () {
+      final cases = {
+        'marc_jacobs_us': CatalogSourceType.marcJacobsUs,
+        'tory_burch_us': CatalogSourceType.toryBurchUs,
+        'kate_spade_us': CatalogSourceType.kateSpadeUs,
+        'guess_factory_us': CatalogSourceType.guessFactoryUs,
+        'gp_mcallen_perfumes': CatalogSourceType.gpMcallenPerfumes,
+      };
+      for (final entry in cases.entries) {
+        final item = catalogItemFromExternalJson(
+          _coachItemJson(overrides: {'source': entry.key}),
+        );
+        expect(item.source, entry.value);
+      }
+    });
+
+    test('uses suggested MXN retail price while preserving the USD source cost',
+        () {
+      final item = catalogItemFromExternalJson(
+        _coachItemJson(
+          overrides: {
+            'vertical': 'bags_wallets',
+            'suggestedRetailPrice': {'amount': 7980, 'currency': 'MXN'},
+            'commission': {'rate': 0.14, 'rule': 'high_value'},
+            'variants': [
+              {
+                'variantId': 'C8879:B4BK',
+                'sku': 'C8879 B4/BK',
+                'colorName': 'Black',
+                'colorCode': 'B4BK',
+                'imageUrl': null,
+                'price': {'amount': 320, 'currency': 'USD'},
+                'suggestedRetailPrice': {'amount': 7296, 'currency': 'MXN'},
+                'availability': 'inStock',
+                'detailUrl': 'https://www.coach.com/products/tabby/C8879.html',
+              },
+            ],
+          },
+        ),
+      );
+
+      expect(item.price!.currency, Currency.mxn);
+      expect(item.price!.amount, 7980);
+      expect(item.sourcePrice!.currency, Currency.usd);
+      expect(item.sourcePrice!.amount, 350);
+      expect(item.commissionRate, 0.14);
+      expect(item.commissionRule, 'high_value');
+      expect(item.vertical, CatalogVertical.bagsWallets);
+      expect(item.variants.single.price!.currency, Currency.mxn);
+      expect(item.variants.single.sourcePrice!.currency, Currency.usd);
+    });
+
+    test('maps GP McAllen listings to the perfume vertical', () {
+      final item = catalogItemFromExternalJson(
+        _coachItemJson(overrides: {'vertical': 'perfumes'}),
+      );
+      expect(item.vertical, CatalogVertical.perfumes);
+    });
+
     test('maps a null price to null rather than a fabricated \$0', () {
       final item = catalogItemFromExternalJson(
         _coachItemJson(overrides: {'price': null}),

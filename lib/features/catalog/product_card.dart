@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../domain/product.dart';
@@ -33,7 +34,6 @@ class ProductCard extends StatelessWidget {
     final facets = store.facetsFor(product.id);
     final brand = facets?.brand?.value;
     final wishlisted = store.wishlist.contains(product.id);
-    final second = product.images.length > 1 ? product.images[1] : null;
 
     return GestureDetector(
       onTap: () => openProduct(context, product),
@@ -46,8 +46,10 @@ class ProductCard extends StatelessWidget {
               fit: StackFit.expand,
               children: [
                 _CardImage(
-                  url: product.primaryImage,
-                  secondUrl: second,
+                  urls: product.images,
+                  fallbackLabel: brand == null
+                      ? product.title
+                      : '${brandLabel(brand)} · ${product.title}',
                 ),
                 if (!product.isInStock)
                   ColoredBox(
@@ -86,31 +88,39 @@ class ProductCard extends StatelessWidget {
           if (brand != null) ...[
             Text(
               brandLabel(brand).toUpperCase(),
-              style: sans(size: 10.5, weight: FontWeight.w600),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: sans(size: 12, height: 1.3).copyWith(letterSpacing: 0.6),
             ),
-            const SizedBox(height: 3),
+            const SizedBox(height: 2),
           ],
           Text(
-            product.title,
+            cardPieceName(
+              title: product.title,
+              colorSlug: facets?.colors.isEmpty == true
+                  ? null
+                  : facets!.colors.first.value,
+            ),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
-            style: sans(size: 12.5, height: 1.35),
+            style: sans(size: 12, height: 1.35),
           ),
-          const SizedBox(height: 6),
+          const SizedBox(height: 2),
           Wrap(
             spacing: 7,
             runSpacing: 2,
             children: [
               Text(
                 kMoney.format(product.price),
-                style: sans(size: 12, weight: FontWeight.w600),
+                style: sans(size: 12, height: 1.3),
               ),
               if (product.isOnSale)
                 Text(
                   kMoney.format(product.compareAtPrice),
                   style: sans(
-                    size: 11,
+                    size: 12,
                     color: kInkMuted,
+                    height: 1.3,
                     decoration: TextDecoration.lineThrough,
                   ),
                 ),
@@ -136,42 +146,69 @@ void openProduct(BuildContext context, Product product) {
 }
 
 class _CardImage extends StatefulWidget {
-  const _CardImage({required this.url, this.secondUrl});
+  const _CardImage({required this.urls, required this.fallbackLabel});
 
-  final String? url;
-  final String? secondUrl;
+  final List<String> urls;
+  final String fallbackLabel;
 
   @override
   State<_CardImage> createState() => _CardImageState();
 }
 
 class _CardImageState extends State<_CardImage> {
+  int _activeIndex = 0;
   bool _showSecond = false;
+
+  List<String> get _candidates => [
+        for (final url in widget.urls)
+          if (url.trim().isNotEmpty) url,
+      ];
+
+  void _advance() {
+    if (_activeIndex + 1 >= _candidates.length || !mounted) return;
+    setState(() {
+      _activeIndex += 1;
+      _showSecond = false;
+    });
+  }
+
+  @override
+  void didUpdateWidget(covariant _CardImage oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.urls != widget.urls) {
+      _activeIndex = 0;
+      _showSecond = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
-    final url = _showSecond ? (widget.secondUrl ?? widget.url) : widget.url;
+    final candidates = _candidates;
+    final url = candidates.isEmpty ? null : candidates[_activeIndex];
     return GestureDetector(
-      onLongPressStart:
-          widget.secondUrl == null ? null : (_) => setState(() => _showSecond = true),
-      onLongPressEnd:
-          widget.secondUrl == null ? null : (_) => setState(() => _showSecond = false),
+      onLongPressStart: candidates.length < 2
+          ? null
+          : (_) => setState(() => _showSecond = true),
+      onLongPressEnd: candidates.length < 2
+          ? null
+          : (_) => setState(() => _showSecond = false),
       child: ColoredBox(
         color: kMist,
         child: url == null
-            ? const Center(
-                child: Icon(
-                  Icons.image_not_supported_outlined,
-                  size: 20,
-                  color: kInkMuted,
-                ),
+            ? MonettaImage(
+                url: null,
+                fallbackLabel: widget.fallbackLabel,
               )
             : AnimatedSwitcher(
                 duration: reduceMotion(context) ? Duration.zero : kSwap,
                 child: MonettaImage(
                   key: ValueKey(url),
-                  url: url,
+                  url: _showSecond && candidates.length > 1
+                      ? candidates[1]
+                      : url,
                   cacheWidth: MediaUrl.cardWidth,
+                  fallbackLabel: widget.fallbackLabel,
+                  onFailed: _advance,
                 ),
               ),
       ),

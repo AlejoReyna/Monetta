@@ -27,6 +27,11 @@ const Map<CatalogSourceType, String> _kExternalBrandSlugs = {
   CatalogSourceType.michaelKorsUs: 'michael_kors',
   CatalogSourceType.guessUs: 'guess',
   CatalogSourceType.steveMaddenUs: 'steve_madden',
+  CatalogSourceType.marcJacobsUs: 'marc_jacobs',
+  CatalogSourceType.toryBurchUs: 'tory_burch',
+  CatalogSourceType.kateSpadeUs: 'kate_spade',
+  CatalogSourceType.guessFactoryUs: 'guess_factory',
+  CatalogSourceType.gpMcallenPerfumes: 'perfumes',
 };
 
 /// Best-effort English → Monetta category slug. Deliberately small and
@@ -45,6 +50,12 @@ const Map<String, String> _kExternalCategorySlugs = {
   'cosmetic cases': 'cosmetiquera',
   'jewelry': 'accesorio',
   'accessories': 'accesorio',
+  'perfume': 'perfume',
+  'perfumes': 'perfume',
+  'cologne': 'perfume',
+  'colognes': 'perfume',
+  'fragrance': 'perfume',
+  'fragrances': 'perfume',
 };
 
 /// USD-only price-band thresholds — see the library doc comment for why
@@ -69,14 +80,20 @@ String externalPriceBandFor(double usdAmount) {
 }
 
 /// Builds the [CanonicalFacets] the recommender scores an external
-/// [CatalogItem] against. [item.price] being `null` (Fix 8) simply omits the
+/// [CatalogItem] against. A missing USD source price simply omits the
 /// price-band facet — an unknown price contributes no price-tier signal
 /// rather than a fabricated one.
 CanonicalFacets externalItemFacets(CatalogItem item) {
   final brandSlug = _kExternalBrandSlugs[item.source];
   final categorySlug =
       _kExternalCategorySlugs[item.category?.toLowerCase().trim() ?? ''];
-  final price = item.price;
+  // A commission-enabled response presents MXN in `price` and preserves the
+  // merchant's USD amount in `sourcePrice`. Recommendation price bands are
+  // intentionally USD-only, so never feed the suggested MXN value into the
+  // USD thresholds.
+  final candidatePrice = item.sourcePrice ?? item.price;
+  final sourcePrice =
+      candidatePrice?.currency == Currency.usd ? candidatePrice : null;
 
   return CanonicalFacets(
     productId: item.sourceScopedId,
@@ -86,7 +103,8 @@ CanonicalFacets externalItemFacets(CatalogItem item) {
     // Silhouette, color and pattern are not part of the wire schema — no
     // fabricated signal. An unknown price (Fix 8) contributes no price-band
     // facet at all, rather than a fabricated tier.
-    priceBand: price == null ? null : externalPriceBandFor(price.amount),
+    priceBand:
+        sourcePrice == null ? null : externalPriceBandFor(sourcePrice.amount),
     onSale: false, // No historical price tracking on external sources yet.
     inStock: item.availability == CatalogAvailability.inStock,
     newArrival: false,

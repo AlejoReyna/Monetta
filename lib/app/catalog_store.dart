@@ -66,8 +66,10 @@ class CatalogStore extends ChangeNotifier {
   /// [catalogSync] is the real `data/shopify` delta sync, null when no
   /// usable `StorefrontConfig` exists — today's honest default. See
   /// `lib/data/repositories/catalog_repository.dart`.
-  CatalogStore({required AppDatabase database, shopify.CatalogSync? catalogSync})
-      : _database = database,
+  CatalogStore({
+    required AppDatabase database,
+    shopify.CatalogSync? catalogSync,
+  })  : _database = database,
         _catalogSyncOverride = catalogSync,
         _cacheStore = CatalogCacheStore(database),
         _cursorStore = SyncCursorStore(database),
@@ -153,6 +155,10 @@ class CatalogStore extends ChangeNotifier {
     // A no-op once the cache already has rows — the common case after the
     // very first app open.
     await _catalogRepository.seedFromAssetIfEmpty(catalogJson);
+    // Existing installs may have a partial cache from an older snapshot.
+    // Keep the cache-first startup path, but add products that are present in
+    // the bundled catalog and missing locally.
+    await _catalogRepository.addMissingFromAsset(catalogJson);
 
     final snapshot = await _catalogRepository.loadCached();
     products = snapshot.products;
@@ -271,7 +277,11 @@ class CatalogStore extends ChangeNotifier {
     return out;
   }
 
-  List<Product> moreFromBrand(String brandSlug, {String? excluding, int limit = 8}) {
+  List<Product> moreFromBrand(
+    String brandSlug, {
+    String? excluding,
+    int limit = 8,
+  }) {
     final out = <Product>[];
     for (final product in products) {
       if (product.id == excluding) continue;
@@ -282,7 +292,9 @@ class CatalogStore extends ChangeNotifier {
     return out;
   }
 
-  Product? firstInStockWhere(bool Function(Product product, CanonicalFacets? facets) test) {
+  Product? firstInStockWhere(
+    bool Function(Product product, CanonicalFacets? facets) test,
+  ) {
     for (final product in products) {
       if (!product.isInStock || product.primaryImage == null) continue;
       if (test(product, facetsById[product.id])) return product;

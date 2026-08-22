@@ -35,7 +35,11 @@ void main() {
 
     expect(find.text(product.title), findsWidgets);
     expect(find.text('AGREGAR A LA BOLSA'), findsOneWidget);
-    expect(find.text('APARTAR · ANTICIPO \$400'), findsOneWidget);
+    expect(find.text('APARTAR'), findsOneWidget);
+    expect(
+      find.text('Apártala con \$400 MXN. Tienes 20 días para liquidar.'),
+      findsOneWidget,
+    );
     expect(find.text('Escribir por WhatsApp'), findsOneWidget);
     expect(find.text('Gama'), findsNothing);
     expect(find.text('extracted'), findsNothing);

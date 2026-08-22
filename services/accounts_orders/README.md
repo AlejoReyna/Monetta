@@ -143,6 +143,60 @@ npm test
   the three compliance topics' actual effects on mirrored data.
 - `test/api.test.ts` — the same, over real HTTP against an ephemeral server with real HMAC
   signing, matching `services/catalog_monitor/test/api.test.ts`'s pattern.
+- `test/webhookRoutes.test.ts` — drift guard: every `uri` in every `shopify/shopify.app*.toml`
+  must resolve to a route this server registers. Shopify POSTs to whatever absolute path the
+  deployed config names, and a path with no route 404s silently — for the three mandatory
+  compliance topics that is a compliance failure, not a missing feature. The test POSTs a
+  deliberately wrong signature to each configured path: a real route answers 401, a missing
+  one answers 404.
 
-All three run against in-memory repositories (`test/support/inMemoryRepositories.ts`) — no
+All of them run against in-memory repositories (`test/support/inMemoryRepositories.ts`) — no
 database, no network.
+
+## 11. Deploy (staging)
+
+**Postgres: Neon.** Managed, TLS required by default, and `src/db/pool.ts` hands the
+connection string straight to `pg.Pool`, which honours `?sslmode=require` — no code change.
+
+**App: Fly.io** (`fly.toml`). Migrations only reach `dist/` through the Dockerfile's explicit
+`COPY src/db/migrations ./dist/db/migrations`; `tsc` does not copy `.sql`, and `npm run migrate`
+shells out to `tsx`, a devDependency the runtime stage omits. Fly builds this Dockerfile
+unchanged, so the deployed image is the one `docker-compose` already runs. A buildpack platform
+would produce a container that cannot migrate.
+
+Inside the container the release path is therefore `node dist/db/migrate.js` (wired as Fly's
+`release_command`) and `node dist/api/server.js` — **not** `npm run migrate` / `npm start`,
+which are the local-dev, tsx-on-`src` path.
+
+```bash
+# One-time, by a human with the accounts:
+brew install flyctl
+fly auth login
+fly launch --no-deploy --copy-config --name monetta-accounts-staging   # in this directory
+
+# Neon: create a project, copy its pooled connection string.
+fly secrets set DATABASE_URL='postgres://…@…neon.tech/…?sslmode=require'
+
+# The Shopify app secret. Dev Dashboard → monetta-staging → Configuración →
+# Credenciales → Secreto. Paste it yourself; it belongs in no file and no chat.
+fly secrets set SHOPIFY_APP_CLIENT_SECRET='shpss_…'
+
+fly deploy
+fly status                       # confirm the release_command ran and checks are passing
+curl -fsS https://monetta-accounts-staging.fly.dev/livez
+```
+
+An empty `SHOPIFY_APP_CLIENT_SECRET` is not a crash — `config.ts` keeps the service up and
+every webhook route fails closed with 401 (see § 3). That is the correct posture, and it
+means the app boots fine before the secret is set.
+
+Then point Shopify at it: replace `REPLACE_STAGING_BACKEND_HOST` in
+`shopify/shopify.app.staging.toml`, and from `shopify/`:
+
+```bash
+npm_config_cache=../.npm-cache npx shopify app config validate --config staging
+npm_config_cache=../.npm-cache npx shopify app deploy --config staging --no-release
+```
+
+Review the diff, release, then install the app on `monetta-staging.myshopify.com` only —
+never on the production store (`monetta.mx` / `fakcei-n9` / admin handle `monetta-2`).

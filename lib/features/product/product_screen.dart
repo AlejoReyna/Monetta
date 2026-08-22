@@ -33,7 +33,7 @@ class _ProductScreenState extends State<ProductScreen> {
   final PageController _gallery = PageController();
   int _page = 0;
   int _variantIndex = 0;
-  final Set<String> _open = {'envio', 'apartado'};
+  final Set<String> _open = <String>{};
 
   @override
   void dispose() {
@@ -117,7 +117,8 @@ class _ProductScreenState extends State<ProductScreen> {
         brandSlug: facets?.brand?.value,
         categorySlug: facets?.category?.value,
         silhouetteSlug: facets?.silhouette?.value,
-        colorSlug: facets?.colors.isEmpty == true ? null : facets!.colors.first.value,
+        colorSlug:
+            facets?.colors.isEmpty == true ? null : facets!.colors.first.value,
       );
     }();
     final recent = store.recentlyViewed(excluding: product.id);
@@ -216,7 +217,7 @@ class _ProductScreenState extends State<ProductScreen> {
                         kMoney.format(price),
                         style: sans(size: 17, weight: FontWeight.w500),
                       ),
-                      if (onSale) ...[
+                      if (onSale)
                         Text(
                           kMoney.format(compare),
                           style: sans(
@@ -225,27 +226,15 @@ class _ProductScreenState extends State<ProductScreen> {
                             decoration: TextDecoration.lineThrough,
                           ),
                         ),
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 7,
-                            vertical: 3,
-                          ),
-                          decoration: BoxDecoration(
-                            border: Border.all(color: kGold, width: 0.8),
-                          ),
-                          child: Text(
-                            '-${(((compare - price) / compare) * 100).round()}%',
-                            style: eyebrow(
-                              size: 9.5,
-                              color: kGold,
-                              weight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
                     ],
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
+                  if (inStock)
+                    Text(
+                      kApartadoSentence,
+                      style: sans(size: 13, height: 1.45),
+                    ),
+                  const SizedBox(height: 8),
                   Text(
                     inStock
                         ? 'Disponible · envío 3 a 5 días · gratis desde ${kMoney.format(kFreeShippingThreshold)}'
@@ -264,9 +253,8 @@ class _ProductScreenState extends State<ProductScreen> {
                           GestureDetector(
                             onTap: () => setState(() => _variantIndex = i),
                             child: AnimatedContainer(
-                              duration: reduceMotion(context)
-                                  ? Duration.zero
-                                  : kSwap,
+                              duration:
+                                  reduceMotion(context) ? Duration.zero : kSwap,
                               padding: const EdgeInsets.symmetric(
                                 horizontal: 12,
                                 vertical: 8,
@@ -282,9 +270,8 @@ class _ProductScreenState extends State<ProductScreen> {
                                 selectable[i].title.toUpperCase(),
                                 style: eyebrow(
                                   size: 8.5,
-                                  color: i == _variantIndex
-                                      ? Colors.white
-                                      : kInk,
+                                  color:
+                                      i == _variantIndex ? Colors.white : kInk,
                                 ),
                               ),
                             ),
@@ -296,47 +283,38 @@ class _ProductScreenState extends State<ProductScreen> {
                     const SizedBox(height: 28),
                     Text(description, style: sans(size: 13.5, height: 1.6)),
                   ],
+                  const SizedBox(height: 28),
+                  _FactLink(
+                    label: 'Detalles',
+                    open: _open.contains('detalles'),
+                    onTap: () => setState(() {
+                      _open.contains('detalles')
+                          ? _open.remove('detalles')
+                          : _open.add('detalles');
+                    }),
+                    child: _Details(facets: facets),
+                  ),
+                  _FactLink(
+                    label: 'Envío y cambios',
+                    open: _open.contains('envio'),
+                    onTap: () => setState(() {
+                      _open.contains('envio')
+                          ? _open.remove('envio')
+                          : _open.add('envio');
+                    }),
+                    child: Text(
+                      'Envío a todo México en 3 a 5 días hábiles, por DHL, FedEx o Estafeta. '
+                      'Gratis desde ${kMoney.format(kFreeShippingThreshold)}. '
+                      'Si la pieza no es lo que esperabas, escríbenos por WhatsApp y lo resolvemos.',
+                      style: sans(size: 13, height: 1.6),
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  UnderlineLink(
+                    label: 'Escribir por WhatsApp',
+                    onTap: () => _openConcierge(product),
+                  ),
                 ],
-              ),
-            ),
-            const SizedBox(height: 28),
-            _Accordion(
-              title: 'Detalles',
-              open: _open.contains('detalles'),
-              onToggle: () => setState(() {
-                _open.contains('detalles')
-                    ? _open.remove('detalles')
-                    : _open.add('detalles');
-              }),
-              child: _Details(facets: facets),
-            ),
-            _Accordion(
-              title: 'Envío y cambios',
-              open: _open.contains('envio'),
-              onToggle: () => setState(() {
-                _open.contains('envio')
-                    ? _open.remove('envio')
-                    : _open.add('envio');
-              }),
-              child: Text(
-                'Envío a todo México en 3 a 5 días hábiles, por DHL, FedEx o Estafeta. '
-                'Gratis desde ${kMoney.format(kFreeShippingThreshold)}. '
-                'Si la pieza no es lo que esperabas, escríbenos por WhatsApp y lo resolvemos.',
-                style: sans(size: 13, height: 1.6),
-              ),
-            ),
-            _Accordion(
-              title: 'Apartado',
-              open: _open.contains('apartado'),
-              onToggle: () => setState(() {
-                _open.contains('apartado')
-                    ? _open.remove('apartado')
-                    : _open.add('apartado');
-              }),
-              child: Text(
-                'Aparta con \$400 MXN por WhatsApp. Tienes 20 días para liquidar. '
-                'Te confirmamos disponibilidad al momento.',
-                style: sans(size: 13, height: 1.6),
               ),
             ),
             if (related.isNotEmpty) ...[
@@ -369,31 +347,49 @@ class _ProductScreenState extends State<ProductScreen> {
             border: Border(top: kHairline),
           ),
           child: SafeArea(
-            minimum: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+            minimum: const EdgeInsets.fromLTRB(20, 12, 20, 12),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                FilledButton(
-                  onPressed: inStock
-                      ? () {
-                          store.addToBag(product);
-                          showMiniCart(context);
-                        }
-                      : null,
-                  child: Text(
-                    (inStock ? 'Agregar a la bolsa' : 'Agotado').toUpperCase(),
+                Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        kMoney.format(price),
+                        style: sans(size: 16, weight: FontWeight.w500),
+                      ),
+                    ),
+                    if (inStock)
+                      Expanded(
+                        flex: 2,
+                        child: FilledButton(
+                          onPressed: () {
+                            store.addToBag(product);
+                            showMiniCart(context);
+                          },
+                          child: const Text('AGREGAR A LA BOLSA'),
+                        ),
+                      )
+                    else
+                      Expanded(
+                        flex: 2,
+                        child: OutlinedButton(
+                          onPressed: null,
+                          child: Text(
+                            'Agotado'.toUpperCase(),
+                            style: const TextStyle(height: 1.1),
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                if (inStock) ...[
+                  const SizedBox(height: 8),
+                  OutlinedButton(
+                    onPressed: () => _openApartado(product),
+                    child: const Text('APARTAR'),
                   ),
-                ),
-                const SizedBox(height: 10),
-                OutlinedButton(
-                  onPressed: () => _openApartado(product),
-                  child: const Text('APARTAR · ANTICIPO \$400'),
-                ),
-                const SizedBox(height: 12),
-                UnderlineLink(
-                  label: 'Escribir por WhatsApp',
-                  onTap: () => _openConcierge(product),
-                ),
+                ],
               ],
             ),
           ),
@@ -426,45 +422,31 @@ class _Rail extends StatelessWidget {
   }
 }
 
-class _Accordion extends StatelessWidget {
-  const _Accordion({
-    required this.title,
+class _FactLink extends StatelessWidget {
+  const _FactLink({
+    required this.label,
     required this.open,
-    required this.onToggle,
+    required this.onTap,
     required this.child,
   });
 
-  final String title;
+  final String label;
   final bool open;
-  final VoidCallback onToggle;
+  final VoidCallback onTap;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
-    return DecoratedBox(
-      decoration: const BoxDecoration(border: Border(top: kHairline)),
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 14),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          InkWell(
-            onTap: onToggle,
-            child: Padding(
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(title.toUpperCase(), style: eyebrow()),
-                  ),
-                  Text(open ? '–' : '+', style: sans(size: 16)),
-                ],
-              ),
-            ),
-          ),
-          if (open)
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
-              child: child,
-            ),
+          UnderlineLink(label: label, onTap: onTap),
+          if (open) ...[
+            const SizedBox(height: 12),
+            child,
+          ],
         ],
       ),
     );

@@ -112,6 +112,31 @@ void main() {
         ),
         isTrue,
       );
+      final additionalSources = {
+        CatalogSourceType.marcJacobsUs:
+            'https://www.marcjacobs.com/us-en/a-bag/X.html',
+        CatalogSourceType.toryBurchUs:
+            'https://www.toryburch.com/en-us/handbags/tote-bags/a/1.html',
+        CatalogSourceType.kateSpadeUs:
+            'https://www.katespade.com/products/a-bag/X.html',
+        CatalogSourceType.guessFactoryUs:
+            'https://www.guessfactory.com/us/en/handbags/a/X-1.html',
+        CatalogSourceType.gpMcallenPerfumes:
+            'https://www.gpmcallen.com/a-perfume.html',
+      };
+      for (final entry in additionalSources.entries) {
+        expect(
+          isValidExternalDetailUrl(
+            _item(
+              brand: 'Brand',
+              title: 'X',
+              detailUrl: entry.value,
+              source: entry.key,
+            ),
+          ),
+          isTrue,
+        );
+      }
       expect(
         isValidExternalDetailUrl(
           _item(

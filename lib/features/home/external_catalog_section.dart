@@ -14,7 +14,6 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
-import '../catalog/extracted_badge.dart';
 import '../product/external_product_screen.dart';
 
 String externalSourceBadge(CatalogSourceType source) {
@@ -27,6 +26,16 @@ String externalSourceBadge(CatalogSourceType source) {
       return 'GUESS US · USD';
     case CatalogSourceType.steveMaddenUs:
       return 'Steve Madden US · USD';
+    case CatalogSourceType.marcJacobsUs:
+      return 'Marc Jacobs US · USD';
+    case CatalogSourceType.toryBurchUs:
+      return 'Tory Burch US · USD';
+    case CatalogSourceType.kateSpadeUs:
+      return 'Kate Spade US · USD';
+    case CatalogSourceType.guessFactoryUs:
+      return 'GUESS Factory US · USD';
+    case CatalogSourceType.gpMcallenPerfumes:
+      return 'GP McAllen · USD';
     case CatalogSourceType.monettaShopify:
       return '';
   }
@@ -42,6 +51,16 @@ String externalCtaLabel(CatalogSourceType source) {
       return 'Ver en GUESS';
     case CatalogSourceType.steveMaddenUs:
       return 'Ver en Steve Madden';
+    case CatalogSourceType.marcJacobsUs:
+      return 'Ver en Marc Jacobs';
+    case CatalogSourceType.toryBurchUs:
+      return 'Ver en Tory Burch';
+    case CatalogSourceType.kateSpadeUs:
+      return 'Ver en Kate Spade';
+    case CatalogSourceType.guessFactoryUs:
+      return 'Ver en GUESS Factory';
+    case CatalogSourceType.gpMcallenPerfumes:
+      return 'Ver en GP McAllen';
     case CatalogSourceType.monettaShopify:
       return '';
   }
@@ -68,15 +87,31 @@ class ExternalCatalogSection extends StatelessWidget {
         if (aHasColors == bHasColors) return 0;
         return aHasColors ? -1 : 1;
       });
+    final perfumeItems = displayItems
+        .where((item) => item.vertical == CatalogVertical.perfumes)
+        .toList(growable: false);
+    final bagAndWalletItems = displayItems
+        .where((item) => item.vertical != CatalogVertical.perfumes)
+        .toList(growable: false);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeading(
-          kicker: 'Investigación · Estados Unidos',
-          title: 'También en marcas de Estados Unidos',
-        ),
-        _ExternalRail(items: displayItems, openLink: openLink),
+        if (bagAndWalletItems.isNotEmpty) ...[
+          const SectionHeading(
+            kicker: 'Bolsas y carteras · Estados Unidos',
+            title: 'Selección de marcas originales',
+          ),
+          _ExternalRail(items: bagAndWalletItems, openLink: openLink),
+        ],
+        if (perfumeItems.isNotEmpty) ...[
+          if (bagAndWalletItems.isNotEmpty) const SizedBox(height: 12),
+          const SectionHeading(
+            kicker: 'Perfumería · GP McAllen',
+            title: 'Perfumes seleccionados',
+          ),
+          _ExternalRail(items: perfumeItems, openLink: openLink),
+        ],
         const SizedBox(height: 16),
         _Disclosure(generatedAt: generatedAt),
         const SizedBox(height: kSectionGap),
@@ -176,41 +211,30 @@ class _ExternalCardState extends State<_ExternalCard> {
         children: [
           AspectRatio(
             aspectRatio: 3 / 4,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                ColoredBox(
-                  color: kMist,
-                  child: _imageUrl == null
-                      ? const Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 18,
-                            color: kInkMuted,
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          key: ValueKey(_imageUrl),
-                          imageUrl: _imageUrl!,
-                          fit: BoxFit.cover,
-                          fadeInDuration: const Duration(milliseconds: 240),
-                          placeholder: (_, __) =>
-                              const ColoredBox(color: kMist),
-                          errorWidget: (_, __, ___) => const Center(
-                            child: Icon(
-                              Icons.broken_image_outlined,
-                              size: 18,
-                              color: kInkMuted,
-                            ),
-                          ),
+            child: ColoredBox(
+              color: kMist,
+              child: _imageUrl == null
+                  ? const Center(
+                      child: Icon(
+                        Icons.image_not_supported_outlined,
+                        size: 18,
+                        color: kInkMuted,
+                      ),
+                    )
+                  : CachedNetworkImage(
+                      key: ValueKey(_imageUrl),
+                      imageUrl: _imageUrl!,
+                      fit: BoxFit.cover,
+                      fadeInDuration: const Duration(milliseconds: 240),
+                      placeholder: (_, __) => const ColoredBox(color: kMist),
+                      errorWidget: (_, __, ___) => const Center(
+                        child: Icon(
+                          Icons.broken_image_outlined,
+                          size: 18,
+                          color: kInkMuted,
                         ),
-                ),
-                const Positioned(
-                  top: 8,
-                  left: 8,
-                  child: ExtractedBadge(),
-                ),
-              ],
+                      ),
+                    ),
             ),
           ),
           const SizedBox(height: 10),

@@ -40,9 +40,13 @@ void main() {
     expect(find.text('Elige marcas'), findsNothing);
     expect(find.text('¿Qué le gusta?'), findsNothing);
     await tester.pump();
-    expect(find.text('VER CATÁLOGOS'), findsOneWidget);
+    expect(find.text('Ver el catálogo'), findsOneWidget);
     expect(find.text('VER LA PIEZA'), findsNothing);
     expect(find.text('Novedades'), findsOneWidget);
+    expect(
+      find.text('Piezas originales, elegidas una por una.'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('shopper home does not narrate the engine or the scrape',
@@ -66,7 +70,7 @@ void main() {
     expect(find.text('ORDENAR'), findsNothing);
   });
 
-  testWidgets('newest pieces sit directly under a mid-height film',
+  testWidgets('hero media fills its padded card and copy sits underneath',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 2000);
@@ -80,12 +84,48 @@ void main() {
     final newest = [...store.products]
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final heroBox = tester.getRect(find.byKey(const Key('campaign-hero')));
+    final mediaBox = tester.getRect(
+      find.byKey(const ValueKey('campaign-slide-media-0')),
+    );
+    final breathBox = tester.getRect(find.byKey(const Key('editorial-breath')));
     final newsTop = tester.getTopLeft(find.text('Novedades')).dy;
-    expect(newsTop, greaterThan(heroBox.bottom));
-    expect(newsTop - heroBox.bottom, lessThan(80));
-    expect(find.text(newest.first.title), findsWidgets);
-    expect(find.text('VER CATÁLOGOS'), findsOneWidget);
-    final ctaCenter = tester.getCenter(find.text('VER CATÁLOGOS'));
-    expect((ctaCenter.dy - heroBox.center.dy).abs(), lessThan(24));
+    expect(mediaBox.left - heroBox.left, greaterThanOrEqualTo(16));
+    expect(heroBox.right - mediaBox.right, greaterThanOrEqualTo(16));
+    expect(mediaBox.height, greaterThan(320));
+    expect(breathBox.top, closeTo(mediaBox.bottom, 0.5));
+    expect(breathBox.bottom, lessThanOrEqualTo(heroBox.bottom - 28));
+    expect(newsTop, greaterThanOrEqualTo(heroBox.bottom));
+    expect(find.textContaining(newest.first.title), findsWidgets);
+    expect(find.text('Ver el catálogo'), findsOneWidget);
+    final ctaCenter = tester.getCenter(find.text('Ver el catálogo'));
+    expect(ctaCenter.dy, greaterThan(mediaBox.bottom));
+  });
+
+  testWidgets('hero advances to the next of three cards every 3.5 seconds',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 2000);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    await tester.pumpWidget(_app(store));
+    await tester.pump();
+
+    expect(
+      find.text('Piezas originales, elegidas una por una.').hitTestable(),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Nuevas siluetas para todos los días.').hitTestable(),
+      findsNothing,
+    );
+
+    await tester.pump(const Duration(milliseconds: 3500));
+    await tester.pump(const Duration(milliseconds: 500));
+
+    expect(
+      find.text('Nuevas siluetas para todos los días.').hitTestable(),
+      findsOneWidget,
+    );
   });
 }

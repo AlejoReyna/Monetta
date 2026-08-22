@@ -2,7 +2,7 @@
   "name": "@monetta/catalog-monitor",
   "version": "0.1.0",
   "private": true,
-  "description": "Internal prototype: monitors public US Coach, Michael Kors, GUESS, and Steve Madden catalogs once daily and serves owner-procurement candidates. No supplier-authorization gate, affiliate tracking, checkout, or fulfillment.",
+  "description": "Curated owner-procurement catalog monitor for selected US bags, wallets, and GP McAllen perfumes. Tracks inventory and suggested commission pricing; no affiliate checkout or automated fulfillment.",
   "type": "module",
   "engines": {
     "node": ">=22"
