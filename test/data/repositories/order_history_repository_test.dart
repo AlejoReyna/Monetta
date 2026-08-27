@@ -7,13 +7,17 @@ import 'package:monetta_app/data/repositories/order_history_repository.dart';
 
 class _FakeOrderHistoryClient implements OrderHistoryClient {
   _FakeOrderHistoryClient(this.orders);
-  _FakeOrderHistoryClient.throwing() : orders = const [], shouldThrow = true;
+  _FakeOrderHistoryClient.throwing()
+      : orders = const [],
+        shouldThrow = true;
 
   List<MirroredOrder> orders;
   bool shouldThrow = false;
+  String? receivedAccessToken;
 
   @override
-  Future<List<MirroredOrder>> fetchOrders(String shopifyCustomerId) async {
+  Future<List<MirroredOrder>> fetchOrders(String accessToken) async {
+    receivedAccessToken = accessToken;
     if (shouldThrow) throw OrderHistoryException('boom');
     return orders;
   }
@@ -36,18 +40,20 @@ void main() {
   tearDown(() => db.close());
 
   group('OrderHistoryRepository', () {
-    test('canRefresh is false and refresh() is a no-op when not configured', () async {
+    test('canRefresh is false and refresh() is a no-op when not configured',
+        () async {
       final repo = OrderHistoryRepository(
         store: OrderSummaryStore(db),
         config: AccountsOrdersConfig.disabled,
       );
 
       expect(repo.canRefresh, isFalse);
-      await repo.refresh(accountId: 'acct-1', shopifyCustomerId: 'c1');
+      await repo.refresh(accountId: 'acct-1', accessToken: 'access');
       expect(await repo.loadCached('acct-1'), isEmpty);
     });
 
-    test('refresh() unifies real and apartado orders into the local cache', () async {
+    test('refresh() unifies real and apartado orders into the local cache',
+        () async {
       final client = _FakeOrderHistoryClient([
         const MirroredOrder(
           id: 1,
@@ -79,15 +85,20 @@ void main() {
       );
 
       expect(repo.canRefresh, isTrue);
-      await repo.refresh(accountId: 'acct-1', shopifyCustomerId: 'c1');
+      await repo.refresh(accountId: 'acct-1', accessToken: 'access');
+      expect(client.receivedAccessToken, 'access');
 
       final cached = await repo.loadCached('acct-1');
       expect(cached, hasLength(2));
-      expect(cached.map((o) => o.source).toSet(), {'shopify_checkout', 'whatsapp_apartado'});
+      expect(
+        cached.map((o) => o.source).toSet(),
+        {'shopify_checkout', 'whatsapp_apartado'},
+      );
       expect(cached.firstWhere((o) => o.id == '2').attributionCode, 'MN-7K3Q');
     });
 
-    test('a failed refresh preserves the cache rather than clearing it', () async {
+    test('a failed refresh preserves the cache rather than clearing it',
+        () async {
       final store = OrderSummaryStore(db);
       final workingRepo = OrderHistoryRepository(
         store: store,
@@ -106,7 +117,7 @@ void main() {
           ),
         ]),
       );
-      await workingRepo.refresh(accountId: 'acct-1', shopifyCustomerId: 'c1');
+      await workingRepo.refresh(accountId: 'acct-1', accessToken: 'access');
       expect(await store.allForAccount('acct-1'), hasLength(1));
 
       final failingRepo = OrderHistoryRepository(
@@ -114,7 +125,7 @@ void main() {
         config: AccountsOrdersConfig.disabled,
         client: _FakeOrderHistoryClient.throwing(),
       );
-      await failingRepo.refresh(accountId: 'acct-1', shopifyCustomerId: 'c1');
+      await failingRepo.refresh(accountId: 'acct-1', accessToken: 'access');
 
       expect(await store.allForAccount('acct-1'), hasLength(1));
     });

@@ -1,16 +1,17 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/product/external_product_screen.dart';
 
-CatalogItem _item() => CatalogItem(
+CatalogItem _item({String? imageUrl}) => CatalogItem(
       sourceScopedId: 'coach_us:CU068',
       source: CatalogSourceType.coachUs,
       merchant: 'Coach',
       title: 'Brooklyn Shoulder Bag 28',
       brand: 'Coach',
       category: 'Handbags',
-      imageUrl: null,
+      imageUrl: imageUrl,
       price: const Money(amount: 295, currency: Currency.usd),
       availability: CatalogAvailability.inStock,
       detailUrl:
@@ -45,6 +46,22 @@ CatalogItem _item() => CatalogItem(
     );
 
 void main() {
+  testWidgets('external product hero also covers the complete viewport',
+      (tester) async {
+    await tester.pumpWidget(
+      MaterialApp(
+        home: ExternalProductScreen(
+          item: _item(imageUrl: 'https://example.com/product.jpg'),
+        ),
+      ),
+    );
+
+    final image = tester.widget<CachedNetworkImage>(
+      find.byType(CachedNetworkImage),
+    );
+    expect(image.fit, BoxFit.cover);
+  });
+
   testWidgets(
       'renders product information in-app and updates commerce fields by selected color',
       (tester) async {

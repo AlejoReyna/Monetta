@@ -280,3 +280,29 @@ query ShopConfig {
   }
 }
 ''';
+
+/// Home composition and image sources. The collection connection is queried
+/// alongside shop metafields so one Storefront request refreshes the surface.
+const String kHomeContentQuery = r'''
+query HomeContent {
+  shop {
+    homeSections: metafield(namespace: "app", key: "home_sections") { value }
+    homeCollections: metafield(namespace: "app", key: "home_collections") { value }
+    homeBagTypes: metafield(namespace: "app", key: "home_bag_types") { value }
+    socialLinks: metafield(namespace: "app", key: "social_links") { value }
+    aboutImageUrl: metafield(namespace: "app", key: "about_image_url") { value }
+  }
+  collections(first: 50, sortKey: TITLE) {
+    edges {
+      node {
+        id
+        handle
+        title
+        description
+        image { url(transform: {maxWidth: 1200}) }
+        products(first: 1) { pageInfo { hasNextPage } edges { node { id } } }
+      }
+    }
+  }
+}
+''';

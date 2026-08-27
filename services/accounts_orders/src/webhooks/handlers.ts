@@ -12,6 +12,7 @@ import {
   type ShopifyCustomerDataRequestWebhookPayload,
   type ShopifyCustomerRedactWebhookPayload,
   type ShopifyOrderWebhookPayload,
+  type ShopifyProductWebhookPayload,
   type ShopifyShopRedactWebhookPayload,
 } from './payloads.js';
 
@@ -20,6 +21,37 @@ export interface HandlerDeps {
   readonly orders: OrdersRepository;
   readonly webhookEvents: WebhookEventsRepository;
   readonly pushTokens: PushTokensRepository;
+  readonly catalogEvents?: {
+    process(
+      topic: 'products/create' | 'products/update',
+      webhookId: string,
+      payload: ShopifyProductWebhookPayload,
+    ): Promise<void>;
+  };
+  readonly engagementPrivacy?: {
+    deleteForShopifyCustomer(shopifyCustomerId: string): Promise<void>;
+    deleteAll(): Promise<void>;
+  };
+}
+
+export async function handleProductsWebhook(
+  deps: HandlerDeps,
+  webhookId: string,
+  topic: 'products/create' | 'products/update',
+  payload: ShopifyProductWebhookPayload,
+  rawBody: Buffer,
+): Promise<void> {
+  const productId = String(payload.id);
+  const isNew = await claimDelivery(deps, {
+    webhookId,
+    topic,
+    shopifyResourceId: productId,
+    rawBody,
+  });
+  if (!isNew) return;
+  await deps.catalogEvents?.process(topic, webhookId, payload);
+  await deps.webhookEvents.markProcessed(webhookId);
+  logger.info('Shopify catalog transition evaluated', { productId, topic });
 }
 
 /**
@@ -163,6 +195,7 @@ export async function handleCustomersRedact(
   // correctness to be visible/auditable in this code.
   await deps.orders.detachCustomer(shopifyCustomerId);
   await deps.pushTokens.deleteAllForCustomer(shopifyCustomerId);
+  await deps.engagementPrivacy?.deleteForShopifyCustomer(shopifyCustomerId);
   await deps.customers.delete(shopifyCustomerId);
 
   await deps.webhookEvents.markProcessed(webhookId);
@@ -185,6 +218,7 @@ export async function handleShopRedact(
   if (!isNew) return;
 
   await deps.pushTokens.deleteAll();
+  await deps.engagementPrivacy?.deleteAll();
   await deps.orders.deleteAll();
   await deps.customers.deleteAll();
 

@@ -120,6 +120,7 @@ class BagScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: _CheckoutAppBar(
+        showSecurityIndicator: false,
         leading: IconButton(
           tooltip: 'Volver',
           onPressed: () => Navigator.of(context).pop(),
@@ -299,6 +300,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   }
 
   Future<void> _pay() async {
+    NotificationScope.maybeOf(context)?.recordPushOutcome('checkout_started');
     final lines = StoreScope.of(context).bagLines;
     if (widget.launchSecureCheckout case final launcher?) {
       setState(() => _launching = true);
@@ -429,9 +431,13 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
 }
 
 class _CheckoutAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _CheckoutAppBar({this.leading});
+  const _CheckoutAppBar({
+    this.leading,
+    this.showSecurityIndicator = true,
+  });
 
   final Widget? leading;
+  final bool showSecurityIndicator;
 
   @override
   Size get preferredSize => const Size.fromHeight(64.5);
@@ -442,23 +448,25 @@ class _CheckoutAppBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 64,
       leading: leading,
       automaticallyImplyLeading: false,
-      title: const MonettaWordmark(height: 22),
+      title: const MonettaWordmark.appBar(),
       centerTitle: true,
-      actions: [
-        Padding(
-          padding: const EdgeInsets.only(right: 18),
-          child: Row(
-            children: [
-              const Icon(Icons.lock_outline, size: 15),
-              const SizedBox(width: 6),
-              Text(
-                'SEGURO',
-                style: eyebrow(size: 8.5, color: kInk),
+      actions: showSecurityIndicator
+          ? [
+              Padding(
+                padding: const EdgeInsets.only(right: 18),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_outline, size: 15),
+                    const SizedBox(width: 6),
+                    Text(
+                      'SEGURO',
+                      style: eyebrow(size: 8.5, color: kInk),
+                    ),
+                  ],
+                ),
               ),
-            ],
-          ),
-        ),
-      ],
+            ]
+          : null,
       bottom: const PreferredSize(
         preferredSize: Size.fromHeight(.5),
         child: Divider(height: .5),

@@ -112,6 +112,10 @@ void main() {
     );
     expect((await db.select(db.bagLines).get()).single.accountId, 'account-1');
     expect(secureStore.values.values.single, 'opaque-token');
+    expect(
+      await repository.accessTokenFor(account.localAccountId),
+      'opaque-token',
+    );
   });
 
   test(

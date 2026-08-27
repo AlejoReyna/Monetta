@@ -1,0 +1,49 @@
+import 'package:flutter_test/flutter_test.dart';
+import 'package:http/http.dart' as http;
+import 'package:http/testing.dart';
+import 'package:monetta_app/data/accounts_orders/order_history_client.dart';
+
+void main() {
+  test('requests the authenticated customer route with a bearer token',
+      () async {
+    late http.Request captured;
+    final client = HttpOrderHistoryClient(
+      baseUrl: 'https://accounts.example.com',
+      httpClient: MockClient((request) async {
+        captured = request;
+        return http.Response(
+          '''{"orders":[{"id":1,"shopifyOrderId":"100","source":"shopify_checkout","attributionCode":null,"financialStatus":"paid","fulfillmentStatus":null,"totalAmount":1749,"currencyCode":"MXN","placedAt":"2026-08-25T00:00:00Z"}]}''',
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      }),
+    );
+
+    final orders = await client.fetchOrders('customer-access-token');
+
+    expect(
+      captured.url.toString(),
+      'https://accounts.example.com/customers/me/orders',
+    );
+    expect(captured.headers['Authorization'], 'Bearer customer-access-token');
+    expect(orders.single.shopifyOrderId, '100');
+  });
+
+  test('does not include the bearer value in an HTTP error', () async {
+    final client = HttpOrderHistoryClient(
+      baseUrl: 'https://accounts.example.com',
+      httpClient: MockClient((_) async => http.Response('{}', 401)),
+    );
+
+    await expectLater(
+      client.fetchOrders('do-not-log-me'),
+      throwsA(
+        isA<OrderHistoryException>().having(
+          (error) => error.toString(),
+          'message',
+          isNot(contains('do-not-log-me')),
+        ),
+      ),
+    );
+  });
+}

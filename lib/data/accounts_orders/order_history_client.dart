@@ -1,4 +1,4 @@
-/// Injected client for `GET /customers/:id/orders` on `services/accounts_orders`
+/// Injected client for `GET /customers/me/orders` on `services/accounts_orders`
 /// — the backend that unifies real Shopify checkout orders and hand-entered
 /// WhatsApp apartado orders (`docs/ACCOUNTS_AND_SYNC_PLAN.md` Phase 3). Same
 /// injected-transport shape as `data/external_catalog/external_catalog_client.dart`.
@@ -58,12 +58,14 @@ class MirroredOrder {
         fulfillmentStatus: json['fulfillmentStatus'] as String?,
         totalAmount: (json['totalAmount'] as num?)?.toDouble(),
         currencyCode: json['currencyCode'] as String?,
-        placedAt: json['placedAt'] == null ? null : DateTime.parse(json['placedAt'] as String),
+        placedAt: json['placedAt'] == null
+            ? null
+            : DateTime.parse(json['placedAt'] as String),
       );
 }
 
 abstract class OrderHistoryClient {
-  Future<List<MirroredOrder>> fetchOrders(String shopifyCustomerId);
+  Future<List<MirroredOrder>> fetchOrders(String accessToken);
 }
 
 class HttpOrderHistoryClient implements OrderHistoryClient {
@@ -74,13 +76,19 @@ class HttpOrderHistoryClient implements OrderHistoryClient {
   final http.Client _client;
 
   @override
-  Future<List<MirroredOrder>> fetchOrders(String shopifyCustomerId) async {
-    final uri = Uri.parse('$baseUrl/customers/$shopifyCustomerId/orders');
-    final response = await _client.get(uri, headers: {'Accept': 'application/json'});
+  Future<List<MirroredOrder>> fetchOrders(String accessToken) async {
+    final uri = Uri.parse('$baseUrl/customers/me/orders');
+    final response = await _client.get(
+      uri,
+      headers: {
+        'Accept': 'application/json',
+        'Authorization': 'Bearer $accessToken',
+      },
+    );
 
     if (response.statusCode != 200) {
       throw OrderHistoryException(
-        'GET /customers/$shopifyCustomerId/orders returned ${response.statusCode}',
+        'GET /customers/me/orders returned ${response.statusCode}',
       );
     }
 

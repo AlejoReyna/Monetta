@@ -1,55 +1,163 @@
 import './styles.css';
 
+const references = [
+  {
+    id: 'home',
+    index: '01',
+    src: '/live/2026-08-23-home.png',
+    label: 'Inicio',
+    title: 'Inicio / hero editorial',
+    meta: 'Portada, anuncio y navegación persistente',
+    alt: 'Inicio actual de Monetta con hero editorial',
+  },
+  {
+    id: 'catalog',
+    index: '02',
+    src: '/live/2026-08-23-catalog.png',
+    label: 'Catálogo',
+    title: 'Catálogo / colección compacta',
+    meta: 'Búsqueda, secciones y grilla editorial',
+    alt: 'Catálogo actual de Monetta con búsqueda y secciones',
+  },
+  {
+    id: 'catalog-night',
+    index: '03',
+    src: '/live/2026-08-23-catalog-night.png',
+    label: 'Catálogo nocturno',
+    title: 'Catálogo / modo nocturno',
+    meta: 'Carbón, marfil y acentos dorados',
+    alt: 'Modo nocturno actual del catálogo de Monetta',
+  },
+  {
+    id: 'product',
+    index: '04',
+    src: '/live/2026-08-23-product.png',
+    label: 'Producto',
+    title: 'Producto / acciones de compra',
+    meta: 'Detalle, precio, bolsa y apartado',
+    alt: 'Detalle actual de un producto de Monetta',
+  },
+  {
+    id: 'bag-empty',
+    index: '05',
+    src: '/live/2026-08-23-bag-empty.png',
+    label: 'Bolsa vacía',
+    title: 'Bolsa / estado vacío',
+    meta: 'Estado vacío, mensaje y retorno a catálogo',
+    alt: 'Estado actual de la bolsa vacía de Monetta',
+  },
+];
+
 const canvas = document.querySelector('[data-canvas]');
-const boardWrap = document.querySelector('[data-board-wrap]');
+const stage = document.querySelector('[data-stage]');
+const overviewBoard = document.querySelector('[data-overview-board]');
+const detailBoard = document.querySelector('[data-detail-board]');
 const boardImage = document.querySelector('[data-board-image]');
 const zoomLabel = document.querySelector('[data-zoom-label]');
-const captureHead = document.querySelector('[data-capture-head]');
 const captureTitle = document.querySelector('[data-capture-title]');
 const captureMeta = document.querySelector('[data-capture-meta]');
-const captureEyebrow = document.querySelector('[data-capture-eyebrow]');
-const captureStatus = document.querySelector('[data-capture-status]');
 const openBoard = document.querySelector('[data-open-board]');
-const tabs = [...document.querySelectorAll('[data-board]')];
+const viewButtons = [...document.querySelectorAll('[data-view]')];
+const paletteList = document.querySelector('[data-palette-list]');
+const overviewGrid = document.querySelector('[data-overview-grid]');
+
 let zoom = 1;
-let boardWidth = 420;
-let boardHeight = 2868;
+let activeReference = references[0];
+let mode = 'overview';
+
+function referenceButton(reference) {
+  return `
+    <button class="palette-card" type="button" data-reference="${reference.id}">
+      <span class="palette-card__thumb"><img src="${reference.src}" alt="" /></span>
+      <span class="palette-card__copy">
+        <small>${reference.index}</small>
+        <strong>${reference.label}</strong>
+        <em>${reference.meta}</em>
+      </span>
+    </button>`;
+}
+
+function overviewCard(reference) {
+  return `
+    <button class="overview-card" type="button" data-reference="${reference.id}">
+      <span class="overview-card__top"><small>${reference.index}</small><i></i><em>ACTUAL</em></span>
+      <span class="overview-card__device"><img src="${reference.src}" alt="${reference.alt}" /></span>
+      <span class="overview-card__label"><strong>${reference.label}</strong><small>${reference.meta}</small></span>
+    </button>`;
+}
+
+paletteList.innerHTML = references.map(referenceButton).join('');
+overviewGrid.innerHTML = references.map(overviewCard).join('');
+
+function activeSurface() {
+  return mode === 'overview' ? overviewBoard : detailBoard;
+}
+
+function measureBoard() {
+  const surface = activeSurface();
+  return {
+    width: surface.offsetWidth + 128,
+    height: surface.offsetHeight + 128,
+  };
+}
 
 function applyZoom(next) {
   zoom = Math.min(2.4, Math.max(0.32, next));
-  boardWrap.style.transform = `scale(${zoom})`;
-  const pad = boardWrap.classList.contains('is-live') ? 300 : 152;
-  boardWrap.style.width = `calc(max(100%, ${boardWidth * zoom + pad}px))`;
-  boardWrap.style.minHeight = `calc(100% + ${Math.max(0, (boardHeight * zoom) - window.innerHeight)}px)`;
+  stage.style.transform = `scale(${zoom})`;
+  const { width, height } = measureBoard();
+  stage.style.width = `calc(max(100%, ${width * zoom}px))`;
+  stage.style.minHeight = `calc(100% + ${Math.max(0, (height * zoom) - window.innerHeight)}px)`;
   zoomLabel.textContent = `${Math.round(zoom * 100)}%`;
 }
 
-function switchBoard(button) {
-  boardImage.src = button.dataset.board;
-  const isLive = button.dataset.kind === 'live';
-  boardWrap.classList.toggle('is-live', isLive);
-  boardWrap.classList.toggle('is-svg', !isLive);
-  boardWidth = isLive ? 420 : 1800;
-  boardHeight = isLive ? 2868 : 6300;
-  captureEyebrow.textContent = isLive ? 'RUNNING BUILD' : 'REFERENCE BOARD';
-  captureStatus.innerHTML = isLive ? '<i></i> LIVE CAPTURE' : '<i></i> SVG GUIDELINE';
-  captureTitle.textContent = button.dataset.title || 'Current UI';
-  captureMeta.textContent = button.dataset.meta || 'Monetta current UI';
-  openBoard.href = button.dataset.board;
-  boardImage.alt = isLive ? `Monetta live app capture: ${button.dataset.title}` : 'Monetta current UI screen atlas';
-  tabs.forEach(tab => tab.classList.toggle('is-active', tab === button));
-  canvas.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-  applyZoom(1);
+function updateActiveCards() {
+  document.querySelectorAll('[data-reference]').forEach(card => {
+    const selected = card.dataset.reference === activeReference.id;
+    card.classList.toggle('is-active', selected);
+    card.setAttribute('aria-pressed', selected ? 'true' : 'false');
+  });
 }
 
-tabs.forEach(tab => tab.addEventListener('click', () => switchBoard(tab)));
+function selectReference(id, { openDetail = true } = {}) {
+  activeReference = references.find(reference => reference.id === id) || references[0];
+  boardImage.src = activeReference.src;
+  boardImage.alt = activeReference.alt;
+  captureTitle.textContent = activeReference.title;
+  captureMeta.textContent = `${activeReference.meta} · iPhone 17 Pro Max`;
+  openBoard.href = activeReference.src;
+  updateActiveCards();
+  if (openDetail) setMode('detail');
+}
+
+function fitBoard() {
+  const { width } = measureBoard();
+  applyZoom(Math.min(1, (canvas.clientWidth - 48) / width));
+  canvas.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+}
+
+function setMode(nextMode) {
+  mode = nextMode;
+  const showOverview = mode === 'overview';
+  overviewBoard.hidden = !showOverview;
+  detailBoard.hidden = showOverview;
+  stage.classList.toggle('is-overview', showOverview);
+  stage.classList.toggle('is-detail', !showOverview);
+  viewButtons.forEach(button => button.classList.toggle('is-active', button.dataset.view === mode));
+  canvas.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
+  requestAnimationFrame(() => showOverview ? fitBoard() : applyZoom(1));
+}
+
+document.querySelectorAll('[data-reference]').forEach(card => {
+  card.addEventListener('click', () => selectReference(card.dataset.reference));
+});
+
+viewButtons.forEach(button => {
+  button.addEventListener('click', () => setMode(button.dataset.view));
+});
+
 document.querySelector('[data-zoom-in]').addEventListener('click', () => applyZoom(zoom + 0.1));
 document.querySelector('[data-zoom-out]').addEventListener('click', () => applyZoom(zoom - 0.1));
-document.querySelector('[data-fit]').addEventListener('click', () => {
-  const available = canvas.clientWidth - (boardWrap.classList.contains('is-live') ? 300 : 152);
-  applyZoom(Math.min(1, available / boardWidth));
-  canvas.scrollTo({ top: 0, left: 0, behavior: 'smooth' });
-});
+document.querySelector('[data-fit]').addEventListener('click', fitBoard);
 
 canvas.addEventListener('wheel', event => {
   if (!(event.metaKey || event.ctrlKey)) return;
@@ -59,6 +167,7 @@ canvas.addEventListener('wheel', event => {
 
 let pointer = null;
 canvas.addEventListener('pointerdown', event => {
+  if (event.target.closest('button, a')) return;
   pointer = { x: event.clientX, y: event.clientY, left: canvas.scrollLeft, top: canvas.scrollTop };
   canvas.classList.add('is-panning');
   canvas.setPointerCapture(event.pointerId);
@@ -71,9 +180,12 @@ canvas.addEventListener('pointermove', event => {
 canvas.addEventListener('pointerup', event => {
   pointer = null;
   canvas.classList.remove('is-panning');
-  canvas.releasePointerCapture(event.pointerId);
+  if (canvas.hasPointerCapture(event.pointerId)) canvas.releasePointerCapture(event.pointerId);
 });
-canvas.addEventListener('pointercancel', () => { pointer = null; canvas.classList.remove('is-panning'); });
+canvas.addEventListener('pointercancel', () => {
+  pointer = null;
+  canvas.classList.remove('is-panning');
+});
 
 window.addEventListener('keydown', event => {
   if (!(event.metaKey || event.ctrlKey)) return;
@@ -81,5 +193,7 @@ window.addEventListener('keydown', event => {
   if (event.key === '-') { event.preventDefault(); applyZoom(zoom - 0.1); }
   if (event.key === '0') { event.preventDefault(); document.querySelector('[data-fit]').click(); }
 });
+window.addEventListener('resize', () => applyZoom(zoom));
 
-switchBoard(tabs[0]);
+selectReference(references[0].id, { openDetail: false });
+setMode('overview');

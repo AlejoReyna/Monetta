@@ -40,7 +40,7 @@ Map<String, dynamic> productNode({
   String title = 'Bolsa Guess Crossbody Negro',
 }) =>
     <String, dynamic>{
-      'id': id,
+      'id': 'gid://shopify/Product/$id',
       'handle': 'p-$id',
       'title': title,
       'vendor': 'Monetta ',
@@ -60,7 +60,7 @@ Map<String, dynamic> productNode({
         'edges': [
           {
             'node': {
-              'id': 'v-$id',
+              'id': 'gid://shopify/ProductVariant/$id',
               'title': 'Default Title',
               'availableForSale': true,
               'price': {'amount': '1749.00', 'currencyCode': 'MXN'},

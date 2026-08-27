@@ -31,7 +31,12 @@ primary_region = "qro"
   PORT = "8082"
   NODE_ENV = "production"
 
+[processes]
+  app = "node dist/api/server.js"
+  worker = "node dist/engagement/worker.js"
+
 [http_service]
+  processes = ["app"]
   internal_port = 8082
   force_https = true
 

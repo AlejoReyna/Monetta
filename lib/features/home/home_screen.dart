@@ -7,7 +7,6 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/catalog_store.dart';
-import '../../app/media/monetta_image.dart';
 import '../../app/media/monetta_video.dart';
 import '../../app/motion.dart';
 import '../../app/mixed_feed.dart';
@@ -16,6 +15,7 @@ import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../domain/campaign.dart';
 import '../../domain/editorial_content.dart';
+import '../../domain/home_content.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
@@ -26,15 +26,14 @@ import '../catalog/catalog_browse_screen.dart';
 import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
 import '../catalog/search_screen.dart';
-import '../catalog/silhouette_cutout.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
-import '../onboarding/onboarding_sheet.dart';
+import '../navigation/monetta_side_menu.dart';
+import '../notifications/notification_settings_sheet.dart';
 import '../partner/partner_hub_screen.dart';
 import 'external_catalog_section.dart';
 
 const int _kNewestCount = 8;
-const int _kGridCount = 12;
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -89,21 +88,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     }
   }
 
-  void _openOnboarding() {
-    showModalBottomSheet<void>(
-      context: context,
-      useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      builder: (_) {
-        return StoreScope(
-          notifier: StoreScope.of(context),
-          child: const OnboardingSheet(),
-        );
-      },
-    ).ignore();
-  }
-
   void _openAccount() {
     final account = AccountScope.of(context);
     final admin = AdminScope.of(context);
@@ -124,6 +108,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   MaterialPageRoute<void>(
                     builder: (_) => AdminScreen(
                       controller: admin,
+                      notificationController:
+                          AdminNotificationScope.maybeOf(context),
                       catalogStore: catalogStore,
                       externalCatalogController: externalCatalog,
                     ),
@@ -164,6 +150,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
   }
 
+  void _openExternal(Uri uri) {
+    unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
+  }
+
   void _openFullCatalog() {
     final store = StoreScope.of(context);
     final external = ExternalCatalogScope.maybeOf(context)?.items ?? const [];
@@ -172,6 +162,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       items: fullDeduplicatedCatalog(
         monettaItems: store.catalogItems,
         externalItems: external,
+      ),
+    );
+  }
+
+  void _openCatalogSection({
+    required String title,
+    String? category,
+    List<String> queryTerms = const [],
+  }) {
+    openCollection(
+      context,
+      CollectionScreen(
+        title: title,
+        filter: CollectionFilter(
+          category: category,
+          queryTerms: queryTerms,
+        ),
       ),
     );
   }
@@ -207,16 +214,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final externalCatalog = ExternalCatalogScope.maybeOf(context);
     final externalItems = externalCatalog?.items ?? const [];
     final editorial = _editorialContent;
+    final homeContent =
+        HomeContentScope.maybeOf(context)?.content ?? HomeContent.fallback;
     final storefront = AdminScope.maybeOf(context)?.storefront;
     final showHero = storefront?.showHero ?? true;
     final showNewest = storefront?.showNewest ?? true;
     final showExternalPicks = storefront?.showExternalPicks ?? true;
-    final announcement =
-        storefront?.announcement ?? r'ENVÍO GRATIS DESDE $1,499';
 
     if (feed.isEmpty) {
       return Scaffold(
-        appBar: _buildAppBar(24),
+        drawer: _buildSideMenu(store),
+        drawerScrimColor: Colors.black.withValues(alpha: 0.32),
+        appBar: _buildAppBar(),
         body: Center(child: Text('Sin resultados', style: eyebrow())),
         bottomNavigationBar: MonettaBottomNavigation(
           current: MonettaBottomDestination.home,
@@ -229,48 +238,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final newest = [...store.products]
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final fresh = newest.take(_kNewestCount).toList();
-    final freshIds = fresh.map((p) => p.id).toSet();
-    final rest = feed
-        .map((item) => item.product)
-        .where((p) => !freshIds.contains(p.id))
-        .take(_kGridCount)
-        .toList();
-
-    final bolsa = store.firstInStockWhere(
-      (p, f) => f?.category?.value == 'bolsa',
-    );
-    final cartera = store.firstInStockWhere(
-      (p, f) => f?.category?.value == 'cartera',
-    );
-    final reloj = store.firstInStockWhere(
-      (p, f) => f?.category?.value == 'reloj',
-    );
-
-    final announcementH = 32 * (1 - _collapse);
     final barH = 68 - 16 * _collapse;
-    final markH = 24 - 6 * _collapse;
 
     return Scaffold(
-      appBar: _buildAppBar(markH, height: barH),
+      drawer: _buildSideMenu(store),
+      drawerScrimColor: Colors.black.withValues(alpha: 0.32),
+      appBar: _buildAppBar(height: barH),
       body: LayoutBuilder(
         builder: (context, constraints) {
           // Fill the first body viewport (plus a small scroll lead) so the
           // next section cannot peek above the bottom navigation on load.
-          final heroH = constraints.maxHeight - announcementH + 12;
+          final heroH = constraints.maxHeight + 12;
           final heroMediaH = heroH - _CampaignHero.outerVerticalPadding;
           return ListView(
             controller: _scroll,
             padding: EdgeInsets.zero,
             children: [
-              SizedBox(
-                height: announcementH,
-                child: ClipRect(
-                  child: Opacity(
-                    opacity: 1 - _collapse,
-                    child: _AnnouncementStrip(text: announcement),
-                  ),
-                ),
-              ),
               if (showHero)
                 _CampaignHero(
                   mediaHeight: heroMediaH,
@@ -283,74 +266,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   items: externalItems,
                   generatedAt: externalCatalog?.generatedAt,
                 ),
-              if (showNewest) ...[
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-                  child: Text('Novedades', style: display(24)),
-                ),
-                _CatalogGrid(products: fresh),
-              ],
-              const SizedBox(height: 48),
-              _PhotoShopRow(
-                tiles: [
-                  if (bolsa != null)
-                    _ShopTileData(
-                      label: 'Bolsas',
-                      imageUrl: bolsa.primaryImage,
-                      screen: const CollectionScreen(
-                        title: 'Bolsas',
-                        filter: CollectionFilter(category: 'bolsa'),
-                      ),
-                    ),
-                  if (cartera != null)
-                    _ShopTileData(
-                      label: 'Carteras',
-                      imageUrl: cartera.primaryImage,
-                      screen: const CollectionScreen(
-                        title: 'Carteras',
-                        filter: CollectionFilter(category: 'cartera'),
-                      ),
-                    ),
-                  if (reloj != null)
-                    _ShopTileData(
-                      label: 'Relojes',
-                      imageUrl: reloj.primaryImage,
-                      screen: const CollectionScreen(
-                        title: 'Relojes',
-                        filter: CollectionFilter(category: 'reloj'),
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 64),
-              _AboutMonettaSection(
-                content: editorial.about,
-                onOpen: _openAbout,
-              ),
-              const SizedBox(height: 12),
-              _PartnerTeaser(
-                content: editorial.partner,
-                onOpen: _openPartner,
-              ),
-              const SizedBox(height: 64),
-              _FinishedBrandBlock(store: store),
-              const SizedBox(height: 64),
-              _FinishedFormaBlock(store: store),
-              const SizedBox(height: 48),
-              _CatalogGrid(products: rest),
-              const SizedBox(height: 20),
-              Center(
-                child: UnderlineLink(
-                  label: 'Ver todo',
-                  onTap: _openFullCatalog,
-                ),
-              ),
-              const SizedBox(height: 52),
-              _QuietFooter(
-                onChooseBrands: _openOnboarding,
-                onWhatsApp: () => _openWhatsApp(conciergeWhatsAppUri()),
-                onWholesale: () => _openWhatsApp(wholesaleWhatsAppUri()),
-              ),
+              for (final section in homeContent.sectionOrder)
+                if (showNewest || section != HomeSectionId.newProducts)
+                  _buildHomeSection(
+                    section,
+                    store: store,
+                    content: homeContent,
+                    editorial: editorial,
+                    fresh: fresh,
+                  ),
+              const SizedBox(height: 72),
             ],
           );
         },
@@ -363,16 +288,93 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(double markHeight, {double height = 68}) {
+  Widget _buildHomeSection(
+    HomeSectionId section, {
+    required CatalogStore store,
+    required HomeContent content,
+    required MonettaEditorialContent editorial,
+    required List<Product> fresh,
+  }) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 72),
+      child: switch (section) {
+        HomeSectionId.collections => _HomeCollectionsSection(
+            cards: content.collections,
+          ),
+        HomeSectionId.newProducts => _NewestProductsSection(
+            products: fresh,
+            onOpenAll: _openFullCatalog,
+          ),
+        HomeSectionId.bagTypes => _BagTypesSection(cards: content.bagTypes),
+        HomeSectionId.brands => _BrandsSection(
+            brands: store.availableBrands,
+          ),
+        HomeSectionId.about => _AboutMonettaSection(
+            content: editorial.about,
+            imageUrl: content.aboutImageUrl,
+            onOpen: _openAbout,
+            onOpenPartner: _openPartner,
+          ),
+        HomeSectionId.social => _SocialSection(
+            links: content.socialLinks,
+            onOpen: _openExternal,
+          ),
+        HomeSectionId.testimonials => _TestimonialsSection(
+            testimonials: content.testimonials,
+            average: content.reviewAverage,
+            count: content.reviewCount,
+          ),
+      },
+    );
+  }
+
+  Widget _buildSideMenu(CatalogStore store) {
+    final notifications = NotificationScope.maybeOf(context);
+    return MonettaSideMenu(
+      onSearch: () => openSearch(context),
+      onCatalog: _openFullCatalog,
+      onBags: () => _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
+      onWallets: () =>
+          _openCatalogSection(title: 'Carteras', category: 'cartera'),
+      onWatches: () => _openCatalogSection(title: 'Relojes', category: 'reloj'),
+      onPerfumes: () => _openCatalogSection(
+        title: 'Perfumes',
+        queryTerms: const ['perfume', 'fragancia'],
+      ),
+      onBeauty: () => _openCatalogSection(
+        title: 'Maquillaje y skincare',
+        queryTerms: const ['maquillaje', 'skincare'],
+      ),
+      onNotifications: notifications == null
+          ? null
+          : () => unawaited(
+                openNotificationSettings(
+                  context,
+                  controller: notifications,
+                ),
+              ),
+      onAbout: _openAbout,
+      onPartner: _openPartner,
+      onSupport: () => _openWhatsApp(conciergeWhatsAppUri()),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar({double height = 68}) {
     return AppBar(
       automaticallyImplyLeading: false,
       toolbarHeight: height,
-      centerTitle: false,
-      titleSpacing: 20,
-      title: Align(
-        alignment: Alignment.centerLeft,
-        child: MonettaWordmark(height: markHeight),
+      centerTitle: true,
+      titleSpacing: 0,
+      leadingWidth: 58,
+      leading: Builder(
+        builder: (scaffoldContext) => IconButton(
+          key: const Key('home-menu-button'),
+          tooltip: 'Abrir menú',
+          onPressed: () => Scaffold.of(scaffoldContext).openDrawer(),
+          icon: const Icon(Icons.menu_rounded, size: 23),
+        ),
       ),
+      title: const MonettaWordmark.appBar(),
       actions: [
         IconButton(
           tooltip: 'Buscar',
@@ -384,28 +386,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       bottom: const PreferredSize(
         preferredSize: Size.fromHeight(0.5),
         child: Divider(height: 0.5),
-      ),
-    );
-  }
-}
-
-class _AnnouncementStrip extends StatelessWidget {
-  const _AnnouncementStrip({required this.text});
-
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: 32,
-      color: kInk,
-      alignment: Alignment.center,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Text(
-        text.isEmpty ? 'MONETTA' : text.toUpperCase(),
-        maxLines: 1,
-        overflow: TextOverflow.ellipsis,
-        style: eyebrow(size: 9, color: Colors.white, weight: FontWeight.w500),
       ),
     );
   }
@@ -433,6 +413,10 @@ class _CampaignHeroState extends State<_CampaignHero> {
   static const _initialPage = 3000;
   static const _slides = <_CampaignSlideData>[
     _CampaignSlideData(isVideo: true),
+    _CampaignSlideData(
+      asset: 'assets/images/campaign_welcome.png',
+      fit: BoxFit.contain,
+    ),
     _CampaignSlideData(
       asset: 'assets/images/campaign_olive.jpg',
     ),
@@ -530,10 +514,12 @@ class _CampaignSlideData {
   const _CampaignSlideData({
     this.asset,
     this.isVideo = false,
+    this.fit,
   });
 
   final String? asset;
   final bool isVideo;
+  final BoxFit? fit;
 }
 
 class _CampaignSlide extends StatelessWidget {
@@ -575,7 +561,7 @@ class _CampaignSlide extends StatelessWidget {
                       data.asset!,
                       width: double.infinity,
                       height: mediaHeight,
-                      fit: BoxFit.cover,
+                      fit: data.fit ?? BoxFit.cover,
                       filterQuality: FilterQuality.medium,
                     ),
             ),
@@ -586,183 +572,511 @@ class _CampaignSlide extends StatelessWidget {
   }
 }
 
-class _ShopTileData {
-  const _ShopTileData({
-    required this.label,
-    required this.imageUrl,
-    required this.screen,
-  });
+class _HomeCollectionsSection extends StatelessWidget {
+  const _HomeCollectionsSection({required this.cards});
 
-  final String label;
-  final String? imageUrl;
-  final CollectionScreen screen;
-}
-
-class _PhotoShopRow extends StatelessWidget {
-  const _PhotoShopRow({required this.tiles});
-
-  final List<_ShopTileData> tiles;
+  final List<HomeCollectionCard> cards;
 
   @override
   Widget build(BuildContext context) {
-    if (tiles.isEmpty) return const SizedBox.shrink();
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      child: Row(
-        children: [
-          for (var i = 0; i < tiles.length; i++) ...[
-            if (i > 0) const SizedBox(width: 8),
-            Expanded(child: _PhotoTile(data: tiles[i])),
-          ],
-        ],
+    if (cards.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey('home-section-collections'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeading(kicker: 'DESCUBRE', title: 'Colecciones'),
+        SizedBox(
+          height: 414,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: cards.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, index) => SizedBox(
+              width: MediaQuery.sizeOf(context).width.clamp(280, 440) * .78,
+              child: _CollectionEditorialCard(card: cards[index]),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _CollectionEditorialCard extends StatelessWidget {
+  const _CollectionEditorialCard({required this.card});
+
+  final HomeCollectionCard card;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Ver colección ${card.title}',
+      child: GestureDetector(
+        onTap: () => _openHomeCollection(context, card),
+        child: Container(
+          decoration: BoxDecoration(border: Border.all(color: kLine)),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Expanded(
+                child: _HomeImage(
+                  imageUrl: card.imageUrl,
+                  fallbackAsset: card.fallbackAsset,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
+                child: Row(
+                  children: [
+                    Expanded(child: Text(card.title, style: display(23))),
+                    const Icon(Icons.arrow_forward, size: 18),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
 }
 
-class _PhotoTile extends StatefulWidget {
-  const _PhotoTile({required this.data});
+class _NewestProductsSection extends StatelessWidget {
+  const _NewestProductsSection({
+    required this.products,
+    required this.onOpenAll,
+  });
 
-  final _ShopTileData data;
-
-  @override
-  State<_PhotoTile> createState() => _PhotoTileState();
-}
-
-class _PhotoTileState extends State<_PhotoTile> {
-  bool _pressed = false;
+  final List<Product> products;
+  final VoidCallback onOpenAll;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTapDown: (_) => setState(() => _pressed = true),
-      onTapCancel: () => setState(() => _pressed = false),
-      onTapUp: (_) => setState(() => _pressed = false),
-      onTap: () => openCollection(context, widget.data.screen),
-      child: AnimatedScale(
-        scale: _pressed ? 0.985 : 1,
-        duration: reduceMotion(context) ? Duration.zero : kSnap,
+    if (products.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey('home-section-new-products'),
+      children: [
+        SectionHeading(
+          kicker: 'Novedades',
+          title: 'Nuevos productos',
+          trailing: UnderlineLink(label: 'Ver todos', onTap: onOpenAll),
+        ),
+        _CatalogGrid(products: products.take(4).toList()),
+        const SizedBox(height: 26),
+        Center(
+          child: UnderlineLink(
+            label: 'Todos los productos',
+            onTap: onOpenAll,
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BagTypesSection extends StatelessWidget {
+  const _BagTypesSection({required this.cards});
+
+  final List<HomeCollectionCard> cards;
+
+  @override
+  Widget build(BuildContext context) {
+    if (cards.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey('home-section-bag-types'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeading(kicker: 'ELIGE TU FORMA', title: 'Tipo de bolsas'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              for (var index = 0; index < cards.length; index++) ...[
+                if (index > 0) const SizedBox(width: 8),
+                Expanded(child: _BagTypeTile(card: cards[index])),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _BagTypeTile extends StatelessWidget {
+  const _BagTypeTile({required this.card});
+
+  final HomeCollectionCard card;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: 'Ver ${card.title}',
+      child: GestureDetector(
+        onTap: () => _openHomeCollection(context, card),
         child: Column(
           children: [
             AspectRatio(
-              aspectRatio: 3 / 4,
-              child: MonettaImage(
-                url: widget.data.imageUrl,
-                cacheWidth: MediaUrl.cardWidth,
+              aspectRatio: 1,
+              child: Container(
+                decoration: BoxDecoration(border: Border.all(color: kLine)),
+                padding: const EdgeInsets.all(8),
+                child: _HomeImage(
+                  imageUrl: card.imageUrl,
+                  fallbackAsset: card.fallbackAsset,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
-            const SizedBox(height: 10),
-            Text(widget.data.label.toUpperCase(), style: eyebrow(size: 9)),
+            const SizedBox(height: 12),
+            Text(
+              card.title.toUpperCase(),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: eyebrow(size: 8.5),
+            ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _BrandsSection extends StatelessWidget {
+  const _BrandsSection({required this.brands});
+
+  final List<String> brands;
+
+  @override
+  Widget build(BuildContext context) {
+    if (brands.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey('home-section-brands'),
+      children: [
+        const SectionHeading(
+          kicker: 'NUESTRA SELECCIÓN',
+          title: 'Todas las marcas',
+        ),
+        GridView.builder(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 2.45,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: brands.length,
+          itemBuilder: (context, index) {
+            final brand = brands[index];
+            return Semantics(
+              button: true,
+              label: 'Ver ${brandLabel(brand)}',
+              child: GestureDetector(
+                onTap: () => openCollection(
+                  context,
+                  CollectionScreen(
+                    title: brandLabel(brand),
+                    filter: CollectionFilter(brand: brand),
+                  ),
+                ),
+                child: Container(
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(border: Border.all(color: kLine)),
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  child: Text(
+                    brandLabel(brand).toUpperCase(),
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: eyebrow(size: 8.5),
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
     );
   }
 }
 
 class _AboutMonettaSection extends StatelessWidget {
-  const _AboutMonettaSection({required this.content, required this.onOpen});
+  const _AboutMonettaSection({
+    required this.content,
+    required this.imageUrl,
+    required this.onOpen,
+    required this.onOpenPartner,
+  });
 
   final AboutMonettaContent content;
+  final String? imageUrl;
   final VoidCallback onOpen;
+  final VoidCallback onOpenPartner;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      key: const ValueKey('home-about-monetta'),
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      decoration: BoxDecoration(border: Border.all(color: kLine)),
-      child: LayoutBuilder(
-        builder: (context, constraints) {
-          final wide = constraints.maxWidth >= 720;
-          final image = Image.asset(
-            content.heroAsset,
-            height: wide ? 330 : 250,
-            width: double.infinity,
-            fit: BoxFit.cover,
-            filterQuality: FilterQuality.medium,
-          );
-          final copy = Padding(
-            padding: EdgeInsets.all(wide ? 36 : 24),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(content.eyebrow, style: eyebrow(color: kGold)),
-                const SizedBox(height: 13),
-                Text(content.headline, style: display(wide ? 30 : 25)),
-                const SizedBox(height: 14),
-                Text(
-                  content.body,
-                  maxLines: wide ? 5 : 4,
-                  overflow: TextOverflow.ellipsis,
-                  style: sans(size: 13, color: kInkMuted, height: 1.55),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeading(
+          kicker: 'NUESTRA HISTORIA',
+          title: 'Más sobre Monetta',
+        ),
+        Container(
+          margin: const EdgeInsets.symmetric(horizontal: 12),
+          decoration: BoxDecoration(border: Border.all(color: kLine)),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 720;
+              final image = SizedBox(
+                height: wide ? 360 : 310,
+                width: double.infinity,
+                child: _HomeImage(
+                  imageUrl: imageUrl,
+                  fallbackAsset: 'assets/images/home_about.webp',
+                  fit: BoxFit.cover,
                 ),
-                const SizedBox(height: 22),
-                UnderlineLink(
-                  label: 'Conoce nuestra historia',
-                  onTap: onOpen,
+              );
+              final copy = Padding(
+                key: const ValueKey('home-about-monetta'),
+                padding: EdgeInsets.all(wide ? 36 : 24),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'BIENVENID@',
+                      style: display(wide ? 31 : 27, color: kGold),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(content.headline, style: display(wide ? 27 : 23)),
+                    const SizedBox(height: 14),
+                    Text(
+                      content.body,
+                      style: sans(size: 13, color: kInkMuted, height: 1.55),
+                    ),
+                    const SizedBox(height: 24),
+                    Wrap(
+                      spacing: 26,
+                      runSpacing: 18,
+                      children: [
+                        UnderlineLink(
+                          label: 'Conoce nuestra historia',
+                          onTap: onOpen,
+                        ),
+                        UnderlineLink(
+                          key: const ValueKey('home-open-partner'),
+                          label: 'Vende con Monetta',
+                          onTap: onOpenPartner,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-              ],
-            ),
-          );
-          if (!wide) return Column(children: [image, copy]);
-          return SizedBox(
-            height: 330,
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                Expanded(child: image),
-                Expanded(child: copy),
-              ],
-            ),
-          );
-        },
-      ),
+              );
+              if (!wide) return Column(children: [image, copy]);
+              return SizedBox(
+                height: 360,
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Expanded(child: image),
+                    Expanded(child: copy),
+                  ],
+                ),
+              );
+            },
+          ),
+        ),
+      ],
     );
   }
 }
 
-class _PartnerTeaser extends StatelessWidget {
-  const _PartnerTeaser({required this.content, required this.onOpen});
+class _SocialSection extends StatelessWidget {
+  const _SocialSection({required this.links, required this.onOpen});
 
-  final PartnerProgramContent content;
-  final VoidCallback onOpen;
+  final List<HomeSocialLink> links;
+  final ValueChanged<Uri> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    if (links.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey('home-section-social'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const SectionHeading(kicker: 'SÍGUENOS', title: 'Nuestras redes'),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          child: Row(
+            children: [
+              for (var index = 0; index < links.length; index++) ...[
+                if (index > 0) const SizedBox(width: 8),
+                Expanded(
+                  child: _SocialTile(link: links[index], onOpen: onOpen),
+                ),
+              ],
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _SocialTile extends StatelessWidget {
+  const _SocialTile({required this.link, required this.onOpen});
+
+  final HomeSocialLink link;
+  final ValueChanged<Uri> onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final uri = link.uri;
+    return Semantics(
+      button: uri != null,
+      label: 'Abrir ${link.label}',
+      child: GestureDetector(
+        onTap: uri == null ? null : () => onOpen(uri),
+        child: AspectRatio(
+          aspectRatio: .82,
+          child: Container(
+            decoration: BoxDecoration(border: Border.all(color: kLine)),
+            padding: const EdgeInsets.symmetric(horizontal: 6),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Icon(_socialIcon(link.id), color: kGold, size: 28),
+                const SizedBox(height: 18),
+                Text(
+                  link.label.toUpperCase(),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: eyebrow(size: 8),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  IconData _socialIcon(String id) => switch (id) {
+        'instagram' => Icons.camera_alt_outlined,
+        'facebook' => Icons.facebook,
+        'tiktok' => Icons.music_note,
+        _ => Icons.open_in_new,
+      };
+}
+
+class _TestimonialsSection extends StatelessWidget {
+  const _TestimonialsSection({
+    required this.testimonials,
+    required this.average,
+    required this.count,
+  });
+
+  final List<HomeTestimonial> testimonials;
+  final double? average;
+  final int? count;
+
+  @override
+  Widget build(BuildContext context) {
+    if (testimonials.isEmpty) return const SizedBox.shrink();
+    final summary = [
+      if (average != null) average!.toStringAsFixed(1),
+      if (count != null) '$count reseñas',
+    ].join(' · ');
+    return Column(
+      key: const ValueKey('home-section-testimonials'),
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SectionHeading(
+          kicker: summary.isEmpty ? 'COMUNIDAD MONETTA' : summary,
+          title: 'Experiencias de clientes',
+        ),
+        SizedBox(
+          height: 520,
+          child: ListView.separated(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            itemCount: testimonials.length,
+            separatorBuilder: (_, __) => const SizedBox(width: 10),
+            itemBuilder: (context, index) => SizedBox(
+              width: MediaQuery.sizeOf(context).width.clamp(280, 440) * .82,
+              child: _TestimonialCard(testimonial: testimonials[index]),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _TestimonialCard extends StatelessWidget {
+  const _TestimonialCard({required this.testimonial});
+
+  final HomeTestimonial testimonial;
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      key: const ValueKey('home-partner-teaser'),
-      margin: const EdgeInsets.symmetric(horizontal: 12),
-      color: kInk,
-      padding: const EdgeInsets.fromLTRB(24, 38, 24, 36),
+      decoration: BoxDecoration(border: Border.all(color: kLine)),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(content.eyebrow, style: eyebrow(color: kGold)),
-          const SizedBox(height: 14),
-          Text(
-            content.headline,
-            style: display(27, color: Colors.white, height: 1.22),
-          ),
-          const SizedBox(height: 14),
-          Text(
-            content.body,
-            style: sans(
-              size: 13,
-              color: const Color(0xFFD3D3D3),
-              height: 1.55,
+          Expanded(
+            child: _HomeImage(
+              imageUrl: testimonial.imageUrl,
+              fallbackAsset: testimonial.fallbackAsset,
+              fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(height: 24),
-          FilledButton(
-            key: const ValueKey('home-open-partner'),
-            onPressed: onOpen,
-            style: FilledButton.styleFrom(
-              backgroundColor: Colors.white,
-              foregroundColor: kInk,
+          Padding(
+            padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    for (var i = 0; i < testimonial.rating; i++)
+                      const Icon(Icons.star, color: kGold, size: 16),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                Text(
+                  '“${testimonial.body}”',
+                  maxLines: 5,
+                  overflow: TextOverflow.ellipsis,
+                  style: display(18, height: 1.36),
+                ),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    Text(
+                      testimonial.reviewer.toUpperCase(),
+                      style: eyebrow(size: 9),
+                    ),
+                    if (testimonial.verified) ...[
+                      const SizedBox(width: 7),
+                      const Icon(
+                        Icons.verified_outlined,
+                        size: 14,
+                        color: kGold,
+                      ),
+                    ],
+                  ],
+                ),
+              ],
             ),
-            child: const Text('VER CÓMO FUNCIONA'),
           ),
         ],
       ),
@@ -770,237 +1084,51 @@ class _PartnerTeaser extends StatelessWidget {
   }
 }
 
-List<Product> _inStockFor(
-  CatalogStore store, {
-  String? brand,
-  String? silhouette,
-  int limit = 4,
-}) {
-  final out = <Product>[];
-  for (final product in store.products) {
-    if (!product.isInStock) continue;
-    final facets = store.facetsFor(product.id);
-    if (brand != null && facets?.brand?.value != brand) continue;
-    if (silhouette != null && facets?.silhouette?.value != silhouette) {
-      continue;
-    }
-    out.add(product);
-    if (out.length >= limit) break;
-  }
-  return out;
-}
+class _HomeImage extends StatelessWidget {
+  const _HomeImage({
+    required this.imageUrl,
+    required this.fallbackAsset,
+    this.fit = BoxFit.cover,
+  });
 
-class _FinishedBrandBlock extends StatefulWidget {
-  const _FinishedBrandBlock({required this.store});
-
-  final CatalogStore store;
-
-  @override
-  State<_FinishedBrandBlock> createState() => _FinishedBrandBlockState();
-}
-
-class _FinishedBrandBlockState extends State<_FinishedBrandBlock> {
-  String? _brand;
-
-  List<String> get _brands {
-    return [
-      for (final brand in widget.store.availableBrands)
-        if (_inStockFor(widget.store, brand: brand, limit: 1).isNotEmpty) brand,
-    ];
-  }
+  final String? imageUrl;
+  final String fallbackAsset;
+  final BoxFit fit;
 
   @override
   Widget build(BuildContext context) {
-    final brands = _brands;
-    if (brands.isEmpty) return const SizedBox.shrink();
-    final brand = brands.contains(_brand) ? _brand! : brands.first;
-    final pieces = _inStockFor(widget.store, brand: brand);
-    if (pieces.isEmpty) return const SizedBox.shrink();
-    final still = pieces.first.primaryImage;
-    final label = brandLabel(brand);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (still != null)
-          AspectRatio(
-            aspectRatio: 16 / 10,
-            child: MonettaImage(url: still, cacheWidth: MediaUrl.heroWidth),
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-          child: Text('Marcas'.toUpperCase(), style: eyebrow()),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-          child: Text('Las casas que traemos', style: display(24)),
-        ),
-        SizedBox(
-          height: 40,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: brands.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 8),
-            itemBuilder: (context, index) {
-              final slug = brands[index];
-              final selected = slug == brand;
-              return GestureDetector(
-                onTap: () => setState(() => _brand = slug),
-                child: Container(
-                  alignment: Alignment.center,
-                  padding: const EdgeInsets.symmetric(horizontal: 14),
-                  decoration: BoxDecoration(
-                    border: Border.all(
-                      color: selected ? kInk : kLine,
-                      width: 0.5,
-                    ),
-                  ),
-                  child: Text(
-                    brandLabel(slug).toUpperCase(),
-                    style: eyebrow(
-                      size: 9,
-                      color: selected ? kInk : kInkMuted,
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 20),
-        _CatalogGrid(products: pieces),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-          child: FilledButton(
-            onPressed: () => openCollection(
-              context,
-              CollectionScreen(
-                title: label,
-                filter: CollectionFilter(brand: brand),
-              ),
-            ),
-            child: Text('Ver $label'.toUpperCase()),
-          ),
-        ),
-      ],
+    final fallback = Image.asset(
+      fallbackAsset,
+      width: double.infinity,
+      height: double.infinity,
+      fit: fit,
+      filterQuality: FilterQuality.medium,
+    );
+    final url = imageUrl;
+    if (url == null || url.isEmpty) return fallback;
+    return Image.network(
+      url,
+      width: double.infinity,
+      height: double.infinity,
+      fit: fit,
+      filterQuality: FilterQuality.medium,
+      errorBuilder: (_, __, ___) => fallback,
     );
   }
 }
 
-class _FinishedFormaBlock extends StatefulWidget {
-  const _FinishedFormaBlock({required this.store});
-
-  final CatalogStore store;
-
-  @override
-  State<_FinishedFormaBlock> createState() => _FinishedFormaBlockState();
-}
-
-class _FinishedFormaBlockState extends State<_FinishedFormaBlock> {
-  static const _shapes = <(String, String, SilhouetteCutoutKind)>[
-    ('tote', 'Totes', SilhouetteCutoutKind.tote),
-    ('crossbody', 'Crossbody', SilhouetteCutoutKind.crossbody),
-    ('shoulder', 'De hombro', SilhouetteCutoutKind.shoulder),
-  ];
-
-  String? _silhouette;
-
-  List<(String, String, SilhouetteCutoutKind)> get _available {
-    return [
-      for (final shape in _shapes)
-        if (_inStockFor(widget.store, silhouette: shape.$1, limit: 1)
-            .isNotEmpty)
-          shape,
-    ];
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final shapes = _available;
-    if (shapes.isEmpty) return const SizedBox.shrink();
-    final selected = shapes.firstWhere(
-      (s) => s.$1 == _silhouette,
-      orElse: () => shapes.first,
-    );
-    final pieces = _inStockFor(widget.store, silhouette: selected.$1);
-    if (pieces.isEmpty) return const SizedBox.shrink();
-    final still = pieces.first.primaryImage;
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (still != null)
-          AspectRatio(
-            aspectRatio: 16 / 10,
-            child: MonettaImage(url: still, cacheWidth: MediaUrl.heroWidth),
-          ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 22, 20, 0),
-          child: Text('Formas'.toUpperCase(), style: eyebrow()),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 16),
-          child: Text('Cómo se lleva', style: display(24)),
-        ),
-        SizedBox(
-          height: 72,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 20),
-            itemCount: shapes.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 18),
-            itemBuilder: (context, index) {
-              final shape = shapes[index];
-              final on = shape.$1 == selected.$1;
-              return GestureDetector(
-                onTap: () => setState(() => _silhouette = shape.$1),
-                child: SizedBox(
-                  width: 64,
-                  child: Column(
-                    children: [
-                      SilhouetteCutout(
-                        kind: shape.$3,
-                        color: on ? kInk : kInkMuted,
-                      ),
-                      const SizedBox(height: 6),
-                      Text(
-                        shape.$2.toUpperCase(),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: eyebrow(
-                          size: 8,
-                          color: on ? kInk : kInkMuted,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              );
-            },
-          ),
-        ),
-        const SizedBox(height: 12),
-        _CatalogGrid(products: pieces),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 0),
-          child: FilledButton(
-            onPressed: () => openCollection(
-              context,
-              CollectionScreen(
-                title: selected.$2,
-                filter: CollectionFilter(
-                  category: 'bolsa',
-                  silhouette: selected.$1,
-                ),
-              ),
-            ),
-            child: Text('Ver ${selected.$2}'.toUpperCase()),
-          ),
-        ),
-      ],
-    );
-  }
+void _openHomeCollection(BuildContext context, HomeCollectionCard card) {
+  openCollection(
+    context,
+    CollectionScreen(
+      title: card.title,
+      filter: CollectionFilter(
+        collectionHandle: card.handle,
+        category: card.category,
+        silhouette: card.silhouette,
+      ),
+    ),
+  );
 }
 
 class _CatalogGrid extends StatelessWidget {
@@ -1033,44 +1161,6 @@ class _CatalogGrid extends StatelessWidget {
               ProductCard(product: products[index]),
         );
       },
-    );
-  }
-}
-
-class _QuietFooter extends StatelessWidget {
-  const _QuietFooter({
-    required this.onChooseBrands,
-    required this.onWhatsApp,
-    required this.onWholesale,
-  });
-
-  final VoidCallback onChooseBrands;
-  final VoidCallback onWhatsApp;
-  final VoidCallback onWholesale;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      color: kMist,
-      padding: const EdgeInsets.fromLTRB(20, 34, 20, 38),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          const MonettaTrustRows(),
-          const SizedBox(height: 28),
-          UnderlineLink(label: 'Elige marcas', onTap: onChooseBrands),
-          const SizedBox(height: 16),
-          UnderlineLink(label: 'WhatsApp', onTap: onWhatsApp),
-          const SizedBox(height: 16),
-          UnderlineLink(label: 'Mayoreo', onTap: onWholesale),
-          const SizedBox(height: 22),
-          Text(
-            'MONETTA · MÉXICO',
-            style: eyebrow(size: 9, color: kInkMuted),
-          ),
-        ],
-      ),
     );
   }
 }

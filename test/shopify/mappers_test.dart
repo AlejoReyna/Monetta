@@ -106,7 +106,17 @@ void main() {
       expect(product.isOnSale, isTrue);
       expect(product.isInStock, isTrue);
       expect(product.collectionHandles, ['steve-madden']);
+      expect(product.id, 'gid://shopify/Product/9683379781783');
+      expect(
+        product.variants.single.id,
+        'gid://shopify/ProductVariant/48087674421399',
+      );
       expect(product.variants.single.isDefault, isTrue);
+    });
+
+    test('rejects non-GID identities from Storefront', () {
+      final json = baseJson()..['id'] = 'not-a-shopify-id';
+      expect(() => productFromJson(json), throwsFormatException);
     });
 
     test('computes the discount fraction', () {

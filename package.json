@@ -1,0 +1,44 @@
+{
+  "name": "monetta-app",
+  "version": "1.0.0",
+  "description": "iOS + Android Flutter client for [monetta.mx](https://monetta.mx) — bolsas, carteras y relojes importados originales.",
+  "directories": {
+    "doc": "docs",
+    "lib": "lib",
+    "test": "test"
+  },
+  "scripts": {
+    "build": "npm --prefix web install && npm --prefix web run build",
+    "typecheck:api": "tsc -p tsconfig.vercel.json --noEmit",
+    "test:api": "vitest run --dir server/catalog",
+    "build:web": "npm --prefix web run build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AlejoReyna/Monetta.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "module",
+  "engines": {
+    "node": "24.x"
+  },
+  "bugs": {
+    "url": "https://github.com/AlejoReyna/Monetta/issues"
+  },
+  "homepage": "https://github.com/AlejoReyna/Monetta#readme",
+  "dependencies": {
+    "firebase-admin": "^14.3.0",
+    "json-bigint": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/json-bigint": "^1.0.4",
+    "@types/node": "^22.15.0",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  },
+  "overrides": {
+    "uuid": "^11.1.1"
+  }
+}

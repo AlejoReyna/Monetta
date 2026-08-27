@@ -5,6 +5,15 @@ import type { CustomerRecord } from '../domain/types.js';
 export class PgCustomersRepository implements CustomersRepository {
   constructor(private readonly pool: pg.Pool) {}
 
+  async ensureExists(shopifyCustomerId: string): Promise<void> {
+    await this.pool.query(
+      `INSERT INTO customers_mirror (shopify_customer_id)
+       VALUES ($1)
+       ON CONFLICT (shopify_customer_id) DO NOTHING`,
+      [shopifyCustomerId],
+    );
+  }
+
   async upsert(record: CustomerRecord): Promise<void> {
     await this.pool.query(
       `INSERT INTO customers_mirror

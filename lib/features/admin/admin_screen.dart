@@ -4,21 +4,25 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/admin_controller.dart';
+import '../../app/admin_notification_controller.dart';
 import '../../app/catalog_store.dart';
 import '../../app/external_catalog_controller.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/theme.dart';
 import '../../domain/admin_control.dart';
+import '../../data/notifications/admin_notification_client.dart';
 
 class AdminScreen extends StatefulWidget {
   const AdminScreen({
     required this.controller,
+    this.notificationController,
     required this.catalogStore,
     required this.externalCatalogController,
     super.key,
   });
 
   final AdminController controller;
+  final AdminNotificationController? notificationController;
   final CatalogStore catalogStore;
   final ExternalCatalogController externalCatalogController;
 
@@ -32,7 +36,10 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => _load());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _load();
+      widget.notificationController?.load();
+    });
   }
 
   Future<void> _load() {
@@ -68,7 +75,7 @@ class _AdminScreenState extends State<AdminScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const MonettaWordmark(height: 20),
+        title: const MonettaWordmark.appBar(),
         centerTitle: true,
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(.5),
@@ -108,6 +115,11 @@ class _AdminScreenState extends State<AdminScreen> {
                       ),
                       _SourcesSection(
                         controller: controller,
+                        onMessage: _toast,
+                      ),
+                      _NotificationsSection(
+                        controller: widget.notificationController,
+                        products: controller.products,
                         onMessage: _toast,
                       ),
                     ],
@@ -204,6 +216,7 @@ class _SectionPicker extends StatelessWidget {
     (Icons.inventory_2_outlined, 'Productos'),
     (Icons.storefront_outlined, 'Tienda'),
     (Icons.language_rounded, 'Fuentes'),
+    (Icons.notifications_outlined, 'Avisos'),
   ];
 
   @override
@@ -1244,6 +1257,422 @@ class _SourceEditorState extends State<_SourceEditor> {
       ),
     );
     if (mounted && ok) Navigator.pop(context, true);
+  }
+}
+
+class _NotificationsSection extends StatefulWidget {
+  const _NotificationsSection({
+    required this.controller,
+    required this.products,
+    required this.onMessage,
+  });
+
+  final AdminNotificationController? controller;
+  final List<AdminProductRecord> products;
+  final ValueChanged<String> onMessage;
+
+  @override
+  State<_NotificationsSection> createState() => _NotificationsSectionState();
+}
+
+class _NotificationsSectionState extends State<_NotificationsSection> {
+  final _title = TextEditingController();
+  final _body = TextEditingController();
+  final _trait = TextEditingController();
+  String _audience = 'announcements';
+  bool _openProduct = false;
+  String? _productId;
+
+  @override
+  void dispose() {
+    _title.dispose();
+    _body.dispose();
+    _trait.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final controller = widget.controller;
+    if (controller == null || !controller.available) {
+      return _AdminScroll(
+        children: [
+          Text('Notificaciones', style: display(28)),
+          const SizedBox(height: 8),
+          Text(
+            'Configura la URL del servicio para crear campañas y activar automatizaciones.',
+            style: sans(size: 12, color: kInkMuted),
+          ),
+        ],
+      );
+    }
+    return ListenableBuilder(
+      listenable: controller,
+      builder: (context, _) => _AdminScroll(
+        children: [
+          Text('Notificaciones', style: display(28)),
+          const SizedBox(height: 6),
+          Text(
+            'El servidor decide la audiencia con consentimiento, horario '
+            'silencioso, límite de frecuencia y perfil resumido.',
+            style: sans(size: 12, color: kInkMuted, height: 1.45),
+          ),
+          if (controller.loading) ...[
+            const SizedBox(height: 18),
+            const LinearProgressIndicator(minHeight: 1.5),
+          ],
+          if (controller.lastError != null) ...[
+            const SizedBox(height: 14),
+            Text(
+              controller.lastError!,
+              style: sans(size: 11, color: Colors.red.shade700),
+            ),
+          ],
+          const SizedBox(height: 22),
+          Row(
+            children: [
+              Expanded(
+                child: _Metric(
+                  value: '${controller.overview.grantedEndpoints}',
+                  label: 'dispositivos',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _Metric(
+                  value: '${controller.overview.personalizedProfiles}',
+                  label: 'perfiles',
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: _Metric(
+                  value: '${controller.overview.queuedDeliveries}',
+                  label: 'en cola',
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 28),
+          Text('NUEVA CAMPAÑA', style: eyebrow()),
+          const SizedBox(height: 10),
+          TextField(
+            key: const ValueKey('notification-campaign-title'),
+            controller: _title,
+            maxLength: 80,
+            decoration: const InputDecoration(labelText: 'Título'),
+          ),
+          const SizedBox(height: 10),
+          TextField(
+            key: const ValueKey('notification-campaign-body'),
+            controller: _body,
+            maxLength: 180,
+            maxLines: 3,
+            decoration: const InputDecoration(labelText: 'Mensaje'),
+          ),
+          const SizedBox(height: 12),
+          DropdownButtonFormField<String>(
+            key: const ValueKey('notification-campaign-audience'),
+            initialValue: _audience,
+            decoration: const InputDecoration(labelText: 'Audiencia'),
+            items: const [
+              DropdownMenuItem(
+                value: 'announcements',
+                child: Text('Anuncios · personas suscritas'),
+              ),
+              DropdownMenuItem(
+                value: 'high_intent',
+                child: Text('Ofertas · alta intención'),
+              ),
+              DropdownMenuItem(
+                value: 'brand',
+                child: Text('Ofertas · afinidad de marca'),
+              ),
+              DropdownMenuItem(
+                value: 'category',
+                child: Text('Ofertas · afinidad de categoría'),
+              ),
+            ],
+            onChanged: controller.pendingCampaign == null
+                ? (value) => setState(() => _audience = value ?? _audience)
+                : null,
+          ),
+          if (_audience == 'brand' || _audience == 'category') ...[
+            const SizedBox(height: 12),
+            TextField(
+              key: const ValueKey('notification-campaign-trait'),
+              controller: _trait,
+              decoration: InputDecoration(
+                labelText: _audience == 'brand'
+                    ? 'Slug de marca (ej. coach)'
+                    : 'Slug de categoría (ej. bolsa)',
+              ),
+            ),
+          ],
+          const SizedBox(height: 10),
+          SwitchListTile.adaptive(
+            contentPadding: EdgeInsets.zero,
+            title: Text('Abrir un producto', style: sans(size: 13)),
+            subtitle: Text(
+              _openProduct
+                  ? 'La notificación abre la pieza.'
+                  : 'Abre la portada.',
+              style: sans(size: 11, color: kInkMuted),
+            ),
+            value: _openProduct,
+            onChanged: controller.pendingCampaign == null
+                ? (value) => setState(() => _openProduct = value)
+                : null,
+          ),
+          if (_openProduct && widget.products.isNotEmpty)
+            DropdownButtonFormField<String>(
+              key: const ValueKey('notification-campaign-product'),
+              initialValue: _productId,
+              decoration: const InputDecoration(labelText: 'Producto'),
+              items: [
+                for (final product in widget.products)
+                  DropdownMenuItem(
+                    value: product.id,
+                    child: SizedBox(
+                      width: 240,
+                      child: Text(
+                        product.title,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ),
+              ],
+              onChanged: (value) => setState(() => _productId = value),
+            ),
+          const SizedBox(height: 16),
+          if (controller.pendingCampaign == null)
+            FilledButton.icon(
+              key: const ValueKey('notification-create-preview'),
+              onPressed: controller.saving ? null : _createPreview,
+              icon: const Icon(Icons.visibility_outlined, size: 18),
+              label: const Text('CREAR Y REVISAR AUDIENCIA'),
+            )
+          else
+            _CampaignReview(
+              preview: controller.pendingCampaign!,
+              saving: controller.saving,
+              onTest: _sendTest,
+              onSchedule: _schedule,
+              onDiscard: controller.discardPending,
+            ),
+          const SizedBox(height: 32),
+          Text('AUTOMATIZACIONES', style: eyebrow()),
+          const SizedBox(height: 8),
+          for (final rule in controller.rules)
+            SwitchListTile.adaptive(
+              key: ValueKey('notification-rule-${rule.key}'),
+              contentPadding: EdgeInsets.zero,
+              title: Text(_ruleLabel(rule.key), style: sans(size: 13)),
+              subtitle: Text(
+                _ruleDescription(rule.key),
+                style: sans(size: 10.5, color: kInkMuted),
+              ),
+              value: rule.enabled,
+              onChanged: controller.saving
+                  ? null
+                  : (_) async {
+                      final ok = await controller.toggleRule(rule);
+                      if (ok) widget.onMessage('Automatización actualizada.');
+                    },
+            ),
+          if (controller.overview.recentCampaigns.isNotEmpty) ...[
+            const SizedBox(height: 28),
+            Text('CAMPAÑAS RECIENTES', style: eyebrow()),
+            const SizedBox(height: 8),
+            for (final campaign in controller.overview.recentCampaigns)
+              _CampaignRow(campaign: campaign),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Future<void> _createPreview() async {
+    final controller = widget.controller!;
+    final title = _title.text.trim();
+    final body = _body.text.trim();
+    final trait = _trait.text.trim().toLowerCase();
+    if (title.isEmpty || body.isEmpty) {
+      widget.onMessage('Escribe el título y el mensaje.');
+      return;
+    }
+    if ((_audience == 'brand' || _audience == 'category') && trait.isEmpty) {
+      widget.onMessage('Escribe la marca o categoría de la audiencia.');
+      return;
+    }
+    if (_openProduct && _productId == null) {
+      widget.onMessage('Elige el producto que abrirá la notificación.');
+      return;
+    }
+    final segment = switch (_audience) {
+      'high_intent' => <String, Object>{'kind': 'high_intent'},
+      'brand' => <String, Object>{
+          'kind': 'brand',
+          'value': trait,
+          'minimumScore': 60,
+        },
+      'category' => <String, Object>{
+          'kind': 'category',
+          'value': trait,
+          'minimumScore': 60,
+        },
+      _ => <String, Object>{'kind': 'all'},
+    };
+    final route = _openProduct
+        ? <String, Object>{
+            'type': 'product',
+            'productKey': 'shopify:${_productId!}',
+          }
+        : <String, Object>{'type': 'home'};
+    final ok = await controller.createDraft(
+      CampaignDraftInput(
+        title: title,
+        body: body,
+        purpose: _audience == 'announcements'
+            ? 'announcements'
+            : 'personalized_offers',
+        segment: segment,
+        route: route,
+      ),
+    );
+    if (ok) widget.onMessage('Audiencia calculada. Revisa antes de enviar.');
+  }
+
+  Future<void> _sendTest() async {
+    final ok = await widget.controller!.sendPendingTest();
+    widget.onMessage(
+      ok
+          ? 'Prueba puesta en cola para este dispositivo.'
+          : 'No se envió la prueba.',
+    );
+  }
+
+  Future<void> _schedule() async {
+    final confirmed = await _confirmChange(
+      context,
+      title: '¿Enviar esta campaña?',
+      description:
+          'Se creará una entrega por dispositivo elegible. Esta acción queda auditada.',
+    );
+    if (!confirmed || !mounted) return;
+    final ok = await widget.controller!.schedulePending();
+    if (ok) {
+      _title.clear();
+      _body.clear();
+    }
+    widget.onMessage(
+      ok ? 'Campaña puesta en cola.' : 'No se programó la campaña.',
+    );
+  }
+
+  static String _ruleLabel(String key) => switch (key) {
+        'restock' => 'Regreso de producto',
+        'price_drop' => 'Baja de precio',
+        'new_arrival' => 'Nueva llegada afín',
+        'local_cart_reminder' => 'Recordatorio local de bolsa',
+        _ => key,
+      };
+
+  static String _ruleDescription(String key) => switch (key) {
+        'restock' => 'Sólo para personas que tocaron “Avísame”.',
+        'price_drop' => 'Usa afinidad resumida y consentimiento de ofertas.',
+        'new_arrival' => 'Segmenta por marca o categoría afín.',
+        'local_cart_reminder' =>
+          'Se programa en el dispositivo, no en el servidor.',
+        _ => 'Regla automática del servicio.',
+      };
+}
+
+class _CampaignReview extends StatelessWidget {
+  const _CampaignReview({
+    required this.preview,
+    required this.saving,
+    required this.onTest,
+    required this.onSchedule,
+    required this.onDiscard,
+  });
+
+  final CampaignPreview preview;
+  final bool saving;
+  final VoidCallback onTest;
+  final VoidCallback onSchedule;
+  final VoidCallback onDiscard;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(18),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF7F0E6),
+        border: Border.all(color: kLine, width: .5),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${preview.eligible}', style: display(30)),
+          Text('dispositivos elegibles ahora', style: sans(size: 11)),
+          const SizedBox(height: 14),
+          OutlinedButton(
+            key: const ValueKey('notification-send-test'),
+            onPressed: saving ? null : onTest,
+            child: const Text('ENVIAR PRUEBA A ESTE TELÉFONO'),
+          ),
+          const SizedBox(height: 8),
+          FilledButton(
+            key: const ValueKey('notification-schedule-now'),
+            onPressed: saving ? null : onSchedule,
+            child: const Text('ENVIAR AHORA'),
+          ),
+          Center(
+            child: TextButton(
+              onPressed: saving ? null : onDiscard,
+              child: const Text('DESCARTAR BORRADOR'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CampaignRow extends StatelessWidget {
+  const _CampaignRow({required this.campaign});
+
+  final NotificationCampaignSummary campaign;
+
+  @override
+  Widget build(BuildContext context) {
+    final openRate = campaign.acceptedCount == 0
+        ? 0
+        : (campaign.openedCount * 100 / campaign.acceptedCount).round();
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: kLine, width: .5)),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(campaign.title, style: sans(size: 12.5)),
+                Text(
+                  '${campaign.acceptedCount} enviados · ${campaign.openedCount} abiertos · $openRate%',
+                  style: sans(size: 10, color: kInkMuted),
+                ),
+              ],
+            ),
+          ),
+          _StatusPill(label: campaign.status),
+        ],
+      ),
+    );
   }
 }
 

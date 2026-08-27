@@ -27,6 +27,8 @@ void main() {
 
     expect(find.text('Tu bolsa está vacía'), findsOneWidget);
     expect(find.text('VOLVER A LA TIENDA'), findsOneWidget);
+    expect(find.text('SEGURO'), findsNothing);
+    expect(find.byIcon(Icons.lock_outline), findsNothing);
   });
 
   testWidgets('bag quantities stay editable and update the order total',
@@ -58,6 +60,7 @@ void main() {
     await tester.pumpWidget(_app(store, const CheckoutFlowScreen()));
     await tester.pump();
 
+    expect(find.text('SEGURO'), findsOneWidget);
     expect(find.text('¿Dónde lo enviamos?'), findsOneWidget);
     expect(
       find.text(

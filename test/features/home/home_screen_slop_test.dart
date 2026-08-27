@@ -4,6 +4,7 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/external_catalog_config.dart';
 import 'package:monetta_app/app/external_catalog_controller.dart';
+import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
 
@@ -71,7 +72,7 @@ void main() {
     expect(find.text('ORDENAR'), findsNothing);
   });
 
-  testWidgets('hero is media-only and hides newest until the user scrolls',
+  testWidgets('hero is media-only and reveals collections after scrolling',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 2000);
@@ -91,7 +92,7 @@ void main() {
     expect(mediaBox.top - heroBox.top, closeTo(12, 0.5));
     expect(heroBox.bottom - mediaBox.bottom, closeTo(12, 0.5));
     expect(mediaBox.height, greaterThan(heroBox.height * 0.9));
-    expect(find.text('Novedades'), findsNothing);
+    expect(find.text('Colecciones'), findsNothing);
     expect(find.text('Ver el catálogo'), findsNothing);
 
     await tester.drag(
@@ -100,7 +101,44 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Novedades').hitTestable(), findsOneWidget);
+    expect(find.text('Colecciones').hitTestable(), findsOneWidget);
+    expect(
+      tester.widget<Text>(find.text('Colecciones')).style?.fontFamily,
+      kEditorialFontFamily,
+    );
+  });
+
+  testWidgets('navbar wordmark keeps its canonical size while home collapses',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 2000);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    await tester.pumpWidget(_app(store));
+    await tester.pump();
+
+    final appBarWordmark = find.descendant(
+      of: find.byType(AppBar),
+      matching: find.byType(MonettaWordmark),
+    );
+    expect(
+      tester.widget<MonettaWordmark>(appBarWordmark).height,
+      kAppBarWordmarkHeight,
+    );
+    expect(tester.widget<AppBar>(find.byType(AppBar)).toolbarHeight, 68);
+
+    await tester.drag(
+      find.byKey(const Key('campaign-hero')),
+      const Offset(0, -260),
+    );
+    await tester.pump();
+
+    expect(tester.widget<AppBar>(find.byType(AppBar)).toolbarHeight, 52);
+    expect(
+      tester.widget<MonettaWordmark>(appBarWordmark).height,
+      kAppBarWordmarkHeight,
+    );
   });
 
   testWidgets('hero advances to the next of three cards every 3.5 seconds',

@@ -8,6 +8,7 @@ library;
 import '../../domain/cart.dart';
 import '../../domain/collection.dart';
 import '../../domain/product.dart';
+import 'shopify_gid.dart';
 
 /// Unwraps the `{edges: [{node: {...}}]}` shape Shopify uses everywhere.
 List<Map<String, dynamic>> edgeNodes(Object? connection) {
@@ -41,7 +42,7 @@ String? metafieldValue(Object? metafield) {
 Product productFromJson(Map<String, dynamic> json) {
   final variants = edgeNodes(json['variants']).map((v) {
     return ProductVariant(
-      id: '${v['id']}',
+      id: shopifyVariantGid(v['id']),
       title: '${v['title'] ?? ''}',
       price: money(v['price']) ?? 0,
       available: v['availableForSale'] == true,
@@ -61,7 +62,7 @@ Product productFromJson(Map<String, dynamic> json) {
       .toList();
 
   return Product(
-    id: '${json['id']}',
+    id: shopifyProductGid(json['id']),
     handle: '${json['handle'] ?? ''}',
     title: '${json['title'] ?? ''}',
     vendor: '${json['vendor'] ?? ''}',

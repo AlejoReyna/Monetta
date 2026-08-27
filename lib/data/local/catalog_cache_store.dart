@@ -55,19 +55,36 @@ class CatalogCacheStore {
     if (products.isEmpty) return;
     await _db.transaction(() async {
       for (final product in products) {
-        await _db.into(_db.cachedProducts).insertOnConflictUpdate(
-              _productToCompanion(product),
-            );
-        await (_db.delete(_db.cachedVariants)
-              ..where((t) => t.productId.equals(product.id)))
-            .go();
-        for (final variant in product.variants) {
-          await _db.into(_db.cachedVariants).insertOnConflictUpdate(
-                _variantToCompanion(product.id, variant),
-              );
-        }
+        await _upsertProduct(product);
       }
     });
+  }
+
+  /// Atomically replaces the complete catalog after a validated authoritative
+  /// Firestore snapshot. Callers must reject empty/invalid snapshots first.
+  Future<void> replaceProducts(List<Product> products) async {
+    if (products.isEmpty) return;
+    await _db.transaction(() async {
+      await _db.delete(_db.cachedVariants).go();
+      await _db.delete(_db.cachedProducts).go();
+      for (final product in products) {
+        await _upsertProduct(product);
+      }
+    });
+  }
+
+  Future<void> _upsertProduct(Product product) async {
+    await _db.into(_db.cachedProducts).insertOnConflictUpdate(
+          _productToCompanion(product),
+        );
+    await (_db.delete(_db.cachedVariants)
+          ..where((table) => table.productId.equals(product.id)))
+        .go();
+    for (final variant in product.variants) {
+      await _db.into(_db.cachedVariants).insertOnConflictUpdate(
+            _variantToCompanion(product.id, variant),
+          );
+    }
   }
 
   Future<void> upsertCollections(List<domain.Collection> collections) async {
@@ -75,7 +92,10 @@ class CatalogCacheStore {
     await _db.batch((batch) {
       batch.insertAllOnConflictUpdate(
         _db.cachedCollections,
-        [for (final collection in collections) _collectionToCompanion(collection)],
+        [
+          for (final collection in collections)
+            _collectionToCompanion(collection),
+        ],
       );
     });
   }
@@ -154,7 +174,9 @@ class CatalogCacheStore {
     );
   }
 
-  CachedCollectionsCompanion _collectionToCompanion(domain.Collection collection) {
+  CachedCollectionsCompanion _collectionToCompanion(
+    domain.Collection collection,
+  ) {
     return CachedCollectionsCompanion.insert(
       id: collection.id,
       handle: collection.handle,

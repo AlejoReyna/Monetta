@@ -42,6 +42,8 @@ services:
       # starts a live crawl.
       LIVE_CRAWL_ENABLED: "false"
       PLAYWRIGHT_FALLBACK_ENABLED: "false"
+      NOTIFICATION_EVENTS_URL: ""
+      NOTIFICATION_EVENTS_SECRET: ""
     ports:
       - "8081:8081"
 

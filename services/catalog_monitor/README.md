@@ -455,3 +455,13 @@ guard.
   `curated_us_snapshot`, availability is `unknown`, and `/healthz` does not
   become healthy because fallback records are present. A successful live US
   crawl replaces matching records and fills beyond the floor.
+
+## Notification event outbox
+
+Successful full snapshots now write new-arrival, restock and price-drop events
+to `notification_event_outbox` in the same transaction as product changes.
+`src/monitor/scheduler.ts` dispatches them to the signed `accounts_orders`
+ingress and retries transient failures without repeating a delivered event.
+Set `NOTIFICATION_EVENTS_URL` and a matching 32+ character
+`NOTIFICATION_EVENTS_SECRET` to enable delivery; leaving the URL empty performs
+no notification network calls. See `../../docs/PUSH_NOTIFICATIONS_RUNBOOK.md`.

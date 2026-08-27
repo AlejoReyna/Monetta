@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:drift/drift.dart';
+import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/data/local/database.dart';
 
@@ -9,8 +12,8 @@ void main() {
   tearDown(() => db.close());
 
   group('AppDatabase', () {
-    test('opens and reports schema version 1', () {
-      expect(db.schemaVersion, 1);
+    test('opens and reports schema version 2', () {
+      expect(db.schemaVersion, 2);
     });
 
     test('round-trips a cached product and its variants', () async {
@@ -44,7 +47,8 @@ void main() {
       expect(variants.single.productId, 'gid://shopify/Product/1');
     });
 
-    test('cascades variant deletion when the parent product is deleted', () async {
+    test('cascades variant deletion when the parent product is deleted',
+        () async {
       await db.into(db.cachedProducts).insert(
             CachedProductsCompanion.insert(
               id: 'p1',
@@ -104,7 +108,8 @@ void main() {
       );
     });
 
-    test('wishlist item primary key rejects a duplicate product insert', () async {
+    test('wishlist item primary key rejects a duplicate product insert',
+        () async {
       await db.into(db.wishlistItems).insert(
             WishlistItemsCompanion.insert(
               productId: 'p1',
@@ -140,10 +145,90 @@ void main() {
             ),
           );
 
-      await (db.delete(db.accounts)..where((t) => t.localAccountId.equals('a1')))
+      await (db.delete(db.accounts)
+            ..where((t) => t.localAccountId.equals('a1')))
           .go();
 
       expect(await db.select(db.sessions).get(), isEmpty);
+    });
+
+    test('v1 upgrade migrates catalog, wishlist, bag and history to GIDs',
+        () async {
+      final directory = await Directory.systemTemp.createTemp('monetta-v1-');
+      addTearDown(() => directory.delete(recursive: true));
+      final file = File('${directory.path}/monetta.sqlite');
+
+      final legacy = AppDatabase(NativeDatabase(file));
+      await legacy.into(legacy.cachedProducts).insert(
+            CachedProductsCompanion.insert(
+              id: '9683379781783',
+              handle: 'legacy-product',
+              title: 'Producto existente',
+              vendor: 'Monetta',
+              productType: 'Bolsa',
+              createdAt: DateTime.utc(2026, 1, 1),
+              updatedAt: DateTime.utc(2026, 1, 2),
+            ),
+          );
+      await legacy.into(legacy.cachedVariants).insert(
+            CachedVariantsCompanion.insert(
+              id: '48087674421399',
+              productId: '9683379781783',
+              title: 'Default Title',
+              price: 1589,
+              available: true,
+            ),
+          );
+      await legacy.into(legacy.wishlistItems).insert(
+            WishlistItemsCompanion.insert(
+              productId: '9683379781783',
+              addedAt: DateTime.utc(2026, 1, 3),
+            ),
+          );
+      await legacy.into(legacy.bagLines).insert(
+            BagLinesCompanion.insert(
+              productId: '9683379781783',
+              variantId: '48087674421399',
+              quantity: 2,
+            ),
+          );
+      await legacy.into(legacy.interactionEvents).insert(
+            InteractionEventsCompanion.insert(
+              type: 'productView',
+              timestamp: DateTime.utc(2026, 1, 4),
+              productId: const Value('9683379781783'),
+            ),
+          );
+      await legacy.customStatement('PRAGMA user_version = 1');
+      await legacy.close();
+
+      final upgraded = AppDatabase(NativeDatabase(file));
+      addTearDown(upgraded.close);
+      final products = await upgraded.select(upgraded.cachedProducts).get();
+      final variants = await upgraded.select(upgraded.cachedVariants).get();
+      final wishlist = await upgraded.select(upgraded.wishlistItems).get();
+      final bag = await upgraded.select(upgraded.bagLines).get();
+      final events = await upgraded.select(upgraded.interactionEvents).get();
+
+      expect(products.single.id, 'gid://shopify/Product/9683379781783');
+      expect(
+        variants.single.id,
+        'gid://shopify/ProductVariant/48087674421399',
+      );
+      expect(
+        variants.single.productId,
+        'gid://shopify/Product/9683379781783',
+      );
+      expect(
+        wishlist.single.productId,
+        'gid://shopify/Product/9683379781783',
+      );
+      expect(bag.single.productId, 'gid://shopify/Product/9683379781783');
+      expect(
+        bag.single.variantId,
+        'gid://shopify/ProductVariant/48087674421399',
+      );
+      expect(events.single.productId, 'gid://shopify/Product/9683379781783');
     });
   });
 }

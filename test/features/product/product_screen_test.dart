@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/media/monetta_image.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
@@ -13,6 +14,31 @@ Future<CatalogStore> _loadedStore() async {
 }
 
 void main() {
+  testWidgets('product hero covers the complete detail viewport',
+      (tester) async {
+    final store = await _loadedStore();
+    final product = store.products.firstWhere(
+      (item) => item.isInStock && item.images.isNotEmpty,
+    );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildTheme(),
+        home: StoreScope(
+          notifier: store,
+          child: ProductScreen(productId: product.id),
+        ),
+      ),
+    );
+
+    final heroImage = find.descendant(
+      of: find.byType(InteractiveViewer),
+      matching: find.byType(MonettaImage),
+    );
+    expect(heroImage, findsOneWidget);
+    expect(tester.widget<MonettaImage>(heroImage).fit, BoxFit.cover);
+  });
+
   testWidgets('product page sells with facts, not internal facets',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());

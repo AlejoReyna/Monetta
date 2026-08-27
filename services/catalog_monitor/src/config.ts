@@ -27,6 +27,8 @@ export interface CatalogMonitorConfig {
   readonly sourceCommissionBps: Readonly<Record<string, number>>;
   readonly productCommissionBps: Readonly<Record<string, number>>;
   readonly enabledSourceIds: readonly SourceId[];
+  readonly notificationEventsUrl: string | null;
+  readonly notificationEventsSecret: string | null;
 }
 
 function bool(value: string | undefined, fallback: boolean): boolean {
@@ -103,6 +105,18 @@ const PLACEHOLDER_CONTACT_DOMAIN_RE = /@[\w-]+\.(invalid|example|test|localhost)
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): CatalogMonitorConfig {
   const liveCrawlEnabled = bool(env.LIVE_CRAWL_ENABLED, false);
   const userAgent = env.USER_AGENT ?? PLACEHOLDER_CONTACT_USER_AGENT;
+  const notificationEventsUrl = nonEmpty(env.NOTIFICATION_EVENTS_URL);
+  const notificationEventsSecret = nonEmpty(env.NOTIFICATION_EVENTS_SECRET);
+
+  if (notificationEventsUrl !== null) {
+    const parsed = new URL(notificationEventsUrl);
+    if (!['https:', 'http:'].includes(parsed.protocol)) {
+      throw new Error('NOTIFICATION_EVENTS_URL must use HTTP or HTTPS');
+    }
+    if (notificationEventsSecret === null || notificationEventsSecret.length < 32) {
+      throw new Error('NOTIFICATION_EVENTS_SECRET must be at least 32 characters');
+    }
+  }
 
   if (/mozilla|chrome|safari|webkit|gecko/i.test(userAgent) && !/monetta/i.test(userAgent)) {
     throw new Error(
@@ -145,5 +159,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): CatalogMonitor
     sourceCommissionBps: rateMap(env.COMMISSION_SOURCE_RATES_JSON, 'COMMISSION_SOURCE_RATES_JSON'),
     productCommissionBps: rateMap(env.COMMISSION_PRODUCT_RATES_JSON, 'COMMISSION_PRODUCT_RATES_JSON'),
     enabledSourceIds: enabledSources(env.ENABLED_SOURCE_IDS),
+    notificationEventsUrl,
+    notificationEventsSecret,
   };
+}
+
+function nonEmpty(value: string | undefined): string | null {
+  const trimmed = value?.trim() ?? '';
+  return trimmed === '' ? null : trimmed;
 }

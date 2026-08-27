@@ -49,6 +49,7 @@ class _ProductScreenState extends State<ProductScreen> {
       productId: widget.productId,
       dwellMs: _dwell.elapsedMilliseconds,
     );
+    NotificationScope.maybeOf(context)?.recordPushOutcome('product_viewed');
     Navigator.of(context).pop();
   }
 
@@ -96,6 +97,30 @@ class _ProductScreenState extends State<ProductScreen> {
     }
   }
 
+  Future<void> _createRestockAlert(Product product) async {
+    final notifications = NotificationScope.maybeOf(context);
+    if (notifications == null || !notifications.available) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content:
+              Text('Los avisos todavía no están disponibles en esta versión.'),
+        ),
+      );
+      return;
+    }
+    final ok = await notifications.createRestockAlert(product.id);
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          ok
+              ? 'Te avisaremos cuando esta pieza vuelva.'
+              : notifications.lastError ?? 'No pudimos crear el aviso.',
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
@@ -128,6 +153,7 @@ class _ProductScreenState extends State<ProductScreen> {
             facets!.brand!.value,
             excluding: product.id,
           );
+    final notifications = NotificationScope.maybeOf(context);
 
     return PopScope(
       canPop: false,
@@ -140,7 +166,7 @@ class _ProductScreenState extends State<ProductScreen> {
             icon: const Icon(Icons.arrow_back, size: 20),
             onPressed: _recordDwellAndPop,
           ),
-          title: const MonettaWordmark(),
+          title: const MonettaWordmark.appBar(),
           actions: [
             IconButton(
               tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
@@ -365,6 +391,9 @@ class _ProductScreenState extends State<ProductScreen> {
                         child: FilledButton(
                           onPressed: () {
                             store.addToBag(product);
+                            NotificationScope.maybeOf(
+                              context,
+                            )?.recordPushOutcome('add_to_cart');
                             showMiniCart(context);
                           },
                           child: const Text('AGREGAR A LA BOLSA'),
@@ -374,9 +403,14 @@ class _ProductScreenState extends State<ProductScreen> {
                       Expanded(
                         flex: 2,
                         child: OutlinedButton(
-                          onPressed: null,
+                          key: const ValueKey('create-restock-alert'),
+                          onPressed: notifications?.saving == true
+                              ? null
+                              : () => _createRestockAlert(product),
                           child: Text(
-                            'Agotado'.toUpperCase(),
+                            notifications?.saving == true
+                                ? 'GUARDANDO…'
+                                : 'AVÍSAME CUANDO VUELVA',
                             style: const TextStyle(height: 1.1),
                           ),
                         ),
@@ -549,7 +583,7 @@ class _ZoomImage extends StatelessWidget {
               maxScale: 2.2,
               child: MonettaImage(
                 url: url,
-                fit: BoxFit.contain,
+                fit: BoxFit.cover,
                 cacheWidth: MediaUrl.heroWidth,
               ),
             ),

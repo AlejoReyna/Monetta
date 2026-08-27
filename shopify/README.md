@@ -40,7 +40,8 @@ npm_config_cache=../.npm-cache npx shopify auth login   # if needed
 npm_config_cache=../.npm-cache npx shopify organization list
 # expect: Monetta (211167120)
 npm_config_cache=../.npm-cache npx shopify store list
-# expect: fakcei-n9  Monetta
+# select only the monetta-staging development store for staging work;
+# never select fakcei-n9 / monetta-2 / monetta.mx
 
 # Link / create the staging app (writes client_id into the staging TOML)
 npm_config_cache=../.npm-cache npx shopify app config link --config staging
@@ -79,6 +80,12 @@ npx shopify app config validate --config production
 ```
 
 Every mutating command must pass `--config staging` or `--config production`.
+
+`shopify.app.catalog-mirror.toml` is a separate, read-only catalog mirror app.
+It reads the live store (`fakcei-n9.myshopify.com` / `monetta.mx`) and writes
+only to the isolated staging Vercel/Firebase pipeline. Its scopes remain
+limited to `read_products,read_inventory`; it cannot edit Shopify commerce
+data.
 
 ## Headless + Customer Account (Admin UI, not CLI)
 

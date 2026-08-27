@@ -34,11 +34,20 @@ void main() {
     );
     await tester.pump();
 
+    final homeScroll = find
+        .byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('home-about-monetta')),
+      find.text('Conoce nuestra historia'),
       600,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: homeScroll,
     );
+    await tester.ensureVisible(find.text('Conoce nuestra historia'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('Conoce nuestra historia'));
     await tester.pumpAndSettle();
     expect(find.byType(AboutMonettaScreen), findsOneWidget);
@@ -49,7 +58,7 @@ void main() {
     await tester.scrollUntilVisible(
       partnerButton,
       500,
-      scrollable: find.byType(Scrollable).first,
+      scrollable: homeScroll,
     );
     await tester.ensureVisible(partnerButton);
     await tester.pumpAndSettle();

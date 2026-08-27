@@ -21,6 +21,13 @@ Documents — this is app data, not something a shopper should find in the Files
 inject one or the other; nothing in this module should ever choose for itself which one to
 open.
 
+Schema version 2 establishes Shopify GIDs as the only catalog identity. The
+v1→v2 migration converts numeric cached product and variant ids plus every
+wishlist, bag, and recommendation-event reference. Order summaries currently
+contain no product or variant ids, so there is no order-history reference to
+migrate. The upgrade test opens a persisted v1 database and verifies all of
+these references after reopening it as v2.
+
 ## 2. Three gotchas that cost real debugging time building this
 
 **An `INTEGER PRIMARY KEY` column omitted from an insert gets a fresh SQLite-assigned rowid,
@@ -71,7 +78,7 @@ flutter test test/data/local
 ```
 
 `database_test.dart` exercises the schema directly (cascade deletes, the singleton-row upsert,
-the UTC round-trip). `stores_test.dart` and `order_summary_store_test.dart` exercise each store
+the UTC round-trip, and the v1 numeric-id migration). `stores_test.dart` and `order_summary_store_test.dart` exercise each store
 class, including the device-to-account wishlist/bag merge
 (`docs/ACCOUNTS_AND_SYNC_PLAN.md` § 5) and the apartado/checkout order unification
 (§ Phase 3).

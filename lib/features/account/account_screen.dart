@@ -83,7 +83,7 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const MonettaWordmark(height: 20)),
+      appBar: AppBar(title: const MonettaWordmark.appBar()),
       body: SafeArea(
         child: ListenableBuilder(
           listenable: controller,
