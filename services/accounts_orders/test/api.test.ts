@@ -2,6 +2,7 @@ import { createHmac, randomUUID } from 'node:crypto';
 import type { Server } from 'node:http';
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { createApp, type ServerDeps } from '../src/api/server.js';
+import type { CustomerTokenVerifier } from '../src/auth/customerTokenVerifier.js';
 import {
   InMemoryAppAccountsRepository,
   InMemoryCustomersRepository,
@@ -11,6 +12,16 @@ import {
 } from './support/inMemoryRepositories.js';
 
 const secret = 'shpss_test_secret';
+
+class InMemoryCustomerTokenVerifier implements CustomerTokenVerifier {
+  readonly customerIdsByToken = new Map<string, string>();
+  unavailable = false;
+
+  async resolveCustomerId(accessToken: string): Promise<string | null> {
+    if (this.unavailable) throw new Error('shopify unavailable');
+    return this.customerIdsByToken.get(accessToken) ?? null;
+  }
+}
 
 function sign(body: string): string {
   return createHmac('sha256', secret).update(body).digest('base64');
@@ -24,6 +35,7 @@ describe('accounts_orders API', () => {
   let orders: InMemoryOrdersRepository;
   let webhookEvents: InMemoryWebhookEventsRepository;
   let pushTokens: InMemoryPushTokensRepository;
+  let customerTokenVerifier: InMemoryCustomerTokenVerifier;
 
   beforeEach(async () => {
     customers = new InMemoryCustomersRepository();
@@ -31,6 +43,15 @@ describe('accounts_orders API', () => {
     orders = new InMemoryOrdersRepository();
     webhookEvents = new InMemoryWebhookEventsRepository();
     pushTokens = new InMemoryPushTokensRepository();
+    customerTokenVerifier = new InMemoryCustomerTokenVerifier();
+    customerTokenVerifier.customerIdsByToken.set(
+      'shopify-token-77',
+      'gid://shopify/Customer/77',
+    );
+    customerTokenVerifier.customerIdsByToken.set(
+      'shopify-token-88',
+      'gid://shopify/Customer/88',
+    );
     const deps: ServerDeps = {
       appAccounts,
       customers,
@@ -38,6 +59,7 @@ describe('accounts_orders API', () => {
       webhookEvents,
       pushTokens,
       webhookSecret: secret,
+      customerTokenVerifier,
     };
     const app = createApp(deps);
     await new Promise<void>((resolve) => {
@@ -201,7 +223,7 @@ describe('accounts_orders API', () => {
     }
   });
 
-  it('registers a push token', async () => {
+  it('rejects push-token registration without a valid customer bearer', async () => {
     const response = await fetch(`${baseUrl}/push-tokens`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -213,11 +235,62 @@ describe('accounts_orders API', () => {
       }),
     });
 
-    expect(response.status).toBe(200);
-    expect(pushTokens.byDeviceId.get('dev-1')?.fcmToken).toBe('tok-abc');
+    expect(response.status).toBe(401);
+    expect(pushTokens.byDeviceId.size).toBe(0);
   });
 
-  it('lists a customer\'s mirrored orders, newest first', async () => {
+  it('binds a push token to the verified customer and ignores a spoofed body id', async () => {
+    const response = await fetch(`${baseUrl}/push-tokens`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer shopify-token-77',
+      },
+      body: JSON.stringify({
+        deviceId: 'dev-1',
+        customerId: '88',
+        fcmToken: 'tok-abc',
+        platform: 'ios',
+      }),
+    });
+
+    expect(response.status).toBe(200);
+    expect(pushTokens.byDeviceId.get('dev-1')).toMatchObject({
+      customerId: '77',
+      fcmToken: 'tok-abc',
+    });
+  });
+
+  it('does not let another authenticated customer take over a device token', async () => {
+    await pushTokens.upsert({
+      deviceId: 'dev-1',
+      customerId: '77',
+      fcmToken: 'tok-original',
+      platform: 'ios',
+    });
+
+    const response = await fetch(`${baseUrl}/push-tokens`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer shopify-token-88',
+      },
+      body: JSON.stringify({
+        deviceId: 'dev-1',
+        fcmToken: 'tok-attacker',
+        platform: 'android',
+      }),
+    });
+
+    expect(response.status).toBe(409);
+    expect(pushTokens.byDeviceId.get('dev-1')).toMatchObject({
+      customerId: '77',
+      fcmToken: 'tok-original',
+      platform: 'ios',
+    });
+  });
+
+  it('lists only the authenticated customer\'s mirrored orders, newest first', async () => {
     for (const [id, placedAt] of [[10, '2026-01-01T00:00:00Z'], [11, '2026-06-01T00:00:00Z']] as const) {
       const body = JSON.stringify({
         id,
@@ -235,16 +308,111 @@ describe('accounts_orders API', () => {
       });
     }
 
-    const response = await fetch(`${baseUrl}/customers/77/orders`);
+    const otherCustomerBody = JSON.stringify({
+      id: 12,
+      created_at: '2026-08-01T00:00:00Z',
+      customer: { id: 88, email: 'other@example.com' },
+    });
+    await fetch(`${baseUrl}/webhooks/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Hmac-Sha256': sign(otherCustomerBody),
+        'X-Shopify-Webhook-Id': randomUUID(),
+      },
+      body: otherCustomerBody,
+    });
+
+    const unauthenticated = await fetch(`${baseUrl}/customers/me/orders`);
+    expect(unauthenticated.status).toBe(401);
+
+    const response = await fetch(`${baseUrl}/customers/me/orders`, {
+      headers: { Authorization: 'Bearer shopify-token-77' },
+    });
     expect(response.status).toBe(200);
     const json = (await response.json()) as { orders: Array<{ shopifyOrderId: string }> };
     expect(json.orders.map((o) => o.shopifyOrderId)).toEqual(['11', '10']);
+
+    expect((await fetch(`${baseUrl}/customers/77/orders`, {
+      headers: { Authorization: 'Bearer shopify-token-77' },
+    })).status).toBe(404);
+  });
+
+  it('requires an explicit Shopify link before a Monetta session can read orders', async () => {
+    const orderBody = JSON.stringify({
+      id: 21,
+      created_at: '2026-08-01T00:00:00Z',
+      customer: { id: 77, email: 'linked@example.com' },
+    });
+    await fetch(`${baseUrl}/webhooks/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Hmac-Sha256': sign(orderBody),
+        'X-Shopify-Webhook-Id': randomUUID(),
+      },
+      body: orderBody,
+    });
+
+    const registration = await fetch(`${baseUrl}/accounts/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        email: 'linked@example.com',
+        password: 'correct horse battery staple',
+        deviceId: 'dev-linked',
+      }),
+    });
+    const registrationBody = (await registration.json()) as {
+      account: { id: string };
+      session: { token: string };
+    };
+    const authorization = `Bearer ${registrationBody.session.token}`;
+
+    expect((await fetch(`${baseUrl}/customers/me/orders`, {
+      headers: { Authorization: authorization },
+    })).status).toBe(403);
+
+    const account = appAccounts.byId.get(registrationBody.account.id);
+    expect(account).toBeDefined();
+    appAccounts.byId.set(registrationBody.account.id, {
+      ...account!,
+      shopifyCustomerId: 'gid://shopify/Customer/77',
+    });
+
+    const response = await fetch(`${baseUrl}/customers/me/orders`, {
+      headers: { Authorization: authorization },
+    });
+    expect(response.status).toBe(200);
+    const json = (await response.json()) as { orders: Array<{ shopifyOrderId: string }> };
+    expect(json.orders.map((order) => order.shopifyOrderId)).toEqual(['21']);
+  });
+
+  it('rejects an invalid customer bearer', async () => {
+    const response = await fetch(`${baseUrl}/customers/me/orders`, {
+      headers: { Authorization: 'Bearer invalid-token' },
+    });
+
+    expect(response.status).toBe(401);
+  });
+
+  it('returns 503 instead of leaking data when Shopify token verification is unavailable', async () => {
+    customerTokenVerifier.unavailable = true;
+
+    const response = await fetch(`${baseUrl}/customers/me/orders`, {
+      headers: { Authorization: 'Bearer any-token' },
+    });
+
+    expect(response.status).toBe(503);
   });
 
   it('rejects an invalid push-token request', async () => {
     const response = await fetch(`${baseUrl}/push-tokens`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: 'Bearer shopify-token-77',
+      },
       body: JSON.stringify({ deviceId: 'dev-1' }),
     });
     expect(response.status).toBe(400);

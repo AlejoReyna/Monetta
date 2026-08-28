@@ -116,6 +116,24 @@ class AccountController extends ChangeNotifier {
     return repository.accessTokenFor(current.localAccountId);
   }
 
+  /// Credential for customer-scoped Monetta backend routes. Shopify accounts
+  /// use their short-lived Customer Account token; legacy Monetta accounts use
+  /// the opaque server session already stored in the platform keychain.
+  Future<String?> accessTokenForBackend() async {
+    final current = account;
+    if (current == null) return null;
+    try {
+      if (current.authProvider == 'monetta') {
+        return _systemSessionRepository?.accessTokenFor(
+          current.localAccountId,
+        );
+      }
+      return _sessionRepository?.accessTokenFor(current.localAccountId);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Restores whichever account this device was last signed into, if any —
   /// call once at startup so "still logged in" survives a restart. Cheap:
   /// reads local rows only, no network.
@@ -322,13 +340,18 @@ class AccountController extends ChangeNotifier {
     orders = await _orderHistoryRepository.loadCached(current.localAccountId);
     notifyListeners();
 
-    final shopifyCustomerId = current.shopifyCustomerId;
-    if (shopifyCustomerId != null) {
+    // The backend, not this local row, is authoritative for the Shopify
+    // linkage. This also lets a linked legacy Monetta account refresh orders
+    // even when its local cache does not yet contain the Shopify customer id.
+    final accessToken = await accessTokenForBackend();
+    if (accessToken != null) {
       await _orderHistoryRepository.refresh(
         accountId: current.localAccountId,
-        shopifyCustomerId: shopifyCustomerId,
+        accessToken: accessToken,
       );
-      orders = await _orderHistoryRepository.loadCached(current.localAccountId);
+      orders = await _orderHistoryRepository.loadCached(
+        current.localAccountId,
+      );
     }
 
     ordersLoading = false;

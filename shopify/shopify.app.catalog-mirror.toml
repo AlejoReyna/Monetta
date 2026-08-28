@@ -1,0 +1,29 @@
+# Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
+# Read-only source: live Monetta (`fakcei-n9.myshopify.com` / `monetta.mx`).
+# The destination remains the isolated staging Vercel/Firebase mirror.
+
+client_id = "f31749cebb11a17269a783d55e719306"
+name = "Monetta Catalog Mirror"
+application_url = "https://monetta-catalog-staging.vercel.app"
+embedded = false
+
+[webhooks]
+api_version = "2026-07"
+
+[[webhooks.subscriptions]]
+topics = [
+  "products/create",
+  "products/update",
+  "products/delete",
+  "inventory_levels/update"
+]
+uri = "https://monetta-catalog-staging.vercel.app/api"
+
+[access_scopes]
+# Learn more at https://shopify.dev/docs/apps/tools/cli/configuration#access_scopes
+scopes = "read_inventory,read_products"
+optional_scopes = [ ]
+use_legacy_install_flow = false
+
+[auth]
+redirect_urls = [ ]

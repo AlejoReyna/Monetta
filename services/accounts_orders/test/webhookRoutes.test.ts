@@ -43,6 +43,9 @@ interface ConfiguredUri {
  * `[[webhooks.subscriptions]]` are unambiguous enough to match directly,
  * and an over-broad match would only ever add paths — making the test
  * stricter, never vacuous.
+ *
+ * Only `/webhooks/*` belongs to this service. Catalog Mirror intentionally
+ * delivers to Vercel's `/api` function and has its own route tests.
  */
 function configuredWebhookPaths(): ConfiguredUri[] {
   const files = readdirSync(shopifyConfigDir).filter((f) => f.endsWith('.toml'));
@@ -55,6 +58,7 @@ function configuredWebhookPaths(): ConfiguredUri[] {
       // `application_url` and auth redirects live under other keys.
       if (!uri.startsWith('https://')) continue;
       const { pathname } = new URL(uri);
+      if (!pathname.startsWith('/webhooks/')) continue;
       found.push({ file, path: pathname });
     }
   }
@@ -73,6 +77,7 @@ describe('shopify.app*.toml webhook URIs match registered routes', () => {
       webhookEvents: new InMemoryWebhookEventsRepository(),
       pushTokens: new InMemoryPushTokensRepository(),
       webhookSecret: 'shpss_test_secret',
+      customerTokenVerifier: { resolveCustomerId: async () => null },
     };
     const app = createApp(deps);
     await new Promise<void>((resolve) => {

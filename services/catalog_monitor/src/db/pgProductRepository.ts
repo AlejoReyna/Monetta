@@ -1,4 +1,5 @@
 import type pg from 'pg';
+import { createHash, randomUUID } from 'node:crypto';
 import type { ProductRepository } from '../crawl/ports.js';
 import type {
   Availability,
@@ -71,6 +72,15 @@ export class PgProductRepository implements ProductRepository {
     try {
       await client.query('BEGIN');
       for (const r of records) {
+        const previousResult = await client.query<ProductRow>(
+          `SELECT * FROM products
+            WHERE source_id = $1 AND external_id = $2
+            FOR UPDATE`,
+          [r.sourceId, r.externalId],
+        );
+        const previous = previousResult.rows[0] === undefined
+          ? null
+          : fromRow(previousResult.rows[0]);
         await client.query(
           `INSERT INTO products (
              source_id, external_id, canonical_url, title, brand, category, image_url,
@@ -111,6 +121,15 @@ export class PgProductRepository implements ProductRepository {
             r.consecutiveMissingSnapshots,
           ],
         );
+        for (const event of catalogEvents(previous, r)) {
+          await client.query(
+            `INSERT INTO notification_event_outbox
+               (id, event_id, payload, status, next_attempt_at, created_at, updated_at)
+             VALUES ($1, $2, $3::jsonb, 'pending', $4, $4, $4)
+             ON CONFLICT (event_id) DO NOTHING`,
+            [randomUUID(), event.eventId, JSON.stringify(event), r.lastChangedAt],
+          );
+        }
       }
       await client.query('COMMIT');
     } catch (error) {
@@ -120,4 +139,80 @@ export class PgProductRepository implements ProductRepository {
       client.release();
     }
   }
+}
+
+type CatalogEventType =
+  | 'catalog.product.created'
+  | 'catalog.product.restocked'
+  | 'catalog.product.price_dropped';
+
+interface CatalogEventPayload {
+  readonly eventId: string;
+  readonly eventType: CatalogEventType;
+  readonly source: string;
+  readonly productKey: string;
+  readonly occurredAt: string;
+  readonly before: Record<string, unknown> | null;
+  readonly after: Record<string, unknown>;
+}
+
+export function catalogEvents(
+  previous: CatalogProductRecord | null,
+  next: CatalogProductRecord,
+): readonly CatalogEventPayload[] {
+  if (!next.isActive) return [];
+  const types: CatalogEventType[] = [];
+  if (previous === null) {
+    types.push('catalog.product.created');
+  } else {
+    if (previous.availability !== 'inStock' && next.availability === 'inStock') {
+      types.push('catalog.product.restocked');
+    }
+    if (
+      previous.priceUsd !== null &&
+      next.priceUsd !== null &&
+      next.priceUsd < previous.priceUsd
+    ) {
+      types.push('catalog.product.price_dropped');
+    }
+  }
+  const productKey = `external:${next.sourceId}:${next.externalId}`;
+  const transitionKey = [
+    next.fingerprint,
+    next.availability,
+    next.priceUsd,
+    next.lastChangedAt.toISOString(),
+  ].join(':');
+  return types.map((eventType) => ({
+    eventId: createHash('sha256')
+      .update(`${eventType}:${productKey}:${transitionKey}`)
+      .digest('hex'),
+    eventType,
+    source: next.sourceId,
+    productKey,
+    occurredAt: next.lastChangedAt.toISOString(),
+    before: previous === null ? null : eventView(previous),
+    after: eventView(next),
+  }));
+}
+
+function eventView(product: CatalogProductRecord): Record<string, unknown> {
+  return {
+    title: product.title,
+    brand: slug(product.brand),
+    category: product.category === null ? null : slug(product.category),
+    imageUrl: product.imageUrl,
+    price: product.priceUsd,
+    availability: product.availability,
+    detailUrl: product.canonicalUrl,
+  };
+}
+
+function slug(value: string): string {
+  return value
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/^-|-$/g, '');
 }

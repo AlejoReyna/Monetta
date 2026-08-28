@@ -111,4 +111,26 @@ void main() {
     );
     transport.close();
   });
+
+  test('sendOnce never retries an ambiguous mutation response', () async {
+    var calls = 0;
+    final transport = HttpStorefrontTransport(
+      client: MockClient((request) async {
+        calls += 1;
+        return http.Response('unavailable', 503);
+      }),
+      maxAttempts: 3,
+      baseBackoff: Duration.zero,
+    );
+
+    await expectLater(
+      transport.sendOnce(endpoint, headers, body),
+      throwsA(
+        isA<StorefrontException>()
+            .having((error) => error.isAmbiguous, 'ambiguous', isTrue),
+      ),
+    );
+    expect(calls, 1);
+    transport.close();
+  });
 }

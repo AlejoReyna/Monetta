@@ -1,0 +1,18 @@
+[Unit]
+Description=Monetta external catalog monitor container
+Requires=docker.service
+After=docker.service network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=/opt/monetta-catalog
+ExecStartPre=/usr/bin/docker network inspect monetta_catalog_edge
+ExecStart=/usr/bin/docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d monetta-catalog-monitor
+ExecStop=-/usr/bin/docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml stop monetta-catalog-monitor
+RemainAfterExit=yes
+TimeoutStartSec=120
+TimeoutStopSec=120
+
+[Install]
+WantedBy=multi-user.target

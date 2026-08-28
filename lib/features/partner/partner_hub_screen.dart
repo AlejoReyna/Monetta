@@ -86,7 +86,7 @@ class PartnerHubScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const MonettaWordmark(height: 20),
+        title: const MonettaWordmark.appBar(),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(0.5),
           child: Divider(height: 0.5),

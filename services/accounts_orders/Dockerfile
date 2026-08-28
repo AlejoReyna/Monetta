@@ -1,4 +1,4 @@
-# Single image, two roles (migrations / API) selected by command override
+# Single image, three roles (migrations / API / notification worker) selected by command override
 # in docker-compose.yml — same shape as services/catalog_monitor/Dockerfile,
 # minus the Playwright runtime this service has no use for.
 FROM node:22-slim AS build

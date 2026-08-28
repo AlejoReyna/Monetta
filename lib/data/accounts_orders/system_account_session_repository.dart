@@ -40,12 +40,18 @@ class SystemAccountSessionRepository {
   bool get canLogin => _client != null;
 
   Future<bool> hasUsableLocalSession(String localAccountId) async {
+    return await accessTokenFor(localAccountId) != null;
+  }
+
+  /// Returns the opaque backend session only while its local expiry is valid.
+  /// The token stays in secure storage and is never copied into Drift.
+  Future<String?> accessTokenFor(String localAccountId) async {
     final session = await _sessionStore.latestFor(localAccountId);
     if (session == null ||
         !session.accessTokenExpiresAt.isAfter(DateTime.now().toUtc())) {
-      return false;
+      return null;
     }
-    return await _secureStore.read(session.secureStorageKeyRef) != null;
+    return _secureStore.read(session.secureStorageKeyRef);
   }
 
   Future<Account> register({

@@ -10,7 +10,7 @@ embedded = false
 handle = "monetta"
 
 [access_scopes]
-scopes = "read_orders,read_customers"
+scopes = "read_orders,read_customers,read_products"
 
 [auth]
 redirect_urls = [
@@ -27,6 +27,14 @@ uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/orders/create"
 [[webhooks.subscriptions]]
 topics = ["orders/updated"]
 uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/orders/updated"
+
+[[webhooks.subscriptions]]
+topics = ["products/create"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/products/create"
+
+[[webhooks.subscriptions]]
+topics = ["products/update"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/products/update"
 
 # Compliance topics must be separate absolute paths — the server has no
 # catch-all /webhooks route. app/uninstalled is intentionally omitted until

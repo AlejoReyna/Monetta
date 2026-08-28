@@ -13,6 +13,7 @@ import '../normalize/facets.dart';
 import '../normalize/normalizer.dart';
 import '../normalize/rules.dart';
 import '../shopify/catalog_sync.dart' as shopify;
+import '../shopify/shopify_gid.dart';
 import '../../domain/product.dart';
 
 class CatalogSnapshot {
@@ -30,6 +31,10 @@ enum CatalogSyncOutcome {
   /// `lib/data/shopify/README.md` § 3, "The access token comes from Remote
   /// Config, not the binary").
   skippedNotConfigured,
+
+  /// Firestore is connected or still establishing its initial authority.
+  /// A Storefront delta must not compete with that writer.
+  skippedRealtimeAuthoritative,
   upToDate,
   updated,
   failed,
@@ -149,7 +154,7 @@ class CatalogRepository {
 /// comment — into the domain `Product`. Moved from `app/catalog_store.dart`,
 /// which owned this before there was a repository layer to own it instead.
 Product productFromCatalogSnapshot(Map<String, dynamic> json) => Product(
-      id: json['id'].toString(),
+      id: shopifyProductGid(json['id']),
       handle: json['handle'] as String,
       title: json['title'] as String,
       vendor: json['vendor'] as String,
@@ -161,7 +166,7 @@ Product productFromCatalogSnapshot(Map<String, dynamic> json) => Product(
       variants: (json['variants'] as List<dynamic>).map((v) {
         final variant = v as Map<String, dynamic>;
         return ProductVariant(
-          id: variant['id'].toString(),
+          id: shopifyVariantGid(variant['id']),
           title: variant['title'] as String,
           price: double.parse(variant['price'] as String),
           available: variant['available'] as bool,

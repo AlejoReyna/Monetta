@@ -21,15 +21,21 @@ CatalogItem _monetta(int i) => CatalogItem(
       shopifyProductId: '$i',
     );
 
-CatalogItem _external(int i) => CatalogItem(
+CatalogItem _external(
+  int i, {
+  String? title,
+  String brand = 'Coach',
+  double price = 300,
+}) =>
+    CatalogItem(
       sourceScopedId: 'coach_us:$i',
       source: CatalogSourceType.coachUs,
       merchant: 'Coach',
-      title: 'External Item $i',
-      brand: 'Coach',
+      title: title ?? 'External Item $i',
+      brand: brand,
       category: 'Handbags',
       imageUrl: null,
-      price: const Money(amount: 300, currency: Currency.usd),
+      price: Money(amount: price, currency: Currency.usd),
       availability: CatalogAvailability.inStock,
       detailUrl: 'https://www.coach.com/products/item-$i/C$i.html',
       marketRestriction: MarketRestriction.unitedStates,
@@ -38,13 +44,31 @@ CatalogItem _external(int i) => CatalogItem(
     );
 
 Future<void> _pump(WidgetTester tester, Widget child) {
-  return tester.pumpWidget(MaterialApp(home: child));
+  return tester.pumpWidget(
+    MaterialApp(
+      theme: ThemeData(splashFactory: InkRipple.splashFactory),
+      home: child,
+    ),
+  );
 }
 
 void main() {
   testWidgets('shows an empty state for zero items', (tester) async {
     await _pump(tester, const CatalogBrowseScreen(items: []));
     expect(find.text('Sin resultados'), findsOneWidget);
+  });
+
+  testWidgets('keeps search behind an icon and removes category rails',
+      (tester) async {
+    await _pump(tester, CatalogBrowseScreen(items: [_monetta(1)]));
+
+    expect(find.text('Productos'), findsOneWidget);
+    expect(find.byKey(const Key('catalog-search-field')), findsNothing);
+    expect(find.byKey(const Key('catalog-search-toggle')), findsOneWidget);
+    expect(find.byKey(const Key('catalog-filter-button')), findsOneWidget);
+    expect(find.text('Colección'), findsNothing);
+    expect(find.text('Monetta'), findsNothing);
+    expect(find.text('Internacional'), findsNothing);
   });
 
   testWidgets(
@@ -64,8 +88,7 @@ void main() {
     expect(builtTitles, lessThan(100));
   });
 
-  testWidgets(
-      'separates Monetta items from external items into two clearly labeled sections',
+  testWidgets('uses one uninterrupted photography grid for every source',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(800, 4000);
@@ -75,31 +98,154 @@ void main() {
     await _pump(tester, CatalogBrowseScreen(items: items));
     await tester.pump();
 
-    expect(find.text('Catálogo Monetta'), findsOneWidget);
-    expect(
-      find.text('También en marcas de Estados Unidos'),
-      findsOneWidget,
-    );
+    expect(find.text('Selección Monetta'), findsNothing);
+    expect(find.text('Edición internacional'), findsNothing);
+    expect(find.text('Monetta Item 1'), findsOneWidget);
+    expect(find.text('External Item 1'), findsOneWidget);
     expect(find.text('extracted'), findsNWidgets(2));
-
-    // The Monetta heading must appear before the external heading.
-    final monettaHeadingY = tester.getTopLeft(find.text('Catálogo Monetta')).dy;
-    final externalHeadingY =
-        tester.getTopLeft(find.text('También en marcas de Estados Unidos')).dy;
-    expect(monettaHeadingY, lessThan(externalHeadingY));
   });
 
-  testWidgets('shows only the external heading when there are no Monetta items',
+  testWidgets('keeps the same grid chrome when there are only external items',
       (tester) async {
     final items = [_external(1)];
     await _pump(tester, CatalogBrowseScreen(items: items));
     await tester.pump();
 
-    expect(find.text('Catálogo Monetta'), findsNothing);
-    expect(
-      find.text('También en marcas de Estados Unidos'),
-      findsOneWidget,
+    expect(find.text('Selección Monetta'), findsNothing);
+    expect(find.text('Edición internacional'), findsNothing);
+    expect(find.text('External Item 1'), findsOneWidget);
+  });
+
+  testWidgets('searches across item, brand, merchant and category',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+
+    await _pump(
+      tester,
+      CatalogBrowseScreen(items: [_monetta(1), _external(1)]),
     );
+
+    await tester.tap(find.byKey(const Key('catalog-search-toggle')));
+    await tester.pump();
+
+    await tester.enterText(
+      find.byKey(const Key('catalog-search-field')),
+      'Coach',
+    );
+    await tester.pump();
+
+    expect(find.text('External Item 1'), findsOneWidget);
+    expect(find.text('Monetta Item 1'), findsNothing);
+
+    await tester.enterText(
+      find.byKey(const Key('catalog-search-field')),
+      'Handbags',
+    );
+    await tester.pump();
+    expect(find.text('External Item 1'), findsOneWidget);
+  });
+
+  testWidgets('filters through bag-specific expandable options',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+
+    await _pump(
+      tester,
+      CatalogBrowseScreen(items: [_monetta(1), _external(1)]),
+    );
+
+    await tester.tap(find.byKey(const Key('catalog-filter-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Filtrar y ordenar'), findsOneWidget);
+    expect(find.text('Tipo de bolsa'), findsOneWidget);
+    expect(find.text('Marca'), findsOneWidget);
+    expect(find.text('Precio'), findsOneWidget);
+    expect(find.text('Color'), findsNothing);
+    expect(find.text('Tipo de fit'), findsNothing);
+    expect(find.text('Talla'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('catalog-filter-type')));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('Bolsa de mano'));
+    await tester.tap(find.text('Bolsa de mano'));
+    await tester.pump();
+    expect(find.text('Ver 1 artículo'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('catalog-filter-apply')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('External Item 1'), findsOneWidget);
+    expect(find.text('Monetta Item 1'), findsNothing);
+    expect(find.byKey(const Key('catalog-filter-count')), findsOneWidget);
+  });
+
+  testWidgets('only offers colors and bag styles that exist in the catalog',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+
+    final cafe = _external(1, title: 'Bolsa Tote Café');
+    final negra = _external(2, title: 'Crossbody Negra');
+    await _pump(tester, CatalogBrowseScreen(items: [cafe, negra]));
+
+    await tester.tap(find.byKey(const Key('catalog-filter-button')));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('catalog-filter-color')));
+    await tester.pumpAndSettle();
+    expect(find.text('Café'), findsOneWidget);
+    expect(find.text('Negro'), findsOneWidget);
+    expect(find.text('Verde'), findsNothing);
+
+    await tester.ensureVisible(find.text('Café'));
+    await tester.tap(find.text('Café'));
+    await tester.pump();
+    expect(find.text('Ver 1 artículo'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('catalog-filter-apply')));
+    await tester.pumpAndSettle();
+    expect(find.text('Bolsa Tote Café'), findsOneWidget);
+    expect(find.text('Crossbody Negra'), findsNothing);
+  });
+
+  testWidgets('the filter sheet fits a compact phone without overflow',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(320, 568);
+    tester.view.devicePixelRatio = 1.0;
+
+    await _pump(
+      tester,
+      CatalogBrowseScreen(
+        items: [_external(1, title: 'Bolsa Tote Café')],
+      ),
+    );
+    await tester.tap(find.byKey(const Key('catalog-filter-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('catalog-filter-apply')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('opens and closes the inline search from the header icon',
+      (tester) async {
+    await _pump(tester, CatalogBrowseScreen(items: [_monetta(1)]));
+
+    expect(find.byKey(const Key('catalog-search-field')), findsNothing);
+    await tester.tap(find.byKey(const Key('catalog-search-toggle')));
+    await tester.pump();
+    expect(find.byKey(const Key('catalog-search-field')), findsOneWidget);
+    expect(find.text('Buscar bolsas, marcas o colores'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('catalog-search-toggle')));
+    await tester.pump();
+    expect(find.byKey(const Key('catalog-search-field')), findsNothing);
   });
 
   testWidgets(

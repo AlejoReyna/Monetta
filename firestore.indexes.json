@@ -1,0 +1,26 @@
+{
+  "indexes": [],
+  "fieldOverrides": [
+    {
+      "collectionGroup": "_shopifyWebhookDeliveries",
+      "fieldPath": "expiresAt",
+      "ttl": true,
+      "indexes": []
+    },
+    {
+      "collectionGroup": "products",
+      "fieldPath": "descriptionHtml",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "products",
+      "fieldPath": "images",
+      "indexes": []
+    },
+    {
+      "collectionGroup": "products",
+      "fieldPath": "variants",
+      "indexes": []
+    }
+  ]
+}

@@ -29,8 +29,12 @@ class _FakeTransport {
   }
 }
 
-Map<String, dynamic> _productNode({required String id, required String updatedAt}) => {
-      'id': id,
+Map<String, dynamic> _productNode({
+  required String id,
+  required String updatedAt,
+}) =>
+    {
+      'id': 'gid://shopify/Product/$id',
       'handle': 'p-$id',
       'title': 'Bolsa Guess Crossbody',
       'vendor': 'Monetta ',
@@ -50,7 +54,7 @@ Map<String, dynamic> _productNode({required String id, required String updatedAt
         'edges': [
           {
             'node': {
-              'id': 'v-$id',
+              'id': 'gid://shopify/ProductVariant/$id',
               'title': 'Default Title',
               'availableForSale': true,
               'price': {'amount': '1749.00', 'currencyCode': 'MXN'},
@@ -101,7 +105,9 @@ void main() {
       expect(result.outcome, CatalogSyncOutcome.skippedNotConfigured);
     });
 
-    test('seedFromAssetIfEmpty writes the bundled snapshot only on a cold cache', () async {
+    test(
+        'seedFromAssetIfEmpty writes the bundled snapshot only on a cold cache',
+        () async {
       final cache = CatalogCacheStore(db);
       final repo = CatalogRepository(
         cache: cache,
@@ -112,7 +118,7 @@ void main() {
       final snapshotJson = {
         'products': [
           {
-            'id': 'gid://shopify/Product/1',
+            'id': 1,
             'handle': 'p1',
             'title': 'Bolsa',
             'vendor': 'Monetta',
@@ -123,7 +129,7 @@ void main() {
             'updated_at': '2026-01-01T00:00:00Z',
             'variants': [
               {
-                'id': 'v1',
+                'id': 11,
                 'title': 'Default Title',
                 'price': '999.00',
                 'available': true,
@@ -135,14 +141,19 @@ void main() {
       };
 
       await repo.seedFromAssetIfEmpty(snapshotJson);
-      expect(await cache.allProducts(), hasLength(1));
+      final seeded = await cache.allProducts();
+      expect(seeded.single.id, 'gid://shopify/Product/1');
+      expect(
+        seeded.single.variants.single.id,
+        'gid://shopify/ProductVariant/11',
+      );
 
       // A second seed call must not touch an already-populated cache.
       await cache.upsertProducts([]); // no-op, cache still has the seeded row
       await repo.seedFromAssetIfEmpty({
         'products': [
           {
-            'id': 'gid://shopify/Product/2',
+            'id': 2,
             'handle': 'p2',
             'title': 'Other',
             'vendor': 'Monetta',
@@ -158,7 +169,9 @@ void main() {
       expect(await cache.allProducts(), hasLength(1));
     });
 
-    test('sync() runs a real delta sync via a fake transport and writes into the cache', () async {
+    test(
+        'sync() runs a real delta sync via a fake transport and writes into the cache',
+        () async {
       final cache = CatalogCacheStore(db);
       final cursorStore = SyncCursorStore(db);
       final transport = _FakeTransport([
@@ -192,7 +205,8 @@ void main() {
       expect(cursor.lastFullSyncAt, isNotNull);
     });
 
-    test('loadCached() normalizes cached products via the real normalizer', () async {
+    test('loadCached() normalizes cached products via the real normalizer',
+        () async {
       final cache = CatalogCacheStore(db);
       final repo = CatalogRepository(
         cache: cache,
@@ -206,7 +220,7 @@ void main() {
       await repo.seedFromAssetIfEmpty({
         'products': [
           {
-            'id': 'p1',
+            'id': 1,
             'handle': 'p1',
             'title': 'Bolsa',
             'vendor': 'Monetta',
@@ -222,7 +236,10 @@ void main() {
 
       final snapshot = await repo.loadCached();
       expect(snapshot.products, hasLength(1));
-      expect(snapshot.facetsById.containsKey('p1'), isTrue);
+      expect(
+        snapshot.facetsById.containsKey('gid://shopify/Product/1'),
+        isTrue,
+      );
     });
   });
 }

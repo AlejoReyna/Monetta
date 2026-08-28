@@ -1,12 +1,12 @@
 # Shopify production implementation plan
 
-Status: Phase 0 largely complete for **dev-store staging**; backend HTTPS still optional for catalog/login, required for webhooks  
-Prepared: 2026-08-16  
-Updated: 2026-08-17  
-Primary executor: coding agent with terminal access and Shopify CLI  
-Owner involvement: interactive Shopify authentication, approvals, credentials, store configuration, and final test-order approval  
-Branch: `agent/shopify-production`  
-CLI: local install under `shopify/` (`npx shopify` → **4.6.1**)  
+Status: Phase 0 largely complete for **dev-store staging**; backend HTTPS still optional for catalog/login, required for webhooks
+Prepared: 2026-08-16
+Updated: 2026-08-17
+Primary executor: coding agent with terminal access and Shopify CLI
+Owner involvement: interactive Shopify authentication, approvals, credentials, store configuration, and final test-order approval
+Branch: `agent/shopify-production`
+CLI: local install under `shopify/` (`npx shopify` → **4.6.1**)
 
 ### Phase 0 owner answers (recorded)
 

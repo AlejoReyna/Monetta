@@ -54,6 +54,7 @@ export interface AppAccountRecord {
   readonly email: string;
   readonly displayName: string | null;
   readonly emailVerified: boolean;
+  readonly shopifyCustomerId: string | null;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }

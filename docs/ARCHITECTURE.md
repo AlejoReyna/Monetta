@@ -2,6 +2,13 @@
 
 How the modules fit together, and why the boundaries sit where they do.
 
+> **Current implementation guide:** the catalog mirror, Firestore/Drift
+> authority policy, both login providers, order synchronization, verified
+> staging state, and their exact code references are documented in
+> [`SYSTEM_IMPLEMENTATION.md`](SYSTEM_IMPLEMENTATION.md). This older module map
+> remains useful for design boundaries, but the implementation guide is the
+> authoritative description of the system shipped in August 2026.
+
 > This document and the per-module `README.md` files are the contract. If code and doc
 > disagree, one of them is a bug — fix both in the same commit.
 
@@ -99,15 +106,16 @@ cart state (drift)
   → cartCreate / cartLinesAdd (Storefront)   attributes: _channel, _platform, _device_id, _rec_source
   → cart.checkoutUrl
   → CheckoutLauncher (interface)
-       ├─ CheckoutKitLauncher   (checkout_sheet_kit_flutter — default)
-       └─ WebViewLauncher       (fallback)
+       ├─ MethodChannelCheckoutLauncher
+       │    └─ official Shopify Checkout Sheet Kit (iOS / Android)
+       └─ validated browser fallback (explicit only)
   → order lands in Shopify with our attribution attributes intact
 ```
 
-The `CheckoutLauncher` seam exists because `checkout_sheet_kit_flutter` is a **v0.0.2**
-plugin sitting on the revenue path. If it disappoints, swapping to the WebView fallback is
-a one-line provider change. The attribution attributes are not cosmetic: they are what makes
-the revenue-share arrangement auditable.
+The `CheckoutLauncher` seam keeps Flutter independent of the native Shopify SDK. The
+composition root injects `MethodChannelCheckoutLauncher`; the explicit browser fallback
+receives only the same validated checkout URL and never implies completion. The attribution
+attributes are not cosmetic: they are what makes the revenue-share arrangement auditable.
 
 ## External catalog prototype (internal, off by default)
 

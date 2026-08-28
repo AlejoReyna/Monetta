@@ -11,14 +11,21 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'app/account_controller.dart';
 import 'app/admin_config.dart';
 import 'app/admin_controller.dart';
+import 'app/admin_notification_controller.dart';
 import 'app/catalog_store.dart';
+import 'app/cart_controller.dart';
 import 'app/editorial_content_controller.dart';
 import 'app/external_catalog_config.dart';
 import 'app/external_catalog_controller.dart';
+import 'app/home_content_controller.dart';
+import 'app/notification_controller.dart';
+import 'app/shopify_cart_composition.dart';
+import 'app/shopify_checkout_coordinator.dart';
 import 'app/theme.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
 import 'data/accounts_orders/system_account_client.dart';
@@ -30,21 +37,69 @@ import 'data/customer_auth/customer_identity.dart';
 import 'data/customer_auth/customer_session_repository.dart';
 import 'data/customer_auth/device_identity.dart';
 import 'data/customer_auth/secure_token_store.dart';
+import 'data/firebase/firebase_app_bootstrap.dart';
+import 'data/firestore/catalog_realtime_source.dart';
+import 'data/firestore/firestore_catalog_config.dart';
+import 'data/firestore/firestore_catalog_source.dart';
 import 'data/local/account_store.dart';
 import 'data/local/bag_store.dart';
 import 'data/local/database.dart';
 import 'data/local/order_summary_store.dart';
 import 'data/local/wishlist_store.dart';
+import 'data/notifications/firebase_notification_gateway.dart';
+import 'data/notifications/admin_notification_client.dart';
+import 'data/notifications/local_notification_scheduler.dart';
+import 'data/notifications/notification_api_client.dart';
+import 'data/notifications/notification_config.dart';
+import 'data/notifications/notification_models.dart';
 import 'data/repositories/order_history_repository.dart';
+import 'data/reviews/loox_reviews_repository.dart';
 import 'data/shopify/catalog_sync.dart' as shopify;
+import 'data/shopify/cart_attribution.dart';
 import 'data/shopify/editorial_content_repository.dart';
+import 'data/shopify/home_content_repository.dart';
 import 'data/shopify/http_storefront_transport.dart';
 import 'data/shopify/storefront_client.dart';
 import 'data/shopify/storefront_config.dart';
 import 'features/home/home_screen.dart';
+import 'features/catalog/collection_screen.dart';
+import 'features/product/product_screen.dart';
+import 'features/product/external_product_screen.dart';
 
-void main() {
-  runApp(const MonettaApp());
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  final accountsConfig = AccountsOrdersConfig.fromEnvironment();
+  final notifications = NotificationConfig.fromEnvironment(
+    fallbackBaseUrl: accountsConfig.baseUrl,
+  );
+  final firestoreCatalogConfig = FirestoreCatalogConfig.fromEnvironment();
+  CatalogRealtimeSource? realtimeCatalogSource;
+  if (firestoreCatalogConfig.enabled && notifications.hasFirebaseOptions) {
+    try {
+      await FirebaseAppBootstrap.ensureInitialized(
+        notifications.firebaseOptions,
+      );
+      realtimeCatalogSource = FirestoreCatalogSource(
+        FirebaseFirestore.instance,
+      );
+    } catch (error) {
+      debugPrint('Firestore catalog bootstrap disabled: $error');
+    }
+  }
+  NotificationGateway? gateway;
+  try {
+    gateway = await FirebaseNotificationGateway.initialize(notifications);
+  } catch (error) {
+    // A missing Firebase native capability must not stop the storefront.
+    debugPrint('Notifications bootstrap disabled: $error');
+  }
+  runApp(
+    MonettaApp(
+      notificationConfig: notifications,
+      gateway: gateway,
+      realtimeCatalogSource: realtimeCatalogSource,
+    ),
+  );
 }
 
 /// Exposes the store to the widget tree.
@@ -114,6 +169,22 @@ class EditorialContentScope
   }
 }
 
+/// Exposes the Shopify/Loox-backed home composition. Like editorial content,
+/// it always starts with a complete bundled fallback and never gates startup.
+class HomeContentScope extends InheritedNotifier<HomeContentController> {
+  const HomeContentScope({
+    required HomeContentController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  static HomeContentController? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<HomeContentScope>()
+        ?.notifier;
+  }
+}
+
 /// Exposes account state to the widget tree. See `app/account_controller.dart`
 /// — `account == null` is a normal, fully-functional state, not a loading
 /// gap. Only mounted once `_MonettaAppState._loading` has resolved, since
@@ -130,6 +201,60 @@ class AccountScope extends InheritedNotifier<AccountController> {
     final scope = context.dependOnInheritedWidgetOfExactType<AccountScope>();
     assert(scope?.notifier != null, 'AccountScope is missing from the tree');
     return scope!.notifier!;
+  }
+
+  static AccountController? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<AccountScope>()?.notifier;
+}
+
+/// Optional production Shopify cart stack. It is absent in builds without
+/// public Storefront configuration and performs no work merely by being built.
+class CartScope extends InheritedNotifier<CartController> {
+  const CartScope({
+    required this.shopDomain,
+    this.checkoutCoordinator,
+    required CartController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  final String shopDomain;
+  final ShopifyCheckoutCoordinator? checkoutCoordinator;
+
+  static CartScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CartScope>();
+}
+
+/// Places account and cart dependencies above the app Navigator so every
+/// sibling route observes the same configured controller and buyer scope.
+class AppRouteScopes extends StatelessWidget {
+  const AppRouteScopes({
+    required this.accountController,
+    required this.cartController,
+    this.checkoutCoordinator,
+    required this.shopDomain,
+    required this.child,
+    super.key,
+  });
+
+  final AccountController accountController;
+  final CartController? cartController;
+  final ShopifyCheckoutCoordinator? checkoutCoordinator;
+  final String shopDomain;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final cart = cartController;
+    final routedApp = cart == null
+        ? child
+        : CartScope(
+            shopDomain: shopDomain,
+            notifier: cart,
+            checkoutCoordinator: checkoutCoordinator,
+            child: child,
+          );
+    return AccountScope(notifier: accountController, child: routedApp);
   }
 }
 
@@ -155,14 +280,61 @@ class AdminScope extends InheritedNotifier<AdminController> {
   }
 }
 
+/// Exposes opt-in notification state without coupling feature widgets to FCM.
+class NotificationScope extends InheritedNotifier<NotificationController> {
+  const NotificationScope({
+    required NotificationController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  static NotificationController of(BuildContext context) {
+    final scope =
+        context.dependOnInheritedWidgetOfExactType<NotificationScope>();
+    assert(scope?.notifier != null, 'NotificationScope is missing');
+    return scope!.notifier!;
+  }
+
+  static NotificationController? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<NotificationScope>()
+        ?.notifier;
+  }
+}
+
+class AdminNotificationScope
+    extends InheritedNotifier<AdminNotificationController> {
+  const AdminNotificationScope({
+    required AdminNotificationController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  static AdminNotificationController? maybeOf(BuildContext context) {
+    return context
+        .dependOnInheritedWidgetOfExactType<AdminNotificationScope>()
+        ?.notifier;
+  }
+}
+
 class MonettaApp extends StatefulWidget {
-  const MonettaApp({super.key});
+  const MonettaApp({
+    this.notificationConfig = NotificationConfig.disabled,
+    this.gateway,
+    this.realtimeCatalogSource,
+    super.key,
+  });
+
+  final NotificationConfig notificationConfig;
+  final NotificationGateway? gateway;
+  final CatalogRealtimeSource? realtimeCatalogSource;
 
   @override
   State<MonettaApp> createState() => _MonettaAppState();
 }
 
 class _MonettaAppState extends State<MonettaApp> {
+  final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   final AppDatabase _database = AppDatabase.connect();
 
   /// Null when no usable public Storefront credentials were compiled in.
@@ -171,6 +343,7 @@ class _MonettaAppState extends State<MonettaApp> {
   late final CatalogStore _store = CatalogStore(
     database: _database,
     catalogSync: _maybeCatalogSync(_storefrontTransport),
+    realtimeSource: widget.realtimeCatalogSource,
   );
   final ExternalCatalogController _externalCatalog = ExternalCatalogController(
     config: ExternalCatalogConfig.fromEnvironment(),
@@ -179,12 +352,19 @@ class _MonettaAppState extends State<MonettaApp> {
       EditorialContentController(
     repository: _maybeEditorialRepository(_storefrontTransport),
   );
+  late final HomeContentController _homeContent = HomeContentController(
+    repository: _maybeHomeContentRepository(_storefrontTransport),
+    reviewsRepository: _maybeLooxReviewsRepository(),
+  );
 
   /// Built inside [_load], once the device id it depends on exists — see
   /// there. Only ever read from [build]'s `FutureBuilder`, after `_loading`
   /// has resolved, so it is always assigned by the time anything touches it.
   late final AccountController _account;
   AdminController? _admin;
+  AdminNotificationController? _adminNotifications;
+  NotificationController? _notifications;
+  ShopifyCartComposition? _shopifyCart;
   late final Future<void> _loading = _load();
 
   /// Owns an HTTP client, so it needs closing — and it is built inside
@@ -222,6 +402,23 @@ class _MonettaAppState extends State<MonettaApp> {
     );
   }
 
+  static HomeContentRepository? _maybeHomeContentRepository(
+    HttpStorefrontTransport? transport,
+  ) {
+    if (transport == null) return null;
+    final config = StorefrontConfig.fromEnvironment();
+    if (!config.isUsable) return null;
+    return HomeContentRepository(
+      client: StorefrontClient(config: config, transport: transport.send),
+    );
+  }
+
+  static LooxReviewsRepository? _maybeLooxReviewsRepository() {
+    final config = LooxConfig.fromEnvironment();
+    if (!config.isUsable) return null;
+    return LooxReviewsRepository(config: config);
+  }
+
   Future<void> _load() async {
     // Seeds/hydrates the Drift database both `CatalogStore` and account
     // state share, so nothing below races it.
@@ -243,6 +440,21 @@ class _MonettaAppState extends State<MonettaApp> {
       // `_app_version` attribute, which has the same gap.
       appVersion: '0.1.0',
     );
+
+    final storefrontConfig = StorefrontConfig.fromEnvironment();
+    final storefrontTransport = _storefrontTransport;
+    if (storefrontTransport != null && storefrontConfig.isUsable) {
+      _shopifyCart = ShopifyCartComposition.production(
+        config: storefrontConfig,
+        transport: storefrontTransport,
+        secureStore: secureStore,
+        attribution: CartAttribution(
+          platform: Platform.isIOS ? 'ios' : 'android',
+          deviceId: deviceId,
+          appVersion: '0.1.0',
+        ),
+      );
+    }
 
     // Shopify Customer Account login. Deliberately independent of
     // `AccountsOrdersConfig` below: OAuth talks to Shopify directly, so a
@@ -310,7 +522,39 @@ class _MonettaAppState extends State<MonettaApp> {
         await _store.syncWithShopify();
         await _externalCatalog.loadAndRefresh();
         await _editorialContent.refresh();
+        await _homeContent.refresh();
       },
+    );
+    final notificationBaseUrl = widget.notificationConfig.apiBaseUrl;
+    _notifications = NotificationController(
+      config: widget.notificationConfig,
+      deviceId: deviceId,
+      catalogStore: _store,
+      secureStore: secureStore,
+      gateway: widget.gateway,
+      apiClient: notificationBaseUrl == null || widget.gateway == null
+          ? null
+          : NotificationApiClient(
+              baseUrl: notificationBaseUrl,
+              appCheckTokenProvider: widget.gateway!.appCheckToken,
+            ),
+      localScheduler: widget.gateway == null
+          ? null
+          : PluginLocalNotificationScheduler(
+              timezone: widget.notificationConfig.timezone,
+            ),
+      onOpenRoute: _openNotificationRoute,
+    );
+    final notificationAdminBaseUrl =
+        widget.notificationConfig.apiBaseUrl ?? adminBaseUrl;
+    _adminNotifications = AdminNotificationController(
+      deviceId: deviceId,
+      client: notificationAdminBaseUrl == null
+          ? null
+          : AdminNotificationClient(
+              baseUrl: notificationAdminBaseUrl,
+              accessTokenProvider: _account.accessTokenForAdmin,
+            ),
     );
     await _account.restore();
     if (_account.isSignedIn) {
@@ -328,6 +572,53 @@ class _MonettaAppState extends State<MonettaApp> {
     // External catalog stays off in public builds unless explicitly enabled.
     unawaited(_externalCatalog.loadAndRefresh());
     unawaited(_editorialContent.refresh());
+    unawaited(_homeContent.refresh());
+    await _notifications!.restore();
+  }
+
+  void _openNotificationRoute(NotificationRouteData route) {
+    final navigator = _navigatorKey.currentState;
+    if (navigator == null) return;
+    if (route.type == 'product' && route.productKey != null) {
+      final key = route.productKey!;
+      if (key.startsWith('external:')) {
+        final sourceScopedId = key.substring('external:'.length);
+        for (final item in _externalCatalog.items) {
+          if (item.sourceScopedId == sourceScopedId) {
+            navigator.push(
+              MaterialPageRoute<void>(
+                builder: (_) => ExternalProductScreen(item: item),
+              ),
+            );
+            return;
+          }
+        }
+      }
+      final rawId =
+          key.startsWith('shopify:') ? key.substring('shopify:'.length) : key;
+      final exists = _store.products.any((product) => product.id == rawId);
+      if (exists) {
+        navigator.push(
+          MaterialPageRoute<void>(
+            builder: (_) => ProductScreen(productId: rawId),
+          ),
+        );
+        return;
+      }
+    }
+    if (route.type == 'collection' && route.collectionHandle != null) {
+      final handle = route.collectionHandle!;
+      navigator.push(
+        MaterialPageRoute<void>(
+          builder: (_) => CollectionScreen(
+            title: handle,
+            filter: CollectionFilter(category: handle),
+          ),
+        ),
+      );
+      return;
+    }
+    navigator.popUntil((candidate) => candidate.isFirst);
   }
 
   @override
@@ -336,41 +627,70 @@ class _MonettaAppState extends State<MonettaApp> {
     _customerIdentityService?.close();
     _adminClient?.close();
     _admin?.dispose();
+    _notifications?.dispose();
+    _adminNotifications?.dispose();
+    _shopifyCart?.controller.dispose();
     _store.dispose();
     _externalCatalog.dispose();
     _editorialContent.dispose();
+    _homeContent.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      navigatorKey: _navigatorKey,
       title: 'Monetta',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
+      builder: (context, navigator) => FutureBuilder<void>(
+        future: _loading,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return _ErrorScreen(error: '${snapshot.error}');
+          }
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const _SplashScreen();
+          }
+          return AppRouteScopes(
+            accountController: _account,
+            cartController: _shopifyCart?.controller,
+            checkoutCoordinator: _shopifyCart?.checkout,
+            shopDomain: StorefrontConfig.fromEnvironment().shopDomain,
+            child: navigator!,
+          );
+        },
+      ),
       home: StoreScope(
         notifier: _store,
         child: ExternalCatalogScope(
           notifier: _externalCatalog,
           child: EditorialContentScope(
             notifier: _editorialContent,
-            child: FutureBuilder<void>(
-              future: _loading,
-              builder: (context, snapshot) {
-                if (snapshot.hasError) {
-                  return _ErrorScreen(error: '${snapshot.error}');
-                }
-                if (snapshot.connectionState != ConnectionState.done) {
-                  return const _SplashScreen();
-                }
-                return AccountScope(
-                  notifier: _account,
-                  child: AdminScope(
-                    notifier: _admin!,
-                    child: const HomeScreen(),
-                  ),
-                );
-              },
+            child: HomeContentScope(
+              notifier: _homeContent,
+              child: FutureBuilder<void>(
+                future: _loading,
+                builder: (context, snapshot) {
+                  if (snapshot.hasError) {
+                    return const SizedBox.shrink();
+                  }
+                  if (snapshot.connectionState != ConnectionState.done) {
+                    return const SizedBox.shrink();
+                  }
+                  return NotificationScope(
+                    notifier: _notifications!,
+                    child: AdminNotificationScope(
+                      notifier: _adminNotifications!,
+                      child: AdminScope(
+                        notifier: _admin!,
+                        child: const HomeScreen(),
+                      ),
+                    ),
+                  );
+                },
+              ),
             ),
           ),
         ),

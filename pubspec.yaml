@@ -23,6 +23,7 @@ dependencies:
   # Shopify Storefront API (GraphQL over plain HTTP).
   # Deliberately no ferry/codegen — see lib/data/shopify/README.md § 3.
   http: ^1.2.2
+  html: ^0.15.6
 
   # Local persistence
   drift: ^2.22.0
@@ -37,15 +38,17 @@ dependencies:
   # `lib/data/customer_auth/README.md`.
   flutter_appauth: ^12.0.2
 
-  # Checkout — see lib/features/cart/README.md for the CheckoutLauncher seam.
-  # Pinned deliberately: this is a pre-1.0 plugin on the revenue path.
-  checkout_sheet_kit_flutter: ^0.0.2
-
   # Firebase
   firebase_core: ^3.8.1
+  cloud_firestore: ^5.6.12
   firebase_analytics: ^11.3.6
   firebase_messaging: ^15.1.6
   firebase_remote_config: ^5.1.6
+  # Kept on the FlutterFire generation compatible with firebase_core 3.x.
+  firebase_app_check: ^0.3.2+10
+  # Device-only cart reminders; remote campaigns still use FCM.
+  flutter_local_notifications: ^22.3.0
+  timezone: ^0.11.0
 
   # UI
   cached_network_image: ^3.4.1

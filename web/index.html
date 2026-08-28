@@ -1,35 +1,97 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#1b1b1a" />
-    <meta name="description" content="Monetta live product captures and current UI screen atlas." />
+    <meta
+      name="description"
+      content="Paleta de referencias visuales capturada directamente del build actual de Monetta."
+    />
     <link rel="icon" type="image/png" href="/images/monetta_favicon.png" />
-    <title>Monetta — Current UI</title>
+    <title>Monetta — Referencias del build actual</title>
   </head>
   <body>
     <div class="viewer">
       <header class="toolbar">
-        <a class="toolbar__brand" href="/" aria-label="Monetta current UI"><img src="/images/logo_monetta.png" alt="Monetta" /></a>
-        <span class="toolbar__file">Live capture / current UI</span>
-        <nav class="toolbar__tabs" aria-label="Live app captures and UI boards">
-          <button class="is-active" type="button" data-board="/live/01-home.png" data-kind="live" data-title="Home / initial load" data-meta="Flutter app · iPhone 17 Pro Max · captured 12:15">Live / Home</button>
-          <button type="button" data-board="/live/04-home-down.png" data-kind="live" data-title="Home / catalog scroll" data-meta="Real catalog state · sold-out and available inventory">Live / Catalog</button>
-          <button type="button" data-board="/guidelines/00-all-ui.svg" data-kind="svg" data-title="SVG guideline atlas" data-meta="Reference board · current UI sections">SVG atlas</button>
+        <a class="toolbar__brand" href="/" aria-label="Referencias visuales de Monetta">
+          <img src="/images/logo_monetta.png" alt="Monetta" />
+        </a>
+        <span class="toolbar__file">Referencia visual · build actual</span>
+        <nav class="toolbar__tabs" aria-label="Modo de visualización">
+          <button class="is-active" type="button" data-view="overview">Paleta</button>
+          <button type="button" data-view="detail">Pantalla</button>
         </nav>
-        <div class="toolbar__actions"><button type="button" data-fit>Fit</button><button type="button" data-zoom-out aria-label="Zoom out">−</button><span data-zoom-label>100%</span><button type="button" data-zoom-in aria-label="Zoom in">+</button><a data-open-board href="/live/01-home.png" target="_blank" aria-label="Open current capture">↗</a></div>
+        <div class="toolbar__actions">
+          <button type="button" data-fit>Fit</button>
+          <button type="button" data-zoom-out aria-label="Alejar">−</button>
+          <span data-zoom-label>100%</span>
+          <button type="button" data-zoom-in aria-label="Acercar">+</button>
+          <a
+            data-open-board
+            href="/live/2026-08-23-home.png"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Abrir captura seleccionada"
+          >↗</a>
+        </div>
       </header>
+
+      <aside class="palette" aria-label="Capturas del build actual">
+        <div class="palette__head">
+          <div>
+            <span>BUILD 0D00C63</span>
+            <h1>UI actual</h1>
+          </div>
+          <strong>4</strong>
+        </div>
+        <div class="palette__list" data-palette-list></div>
+        <p class="palette__note">
+          iPhone 17 Pro Max · iOS 26.5<br />Capturado el 23 ago 2026
+        </p>
+      </aside>
+
       <main class="canvas" data-canvas>
         <div class="canvas__backdrop"></div>
-        <div class="board-wrap is-live" data-board-wrap>
-          <div class="capture-head" data-capture-head>
-            <div><span class="capture-head__eyebrow" data-capture-eyebrow>RUNNING BUILD</span><h1 data-capture-title>Home / initial load</h1><p data-capture-meta>Flutter app · iPhone 17 Pro Max · captured 12:15</p></div>
-            <span class="capture-head__status" data-capture-status><i></i> LIVE CAPTURE</span>
-          </div>
-          <img data-board-image src="/live/01-home.png" alt="Monetta live app home screen" draggable="false" />
+        <div class="stage is-overview" data-stage>
+          <section class="overview-board" data-overview-board>
+            <header class="overview-head">
+              <div>
+                <span class="eyebrow">MONETTA · BUILD ACTUAL</span>
+                <h2>Paleta de referencias visuales</h2>
+                <p>Estados capturados directamente del producto en ejecución.</p>
+              </div>
+              <div class="overview-stamp"><i></i> 23 AGO 2026</div>
+            </header>
+            <div class="overview-grid" data-overview-grid></div>
+            <footer class="overview-foot">
+              <span>Fuente</span>
+              <p>Flutter · iPhone 17 Pro Max · staging catalog</p>
+              <span>Nota</span>
+              <p>Los fallbacks de media visibles pertenecen al build real y se conservan como referencia.</p>
+            </footer>
+          </section>
+
+          <section class="detail-board" data-detail-board hidden>
+            <div class="capture-head">
+              <div>
+                <span class="capture-head__eyebrow">RUNNING BUILD</span>
+                <h2 data-capture-title>Inicio / hero editorial</h2>
+                <p data-capture-meta>Flutter · iPhone 17 Pro Max</p>
+              </div>
+              <span class="capture-head__status"><i></i> CAPTURA ACTUAL</span>
+            </div>
+            <div class="device-frame">
+              <img
+                data-board-image
+                src="/live/2026-08-23-home.png"
+                alt="Inicio actual de Monetta"
+                draggable="false"
+              />
+            </div>
+          </section>
         </div>
-        <div class="canvas__hint">Drag to pan · ⌘ + / − to zoom</div>
+        <div class="canvas__hint">Arrastra para mover · ⌘ + / − para zoom</div>
       </main>
     </div>
     <script type="module" src="/src/main.js"></script>

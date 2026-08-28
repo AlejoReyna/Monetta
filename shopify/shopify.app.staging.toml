@@ -17,7 +17,7 @@ embedded = false
 handle = "monetta-staging"
 
 [access_scopes]
-scopes = "read_orders,read_customers"
+scopes = "read_orders,read_customers,read_products"
 
 [auth]
 redirect_urls = [
@@ -35,6 +35,14 @@ uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhook
 [[webhooks.subscriptions]]
 topics = ["orders/updated"]
 uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/orders/updated"
+
+[[webhooks.subscriptions]]
+topics = ["products/create"]
+uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/products/create"
+
+[[webhooks.subscriptions]]
+topics = ["products/update"]
+uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/products/update"
 
 # Compliance topics must be separate absolute paths — the server has no
 # catch-all /webhooks route. app/uninstalled is intentionally omitted until

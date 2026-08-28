@@ -6,10 +6,13 @@ plugins {
 
 android {
     namespace = "mx.monetta.monetta_app"
-    compileSdk = flutter.compileSdkVersion
+    // Checkout Sheet Kit 3.6.1 requires compileSdk 35+ and minSdk 23.
+    // Existing AndroidX/plugins in this app require compileSdk 36+.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -19,7 +22,9 @@ android {
         applicationId = "mx.monetta.monetta_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // flutter_appauth already requires API 24; this still exceeds Checkout
+        // Sheet Kit's API 23 minimum.
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -40,6 +45,11 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("com.shopify:checkout-sheet-kit:3.6.1")
 }
 
 kotlin {

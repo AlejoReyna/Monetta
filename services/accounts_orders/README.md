@@ -21,8 +21,13 @@ next identity layer; Shopify linkage remains nullable and independent.
 ## 2. Why the Shopify mirror exists
 
 The Flutter app's Customer Account API login (`lib/data/customer_auth/`) needs no backend —
-it's a public OAuth client talking to Shopify directly. This service exists only for the two
-things a phone structurally cannot do:
+it's a public OAuth client talking to Shopify directly. This service owns the customer-scoped
+mirror and the two things a phone structurally cannot do:
+
+- **Serve mirrored order history safely.** `GET /customers/me/orders` accepts a bearer
+  credential, resolves its owner server-side through Shopify's Customer Account API (or an
+  explicitly linked Monetta session), and only then reads that customer's rows. There is no
+  caller-controlled customer id in the route.
 
 - **Receive webhooks.** `orders/create` and `orders/updated` are how the app ever learns an
   order happened — nothing calls out from the phone to ask.
@@ -32,7 +37,8 @@ things a phone structurally cannot do:
   immediately). See `src/webhooks/handlers.ts`.
 
 It does not become a general API layer in front of Shopify. The Storefront API and Customer
-Account API stay directly reachable from the app, unchanged.
+Account API stay directly reachable from the app; this service uses the latter only to verify
+the owner of credentials presented to customer-scoped endpoints.
 
 ## 3. Shopify credentials are optional
 
@@ -40,10 +46,13 @@ Account API stay directly reachable from the app, unchanged.
 |---|---|---|
 | Used by | `lib/data/customer_auth/` (the phone) | This service only |
 | Secret? | **No** — a public OAuth client, PKCE instead | **Yes** — the API secret key |
-| Used for | Login | Verifying `X-Shopify-Hmac-Sha256` on every webhook |
-| Config | `CustomerAccountConfig` (Dart, `--dart-define`) | `SHOPIFY_APP_CLIENT_SECRET` (this service's `.env`) |
+| Used for | Login and bearer identity | Verifying `X-Shopify-Hmac-Sha256` on every webhook |
+| Config | `CustomerAccountConfig` (Dart, `--dart-define`) and `SHOPIFY_STORE_DOMAIN` (service) | `SHOPIFY_APP_CLIENT_SECRET` (this service's `.env`) |
 
-The first-party account flow needs neither credential. With
+`SHOPIFY_STORE_DOMAIN` is public configuration, not a secret. It is required for validating
+Shopify customer tokens on `GET /customers/me/orders` and `POST /push-tokens`; verification
+fails closed if it is absent or Shopify is unavailable. The first-party account flow needs
+neither credential. With
 `SHOPIFY_APP_CLIENT_SECRET` empty, webhook verification fails closed while `/accounts/*`
 continues to work. A Shopify client secret must never end up in the Flutter app or binary.
 
@@ -113,11 +122,9 @@ and mirrors it with `source = 'whatsapp_apartado'` instead of `'shopify_checkout
 - Deployments should rate-limit `POST /accounts/register` and `POST /accounts/login` at the
   edge before public launch.
 
-- **`POST /push-tokens` has no request authentication yet.** It's internal/prototype status
-  only, the same posture `services/catalog_monitor` ships its live-crawl gate with. Before
-  this leaves prototype status, requests should carry the Customer Account API access token
-  the app already holds after login, verified here (e.g. by calling the Customer Account API
-  with it) rather than trusting an unauthenticated `customerId` field.
+- Customer-facing routes require a bearer credential and derive the Shopify customer id on
+  the server. `POST /push-tokens` ignores any caller-supplied `customerId`, and a device token
+  already owned by a different customer cannot be reassigned through that endpoint.
 - **No `customers/update` webhook subscribed yet.** `customers_mirror.marketing_consent`
   therefore never becomes `true` here — only what a webhook actually carries is ever written,
   never a fabricated default. Order webhooks are enough to seed a customer row but not to keep
@@ -142,7 +149,10 @@ npm test
   false-positive guard against an `MN-` tag outside the real alphabet), idempotent retries,
   the three compliance topics' actual effects on mirrored data.
 - `test/api.test.ts` — the same, over real HTTP against an ephemeral server with real HMAC
-  signing, matching `services/catalog_monitor/test/api.test.ts`'s pattern.
+  signing, plus customer authorization, ID-spoofing and device-token takeover boundaries,
+  matching `services/catalog_monitor/test/api.test.ts`'s pattern.
+- `test/customerTokenVerifier.test.ts` — Customer Account API discovery, identity lookup,
+  invalid-token handling, response bounds and unsafe endpoint rejection.
 - `test/webhookRoutes.test.ts` — drift guard: every `uri` in every `shopify/shopify.app*.toml`
   must resolve to a route this server registers. Shopify POSTs to whatever absolute path the
   deployed config names, and a path with no route 404s silently — for the three mandatory
@@ -181,6 +191,9 @@ fly secrets set DATABASE_URL='postgres://…@…neon.tech/…?sslmode=require'
 # Credenciales → Secreto. Paste it yourself; it belongs in no file and no chat.
 fly secrets set SHOPIFY_APP_CLIENT_SECRET='shpss_…'
 
+# Public store hostname used to verify Customer Account API bearer tokens.
+fly secrets set SHOPIFY_STORE_DOMAIN='monetta-staging.myshopify.com'
+
 fly deploy
 fly status                       # confirm the release_command ran and checks are passing
 curl -fsS https://monetta-accounts-staging.fly.dev/livez
@@ -200,3 +213,16 @@ npm_config_cache=../.npm-cache npx shopify app deploy --config staging --no-rele
 
 Review the diff, release, then install the app on `monetta-staging.myshopify.com` only —
 never on the production store (`monetta.mx` / `fakcei-n9` / admin handle `monetta-2`).
+
+## 12. Engagement y notificaciones
+
+La implementación completa vive en `src/engagement`: instalaciones anónimas
+atestadas con App Check, registros FCM cifrados, preferencias por finalidad,
+perfil compacto, campañas, cola Postgres, worker HTTP v1, rutas internas y panel
+del dueño. También procesa `products/create` / `products/update` para detectar
+regresos y bajas de precio. Está apagada salvo que
+`NOTIFICATIONS_ENABLED=true`.
+
+La lista exacta de secretos, procesos, dart-defines y la secuencia de activación
+está en `../../docs/PUSH_NOTIFICATIONS_RUNBOOK.md`. En Fly hay que mantener un proceso
+`app` y uno `worker`; sólo el primero recibe HTTP.

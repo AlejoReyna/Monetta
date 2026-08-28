@@ -1,6 +1,8 @@
 /// A real destination: one category, brand, or silhouette. Filters work.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../../app/mixed_feed.dart';
@@ -25,12 +27,16 @@ class CollectionFilter {
     this.brand,
     this.silhouette,
     this.query,
+    this.queryTerms = const [],
+    this.collectionHandle,
   });
 
   final String? category;
   final String? brand;
   final String? silhouette;
   final String? query;
+  final List<String> queryTerms;
+  final String? collectionHandle;
 }
 
 class CollectionScreen extends StatefulWidget {
@@ -68,11 +74,22 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   List<Product> _items() {
     final store = StoreScope.of(context);
-    final query = widget.filter.query?.trim().toLowerCase() ?? '';
+    final queryTerms = <String>{
+      if (widget.filter.query?.trim().toLowerCase() case final query?
+          when query.isNotEmpty)
+        query,
+      for (final term in widget.filter.queryTerms)
+        if (term.trim().isNotEmpty) term.trim().toLowerCase(),
+    };
     final items = store.products.where((product) {
       final facets = store.facetsFor(product.id);
       if (widget.filter.category != null &&
           facets?.category?.value != widget.filter.category) {
+        return false;
+      }
+      if (widget.filter.collectionHandle != null &&
+          product.collectionHandles.isNotEmpty &&
+          !product.collectionHandles.contains(widget.filter.collectionHandle)) {
         return false;
       }
       if (_brand != null && facets?.brand?.value != _brand) return false;
@@ -80,12 +97,18 @@ class _CollectionScreenState extends State<CollectionScreen> {
         return false;
       }
       if (_inStockOnly && !product.isInStock) return false;
-      if (query.isEmpty) return true;
+      if (queryTerms.isEmpty) return true;
       final brand = facets?.brand?.value == null
           ? ''
           : brandLabel(facets!.brand!.value).toLowerCase();
-      return product.title.toLowerCase().contains(query) ||
-          brand.contains(query);
+      final searchable = <String>[
+        product.title,
+        brand,
+        product.productType,
+        ...product.tags,
+        ...product.collectionHandles,
+      ].join(' ').toLowerCase();
+      return queryTerms.any(searchable.contains);
     }).toList();
 
     items.sort((a, b) {
@@ -122,12 +145,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
       case MonettaBottomDestination.bag:
         openBag(context);
       case MonettaBottomDestination.account:
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => AccountScreen(
-              controller: AccountScope.of(context),
-              openHostedLoginOnStart: true,
-            ),
+        unawaited(
+          openAccount(
+            context,
+            controller: AccountScope.of(context),
           ),
         );
     }

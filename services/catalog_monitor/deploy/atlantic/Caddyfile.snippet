@@ -1,0 +1,12 @@
+# Add this site block to /opt/artisanalbrew/Caddyfile.
+# The Caddy container must be connected to monetta_catalog_edge first.
+
+catalog.monetta.mx {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        Strict-Transport-Security "max-age=31536000"
+    }
+    reverse_proxy monetta-catalog-api:8081
+}

@@ -2,6 +2,10 @@ import { fileURLToPath } from 'node:url';
 import { createHash, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
+import {
+  ShopifyCustomerTokenVerifier,
+  type CustomerTokenVerifier,
+} from '../auth/customerTokenVerifier.js';
 import { loadConfig } from '../config.js';
 import { getPool, closePool } from '../db/pool.js';
 import { PgCustomersRepository } from '../db/pgCustomersRepository.js';
@@ -9,12 +13,23 @@ import { PgAppAccountsRepository } from '../db/pgAppAccountsRepository.js';
 import { PgOrdersRepository } from '../db/pgOrdersRepository.js';
 import { PgPushTokensRepository } from '../db/pgPushTokensRepository.js';
 import { PgWebhookEventsRepository } from '../db/pgWebhookEventsRepository.js';
+import { EngagementService } from '../engagement/application/engagementService.js';
+import { registerEngagementRoutes, type EngagementRouteDeps } from '../engagement/api/routes.js';
+import { registerInternalCatalogRoute } from '../engagement/api/internalCatalogRoute.js';
+import { RegistrationCipher } from '../engagement/crypto/registrationCipher.js';
+import { FirebaseAppCheckVerifier } from '../engagement/infrastructure/firebaseAppCheckVerifier.js';
+import { FcmMessagingProvider } from '../engagement/infrastructure/fcmMessagingProvider.js';
+import { GoogleAccessTokenProvider } from '../engagement/infrastructure/googleAccessTokenProvider.js';
+import { PgEngagementRepository } from '../engagement/infrastructure/pgEngagementRepository.js';
+import { PgShopifyCatalogEventProcessor } from '../engagement/infrastructure/pgShopifyCatalogEventProcessor.js';
+import { PgEngagementPrivacyRepository } from '../engagement/infrastructure/pgEngagementPrivacyRepository.js';
 import { logger } from '../logger.js';
 import { verifyShopifyWebhookHmac } from '../webhooks/verifyHmac.js';
 import {
   handleCustomersDataRequest,
   handleCustomersRedact,
   handleOrdersWebhook,
+  handleProductsWebhook,
   handleShopRedact,
   type HandlerDeps,
 } from '../webhooks/handlers.js';
@@ -22,6 +37,7 @@ import type {
   ShopifyCustomerDataRequestWebhookPayload,
   ShopifyCustomerRedactWebhookPayload,
   ShopifyOrderWebhookPayload,
+  ShopifyProductWebhookPayload,
   ShopifyShopRedactWebhookPayload,
 } from '../webhooks/payloads.js';
 import type { Platform } from '../domain/types.js';
@@ -29,6 +45,8 @@ import type { Platform } from '../domain/types.js';
 export interface ServerDeps extends HandlerDeps {
   readonly webhookSecret: string;
   readonly appAccounts: import('../domain/ports.js').AppAccountsRepository;
+  readonly customerTokenVerifier: CustomerTokenVerifier;
+  readonly engagement?: EngagementRouteDeps & { readonly internalCatalogEventSecret: string };
 }
 
 const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
@@ -42,7 +60,64 @@ function bearerToken(req: Request): string | null {
   const authorization = req.header('Authorization');
   if (!authorization?.startsWith('Bearer ')) return null;
   const token = authorization.slice('Bearer '.length).trim();
-  return token === '' ? null : token;
+  return token === '' || token.length > 8192 || /\s/.test(token) ? null : token;
+}
+
+/**
+ * Resolves customer identity server-side. Legacy Monetta sessions are accepted
+ * only after they have an explicit Shopify customer linkage; every other
+ * credential is verified by asking Shopify's Customer Account API who it
+ * represents. No route trusts a customer id supplied by the caller.
+ */
+async function authenticatedCustomerId(
+  deps: ServerDeps,
+  req: Request,
+  res: Response,
+): Promise<string | null> {
+  const token = bearerToken(req);
+  if (token === null) {
+    res.status(401).json({ error: 'unauthorized' });
+    return null;
+  }
+
+  const appAccount = await deps.appAccounts.findByTokenHash(hashToken(token));
+  if (appAccount !== null) {
+    const customerId = canonicalShopifyCustomerId(appAccount.shopifyCustomerId);
+    if (customerId === null) {
+      res.status(403).json({ error: 'shopify_customer_not_linked' });
+      return null;
+    }
+    return customerId;
+  }
+
+  try {
+    const verifiedId = await deps.customerTokenVerifier.resolveCustomerId(token);
+    if (verifiedId === null) {
+      res.status(401).json({ error: 'unauthorized' });
+      return null;
+    }
+    const customerId = canonicalShopifyCustomerId(verifiedId);
+    if (customerId === null) {
+      res.status(503).json({ error: 'authentication_unavailable' });
+      return null;
+    }
+    return customerId;
+  } catch (error) {
+    // The verifier deliberately never places a token in its errors. Log only
+    // the error class anyway, keeping that invariant even for injected code.
+    logger.warn('customer authentication unavailable', {
+      errorType: error instanceof Error ? error.name : typeof error,
+    });
+    res.status(503).json({ error: 'authentication_unavailable' });
+    return null;
+  }
+}
+
+function canonicalShopifyCustomerId(value: string | null): string | null {
+  if (value === null) return null;
+  if (/^[0-9]+$/.test(value)) return value;
+  const gid = /^gid:\/\/shopify\/Customer\/([0-9]+)$/.exec(value);
+  return gid?.[1] ?? null;
 }
 
 async function hashPassword(password: string): Promise<string> {
@@ -132,6 +207,20 @@ export function createApp(deps: ServerDeps): Express {
     ),
   );
   app.post(
+    '/webhooks/products/create',
+    raw,
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyProductWebhookPayload, body) =>
+      handleProductsWebhook(d, id, 'products/create', payload, body),
+    ),
+  );
+  app.post(
+    '/webhooks/products/update',
+    raw,
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyProductWebhookPayload, body) =>
+      handleProductsWebhook(d, id, 'products/update', payload, body),
+    ),
+  );
+  app.post(
     '/webhooks/customers/data_request',
     raw,
     shopifyWebhookRoute(deps, (d, id, payload: ShopifyCustomerDataRequestWebhookPayload, body) =>
@@ -153,10 +242,20 @@ export function createApp(deps: ServerDeps): Express {
     ),
   );
 
-  // Push-token registration. Deliberately unauthenticated for now — see
-  // README.md § "Known limitations". Internal/prototype status only, the
-  // same posture services/catalog_monitor ships its live-crawl gate with.
+  if (deps.engagement !== undefined) {
+    registerInternalCatalogRoute(
+      app,
+      deps.engagement.service,
+      deps.engagement.internalCatalogEventSecret,
+      deps.engagement.now,
+    );
+  }
+
   app.use(express.json());
+
+  if (deps.engagement !== undefined) {
+    registerEngagementRoutes(app, deps.engagement);
+  }
 
   // First-party, device-bound Monetta registration. Email is intentionally
   // unverified and is profile metadata only: this endpoint does not claim
@@ -294,43 +393,52 @@ export function createApp(deps: ServerDeps): Express {
 
   app.post('/push-tokens', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { deviceId, customerId, fcmToken, platform } = req.body as {
+      const customerId = await authenticatedCustomerId(deps, req, res);
+      if (customerId === null) return;
+
+      const { deviceId, fcmToken, platform } = req.body as {
         deviceId?: string;
-        customerId?: string | null;
         fcmToken?: string;
         platform?: Platform;
       };
-      if (!deviceId || !fcmToken || (platform !== 'ios' && platform !== 'android')) {
+      if (
+        !deviceId || deviceId.length > 200 ||
+        !fcmToken || fcmToken.length > 4096 ||
+        (platform !== 'ios' && platform !== 'android')
+      ) {
         res.status(400).json({ error: 'invalid_request' });
         return;
       }
-      await deps.pushTokens.upsert({
+      // A shopper can opt into notifications before placing their first
+      // order, so the webhook-maintained customer mirror may not exist yet.
+      // Create only the identity row; never overwrite richer webhook PII.
+      await deps.customers.ensureExists(customerId);
+      const stored = await deps.pushTokens.upsert({
         deviceId,
-        customerId: customerId ?? null,
+        customerId,
         fcmToken,
         platform,
       });
+      if (!stored) {
+        res.status(409).json({ error: 'device_owned_by_another_customer' });
+        return;
+      }
       res.status(200).json({ status: 'ok' });
     } catch (error) {
       next(error);
     }
   });
 
-  // "Mis pedidos" (lib/features/account/) — unifies real Shopify checkout
-  // orders and hand-entered WhatsApp apartado orders, since both land in
-  // orders_mirror the same way (§ 7 of README.md). Deliberately
-  // unauthenticated for now — same prototype-status caveat as
-  // POST /push-tokens above, see README.md § "Known limitations": a
-  // shopifyCustomerId in the URL is trusted as-is rather than verified
-  // against the caller's own access token.
-  app.get('/customers/:shopifyCustomerId/orders', async (req: Request, res: Response, next: NextFunction) => {
+  // "Mis pedidos" derives the customer from the bearer credential. There is
+  // deliberately no /customers/:id/orders compatibility route: keeping a
+  // caller-controlled id in the contract makes an authorization regression
+  // far too easy.
+  app.get('/customers/me/orders', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { shopifyCustomerId } = req.params;
-      if (!shopifyCustomerId) {
-        res.status(400).json({ error: 'missing_shopify_customer_id' });
-        return;
-      }
-      const orders = await deps.orders.listForCustomer(shopifyCustomerId);
+      const customerId = await authenticatedCustomerId(deps, req, res);
+      if (customerId === null) return;
+
+      const orders = await deps.orders.listForCustomer(customerId);
       res.status(200).json({
         orders: orders.map((o) => ({
           id: o.id,
@@ -361,13 +469,62 @@ const isMain = process.argv[1] === fileURLToPath(import.meta.url);
 if (isMain) {
   const config = loadConfig();
   const pool = getPool();
+  const appAccounts = new PgAppAccountsRepository(pool);
+  const customerTokenVerifier = new ShopifyCustomerTokenVerifier({
+    shopDomain: config.shopDomain,
+  });
+  let engagement: ServerDeps['engagement'];
+  let catalogEvents: HandlerDeps['catalogEvents'];
+  if (config.notificationsEnabled) {
+    const googleTokens = new GoogleAccessTokenProvider(
+      config.firebaseClientEmail,
+      config.firebasePrivateKey,
+    );
+    const engagementService = new EngagementService(
+      new PgEngagementRepository(
+        pool,
+        RegistrationCipher.fromSecret(config.pushTokenEncryptionSecret),
+      ),
+      new FcmMessagingProvider(config.firebaseProjectId, googleTokens),
+    );
+    engagement = {
+      service: engagementService,
+      appCheck: new FirebaseAppCheckVerifier(config.firebaseProjectId, googleTokens),
+      ownerAuthorizer: {
+        authenticate: async (token) => {
+          const account = await appAccounts.findByTokenHash(hashToken(token));
+          if (account !== null && config.ownerEmails.has(account.email.trim().toLowerCase())) {
+            return { actorId: `account:${account.id}` };
+          }
+          try {
+            const customerId = canonicalShopifyCustomerId(
+              await customerTokenVerifier.resolveCustomerId(token),
+            );
+            return customerId !== null && config.ownerShopifyCustomerIds.has(customerId)
+              ? { actorId: `shopify-customer:${customerId}` }
+              : null;
+          } catch {
+            return null;
+          }
+        },
+      },
+      internalCatalogEventSecret: config.internalCatalogEventSecret,
+    };
+    catalogEvents = new PgShopifyCatalogEventProcessor(pool, engagementService);
+  }
   const app = createApp({
-    appAccounts: new PgAppAccountsRepository(pool),
+    appAccounts,
     customers: new PgCustomersRepository(pool),
     orders: new PgOrdersRepository(pool),
     webhookEvents: new PgWebhookEventsRepository(pool),
     pushTokens: new PgPushTokensRepository(pool),
     webhookSecret: config.webhookSecret,
+    customerTokenVerifier,
+    engagement,
+    catalogEvents,
+    engagementPrivacy: config.notificationsEnabled
+      ? new PgEngagementPrivacyRepository(pool)
+      : undefined,
   });
   const server = app.listen(config.port, () => {
     logger.info('accounts & orders API listening', { port: config.port });

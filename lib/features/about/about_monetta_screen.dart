@@ -23,7 +23,7 @@ class AboutMonettaScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const MonettaWordmark(height: 20),
+        title: const MonettaWordmark.appBar(),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(0.5),
           child: Divider(height: 0.5),

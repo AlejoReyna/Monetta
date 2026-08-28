@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+readonly ROOT=/opt/monetta-catalog
+readonly ENV_FILE="$ROOT/.env"
+readonly BACKUP_DIR="$ROOT/backups"
+readonly SELECTION_FILE="$ROOT/selection/selection.json"
+readonly POSTGRES_CONTAINER=monetta-catalog-postgres
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "run as root" >&2
+    exit 2
+fi
+if [[ ! -r "$ENV_FILE" ]]; then
+    echo "missing $ENV_FILE" >&2
+    exit 1
+fi
+
+# The deployment .env is root-owned and mode 0600. Passwords are kept in the
+# process environment for docker exec and are never printed by this script.
+set -a
+# shellcheck disable=SC1090
+source "$ENV_FILE"
+set +a
+
+POSTGRES_USER="${POSTGRES_USER:-monetta_catalog}"
+POSTGRES_DB="${POSTGRES_DB:-monetta_catalog}"
+: "${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required in /opt/monetta-catalog/.env}"
+
+umask 077
+install -d -m 0700 "$BACKUP_DIR"
+
+backup() {
+    local stamp dump tmp
+    stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+    dump="$BACKUP_DIR/catalog-$stamp.dump"
+    tmp="$dump.tmp.$$"
+
+    if ! docker exec -e "PGPASSWORD=$POSTGRES_PASSWORD" "$POSTGRES_CONTAINER" \
+        pg_dump --format=custom --no-owner --username "$POSTGRES_USER" \
+        --dbname "$POSTGRES_DB" > "$tmp"; then
+        rm -f -- "$tmp"
+        echo "pg_dump failed" >&2
+        exit 1
+    fi
+    mv -f -- "$tmp" "$dump"
+
+    if [[ -f "$SELECTION_FILE" ]]; then
+        cp -- "$SELECTION_FILE" "$BACKUP_DIR/selection-$stamp.json"
+    fi
+
+    find "$BACKUP_DIR" -maxdepth 1 -type f -name 'catalog-*.dump' -mtime +14 -delete
+    find "$BACKUP_DIR" -maxdepth 1 -type f -name 'selection-*.json' -mtime +14 -delete
+    chmod 0600 "$dump"
+    printf 'backup created: %s\n' "$dump"
+}
+
+restore() {
+    local dump resolved
+    if [[ "${2:-}" != "--confirm" || -z "${3:-}" ]]; then
+        echo "usage: $0 restore --confirm /opt/monetta-catalog/backups/catalog-<timestamp>.dump" >&2
+        exit 2
+    fi
+    dump="$3"
+    resolved="$(realpath -e -- "$dump")"
+    case "$resolved" in
+        "$BACKUP_DIR"/catalog-*.dump) ;;
+        *) echo "restore target must be a catalog backup in $BACKUP_DIR" >&2; exit 2 ;;
+    esac
+
+    docker exec -i -e "PGPASSWORD=$POSTGRES_PASSWORD" "$POSTGRES_CONTAINER" \
+        pg_restore --clean --if-exists --no-owner --exit-on-error \
+        --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" < "$resolved"
+    printf 'backup restored: %s\n' "$resolved"
+}
+
+case "${1:-backup}" in
+    backup) backup ;;
+    restore) restore "$@" ;;
+    *)
+        echo "usage: $0 [backup|restore --confirm /path/to/catalog.dump]" >&2
+        exit 2
+        ;;
+esac

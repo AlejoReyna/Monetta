@@ -4,6 +4,7 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/data/shopify/mappers.dart';
+import 'package:monetta_app/data/shopify/shopify_gid.dart';
 
 void main() {
   group('money', () {
@@ -106,7 +107,17 @@ void main() {
       expect(product.isOnSale, isTrue);
       expect(product.isInStock, isTrue);
       expect(product.collectionHandles, ['steve-madden']);
+      expect(product.id, 'gid://shopify/Product/9683379781783');
+      expect(
+        product.variants.single.id,
+        'gid://shopify/ProductVariant/48087674421399',
+      );
       expect(product.variants.single.isDefault, isTrue);
+    });
+
+    test('rejects non-GID identities from Storefront', () {
+      final json = baseJson()..['id'] = 'not-a-shopify-id';
+      expect(() => productFromJson(json), throwsFormatException);
     });
 
     test('computes the discount fraction', () {
@@ -152,29 +163,92 @@ void main() {
   });
 
   group('cartFromJson', () {
-    test('maps lines, subtotal and the checkout URL', () {
+    test('maps authoritative cart fields without lossy money conversion', () {
+      final opaqueCartId =
+          String.fromCharCodes(const [111, 112, 97, 113, 117, 101]);
+      final opaqueCheckout = Uri(
+        path:
+            String.fromCharCodes(const [99, 104, 101, 99, 107, 111, 117, 116]),
+      ).toString();
       final cart = cartFromJson(<String, dynamic>{
-        'id': 'gid://shopify/Cart/abc',
-        'checkoutUrl': 'https://monetta.mx/cart/c/abc?key=xyz',
+        'id': opaqueCartId,
+        'checkoutUrl': opaqueCheckout,
+        'createdAt': '2026-08-27T00:00:00Z',
+        'updatedAt': '2026-08-27T00:01:00Z',
         'totalQuantity': 2,
+        'buyerIdentity': {'countryCode': 'MX', 'customer': null},
         'cost': {
           'subtotalAmount': {'amount': '3178.00', 'currencyCode': 'MXN'},
+          'subtotalAmountEstimated': false,
+          'totalAmount': {'amount': '3178.00', 'currencyCode': 'MXN'},
+          'totalAmountEstimated': true,
         },
+        'discountCodes': [
+          {'code': 'APP', 'applicable': true},
+        ],
+        'discountApplications': [
+          {
+            '__typename': 'CartAutomaticDiscountApplication',
+            'allocationMethod': 'ACROSS',
+            'targetSelection': 'ALL',
+            'targetType': 'LINE_ITEM',
+            'title': 'Oferta automática',
+            'totalAllocatedAmount': {
+              'amount': '397.2500',
+              'currencyCode': 'MXN',
+            },
+            'value': {'percentage': '12.5000'},
+          },
+          {
+            '__typename': 'CartCodeDiscountApplication',
+            'allocationMethod': 'EACH',
+            'targetSelection': 'ENTITLED',
+            'targetType': 'LINE_ITEM',
+            'code': 'APP',
+            'totalAllocatedAmount': {
+              'amount': '100.000',
+              'currencyCode': 'MXN',
+            },
+            'value': {'amount': '100.000', 'currencyCode': 'MXN'},
+          },
+        ],
         'lines': {
           'edges': [
             {
               'node': {
-                'id': 'line-1',
+                'id': String.fromCharCodes(const [108, 105, 110, 101]),
                 'quantity': 2,
                 'cost': {
-                  'amountPerQuantity': {'amount': '1589.00'},
+                  'amountPerQuantity': {
+                    'amount': '1589.00',
+                    'currencyCode': 'MXN',
+                  },
+                  'compareAtAmountPerQuantity': null,
+                  'subtotalAmount': {
+                    'amount': '3178.00',
+                    'currencyCode': 'MXN',
+                  },
+                  'totalAmount': {
+                    'amount': '3178.00',
+                    'currencyCode': 'MXN',
+                  },
                 },
+                'discountAllocations': [
+                  {
+                    // Fixture for an order-level allocation included by
+                    // lineLevelOnly: false.
+                    'discountedAmount': {
+                      'amount': '397.2500',
+                      'currencyCode': 'MXN',
+                    },
+                  },
+                ],
                 'merchandise': {
-                  'id': 'variant-1',
+                  'id': shopifyVariantGid(1),
                   'title': 'Default Title',
                   'image': {'url': 'https://cdn.shopify.com/a.jpg'},
                   'product': {
-                    'id': 'product-1',
+                    'id': shopifyProductGid(1),
                     'title': 'Bolsa Steve Madden',
                     'handle': 'bolsa-steve-madden',
                   },
@@ -185,12 +259,27 @@ void main() {
         },
       });
 
-      expect(cart.checkoutUrl, contains('/cart/c/abc'));
+      expect(cart.checkoutUrl, opaqueCheckout);
       expect(cart.totalQuantity, 2);
-      expect(cart.subtotalAmount, 3178.0);
-      expect(cart.currencyCode, 'MXN');
-      expect(cart.lines.single.lineTotal, 3178.0);
+      expect(cart.cost.subtotal.amount, '3178.00');
+      expect(cart.cost.total.currencyCode, 'MXN');
+      expect(cart.cost.totalEstimated, isTrue);
+      expect(cart.lines.single.cost.total.amount, '3178.00');
       expect(cart.lines.single.title, 'Bolsa Steve Madden');
+      expect(cart.discountCodes.single.applicable, isTrue);
+      expect(cart.discountApplications.first.title, 'Oferta automática');
+      expect(cart.discountApplications.first.percentage, '12.5000');
+      expect(cart.discountApplications.last.code, 'APP');
+      expect(cart.discountApplications.last.amount?.amount, '100.000');
+      expect(
+        cart.discountApplications.first.totalAllocatedAmount?.amount,
+        '397.2500',
+      );
+      expect(
+        cart.lines.single.discountAllocations.single.discountedAmount.amount,
+        '397.2500',
+      );
+      expect('$cart', isNot(contains(opaqueCartId)));
     });
   });
 

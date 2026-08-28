@@ -42,11 +42,88 @@ class AppDatabase extends _$AppDatabase {
   /// Opens the real on-device file, under the app's support directory (not
   /// documents — this is app data, not something the shopper should see in
   /// the Files app).
-  factory AppDatabase.connect() =>
-      AppDatabase(_openConnection());
+  factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+        onCreate: (migrator) => migrator.createAll(),
+        onUpgrade: (migrator, from, to) async {
+          if (from < 2) await _migrateShopifyIdsToGids();
+        },
+        beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),
+      );
+
+  /// Version 1 persisted ids from the bundled Ajax snapshot as decimal text.
+  /// Storefront and Firestore use GIDs, so an upgraded installation must move
+  /// the catalog and every shopper-owned reference as one migration. Existing
+  /// GID rows win if a partially-upgraded database contains both identities.
+  Future<void> _migrateShopifyIdsToGids() async {
+    const numeric =
+        "%s GLOB '[0-9]*' AND %s NOT GLOB '*[^0-9]*' AND length(%s) > 0";
+    final productNumeric = numeric.replaceAll('%s', 'id');
+    final variantNumeric = numeric.replaceAll('%s', 'id');
+    final productReferenceNumeric = numeric.replaceAll('%s', 'product_id');
+    final variantReferenceNumeric = numeric.replaceAll('%s', 'variant_id');
+
+    await customStatement('''
+      INSERT OR IGNORE INTO cached_products (
+        id, handle, title, vendor, product_type, tags, images,
+        description_html, collection_handles, brand_override,
+        category_override, created_at, updated_at
+      )
+      SELECT 'gid://shopify/Product/' || id, handle, title, vendor,
+        product_type, tags, images, description_html, collection_handles,
+        brand_override, category_override, created_at, updated_at
+      FROM cached_products WHERE $productNumeric
+    ''');
+    await customStatement('''
+      INSERT OR IGNORE INTO cached_variants (
+        id, product_id, title, price, compare_at_price, available, sku
+      )
+      SELECT 'gid://shopify/ProductVariant/' || id,
+        'gid://shopify/Product/' || product_id, title, price,
+        compare_at_price, available, sku
+      FROM cached_variants
+      WHERE $variantNumeric AND $productReferenceNumeric
+    ''');
+    await customStatement('''
+      INSERT OR IGNORE INTO wishlist_items (product_id, account_id, added_at)
+      SELECT 'gid://shopify/Product/' || product_id, account_id, added_at
+      FROM wishlist_items WHERE $productReferenceNumeric
+    ''');
+    await customStatement('''
+      INSERT OR IGNORE INTO bag_lines (
+        product_id, variant_id, account_id, quantity
+      )
+      SELECT 'gid://shopify/Product/' || product_id,
+        CASE WHEN $variantReferenceNumeric
+          THEN 'gid://shopify/ProductVariant/' || variant_id
+          ELSE variant_id END,
+        account_id, quantity
+      FROM bag_lines WHERE $productReferenceNumeric
+    ''');
+    await customStatement('''
+      UPDATE interaction_events
+      SET product_id = 'gid://shopify/Product/' || product_id
+      WHERE $productReferenceNumeric
+    ''');
+
+    await customStatement(
+      'DELETE FROM wishlist_items WHERE $productReferenceNumeric',
+    );
+    await customStatement(
+      'DELETE FROM bag_lines WHERE $productReferenceNumeric',
+    );
+    await customStatement(
+      'DELETE FROM cached_variants WHERE $variantNumeric',
+    );
+    await customStatement(
+      'DELETE FROM cached_products WHERE $productNumeric',
+    );
+  }
 
   static QueryExecutor _openConnection() {
     return LazyDatabase(() async {

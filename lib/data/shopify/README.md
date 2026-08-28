@@ -24,6 +24,11 @@ here.
 | Category navigation | `menu(handle: "main-menu")` | Shopify → Navigation |
 | Collection screens | `collection(handle:)` | Adding a collection |
 | Home section order | shop metafield `app.home_sections` | Settings → Metafields |
+| Home collections | shop metafield `app.home_collections` + collection images | Settings → Metafields / Collections |
+| Home bag types | shop metafield `app.home_bag_types` + collection images | Settings → Metafields / Collections |
+| Social URLs | shop metafield `app.social_links` | Settings → Metafields |
+| About home image | shop metafield `app.about_image_url` | Settings → Metafields |
+| Customer reviews | Public Loox carousel JSON (`/widget/{id}/dynamic-carousel/reviews/`) | Loox → Manage reviews |
 | Product badge | product metafield `app.badge` | The product page |
 | Brand/category fix-ups | `app.brand_override`, `app.category_override` | The product page |
 | Search | `predictiveSearch` | automatic |
@@ -31,7 +36,25 @@ here.
 
 Add a collection in Shopify Admin → it is in the app's menu on the next open. No release.
 
-### Delta sync — there is no sync job
+### Home metafield contract
+
+Expose these **shop** metafields to the Storefront API (`PUBLIC_READ`). All are
+optional; missing or malformed values retain the bundled mobile-home fallback.
+
+| Key | Suggested type | Example |
+|---|---|---|
+| `app.home_sections` | JSON | `["collections","new_products","bag_types","brands","about","social","testimonials"]` |
+| `app.home_collections` | JSON | `["guess","carteras-1","relojes"]` |
+| `app.home_bag_types` | JSON | `["totes","crossbodys","hombro"]` |
+| `app.social_links` | JSON | `{"instagram":"https://…","tiktok":"https://…","facebook":"https://…"}` |
+| `app.about_image_url` | Single line text / URL | `https://cdn.shopify.com/…` |
+
+The app reads collection titles and images directly from the referenced
+Shopify collections. Products and brands continue to come from the regular
+catalog delta sync. Reviews use the same public Loox carousel JSON as the
+live storefront and fall back locally on network/configuration errors.
+
+### Delta sync — retained as the offline/error fallback
 
 ```
 app foreground
@@ -42,6 +65,20 @@ app foreground
    ├─ map → normalize → write to drift
    └─ advance cursor to the highest updatedAt seen
 ```
+
+Staging can additionally enable the Firestore `products` snapshot listener
+with `FIRESTORE_CATALOG_ENABLED=true`. A complete valid snapshot replaces the
+Drift cache atomically; empty, invalid, disconnected, and error states preserve
+the last valid cache. While Firestore is connecting or live, delta sync is
+blocked. It becomes eligible only after an error/disconnection (or when no
+Firestore listener is configured). Both writers share an exclusive coordinator;
+if Firestore reconnects during a fallback sync, its queued snapshot is applied
+last and restores Firestore authority.
+
+`Product.id` and `ProductVariant.id` are always Shopify GIDs. The numeric Ajax
+ids in the bundled snapshot are canonicalized by its mapper, and database v2
+migrates cached v1 product/variant ids plus wishlist, bag, and interaction-event
+references.
 
 The `query` argument's supported filter fields on this connection are `available_for_sale`,
 `created_at`, `product_type`, `tag`, `tag_not`, `title`, `updated_at`, `variants.price`,
@@ -90,10 +127,10 @@ one is invisible and permanent.
 to be public and expose a limited surface, but delivering it remotely means rotation takes
 minutes instead of an App Store review.
 
-**Rejected: mirroring the catalog through our own backend in Phase 1.** It would put a
-server between the owner and their app on day one — a new failure mode for the exact
-property the project exists to guarantee. The backend arrives in Phase 2 for push
-notifications, where it earns its keep.
+**The Firestore mirror is authoritative while healthy, not the only boot
+path.** It gives the app low-latency product updates, while the bundled
+snapshot, Drift cache, and Storefront delta fallback prevent a backend outage
+or malformed snapshot from blanking the catalog.
 
 ## 4. Data in / data out
 

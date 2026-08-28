@@ -52,6 +52,9 @@ shopify/node_modules/
 shopify/.shopify/
 .npm-cache/
 
+# Root Vercel function dependencies
+/node_modules/
+
 # Immersive web site: Vercel installs and builds from source (see
 # vercel.json), so neither the install cache nor the build output belongs
 # in git.
@@ -62,3 +65,5 @@ web/dist/
 # so no *.g.dart / *.freezed.dart ignores here.
 .vercel/
 .env.local
+.vercel
+.env*

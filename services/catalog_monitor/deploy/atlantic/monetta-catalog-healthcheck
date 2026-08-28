@@ -1,0 +1,70 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+readonly STATE_DIR=/var/lib/monetta-catalog
+readonly STATE_FILE="$STATE_DIR/healthcheck.state"
+readonly COMPOSE_FILE=/opt/monetta-catalog/compose.yml
+readonly ENV_FILE=/opt/monetta-catalog/.env
+readonly API_CONTAINER=monetta-catalog-api
+readonly MONITOR_CONTAINER=monetta-catalog-monitor
+
+if [[ "$EUID" -ne 0 ]]; then
+    echo "run as root" >&2
+    exit 2
+fi
+
+install -d -m 0700 "$STATE_DIR"
+
+read_failures() {
+    local value
+    value="$(sed -n '1p' "$STATE_FILE" 2>/dev/null || true)"
+    if [[ "$value" =~ ^[0-9]+$ ]]; then
+        printf '%s\n' "$value"
+    else
+        printf '0\n'
+    fi
+}
+
+write_failures() {
+    local value="$1"
+    local tmp="${STATE_FILE}.tmp.$$"
+    printf '%s\n' "$value" > "$tmp"
+    chmod 0600 "$tmp"
+    mv -f -- "$tmp" "$STATE_FILE"
+}
+
+is_running() {
+    [[ "$(docker inspect --format '{{.State.Running}}' "$1" 2>/dev/null || true)" == "true" ]]
+}
+
+unhealthy=0
+if ! is_running "$API_CONTAINER"; then
+    unhealthy=1
+elif ! docker exec "$API_CONTAINER" node -e \
+    'fetch("http://127.0.0.1:8081/livez").then((r) => { if (!r.ok) process.exit(1); }).catch(() => process.exit(1))' \
+    >/dev/null 2>&1; then
+    unhealthy=1
+fi
+
+if ! is_running "$MONITOR_CONTAINER"; then
+    unhealthy=1
+fi
+
+if [[ "$unhealthy" -eq 0 ]]; then
+    write_failures 0
+    exit 0
+fi
+
+failures=$(( $(read_failures) + 1 ))
+write_failures "$failures"
+logger -t monetta-catalog-healthcheck "catalog service unhealthy (consecutive failure $failures)"
+
+if [[ "$failures" -ge 3 ]]; then
+    docker compose --project-name monetta-catalog --env-file "$ENV_FILE" \
+        -f "$COMPOSE_FILE" up -d monetta-catalog-api monetta-catalog-monitor \
+        >/dev/null
+    write_failures 0
+    logger -t monetta-catalog-healthcheck "catalog containers were started after three failed checks"
+fi
+
+exit 1
