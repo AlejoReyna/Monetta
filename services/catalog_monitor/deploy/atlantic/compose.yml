@@ -1,0 +1,143 @@
+# Production topology for the Texas host.
+#
+# The active copy is installed at /opt/monetta-catalog/compose.yml. Its
+# CATALOG_BUILD_CONTEXT points at the source checkout beneath that directory;
+# the default below keeps this file verifiable from the repository.
+#
+# The API has no published host port. Caddy reaches it through the external
+# monetta_catalog_edge network after that network is connected to Caddy.
+
+services:
+  monetta-catalog-postgres:
+    image: postgres:16-alpine
+    container_name: monetta-catalog-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-monetta_catalog}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in the deployment environment}
+      POSTGRES_DB: ${POSTGRES_DB:-monetta_catalog}
+    volumes:
+      - monetta_catalog_pgdata:/var/lib/postgresql/data
+    networks:
+      - catalog_internal
+    mem_limit: 768m
+    cpus: "0.50"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$${POSTGRES_USER}" -d "$${POSTGRES_DB}"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  # One-shot migration job. API and monitor cannot start against an
+  # unmigrated database.
+  monetta-catalog-migrate:
+    build:
+      context: ${CATALOG_BUILD_CONTEXT:-../..}
+      dockerfile: deploy/atlantic/Dockerfile
+    image: monetta-catalog:${CATALOG_IMAGE_TAG:-current}
+    container_name: monetta-catalog-migrate
+    restart: "no"
+    command: ["node", "dist/db/migrate.js"]
+    depends_on:
+      monetta-catalog-postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set in the deployment environment}
+    networks:
+      - catalog_internal
+    mem_limit: 256m
+    cpus: "0.25"
+
+  monetta-catalog-api:
+    build:
+      context: ${CATALOG_BUILD_CONTEXT:-../..}
+      dockerfile: deploy/atlantic/Dockerfile
+    image: monetta-catalog:${CATALOG_IMAGE_TAG:-current}
+    container_name: monetta-catalog-api
+    init: true
+    restart: unless-stopped
+    command: ["node", "dist/api/server.js"]
+    depends_on:
+      monetta-catalog-postgres:
+        condition: service_healthy
+      monetta-catalog-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set in the deployment environment}
+      PORT: ${PORT:-8081}
+      # The API is a passive reader. Only the monitor may crawl.
+      LIVE_CRAWL_ENABLED: "false"
+      PLAYWRIGHT_FALLBACK_ENABLED: "false"
+      ENABLED_SOURCE_IDS: ${ENABLED_SOURCE_IDS:?ENABLED_SOURCE_IDS must be set in the deployment environment}
+    networks:
+      catalog_internal:
+      catalog_edge:
+        aliases:
+          - monetta-catalog-api
+    mem_limit: 256m
+    cpus: "0.25"
+    stop_grace_period: 15s
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8081/livez').then((r) => {
+          if (!r.ok) process.exit(1);
+          }).catch(() => process.exit(1))
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+  monetta-catalog-monitor:
+    build:
+      context: ${CATALOG_BUILD_CONTEXT:-../..}
+      dockerfile: deploy/atlantic/Dockerfile
+    image: monetta-catalog:${CATALOG_IMAGE_TAG:-current}
+    container_name: monetta-catalog-monitor
+    init: true
+    restart: unless-stopped
+    command: ["node", "dist/monitor/scheduler.js"]
+    depends_on:
+      monetta-catalog-postgres:
+        condition: service_healthy
+      monetta-catalog-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set in the deployment environment}
+      LIVE_CRAWL_ENABLED: ${LIVE_CRAWL_ENABLED:?LIVE_CRAWL_ENABLED must be explicitly set in the deployment environment}
+      PLAYWRIGHT_FALLBACK_ENABLED: "false"
+      USER_AGENT: ${USER_AGENT:?USER_AGENT must contain a real monitored contact address}
+      REQUEST_DELAY_MS: ${REQUEST_DELAY_MS:-1000}
+      CATALOG_CRON: ${CATALOG_CRON:-17 3 * * *}
+      ENABLED_SOURCE_IDS: ${ENABLED_SOURCE_IDS:?ENABLED_SOURCE_IDS must be set in the deployment environment}
+    networks:
+      - catalog_internal
+    mem_limit: 640m
+    cpus: "0.50"
+    stop_grace_period: 15s
+    healthcheck:
+      test: ["CMD-SHELL", "kill -0 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  monetta_catalog_pgdata:
+    name: monetta_catalog_pgdata
+
+networks:
+  # PostgreSQL is never attached to the edge network.
+  catalog_internal:
+    name: monetta_catalog_internal
+    internal: true
+  # Created once on the host and shared only with Caddy and this API.
+  catalog_edge:
+    name: monetta_catalog_edge
+    external: true

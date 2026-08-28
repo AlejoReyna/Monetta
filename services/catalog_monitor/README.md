@@ -271,6 +271,12 @@ blocking it, the correct next step is to stop and review the site's terms and
 permission, not to work around the block (see `crawl/blockDetection.ts` and
 the `blocked` crawl-run status).
 
+## Atlantic deployment
+
+The Texas production topology, first installation, Caddy/DNS cutover, real
+crawl acceptance, backup/restore, rollback, source kill switch and staging
+device verification are documented in [`docs/OPERATIONS.md`](../../docs/OPERATIONS.md).
+
 ## How a crawl works
 
 1. **Discovery** (`discovery/sitemap.ts`) recursively walks the site's
