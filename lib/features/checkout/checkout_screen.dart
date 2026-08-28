@@ -175,11 +175,15 @@ class _BagContents extends StatelessWidget {
             _CheckoutProgress(activeIndex: 0),
             Padding(
               padding: const EdgeInsets.fromLTRB(24, 34, 24, 24),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              child: Row(
+                key: const ValueKey('bag-heading-row'),
+                crossAxisAlignment: CrossAxisAlignment.baseline,
+                textBaseline: TextBaseline.alphabetic,
                 children: [
-                  Text('Tu bolsa', style: display(wide ? 36 : 30)),
-                  const SizedBox(height: 6),
+                  Expanded(
+                    child: Text('Tu bolsa', style: display(wide ? 36 : 30)),
+                  ),
+                  const SizedBox(width: 16),
                   Text(
                     '$count ${count == 1 ? 'artículo' : 'artículos'}',
                     style: sans(size: 12.5, color: kInkMuted),
@@ -215,13 +219,7 @@ class _BagContents extends StatelessWidget {
                   children: [
                     Expanded(
                       flex: 7,
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          list,
-                          const _TrustBar(),
-                        ],
-                      ),
+                      child: list,
                     ),
                     const SizedBox(width: 52),
                     Expanded(
@@ -239,11 +237,10 @@ class _BagContents extends StatelessWidget {
         }
 
         return ListView(
-          padding: const EdgeInsets.only(bottom: 28),
+          padding: EdgeInsets.zero,
           children: [
             list,
-            Padding(padding: const EdgeInsets.all(20), child: summary),
-            const _TrustBar(),
+            summary,
           ],
         );
       },
@@ -728,6 +725,7 @@ class _OrderSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
+      key: const ValueKey('bag-order-summary'),
       color: kMist,
       padding: const EdgeInsets.all(24),
       child: Column(
@@ -805,24 +803,6 @@ class _SummaryRow extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _TrustBar extends StatelessWidget {
-  const _TrustBar();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(24, 22, 24, 6),
-      child: DecoratedBox(
-        decoration: BoxDecoration(border: Border(top: kHairline)),
-        child: Padding(
-          padding: EdgeInsets.only(top: 18),
-          child: MonettaTrustRows(),
-        ),
-      ),
     );
   }
 }

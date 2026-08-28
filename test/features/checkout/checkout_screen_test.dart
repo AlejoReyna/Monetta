@@ -43,6 +43,28 @@ void main() {
     expect(find.text('Tu bolsa'), findsOneWidget);
     expect(find.text(product.title), findsOneWidget);
     expect(find.text('CONTINUAR A ENTREGA'), findsOneWidget);
+
+    final headingRow = find.byKey(const ValueKey('bag-heading-row'));
+    expect(
+      find.descendant(of: headingRow, matching: find.text('Tu bolsa')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: headingRow, matching: find.text('1 artículo')),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Piezas originales importadas de Estados Unidos'),
+      findsNothing,
+    );
+
+    final summary = find.byKey(const ValueKey('bag-order-summary'));
+    expect(summary, findsOneWidget);
+    expect(tester.getTopLeft(summary).dx, 0);
+    expect(
+      tester.getSize(summary).width,
+      tester.getSize(find.byType(Scaffold).first).width,
+    );
     expect(store.bagQuantity, 1);
 
     await tester.tap(find.byTooltip('Agregar uno'));
