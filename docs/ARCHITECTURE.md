@@ -2,6 +2,13 @@
 
 How the modules fit together, and why the boundaries sit where they do.
 
+> **Current implementation guide:** the catalog mirror, Firestore/Drift
+> authority policy, both login providers, order synchronization, verified
+> staging state, and their exact code references are documented in
+> [`SYSTEM_IMPLEMENTATION.md`](SYSTEM_IMPLEMENTATION.md). This older module map
+> remains useful for design boundaries, but the implementation guide is the
+> authoritative description of the system shipped in August 2026.
+
 > This document and the per-module `README.md` files are the contract. If code and doc
 > disagree, one of them is a bug — fix both in the same commit.
 
