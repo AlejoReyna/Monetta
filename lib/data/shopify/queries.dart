@@ -198,14 +198,57 @@ const String kCartFragment = r'''
 fragment CartFields on Cart {
   id
   checkoutUrl
+  createdAt
+  updatedAt
   totalQuantity
-  cost { subtotalAmount { amount currencyCode } }
-  lines(first: 50) {
+  buyerIdentity {
+    countryCode
+    customer { __typename }
+  }
+  cost {
+    checkoutChargeAmount { amount currencyCode }
+    subtotalAmount { amount currencyCode }
+    subtotalAmountEstimated
+    totalAmount { amount currencyCode }
+    totalAmountEstimated
+  }
+  discountCodes { code applicable }
+  discountApplications {
+    __typename
+    allocationMethod
+    targetSelection
+    targetType
+    value {
+      ... on MoneyV2 { amount currencyCode }
+      ... on PricingPercentageValue { percentage }
+    }
+    ... on CartAutomaticDiscountApplication {
+      title
+      totalAllocatedAmount { amount currencyCode }
+    }
+    ... on CartCodeDiscountApplication {
+      code
+      totalAllocatedAmount { amount currencyCode }
+    }
+    ... on CartCustomDiscountApplication {
+      title
+      totalAllocatedAmount { amount currencyCode }
+    }
+  }
+  lines(first: 250) {
     edges {
       node {
         id
         quantity
-        cost { amountPerQuantity { amount } }
+        cost {
+          amountPerQuantity { amount currencyCode }
+          compareAtAmountPerQuantity { amount currencyCode }
+          subtotalAmount { amount currencyCode }
+          totalAmount { amount currencyCode }
+        }
+        discountAllocations(lineLevelOnly: false) {
+          discountedAmount { amount currencyCode }
+        }
         merchandise {
           ... on ProductVariant {
             id
@@ -224,10 +267,11 @@ fragment CartFields on Cart {
 /// the revenue-share arrangement auditable — see `cart_attribution.dart`.
 const String kCartCreateMutation = '''
 $kCartFragment
-mutation CartCreate(\$lines: [CartLineInput!], \$attributes: [AttributeInput!]) {
-  cartCreate(input: {lines: \$lines, attributes: \$attributes}) {
+mutation CartCreate(\$input: CartInput) {
+  cartCreate(input: \$input) {
     cart { ...CartFields }
-    userErrors { field message }
+    userErrors { field code message }
+    warnings { code message target }
   }
 }
 ''';
@@ -237,7 +281,8 @@ $kCartFragment
 mutation CartLinesAdd(\$cartId: ID!, \$lines: [CartLineInput!]!) {
   cartLinesAdd(cartId: \$cartId, lines: \$lines) {
     cart { ...CartFields }
-    userErrors { field message }
+    userErrors { field code message }
+    warnings { code message target }
   }
 }
 ''';
@@ -247,7 +292,8 @@ $kCartFragment
 mutation CartLinesUpdate(\$cartId: ID!, \$lines: [CartLineUpdateInput!]!) {
   cartLinesUpdate(cartId: \$cartId, lines: \$lines) {
     cart { ...CartFields }
-    userErrors { field message }
+    userErrors { field code message }
+    warnings { code message target }
   }
 }
 ''';
@@ -257,7 +303,44 @@ $kCartFragment
 mutation CartLinesRemove(\$cartId: ID!, \$lineIds: [ID!]!) {
   cartLinesRemove(cartId: \$cartId, lineIds: \$lineIds) {
     cart { ...CartFields }
-    userErrors { field message }
+    userErrors { field code message }
+    warnings { code message target }
+  }
+}
+''';
+
+const String kCartBuyerIdentityUpdateMutation = '''
+$kCartFragment
+mutation CartBuyerIdentityUpdate(
+  \$cartId: ID!
+  \$buyerIdentity: CartBuyerIdentityInput!
+) {
+  cartBuyerIdentityUpdate(
+    cartId: \$cartId
+    buyerIdentity: \$buyerIdentity
+  ) {
+    cart { ...CartFields }
+    userErrors { field code message }
+    warnings { code message target }
+  }
+}
+''';
+
+/// Replaces the complete discount-code set. Shopify treats an empty list as
+/// removal of every code; callers must therefore always send their full intent.
+const String kCartDiscountCodesUpdateMutation = '''
+$kCartFragment
+mutation CartDiscountCodesUpdate(
+  \$cartId: ID!
+  \$discountCodes: [String!]!
+) {
+  cartDiscountCodesUpdate(
+    cartId: \$cartId
+    discountCodes: \$discountCodes
+  ) {
+    cart { ...CartFields }
+    userErrors { field code message }
+    warnings { code message target }
   }
 }
 ''';

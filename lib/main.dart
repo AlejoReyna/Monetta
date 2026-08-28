@@ -18,11 +18,14 @@ import 'app/admin_config.dart';
 import 'app/admin_controller.dart';
 import 'app/admin_notification_controller.dart';
 import 'app/catalog_store.dart';
+import 'app/cart_controller.dart';
 import 'app/editorial_content_controller.dart';
 import 'app/external_catalog_config.dart';
 import 'app/external_catalog_controller.dart';
 import 'app/home_content_controller.dart';
 import 'app/notification_controller.dart';
+import 'app/shopify_cart_composition.dart';
+import 'app/shopify_checkout_coordinator.dart';
 import 'app/theme.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
 import 'data/accounts_orders/system_account_client.dart';
@@ -52,6 +55,7 @@ import 'data/notifications/notification_models.dart';
 import 'data/repositories/order_history_repository.dart';
 import 'data/reviews/loox_reviews_repository.dart';
 import 'data/shopify/catalog_sync.dart' as shopify;
+import 'data/shopify/cart_attribution.dart';
 import 'data/shopify/editorial_content_repository.dart';
 import 'data/shopify/home_content_repository.dart';
 import 'data/shopify/http_storefront_transport.dart';
@@ -198,6 +202,60 @@ class AccountScope extends InheritedNotifier<AccountController> {
     assert(scope?.notifier != null, 'AccountScope is missing from the tree');
     return scope!.notifier!;
   }
+
+  static AccountController? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<AccountScope>()?.notifier;
+}
+
+/// Optional production Shopify cart stack. It is absent in builds without
+/// public Storefront configuration and performs no work merely by being built.
+class CartScope extends InheritedNotifier<CartController> {
+  const CartScope({
+    required this.shopDomain,
+    this.checkoutCoordinator,
+    required CartController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  final String shopDomain;
+  final ShopifyCheckoutCoordinator? checkoutCoordinator;
+
+  static CartScope? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<CartScope>();
+}
+
+/// Places account and cart dependencies above the app Navigator so every
+/// sibling route observes the same configured controller and buyer scope.
+class AppRouteScopes extends StatelessWidget {
+  const AppRouteScopes({
+    required this.accountController,
+    required this.cartController,
+    this.checkoutCoordinator,
+    required this.shopDomain,
+    required this.child,
+    super.key,
+  });
+
+  final AccountController accountController;
+  final CartController? cartController;
+  final ShopifyCheckoutCoordinator? checkoutCoordinator;
+  final String shopDomain;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final cart = cartController;
+    final routedApp = cart == null
+        ? child
+        : CartScope(
+            shopDomain: shopDomain,
+            notifier: cart,
+            checkoutCoordinator: checkoutCoordinator,
+            child: child,
+          );
+    return AccountScope(notifier: accountController, child: routedApp);
+  }
 }
 
 /// Exposes owner administration alongside account and catalog state. The
@@ -306,6 +364,7 @@ class _MonettaAppState extends State<MonettaApp> {
   AdminController? _admin;
   AdminNotificationController? _adminNotifications;
   NotificationController? _notifications;
+  ShopifyCartComposition? _shopifyCart;
   late final Future<void> _loading = _load();
 
   /// Owns an HTTP client, so it needs closing — and it is built inside
@@ -381,6 +440,21 @@ class _MonettaAppState extends State<MonettaApp> {
       // `_app_version` attribute, which has the same gap.
       appVersion: '0.1.0',
     );
+
+    final storefrontConfig = StorefrontConfig.fromEnvironment();
+    final storefrontTransport = _storefrontTransport;
+    if (storefrontTransport != null && storefrontConfig.isUsable) {
+      _shopifyCart = ShopifyCartComposition.production(
+        config: storefrontConfig,
+        transport: storefrontTransport,
+        secureStore: secureStore,
+        attribution: CartAttribution(
+          platform: Platform.isIOS ? 'ios' : 'android',
+          deviceId: deviceId,
+          appVersion: '0.1.0',
+        ),
+      );
+    }
 
     // Shopify Customer Account login. Deliberately independent of
     // `AccountsOrdersConfig` below: OAuth talks to Shopify directly, so a
@@ -555,6 +629,7 @@ class _MonettaAppState extends State<MonettaApp> {
     _admin?.dispose();
     _notifications?.dispose();
     _adminNotifications?.dispose();
+    _shopifyCart?.controller.dispose();
     _store.dispose();
     _externalCatalog.dispose();
     _editorialContent.dispose();
@@ -569,6 +644,24 @@ class _MonettaAppState extends State<MonettaApp> {
       title: 'Monetta',
       debugShowCheckedModeBanner: false,
       theme: buildTheme(),
+      builder: (context, navigator) => FutureBuilder<void>(
+        future: _loading,
+        builder: (context, snapshot) {
+          if (snapshot.hasError) {
+            return _ErrorScreen(error: '${snapshot.error}');
+          }
+          if (snapshot.connectionState != ConnectionState.done) {
+            return const _SplashScreen();
+          }
+          return AppRouteScopes(
+            accountController: _account,
+            cartController: _shopifyCart?.controller,
+            checkoutCoordinator: _shopifyCart?.checkout,
+            shopDomain: StorefrontConfig.fromEnvironment().shopDomain,
+            child: navigator!,
+          );
+        },
+      ),
       home: StoreScope(
         notifier: _store,
         child: ExternalCatalogScope(
@@ -581,21 +674,18 @@ class _MonettaAppState extends State<MonettaApp> {
                 future: _loading,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return _ErrorScreen(error: '${snapshot.error}');
+                    return const SizedBox.shrink();
                   }
                   if (snapshot.connectionState != ConnectionState.done) {
-                    return const _SplashScreen();
+                    return const SizedBox.shrink();
                   }
-                  return AccountScope(
-                    notifier: _account,
-                    child: NotificationScope(
-                      notifier: _notifications!,
-                      child: AdminNotificationScope(
-                        notifier: _adminNotifications!,
-                        child: AdminScope(
-                          notifier: _admin!,
-                          child: const HomeScreen(),
-                        ),
+                  return NotificationScope(
+                    notifier: _notifications!,
+                    child: AdminNotificationScope(
+                      notifier: _adminNotifications!,
+                      child: AdminScope(
+                        notifier: _admin!,
+                        child: const HomeScreen(),
                       ),
                     ),
                   );

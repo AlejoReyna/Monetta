@@ -9,7 +9,6 @@ Current references:
 
 - Home hero
 - Compact catalog with search and sections
-- Catalog night mode
 - Product detail and purchase actions
 - Empty bag state
 

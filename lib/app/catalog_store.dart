@@ -449,6 +449,15 @@ class CatalogStore extends ChangeNotifier {
     }
   }
 
+  /// Clears durable and in-memory bag state after a trusted checkout event.
+  /// Persistence completes first so a storage failure never hides the bag.
+  Future<void> clearBagAfterCheckout() async {
+    await _bagStore.clear();
+    if (_bagQuantities.isEmpty) return;
+    _bagQuantities.clear();
+    notifyListeners();
+  }
+
   Product? _productById(String id) {
     for (final product in products) {
       if (product.id == id) return product;

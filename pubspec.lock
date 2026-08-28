@@ -185,14 +185,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "2.0.4"
-  checkout_sheet_kit_flutter:
-    dependency: "direct main"
-    description:
-      name: checkout_sheet_kit_flutter
-      sha256: "9a8893b5d41bd9d7d66b57e5c1dc239ac222dbad036f6e00d02b328d0a11593e"
-      url: "https://pub.dev"
-    source: hosted
-    version: "0.0.2"
   ci:
     dependency: transitive
     description:
@@ -736,7 +728,7 @@ packages:
     source: hosted
     version: "2.0.2"
   html:
-    dependency: transitive
+    dependency: "direct main"
     description:
       name: html
       sha256: "6d1264f2dffa1b1101c25a91dff0dc2daee4c18e87cd8538729773c073dbf602"

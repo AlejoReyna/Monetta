@@ -28,7 +28,7 @@ here.
 | Home bag types | shop metafield `app.home_bag_types` + collection images | Settings → Metafields / Collections |
 | Social URLs | shop metafield `app.social_links` | Settings → Metafields |
 | About home image | shop metafield `app.about_image_url` | Settings → Metafields |
-| Customer reviews | Loox Storefront API | Loox → Manage reviews |
+| Customer reviews | Public Loox carousel JSON (`/widget/{id}/dynamic-carousel/reviews/`) | Loox → Manage reviews |
 | Product badge | product metafield `app.badge` | The product page |
 | Brand/category fix-ups | `app.brand_override`, `app.category_override` | The product page |
 | Search | `predictiveSearch` | automatic |
@@ -51,8 +51,8 @@ optional; missing or malformed values retain the bundled mobile-home fallback.
 
 The app reads collection titles and images directly from the referenced
 Shopify collections. Products and brands continue to come from the regular
-catalog delta sync. Reviews use Loox's public, read-only Storefront API when
-the store plan allows it and fall back locally on network/configuration errors.
+catalog delta sync. Reviews use the same public Loox carousel JSON as the
+live storefront and fall back locally on network/configuration errors.
 
 ### Delta sync — retained as the offline/error fallback
 

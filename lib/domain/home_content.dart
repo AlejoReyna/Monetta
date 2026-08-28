@@ -98,6 +98,8 @@ class HomeTestimonial {
     required this.rating,
     required this.fallbackAsset,
     this.imageUrl,
+    this.imageAlt,
+    this.productName,
     this.verified = true,
   });
 
@@ -106,6 +108,8 @@ class HomeTestimonial {
   final int rating;
   final String fallbackAsset;
   final String? imageUrl;
+  final String? imageAlt;
+  final String? productName;
   final bool verified;
 }
 

@@ -23,6 +23,7 @@ dependencies:
   # Shopify Storefront API (GraphQL over plain HTTP).
   # Deliberately no ferry/codegen — see lib/data/shopify/README.md § 3.
   http: ^1.2.2
+  html: ^0.15.6
 
   # Local persistence
   drift: ^2.22.0
@@ -36,10 +37,6 @@ dependencies:
   # end-to-end, so there is deliberately no hand-rolled crypto here — see
   # `lib/data/customer_auth/README.md`.
   flutter_appauth: ^12.0.2
-
-  # Checkout — see lib/features/cart/README.md for the CheckoutLauncher seam.
-  # Pinned deliberately: this is a pre-1.0 plugin on the revenue path.
-  checkout_sheet_kit_flutter: ^0.0.2
 
   # Firebase
   firebase_core: ^3.8.1

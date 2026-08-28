@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/catalog_store.dart';
+import '../../app/home_content_controller.dart';
 import '../../app/media/monetta_video.dart';
 import '../../app/motion.dart';
 import '../../app/mixed_feed.dart';
@@ -31,9 +32,14 @@ import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
 import '../notifications/notification_settings_sheet.dart';
 import '../partner/partner_hub_screen.dart';
+import 'customer_experiences_section.dart';
+import 'customer_experiences_screen.dart';
 import 'external_catalog_section.dart';
 
 const int _kNewestCount = 8;
+
+Duration _homeSectionDelay(int index) =>
+    Duration(milliseconds: (index * 70).clamp(0, 350));
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -44,7 +50,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _scroll = ScrollController();
-  double _collapse = 0;
+  // Keep scroll-driven state out of the (image-heavy) home body. The app bar
+  // and hero playback each listen to only the value they need.
+  final ValueNotifier<double> _collapse = ValueNotifier<double>(0);
+  final ValueNotifier<bool> _heroPlaying = ValueNotifier<bool>(true);
+  double _heroHeight = double.infinity;
   bool _foreground = true;
 
   @override
@@ -58,6 +68,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
+    _collapse.dispose();
+    _heroPlaying.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -67,12 +79,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final active = state == AppLifecycleState.resumed;
     if (active == _foreground) return;
     setState(() => _foreground = active);
+    _syncHeroPlayback();
   }
 
   void _onScroll() {
     final next = (_scroll.offset / 80).clamp(0.0, 1.0);
-    if ((next - _collapse).abs() < 0.01) return;
-    setState(() => _collapse = next);
+    if ((next - _collapse.value).abs() >= 0.01) {
+      _collapse.value = next;
+    }
+    _syncHeroPlayback();
+  }
+
+  void _syncHeroPlayback() {
+    final shouldPlay =
+        _foreground && (!_scroll.hasClients || _scroll.offset < _heroHeight);
+    if (_heroPlaying.value == shouldPlay) return;
+    _heroPlaying.value = shouldPlay;
   }
 
   void _precacheRail() {
@@ -154,6 +176,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
   }
 
+  void _openCustomerExperiences(HomeContent content) {
+    final homeController = HomeContentScope.maybeOf(context);
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => CustomerExperiencesScreen(
+          repository: homeController?.reviewsRepository,
+          fallbackReviews: content.testimonials,
+          average: content.reviewAverage,
+          count: content.reviewCount,
+        ),
+      ),
+    );
+  }
+
   void _openFullCatalog() {
     final store = StoreScope.of(context);
     final external = ExternalCatalogScope.maybeOf(context)?.items ?? const [];
@@ -214,8 +250,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final externalCatalog = ExternalCatalogScope.maybeOf(context);
     final externalItems = externalCatalog?.items ?? const [];
     final editorial = _editorialContent;
-    final homeContent =
-        HomeContentScope.maybeOf(context)?.content ?? HomeContent.fallback;
+    final homeScope = HomeContentScope.maybeOf(context);
+    final homeContent = homeScope?.content ?? HomeContent.fallback;
+    final reviewsStatus =
+        homeScope?.reviewsStatus ?? HomeReviewsStatus.fallback;
     final storefront = AdminScope.maybeOf(context)?.storefront;
     final showHero = storefront?.showHero ?? true;
     final showNewest = storefront?.showNewest ?? true;
@@ -238,93 +276,134 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final newest = [...store.products]
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final fresh = newest.take(_kNewestCount).toList();
-    final barH = 68 - 16 * _collapse;
-
-    return Scaffold(
-      drawer: _buildSideMenu(store),
-      drawerScrimColor: Colors.black.withValues(alpha: 0.32),
-      appBar: _buildAppBar(height: barH),
-      body: LayoutBuilder(
-        builder: (context, constraints) {
-          // Fill the first body viewport (plus a small scroll lead) so the
-          // next section cannot peek above the bottom navigation on load.
-          final heroH = constraints.maxHeight + 12;
-          final heroMediaH = heroH - _CampaignHero.outerVerticalPadding;
-          return ListView(
-            controller: _scroll,
-            padding: EdgeInsets.zero,
-            children: [
-              if (showHero)
-                _CampaignHero(
-                  mediaHeight: heroMediaH,
-                  playing: _foreground &&
-                      (!_scroll.hasClients || _scroll.offset < heroH),
-                  onOpenCatalog: _openFullCatalog,
+    final drawer = _buildSideMenu(store);
+    final bottomNavigation = MonettaBottomNavigation(
+      current: MonettaBottomDestination.home,
+      bagCount: store.bagQuantity,
+      onSelected: _handleBottomNavigation,
+    );
+    final body = LayoutBuilder(
+      builder: (context, constraints) {
+        // Fill the first body viewport (plus a small scroll lead) so the
+        // next section cannot peek above the bottom navigation on load.
+        final heroH = constraints.maxHeight + 12;
+        final heroMediaH = heroH - _CampaignHero.outerVerticalPadding;
+        _heroHeight = heroH;
+        return ListView(
+          controller: _scroll,
+          padding: EdgeInsets.zero,
+          children: [
+            if (showHero)
+              RevealOnScroll(
+                key: const ValueKey('home-reveal-hero'),
+                scrollController: _scroll,
+                delay: const Duration(milliseconds: 60),
+                offset: 6,
+                child: ValueListenableBuilder<bool>(
+                  valueListenable: _heroPlaying,
+                  builder: (context, playing, child) => _CampaignHero(
+                    mediaHeight: heroMediaH,
+                    playing: playing,
+                    onOpenCatalog: _openFullCatalog,
+                  ),
                 ),
-              if (showExternalPicks && externalItems.isNotEmpty)
-                ExternalCatalogSection(
+              ),
+            if (showExternalPicks && externalItems.isNotEmpty)
+              RevealOnScroll(
+                key: const ValueKey('home-reveal-external-picks'),
+                scrollController: _scroll,
+                delay: const Duration(milliseconds: 80),
+                offset: 0,
+                child: ExternalCatalogSection(
                   items: externalItems,
                   generatedAt: externalCatalog?.generatedAt,
                 ),
-              for (final section in homeContent.sectionOrder)
-                if (showNewest || section != HomeSectionId.newProducts)
-                  _buildHomeSection(
-                    section,
-                    store: store,
-                    content: homeContent,
-                    editorial: editorial,
-                    fresh: fresh,
-                  ),
-              const SizedBox(height: 72),
-            ],
-          );
-        },
-      ),
-      bottomNavigationBar: MonettaBottomNavigation(
-        current: MonettaBottomDestination.home,
-        bagCount: store.bagQuantity,
-        onSelected: _handleBottomNavigation,
+              ),
+            for (var index = 0;
+                index < homeContent.sectionOrder.length;
+                index++)
+              if (showNewest ||
+                  homeContent.sectionOrder[index] != HomeSectionId.newProducts)
+                _buildHomeSection(
+                  homeContent.sectionOrder[index],
+                  index: index,
+                  store: store,
+                  content: homeContent,
+                  editorial: editorial,
+                  fresh: fresh,
+                  reviewsStatus: reviewsStatus,
+                ),
+            const SizedBox(height: 72),
+          ],
+        );
+      },
+    );
+
+    return ValueListenableBuilder<double>(
+      valueListenable: _collapse,
+      // This child is retained while the app bar collapses. A scroll tick
+      // therefore does not rebuild or relayout the full home content tree.
+      child: body,
+      builder: (context, collapse, child) => Scaffold(
+        drawer: drawer,
+        drawerScrimColor: Colors.black.withValues(alpha: 0.32),
+        appBar: _buildAppBar(height: 68 - 16 * collapse),
+        body: child,
+        bottomNavigationBar: bottomNavigation,
       ),
     );
   }
 
   Widget _buildHomeSection(
     HomeSectionId section, {
+    required int index,
     required CatalogStore store,
     required HomeContent content,
     required MonettaEditorialContent editorial,
     required List<Product> fresh,
+    required HomeReviewsStatus reviewsStatus,
   }) {
     return Padding(
       padding: const EdgeInsets.only(top: 72),
-      child: switch (section) {
-        HomeSectionId.collections => _HomeCollectionsSection(
-            cards: content.collections,
-          ),
-        HomeSectionId.newProducts => _NewestProductsSection(
-            products: fresh,
-            onOpenAll: _openFullCatalog,
-          ),
-        HomeSectionId.bagTypes => _BagTypesSection(cards: content.bagTypes),
-        HomeSectionId.brands => _BrandsSection(
-            brands: store.availableBrands,
-          ),
-        HomeSectionId.about => _AboutMonettaSection(
-            content: editorial.about,
-            imageUrl: content.aboutImageUrl,
-            onOpen: _openAbout,
-            onOpenPartner: _openPartner,
-          ),
-        HomeSectionId.social => _SocialSection(
-            links: content.socialLinks,
-            onOpen: _openExternal,
-          ),
-        HomeSectionId.testimonials => _TestimonialsSection(
-            testimonials: content.testimonials,
-            average: content.reviewAverage,
-            count: content.reviewCount,
-          ),
-      },
+      child: RevealOnScroll(
+        key: ValueKey('home-reveal-${section.name}'),
+        scrollController: _scroll,
+        delay: _homeSectionDelay(index),
+        // Keep layout-driven scrolling exact for buttons inside the section;
+        // the section's appearance is carried by opacity rather than a
+        // translated render box.
+        offset: 0,
+        child: switch (section) {
+          HomeSectionId.collections => _HomeCollectionsSection(
+              cards: content.collections,
+            ),
+          HomeSectionId.newProducts => _NewestProductsSection(
+              products: fresh,
+              onOpenAll: _openFullCatalog,
+            ),
+          HomeSectionId.bagTypes => _BagTypesSection(cards: content.bagTypes),
+          HomeSectionId.brands => _BrandsSection(
+              brands: store.availableBrands,
+            ),
+          HomeSectionId.about => _AboutMonettaSection(
+              content: editorial.about,
+              imageUrl: content.aboutImageUrl,
+              onOpen: _openAbout,
+              onOpenPartner: _openPartner,
+            ),
+          HomeSectionId.social => _SocialSection(
+              links: content.socialLinks,
+              onOpen: _openExternal,
+            ),
+          HomeSectionId.testimonials => CustomerExperiencesSection(
+              testimonials: content.testimonials,
+              average: content.reviewAverage,
+              count: content.reviewCount,
+              status: reviewsStatus,
+              onSeeMore: () => _openCustomerExperiences(content),
+            ),
+        },
+      ),
     );
   }
 
@@ -829,13 +908,15 @@ class _AboutMonettaSection extends StatelessWidget {
           title: 'Más sobre Monetta',
         ),
         Container(
-          margin: const EdgeInsets.symmetric(horizontal: 12),
+          key: const ValueKey('home-about-card'),
+          width: double.infinity,
           decoration: BoxDecoration(border: Border.all(color: kLine)),
           child: LayoutBuilder(
             builder: (context, constraints) {
               final wide = constraints.maxWidth >= 720;
               final image = SizedBox(
-                height: wide ? 360 : 310,
+                key: const ValueKey('home-about-image'),
+                height: 360,
                 width: double.infinity,
                 child: _HomeImage(
                   imageUrl: imageUrl,
@@ -977,113 +1058,6 @@ class _SocialTile extends StatelessWidget {
       };
 }
 
-class _TestimonialsSection extends StatelessWidget {
-  const _TestimonialsSection({
-    required this.testimonials,
-    required this.average,
-    required this.count,
-  });
-
-  final List<HomeTestimonial> testimonials;
-  final double? average;
-  final int? count;
-
-  @override
-  Widget build(BuildContext context) {
-    if (testimonials.isEmpty) return const SizedBox.shrink();
-    final summary = [
-      if (average != null) average!.toStringAsFixed(1),
-      if (count != null) '$count reseñas',
-    ].join(' · ');
-    return Column(
-      key: const ValueKey('home-section-testimonials'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        SectionHeading(
-          kicker: summary.isEmpty ? 'COMUNIDAD MONETTA' : summary,
-          title: 'Experiencias de clientes',
-        ),
-        SizedBox(
-          height: 520,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: testimonials.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 10),
-            itemBuilder: (context, index) => SizedBox(
-              width: MediaQuery.sizeOf(context).width.clamp(280, 440) * .82,
-              child: _TestimonialCard(testimonial: testimonials[index]),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _TestimonialCard extends StatelessWidget {
-  const _TestimonialCard({required this.testimonial});
-
-  final HomeTestimonial testimonial;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(border: Border.all(color: kLine)),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: _HomeImage(
-              imageUrl: testimonial.imageUrl,
-              fallbackAsset: testimonial.fallbackAsset,
-              fit: BoxFit.cover,
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Row(
-                  children: [
-                    for (var i = 0; i < testimonial.rating; i++)
-                      const Icon(Icons.star, color: kGold, size: 16),
-                  ],
-                ),
-                const SizedBox(height: 14),
-                Text(
-                  '“${testimonial.body}”',
-                  maxLines: 5,
-                  overflow: TextOverflow.ellipsis,
-                  style: display(18, height: 1.36),
-                ),
-                const SizedBox(height: 16),
-                Row(
-                  children: [
-                    Text(
-                      testimonial.reviewer.toUpperCase(),
-                      style: eyebrow(size: 9),
-                    ),
-                    if (testimonial.verified) ...[
-                      const SizedBox(width: 7),
-                      const Icon(
-                        Icons.verified_outlined,
-                        size: 14,
-                        color: kGold,
-                      ),
-                    ],
-                  ],
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _HomeImage extends StatelessWidget {
   const _HomeImage({
     required this.imageUrl,
@@ -1106,12 +1080,16 @@ class _HomeImage extends StatelessWidget {
     );
     final url = imageUrl;
     if (url == null || url.isEmpty) return fallback;
+    final sizedUrl = MediaUrl.sized(url, width: MediaUrl.cardWidth);
     return Image.network(
-      url,
+      sizedUrl,
       width: double.infinity,
       height: double.infinity,
       fit: fit,
       filterQuality: FilterQuality.medium,
+      // Home artwork is displayed in rails/cards, not full-screen. Keep
+      // oversized Shopify originals from being decoded on the UI thread.
+      cacheWidth: MediaUrl.cardWidth,
       errorBuilder: (_, __, ___) => fallback,
     );
   }

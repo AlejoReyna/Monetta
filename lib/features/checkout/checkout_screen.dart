@@ -11,11 +11,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/media/monetta_image.dart';
+import '../../app/cart_controller.dart';
 import '../../app/motion.dart';
+import '../../app/shopify_checkout_coordinator.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
+import '../../data/shopify/cart/cart_repository.dart';
+import '../../data/shopify/cart/cart_session_store.dart';
+import '../../data/shopify/cart/cart_api.dart';
+import '../../data/shopify/cart/checkout_launcher.dart';
 import '../../domain/bag_line.dart';
 import '../../main.dart';
+import 'shopify_cart_summary.dart';
 
 /// The transient data a real Shopify launcher needs to create the Cart and
 /// prefill buyer identity before opening `cart.checkoutUrl`.
@@ -46,7 +53,10 @@ class CheckoutDraft {
   final String state;
 }
 
-typedef SecureCheckoutLauncher = Future<void> Function(CheckoutDraft draft);
+typedef SecureCheckoutLauncher = Future<CheckoutResult> Function(
+  CheckoutDraft draft,
+);
+typedef ExternalCheckoutFallback = Future<bool> Function();
 
 Future<void> openBag(
   BuildContext context, {
@@ -108,15 +118,45 @@ class BagAction extends StatelessWidget {
   }
 }
 
-class BagScreen extends StatelessWidget {
+class BagScreen extends StatefulWidget {
   const BagScreen({this.launchSecureCheckout, super.key});
 
   final SecureCheckoutLauncher? launchSecureCheckout;
 
   @override
+  State<BagScreen> createState() => _BagScreenState();
+}
+
+class _BagScreenState extends State<BagScreen> {
+  CartSessionScope? _requestedScope;
+  String? _requestedIntentShape;
+
+  @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
     final lines = store.bagLines;
+    final cartScope = CartScope.maybeOf(context);
+    final account = AccountScope.maybeOf(context)?.account;
+    final sessionScope = cartScope == null
+        ? null
+        : account == null
+            ? CartSessionScope.guest(shopDomain: cartScope.shopDomain)
+            : CartSessionScope.authenticated(
+                shopDomain: cartScope.shopDomain,
+                localAccountId: account.localAccountId,
+              );
+    final localIntent = [
+      for (final line in lines)
+        LocalCartIntent(variantId: line.variant.id, quantity: line.quantity),
+    ];
+    if (cartScope != null && sessionScope != null && lines.isNotEmpty) {
+      _scheduleReconciliation(
+        cartScope.notifier!,
+        cartScope.checkoutCoordinator,
+        sessionScope,
+        localIntent,
+      );
+    }
 
     return Scaffold(
       appBar: _CheckoutAppBar(
@@ -131,9 +171,38 @@ class BagScreen extends StatelessWidget {
           ? const _EmptyBag()
           : _BagContents(
               lines: lines,
-              launchSecureCheckout: launchSecureCheckout,
+              launchSecureCheckout: widget.launchSecureCheckout,
+              cartController: cartScope?.notifier,
+              checkoutCoordinator: cartScope?.checkoutCoordinator,
+              cartScope: sessionScope,
+              localIntent: localIntent,
             ),
     );
+  }
+
+  void _scheduleReconciliation(
+    CartController controller,
+    ShopifyCheckoutCoordinator? checkoutCoordinator,
+    CartSessionScope scope,
+    List<LocalCartIntent> localIntent,
+  ) {
+    final shape = localIntent
+        .map((item) => '${item.variantId}:${item.quantity}')
+        .join('|');
+    if (_requestedScope == scope && _requestedIntentShape == shape) return;
+    _requestedScope = scope;
+    _requestedIntentShape = shape;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      unawaited(() async {
+        final refreshed = await controller.reconcileLocalBag(
+          scope: scope,
+          localIntent: localIntent,
+        );
+        if (!mounted || refreshed == null) return;
+        await checkoutCoordinator?.preload(refreshed);
+      }());
+    });
   }
 }
 
@@ -141,10 +210,18 @@ class _BagContents extends StatelessWidget {
   const _BagContents({
     required this.lines,
     required this.launchSecureCheckout,
+    required this.cartController,
+    required this.checkoutCoordinator,
+    required this.cartScope,
+    required this.localIntent,
   });
 
   final List<BagLine> lines;
   final SecureCheckoutLauncher? launchSecureCheckout;
+  final CartController? cartController;
+  final ShopifyCheckoutCoordinator? checkoutCoordinator;
+  final CartSessionScope? cartScope;
+  final List<LocalCartIntent> localIntent;
 
   @override
   Widget build(BuildContext context) {
@@ -154,12 +231,33 @@ class _BagContents extends StatelessWidget {
     final shipping = _shippingFor(subtotal);
 
     void continueToCheckout() {
+      final controller = cartController;
+      final scope = cartScope;
+      final checkout = checkoutCoordinator;
+      final productionLauncher =
+          controller == null || scope == null || checkout == null
+              ? null
+              : (CheckoutDraft draft) => checkout.present(
+                    controller: controller,
+                    scope: scope,
+                    localIntent: localIntent,
+                    buyerIdentity: GuestCartBuyerIdentity(
+                      email: draft.email,
+                      phone: draft.phone,
+                      countryCode: 'MX',
+                    ),
+                    onCompleted: store.clearBagAfterCheckout,
+                  );
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => StoreScope(
             notifier: store,
             child: CheckoutFlowScreen(
-              launchSecureCheckout: launchSecureCheckout,
+              launchSecureCheckout: launchSecureCheckout ?? productionLauncher,
+              // The coordinator decides at invocation time whether the fresh
+              // reconciled URL is available; do not snapshot that state before
+              // the checkout screen performs its final reconciliation.
+              openExternalCheckout: checkout?.openExternalFallback,
             ),
           ),
         ),
@@ -201,12 +299,23 @@ class _BagContents extends StatelessWidget {
           ],
         );
 
-        final summary = _OrderSummary(
-          subtotal: subtotal,
-          shipping: shipping,
-          ctaLabel: 'Continuar a entrega',
-          onContinue: continueToCheckout,
-        );
+        final controller = cartController;
+        final scope = cartScope;
+        final hasRemoteCart = controller?.scopedSnapshot?.scope == scope &&
+            controller?.snapshot?.cart != null;
+        final summary = controller != null && scope != null && hasRemoteCart
+            ? ShopifyCartSummary(
+                controller: controller,
+                scope: scope,
+                localIntent: localIntent,
+                onContinue: continueToCheckout,
+              )
+            : _OrderSummary(
+                subtotal: subtotal,
+                shipping: shipping,
+                ctaLabel: 'Continuar a entrega',
+                onContinue: continueToCheckout,
+              );
 
         if (wide) {
           return SingleChildScrollView(
@@ -249,9 +358,14 @@ class _BagContents extends StatelessWidget {
 }
 
 class CheckoutFlowScreen extends StatefulWidget {
-  const CheckoutFlowScreen({this.launchSecureCheckout, super.key});
+  const CheckoutFlowScreen({
+    this.launchSecureCheckout,
+    this.openExternalCheckout,
+    super.key,
+  });
 
   final SecureCheckoutLauncher? launchSecureCheckout;
+  final ExternalCheckoutFallback? openExternalCheckout;
 
   @override
   State<CheckoutFlowScreen> createState() => _CheckoutFlowScreenState();
@@ -297,12 +411,12 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   }
 
   Future<void> _pay() async {
-    NotificationScope.maybeOf(context)?.recordPushOutcome('checkout_started');
     final lines = StoreScope.of(context).bagLines;
     if (widget.launchSecureCheckout case final launcher?) {
+      NotificationScope.maybeOf(context)?.recordPushOutcome('checkout_started');
       setState(() => _launching = true);
       try {
-        await launcher(
+        final result = await launcher(
           CheckoutDraft(
             lines: lines,
             email: _email.text.trim(),
@@ -315,16 +429,42 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             state: _state.text.trim(),
           ),
         );
+        if (!mounted) return;
+        switch (result) {
+          case CheckoutCompleted():
+            Navigator.of(context).popUntil((route) => route.isFirst);
+          case CheckoutCancelled():
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text('Checkout cancelado. Tu bolsa se conserva.'),
+              ),
+            );
+          case CheckoutFailed(:final userMessage):
+            final fallback = widget.openExternalCheckout;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(userMessage),
+                action: fallback == null
+                    ? null
+                    : SnackBarAction(
+                        label: 'ABRIR NAVEGADOR',
+                        onPressed: () => unawaited(fallback()),
+                      ),
+              ),
+            );
+        }
       } finally {
         if (mounted) setState(() => _launching = false);
       }
       return;
     }
     if (!mounted) return;
-    await showModalBottomSheet<void>(
-      context: context,
-      showDragHandle: true,
-      builder: (_) => const _SecureHandoffPreview(),
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'El checkout seguro no está disponible en esta configuración. Tu bolsa se conserva.',
+        ),
+      ),
     );
   }
 
@@ -733,18 +873,23 @@ class _OrderSummary extends StatelessWidget {
         children: [
           Text('Resumen', style: display(22, weight: FontWeight.w400)),
           const SizedBox(height: 22),
-          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
+          _SummaryRow(
+            label: 'Subtotal local estimado',
+            value: kMoney.format(subtotal),
+          ),
           const SizedBox(height: 12),
           _SummaryRow(
-            label: 'Envío estándar',
-            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
+            label: 'Envío estimado',
+            value: shipping == 0
+                ? 'Estimado: gratis'
+                : 'Estimado: ${kMoney.format(shipping)}',
           ),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 18),
             child: Divider(),
           ),
           _SummaryRow(
-            label: 'Total estimado',
+            label: 'Estimación local',
             value: kMoney.format(subtotal + shipping),
             prominent: true,
           ),
@@ -1038,7 +1183,9 @@ class _DeliveryOption extends StatelessWidget {
             ),
           ),
           Text(
-            shipping == 0 ? 'GRATIS' : kMoney.format(shipping),
+            shipping == 0
+                ? 'ESTIMADO: GRATIS'
+                : 'ESTIMADO: ${kMoney.format(shipping)}',
             style: eyebrow(size: 8.5, color: kInk),
           ),
         ],
@@ -1093,7 +1240,7 @@ class _ReviewPanel extends StatelessWidget {
         _ReviewBlock(
           title: 'Método',
           value:
-              'Envío estándar · 3 a 5 días hábiles\n${shipping == 0 ? 'Gratis' : kMoney.format(shipping)}',
+              'Envío estándar · 3 a 5 días hábiles\n${shipping == 0 ? 'Estimado: gratis' : 'Estimado: ${kMoney.format(shipping)}'}',
         ),
         const SizedBox(height: 24),
         FilledButton.icon(
@@ -1216,15 +1363,20 @@ class _CheckoutSummary extends StatelessWidget {
             ),
           const Divider(),
           const SizedBox(height: 16),
-          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
+          _SummaryRow(
+            label: 'Subtotal local estimado',
+            value: kMoney.format(subtotal),
+          ),
           const SizedBox(height: 10),
           _SummaryRow(
-            label: 'Envío',
-            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
+            label: 'Envío estimado',
+            value: shipping == 0
+                ? 'Estimado: gratis'
+                : 'Estimado: ${kMoney.format(shipping)}',
           ),
           const SizedBox(height: 16),
           _SummaryRow(
-            label: 'Total',
+            label: 'Estimación local',
             value: kMoney.format(subtotal + shipping),
             prominent: true,
           ),
@@ -1272,47 +1424,6 @@ class _EmptyBag extends StatelessWidget {
                 onPressed: () => Navigator.of(context).pop(),
                 child: const Text('VOLVER A LA TIENDA'),
               ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SecureHandoffPreview extends StatelessWidget {
-  const _SecureHandoffPreview();
-
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(28, 8, 28, 28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Container(
-              width: 46,
-              height: 46,
-              alignment: Alignment.center,
-              decoration: const BoxDecoration(
-                shape: BoxShape.circle,
-                color: kMist,
-              ),
-              child: const Icon(Icons.lock_outline, size: 21),
-            ),
-            const SizedBox(height: 18),
-            Text('Pago protegido', style: display(25)),
-            const SizedBox(height: 10),
-            Text(
-              'Este prototipo termina en la entrega segura a Shopify. Al conectar la tienda, aquí se abrirán los métodos de pago habilitados sin exponer los datos de tu tarjeta a Monetta.',
-              textAlign: TextAlign.center,
-              style: sans(size: 12.5, color: kInkMuted),
-            ),
-            const SizedBox(height: 22),
-            FilledButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('ENTENDIDO'),
             ),
           ],
         ),

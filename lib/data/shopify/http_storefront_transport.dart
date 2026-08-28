@@ -17,7 +17,7 @@ import 'storefront_client.dart';
 /// page is far smaller). Oversized responses fail closed.
 const int kMaxStorefrontResponseBytes = 8 * 1024 * 1024;
 
-class HttpStorefrontTransport {
+class HttpStorefrontTransport implements CartStorefrontTransport {
   HttpStorefrontTransport({
     http.Client? client,
     this.timeout = const Duration(seconds: 20),
@@ -61,10 +61,36 @@ class HttpStorefrontTransport {
       }
     }
     throw StorefrontException(
-      'Network failure talking to Shopify: $lastError',
-      isRetryable: true,
+      'Network failure talking to Shopify',
+      isRetryable:
+          lastError is StorefrontException ? lastError.isRetryable : true,
     );
   }
+
+  /// One attempt only. This is the mutation transport for [StorefrontClient].
+  /// A timeout or server failure is ambiguous and must be recovered by a read.
+  Future<Map<String, dynamic>> sendOnce(
+    Uri endpoint,
+    Map<String, String> headers,
+    String body,
+  ) =>
+      _attempt(endpoint, headers, body);
+
+  @override
+  Future<Map<String, dynamic>> query(
+    Uri endpoint,
+    Map<String, String> headers,
+    String body,
+  ) =>
+      send(endpoint, headers, body);
+
+  @override
+  Future<Map<String, dynamic>> mutate(
+    Uri endpoint,
+    Map<String, String> headers,
+    String body,
+  ) =>
+      sendOnce(endpoint, headers, body);
 
   Future<Map<String, dynamic>> _attempt(
     Uri endpoint,
@@ -80,13 +106,21 @@ class HttpStorefrontTransport {
       throw StorefrontException(
         'Storefront request timed out',
         isRetryable: true,
+        isAmbiguous: true,
       );
     }
 
-    if (response.statusCode == 429 || response.statusCode >= 500) {
+    if (response.statusCode == 429) {
       throw StorefrontException(
         'Storefront HTTP ${response.statusCode}',
         isRetryable: true,
+      );
+    }
+    if (response.statusCode >= 500) {
+      throw StorefrontException(
+        'Storefront server failure',
+        isRetryable: true,
+        isAmbiguous: true,
       );
     }
     if (response.statusCode < 200 || response.statusCode >= 300) {

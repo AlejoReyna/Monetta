@@ -20,17 +20,8 @@ const references = [
     alt: 'Catálogo actual de Monetta con búsqueda y secciones',
   },
   {
-    id: 'catalog-night',
-    index: '03',
-    src: '/live/2026-08-23-catalog-night.png',
-    label: 'Catálogo nocturno',
-    title: 'Catálogo / modo nocturno',
-    meta: 'Carbón, marfil y acentos dorados',
-    alt: 'Modo nocturno actual del catálogo de Monetta',
-  },
-  {
     id: 'product',
-    index: '04',
+    index: '03',
     src: '/live/2026-08-23-product.png',
     label: 'Producto',
     title: 'Producto / acciones de compra',
@@ -39,7 +30,7 @@ const references = [
   },
   {
     id: 'bag-empty',
-    index: '05',
+    index: '04',
     src: '/live/2026-08-23-bag-empty.png',
     label: 'Bolsa vacía',
     title: 'Bolsa / estado vacío',

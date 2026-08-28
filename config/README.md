@@ -25,9 +25,11 @@ flutter run --dart-define-from-file=config/dart_defines.staging.json
 | `dart_defines.staging.json.example` | `dart_defines.staging.json` | Staging device builds |
 | `dart_defines.production.json.example` | `dart_defines.production.json` | Production release builds |
 
-`LOOX_PUBLIC_STORE_ID` is intentionally public and powers the same published
-reviews used by the Shopify storefront. Leave it empty in an environment that
-does not have Loox Storefront API access; the app will use bundled reviews.
+`LOOX_PUBLIC_STORE_ID` is the public Loox widget client id already published
+on the Shopify storefront. It is not a secret. The app reads
+`https://loox.io/widget/{id}/dynamic-carousel/reviews/` — the same JSON the
+live carousel uses. An empty value disables the live fetch and keeps bundled
+reviews.
 
 `FIRESTORE_CATALOG_ENABLED` is `true` only for a build whose Firebase client
 options point at the validated catalog project. Android and iOS use their own

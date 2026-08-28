@@ -106,15 +106,16 @@ cart state (drift)
   → cartCreate / cartLinesAdd (Storefront)   attributes: _channel, _platform, _device_id, _rec_source
   → cart.checkoutUrl
   → CheckoutLauncher (interface)
-       ├─ CheckoutKitLauncher   (checkout_sheet_kit_flutter — default)
-       └─ WebViewLauncher       (fallback)
+       ├─ MethodChannelCheckoutLauncher
+       │    └─ official Shopify Checkout Sheet Kit (iOS / Android)
+       └─ validated browser fallback (explicit only)
   → order lands in Shopify with our attribution attributes intact
 ```
 
-The `CheckoutLauncher` seam exists because `checkout_sheet_kit_flutter` is a **v0.0.2**
-plugin sitting on the revenue path. If it disappoints, swapping to the WebView fallback is
-a one-line provider change. The attribution attributes are not cosmetic: they are what makes
-the revenue-share arrangement auditable.
+The `CheckoutLauncher` seam keeps Flutter independent of the native Shopify SDK. The
+composition root injects `MethodChannelCheckoutLauncher`; the explicit browser fallback
+receives only the same validated checkout URL and never implies completion. The attribution
+attributes are not cosmetic: they are what makes the revenue-share arrangement auditable.
 
 ## External catalog prototype (internal, off by default)
 

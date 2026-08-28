@@ -1,9 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/account_controller.dart';
+import 'package:monetta_app/app/cart_controller.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
+import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/data/local/order_summary_store.dart';
+import 'package:monetta_app/data/repositories/order_history_repository.dart';
+import 'package:monetta_app/data/shopify/cart/cart_api.dart';
+import 'package:monetta_app/data/shopify/cart/cart_repository.dart';
+import 'package:monetta_app/data/shopify/cart/cart_session_store.dart';
+import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
+import 'package:monetta_app/data/shopify/shopify_gid.dart';
 import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/domain/cart.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
+import 'package:monetta_app/features/checkout/shopify_cart_summary.dart';
 import 'package:monetta_app/main.dart';
 
 Future<CatalogStore> _loadedStore() async {
@@ -74,7 +87,7 @@ void main() {
     expect(find.text('2'), findsWidgets);
   });
 
-  testWidgets('guest delivery leads to review and the secure Shopify handoff',
+  testWidgets('guest delivery never simulates payment without a Shopify bridge',
       (tester) async {
     final store = await _loadedStore();
     store.addToBag(store.products.firstWhere((item) => item.isInStock));
@@ -114,7 +127,165 @@ void main() {
     await tester.tap(find.text('CONTINUAR AL PAGO SEGURO'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Pago protegido'), findsOneWidget);
-    expect(find.textContaining('Este prototipo termina'), findsOneWidget);
+    expect(
+      find.textContaining('El checkout seguro no está disponible'),
+      findsOneWidget,
+    );
+    expect(find.text('Pago protegido'), findsNothing);
+    expect(store.bagQuantity, 1);
+  });
+
+  testWidgets('BagAction route inherits authenticated cart composition',
+      (tester) async {
+    final store = await _loadedStore();
+    store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    final database = openTestDatabase();
+    final accountController = AccountController(
+      accountStore: AccountStore(database),
+      deviceStore: DeviceStore(database),
+      orderHistoryRepository: OrderHistoryRepository(
+        store: OrderSummaryStore(database),
+        config: AccountsOrdersConfig.disabled,
+      ),
+      deviceId: 'device-local',
+    )..account = Account(
+        localAccountId: 'account-current',
+        authProvider: 'monetta',
+        createdAt: DateTime.utc(2026, 8, 27),
+        lastSeenAt: DateTime.utc(2026, 8, 27),
+      );
+    final reconciler = _NavigationReconciler();
+    final cartController = CartController(reconciler: reconciler);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildTheme(),
+        builder: (context, navigator) => AppRouteScopes(
+          accountController: accountController,
+          cartController: cartController,
+          shopDomain: 'staging.invalid',
+          child: navigator!,
+        ),
+        home: StoreScope(
+          notifier: store,
+          child: Scaffold(
+            appBar: AppBar(actions: const [BagAction()]),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byTooltip('Mi bolsa, 1 artículos'));
+    await tester.pumpAndSettle();
+
+    expect(reconciler.scopes, hasLength(1));
+    expect(
+      reconciler.scopes.single,
+      const CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-current',
+      ),
+    );
+    expect(find.byType(ShopifyCartSummary), findsOneWidget);
+
+    cartController.dispose();
+    accountController.dispose();
+    await database.close();
+  });
+
+  testWidgets('configured cancellation preserves bag and never shows preview',
+      (tester) async {
+    final store = await _loadedStore();
+    store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    var launches = 0;
+
+    await tester.pumpWidget(
+      _app(
+        store,
+        CheckoutFlowScreen(
+          launchSecureCheckout: (_) async {
+            launches += 1;
+            return const CheckoutCancelled();
+          },
+        ),
+      ),
+    );
+    final fields = find.byType(TextFormField);
+    await tester.enterText(fields.at(0), 'buyer@example.invalid');
+    await tester.enterText(fields.at(1), '8112345678');
+    await tester.enterText(fields.at(2), 'Persona');
+    await tester.enterText(fields.at(3), 'Calle 1');
+    await tester.enterText(fields.at(4), 'Centro');
+    await tester.enterText(fields.at(5), '64000');
+    await tester.enterText(fields.at(6), 'Monterrey');
+    await tester.enterText(fields.at(7), 'Nuevo León');
+    await tester.ensureVisible(find.text('REVISAR PEDIDO'));
+    await tester.tap(find.text('REVISAR PEDIDO'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('CONTINUAR AL PAGO SEGURO'));
+    await tester.tap(find.text('CONTINUAR AL PAGO SEGURO'));
+    await tester.pumpAndSettle();
+
+    expect(launches, 1);
+    expect(store.bagQuantity, 1);
+    expect(find.text('Checkout cancelado. Tu bolsa se conserva.'), findsOne);
+    expect(find.text('Pago protegido'), findsNothing);
   });
 }
+
+final class _NavigationReconciler implements CartReconciler {
+  final List<CartSessionScope> scopes = [];
+
+  @override
+  Future<CartReconciliation> reconcile({
+    required CartSessionScope scope,
+    required Iterable<LocalCartIntent> localIntent,
+    CartBuyerIdentity? buyerIdentity,
+    List<String>? desiredDiscountCodes,
+  }) async {
+    scopes.add(scope);
+    final local = localIntent.single;
+    const money = CartMoney(amount: '10.00', currencyCode: 'MXN');
+    final timestamp = DateTime.utc(2026, 8, 27);
+    return CartReconciliation(
+      status: CartReconciliationStatus.authoritative,
+      cart: Cart(
+        id: _opaque('cart'),
+        checkoutUrl: Uri(path: _opaque('checkout')).toString(),
+        createdAt: timestamp,
+        updatedAt: timestamp,
+        lines: [
+          CartLine(
+            id: _opaque('line'),
+            variantId: local.variantId,
+            productId: shopifyProductGid(1),
+            title: 'Producto',
+            variantTitle: 'Variante',
+            quantity: local.quantity,
+            cost: const CartLineCost(
+              amountPerQuantity: money,
+              subtotal: money,
+              total: money,
+            ),
+          ),
+        ],
+        totalQuantity: local.quantity,
+        buyerIdentity: const CartBuyerSummary(
+          countryCode: 'MX',
+          isAuthenticated: false,
+        ),
+        cost: const CartCost(subtotal: money, total: money),
+      ),
+    );
+  }
+}
+
+String _opaque(String suffix) => String.fromCharCodes([
+      111,
+      112,
+      97,
+      113,
+      117,
+      101,
+      ...suffix.codeUnits,
+    ]);
