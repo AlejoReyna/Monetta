@@ -167,5 +167,10 @@ void main() {
       find.byKey(const ValueKey('campaign-slide-media-1')).hitTestable(),
       findsOneWidget,
     );
+    final welcomeImage = find.descendant(
+      of: find.byKey(const ValueKey('campaign-slide-media-1')),
+      matching: find.byType(Image),
+    );
+    expect(tester.widget<Image>(welcomeImage).fit, BoxFit.fill);
   });
 }

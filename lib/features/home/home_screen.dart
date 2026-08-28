@@ -494,7 +494,10 @@ class _CampaignHeroState extends State<_CampaignHero> {
     _CampaignSlideData(isVideo: true),
     _CampaignSlideData(
       asset: 'assets/images/campaign_welcome.png',
-      fit: BoxFit.contain,
+      // The welcome artwork is a designed card. Fill the same hero frame as
+      // the campaign photography so it does not render as a smaller inset
+      // panel with unused space around it.
+      fit: BoxFit.fill,
     ),
     _CampaignSlideData(
       asset: 'assets/images/campaign_olive.jpg',
