@@ -116,8 +116,15 @@ services:
       REQUEST_DELAY_MS: ${REQUEST_DELAY_MS:-1000}
       CATALOG_CRON: ${CATALOG_CRON:-17 3 * * *}
       ENABLED_SOURCE_IDS: ${ENABLED_SOURCE_IDS:?ENABLED_SOURCE_IDS must be set in the deployment environment}
+    # Docker's embedded resolver on this host cannot forward through the
+    # systemd-resolved stub. Use the host provider's ordinary recursive DNS
+    # resolvers; this is not an HTTP proxy or a crawl-evasion mechanism.
+    dns:
+      - 209.208.127.65
+      - 209.208.25.18
     networks:
       - catalog_internal
+      - catalog_egress
     mem_limit: 640m
     cpus: "0.50"
     stop_grace_period: 15s
@@ -137,6 +144,14 @@ networks:
   catalog_internal:
     name: monetta_catalog_internal
     internal: true
+  # Only the monitor gets outbound access, through this private, un-published
+  # network. It is separate from the API edge network and carries no secrets
+  # or inbound listener.
+  catalog_egress:
+    name: monetta_catalog_egress
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
   # Created once on the host and shared only with Caddy and this API.
   catalog_edge:
     name: monetta_catalog_edge

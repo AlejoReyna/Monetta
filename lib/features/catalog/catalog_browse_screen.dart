@@ -1,8 +1,8 @@
 /// Full-catalog browsing for Monetta's bags and accessories.
 ///
-/// Search stays behind an icon so photography owns the screen. Filtering is
-/// handled by a single expandable sheet with bag-specific facets instead of
-/// permanent category rails.
+/// Photography owns the screen. Filtering is handled by a single expandable
+/// sheet with bag-specific facets and horizontal category pills instead of
+/// search.
 library;
 
 import 'dart:async';
@@ -176,7 +176,11 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   }
 
   int _countForCategory(String category) {
-    final items = widget.items;
+    final items = _filterCatalog(
+      widget.items,
+      query: '',
+      filters: _filters,
+    );
     if (category == 'Monetta') {
       return items.where((i) => !i.isExternal).length;
     } else if (category == 'Bolsas') {
@@ -951,7 +955,7 @@ class _EmptyCatalogState extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             hasActiveFilter
-                ? 'Prueba otra búsqueda o quita alguno de los filtros.'
+                ? 'Intenta usar otros filtros o quita los actuales.'
                 : 'Muy pronto encontrarás nuevas piezas aquí.',
             textAlign: TextAlign.center,
             style: sans(size: 13, color: kInkMuted, height: 1.5),

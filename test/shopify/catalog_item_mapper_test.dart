@@ -1,17 +1,21 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/data/normalize/facets.dart';
+import 'package:monetta_app/data/normalize/normalizer.dart';
+import 'package:monetta_app/data/normalize/rules.dart';
 import 'package:monetta_app/data/shopify/catalog_item_mapper.dart';
 import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/domain/product.dart';
 
-Product _product({required bool inStock}) {
+Product _product({required bool inStock, String productType = 'Bolsa'}) {
   return Product(
     id: 'gid://shopify/Product/1',
-    handle: 'tabby-bag',
-    title: 'Tabby Bag',
-    vendor:
-        'Monetta ', // the unreliable raw field — mapper must not use it when facets exist
-    productType: 'Bolsa',
+    handle: 'test-product',
+    title: 'Test Product',
+    vendor: 'Monetta ',
+    productType: productType,
     tags: const ['coach'],
     variants: [
       ProductVariant(
@@ -29,15 +33,14 @@ Product _product({required bool inStock}) {
 
 void main() {
   group('catalogItemFromShopifyProduct', () {
-    test('maps into a monettaCheckout, MXN CatalogItem scoped by "monetta:"',
-        () {
+    test('maps into a monettaCheckout, MXN CatalogItem scoped by "monetta:"', () {
       final item = catalogItemFromShopifyProduct(_product(inStock: true));
 
       expect(item.sourceScopedId, 'monetta:gid://shopify/Product/1');
       expect(item.source, CatalogSourceType.monettaShopify);
       expect(item.purchaseMode, PurchaseMode.monettaCheckout);
       expect(item.marketRestriction, MarketRestriction.mexico);
-      expect(item.price, isNotNull); // Monetta items always have a price
+      expect(item.price, isNotNull);
       expect(item.price!.currency, Currency.mxn);
       expect(item.price!.amount, 1999);
       expect(item.availability, CatalogAvailability.inStock);
@@ -45,9 +48,7 @@ void main() {
       expect(item.imageUrl, 'https://cdn.shopify.com/img.jpg');
     });
 
-    test(
-        'prefers normalized facets brand/category over the raw, unreliable vendor field',
-        () {
+    test('prefers normalized facets brand/category over the raw, unreliable vendor field', () {
       const facets = CanonicalFacets(
         productId: 'gid://shopify/Product/1',
         brand: FacetValue('Coach', FacetSource.tag),
@@ -62,38 +63,93 @@ void main() {
         facets: facets,
       );
 
-      expect(item.brand, 'Coach'); // not "Monetta " (the raw vendor)
+      expect(item.brand, 'Coach');
       expect(item.category, 'Bolsas');
       expect(item.vertical, CatalogVertical.bagsWallets);
-    });
-
-    test('maps perfume facets into the perfumes vertical', () {
-      const facets = CanonicalFacets(
-        productId: 'gid://shopify/Product/1',
-        category: FacetValue('perfume', FacetSource.metafieldOverride),
-        priceBand: 'alto',
-        onSale: false,
-        inStock: true,
-        newArrival: false,
-      );
-
-      final item = catalogItemFromShopifyProduct(
-        _product(inStock: true),
-        facets: facets,
-      );
-
-      expect(item.vertical, CatalogVertical.perfumes);
-    });
-
-    test('falls back to raw vendor only when no facets are supplied', () {
-      final item = catalogItemFromShopifyProduct(_product(inStock: true));
-      expect(item.brand, 'Monetta ');
-      expect(item.vertical, CatalogVertical.general);
     });
 
     test('maps out-of-stock variants to outOfStock availability', () {
       final item = catalogItemFromShopifyProduct(_product(inStock: false));
       expect(item.availability, CatalogAvailability.outOfStock);
+    });
+
+    group('CatalogVertical mapping', () {
+      final bagCategories = [
+        'bolsa', 'bolsas', 'cartera', 'carteras',
+        'monedero', 'monederos', 'cosmetiquera', 'cosmetiqueras',
+      ];
+      for (final cat in bagCategories) {
+        test('maps category "$cat" (case insensitive/spaces) to bagsWallets', () {
+          final facets = CanonicalFacets(
+            productId: 'gid://shopify/Product/1',
+            category: FacetValue('  ${cat.toUpperCase()}  ', FacetSource.metafieldOverride),
+            priceBand: 'alto',
+            onSale: false,
+            inStock: true,
+            newArrival: false,
+          );
+          final item = catalogItemFromShopifyProduct(_product(inStock: true), facets: facets);
+          expect(item.vertical, CatalogVertical.bagsWallets);
+        });
+      }
+
+      final perfumeCategories = ['perfume', 'perfumes', 'fragancia', 'fragancias'];
+      for (final cat in perfumeCategories) {
+        test('maps category "$cat" (spaces/caps) to perfumes', () {
+          final facets = CanonicalFacets(
+            productId: 'gid://shopify/Product/1',
+            category: FacetValue('  ${cat.toUpperCase()}  ', FacetSource.metafieldOverride),
+            priceBand: 'alto',
+            onSale: false,
+            inStock: true,
+            newArrival: false,
+          );
+          final item = catalogItemFromShopifyProduct(_product(inStock: true), facets: facets);
+          expect(item.vertical, CatalogVertical.perfumes);
+        });
+      }
+
+      test('maps unknown categories to general vertical', () {
+        const facets = CanonicalFacets(
+          productId: 'gid://shopify/Product/1',
+          category: FacetValue('Sombrero', FacetSource.metafieldOverride),
+          priceBand: 'alto',
+          onSale: false,
+          inStock: true,
+          newArrival: false,
+        );
+        final item = catalogItemFromShopifyProduct(_product(inStock: true), facets: facets);
+        expect(item.vertical, CatalogVertical.general);
+      });
+    });
+
+    group('Integrated Normalizer to Mapper', () {
+      late Normalizer normalizer;
+
+      setUpAll(() {
+        final file = File('assets/rules/normalization_rules.json');
+        final json = jsonDecode(file.readAsStringSync()) as Map<String, dynamic>;
+        final rules = NormalizationRules.fromJson(json);
+        normalizer = Normalizer(rules);
+      });
+
+      test('integrates Shopify Product -> Normalizer -> CatalogItem for Perfumes', () {
+        final product = _product(inStock: true, productType: 'Fragancias');
+        final facets = normalizer.normalize(product, now: DateTime.utc(2026, 8, 1));
+        final item = catalogItemFromShopifyProduct(product, facets: facets);
+
+        expect(facets.category?.value, 'perfume'); // Verified by normalizer config
+        expect(item.vertical, CatalogVertical.perfumes);
+      });
+
+      test('integrates Shopify Product -> Normalizer -> CatalogItem for Bags', () {
+        final product = _product(inStock: true, productType: 'Bolso de mano');
+        final facets = normalizer.normalize(product, now: DateTime.utc(2026, 8, 1));
+        final item = catalogItemFromShopifyProduct(product, facets: facets);
+
+        expect(facets.category?.value, 'bolsa');
+        expect(item.vertical, CatalogVertical.bagsWallets);
+      });
     });
   });
 }

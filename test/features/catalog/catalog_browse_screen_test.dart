@@ -260,6 +260,109 @@ void main() {
     expect(find.text('Monetta General 4'), findsNothing);
   });
 
+
+
+  testWidgets('category pill count respects secondary active filters', (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(800, 1600);
+    tester.view.devicePixelRatio = 1.0;
+
+    final cafe = CatalogItem(
+      sourceScopedId: 'coach_us:1',
+      source: CatalogSourceType.coachUs,
+      merchant: 'Coach',
+      title: 'Bolsa Tote Café',
+      brand: 'Coach',
+      category: 'Handbags',
+      imageUrl: null,
+      price: const Money(amount: 300, currency: Currency.usd),
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://www.coach.com/1',
+      marketRestriction: MarketRestriction.unitedStates,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.externalResearch,
+      vertical: CatalogVertical.bagsWallets,
+    );
+    final negra = CatalogItem(
+      sourceScopedId: 'coach_us:2',
+      source: CatalogSourceType.coachUs,
+      merchant: 'Coach',
+      title: 'Crossbody Negra',
+      brand: 'Coach',
+      category: 'Handbags',
+      imageUrl: null,
+      price: const Money(amount: 300, currency: Currency.usd),
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://www.coach.com/2',
+      marketRestriction: MarketRestriction.unitedStates,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.externalResearch,
+      vertical: CatalogVertical.bagsWallets,
+    );
+    final monettaBag = CatalogItem(
+      sourceScopedId: 'monetta:3',
+      source: CatalogSourceType.monettaShopify,
+      merchant: 'Monetta',
+      title: 'Bolsa Monetta Café',
+      brand: 'Guess',
+      category: null,
+      imageUrl: null,
+      price: const Money(amount: 1999, currency: Currency.mxn),
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://monetta.mx/products/item-3',
+      marketRestriction: MarketRestriction.mexico,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.monettaCheckout,
+      shopifyProductId: '3',
+      vertical: CatalogVertical.bagsWallets,
+    );
+    final monettaPerfume = CatalogItem(
+      sourceScopedId: 'monetta:4',
+      source: CatalogSourceType.monettaShopify,
+      merchant: 'Monetta',
+      title: 'Perfume Monetta',
+      brand: 'Guess',
+      category: null,
+      imageUrl: null,
+      price: const Money(amount: 1999, currency: Currency.mxn),
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://monetta.mx/products/item-4',
+      marketRestriction: MarketRestriction.mexico,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.monettaCheckout,
+      shopifyProductId: '4',
+      vertical: CatalogVertical.perfumes,
+    );
+    await _pump(tester, CatalogBrowseScreen(items: [cafe, negra, monettaBag, monettaPerfume]));
+    await tester.pump();
+
+    expect(find.text(' 4'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('catalog-filter-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('catalog-filter-color')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Café'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('catalog-filter-apply')));
+    await tester.pumpAndSettle();
+
+    expect(find.text(' 2'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('catalog-category-monetta')));
+    await tester.pumpAndSettle();
+    expect(find.text(' 1'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('catalog-category-bags')));
+    await tester.pumpAndSettle();
+    expect(find.text(' 2'), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('catalog-category-perfumes')));
+    await tester.pumpAndSettle();
+    expect(find.text('Perfumes'), findsOneWidget);
+  });
+
+
   testWidgets('filters through bag-specific expandable options',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());

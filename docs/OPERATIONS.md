@@ -31,6 +31,23 @@ de Flutter y 419 tests Flutter. El servidor no tenía contenedor de catálogo,
 no escuchaba `8081` y `catalog.monetta.mx` aún no tenía un registro A al
 momento de la preparación.
 
+### Estado de esta instalación
+
+La infraestructura quedó construida en Texas y el API interno responde, pero
+la entrega real está bloqueada por las respuestas de los comercios. El smoke
+crawl del 28 de agosto de 2026 produjo:
+
+- Coach (`coach_us`): `partial`, 3,197 URLs descubiertas, 5 páginas, 0 parses
+  y 6 respuestas 4xx.
+- Michael Kors (`michael_kors_us`): `blocked`, 643 URLs descubiertas, 1 página,
+  0 parses y `captcha_or_block`.
+
+En consecuencia, el monitor quedó detenido, su unidad systemd quedó
+deshabilitada temporalmente y `LIVE_CRAWL_ENABLED=false`; el payload curado
+que pudiera quedar en el API no es evidencia de catálogo real.
+No se ejecutó crawl persistente ni se declarará éxito hasta tener un crawl
+permitido por cada fuente y `dataOrigin: "live_crawl"`.
+
 ## Primera instalación
 
 ### 1. Preparar el árbol remoto sin copiar secretos
@@ -40,8 +57,9 @@ excluye mediante `.dockerignore`.
 
 ```bash
 ssh -i /Users/alexis/.ssh/artisanalbrew-atlantic-codex artisanalbrew@209.23.11.117 \
-  'install -d -m 0750 /opt/monetta-catalog/repo/services'
-rsync -az \
+  'sudo -n install -d -m 0750 /opt/monetta-catalog/repo/services'
+rsync -az -e 'ssh -o BatchMode=yes -i /Users/alexis/.ssh/artisanalbrew-atlantic-codex' \
+  --rsync-path='sudo -n rsync' \
   --exclude='.env' \
   --exclude='node_modules' \
   --exclude='dist' \
@@ -53,14 +71,14 @@ En el servidor, instalar el compose y los archivos de operación desde la
 copia transferida:
 
 ```bash
-install -d -m 0750 /opt/monetta-catalog/backups
-install -d -m 0750 /opt/monetta-catalog/selection
-install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/compose.yml /opt/monetta-catalog/compose.yml
-install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/Caddyfile.snippet /opt/monetta-catalog/Caddyfile.snippet
-install -m 0750 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/monetta-catalog-healthcheck /usr/local/sbin/monetta-catalog-healthcheck
-install -m 0750 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/monetta-catalog-backup /usr/local/sbin/monetta-catalog-backup
-install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/monetta-catalog-api.service /etc/systemd/system/monetta-catalog-api.service
-install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/monetta-catalog-monitor.service /etc/systemd/system/monetta-catalog-monitor.service
+sudo -n install -d -m 0750 /opt/monetta-catalog/backups
+sudo -n install -d -m 0750 /opt/monetta-catalog/selection
+sudo -n install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/compose.yml /opt/monetta-catalog/compose.yml
+sudo -n install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/Caddyfile.snippet /opt/monetta-catalog/Caddyfile.snippet
+sudo -n install -m 0750 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/monetta-catalog-healthcheck /usr/local/sbin/monetta-catalog-healthcheck
+sudo -n install -m 0750 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/monetta-catalog-backup /usr/local/sbin/monetta-catalog-backup
+sudo -n install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/monetta-catalog-api.service /etc/systemd/system/monetta-catalog-api.service
+sudo -n install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/monetta-catalog-monitor.service /etc/systemd/system/monetta-catalog-monitor.service
 ```
 
 ### 2. Crear el `.env` de producción
@@ -87,7 +105,7 @@ CATALOG_CRON=17 3 * * *
 ```
 
 ```bash
-chmod 0600 /opt/monetta-catalog/.env
+sudo -n chmod 0600 /opt/monetta-catalog/.env
 ```
 
 `USER_AGENT` debe llevar el correo real y monitoreado antes de arrancar el
@@ -97,20 +115,29 @@ monitor recibe `true`.
 ### 3. Red y primer arranque
 
 Crear la red de borde una sola vez. PostgreSQL sólo queda en
-`monetta_catalog_internal`; el API se conecta a ambas redes y el monitor sólo
-a la interna.
+`monetta_catalog_internal`; el API se conecta a la red interna y a Caddy; el
+monitor se conecta a la interna y a una red de egreso privada sin puertos
+publicados. La red de egreso permite que el monitor consulte las páginas
+públicas, sin exponer PostgreSQL ni el API.
 
 ```bash
 docker network inspect monetta_catalog_edge >/dev/null 2>&1 || docker network create monetta_catalog_edge
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml config >/dev/null
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml build
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml ps
+sudo -n ufw route allow from 172.21.0.0/16 to any port 53 proto udp
+sudo -n ufw route allow from 172.21.0.0/16 to any port 53 proto tcp
+sudo -n ufw route allow from 172.21.0.0/16 to any port 443 proto tcp
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml config >/dev/null
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml build
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml ps
 ```
 
 El compose no publica `8081` ni `5432` en el host. La imagen de producción
 usa `node:22-slim`, no contiene el navegador Playwright y mantiene el fallback
 desactivado.
+
+Las reglas `ufw route` anteriores son deliberadamente limitadas al subnet
+`172.21.0.0/16` de egreso del monitor. No habilitar el forwarding general ni
+modificar las reglas de los servicios existentes.
 
 ### 4. Caddy y DNS
 
@@ -140,12 +167,14 @@ Conservar el `.env` remoto y transferir únicamente una revisión aprobada del
 servicio, siempre excluyendo `.env`, `dist` y `node_modules`:
 
 ```bash
-rsync -az --exclude='.env' --exclude='node_modules' --exclude='dist' \
+rsync -az -e 'ssh -o BatchMode=yes -i /Users/alexis/.ssh/artisanalbrew-atlantic-codex' \
+  --rsync-path='sudo -n rsync' \
+  --exclude='.env' --exclude='node_modules' --exclude='dist' \
   services/catalog_monitor/ \
   artisanalbrew@209.23.11.117:/opt/monetta-catalog/repo/services/catalog_monitor/
-install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/compose.yml /opt/monetta-catalog/compose.yml
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml build
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d
+sudo -n install -m 0644 /opt/monetta-catalog/repo/services/catalog_monitor/deploy/atlantic/compose.yml /opt/monetta-catalog/compose.yml
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml build
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d
 ```
 
 Para el arranque al boot, después de confirmar el primer despliegue:
@@ -159,9 +188,9 @@ systemctl start monetta-catalog-api.service monetta-catalog-monitor.service
 ## Logs y estado
 
 ```bash
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml ps
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml logs --tail=200 monetta-catalog-api
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml logs --tail=200 monetta-catalog-monitor
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml ps
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml logs --tail=200 monetta-catalog-api
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml logs --tail=200 monetta-catalog-monitor
 /usr/local/sbin/monetta-catalog-healthcheck
 ```
 
@@ -193,9 +222,9 @@ Ejecutar primero los dos smoke crawls limitados. `--dry-run` no escribe en la
 base de datos, pero sí hace peticiones reales desde la IP del servidor:
 
 ```bash
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
   exec -T monetta-catalog-monitor node dist/cli/manualCrawl.js --brand coach --limit 5 --dry-run
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
   exec -T monetta-catalog-monitor node dist/cli/manualCrawl.js --brand michael_kors --limit 5 --dry-run
 ```
 
@@ -216,11 +245,11 @@ Después de un smoke crawl aceptable, ejecutar el crawl persistente sin límite
 para que el run pueda ser un snapshot completo:
 
 ```bash
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
   exec -T monetta-catalog-monitor node dist/cli/manualCrawl.js --brand coach
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
   exec -T monetta-catalog-monitor node dist/cli/manualCrawl.js --brand michael_kors
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml logs --tail=200 monetta-catalog-monitor
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml logs --tail=200 monetta-catalog-monitor
 ```
 
 Un crawl con `--limit` es deliberadamente parcial y no refresca la freshness
@@ -235,7 +264,7 @@ Recrear sólo API y monitor para que el API deje de presentar esa fuente y el
 monitor deje de solicitarla:
 
 ```bash
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml \
   up -d --force-recreate monetta-catalog-api monetta-catalog-monitor
 ```
 
@@ -258,9 +287,9 @@ Para restaurar un dump exacto, primero detener API y monitor. La opción
 `--confirm` es obligatoria porque reemplaza las tablas de la base de catálogo:
 
 ```bash
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml stop monetta-catalog-api monetta-catalog-monitor
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml stop monetta-catalog-api monetta-catalog-monitor
 /usr/local/sbin/monetta-catalog-backup restore --confirm /opt/monetta-catalog/backups/catalog-<timestamp>.dump
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d monetta-catalog-api monetta-catalog-monitor
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d monetta-catalog-api monetta-catalog-monitor
 ```
 
 Después validar migraciones, `/livez`, `/healthz` y el origen real de los
@@ -274,8 +303,8 @@ imagen anterior existe, cambiar sólo `CATALOG_IMAGE_TAG` en el `.env`, y
 recrear los tres roles del proyecto:
 
 ```bash
-docker image inspect monetta-catalog:<previous-tag> >/dev/null
-docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d --force-recreate
+sudo -n docker image inspect monetta-catalog:<previous-tag> >/dev/null
+sudo -n docker compose --project-name monetta-catalog --env-file /opt/monetta-catalog/.env -f /opt/monetta-catalog/compose.yml up -d --force-recreate
 ```
 
 No usar `git reset`, `git checkout` ni `git clean`. Si la revisión anterior no

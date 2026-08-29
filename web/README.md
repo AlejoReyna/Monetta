@@ -5,15 +5,24 @@ The primary board and its detail viewer use screenshots captured directly from
 the running iPhone 17 Pro Max build. Historical SVGs and screenshots may remain
 in `public/`, but they are intentionally excluded from the palette navigation.
 
-Current references:
+The palette currently contains 23 real simulator states grouped across:
 
-- Home hero
-- Compact catalog with search and sections
-- Product detail and purchase actions
-- Empty bag state
+- Home, side menu, onboarding, notifications and editorial pages
+- Search: initial, results and no-results states
+- Collection and catalog category/filter states
+- Product detail, minicart, populated bag and empty bag
+- Checkout delivery and order review (using local demo input; no payment sent)
+
+Account authentication, owner-only administration and hosted Shopify payment
+are intentionally excluded because they leave the public in-app flow or require
+credentials. Media fallbacks visible in the screenshots are the app's real
+runtime behavior for unavailable staging assets.
 
 Select a thumbnail to inspect the full-resolution capture. The canvas supports
-fit, zoom, keyboard shortcuts and drag-to-pan.
+fit, zoom, keyboard shortcuts and drag-to-pan in the palette. Detail mode fits
+one centered device inside the available viewport without vertical scrolling;
+select screens also include restrained leader-line annotations where context is
+useful.
 
 ## Local
 

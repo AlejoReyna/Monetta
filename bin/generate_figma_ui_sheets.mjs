@@ -190,14 +190,21 @@ function collectionScreen(filtered = false, empty = false) {
 }
 
 function browseScreen() {
-  let s = appHeader({ title: 'Todo el catálogo', back: true, actions: false });
-  s += `${rect(18, 106, 354, 44, C.search)}${icon('search', 31, 117, C.muted)}${t(60, 133, 'Buscar en todo el catálogo', 12.5, 400, C.muted)}`;
-  s += t(18, 190, 'CATÁLOGO MONETTA', 10, 700, C.muted, 'letter-spacing="1.4"');
+  let s = appHeader({ title: 'Productos', back: true, actions: true });
+  s += `${rect(0, 86, 390, 60, C.ink)}`;
+  s += chip(16, 101, 'Colección', true, 80);
+  s += chip(104, 101, 'Monetta', false, 76);
+  s += chip(188, 101, 'Bolsas', false, 68);
+  s += chip(264, 101, 'Perfumes', false, 80);
+  
+  s += t(18, 180, 'MONETTA', 10, 700, C.muted, 'letter-spacing="1.4"');
+  s += t(18, 205, 'Selección Monetta', 24, 400);
+  
   [['coral','Bolsa Steve Madden Tote','$1,589'], ['olive','Bolsa Guess Hobo','$1,449']].forEach((v,i)=>{
-    const y=210+i*142; s += useImg(v[0],18,y,102,126)+t(136,y+20,'MONETTA',8.5,700,C.muted,'letter-spacing="1.2"')+t(136,y+46,v[1],13,500)+t(136,y+72,v[2],12.5,600)+t(354,y+72,'›',22,300,C.muted);
+    const y=230+i*142; s += useImg(v[0],18,y,102,126)+t(136,y+20,'MONETTA',8.5,700,C.muted,'letter-spacing="1.2"')+t(136,y+46,v[1],13,500)+t(136,y+72,v[2],12.5,600)+t(354,y+72,'›',22,300,C.muted);
   });
-  s += line(18, 505, 372, 505)+t(18, 546, 'TAMBIÉN EN MARCAS DE ESTADOS UNIDOS', 9.5, 700, C.muted, 'letter-spacing="1.1"');
-  s += useImg('terra',18,570,102,126)+t(136,590,'COACH · USD',8.5,700,C.muted,'letter-spacing="1.1"')+t(136,618,'Tabby Shoulder Bag',13,500)+t(136,646,'$395 USD',12.5,600)+t(136,675,'VER EN COACH',9.5,700,C.gold,'letter-spacing="1.2"');
+  s += line(18, 525, 372, 525)+t(18, 566, 'TAMBIÉN EN MARCAS DE ESTADOS UNIDOS', 9.5, 700, C.muted, 'letter-spacing="1.1"');
+  s += useImg('terra',18,590,102,126)+t(136,610,'COACH · USD',8.5,700,C.muted,'letter-spacing="1.1"')+t(136,638,'Tabby Shoulder Bag',13,500)+t(136,666,'$395 USD',12.5,600)+t(136,695,'VER EN COACH',9.5,700,C.gold,'letter-spacing="1.2"');
   return s;
 }
 
@@ -364,14 +371,53 @@ const commerce = [
   ['16 · Bolsa vacía', bagScreen(true)],
 ].map((v,i)=>({x:grid[i][0],y:grid[i][1],name:v[0],content:v[1]}));
 
-const flowGrid = [[80,250],[534,250],[988,250],[1442,250],[80,1160],[534,1160]];
+function checkoutProductsScreen() {
+  let s = appHeader({ back: true, actions: false }) + progress(2);
+  s += t(18, 211, 'Productos seleccionados', 30, 400) + t(18, 239, 'Revisa los artículos de tu compra.', 12.5, 400, C.muted);
+  s += useImg('coral', 18, 280, 112, 140) + t(148, 299, 'STEVE MADDEN', 8.5, 700, C.muted, 'letter-spacing="1.2"') + t(148, 328, 'Bolsa Tote Crossbody', 13, 500) + t(148, 356, '$1,589', 13, 600);
+  s += useImg('olive', 18, 440, 112, 140) + t(148, 459, 'GUESS', 8.5, 700, C.muted, 'letter-spacing="1.2"') + t(148, 488, 'Bolsa Hobo Oliva', 13, 500) + t(148, 516, '$1,449', 13, 600);
+  s += summaryBox(620,'CONTINUAR AL PAGO SEGURO');
+  return s;
+}
+
+function checkoutSuccessScreen() {
+  let s = statusBar();
+  s += `<use href="#logo" x="18" y="42" width="104" height="30"/>`;
+  s += `${circle(195,300,44,C.mist,'none')}${t(195,313,'✓',34,500,C.success,'text-anchor="middle"')}`;
+  s += t(195, 386, '¡Compra exitosa!', 25, 400, C.ink, 'text-anchor="middle"');
+  s += t(195, 419, 'Tu pedido #MON-1284 ha sido confirmado.', 12.5, 400, C.muted, 'text-anchor="middle"');
+  s += t(195, 439, 'Enviamos los detalles a tu correo.', 12.5, 400, C.muted, 'text-anchor="middle"');
+  s += button(95, 491, 200, 'VER MIS PEDIDOS');
+  s += t(195, 570, 'Seguir comprando', 11, 500, C.ink, 'text-anchor="middle" text-decoration="underline"');
+  return s;
+}
+
+function checkoutFailureScreen() {
+  let s = statusBar();
+  s += `<use href="#logo" x="18" y="42" width="104" height="30"/>`;
+  s += `${circle(195,300,44,C.mist,'none')}${t(195,313,'×',34,400,C.sale,'text-anchor="middle"')}`;
+  s += t(195, 386, 'Pago rechazado', 25, 400, C.ink, 'text-anchor="middle"');
+  s += t(195, 419, 'Tuvimos un problema al procesar tu tarjeta.', 12.5, 400, C.muted, 'text-anchor="middle"');
+  s += t(195, 439, 'Por favor, intenta con otro método de pago.', 12.5, 400, C.muted, 'text-anchor="middle"');
+  s += button(95, 491, 200, 'REINTENTAR PAGO');
+  s += t(195, 570, 'Volver a la bolsa', 11, 500, C.ink, 'text-anchor="middle" text-decoration="underline"');
+  return s;
+}
+
+const flowGrid = [
+  [80,250],[534,250],[988,250],[1442,250],[1896,250],
+  [80,1160],[534,1160],[988,1160],[1442,1160],
+];
 const flows = [
   ['17 · Checkout · Entrega', deliveryScreen()],
-  ['18 · Checkout · Revisión', reviewScreen()],
-  ['19 · Pago seguro', secureScreen()],
-  ['20 · Cuenta · Login', accountScreen('login')],
-  ['21 · Cuenta · Registro', accountScreen('register')],
-  ['22 · Cuenta · Pedidos', accountScreen('signed')],
+  ['18 · Checkout · Productos', checkoutProductsScreen()],
+  ['19 · Checkout · Revisión', reviewScreen()],
+  ['20 · Pago seguro', secureScreen()],
+  ['21 · Pago exitoso', checkoutSuccessScreen()],
+  ['22 · Pago rechazado', checkoutFailureScreen()],
+  ['23 · Cuenta · Login', accountScreen('login')],
+  ['24 · Cuenta · Registro', accountScreen('register')],
+  ['25 · Cuenta · Pedidos', accountScreen('signed')],
 ].map((v,i)=>({x:flowGrid[i][0],y:flowGrid[i][1],name:v[0],content:v[1]}));
 flows.push({x:988,y:1160,name:'23 · Home · Tablet',content:wideHome(),size:{w:1000,h:720}});
 flows.push({x:2052,y:1160,name:'24 · Checkout · Desktop',content:wideCheckout(),size:{w:1000,h:720}});
