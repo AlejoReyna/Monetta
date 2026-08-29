@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 import '../domain/catalog_item.dart' show Money;
+import 'shopper_copy.dart';
 
 // ---------------------------------------------------------------------------
 // Palette
@@ -38,6 +39,12 @@ const BorderRadius kSquare = BorderRadius.zero;
 const BorderSide kHairline = BorderSide(color: kLine, width: 0.5);
 
 const double kSectionGap = 52;
+
+/// Canonical logo height for every top navigation bar.
+///
+/// Keep navigation wordmarks on this token so routes and scroll states cannot
+/// silently render the Monetta identity at different sizes.
+const double kAppBarWordmarkHeight = 20;
 
 /// Matches the store's `money_format` of `$ {{amount}}` in MXN.
 final NumberFormat kMoney = NumberFormat.currency(
@@ -79,6 +86,19 @@ const List<String> _displayFallback = <String>[
   'sans-serif',
 ];
 
+/// Serif used by Monetta's storefront navigation and editorial section titles.
+///
+/// The live storefront uses New York as its menu face. The fallbacks preserve
+/// that high-contrast editorial character on platforms that do not ship it.
+const String kEditorialFontFamily = 'New York';
+const List<String> _editorialFallback = <String>[
+  'Iowan Old Style',
+  'Baskerville',
+  'Georgia',
+  'Times New Roman',
+  'serif',
+];
+
 /// Editorial headline. Clean geometric sans with restrained tracking.
 TextStyle display(
   double size, {
@@ -92,6 +112,22 @@ TextStyle display(
       fontSize: size,
       fontWeight: weight,
       letterSpacing: size * -0.025,
+      height: height,
+      color: color,
+    );
+
+TextStyle editorial(
+  double size, {
+  Color color = kInk,
+  FontWeight weight = FontWeight.w400,
+  double height = 1.2,
+}) =>
+    TextStyle(
+      fontFamily: kEditorialFontFamily,
+      fontFamilyFallback: _editorialFallback,
+      fontSize: size,
+      fontWeight: weight,
+      letterSpacing: size * -0.012,
       height: height,
       color: color,
     );
@@ -198,6 +234,8 @@ class UnderlineLink extends StatelessWidget {
 class MonettaWordmark extends StatelessWidget {
   const MonettaWordmark({this.height = 22, super.key});
 
+  const MonettaWordmark.appBar({super.key}) : height = kAppBarWordmarkHeight;
+
   /// Logical height. The asset is ~3.47:1, so 22 gives a ~76pt mark — close to
   /// the 21%-of-viewport ratio Dior sets its logotype at.
   final double height;
@@ -212,6 +250,28 @@ class MonettaWordmark extends StatelessWidget {
       semanticLabel: 'Monetta',
       errorBuilder: (context, _, __) =>
           Text('MONETTA', style: wordmark(size: height * 0.82)),
+    );
+  }
+}
+
+/// Quiet service facts. Type only — no icons, no ticker.
+class MonettaTrustRows extends StatelessWidget {
+  const MonettaTrustRows({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        for (var i = 0; i < kTrustRows.length; i++) ...[
+          if (i > 0)
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: 12),
+              child: Divider(height: 0.5),
+            ),
+          Text(kTrustRows[i], style: sans(size: 13, height: 1.45)),
+        ],
+      ],
     );
   }
 }
@@ -242,7 +302,7 @@ class SectionHeading extends StatelessWidget {
               children: [
                 Text(kicker.toUpperCase(), style: eyebrow()),
                 const SizedBox(height: 8),
-                Text(title, style: display(24)),
+                Text(title, style: editorial(25)),
               ],
             ),
           ),

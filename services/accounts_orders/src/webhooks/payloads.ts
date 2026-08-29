@@ -44,6 +44,21 @@ export interface ShopifyShopRedactWebhookPayload {
   readonly shop_domain?: string;
 }
 
+export interface ShopifyProductWebhookPayload {
+  readonly id: number;
+  readonly title?: string;
+  readonly vendor?: string;
+  readonly product_type?: string;
+  readonly updated_at?: string;
+  readonly image?: { readonly src?: string | null } | null;
+  readonly images?: ReadonlyArray<{ readonly src?: string | null }>;
+  readonly variants?: ReadonlyArray<{
+    readonly price?: string | null;
+    readonly inventory_quantity?: number | null;
+    readonly inventory_policy?: string | null;
+  }>;
+}
+
 export function noteAttribute(
   payload: ShopifyOrderWebhookPayload,
   name: string,

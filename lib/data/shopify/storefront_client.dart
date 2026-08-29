@@ -19,31 +19,63 @@ typedef GraphQLTransport = Future<Map<String, dynamic>> Function(
   String body,
 );
 
+/// Paired transport capability for carts.
+///
+/// Callers cannot provide an arbitrary mutation callback to [StorefrontClient];
+/// production receives this capability from `HttpStorefrontTransport`, whose
+/// mutation path is permanently single-attempt.
+abstract interface class CartStorefrontTransport {
+  Future<Map<String, dynamic>> query(
+    Uri endpoint,
+    Map<String, String> headers,
+    String body,
+  );
+
+  Future<Map<String, dynamic>> mutate(
+    Uri endpoint,
+    Map<String, String> headers,
+    String body,
+  );
+}
+
 /// Anything that went wrong talking to Shopify.
 class StorefrontException implements Exception {
-  StorefrontException(this.message, {this.errors, this.isRetryable = false});
+  const StorefrontException(
+    this.message, {
+    this.isRetryable = false,
+    this.isAmbiguous = false,
+  });
 
   final String message;
-  final List<String>? errors;
 
   /// True for throttling and transient network failures. The caller may retry
   /// with backoff; callers must not retry anything else, because a GraphQL
   /// validation error will fail identically forever.
   final bool isRetryable;
 
+  /// The server may have accepted a mutation although no response was seen.
+  final bool isAmbiguous;
+
   @override
-  String toString() => 'StorefrontException: $message'
-      '${errors == null ? '' : ' ${errors!.join('; ')}'}';
+  String toString() => 'StorefrontException: $message';
 }
 
 class StorefrontClient {
   StorefrontClient({
     required this.config,
     required GraphQLTransport transport,
-  }) : _transport = transport;
+  })  : _transport = transport,
+        _mutationTransport = null;
+
+  StorefrontClient.forCart({
+    required this.config,
+    required CartStorefrontTransport transport,
+  })  : _transport = transport.query,
+        _mutationTransport = transport.mutate;
 
   final StorefrontConfig config;
   final GraphQLTransport _transport;
+  final GraphQLTransport? _mutationTransport;
 
   /// Run [document] with [variables] and return the `data` object.
   ///
@@ -52,6 +84,28 @@ class StorefrontClient {
   Future<Map<String, dynamic>> query(
     String document, {
     Map<String, dynamic> variables = const {},
+  }) =>
+      _execute(_transport, document, variables, isMutation: false);
+
+  /// Executes a mutation through a transport that must not retry blindly.
+  Future<Map<String, dynamic>> mutate(
+    String document, {
+    Map<String, dynamic> variables = const {},
+  }) {
+    final transport = _mutationTransport;
+    if (transport == null) {
+      throw const StorefrontException(
+        'Mutation transport is not configured',
+      );
+    }
+    return _execute(transport, document, variables, isMutation: true);
+  }
+
+  Future<Map<String, dynamic>> _execute(
+    GraphQLTransport transport,
+    String document,
+    Map<String, dynamic> variables, {
+    required bool isMutation,
   }) async {
     if (!config.isUsable) {
       throw StorefrontException(
@@ -63,13 +117,14 @@ class StorefrontClient {
 
     final Map<String, dynamic> response;
     try {
-      response = await _transport(config.endpoint, config.headers, body);
+      response = await transport(config.endpoint, config.headers, body);
     } on StorefrontException {
       rethrow;
-    } catch (error) {
+    } catch (_) {
       throw StorefrontException(
-        'Network failure talking to Shopify: $error',
-        isRetryable: true,
+        'Network failure talking to Shopify',
+        isRetryable: !isMutation,
+        isAmbiguous: isMutation,
       );
     }
 
@@ -86,7 +141,6 @@ class StorefrontClient {
 
       throw StorefrontException(
         throttled ? 'Throttled by Shopify' : 'Shopify returned errors',
-        errors: messages,
         isRetryable: throttled,
       );
     }

@@ -34,14 +34,12 @@
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Monetta se conecta al catálogo local de desarrollo para mostrar productos externos.</string>
 	<!-- Customer Account API login callback (flutter_appauth /
-	     data/customer_auth). Shopify requires the mobile redirect scheme
-	     "shop.{shop_id}.*" — replace_with_shop_id must become the real shop
-	     id from the Partner-dashboard Customer Account API registration
-	     before login can work; see lib/data/customer_auth/README.md § 8.
-	     Kept lowercase to match Android's case-sensitive redirect matching
-	     even though iOS itself doesn't require it. Must stay in sync with
-	     CustomerAccountConfig.fromEnvironment() and with
-	     android/app/build.gradle.kts's appAuthRedirectScheme. -->
+	     data/customer_auth). Scheme is shop.{shop_id}.oauth for the
+	     STAGING development store (monetta-staging.myshopify.com,
+	     shop id 90228850722). Production uses a different shop id and
+	     needs a build flavor before release. Must match
+	     CUSTOMER_ACCOUNT_SHOP_ID / CustomerAccountConfig.redirectUri and
+	     android/app/build.gradle.kts appAuthRedirectScheme (lowercase). -->
 	<key>CFBundleURLTypes</key>
 	<array>
 		<dict>
@@ -49,7 +47,7 @@
 			<string>Editor</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>shop.replace_with_shop_id.oauth</string>
+				<string>shop.90228850722.oauth</string>
 			</array>
 		</dict>
 	</array>
@@ -76,6 +74,10 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>remote-notification</string>
+	</array>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

@@ -17,14 +17,17 @@ class OrderHistoryRepository {
     required AccountsOrdersConfig config,
     OrderHistoryClient? client,
   }) : _client = client ??
-            (config.enabled ? HttpOrderHistoryClient(baseUrl: config.baseUrl!) : null);
+            (config.enabled
+                ? HttpOrderHistoryClient(baseUrl: config.baseUrl!)
+                : null);
 
   final OrderSummaryStore store;
   final OrderHistoryClient? _client;
 
   bool get canRefresh => _client != null;
 
-  Future<List<OrderSummary>> loadCached(String accountId) => store.allForAccount(accountId);
+  Future<List<OrderSummary>> loadCached(String accountId) =>
+      store.allForAccount(accountId);
 
   /// Refetches the shopper's full order list from `services/accounts_orders`
   /// and replaces the local cache — a safe no-op when the service isn't
@@ -33,12 +36,12 @@ class OrderHistoryRepository {
   /// contract as `ExternalCatalogRepository.refresh`.
   Future<void> refresh({
     required String accountId,
-    required String shopifyCustomerId,
+    required String accessToken,
   }) async {
     final client = _client;
     if (client == null) return;
     try {
-      final remote = await client.fetchOrders(shopifyCustomerId);
+      final remote = await client.fetchOrders(accessToken);
       final rows = [
         for (final order in remote)
           OrderSummariesCompanion.insert(

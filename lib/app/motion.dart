@@ -2,6 +2,8 @@
 /// settles. Tokens live here so duration is not a personality choice.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 const Duration kEnter = Duration(milliseconds: 720);
@@ -114,6 +116,124 @@ class _RevealState extends State<Reveal> with SingleTickerProviderStateMixin {
     return FadeTransition(
       opacity: _opacity,
       child: SlideTransition(position: _slide, child: widget.child),
+    );
+  }
+}
+
+/// Reveals a block the first time it reaches the viewport.
+///
+/// Home uses this for complete editorial groups — hero, heading plus rail,
+/// story card, and social proof — rather than animating every label and tile
+/// independently. The group remains one perceptual unit while the stagger
+/// between sections gives the eye a clear path through the storefront.
+class RevealOnScroll extends StatefulWidget {
+  const RevealOnScroll({
+    required this.child,
+    required this.scrollController,
+    this.delay = Duration.zero,
+    this.offset = 10,
+    super.key,
+  });
+
+  final Widget child;
+  final ScrollController scrollController;
+  final Duration delay;
+  final double offset;
+
+  @override
+  State<RevealOnScroll> createState() => _RevealOnScrollState();
+}
+
+class _RevealOnScrollState extends State<RevealOnScroll>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+  late final Animation<double> _opacity;
+  late final Animation<double> _translation;
+  Timer? _delayTimer;
+  bool _checkScheduled = false;
+  bool _started = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: kSettle);
+    _opacity = CurvedAnimation(parent: _controller, curve: kMotionCurve);
+    _translation = Tween<double>(
+      begin: widget.offset,
+      end: 0,
+    ).animate(CurvedAnimation(parent: _controller, curve: kMotionCurve));
+    widget.scrollController.addListener(_scheduleViewportCheck);
+    WidgetsBinding.instance.addPostFrameCallback(
+      (_) => _scheduleViewportCheck(),
+    );
+  }
+
+  @override
+  void didUpdateWidget(covariant RevealOnScroll oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.scrollController == widget.scrollController) return;
+    oldWidget.scrollController.removeListener(_scheduleViewportCheck);
+    widget.scrollController.addListener(_scheduleViewportCheck);
+  }
+
+  bool _isInViewport() {
+    final renderObject = context.findRenderObject();
+    if (renderObject is! RenderBox || !renderObject.attached) return false;
+
+    final top = renderObject.localToGlobal(Offset.zero).dy;
+    final bottom = top + renderObject.size.height;
+    final viewportHeight = MediaQuery.sizeOf(context).height;
+    return bottom > 0 && top < viewportHeight;
+  }
+
+  void _scheduleViewportCheck() {
+    if (_started || _checkScheduled || !mounted) return;
+    _checkScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkScheduled = false;
+      _maybeStart();
+    });
+  }
+
+  void _maybeStart() {
+    if (_started || !mounted || !_isInViewport()) return;
+    _started = true;
+
+    if (reduceMotion(context)) {
+      _controller.value = 1;
+      return;
+    }
+
+    if (widget.delay <= Duration.zero) {
+      _controller.forward();
+      return;
+    }
+
+    _delayTimer = Timer(widget.delay, () {
+      if (mounted) _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _delayTimer?.cancel();
+    widget.scrollController.removeListener(_scheduleViewportCheck);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FadeTransition(
+      opacity: _opacity,
+      child: AnimatedBuilder(
+        animation: _translation,
+        child: widget.child,
+        builder: (context, child) => Transform.translate(
+          offset: Offset(0, _translation.value),
+          child: child,
+        ),
+      ),
     );
   }
 }

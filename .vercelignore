@@ -1,0 +1,22 @@
+# The Vercel project only hosts the standalone guideline in web/.
+/*
+!/.vercelignore
+!/vercel.json
+!/package.json
+!/package-lock.json
+!/tsconfig.vercel.json
+!/api
+!/api/**
+!/server
+!/server/catalog
+!/server/catalog/**
+/server/catalog/*.test.ts
+!/web
+/web/*
+!/web/index.html
+!/web/package.json
+!/web/package-lock.json
+!/web/public
+!/web/public/**
+!/web/src
+!/web/src/**

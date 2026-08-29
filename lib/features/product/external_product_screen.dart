@@ -99,7 +99,7 @@ class _ExternalProductScreenState extends State<ExternalProductScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const MonettaWordmark(),
+        title: const MonettaWordmark.appBar(),
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(0.5),
           child: Divider(height: 0.5),

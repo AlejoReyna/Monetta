@@ -1,116 +1,981 @@
-/// Full-catalog browsing: every deduplicated [CatalogItem] — Monetta and
-/// external, Monetta preferred on an exact brand+title collision — reachable
-/// in one place, not just through the ranked feed or the capped external
-/// rail. See `app/mixed_feed.dart#fullDeduplicatedCatalog`.
+/// Full-catalog browsing for Monetta's bags and accessories.
 ///
-/// Built on a top-level `GridView.builder` (its own scrollable, no
-/// `shrinkWrap`) so only the tiles actually on screen are ever built — a
-/// catalog of any size renders lazily here, unlike the home feed's grid,
-/// which is intentionally bounded to the ranked feed's own limit.
+/// Photography owns the screen. Filtering is handled by a single expandable
+/// sheet with bag-specific facets and horizontal category pills instead of
+/// search.
 library;
 
 import 'dart:async';
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
+import '../../app/media/monetta_image.dart';
+import '../../app/motion.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
 import '../../main.dart';
-import 'extracted_badge.dart';
+import '../account/account_screen.dart';
+import '../checkout/checkout_screen.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
 import '../product/product_screen.dart';
+import 'extracted_badge.dart';
 
-class CatalogBrowseScreen extends StatelessWidget {
+enum _CatalogSort { featured, newest, priceAsc, priceDesc }
+
+extension on _CatalogSort {
+  String get label => switch (this) {
+        _CatalogSort.featured => 'Destacados',
+        _CatalogSort.newest => 'Más recientes',
+        _CatalogSort.priceAsc => 'Precio: de menor a mayor',
+        _CatalogSort.priceDesc => 'Precio: de mayor a menor',
+      };
+}
+
+enum _FilterSection { sort, type, brand, price, color, availability }
+
+extension on _FilterSection {
+  String get label => switch (this) {
+        _FilterSection.sort => 'Ordenar por',
+        _FilterSection.type => 'Tipo de bolsa',
+        _FilterSection.brand => 'Marca',
+        _FilterSection.price => 'Precio',
+        _FilterSection.color => 'Color',
+        _FilterSection.availability => 'Disponibilidad',
+      };
+}
+
+class _CatalogFilters {
+  const _CatalogFilters({
+    this.sort = _CatalogSort.featured,
+    this.types = const <String>{},
+    this.brands = const <String>{},
+    this.priceBands = const <String>{},
+    this.colors = const <String>{},
+    this.inStockOnly = false,
+  });
+
+  final _CatalogSort sort;
+  final Set<String> types;
+  final Set<String> brands;
+  final Set<String> priceBands;
+  final Set<String> colors;
+  final bool inStockOnly;
+
+  int get activeCount =>
+      types.length +
+      brands.length +
+      priceBands.length +
+      colors.length +
+      (inStockOnly ? 1 : 0);
+}
+
+const Map<String, List<String>> _bagTypeTerms = {
+  'Crossbody': ['crossbody', 'bandolera', 'messenger'],
+  'Tote': ['tote'],
+  'Bolsa de hombro': ['shoulder', 'hombro'],
+  'Satchel': ['satchel'],
+  'Bolsa de mano': ['handbag', 'top handle', 'bolsa de mano'],
+  'Mochila': ['backpack', 'mochila'],
+  'Clutch': ['clutch'],
+  'Cangurera': ['belt bag', 'waist bag', 'cangurera'],
+  'Bolsa cubeta': ['bucket', 'cubeta'],
+  'Cartera': ['wallet', 'cartera'],
+  'Tarjetero': ['card holder', 'cardholder', 'tarjetero'],
+};
+
+const Map<String, List<String>> _colorTerms = {
+  'Negro': ['negro', 'negra', 'black'],
+  'Café': ['cafe', 'café', 'brown', 'cognac'],
+  'Beige': ['beige', 'arena', 'sand', 'camel', 'nude'],
+  'Blanco': ['blanco', 'blanca', 'white', 'ivory', 'hueso'],
+  'Gris': ['gris', 'gray', 'grey'],
+  'Azul': ['azul', 'blue', 'navy', 'marino', 'mezclilla'],
+  'Rosa': ['rosa', 'pink', 'blush'],
+  'Rojo': ['rojo', 'roja', 'red'],
+  'Vino': ['vino', 'burgundy', 'bordo'],
+  'Verde': ['verde', 'green', 'olive', 'oliva'],
+  'Morado': ['morado', 'morada', 'purple', 'lila'],
+  'Amarillo': ['amarillo', 'amarilla', 'yellow'],
+  'Naranja': ['naranja', 'orange'],
+  'Dorado': ['dorado', 'gold'],
+  'Plateado': ['plateado', 'silver'],
+};
+
+class CatalogBrowseScreen extends StatefulWidget {
   const CatalogBrowseScreen({
     required this.items,
     this.openExternalLink = defaultExternalLinkOpener,
+    this.bagCount = 0,
     super.key,
   });
 
   final List<CatalogItem> items;
   final ExternalLinkOpener openExternalLink;
+  final int bagCount;
 
+  @override
+  State<CatalogBrowseScreen> createState() => _CatalogBrowseScreenState();
+}
+
+class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   static const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: 2,
-    // 0.46, not 0.50 — an external tile's caption has one more line: the
-    // source-link text.
-    childAspectRatio: 0.46,
-    crossAxisSpacing: 14,
-    mainAxisSpacing: 36,
+    childAspectRatio: 0.50,
+    crossAxisSpacing: 4,
+    mainAxisSpacing: 26,
   );
+
+  _CatalogFilters _filters = const _CatalogFilters();
+  String _activeCategory = 'Colección';
+
+  List<CatalogItem> _visibleItems([_CatalogFilters? filters]) {
+    final baseFilters = filters ?? _filters;
+    var items = _filterCatalog(
+      widget.items,
+      query: '',
+      filters: baseFilters,
+    );
+
+    if (_activeCategory == 'Monetta') {
+      items = items.where((i) => !i.isExternal).toList();
+    } else if (_activeCategory == 'Bolsas') {
+      items = items
+          .where((i) => i.vertical == CatalogVertical.bagsWallets)
+          .toList();
+    } else if (_activeCategory == 'Perfumes') {
+      items =
+          items.where((i) => i.vertical == CatalogVertical.perfumes).toList();
+    }
+    return items;
+  }
+
+  void _resetAll() {
+    FocusManager.instance.primaryFocus?.unfocus();
+    setState(() {
+      _filters = const _CatalogFilters();
+      _activeCategory = 'Colección';
+    });
+  }
+
+  Future<void> _openFilters() async {
+    FocusManager.instance.primaryFocus?.unfocus();
+    final result = await showModalBottomSheet<_CatalogFilters>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black.withValues(alpha: 0.46),
+      builder: (sheetContext) => _CatalogFilterSheet(
+        items: widget.items,
+        initial: _filters,
+        visibleCount: (draft) => _visibleItems(draft).length,
+      ),
+    );
+    if (result != null && mounted) setState(() => _filters = result);
+  }
+
+  int _countForCategory(String category) {
+    final items = _filterCatalog(
+      widget.items,
+      query: '',
+      filters: _filters,
+    );
+    if (category == 'Monetta') {
+      return items.where((i) => !i.isExternal).length;
+    } else if (category == 'Bolsas') {
+      return items
+          .where((i) => i.vertical == CatalogVertical.bagsWallets)
+          .length;
+    } else if (category == 'Perfumes') {
+      return items.where((i) => i.vertical == CatalogVertical.perfumes).length;
+    }
+    return items.length;
+  }
+
+  Widget _buildCategoryPill({
+    required String title,
+    required String keyName,
+    bool showCount = true,
+  }) {
+    final isSelected = _activeCategory == title;
+    final count = _countForCategory(title);
+    final labelColor = isSelected ? kInk : Colors.white;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        key: Key(keyName),
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: sans(
+                size: 13,
+                weight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: labelColor,
+              ),
+            ),
+            if (showCount && isSelected)
+              Text(
+                ' $count',
+                style: sans(size: 13, color: labelColor),
+              ),
+          ],
+        ),
+        selected: isSelected,
+        onSelected: (selected) {
+          if (selected) setState(() => _activeCategory = title);
+        },
+        color: WidgetStateProperty.resolveWith<Color>((states) {
+          return states.contains(WidgetState.selected) ? kGold : kInk;
+        }),
+        backgroundColor: kInk,
+        selectedColor: kGold,
+        surfaceTintColor: Colors.transparent,
+        side: BorderSide(
+          color: isSelected
+              ? Colors.transparent
+              : Colors.white.withValues(alpha: 0.3),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        showCheckmark: false,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
-    // Two clearly separated groups, each with its own heading — Monetta
-    // first, external research items second — rather than one undifferentiated
-    // grid. `fullDeduplicatedCatalog` already orders the flat list this way
-    // (Monetta items, then deduped external items); this just draws the seam.
-    final monettaItems = items.where((i) => !i.isExternal).toList();
-    final externalItems = items.where((i) => i.isExternal).toList();
+    final visibleItems = _visibleItems();
 
     return Scaffold(
+      backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Todo el catálogo'),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0.5),
-          child: Divider(height: 0.5),
+        toolbarHeight: 68,
+        backgroundColor: Colors.white,
+        foregroundColor: kInk,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        centerTitle: true,
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
+        title: Text(
+          'Productos',
+          style: display(20, weight: FontWeight.w600, height: 1.1),
         ),
-      ),
-      body: items.isEmpty
-          ? Center(child: Text('Sin resultados', style: eyebrow()))
-          : CustomScrollView(
-              slivers: [
-                if (monettaItems.isNotEmpty) ...[
-                  const SliverToBoxAdapter(
-                    child: SectionHeading(
-                      kicker: 'Monetta',
-                      title: 'Catálogo Monetta',
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
-                    sliver: SliverGrid(
-                      gridDelegate: _gridDelegate,
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => _BrowseTile(
-                          item: monettaItems[index],
-                          openExternalLink: openExternalLink,
-                        ),
-                        childCount: monettaItems.length,
-                      ),
-                    ),
-                  ),
-                ],
-                if (externalItems.isNotEmpty) ...[
-                  SliverToBoxAdapter(
-                    child: SizedBox(
-                      height: monettaItems.isEmpty ? 0 : kSectionGap,
-                    ),
-                  ),
-                  const SliverToBoxAdapter(
-                    child: SectionHeading(
-                      kicker: 'Investigación · Estados Unidos',
-                      title: 'También en marcas de Estados Unidos',
-                    ),
-                  ),
-                  SliverPadding(
-                    padding: const EdgeInsets.fromLTRB(20, 0, 20, 40),
-                    sliver: SliverGrid(
-                      gridDelegate: _gridDelegate,
-                      delegate: SliverChildBuilderDelegate(
-                        (context, index) => _BrowseTile(
-                          item: externalItems[index],
-                          openExternalLink: openExternalLink,
-                        ),
-                        childCount: externalItems.length,
-                      ),
-                    ),
-                  ),
-                ] else
-                  const SliverToBoxAdapter(child: SizedBox(height: 40)),
+        actions: [
+          _FilterIconButton(
+            activeCount: _filters.activeCount,
+            onPressed: _openFilters,
+          ),
+          const SizedBox(width: 6),
+        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Container(
+            color: kInk,
+            height: 60,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              children: [
+                _buildCategoryPill(
+                  title: 'Colección',
+                  keyName: 'catalog-category-collection',
+                ),
+                _buildCategoryPill(
+                  title: 'Monetta',
+                  keyName: 'catalog-category-monetta',
+                ),
+                _buildCategoryPill(
+                  title: 'Bolsas',
+                  keyName: 'catalog-category-bags',
+                ),
+                _buildCategoryPill(
+                  title: 'Perfumes',
+                  keyName: 'catalog-category-perfumes',
+                  showCount: false,
+                ),
               ],
             ),
+          ),
+        ),
+      ),
+      body: CustomScrollView(
+        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+        slivers: [
+          if (_activeCategory == 'Monetta')
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(top: 24),
+                child: SectionHeading(
+                  kicker: 'Monetta',
+                  title: 'Selección Monetta',
+                ),
+              ),
+            ),
+          SliverToBoxAdapter(
+            child: _CatalogSummary(
+              count: visibleItems.length,
+              sort: _filters.sort,
+            ),
+          ),
+          if (visibleItems.isEmpty)
+            SliverFillRemaining(
+              hasScrollBody: false,
+              child: _EmptyCatalogState(
+                hasActiveFilter: _filters.activeCount > 0,
+                onReset: _resetAll,
+              ),
+            )
+          else
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(4, 0, 4, 44),
+              sliver: SliverGrid(
+                gridDelegate: _gridDelegate,
+                delegate: SliverChildBuilderDelegate(
+                  (context, index) => _BrowseTile(
+                    item: visibleItems[index],
+                    openExternalLink: widget.openExternalLink,
+                  ),
+                  childCount: visibleItems.length,
+                ),
+              ),
+            ),
+        ],
+      ),
+      bottomNavigationBar: MonettaBottomNavigation(
+        current: MonettaBottomDestination.catalog,
+        bagCount: widget.bagCount,
+        surfaceColor: Colors.white,
+        onSelected: (destination) {
+          switch (destination) {
+            case MonettaBottomDestination.home:
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            case MonettaBottomDestination.catalog:
+              break;
+            case MonettaBottomDestination.bag:
+              unawaited(openBag(context));
+            case MonettaBottomDestination.account:
+              unawaited(
+                openAccount(
+                  context,
+                  controller: AccountScope.of(context),
+                ),
+              );
+          }
+        },
+      ),
+    );
+  }
+}
+
+void openCatalogBrowse(
+  BuildContext context, {
+  required List<CatalogItem> items,
+}) {
+  final store = StoreScope.of(context);
+  Navigator.of(context).push(
+    monettaFadeRoute(
+      StoreScope(
+        notifier: store,
+        child: CatalogBrowseScreen(
+          items: items,
+          bagCount: store.bagQuantity,
+        ),
+      ),
+    ),
+  );
+}
+
+class _FilterIconButton extends StatelessWidget {
+  const _FilterIconButton({
+    required this.activeCount,
+    required this.onPressed,
+  });
+
+  final int activeCount;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          key: const Key('catalog-filter-button'),
+          tooltip: 'Filtrar y ordenar',
+          onPressed: onPressed,
+          icon: const Icon(Icons.tune_rounded, size: 27),
+        ),
+        if (activeCount > 0)
+          Positioned(
+            right: 3,
+            top: 5,
+            child: IgnorePointer(
+              child: Container(
+                key: const Key('catalog-filter-count'),
+                constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: const BoxDecoration(
+                  color: kInk,
+                  shape: BoxShape.circle,
+                ),
+                child: Text(
+                  '$activeCount',
+                  style: sans(
+                    size: 9,
+                    color: Colors.white,
+                    weight: FontWeight.w700,
+                    height: 1,
+                  ),
+                ),
+              ),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
+class _CatalogSummary extends StatelessWidget {
+  const _CatalogSummary({required this.count, required this.sort});
+
+  final int count;
+  final _CatalogSort sort;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 15, 14, 14),
+      child: Row(
+        children: [
+          Text(
+            count == 1 ? '1 artículo' : '$count artículos',
+            style: sans(size: 12.5, color: kInkMuted),
+          ),
+          const Spacer(),
+          Text(
+            sort.label,
+            style: sans(
+              size: 12.5,
+              color: kInk,
+              weight: FontWeight.w500,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CatalogFilterSheet extends StatefulWidget {
+  const _CatalogFilterSheet({
+    required this.items,
+    required this.initial,
+    required this.visibleCount,
+  });
+
+  final List<CatalogItem> items;
+  final _CatalogFilters initial;
+  final int Function(_CatalogFilters filters) visibleCount;
+
+  @override
+  State<_CatalogFilterSheet> createState() => _CatalogFilterSheetState();
+}
+
+class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
+  late _CatalogSort _sort;
+  late Set<String> _types;
+  late Set<String> _brands;
+  late Set<String> _priceBands;
+  late Set<String> _colors;
+  late bool _inStockOnly;
+
+  final Set<_FilterSection> _expanded = {_FilterSection.sort};
+
+  @override
+  void initState() {
+    super.initState();
+    _load(widget.initial);
+  }
+
+  void _load(_CatalogFilters filters) {
+    _sort = filters.sort;
+    _types = {...filters.types};
+    _brands = {...filters.brands};
+    _priceBands = {...filters.priceBands};
+    _colors = {...filters.colors};
+    _inStockOnly = filters.inStockOnly;
+  }
+
+  _CatalogFilters get _selection => _CatalogFilters(
+        sort: _sort,
+        types: _types,
+        brands: _brands,
+        priceBands: _priceBands,
+        colors: _colors,
+        inStockOnly: _inStockOnly,
+      );
+
+  List<String> get _typeOptions => _optionsWithMatches(
+        _bagTypeTerms.keys,
+        (item, value) => _bagTypeFor(item) == value,
+      );
+
+  List<String> get _brandOptions {
+    final values = {
+      for (final item in widget.items)
+        if (_brandFor(item).isNotEmpty) _brandFor(item),
+    }.toList();
+    values.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
+    return values;
+  }
+
+  List<String> get _priceOptions => _optionsWithMatches(
+        const [
+          'mxn-under-1000',
+          'mxn-1000-2499',
+          'mxn-2500-4999',
+          'mxn-5000-plus',
+          'usd-under-100',
+          'usd-100-249',
+          'usd-250-499',
+          'usd-500-plus',
+        ],
+        (item, value) => _priceBandFor(item) == value,
+      );
+
+  List<String> get _colorOptions => _optionsWithMatches(
+        _colorTerms.keys,
+        (item, value) => _colorsFor(item).contains(value),
+      );
+
+  List<String> _optionsWithMatches(
+    Iterable<String> candidates,
+    bool Function(CatalogItem item, String value) matches,
+  ) =>
+      candidates
+          .where((value) => widget.items.any((item) => matches(item, value)))
+          .toList(growable: false);
+
+  void _toggleExpanded(_FilterSection section) {
+    setState(() {
+      _expanded.contains(section)
+          ? _expanded.remove(section)
+          : _expanded.add(section);
+    });
+  }
+
+  void _toggle(Set<String> values, String value) {
+    setState(
+      () => values.contains(value) ? values.remove(value) : values.add(value),
+    );
+  }
+
+  void _clear() {
+    setState(() => _load(const _CatalogFilters()));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final typeOptions = _typeOptions;
+    final brandOptions = _brandOptions;
+    final priceOptions = _priceOptions;
+    final colorOptions = _colorOptions;
+    final resultCount = widget.visibleCount(_selection);
+
+    return FractionallySizedBox(
+      heightFactor: 0.94,
+      child: Material(
+        color: Colors.white,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              SizedBox(
+                height: 74,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text(
+                      'Filtrar y ordenar',
+                      style: display(20, weight: FontWeight.w600),
+                    ),
+                    Positioned(
+                      right: 12,
+                      child: IconButton(
+                        key: const Key('catalog-filter-close'),
+                        tooltip: 'Cerrar filtros',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close_rounded, size: 28),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const Divider(height: 0.5, color: kLine),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Column(
+                    children: [
+                      _FilterAccordion(
+                        section: _FilterSection.sort,
+                        expanded: _expanded.contains(_FilterSection.sort),
+                        onTap: () => _toggleExpanded(_FilterSection.sort),
+                        child: Column(
+                          children: [
+                            for (final option in _CatalogSort.values)
+                              _FilterChoiceRow(
+                                label: option.label,
+                                selected: _sort == option,
+                                radio: true,
+                                onTap: () => setState(() => _sort = option),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (typeOptions.isNotEmpty)
+                        _FilterAccordion(
+                          section: _FilterSection.type,
+                          expanded: _expanded.contains(_FilterSection.type),
+                          onTap: () => _toggleExpanded(_FilterSection.type),
+                          child: Column(
+                            children: [
+                              for (final option in typeOptions)
+                                _FilterChoiceRow(
+                                  label: option,
+                                  selected: _types.contains(option),
+                                  onTap: () => _toggle(_types, option),
+                                ),
+                            ],
+                          ),
+                        ),
+                      if (brandOptions.isNotEmpty)
+                        _FilterAccordion(
+                          section: _FilterSection.brand,
+                          expanded: _expanded.contains(_FilterSection.brand),
+                          onTap: () => _toggleExpanded(_FilterSection.brand),
+                          child: Column(
+                            children: [
+                              for (final option in brandOptions)
+                                _FilterChoiceRow(
+                                  label: option,
+                                  selected: _brands.contains(option),
+                                  onTap: () => _toggle(_brands, option),
+                                ),
+                            ],
+                          ),
+                        ),
+                      if (priceOptions.isNotEmpty)
+                        _FilterAccordion(
+                          section: _FilterSection.price,
+                          expanded: _expanded.contains(_FilterSection.price),
+                          onTap: () => _toggleExpanded(_FilterSection.price),
+                          child: Column(
+                            children: [
+                              for (final option in priceOptions)
+                                _FilterChoiceRow(
+                                  label: _priceBandLabel(option),
+                                  selected: _priceBands.contains(option),
+                                  onTap: () => _toggle(_priceBands, option),
+                                ),
+                            ],
+                          ),
+                        ),
+                      if (colorOptions.isNotEmpty)
+                        _FilterAccordion(
+                          section: _FilterSection.color,
+                          expanded: _expanded.contains(_FilterSection.color),
+                          onTap: () => _toggleExpanded(_FilterSection.color),
+                          child: Column(
+                            children: [
+                              for (final option in colorOptions)
+                                _FilterChoiceRow(
+                                  label: option,
+                                  selected: _colors.contains(option),
+                                  swatch: _colorSwatch(option),
+                                  onTap: () => _toggle(_colors, option),
+                                ),
+                            ],
+                          ),
+                        ),
+                      _FilterAccordion(
+                        section: _FilterSection.availability,
+                        expanded:
+                            _expanded.contains(_FilterSection.availability),
+                        onTap: () =>
+                            _toggleExpanded(_FilterSection.availability),
+                        child: _FilterChoiceRow(
+                          label: 'En existencia',
+                          selected: _inStockOnly,
+                          onTap: () =>
+                              setState(() => _inStockOnly = !_inStockOnly),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              DecoratedBox(
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  border: Border(top: BorderSide(color: kLine, width: 0.5)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
+                  child: Row(
+                    children: [
+                      TextButton(
+                        key: const Key('catalog-filter-clear'),
+                        onPressed: _clear,
+                        style: TextButton.styleFrom(foregroundColor: kInk),
+                        child: Text(
+                          'Limpiar',
+                          style: sans(
+                            size: 13,
+                            weight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton(
+                          key: const Key('catalog-filter-apply'),
+                          onPressed: () =>
+                              Navigator.of(context).pop(_selection),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: kInk,
+                            foregroundColor: Colors.white,
+                            minimumSize: const Size.fromHeight(56),
+                            shape: const StadiumBorder(),
+                          ),
+                          child: Text(
+                            resultCount == 1
+                                ? 'Ver 1 artículo'
+                                : 'Ver $resultCount artículos',
+                            style: sans(
+                              size: 15,
+                              color: Colors.white,
+                              weight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FilterAccordion extends StatelessWidget {
+  const _FilterAccordion({
+    required this.section,
+    required this.expanded,
+    required this.onTap,
+    required this.child,
+  });
+
+  final _FilterSection section;
+  final bool expanded;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: const BoxDecoration(
+        border: Border(bottom: BorderSide(color: kLine, width: 0.5)),
+      ),
+      child: Column(
+        children: [
+          Semantics(
+            button: true,
+            expanded: expanded,
+            child: InkWell(
+              key: Key('catalog-filter-${section.name}'),
+              onTap: onTap,
+              child: SizedBox(
+                height: 78,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        section.label,
+                        style: sans(
+                          size: 17,
+                          weight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    Icon(
+                      expanded ? Icons.remove_rounded : Icons.add_rounded,
+                      size: 26,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (expanded)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 8, 20),
+              child: child,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FilterChoiceRow extends StatelessWidget {
+  const _FilterChoiceRow({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.radio = false,
+    this.swatch,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+  final bool radio;
+  final Color? swatch;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      child: SizedBox(
+        height: 52,
+        child: Row(
+          children: [
+            _SelectionMark(selected: selected, radio: radio),
+            if (swatch != null) ...[
+              const SizedBox(width: 12),
+              Container(
+                width: 18,
+                height: 18,
+                decoration: BoxDecoration(
+                  color: swatch,
+                  shape: BoxShape.circle,
+                  border: Border.all(color: kLine),
+                ),
+              ),
+            ],
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: sans(
+                  size: 15,
+                  color: selected ? kInk : kInkMuted,
+                  weight: selected ? FontWeight.w600 : FontWeight.w400,
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SelectionMark extends StatelessWidget {
+  const _SelectionMark({required this.selected, required this.radio});
+
+  final bool selected;
+  final bool radio;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: reduceMotion(context) ? Duration.zero : kSnap,
+      width: 28,
+      height: 28,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: selected ? kInk : Colors.white,
+        shape: radio ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius: radio ? null : BorderRadius.circular(4),
+        border: Border.all(color: selected ? kInk : kLine, width: 1.5),
+      ),
+      child: selected
+          ? radio
+              ? const DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                  ),
+                  child: SizedBox(width: 9, height: 9),
+                )
+              : const Icon(Icons.check_rounded, size: 18, color: Colors.white)
+          : null,
+    );
+  }
+}
+
+class _EmptyCatalogState extends StatelessWidget {
+  const _EmptyCatalogState({
+    required this.hasActiveFilter,
+    required this.onReset,
+  });
+
+  final bool hasActiveFilter;
+  final VoidCallback onReset;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 64, 32, 80),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
+        children: [
+          const Icon(Icons.search_off_rounded, size: 30, color: kInkMuted),
+          const SizedBox(height: 18),
+          Text(
+            'Sin resultados',
+            style: display(24, weight: FontWeight.w600),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            hasActiveFilter
+                ? 'Intenta usar otros filtros o quita los actuales.'
+                : 'Muy pronto encontrarás nuevas piezas aquí.',
+            textAlign: TextAlign.center,
+            style: sans(size: 13, color: kInkMuted, height: 1.5),
+          ),
+          if (hasActiveFilter) ...[
+            const SizedBox(height: 22),
+            TextButton(
+              onPressed: onReset,
+              child: Text(
+                'Limpiar filtros',
+                style: sans(
+                  size: 13,
+                  weight: FontWeight.w600,
+                  decoration: TextDecoration.underline,
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
     );
   }
 }
@@ -149,86 +1014,216 @@ class _BrowseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _tap(context),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: 3 / 4,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                ColoredBox(
-                  color: kMist,
-                  child: item.imageUrl == null
-                      ? const Center(
-                          child: Icon(
-                            Icons.image_not_supported_outlined,
-                            size: 18,
-                            color: kInkMuted,
-                          ),
-                        )
-                      : CachedNetworkImage(
-                          imageUrl: item.imageUrl!,
-                          fit: BoxFit.cover,
-                          fadeInDuration: const Duration(milliseconds: 240),
-                          placeholder: (_, __) =>
-                              const ColoredBox(color: kMist),
-                          errorWidget: (_, __, ___) => const Center(
-                            child: Icon(
-                              Icons.broken_image_outlined,
-                              size: 18,
-                              color: kInkMuted,
-                            ),
-                          ),
-                        ),
+    return Semantics(
+      button: true,
+      label: '${item.merchant}, ${item.title}',
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: () => _tap(context),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 3 / 4,
+              child: ColoredBox(
+                color: kMist,
+                child: Stack(
+                  fit: StackFit.expand,
+                  children: [
+                    MonettaImage(
+                      url: item.imageUrl,
+                      fallbackLabel: item.imageUrl == null ? null : item.title,
+                    ),
+                    if (item.isExternal)
+                      const Positioned(
+                        top: 8,
+                        left: 8,
+                        child: ExtractedBadge(),
+                      ),
+                  ],
                 ),
-                if (item.isExternal)
-                  const Positioned(
-                    top: 8,
-                    left: 8,
-                    child: ExtractedBadge(),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 11, 8, 0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    _brandFor(item),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: sans(
+                      size: 11.5,
+                      color: item.isExternal ? kGold : kInk,
+                      weight: FontWeight.w600,
+                    ),
                   ),
-              ],
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            '${item.merchant}${item.isExternal ? ' · ${item.price?.currencyCode ?? 'USD'}' : ''}'
-                .toUpperCase(),
-            style: eyebrow(size: 9.5),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            item.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: display(14, weight: FontWeight.w400, height: 1.35),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            formatCatalogMoney(item.price),
-            style: sans(size: 12.5, weight: FontWeight.w500),
-          ),
-          if (item.isExternal) ...[
-            const SizedBox(height: 4),
-            Text(
-              'Candidato de compra · origen EE. UU.',
-              style: sans(size: 10.5, color: kInkMuted),
-            ),
-            const SizedBox(height: 4),
-            // Where this listing's data actually came from — visible text,
-            // not only reachable by tapping the tile.
-            Text(
-              sourceLinkLabel(item),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: sans(size: 9.5, color: kInkMuted),
+                  const SizedBox(height: 4),
+                  Text(
+                    item.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: sans(size: 13, color: kInkMuted, height: 1.35),
+                  ),
+                  const SizedBox(height: 7),
+                  Text(
+                    formatCatalogMoney(item.price),
+                    style: sans(size: 13.5, weight: FontWeight.w700),
+                  ),
+                ],
+              ),
             ),
           ],
-        ],
+        ),
       ),
     );
   }
 }
+
+List<CatalogItem> _filterCatalog(
+  List<CatalogItem> items, {
+  required String query,
+  required _CatalogFilters filters,
+}) {
+  final normalizedQuery = query.trim().toLowerCase();
+  final result = items.where((item) {
+    if (normalizedQuery.isNotEmpty) {
+      final searchable = [
+        item.title,
+        item.brand,
+        item.merchant,
+        item.category ?? '',
+        ...item.variants.map((variant) => variant.displayName),
+      ].join(' ').toLowerCase();
+      if (!searchable.contains(normalizedQuery)) return false;
+    }
+
+    if (filters.types.isNotEmpty &&
+        !filters.types.contains(_bagTypeFor(item))) {
+      return false;
+    }
+    if (filters.brands.isNotEmpty &&
+        !filters.brands.contains(_brandFor(item))) {
+      return false;
+    }
+    if (filters.priceBands.isNotEmpty &&
+        !filters.priceBands.contains(_priceBandFor(item))) {
+      return false;
+    }
+    if (filters.colors.isNotEmpty &&
+        filters.colors.intersection(_colorsFor(item)).isEmpty) {
+      return false;
+    }
+    if (filters.inStockOnly &&
+        item.availability != CatalogAvailability.inStock) {
+      return false;
+    }
+    return true;
+  }).toList(growable: false);
+
+  switch (filters.sort) {
+    case _CatalogSort.featured:
+      break;
+    case _CatalogSort.newest:
+      result.sort((a, b) => b.lastObservedAt.compareTo(a.lastObservedAt));
+    case _CatalogSort.priceAsc:
+      result.sort(_comparePriceAsc);
+    case _CatalogSort.priceDesc:
+      result.sort((a, b) => _comparePriceAsc(b, a));
+  }
+  return result;
+}
+
+int _comparePriceAsc(CatalogItem a, CatalogItem b) {
+  final aPrice = a.price;
+  final bPrice = b.price;
+  if (aPrice == null && bPrice == null) return 0;
+  if (aPrice == null) return 1;
+  if (bPrice == null) return -1;
+  final currencyOrder = aPrice.currency.index.compareTo(bPrice.currency.index);
+  if (currencyOrder != 0) return currencyOrder;
+  return aPrice.amount.compareTo(bPrice.amount);
+}
+
+String _brandFor(CatalogItem item) {
+  final brand = item.brand.trim();
+  return brand.isEmpty ? item.merchant.trim() : brand;
+}
+
+String? _bagTypeFor(CatalogItem item) {
+  final terms = '${item.category ?? ''} ${item.title}'.toLowerCase();
+  for (final entry in _bagTypeTerms.entries) {
+    if (entry.value.any(terms.contains)) return entry.key;
+  }
+  return null;
+}
+
+Set<String> _colorsFor(CatalogItem item) {
+  // External variant names often append hardware finishes (for example
+  // "Café/Dorado"). Those should not make a brown bag appear under a gold
+  // body-colour filter, so metallic hardware words are ignored in variants;
+  // a genuinely gold or silver bag still matches when its product title says
+  // so explicitly.
+  final variantColors = item.variants.map(
+    (variant) => variant.displayName.toLowerCase().replaceAll(
+          RegExp(r'\b(dorado|dorada|plateado|plateada|gold|silver)\b'),
+          '',
+        ),
+  );
+  final terms = [
+    item.title,
+    item.category ?? '',
+    ...variantColors,
+  ].join(' ').toLowerCase();
+  return {
+    for (final entry in _colorTerms.entries)
+      if (entry.value.any(terms.contains)) entry.key,
+  };
+}
+
+String? _priceBandFor(CatalogItem item) {
+  final price = item.price;
+  if (price == null) return null;
+  if (price.currency == Currency.mxn) {
+    if (price.amount < 1000) return 'mxn-under-1000';
+    if (price.amount < 2500) return 'mxn-1000-2499';
+    if (price.amount < 5000) return 'mxn-2500-4999';
+    return 'mxn-5000-plus';
+  }
+  if (price.amount < 100) return 'usd-under-100';
+  if (price.amount < 250) return 'usd-100-249';
+  if (price.amount < 500) return 'usd-250-499';
+  return 'usd-500-plus';
+}
+
+String _priceBandLabel(String value) => switch (value) {
+      'mxn-under-1000' => 'Menos de \$1,000 MXN',
+      'mxn-1000-2499' => '\$1,000 – \$2,499 MXN',
+      'mxn-2500-4999' => '\$2,500 – \$4,999 MXN',
+      'mxn-5000-plus' => '\$5,000 MXN o más',
+      'usd-under-100' => 'Menos de \$100 USD',
+      'usd-100-249' => '\$100 – \$249 USD',
+      'usd-250-499' => '\$250 – \$499 USD',
+      'usd-500-plus' => '\$500 USD o más',
+      _ => value,
+    };
+
+Color _colorSwatch(String value) => switch (value) {
+      'Negro' => const Color(0xFF161616),
+      'Café' => const Color(0xFF76513B),
+      'Beige' => const Color(0xFFD7C4A3),
+      'Blanco' => const Color(0xFFF7F5EF),
+      'Gris' => const Color(0xFF999999),
+      'Azul' => const Color(0xFF355C86),
+      'Rosa' => const Color(0xFFD99AAA),
+      'Rojo' => const Color(0xFFA83232),
+      'Vino' => const Color(0xFF682D3D),
+      'Verde' => const Color(0xFF5E7251),
+      'Morado' => const Color(0xFF725A82),
+      'Amarillo' => const Color(0xFFE2C452),
+      'Naranja' => const Color(0xFFD67B3B),
+      'Dorado' => const Color(0xFFB9904F),
+      'Plateado' => const Color(0xFFB8B8B8),
+      _ => kMist,
+    };

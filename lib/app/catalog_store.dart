@@ -31,9 +31,13 @@ import '../data/local/database.dart' hide BagLine, InteractionEvent;
 import '../data/local/interaction_event_store.dart';
 import '../data/local/sync_cursor_store.dart';
 import '../data/local/wishlist_store.dart';
+import '../data/firestore/catalog_realtime_source.dart';
 import '../data/normalize/facets.dart';
+import '../data/normalize/normalizer.dart';
 import '../data/normalize/rules.dart';
 import '../data/repositories/catalog_repository.dart';
+import '../data/repositories/catalog_write_coordinator.dart';
+import '../data/repositories/realtime_catalog_repository.dart';
 import '../data/shopify/catalog_item_mapper.dart';
 import '../data/shopify/catalog_sync.dart' as shopify;
 import '../domain/catalog_item.dart';
@@ -57,6 +61,15 @@ class Recommendation {
   final RecoReason reason;
 }
 
+enum CatalogRealtimeStatus {
+  disabled,
+  connecting,
+  live,
+  empty,
+  invalid,
+  reconnecting,
+}
+
 class CatalogStore extends ChangeNotifier {
   /// [database] is required explicitly rather than defaulted — production
   /// call sites pass `AppDatabase.connect()` (real on-device file), test
@@ -66,9 +79,16 @@ class CatalogStore extends ChangeNotifier {
   /// [catalogSync] is the real `data/shopify` delta sync, null when no
   /// usable `StorefrontConfig` exists — today's honest default. See
   /// `lib/data/repositories/catalog_repository.dart`.
-  CatalogStore({required AppDatabase database, shopify.CatalogSync? catalogSync})
-      : _database = database,
+  CatalogStore({
+    required AppDatabase database,
+    shopify.CatalogSync? catalogSync,
+    CatalogRealtimeSource? realtimeSource,
+  })  : _database = database,
         _catalogSyncOverride = catalogSync,
+        _realtimeSource = realtimeSource,
+        _writeCoordinator = CatalogWriteCoordinator(
+          expectsFirestore: realtimeSource != null,
+        ),
         _cacheStore = CatalogCacheStore(database),
         _cursorStore = SyncCursorStore(database),
         _wishlistStore = WishlistStore(database),
@@ -80,12 +100,16 @@ class CatalogStore extends ChangeNotifier {
 
   final AppDatabase _database;
   final shopify.CatalogSync? _catalogSyncOverride;
+  final CatalogRealtimeSource? _realtimeSource;
+  final CatalogWriteCoordinator _writeCoordinator;
   final CatalogCacheStore _cacheStore;
   final SyncCursorStore _cursorStore;
   final WishlistStore _wishlistStore;
   final BagStore _bagStore;
   final InteractionEventStore _eventStore;
   late final CatalogRepository _catalogRepository;
+  StreamSubscription<RealtimeCatalogUpdate>? _realtimeSubscription;
+  Future<CatalogSyncResult>? _deltaSyncInFlight;
 
   final List<InteractionEvent> _events = [];
   final Set<String> _viewed = {};
@@ -99,6 +123,7 @@ class CatalogStore extends ChangeNotifier {
 
   TasteProfile profile = const TasteProfile.empty();
   bool ready = false;
+  CatalogRealtimeStatus realtimeStatus = CatalogRealtimeStatus.disabled;
 
   final _profileBuilder = const ProfileBuilder();
   final _explainer = const Explainer();
@@ -153,6 +178,10 @@ class CatalogStore extends ChangeNotifier {
     // A no-op once the cache already has rows — the common case after the
     // very first app open.
     await _catalogRepository.seedFromAssetIfEmpty(catalogJson);
+    // Existing installs may have a partial cache from an older snapshot.
+    // Keep the cache-first startup path, but add products that are present in
+    // the bundled catalog and missing locally.
+    await _catalogRepository.addMissingFromAsset(catalogJson);
 
     final snapshot = await _catalogRepository.loadCached();
     products = snapshot.products;
@@ -163,10 +192,11 @@ class CatalogStore extends ChangeNotifier {
     ready = true;
     notifyListeners();
 
-    // Cache-first paint happens above; the sync below is background refresh
-    // and — with no Storefront token configured — a fast, safe no-op today.
-    // See `docs/ARCHITECTURE.md`'s "Data flow: opening the app".
-    unawaited(syncWithShopify());
+    _startRealtimeCatalog();
+
+    // Without a Firestore source, delta sync is the normal background writer.
+    // With one, it waits until the listener reports an error/disconnection.
+    if (_realtimeSource == null) unawaited(syncWithShopify());
   }
 
   Future<void> _hydrateFromDrift() async {
@@ -202,10 +232,35 @@ class CatalogStore extends ChangeNotifier {
   }
 
   /// Runs a real Shopify delta sync (`data/repositories/catalog_repository.dart`)
-  /// and applies whatever changed to the in-memory catalog. Safe to call any
-  /// time — a `skippedNotConfigured` outcome (today's default, no token yet)
-  /// costs one cheap early return.
-  Future<CatalogSyncResult> syncWithShopify() async {
+  /// and applies whatever changed to the in-memory catalog. It is a normal
+  /// writer without Firestore, an error/disconnection fallback with Firestore,
+  /// and returns `skippedRealtimeAuthoritative` while that listener is
+  /// connecting or live.
+  Future<CatalogSyncResult> syncWithShopify() {
+    final active = _deltaSyncInFlight;
+    if (active != null) return active;
+
+    final future = _writeCoordinator.runDeltaWrite(
+      write: _syncWithShopifyFallback,
+      blocked: () => const CatalogSyncResult(
+        outcome: CatalogSyncOutcome.skippedRealtimeAuthoritative,
+      ),
+    );
+    _deltaSyncInFlight = future;
+    unawaited(
+      future.then<void>(
+        (_) => _clearDeltaSync(future),
+        onError: (Object _, StackTrace __) => _clearDeltaSync(future),
+      ),
+    );
+    return future;
+  }
+
+  void _clearDeltaSync(Future<CatalogSyncResult> completed) {
+    if (identical(_deltaSyncInFlight, completed)) _deltaSyncInFlight = null;
+  }
+
+  Future<CatalogSyncResult> _syncWithShopifyFallback() async {
     final result = await _catalogRepository.sync();
     if (result.outcome == CatalogSyncOutcome.updated) {
       final snapshot = await _catalogRepository.loadCached();
@@ -214,6 +269,44 @@ class CatalogStore extends ChangeNotifier {
       notifyListeners();
     }
     return result;
+  }
+
+  void _startRealtimeCatalog() {
+    final source = _realtimeSource;
+    if (source == null || _realtimeSubscription != null) return;
+    realtimeStatus = CatalogRealtimeStatus.connecting;
+    notifyListeners();
+
+    final repository = RealtimeCatalogRepository(
+      source: source,
+      cache: _cacheStore,
+      writeCoordinator: _writeCoordinator,
+    );
+    _realtimeSubscription = repository.watch().listen(_applyRealtimeUpdate);
+  }
+
+  void _applyRealtimeUpdate(RealtimeCatalogUpdate update) {
+    switch (update.outcome) {
+      case RealtimeCatalogOutcome.applied:
+        products = update.products;
+        final normalizer = Normalizer(rules);
+        final now = DateTime.now();
+        facetsById = {
+          for (final product in products)
+            product.id: normalizer.normalize(product, now: now),
+        };
+        realtimeStatus = CatalogRealtimeStatus.live;
+      case RealtimeCatalogOutcome.empty:
+        realtimeStatus = CatalogRealtimeStatus.empty;
+      case RealtimeCatalogOutcome.invalid:
+        realtimeStatus = CatalogRealtimeStatus.invalid;
+      case RealtimeCatalogOutcome.error:
+      case RealtimeCatalogOutcome.disconnected:
+        _writeCoordinator.markFirestoreUnavailable();
+        realtimeStatus = CatalogRealtimeStatus.reconnecting;
+        unawaited(syncWithShopify());
+    }
+    notifyListeners();
   }
 
   /// Seeds the profile from the onboarding taps so the very first feed is
@@ -271,7 +364,11 @@ class CatalogStore extends ChangeNotifier {
     return out;
   }
 
-  List<Product> moreFromBrand(String brandSlug, {String? excluding, int limit = 8}) {
+  List<Product> moreFromBrand(
+    String brandSlug, {
+    String? excluding,
+    int limit = 8,
+  }) {
     final out = <Product>[];
     for (final product in products) {
       if (product.id == excluding) continue;
@@ -282,7 +379,9 @@ class CatalogStore extends ChangeNotifier {
     return out;
   }
 
-  Product? firstInStockWhere(bool Function(Product product, CanonicalFacets? facets) test) {
+  Product? firstInStockWhere(
+    bool Function(Product product, CanonicalFacets? facets) test,
+  ) {
     for (final product in products) {
       if (!product.isInStock || product.primaryImage == null) continue;
       if (test(product, facetsById[product.id])) return product;
@@ -348,6 +447,15 @@ class CatalogStore extends ChangeNotifier {
       unawaited(_bagStore.remove(productId));
       notifyListeners();
     }
+  }
+
+  /// Clears durable and in-memory bag state after a trusted checkout event.
+  /// Persistence completes first so a storage failure never hides the bag.
+  Future<void> clearBagAfterCheckout() async {
+    await _bagStore.clear();
+    if (_bagQuantities.isEmpty) return;
+    _bagQuantities.clear();
+    notifyListeners();
   }
 
   Product? _productById(String id) {
@@ -484,6 +592,7 @@ class CatalogStore extends ChangeNotifier {
 
   @override
   void dispose() {
+    unawaited(_realtimeSubscription?.cancel());
     unawaited(_database.close());
     super.dispose();
   }

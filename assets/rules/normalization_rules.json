@@ -41,6 +41,8 @@
     "reloj": ["Reloj", "Relojes", "Watch"],
     "cosmetiquera": ["Cosmetiquera", "Neceser", "Makeup bag", "Pouch"],
     "set": ["Set de Regalo", "Set", "Kit", "Caja de regalo", "Gift set"],
+    "perfume": ["Perfume", "Perfumes", "Fragancia", "Fragancias"],
+
     "accesorio": ["Accesorio", "Accesorios", "Pañuelo", "Wristlet", "Llavero"]
   },
 

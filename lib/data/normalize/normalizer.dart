@@ -25,6 +25,7 @@ class _Signal {
 /// `bolsa` — the more specific one wins. `bolsa` is deliberately last because
 /// its alias list is the broadest and it acts as the catch-all for this store.
 const List<String> _categoryPriority = <String>[
+  'perfume',
   'reloj',
   'cosmetiquera',
   'tarjetero',

@@ -11,10 +11,42 @@ import 'package:flutter/foundation.dart';
 
 import '../data/accounts_orders/system_account_session_repository.dart';
 import '../data/customer_auth/customer_account_config.dart';
+import '../data/customer_auth/customer_auth_error.dart';
 import '../data/customer_auth/customer_session_repository.dart';
 import '../data/local/account_store.dart';
 import '../data/local/database.dart' as local show Account, OrderSummary;
 import '../data/repositories/order_history_repository.dart';
+
+/// Which of the two entry points a failure came from. They fail for different
+/// reasons and deserve different sentences: a Shopify login can be cancelled
+/// in a browser, and a Monetta password login cannot.
+enum AccountAuthFlow { shopify, monetta }
+
+/// A login failure the UI can render without ever printing an exception.
+class AccountError {
+  const AccountError({
+    required this.flow,
+    required this.kind,
+    this.debugDetail,
+  });
+
+  final AccountAuthFlow flow;
+
+  /// Precise for [AccountAuthFlow.shopify] (see
+  /// `data/customer_auth/customer_auth_error.dart`); coarse for
+  /// [AccountAuthFlow.monetta], where the accounts service reports failures
+  /// as bare status codes and the screen shows one generic sentence anyway.
+  final CustomerAuthErrorKind kind;
+
+  /// Logs and telemetry only — never rendered, never a token or a password.
+  final String? debugDetail;
+
+  /// The shopper backing out of the browser is not a problem to report.
+  bool get isSilent => kind == CustomerAuthErrorKind.cancelled;
+
+  @override
+  String toString() => 'AccountError(${flow.name}/${kind.name})';
+}
 
 class AccountController extends ChangeNotifier {
   AccountController({
@@ -43,7 +75,11 @@ class AccountController extends ChangeNotifier {
 
   local.Account? account;
   bool isLoading = false;
-  String? lastError;
+
+  /// The last failure, or null if the last attempt succeeded (or there has
+  /// been none). Classified, never a raw exception — the shopper must never
+  /// be shown a platform error string.
+  AccountError? lastError;
 
   /// "Mis pedidos" — real Shopify checkout orders and hand-entered WhatsApp
   /// apartado orders, unified (`docs/ACCOUNTS_AND_SYNC_PLAN.md` Phase 3).
@@ -65,6 +101,39 @@ class AccountController extends ChangeNotifier {
   bool get canRegister => _systemSessionRepository?.canRegister == true;
   bool get canSystemLogin => _systemSessionRepository?.canLogin == true;
 
+  /// Short-lived Shopify Customer token for first-party services acting on
+  /// behalf of the signed-in owner. This never exposes an Admin API token:
+  /// the control-plane service validates this customer token, checks the
+  /// owner role server-side, and keeps Shopify Admin credentials to itself.
+  Future<String?> accessTokenForAdmin() async {
+    final current = account;
+    final repository = _sessionRepository;
+    if (current == null ||
+        repository == null ||
+        current.authProvider != 'shopify') {
+      return null;
+    }
+    return repository.accessTokenFor(current.localAccountId);
+  }
+
+  /// Credential for customer-scoped Monetta backend routes. Shopify accounts
+  /// use their short-lived Customer Account token; legacy Monetta accounts use
+  /// the opaque server session already stored in the platform keychain.
+  Future<String?> accessTokenForBackend() async {
+    final current = account;
+    if (current == null) return null;
+    try {
+      if (current.authProvider == 'monetta') {
+        return _systemSessionRepository?.accessTokenFor(
+          current.localAccountId,
+        );
+      }
+      return _sessionRepository?.accessTokenFor(current.localAccountId);
+    } catch (_) {
+      return null;
+    }
+  }
+
   /// Restores whichever account this device was last signed into, if any —
   /// call once at startup so "still logged in" survives a restart. Cheap:
   /// reads local rows only, no network.
@@ -73,13 +142,72 @@ class AccountController extends ChangeNotifier {
     final accountId = device?.accountId;
     if (accountId == null) return;
     final restored = await _accountStore.byLocalId(accountId);
-    if (restored?.authProvider == 'monetta' &&
-        await _systemSessionRepository?.hasUsableLocalSession(accountId) !=
-            true) {
+    if (!await _hasUsableSessionFor(restored, accountId)) {
+      // Nothing to sign back in with — a secure-storage entry wiped by a
+      // reinstall or an OS-level credential reset. Detaching is what keeps
+      // this a clean guest state instead of a signed-in-looking screen whose
+      // every action fails. The guest bag and wishlist are untouched: they
+      // are device-scoped rows, not account-scoped ones.
       await _deviceStore.detachAccount(_deviceId);
       return;
     }
     account = restored;
+    notifyListeners();
+  }
+
+  Future<bool> _hasUsableSessionFor(
+    local.Account? restored,
+    String accountId,
+  ) async {
+    if (restored == null) return false;
+    if (restored.authProvider == 'monetta') {
+      return await _systemSessionRepository?.hasUsableLocalSession(accountId) ==
+          true;
+    }
+    // A Shopify account restored on a build with no Customer Account
+    // credentials compiled in cannot refresh anything, but it also has no
+    // broken affordance: nothing here needs an access token until the shopper
+    // asks for something that does. Keep the row, let the UI show them signed
+    // in, and let `revalidateSession` decide.
+    final repository = _sessionRepository;
+    if (repository == null) return true;
+    return repository.hasUsableLocalSession(accountId);
+  }
+
+  /// Confirms with Shopify — silently, no browser — that the restored session
+  /// is still real, and signs out locally if it is not. Safe to call
+  /// fire-and-forget right after [restore]: it never blocks the first frame,
+  /// and being offline is not treated as being signed out.
+  Future<void> revalidateSession() async {
+    final current = account;
+    final repository = _sessionRepository;
+    if (current == null ||
+        repository == null ||
+        current.authProvider == 'monetta') {
+      return;
+    }
+    try {
+      await repository.accessTokenFor(current.localAccountId);
+    } on CustomerAuthException catch (error) {
+      if (error.kind != CustomerAuthErrorKind.sessionExpired) return;
+      await _signOutLocally(repository, current.localAccountId);
+    } on NoActiveSessionException {
+      await _signOutLocally(repository, current.localAccountId);
+    }
+  }
+
+  Future<void> _signOutLocally(
+    CustomerSessionRepository repository,
+    String localAccountId,
+  ) async {
+    await repository.logout(localAccountId);
+    account = null;
+    orders = const [];
+    lastError = const AccountError(
+      flow: AccountAuthFlow.shopify,
+      kind: CustomerAuthErrorKind.sessionExpired,
+      debugDetail: 'revalidation found no usable session',
+    );
     notifyListeners();
   }
 
@@ -93,11 +221,17 @@ class AccountController extends ChangeNotifier {
       final session = await sessionRepository.login();
       account = session.account;
     } catch (error) {
-      // A cancelled system browser is the overwhelmingly common "failure"
-      // here (the shopper backed out) — surfaced the same as any other
-      // error rather than special-cased, since there is nothing more
-      // actionable to tell them either way.
-      lastError = '$error';
+      // Classified rather than stringified: a cancelled browser (by far the
+      // most common outcome that isn't success) must not read like a crash,
+      // and an AppAuth exception's own text is not something to put in front
+      // of a shopper.
+      lastError = AccountError(
+        flow: AccountAuthFlow.shopify,
+        kind: classifyCustomerAuthError(error),
+        debugDetail: error is CustomerAuthException
+            ? error.debugDetail
+            : error.runtimeType.toString(),
+      );
     } finally {
       isLoading = false;
       notifyListeners();
@@ -131,7 +265,7 @@ class AccountController extends ChangeNotifier {
             displayName?.trim().isEmpty == true ? null : displayName?.trim(),
       );
     } catch (error) {
-      lastError = '$error';
+      lastError = _monettaError(error);
     } finally {
       isLoading = false;
       notifyListeners();
@@ -153,13 +287,25 @@ class AccountController extends ChangeNotifier {
         password: password,
       );
     } catch (error) {
-      lastError = '$error';
+      lastError = _monettaError(error);
     } finally {
       isLoading = false;
       notifyListeners();
     }
     if (isSignedIn) await loadOrders();
   }
+
+  /// The accounts service reports every failure as a status code inside an
+  /// exception message, so there is no honest way to tell "wrong password"
+  /// from "service down" here. Kept deliberately coarse rather than guessed
+  /// at: the legacy password screen shows one sentence covering both, and
+  /// `debugDetail` keeps the message itself for logs. Never carries the
+  /// password — the exception is built from the response, not the request.
+  AccountError _monettaError(Object error) => AccountError(
+        flow: AccountAuthFlow.monetta,
+        kind: CustomerAuthErrorKind.unknown,
+        debugDetail: '$error',
+      );
 
   Future<void> logout() async {
     final current = account;
@@ -194,13 +340,18 @@ class AccountController extends ChangeNotifier {
     orders = await _orderHistoryRepository.loadCached(current.localAccountId);
     notifyListeners();
 
-    final shopifyCustomerId = current.shopifyCustomerId;
-    if (shopifyCustomerId != null) {
+    // The backend, not this local row, is authoritative for the Shopify
+    // linkage. This also lets a linked legacy Monetta account refresh orders
+    // even when its local cache does not yet contain the Shopify customer id.
+    final accessToken = await accessTokenForBackend();
+    if (accessToken != null) {
       await _orderHistoryRepository.refresh(
         accountId: current.localAccountId,
-        shopifyCustomerId: shopifyCustomerId,
+        accessToken: accessToken,
       );
-      orders = await _orderHistoryRepository.loadCached(current.localAccountId);
+      orders = await _orderHistoryRepository.loadCached(
+        current.localAccountId,
+      );
     }
 
     ordersLoading = false;

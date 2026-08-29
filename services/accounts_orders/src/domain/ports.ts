@@ -27,6 +27,9 @@ export interface AppAccountsRepository {
 }
 
 export interface CustomersRepository {
+  /** Creates the identity row without overwriting richer webhook-sourced PII. */
+  ensureExists(shopifyCustomerId: string): Promise<void>;
+
   upsert(record: CustomerRecord): Promise<void>;
 
   /** `customers/redact` — deletes the mirrored PII entirely. */
@@ -64,7 +67,12 @@ export interface WebhookEventsRepository {
 }
 
 export interface PushTokensRepository {
-  upsert(token: PushTokenRecord): Promise<void>;
+  /**
+   * Inserts or refreshes a device token without allowing one customer to
+   * overwrite a device already owned by another. False means ownership
+   * conflict.
+   */
+  upsert(token: PushTokenRecord): Promise<boolean>;
   deleteAllForCustomer(shopifyCustomerId: string): Promise<void>;
   deleteAll(): Promise<void>;
 }

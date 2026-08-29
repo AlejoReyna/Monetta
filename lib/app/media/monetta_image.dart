@@ -15,6 +15,7 @@ class MonettaImage extends StatefulWidget {
     this.fit = BoxFit.cover,
     this.cacheWidth = MediaUrl.cardWidth,
     this.onFailed,
+    this.fallbackLabel,
     super.key,
   });
 
@@ -22,6 +23,7 @@ class MonettaImage extends StatefulWidget {
   final BoxFit fit;
   final int cacheWidth;
   final VoidCallback? onFailed;
+  final String? fallbackLabel;
 
   @override
   State<MonettaImage> createState() => _MonettaImageState();
@@ -30,6 +32,7 @@ class MonettaImage extends StatefulWidget {
 class _MonettaImageState extends State<MonettaImage> {
   int _attempt = 0;
   bool _gaveUp = false;
+  bool _failureNotified = false;
 
   static const _delays = <Duration>[
     Duration(milliseconds: 400),
@@ -40,7 +43,7 @@ class _MonettaImageState extends State<MonettaImage> {
     if (_attempt >= _delays.length) {
       if (!_gaveUp) {
         _gaveUp = true;
-        widget.onFailed?.call();
+        _notifyFailure();
         if (mounted) setState(() {});
       }
       return;
@@ -52,12 +55,19 @@ class _MonettaImageState extends State<MonettaImage> {
     });
   }
 
+  void _notifyFailure() {
+    if (_failureNotified) return;
+    _failureNotified = true;
+    widget.onFailed?.call();
+  }
+
   @override
   void didUpdateWidget(covariant MonettaImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.url != widget.url) {
       _attempt = 0;
       _gaveUp = false;
+      _failureNotified = false;
     }
   }
 
@@ -65,9 +75,10 @@ class _MonettaImageState extends State<MonettaImage> {
   Widget build(BuildContext context) {
     final raw = widget.url;
     if (raw == null || raw.isEmpty || !MediaUrl.isHttps(raw)) {
-      return const _ImageFallback();
+      WidgetsBinding.instance.addPostFrameCallback((_) => _notifyFailure());
+      return _ImageFallback(label: widget.fallbackLabel);
     }
-    if (_gaveUp) return const _ImageFallback();
+    if (_gaveUp) return _ImageFallback(label: widget.fallbackLabel);
 
     final url = MediaUrl.sized(raw, width: widget.cacheWidth);
     return ColoredBox(
@@ -91,13 +102,35 @@ class _MonettaImageState extends State<MonettaImage> {
 }
 
 class _ImageFallback extends StatelessWidget {
-  const _ImageFallback();
+  const _ImageFallback({this.label});
+
+  final String? label;
 
   @override
   Widget build(BuildContext context) {
-    return const ColoredBox(
+    return ColoredBox(
       color: kMist,
-      child: Center(child: MonettaWordmark(height: 18)),
+      child: Center(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const MonettaWordmark(height: 18),
+            if (label != null) ...[
+              const SizedBox(height: 8),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 12),
+                child: Text(
+                  label!,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: sans(size: 9, color: kInkMuted),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
     );
   }
 }

@@ -1,0 +1,57 @@
+# Monetta Shopify app — production.
+# Do not deploy this config until the staging acceptance suite passes
+# (docs/SHOPIFY_PRODUCTION_IMPLEMENTATION_PLAN.md § 6 Phase 7).
+# Every mutating CLI command MUST use: --config production
+
+name = "Monetta"
+client_id = "REPLACE_AFTER_shopify_app_config_link"
+application_url = "https://REPLACE_PRODUCTION_BACKEND_HOST"
+embedded = false
+handle = "monetta"
+
+[access_scopes]
+scopes = "read_orders,read_customers,read_products"
+
+[auth]
+redirect_urls = [
+  "https://REPLACE_PRODUCTION_BACKEND_HOST/auth/callback"
+]
+
+[webhooks]
+api_version = "2026-07"
+
+[[webhooks.subscriptions]]
+topics = ["orders/create"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/orders/create"
+
+[[webhooks.subscriptions]]
+topics = ["orders/updated"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/orders/updated"
+
+[[webhooks.subscriptions]]
+topics = ["products/create"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/products/create"
+
+[[webhooks.subscriptions]]
+topics = ["products/update"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/products/update"
+
+# Compliance topics must be separate absolute paths — the server has no
+# catch-all /webhooks route. app/uninstalled is intentionally omitted until
+# a handler exists (otherwise Shopify would POST to a 404). Kept in sync
+# with staging and with src/api/server.ts by
+# services/accounts_orders/test/webhookRoutes.test.ts.
+[[webhooks.subscriptions]]
+compliance_topics = ["customers/data_request"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/customers/data_request"
+
+[[webhooks.subscriptions]]
+compliance_topics = ["customers/redact"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/customers/redact"
+
+[[webhooks.subscriptions]]
+compliance_topics = ["shop/redact"]
+uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/shop/redact"
+
+[build]
+automatically_update_urls_on_dev = false

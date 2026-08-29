@@ -12,6 +12,7 @@ interface AppAccountRow {
   email: string;
   display_name: string | null;
   email_verified: boolean;
+  shopify_customer_id: string | null;
   password_hash?: string | null;
   created_at: Date;
   updated_at: Date;
@@ -23,6 +24,7 @@ function fromRow(row: AppAccountRow): AppAccountRecord {
     email: row.email,
     displayName: row.display_name,
     emailVerified: row.email_verified,
+    shopifyCustomerId: row.shopify_customer_id,
     createdAt: row.created_at,
     updatedAt: row.updated_at,
   };
@@ -39,7 +41,8 @@ export class PgAppAccountsRepository implements AppAccountsRepository {
       // create an orphan account before the UNIQUE(device_id) upsert wins.
       await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [record.deviceId]);
       const existing = await client.query<AppAccountRow>(
-        `SELECT a.id, a.email, a.display_name, a.email_verified, a.created_at, a.updated_at
+        `SELECT a.id, a.email, a.display_name, a.email_verified, a.shopify_customer_id,
+                a.created_at, a.updated_at
            FROM app_accounts a
            JOIN app_sessions s ON s.account_id = a.id
           WHERE s.device_id = $1
@@ -52,14 +55,16 @@ export class PgAppAccountsRepository implements AppAccountsRepository {
         ? await client.query<AppAccountRow>(
             `INSERT INTO app_accounts (id, email, display_name, password_hash)
              VALUES ($1, $2, $3, $4)
-             RETURNING id, email, display_name, email_verified, created_at, updated_at`,
+             RETURNING id, email, display_name, email_verified, shopify_customer_id,
+                       created_at, updated_at`,
             [accountId, record.email, record.displayName, record.passwordHash],
           )
         : await client.query<AppAccountRow>(
             `UPDATE app_accounts
                 SET email = $2, display_name = $3, password_hash = $4, updated_at = now()
               WHERE id = $1
-              RETURNING id, email, display_name, email_verified, created_at, updated_at`,
+              RETURNING id, email, display_name, email_verified, shopify_customer_id,
+                        created_at, updated_at`,
             [accountId, record.email, record.displayName, record.passwordHash],
           );
 
@@ -85,7 +90,8 @@ export class PgAppAccountsRepository implements AppAccountsRepository {
 
   async findCredentialsByEmail(email: string): Promise<AppAccountCredentials | null> {
     const result = await this.pool.query<AppAccountRow>(
-      `SELECT id, email, display_name, email_verified, password_hash, created_at, updated_at
+      `SELECT id, email, display_name, email_verified, shopify_customer_id, password_hash,
+              created_at, updated_at
          FROM app_accounts
         WHERE lower(email) = lower($1)`,
       [email],
@@ -110,7 +116,8 @@ export class PgAppAccountsRepository implements AppAccountsRepository {
 
   async findByTokenHash(tokenHash: string): Promise<AppAccountRecord | null> {
     const result = await this.pool.query<AppAccountRow>(
-      `SELECT a.id, a.email, a.display_name, a.email_verified, a.created_at, a.updated_at
+      `SELECT a.id, a.email, a.display_name, a.email_verified, a.shopify_customer_id,
+              a.created_at, a.updated_at
          FROM app_accounts a
          JOIN app_sessions s ON s.account_id = a.id
         WHERE s.token_hash = $1 AND s.expires_at > now()`,

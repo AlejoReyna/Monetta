@@ -3,8 +3,7 @@
 /// Optional by design — skipping it falls back to trending, never an empty
 /// screen. See `lib/reco/README.md` § 5.
 ///
-/// Styled as a full menu panel — the same header chrome as [_MainDrawer] in
-/// `features/home/home_screen.dart` (wordmark, close, hairline) — rather than
+/// Styled as a full menu panel — wordmark, close, hairline — rather than
 /// the small rounded card a `showModalBottomSheet` gives by default. It still
 /// arrives *through* that same call (`isScrollControlled: true`, and
 /// `bottomSheetTheme` already squares the corners — see `app/theme.dart`), it

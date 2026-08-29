@@ -8,6 +8,7 @@ library;
 import '../../domain/cart.dart';
 import '../../domain/collection.dart';
 import '../../domain/product.dart';
+import 'shopify_gid.dart';
 
 /// Unwraps the `{edges: [{node: {...}}]}` shape Shopify uses everywhere.
 List<Map<String, dynamic>> edgeNodes(Object? connection) {
@@ -41,7 +42,7 @@ String? metafieldValue(Object? metafield) {
 Product productFromJson(Map<String, dynamic> json) {
   final variants = edgeNodes(json['variants']).map((v) {
     return ProductVariant(
-      id: '${v['id']}',
+      id: shopifyVariantGid(v['id']),
       title: '${v['title'] ?? ''}',
       price: money(v['price']) ?? 0,
       available: v['availableForSale'] == true,
@@ -61,7 +62,7 @@ Product productFromJson(Map<String, dynamic> json) {
       .toList();
 
   return Product(
-    id: '${json['id']}',
+    id: shopifyProductGid(json['id']),
     handle: '${json['handle'] ?? ''}',
     title: '${json['title'] ?? ''}',
     vendor: '${json['vendor'] ?? ''}',
@@ -140,32 +141,130 @@ Cart cartFromJson(Map<String, dynamic> json) {
     final product = merchandise is Map ? merchandise['product'] : null;
     final image = merchandise is Map ? merchandise['image'] : null;
     final cost = line['cost'];
+    final discountAllocations = (line['discountAllocations'] as List?)
+            ?.whereType<Map<String, dynamic>>()
+            .map(
+              (allocation) => CartDiscountAllocation(
+                discountedAmount: _cartMoney(
+                  allocation['discountedAmount'],
+                ),
+              ),
+            )
+            .toList() ??
+        const <CartDiscountAllocation>[];
 
+    final amountPerQuantity = _cartMoney(
+      cost is Map ? cost['amountPerQuantity'] : null,
+    );
     return CartLine(
       id: '${line['id']}',
-      variantId: merchandise is Map ? '${merchandise['id']}' : '',
-      productId: product is Map ? '${product['id']}' : '',
+      variantId: shopifyVariantGid(
+        merchandise is Map ? merchandise['id'] : null,
+      ),
+      productId: shopifyProductGid(product is Map ? product['id'] : null),
       title: product is Map ? '${product['title'] ?? ''}' : '',
       variantTitle: merchandise is Map ? '${merchandise['title'] ?? ''}' : '',
       quantity: (line['quantity'] as num?)?.toInt() ?? 0,
-      unitPrice: cost is Map ? money(cost['amountPerQuantity']) ?? 0 : 0,
+      cost: CartLineCost(
+        amountPerQuantity: amountPerQuantity,
+        compareAt: cost is Map && cost['compareAtAmountPerQuantity'] != null
+            ? _cartMoney(cost['compareAtAmountPerQuantity'])
+            : null,
+        subtotal: _cartMoney(
+          cost is Map ? cost['subtotalAmount'] : null,
+          fallback: amountPerQuantity,
+        ),
+        total: _cartMoney(
+          cost is Map ? cost['totalAmount'] : null,
+          fallback: amountPerQuantity,
+        ),
+      ),
       imageUrl: image is Map ? image['url'] as String? : null,
+      discountAllocations: discountAllocations,
     );
   }).toList();
 
   final cost = json['cost'];
-  final subtotal = cost is Map ? money(cost['subtotalAmount']) ?? 0 : 0.0;
-  final currency = cost is Map && cost['subtotalAmount'] is Map
-      ? '${(cost['subtotalAmount'] as Map)['currencyCode'] ?? 'MXN'}'
-      : 'MXN';
+  final subtotal = _cartMoney(cost is Map ? cost['subtotalAmount'] : null);
+  final buyer = json['buyerIdentity'];
+  final discountCodes = (json['discountCodes'] as List?)
+          ?.whereType<Map<String, dynamic>>()
+          .map(
+            (code) => CartDiscountCode(
+              code: '${code['code'] ?? ''}',
+              applicable: code['applicable'] == true,
+            ),
+          )
+          .toList() ??
+      const <CartDiscountCode>[];
+  final discountApplications = (json['discountApplications'] as List?)
+          ?.whereType<Map<String, dynamic>>()
+          .map(_cartDiscountApplication)
+          .toList() ??
+      const <CartDiscountApplication>[];
 
   return Cart(
     id: '${json['id']}',
     checkoutUrl: '${json['checkoutUrl'] ?? ''}',
+    createdAt: _date(json['createdAt']),
+    updatedAt: _date(json['updatedAt']),
     lines: lines,
-    subtotalAmount: subtotal,
     totalQuantity: (json['totalQuantity'] as num?)?.toInt() ?? 0,
-    currencyCode: currency,
+    buyerIdentity: CartBuyerSummary(
+      countryCode: buyer is Map ? buyer['countryCode'] as String? : null,
+      isAuthenticated: buyer is Map && buyer['customer'] is Map,
+    ),
+    cost: CartCost(
+      subtotal: subtotal,
+      total: _cartMoney(
+        cost is Map ? cost['totalAmount'] : null,
+        fallback: subtotal,
+      ),
+      checkoutCharge: cost is Map && cost['checkoutChargeAmount'] != null
+          ? _cartMoney(cost['checkoutChargeAmount'])
+          : null,
+      subtotalEstimated: cost is Map && cost['subtotalAmountEstimated'] == true,
+      totalEstimated: cost is Map && cost['totalAmountEstimated'] == true,
+    ),
+    discountCodes: discountCodes,
+    discountApplications: discountApplications,
+  );
+}
+
+CartMoney _cartMoney(Object? value, {CartMoney? fallback}) {
+  if (value is Map) {
+    final amount = value['amount'];
+    final currency = value['currencyCode'];
+    if (amount is String && currency is String && currency.isNotEmpty) {
+      return CartMoney(amount: amount, currencyCode: currency);
+    }
+  }
+  if (fallback != null) return fallback;
+  throw const FormatException('Invalid Shopify cart money');
+}
+
+CartDiscountApplication _cartDiscountApplication(Map<String, dynamic> json) {
+  final value = json['value'];
+  final kind = switch (json['__typename']) {
+    'CartAutomaticDiscountApplication' => CartDiscountApplicationKind.automatic,
+    'CartCodeDiscountApplication' => CartDiscountApplicationKind.code,
+    'CartCustomDiscountApplication' => CartDiscountApplicationKind.custom,
+    _ => CartDiscountApplicationKind.unknown,
+  };
+  return CartDiscountApplication(
+    kind: kind,
+    allocationMethod: '${json['allocationMethod'] ?? ''}',
+    targetSelection: '${json['targetSelection'] ?? ''}',
+    targetType: '${json['targetType'] ?? ''}',
+    amount: value is Map && value['amount'] != null ? _cartMoney(value) : null,
+    percentage: value is Map && value['percentage'] != null
+        ? '${value['percentage']}'
+        : null,
+    title: json['title'] is String ? json['title'] as String : null,
+    code: json['code'] is String ? json['code'] as String : null,
+    totalAllocatedAmount: json['totalAllocatedAmount'] is Map
+        ? _cartMoney(json['totalAllocatedAmount'])
+        : null,
   );
 }
 

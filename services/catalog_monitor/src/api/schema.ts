@@ -1,10 +1,16 @@
-import type { Availability, SourceId } from '../domain/types.js';
+import { SOURCE_IDS, type Availability, type CatalogVertical, type SourceId } from '../domain/types.js';
 import type { SourceHealth } from '../monitor/health.js';
 import { SOURCES } from '../domain/types.js';
 import type {
   CatalogDataOrigin,
   PresentedCatalogProduct,
 } from '../catalog/curatedUsCatalog.js';
+import {
+  DEFAULT_RETAIL_PRICING_POLICY,
+  quoteRetailPrice,
+  type CommissionRule,
+  type RetailPricingPolicy,
+} from '../pricing/commission.js';
 
 /**
  * The public, versioned response shape. `schemaVersion` bumps on any
@@ -17,11 +23,14 @@ export interface ExternalCatalogItemV1 {
   readonly sourceScopedId: string;
   readonly source: SourceId;
   readonly merchant: string;
+  readonly vertical: CatalogVertical;
   readonly title: string;
   readonly brand: string;
   readonly category: string | null;
   readonly imageUrl: string | null;
   readonly price: { readonly amount: number; readonly currency: 'USD' } | null;
+  readonly suggestedRetailPrice: { readonly amount: number; readonly currency: 'MXN' } | null;
+  readonly commission: ExternalCatalogCommissionV1 | null;
   readonly availability: Availability;
   readonly detailUrl: string;
   readonly lastObservedAt: string;
@@ -37,8 +46,17 @@ export interface ExternalCatalogVariantV1 {
   readonly colorCode: string | null;
   readonly imageUrl: string | null;
   readonly price: { readonly amount: number; readonly currency: 'USD' } | null;
+  readonly suggestedRetailPrice: { readonly amount: number; readonly currency: 'MXN' } | null;
   readonly availability: Availability;
   readonly detailUrl: string;
+}
+
+export interface ExternalCatalogCommissionV1 {
+  readonly sourceCost: { readonly amount: number; readonly currency: 'MXN' };
+  readonly rate: number;
+  readonly amount: { readonly amount: number; readonly currency: 'MXN' };
+  readonly usdToMxnRate: number;
+  readonly rule: CommissionRule;
 }
 
 export interface ExternalCatalogSourceStatusV1 {
@@ -58,7 +76,10 @@ export interface ExternalCatalogResponseV1 {
   readonly items: readonly ExternalCatalogItemV1[];
 }
 
-function toItem(record: PresentedCatalogProduct): ExternalCatalogItemV1 {
+function toItem(
+  record: PresentedCatalogProduct,
+  pricingPolicy: RetailPricingPolicy,
+): ExternalCatalogItemV1 {
   const storedVariants = record.variants ?? [];
   const variants = (
     storedVariants.length > 0
@@ -76,30 +97,61 @@ function toItem(record: PresentedCatalogProduct): ExternalCatalogItemV1 {
           },
         ]
   )
-    .map((variant): ExternalCatalogVariantV1 => ({
-      variantId: variant.variantId,
-      sku: variant.sku,
-      colorName: variant.colorName,
-      colorCode: variant.colorCode,
-      imageUrl: variant.imageUrl,
-      price:
-        variant.priceUsd === null
+    .map((variant): ExternalCatalogVariantV1 => {
+      const quote = quoteRetailPrice(
+        record.sourceId,
+        record.externalId,
+        variant.priceUsd,
+        pricingPolicy,
+      );
+      return {
+        variantId: variant.variantId,
+        sku: variant.sku,
+        colorName: variant.colorName,
+        colorCode: variant.colorCode,
+        imageUrl: variant.imageUrl,
+        price:
+          variant.priceUsd === null
+            ? null
+            : { amount: variant.priceUsd, currency: 'USD' },
+        suggestedRetailPrice: quote === null
           ? null
-          : { amount: variant.priceUsd, currency: 'USD' },
-      availability: variant.availability,
-      detailUrl: variant.detailUrl,
-    }))
+          : { amount: quote.suggestedRetailPriceMxn, currency: 'MXN' },
+        availability: variant.availability,
+        detailUrl: variant.detailUrl,
+      };
+    })
     .sort((a, b) => a.variantId.localeCompare(b.variantId));
+
+  const quote = quoteRetailPrice(
+    record.sourceId,
+    record.externalId,
+    record.priceUsd,
+    pricingPolicy,
+  );
 
   return {
     sourceScopedId: `${record.sourceId}:${record.externalId}`,
     source: record.sourceId,
     merchant: SOURCES[record.sourceId].merchant,
+    vertical: SOURCES[record.sourceId].vertical,
     title: record.title,
     brand: record.brand,
     category: record.category,
     imageUrl: record.imageUrl,
     price: record.priceUsd === null ? null : { amount: record.priceUsd, currency: 'USD' },
+    suggestedRetailPrice: quote === null
+      ? null
+      : { amount: quote.suggestedRetailPriceMxn, currency: 'MXN' },
+    commission: quote === null
+      ? null
+      : {
+          sourceCost: { amount: quote.sourceCostMxn, currency: 'MXN' },
+          rate: quote.commissionRate,
+          amount: { amount: quote.commissionAmountMxn, currency: 'MXN' },
+          usdToMxnRate: quote.usdToMxnRate,
+          rule: quote.rule,
+        },
     availability: record.availability,
     detailUrl: record.canonicalUrl,
     lastObservedAt: record.lastSeenAt.toISOString(),
@@ -118,12 +170,15 @@ function toItem(record: PresentedCatalogProduct): ExternalCatalogItemV1 {
 export function buildExternalCatalogResponse(
   activeProducts: readonly PresentedCatalogProduct[],
   healthBySource: ReadonlyMap<SourceId, SourceHealth>,
+  pricingPolicy: RetailPricingPolicy = DEFAULT_RETAIL_PRICING_POLICY,
+  sourceIds: readonly SourceId[] = SOURCE_IDS,
 ): ExternalCatalogResponseV1 {
   const items = activeProducts
-    .map(toItem)
+    .map((record) => toItem(record, pricingPolicy))
     .sort((a, b) => a.sourceScopedId.localeCompare(b.sourceScopedId));
 
-  const sources: ExternalCatalogSourceStatusV1[] = Object.values(SOURCES).map((source) => {
+  const sources: ExternalCatalogSourceStatusV1[] = sourceIds.map((sourceId) => {
+    const source = SOURCES[sourceId];
     const health = healthBySource.get(source.id);
     return {
       source: source.id,

@@ -1,35 +1,100 @@
-/// The account entry point — reachable from the home drawer, never forced.
+/// The signed-in account page.
 ///
-/// `docs/CHECKOUT_DESIGN.md` states "no account wall" as a design rule for
-/// checkout; this screen is the other half of that promise. Signed out is a
-/// complete, ordinary state here, not an error or a nag — see
-/// `lib/data/customer_auth/README.md` § 5.
+/// Signed-out shoppers never see a Flutter login page: [openAccount] launches
+/// Shopify's hosted authentication first and only pushes this route after a
+/// successful callback.
 library;
 
 import 'package:flutter/material.dart';
 
 import '../../app/account_controller.dart';
 import '../../app/theme.dart';
+import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
 
+/// Opens the hosted Shopify flow when needed, then presents the signed-in
+/// account. Keeping authentication before the route push prevents the old
+/// in-app login design from flashing underneath the system browser.
+Future<void> openAccount(
+  BuildContext context, {
+  required AccountController controller,
+  bool Function()? canOpenAdmin,
+  VoidCallback? onOpenAdmin,
+  VoidCallback? onOpenPartner,
+}) async {
+  if (controller.isLoading) return;
+
+  if (!controller.isSignedIn) {
+    if (!controller.canLogin) {
+      _showAccountMessage(
+        context,
+        'El inicio de sesión no está disponible en esta versión de la app.',
+      );
+      return;
+    }
+
+    await controller.login();
+    if (!context.mounted) return;
+    if (!controller.isSignedIn) {
+      final error = controller.lastError;
+      if (error != null && !error.isSilent) {
+        _showAccountMessage(context, _shopifyErrorMessage(error.kind));
+      }
+      return;
+    }
+  }
+
+  if (!context.mounted) return;
+  await Navigator.of(context).push(
+    MaterialPageRoute<void>(
+      builder: (_) => AccountScreen(
+        controller: controller,
+        canOpenAdmin: canOpenAdmin,
+        onOpenAdmin: onOpenAdmin,
+        onOpenPartner: onOpenPartner,
+      ),
+    ),
+  );
+}
+
+void _showAccountMessage(BuildContext context, String message) {
+  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+    SnackBar(content: Text(message)),
+  );
+}
+
 class AccountScreen extends StatelessWidget {
-  const AccountScreen({required this.controller, super.key});
+  const AccountScreen({
+    required this.controller,
+    this.canOpenAdmin,
+    this.onOpenAdmin,
+    this.onOpenPartner,
+    super.key,
+  });
 
   final AccountController controller;
+
+  /// Owner administration remains an optional capability so account flows
+  /// stay reusable in tests and in builds without a configured control plane.
+  final bool Function()? canOpenAdmin;
+  final VoidCallback? onOpenAdmin;
+  final VoidCallback? onOpenPartner;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Mi cuenta')),
+      appBar: AppBar(title: const MonettaWordmark.appBar()),
       body: SafeArea(
         child: ListenableBuilder(
           listenable: controller,
           builder: (context, _) => controller.isSignedIn
-              ? _SignedIn(controller: controller)
-              : Padding(
-                  padding: const EdgeInsets.all(24),
-                  child: _SignedOut(controller: controller),
-                ),
+              ? _SignedIn(
+                  controller: controller,
+                  showAdmin: canOpenAdmin?.call() == true,
+                  onOpenAdmin: onOpenAdmin,
+                  onOpenPartner: onOpenPartner,
+                )
+              : const SizedBox.shrink(),
         ),
       ),
     );
@@ -37,9 +102,24 @@ class AccountScreen extends StatelessWidget {
 }
 
 class _SignedIn extends StatelessWidget {
-  const _SignedIn({required this.controller});
+  const _SignedIn({
+    required this.controller,
+    required this.showAdmin,
+    required this.onOpenAdmin,
+    required this.onOpenPartner,
+  });
 
   final AccountController controller;
+  final bool showAdmin;
+  final VoidCallback? onOpenAdmin;
+  final VoidCallback? onOpenPartner;
+
+  Future<void> _logout(BuildContext context) async {
+    await controller.logout();
+    if (context.mounted && Navigator.of(context).canPop()) {
+      Navigator.of(context).pop();
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -50,12 +130,72 @@ class _SignedIn extends StatelessWidget {
         Text('Sesión iniciada', style: display(20)),
         const SizedBox(height: 8),
         Text(
-          account.email ?? account.displayName ?? 'Tu cuenta',
+          account.displayName ?? account.email ?? 'Tu cuenta',
           style: sans(size: 14, color: kInkMuted),
         ),
+        if (account.displayName != null && account.email != null) ...[
+          const SizedBox(height: 2),
+          Text(account.email!, style: sans(size: 12, color: kInkMuted)),
+        ],
+        if (showAdmin && onOpenAdmin != null) ...[
+          const SizedBox(height: 24),
+          InkWell(
+            key: const ValueKey('open-owner-admin'),
+            onTap: onOpenAdmin,
+            child: Container(
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: kInk,
+                border: Border.all(color: kGold, width: .6),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.admin_panel_settings_outlined,
+                    color: kGold,
+                    size: 23,
+                  ),
+                  const SizedBox(width: 14),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'ADMINISTRAR MONETTA',
+                          style: eyebrow(
+                            size: 9,
+                            color: kGold,
+                            weight: FontWeight.w700,
+                          ),
+                        ),
+                        const SizedBox(height: 3),
+                        Text(
+                          'Productos, portada, fuentes y sincronización',
+                          style: sans(
+                            size: 11,
+                            color: const Color(0xFFD2D2D2),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const Icon(
+                    Icons.arrow_forward_rounded,
+                    color: Colors.white,
+                    size: 19,
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+        if (onOpenPartner != null) ...[
+          const SizedBox(height: 18),
+          _PartnerAccountLink(onTap: onOpenPartner!),
+        ],
         const SizedBox(height: 28),
         FilledButton(
-          onPressed: controller.isLoading ? null : controller.logout,
+          onPressed: controller.isLoading ? null : () => _logout(context),
           child: controller.isLoading
               ? const SizedBox(
                   width: 18,
@@ -153,165 +293,62 @@ class _OrderRow extends StatelessWidget {
   }
 }
 
-class _SignedOut extends StatefulWidget {
-  const _SignedOut({required this.controller});
+class _PartnerAccountLink extends StatelessWidget {
+  const _PartnerAccountLink({required this.onTap});
 
-  final AccountController controller;
-
-  @override
-  State<_SignedOut> createState() => _SignedOutState();
-}
-
-class _SignedOutState extends State<_SignedOut> {
-  final _formKey = GlobalKey<FormState>();
-  final _email = TextEditingController();
-  final _displayName = TextEditingController();
-  final _password = TextEditingController();
-  bool _isRegistering = false;
-
-  @override
-  void dispose() {
-    _email.dispose();
-    _displayName.dispose();
-    _password.dispose();
-    super.dispose();
-  }
-
-  void _register() {
-    if (_formKey.currentState?.validate() != true) return;
-    widget.controller.register(
-      email: _email.text,
-      password: _password.text,
-      displayName: _displayName.text,
-    );
-  }
-
-  void _login() {
-    if (_formKey.currentState?.validate() != true) return;
-    widget.controller.loginWithSystemAccount(
-      email: _email.text,
-      password: _password.text,
-    );
-  }
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final controller = widget.controller;
-    final canSubmit =
-        _isRegistering ? controller.canRegister : controller.canSystemLogin;
-    return Form(
-      key: _formKey,
-      child: ListView(
-        children: [
-          Text(
-            _isRegistering ? 'Crea tu cuenta' : 'Inicia sesión',
-            style: display(20),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            _isRegistering
-                ? 'Regístrate directamente con Monetta. No necesitas una cuenta de Shopify.'
-                : 'Entra con el correo y contraseña de tu cuenta Monetta.',
-            style: sans(size: 13, color: kInkMuted, height: 1.5),
-          ),
-          const SizedBox(height: 24),
-          SegmentedButton<bool>(
-            segments: const [
-              ButtonSegment(value: false, label: Text('INICIAR SESIÓN')),
-              ButtonSegment(value: true, label: Text('REGISTRARME')),
-            ],
-            selected: {_isRegistering},
-            onSelectionChanged: controller.isLoading
-                ? null
-                : (selection) => setState(() {
-                      _isRegistering = selection.single;
-                      _formKey.currentState?.reset();
-                    }),
-          ),
-          const SizedBox(height: 24),
-          if (_isRegistering) ...[
-            TextFormField(
-              controller: _displayName,
-              enabled: canSubmit && !controller.isLoading,
-              textCapitalization: TextCapitalization.words,
-              autofillHints: const [AutofillHints.name],
-              decoration: const InputDecoration(labelText: 'Nombre (opcional)'),
+    return InkWell(
+      key: const ValueKey('account-open-partner'),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: kMist,
+          border: Border.all(color: kLine),
+        ),
+        child: Row(
+          children: [
+            const Icon(Icons.storefront_outlined, size: 21, color: kGold),
+            const SizedBox(width: 13),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('VENDE CON MONETTA', style: eyebrow(size: 9)),
+                  const SizedBox(height: 3),
+                  Text(
+                    'Catálogos y cotizaciones para tu negocio',
+                    style: sans(size: 11.5, color: kInkMuted),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 14),
+            const Icon(Icons.arrow_forward_rounded, size: 18),
           ],
-          TextFormField(
-            controller: _email,
-            enabled: canSubmit && !controller.isLoading,
-            keyboardType: TextInputType.emailAddress,
-            autofillHints: const [AutofillHints.email],
-            autocorrect: false,
-            decoration: const InputDecoration(labelText: 'Correo electrónico'),
-            validator: (value) {
-              final email = value?.trim() ?? '';
-              if (email.isEmpty ||
-                  !email.contains('@') ||
-                  !email.contains('.')) {
-                return 'Escribe un correo válido.';
-              }
-              return null;
-            },
-          ),
-          const SizedBox(height: 14),
-          TextFormField(
-            controller: _password,
-            enabled: canSubmit && !controller.isLoading,
-            obscureText: true,
-            enableSuggestions: false,
-            autocorrect: false,
-            autofillHints: _isRegistering
-                ? const [AutofillHints.newPassword]
-                : const [AutofillHints.password],
-            decoration: const InputDecoration(labelText: 'Contraseña'),
-            validator: (value) {
-              if ((value ?? '').length < 8) {
-                return 'Usa al menos 8 caracteres.';
-              }
-              return null;
-            },
-            onFieldSubmitted: (_) => _isRegistering ? _register() : _login(),
-          ),
-          const SizedBox(height: 24),
-          if (controller.lastError != null) ...[
-            Text(
-              _isRegistering
-                  ? 'No se pudo crear la cuenta. Revisa los datos o usa Iniciar sesión.'
-                  : 'Correo o contraseña incorrectos.',
-              style: sans(size: 12, color: kInk),
-            ),
-            const SizedBox(height: 12),
-          ],
-          FilledButton(
-            onPressed: (!canSubmit || controller.isLoading)
-                ? null
-                : (_isRegistering ? _register : _login),
-            child: controller.isLoading
-                ? const SizedBox(
-                    width: 18,
-                    height: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(_isRegistering ? 'CREAR CUENTA' : 'ENTRAR'),
-          ),
-          if (!canSubmit) ...[
-            const SizedBox(height: 12),
-            Text(
-              'El servicio de cuentas aún no está configurado en esta versión.',
-              style: sans(size: 11, color: kInkMuted),
-            ),
-          ] else ...[
-            const SizedBox(height: 12),
-            Text(
-              'Tu sesión se guarda de forma segura en este dispositivo.',
-              style: sans(size: 11, color: kInkMuted),
-            ),
-          ],
-        ],
+        ),
       ),
     );
+  }
+}
+
+String _shopifyErrorMessage(CustomerAuthErrorKind kind) {
+  switch (kind) {
+    case CustomerAuthErrorKind.cancelled:
+      // Never rendered — `AccountError.isSilent` filters this out before the
+      // UI asks for a sentence. Present so this switch stays exhaustive.
+      return '';
+    case CustomerAuthErrorKind.offline:
+      return 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
+    case CustomerAuthErrorKind.configuration:
+      return 'El inicio de sesión no está disponible en esta versión de la app.';
+    case CustomerAuthErrorKind.sessionExpired:
+      return 'Tu sesión terminó. Inicia sesión de nuevo.';
+    case CustomerAuthErrorKind.server:
+      return 'Shopify no pudo completar el inicio de sesión. Inténtalo en un momento.';
+    case CustomerAuthErrorKind.unknown:
+      return 'No se pudo iniciar sesión. Inténtalo de nuevo.';
   }
 }

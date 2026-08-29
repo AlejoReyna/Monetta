@@ -17,6 +17,15 @@ import {
   MINIMUM_PRODUCTS_PER_SOURCE,
   withMinimumUsCatalog,
 } from '../catalog/curatedUsCatalog.js';
+import {
+  curateCatalog,
+  DEFAULT_CURATION_POLICY,
+  type CatalogCurationPolicy,
+} from '../catalog/curation.js';
+import {
+  DEFAULT_RETAIL_PRICING_POLICY,
+  type RetailPricingPolicy,
+} from '../pricing/commission.js';
 
 export interface ServerDeps {
   readonly products: ProductRepository;
@@ -24,6 +33,9 @@ export interface ServerDeps {
   readonly now?: () => Date;
   /** Test seam; production defaults to the documented 10-per-source floor. */
   readonly minimumProductsPerSource?: number;
+  readonly curationPolicy?: CatalogCurationPolicy;
+  readonly pricingPolicy?: RetailPricingPolicy;
+  readonly enabledSourceIds?: readonly SourceId[];
 }
 
 export function createApp(deps: ServerDeps): Express {
@@ -69,11 +81,22 @@ export function createApp(deps: ServerDeps): Express {
         deps.products.getAllActiveProducts(),
         allSourceHealth(deps),
       ]);
+      const enabledSourceIds = deps.enabledSourceIds ?? SOURCE_IDS;
+      const enabledSources = new Set<SourceId>(enabledSourceIds);
       const presentableProducts = withMinimumUsCatalog(
-        activeProducts,
+        activeProducts.filter((record) => enabledSources.has(record.sourceId)),
         deps.minimumProductsPerSource ?? MINIMUM_PRODUCTS_PER_SOURCE,
+      ).filter((record) => enabledSources.has(record.sourceId));
+      const curatedProducts = curateCatalog(
+        presentableProducts,
+        deps.curationPolicy ?? DEFAULT_CURATION_POLICY,
       );
-      const body = buildExternalCatalogResponse(presentableProducts, healthBySource);
+      const body = buildExternalCatalogResponse(
+        curatedProducts,
+        healthBySource,
+        deps.pricingPolicy ?? DEFAULT_RETAIL_PRICING_POLICY,
+        enabledSourceIds,
+      );
       const json = JSON.stringify(body);
       const etag = computeEtag(json);
 
@@ -106,7 +129,9 @@ export function createApp(deps: ServerDeps): Express {
 
 async function allSourceHealth(deps: ServerDeps): Promise<Map<SourceId, SourceHealth>> {
   const entries = await Promise.all(
-    SOURCE_IDS.map(async (id) => [id, await evaluateSourceHealth(id, deps.crawlRuns, deps.now?.())] as const),
+    (deps.enabledSourceIds ?? SOURCE_IDS).map(
+      async (id) => [id, await evaluateSourceHealth(id, deps.crawlRuns, deps.now?.())] as const,
+    ),
   );
   return new Map(entries);
 }
@@ -118,6 +143,20 @@ if (isMain) {
   const app = createApp({
     products: new PgProductRepository(pool),
     crawlRuns: new PgCrawlRunRepository(pool),
+    curationPolicy: {
+      fashionItemsPerSource: config.fashionItemsPerSource,
+      perfumeItemsPerSource: config.perfumeItemsPerSource,
+      maximumItems: config.maximumCatalogItems,
+    },
+    pricingPolicy: {
+      usdToMxnRate: config.usdToMxnRate,
+      defaultCommissionBps: config.defaultCommissionBps,
+      highValueThresholdMxn: config.highValueThresholdMxn,
+      highValueCommissionBps: config.highValueCommissionBps,
+      sourceCommissionBps: config.sourceCommissionBps,
+      productCommissionBps: config.productCommissionBps,
+    },
+    enabledSourceIds: config.enabledSourceIds,
   });
   const server = app.listen(config.port, () => {
     logger.info('catalog monitor API listening', { port: config.port });

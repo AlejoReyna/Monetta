@@ -6,10 +6,13 @@ plugins {
 
 android {
     namespace = "mx.monetta.monetta_app"
-    compileSdk = flutter.compileSdkVersion
+    // Checkout Sheet Kit 3.6.1 requires compileSdk 35+ and minSdk 23.
+    // Existing AndroidX/plugins in this app require compileSdk 36+.
+    compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
+        isCoreLibraryDesugaringEnabled = true
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
     }
@@ -19,21 +22,19 @@ android {
         applicationId = "mx.monetta.monetta_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // flutter_appauth already requires API 24; this still exceeds Checkout
+        // Sheet Kit's API 23 minimum.
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Customer Account API login callback (flutter_appauth /
-        // data/customer_auth). Shopify requires the mobile redirect scheme
-        // "shop.{shop_id}.*" — REPLACE_WITH_SHOP_ID must become the real
-        // shop id from the Partner-dashboard Customer Account API
-        // registration before login can work; see
-        // lib/data/customer_auth/README.md § 8. Must stay lowercase (see
-        // flutter_appauth's README) and in sync with
-        // CustomerAccountConfig.redirectUri and ios/Runner/Info.plist.
+        // Customer Account API login callback (flutter_appauth).
+        // Staging shop id for monetta-staging.myshopify.com. Production
+        // needs a separate flavor (different shop id). Lowercase, in sync
+        // with CUSTOMER_ACCOUNT_SHOP_ID / ios/Runner/Info.plist.
         manifestPlaceholders += mapOf(
-            "appAuthRedirectScheme" to "shop.replace_with_shop_id.oauth"
+            "appAuthRedirectScheme" to "shop.90228850722.oauth"
         )
     }
 
@@ -44,6 +45,11 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+    implementation("com.shopify:checkout-sheet-kit:3.6.1")
 }
 
 kotlin {

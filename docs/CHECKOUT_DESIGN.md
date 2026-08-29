@@ -54,5 +54,6 @@ Shopify Storefront Cart, prefill buyer identity, attach private attribution,
 and open `cart.checkoutUrl`. Shopify then owns payment methods, authentication
 and PCI scope.
 
-Until Shopify credentials are connected, the final action intentionally opens
-an explicit secure-handoff preview instead of pretending an order was placed.
+If the native Shopify bridge is unavailable, the final action shows a safe
+unavailable message and preserves the bag. The app never simulates payment or
+pretends an order was placed.

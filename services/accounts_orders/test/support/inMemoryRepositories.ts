@@ -35,6 +35,7 @@ export class InMemoryAppAccountsRepository implements AppAccountsRepository {
       email: record.email,
       displayName: record.displayName,
       emailVerified: existing?.emailVerified ?? false,
+      shopifyCustomerId: existing?.shopifyCustomerId ?? null,
       createdAt: existing?.createdAt ?? now,
       updatedAt: now,
     };
@@ -88,6 +89,18 @@ export class InMemoryAppAccountsRepository implements AppAccountsRepository {
 
 export class InMemoryCustomersRepository implements CustomersRepository {
   readonly byId = new Map<string, CustomerRecord>();
+
+  async ensureExists(shopifyCustomerId: string): Promise<void> {
+    if (this.byId.has(shopifyCustomerId)) return;
+    this.byId.set(shopifyCustomerId, {
+      shopifyCustomerId,
+      email: null,
+      firstName: null,
+      lastName: null,
+      phone: null,
+      marketingConsent: false,
+    });
+  }
 
   async upsert(record: CustomerRecord): Promise<void> {
     this.byId.set(record.shopifyCustomerId, record);
@@ -171,8 +184,17 @@ export class InMemoryWebhookEventsRepository implements WebhookEventsRepository 
 export class InMemoryPushTokensRepository implements PushTokensRepository {
   readonly byDeviceId = new Map<string, PushTokenRecord>();
 
-  async upsert(token: PushTokenRecord): Promise<void> {
+  async upsert(token: PushTokenRecord): Promise<boolean> {
+    const existing = this.byDeviceId.get(token.deviceId);
+    if (
+      existing?.customerId !== null &&
+      existing?.customerId !== undefined &&
+      existing.customerId !== token.customerId
+    ) {
+      return false;
+    }
     this.byDeviceId.set(token.deviceId, token);
+    return true;
   }
 
   async deleteAllForCustomer(shopifyCustomerId: string): Promise<void> {

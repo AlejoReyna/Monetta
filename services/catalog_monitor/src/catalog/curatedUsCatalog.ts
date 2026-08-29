@@ -9,6 +9,14 @@ import {
 /** Minimum number of presentable products the API keeps for each US source. */
 export const MINIMUM_PRODUCTS_PER_SOURCE = 10;
 
+/** Sources that currently have a reviewed, dated fallback set. */
+export const CURATED_SOURCE_IDS: readonly SourceId[] = [
+  'coach_us',
+  'michael_kors_us',
+  'guess_us',
+  'steve_madden_us',
+];
+
 /**
  * These records were checked against the brands' public US product pages on
  * 2026-08-12. They are a display fallback, not an inventory feed: prices are
@@ -690,7 +698,8 @@ export function withMinimumUsCatalog(
   );
   const seenUrls = new Set(presented.map((record) => record.canonicalUrl));
 
-  for (const sourceId of SOURCE_IDS) {
+  const fallbackSourceIds = new Set(curatedProducts.map((record) => record.sourceId));
+  for (const sourceId of SOURCE_IDS.filter((id) => fallbackSourceIds.has(id))) {
     let sourceCount = presented.filter((record) => record.sourceId === sourceId).length;
     if (sourceCount >= minimumPerSource) continue;
 

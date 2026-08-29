@@ -1,0 +1,17 @@
+{
+  "name": "monetta-shopify-cli",
+  "private": true,
+  "description": "Local Shopify CLI workspace for Monetta app config (webhooks/compliance only). Not the Flutter app.",
+  "scripts": {
+    "shopify": "shopify",
+    "version": "shopify version",
+    "auth": "shopify auth login",
+    "link:staging": "shopify app config link --config staging",
+    "link:production": "shopify app config link --config production",
+    "validate:staging": "shopify app config validate --config staging",
+    "validate:production": "shopify app config validate --config production"
+  },
+  "devDependencies": {
+    "@shopify/cli": "^4.6.1"
+  }
+}

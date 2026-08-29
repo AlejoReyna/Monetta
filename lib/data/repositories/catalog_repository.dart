@@ -13,6 +13,7 @@ import '../normalize/facets.dart';
 import '../normalize/normalizer.dart';
 import '../normalize/rules.dart';
 import '../shopify/catalog_sync.dart' as shopify;
+import '../shopify/shopify_gid.dart';
 import '../../domain/product.dart';
 
 class CatalogSnapshot {
@@ -30,6 +31,10 @@ enum CatalogSyncOutcome {
   /// `lib/data/shopify/README.md` § 3, "The access token comes from Remote
   /// Config, not the binary").
   skippedNotConfigured,
+
+  /// Firestore is connected or still establishing its initial authority.
+  /// A Storefront delta must not compete with that writer.
+  skippedRealtimeAuthoritative,
   upToDate,
   updated,
   failed,
@@ -76,6 +81,21 @@ class CatalogRepository {
     await cache.upsertProducts(products);
   }
 
+  /// Repairs an older local cache without replacing rows that may have been
+  /// updated by a real Shopify sync. This matters for installs that were
+  /// seeded with an earlier snapshot: the cache is persistent, so the old
+  /// "seed only when empty" rule otherwise hides every product added later.
+  Future<void> addMissingFromAsset(Map<String, dynamic> catalogJson) async {
+    final cachedIds = (await cache.allProducts()).map((p) => p.id).toSet();
+    if (cachedIds.isEmpty) return;
+
+    final missing = (catalogJson['products'] as List<dynamic>)
+        .map((e) => productFromCatalogSnapshot(e as Map<String, dynamic>))
+        .where((product) => !cachedIds.contains(product.id))
+        .toList();
+    await cache.upsertProducts(missing);
+  }
+
   /// Cached products, normalized. Reads only — the UI should paint from
   /// this immediately, even offline, per `docs/ARCHITECTURE.md`'s "Data
   /// flow: opening the app".
@@ -88,7 +108,8 @@ class CatalogRepository {
     return CatalogSnapshot(
       products: products,
       facetsById: {
-        for (final product in products) product.id: normalizer.normalize(product, now: now),
+        for (final product in products)
+          product.id: normalizer.normalize(product, now: now),
       },
     );
   }
@@ -112,13 +133,18 @@ class CatalogRepository {
       }
       await cursorStore.save(result.cursor);
       return CatalogSyncResult(
-        outcome: result.hasChanges ? CatalogSyncOutcome.updated : CatalogSyncOutcome.upToDate,
+        outcome: result.hasChanges
+            ? CatalogSyncOutcome.updated
+            : CatalogSyncOutcome.upToDate,
         changedCount: result.products.length,
       );
     } catch (error) {
       // A failed sync must never clear or corrupt what's already cached —
       // same contract as `ExternalCatalogRepository.refresh`.
-      return CatalogSyncResult(outcome: CatalogSyncOutcome.failed, error: error);
+      return CatalogSyncResult(
+        outcome: CatalogSyncOutcome.failed,
+        error: error,
+      );
     }
   }
 }
@@ -128,7 +154,7 @@ class CatalogRepository {
 /// comment — into the domain `Product`. Moved from `app/catalog_store.dart`,
 /// which owned this before there was a repository layer to own it instead.
 Product productFromCatalogSnapshot(Map<String, dynamic> json) => Product(
-      id: json['id'].toString(),
+      id: shopifyProductGid(json['id']),
       handle: json['handle'] as String,
       title: json['title'] as String,
       vendor: json['vendor'] as String,
@@ -140,7 +166,7 @@ Product productFromCatalogSnapshot(Map<String, dynamic> json) => Product(
       variants: (json['variants'] as List<dynamic>).map((v) {
         final variant = v as Map<String, dynamic>;
         return ProductVariant(
-          id: variant['id'].toString(),
+          id: shopifyVariantGid(variant['id']),
           title: variant['title'] as String,
           price: double.parse(variant['price'] as String),
           available: variant['available'] as bool,

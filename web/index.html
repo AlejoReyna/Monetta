@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1b1b1a" />
+    <meta
+      name="description"
+      content="Paleta de referencias visuales capturada directamente del build actual de Monetta."
+    />
+    <link rel="icon" type="image/png" href="/images/monetta_favicon.png" />
+    <title>Monetta — Referencias del build actual</title>
+  </head>
+  <body>
+    <div class="viewer">
+      <header class="toolbar">
+        <a class="toolbar__brand" href="/" aria-label="Referencias visuales de Monetta">
+          <img src="/images/logo_monetta.png" alt="Monetta" />
+        </a>
+        <span class="toolbar__file">Referencia visual · build actual</span>
+        <nav class="toolbar__tabs" aria-label="Modo de visualización">
+          <button class="is-active" type="button" data-view="overview">Paleta</button>
+          <button type="button" data-view="detail">Pantalla</button>
+        </nav>
+        <div class="toolbar__actions">
+          <button type="button" data-fit>Fit</button>
+          <button type="button" data-zoom-out aria-label="Alejar">−</button>
+          <span data-zoom-label>100%</span>
+          <button type="button" data-zoom-in aria-label="Acercar">+</button>
+          <a
+            data-open-board
+            href="/live/2026-08-29-home.png"
+            target="_blank"
+            rel="noreferrer"
+            aria-label="Abrir captura seleccionada"
+          >↗</a>
+        </div>
+      </header>
+
+      <aside class="palette" aria-label="Capturas del build actual">
+        <div class="palette__head">
+          <div>
+            <span>BUILD ACTUAL</span>
+            <h1>UI actual</h1>
+          </div>
+          <strong data-reference-count>0</strong>
+        </div>
+        <div class="palette__list" data-palette-list></div>
+        <p class="palette__note">
+          iPhone 17 Pro Max · iOS 26.5<br />Capturado el 29 ago 2026
+        </p>
+      </aside>
+
+      <main class="canvas" data-canvas>
+        <div class="canvas__backdrop"></div>
+        <div class="stage is-overview" data-stage>
+          <section class="overview-board" data-overview-board>
+            <header class="overview-head">
+              <div>
+                <span class="eyebrow">MONETTA · BUILD ACTUAL</span>
+                <h2>Paleta de referencias visuales</h2>
+              <p>Recorrido completo capturado directamente de la app Flutter en ejecución.</p>
+              </div>
+              <div class="overview-stamp"><i></i> 29 AGO 2026</div>
+            </header>
+            <div class="overview-grid" data-overview-grid></div>
+            <footer class="overview-foot">
+              <span>Fuente</span>
+              <p>Flutter · iPhone 17 Pro Max · staging catalog</p>
+              <span>Nota</span>
+              <p>Los fallbacks de media visibles pertenecen al build real y se conservan como referencia.</p>
+            </footer>
+          </section>
+
+          <section class="detail-board" data-detail-board hidden>
+            <div class="capture-head">
+              <div>
+                <span class="capture-head__eyebrow">RUNNING BUILD</span>
+                <h2 data-capture-title>Inicio / campaña editorial</h2>
+                <p data-capture-meta>Flutter · iPhone 17 Pro Max</p>
+              </div>
+              <span class="capture-head__status"><i></i> CAPTURA ACTUAL</span>
+            </div>
+            <div class="device-shell">
+              <div class="device-frame">
+                <img
+                  data-board-image
+                  src="/live/2026-08-29-home.png"
+                  alt="Inicio actual de Monetta con búsqueda por icono"
+                  draggable="false"
+                />
+              </div>
+              <div class="annotation-layer" data-annotations aria-live="polite"></div>
+            </div>
+          </section>
+        </div>
+        <div class="canvas__hint">Arrastra para mover · ⌘ + / − para zoom</div>
+      </main>
+    </div>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

@@ -61,6 +61,36 @@ void main() {
             ?.value,
         'steve_madden',
       );
+      expect(
+        externalItemFacets(_item(source: CatalogSourceType.marcJacobsUs))
+            .brand
+            ?.value,
+        'marc_jacobs',
+      );
+      expect(
+        externalItemFacets(_item(source: CatalogSourceType.toryBurchUs))
+            .brand
+            ?.value,
+        'tory_burch',
+      );
+      expect(
+        externalItemFacets(_item(source: CatalogSourceType.kateSpadeUs))
+            .brand
+            ?.value,
+        'kate_spade',
+      );
+      expect(
+        externalItemFacets(_item(source: CatalogSourceType.guessFactoryUs))
+            .brand
+            ?.value,
+        'guess_factory',
+      );
+      expect(
+        externalItemFacets(_item(source: CatalogSourceType.gpMcallenPerfumes))
+            .brand
+            ?.value,
+        'perfumes',
+      );
     });
 
     test('maps a known English category to the Monetta slug vocabulary', () {
@@ -86,6 +116,37 @@ void main() {
         _item(price: const Money(amount: 350, currency: Currency.usd)),
       );
       expect(facets.priceBand, 'alto');
+    });
+
+    test('uses source USD rather than a suggested MXN retail price', () {
+      final base = _item(
+        price: const Money(amount: 6200, currency: Currency.mxn),
+      );
+      final item = CatalogItem(
+        sourceScopedId: base.sourceScopedId,
+        source: base.source,
+        merchant: base.merchant,
+        title: base.title,
+        brand: base.brand,
+        category: base.category,
+        imageUrl: base.imageUrl,
+        price: base.price,
+        sourcePrice: const Money(amount: 250, currency: Currency.usd),
+        availability: base.availability,
+        detailUrl: base.detailUrl,
+        marketRestriction: base.marketRestriction,
+        lastObservedAt: base.lastObservedAt,
+        purchaseMode: base.purchaseMode,
+      );
+
+      expect(externalItemFacets(item).priceBand, 'medio');
+    });
+
+    test('omits price band when only a MXN price is available', () {
+      final facets = externalItemFacets(
+        _item(price: const Money(amount: 6200, currency: Currency.mxn)),
+      );
+      expect(facets.priceBand, isNull);
     });
 
     test('inStock/outOfStock maps to CanonicalFacets.inStock', () {

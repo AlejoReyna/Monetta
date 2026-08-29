@@ -63,6 +63,14 @@ describe('GET /v1/external-catalog and /healthz', () => {
       crawlRuns,
       now: () => now,
       minimumProductsPerSource: 0,
+      pricingPolicy: {
+        usdToMxnRate: 20,
+        defaultCommissionBps: 2200,
+        highValueThresholdMxn: 4000,
+        highValueCommissionBps: 1400,
+        sourceCommissionBps: {},
+        productCommissionBps: {},
+      },
     });
     await new Promise<void>((resolve) => {
       server = app.listen(0, '127.0.0.1', resolve);
@@ -94,7 +102,10 @@ describe('GET /v1/external-catalog and /healthz', () => {
       sourceScopedId: 'coach_us:C8879',
       source: 'coach_us',
       merchant: 'Coach',
+      vertical: 'bags_wallets',
       price: { amount: 350, currency: 'USD' },
+      suggestedRetailPrice: { amount: 7980, currency: 'MXN' },
+      commission: expect.objectContaining({ rate: 0.14, rule: 'high_value' }),
       detailUrl: 'https://www.coach.com/tabby-shoulder-bag-26/C8879.html',
       dataOrigin: 'live_crawl',
       variants: [
@@ -136,6 +147,7 @@ describe('GET /v1/external-catalog and /healthz', () => {
         colorName: 'Brass/Black',
         colorCode: 'B4BK',
         price: { amount: 320, currency: 'USD' },
+        suggestedRetailPrice: { amount: 7296, currency: 'MXN' },
         availability: 'outOfStock',
       }),
     ]);
@@ -174,7 +186,7 @@ describe('GET /v1/external-catalog and /healthz', () => {
     expect(etag2).not.toBe(etag1);
   });
 
-  it('serves at least ten US snapshot products per source when the database is empty', async () => {
+  it('serves a compact curated snapshot only for sources with reviewed fallback data', async () => {
     const emptyProducts = new InMemoryProductRepository();
     const floorApp = createApp({ products: emptyProducts, crawlRuns, now: () => now });
     const floorServer = floorApp.listen(0, '127.0.0.1');
@@ -185,10 +197,16 @@ describe('GET /v1/external-catalog and /healthz', () => {
 
       const response = await fetch(`http://127.0.0.1:${address.port}/v1/external-catalog`);
       const body = await response.json();
-      expect(body.items).toHaveLength(40);
+      expect(body.items).toHaveLength(32);
+      const fallbackSources = new Set([
+        'coach_us',
+        'michael_kors_us',
+        'guess_us',
+        'steve_madden_us',
+      ]);
       for (const source of SOURCE_IDS) {
         const items = body.items.filter((item: { source: string }) => item.source === source);
-        expect(items).toHaveLength(10);
+        expect(items).toHaveLength(fallbackSources.has(source) ? 8 : 0);
         expect(
           items.every(
             (item: { dataOrigin: string; price: { currency: string } | null }) =>
@@ -199,9 +217,9 @@ describe('GET /v1/external-catalog and /healthz', () => {
         expect(body.sources).toContainEqual(
           expect.objectContaining({
             source,
-            itemCount: 10,
+            itemCount: fallbackSources.has(source) ? 8 : 0,
             liveItemCount: 0,
-            snapshotItemCount: 10,
+            snapshotItemCount: fallbackSources.has(source) ? 8 : 0,
           }),
         );
       }

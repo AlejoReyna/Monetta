@@ -1,0 +1,18 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "version": 2,
+  "framework": "vite",
+  "installCommand": "npm install && npm --prefix web install",
+  "buildCommand": "npm --prefix web run build",
+  "outputDirectory": "web/dist",
+  "functions": {
+    "api/index.ts": { "maxDuration": 10 },
+    "api/reconcile.ts": { "maxDuration": 60 }
+  },
+  "crons": [
+    { "path": "/api/reconcile", "schedule": "17 9 * * *" }
+  ],
+  "rewrites": [
+    { "source": "/:path((?!api(?:/|$)).*)", "destination": "/" }
+  ]
+}

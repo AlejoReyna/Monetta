@@ -4,7 +4,7 @@ import { logger } from '../logger.js';
 import { getPool, closePool } from '../db/pool.js';
 import { PgProductRepository } from '../db/pgProductRepository.js';
 import { PgCrawlRunRepository } from '../db/pgCrawlRunRepository.js';
-import { allAdapters } from '../adapters/registry.js';
+import { adapterFor } from '../adapters/registry.js';
 import { crawlSourceWithRobotsGate } from '../crawl/guardedCrawl.js';
 import { DomainRateLimiter } from '../crawl/rateLimiter.js';
 import { liveFetch } from '../crawl/httpFetcher.js';
@@ -12,6 +12,7 @@ import { renderWithPlaywright } from '../crawl/playwrightFallback.js';
 import { withDbLock, SOURCE_LOCK_KEYS } from '../db/advisoryLock.js';
 import type { BrandAdapter } from '../adapters/types.js';
 import type pg from 'pg';
+import { CatalogEventOutbox } from '../notifications/catalogEventOutbox.js';
 
 /**
  * The one place a daily cron job gets registered. If `LIVE_CRAWL_ENABLED`
@@ -22,21 +23,48 @@ import type pg from 'pg';
  */
 export async function startScheduler(): Promise<void> {
   const config = loadConfig();
-  if (!config.liveCrawlEnabled) {
+  if (!config.liveCrawlEnabled && config.notificationEventsUrl === null) {
     logger.info('scheduler not started: LIVE_CRAWL_ENABLED is false');
     return;
+  }
+  if (!config.liveCrawlEnabled) {
+    logger.info('live crawling disabled; notification outbox worker only');
   }
 
   const pool = getPool();
   const products = new PgProductRepository(pool);
   const crawlRuns = new PgCrawlRunRepository(pool);
   const rateLimiter = new DomainRateLimiter(config.requestDelayMs);
+  const outbox = config.notificationEventsUrl !== null && config.notificationEventsSecret !== null
+    ? new CatalogEventOutbox(
+        pool,
+        config.notificationEventsUrl,
+        config.notificationEventsSecret,
+      )
+    : null;
+
+  const dispatchOutbox = async () => {
+    if (outbox === null) return;
+    try {
+      const delivered = await outbox.dispatchOnce();
+      if (delivered > 0) logger.info('catalog notification events dispatched', { delivered });
+    } catch (error) {
+      logger.error('catalog notification outbox dispatch failed', {
+        error: error instanceof Error ? error.message : String(error),
+      });
+    }
+  };
+  const outboxTimer = outbox === null
+    ? null
+    : setInterval(() => void dispatchOutbox(), 30_000);
+  void dispatchOutbox();
 
   const runAll = async () => {
     // A failure attempting one source (thrown exception, lock contention,
     // robots failure) must never prevent the other source from being
     // attempted — each source is fully isolated.
-    for (const adapter of allAdapters()) {
+    for (const sourceId of config.enabledSourceIds) {
+      const adapter = adapterFor(sourceId);
       try {
         await runOneSourceLocked(adapter, { pool, products, crawlRuns, rateLimiter, config });
       } catch (error) {
@@ -45,23 +73,29 @@ export async function startScheduler(): Promise<void> {
           error: error instanceof Error ? error.message : String(error),
         });
       }
+      await dispatchOutbox();
     }
   };
 
-  const task = cron.schedule(config.catalogCron, () => {
-    runAll().catch((error) => {
-      logger.error('scheduled crawl run failed', { error: String(error) });
-    });
-  });
+  const task = config.liveCrawlEnabled
+    ? cron.schedule(config.catalogCron, () => {
+        runAll().catch((error) => {
+          logger.error('scheduled crawl run failed', { error: String(error) });
+        });
+      })
+    : null;
 
-  logger.info('catalog monitor scheduler started', { cron: config.catalogCron });
+  if (task !== null) {
+    logger.info('catalog monitor scheduler started', { cron: config.catalogCron });
+  }
 
   let shuttingDown = false;
   const shutdown = async (signal: string) => {
     if (shuttingDown) return;
     shuttingDown = true;
     logger.info('scheduler shutting down', { signal });
-    task.stop();
+    task?.stop();
+    if (outboxTimer !== null) clearInterval(outboxTimer);
     await closePool();
     process.exit(0);
   };

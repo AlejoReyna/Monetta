@@ -165,18 +165,90 @@ query PredictiveSearch($query: String!, $limit: Int!) {
 }
 ''';
 
+/// Optional owner-editable content for the two non-commerce experiences.
+///
+/// The app ships a complete offline fallback, so missing Metaobject
+/// definitions are harmless. To enable overrides, expose these definitions to
+/// the Storefront API:
+/// - `app_about` / handle `monetta`
+/// - `app_partner_program` / handle `vende-con-monetta`
+/// - any number of `reseller_catalog` entries
+const String kEditorialContentQuery = r'''
+query AppEditorialContent {
+  about: metaobject(handle: {type: "app_about", handle: "monetta"}) {
+    fields { key value }
+  }
+  partner: metaobject(
+    handle: {type: "app_partner_program", handle: "vende-con-monetta"}
+  ) {
+    fields { key value }
+  }
+  catalogs: metaobjects(type: "reseller_catalog", first: 50) {
+    edges {
+      node {
+        handle
+        fields { key value }
+      }
+    }
+  }
+}
+''';
+
 const String kCartFragment = r'''
 fragment CartFields on Cart {
   id
   checkoutUrl
+  createdAt
+  updatedAt
   totalQuantity
-  cost { subtotalAmount { amount currencyCode } }
-  lines(first: 50) {
+  buyerIdentity {
+    countryCode
+    customer { __typename }
+  }
+  cost {
+    checkoutChargeAmount { amount currencyCode }
+    subtotalAmount { amount currencyCode }
+    subtotalAmountEstimated
+    totalAmount { amount currencyCode }
+    totalAmountEstimated
+  }
+  discountCodes { code applicable }
+  discountApplications {
+    __typename
+    allocationMethod
+    targetSelection
+    targetType
+    value {
+      ... on MoneyV2 { amount currencyCode }
+      ... on PricingPercentageValue { percentage }
+    }
+    ... on CartAutomaticDiscountApplication {
+      title
+      totalAllocatedAmount { amount currencyCode }
+    }
+    ... on CartCodeDiscountApplication {
+      code
+      totalAllocatedAmount { amount currencyCode }
+    }
+    ... on CartCustomDiscountApplication {
+      title
+      totalAllocatedAmount { amount currencyCode }
+    }
+  }
+  lines(first: 250) {
     edges {
       node {
         id
         quantity
-        cost { amountPerQuantity { amount } }
+        cost {
+          amountPerQuantity { amount currencyCode }
+          compareAtAmountPerQuantity { amount currencyCode }
+          subtotalAmount { amount currencyCode }
+          totalAmount { amount currencyCode }
+        }
+        discountAllocations(lineLevelOnly: false) {
+          discountedAmount { amount currencyCode }
+        }
         merchandise {
           ... on ProductVariant {
             id
@@ -195,10 +267,11 @@ fragment CartFields on Cart {
 /// the revenue-share arrangement auditable — see `cart_attribution.dart`.
 const String kCartCreateMutation = '''
 $kCartFragment
-mutation CartCreate(\$lines: [CartLineInput!], \$attributes: [AttributeInput!]) {
-  cartCreate(input: {lines: \$lines, attributes: \$attributes}) {
+mutation CartCreate(\$input: CartInput) {
+  cartCreate(input: \$input) {
     cart { ...CartFields }
-    userErrors { field message }
+    userErrors { field code message }
+    warnings { code message target }
   }
 }
 ''';
@@ -208,7 +281,8 @@ $kCartFragment
 mutation CartLinesAdd(\$cartId: ID!, \$lines: [CartLineInput!]!) {
   cartLinesAdd(cartId: \$cartId, lines: \$lines) {
     cart { ...CartFields }
-    userErrors { field message }
+    userErrors { field code message }
+    warnings { code message target }
   }
 }
 ''';
@@ -218,7 +292,8 @@ $kCartFragment
 mutation CartLinesUpdate(\$cartId: ID!, \$lines: [CartLineUpdateInput!]!) {
   cartLinesUpdate(cartId: \$cartId, lines: \$lines) {
     cart { ...CartFields }
-    userErrors { field message }
+    userErrors { field code message }
+    warnings { code message target }
   }
 }
 ''';
@@ -228,7 +303,44 @@ $kCartFragment
 mutation CartLinesRemove(\$cartId: ID!, \$lineIds: [ID!]!) {
   cartLinesRemove(cartId: \$cartId, lineIds: \$lineIds) {
     cart { ...CartFields }
-    userErrors { field message }
+    userErrors { field code message }
+    warnings { code message target }
+  }
+}
+''';
+
+const String kCartBuyerIdentityUpdateMutation = '''
+$kCartFragment
+mutation CartBuyerIdentityUpdate(
+  \$cartId: ID!
+  \$buyerIdentity: CartBuyerIdentityInput!
+) {
+  cartBuyerIdentityUpdate(
+    cartId: \$cartId
+    buyerIdentity: \$buyerIdentity
+  ) {
+    cart { ...CartFields }
+    userErrors { field code message }
+    warnings { code message target }
+  }
+}
+''';
+
+/// Replaces the complete discount-code set. Shopify treats an empty list as
+/// removal of every code; callers must therefore always send their full intent.
+const String kCartDiscountCodesUpdateMutation = '''
+$kCartFragment
+mutation CartDiscountCodesUpdate(
+  \$cartId: ID!
+  \$discountCodes: [String!]!
+) {
+  cartDiscountCodesUpdate(
+    cartId: \$cartId
+    discountCodes: \$discountCodes
+  ) {
+    cart { ...CartFields }
+    userErrors { field code message }
+    warnings { code message target }
   }
 }
 ''';
@@ -248,6 +360,32 @@ query ShopConfig {
     name
     homeSections: metafield(namespace: "app", key: "home_sections") { value }
     announcement: metafield(namespace: "app", key: "announcement") { value }
+  }
+}
+''';
+
+/// Home composition and image sources. The collection connection is queried
+/// alongside shop metafields so one Storefront request refreshes the surface.
+const String kHomeContentQuery = r'''
+query HomeContent {
+  shop {
+    homeSections: metafield(namespace: "app", key: "home_sections") { value }
+    homeCollections: metafield(namespace: "app", key: "home_collections") { value }
+    homeBagTypes: metafield(namespace: "app", key: "home_bag_types") { value }
+    socialLinks: metafield(namespace: "app", key: "social_links") { value }
+    aboutImageUrl: metafield(namespace: "app", key: "about_image_url") { value }
+  }
+  collections(first: 50, sortKey: TITLE) {
+    edges {
+      node {
+        id
+        handle
+        title
+        description
+        image { url(transform: {maxWidth: 1200}) }
+        products(first: 1) { pageInfo { hasNextPage } edges { node { id } } }
+      }
+    }
   }
 }
 ''';

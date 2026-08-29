@@ -30,6 +30,10 @@ class Product {
     this.categoryOverride,
   });
 
+  /// Canonical Shopify GID (`gid://shopify/Product/<legacy id>`).
+  ///
+  /// The bundled Ajax snapshot is normalized at its mapper boundary and the
+  /// local database migrates legacy numeric ids before exposing rows.
   final String id;
   final String handle;
   final String title;
@@ -100,6 +104,7 @@ class ProductVariant {
     this.sku,
   });
 
+  /// Canonical Shopify GID (`gid://shopify/ProductVariant/<legacy id>`).
   final String id;
   final String title;
   final double price;
