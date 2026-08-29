@@ -14,6 +14,31 @@ import '../normalize/facets.dart';
 
 const String _monettaMerchant = 'Monetta';
 const String _monettaStoreBaseUrl = 'https://monetta.mx/products';
+const Set<String> _bagsWalletCategories = {
+  'bolsa',
+  'bolsas',
+  'cartera',
+  'carteras',
+  'monedero',
+  'monederos',
+  'cosmetiquera',
+  'cosmetiqueras',
+};
+
+CatalogVertical _verticalFromFacets(CanonicalFacets? facets) {
+  final category = facets?.category?.value.trim().toLowerCase();
+  if (category == null) return CatalogVertical.general;
+  if (_bagsWalletCategories.contains(category)) {
+    return CatalogVertical.bagsWallets;
+  }
+  if (category == 'perfume' ||
+      category == 'perfumes' ||
+      category == 'fragancia' ||
+      category == 'fragancias') {
+    return CatalogVertical.perfumes;
+  }
+  return CatalogVertical.general;
+}
 
 CatalogItem catalogItemFromShopifyProduct(
   Product product, {
@@ -36,5 +61,6 @@ CatalogItem catalogItemFromShopifyProduct(
     lastObservedAt: product.updatedAt,
     purchaseMode: PurchaseMode.monettaCheckout,
     shopifyProductId: product.id,
+    vertical: _verticalFromFacets(facets),
   );
 }

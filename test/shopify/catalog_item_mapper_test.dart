@@ -64,11 +64,31 @@ void main() {
 
       expect(item.brand, 'Coach'); // not "Monetta " (the raw vendor)
       expect(item.category, 'Bolsas');
+      expect(item.vertical, CatalogVertical.bagsWallets);
+    });
+
+    test('maps perfume facets into the perfumes vertical', () {
+      const facets = CanonicalFacets(
+        productId: 'gid://shopify/Product/1',
+        category: FacetValue('perfume', FacetSource.metafieldOverride),
+        priceBand: 'alto',
+        onSale: false,
+        inStock: true,
+        newArrival: false,
+      );
+
+      final item = catalogItemFromShopifyProduct(
+        _product(inStock: true),
+        facets: facets,
+      );
+
+      expect(item.vertical, CatalogVertical.perfumes);
     });
 
     test('falls back to raw vendor only when no facets are supplied', () {
       final item = catalogItemFromShopifyProduct(_product(inStock: true));
       expect(item.brand, 'Monetta ');
+      expect(item.vertical, CatalogVertical.general);
     });
 
     test('maps out-of-stock variants to outOfStock availability', () {

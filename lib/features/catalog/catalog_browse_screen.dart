@@ -127,39 +127,35 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     mainAxisSpacing: 26,
   );
 
-  final _searchController = TextEditingController();
-  String _query = '';
-  bool _searchOpen = false;
   _CatalogFilters _filters = const _CatalogFilters();
+  String _activeCategory = 'Colección';
 
-  @override
-  void dispose() {
-    _searchController.dispose();
-    super.dispose();
-  }
+  List<CatalogItem> _visibleItems([_CatalogFilters? filters]) {
+    final baseFilters = filters ?? _filters;
+    var items = _filterCatalog(
+      widget.items,
+      query: '',
+      filters: baseFilters,
+    );
 
-  List<CatalogItem> _visibleItems([_CatalogFilters? filters]) => _filterCatalog(
-        widget.items,
-        query: _query,
-        filters: filters ?? _filters,
-      );
-
-  void _toggleSearch() {
-    if (_searchOpen) {
-      _searchController.clear();
-      _query = '';
-      FocusManager.instance.primaryFocus?.unfocus();
+    if (_activeCategory == 'Monetta') {
+      items = items.where((i) => !i.isExternal).toList();
+    } else if (_activeCategory == 'Bolsas') {
+      items = items
+          .where((i) => i.vertical == CatalogVertical.bagsWallets)
+          .toList();
+    } else if (_activeCategory == 'Perfumes') {
+      items =
+          items.where((i) => i.vertical == CatalogVertical.perfumes).toList();
     }
-    setState(() => _searchOpen = !_searchOpen);
+    return items;
   }
 
   void _resetAll() {
-    _searchController.clear();
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
-      _query = '';
-      _searchOpen = false;
       _filters = const _CatalogFilters();
+      _activeCategory = 'Colección';
     });
   }
 
@@ -179,6 +175,73 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     if (result != null && mounted) setState(() => _filters = result);
   }
 
+  int _countForCategory(String category) {
+    final items = widget.items;
+    if (category == 'Monetta') {
+      return items.where((i) => !i.isExternal).length;
+    } else if (category == 'Bolsas') {
+      return items
+          .where((i) => i.vertical == CatalogVertical.bagsWallets)
+          .length;
+    } else if (category == 'Perfumes') {
+      return items.where((i) => i.vertical == CatalogVertical.perfumes).length;
+    }
+    return items.length;
+  }
+
+  Widget _buildCategoryPill({
+    required String title,
+    required String keyName,
+    bool showCount = true,
+  }) {
+    final isSelected = _activeCategory == title;
+    final count = _countForCategory(title);
+    final labelColor = isSelected ? kInk : Colors.white;
+
+    return Padding(
+      padding: const EdgeInsets.only(right: 8),
+      child: ChoiceChip(
+        key: Key(keyName),
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: sans(
+                size: 13,
+                weight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                color: labelColor,
+              ),
+            ),
+            if (showCount && isSelected)
+              Text(
+                ' $count',
+                style: sans(size: 13, color: labelColor),
+              ),
+          ],
+        ),
+        selected: isSelected,
+        onSelected: (selected) {
+          if (selected) setState(() => _activeCategory = title);
+        },
+        color: WidgetStateProperty.resolveWith<Color>((states) {
+          return states.contains(WidgetState.selected) ? kGold : kInk;
+        }),
+        backgroundColor: kInk,
+        selectedColor: kGold,
+        surfaceTintColor: Colors.transparent,
+        side: BorderSide(
+          color: isSelected
+              ? Colors.transparent
+              : Colors.white.withValues(alpha: 0.3),
+        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        showCheckmark: false,
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final visibleItems = _visibleItems();
@@ -194,52 +257,61 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
         scrolledUnderElevation: 0,
         centerTitle: true,
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-        titleSpacing: _searchOpen ? 0 : NavigationToolbar.kMiddleSpacing,
-        title: _searchOpen
-            ? TextField(
-                key: const Key('catalog-search-field'),
-                controller: _searchController,
-                autofocus: true,
-                cursorColor: kInk,
-                textInputAction: TextInputAction.search,
-                onChanged: (value) =>
-                    setState(() => _query = value.trim().toLowerCase()),
-                style: sans(size: 16, weight: FontWeight.w500),
-                decoration: InputDecoration(
-                  hintText: 'Buscar bolsas, marcas o colores',
-                  hintStyle: sans(size: 15, color: kInkMuted),
-                  border: InputBorder.none,
-                  isDense: true,
-                ),
-              )
-            : Text(
-                'Productos',
-                style: display(20, weight: FontWeight.w600, height: 1.1),
-              ),
+        title: Text(
+          'Productos',
+          style: display(20, weight: FontWeight.w600, height: 1.1),
+        ),
         actions: [
-          IconButton(
-            key: const Key('catalog-search-toggle'),
-            tooltip: _searchOpen ? 'Cerrar búsqueda' : 'Buscar productos',
-            onPressed: _toggleSearch,
-            icon: Icon(
-              _searchOpen ? Icons.close_rounded : Icons.search_rounded,
-              size: 27,
-            ),
-          ),
           _FilterIconButton(
             activeCount: _filters.activeCount,
             onPressed: _openFilters,
           ),
           const SizedBox(width: 6),
         ],
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0.5),
-          child: Divider(height: 0.5, color: kLine),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(60),
+          child: Container(
+            color: kInk,
+            height: 60,
+            child: ListView(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+              children: [
+                _buildCategoryPill(
+                  title: 'Colección',
+                  keyName: 'catalog-category-collection',
+                ),
+                _buildCategoryPill(
+                  title: 'Monetta',
+                  keyName: 'catalog-category-monetta',
+                ),
+                _buildCategoryPill(
+                  title: 'Bolsas',
+                  keyName: 'catalog-category-bags',
+                ),
+                _buildCategoryPill(
+                  title: 'Perfumes',
+                  keyName: 'catalog-category-perfumes',
+                  showCount: false,
+                ),
+              ],
+            ),
+          ),
         ),
       ),
       body: CustomScrollView(
         keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
         slivers: [
+          if (_activeCategory == 'Monetta')
+            const SliverToBoxAdapter(
+              child: Padding(
+                padding: EdgeInsets.only(top: 24),
+                child: SectionHeading(
+                  kicker: 'Monetta',
+                  title: 'Selección Monetta',
+                ),
+              ),
+            ),
           SliverToBoxAdapter(
             child: _CatalogSummary(
               count: visibleItems.length,
@@ -250,7 +322,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             SliverFillRemaining(
               hasScrollBody: false,
               child: _EmptyCatalogState(
-                hasActiveFilter: _query.isNotEmpty || _filters.activeCount > 0,
+                hasActiveFilter: _filters.activeCount > 0,
                 onReset: _resetAll,
               ),
             )
