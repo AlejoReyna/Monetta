@@ -94,4 +94,5 @@ flutter:
   assets:
     - assets/rules/
     - assets/images/
+    - assets/images/brands/
     - assets/catalog/

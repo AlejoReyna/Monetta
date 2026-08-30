@@ -107,18 +107,26 @@ class _SearchScreenState extends State<SearchScreen> {
             child: TextField(
               controller: _controller,
               focusNode: _focus,
-              cursorColor: kInk,
+              cursorColor: context.monettaColors.contentPrimary,
               style: sans(size: 16),
               textInputAction: TextInputAction.search,
               onChanged: (_) => setState(() {}),
               decoration: InputDecoration(
                 hintText: 'Buscar bolsas, marcas o estilos',
-                hintStyle: sans(size: 16, color: kInkMuted),
+                hintStyle:
+                    sans(size: 16, color: context.monettaColors.contentMuted),
                 border: InputBorder.none,
-                enabledBorder:
-                    const UnderlineInputBorder(borderSide: kHairline),
-                focusedBorder: const UnderlineInputBorder(
-                  borderSide: BorderSide(color: kInk, width: 0.5),
+                enabledBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: context.monettaColors.divider,
+                    width: 0.5,
+                  ),
+                ),
+                focusedBorder: UnderlineInputBorder(
+                  borderSide: BorderSide(
+                    color: context.monettaColors.contentPrimary,
+                    width: 0.5,
+                  ),
                 ),
                 isDense: true,
                 contentPadding: const EdgeInsets.only(bottom: 10),
@@ -131,7 +139,11 @@ class _SearchScreenState extends State<SearchScreen> {
                           setState(() {});
                           _focus.requestFocus();
                         },
-                        icon: const Icon(Icons.close, size: 18, color: kInk),
+                        icon: Icon(
+                          Icons.close,
+                          size: 18,
+                          color: context.monettaColors.contentPrimary,
+                        ),
                       ),
               ),
             ),
@@ -183,7 +195,13 @@ class _EmptySearch extends StatelessWidget {
                 if (i > 0)
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 8),
-                    child: Text('·', style: sans(size: 15, color: kInkMuted)),
+                    child: Text(
+                      '·',
+                      style: sans(
+                        size: 15,
+                        color: context.monettaColors.contentMuted,
+                      ),
+                    ),
                   ),
                 GestureDetector(
                   onTap: () => onTerm(_kFrequent[i]),
@@ -230,7 +248,7 @@ class _NoResults extends StatelessWidget {
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
           child: Text(
             'Prueba otra marca o silueta, o mira lo que acaba de llegar.',
-            style: sans(size: 13, color: kInkMuted),
+            style: sans(size: 13, color: context.monettaColors.contentMuted),
           ),
         ),
         if (featured.isNotEmpty) ...[

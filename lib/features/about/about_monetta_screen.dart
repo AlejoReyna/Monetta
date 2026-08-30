@@ -37,13 +37,16 @@ class AboutMonettaScreen extends StatelessWidget {
           const SizedBox(height: 64),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
-            child: Text('NUESTRA HISTORIA', style: eyebrow(color: kGold)),
+            child: Text(
+              'NUESTRA HISTORIA',
+              style: eyebrow(color: context.monettaColors.accent),
+            ),
           ),
           const SizedBox(height: 26),
           _Timeline(milestones: content.milestones),
           const SizedBox(height: 64),
           Container(
-            color: kMist,
+            color: context.monettaColors.surfaceMuted,
             padding: const EdgeInsets.fromLTRB(20, 48, 20, 52),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -62,7 +65,7 @@ class AboutMonettaScreen extends StatelessWidget {
               children: [
                 Text(
                   'MONETTA TAMBIÉN ES PARA EMPRENDER',
-                  style: eyebrow(color: kGold),
+                  style: eyebrow(color: context.monettaColors.accent),
                 ),
                 const SizedBox(height: 14),
                 Text(
@@ -114,7 +117,7 @@ class _StoryHero extends StatelessWidget {
           filterQuality: FilterQuality.medium,
         );
         final copy = Container(
-          color: Colors.white,
+          color: context.monettaColors.surfaceRaised,
           padding: EdgeInsets.fromLTRB(
             wide ? 48 : 20,
             wide ? 48 : 38,
@@ -125,13 +128,20 @@ class _StoryHero extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(content.eyebrow, style: eyebrow(color: kGold)),
+              Text(
+                content.eyebrow,
+                style: eyebrow(color: context.monettaColors.accent),
+              ),
               const SizedBox(height: 16),
               Text(content.headline, style: display(wide ? 42 : 31)),
               const SizedBox(height: 20),
               Text(
                 content.body,
-                style: sans(size: 14, color: kInkMuted, height: 1.65),
+                style: sans(
+                  size: 14,
+                  color: context.monettaColors.contentMuted,
+                  height: 1.65,
+                ),
               ),
             ],
           ),
@@ -190,7 +200,7 @@ class _TimelineRow extends StatelessWidget {
             width: 58,
             child: Text(
               milestone.year,
-              style: eyebrow(size: 9, color: kGold),
+              style: eyebrow(size: 9, color: context.monettaColors.accent),
             ),
           ),
           SizedBox(
@@ -200,8 +210,8 @@ class _TimelineRow extends StatelessWidget {
                 Container(
                   width: 7,
                   height: 7,
-                  decoration: const BoxDecoration(
-                    color: kGold,
+                  decoration: BoxDecoration(
+                    color: context.monettaColors.accent,
                     shape: BoxShape.circle,
                   ),
                 ),
@@ -223,7 +233,11 @@ class _TimelineRow extends StatelessWidget {
                   const SizedBox(height: 8),
                   Text(
                     milestone.body,
-                    style: sans(size: 13, color: kInkMuted, height: 1.55),
+                    style: sans(
+                      size: 13,
+                      color: context.monettaColors.contentMuted,
+                      height: 1.55,
+                    ),
                   ),
                 ],
               ),
@@ -258,7 +272,9 @@ class _TrustGrid extends StatelessWidget {
           itemBuilder: (context, index) => Container(
             alignment: Alignment.centerLeft,
             padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(border: Border.all(color: kLine)),
+            decoration: BoxDecoration(
+              border: Border.all(color: context.monettaColors.divider),
+            ),
             child: Text(facts[index], style: sans(size: 12, height: 1.4)),
           ),
         );

@@ -16,7 +16,7 @@ Future<void> showMiniCart(BuildContext context) {
     context: context,
     useRootNavigator: true,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: context.monettaColors.surfaceRaised,
     builder: (_) => StoreScope(
       notifier: store,
       child: const MiniCartSheet(),
@@ -45,7 +45,7 @@ class MiniCartSheet extends StatelessWidget {
               child: Container(
                 width: 36,
                 height: 2,
-                color: kLine,
+                color: context.monettaColors.divider,
               ),
             ),
             const SizedBox(height: 22),
@@ -55,7 +55,8 @@ class MiniCartSheet extends StatelessWidget {
               remaining == 0
                   ? 'Envío gratis en este pedido.'
                   : 'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)} · te faltan ${kMoney.format(remaining)}',
-              style: sans(size: 12.5, color: kInkMuted),
+              style:
+                  sans(size: 12.5, color: context.monettaColors.contentMuted),
             ),
             if (last != null) ...[
               const SizedBox(height: 22),

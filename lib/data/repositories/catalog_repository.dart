@@ -78,7 +78,15 @@ class CatalogRepository {
     final products = (catalogJson['products'] as List<dynamic>)
         .map((e) => productFromCatalogSnapshot(e as Map<String, dynamic>))
         .toList();
-    await cache.upsertProducts(products);
+    await cache.seedProducts(
+      products,
+      CatalogCacheMetadata.forProducts(
+        source: CatalogCacheSource.asset,
+        products: products,
+        syncedAt: DateTime.tryParse('${catalogJson['_snapshot'] ?? ''}'),
+        status: CatalogCacheStatus.fallback,
+      ),
+    );
   }
 
   /// Repairs an older local cache without replacing rows that may have been
@@ -86,6 +94,12 @@ class CatalogRepository {
   /// seeded with an earlier snapshot: the cache is persistent, so the old
   /// "seed only when empty" rule otherwise hides every product added later.
   Future<void> addMissingFromAsset(Map<String, dynamic> catalogJson) async {
+    final metadata = await cache.metadata();
+    if (metadata != null &&
+        metadata.source != CatalogCacheSource.asset &&
+        metadata.source != CatalogCacheSource.legacyCache) {
+      return;
+    }
     final cachedIds = (await cache.allProducts()).map((p) => p.id).toSet();
     if (cachedIds.isEmpty) return;
 
@@ -94,6 +108,23 @@ class CatalogRepository {
         .where((product) => !cachedIds.contains(product.id))
         .toList();
     await cache.upsertProducts(missing);
+  }
+
+  Future<CatalogCacheMetadata?> loadOrCreateMetadata(
+    List<Product> products,
+  ) async {
+    final existing = await cache.metadata();
+    if (existing != null) return existing;
+    if (products.isEmpty) return null;
+    final inferred = CatalogCacheMetadata.forProducts(
+      source: CatalogCacheSource.legacyCache,
+      products: products,
+      syncedAt: null,
+      status: CatalogCacheStatus.fallback,
+      detail: 'Cache creado antes de registrar procedencia.',
+    );
+    await cache.saveMetadata(inferred);
+    return inferred;
   }
 
   /// Cached products, normalized. Reads only — the UI should paint from
@@ -132,6 +163,15 @@ class CatalogRepository {
         await cache.upsertProducts(result.products);
       }
       await cursorStore.save(result.cursor);
+      final products = await cache.allProducts();
+      await cache.saveMetadata(
+        CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.shopify,
+          products: products,
+          syncedAt: DateTime.now(),
+          status: CatalogCacheStatus.healthy,
+        ),
+      );
       return CatalogSyncResult(
         outcome: result.hasChanges
             ? CatalogSyncOutcome.updated
@@ -141,6 +181,15 @@ class CatalogRepository {
     } catch (error) {
       // A failed sync must never clear or corrupt what's already cached —
       // same contract as `ExternalCatalogRepository.refresh`.
+      final existing = await cache.metadata();
+      if (existing != null) {
+        await cache.saveMetadata(
+          existing.copyWith(
+            status: CatalogCacheStatus.unavailable,
+            detail: error.runtimeType.toString(),
+          ),
+        );
+      }
       return CatalogSyncResult(
         outcome: CatalogSyncOutcome.failed,
         error: error,

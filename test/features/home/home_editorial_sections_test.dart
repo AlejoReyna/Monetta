@@ -15,6 +15,104 @@ import 'package:monetta_app/features/partner/partner_hub_screen.dart';
 import 'package:monetta_app/main.dart';
 
 void main() {
+  testWidgets('all monetta.mx brands render with their logo artwork', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final store = CatalogStore(database: openTestDatabase());
+    addTearDown(store.dispose);
+    await store.loadFromAsset();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StoreScope(
+          notifier: store,
+          child: ExternalCatalogScope(
+            notifier: ExternalCatalogController(
+              config: ExternalCatalogConfig.disabled,
+            ),
+            child: const HomeScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final brandsSection = find.byKey(
+      const ValueKey('home-section-brands'),
+    );
+    final homeScroll = find
+        .byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      brandsSection,
+      700,
+      scrollable: homeScroll,
+    );
+    await tester.pump();
+
+    expect(find.byKey(const ValueKey('home-brand-coach')), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-brand-rhode')), findsOneWidget);
+    expect(
+      find.descendant(of: brandsSection, matching: find.byType(Image)),
+      findsNWidgets(12),
+    );
+  });
+
+  testWidgets('collection cards use full-bleed editorial overlays', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 900));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+    final store = CatalogStore(database: openTestDatabase());
+    addTearDown(store.dispose);
+    await store.loadFromAsset();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: StoreScope(
+          notifier: store,
+          child: ExternalCatalogScope(
+            notifier: ExternalCatalogController(
+              config: ExternalCatalogConfig.disabled,
+            ),
+            child: const HomeScreen(),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final card = find.byKey(const ValueKey('home-collection-card-guess'));
+    final homeScroll = find
+        .byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
+    await tester.scrollUntilVisible(card, 500, scrollable: homeScroll);
+    await tester.pump();
+    final cardSize = tester.getSize(card);
+    expect(cardSize.width, inInclusiveRange(280, 460));
+    expect(cardSize.height, closeTo(cardSize.width / .7, .1));
+
+    final cardBottom = tester.getBottomLeft(card).dy;
+    final titleBottom = tester
+        .getBottomLeft(find.descendant(of: card, matching: find.text('Bolsas')))
+        .dy;
+    expect(cardBottom - titleBottom, lessThan(52));
+    expect(
+      find.descendant(of: card, matching: find.byType(Image)),
+      findsOneWidget,
+    );
+  });
+
   testWidgets('home exposes the story and reseller hub without a new nav tab', (
     tester,
   ) async {
@@ -51,7 +149,10 @@ void main() {
       600,
       scrollable: homeScroll,
     );
-    await tester.ensureVisible(find.text('Conoce nuestra historia'));
+    await Scrollable.ensureVisible(
+      tester.element(find.text('Conoce nuestra historia')),
+      alignment: .35,
+    );
     await tester.pumpAndSettle();
 
     final aboutCard = find.byKey(const ValueKey('home-about-card'));
@@ -71,7 +172,10 @@ void main() {
       500,
       scrollable: homeScroll,
     );
-    await tester.ensureVisible(partnerButton);
+    await Scrollable.ensureVisible(
+      tester.element(partnerButton),
+      alignment: .35,
+    );
     await tester.pumpAndSettle();
     await tester.tap(partnerButton);
     await tester.pumpAndSettle();
@@ -118,7 +222,7 @@ void main() {
         tester.state<ScrollableState>(homeScroll).position.pixels;
 
     await tester.scrollUntilVisible(
-      find.text('EXPERIENCIAS DE CLIENTES'),
+      find.text('Experiencias de clientes'),
       700,
       scrollable: homeScroll,
     );
@@ -184,7 +288,7 @@ void main() {
         )
         .first;
     await tester.scrollUntilVisible(
-      find.text('EXPERIENCIAS DE CLIENTES'),
+      find.text('Experiencias de clientes'),
       700,
       scrollable: homeScroll,
     );

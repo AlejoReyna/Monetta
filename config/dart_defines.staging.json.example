@@ -1,4 +1,6 @@
 {
+  "APP_ENV": "staging",
+  "ALLOW_OFFLINE_CATALOG": "false",
   "SHOPIFY_STORE_DOMAIN": "monetta.mx",
   "SHOPIFY_STOREFRONT_ACCESS_TOKEN": "public_live_storefront_token_or_empty",
   "SHOPIFY_API_VERSION": "2026-07",

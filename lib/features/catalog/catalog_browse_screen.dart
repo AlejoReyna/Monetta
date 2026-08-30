@@ -8,7 +8,6 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
@@ -165,7 +164,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.46),
+      barrierColor: context.monettaColors.scrim,
       builder: (sheetContext) => _CatalogFilterSheet(
         items: widget.items,
         initial: _filters,
@@ -200,48 +199,71 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   }) {
     final isSelected = _activeCategory == title;
     final count = _countForCategory(title);
-    final labelColor = isSelected ? kInk : Colors.white;
+    final colors = context.monettaColors;
+    final animationsDisabled = reduceMotion(context);
+    final labelColor =
+        isSelected ? colors.accentContent : colors.contentPrimary;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        key: Key(keyName),
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: sans(
-                size: 13,
-                weight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: labelColor,
-              ),
-            ),
-            if (showCount && isSelected)
+      child: AnimatedScale(
+        key: Key('$keyName-motion'),
+        scale: isSelected ? 1.025 : 1,
+        duration: animationsDisabled ? Duration.zero : kSnap,
+        curve: kMotionCurve,
+        child: ChoiceChip(
+          key: Key(keyName),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Text(
-                ' $count',
-                style: sans(size: 13, color: labelColor),
+                title,
+                style: sans(
+                  size: 13,
+                  weight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: labelColor,
+                ),
               ),
-          ],
+              if (showCount && isSelected)
+                Text(
+                  ' $count',
+                  style: sans(size: 13, color: labelColor),
+                ),
+            ],
+          ),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) setState(() => _activeCategory = title);
+          },
+          color: WidgetStateProperty.resolveWith<Color>((states) {
+            return states.contains(WidgetState.selected)
+                ? colors.navigationSelection
+                : Colors.transparent;
+          }),
+          backgroundColor: Colors.transparent,
+          selectedColor: colors.navigationSelection,
+          surfaceTintColor: Colors.transparent,
+          side: BorderSide(
+            color: isSelected
+                ? colors.accent.withValues(alpha: 0.48)
+                : colors.divider,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          showCheckmark: false,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          chipAnimationStyle: ChipAnimationStyle(
+            selectAnimation: animationsDisabled
+                ? AnimationStyle.noAnimation
+                : const AnimationStyle(
+                    curve: kMotionCurve,
+                    duration: kSwap,
+                    reverseCurve: kMotionCurve,
+                    reverseDuration: kSnap,
+                  ),
+          ),
         ),
-        selected: isSelected,
-        onSelected: (selected) {
-          if (selected) setState(() => _activeCategory = title);
-        },
-        color: WidgetStateProperty.resolveWith<Color>((states) {
-          return states.contains(WidgetState.selected) ? kGold : kInk;
-        }),
-        backgroundColor: kInk,
-        selectedColor: kGold,
-        surfaceTintColor: Colors.transparent,
-        side: BorderSide(
-          color: isSelected
-              ? Colors.transparent
-              : Colors.white.withValues(alpha: 0.3),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        showCheckmark: false,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );
   }
@@ -251,16 +273,16 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     final visibleItems = _visibleItems();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      extendBody: true,
+      backgroundColor: context.monettaColors.surface,
       appBar: AppBar(
         toolbarHeight: 68,
-        backgroundColor: Colors.white,
-        foregroundColor: kInk,
+        backgroundColor: context.monettaColors.surface,
+        foregroundColor: context.monettaColors.contentPrimary,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
         title: Text(
           'Productos',
           style: display(20, weight: FontWeight.w600, height: 1.1),
@@ -275,7 +297,8 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Container(
-            color: kInk,
+            key: const Key('catalog-category-rail'),
+            color: context.monettaColors.surface,
             height: 60,
             child: ListView(
               scrollDirection: Axis.horizontal,
@@ -303,53 +326,73 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
           ),
         ),
       ),
-      body: CustomScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        slivers: [
-          if (_activeCategory == 'Monetta')
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.only(top: 24),
-                child: SectionHeading(
-                  kicker: 'Monetta',
-                  title: 'Selección Monetta',
-                ),
-              ),
-            ),
-          SliverToBoxAdapter(
-            child: _CatalogSummary(
-              count: visibleItems.length,
-              sort: _filters.sort,
+      body: ClipRect(
+        child: AnimatedSwitcher(
+          key: const Key('catalog-section-transition'),
+          duration: reduceMotion(context) ? Duration.zero : kSettle,
+          switchInCurve: kMotionCurve,
+          switchOutCurve: kMotionCurve,
+          transitionBuilder: (child, animation) => FadeTransition(
+            opacity: animation,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.012),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
             ),
           ),
-          if (visibleItems.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: _EmptyCatalogState(
-                hasActiveFilter: _filters.activeCount > 0,
-                onReset: _resetAll,
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(4, 0, 4, 44),
-              sliver: SliverGrid(
-                gridDelegate: _gridDelegate,
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => _BrowseTile(
-                    item: visibleItems[index],
-                    openExternalLink: widget.openExternalLink,
+          child: CustomScrollView(
+            key: ValueKey('catalog-section-$_activeCategory'),
+            primary: false,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              if (_activeCategory == 'Monetta')
+                const SliverToBoxAdapter(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 24),
+                    child: SectionHeading(
+                      kicker: 'Monetta',
+                      title: 'Selección Monetta',
+                    ),
                   ),
-                  childCount: visibleItems.length,
+                ),
+              SliverToBoxAdapter(
+                child: _CatalogSummary(
+                  count: visibleItems.length,
+                  sort: _filters.sort,
                 ),
               ),
-            ),
-        ],
+              if (visibleItems.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _EmptyCatalogState(
+                    hasActiveFilter: _filters.activeCount > 0,
+                    onReset: _resetAll,
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 44),
+                  sliver: SliverGrid(
+                    gridDelegate: _gridDelegate,
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _BrowseTile(
+                        item: visibleItems[index],
+                        openExternalLink: widget.openExternalLink,
+                      ),
+                      childCount: visibleItems.length,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.catalog,
         bagCount: widget.bagCount,
-        surfaceColor: Colors.white,
+        surfaceColor: context.monettaColors.navigationSurface,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
@@ -420,15 +463,15 @@ class _FilterIconButton extends StatelessWidget {
                 constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: const BoxDecoration(
-                  color: kInk,
+                decoration: BoxDecoration(
+                  color: context.monettaColors.contentPrimary,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   '$activeCount',
                   style: sans(
                     size: 9,
-                    color: Colors.white,
+                    color: context.monettaColors.canvas,
                     weight: FontWeight.w700,
                     height: 1,
                   ),
@@ -455,14 +498,14 @@ class _CatalogSummary extends StatelessWidget {
         children: [
           Text(
             count == 1 ? '1 artículo' : '$count artículos',
-            style: sans(size: 12.5, color: kInkMuted),
+            style: sans(size: 12.5, color: context.monettaColors.contentMuted),
           ),
           const Spacer(),
           Text(
             sort.label,
             style: sans(
               size: 12.5,
-              color: kInk,
+              color: context.monettaColors.contentPrimary,
               weight: FontWeight.w500,
             ),
           ),
@@ -582,6 +625,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     final typeOptions = _typeOptions;
     final brandOptions = _brandOptions;
     final priceOptions = _priceOptions;
@@ -591,7 +635,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
     return FractionallySizedBox(
       heightFactor: 0.94,
       child: Material(
-        color: Colors.white,
+        color: context.monettaColors.surfaceRaised,
         clipBehavior: Clip.antiAlias,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
         child: SafeArea(
@@ -599,6 +643,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
           child: Column(
             children: [
               SizedBox(
+                width: double.infinity,
                 height: 74,
                 child: Stack(
                   alignment: Alignment.center,
@@ -619,7 +664,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                   ],
                 ),
               ),
-              const Divider(height: 0.5, color: kLine),
+              Divider(height: 0.5, color: context.monettaColors.divider),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -724,9 +769,14 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                 ),
               ),
               DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(top: BorderSide(color: kLine, width: 0.5)),
+                decoration: BoxDecoration(
+                  color: context.monettaColors.surfaceRaised,
+                  border: Border(
+                    top: BorderSide(
+                      color: context.monettaColors.divider,
+                      width: 0.5,
+                    ),
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
@@ -735,7 +785,9 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                       TextButton(
                         key: const Key('catalog-filter-clear'),
                         onPressed: _clear,
-                        style: TextButton.styleFrom(foregroundColor: kInk),
+                        style: TextButton.styleFrom(
+                          foregroundColor: context.monettaColors.contentPrimary,
+                        ),
                         child: Text(
                           'Limpiar',
                           style: sans(
@@ -752,8 +804,11 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                           onPressed: () =>
                               Navigator.of(context).pop(_selection),
                           style: FilledButton.styleFrom(
-                            backgroundColor: kInk,
-                            foregroundColor: Colors.white,
+                            backgroundColor: colors.navigationSelection,
+                            foregroundColor: colors.accentContent,
+                            side: BorderSide(
+                              color: colors.accent.withValues(alpha: 0.48),
+                            ),
                             minimumSize: const Size.fromHeight(56),
                             shape: const StadiumBorder(),
                           ),
@@ -763,7 +818,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                                 : 'Ver $resultCount artículos',
                             style: sans(
                               size: 15,
-                              color: Colors.white,
+                              color: colors.accentContent,
                               weight: FontWeight.w700,
                             ),
                           ),
@@ -797,8 +852,10 @@ class _FilterAccordion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: kLine, width: 0.5)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: 0.5),
+        ),
       ),
       child: Column(
         children: [
@@ -874,7 +931,7 @@ class _FilterChoiceRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: swatch,
                   shape: BoxShape.circle,
-                  border: Border.all(color: kLine),
+                  border: Border.all(color: context.monettaColors.divider),
                 ),
               ),
             ],
@@ -884,7 +941,9 @@ class _FilterChoiceRow extends StatelessWidget {
                 label,
                 style: sans(
                   size: 15,
-                  color: selected ? kInk : kInkMuted,
+                  color: selected
+                      ? context.monettaColors.contentPrimary
+                      : context.monettaColors.contentMuted,
                   weight: selected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
@@ -910,21 +969,32 @@ class _SelectionMark extends StatelessWidget {
       height: 28,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected ? kInk : Colors.white,
+        color: selected
+            ? context.monettaColors.contentPrimary
+            : context.monettaColors.surface,
         shape: radio ? BoxShape.circle : BoxShape.rectangle,
         borderRadius: radio ? null : BorderRadius.circular(4),
-        border: Border.all(color: selected ? kInk : kLine, width: 1.5),
+        border: Border.all(
+          color: selected
+              ? context.monettaColors.contentPrimary
+              : context.monettaColors.divider,
+          width: 1.5,
+        ),
       ),
       child: selected
           ? radio
-              ? const DecoratedBox(
+              ? DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.monettaColors.canvas,
                     shape: BoxShape.circle,
                   ),
                   child: SizedBox(width: 9, height: 9),
                 )
-              : const Icon(Icons.check_rounded, size: 18, color: Colors.white)
+              : Icon(
+                  Icons.check_rounded,
+                  size: 18,
+                  color: context.monettaColors.canvas,
+                )
           : null,
     );
   }
@@ -946,7 +1016,11 @@ class _EmptyCatalogState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Icon(Icons.search_off_rounded, size: 30, color: kInkMuted),
+          Icon(
+            Icons.search_off_rounded,
+            size: 30,
+            color: context.monettaColors.contentMuted,
+          ),
           const SizedBox(height: 18),
           Text(
             'Sin resultados',
@@ -958,7 +1032,11 @@ class _EmptyCatalogState extends StatelessWidget {
                 ? 'Intenta usar otros filtros o quita los actuales.'
                 : 'Muy pronto encontrarás nuevas piezas aquí.',
             textAlign: TextAlign.center,
-            style: sans(size: 13, color: kInkMuted, height: 1.5),
+            style: sans(
+              size: 13,
+              color: context.monettaColors.contentMuted,
+              height: 1.5,
+            ),
           ),
           if (hasActiveFilter) ...[
             const SizedBox(height: 22),
@@ -1026,7 +1104,7 @@ class _BrowseTile extends StatelessWidget {
             AspectRatio(
               aspectRatio: 3 / 4,
               child: ColoredBox(
-                color: kMist,
+                color: context.monettaColors.surfaceMuted,
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -1055,7 +1133,9 @@ class _BrowseTile extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                     style: sans(
                       size: 11.5,
-                      color: item.isExternal ? kGold : kInk,
+                      color: item.isExternal
+                          ? context.monettaColors.accent
+                          : context.monettaColors.contentPrimary,
                       weight: FontWeight.w600,
                     ),
                   ),
@@ -1064,7 +1144,11 @@ class _BrowseTile extends StatelessWidget {
                     item.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: sans(size: 13, color: kInkMuted, height: 1.35),
+                    style: sans(
+                      size: 13,
+                      color: context.monettaColors.contentMuted,
+                      height: 1.35,
+                    ),
                   ),
                   const SizedBox(height: 7),
                   Text(
@@ -1225,5 +1309,5 @@ Color _colorSwatch(String value) => switch (value) {
       'Naranja' => const Color(0xFFD67B3B),
       'Dorado' => const Color(0xFFB9904F),
       'Plateado' => const Color(0xFFB8B8B8),
-      _ => kMist,
+      _ => const Color(0xFF999999),
     };

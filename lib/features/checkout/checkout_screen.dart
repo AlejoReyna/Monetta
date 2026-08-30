@@ -97,15 +97,15 @@ class BagAction extends StatelessWidget {
                 constraints: const BoxConstraints(minWidth: 18, minHeight: 18),
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 alignment: Alignment.center,
-                decoration: const BoxDecoration(
-                  color: kInk,
+                decoration: BoxDecoration(
+                  color: context.monettaColors.contentPrimary,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   count > 9 ? '9+' : '$count',
                   style: sans(
                     size: 9,
-                    color: Colors.white,
+                    color: context.monettaColors.canvas,
                     weight: FontWeight.w600,
                     height: 1,
                   ),
@@ -284,7 +284,10 @@ class _BagContents extends StatelessWidget {
                   const SizedBox(width: 16),
                   Text(
                     '$count ${count == 1 ? 'artículo' : 'artículos'}',
-                    style: sans(size: 12.5, color: kInkMuted),
+                    style: sans(
+                      size: 12.5,
+                      color: context.monettaColors.contentMuted,
+                    ),
                   ),
                 ],
               ),
@@ -597,7 +600,10 @@ class _CheckoutAppBar extends StatelessWidget implements PreferredSizeWidget {
                     const SizedBox(width: 6),
                     Text(
                       'SEGURO',
-                      style: eyebrow(size: 8.5, color: kInk),
+                      style: eyebrow(
+                        size: 8.5,
+                        color: context.monettaColors.contentPrimary,
+                      ),
                     ),
                   ],
                 ),
@@ -621,7 +627,7 @@ class _CheckoutProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     const labels = ['Bolsa', 'Entrega', 'Pago'];
     return Container(
-      color: kMist,
+      color: context.monettaColors.surfaceMuted,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
       child: Center(
         child: ConstrainedBox(
@@ -633,7 +639,9 @@ class _CheckoutProgress extends StatelessWidget {
                   Expanded(
                     child: Container(
                       height: .5,
-                      color: index <= activeIndex ? kInk : kLine,
+                      color: index <= activeIndex
+                          ? context.monettaColors.contentPrimary
+                          : context.monettaColors.divider,
                     ),
                   ),
                 _ProgressStep(
@@ -677,16 +685,28 @@ class _ProgressStep extends StatelessWidget {
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: active || complete ? kInk : Colors.white,
-              border: Border.all(color: active || complete ? kInk : kLine),
+              color: active || complete
+                  ? context.monettaColors.contentPrimary
+                  : context.monettaColors.surface,
+              border: Border.all(
+                color: active || complete
+                    ? context.monettaColors.contentPrimary
+                    : context.monettaColors.divider,
+              ),
             ),
             child: complete
-                ? const Icon(Icons.check, size: 13, color: Colors.white)
+                ? Icon(
+                    Icons.check,
+                    size: 13,
+                    color: context.monettaColors.canvas,
+                  )
                 : Text(
                     '$number',
                     style: sans(
                       size: 10,
-                      color: active ? Colors.white : kInkMuted,
+                      color: active
+                          ? context.monettaColors.canvas
+                          : context.monettaColors.contentMuted,
                       weight: FontWeight.w600,
                       height: 1,
                     ),
@@ -697,7 +717,9 @@ class _ProgressStep extends StatelessWidget {
             label.toUpperCase(),
             style: eyebrow(
               size: 8.5,
-              color: active || complete ? kInk : kInkMuted,
+              color: active || complete
+                  ? context.monettaColors.contentPrimary
+                  : context.monettaColors.contentMuted,
             ),
           ),
         ],
@@ -723,7 +745,14 @@ class _BagLineTile extends StatelessWidget {
     final brand = store.facetsFor(line.product.id)?.brand?.value;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
-      decoration: const BoxDecoration(border: Border(top: kHairline)),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: context.monettaColors.divider,
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -751,7 +780,10 @@ class _BagLineTile extends StatelessWidget {
                   const SizedBox(height: 5),
                   Text(
                     line.variant.title,
-                    style: sans(size: 11.5, color: kInkMuted),
+                    style: sans(
+                      size: 11.5,
+                      color: context.monettaColors.contentMuted,
+                    ),
                   ),
                 ],
                 const SizedBox(height: 10),
@@ -772,7 +804,7 @@ class _BagLineTile extends StatelessWidget {
                       label: 'Eliminar',
                       onTap: onRemove,
                       size: 10.5,
-                      color: kInkMuted,
+                      color: context.monettaColors.contentMuted,
                     ),
                   ],
                 ),
@@ -795,7 +827,9 @@ class _QuantityControl extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: 38,
-      decoration: BoxDecoration(border: Border.all(color: kLine)),
+      decoration: BoxDecoration(
+        border: Border.all(color: context.monettaColors.divider),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
@@ -866,7 +900,7 @@ class _OrderSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       key: const ValueKey('bag-order-summary'),
-      color: kMist,
+      color: context.monettaColors.surfaceMuted,
       padding: const EdgeInsets.all(24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -902,11 +936,16 @@ class _OrderSummary extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              const Icon(Icons.lock_outline, size: 14, color: kInkMuted),
+              Icon(
+                Icons.lock_outline,
+                size: 14,
+                color: context.monettaColors.contentMuted,
+              ),
               const SizedBox(width: 7),
               Text(
                 'Pago procesado de forma segura',
-                style: sans(size: 10.5, color: kInkMuted),
+                style:
+                    sans(size: 10.5, color: context.monettaColors.contentMuted),
               ),
             ],
           ),
@@ -993,7 +1032,7 @@ class _DeliveryForm extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Compra como invitado. Solo pedimos lo necesario para entregar tu pedido.',
-            style: sans(size: 12.5, color: kInkMuted),
+            style: sans(size: 12.5, color: context.monettaColors.contentMuted),
           ),
           const SizedBox(height: 30),
           Text('Contacto'.toUpperCase(), style: eyebrow(size: 9)),
@@ -1116,26 +1155,29 @@ class _CheckoutField extends StatelessWidget {
       style: sans(size: 14),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: sans(size: 12.5, color: kInkMuted),
-        floatingLabelStyle: sans(size: 11, color: kInk),
+        labelStyle: sans(size: 12.5, color: context.monettaColors.contentMuted),
+        floatingLabelStyle:
+            sans(size: 11, color: context.monettaColors.contentPrimary),
         filled: true,
-        fillColor: Colors.white,
+        fillColor: context.monettaColors.inputFill,
         contentPadding: const EdgeInsets.fromLTRB(15, 17, 15, 14),
-        enabledBorder: const OutlineInputBorder(
+        enabledBorder: OutlineInputBorder(
           borderRadius: kSquare,
-          borderSide: kHairline,
+          borderSide:
+              BorderSide(color: context.monettaColors.divider, width: 0.5),
         ),
-        focusedBorder: const OutlineInputBorder(
+        focusedBorder: OutlineInputBorder(
           borderRadius: kSquare,
-          borderSide: BorderSide(color: kInk, width: 1),
+          borderSide:
+              BorderSide(color: context.monettaColors.contentPrimary, width: 1),
         ),
-        errorBorder: const OutlineInputBorder(
+        errorBorder: OutlineInputBorder(
           borderRadius: kSquare,
-          borderSide: BorderSide(color: kSale, width: .8),
+          borderSide: BorderSide(color: context.monettaColors.sale, width: .8),
         ),
-        focusedErrorBorder: const OutlineInputBorder(
+        focusedErrorBorder: OutlineInputBorder(
           borderRadius: kSquare,
-          borderSide: BorderSide(color: kSale, width: 1),
+          borderSide: BorderSide(color: context.monettaColors.sale, width: 1),
         ),
       ),
     );
@@ -1151,7 +1193,12 @@ class _DeliveryOption extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(border: Border.all(color: kInk, width: .8)),
+      decoration: BoxDecoration(
+        border: Border.all(
+          color: context.monettaColors.contentPrimary,
+          width: .8,
+        ),
+      ),
       child: Row(
         children: [
           Container(
@@ -1160,10 +1207,13 @@ class _DeliveryOption extends StatelessWidget {
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: kInk),
+              border: Border.all(color: context.monettaColors.contentPrimary),
             ),
-            child: const DecoratedBox(
-              decoration: BoxDecoration(shape: BoxShape.circle, color: kInk),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: context.monettaColors.contentPrimary,
+              ),
             ),
           ),
           const SizedBox(width: 13),
@@ -1177,7 +1227,8 @@ class _DeliveryOption extends StatelessWidget {
                 ),
                 Text(
                   'Recíbelo en 3 a 5 días hábiles',
-                  style: sans(size: 11, color: kInkMuted),
+                  style:
+                      sans(size: 11, color: context.monettaColors.contentMuted),
                 ),
               ],
             ),
@@ -1186,7 +1237,8 @@ class _DeliveryOption extends StatelessWidget {
             shipping == 0
                 ? 'ESTIMADO: GRATIS'
                 : 'ESTIMADO: ${kMoney.format(shipping)}',
-            style: eyebrow(size: 8.5, color: kInk),
+            style:
+                eyebrow(size: 8.5, color: context.monettaColors.contentPrimary),
           ),
         ],
       ),
@@ -1224,7 +1276,7 @@ class _ReviewPanel extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           'Revisa tu entrega antes de continuar al pago protegido.',
-          style: sans(size: 12.5, color: kInkMuted),
+          style: sans(size: 12.5, color: context.monettaColors.contentMuted),
         ),
         const SizedBox(height: 30),
         _ReviewBlock(
@@ -1246,12 +1298,12 @@ class _ReviewPanel extends StatelessWidget {
         FilledButton.icon(
           onPressed: launching ? null : onPay,
           icon: launching
-              ? const SizedBox(
+              ? SizedBox(
                   width: 14,
                   height: 14,
                   child: CircularProgressIndicator(
                     strokeWidth: 1.5,
-                    color: Colors.white,
+                    color: context.monettaColors.canvas,
                   ),
                 )
               : const Icon(Icons.lock_outline, size: 16),
@@ -1261,7 +1313,7 @@ class _ReviewPanel extends StatelessWidget {
         Text(
           'Shopify procesa el pago. Monetta nunca ve ni guarda los datos de tu tarjeta.',
           textAlign: TextAlign.center,
-          style: sans(size: 10.5, color: kInkMuted),
+          style: sans(size: 10.5, color: context.monettaColors.contentMuted),
         ),
       ],
     );
@@ -1280,7 +1332,14 @@ class _ReviewBlock extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 18),
-      decoration: const BoxDecoration(border: Border(top: kHairline)),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(
+            color: context.monettaColors.divider,
+            width: 0.5,
+          ),
+        ),
+      ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -1307,7 +1366,7 @@ class _CheckoutSummary extends StatelessWidget {
   Widget build(BuildContext context) {
     final shipping = _shippingFor(subtotal);
     return Container(
-      color: kMist,
+      color: context.monettaColors.surfaceMuted,
       padding: const EdgeInsets.all(22),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1351,7 +1410,10 @@ class _CheckoutSummary extends StatelessWidget {
                         ),
                         Text(
                           'Cantidad ${line.quantity}',
-                          style: sans(size: 10.5, color: kInkMuted),
+                          style: sans(
+                            size: 10.5,
+                            color: context.monettaColors.contentMuted,
+                          ),
                         ),
                       ],
                     ),
@@ -1415,7 +1477,8 @@ class _EmptyBag extends StatelessWidget {
             Text(
               'Encuentra una pieza que quieras llevar contigo.',
               textAlign: TextAlign.center,
-              style: sans(size: 12.5, color: kInkMuted),
+              style:
+                  sans(size: 12.5, color: context.monettaColors.contentMuted),
             ),
             const SizedBox(height: 26),
             SizedBox(

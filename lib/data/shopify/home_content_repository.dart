@@ -24,10 +24,13 @@ class HomeContentRepository {
         : const <Object?, Object?>{};
     final collections = edgeNodes(data['collections'])
         .map(collectionFromJson)
-        .where((item) => !item.isEmpty)
         .toList(growable: false);
-    final byHandle = <String, Collection>{
+    final allByHandle = <String, Collection>{
       for (final item in collections) item.handle.toLowerCase(): item,
+    };
+    final byHandle = <String, Collection>{
+      for (final item in collections)
+        if (!item.isEmpty) item.handle.toLowerCase(): item,
     };
 
     return fallback.copyWith(
@@ -45,6 +48,9 @@ class HomeContentRepository {
         fallback.bagTypes,
         byHandle,
       ),
+      // Brand logos remain useful navigation and merchandising artwork even
+      // when their Shopify collection is temporarily empty.
+      brands: _brands(fallback.brands, allByHandle),
       socialLinks: _socialLinks(
         metafieldValue(shop['socialLinks']),
         fallback.socialLinks,
@@ -52,6 +58,18 @@ class HomeContentRepository {
       aboutImageUrl:
           _url(metafieldValue(shop['aboutImageUrl'])) ?? fallback.aboutImageUrl,
     );
+  }
+
+  List<HomeBrandCard> _brands(
+    List<HomeBrandCard> fallback,
+    Map<String, Collection> byHandle,
+  ) {
+    return List.unmodifiable([
+      for (final seed in fallback)
+        seed.copyWith(
+          imageUrl: _url(byHandle[seed.handle.toLowerCase()]?.imageUrl),
+        ),
+    ]);
   }
 
   List<HomeSectionId> _sectionOrder(

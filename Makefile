@@ -1,4 +1,4 @@
-.PHONY: help setup gen gen-watch test test-core analyze format fix schema clean run-dev doctor
+.PHONY: help setup gen gen-watch test test-core analyze format fix schema clean run-dev run-staging validate-staging refresh-catalog verify-catalog verify-catalog-remote doctor
 
 FLUTTER ?= flutter
 DART    ?= dart
@@ -30,6 +30,15 @@ test-core: ## Run only the pure-Dart core tests (fast: no widget pump)
 report: ## Print the catalog health report the owner acts on
 	$(DART) run bin/catalog_report.dart
 
+refresh-catalog: ## Regenerate the bundled snapshot from its public source
+	$(DART) run bin/refresh_catalog_snapshot.dart
+
+verify-catalog: ## Check bundled catalog shape and freshness
+	$(DART) run bin/verify_catalog_snapshot.dart
+
+verify-catalog-remote: ## Also verify every bundled product image URL
+	$(DART) run bin/verify_catalog_snapshot.dart --remote
+
 analyze: ## Static analysis
 	$(FLUTTER) analyze
 
@@ -40,8 +49,13 @@ fix: ## Apply formatting and automated fixes
 	$(DART) format lib test
 	$(DART) fix --apply
 
-run-dev: ## Run the dev flavor
-	$(FLUTTER) run --flavor dev -t lib/main_dev.dart
+validate-staging: ## Validate the local staging dart-defines
+	$(DART) run bin/validate_dart_defines.dart config/dart_defines.staging.json staging
+
+run-staging: validate-staging ## Run against the authoritative staging catalog
+	$(FLUTTER) run --dart-define-from-file=config/dart_defines.staging.json
+
+run-dev: run-staging ## Alias for the canonical staging launch
 
 clean: ## Clean build artifacts
 	$(FLUTTER) clean

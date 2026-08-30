@@ -101,6 +101,10 @@ void main() {
     final cached = await cache.allProducts();
     expect(cached, hasLength(1));
     expect(cached.single.id, 'gid://shopify/Product/123');
+    final metadata = await cache.metadata();
+    expect(metadata?.source, CatalogCacheSource.firestore);
+    expect(metadata?.status, CatalogCacheStatus.healthy);
+    expect(metadata?.productCount, 1);
   });
 
   test('an empty snapshot never erases a valid cached catalog', () async {

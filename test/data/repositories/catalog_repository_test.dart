@@ -12,6 +12,7 @@ import 'package:monetta_app/data/repositories/catalog_repository.dart';
 import 'package:monetta_app/data/shopify/catalog_sync.dart';
 import 'package:monetta_app/data/shopify/storefront_client.dart';
 import 'package:monetta_app/data/shopify/storefront_config.dart';
+import 'package:monetta_app/domain/product.dart';
 
 class _FakeTransport {
   _FakeTransport(this.pages);
@@ -147,6 +148,10 @@ void main() {
         seeded.single.variants.single.id,
         'gid://shopify/ProductVariant/11',
       );
+      final metadata = await cache.metadata();
+      expect(metadata?.source, CatalogCacheSource.asset);
+      expect(metadata?.productCount, seeded.length);
+      expect(metadata?.fingerprint, isNotEmpty);
 
       // A second seed call must not touch an already-populated cache.
       await cache.upsertProducts([]); // no-op, cache still has the seeded row
@@ -167,6 +172,56 @@ void main() {
         ],
       });
       expect(await cache.allProducts(), hasLength(1));
+    });
+
+    test('the bundled asset cannot mutate an authoritative remote cache',
+        () async {
+      final cache = CatalogCacheStore(db);
+      final remote = Product(
+        id: 'gid://shopify/Product/99',
+        handle: 'remote',
+        title: 'Remoto',
+        vendor: 'Monetta',
+        productType: 'Bolsa',
+        tags: const [],
+        variants: const [],
+        images: const [],
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      );
+      await cache.replaceProducts(
+        [remote],
+        metadata: CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.firestore,
+          products: [remote],
+          syncedAt: DateTime.utc(2026, 8, 30),
+          status: CatalogCacheStatus.healthy,
+        ),
+      );
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: SyncCursorStore(db),
+        rules: _emptyRules(),
+      );
+
+      await repo.addMissingFromAsset({
+        'products': [
+          {
+            'id': 1,
+            'handle': 'stale-asset',
+            'title': 'Obsoleto',
+            'vendor': 'Monetta',
+            'product_type': 'Bolsa',
+            'tags': <String>[],
+            'images': <String>[],
+            'created_at': '2026-01-01T00:00:00Z',
+            'updated_at': '2026-01-01T00:00:00Z',
+            'variants': <Map<String, dynamic>>[],
+          },
+        ],
+      });
+
+      expect((await cache.allProducts()).single.id, remote.id);
     });
 
     test(

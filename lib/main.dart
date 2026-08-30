@@ -11,6 +11,7 @@ import 'dart:async';
 import 'dart:io' show Platform;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'app/account_controller.dart';
@@ -24,9 +25,11 @@ import 'app/external_catalog_config.dart';
 import 'app/external_catalog_controller.dart';
 import 'app/home_content_controller.dart';
 import 'app/notification_controller.dart';
+import 'app/runtime_config.dart';
 import 'app/shopify_cart_composition.dart';
 import 'app/shopify_checkout_coordinator.dart';
 import 'app/theme.dart';
+import 'app/theme_controller.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
 import 'data/accounts_orders/system_account_client.dart';
 import 'data/accounts_orders/system_account_session_repository.dart';
@@ -42,6 +45,7 @@ import 'data/firestore/catalog_realtime_source.dart';
 import 'data/firestore/firestore_catalog_config.dart';
 import 'data/firestore/firestore_catalog_source.dart';
 import 'data/local/account_store.dart';
+import 'data/local/appearance_store.dart';
 import 'data/local/bag_store.dart';
 import 'data/local/database.dart';
 import 'data/local/order_summary_store.dart';
@@ -73,6 +77,17 @@ Future<void> main() async {
     fallbackBaseUrl: accountsConfig.baseUrl,
   );
   final firestoreCatalogConfig = FirestoreCatalogConfig.fromEnvironment();
+  final storefrontConfig = StorefrontConfig.fromEnvironment();
+  final runtimeConfig = RuntimeConfig.fromEnvironment();
+  final configurationError = runtimeConfig.catalogConfigurationError(
+    firestore: firestoreCatalogConfig,
+    hasFirebaseOptions: notifications.hasFirebaseOptions,
+    hasShopify: storefrontConfig.isUsable,
+  );
+  if (configurationError != null) {
+    runApp(_ConfigurationErrorApp(message: configurationError));
+    return;
+  }
   CatalogRealtimeSource? realtimeCatalogSource;
   if (firestoreCatalogConfig.enabled && notifications.hasFirebaseOptions) {
     try {
@@ -83,6 +98,15 @@ Future<void> main() async {
         FirebaseFirestore.instance,
       );
     } catch (error) {
+      if (runtimeConfig.requiresFirestore) {
+        runApp(
+          _ConfigurationErrorApp(
+            message: 'No se pudo iniciar el catálogo de Firestore '
+                '(${error.runtimeType}).',
+          ),
+        );
+        return;
+      }
       debugPrint('Firestore catalog bootstrap disabled: $error');
     }
   }
@@ -100,6 +124,52 @@ Future<void> main() async {
       realtimeCatalogSource: realtimeCatalogSource,
     ),
   );
+}
+
+class _ConfigurationErrorApp extends StatelessWidget {
+  const _ConfigurationErrorApp({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      home: Scaffold(
+        body: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 480),
+              child: Padding(
+                padding: const EdgeInsets.all(28),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Configuración incompleta',
+                      style: TextStyle(
+                        fontFamily: 'serif',
+                        fontSize: 28,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 14),
+                    Text(message),
+                    const SizedBox(height: 14),
+                    const SelectableText(
+                      'make run-staging',
+                      style: TextStyle(fontFamily: 'monospace'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// Exposes the store to the widget tree.
@@ -336,6 +406,9 @@ class MonettaApp extends StatefulWidget {
 class _MonettaAppState extends State<MonettaApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
   final AppDatabase _database = AppDatabase.connect();
+  late final ThemeController _theme = ThemeController(
+    store: AppearanceStore(_database),
+  );
 
   /// Null when no usable public Storefront credentials were compiled in.
   final HttpStorefrontTransport? _storefrontTransport =
@@ -420,6 +493,8 @@ class _MonettaAppState extends State<MonettaApp> {
   }
 
   Future<void> _load() async {
+    await _theme.restore();
+
     // Seeds/hydrates the Drift database both `CatalogStore` and account
     // state share, so nothing below races it.
     await _store.loadFromAsset();
@@ -634,62 +709,78 @@ class _MonettaAppState extends State<MonettaApp> {
     _externalCatalog.dispose();
     _editorialContent.dispose();
     _homeContent.dispose();
+    _theme.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      navigatorKey: _navigatorKey,
-      title: 'Monetta',
-      debugShowCheckedModeBanner: false,
-      theme: buildTheme(),
-      builder: (context, navigator) => FutureBuilder<void>(
-        future: _loading,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return _ErrorScreen(error: '${snapshot.error}');
-          }
-          if (snapshot.connectionState != ConnectionState.done) {
-            return const _SplashScreen();
-          }
-          return AppRouteScopes(
-            accountController: _account,
-            cartController: _shopifyCart?.controller,
-            checkoutCoordinator: _shopifyCart?.checkout,
-            shopDomain: StorefrontConfig.fromEnvironment().shopDomain,
-            child: navigator!,
-          );
-        },
-      ),
-      home: StoreScope(
-        notifier: _store,
-        child: ExternalCatalogScope(
-          notifier: _externalCatalog,
-          child: EditorialContentScope(
-            notifier: _editorialContent,
-            child: HomeContentScope(
-              notifier: _homeContent,
+    return ListenableBuilder(
+      listenable: _theme,
+      builder: (context, _) => ThemeScope(
+        notifier: _theme,
+        child: MaterialApp(
+          navigatorKey: _navigatorKey,
+          title: 'Monetta',
+          debugShowCheckedModeBanner: false,
+          theme: buildLightTheme(),
+          darkTheme: buildDarkTheme(),
+          themeMode: _theme.mode,
+          builder: (context, navigator) {
+            final overlay = Theme.of(context).appBarTheme.systemOverlayStyle ??
+                SystemUiOverlayStyle.light;
+            return AnnotatedRegion<SystemUiOverlayStyle>(
+              value: overlay,
               child: FutureBuilder<void>(
                 future: _loading,
                 builder: (context, snapshot) {
                   if (snapshot.hasError) {
-                    return const SizedBox.shrink();
+                    return _ErrorScreen(error: '${snapshot.error}');
                   }
                   if (snapshot.connectionState != ConnectionState.done) {
-                    return const SizedBox.shrink();
+                    return const _SplashScreen();
                   }
-                  return NotificationScope(
-                    notifier: _notifications!,
-                    child: AdminNotificationScope(
-                      notifier: _adminNotifications!,
-                      child: AdminScope(
-                        notifier: _admin!,
-                        child: const HomeScreen(),
-                      ),
-                    ),
+                  return AppRouteScopes(
+                    accountController: _account,
+                    cartController: _shopifyCart?.controller,
+                    checkoutCoordinator: _shopifyCart?.checkout,
+                    shopDomain: StorefrontConfig.fromEnvironment().shopDomain,
+                    child: navigator!,
                   );
                 },
+              ),
+            );
+          },
+          home: StoreScope(
+            notifier: _store,
+            child: ExternalCatalogScope(
+              notifier: _externalCatalog,
+              child: EditorialContentScope(
+                notifier: _editorialContent,
+                child: HomeContentScope(
+                  notifier: _homeContent,
+                  child: FutureBuilder<void>(
+                    future: _loading,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return const SizedBox.shrink();
+                      }
+                      if (snapshot.connectionState != ConnectionState.done) {
+                        return const SizedBox.shrink();
+                      }
+                      return NotificationScope(
+                        notifier: _notifications!,
+                        child: AdminNotificationScope(
+                          notifier: _adminNotifications!,
+                          child: AdminScope(
+                            notifier: _admin!,
+                            child: const HomeScreen(),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
               ),
             ),
           ),
@@ -707,6 +798,7 @@ class _SplashScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     return Scaffold(
       body: Center(
         child: Column(
@@ -714,7 +806,10 @@ class _SplashScreen extends StatelessWidget {
           children: [
             const MonettaWordmark(height: 34),
             const SizedBox(height: 18),
-            Text('Originales importados'.toUpperCase(), style: eyebrow()),
+            Text(
+              'Originales importados'.toUpperCase(),
+              style: eyebrow(color: colors.contentMuted),
+            ),
             const SizedBox(height: 36),
             const SizedBox(
               width: 64,
@@ -735,6 +830,7 @@ class _ErrorScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     return Scaffold(
       body: Padding(
         padding: const EdgeInsets.all(24),
@@ -747,7 +843,7 @@ class _ErrorScreen extends StatelessWidget {
               Text(
                 error,
                 textAlign: TextAlign.center,
-                style: sans(size: 12, color: kInkMuted),
+                style: sans(size: 12, color: colors.contentMuted),
               ),
             ],
           ),

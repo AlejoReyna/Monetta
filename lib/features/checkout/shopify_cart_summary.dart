@@ -61,7 +61,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
 
         return Container(
           key: const ValueKey('shopify-cart-summary'),
-          color: kMist,
+          color: context.monettaColors.surfaceMuted,
           padding: const EdgeInsets.all(24),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -92,7 +92,10 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                 const SizedBox(height: 12),
                 Text(
                   'Incluye descuentos automáticos de Shopify',
-                  style: sans(size: 11.5, color: kInkMuted),
+                  style: sans(
+                    size: 11.5,
+                    color: context.monettaColors.contentMuted,
+                  ),
                 ),
               ],
               const SizedBox(height: 12),
@@ -186,7 +189,10 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                   child: Text(
                     message,
                     key: const ValueKey('discount-status-message'),
-                    style: sans(size: 11.5, color: kInkMuted),
+                    style: sans(
+                      size: 11.5,
+                      color: context.monettaColors.contentMuted,
+                    ),
                   ),
                 ),
               ],

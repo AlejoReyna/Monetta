@@ -6,6 +6,7 @@ import 'package:video_player/video_player.dart';
 
 import '../../domain/campaign.dart';
 import '../motion.dart';
+import '../theme.dart';
 
 class MonettaVideo extends StatefulWidget {
   const MonettaVideo({
@@ -110,6 +111,7 @@ class _MonettaVideoState extends State<MonettaVideo> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     final controller = _controller;
     final showVideo =
         _ready && controller != null && controller.value.isInitialized;
@@ -122,7 +124,7 @@ class _MonettaVideoState extends State<MonettaVideo> {
           fit: BoxFit.cover,
           filterQuality: FilterQuality.medium,
           errorBuilder: (_, __, ___) =>
-              const ColoredBox(color: Color(0xFFF5F5F5)),
+              ColoredBox(color: colors.mediaPlaceholder),
         ),
         if (showVideo)
           FittedBox(

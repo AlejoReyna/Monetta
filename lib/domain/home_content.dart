@@ -73,6 +73,38 @@ class HomeCollectionCard {
   }
 }
 
+class HomeBrandCard {
+  const HomeBrandCard({
+    required this.title,
+    required this.brand,
+    required this.handle,
+    required this.fallbackAsset,
+    this.imageUrl,
+  });
+
+  final String title;
+  final String brand;
+  final String handle;
+  final String fallbackAsset;
+  final String? imageUrl;
+
+  HomeBrandCard copyWith({
+    String? title,
+    String? brand,
+    String? handle,
+    String? fallbackAsset,
+    String? imageUrl,
+  }) {
+    return HomeBrandCard(
+      title: title ?? this.title,
+      brand: brand ?? this.brand,
+      handle: handle ?? this.handle,
+      fallbackAsset: fallbackAsset ?? this.fallbackAsset,
+      imageUrl: imageUrl ?? this.imageUrl,
+    );
+  }
+}
+
 class HomeSocialLink {
   const HomeSocialLink({
     required this.id,
@@ -118,6 +150,7 @@ class HomeContent {
     required this.sectionOrder,
     required this.collections,
     required this.bagTypes,
+    required this.brands,
     required this.socialLinks,
     required this.testimonials,
     this.aboutImageUrl,
@@ -128,6 +161,7 @@ class HomeContent {
   final List<HomeSectionId> sectionOrder;
   final List<HomeCollectionCard> collections;
   final List<HomeCollectionCard> bagTypes;
+  final List<HomeBrandCard> brands;
   final List<HomeSocialLink> socialLinks;
   final List<HomeTestimonial> testimonials;
   final String? aboutImageUrl;
@@ -138,6 +172,7 @@ class HomeContent {
     List<HomeSectionId>? sectionOrder,
     List<HomeCollectionCard>? collections,
     List<HomeCollectionCard>? bagTypes,
+    List<HomeBrandCard>? brands,
     List<HomeSocialLink>? socialLinks,
     List<HomeTestimonial>? testimonials,
     String? aboutImageUrl,
@@ -148,6 +183,7 @@ class HomeContent {
       sectionOrder: sectionOrder ?? this.sectionOrder,
       collections: collections ?? this.collections,
       bagTypes: bagTypes ?? this.bagTypes,
+      brands: brands ?? this.brands,
       socialLinks: socialLinks ?? this.socialLinks,
       testimonials: testimonials ?? this.testimonials,
       aboutImageUrl: aboutImageUrl ?? this.aboutImageUrl,
@@ -207,6 +243,80 @@ class HomeContent {
         category: 'bolsa',
         silhouette: 'shoulder',
         fallbackAsset: 'assets/images/home_bag_shoulder.webp',
+      ),
+    ],
+    brands: <HomeBrandCard>[
+      HomeBrandCard(
+        title: 'Coach',
+        brand: 'Coach',
+        handle: 'coach',
+        fallbackAsset: 'assets/images/brands/coach.webp',
+      ),
+      HomeBrandCard(
+        title: 'Michael Kors',
+        brand: 'Michael Kors',
+        handle: 'michael-kors',
+        fallbackAsset: 'assets/images/brands/michael_kors.webp',
+      ),
+      HomeBrandCard(
+        title: 'Anne Klein',
+        brand: 'Anne Klein',
+        handle: 'anne-klein',
+        fallbackAsset: 'assets/images/brands/anne_klein.webp',
+      ),
+      HomeBrandCard(
+        title: 'Guess',
+        brand: 'Guess',
+        handle: 'guess-1',
+        fallbackAsset: 'assets/images/brands/guess.webp',
+      ),
+      HomeBrandCard(
+        title: 'Steve Madden',
+        brand: 'Steve Madden',
+        handle: 'steve-madden',
+        fallbackAsset: 'assets/images/brands/steve_madden.webp',
+      ),
+      HomeBrandCard(
+        title: 'Tommy Hilfiger',
+        brand: 'Tommy Hilfiger',
+        handle: 'tommy-hilfiger',
+        fallbackAsset: 'assets/images/brands/tommy_hilfiger.webp',
+      ),
+      HomeBrandCard(
+        title: 'Olaplex',
+        brand: 'Olaplex',
+        handle: 'olalplex',
+        fallbackAsset: 'assets/images/brands/olaplex.webp',
+      ),
+      HomeBrandCard(
+        title: 'Dior',
+        brand: 'Christian Dior',
+        handle: 'christian-dior',
+        fallbackAsset: 'assets/images/brands/dior.webp',
+      ),
+      HomeBrandCard(
+        title: 'The Ordinary',
+        brand: 'The Ordinary',
+        handle: 'the-ordinary',
+        fallbackAsset: 'assets/images/brands/the_ordinary.webp',
+      ),
+      HomeBrandCard(
+        title: 'Summer Fridays',
+        brand: 'Summer Fridays',
+        handle: 'summer-fridays',
+        fallbackAsset: 'assets/images/brands/summer_fridays.webp',
+      ),
+      HomeBrandCard(
+        title: 'Laneige',
+        brand: 'Laneige',
+        handle: 'laneige',
+        fallbackAsset: 'assets/images/brands/laneige.webp',
+      ),
+      HomeBrandCard(
+        title: 'Rhode',
+        brand: 'Rhode',
+        handle: 'rhode',
+        fallbackAsset: 'assets/images/brands/rhode.webp',
       ),
     ],
     socialLinks: <HomeSocialLink>[

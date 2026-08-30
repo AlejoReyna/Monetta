@@ -40,6 +40,31 @@ void main() {
     expect(find.text('extracted'), findsNothing);
     expect(find.text('También en marcas de Estados Unidos'), findsNothing);
 
+    final silhouettePills = find.byWidgetPredicate(
+      (widget) =>
+          widget is ChoiceChip &&
+          widget.key is ValueKey<String> &&
+          (widget.key! as ValueKey<String>)
+              .value
+              .startsWith('collection-silhouette-'),
+    );
+    expect(silhouettePills, findsWidgets);
+
+    final firstPill = silhouettePills.first;
+    expect(tester.widget<ChoiceChip>(firstPill).selected, isFalse);
+    await tester.tap(firstPill);
+    await tester.pumpAndSettle();
+    expect(tester.widget<ChoiceChip>(firstPill).selected, isTrue);
+    expect(
+      tester
+          .widget<ChoiceChip>(firstPill)
+          .color
+          ?.resolve(const <WidgetState>{WidgetState.selected}),
+      MonettaColors.light.navigationSelection,
+    );
+    await tester.tap(firstPill);
+    await tester.pumpAndSettle();
+
     await tester.tap(find.text('Más nuevas'));
     await tester.pumpAndSettle();
     expect(find.text('EN STOCK'), findsOneWidget);

@@ -173,7 +173,9 @@ class _ProductScreenState extends State<ProductScreen> {
               icon: Icon(
                 wishlisted ? Icons.favorite : Icons.favorite_border,
                 size: 20,
-                color: wishlisted ? kGold : kInk,
+                color: wishlisted
+                    ? context.monettaColors.accent
+                    : context.monettaColors.contentPrimary,
               ),
               onPressed: () => store.toggleWishlist(product.id),
             ),
@@ -248,7 +250,7 @@ class _ProductScreenState extends State<ProductScreen> {
                           kMoney.format(compare),
                           style: sans(
                             size: 13,
-                            color: kInkMuted,
+                            color: context.monettaColors.contentMuted,
                             decoration: TextDecoration.lineThrough,
                           ),
                         ),
@@ -265,7 +267,12 @@ class _ProductScreenState extends State<ProductScreen> {
                     inStock
                         ? 'Disponible · envío 3 a 5 días · gratis desde ${kMoney.format(kFreeShippingThreshold)}'
                         : 'Agotado',
-                    style: sans(size: 12, color: inStock ? kInk : kInkMuted),
+                    style: sans(
+                      size: 12,
+                      color: inStock
+                          ? context.monettaColors.contentPrimary
+                          : context.monettaColors.contentMuted,
+                    ),
                   ),
                   if (selectable.length > 1) ...[
                     const SizedBox(height: 28),
@@ -286,9 +293,13 @@ class _ProductScreenState extends State<ProductScreen> {
                                 vertical: 8,
                               ),
                               decoration: BoxDecoration(
-                                color: i == _variantIndex ? kInk : Colors.white,
+                                color: i == _variantIndex
+                                    ? context.monettaColors.contentPrimary
+                                    : context.monettaColors.surface,
                                 border: Border.all(
-                                  color: i == _variantIndex ? kInk : kLine,
+                                  color: i == _variantIndex
+                                      ? context.monettaColors.contentPrimary
+                                      : context.monettaColors.divider,
                                   width: 0.5,
                                 ),
                               ),
@@ -296,8 +307,9 @@ class _ProductScreenState extends State<ProductScreen> {
                                 selectable[i].title.toUpperCase(),
                                 style: eyebrow(
                                   size: 8.5,
-                                  color:
-                                      i == _variantIndex ? Colors.white : kInk,
+                                  color: i == _variantIndex
+                                      ? context.monettaColors.canvas
+                                      : context.monettaColors.contentPrimary,
                                 ),
                               ),
                             ),
@@ -368,9 +380,14 @@ class _ProductScreenState extends State<ProductScreen> {
           ],
         ),
         bottomNavigationBar: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(top: kHairline),
+          decoration: BoxDecoration(
+            color: context.monettaColors.surfaceRaised,
+            border: Border(
+              top: BorderSide(
+                color: context.monettaColors.divider,
+                width: 0.5,
+              ),
+            ),
           ),
           child: SafeArea(
             minimum: const EdgeInsets.fromLTRB(20, 12, 20, 12),
@@ -526,7 +543,13 @@ class _Details extends StatelessWidget {
               children: [
                 SizedBox(
                   width: 88,
-                  child: Text(row.$1, style: sans(size: 12, color: kInkMuted)),
+                  child: Text(
+                    row.$1,
+                    style: sans(
+                      size: 12,
+                      color: context.monettaColors.contentMuted,
+                    ),
+                  ),
                 ),
                 Expanded(child: Text(row.$2, style: sans(size: 12.5))),
               ],
@@ -554,7 +577,9 @@ class _RuleIndicator extends StatelessWidget {
           margin: const EdgeInsets.symmetric(horizontal: 3),
           width: on ? 22 : 12,
           height: 1.5,
-          color: on ? kInk : kInk.withValues(alpha: 0.25),
+          color: on
+              ? context.monettaColors.contentPrimary
+              : context.monettaColors.contentPrimary.withValues(alpha: 0.25),
         );
       }),
     );
@@ -569,13 +594,13 @@ class _ZoomImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: kMist,
+      color: context.monettaColors.surfaceMuted,
       child: url == null
-          ? const Center(
+          ? Center(
               child: Icon(
                 Icons.image_not_supported_outlined,
                 size: 20,
-                color: kInkMuted,
+                color: context.monettaColors.contentMuted,
               ),
             )
           : InteractiveViewer(

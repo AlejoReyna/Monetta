@@ -162,15 +162,15 @@ class _ExternalProductScreenState extends State<ExternalProductScreen> {
                           onSelected: (_) {
                             setState(() => _selectedVariantIndex = index);
                           },
-                          selectedColor: kInk,
-                          backgroundColor: kMist,
+                          selectedColor: context.monettaColors.contentPrimary,
+                          backgroundColor: context.monettaColors.surfaceMuted,
                           side: BorderSide.none,
                           showCheckmark: false,
                           labelStyle: sans(
                             size: 11,
                             color: index == _selectedVariantIndex
-                                ? Colors.white
-                                : kInk,
+                                ? context.monettaColors.canvas
+                                : context.monettaColors.contentPrimary,
                           ),
                         ),
                     ],
@@ -203,25 +203,26 @@ class _ExternalDetailImage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ColoredBox(
-      color: kMist,
+      color: context.monettaColors.surfaceMuted,
       child: url == null
-          ? const Center(
+          ? Center(
               child: Icon(
                 Icons.image_not_supported_outlined,
                 size: 22,
-                color: kInkMuted,
+                color: context.monettaColors.contentMuted,
               ),
             )
           : CachedNetworkImage(
               key: ValueKey(url),
               imageUrl: url!,
               fit: BoxFit.cover,
-              placeholder: (_, __) => const ColoredBox(color: kMist),
-              errorWidget: (_, __, ___) => const Center(
+              placeholder: (_, __) =>
+                  ColoredBox(color: context.monettaColors.surfaceMuted),
+              errorWidget: (_, __, ___) => Center(
                 child: Icon(
                   Icons.broken_image_outlined,
                   size: 22,
-                  color: kInkMuted,
+                  color: context.monettaColors.contentMuted,
                 ),
               ),
             ),
@@ -237,11 +238,14 @@ class _AvailabilityLabel extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (label, color) = switch (availability) {
-      CatalogAvailability.inStock => ('Disponible', const Color(0xFF5C7E08)),
-      CatalogAvailability.outOfStock => ('Agotado', kSale),
+      CatalogAvailability.inStock => (
+          'Disponible',
+          context.monettaColors.success
+        ),
+      CatalogAvailability.outOfStock => ('Agotado', context.monettaColors.sale),
       CatalogAvailability.unknown => (
           'Disponibilidad por confirmar',
-          kInkMuted
+          context.monettaColors.contentMuted
         ),
     };
     return Row(
@@ -290,26 +294,50 @@ class _ProductInformation extends StatelessWidget {
             '${item.title} de ${item.brand}. Información extraída del catálogo '
             'estadounidense de ${item.merchant} para que el propietario evalúe '
             'precio, disponibilidad y compra para envío a México.',
-            style: sans(size: 13, color: kInkMuted, height: 1.65),
+            style: sans(
+              size: 13,
+              color: context.monettaColors.contentMuted,
+              height: 1.65,
+            ),
           ),
         ),
         for (final (label, value) in rows)
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-            decoration: const BoxDecoration(border: Border(top: kHairline)),
+            decoration: BoxDecoration(
+              border: Border(
+                top: BorderSide(
+                  color: context.monettaColors.divider,
+                  width: 0.5,
+                ),
+              ),
+            ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 SizedBox(
                   width: 96,
-                  child: Text(label, style: sans(size: 12, color: kInkMuted)),
+                  child: Text(
+                    label,
+                    style: sans(
+                      size: 12,
+                      color: context.monettaColors.contentMuted,
+                    ),
+                  ),
                 ),
                 Expanded(child: Text(value, style: sans(size: 12.5))),
               ],
             ),
           ),
-        const DecoratedBox(
-          decoration: BoxDecoration(border: Border(top: kHairline)),
+        DecoratedBox(
+          decoration: BoxDecoration(
+            border: Border(
+              top: BorderSide(
+                color: context.monettaColors.divider,
+                width: 0.5,
+              ),
+            ),
+          ),
           child: SizedBox(width: double.infinity),
         ),
         Padding(
@@ -317,7 +345,7 @@ class _ProductInformation extends StatelessWidget {
           child: Text(
             'Producto para compra manual. Confirma precio, existencias y envío '
             'en el sitio del comercio antes de comprar.',
-            style: sans(size: 11, color: kInkMuted),
+            style: sans(size: 11, color: context.monettaColors.contentMuted),
           ),
         ),
       ],

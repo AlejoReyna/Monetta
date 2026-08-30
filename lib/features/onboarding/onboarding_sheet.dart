@@ -41,6 +41,7 @@ class _OnboardingSheetState extends State<OnboardingSheet> {
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
+    final colors = context.monettaColors;
     // `showModalBottomSheet` strips `MediaQuery.padding.top` from the
     // ambient MediaQuery it hands to its builder — a sheet is expected to
     // leave the status bar exposed, not to need a top inset. But this panel
@@ -53,7 +54,7 @@ class _OnboardingSheetState extends State<OnboardingSheet> {
     return SizedBox(
       height: MediaQuery.sizeOf(context).height,
       child: Material(
-        color: Colors.white,
+        color: colors.surface,
         child: Padding(
           padding: EdgeInsets.only(
             top: viewPadding.top,
@@ -78,7 +79,7 @@ class _OnboardingSheetState extends State<OnboardingSheet> {
                       padding: const EdgeInsets.fromLTRB(20, 18, 20, 8),
                       child: Text(
                         'Para mostrarte primero lo que te interesa. Puedes cambiarlo cuando quieras.',
-                        style: sans(size: 12.5, color: kInkMuted),
+                        style: sans(size: 12.5, color: colors.contentMuted),
                       ),
                     ),
                     for (final entry in _categoryLabels.entries)
@@ -180,19 +181,22 @@ class _CategoryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-        decoration: const BoxDecoration(border: Border(bottom: kHairline)),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: colors.divider, width: .5)),
+        ),
         child: Row(
           children: [
             Expanded(child: Text(label, style: display(18))),
             Icon(
               selected ? Icons.check : Icons.chevron_right,
               size: 18,
-              color: selected ? kGold : kInkMuted,
+              color: selected ? colors.accent : colors.contentMuted,
             ),
           ],
         ),
@@ -217,12 +221,15 @@ class _LinkRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Container(
         padding: const EdgeInsets.fromLTRB(20, 13, 20, 13),
-        decoration: const BoxDecoration(border: Border(bottom: kHairline)),
+        decoration: BoxDecoration(
+          border: Border(bottom: BorderSide(color: colors.divider, width: .5)),
+        ),
         child: Row(
           children: [
             Expanded(
@@ -230,12 +237,12 @@ class _LinkRow extends StatelessWidget {
                 label,
                 style: sans(
                   size: 14,
-                  color: selected ? kInk : kInkMuted,
+                  color: selected ? colors.contentPrimary : colors.contentMuted,
                   weight: selected ? FontWeight.w500 : FontWeight.w400,
                 ),
               ),
             ),
-            if (selected) const Icon(Icons.check, size: 15, color: kGold),
+            if (selected) Icon(Icons.check, size: 15, color: colors.accent),
           ],
         ),
       ),

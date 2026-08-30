@@ -73,6 +73,7 @@ class _MonettaImageState extends State<MonettaImage> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     final raw = widget.url;
     if (raw == null || raw.isEmpty || !MediaUrl.isHttps(raw)) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _notifyFailure());
@@ -82,7 +83,7 @@ class _MonettaImageState extends State<MonettaImage> {
 
     final url = MediaUrl.sized(raw, width: widget.cacheWidth);
     return ColoredBox(
-      color: kMist,
+      color: colors.mediaPlaceholder,
       child: CachedNetworkImage(
         key: ValueKey('$url#$_attempt'),
         imageUrl: url,
@@ -91,10 +92,10 @@ class _MonettaImageState extends State<MonettaImage> {
         height: double.infinity,
         memCacheWidth: widget.cacheWidth,
         fadeInDuration: reduceMotion(context) ? Duration.zero : kSwap,
-        placeholder: (_, __) => const ColoredBox(color: kMist),
+        placeholder: (_, __) => ColoredBox(color: colors.mediaPlaceholder),
         errorWidget: (_, __, ___) {
           WidgetsBinding.instance.addPostFrameCallback((_) => _onError());
-          return const ColoredBox(color: kMist);
+          return ColoredBox(color: colors.mediaPlaceholder);
         },
       ),
     );
@@ -108,8 +109,9 @@ class _ImageFallback extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     return ColoredBox(
-      color: kMist,
+      color: colors.mediaPlaceholder,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -124,7 +126,7 @@ class _ImageFallback extends StatelessWidget {
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   textAlign: TextAlign.center,
-                  style: sans(size: 9, color: kInkMuted),
+                  style: sans(size: 9, color: colors.contentMuted),
                 ),
               ),
             ],

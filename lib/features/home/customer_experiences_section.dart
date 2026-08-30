@@ -50,16 +50,10 @@ class CustomerExperiencesSection extends StatelessWidget {
       key: const ValueKey('home-section-testimonials'),
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 20),
-          child: Semantics(
-            header: true,
-            child: Text(
-              'EXPERIENCIAS DE CLIENTES',
-              textAlign: TextAlign.center,
-              style: editorial(24, height: 1.4),
-            ),
-          ),
+        const SectionHeading(
+          key: ValueKey('customer-experiences-heading'),
+          kicker: 'LO QUE DICEN',
+          title: 'Experiencias de clientes',
         ),
         Align(
           alignment: Alignment.topCenter,
@@ -124,8 +118,11 @@ class _CarouselBody extends StatelessWidget {
                 icon: const Icon(Icons.arrow_forward, size: 17),
                 label: const Text('VER TODAS LAS RESEÑAS'),
                 style: TextButton.styleFrom(
-                  foregroundColor: kInk,
-                  textStyle: eyebrow(size: 10, color: kInk),
+                  foregroundColor: context.monettaColors.contentPrimary,
+                  textStyle: eyebrow(
+                    size: 10,
+                    color: context.monettaColors.contentPrimary,
+                  ),
                 ),
               ),
             ],
@@ -212,7 +209,7 @@ class _MistPane extends StatelessWidget {
       width: width ?? double.infinity,
       height: height,
       decoration: BoxDecoration(
-        color: kMist,
+        color: context.monettaColors.surfaceMuted,
         borderRadius: BorderRadius.circular(_kCornerRadius),
       ),
     );
@@ -426,7 +423,7 @@ class _TextCard extends StatelessWidget {
     final starSize = wide ? 24.0 : 16.0;
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: context.monettaColors.surfaceRaised,
         borderRadius: BorderRadius.circular(_kCornerRadius),
       ),
       padding: wide
@@ -468,7 +465,10 @@ class _TextCard extends StatelessWidget {
                   testimonial.reviewer,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: sans(size: wide ? 16 : 14, color: Colors.black),
+                  style: sans(
+                    size: wide ? 16 : 14,
+                    color: context.monettaColors.contentPrimary,
+                  ),
                 ),
               ),
               if (testimonial.verified) ...[
@@ -567,7 +567,7 @@ class _StarRow extends StatelessWidget {
             if (i > 0) const SizedBox(width: 4),
             Icon(
               i < rating ? Icons.star : Icons.star_border,
-              color: kGold,
+              color: context.monettaColors.accent,
               size: size,
             ),
           ],
@@ -655,7 +655,7 @@ class _NavButton extends StatelessWidget {
       child: IconButton(
         tooltip: tooltip,
         onPressed: onPressed,
-        icon: Icon(icon, size: 28, color: kGold),
+        icon: Icon(icon, size: 28, color: context.monettaColors.accent),
       ),
     );
   }
@@ -675,7 +675,9 @@ class _Dot extends StatelessWidget {
       width: active ? 24 : 5,
       height: active ? 8 : 5,
       decoration: BoxDecoration(
-        color: active ? kGold : const Color(0xFFC8C8C8),
+        color: active
+            ? context.monettaColors.accent
+            : context.monettaColors.divider,
         borderRadius: BorderRadius.circular(8),
       ),
     );

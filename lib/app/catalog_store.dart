@@ -124,6 +124,7 @@ class CatalogStore extends ChangeNotifier {
   TasteProfile profile = const TasteProfile.empty();
   bool ready = false;
   CatalogRealtimeStatus realtimeStatus = CatalogRealtimeStatus.disabled;
+  CatalogCacheMetadata? catalogMetadata;
 
   final _profileBuilder = const ProfileBuilder();
   final _explainer = const Explainer();
@@ -186,6 +187,8 @@ class CatalogStore extends ChangeNotifier {
     final snapshot = await _catalogRepository.loadCached();
     products = snapshot.products;
     facetsById = snapshot.facetsById;
+    catalogMetadata =
+        await _catalogRepository.loadOrCreateMetadata(snapshot.products);
 
     await _hydrateFromDrift();
 
@@ -266,8 +269,9 @@ class CatalogStore extends ChangeNotifier {
       final snapshot = await _catalogRepository.loadCached();
       products = snapshot.products;
       facetsById = snapshot.facetsById;
-      notifyListeners();
     }
+    catalogMetadata = await _cacheStore.metadata();
+    notifyListeners();
     return result;
   }
 
@@ -289,6 +293,7 @@ class CatalogStore extends ChangeNotifier {
     switch (update.outcome) {
       case RealtimeCatalogOutcome.applied:
         products = update.products;
+        catalogMetadata = update.metadata;
         final normalizer = Normalizer(rules);
         final now = DateTime.now();
         facetsById = {
@@ -298,14 +303,39 @@ class CatalogStore extends ChangeNotifier {
         realtimeStatus = CatalogRealtimeStatus.live;
       case RealtimeCatalogOutcome.empty:
         realtimeStatus = CatalogRealtimeStatus.empty;
+        unawaited(_recordCatalogStatus(CatalogCacheStatus.invalid, 'Vacío'));
       case RealtimeCatalogOutcome.invalid:
         realtimeStatus = CatalogRealtimeStatus.invalid;
+        unawaited(
+          _recordCatalogStatus(
+            CatalogCacheStatus.invalid,
+            'Documentos inválidos: ${update.invalidDocumentIds.length}',
+          ),
+        );
       case RealtimeCatalogOutcome.error:
       case RealtimeCatalogOutcome.disconnected:
         _writeCoordinator.markFirestoreUnavailable();
         realtimeStatus = CatalogRealtimeStatus.reconnecting;
+        unawaited(
+          _recordCatalogStatus(
+            CatalogCacheStatus.unavailable,
+            update.error?.runtimeType.toString() ?? 'Desconectado',
+          ),
+        );
         unawaited(syncWithShopify());
     }
+    notifyListeners();
+  }
+
+  Future<void> _recordCatalogStatus(
+    CatalogCacheStatus status,
+    String detail,
+  ) async {
+    final current = catalogMetadata ?? await _cacheStore.metadata();
+    if (current == null) return;
+    final updated = current.copyWith(status: status, detail: detail);
+    await _cacheStore.saveMetadata(updated);
+    catalogMetadata = updated;
     notifyListeners();
   }
 

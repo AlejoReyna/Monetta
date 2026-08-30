@@ -22,6 +22,32 @@ void main() {
     );
   });
 
+  test('offline brands mirror every brand shown on monetta.mx', () {
+    expect(
+      HomeContent.fallback.brands.map((brand) => brand.handle),
+      const [
+        'coach',
+        'michael-kors',
+        'anne-klein',
+        'guess-1',
+        'steve-madden',
+        'tommy-hilfiger',
+        'olalplex',
+        'christian-dior',
+        'the-ordinary',
+        'summer-fridays',
+        'laneige',
+        'rhode',
+      ],
+    );
+    expect(
+      HomeContent.fallback.brands.every(
+        (brand) => brand.fallbackAsset.startsWith('assets/images/brands/'),
+      ),
+      isTrue,
+    );
+  });
+
   test('Shopify controls home order, links and collection artwork', () async {
     late String requestBody;
     final repository = HomeContentRepository(
@@ -93,6 +119,21 @@ void main() {
                       },
                     },
                   },
+                  {
+                    'node': {
+                      'id': 'gid://Collection/3',
+                      'handle': 'coach',
+                      'title': 'COACH',
+                      'description': '',
+                      'image': {
+                        'url': 'https://cdn.shopify.com/coach-logo.png',
+                      },
+                      'products': {
+                        'pageInfo': {'hasNextPage': false},
+                        'edges': <Object>[],
+                      },
+                    },
+                  },
                 ],
               },
             },
@@ -123,6 +164,11 @@ void main() {
       'https://instagram.com/monetta-synced',
     );
     expect(content.aboutImageUrl, 'https://cdn.shopify.com/about.jpg');
+    expect(content.brands, hasLength(12));
+    expect(
+      content.brands.first.imageUrl,
+      'https://cdn.shopify.com/coach-logo.png',
+    );
     expect(requestBody, contains('home_sections'));
     expect(requestBody, contains('collections(first: 50'));
   });

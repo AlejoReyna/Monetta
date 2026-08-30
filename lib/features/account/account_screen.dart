@@ -131,11 +131,14 @@ class _SignedIn extends StatelessWidget {
         const SizedBox(height: 8),
         Text(
           account.displayName ?? account.email ?? 'Tu cuenta',
-          style: sans(size: 14, color: kInkMuted),
+          style: sans(size: 14, color: context.monettaColors.contentMuted),
         ),
         if (account.displayName != null && account.email != null) ...[
           const SizedBox(height: 2),
-          Text(account.email!, style: sans(size: 12, color: kInkMuted)),
+          Text(
+            account.email!,
+            style: sans(size: 12, color: context.monettaColors.contentMuted),
+          ),
         ],
         if (showAdmin && onOpenAdmin != null) ...[
           const SizedBox(height: 24),
@@ -146,11 +149,12 @@ class _SignedIn extends StatelessWidget {
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
                 color: kInk,
-                border: Border.all(color: kGold, width: .6),
+                border:
+                    Border.all(color: context.monettaColors.accent, width: .6),
               ),
               child: Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.admin_panel_settings_outlined,
                     color: kGold,
                     size: 23,
@@ -225,7 +229,7 @@ class _OrdersList extends StatelessWidget {
     if (controller.orders.isEmpty) {
       return Text(
         controller.ordersLoading ? 'Cargando…' : 'Aún no tienes pedidos.',
-        style: sans(size: 13, color: kInkMuted),
+        style: sans(size: 13, color: context.monettaColors.contentMuted),
       );
     }
     return Column(
@@ -260,7 +264,8 @@ class _OrderRow extends StatelessWidget {
                 const SizedBox(height: 2),
                 Text(
                   _placedAtLabel(order.placedAt),
-                  style: sans(size: 11, color: kInkMuted),
+                  style:
+                      sans(size: 11, color: context.monettaColors.contentMuted),
                 ),
               ],
             ),
@@ -306,12 +311,16 @@ class _PartnerAccountLink extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: kMist,
-          border: Border.all(color: kLine),
+          color: context.monettaColors.surfaceMuted,
+          border: Border.all(color: context.monettaColors.divider),
         ),
         child: Row(
           children: [
-            const Icon(Icons.storefront_outlined, size: 21, color: kGold),
+            Icon(
+              Icons.storefront_outlined,
+              size: 21,
+              color: context.monettaColors.accent,
+            ),
             const SizedBox(width: 13),
             Expanded(
               child: Column(
@@ -321,7 +330,10 @@ class _PartnerAccountLink extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     'Catálogos y cotizaciones para tu negocio',
-                    style: sans(size: 11.5, color: kInkMuted),
+                    style: sans(
+                      size: 11.5,
+                      color: context.monettaColors.contentMuted,
+                    ),
                   ),
                 ],
               ),

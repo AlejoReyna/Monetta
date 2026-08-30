@@ -10,6 +10,7 @@ import '../../app/external_catalog_controller.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/theme.dart';
 import '../../domain/admin_control.dart';
+import '../../data/local/catalog_cache_store.dart';
 import '../../data/notifications/admin_notification_client.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -32,6 +33,10 @@ class AdminScreen extends StatefulWidget {
 
 class _AdminScreenState extends State<AdminScreen> {
   int _section = 0;
+  late final Listenable _refresh = Listenable.merge([
+    widget.controller,
+    widget.catalogStore,
+  ]);
 
   @override
   void initState() {
@@ -84,7 +89,7 @@ class _AdminScreenState extends State<AdminScreen> {
       ),
       body: SafeArea(
         child: ListenableBuilder(
-          listenable: widget.controller,
+          listenable: _refresh,
           builder: (context, _) {
             final controller = widget.controller;
             return Column(
@@ -103,7 +108,11 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: IndexedStack(
                     index: _section,
                     children: [
-                      _OverviewSection(controller: controller, onSync: _sync),
+                      _OverviewSection(
+                        controller: controller,
+                        catalogStore: widget.catalogStore,
+                        onSync: _sync,
+                      ),
                       _ProductsSection(
                         controller: controller,
                         onMessage: _toast,
@@ -150,7 +159,9 @@ class _AdminHeader extends StatelessWidget {
     final live = mode == AdminConnectionMode.live;
     return Container(
       width: double.infinity,
-      color: live ? const Color(0xFFEAF4EC) : const Color(0xFFF7F0E6),
+      color: live
+          ? context.monettaColors.successSurface
+          : context.monettaColors.warningSurface,
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +172,9 @@ class _AdminHeader extends StatelessWidget {
             margin: const EdgeInsets.only(top: 5),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: live ? const Color(0xFF3B7B4A) : kGold,
+              color: live
+                  ? context.monettaColors.success
+                  : context.monettaColors.accent,
             ),
           ),
           const SizedBox(width: 10),
@@ -173,7 +186,9 @@ class _AdminHeader extends StatelessWidget {
                   live ? 'CONTROL EN VIVO' : 'VISTA PREVIA',
                   style: eyebrow(
                     size: 9,
-                    color: live ? const Color(0xFF2F633B) : kGold,
+                    color: live
+                        ? context.monettaColors.success
+                        : context.monettaColors.accent,
                     weight: FontWeight.w700,
                   ),
                 ),
@@ -185,7 +200,11 @@ class _AdminHeader extends StatelessWidget {
                               'en la app.'
                           : 'Puedes revisar el panel; los cambios todavía no '
                               'se publican.'),
-                  style: sans(size: 11, color: kInkMuted, height: 1.35),
+                  style: sans(
+                    size: 11,
+                    color: context.monettaColors.contentMuted,
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),
@@ -243,20 +262,30 @@ class _SectionPicker extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: active ? kGold : Colors.transparent,
+                      color: active
+                          ? context.monettaColors.accent
+                          : Colors.transparent,
                       width: 1.5,
                     ),
                   ),
                 ),
                 child: Column(
                   children: [
-                    Icon(item.$1, size: 19, color: active ? kInk : kInkMuted),
+                    Icon(
+                      item.$1,
+                      size: 19,
+                      color: active
+                          ? context.monettaColors.contentPrimary
+                          : context.monettaColors.contentMuted,
+                    ),
                     const SizedBox(height: 5),
                     Text(
                       item.$2,
                       style: sans(
                         size: 10,
-                        color: active ? kInk : kInkMuted,
+                        color: active
+                            ? context.monettaColors.contentPrimary
+                            : context.monettaColors.contentMuted,
                         weight: active ? FontWeight.w600 : FontWeight.w400,
                       ),
                     ),
@@ -272,9 +301,14 @@ class _SectionPicker extends StatelessWidget {
 }
 
 class _OverviewSection extends StatelessWidget {
-  const _OverviewSection({required this.controller, required this.onSync});
+  const _OverviewSection({
+    required this.controller,
+    required this.catalogStore,
+    required this.onSync,
+  });
 
   final AdminController controller;
+  final CatalogStore catalogStore;
   final VoidCallback onSync;
 
   @override
@@ -284,6 +318,27 @@ class _OverviewSection extends StatelessWidget {
       0,
       (total, source) => total + source.itemCount,
     );
+    final metadata = catalogStore.catalogMetadata;
+    final catalogSource = switch (metadata?.source) {
+      CatalogCacheSource.firestore => 'Firestore',
+      CatalogCacheSource.shopify => 'Shopify',
+      CatalogCacheSource.asset => 'Respaldo incluido',
+      CatalogCacheSource.legacyCache => 'Caché heredado',
+      null => 'Procedencia pendiente',
+    };
+    final catalogStatus = switch (catalogStore.realtimeStatus) {
+      CatalogRealtimeStatus.live => 'Al día',
+      CatalogRealtimeStatus.connecting => 'Conectando',
+      CatalogRealtimeStatus.reconnecting => 'Sin conexión',
+      CatalogRealtimeStatus.empty => 'Vacío',
+      CatalogRealtimeStatus.invalid => 'Inválido',
+      CatalogRealtimeStatus.disabled =>
+        metadata?.status == CatalogCacheStatus.healthy ? 'Al día' : 'Respaldo',
+    };
+    final catalogDescription = metadata == null
+        ? catalogSource
+        : '$catalogSource · ${metadata.productCount} productos'
+            '${metadata.syncedAt == null ? '' : ' · ${metadata.syncedAt!.toIso8601String().split('T').first}'}';
     return _AdminScroll(
       children: [
         Container(
@@ -294,7 +349,7 @@ class _OverviewSection extends StatelessWidget {
             children: [
               Text(
                 'ADMINISTRACIÓN',
-                style: eyebrow(size: 9, color: kGold),
+                style: eyebrow(size: 9, color: context.monettaColors.accent),
               ),
               const SizedBox(height: 10),
               Text(
@@ -332,11 +387,12 @@ class _OverviewSection extends StatelessWidget {
         const SizedBox(height: 28),
         Text('CANALES', style: eyebrow()),
         const SizedBox(height: 10),
-        const _ChannelRow(
+        _ChannelRow(
+          key: const ValueKey('admin-catalog-health'),
           icon: Icons.shopping_bag_outlined,
-          title: 'Shopify',
-          description: 'Precios, publicación e inventario',
-          status: 'Conectado',
+          title: 'Catálogo de la app',
+          description: catalogDescription,
+          status: catalogStatus,
         ),
         const _ChannelRow(
           icon: Icons.phone_iphone_rounded,
@@ -355,12 +411,12 @@ class _OverviewSection extends StatelessWidget {
           key: const ValueKey('admin-sync-all'),
           onPressed: controller.saving ? null : onSync,
           icon: controller.saving
-              ? const SizedBox(
+              ? SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 1.5,
-                    color: Colors.white,
+                    color: context.monettaColors.canvas,
                   ),
                 )
               : const Icon(Icons.sync_rounded, size: 18),
@@ -388,13 +444,18 @@ class _Metric extends StatelessWidget {
     return Container(
       height: 92,
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(border: Border.all(color: kLine, width: .5)),
+      decoration: BoxDecoration(
+        border: Border.all(color: context.monettaColors.divider, width: .5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(value, style: display(24)),
-          Text(label, style: sans(size: 10, color: kInkMuted)),
+          Text(
+            label,
+            style: sans(size: 10, color: context.monettaColors.contentMuted),
+          ),
         ],
       ),
     );
@@ -407,6 +468,7 @@ class _ChannelRow extends StatelessWidget {
     required this.title,
     required this.description,
     required this.status,
+    super.key,
   });
 
   final IconData icon;
@@ -418,8 +480,10 @@ class _ChannelRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: kLine, width: .5)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: .5),
+        ),
       ),
       child: Row(
         children: [
@@ -430,7 +494,13 @@ class _ChannelRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: sans(size: 13, weight: FontWeight.w600)),
-                Text(description, style: sans(size: 10, color: kInkMuted)),
+                Text(
+                  description,
+                  style: sans(
+                    size: 10,
+                    color: context.monettaColors.contentMuted,
+                  ),
+                ),
               ],
             ),
           ),
@@ -470,17 +540,17 @@ class _ProductsSectionState extends State<_ProductsSection> {
         Text(
           'Cambios de precio y visibilidad se envían a Shopify y después se '
           'actualizan en la app.',
-          style: sans(size: 12, color: kInkMuted),
+          style: sans(size: 12, color: context.monettaColors.contentMuted),
         ),
         const SizedBox(height: 18),
         TextField(
           key: const ValueKey('admin-product-search'),
           onChanged: (value) => setState(() => _query = value),
-          decoration: const InputDecoration(
+          decoration: InputDecoration(
             hintText: 'Buscar producto',
             prefixIcon: Icon(Icons.search, size: 20),
             filled: true,
-            fillColor: kSearchFill,
+            fillColor: context.monettaColors.inputFill,
             border: OutlineInputBorder(borderSide: BorderSide.none),
           ),
         ),
@@ -500,7 +570,7 @@ class _ProductsSectionState extends State<_ProductsSection> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.monettaColors.surfaceRaised,
       builder: (_) => _ProductEditor(
         product: product,
         controller: widget.controller,
@@ -528,8 +598,10 @@ class _ProductRow extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: kLine, width: .5)),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: context.monettaColors.divider, width: .5),
+          ),
         ),
         child: Row(
           children: [
@@ -568,7 +640,10 @@ class _ProductRow extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: kInkMuted),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: context.monettaColors.contentMuted,
+            ),
           ],
         ),
       ),
@@ -626,7 +701,7 @@ class _ProductEditorState extends State<_ProductEditor> {
             const SizedBox(height: 5),
             Text(
               'Se actualizará en Shopify y en la app Monetta.',
-              style: sans(size: 11, color: kInkMuted),
+              style: sans(size: 11, color: context.monettaColors.contentMuted),
             ),
             const SizedBox(height: 22),
             TextField(
@@ -652,7 +727,8 @@ class _ProductEditorState extends State<_ProductEditor> {
               title: Text('Visible en la tienda', style: sans(size: 13)),
               subtitle: Text(
                 _visible ? 'Publicado' : 'Oculto para clientes',
-                style: sans(size: 11, color: kInkMuted),
+                style:
+                    sans(size: 11, color: context.monettaColors.contentMuted),
               ),
               value: _visible,
               onChanged: (value) => setState(() => _visible = value),
@@ -741,7 +817,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
         const SizedBox(height: 6),
         Text(
           'Controla lo que ven tus clientes sin salir de Monetta.',
-          style: sans(size: 12, color: kInkMuted),
+          style: sans(size: 12, color: context.monettaColors.contentMuted),
         ),
         const SizedBox(height: 24),
         Text('AVISO SUPERIOR', style: eyebrow()),
@@ -837,7 +913,10 @@ class _SettingSwitch extends StatelessWidget {
     return SwitchListTile.adaptive(
       contentPadding: EdgeInsets.zero,
       title: Text(title, style: sans(size: 13, weight: FontWeight.w600)),
-      subtitle: Text(description, style: sans(size: 10, color: kInkMuted)),
+      subtitle: Text(
+        description,
+        style: sans(size: 10, color: context.monettaColors.contentMuted),
+      ),
       value: value,
       onChanged: onChanged,
     );
@@ -861,7 +940,7 @@ class _PhonePreview extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(18),
-      color: kMist,
+      color: context.monettaColors.surfaceMuted,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -871,8 +950,11 @@ class _PhonePreview extends StatelessWidget {
             child: Container(
               width: 190,
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: kInk, width: 1.5),
+                color: context.monettaColors.surfaceRaised,
+                border: Border.all(
+                  color: context.monettaColors.contentPrimary,
+                  width: 1.5,
+                ),
                 borderRadius: BorderRadius.circular(18),
               ),
               clipBehavior: Clip.antiAlias,
@@ -881,14 +963,17 @@ class _PhonePreview extends StatelessWidget {
                   Container(
                     height: 22,
                     width: double.infinity,
-                    color: kInk,
+                    color: context.monettaColors.contentPrimary,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Text(
                       announcement.isEmpty ? 'MONETTA' : announcement,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: eyebrow(size: 5, color: Colors.white),
+                      style: eyebrow(
+                        size: 5,
+                        color: context.monettaColors.canvas,
+                      ),
                     ),
                   ),
                   const Padding(
@@ -899,16 +984,19 @@ class _PhonePreview extends StatelessWidget {
                     Container(
                       height: 92,
                       width: double.infinity,
-                      color: const Color(0xFFEAE4DC),
+                      color: context.monettaColors.surfaceMuted,
                       alignment: Alignment.center,
                       child: Text('CAMPAÑA', style: eyebrow(size: 6)),
                     ),
                   if (showNewest)
-                    _PreviewLine(label: 'NOVEDADES', color: kGold),
+                    _PreviewLine(
+                      label: 'NOVEDADES',
+                      color: context.monettaColors.accent,
+                    ),
                   if (showExternal)
-                    const _PreviewLine(
+                    _PreviewLine(
                       label: 'SELECCIÓN ESPECIAL',
-                      color: kInk,
+                      color: context.monettaColors.contentPrimary,
                     ),
                   const SizedBox(height: 10),
                 ],
@@ -940,7 +1028,12 @@ class _PreviewLine extends StatelessWidget {
             children: [
               for (var i = 0; i < 3; i++) ...[
                 if (i > 0) const SizedBox(width: 4),
-                Expanded(child: Container(height: 38, color: kMist)),
+                Expanded(
+                  child: Container(
+                    height: 38,
+                    color: context.monettaColors.surfaceMuted,
+                  ),
+                ),
               ],
             ],
           ),
@@ -965,7 +1058,7 @@ class _SourcesSection extends StatelessWidget {
         Text(
           'Decide qué proveedores monitorear y cuánto margen aplicar. Los '
           'artículos externos no entran al inventario de Shopify.',
-          style: sans(size: 12, color: kInkMuted),
+          style: sans(size: 12, color: context.monettaColors.contentMuted),
         ),
         const SizedBox(height: 22),
         for (final source in controller.sources)
@@ -984,7 +1077,7 @@ class _SourcesSection extends StatelessWidget {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.monettaColors.surfaceRaised,
       builder: (_) => _SourceEditor(source: source, controller: controller),
     );
     if (!context.mounted || saved != true) return;
@@ -1011,7 +1104,7 @@ class _SourceCard extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 12),
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          border: Border.all(color: kLine, width: .5),
+          border: Border.all(color: context.monettaColors.divider, width: .5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -1029,7 +1122,10 @@ class _SourceCard extends StatelessWidget {
                   muted: !source.enabled,
                 ),
                 const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded, color: kInkMuted),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  color: context.monettaColors.contentMuted,
+                ),
               ],
             ),
             const SizedBox(height: 13),
@@ -1074,7 +1170,10 @@ class _SourceMetric extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(value, style: sans(size: 13, weight: FontWeight.w600)),
-        Text(label, style: sans(size: 9, color: kInkMuted)),
+        Text(
+          label,
+          style: sans(size: 9, color: context.monettaColors.contentMuted),
+        ),
       ],
     );
   }
@@ -1142,7 +1241,7 @@ class _SourceEditorState extends State<_SourceEditor> {
             const SizedBox(height: 5),
             Text(
               'Curaduría automática para el catálogo de la app.',
-              style: sans(size: 11, color: kInkMuted),
+              style: sans(size: 11, color: context.monettaColors.contentMuted),
             ),
             const SizedBox(height: 16),
             SwitchListTile.adaptive(
@@ -1205,7 +1304,7 @@ class _SourceEditorState extends State<_SourceEditor> {
             const SizedBox(height: 8),
             Text(
               'La comisión menor aplica cuando el precio supera el umbral.',
-              style: sans(size: 10, color: kInkMuted),
+              style: sans(size: 10, color: context.monettaColors.contentMuted),
             ),
             const SizedBox(height: 22),
             FilledButton(
@@ -1301,7 +1400,7 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
           const SizedBox(height: 8),
           Text(
             'Configura la URL del servicio para crear campañas y activar automatizaciones.',
-            style: sans(size: 12, color: kInkMuted),
+            style: sans(size: 12, color: context.monettaColors.contentMuted),
           ),
         ],
       );
@@ -1315,7 +1414,11 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
           Text(
             'El servidor decide la audiencia con consentimiento, horario '
             'silencioso, límite de frecuencia y perfil resumido.',
-            style: sans(size: 12, color: kInkMuted, height: 1.45),
+            style: sans(
+              size: 12,
+              color: context.monettaColors.contentMuted,
+              height: 1.45,
+            ),
           ),
           if (controller.loading) ...[
             const SizedBox(height: 18),
@@ -1417,7 +1520,7 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
               _openProduct
                   ? 'La notificación abre la pieza.'
                   : 'Abre la portada.',
-              style: sans(size: 11, color: kInkMuted),
+              style: sans(size: 11, color: context.monettaColors.contentMuted),
             ),
             value: _openProduct,
             onChanged: controller.pendingCampaign == null
@@ -1470,7 +1573,8 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
               title: Text(_ruleLabel(rule.key), style: sans(size: 13)),
               subtitle: Text(
                 _ruleDescription(rule.key),
-                style: sans(size: 10.5, color: kInkMuted),
+                style:
+                    sans(size: 10.5, color: context.monettaColors.contentMuted),
               ),
               value: rule.enabled,
               onChanged: controller.saving
@@ -1608,8 +1712,8 @@ class _CampaignReview extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F0E6),
-        border: Border.all(color: kLine, width: .5),
+        color: context.monettaColors.warningSurface,
+        border: Border.all(color: context.monettaColors.divider, width: .5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1652,8 +1756,10 @@ class _CampaignRow extends StatelessWidget {
         : (campaign.openedCount * 100 / campaign.acceptedCount).round();
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: kLine, width: .5)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: .5),
+        ),
       ),
       child: Row(
         children: [
@@ -1664,7 +1770,8 @@ class _CampaignRow extends StatelessWidget {
                 Text(campaign.title, style: sans(size: 12.5)),
                 Text(
                   '${campaign.acceptedCount} enviados · ${campaign.openedCount} abiertos · $openRate%',
-                  style: sans(size: 10, color: kInkMuted),
+                  style:
+                      sans(size: 10, color: context.monettaColors.contentMuted),
                 ),
               ],
             ),
@@ -1689,10 +1796,10 @@ class _AuditRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.check_circle_outline_rounded,
             size: 18,
-            color: kGold,
+            color: context.monettaColors.accent,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -1703,7 +1810,8 @@ class _AuditRow extends StatelessWidget {
                 Text(
                   '${event.createdAt.hour}:$minute · '
                   '${event.previewOnly ? 'Vista previa' : 'Publicado'}',
-                  style: sans(size: 9, color: kInkMuted),
+                  style:
+                      sans(size: 9, color: context.monettaColors.contentMuted),
                 ),
               ],
             ),
@@ -1725,12 +1833,19 @@ class _StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: muted ? kMist : const Color(0xFFF4EEE6),
+        color: muted
+            ? context.monettaColors.surfaceMuted
+            : context.monettaColors.warningSurface,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
-        style: sans(size: 8, color: muted ? kInkMuted : kGold),
+        style: sans(
+          size: 8,
+          color: muted
+              ? context.monettaColors.contentMuted
+              : context.monettaColors.accent,
+        ),
       ),
     );
   }
@@ -1746,7 +1861,7 @@ class _SheetHandle extends StatelessWidget {
         width: 36,
         height: 3,
         margin: const EdgeInsets.only(bottom: 22),
-        color: kLine,
+        color: context.monettaColors.divider,
       ),
     );
   }
@@ -1785,7 +1900,10 @@ Future<bool> _confirmChange(
         context: context,
         builder: (context) => AlertDialog(
           title: Text(title, style: display(22)),
-          content: Text(description, style: sans(size: 12, color: kInkMuted)),
+          content: Text(
+            description,
+            style: sans(size: 12, color: context.monettaColors.contentMuted),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),

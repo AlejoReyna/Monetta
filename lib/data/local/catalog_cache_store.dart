@@ -15,6 +15,61 @@ import '../../domain/collection.dart' as domain;
 import '../../domain/product.dart';
 import 'database.dart';
 
+enum CatalogCacheSource { asset, legacyCache, firestore, shopify }
+
+enum CatalogCacheStatus { fallback, healthy, unavailable, invalid }
+
+class CatalogCacheMetadata {
+  const CatalogCacheMetadata({
+    required this.source,
+    required this.syncedAt,
+    required this.productCount,
+    required this.fingerprint,
+    required this.status,
+    this.detail,
+  });
+
+  factory CatalogCacheMetadata.forProducts({
+    required CatalogCacheSource source,
+    required List<Product> products,
+    required DateTime? syncedAt,
+    required CatalogCacheStatus status,
+    String? detail,
+  }) =>
+      CatalogCacheMetadata(
+        source: source,
+        syncedAt: syncedAt?.toUtc(),
+        productCount: products.length,
+        fingerprint: catalogFingerprint(products),
+        status: status,
+        detail: detail,
+      );
+
+  final CatalogCacheSource source;
+  final DateTime? syncedAt;
+  final int productCount;
+  final String fingerprint;
+  final CatalogCacheStatus status;
+  final String? detail;
+
+  CatalogCacheMetadata copyWith({
+    CatalogCacheSource? source,
+    DateTime? syncedAt,
+    int? productCount,
+    String? fingerprint,
+    CatalogCacheStatus? status,
+    String? detail,
+  }) =>
+      CatalogCacheMetadata(
+        source: source ?? this.source,
+        syncedAt: syncedAt ?? this.syncedAt,
+        productCount: productCount ?? this.productCount,
+        fingerprint: fingerprint ?? this.fingerprint,
+        status: status ?? this.status,
+        detail: detail,
+      );
+}
+
 class CatalogCacheStore {
   CatalogCacheStore(this._db);
 
@@ -47,6 +102,21 @@ class CatalogCacheStore {
     return [for (final row in rows) _collectionFromRow(row)];
   }
 
+  Future<CatalogCacheMetadata?> metadata() async {
+    final row = await (_db.select(_db.catalogStates)
+          ..where((table) => table.id.equals(0)))
+        .getSingleOrNull();
+    if (row == null) return null;
+    return CatalogCacheMetadata(
+      source: CatalogCacheSource.values.byName(row.source),
+      syncedAt: row.syncedAt?.toUtc(),
+      productCount: row.productCount,
+      fingerprint: row.fingerprint,
+      status: CatalogCacheStatus.values.byName(row.status),
+      detail: row.detail,
+    );
+  }
+
   /// Replaces the stored rows for every product in [products] — an insert or
   /// a full overwrite of an existing row, never a partial patch. Variants are
   /// replaced wholesale per product so a removed variant disappears from the
@@ -54,23 +124,57 @@ class CatalogCacheStore {
   Future<void> upsertProducts(List<Product> products) async {
     if (products.isEmpty) return;
     await _db.transaction(() async {
-      for (final product in products) {
-        await _upsertProduct(product);
-      }
+      await _upsertProducts(products);
+    });
+  }
+
+  Future<void> seedProducts(
+    List<Product> products,
+    CatalogCacheMetadata metadata,
+  ) async {
+    if (products.isEmpty) return;
+    await _db.transaction(() async {
+      await _upsertProducts(products);
+      await _writeMetadata(metadata);
     });
   }
 
   /// Atomically replaces the complete catalog after a validated authoritative
   /// Firestore snapshot. Callers must reject empty/invalid snapshots first.
-  Future<void> replaceProducts(List<Product> products) async {
+  Future<void> replaceProducts(
+    List<Product> products, {
+    CatalogCacheMetadata? metadata,
+  }) async {
     if (products.isEmpty) return;
     await _db.transaction(() async {
       await _db.delete(_db.cachedVariants).go();
       await _db.delete(_db.cachedProducts).go();
-      for (final product in products) {
-        await _upsertProduct(product);
-      }
+      await _upsertProducts(products);
+      if (metadata != null) await _writeMetadata(metadata);
     });
+  }
+
+  Future<void> saveMetadata(CatalogCacheMetadata metadata) =>
+      _writeMetadata(metadata);
+
+  Future<void> _writeMetadata(CatalogCacheMetadata metadata) {
+    return _db.into(_db.catalogStates).insertOnConflictUpdate(
+          CatalogStatesCompanion.insert(
+            id: const Value(0),
+            source: metadata.source.name,
+            syncedAt: Value(metadata.syncedAt),
+            productCount: metadata.productCount,
+            fingerprint: metadata.fingerprint,
+            status: metadata.status.name,
+            detail: Value(metadata.detail),
+          ),
+        );
+  }
+
+  Future<void> _upsertProducts(List<Product> products) async {
+    for (final product in products) {
+      await _upsertProduct(product);
+    }
   }
 
   Future<void> _upsertProduct(Product product) async {
@@ -192,3 +296,19 @@ List<String> _decodeStringList(String jsonText) =>
     (jsonDecode(jsonText) as List<dynamic>).cast<String>();
 
 String _encodeStringList(List<String> values) => jsonEncode(values);
+
+/// Stable, non-cryptographic identity for one catalog observation.
+String catalogFingerprint(List<Product> products) {
+  final ordered = [...products]..sort((a, b) => a.id.compareTo(b.id));
+  var hash = 0x811c9dc5;
+  for (final product in ordered) {
+    final value =
+        '${product.id}\u001f${product.updatedAt.toUtc().toIso8601String()}'
+        '\u001f${product.images.join('\u001e')}';
+    for (final unit in value.codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0xffffffff;
+    }
+  }
+  return hash.toRadixString(16).padLeft(8, '0');
+}

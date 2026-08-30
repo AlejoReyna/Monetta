@@ -41,10 +41,9 @@ void main() {
     expect(find.text('Elige marcas'), findsNothing);
     expect(find.text('¿Qué le gusta?'), findsNothing);
     await tester.pump();
-    expect(
-      find.byKey(const ValueKey('campaign-slide-media-0')),
-      findsOneWidget,
-    );
+    expect(find.byKey(const ValueKey('home-search-bar')), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-offers-rail')), findsOneWidget);
+    expect(find.text('Ofertas de hoy'), findsOneWidget);
     expect(find.text('VER LA PIEZA'), findsNothing);
     expect(find.text('Novedades'), findsNothing);
     expect(find.text('Piezas originales, elegidas una por una.'), findsNothing);
@@ -63,7 +62,6 @@ void main() {
     expect(find.textContaining('propietario'), findsNothing);
     expect(find.textContaining('Porque te gustan'), findsNothing);
     expect(find.text('POPULAR AHORA'), findsNothing);
-    expect(find.text('PARA TI'), findsNothing);
     expect(find.textContaining('interacciones'), findsNothing);
     expect(find.text('TU EXPERIENCIA MONETTA'), findsNothing);
     expect(find.textContaining('definen la temporada'), findsNothing);
@@ -72,8 +70,9 @@ void main() {
     expect(find.text('ORDENAR'), findsNothing);
   });
 
-  testWidgets('hero is media-only and reveals collections after scrolling',
-      (tester) async {
+  testWidgets('compact discovery header replaces full-screen campaign pages', (
+    tester,
+  ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 2000);
     tester.view.devicePixelRatio = 1.0;
@@ -83,28 +82,117 @@ void main() {
     await tester.pump();
 
     await tester.pump();
-    final heroBox = tester.getRect(find.byKey(const Key('campaign-hero')));
-    final mediaBox = tester.getRect(
-      find.byKey(const ValueKey('campaign-slide-media-0')),
+    final headerBox = tester.getRect(
+      find.byKey(const ValueKey('home-discovery-header')),
     );
-    expect(mediaBox.left - heroBox.left, greaterThanOrEqualTo(16));
-    expect(heroBox.right - mediaBox.right, greaterThanOrEqualTo(16));
-    expect(mediaBox.top - heroBox.top, closeTo(12, 0.5));
-    expect(heroBox.bottom - mediaBox.bottom, closeTo(12, 0.5));
-    expect(mediaBox.height, greaterThan(heroBox.height * 0.9));
-    expect(find.text('Colecciones'), findsNothing);
-    expect(find.text('Ver el catálogo'), findsNothing);
+    final mediaBox = tester.getRect(
+      find.byKey(const ValueKey('home-compact-hero')),
+    );
+    expect(mediaBox.width, closeTo(390, .1));
+    expect(mediaBox.height, 280);
+    expect(headerBox.height, 280);
+    expect(find.byKey(const ValueKey('home-offer-card-0')), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-offer-card-1')), findsOneWidget);
+    expect(find.text('BIENVENID@'), findsNothing);
+    expect(find.text('20% en bolsos seleccionados'), findsOneWidget);
+    expect(find.text('Comprar ahora'), findsWidgets);
+    expect(
+      tester
+          .getTopLeft(find.byKey(const ValueKey('home-section-collections')))
+          .dy,
+      lessThan(
+        tester.getTopLeft(find.byKey(const ValueKey('home-section-offers'))).dy,
+      ),
+    );
+    expect(find.byKey(const ValueKey('campaign-slide-media-0')), findsNothing);
+  });
+
+  testWidgets(
+    'hero starts behind a transparent bar and collapses to a surface',
+    (
+      tester,
+    ) async {
+      addTearDown(() => tester.view.resetPhysicalSize());
+      tester.view.physicalSize = const Size(390, 2000);
+      tester.view.devicePixelRatio = 1.0;
+
+      final store = await _loadedStore();
+      await tester.pumpWidget(_app(store));
+      await tester.pump();
+
+      expect(
+        tester.widget<Scaffold>(find.byType(Scaffold)).extendBodyBehindAppBar,
+        isTrue,
+      );
+      expect(
+        tester.widget<AppBar>(find.byType(AppBar)).backgroundColor,
+        Colors.transparent,
+      );
+
+      await tester.dragFrom(const Offset(190, 300), const Offset(0, -180));
+      await tester.pump();
+
+      final colors = tester.element(find.byType(AppBar)).monettaColors;
+      expect(
+        tester.widget<AppBar>(find.byType(AppBar)).backgroundColor,
+        colors.surface,
+      );
+    },
+  );
+
+  testWidgets('search pill is replaced by the app-bar icon while scrolling', (
+    tester,
+  ) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 2000);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    await tester.pumpWidget(_app(store));
+    await tester.pump();
+
+    expect(
+      tester
+          .widget<Opacity>(
+            find.byKey(const ValueKey('home-search-bar-transition')),
+          )
+          .opacity,
+      closeTo(1, .00001),
+    );
+    expect(
+      tester
+          .widget<Opacity>(
+            find.byKey(const ValueKey('home-appbar-search-transition')),
+          )
+          .opacity,
+      0,
+    );
 
     await tester.drag(
-      find.byKey(const Key('campaign-hero')),
-      const Offset(0, -260),
+      find.byKey(const ValueKey('home-discovery-header')),
+      const Offset(0, -180),
     );
-    await tester.pumpAndSettle();
+    await tester.pump();
 
-    expect(find.text('Colecciones').hitTestable(), findsOneWidget);
     expect(
-      tester.widget<Text>(find.text('Colecciones')).style?.fontFamily,
-      kEditorialFontFamily,
+      tester
+          .widget<Opacity>(
+            find.byKey(const ValueKey('home-search-bar-transition')),
+          )
+          .opacity,
+      0,
+    );
+    expect(
+      tester
+          .widget<Opacity>(
+            find.byKey(const ValueKey('home-appbar-search-transition')),
+          )
+          .opacity,
+      closeTo(1, .00001),
+    );
+    expect(
+      find.byKey(const ValueKey('home-appbar-search-button')).hitTestable(),
+      findsOneWidget,
     );
   });
 
@@ -129,7 +217,7 @@ void main() {
     expect(tester.widget<AppBar>(find.byType(AppBar)).toolbarHeight, 68);
 
     await tester.drag(
-      find.byKey(const Key('campaign-hero')),
+      find.byKey(const ValueKey('home-discovery-header')),
       const Offset(0, -260),
     );
     await tester.pump();
@@ -141,8 +229,7 @@ void main() {
     );
   });
 
-  testWidgets('hero advances to the next of three cards every 3.5 seconds',
-      (tester) async {
+  testWidgets('home search pill opens the product search', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 2000);
     tester.view.devicePixelRatio = 1.0;
@@ -151,26 +238,10 @@ void main() {
     await tester.pumpWidget(_app(store));
     await tester.pump();
 
-    expect(
-      find.byKey(const ValueKey('campaign-slide-media-0')).hitTestable(),
-      findsOneWidget,
-    );
-    expect(
-      find.byKey(const ValueKey('campaign-slide-media-1')).hitTestable(),
-      findsNothing,
-    );
+    await tester.tap(find.byKey(const ValueKey('home-search-bar')));
+    await tester.pumpAndSettle();
 
-    await tester.pump(const Duration(milliseconds: 3500));
-    await tester.pump(const Duration(milliseconds: 500));
-
-    expect(
-      find.byKey(const ValueKey('campaign-slide-media-1')).hitTestable(),
-      findsOneWidget,
-    );
-    final welcomeImage = find.descendant(
-      of: find.byKey(const ValueKey('campaign-slide-media-1')),
-      matching: find.byType(Image),
-    );
-    expect(tester.widget<Image>(welcomeImage).fit, BoxFit.fill);
+    expect(find.text('BÚSQUEDAS FRECUENTES'), findsOneWidget);
+    expect(find.text('Buscar'), findsOneWidget);
   });
 }

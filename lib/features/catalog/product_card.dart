@@ -68,7 +68,9 @@ class ProductCard extends StatelessWidget {
                     icon: Icon(
                       wishlisted ? Icons.favorite : Icons.favorite_border,
                       size: 19,
-                      color: wishlisted ? kGold : kInk,
+                      color: wishlisted
+                          ? context.monettaColors.accent
+                          : context.monettaColors.contentPrimary,
                     ),
                   ),
                 ),
@@ -81,7 +83,7 @@ class ProductCard extends StatelessWidget {
               urgency!.toUpperCase(),
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: eyebrow(size: 8.5, color: kSale),
+              style: eyebrow(size: 8.5, color: context.monettaColors.sale),
             ),
             const SizedBox(height: 6),
           ],
@@ -119,7 +121,7 @@ class ProductCard extends StatelessWidget {
                   kMoney.format(product.compareAtPrice),
                   style: sans(
                     size: 12,
-                    color: kInkMuted,
+                    color: context.monettaColors.contentMuted,
                     height: 1.3,
                     decoration: TextDecoration.lineThrough,
                   ),
@@ -193,7 +195,7 @@ class _CardImageState extends State<_CardImage> {
           ? null
           : (_) => setState(() => _showSecond = false),
       child: ColoredBox(
-        color: kMist,
+        color: context.monettaColors.surfaceMuted,
         child: url == null
             ? MonettaImage(
                 url: null,

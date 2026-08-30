@@ -15,6 +15,7 @@ class MonettaSideMenu extends StatelessWidget {
     required this.onPerfumes,
     required this.onBeauty,
     this.onNotifications,
+    required this.onAppearance,
     required this.onAbout,
     required this.onPartner,
     required this.onSupport,
@@ -29,6 +30,7 @@ class MonettaSideMenu extends StatelessWidget {
   final VoidCallback onPerfumes;
   final VoidCallback onBeauty;
   final VoidCallback? onNotifications;
+  final VoidCallback onAppearance;
   final VoidCallback onAbout;
   final VoidCallback onPartner;
   final VoidCallback onSupport;
@@ -41,12 +43,13 @@ class MonettaSideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width.clamp(300.0, 366.0);
+    final colors = context.monettaColors;
 
     return Drawer(
       key: const Key('monetta-side-menu'),
       width: width,
       elevation: 0,
-      backgroundColor: const Color(0xFFFAF8F4),
+      backgroundColor: colors.surfaceRaised,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.horizontal(right: Radius.circular(30)),
       ),
@@ -73,7 +76,7 @@ class MonettaSideMenu extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
               child: Material(
-                color: const Color(0xFFF0ECE5),
+                color: colors.inputFill,
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   key: const Key('side-menu-search'),
@@ -147,6 +150,11 @@ class MonettaSideMenu extends StatelessWidget {
                       onTap: () => _select(context, onNotifications!),
                     ),
                   _MenuLink(
+                    key: const Key('side-menu-appearance'),
+                    label: 'Apariencia',
+                    onTap: () => _select(context, onAppearance),
+                  ),
+                  _MenuLink(
                     label: 'Nuestra historia',
                     onTap: () => _select(context, onAbout),
                   ),
@@ -167,9 +175,13 @@ class _MenuSectionLabel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     return Padding(
       padding: const EdgeInsets.fromLTRB(6, 6, 6, 8),
-      child: Text(label, style: eyebrow(size: 8.5)),
+      child: Text(
+        label,
+        style: eyebrow(size: 8.5, color: colors.contentMuted),
+      ),
     );
   }
 }
@@ -186,6 +198,7 @@ class _MenuLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     return Material(
       color: Colors.transparent,
       child: InkWell(
@@ -198,7 +211,7 @@ class _MenuLink extends StatelessWidget {
               Expanded(
                 child: Text(
                   label,
-                  style: editorial(18),
+                  style: editorial(18, color: colors.contentPrimary),
                 ),
               ),
               const SizedBox(width: 8),

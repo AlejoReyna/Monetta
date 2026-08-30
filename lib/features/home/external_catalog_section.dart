@@ -212,13 +212,13 @@ class _ExternalCardState extends State<_ExternalCard> {
           AspectRatio(
             aspectRatio: 3 / 4,
             child: ColoredBox(
-              color: kMist,
+              color: context.monettaColors.surfaceMuted,
               child: _imageUrl == null
-                  ? const Center(
+                  ? Center(
                       child: Icon(
                         Icons.image_not_supported_outlined,
                         size: 18,
-                        color: kInkMuted,
+                        color: context.monettaColors.contentMuted,
                       ),
                     )
                   : CachedNetworkImage(
@@ -226,12 +226,14 @@ class _ExternalCardState extends State<_ExternalCard> {
                       imageUrl: _imageUrl!,
                       fit: BoxFit.cover,
                       fadeInDuration: const Duration(milliseconds: 240),
-                      placeholder: (_, __) => const ColoredBox(color: kMist),
-                      errorWidget: (_, __, ___) => const Center(
+                      placeholder: (_, __) => ColoredBox(
+                        color: context.monettaColors.surfaceMuted,
+                      ),
+                      errorWidget: (_, __, ___) => Center(
                         child: Icon(
                           Icons.broken_image_outlined,
                           size: 18,
-                          color: kInkMuted,
+                          color: context.monettaColors.contentMuted,
                         ),
                       ),
                     ),
@@ -280,11 +282,12 @@ class _ExternalCardState extends State<_ExternalCard> {
                     },
                     labelStyle: sans(
                       size: 9.5,
-                      color:
-                          index == _selectedVariantIndex ? Colors.white : kInk,
+                      color: index == _selectedVariantIndex
+                          ? context.monettaColors.canvas
+                          : context.monettaColors.contentPrimary,
                     ),
-                    selectedColor: kInk,
-                    backgroundColor: kMist,
+                    selectedColor: context.monettaColors.contentPrimary,
+                    backgroundColor: context.monettaColors.surfaceMuted,
                     side: BorderSide.none,
                     padding: const EdgeInsets.symmetric(horizontal: 5),
                     visualDensity: VisualDensity.compact,
@@ -297,7 +300,7 @@ class _ExternalCardState extends State<_ExternalCard> {
           const SizedBox(height: 4),
           Text(
             'Candidato de compra · origen EE. UU.',
-            style: sans(size: 10.5, color: kInkMuted),
+            style: sans(size: 10.5, color: context.monettaColors.contentMuted),
           ),
           const SizedBox(height: 6),
           // Where this listing's data actually came from — shown as text in
@@ -306,7 +309,7 @@ class _ExternalCardState extends State<_ExternalCard> {
             _sourceLabel(_detailUrl),
             maxLines: 1,
             overflow: TextOverflow.ellipsis,
-            style: sans(size: 10, color: kInkMuted),
+            style: sans(size: 10, color: context.monettaColors.contentMuted),
           ),
           const SizedBox(height: 6),
           UnderlineLink(
@@ -342,7 +345,7 @@ class _Disclosure extends StatelessWidget {
       child: Text(
         'Candidatos para compra manual del propietario. Precio y disponibilidad '
         'pueden haber cambiado en el sitio del comercio.$stamp',
-        style: sans(size: 10.5, color: kInkMuted),
+        style: sans(size: 10.5, color: context.monettaColors.contentMuted),
       ),
     );
   }

@@ -27,6 +27,8 @@ part 'database.g.dart';
     CachedVariants,
     CachedCollections,
     SyncCursors,
+    CatalogStates,
+    AppPreferences,
     WishlistItems,
     BagLines,
     InteractionEvents,
@@ -45,13 +47,15 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (migrator) => migrator.createAll(),
         onUpgrade: (migrator, from, to) async {
           if (from < 2) await _migrateShopifyIdsToGids();
+          if (from < 3) await migrator.createTable(appPreferences);
+          if (from < 4) await migrator.createTable(catalogStates);
         },
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),
       );

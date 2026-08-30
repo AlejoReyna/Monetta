@@ -3,7 +3,7 @@
 Flutter loads these via:
 
 ```bash
-flutter run --dart-define-from-file=config/dart_defines.staging.json
+make run-staging
 ```
 
 ## Rules
@@ -17,6 +17,10 @@ flutter run --dart-define-from-file=config/dart_defines.staging.json
    real values, and leave the real file gitignored.
 4. Real production values also belong in CI secret stores / hosting dashboards,
    not only on a laptop.
+5. `APP_ENV` is mandatory. A bare `flutter run` intentionally stops on a
+   configuration screen instead of silently serving a potentially stale
+   bundled catalog. Offline-only development must opt in with
+   `APP_ENV=local` and `ALLOW_OFFLINE_CATALOG=true`.
 
 ## Files
 

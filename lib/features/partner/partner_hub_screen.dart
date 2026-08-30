@@ -104,7 +104,10 @@ class PartnerHubScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(content.eyebrow, style: eyebrow(color: kGold)),
+                  Text(
+                    content.eyebrow,
+                    style: eyebrow(color: context.monettaColors.accent),
+                  ),
                   const SizedBox(height: 18),
                   Text(
                     content.headline,
@@ -157,7 +160,7 @@ class PartnerHubScreen extends StatelessWidget {
             ),
           const SizedBox(height: 42),
           Container(
-            color: kMist,
+            color: context.monettaColors.surfaceMuted,
             padding: const EdgeInsets.fromLTRB(20, 48, 20, 50),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -251,17 +254,26 @@ class _StepCard extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(border: Border.all(color: kLine)),
+      decoration: BoxDecoration(
+        border: Border.all(color: context.monettaColors.divider),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(step.number, style: eyebrow(color: kGold)),
+          Text(
+            step.number,
+            style: eyebrow(color: context.monettaColors.accent),
+          ),
           const SizedBox(height: 18),
           Text(step.title, style: display(20)),
           const SizedBox(height: 8),
           Text(
             step.body,
-            style: sans(size: 12.5, color: kInkMuted, height: 1.55),
+            style: sans(
+              size: 12.5,
+              color: context.monettaColors.contentMuted,
+              height: 1.55,
+            ),
           ),
         ],
       ),
@@ -277,7 +289,7 @@ class _Terms extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: kMist,
+      color: context.monettaColors.surfaceMuted,
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 34),
       child: LayoutBuilder(
         builder: (context, constraints) {
@@ -296,7 +308,7 @@ class _Terms extends StatelessWidget {
               final term = terms[index];
               return Container(
                 padding: const EdgeInsets.all(14),
-                color: Colors.white,
+                color: context.monettaColors.surfaceRaised,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
@@ -309,7 +321,11 @@ class _Terms extends StatelessWidget {
                     Text(
                       term.label,
                       textAlign: TextAlign.center,
-                      style: sans(size: 10.5, color: kInkMuted, height: 1.25),
+                      style: sans(
+                        size: 10.5,
+                        color: context.monettaColors.contentMuted,
+                        height: 1.25,
+                      ),
                     ),
                   ],
                 ),
@@ -383,7 +399,9 @@ class _CatalogCard extends StatelessWidget {
     return Container(
       key: ValueKey('partner-catalog-${catalog.id}'),
       padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(border: Border.all(color: kLine)),
+      decoration: BoxDecoration(
+        border: Border.all(color: context.monettaColors.divider),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -392,7 +410,7 @@ class _CatalogCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   catalog.mode.label.toUpperCase(),
-                  style: eyebrow(color: kGold),
+                  style: eyebrow(color: context.monettaColors.accent),
                 ),
               ),
               Text(
@@ -405,7 +423,10 @@ class _CatalogCard extends StatelessWidget {
           Text(catalog.description, style: sans(size: 12.5, height: 1.5)),
           if (catalog.updatedLabel case final label?) ...[
             const SizedBox(height: 5),
-            Text(label, style: sans(size: 10, color: kInkMuted)),
+            Text(
+              label,
+              style: sans(size: 10, color: context.monettaColors.contentMuted),
+            ),
           ],
           const SizedBox(height: 16),
           Row(
@@ -463,14 +484,18 @@ class _FaqTile extends StatelessWidget {
             faq.question,
             style: sans(size: 13, weight: FontWeight.w500),
           ),
-          iconColor: kInk,
-          collapsedIconColor: kInk,
+          iconColor: context.monettaColors.contentPrimary,
+          collapsedIconColor: context.monettaColors.contentPrimary,
           children: [
             Align(
               alignment: Alignment.centerLeft,
               child: Text(
                 faq.answer,
-                style: sans(size: 12.5, color: kInkMuted, height: 1.55),
+                style: sans(
+                  size: 12.5,
+                  color: context.monettaColors.contentMuted,
+                  height: 1.55,
+                ),
               ),
             ),
           ],

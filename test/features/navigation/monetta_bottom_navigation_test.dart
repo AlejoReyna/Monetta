@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
 
 void main() {
@@ -50,7 +51,7 @@ void main() {
     );
     expect(
       (activeFill.decoration as BoxDecoration).color,
-      const Color(0xFFE7E5E0),
+      const Color(0x24AA7D44),
     );
 
     await tester.tap(catalog);
@@ -89,6 +90,11 @@ void main() {
     expect(surfaceRect.right, 800);
     expect(surfaceRect.bottom, 600);
     expect(surfaceRect.height, 70);
+
+    final surfaceDecoration =
+        tester.widget<DecoratedBox>(surface).decoration as BoxDecoration;
+    expect(surfaceDecoration.color, MonettaColors.light.navigationSurface);
+    expect(surfaceDecoration.border, isNotNull);
   });
 }
 

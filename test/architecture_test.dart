@@ -135,5 +135,37 @@ void main() {
 
       expect(offenders, isEmpty, reason: offenders.join('\n'));
     });
+
+    test('feature UI does not use legacy light-only semantic colors', () {
+      const forbidden = <String>[
+        'kInkMuted',
+        'kMist',
+        'kSearchFill',
+        'kLine',
+        'kHairline',
+        'kSale',
+      ];
+      final offenders = <String>[];
+      final dir = Directory('lib/features');
+
+      for (final entity in dir.listSync(recursive: true)) {
+        if (entity is! File || !entity.path.endsWith('.dart')) continue;
+        final lines = entity.readAsLinesSync();
+        for (var index = 0; index < lines.length; index++) {
+          for (final token in forbidden) {
+            if (lines[index].contains(token)) {
+              offenders.add('${entity.path}:${index + 1} uses $token');
+            }
+          }
+        }
+      }
+
+      expect(
+        offenders,
+        isEmpty,
+        reason: 'Use context.monettaColors for theme-dependent UI:\n'
+            '${offenders.join('\n')}',
+      );
+    });
   });
 }

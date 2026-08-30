@@ -52,7 +52,7 @@ void main() {
 
     expect(find.byType(SearchScreen), findsNothing);
 
-    await tester.tap(find.byIcon(Icons.search));
+    await tester.tap(find.byKey(const ValueKey('home-search-bar')));
     await tester.pumpAndSettle();
 
     expect(find.byType(SearchScreen), findsOneWidget);
@@ -77,22 +77,25 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byKey(const Key('monetta-side-menu')), findsOneWidget);
-    expect(find.text('Buscar una pieza'), findsOneWidget);
-    expect(find.text('Bolsas'), findsOneWidget);
-    expect(find.text('Carteras'), findsOneWidget);
-    expect(find.text('Relojes'), findsOneWidget);
-    expect(find.text('Perfumes'), findsOneWidget);
-    expect(find.text('Maquillaje y skincare'), findsOneWidget);
-    expect(find.text('Todas las marcas'), findsOneWidget);
-    expect(find.text('Mayoreo'), findsOneWidget);
-    expect(find.text('Contacto'), findsOneWidget);
+    final menu = find.byKey(const Key('monetta-side-menu'));
+    Finder menuText(String text) =>
+        find.descendant(of: menu, matching: find.text(text));
+    expect(menuText('Buscar una pieza'), findsOneWidget);
+    expect(menuText('Bolsas'), findsOneWidget);
+    expect(menuText('Carteras'), findsOneWidget);
+    expect(menuText('Relojes'), findsOneWidget);
+    expect(menuText('Perfumes'), findsOneWidget);
+    expect(menuText('Maquillaje y skincare'), findsOneWidget);
+    expect(menuText('Todas las marcas'), findsOneWidget);
+    expect(menuText('Mayoreo'), findsOneWidget);
+    expect(menuText('Contacto'), findsOneWidget);
     expect(find.text('Todo lo que buscas,\nen un solo lugar.'), findsNothing);
     expect(find.text('Explorar catálogo'), findsNothing);
     expect(find.text('Mi bolsa'), findsNothing);
     expect(find.text('Mi cuenta'), findsNothing);
-    expect(find.text('Nuestra historia'), findsOneWidget);
+    expect(menuText('Nuestra historia'), findsOneWidget);
     expect(
-      tester.widget<Text>(find.text('Bolsas')).style?.fontFamily,
+      tester.widget<Text>(menuText('Bolsas')).style?.fontFamily,
       kEditorialFontFamily,
     );
   });
@@ -164,6 +167,9 @@ void main() {
 
     expect(find.text('ENVÍO GRATIS ESTE FIN DE SEMANA'), findsNothing);
     expect(find.text('Novedades'), findsNothing);
-    expect(find.byKey(const Key('campaign-hero')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('home-discovery-header')),
+      findsNothing,
+    );
   });
 }

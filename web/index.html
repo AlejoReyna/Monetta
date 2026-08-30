@@ -21,6 +21,7 @@
         <nav class="toolbar__tabs" aria-label="Modo de visualización">
           <button class="is-active" type="button" data-view="overview">Paleta</button>
           <button type="button" data-view="detail">Pantalla</button>
+          <button type="button" data-view="motion">Motion</button>
         </nav>
         <div class="toolbar__actions">
           <button type="button" data-fit>Fit</button>
@@ -92,6 +93,236 @@
               </div>
               <div class="annotation-layer" data-annotations aria-live="polite"></div>
             </div>
+          </section>
+
+          <section class="motion-board" data-motion-board hidden>
+            <header class="motion-head">
+              <div>
+                <span class="eyebrow">PROTOTIPO WEB · SECCIÓN 01</span>
+                <h2>Hero editorial en movimiento</h2>
+                <p>
+                  Una entrada cinematográfica, un cambio de campaña sereno y una salida limpia.
+                  Este patrón define la base para animar el resto del storefront.
+                </p>
+              </div>
+              <button class="motion-replay" type="button" data-motion-replay>
+                <span aria-hidden="true">↻</span> Reproducir
+              </button>
+            </header>
+
+            <div class="motion-layout">
+              <article class="motion-preview" aria-label="Prototipo animado del hero editorial">
+                <div class="motion-preview__label">
+                  <span>PREVIEW EN VIVO</span>
+                  <i></i>
+                  <strong data-motion-status>REPRODUCIENDO</strong>
+                </div>
+
+                <div class="motion-phone" data-motion-phone>
+                  <div class="motion-phone__bar">
+                    <button type="button" aria-label="Abrir menú"><span></span><span></span></button>
+                    <img src="/images/logo_monetta.png" alt="Monetta" />
+                    <button class="motion-search" type="button" aria-label="Buscar"><i></i></button>
+                  </div>
+
+                  <div class="motion-hero" data-motion-hero>
+                    <div class="motion-slides" data-motion-slides>
+                      <article class="motion-slide is-active" data-motion-slide="0">
+                        <img src="/images/campaign_terracotta.jpg" alt="Bolsa Monetta en una escena arquitectónica color terracota" />
+                        <div class="motion-slide__wash"></div>
+                        <div class="motion-slide__copy">
+                          <span>SELECCIÓN MONETTA</span>
+                          <h3>La forma de<br />lo esencial</h3>
+                          <a href="#motion-plan">Explorar colección <i>→</i></a>
+                        </div>
+                      </article>
+                      <article class="motion-slide" data-motion-slide="1" aria-hidden="true">
+                        <img src="/images/campaign_olive.jpg" alt="Bolsa Monetta en una escena editorial verde olivo" />
+                        <div class="motion-slide__wash"></div>
+                        <div class="motion-slide__copy">
+                          <span>NUEVA EDICIÓN</span>
+                          <h3>Quiet luxury,<br />todos los días</h3>
+                          <a href="#motion-plan">Ver novedades <i>→</i></a>
+                        </div>
+                      </article>
+                      <article class="motion-slide" data-motion-slide="2" aria-hidden="true">
+                        <img src="/images/campaign_coral.jpg" alt="Bolsa Monetta en una escena editorial coral" />
+                        <div class="motion-slide__wash"></div>
+                        <div class="motion-slide__copy">
+                          <span>CURADURÍA DE TEMPORADA</span>
+                          <h3>Color con<br />intención</h3>
+                          <a href="#motion-plan">Descubrir piezas <i>→</i></a>
+                        </div>
+                      </article>
+                    </div>
+
+                    <div class="motion-hero__controls">
+                      <span data-motion-counter>01 / 03</span>
+                      <div class="motion-progress" aria-hidden="true"><i data-motion-progress></i></div>
+                      <button type="button" data-motion-prev aria-label="Campaña anterior">←</button>
+                      <button type="button" data-motion-next aria-label="Campaña siguiente">→</button>
+                    </div>
+                  </div>
+                </div>
+              </article>
+
+              <aside class="motion-plan" id="motion-plan">
+                <div class="motion-plan__intro">
+                  <span>INTENCIÓN</span>
+                  <p>Dirigir la mirada de marca → producto → acción, sin convertir el hero en una secuencia decorativa.</p>
+                </div>
+
+                <ol class="motion-sequence">
+                  <li>
+                    <span class="motion-sequence__time">00 ms</span>
+                    <div><strong>Marco y navegación</strong><p>Opacidad 0 → 1. La estructura aparece primero para dar estabilidad.</p></div>
+                  </li>
+                  <li>
+                    <span class="motion-sequence__time">60 ms</span>
+                    <div><strong>Imagen editorial</strong><p>Reveal vertical de 12 px y escala 1.035 → 1 durante 720 ms.</p></div>
+                  </li>
+                  <li>
+                    <span class="motion-sequence__time">180 ms</span>
+                    <div><strong>Mensaje y CTA</strong><p>Stagger de 70 ms por bloque; solo opacity y translateY.</p></div>
+                  </li>
+                  <li>
+                    <span class="motion-sequence__time">3.5 s</span>
+                    <div><strong>Cambio de campaña</strong><p>Crossfade con desplazamiento de 2% durante 460 ms; reinicia al interactuar.</p></div>
+                  </li>
+                </ol>
+
+                <div class="motion-rules">
+                  <div><span>DURACIÓN</span><strong>180 / 480 / 720 ms</strong></div>
+                  <div><span>CURVA</span><strong>cubic-bezier(.16, 1, .3, 1)</strong></div>
+                  <div><span>REPETICIÓN</span><strong>Entrada una sola vez</strong></div>
+                  <div><span>ACCESIBILIDAD</span><strong>Sin autoplay con reduced motion</strong></div>
+                </div>
+              </aside>
+            </div>
+
+            <section class="motion-studies" aria-labelledby="motion-studies-title">
+              <header class="motion-studies__head">
+                <div>
+                  <span class="eyebrow">SISTEMA APLICADO</span>
+                  <h3 id="motion-studies-title">Tres secciones, tres comportamientos</h3>
+                </div>
+                <p>El movimiento responde a la función de cada bloque: descubrir, comparar o generar confianza.</p>
+              </header>
+
+              <div class="motion-study-grid">
+                <article class="motion-study motion-study--collections" data-motion-demo>
+                  <header>
+                    <span>02 · REVEAL POR GRUPO</span>
+                    <strong>Colecciones</strong>
+                    <p>El bloque entra como una sola unidad. Las tarjetas no compiten entre sí.</p>
+                  </header>
+                  <div class="motion-mini-phone">
+                    <div class="motion-mini-phone__status"><span>9:41</span><i></i><span>● ◒ ▰</span></div>
+                    <div class="motion-mini-phone__bar">
+                      <span class="motion-mini-phone__menu" aria-hidden="true"><i></i><i></i></span>
+                      <img src="/images/logo_monetta.png" alt="Monetta" />
+                      <span class="motion-mini-phone__search" aria-hidden="true"></span>
+                    </div>
+                    <div class="motion-mini-phone__screen">
+                      <div class="collection-demo">
+                        <div class="collection-demo__heading"><small>DESCUBRE</small><strong>Colecciones</strong></div>
+                        <div class="collection-demo__rail">
+                          <button class="collection-demo__card collection-demo__card--bags" type="button"><span>Bolsas <i>→</i></span></button>
+                          <button class="collection-demo__card collection-demo__card--wallets" type="button"><span>Carteras <i>→</i></span></button>
+                          <button class="collection-demo__card collection-demo__card--watches" type="button"><span>Relojes <i>→</i></span></button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="motion-mini-phone__nav" aria-hidden="true"><strong>⌂<small>Inicio</small></strong><span>▦<small>Catálogo</small></span><span>▢<small>Bolsa</small></span><span>♙<small>Cuenta</small></span></div>
+                  </div>
+                  <footer><span>480 ms</span><span>opacity + 10 px</span><span>1 sola vez</span></footer>
+                </article>
+
+                <article class="motion-study motion-study--products" data-motion-demo>
+                  <header>
+                    <span>03 · FEEDBACK DE INTERACCIÓN</span>
+                    <strong>Nuevos productos</strong>
+                    <p>El rail permanece estable; solo responde el producto que recibe intención.</p>
+                  </header>
+                  <div class="motion-mini-phone">
+                    <div class="motion-mini-phone__status"><span>9:41</span><i></i><span>● ◒ ▰</span></div>
+                    <div class="motion-mini-phone__bar">
+                      <span class="motion-mini-phone__menu" aria-hidden="true"><i></i><i></i></span>
+                      <img src="/images/logo_monetta.png" alt="Monetta" />
+                      <span class="motion-mini-phone__search" aria-hidden="true"></span>
+                    </div>
+                    <div class="motion-mini-phone__screen">
+                      <div class="product-demo">
+                        <div class="product-demo__heading"><small>NOVEDADES</small><strong>Nuevos productos</strong><a href="#motion-plan">Ver todos</a></div>
+                        <div class="product-demo__rail">
+                          <button class="product-demo__card product-demo__card--tote" type="button">
+                            <span class="product-demo__image"><i aria-hidden="true">♡</i></span>
+                            <span class="product-demo__copy"><small>MONETTA</small><strong>Tote estructurada</strong><em>$1,589.00</em></span>
+                          </button>
+                          <button class="product-demo__card product-demo__card--shoulder" type="button">
+                            <span class="product-demo__image"><i aria-hidden="true">♡</i></span>
+                            <span class="product-demo__copy"><small>MONETTA</small><strong>Bolsa shoulder</strong><em>$1,249.00</em></span>
+                          </button>
+                          <button class="product-demo__card product-demo__card--crossbody" type="button">
+                            <span class="product-demo__image"><i aria-hidden="true">♡</i></span>
+                            <span class="product-demo__copy"><small>MONETTA</small><strong>Crossbody esencial</strong><em>$1,099.00</em></span>
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="motion-mini-phone__nav" aria-hidden="true"><strong>⌂<small>Inicio</small></strong><span>▦<small>Catálogo</small></span><span>▢<small>Bolsa</small></span><span>♙<small>Cuenta</small></span></div>
+                  </div>
+                  <footer><span>180 ms</span><span>scale 1.025</span><span>hover / focus / tap</span></footer>
+                </article>
+
+                <article class="motion-study motion-study--reviews" data-motion-demo>
+                  <header>
+                    <span>04 · TRANSICIÓN SINCRONIZADA</span>
+                    <strong>Experiencias</strong>
+                    <p>Foto y testimonio cambian juntos para conservar la relación entre persona y relato.</p>
+                  </header>
+                  <div class="motion-mini-phone motion-mini-phone--review">
+                    <div class="motion-mini-phone__status"><span>9:41</span><i></i><span>● ◒ ▰</span></div>
+                    <div class="motion-mini-phone__bar">
+                      <span class="motion-mini-phone__menu" aria-hidden="true"><i></i><i></i></span>
+                      <img src="/images/logo_monetta.png" alt="Monetta" />
+                      <span class="motion-mini-phone__search" aria-hidden="true"></span>
+                    </div>
+                    <div class="motion-mini-phone__screen">
+                      <div class="review-demo" data-review-demo>
+                        <h4>EXPERIENCIAS DE CLIENTES</h4>
+                        <div class="review-demo__slides">
+                          <article class="review-demo__slide is-active" data-review-slide="0">
+                            <div class="review-demo__photo review-demo__photo--gaby"></div>
+                            <div class="review-demo__quote"><span>★★★★★</span><p>“Todo es 100% original. Los bolsos están increíbles y el servicio fue excelente.”</p><strong>Gaby E. <i>✓</i></strong></div>
+                          </article>
+                          <article class="review-demo__slide" data-review-slide="1" aria-hidden="true">
+                            <div class="review-demo__photo review-demo__photo--monse"></div>
+                            <div class="review-demo__quote"><span>★★★★★</span><p>“La pieza llegó perfecta. La atención se sintió cercana desde el primer mensaje.”</p><strong>Monse R. <i>✓</i></strong></div>
+                          </article>
+                        </div>
+                        <div class="review-demo__controls">
+                          <span data-review-counter>01 / 02</span>
+                          <i></i>
+                          <button type="button" data-review-prev aria-label="Testimonio anterior">←</button>
+                          <button type="button" data-review-next aria-label="Testimonio siguiente">→</button>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="motion-mini-phone__nav" aria-hidden="true"><strong>⌂<small>Inicio</small></strong><span>▦<small>Catálogo</small></span><span>▢<small>Bolsa</small></span><span>♙<small>Cuenta</small></span></div>
+                  </div>
+                  <footer><span>500 ms</span><span>crossfade pareado</span><span>7 s / manual</span></footer>
+                </article>
+              </div>
+            </section>
+
+            <footer class="motion-foot">
+              <span>PLAN DE ESCALADO</span>
+              <p><strong>01 Hero</strong> · validar ritmo y legibilidad</p>
+              <p><strong>02 Secciones editoriales</strong> · reveal por grupo al 20% del viewport</p>
+              <p><strong>03 Rails y cards</strong> · feedback táctil, sin stagger masivo</p>
+              <p><strong>04 QA</strong> · 60 fps, teclado, touch y reduced motion</p>
+            </footer>
           </section>
         </div>
         <div class="canvas__hint">Arrastra para mover · ⌘ + / − para zoom</div>

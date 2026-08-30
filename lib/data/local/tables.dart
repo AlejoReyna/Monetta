@@ -83,6 +83,35 @@ class SyncCursors extends Table {
   Set<Column> get primaryKey => {id};
 }
 
+/// Singleton provenance and health record for the catalog cached on device.
+///
+/// Counts are observations, never release constants. The fingerprint makes it
+/// possible to compare snapshots without persisting URLs or product payloads
+/// in logs, while [source] prevents the bundled fallback from mutating a cache
+/// that has already been replaced by an authoritative remote snapshot.
+class CatalogStates extends Table {
+  IntColumn get id => integer().withDefault(const Constant(0))();
+  TextColumn get source => text()();
+  DateTimeColumn get syncedAt => dateTime().nullable()();
+  IntColumn get productCount => integer()();
+  TextColumn get fingerprint => text()();
+  TextColumn get status => text()();
+  TextColumn get detail => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Device-scoped, non-sensitive application preferences. The singleton row
+/// survives sign-in and sign-out so appearance never depends on an account.
+class AppPreferences extends Table {
+  IntColumn get id => integer().withDefault(const Constant(0))();
+  TextColumn get themeMode => text().withDefault(const Constant('system'))();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
 /// One product on a shopper's wishlist.
 ///
 /// `accountId` is nullable — a wishlist starts device-scoped (guest) and
@@ -163,8 +192,8 @@ class Accounts extends Table {
 /// `Session` entity.
 class Sessions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get accountId =>
-      text().references(Accounts, #localAccountId, onDelete: KeyAction.cascade)();
+  TextColumn get accountId => text()
+      .references(Accounts, #localAccountId, onDelete: KeyAction.cascade)();
   TextColumn get secureStorageKeyRef => text()();
 
   /// The *access* token's expiry, not the id token's — they carry separate
@@ -179,8 +208,8 @@ class Sessions extends Table {
 /// `docs/ACCOUNTS_AND_SYNC_PLAN.md`.
 class OrderSummaries extends Table {
   TextColumn get id => text()();
-  TextColumn get accountId =>
-      text().references(Accounts, #localAccountId, onDelete: KeyAction.cascade)();
+  TextColumn get accountId => text()
+      .references(Accounts, #localAccountId, onDelete: KeyAction.cascade)();
 
   /// Null for an apartado order — those have no Shopify order id until the
   /// owner manually enters one, and some never get one recorded here at all.

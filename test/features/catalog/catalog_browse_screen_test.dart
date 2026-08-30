@@ -77,8 +77,59 @@ void main() {
     expect(collection.selected, isTrue);
     expect(monetta.selected, isFalse);
     expect(
+      collection.color?.resolve(const <WidgetState>{WidgetState.selected}),
+      MonettaColors.light.navigationSelection,
+    );
+    expect(
       monetta.color?.resolve(const <WidgetState>{}),
-      kInk,
+      Colors.transparent,
+    );
+  });
+
+  testWidgets('category selection moves the pill motion state', (tester) async {
+    await _pump(tester, CatalogBrowseScreen(items: [_monetta(1)]));
+
+    AnimatedScale motionFor(String category) => tester.widget<AnimatedScale>(
+          find.byKey(Key('catalog-category-$category-motion')),
+        );
+
+    expect(motionFor('collection').scale, 1.025);
+    expect(motionFor('monetta').scale, 1);
+
+    await tester.tap(find.byKey(const Key('catalog-category-monetta')));
+    await tester.pumpAndSettle();
+
+    expect(motionFor('collection').scale, 1);
+    expect(motionFor('monetta').scale, 1.025);
+  });
+
+  testWidgets('category content uses the smooth section transition', (
+    tester,
+  ) async {
+    await _pump(
+      tester,
+      CatalogBrowseScreen(items: [_monetta(1), _external(1)]),
+    );
+
+    expect(
+      find.byKey(const Key('catalog-section-transition')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('catalog-section-Colección')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.byKey(const Key('catalog-category-monetta')));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('catalog-section-Colección')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('catalog-section-Monetta')),
+      findsOneWidget,
     );
   });
 
@@ -260,9 +311,8 @@ void main() {
     expect(find.text('Monetta General 4'), findsNothing);
   });
 
-
-
-  testWidgets('category pill count respects secondary active filters', (tester) async {
+  testWidgets('category pill count respects secondary active filters',
+      (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -333,7 +383,10 @@ void main() {
       shopifyProductId: '4',
       vertical: CatalogVertical.perfumes,
     );
-    await _pump(tester, CatalogBrowseScreen(items: [cafe, negra, monettaBag, monettaPerfume]));
+    await _pump(
+      tester,
+      CatalogBrowseScreen(items: [cafe, negra, monettaBag, monettaPerfume]),
+    );
     await tester.pump();
 
     expect(find.text(' 4'), findsOneWidget);
@@ -362,7 +415,6 @@ void main() {
     expect(find.text('Perfumes'), findsOneWidget);
   });
 
-
   testWidgets('filters through bag-specific expandable options',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -384,6 +436,24 @@ void main() {
     expect(find.text('Color'), findsNothing);
     expect(find.text('Tipo de fit'), findsNothing);
     expect(find.text('Talla'), findsNothing);
+
+    final titleRect = tester.getRect(find.text('Filtrar y ordenar'));
+    final closeRect = tester.getRect(
+      find.byKey(const Key('catalog-filter-close')),
+    );
+    expect(closeRect.left, greaterThan(titleRect.right));
+
+    final applyButton = tester.widget<FilledButton>(
+      find.byKey(const Key('catalog-filter-apply')),
+    );
+    expect(
+      applyButton.style?.backgroundColor?.resolve(const <WidgetState>{}),
+      MonettaColors.light.navigationSelection,
+    );
+    expect(
+      applyButton.style?.foregroundColor?.resolve(const <WidgetState>{}),
+      MonettaColors.light.accentContent,
+    );
 
     await tester.tap(find.byKey(const Key('catalog-filter-type')));
     await tester.pumpAndSettle();

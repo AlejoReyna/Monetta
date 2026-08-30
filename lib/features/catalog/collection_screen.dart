@@ -17,7 +17,6 @@ import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import 'catalog_browse_screen.dart';
 import 'product_card.dart';
-import 'silhouette_cutout.dart';
 
 enum _Sort { newest, priceAsc, priceDesc }
 
@@ -175,7 +174,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
     await showModalBottomSheet<void>(
       context: context,
-      backgroundColor: Colors.white,
+      backgroundColor: context.monettaColors.surfaceRaised,
       isScrollControlled: true,
       builder: (sheetContext) {
         return StoreScope(
@@ -239,6 +238,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
         : '${items.length} piezas ordenadas por ';
 
     return Scaffold(
+      extendBody: true,
       appBar: AppBar(
         title: Text(widget.title, style: display(16, weight: FontWeight.w500)),
         bottom: const PreferredSize(
@@ -262,7 +262,13 @@ class _CollectionScreenState extends State<CollectionScreen> {
             child: Wrap(
               crossAxisAlignment: WrapCrossAlignment.center,
               children: [
-                Text(countLabel, style: sans(size: 12.5, color: kInkMuted)),
+                Text(
+                  countLabel,
+                  style: sans(
+                    size: 12.5,
+                    color: context.monettaColors.contentMuted,
+                  ),
+                ),
                 UnderlineLink(
                   label: _sortLabel,
                   onTap: _openFilterSheet,
@@ -287,7 +293,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
                       alignment: Alignment.center,
                       padding: const EdgeInsets.symmetric(horizontal: 10),
                       decoration: BoxDecoration(
-                        border: Border.all(color: kLine, width: 0.5),
+                        border: Border.all(
+                          color: context.monettaColors.divider,
+                          width: 0.5,
+                        ),
                       ),
                       child: Text(
                         '${chip.$1}  ×',
@@ -343,39 +352,64 @@ class _SilhouetteSiblingRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
+    final animationsDisabled = reduceMotion(context);
+
     return SizedBox(
-      height: 72,
+      height: 60,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.fromLTRB(16, 10, 16, 0),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         itemCount: slugs.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 16),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final slug = slugs[index];
-          final kind = silhouetteCutoutFor(slug);
           final on = slug == selected;
-          return GestureDetector(
-            onTap: () => onSelected(slug),
-            child: SizedBox(
-              width: 68,
-              child: Column(
-                children: [
-                  if (kind != null)
-                    SilhouetteCutout(
-                      kind: kind,
-                      size: 32,
-                      color: on ? kInk : kInkMuted,
-                    )
-                  else
-                    const SizedBox(height: 32),
-                  const SizedBox(height: 4),
-                  Text(
-                    silhouetteLabel(slug).toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: eyebrow(size: 8, color: on ? kInk : kInkMuted),
-                  ),
-                ],
+          final labelColor = on ? colors.accentContent : colors.contentPrimary;
+
+          return AnimatedScale(
+            key: Key('collection-silhouette-$slug-motion'),
+            scale: on ? 1.025 : 1,
+            duration: animationsDisabled ? Duration.zero : kSnap,
+            curve: kMotionCurve,
+            child: ChoiceChip(
+              key: Key('collection-silhouette-$slug'),
+              label: Text(
+                silhouetteLabel(slug),
+                style: sans(
+                  size: 13,
+                  weight: on ? FontWeight.w600 : FontWeight.w400,
+                  color: labelColor,
+                ),
+              ),
+              selected: on,
+              onSelected: (_) => onSelected(slug),
+              color: WidgetStateProperty.resolveWith<Color>((states) {
+                return states.contains(WidgetState.selected)
+                    ? colors.navigationSelection
+                    : Colors.transparent;
+              }),
+              backgroundColor: Colors.transparent,
+              selectedColor: colors.navigationSelection,
+              surfaceTintColor: Colors.transparent,
+              side: BorderSide(
+                color:
+                    on ? colors.accent.withValues(alpha: 0.48) : colors.divider,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
+              showCheckmark: false,
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              chipAnimationStyle: ChipAnimationStyle(
+                selectAnimation: animationsDisabled
+                    ? AnimationStyle.noAnimation
+                    : const AnimationStyle(
+                        curve: kMotionCurve,
+                        duration: kSwap,
+                        reverseCurve: kMotionCurve,
+                        reverseDuration: kSnap,
+                      ),
               ),
             ),
           );
@@ -400,7 +434,7 @@ class _EmptyFilter extends StatelessWidget {
         const SizedBox(height: 10),
         Text(
           'Quita un filtro o mira otras piezas de la colección.',
-          style: sans(size: 13, color: kInkMuted),
+          style: sans(size: 13, color: context.monettaColors.contentMuted),
         ),
         const SizedBox(height: 22),
         Align(
@@ -484,7 +518,11 @@ class _FilterSheetState extends State<_FilterSheet> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Center(
-              child: Container(width: 36, height: 2, color: kLine),
+              child: Container(
+                width: 36,
+                height: 2,
+                color: context.monettaColors.divider,
+              ),
             ),
             const SizedBox(height: 18),
             Text('Ordenar'.toUpperCase(), style: eyebrow()),
@@ -603,14 +641,23 @@ class _SheetChip extends StatelessWidget {
         duration: reduceMotion(context) ? Duration.zero : kSnap,
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
         decoration: BoxDecoration(
-          color: selected ? kInk : Colors.white,
-          border: Border.all(color: selected ? kInk : kLine, width: 0.5),
+          color: selected
+              ? context.monettaColors.contentPrimary
+              : context.monettaColors.surface,
+          border: Border.all(
+            color: selected
+                ? context.monettaColors.contentPrimary
+                : context.monettaColors.divider,
+            width: 0.5,
+          ),
         ),
         child: Text(
           label.toUpperCase(),
           style: eyebrow(
             size: 8.5,
-            color: selected ? Colors.white : kInk,
+            color: selected
+                ? context.monettaColors.canvas
+                : context.monettaColors.contentPrimary,
           ),
         ),
       ),
