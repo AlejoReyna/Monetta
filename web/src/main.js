@@ -210,6 +210,25 @@ const references = [
   },
 ];
 
+function formatDate(date) {
+  return new Intl.DateTimeFormat('es-MX', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  }).format(date).replace(/\./g, '').toUpperCase();
+}
+
+const historyDateLabel = formatDate(new Date());
+const historyReferences = references.map(reference => ({
+  ...reference,
+  id: `history-${reference.id}`,
+  sourceId: reference.id,
+  title: `Historial / ${reference.title}`,
+  meta: `Vista actualizada · ${reference.meta}`,
+  isHistory: true,
+}));
+const allReferences = [...references, ...historyReferences];
+
 const annotations = {
   home: [
     { side: 'right', x: 90, y: 7, label: 'Búsqueda reducida a un icono' },
@@ -244,9 +263,14 @@ const boardImage = document.querySelector('[data-board-image]');
 const zoomLabel = document.querySelector('[data-zoom-label]');
 const captureTitle = document.querySelector('[data-capture-title]');
 const captureMeta = document.querySelector('[data-capture-meta]');
+const captureStatus = document.querySelector('[data-capture-status]');
 const openBoard = document.querySelector('[data-open-board]');
 const viewButtons = [...document.querySelectorAll('[data-view]')];
 const paletteList = document.querySelector('[data-palette-list]');
+const historyList = document.querySelector('[data-history-list]');
+const historyGroup = document.querySelector('[data-history-group]');
+const historyToggle = document.querySelector('[data-history-toggle]');
+const historyPanel = document.querySelector('[data-history-panel]');
 const overviewGrid = document.querySelector('[data-overview-grid]');
 const annotationLayer = document.querySelector('[data-annotations]');
 
@@ -291,8 +315,11 @@ function annotationMarkup(annotation) {
 }
 
 paletteList.innerHTML = references.map(referenceButton).join('');
+historyList.innerHTML = historyReferences.map(referenceButton).join('');
 overviewGrid.innerHTML = references.map(overviewCard).join('');
 document.querySelector('[data-reference-count]').textContent = references.length;
+document.querySelector('[data-history-date]').textContent = historyDateLabel;
+document.querySelector('[data-history-count]').textContent = `${historyReferences.length} vistas actualizadas`;
 
 function activeSurface() {
   if (mode === 'overview') return overviewBoard;
@@ -326,18 +353,28 @@ function updateActiveCards() {
 }
 
 function selectReference(id, { openDetail = true } = {}) {
-  activeReference = references.find(reference => reference.id === id) || references[0];
-  const activeAnnotations = annotations[activeReference.id] || [];
+  activeReference = allReferences.find(reference => reference.id === id) || references[0];
+  const activeAnnotations = annotations[activeReference.sourceId || activeReference.id] || [];
   boardImage.src = activeReference.src;
   boardImage.alt = activeReference.alt;
   captureTitle.textContent = activeReference.title;
   captureMeta.textContent = `${activeReference.meta} · iPhone 17 Pro Max`;
+  captureStatus.textContent = activeReference.isHistory
+    ? `HISTORIAL · ${historyDateLabel}`
+    : 'CAPTURA ACTUAL';
   openBoard.href = activeReference.src;
   annotationLayer.innerHTML = activeAnnotations.map(annotationMarkup).join('');
   detailBoard.classList.toggle('has-callouts', activeAnnotations.length > 0);
   updateActiveCards();
   if (openDetail) setMode('detail');
 }
+
+historyToggle.addEventListener('click', () => {
+  const isOpen = !historyGroup.classList.contains('is-open');
+  historyGroup.classList.toggle('is-open', isOpen);
+  historyToggle.setAttribute('aria-expanded', String(isOpen));
+  historyPanel.setAttribute('aria-hidden', String(!isOpen));
+});
 
 function fitBoard() {
   const { width } = measureBoard();

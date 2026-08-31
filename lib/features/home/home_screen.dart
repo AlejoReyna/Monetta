@@ -13,6 +13,8 @@ import '../../app/home_content_controller.dart';
 import '../../app/media/monetta_video.dart';
 import '../../app/motion.dart';
 import '../../app/mixed_feed.dart';
+import '../../app/onboarding_controller.dart';
+import '../../app/product_telemetry.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
@@ -32,6 +34,7 @@ import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
 import '../notifications/notification_settings_sheet.dart';
+import '../onboarding/onboarding_sheet.dart';
 import '../settings/appearance_sheet.dart';
 import '../partner/partner_hub_screen.dart';
 import 'customer_experiences_section.dart';
@@ -57,15 +60,53 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   // and hero playback each listen to only the value they need.
   final ValueNotifier<double> _collapse = ValueNotifier<double>(0);
   final ValueNotifier<bool> _heroPlaying = ValueNotifier<bool>(true);
+  Timer? _featuredRefreshTimer;
   double _heroHeight = double.infinity;
   bool _foreground = true;
+  bool _onboardingRequested = false;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
     _scroll.addListener(_onScroll);
-    WidgetsBinding.instance.addPostFrameCallback((_) => _precacheRail());
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _precacheRail();
+      unawaited(_showFirstRunOnboarding());
+      unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
+      _featuredRefreshTimer = Timer.periodic(
+        const Duration(seconds: 60),
+        (_) => unawaited(
+          FeaturedCatalogScope.maybeOf(context)?.refreshIfStale(),
+        ),
+      );
+    });
+  }
+
+  Future<void> _showFirstRunOnboarding() async {
+    if (!mounted || _onboardingRequested) return;
+    final onboarding = OnboardingScope.maybeOf(context);
+    if (onboarding == null || !onboarding.shouldShow) return;
+    _onboardingRequested = true;
+    final store = StoreScope.of(context);
+    final completed = await showModalBottomSheet<bool>(
+      context: context,
+      isScrollControlled: true,
+      isDismissible: false,
+      enableDrag: false,
+      builder: (_) => StoreScope(
+        notifier: store,
+        child: const OnboardingSheet(),
+      ),
+    );
+    if (!mounted) return;
+    if (completed == true) {
+      await onboarding.complete();
+      logProductEvent(context, ProductEvent.onboardingCompleted);
+    } else {
+      await onboarding.skip();
+      logProductEvent(context, ProductEvent.onboardingSkipped);
+    }
   }
 
   @override
@@ -73,6 +114,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     WidgetsBinding.instance.removeObserver(this);
     _collapse.dispose();
     _heroPlaying.dispose();
+    _featuredRefreshTimer?.cancel();
     _scroll.dispose();
     super.dispose();
   }
@@ -83,6 +125,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (active == _foreground) return;
     setState(() => _foreground = active);
     _syncHeroPlayback();
+    if (active) {
+      unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
+    }
   }
 
   void _onScroll() {
@@ -255,12 +300,19 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final editorial = _editorialContent;
     final homeScope = HomeContentScope.maybeOf(context);
     final homeContent = homeScope?.content ?? HomeContent.fallback;
+    final featured = FeaturedCatalogScope.maybeOf(context);
     final reviewsStatus =
         homeScope?.reviewsStatus ?? HomeReviewsStatus.fallback;
-    final storefront = AdminScope.maybeOf(context)?.storefront;
-    final showHero = storefront?.showHero ?? true;
-    final showNewest = storefront?.showNewest ?? true;
-    final showExternalPicks = storefront?.showExternalPicks ?? true;
+    // HomeContent is the normal shopper source. The AdminScope fallback keeps
+    // small preview/widget harnesses compatible without making production
+    // rendering depend on an owner opening the admin panel.
+    final storefront = homeScope == null
+        ? AdminScope.maybeOf(context)?.storefront ?? homeContent.storefront
+        : homeContent.storefront;
+    final showHero = storefront.showHero;
+    final showNewest = storefront.showNewest;
+    final showTodaysPicks = storefront.showTodaysPicks;
+    final showExternalPicks = storefront.showExternalPicks;
 
     if (feed.isEmpty) {
       return Scaffold(
@@ -336,7 +388,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       HomeSectionId.collections &&
                   (showNewest ||
                       homeContent.sectionOrder[index] !=
-                          HomeSectionId.newProducts))
+                          HomeSectionId.newProducts) &&
+                  (showTodaysPicks ||
+                      homeContent.sectionOrder[index] !=
+                          HomeSectionId.todaysPicks))
                 _buildHomeSection(
                   homeContent.sectionOrder[index],
                   index: index,
@@ -344,6 +399,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   content: homeContent,
                   editorial: editorial,
                   fresh: fresh,
+                  featuredProducts: featured?.products ?? const [],
                   reviewsStatus: reviewsStatus,
                 ),
             Padding(
@@ -397,6 +453,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     required HomeContent content,
     required MonettaEditorialContent editorial,
     required List<Product> fresh,
+    required List<Product> featuredProducts,
     required HomeReviewsStatus reviewsStatus,
   }) {
     return Padding(
@@ -412,6 +469,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         child: switch (section) {
           HomeSectionId.collections => _HomeCollectionsSection(
               cards: content.collections,
+            ),
+          HomeSectionId.todaysPicks => _TodaysPicksSection(
+              products: featuredProducts,
             ),
           HomeSectionId.newProducts => _NewestProductsSection(
               products: fresh,
@@ -1049,6 +1109,27 @@ class _NewestProductsSection extends StatelessWidget {
             onTap: onOpenAll,
           ),
         ),
+      ],
+    );
+  }
+}
+
+class _TodaysPicksSection extends StatelessWidget {
+  const _TodaysPicksSection({required this.products});
+
+  final List<Product> products;
+
+  @override
+  Widget build(BuildContext context) {
+    if (products.isEmpty) return const SizedBox.shrink();
+    return Column(
+      key: const ValueKey('home-section-todays-picks'),
+      children: [
+        const SectionHeading(
+          kicker: 'SELECCIÓN MONETTA',
+          title: 'Catálogo de hoy',
+        ),
+        _CatalogGrid(products: products.take(4).toList()),
       ],
     );
   }

@@ -375,6 +375,9 @@ query HomeContent {
     socialLinks: metafield(namespace: "app", key: "social_links") { value }
     aboutImageUrl: metafield(namespace: "app", key: "about_image_url") { value }
   }
+  storefrontConfig: metaobject(handle: {type: "$app:storefront_config", handle: "monetta"}) {
+    fields { key value }
+  }
   collections(first: 50, sortKey: TITLE) {
     edges {
       node {

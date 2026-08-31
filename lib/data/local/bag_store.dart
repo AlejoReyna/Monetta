@@ -37,7 +37,8 @@ class BagStore {
   }
 
   Future<void> remove(String productId) {
-    return (_db.delete(_db.bagLines)..where((t) => t.productId.equals(productId)))
+    return (_db.delete(_db.bagLines)
+          ..where((t) => t.productId.equals(productId)))
         .go();
   }
 

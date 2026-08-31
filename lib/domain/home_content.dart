@@ -4,8 +4,11 @@
 /// the current mobile store and keep the home complete while offline.
 library;
 
+import 'admin_control.dart';
+
 enum HomeSectionId {
   collections,
+  todaysPicks,
   newProducts,
   bagTypes,
   brands,
@@ -16,6 +19,11 @@ enum HomeSectionId {
   static HomeSectionId? fromWire(String value) {
     return switch (value.trim().toLowerCase().replaceAll('-', '_')) {
       'collections' || 'colecciones' => collections,
+      'todays_picks' ||
+      'todays-picks' ||
+      'destacados' ||
+      'seleccion_del_dia' =>
+        todaysPicks,
       'new_products' || 'newest' || 'nuevos_productos' => newProducts,
       'bag_types' || 'tipos_de_bolsa' || 'tipo_de_bolsas' => bagTypes,
       'brands' || 'marcas' => brands,
@@ -28,6 +36,7 @@ enum HomeSectionId {
 
   String get wireValue => switch (this) {
         collections => 'collections',
+        todaysPicks => 'todays_picks',
         newProducts => 'new_products',
         bagTypes => 'bag_types',
         brands => 'brands',
@@ -153,6 +162,7 @@ class HomeContent {
     required this.brands,
     required this.socialLinks,
     required this.testimonials,
+    this.storefront = AdminStorefrontSettings.defaults,
     this.aboutImageUrl,
     this.reviewAverage,
     this.reviewCount,
@@ -164,6 +174,7 @@ class HomeContent {
   final List<HomeBrandCard> brands;
   final List<HomeSocialLink> socialLinks;
   final List<HomeTestimonial> testimonials;
+  final AdminStorefrontSettings storefront;
   final String? aboutImageUrl;
   final double? reviewAverage;
   final int? reviewCount;
@@ -175,6 +186,7 @@ class HomeContent {
     List<HomeBrandCard>? brands,
     List<HomeSocialLink>? socialLinks,
     List<HomeTestimonial>? testimonials,
+    AdminStorefrontSettings? storefront,
     String? aboutImageUrl,
     double? reviewAverage,
     int? reviewCount,
@@ -186,6 +198,7 @@ class HomeContent {
       brands: brands ?? this.brands,
       socialLinks: socialLinks ?? this.socialLinks,
       testimonials: testimonials ?? this.testimonials,
+      storefront: storefront ?? this.storefront,
       aboutImageUrl: aboutImageUrl ?? this.aboutImageUrl,
       reviewAverage: reviewAverage ?? this.reviewAverage,
       reviewCount: reviewCount ?? this.reviewCount,
@@ -195,6 +208,7 @@ class HomeContent {
   static const fallback = HomeContent(
     sectionOrder: <HomeSectionId>[
       HomeSectionId.collections,
+      HomeSectionId.todaysPicks,
       HomeSectionId.newProducts,
       HomeSectionId.bagTypes,
       HomeSectionId.brands,

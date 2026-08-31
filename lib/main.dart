@@ -9,6 +9,7 @@ library;
 
 import 'dart:async';
 import 'dart:io' show Platform;
+import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -18,13 +19,17 @@ import 'app/account_controller.dart';
 import 'app/admin_config.dart';
 import 'app/admin_controller.dart';
 import 'app/admin_notification_controller.dart';
+import 'app/app_build_metadata.dart';
 import 'app/catalog_store.dart';
 import 'app/cart_controller.dart';
 import 'app/editorial_content_controller.dart';
+import 'app/featured_catalog_controller.dart';
 import 'app/external_catalog_config.dart';
 import 'app/external_catalog_controller.dart';
 import 'app/home_content_controller.dart';
 import 'app/notification_controller.dart';
+import 'app/onboarding_controller.dart';
+import 'app/product_telemetry.dart';
 import 'app/runtime_config.dart';
 import 'app/shopify_cart_composition.dart';
 import 'app/shopify_checkout_coordinator.dart';
@@ -49,6 +54,7 @@ import 'data/local/appearance_store.dart';
 import 'data/local/bag_store.dart';
 import 'data/local/database.dart';
 import 'data/local/order_summary_store.dart';
+import 'data/local/onboarding_preference_store.dart';
 import 'data/local/wishlist_store.dart';
 import 'data/notifications/firebase_notification_gateway.dart';
 import 'data/notifications/admin_notification_client.dart';
@@ -61,6 +67,7 @@ import 'data/reviews/loox_reviews_repository.dart';
 import 'data/shopify/catalog_sync.dart' as shopify;
 import 'data/shopify/cart_attribution.dart';
 import 'data/shopify/editorial_content_repository.dart';
+import 'data/shopify/featured_catalog_repository.dart';
 import 'data/shopify/home_content_repository.dart';
 import 'data/shopify/http_storefront_transport.dart';
 import 'data/shopify/storefront_client.dart';
@@ -110,6 +117,36 @@ Future<void> main() async {
       debugPrint('Firestore catalog bootstrap disabled: $error');
     }
   }
+  ProductTelemetry telemetry = const DisabledProductTelemetry();
+  if (TelemetryConfig.fromEnvironment().enabled) {
+    if (notifications.hasFirebaseOptions) {
+      try {
+        await FirebaseAppBootstrap.ensureInitialized(
+          notifications.firebaseOptions,
+        );
+        telemetry = await FirebaseProductTelemetry.start();
+        _installTelemetryErrorHandlers(telemetry);
+        await telemetry.log(
+          ProductEvent.appOpen,
+          parameters: const {
+            'environment': String.fromEnvironment(
+              'APP_ENV',
+              defaultValue: 'local',
+            ),
+          },
+        );
+      } on Object catch (error, stackTrace) {
+        debugPrint('Product telemetry bootstrap disabled: $error');
+        await telemetry.recordError(
+          error,
+          stackTrace,
+          reason: 'telemetry_bootstrap',
+        );
+      }
+    } else {
+      debugPrint('Product telemetry disabled: Firebase options are missing.');
+    }
+  }
   NotificationGateway? gateway;
   try {
     gateway = await FirebaseNotificationGateway.initialize(notifications);
@@ -122,8 +159,37 @@ Future<void> main() async {
       notificationConfig: notifications,
       gateway: gateway,
       realtimeCatalogSource: realtimeCatalogSource,
+      telemetry: telemetry,
     ),
   );
+}
+
+void _installTelemetryErrorHandlers(ProductTelemetry telemetry) {
+  final previousFlutterHandler = FlutterError.onError;
+  FlutterError.onError = (details) {
+    previousFlutterHandler?.call(details);
+    unawaited(
+      telemetry.recordError(
+        details.exception,
+        details.stack ?? StackTrace.current,
+        fatal: true,
+        reason: 'flutter_framework',
+      ),
+    );
+  };
+
+  final previousPlatformHandler = PlatformDispatcher.instance.onError;
+  PlatformDispatcher.instance.onError = (error, stackTrace) {
+    unawaited(
+      telemetry.recordError(
+        error,
+        stackTrace,
+        fatal: true,
+        reason: 'platform_dispatcher',
+      ),
+    );
+    return previousPlatformHandler?.call(error, stackTrace) ?? false;
+  };
 }
 
 class _ConfigurationErrorApp extends StatelessWidget {
@@ -188,6 +254,10 @@ class StoreScope extends InheritedNotifier<CatalogStore> {
     final scope = context.dependOnInheritedWidgetOfExactType<StoreScope>();
     assert(scope?.notifier != null, 'StoreScope is missing from the tree');
     return scope!.notifier!;
+  }
+
+  static CatalogStore? maybeOf(BuildContext context) {
+    return context.dependOnInheritedWidgetOfExactType<StoreScope>()?.notifier;
   }
 }
 
@@ -255,6 +325,21 @@ class HomeContentScope extends InheritedNotifier<HomeContentController> {
   }
 }
 
+/// Shopify-backed Today's Picks. It is separate from [HomeContentScope]
+/// because membership is a mutable commerce collection, not editorial copy.
+class FeaturedCatalogScope
+    extends InheritedNotifier<FeaturedCatalogController> {
+  const FeaturedCatalogScope({
+    required FeaturedCatalogController super.notifier,
+    required super.child,
+    super.key,
+  });
+
+  static FeaturedCatalogController? maybeOf(BuildContext context) => context
+      .dependOnInheritedWidgetOfExactType<FeaturedCatalogScope>()
+      ?.notifier;
+}
+
 /// Exposes account state to the widget tree. See `app/account_controller.dart`
 /// — `account == null` is a normal, fully-functional state, not a loading
 /// gap. Only mounted once `_MonettaAppState._loading` has resolved, since
@@ -302,6 +387,8 @@ class AppRouteScopes extends StatelessWidget {
     required this.accountController,
     required this.cartController,
     this.checkoutCoordinator,
+    this.catalogStore,
+    this.notificationController,
     required this.shopDomain,
     required this.child,
     super.key,
@@ -310,13 +397,15 @@ class AppRouteScopes extends StatelessWidget {
   final AccountController accountController;
   final CartController? cartController;
   final ShopifyCheckoutCoordinator? checkoutCoordinator;
+  final CatalogStore? catalogStore;
+  final NotificationController? notificationController;
   final String shopDomain;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final cart = cartController;
-    final routedApp = cart == null
+    Widget routedApp = cart == null
         ? child
         : CartScope(
             shopDomain: shopDomain,
@@ -324,6 +413,17 @@ class AppRouteScopes extends StatelessWidget {
             checkoutCoordinator: checkoutCoordinator,
             child: child,
           );
+    final notifications = notificationController;
+    if (notifications != null) {
+      routedApp = NotificationScope(
+        notifier: notifications,
+        child: routedApp,
+      );
+    }
+    final store = catalogStore;
+    if (store != null) {
+      routedApp = StoreScope(notifier: store, child: routedApp);
+    }
     return AccountScope(notifier: accountController, child: routedApp);
   }
 }
@@ -392,12 +492,14 @@ class MonettaApp extends StatefulWidget {
     this.notificationConfig = NotificationConfig.disabled,
     this.gateway,
     this.realtimeCatalogSource,
+    this.telemetry = const DisabledProductTelemetry(),
     super.key,
   });
 
   final NotificationConfig notificationConfig;
   final NotificationGateway? gateway;
   final CatalogRealtimeSource? realtimeCatalogSource;
+  final ProductTelemetry telemetry;
 
   @override
   State<MonettaApp> createState() => _MonettaAppState();
@@ -408,6 +510,9 @@ class _MonettaAppState extends State<MonettaApp> {
   final AppDatabase _database = AppDatabase.connect();
   late final ThemeController _theme = ThemeController(
     store: AppearanceStore(_database),
+  );
+  late final OnboardingController _onboarding = OnboardingController(
+    store: OnboardingPreferenceStore(_database),
   );
 
   /// Null when no usable public Storefront credentials were compiled in.
@@ -428,6 +533,11 @@ class _MonettaAppState extends State<MonettaApp> {
   late final HomeContentController _homeContent = HomeContentController(
     repository: _maybeHomeContentRepository(_storefrontTransport),
     reviewsRepository: _maybeLooxReviewsRepository(),
+  );
+  late final FeaturedCatalogController _featuredCatalog =
+      FeaturedCatalogController(
+    repository: _maybeFeaturedCatalogRepository(_storefrontTransport),
+    cacheProducts: _store.upsertShopifyProducts,
   );
 
   /// Built inside [_load], once the device id it depends on exists — see
@@ -486,6 +596,23 @@ class _MonettaAppState extends State<MonettaApp> {
     );
   }
 
+  static FeaturedCatalogRepository _maybeFeaturedCatalogRepository(
+    HttpStorefrontTransport? transport,
+  ) {
+    final config = StorefrontConfig.fromEnvironment();
+    // The controller's repository is only used when the public Storefront
+    // config is valid. Keep a transport-backed repository here; the startup
+    // configuration gate already handles invalid builds.
+    return FeaturedCatalogRepository(
+      client: StorefrontClient(
+        config: config,
+        transport: transport?.send ??
+            ((endpoint, headers, body) async =>
+                <String, dynamic>{'data': <String, dynamic>{}}),
+      ),
+    );
+  }
+
   static LooxReviewsRepository? _maybeLooxReviewsRepository() {
     final config = LooxConfig.fromEnvironment();
     if (!config.isUsable) return null;
@@ -493,7 +620,8 @@ class _MonettaAppState extends State<MonettaApp> {
   }
 
   Future<void> _load() async {
-    await _theme.restore();
+    await Future.wait([_theme.restore(), _onboarding.restore()]);
+    final buildMetadata = await AppBuildMetadata.load();
 
     // Seeds/hydrates the Drift database both `CatalogStore` and account
     // state share, so nothing below races it.
@@ -503,6 +631,7 @@ class _MonettaAppState extends State<MonettaApp> {
     // errors must never block first paint — CatalogStore already has asset
     // or cache data from loadFromAsset.
     unawaited(_store.syncWithShopify());
+    unawaited(_featuredCatalog.refresh());
 
     const secureStore = FlutterSecureTokenStore();
     final deviceStore = DeviceStore(_database);
@@ -510,10 +639,7 @@ class _MonettaAppState extends State<MonettaApp> {
       secureStore: secureStore,
       deviceStore: deviceStore,
       platform: Platform.isIOS ? 'ios' : 'android',
-      // TODO(accounts): read from package_info_plus once that dependency
-      // exists — see `lib/data/shopify/cart_attribution.dart`'s
-      // `_app_version` attribute, which has the same gap.
-      appVersion: '0.1.0',
+      appVersion: buildMetadata.displayVersion,
     );
 
     final storefrontConfig = StorefrontConfig.fromEnvironment();
@@ -526,7 +652,7 @@ class _MonettaAppState extends State<MonettaApp> {
         attribution: CartAttribution(
           platform: Platform.isIOS ? 'ios' : 'android',
           deviceId: deviceId,
-          appVersion: '0.1.0',
+          appVersion: buildMetadata.displayVersion,
         ),
       );
     }
@@ -598,6 +724,7 @@ class _MonettaAppState extends State<MonettaApp> {
         await _externalCatalog.loadAndRefresh();
         await _editorialContent.refresh();
         await _homeContent.refresh();
+        await _featuredCatalog.refresh();
       },
     );
     final notificationBaseUrl = widget.notificationConfig.apiBaseUrl;
@@ -648,6 +775,7 @@ class _MonettaAppState extends State<MonettaApp> {
     unawaited(_externalCatalog.loadAndRefresh());
     unawaited(_editorialContent.refresh());
     unawaited(_homeContent.refresh());
+    unawaited(_featuredCatalog.refresh());
     await _notifications!.restore();
   }
 
@@ -709,6 +837,8 @@ class _MonettaAppState extends State<MonettaApp> {
     _externalCatalog.dispose();
     _editorialContent.dispose();
     _homeContent.dispose();
+    _featuredCatalog.dispose();
+    _onboarding.dispose();
     _theme.dispose();
     super.dispose();
   }
@@ -717,9 +847,11 @@ class _MonettaAppState extends State<MonettaApp> {
   Widget build(BuildContext context) {
     return ListenableBuilder(
       listenable: _theme,
-      builder: (context, _) => ThemeScope(
-        notifier: _theme,
-        child: MaterialApp(
+      builder: (context, _) => ProductTelemetryScope(
+        telemetry: widget.telemetry,
+        child: ThemeScope(
+          notifier: _theme,
+          child: MaterialApp(
           navigatorKey: _navigatorKey,
           title: 'Monetta',
           debugShowCheckedModeBanner: false,
@@ -744,6 +876,8 @@ class _MonettaAppState extends State<MonettaApp> {
                     accountController: _account,
                     cartController: _shopifyCart?.controller,
                     checkoutCoordinator: _shopifyCart?.checkout,
+                    catalogStore: _store,
+                    notificationController: _notifications,
                     shopDomain: StorefrontConfig.fromEnvironment().shopDomain,
                     child: navigator!,
                   );
@@ -759,30 +893,37 @@ class _MonettaAppState extends State<MonettaApp> {
                 notifier: _editorialContent,
                 child: HomeContentScope(
                   notifier: _homeContent,
-                  child: FutureBuilder<void>(
-                    future: _loading,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return const SizedBox.shrink();
-                      }
-                      if (snapshot.connectionState != ConnectionState.done) {
-                        return const SizedBox.shrink();
-                      }
-                      return NotificationScope(
-                        notifier: _notifications!,
-                        child: AdminNotificationScope(
-                          notifier: _adminNotifications!,
-                          child: AdminScope(
-                            notifier: _admin!,
-                            child: const HomeScreen(),
+                  child: FeaturedCatalogScope(
+                    notifier: _featuredCatalog,
+                    child: FutureBuilder<void>(
+                      future: _loading,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return const SizedBox.shrink();
+                        }
+                        if (snapshot.connectionState != ConnectionState.done) {
+                          return const SizedBox.shrink();
+                        }
+                        return NotificationScope(
+                          notifier: _notifications!,
+                          child: AdminNotificationScope(
+                            notifier: _adminNotifications!,
+                            child: AdminScope(
+                              notifier: _admin!,
+                              child: OnboardingScope(
+                                notifier: _onboarding,
+                                child: const HomeScreen(),
+                              ),
+                            ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                 ),
               ),
             ),
+          ),
           ),
         ),
       ),

@@ -16,7 +16,9 @@
 # README.md § Deploy.
 
 app = "monetta-accounts-staging"
-primary_region = "qro"
+# Querétaro no longer accepts new Fly resources. Dallas is the supported
+# staging region selected by Fly for this account.
+primary_region = "dfw"
 
 [build]
   dockerfile = "Dockerfile"
@@ -33,7 +35,15 @@ primary_region = "qro"
 
 [processes]
   app = "node dist/api/server.js"
-  worker = "node dist/engagement/worker.js"
+
+# Engagement is disabled in staging. Keeping its worker out of this release
+# avoids paying for a second idle Machine before notification configuration is
+# explicitly enabled and tested.
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  processes = ["app"]
 
 [http_service]
   processes = ["app"]

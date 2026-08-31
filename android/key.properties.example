@@ -1,0 +1,6 @@
+# Copy to android/key.properties (gitignored) and inject these values from the
+# release secret store. Never commit the keystore or real passwords.
+storeFile=app/monetta-release.jks
+storePassword=replace_in_secret_store
+keyAlias=monetta
+keyPassword=replace_in_secret_store

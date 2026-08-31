@@ -175,31 +175,11 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     if (result != null && mounted) setState(() => _filters = result);
   }
 
-  int _countForCategory(String category) {
-    final items = _filterCatalog(
-      widget.items,
-      query: '',
-      filters: _filters,
-    );
-    if (category == 'Monetta') {
-      return items.where((i) => !i.isExternal).length;
-    } else if (category == 'Bolsas') {
-      return items
-          .where((i) => i.vertical == CatalogVertical.bagsWallets)
-          .length;
-    } else if (category == 'Perfumes') {
-      return items.where((i) => i.vertical == CatalogVertical.perfumes).length;
-    }
-    return items.length;
-  }
-
   Widget _buildCategoryPill({
     required String title,
     required String keyName,
-    bool showCount = true,
   }) {
     final isSelected = _activeCategory == title;
-    final count = _countForCategory(title);
     final colors = context.monettaColors;
     final animationsDisabled = reduceMotion(context);
     final labelColor =
@@ -225,11 +205,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                   color: labelColor,
                 ),
               ),
-              if (showCount && isSelected)
-                Text(
-                  ' $count',
-                  style: sans(size: 13, color: labelColor),
-                ),
             ],
           ),
           selected: isSelected,
@@ -320,7 +295,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 _buildCategoryPill(
                   title: 'Perfumes',
                   keyName: 'catalog-category-perfumes',
-                  showCount: false,
                 ),
               ],
             ),

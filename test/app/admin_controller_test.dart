@@ -97,7 +97,7 @@ void main() {
         email: 'duena@monetta.mx',
         authProvider: 'monetta',
       ),
-      isFalse,
+      isTrue,
     );
   });
 

@@ -335,8 +335,7 @@ void main() {
     expect(find.text('Monetta General 4'), findsNothing);
   });
 
-  testWidgets('category pill count respects secondary active filters',
-      (tester) async {
+  testWidgets('category pills do not show article counts', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -413,7 +412,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text(' 4'), findsOneWidget);
+    expect(find.text(' 4'), findsNothing);
 
     await tester.tap(find.byKey(const Key('catalog-filter-button')));
     await tester.pumpAndSettle();
@@ -424,15 +423,15 @@ void main() {
     await tester.tap(find.byKey(const Key('catalog-filter-apply')));
     await tester.pumpAndSettle();
 
-    expect(find.text(' 2'), findsOneWidget);
+    expect(find.text(' 2'), findsNothing);
 
     await tester.tap(find.byKey(const Key('catalog-category-monetta')));
     await tester.pumpAndSettle();
-    expect(find.text(' 1'), findsOneWidget);
+    expect(find.text(' 1'), findsNothing);
 
     await tester.tap(find.byKey(const Key('catalog-category-bags')));
     await tester.pumpAndSettle();
-    expect(find.text(' 2'), findsOneWidget);
+    expect(find.text(' 2'), findsNothing);
 
     await tester.tap(find.byKey(const Key('catalog-category-perfumes')));
     await tester.pumpAndSettle();

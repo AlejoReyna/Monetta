@@ -427,6 +427,17 @@ class _OverviewSection extends StatelessWidget {
           Text('ACTIVIDAD RECIENTE', style: eyebrow()),
           const SizedBox(height: 8),
           for (final event in controller.audit) _AuditRow(event: event),
+          if (controller.auditCursor != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed:
+                    controller.loadingAudit ? null : controller.loadMoreAudit,
+                child: Text(
+                  controller.loadingAudit ? 'CARGANDO…' : 'CARGAR MÁS',
+                ),
+              ),
+            ),
         ],
       ],
     );
@@ -523,9 +534,33 @@ class _ProductsSection extends StatefulWidget {
 
 class _ProductsSectionState extends State<_ProductsSection> {
   String _query = '';
+  String _filter = 'Todos';
+  int _subsection = 0;
 
   @override
   Widget build(BuildContext context) {
+    if (_subsection == 0) return _buildTodaysPicks(context);
+    return _buildProductEditor(context);
+  }
+
+  Widget _subsectionPicker(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      children: [
+        for (final entry in const [
+          (0, 'Catálogo de hoy'),
+          (1, 'Editar productos'),
+        ])
+          ChoiceChip(
+            label: Text(entry.$2),
+            selected: _subsection == entry.$1,
+            onSelected: (_) => setState(() => _subsection = entry.$1),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildProductEditor(BuildContext context) {
     final query = _query.trim().toLowerCase();
     final products = widget.controller.products
         .where(
@@ -536,6 +571,8 @@ class _ProductsSectionState extends State<_ProductsSection> {
     return _AdminScroll(
       children: [
         Text('Catálogo', style: display(28)),
+        const SizedBox(height: 12),
+        _subsectionPicker(context),
         const SizedBox(height: 6),
         Text(
           'Cambios de precio y visibilidad se envían a Shopify y después se '
@@ -563,6 +600,183 @@ class _ProductsSectionState extends State<_ProductsSection> {
             onTap: () => _openEditor(product),
           ),
       ],
+    );
+  }
+
+  Widget _buildTodaysPicks(BuildContext context) {
+    final catalog = widget.controller.featuredCatalog;
+    final query = _query.trim().toLowerCase();
+    final filtered = (catalog?.eligibleProducts ?? const <AdminProductRecord>[])
+        .where((product) {
+      if (query.isNotEmpty && !product.title.toLowerCase().contains(query)) {
+        return false;
+      }
+      return switch (_filter) {
+        'Con stock' => product.inStock,
+        'Mostrándose hoy' =>
+          catalog?.selectedProductIds.contains(product.id) ?? false,
+        'Sin descripción' => !product.hasShopifyDescription,
+        _ => true,
+      };
+    }).toList();
+    final selected = [
+      for (final id in catalog?.selectedProductIds ?? const <String>[])
+        for (final product
+            in catalog?.eligibleProducts ?? const <AdminProductRecord>[])
+          if (product.id == id) product,
+    ];
+    return _AdminScroll(
+      children: [
+        Text('Catálogo de hoy', style: display(28)),
+        const SizedBox(height: 12),
+        _subsectionPicker(context),
+        const SizedBox(height: 10),
+        Text(
+          'Selecciona productos publicados en Shopify. Cada cambio se confirma antes de aparecer en la tienda.',
+          style: sans(size: 12, color: context.monettaColors.contentMuted),
+        ),
+        const SizedBox(height: 16),
+        if (catalog?.healthStatus != 'ready')
+          _AdminNotice(
+            message: catalog?.healthErrorCode ==
+                    'FEATURED_COLLECTION_NOT_CONFIGURED'
+                ? 'Configura la colección manual monetta-todays-picks para activar esta sección.'
+                : 'La selección de hoy no está disponible todavía.',
+          ),
+        if (selected.isNotEmpty) ...[
+          Row(
+            children: [
+              Text(
+                '${selected.length} MOSTRÁNDOSE HOY',
+                style: eyebrow(size: 9),
+              ),
+              const Spacer(),
+              if (widget.controller.saving)
+                Text(
+                  'Ordenando…',
+                  style: sans(
+                    size: 11,
+                    color: context.monettaColors.contentMuted,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ReorderableListView.builder(
+            key: const ValueKey('admin-featured-selection'),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: selected.length,
+            onReorderItem: (oldIndex, newIndex) =>
+                _reorder(selected, oldIndex, newIndex),
+            itemBuilder: (context, index) => ListTile(
+              key: ValueKey('admin-featured-selected-${selected[index].id}'),
+              dense: true,
+              leading: SizedBox(
+                width: 38,
+                height: 44,
+                child: MonettaImage(
+                  url: selected[index].imageUrl,
+                  fallbackLabel: selected[index].title,
+                ),
+              ),
+              title: Text(
+                selected[index].title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: const Icon(Icons.drag_handle),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        TextField(
+          key: const ValueKey('admin-featured-search'),
+          onChanged: (value) => setState(() => _query = value),
+          decoration: InputDecoration(
+            hintText: 'Buscar producto',
+            prefixIcon: const Icon(Icons.search, size: 20),
+            filled: true,
+            fillColor: context.monettaColors.inputFill,
+            border: const OutlineInputBorder(borderSide: BorderSide.none),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final filter in const [
+                'Todos',
+                'Con stock',
+                'Mostrándose hoy',
+                'Sin descripción',
+              ]) ...[
+                ChoiceChip(
+                  label: Text(filter),
+                  selected: _filter == filter,
+                  onSelected: (_) => setState(() => _filter = filter),
+                ),
+                const SizedBox(width: 6),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text('${filtered.length} PRODUCTOS ELEGIBLES', style: eyebrow(size: 9)),
+        const SizedBox(height: 6),
+        for (final product in filtered)
+          _FeaturedProductRow(
+            product: product,
+            selected: catalog?.selectedProductIds.contains(product.id) ?? false,
+            pending: widget.controller.featuredPendingProductIds
+                .contains(product.id),
+            onToggle: catalog?.collectionUpdatedAt == null
+                ? null
+                : () => _toggleFeatured(
+                      product,
+                      catalog!.selectedProductIds.contains(product.id),
+                    ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _toggleFeatured(
+    AdminProductRecord product,
+    bool currentlySelected,
+  ) async {
+    final ok = await widget.controller.setProductFeatured(
+      product,
+      featured: !currentlySelected,
+    );
+    if (!mounted) return;
+    if (ok) {
+      widget.onMessage(
+        !currentlySelected
+            ? 'Producto confirmado en Catálogo de hoy.'
+            : 'Producto quitado de Catálogo de hoy.',
+      );
+    } else if (widget.controller.lastError != null) {
+      widget.onMessage(widget.controller.lastError!);
+    }
+  }
+
+  Future<void> _reorder(
+    List<AdminProductRecord> selected,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    final next = [...selected];
+    final item = next.removeAt(oldIndex);
+    next.insert(newIndex, item);
+    final ok = await widget.controller
+        .replaceFeaturedOrder(next.map((p) => p.id).toList());
+    if (!mounted) return;
+    widget.onMessage(
+      ok
+          ? 'Orden actualizado en Shopify.'
+          : widget.controller.lastError ?? 'No se pudo ordenar la selección.',
     );
   }
 
@@ -651,6 +865,126 @@ class _ProductRow extends StatelessWidget {
   }
 }
 
+class _FeaturedProductRow extends StatelessWidget {
+  const _FeaturedProductRow({
+    required this.product,
+    required this.selected,
+    required this.pending,
+    required this.onToggle,
+  });
+
+  final AdminProductRecord product;
+  final bool selected;
+  final bool pending;
+  final VoidCallback? onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: .5),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 62,
+            height: 72,
+            child: MonettaImage(
+              url: product.imageUrl,
+              fallbackLabel: product.title,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: sans(size: 13, weight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(kMoney.format(product.price), style: sans(size: 12)),
+                const SizedBox(height: 5),
+                Wrap(
+                  spacing: 5,
+                  runSpacing: 5,
+                  children: [
+                    _StatusPill(
+                      label: product.inStock ? 'Con stock' : 'Agotado',
+                      muted: !product.inStock,
+                    ),
+                    if (!product.hasShopifyDescription)
+                      const _StatusPill(
+                        label: 'Sin descripción en Shopify',
+                        muted: true,
+                      ),
+                    if (product.hasShopifyDescription &&
+                        product.descriptionExcerpt.isNotEmpty)
+                      Text(
+                        product.descriptionExcerpt,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: sans(
+                          size: 10,
+                          color: context.monettaColors.contentMuted,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 112,
+            child: OutlinedButton(
+              key: ValueKey('admin-featured-toggle-${product.id}'),
+              onPressed: pending ? null : onToggle,
+              child: pending
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 1.5),
+                    )
+                  : Text(
+                      selected ? 'Quitar de hoy' : 'Mostrar hoy',
+                      textAlign: TextAlign.center,
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminNotice extends StatelessWidget {
+  const _AdminNotice({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      color: context.monettaColors.warningSurface,
+      child: Text(
+        message,
+        style: sans(size: 11, color: context.monettaColors.contentMuted),
+      ),
+    );
+  }
+}
+
 class _ProductEditor extends StatefulWidget {
   const _ProductEditor({required this.product, required this.controller});
 
@@ -664,15 +998,28 @@ class _ProductEditor extends StatefulWidget {
 class _ProductEditorState extends State<_ProductEditor> {
   late final TextEditingController _title;
   late final TextEditingController _price;
+  String? _variantId;
   late bool _visible;
 
   @override
   void initState() {
     super.initState();
     _title = TextEditingController(text: widget.product.title);
-    _price =
-        TextEditingController(text: widget.product.price.toStringAsFixed(2));
+    _variantId = widget.product.variants.length == 1
+        ? widget.product.variants.first.id
+        : null;
+    final selectedVariant = _selectedVariant;
+    _price = TextEditingController(
+      text: (selectedVariant?.price ?? widget.product.price).toStringAsFixed(2),
+    );
     _visible = widget.product.visible;
+  }
+
+  AdminProductVariant? get _selectedVariant {
+    for (final variant in widget.product.variants) {
+      if (variant.id == _variantId) return variant;
+    }
+    return null;
   }
 
   @override
@@ -721,6 +1068,31 @@ class _ProductEditorState extends State<_ProductEditor> {
                 suffixText: 'MXN',
               ),
             ),
+            if (widget.product.variants.length > 1) ...[
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                key: const ValueKey('admin-product-variant'),
+                initialValue: _variantId,
+                decoration: const InputDecoration(labelText: 'Variante'),
+                items: [
+                  for (final variant in widget.product.variants)
+                    DropdownMenuItem(
+                      value: variant.id,
+                      child: Text(variant.title),
+                    ),
+                ],
+                onChanged: (value) {
+                  if (value == null) return;
+                  final variant = widget.product.variants.firstWhere(
+                    (item) => item.id == value,
+                  );
+                  setState(() {
+                    _variantId = value;
+                    _price.text = variant.price.toStringAsFixed(2);
+                  });
+                },
+              ),
+            ],
             const SizedBox(height: 10),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
@@ -754,14 +1126,33 @@ class _ProductEditorState extends State<_ProductEditor> {
       );
       return;
     }
+    if (widget.product.variants.length > 1 && _variantId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona una variante.')),
+      );
+      return;
+    }
     final confirmed = await _confirmChange(
       context,
       title: '¿Guardar este producto?',
       description: 'El cambio afectará Shopify y el catálogo de la app.',
     );
     if (!confirmed || !mounted) return;
+    final variants = widget.product.variants.isEmpty
+        ? null
+        : [
+            for (final variant in widget.product.variants)
+              variant.id == _variantId
+                  ? variant.copyWith(price: price)
+                  : variant,
+          ];
     final ok = await widget.controller.saveProduct(
-      widget.product.copyWith(title: title, price: price, visible: _visible),
+      widget.product.copyWith(
+        title: title,
+        price: price,
+        variants: variants,
+        visible: _visible,
+      ),
     );
     if (mounted && ok) Navigator.pop(context, true);
   }
@@ -785,6 +1176,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
   late final TextEditingController _announcement;
   late bool _hero;
   late bool _newest;
+  late bool _todaysPicks;
   late bool _external;
 
   @override
@@ -795,6 +1187,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
     _announcement.addListener(_refreshPreview);
     _hero = settings.showHero;
     _newest = settings.showNewest;
+    _todaysPicks = settings.showTodaysPicks;
     _external = settings.showExternalPicks;
   }
 
@@ -847,6 +1240,12 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
           onChanged: (value) => setState(() => _newest = value),
         ),
         _SettingSwitch(
+          title: 'Catálogo de hoy',
+          description: 'Selección manual publicada desde Productos',
+          value: _todaysPicks,
+          onChanged: (value) => setState(() => _todaysPicks = value),
+        ),
+        _SettingSwitch(
           title: 'Selección externa',
           description: 'Bolsas y perfumes elegidos por el monitor',
           value: _external,
@@ -857,6 +1256,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
           announcement: _announcement.text,
           showHero: _hero,
           showNewest: _newest,
+          showTodaysPicks: _todaysPicks,
           showExternal: _external,
         ),
         const SizedBox(height: 20),
@@ -881,6 +1281,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
         announcement: _announcement.text.trim(),
         showHero: _hero,
         showNewest: _newest,
+        showTodaysPicks: _todaysPicks,
         showExternalPicks: _external,
       ),
     );
@@ -928,12 +1329,14 @@ class _PhonePreview extends StatelessWidget {
     required this.announcement,
     required this.showHero,
     required this.showNewest,
+    required this.showTodaysPicks,
     required this.showExternal,
   });
 
   final String announcement;
   final bool showHero;
   final bool showNewest;
+  final bool showTodaysPicks;
   final bool showExternal;
 
   @override
@@ -991,6 +1394,11 @@ class _PhonePreview extends StatelessWidget {
                   if (showNewest)
                     _PreviewLine(
                       label: 'NOVEDADES',
+                      color: context.monettaColors.accent,
+                    ),
+                  if (showTodaysPicks)
+                    _PreviewLine(
+                      label: 'CATÁLOGO DE HOY',
                       color: context.monettaColors.accent,
                     ),
                   if (showExternal)
@@ -1120,6 +1528,15 @@ class _SourceCard extends StatelessWidget {
                 _StatusPill(
                   label: source.enabled ? 'Activa' : 'Pausada',
                   muted: !source.enabled,
+                ),
+                const SizedBox(width: 6),
+                _StatusPill(
+                  label: switch (source.healthStatus) {
+                    'ready' => 'Al día',
+                    'degraded' => 'Revisar',
+                    _ => 'Sin conexión',
+                  },
+                  muted: source.healthStatus != 'ready',
                 ),
                 const SizedBox(width: 4),
                 Icon(

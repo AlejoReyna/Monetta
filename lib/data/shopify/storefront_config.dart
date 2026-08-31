@@ -88,10 +88,14 @@ class StorefrontConfig {
     return StorefrontConfig(
       shopDomain: shopDomain.trim(),
       accessToken: accessToken.trim(),
-      apiVersion: apiVersion.trim().isEmpty ? defaultApiVersion : apiVersion.trim(),
-      country: country.trim().isEmpty ? defaultCountry : country.trim().toUpperCase(),
-      language:
-          language.trim().isEmpty ? defaultLanguage : language.trim().toUpperCase(),
+      apiVersion:
+          apiVersion.trim().isEmpty ? defaultApiVersion : apiVersion.trim(),
+      country: country.trim().isEmpty
+          ? defaultCountry
+          : country.trim().toUpperCase(),
+      language: language.trim().isEmpty
+          ? defaultLanguage
+          : language.trim().toUpperCase(),
     );
   }
 

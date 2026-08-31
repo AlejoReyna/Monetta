@@ -62,7 +62,7 @@ class _OnboardingSheetState extends State<OnboardingSheet> {
           ),
           child: Column(
             children: [
-              _Header(onClose: () => Navigator.of(context).pop()),
+              _Header(onClose: () => Navigator.of(context).pop(false)),
               const Divider(height: 0.5),
               Expanded(
                 child: ListView(
@@ -119,7 +119,7 @@ class _OnboardingSheetState extends State<OnboardingSheet> {
                       brands: _brands.toList(),
                       categories: _categories.toList(),
                     );
-                    Navigator.of(context).pop();
+                    Navigator.of(context).pop(true);
                   },
                   child: Text(
                     (_brands.isEmpty && _categories.isEmpty

@@ -107,6 +107,8 @@ class CatalogStates extends Table {
 class AppPreferences extends Table {
   IntColumn get id => integer().withDefault(const Constant(0))();
   TextColumn get themeMode => text().withDefault(const Constant('system'))();
+  TextColumn get onboardingState =>
+      text().withDefault(const Constant('pending'))();
 
   @override
   Set<Column> get primaryKey => {id};

@@ -1,5 +1,7 @@
 # Panel administrativo nativo de Monetta
 
+> Plan de implementación para agentes: `docs/ADMIN_CONTROL_PLANE_IMPLEMENTATION_PLAN.md`. Ese documento define la arquitectura, seguridad, conexión con Shopify, paquetes de trabajo, validación y despliegue. Este documento describe la interfaz y el contrato preliminar existentes.
+
 ## Objetivo
 
 El propietario administra Monetta desde la misma app Flutter y con el mismo
@@ -51,8 +53,9 @@ flutter run \
 
 `OWNER_ADMIN_EMAILS` acepta varios correos separados por coma. La lista sólo
 controla la visibilidad en la app; no reemplaza autorización del servidor. En
-modo en vivo el dueño debe iniciar sesión con Shopify para que la app pueda
-obtener un token de cliente verificable por el servicio.
+modo en vivo la sesión de primera parte o el token de Shopify Customer se
+verifica en el servicio administrativo; la app nunca recibe credenciales de
+Shopify Admin.
 
 ## Contrato del servicio administrativo
 
@@ -60,21 +63,27 @@ obtener un token de cliente verificable por el servicio.
 |---|---|
 | `GET /admin/control-plane` | Estado consolidado del panel. |
 | `PATCH /admin/products/:id` | Actualiza Shopify; la app vuelve a sincronizar Storefront. |
-| `PUT /admin/shop-config` | Guarda portada y configuración compartida. |
+| `PUT /admin/storefront-config` | Guarda portada y configuración compartida. |
 | `PUT /admin/external-policy/:id` | Guarda fuente, cupo, umbral y comisiones. |
 | `POST /admin/sync` | Reconciliación explícita de Shopify, app y monitor. |
 
-La app envía el token corto de Shopify Customer de la sesión del dueño. El
-servicio debe validar identidad y rol, aplicar rate limit y guardar auditoría.
+La app envía el token corto de la sesión del dueño. El servicio debe validar
+identidad y rol, aplicar rate limit y guardar auditoría. El adaptador hacia
+`catalog_monitor` usa una firma HMAC de servicio con timestamp y nonce; nunca
+se envía esa credencial a Flutter.
 El token de Shopify Admin, secretos y credenciales de Postgres viven únicamente
 en el servidor.
 
 ## Permisos de Shopify pendientes de habilitar
 
 - `read_products`, `write_products`
-- `read_inventory`, `write_inventory`
 - `read_publications`, `write_publications`
-- lectura/escritura de metafields o metaobjects usados por la portada
+- `read_metaobjects`, `write_metaobjects` para la configuración compartida
+- permiso Storefront para leer el metaobject y la colección manual
+
+No se necesita `write_inventory`, `write_orders` ni `write_customers` para el
+primer release. Los permisos se habilitan por endpoint después de validar la
+mutación en staging; editar un TOML no concede permisos por sí mismo.
 
 Los permisos se habilitan por endpoint después de validar la mutación en la
 tienda de staging. No se deben conceder todos de una vez.

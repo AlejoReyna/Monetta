@@ -1,4 +1,5 @@
 import { fileURLToPath } from 'node:url';
+import { randomUUID } from 'node:crypto';
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import compression from 'compression';
 import { buildExternalCatalogResponse } from './schema.js';
@@ -13,6 +14,13 @@ import { PgCrawlRunRepository } from '../db/pgCrawlRunRepository.js';
 import type { CrawlRunRepository, ProductRepository } from '../crawl/ports.js';
 import type { SourceHealth } from '../monitor/health.js';
 import type { SourceId } from '../domain/types.js';
+import { registerInternalAdminRoutes } from './internalAdmin.js';
+import type { SourcePolicyRepository } from '../admin/sourcePolicy.js';
+import { PgSourcePolicyRepository } from '../db/pgSourcePolicyRepository.js';
+import {
+  PgInternalRequestReplayRepository,
+  type InternalRequestReplayRepository,
+} from './internalReplay.js';
 import {
   MINIMUM_PRODUCTS_PER_SOURCE,
   withMinimumUsCatalog,
@@ -36,11 +44,31 @@ export interface ServerDeps {
   readonly curationPolicy?: CatalogCurationPolicy;
   readonly pricingPolicy?: RetailPricingPolicy;
   readonly enabledSourceIds?: readonly SourceId[];
+  readonly policies?: SourcePolicyRepository;
+  readonly internalServiceSecret?: string;
+  readonly internalRequestReplay?: InternalRequestReplayRepository;
 }
 
 export function createApp(deps: ServerDeps): Express {
   const app = express();
   app.disable('x-powered-by');
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const requestId = `req_${randomUUID()}`;
+    const startedAt = Date.now();
+    res.locals.requestId = requestId;
+    res.setHeader('X-Request-Id', requestId);
+    res.once('finish', () => {
+      logger.info('http request completed', {
+        requestId,
+        method: req.method,
+        path: req.path,
+        status: res.statusCode,
+        latencyMs: Date.now() - startedAt,
+      });
+    });
+    next();
+  });
+  app.use(express.json({ limit: '32kb' }));
   // threshold: 0 — the catalog payload is small JSON, and "use gzip where
   // supported" should not silently stop applying once the response shrinks
   // below compression's 1kb default.
@@ -116,6 +144,18 @@ export function createApp(deps: ServerDeps): Express {
     }
   });
 
+  if (deps.policies !== undefined && deps.internalServiceSecret !== undefined) {
+    registerInternalAdminRoutes(app, {
+      products: deps.products,
+      crawlRuns: deps.crawlRuns,
+      policies: deps.policies,
+      replay: deps.internalRequestReplay,
+      secret: deps.internalServiceSecret,
+      now: deps.now,
+      enabledSourceIds: deps.enabledSourceIds,
+    });
+  }
+
   // Catch-all error handler: never leak internals (stack traces, DB errors,
   // raw HTML from a scraped page) into the HTTP response.
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
@@ -157,6 +197,9 @@ if (isMain) {
       productCommissionBps: config.productCommissionBps,
     },
     enabledSourceIds: config.enabledSourceIds,
+    policies: new PgSourcePolicyRepository(pool),
+    internalServiceSecret: config.internalServiceSecret ?? undefined,
+    internalRequestReplay: new PgInternalRequestReplayRepository(pool),
   });
   const server = app.listen(config.port, () => {
     logger.info('catalog monitor API listening', { port: config.port });

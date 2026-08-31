@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'node:url';
-import { createHash, randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
+import { randomBytes, randomUUID, scrypt, timingSafeEqual } from 'node:crypto';
 import { promisify } from 'node:util';
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import {
@@ -23,6 +23,28 @@ import { GoogleAccessTokenProvider } from '../engagement/infrastructure/googleAc
 import { PgEngagementRepository } from '../engagement/infrastructure/pgEngagementRepository.js';
 import { PgShopifyCatalogEventProcessor } from '../engagement/infrastructure/pgShopifyCatalogEventProcessor.js';
 import { PgEngagementPrivacyRepository } from '../engagement/infrastructure/pgEngagementPrivacyRepository.js';
+import { ServerAdminAuthorizer, hashAdminBearerToken } from '../admin/authorizer.js';
+import { registerAdminRoutes } from '../admin/routes.js';
+import { PgAdminPrincipalsRepository } from '../admin/pgAdminPrincipalsRepository.js';
+import type { AdminAuthorizer } from '../admin/authorizer.js';
+import { ShopifyAdminClient } from '../admin/shopifyAdminClient.js';
+import type { ShopifyAdminWriteClient } from '../admin/shopifyAdminClient.js';
+import type {
+  AdminAuditLogger,
+  AdminAuditReader,
+  AdminIdempotencyRepository,
+  AdminMutationRateLimiter,
+} from '../admin/mutationPorts.js';
+import { PgAdminAuditLogger, PgAdminIdempotencyRepository } from '../admin/pgMutationRepositories.js';
+import { PgAdminFeaturedJobRepository } from '../admin/pgFeaturedJobRepository.js';
+import type { AdminFeaturedJobRepository } from '../admin/featuredPorts.js';
+import { PgAdminSyncJobRepository } from '../admin/pgSyncJobRepository.js';
+import type { AdminSyncJobRepository } from '../admin/syncPorts.js';
+import { SlidingWindowAdminRateLimiter } from '../admin/rateLimiter.js';
+import {
+  HttpExternalCatalogAdminClient,
+  type ExternalCatalogAdminClient,
+} from '../admin/externalCatalogClient.js';
 import { logger } from '../logger.js';
 import { verifyShopifyWebhookHmac } from '../webhooks/verifyHmac.js';
 import {
@@ -46,6 +68,19 @@ export interface ServerDeps extends HandlerDeps {
   readonly webhookSecret: string;
   readonly appAccounts: import('../domain/ports.js').AppAccountsRepository;
   readonly customerTokenVerifier: CustomerTokenVerifier;
+  readonly adminAuthorizer?: AdminAuthorizer;
+  readonly adminEnvironment?: 'staging' | 'production';
+  readonly shopifyAdmin?: ShopifyAdminWriteClient;
+  readonly featuredJobs?: AdminFeaturedJobRepository;
+  readonly idempotency?: AdminIdempotencyRepository;
+  readonly audit?: AdminAuditLogger;
+  readonly auditReader?: AdminAuditReader;
+  readonly rateLimiter?: AdminMutationRateLimiter;
+  readonly mutationsEnabled?: boolean;
+  readonly shopifyWritesEnabled?: boolean;
+  readonly externalCatalog?: ExternalCatalogAdminClient;
+  readonly externalWritesEnabled?: boolean;
+  readonly syncJobs?: AdminSyncJobRepository;
   readonly engagement?: EngagementRouteDeps & { readonly internalCatalogEventSecret: string };
 }
 
@@ -53,7 +88,7 @@ const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
 const scryptAsync = promisify(scrypt);
 
 function hashToken(token: string): string {
-  return createHash('sha256').update(token).digest('hex');
+  return hashAdminBearerToken(token);
 }
 
 function bearerToken(req: Request): string | null {
@@ -178,6 +213,25 @@ function shopifyWebhookRoute<Payload>(
 export function createApp(deps: ServerDeps): Express {
   const app = express();
   app.disable('x-powered-by');
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    const requestId = `req_${randomUUID()}`;
+    res.locals.requestId = requestId;
+    res.setHeader('X-Request-Id', requestId);
+    next();
+  });
+  app.use((req: Request, res: Response, next: NextFunction) => {
+    const startedAt = Date.now();
+    res.once('finish', () => {
+      logger.info('http request completed', {
+        requestId: res.locals.requestId,
+        method: req.method,
+        path: req.path,
+        status: res.statusCode,
+        latencyMs: Date.now() - startedAt,
+      });
+    });
+    next();
+  });
 
   app.get('/livez', (_req: Request, res: Response) => {
     res.status(200).json({ status: 'ok' });
@@ -252,6 +306,25 @@ export function createApp(deps: ServerDeps): Express {
   }
 
   app.use(express.json());
+
+  if (deps.adminAuthorizer !== undefined) {
+    registerAdminRoutes(app, {
+      authorizer: deps.adminAuthorizer,
+      environment: deps.adminEnvironment ?? 'staging',
+      shopify: deps.shopifyAdmin,
+      shopifyWrites: deps.shopifyAdmin,
+      idempotency: deps.idempotency,
+      audit: deps.audit,
+      auditReader: deps.auditReader,
+      rateLimiter: deps.rateLimiter,
+      mutationsEnabled: deps.mutationsEnabled,
+      shopifyWritesEnabled: deps.shopifyWritesEnabled,
+      externalCatalog: deps.externalCatalog,
+      externalWritesEnabled: deps.externalWritesEnabled,
+      featuredJobs: deps.featuredJobs,
+      syncJobs: deps.syncJobs,
+    });
+  }
 
   if (deps.engagement !== undefined) {
     registerEngagementRoutes(app, deps.engagement);
@@ -470,9 +543,55 @@ if (isMain) {
   const config = loadConfig();
   const pool = getPool();
   const appAccounts = new PgAppAccountsRepository(pool);
+  const adminPrincipals = new PgAdminPrincipalsRepository(pool);
+  const adminIdempotency = new PgAdminIdempotencyRepository(pool);
+  const adminAudit = new PgAdminAuditLogger(pool);
+  const adminFeaturedJobs = new PgAdminFeaturedJobRepository(pool);
+  const adminSyncJobs = new PgAdminSyncJobRepository(pool);
+  const adminRateLimiter = new SlidingWindowAdminRateLimiter();
   const customerTokenVerifier = new ShopifyCustomerTokenVerifier({
     shopDomain: config.shopDomain,
   });
+  const adminAuthorizer = new ServerAdminAuthorizer({
+    appAccounts,
+    customerTokenVerifier,
+    principals: adminPrincipals,
+    ownerEmails: config.ownerEmails,
+    ownerShopifyCustomerIds: config.ownerShopifyCustomerIds,
+  });
+  let shopifyAdmin: ShopifyAdminClient | undefined;
+  if (
+    config.shopDomain !== '' && config.shopifyAppClientId !== '' &&
+    config.webhookSecret !== '' && config.shopifyHeadlessPublicationId !== ''
+  ) {
+    try {
+      shopifyAdmin = new ShopifyAdminClient({
+        shopDomain: config.shopDomain,
+        clientId: config.shopifyAppClientId,
+        clientSecret: config.webhookSecret,
+        apiVersion: config.shopifyAdminApiVersion,
+        headlessPublicationId: config.shopifyHeadlessPublicationId,
+        featuredCollectionId: config.shopifyFeaturedCollectionId,
+      });
+    } catch (error) {
+      logger.warn('Shopify Admin read integration unavailable', {
+        errorType: error instanceof Error ? error.name : typeof error,
+      });
+    }
+  }
+  let externalCatalog: ExternalCatalogAdminClient | undefined;
+  if (config.catalogMonitorBaseUrl !== '' && config.catalogMonitorServiceSecret !== '') {
+    try {
+      externalCatalog = new HttpExternalCatalogAdminClient({
+        baseUrl: config.catalogMonitorBaseUrl,
+        serviceSecret: config.catalogMonitorServiceSecret,
+      });
+    } catch (error) {
+      logger.warn('External catalog admin integration unavailable', {
+        errorType: error instanceof Error ? error.name : typeof error,
+      });
+    }
+  }
   let engagement: ServerDeps['engagement'];
   let catalogEvents: HandlerDeps['catalogEvents'];
   if (config.notificationsEnabled) {
@@ -492,22 +611,11 @@ if (isMain) {
       appCheck: new FirebaseAppCheckVerifier(config.firebaseProjectId, googleTokens),
       ownerAuthorizer: {
         authenticate: async (token) => {
-          const account = await appAccounts.findByTokenHash(hashToken(token));
-          if (account !== null && config.ownerEmails.has(account.email.trim().toLowerCase())) {
-            return { actorId: `account:${account.id}` };
-          }
-          try {
-            const customerId = canonicalShopifyCustomerId(
-              await customerTokenVerifier.resolveCustomerId(token),
-            );
-            return customerId !== null && config.ownerShopifyCustomerIds.has(customerId)
-              ? { actorId: `shopify-customer:${customerId}` }
-              : null;
-          } catch {
-            return null;
-          }
+          const actor = await adminAuthorizer.authenticate(token);
+          return actor === null ? null : { actorId: actor.id };
         },
       },
+      adminAuthorizer,
       internalCatalogEventSecret: config.internalCatalogEventSecret,
     };
     catalogEvents = new PgShopifyCatalogEventProcessor(pool, engagementService);
@@ -520,6 +628,21 @@ if (isMain) {
     pushTokens: new PgPushTokensRepository(pool),
     webhookSecret: config.webhookSecret,
     customerTokenVerifier,
+    adminAuthorizer,
+    adminEnvironment: config.adminEnvironment,
+    // Undefined is an intentional degraded state until all staging ids and
+    // server-only credentials are configured.
+    ...(shopifyAdmin === undefined ? {} : { shopifyAdmin }),
+    idempotency: adminIdempotency,
+    audit: adminAudit,
+    auditReader: adminAudit,
+    featuredJobs: adminFeaturedJobs,
+    syncJobs: adminSyncJobs,
+    rateLimiter: adminRateLimiter,
+    mutationsEnabled: config.adminMutationsEnabled,
+    shopifyWritesEnabled: config.adminShopifyWritesEnabled,
+    ...(externalCatalog === undefined ? {} : { externalCatalog }),
+    externalWritesEnabled: config.adminExternalWritesEnabled,
     engagement,
     catalogEvents,
     engagementPrivacy: config.notificationsEnabled

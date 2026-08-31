@@ -104,6 +104,29 @@ button:focus,a:focus { outline:1px solid var(--gold); outline-offset:2px; }
 .palette-card__copy small { margin-bottom:5px; color:#77746d; font-size:8px; letter-spacing:.14em; }
 .palette-card__copy strong { font-size:12px; font-weight:500; }
 .palette-card__copy em { margin-top:5px; overflow:hidden; color:#77746d; font-size:9px; font-style:normal; line-height:1.35; text-overflow:ellipsis; }
+.palette__history { flex:0 0 auto; padding-top:10px; border-top:1px solid var(--chrome-line); }
+.palette__history-toggle {
+  display:flex;
+  width:100%;
+  min-height:58px;
+  padding:9px 6px 9px 8px;
+  align-items:center;
+  justify-content:space-between;
+  text-align:left;
+  color:#a19f99;
+  background:transparent;
+  border-radius:4px;
+}
+.palette__history-toggle:hover,.palette__history.is-open .palette__history-toggle { color:#f4f1eb; background:#2e2e2c; }
+.palette__history-copy { display:flex; min-width:0; flex-direction:column; }
+.palette__history-copy small { color:#77746d; font-size:8px; font-weight:700; letter-spacing:.15em; }
+.palette__history-copy strong { margin-top:5px; color:#e7e3dc; font-size:12px; font-weight:500; letter-spacing:.01em; }
+.palette__history-copy em { margin-top:4px; overflow:hidden; color:#77746d; font-size:9px; font-style:normal; text-overflow:ellipsis; white-space:nowrap; }
+.palette__history-chevron { color:var(--gold); font-size:17px; line-height:1; transform:translateY(-2px); transition:transform 220ms ease; }
+.palette__history.is-open .palette__history-chevron { transform:rotate(180deg) translateY(2px); }
+.palette__history-panel { max-height:0; overflow:hidden; opacity:0; visibility:hidden; transition:max-height 260ms ease,opacity 180ms ease,visibility 0s linear 260ms; }
+.palette__history.is-open .palette__history-panel { max-height:min(38dvh,340px); padding-top:6px; overflow:auto; opacity:1; visibility:visible; transition:max-height 300ms ease,opacity 180ms ease; }
+.palette__history-list { display:flex; padding-bottom:2px; flex-direction:column; gap:4px; }
 .palette__note { margin:auto 5px 0; padding-top:14px; color:#6f6d67; border-top:1px solid var(--chrome-line); font-size:8px; line-height:1.6; letter-spacing:.03em; }
 
 .canvas { position:relative; min-width:0; overflow:auto; background:var(--canvas); cursor:grab; overscroll-behavior:contain; }
@@ -269,12 +292,18 @@ body[data-mode="detail"] .toolbar__actions a { border-left:0; }
   .toolbar__tabs button { height:30px; padding:0 11px; }
   .toolbar__actions { position:absolute; top:9px; right:8px; }
   .toolbar__actions button[data-fit] { display:none; }
-  .palette { padding:8px 10px; grid-row:2; border-right:0; border-bottom:1px solid var(--chrome-line); }
+  .palette { position:relative; display:grid; padding:8px 10px; grid-row:2; grid-template-columns:minmax(0,1fr) 154px; gap:8px; border-right:0; border-bottom:1px solid var(--chrome-line); }
   .palette__head,.palette__note { display:none; }
-  .palette__list { padding:0; flex-direction:row; gap:6px; overflow-x:auto; }
+  .palette__list { grid-column:1; height:100%; padding:0; flex:none; flex-direction:row; gap:6px; overflow-x:auto; }
   .palette-card { min-width:158px; min-height:92px; padding:6px; grid-template-columns:50px 1fr; gap:9px; }
   .palette-card__thumb { width:50px; height:78px; }
   .palette-card__copy em { display:-webkit-box; margin-top:4px; overflow:hidden; -webkit-box-orient:vertical; -webkit-line-clamp:2; }
+  .palette__history { grid-column:2; min-width:0; padding:0 0 0 8px; border-top:0; border-left:1px solid var(--chrome-line); }
+  .palette__history-toggle { height:100%; min-height:0; padding:5px 6px; }
+  .palette__history-copy strong { font-size:10px; }
+  .palette__history-copy em { font-size:8px; }
+  .palette__history-panel { position:absolute; z-index:20; top:calc(100% - 1px); right:10px; left:10px; background:#222220; border:1px solid var(--chrome-line); box-shadow:0 18px 34px rgba(0,0,0,.28); }
+  .palette__history.is-open .palette__history-panel { max-height:min(46vh,320px); padding:8px; }
   .canvas { grid-row:3; }
   .canvas__backdrop { inset:190px 0 0; }
   .stage { padding:28px; }

@@ -13,6 +13,7 @@ import { withDbLock, SOURCE_LOCK_KEYS } from '../db/advisoryLock.js';
 import type { BrandAdapter } from '../adapters/types.js';
 import type pg from 'pg';
 import { CatalogEventOutbox } from '../notifications/catalogEventOutbox.js';
+import { PgSourcePolicyRepository } from '../db/pgSourcePolicyRepository.js';
 
 /**
  * The one place a daily cron job gets registered. If `LIVE_CRAWL_ENABLED`
@@ -34,6 +35,7 @@ export async function startScheduler(): Promise<void> {
   const pool = getPool();
   const products = new PgProductRepository(pool);
   const crawlRuns = new PgCrawlRunRepository(pool);
+  const policies = new PgSourcePolicyRepository(pool);
   const rateLimiter = new DomainRateLimiter(config.requestDelayMs);
   const outbox = config.notificationEventsUrl !== null && config.notificationEventsSecret !== null
     ? new CatalogEventOutbox(
@@ -63,7 +65,14 @@ export async function startScheduler(): Promise<void> {
     // A failure attempting one source (thrown exception, lock contention,
     // robots failure) must never prevent the other source from being
     // attempted — each source is fully isolated.
+    const configuredPolicies = new Map(
+      (await policies.list()).map((policy) => [policy.sourceId, policy]),
+    );
     for (const sourceId of config.enabledSourceIds) {
+      if (configuredPolicies.get(sourceId)?.enabled === false) {
+        logger.info('skipped disabled source policy', { source: sourceId });
+        continue;
+      }
       const adapter = adapterFor(sourceId);
       try {
         await runOneSourceLocked(adapter, { pool, products, crawlRuns, rateLimiter, config });

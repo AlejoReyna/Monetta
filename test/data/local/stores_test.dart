@@ -39,13 +39,15 @@ void main() {
   tearDown(() => db.close());
 
   group('CatalogCacheStore', () {
-    test('round-trips products including special characters in JSON columns', () async {
+    test('round-trips products including special characters in JSON columns',
+        () async {
       final store = CatalogCacheStore(db);
       expect(await store.isEmpty(), isTrue);
 
       final product = _product(
         variants: const [
-          ProductVariant(id: 'v1', title: 'Default Title', price: 1999, available: true),
+          ProductVariant(
+              id: 'v1', title: 'Default Title', price: 1999, available: true),
         ],
       );
       await store.upsertProducts([product]);
@@ -59,7 +61,8 @@ void main() {
       expect(loaded.single.brandOverride, 'guess');
     });
 
-    test('re-upserting a product replaces its variant set instead of appending', () async {
+    test('re-upserting a product replaces its variant set instead of appending',
+        () async {
       final store = CatalogCacheStore(db);
       await store.upsertProducts([
         _product(
@@ -101,9 +104,11 @@ void main() {
       expect(cursor.isFirstRun, isTrue);
     });
 
-    test('save() then load() round-trips as UTC and survives a second save', () async {
+    test('save() then load() round-trips as UTC and survives a second save',
+        () async {
       final store = SyncCursorStore(db);
-      await store.save(shopify.SyncCursor(lastUpdatedAt: DateTime.utc(2026, 3, 1)));
+      await store
+          .save(shopify.SyncCursor(lastUpdatedAt: DateTime.utc(2026, 3, 1)));
       await store.save(
         shopify.SyncCursor(
           lastUpdatedAt: DateTime.utc(2026, 3, 1),
@@ -189,7 +194,9 @@ void main() {
   });
 
   group('AccountStore / DeviceStore / SessionStore', () {
-    test('account upsert, lookup by shopify id, device attach, session lifecycle', () async {
+    test(
+        'account upsert, lookup by shopify id, device attach, session lifecycle',
+        () async {
       final accounts = AccountStore(db);
       final devices = DeviceStore(db);
       final sessions = SessionStore(db);
@@ -201,10 +208,12 @@ void main() {
         createdAt: DateTime.utc(2026, 1, 1),
       );
 
-      final byShopifyId = await accounts.byShopifyCustomerId('gid://shopify/Customer/1');
+      final byShopifyId =
+          await accounts.byShopifyCustomerId('gid://shopify/Customer/1');
       expect(byShopifyId?.localAccountId, 'acct-1');
 
-      await devices.upsert(deviceId: 'dev-1', platform: 'ios', appVersion: '1.0.0');
+      await devices.upsert(
+          deviceId: 'dev-1', platform: 'ios', appVersion: '1.0.0');
       await devices.attachAccount('dev-1', 'acct-1');
       final device = await devices.byId('dev-1');
       expect(device?.accountId, 'acct-1');
@@ -242,14 +251,17 @@ void main() {
     test('deleting an account cascades to its sessions', () async {
       final accounts = AccountStore(db);
       final sessions = SessionStore(db);
-      await accounts.upsert(localAccountId: 'acct-1', createdAt: DateTime.utc(2026, 1, 1));
+      await accounts.upsert(
+          localAccountId: 'acct-1', createdAt: DateTime.utc(2026, 1, 1));
       await sessions.save(
         accountId: 'acct-1',
         secureStorageKeyRef: 'ref',
         accessTokenExpiresAt: DateTime.utc(2026, 1, 2),
       );
 
-      await (db.delete(db.accounts)..where((t) => t.localAccountId.equals('acct-1'))).go();
+      await (db.delete(db.accounts)
+            ..where((t) => t.localAccountId.equals('acct-1')))
+          .go();
 
       expect(await sessions.latestFor('acct-1'), isNull);
     });

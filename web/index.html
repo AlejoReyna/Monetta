@@ -47,6 +47,30 @@
           <strong data-reference-count>0</strong>
         </div>
         <div class="palette__list" data-palette-list></div>
+        <section class="palette__history" data-history-group aria-labelledby="history-title">
+          <button
+            class="palette__history-toggle"
+            type="button"
+            data-history-toggle
+            aria-expanded="false"
+            aria-controls="palette-history-list"
+          >
+            <span class="palette__history-copy">
+              <small id="history-title">HISTORIAL</small>
+              <strong data-history-date></strong>
+              <em data-history-count></em>
+            </span>
+            <span class="palette__history-chevron" aria-hidden="true">⌄</span>
+          </button>
+          <div
+            class="palette__history-panel"
+            id="palette-history-list"
+            data-history-panel
+            aria-hidden="true"
+          >
+            <div class="palette__history-list" data-history-list></div>
+          </div>
+        </section>
         <p class="palette__note">
           iPhone 17 Pro Max · iOS 26.5<br />Capturado el 29 ago 2026
         </p>
@@ -80,7 +104,7 @@
                 <h2 data-capture-title>Inicio / campaña editorial</h2>
                 <p data-capture-meta>Flutter · iPhone 17 Pro Max</p>
               </div>
-              <span class="capture-head__status"><i></i> CAPTURA ACTUAL</span>
+              <span class="capture-head__status" data-capture-status><i></i> CAPTURA ACTUAL</span>
             </div>
             <div class="device-shell">
               <div class="device-frame">

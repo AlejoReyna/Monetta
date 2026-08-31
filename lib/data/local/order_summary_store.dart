@@ -29,7 +29,9 @@ class OrderSummaryStore {
     List<OrderSummariesCompanion> orders,
   ) async {
     await _db.transaction(() async {
-      await (_db.delete(_db.orderSummaries)..where((t) => t.accountId.equals(accountId))).go();
+      await (_db.delete(_db.orderSummaries)
+            ..where((t) => t.accountId.equals(accountId)))
+          .go();
       for (final order in orders) {
         await _db.into(_db.orderSummaries).insertOnConflictUpdate(order);
       }

@@ -27,6 +27,7 @@ Future<String> ensureDeviceId({
   if (existing == null) {
     await secureStore.write(deviceIdSecureStoreKey, deviceId);
   }
-  await deviceStore.upsert(deviceId: deviceId, platform: platform, appVersion: appVersion);
+  await deviceStore.upsert(
+      deviceId: deviceId, platform: platform, appVersion: appVersion);
   return deviceId;
 }

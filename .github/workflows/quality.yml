@@ -1,0 +1,125 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Formatting
+        run: dart format --output=none --set-exit-if-changed lib test integration_test
+      - name: Static analysis
+        run: flutter analyze
+      - name: Flutter tests
+        run: flutter test
+      - name: Catalog and secret gates
+        run: |
+          dart run bin/verify_catalog_snapshot.dart
+          ./bin/check_no_secrets.sh
+      - name: Android staging compile
+        run: flutter build apk --debug --flavor staging --dart-define-from-file=config/dart_defines.ci.json
+
+  ios-compile:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: iOS staging simulator compile
+        run: flutter build ios --simulator --debug --dart-define-from-file=config/dart_defines.ci.json
+
+  accounts-orders:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: services/accounts_orders/package-lock.json
+      - run: npm ci
+        working-directory: services/accounts_orders
+      - run: npm test
+        working-directory: services/accounts_orders
+      - run: npm run typecheck
+        working-directory: services/accounts_orders
+      - run: npm run build
+        working-directory: services/accounts_orders
+      - run: npm audit --omit=dev --audit-level=moderate
+        working-directory: services/accounts_orders
+
+  catalog-monitor:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: services/catalog_monitor/package-lock.json
+      - run: npm ci
+        working-directory: services/catalog_monitor
+      - run: npm test
+        working-directory: services/catalog_monitor
+      - run: npm run typecheck
+        working-directory: services/catalog_monitor
+      - run: npm run build
+        working-directory: services/catalog_monitor
+      - run: npm audit --omit=dev --audit-level=moderate
+        working-directory: services/catalog_monitor
+
+  functions-and-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            functions/package-lock.json
+            web/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: functions
+      - run: npm ci
+        working-directory: web
+      - run: npm test
+        working-directory: functions
+      - run: npm run typecheck
+        working-directory: functions
+      - run: npm run build
+        working-directory: functions
+      - run: npm run typecheck:api
+      - run: npm run build:web
+      - run: npm audit --omit=dev --audit-level=moderate
+      - run: npm audit --omit=dev --audit-level=moderate
+        working-directory: functions

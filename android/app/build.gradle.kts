@@ -1,8 +1,23 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
+
+val releaseSigningProperties = Properties()
+val releaseSigningFile = rootProject.file("key.properties")
+if (releaseSigningFile.exists()) {
+    FileInputStream(releaseSigningFile).use(releaseSigningProperties::load)
+}
+val hasReleaseSigning = listOf(
+    "storeFile",
+    "storePassword",
+    "keyAlias",
+    "keyPassword",
+).all { !releaseSigningProperties.getProperty(it).isNullOrBlank() }
 
 android {
     namespace = "mx.monetta.monetta_app"
@@ -18,7 +33,6 @@ android {
     }
 
     defaultConfig {
-        // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId = "mx.monetta.monetta_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
@@ -29,21 +43,52 @@ android {
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
-        // Customer Account API login callback (flutter_appauth).
-        // Staging shop id for monetta-staging.myshopify.com. Production
-        // needs a separate flavor (different shop id). Lowercase, in sync
-        // with CUSTOMER_ACCOUNT_SHOP_ID / ios/Runner/Info.plist.
-        manifestPlaceholders += mapOf(
-            "appAuthRedirectScheme" to "shop.90228850722.oauth"
-        )
+    }
+
+    flavorDimensions += "environment"
+    productFlavors {
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+            manifestPlaceholders["appAuthRedirectScheme"] = "shop.90228850722.oauth"
+            resValue("string", "app_name", "Monetta Staging")
+        }
+        create("production") {
+            dimension = "environment"
+            manifestPlaceholders["appAuthRedirectScheme"] = "shop.72391655575.oauth"
+            resValue("string", "app_name", "Monetta")
+        }
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = rootProject.file(releaseSigningProperties.getProperty("storeFile"))
+                storePassword = releaseSigningProperties.getProperty("storePassword")
+                keyAlias = releaseSigningProperties.getProperty("keyAlias")
+                keyPassword = releaseSigningProperties.getProperty("keyPassword")
+            }
+        }
     }
 
     buildTypes {
         release {
-            // TODO: Add your own signing config for the release build.
-            // Signing with the debug keys for now, so `flutter run --release` works.
-            signingConfig = signingConfigs.getByName("debug")
+            // Never fall back to the debug keystore.
+            signingConfig = signingConfigs.findByName("release")
         }
+    }
+}
+
+gradle.taskGraph.whenReady {
+    val releaseRequested = allTasks.any {
+        it.project == project && it.name.contains("Release", ignoreCase = true)
+    }
+    if (releaseRequested && !hasReleaseSigning) {
+        throw GradleException(
+            "Release signing is not configured. Create android/key.properties from " +
+                "android/key.properties.example; debug signing is intentionally forbidden.",
+        )
     }
 }
 

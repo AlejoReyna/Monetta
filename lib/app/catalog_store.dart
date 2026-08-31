@@ -259,6 +259,18 @@ class CatalogStore extends ChangeNotifier {
     return future;
   }
 
+  /// Upserts products returned by a focused Shopify collection read before a
+  /// shopper widget is notified. Featured membership remains Shopify-owned;
+  /// this only keeps the existing product cache current for detail screens.
+  Future<void> upsertShopifyProducts(List<Product> incoming) async {
+    if (incoming.isEmpty || !ready) return;
+    await _catalogRepository.cache.upsertProducts(incoming);
+    final snapshot = await _catalogRepository.loadCached();
+    products = snapshot.products;
+    facetsById = snapshot.facetsById;
+    notifyListeners();
+  }
+
   void _clearDeltaSync(Future<CatalogSyncResult> completed) {
     if (identical(_deltaSyncInFlight, completed)) _deltaSyncInFlight = null;
   }

@@ -2035,8 +2035,16 @@ class $AppPreferencesTable extends AppPreferences
       type: DriftSqlType.string,
       requiredDuringInsert: false,
       defaultValue: const Constant('system'));
+  static const VerificationMeta _onboardingStateMeta =
+      const VerificationMeta('onboardingState');
   @override
-  List<GeneratedColumn> get $columns => [id, themeMode];
+  late final GeneratedColumn<String> onboardingState = GeneratedColumn<String>(
+      'onboarding_state', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant('pending'));
+  @override
+  List<GeneratedColumn> get $columns => [id, themeMode, onboardingState];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -2054,6 +2062,12 @@ class $AppPreferencesTable extends AppPreferences
       context.handle(_themeModeMeta,
           themeMode.isAcceptableOrUnknown(data['theme_mode']!, _themeModeMeta));
     }
+    if (data.containsKey('onboarding_state')) {
+      context.handle(
+          _onboardingStateMeta,
+          onboardingState.isAcceptableOrUnknown(
+              data['onboarding_state']!, _onboardingStateMeta));
+    }
     return context;
   }
 
@@ -2067,6 +2081,8 @@ class $AppPreferencesTable extends AppPreferences
           .read(DriftSqlType.int, data['${effectivePrefix}id'])!,
       themeMode: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}theme_mode'])!,
+      onboardingState: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}onboarding_state'])!,
     );
   }
 
@@ -2079,12 +2095,17 @@ class $AppPreferencesTable extends AppPreferences
 class AppPreference extends DataClass implements Insertable<AppPreference> {
   final int id;
   final String themeMode;
-  const AppPreference({required this.id, required this.themeMode});
+  final String onboardingState;
+  const AppPreference(
+      {required this.id,
+      required this.themeMode,
+      required this.onboardingState});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['id'] = Variable<int>(id);
     map['theme_mode'] = Variable<String>(themeMode);
+    map['onboarding_state'] = Variable<String>(onboardingState);
     return map;
   }
 
@@ -2092,6 +2113,7 @@ class AppPreference extends DataClass implements Insertable<AppPreference> {
     return AppPreferencesCompanion(
       id: Value(id),
       themeMode: Value(themeMode),
+      onboardingState: Value(onboardingState),
     );
   }
 
@@ -2101,6 +2123,7 @@ class AppPreference extends DataClass implements Insertable<AppPreference> {
     return AppPreference(
       id: serializer.fromJson<int>(json['id']),
       themeMode: serializer.fromJson<String>(json['themeMode']),
+      onboardingState: serializer.fromJson<String>(json['onboardingState']),
     );
   }
   @override
@@ -2109,17 +2132,24 @@ class AppPreference extends DataClass implements Insertable<AppPreference> {
     return <String, dynamic>{
       'id': serializer.toJson<int>(id),
       'themeMode': serializer.toJson<String>(themeMode),
+      'onboardingState': serializer.toJson<String>(onboardingState),
     };
   }
 
-  AppPreference copyWith({int? id, String? themeMode}) => AppPreference(
+  AppPreference copyWith(
+          {int? id, String? themeMode, String? onboardingState}) =>
+      AppPreference(
         id: id ?? this.id,
         themeMode: themeMode ?? this.themeMode,
+        onboardingState: onboardingState ?? this.onboardingState,
       );
   AppPreference copyWithCompanion(AppPreferencesCompanion data) {
     return AppPreference(
       id: data.id.present ? data.id.value : this.id,
       themeMode: data.themeMode.present ? data.themeMode.value : this.themeMode,
+      onboardingState: data.onboardingState.present
+          ? data.onboardingState.value
+          : this.onboardingState,
     );
   }
 
@@ -2127,46 +2157,57 @@ class AppPreference extends DataClass implements Insertable<AppPreference> {
   String toString() {
     return (StringBuffer('AppPreference(')
           ..write('id: $id, ')
-          ..write('themeMode: $themeMode')
+          ..write('themeMode: $themeMode, ')
+          ..write('onboardingState: $onboardingState')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, themeMode);
+  int get hashCode => Object.hash(id, themeMode, onboardingState);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is AppPreference &&
           other.id == this.id &&
-          other.themeMode == this.themeMode);
+          other.themeMode == this.themeMode &&
+          other.onboardingState == this.onboardingState);
 }
 
 class AppPreferencesCompanion extends UpdateCompanion<AppPreference> {
   final Value<int> id;
   final Value<String> themeMode;
+  final Value<String> onboardingState;
   const AppPreferencesCompanion({
     this.id = const Value.absent(),
     this.themeMode = const Value.absent(),
+    this.onboardingState = const Value.absent(),
   });
   AppPreferencesCompanion.insert({
     this.id = const Value.absent(),
     this.themeMode = const Value.absent(),
+    this.onboardingState = const Value.absent(),
   });
   static Insertable<AppPreference> custom({
     Expression<int>? id,
     Expression<String>? themeMode,
+    Expression<String>? onboardingState,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (themeMode != null) 'theme_mode': themeMode,
+      if (onboardingState != null) 'onboarding_state': onboardingState,
     });
   }
 
-  AppPreferencesCompanion copyWith({Value<int>? id, Value<String>? themeMode}) {
+  AppPreferencesCompanion copyWith(
+      {Value<int>? id,
+      Value<String>? themeMode,
+      Value<String>? onboardingState}) {
     return AppPreferencesCompanion(
       id: id ?? this.id,
       themeMode: themeMode ?? this.themeMode,
+      onboardingState: onboardingState ?? this.onboardingState,
     );
   }
 
@@ -2179,6 +2220,9 @@ class AppPreferencesCompanion extends UpdateCompanion<AppPreference> {
     if (themeMode.present) {
       map['theme_mode'] = Variable<String>(themeMode.value);
     }
+    if (onboardingState.present) {
+      map['onboarding_state'] = Variable<String>(onboardingState.value);
+    }
     return map;
   }
 
@@ -2186,7 +2230,8 @@ class AppPreferencesCompanion extends UpdateCompanion<AppPreference> {
   String toString() {
     return (StringBuffer('AppPreferencesCompanion(')
           ..write('id: $id, ')
-          ..write('themeMode: $themeMode')
+          ..write('themeMode: $themeMode, ')
+          ..write('onboardingState: $onboardingState')
           ..write(')'))
         .toString();
   }
@@ -5967,11 +6012,13 @@ typedef $$AppPreferencesTableCreateCompanionBuilder = AppPreferencesCompanion
     Function({
   Value<int> id,
   Value<String> themeMode,
+  Value<String> onboardingState,
 });
 typedef $$AppPreferencesTableUpdateCompanionBuilder = AppPreferencesCompanion
     Function({
   Value<int> id,
   Value<String> themeMode,
+  Value<String> onboardingState,
 });
 
 class $$AppPreferencesTableFilterComposer
@@ -5988,6 +6035,10 @@ class $$AppPreferencesTableFilterComposer
 
   ColumnFilters<String> get themeMode => $composableBuilder(
       column: $table.themeMode, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get onboardingState => $composableBuilder(
+      column: $table.onboardingState,
+      builder: (column) => ColumnFilters(column));
 }
 
 class $$AppPreferencesTableOrderingComposer
@@ -6004,6 +6055,10 @@ class $$AppPreferencesTableOrderingComposer
 
   ColumnOrderings<String> get themeMode => $composableBuilder(
       column: $table.themeMode, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get onboardingState => $composableBuilder(
+      column: $table.onboardingState,
+      builder: (column) => ColumnOrderings(column));
 }
 
 class $$AppPreferencesTableAnnotationComposer
@@ -6020,6 +6075,9 @@ class $$AppPreferencesTableAnnotationComposer
 
   GeneratedColumn<String> get themeMode =>
       $composableBuilder(column: $table.themeMode, builder: (column) => column);
+
+  GeneratedColumn<String> get onboardingState => $composableBuilder(
+      column: $table.onboardingState, builder: (column) => column);
 }
 
 class $$AppPreferencesTableTableManager extends RootTableManager<
@@ -6051,18 +6109,22 @@ class $$AppPreferencesTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> themeMode = const Value.absent(),
+            Value<String> onboardingState = const Value.absent(),
           }) =>
               AppPreferencesCompanion(
             id: id,
             themeMode: themeMode,
+            onboardingState: onboardingState,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<String> themeMode = const Value.absent(),
+            Value<String> onboardingState = const Value.absent(),
           }) =>
               AppPreferencesCompanion.insert(
             id: id,
             themeMode: themeMode,
+            onboardingState: onboardingState,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))

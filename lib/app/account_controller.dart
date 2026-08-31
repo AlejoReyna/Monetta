@@ -101,20 +101,10 @@ class AccountController extends ChangeNotifier {
   bool get canRegister => _systemSessionRepository?.canRegister == true;
   bool get canSystemLogin => _systemSessionRepository?.canLogin == true;
 
-  /// Short-lived Shopify Customer token for first-party services acting on
-  /// behalf of the signed-in owner. This never exposes an Admin API token:
-  /// the control-plane service validates this customer token, checks the
-  /// owner role server-side, and keeps Shopify Admin credentials to itself.
-  Future<String?> accessTokenForAdmin() async {
-    final current = account;
-    final repository = _sessionRepository;
-    if (current == null ||
-        repository == null ||
-        current.authProvider != 'shopify') {
-      return null;
-    }
-    return repository.accessTokenFor(current.localAccountId);
-  }
+  /// Credential for the owner control plane. Both first-party Monetta sessions
+  /// and Shopify Customer sessions are accepted; the server resolves the
+  /// subject and role, and Shopify Admin credentials never enter the app.
+  Future<String?> accessTokenForAdmin() => accessTokenForBackend();
 
   /// Credential for customer-scoped Monetta backend routes. Shopify accounts
   /// use their short-lived Customer Account token; legacy Monetta accounts use

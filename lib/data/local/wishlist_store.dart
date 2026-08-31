@@ -39,8 +39,7 @@ class WishlistStore {
   /// people signed into the same device, and this is not the place to
   /// resolve that.
   Future<void> mergeDeviceItemsIntoAccount(String accountId) {
-    return (_db.update(_db.wishlistItems)
-          ..where((t) => t.accountId.isNull()))
+    return (_db.update(_db.wishlistItems)..where((t) => t.accountId.isNull()))
         .write(WishlistItemsCompanion(accountId: Value(accountId)));
   }
 }

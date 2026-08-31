@@ -27,7 +27,7 @@ flutter test
 ```
 
 El preflight de esta entrega pasó: typecheck, 181 tests del monitor, análisis
-de Flutter y 419 tests Flutter. El servidor no tenía contenedor de catálogo,
+de Flutter y 455 tests Flutter. El servidor no tenía contenedor de catálogo,
 no escuchaba `8081` y `catalog.monetta.mx` aún no tenía un registro A al
 momento de la preparación.
 
@@ -47,6 +47,13 @@ deshabilitada temporalmente y `LIVE_CRAWL_ENABLED=false`; el payload curado
 que pudiera quedar en el API no es evidencia de catálogo real.
 No se ejecutó crawl persistente ni se declarará éxito hasta tener un crawl
 permitido por cada fuente y `dataOrigin: "live_crawl"`.
+
+El 30 de agosto de 2026 se publicó `catalog.monetta.mx` en GoDaddy con un
+registro A a `209.23.11.117` (sin AAAA), se obtuvo el certificado de Let's
+Encrypt y se validó `/livez` por HTTPS. `/healthz` permanece correctamente en
+`503 degraded`: el API sirve 16 elementos `curated_us_snapshot`, pero todavía
+no tiene elementos `live_crawl`. El DNS/TLS ya no es un bloqueo; el bloqueo
+restante es la política de fuentes descrita arriba.
 
 ## Primera instalación
 
@@ -143,16 +150,23 @@ modificar las reglas de los servicios existentes.
 
 Conectar el Caddy existente a la red nueva, añadir el contenido de
 `Caddyfile.snippet` a `/opt/artisanalbrew/Caddyfile`, y validar antes de
-recargar:
+recargar. Preservar todos los bloques existentes (actualmente `cafe` y
+`alice-storage`): nunca reemplazar el Caddyfile completo con el snippet.
+
+El Caddyfile está montado como archivo. Editarlo *in place*; `install`, `mv` o
+una escritura atómica pueden cambiar el inode y dejar al contenedor leyendo la
+versión anterior. Comprobar que el contenedor ve los tres hosts antes de la
+recarga:
 
 ```bash
 docker network connect monetta_catalog_edge artisanalbrew-caddy-1
+docker exec artisanalbrew-caddy-1 grep -E '^(cafe|alice-storage|catalog)\.' /etc/caddy/Caddyfile
 docker exec artisanalbrew-caddy-1 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 docker exec artisanalbrew-caddy-1 caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 ```
 
 La zona DNS de `monetta.mx` usa actualmente los nameservers de GoDaddy. Crear
-este registro A, sin un registro AAAA:
+o confirmar este registro A, sin un registro AAAA:
 
 ```text
 catalog.monetta.mx.  A  209.23.11.117

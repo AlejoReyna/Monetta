@@ -2,6 +2,7 @@ import type { Express, NextFunction, Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import { EngagementService, parsePermissionState } from '../application/engagementService.js';
 import type { AppCheckVerifier, OwnerAuthorizer } from '../domain/ports.js';
+import type { AdminAuthorizer } from '../../admin/authorizer.js';
 import type {
   CampaignKind,
   ConsentPurpose,
@@ -17,6 +18,8 @@ export interface EngagementRouteDeps {
   readonly service: EngagementService;
   readonly appCheck: AppCheckVerifier;
   readonly ownerAuthorizer: OwnerAuthorizer;
+  /** Shared control-plane authorization. The legacy field remains for callers not yet on WP-1. */
+  readonly adminAuthorizer?: AdminAuthorizer;
   readonly now?: () => Date;
 }
 
@@ -328,12 +331,20 @@ function deviceRoute(deps: EngagementRouteDeps, handler: DeviceHandler) {
 function ownerRoute(deps: EngagementRouteDeps, handler: OwnerHandler) {
   return asyncRoute(async (req, res) => {
     const token = bearerCredential(req);
-    const owner = token === null ? null : await deps.ownerAuthorizer.authenticate(token);
+    const owner = token === null
+      ? null
+      : deps.adminAuthorizer !== undefined
+        ? await deps.adminAuthorizer.authenticate(token)
+        : await deps.ownerAuthorizer.authenticate(token);
     if (owner === null) {
       res.status(403).json({ error: 'owner_forbidden' });
       return;
     }
-    await handler(req, res, owner.actorId);
+    await handler(
+      req,
+      res,
+      'actorId' in owner ? owner.actorId : owner.id,
+    );
   });
 }
 

@@ -1,4 +1,4 @@
-.PHONY: help setup gen gen-watch test test-core analyze format fix schema clean run-dev run-staging validate-staging refresh-catalog verify-catalog verify-catalog-remote doctor
+.PHONY: help setup gen gen-watch test test-core test-services test-all analyze format fix schema clean run-dev run-staging validate-staging validate-production build-staging-android build-production-android refresh-catalog verify-catalog verify-catalog-remote doctor
 
 FLUTTER ?= flutter
 DART    ?= dart
@@ -27,6 +27,19 @@ test: ## Run all tests
 test-core: ## Run only the pure-Dart core tests (fast: no widget pump)
 	$(FLUTTER) test test/normalize test/reco
 
+test-services: ## Run tests and type checks for every TypeScript service
+	npm --prefix services/accounts_orders test
+	npm --prefix services/accounts_orders run typecheck
+	npm --prefix services/catalog_monitor test
+	npm --prefix services/catalog_monitor run typecheck
+	npm --prefix functions test
+	npm --prefix functions run typecheck
+	npm run typecheck:api
+	npm run build:web
+
+test-all: format analyze test test-services verify-catalog ## Run the complete local quality gate
+	./bin/check_no_secrets.sh
+
 report: ## Print the catalog health report the owner acts on
 	$(DART) run bin/catalog_report.dart
 
@@ -52,10 +65,19 @@ fix: ## Apply formatting and automated fixes
 validate-staging: ## Validate the local staging dart-defines
 	$(DART) run bin/validate_dart_defines.dart config/dart_defines.staging.json staging
 
+validate-production: ## Validate the local production dart-defines
+	$(DART) run bin/validate_dart_defines.dart config/dart_defines.production.json production
+
 run-staging: validate-staging ## Run against the authoritative staging catalog
-	$(FLUTTER) run --dart-define-from-file=config/dart_defines.staging.json
+	$(FLUTTER) run --flavor staging --dart-define-from-file=config/dart_defines.staging.json
 
 run-dev: run-staging ## Alias for the canonical staging launch
+
+build-staging-android: validate-staging ## Build the signed/debug staging Android artifact
+	$(FLUTTER) build apk --debug --flavor staging --dart-define-from-file=config/dart_defines.staging.json
+
+build-production-android: validate-production ## Build the production Android App Bundle
+	$(FLUTTER) build appbundle --release --flavor production --dart-define-from-file=config/dart_defines.production.json
 
 clean: ## Clean build artifacts
 	$(FLUTTER) clean

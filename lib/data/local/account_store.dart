@@ -128,7 +128,8 @@ class SessionStore {
   }) async {
     final existing = await latestFor(accountId);
     if (existing != null) {
-      await (_db.update(_db.sessions)..where((t) => t.id.equals(existing.id))).write(
+      await (_db.update(_db.sessions)..where((t) => t.id.equals(existing.id)))
+          .write(
         SessionsCompanion(
           secureStorageKeyRef: Value(secureStorageKeyRef),
           accessTokenExpiresAt: Value(accessTokenExpiresAt),
@@ -150,7 +151,8 @@ class SessionStore {
   /// logout without deleting the account (the common case) goes through
   /// here instead.
   Future<void> deleteFor(String accountId) {
-    return (_db.delete(_db.sessions)..where((t) => t.accountId.equals(accountId)))
+    return (_db.delete(_db.sessions)
+          ..where((t) => t.accountId.equals(accountId)))
         .go();
   }
 }

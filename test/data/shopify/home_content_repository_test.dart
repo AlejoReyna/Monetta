@@ -12,6 +12,7 @@ void main() {
       HomeContent.fallback.sectionOrder,
       const [
         HomeSectionId.collections,
+        HomeSectionId.todaysPicks,
         HomeSectionId.newProducts,
         HomeSectionId.bagTypes,
         HomeSectionId.brands,
@@ -80,6 +81,15 @@ void main() {
                 'aboutImageUrl': {
                   'value': 'https://cdn.shopify.com/about.jpg',
                 },
+              },
+              'storefrontConfig': {
+                'fields': [
+                  {'key': 'announcement', 'value': 'Envío gratis'},
+                  {'key': 'show_hero', 'value': 'false'},
+                  {'key': 'show_newest', 'value': 'true'},
+                  {'key': 'show_todays_picks', 'value': 'true'},
+                  {'key': 'show_external_picks', 'value': 'false'},
+                ],
               },
               'collections': {
                 'edges': [
@@ -164,6 +174,9 @@ void main() {
       'https://instagram.com/monetta-synced',
     );
     expect(content.aboutImageUrl, 'https://cdn.shopify.com/about.jpg');
+    expect(content.storefront.announcement, 'Envío gratis');
+    expect(content.storefront.showHero, isFalse);
+    expect(content.storefront.showExternalPicks, isFalse);
     expect(content.brands, hasLength(12));
     expect(
       content.brands.first.imageUrl,

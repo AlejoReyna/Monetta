@@ -47,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -56,6 +56,12 @@ class AppDatabase extends _$AppDatabase {
           if (from < 2) await _migrateShopifyIdsToGids();
           if (from < 3) await migrator.createTable(appPreferences);
           if (from < 4) await migrator.createTable(catalogStates);
+          if (from < 5) {
+            await migrator.addColumn(
+              appPreferences,
+              appPreferences.onboardingState,
+            );
+          }
         },
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),
       );
