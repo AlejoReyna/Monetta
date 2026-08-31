@@ -1,8 +1,7 @@
 /// Full-catalog browsing for Monetta's bags and accessories.
 ///
 /// Photography owns the screen. Filtering is handled by a single expandable
-/// sheet with bag-specific facets and horizontal category pills instead of
-/// search.
+/// sheet with bag-specific facets, search, and horizontal category pills.
 library;
 
 import 'dart:async';
@@ -15,12 +14,14 @@ import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
 import '../../main.dart';
+import '../../reco/external_facets.dart';
 import '../account/account_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
 import '../product/product_screen.dart';
 import 'extracted_badge.dart';
+import 'search_screen.dart';
 
 enum _CatalogSort { featured, newest, priceAsc, priceDesc }
 
@@ -103,6 +104,80 @@ const Map<String, List<String>> _colorTerms = {
   'Plateado': ['plateado', 'silver'],
 };
 
+const Map<String, String> _catalogCategoryLabels = {
+  'bolsa': 'Bolsas',
+  'cartera': 'Carteras',
+  'monedero': 'Monederos',
+  'tarjetero': 'Tarjeteros',
+  'reloj': 'Relojes',
+  'cosmetiquera': 'Cosmetiqueras',
+  'set': 'Sets',
+  'accesorio': 'Accesorios',
+  'perfume': 'Perfumes',
+  'otros': 'Otros',
+};
+
+const List<String> _catalogCategoryOrder = [
+  'bolsa',
+  'cartera',
+  'monedero',
+  'tarjetero',
+  'reloj',
+  'cosmetiquera',
+  'set',
+  'accesorio',
+  'perfume',
+  'otros',
+];
+
+String _categoryLabel(String category) =>
+    _catalogCategoryLabels[category] ?? categoryPlural(category);
+
+String _categoryFor(CatalogItem item) {
+  final externalCategory =
+      item.isExternal ? externalItemFacets(item).category?.value : null;
+  final rawCategory = (externalCategory ?? item.category)?.trim().toLowerCase();
+
+  final category = switch (rawCategory) {
+    'bolsas' || 'handbag' || 'handbags' => 'bolsa',
+    'carteras' || 'wallet' || 'wallets' => 'cartera',
+    'monederos' => 'monedero',
+    'tarjeteros' || 'card case' || 'card cases' => 'tarjetero',
+    'relojes' || 'watch' || 'watches' => 'reloj',
+    'cosmetiqueras' || 'cosmetic case' || 'cosmetic cases' => 'cosmetiquera',
+    'sets' => 'set',
+    'accesorios' || 'accessory' || 'accessories' => 'accesorio',
+    'perfumes' ||
+    'fragancia' ||
+    'fragancias' ||
+    'fragrance' ||
+    'fragrances' =>
+      'perfume',
+    final value? when value.isNotEmpty => value,
+    _ => null,
+  };
+  if (category != null) return category;
+
+  if (item.vertical == CatalogVertical.perfumes) return 'perfume';
+  if (item.vertical == CatalogVertical.bagsWallets) {
+    final terms = item.title.toLowerCase();
+    if (RegExp(r'\b(?:wallet|billfold|cartera)\b').hasMatch(terms)) {
+      return 'cartera';
+    }
+    if (RegExp(r'\b(?:card case|card holder|tarjeter[oa])\b').hasMatch(terms)) {
+      return 'tarjetero';
+    }
+    if (RegExp(r'\b(?:monedero|coin purse)\b').hasMatch(terms)) {
+      return 'monedero';
+    }
+    if (RegExp(r'\b(?:cosmetiquera|cosmetic case)\b').hasMatch(terms)) {
+      return 'cosmetiquera';
+    }
+    return 'bolsa';
+  }
+  return 'otros';
+}
+
 class CatalogBrowseScreen extends StatefulWidget {
   const CatalogBrowseScreen({
     required this.items,
@@ -128,7 +203,22 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   );
 
   _CatalogFilters _filters = const _CatalogFilters();
-  String _activeCategory = 'Colección';
+  String? _activeCategory;
+
+  List<String> get _availableCategories {
+    final categories = {
+      for (final item in widget.items) _categoryFor(item),
+    };
+    final ordered = [
+      for (final category in _catalogCategoryOrder)
+        if (categories.remove(category)) category,
+      ...categories.toList()
+        ..sort(
+          (a, b) => _categoryLabel(a).compareTo(_categoryLabel(b)),
+        ),
+    ];
+    return ordered;
+  }
 
   List<CatalogItem> _visibleItems([_CatalogFilters? filters]) {
     final baseFilters = filters ?? _filters;
@@ -138,15 +228,10 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       filters: baseFilters,
     );
 
-    if (_activeCategory == 'Monetta') {
-      items = items.where((i) => !i.isExternal).toList();
-    } else if (_activeCategory == 'Bolsas') {
-      items = items
-          .where((i) => i.vertical == CatalogVertical.bagsWallets)
-          .toList();
-    } else if (_activeCategory == 'Perfumes') {
+    final activeCategory = _activeCategory;
+    if (activeCategory != null) {
       items =
-          items.where((i) => i.vertical == CatalogVertical.perfumes).toList();
+          items.where((item) => _categoryFor(item) == activeCategory).toList();
     }
     return items;
   }
@@ -155,7 +240,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _filters = const _CatalogFilters();
-      _activeCategory = 'Colección';
+      _activeCategory = null;
     });
   }
 
@@ -178,8 +263,9 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   Widget _buildCategoryPill({
     required String title,
     required String keyName,
+    required String? category,
   }) {
-    final isSelected = _activeCategory == title;
+    final isSelected = _activeCategory == category;
     final colors = context.monettaColors;
     final animationsDisabled = reduceMotion(context);
     final labelColor =
@@ -209,7 +295,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
           ),
           selected: isSelected,
           onSelected: (selected) {
-            if (selected) setState(() => _activeCategory = title);
+            if (selected) setState(() => _activeCategory = category);
           },
           color: WidgetStateProperty.resolveWith<Color>((states) {
             return states.contains(WidgetState.selected)
@@ -264,6 +350,12 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
           style: display(20, weight: FontWeight.w600, height: 1.1),
         ),
         actions: [
+          IconButton(
+            key: const Key('catalog-search-button'),
+            tooltip: 'Buscar productos',
+            onPressed: () => openSearch(context),
+            icon: const Icon(Icons.search_rounded, size: 27),
+          ),
           _FilterIconButton(
             activeCount: _filters.activeCount,
             onPressed: _openFilters,
@@ -283,19 +375,14 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 _buildCategoryPill(
                   title: 'Colección',
                   keyName: 'catalog-category-collection',
+                  category: null,
                 ),
-                _buildCategoryPill(
-                  title: 'Monetta',
-                  keyName: 'catalog-category-monetta',
-                ),
-                _buildCategoryPill(
-                  title: 'Bolsas',
-                  keyName: 'catalog-category-bags',
-                ),
-                _buildCategoryPill(
-                  title: 'Perfumes',
-                  keyName: 'catalog-category-perfumes',
-                ),
+                for (final category in _availableCategories)
+                  _buildCategoryPill(
+                    title: _categoryLabel(category),
+                    keyName: 'catalog-category-$category',
+                    category: category,
+                  ),
               ],
             ),
           ),
@@ -324,20 +411,10 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             ),
           ),
           child: CustomScrollView(
-            key: ValueKey('catalog-section-$_activeCategory'),
+            key: ValueKey('catalog-section-${_activeCategory ?? 'collection'}'),
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (_activeCategory == 'Monetta')
-                const SliverToBoxAdapter(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 24),
-                    child: SectionHeading(
-                      kicker: 'Monetta',
-                      title: 'Selección Monetta',
-                    ),
-                  ),
-                ),
               SliverToBoxAdapter(
                 child: _CatalogSummary(
                   count: visibleItems.length,
@@ -1078,7 +1155,9 @@ class _BrowseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayTitle = shopperProductName(item.title);
+    final displayTitle = item.isExternal
+        ? externalProductName(title: item.title, category: item.category)
+        : shopperProductName(item.title);
     return Semantics(
       button: true,
       label: '${item.merchant}, $displayTitle',

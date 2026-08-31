@@ -59,6 +59,21 @@ void main() {
     expect(find.byKey(const ValueKey('home-brand-coach')), findsOneWidget);
     expect(find.byKey(const ValueKey('home-brand-rhode')), findsOneWidget);
     expect(
+      find.descendant(
+        of: brandsSection,
+        matching: find.byType(SlideTransition),
+      ),
+      findsNWidgets(12),
+    );
+    expect(
+      find.byKey(const ValueKey('home-brand-entrance-coach')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('home-brand-entrance-michael-kors')),
+      findsOneWidget,
+    );
+    expect(
       find.descendant(of: brandsSection, matching: find.byType(Image)),
       findsNWidgets(12),
     );

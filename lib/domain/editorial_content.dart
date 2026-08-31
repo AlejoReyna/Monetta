@@ -239,10 +239,10 @@ class MonettaEditorialContent {
     ),
     partner: PartnerProgramContent(
       eyebrow: 'VENDE CON MONETTA',
-      headline: 'Comparte el catálogo. Tú eliges cómo ganar.',
-      body: 'Usa nuestros catálogos para mostrar productos originales a tus '
-          'clientes. Cuando elijan sus favoritos, prepara tu pedido y '
-          'cotízalo con Monetta.',
+      headline: 'Convierte tu buen gusto en un negocio.',
+      body: 'Comparte más de 3,000 productos originales con tus clientes y '
+          'accede a precios de mayoreo desde tres piezas. Tú eliges qué '
+          'vender; Monetta te acompaña para hacerlo crecer.',
       steps: <PartnerStep>[
         PartnerStep(
           number: '01',

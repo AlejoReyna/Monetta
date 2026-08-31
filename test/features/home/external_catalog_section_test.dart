@@ -95,66 +95,17 @@ CatalogItem _perfumeItem() => CatalogItem(
       purchaseMode: PurchaseMode.ownerProcurement,
     );
 
-Future<void> _pump(WidgetTester tester, Widget child) {
-  return tester.pumpWidget(
+Future<void> _pump(WidgetTester tester, Widget child) async {
+  tester.view.physicalSize = const Size(390, 844);
+  tester.view.devicePixelRatio = 1;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+  await tester.pumpWidget(
     MaterialApp(home: Scaffold(body: SingleChildScrollView(child: child))),
   );
 }
 
 void main() {
-  test('provides badges and CTAs for every external source', () {
-    expect(externalSourceBadge(CatalogSourceType.guessUs), 'GUESS US · USD');
-    expect(externalCtaLabel(CatalogSourceType.guessUs), 'Ver en GUESS');
-    expect(
-      externalSourceBadge(CatalogSourceType.steveMaddenUs),
-      'Steve Madden US · USD',
-    );
-    expect(
-      externalCtaLabel(CatalogSourceType.steveMaddenUs),
-      'Ver en Steve Madden',
-    );
-    expect(
-      externalSourceBadge(CatalogSourceType.marcJacobsUs),
-      'Marc Jacobs US · USD',
-    );
-    expect(
-      externalCtaLabel(CatalogSourceType.marcJacobsUs),
-      'Ver en Marc Jacobs',
-    );
-    expect(
-      externalSourceBadge(CatalogSourceType.toryBurchUs),
-      'Tory Burch US · USD',
-    );
-    expect(
-      externalCtaLabel(CatalogSourceType.toryBurchUs),
-      'Ver en Tory Burch',
-    );
-    expect(
-      externalSourceBadge(CatalogSourceType.kateSpadeUs),
-      'Kate Spade US · USD',
-    );
-    expect(
-      externalCtaLabel(CatalogSourceType.kateSpadeUs),
-      'Ver en Kate Spade',
-    );
-    expect(
-      externalSourceBadge(CatalogSourceType.guessFactoryUs),
-      'GUESS Factory US · USD',
-    );
-    expect(
-      externalCtaLabel(CatalogSourceType.guessFactoryUs),
-      'Ver en GUESS Factory',
-    );
-    expect(
-      externalSourceBadge(CatalogSourceType.gpMcallenPerfumes),
-      'GP McAllen · USD',
-    );
-    expect(
-      externalCtaLabel(CatalogSourceType.gpMcallenPerfumes),
-      'Ver en GP McAllen',
-    );
-  });
-
   testWidgets('renders nothing when there are no items', (tester) async {
     await _pump(
       tester,
@@ -165,7 +116,7 @@ void main() {
   });
 
   testWidgets(
-      'shows the source badge, price with currency code, and CTA per source',
+      'matches regular cards with normalized title, brand and compact price',
       (tester) async {
     await _pump(
       tester,
@@ -175,12 +126,15 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('COACH US · USD'), findsOneWidget);
-    expect(find.textContaining('MICHAEL KORS US · USD'), findsOneWidget);
+    expect(find.text('COACH'), findsOneWidget);
+    expect(find.text('MICHAEL KORS'), findsOneWidget);
+    expect(find.text('Bolsa Tabby 26 de hombro'), findsOneWidget);
+    expect(find.text('Bolsa Jet Set crossbody'), findsOneWidget);
     expect(find.text('\$350 USD'), findsOneWidget);
     expect(find.text('\$228 USD'), findsOneWidget);
-    expect(find.text('Ver en Coach'), findsOneWidget);
-    expect(find.text('Ver en Michael Kors'), findsOneWidget);
+    expect(find.textContaining('coach.com'), findsNothing);
+    expect(find.textContaining('Candidato de compra'), findsNothing);
+    expect(find.text('Ver en Coach'), findsNothing);
   });
 
   testWidgets('shows the owner-procurement and internal-prototype disclosures',
@@ -193,11 +147,11 @@ void main() {
       ),
     );
 
-    expect(find.text('Candidato de compra · origen EE. UU.'), findsOneWidget);
     expect(
-      find.textContaining('Candidatos para compra manual del propietario'),
+      find.textContaining('Selección en EE. UU. para compra manual'),
       findsOneWidget,
     );
+    expect(find.textContaining('Candidato de compra'), findsNothing);
   });
 
   testWidgets('separates GP McAllen perfumes from bags and wallets',
@@ -224,7 +178,7 @@ void main() {
 
     expect(find.byIcon(Icons.favorite), findsNothing);
     expect(find.byIcon(Icons.favorite_border), findsNothing);
-    expect(find.textContaining('bolsa'), findsNothing); // "Agregar a la bolsa"
+    expect(find.text('Agregar a la bolsa'), findsNothing);
     expect(find.textContaining('WHATSAPP'), findsNothing);
   });
 
@@ -243,8 +197,11 @@ void main() {
       ),
     );
 
-    await tester.ensureVisible(find.text('Ver en Coach'));
-    await tester.tap(find.text('Ver en Coach'));
+    await tester.ensureVisible(find.text('Bolsa Tabby 26 de hombro'));
+    await tester.tap(find.text('Bolsa Tabby 26 de hombro'));
+    await tester.pumpAndSettle();
+    await tester.ensureVisible(find.text('VER EN COACH'));
+    await tester.tap(find.text('VER EN COACH'));
     await tester.pumpAndSettle();
 
     expect(
@@ -314,8 +271,8 @@ void main() {
       ),
     );
 
-    await tester.ensureVisible(find.text('Spoofed Item'));
-    await tester.tap(find.text('Spoofed Item'));
+    await tester.ensureVisible(find.text('Bolsa Spoofed Item'));
+    await tester.tap(find.text('Bolsa Spoofed Item'));
     await tester.pumpAndSettle();
 
     expect(find.byType(ExternalProductScreen), findsOneWidget);
@@ -344,8 +301,8 @@ void main() {
       ),
     );
 
-    await tester.ensureVisible(find.text('Tabby Shoulder Bag 26'));
-    await tester.tap(find.text('Tabby Shoulder Bag 26'));
+    await tester.ensureVisible(find.text('Bolsa Tabby 26 de hombro'));
+    await tester.tap(find.text('Bolsa Tabby 26 de hombro'));
     await tester.pumpAndSettle();
 
     expect(openCount, 0);
@@ -359,8 +316,7 @@ void main() {
     expect(find.text('VER EN COACH'), findsOneWidget);
   });
 
-  testWidgets(
-      'selecting a color variant updates its label, price and merchant URL',
+  testWidgets('color choices stay in detail and update price and merchant URL',
       (tester) async {
     Uri? openedUri;
     await _pump(
@@ -375,19 +331,45 @@ void main() {
       ),
     );
 
-    expect(find.text('Color: Brass/Black'), findsOneWidget);
+    expect(find.text('Brass/Black'), findsNothing);
     expect(find.text('\$295 USD'), findsOneWidget);
 
-    await tester.ensureVisible(find.text('Brass/Toffee'));
-    await tester.tap(find.text('Brass/Toffee'));
+    await tester.ensureVisible(find.text('Bolsa Brooklyn 28 de hombro'));
+    await tester.tap(find.text('Bolsa Brooklyn 28 de hombro'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Color: Brass/Toffee'), findsOneWidget);
+    expect(find.byType(ExternalProductScreen), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Brass/Black'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('Brass/Black'), findsOneWidget);
+
+    final toffeeChip = tester.widget<ChoiceChip>(
+      find.byKey(const ValueKey('detail-CU068:B4TF')),
+    );
+    toffeeChip.onSelected!(true);
+    await tester.pumpAndSettle();
+
+    expect(
+      tester
+          .widget<ChoiceChip>(
+            find.byKey(const ValueKey('detail-CU068:B4TF')),
+          )
+          .selected,
+      isTrue,
+    );
+    await tester.scrollUntilVisible(
+      find.text('\$206.50 USD'),
+      -300,
+      scrollable: find.byType(Scrollable).last,
+    );
     expect(find.text('\$206.50 USD'), findsOneWidget);
     expect(openedUri, isNull);
 
-    await tester.ensureVisible(find.text('Ver en Coach'));
-    await tester.tap(find.text('Ver en Coach'));
+    await tester.ensureVisible(find.text('VER EN COACH'));
+    await tester.tap(find.text('VER EN COACH'));
     await tester.pumpAndSettle();
     expect(
       openedUri,

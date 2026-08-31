@@ -134,7 +134,10 @@ class _ExternalProductScreenState extends State<ExternalProductScreen> {
                 ),
                 const SizedBox(height: 12),
                 Text(
-                  shopperProductName(widget.item.title),
+                  externalProductName(
+                    title: widget.item.title,
+                    category: widget.item.category,
+                  ),
                   style: display(26),
                 ),
                 const SizedBox(height: 16),
@@ -295,7 +298,8 @@ class _ProductInformation extends StatelessWidget {
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
           child: Text(
-            '${item.title} de ${item.brand}. Información extraída del catálogo '
+            '${externalProductName(title: item.title, category: item.category)} '
+            'de ${item.brand}. Información extraída del catálogo '
             'estadounidense de ${item.merchant} para que el propietario evalúe '
             'precio, disponibilidad y compra para envío a México.',
             style: sans(

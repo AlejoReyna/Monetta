@@ -5,13 +5,19 @@ import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/product/external_product_screen.dart';
 
-CatalogItem _monetta(int i) => CatalogItem(
+CatalogItem _monetta(
+  int i, {
+  String? title,
+  String? category,
+  CatalogVertical vertical = CatalogVertical.general,
+}) =>
+    CatalogItem(
       sourceScopedId: 'monetta:$i',
       source: CatalogSourceType.monettaShopify,
       merchant: 'Monetta',
-      title: 'Monetta Item $i',
+      title: title ?? 'Monetta Item $i',
       brand: 'Guess',
-      category: null,
+      category: category,
       imageUrl: null,
       price: const Money(amount: 1999, currency: Currency.mxn),
       availability: CatalogAvailability.inStock,
@@ -20,6 +26,7 @@ CatalogItem _monetta(int i) => CatalogItem(
       lastObservedAt: DateTime.utc(2026, 8, 10),
       purchaseMode: PurchaseMode.monettaCheckout,
       shopifyProductId: '$i',
+      vertical: vertical,
     );
 
 CatalogItem _external(
@@ -60,47 +67,65 @@ void main() {
   });
 
   testWidgets('shows header and category pills', (tester) async {
-    await _pump(tester, CatalogBrowseScreen(items: [_monetta(1)]));
+    await _pump(
+      tester,
+      CatalogBrowseScreen(
+        items: [
+          _external(1),
+          _monetta(1, category: 'cartera'),
+          _monetta(2, category: 'reloj'),
+          _monetta(3, category: 'perfume'),
+        ],
+      ),
+    );
 
     expect(find.text('Productos'), findsOneWidget);
     expect(find.text('Colección'), findsOneWidget);
-    expect(find.text('Monetta'), findsOneWidget);
     expect(find.text('Bolsas'), findsOneWidget);
+    expect(find.text('Carteras'), findsOneWidget);
+    expect(find.text('Relojes'), findsOneWidget);
     expect(find.text('Perfumes'), findsOneWidget);
+    expect(find.text('Selección Monetta'), findsNothing);
+    expect(find.byKey(const Key('catalog-category-monetta')), findsNothing);
+    expect(find.byKey(const Key('catalog-search-button')), findsOneWidget);
+    expect(find.byIcon(Icons.search_rounded), findsOneWidget);
 
     final collection = tester.widget<ChoiceChip>(
       find.byKey(const Key('catalog-category-collection')),
     );
-    final monetta = tester.widget<ChoiceChip>(
-      find.byKey(const Key('catalog-category-monetta')),
+    final wallets = tester.widget<ChoiceChip>(
+      find.byKey(const Key('catalog-category-cartera')),
     );
     expect(collection.selected, isTrue);
-    expect(monetta.selected, isFalse);
+    expect(wallets.selected, isFalse);
     expect(
       collection.color?.resolve(const <WidgetState>{WidgetState.selected}),
       MonettaColors.light.navigationSelection,
     );
     expect(
-      monetta.color?.resolve(const <WidgetState>{}),
+      wallets.color?.resolve(const <WidgetState>{}),
       Colors.transparent,
     );
   });
 
   testWidgets('category selection moves the pill motion state', (tester) async {
-    await _pump(tester, CatalogBrowseScreen(items: [_monetta(1)]));
+    await _pump(
+      tester,
+      CatalogBrowseScreen(items: [_monetta(1, category: 'cartera')]),
+    );
 
     AnimatedScale motionFor(String category) => tester.widget<AnimatedScale>(
           find.byKey(Key('catalog-category-$category-motion')),
         );
 
     expect(motionFor('collection').scale, 1.025);
-    expect(motionFor('monetta').scale, 1);
+    expect(motionFor('cartera').scale, 1);
 
-    await tester.tap(find.byKey(const Key('catalog-category-monetta')));
+    await tester.tap(find.byKey(const Key('catalog-category-cartera')));
     await tester.pumpAndSettle();
 
     expect(motionFor('collection').scale, 1);
-    expect(motionFor('monetta').scale, 1.025);
+    expect(motionFor('cartera').scale, 1.025);
   });
 
   testWidgets('category content uses the smooth section transition', (
@@ -108,7 +133,9 @@ void main() {
   ) async {
     await _pump(
       tester,
-      CatalogBrowseScreen(items: [_monetta(1), _external(1)]),
+      CatalogBrowseScreen(
+        items: [_monetta(1, category: 'cartera'), _external(1)],
+      ),
     );
 
     expect(
@@ -126,19 +153,19 @@ void main() {
       reason: 'the outgoing product grid must not remain in the layout',
     );
     expect(
-      find.byKey(const ValueKey('catalog-section-Colección')),
+      find.byKey(const ValueKey('catalog-section-collection')),
       findsOneWidget,
     );
 
-    await tester.tap(find.byKey(const Key('catalog-category-monetta')));
+    await tester.tap(find.byKey(const Key('catalog-category-cartera')));
     await tester.pumpAndSettle();
 
     expect(
-      find.byKey(const ValueKey('catalog-section-Colección')),
+      find.byKey(const ValueKey('catalog-section-collection')),
       findsNothing,
     );
     expect(
-      find.byKey(const ValueKey('catalog-section-Monetta')),
+      find.byKey(const ValueKey('catalog-section-cartera')),
       findsOneWidget,
     );
   });
@@ -152,7 +179,7 @@ void main() {
     );
 
     expect(find.text('Michael Kors'), findsOneWidget);
-    expect(find.text('Jet Set Bag'), findsOneWidget);
+    expect(find.text('Bolsa Jet Set'), findsOneWidget);
     expect(find.text('michael_kors'), findsNothing);
     expect(find.text('jet_set_bag'), findsNothing);
   });
@@ -187,7 +214,7 @@ void main() {
     expect(find.text('Selección Monetta'), findsNothing);
     expect(find.text('Edición internacional'), findsNothing);
     expect(find.text('Monetta Item 1'), findsOneWidget);
-    expect(find.text('External Item 1'), findsOneWidget);
+    expect(find.text('Bolsa External Item 1'), findsOneWidget);
     expect(find.text('extracted'), findsNWidgets(2));
   });
 
@@ -199,7 +226,7 @@ void main() {
 
     expect(find.text('Selección Monetta'), findsNothing);
     expect(find.text('Edición internacional'), findsNothing);
-    expect(find.text('External Item 1'), findsOneWidget);
+    expect(find.text('Bolsa External Item 1'), findsOneWidget);
   });
 
   testWidgets('filters by selected category pill correctly', (tester) async {
@@ -276,39 +303,55 @@ void main() {
       purchaseMode: PurchaseMode.monettaCheckout,
       shopifyProductId: 'g4',
     );
+    final wallet = _monetta(
+      5,
+      title: 'Monetta Wallet 5',
+      category: 'cartera',
+      vertical: CatalogVertical.bagsWallets,
+    );
+    final watch = _monetta(
+      6,
+      title: 'Monetta Watch 6',
+      category: 'reloj',
+    );
 
     await _pump(
       tester,
-      CatalogBrowseScreen(items: [perfume, bag, extBag, general]),
+      CatalogBrowseScreen(
+        items: [perfume, bag, extBag, general, wallet, watch],
+      ),
     );
 
     expect(find.text('Monetta Perfume 1'), findsOneWidget);
     expect(find.text('Monetta Item 2'), findsOneWidget);
     expect(find.text('External Item 3'), findsOneWidget);
     expect(find.text('Monetta General 4'), findsOneWidget);
+    expect(find.byKey(const Key('catalog-category-otros')), findsOneWidget);
 
-    await tester.tap(find.byKey(const Key('catalog-category-monetta')));
+    await tester.tap(find.byKey(const Key('catalog-category-cartera')));
     await tester.pumpAndSettle();
     expect(
       tester
           .widget<ChoiceChip>(
-            find.byKey(const Key('catalog-category-monetta')),
+            find.byKey(const Key('catalog-category-cartera')),
           )
           .selected,
       isTrue,
     );
-    expect(find.text('Selección Monetta'), findsOneWidget);
-    expect(find.text('Monetta Perfume 1'), findsOneWidget);
-    expect(find.text('Monetta Item 2'), findsOneWidget);
+    expect(find.text('Selección Monetta'), findsNothing);
+    expect(find.text('Monetta Wallet 5'), findsOneWidget);
+    expect(find.text('Monetta Perfume 1'), findsNothing);
+    expect(find.text('Monetta Item 2'), findsNothing);
     expect(find.text('External Item 3'), findsNothing);
-    expect(find.text('Monetta General 4'), findsOneWidget);
+    expect(find.text('Monetta General 4'), findsNothing);
+    expect(find.text('Monetta Watch 6'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('catalog-category-bags')));
+    await tester.tap(find.byKey(const Key('catalog-category-bolsa')));
     await tester.pumpAndSettle();
     expect(
       tester
           .widget<ChoiceChip>(
-            find.byKey(const Key('catalog-category-bags')),
+            find.byKey(const Key('catalog-category-bolsa')),
           )
           .selected,
       isTrue,
@@ -318,13 +361,19 @@ void main() {
     expect(find.text('Monetta Item 2'), findsOneWidget);
     expect(find.text('External Item 3'), findsOneWidget);
     expect(find.text('Monetta General 4'), findsNothing);
+    expect(find.text('Monetta Wallet 5'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('catalog-category-perfumes')));
+    await tester.tap(find.byKey(const Key('catalog-category-reloj')));
+    await tester.pumpAndSettle();
+    expect(find.text('Monetta Watch 6'), findsOneWidget);
+    expect(find.text('Monetta Item 2'), findsNothing);
+
+    await tester.tap(find.byKey(const Key('catalog-category-perfume')));
     await tester.pumpAndSettle();
     expect(
       tester
           .widget<ChoiceChip>(
-            find.byKey(const Key('catalog-category-perfumes')),
+            find.byKey(const Key('catalog-category-perfume')),
           )
           .selected,
       isTrue,
@@ -425,15 +474,11 @@ void main() {
 
     expect(find.text(' 2'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('catalog-category-monetta')));
-    await tester.pumpAndSettle();
-    expect(find.text(' 1'), findsNothing);
-
-    await tester.tap(find.byKey(const Key('catalog-category-bags')));
+    await tester.tap(find.byKey(const Key('catalog-category-bolsa')));
     await tester.pumpAndSettle();
     expect(find.text(' 2'), findsNothing);
 
-    await tester.tap(find.byKey(const Key('catalog-category-perfumes')));
+    await tester.tap(find.byKey(const Key('catalog-category-perfume')));
     await tester.pumpAndSettle();
     expect(find.text('Perfumes'), findsOneWidget);
   });
@@ -488,7 +533,7 @@ void main() {
     await tester.tap(find.byKey(const Key('catalog-filter-apply')));
     await tester.pumpAndSettle();
 
-    expect(find.text('External Item 1'), findsOneWidget);
+    expect(find.text('Bolsa External Item 1'), findsOneWidget);
     expect(find.text('Monetta Item 1'), findsNothing);
     expect(find.byKey(const Key('catalog-filter-count')), findsOneWidget);
   });
@@ -519,8 +564,8 @@ void main() {
 
     await tester.tap(find.byKey(const Key('catalog-filter-apply')));
     await tester.pumpAndSettle();
-    expect(find.text('Bolsa Tote Café'), findsOneWidget);
-    expect(find.text('Crossbody Negra'), findsNothing);
+    expect(find.text('Bolsa Bolsa Café tote'), findsOneWidget);
+    expect(find.text('Bolsa Negra crossbody'), findsNothing);
   });
 
   testWidgets('the filter sheet fits a compact phone without overflow',
@@ -545,12 +590,18 @@ void main() {
   testWidgets('category rail fits a compact phone without overflow',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(320, 568);
+    tester.view.physicalSize = const Size(360, 640);
     tester.view.devicePixelRatio = 1.0;
 
     await _pump(
       tester,
-      const CatalogBrowseScreen(items: []),
+      CatalogBrowseScreen(
+        items: [
+          _external(1),
+          _monetta(1, category: 'cartera'),
+          _monetta(3, category: 'perfume'),
+        ],
+      ),
     );
     await tester.pump();
 
@@ -558,7 +609,7 @@ void main() {
       find.byKey(const Key('catalog-category-collection')),
       findsOneWidget,
     );
-    expect(find.byKey(const Key('catalog-category-monetta')), findsOneWidget);
+    expect(find.byKey(const Key('catalog-category-cartera')), findsOneWidget);
 
     final categoryRail = find.byWidgetPredicate(
       (widget) =>
@@ -567,7 +618,7 @@ void main() {
     await tester.drag(categoryRail, const Offset(-300, 0));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const Key('catalog-category-perfumes')), findsOneWidget);
+    expect(find.byKey(const Key('catalog-category-perfume')), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 
@@ -582,16 +633,16 @@ void main() {
     await _pump(tester, CatalogBrowseScreen(items: items));
     await tester.pump();
 
-    expect(find.text('External Item 0'), findsOneWidget);
+    expect(find.text('Bolsa External Item 0'), findsOneWidget);
 
     // Scroll to the bottom and confirm the last item eventually renders —
     // i.e. it was never excluded by a hidden cap.
     await tester.scrollUntilVisible(
-      find.text('External Item 29'),
+      find.text('Bolsa External Item 29'),
       400,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('External Item 29'), findsOneWidget);
+    expect(find.text('Bolsa External Item 29'), findsOneWidget);
   });
 
   testWidgets(
@@ -615,7 +666,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('External Item 1'));
+    await tester.tap(find.text('Bolsa External Item 1'));
     await tester.pumpAndSettle();
 
     expect(openedUri, isNull);

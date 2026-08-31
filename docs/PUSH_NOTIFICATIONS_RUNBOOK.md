@@ -90,7 +90,8 @@ con backoff; `accounts_orders` deduplica por `eventId`.
 ## 5. Activación gradual
 
 1. Mantener todas las reglas automáticas apagadas.
-2. Registrar un dispositivo staging desde “Mis notificaciones”.
+2. Completar el onboarding en un dispositivo staging y aceptar el permiso
+   nativo de notificaciones.
 3. En el panel `Avisos`, crear un borrador, revisar el conteo y enviar una prueba.
 4. Confirmar ruta al producto, horario silencioso, apertura y token inválido.
 5. Activar primero `restock`; simular agotado → disponible en Shopify.

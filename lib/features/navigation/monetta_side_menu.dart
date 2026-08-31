@@ -14,7 +14,6 @@ class MonettaSideMenu extends StatelessWidget {
     required this.onWatches,
     required this.onPerfumes,
     required this.onBeauty,
-    this.onNotifications,
     required this.onAppearance,
     required this.onAbout,
     required this.onPartner,
@@ -29,7 +28,6 @@ class MonettaSideMenu extends StatelessWidget {
   final VoidCallback onWatches;
   final VoidCallback onPerfumes;
   final VoidCallback onBeauty;
-  final VoidCallback? onNotifications;
   final VoidCallback onAppearance;
   final VoidCallback onAbout;
   final VoidCallback onPartner;
@@ -63,6 +61,17 @@ class MonettaSideMenu extends StatelessWidget {
               child: Row(
                 children: [
                   const Expanded(child: MonettaWordmark(height: 21)),
+                  IconButton(
+                    key: const Key('side-menu-appearance'),
+                    tooltip: 'Apariencia',
+                    onPressed: () => _select(context, onAppearance),
+                    icon: Icon(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Icons.dark_mode_outlined
+                          : Icons.light_mode_outlined,
+                      size: 21,
+                    ),
+                  ),
                   IconButton(
                     key: const Key('close-side-menu'),
                     tooltip: 'Cerrar menú',
@@ -105,7 +114,6 @@ class MonettaSideMenu extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 22),
                 children: [
-                  const _MenuSectionLabel('TIENDA'),
                   _MenuLink(
                     key: const Key('side-menu-bags'),
                     label: 'Bolsas',
@@ -143,17 +151,6 @@ class MonettaSideMenu extends StatelessWidget {
                     padding: EdgeInsets.symmetric(vertical: 10),
                     child: Divider(height: 1),
                   ),
-                  const _MenuSectionLabel('MÁS DE MONETTA'),
-                  if (onNotifications != null)
-                    _MenuLink(
-                      label: 'Mis notificaciones',
-                      onTap: () => _select(context, onNotifications!),
-                    ),
-                  _MenuLink(
-                    key: const Key('side-menu-appearance'),
-                    label: 'Apariencia',
-                    onTap: () => _select(context, onAppearance),
-                  ),
                   _MenuLink(
                     label: 'Nuestra historia',
                     onTap: () => _select(context, onAbout),
@@ -163,24 +160,6 @@ class MonettaSideMenu extends StatelessWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-class _MenuSectionLabel extends StatelessWidget {
-  const _MenuSectionLabel(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.monettaColors;
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 6, 6, 8),
-      child: Text(
-        label,
-        style: eyebrow(size: 8.5, color: colors.contentMuted),
       ),
     );
   }

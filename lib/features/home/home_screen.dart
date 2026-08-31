@@ -33,7 +33,6 @@ import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
-import '../notifications/notification_settings_sheet.dart';
 import '../onboarding/onboarding_sheet.dart';
 import '../settings/appearance_sheet.dart';
 import '../partner/partner_hub_screen.dart';
@@ -72,7 +71,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _scroll.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _precacheRail();
-      unawaited(_showFirstRunOnboarding());
+      unawaited(_prepareFirstRunExperience());
       unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
       _featuredRefreshTimer = Timer.periodic(
         const Duration(seconds: 60),
@@ -81,6 +80,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ),
       );
     });
+  }
+
+  Future<void> _prepareFirstRunExperience() async {
+    await _showFirstRunOnboarding();
+    if (!mounted) return;
+    await NotificationScope.maybeOf(context)?.requestSystemPermission();
   }
 
   Future<void> _showFirstRunOnboarding() async {
@@ -102,9 +107,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if (!mounted) return;
     if (completed == true) {
       await onboarding.complete();
+      if (!mounted) return;
       logProductEvent(context, ProductEvent.onboardingCompleted);
     } else {
       await onboarding.skip();
+      if (!mounted) return;
       logProductEvent(context, ProductEvent.onboardingSkipped);
     }
   }
@@ -367,18 +374,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 key: const ValueKey('home-reveal-offers'),
                 scrollController: _scroll,
                 offset: 0,
-                child: _HomeOffersSection(onOpenCatalog: _openFullCatalog),
+                child: _HomeOffersSection(
+                  onOpenCatalog: _openFullCatalog,
+                  onOpenPartner: _openPartner,
+                ),
               ),
             ),
             if (showExternalPicks && externalItems.isNotEmpty)
-              RevealOnScroll(
-                key: const ValueKey('home-reveal-external-picks'),
-                scrollController: _scroll,
-                delay: const Duration(milliseconds: 80),
-                offset: 0,
-                child: ExternalCatalogSection(
-                  items: externalItems,
-                  generatedAt: externalCatalog?.generatedAt,
+              Padding(
+                key: const ValueKey('home-external-section-spacing'),
+                padding: const EdgeInsets.only(top: 72),
+                child: RevealOnScroll(
+                  key: const ValueKey('home-reveal-external-picks'),
+                  scrollController: _scroll,
+                  delay: const Duration(milliseconds: 80),
+                  offset: 0,
+                  child: ExternalCatalogSection(
+                    items: externalItems,
+                    generatedAt: externalCatalog?.generatedAt,
+                  ),
                 ),
               ),
             for (var index = 0;
@@ -463,9 +477,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         scrollController: _scroll,
         delay: _homeSectionDelay(index),
         // Keep layout-driven scrolling exact for buttons inside the section;
-        // the section's appearance is carried by opacity rather than a
-        // translated render box.
+        // sections do not move vertically. Brands also skip the group fade so
+        // their own horizontal entrance is the only card motion applied.
         offset: 0,
+        fade: section != HomeSectionId.brands,
         child: switch (section) {
           HomeSectionId.collections => _HomeCollectionsSection(
               cards: content.collections,
@@ -504,7 +519,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildSideMenu(CatalogStore store) {
-    final notifications = NotificationScope.maybeOf(context);
     return MonettaSideMenu(
       onSearch: () => openSearch(context),
       onCatalog: _openFullCatalog,
@@ -520,14 +534,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         title: 'Maquillaje y skincare',
         queryTerms: const ['maquillaje', 'skincare'],
       ),
-      onNotifications: notifications == null
-          ? null
-          : () => unawaited(
-                openNotificationSettings(
-                  context,
-                  controller: notifications,
-                ),
-              ),
       onAppearance: () => unawaited(openAppearanceSettings(context)),
       onAbout: _openAbout,
       onPartner: _openPartner,
@@ -778,27 +784,41 @@ class _HomeSearchBar extends StatelessWidget {
 }
 
 class _HomeOffersSection extends StatelessWidget {
-  const _HomeOffersSection({required this.onOpenCatalog});
+  const _HomeOffersSection({
+    required this.onOpenCatalog,
+    required this.onOpenPartner,
+  });
 
   static const _offers = <_OfferData>[
     _OfferData(
       imageAsset: 'assets/images/campaign_olive.jpg',
-      promotion: '20% en bolsos seleccionados',
-      description: 'Encuentra una pieza para todos los días.',
+      eyebrow: 'OFERTA MONETTA',
+      title: '20% en bolsos seleccionados',
+      description: 'Una selección especial para encontrar tu próxima pieza.',
+      actionLabel: 'Ver la selección',
+      destination: _OfferDestination.catalog,
     ),
     _OfferData(
       imageAsset: 'assets/images/campaign_coral.jpg',
-      promotion: 'Nuevos favoritos de temporada',
-      description: 'Color y siluetas que renuevan tu colección.',
+      eyebrow: 'NUEVO EN MONETTA',
+      title: 'Piezas que acaban de llegar',
+      description: 'Color, formas y favoritos para estrenar esta temporada.',
+      actionLabel: 'Descubrir novedades',
+      destination: _OfferDestination.catalog,
     ),
     _OfferData(
       imageAsset: 'assets/images/campaign_terracotta.jpg',
-      promotion: 'Envío gratis en tu primer pedido',
-      description: 'Regístrate y descubre todo lo nuevo.',
+      eyebrow: 'VENDE CON MONETTA',
+      title: 'Haz crecer tu negocio con mayoreo',
+      description:
+          'Precios desde tres modelos y catálogos listos para compartir.',
+      actionLabel: 'Conocer mayoreo',
+      destination: _OfferDestination.partner,
     ),
   ];
 
   final VoidCallback onOpenCatalog;
+  final VoidCallback onOpenPartner;
 
   @override
   Widget build(BuildContext context) {
@@ -814,7 +834,20 @@ class _HomeOffersSection extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.end,
             children: [
               Expanded(
-                child: Text('Ofertas de hoy', style: editorial(25)),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'PARA COMPRAR, ESTRENAR O CRECER',
+                      style: eyebrow(
+                        size: 8.5,
+                        color: context.monettaColors.accentContent,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    Text('Lo mejor de Monetta, hoy', style: editorial(25)),
+                  ],
+                ),
               ),
               Text(
                 'DESLIZA',
@@ -840,7 +873,9 @@ class _HomeOffersSection extends StatelessWidget {
               child: _OfferCard(
                 key: ValueKey('home-offer-card-$index'),
                 data: _offers[index],
-                onTap: onOpenCatalog,
+                onTap: _offers[index].destination == _OfferDestination.partner
+                    ? onOpenPartner
+                    : onOpenCatalog,
               ),
             ),
           ),
@@ -853,14 +888,22 @@ class _HomeOffersSection extends StatelessWidget {
 class _OfferData {
   const _OfferData({
     required this.imageAsset,
-    required this.promotion,
+    required this.eyebrow,
+    required this.title,
     required this.description,
+    required this.actionLabel,
+    required this.destination,
   });
 
   final String imageAsset;
-  final String promotion;
+  final String eyebrow;
+  final String title;
   final String description;
+  final String actionLabel;
+  final _OfferDestination destination;
 }
+
+enum _OfferDestination { catalog, partner }
 
 class _OfferCard extends StatelessWidget {
   const _OfferCard({required this.data, required this.onTap, super.key});
@@ -873,108 +916,105 @@ class _OfferCard extends StatelessWidget {
     final colors = context.monettaColors;
     return Semantics(
       button: true,
-      label: '${data.promotion}. ${data.description}. Comprar ahora',
+      label: '${data.eyebrow}. ${data.title}. ${data.description}. '
+          '${data.actionLabel}',
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(5),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              color: colors.surfaceRaised,
-              border: Border.all(color: colors.divider, width: .8),
-              borderRadius: BorderRadius.circular(5),
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 51,
-                  child: SizedBox.expand(
-                    child: Image.asset(
-                      data.imageAsset,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                    ),
+        child: DecoratedBox(
+          decoration: BoxDecoration(
+            color: colors.surfaceRaised,
+            border: Border.all(color: colors.divider, width: .8),
+          ),
+          child: Column(
+            children: [
+              Expanded(
+                child: SizedBox.expand(
+                  key: const ValueKey('home-offer-media'),
+                  child: Image.asset(
+                    data.imageAsset,
+                    fit: BoxFit.cover,
+                    alignment: Alignment.center,
                   ),
                 ),
-                Expanded(
-                  flex: 40,
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 22),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          data.promotion,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: sans(
-                            size: 16,
-                            color: colors.contentPrimary,
-                            weight: FontWeight.w700,
-                            height: 1.25,
-                          ),
-                        ),
-                        const SizedBox(height: 9),
-                        Text(
-                          data.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          textAlign: TextAlign.center,
-                          style: sans(
-                            size: 12,
-                            color: colors.contentMuted,
-                            height: 1.35,
-                          ),
-                        ),
-                        const SizedBox(height: 18),
-                        Container(
-                          height: 43,
-                          constraints: const BoxConstraints(minWidth: 178),
-                          padding: const EdgeInsets.symmetric(horizontal: 30),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: colors.inverseSurface,
-                            borderRadius: BorderRadius.circular(23),
-                          ),
-                          child: Text(
-                            'Comprar ahora',
-                            style: sans(
-                              size: 12.5,
-                              color: colors.onInverseSurface,
-                              weight: FontWeight.w600,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                Container(
-                  height: 45,
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  color: colors.surfaceMuted,
-                  child: Row(
+              ),
+              Expanded(
+                child: Padding(
+                  key: const ValueKey('home-offer-content'),
+                  padding: const EdgeInsets.fromLTRB(22, 21, 22, 20),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'No requiere código.',
-                        style: sans(size: 10, color: colors.contentMuted),
+                        data.eyebrow,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: eyebrow(
+                          size: 8.5,
+                          color: colors.accentContent,
+                        ),
+                      ),
+                      const SizedBox(height: 9),
+                      Text(
+                        data.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: editorial(
+                          22,
+                          color: colors.contentPrimary,
+                          height: 1.08,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        data.description,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: sans(
+                          size: 11.5,
+                          color: colors.contentMuted,
+                          height: 1.35,
+                        ),
                       ),
                       const Spacer(),
-                      Text(
-                        'Detalles',
-                        style: sans(
-                          size: 10,
-                          color: colors.contentMuted,
-                          decoration: TextDecoration.underline,
+                      Container(
+                        key: ValueKey(
+                          'home-offer-action-${data.destination.name}',
+                        ),
+                        height: 44,
+                        width: double.infinity,
+                        padding: const EdgeInsets.symmetric(horizontal: 18),
+                        alignment: Alignment.center,
+                        color: colors.inverseSurface,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Flexible(
+                              child: Text(
+                                data.actionLabel,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: sans(
+                                  size: 12,
+                                  color: colors.onInverseSurface,
+                                  weight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 9),
+                            Icon(
+                              Icons.arrow_forward,
+                              size: 15,
+                              color: colors.onInverseSurface,
+                            ),
+                          ],
                         ),
                       ),
                     ],
                   ),
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -997,7 +1037,11 @@ class _HomeCollectionsSection extends StatelessWidget {
       key: const ValueKey('home-section-collections'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeading(kicker: 'DESCUBRE', title: 'Colecciones'),
+        const SectionHeading(
+          kicker: 'DESCUBRE',
+          title: 'Colecciones',
+          animateKickerColor: true,
+        ),
         SizedBox(
           height: cardHeight,
           child: ListView.separated(
@@ -1099,6 +1143,7 @@ class _NewestProductsSection extends StatelessWidget {
         SectionHeading(
           kicker: 'Novedades',
           title: 'Nuevos productos',
+          animateKickerColor: true,
           trailing: UnderlineLink(label: 'Ver todos', onTap: onOpenAll),
         ),
         _CatalogGrid(products: products.take(4).toList()),
@@ -1128,6 +1173,7 @@ class _TodaysPicksSection extends StatelessWidget {
         const SectionHeading(
           kicker: 'SELECCIÓN MONETTA',
           title: 'Catálogo de hoy',
+          animateKickerColor: true,
         ),
         _CatalogGrid(products: products.take(4).toList()),
       ],
@@ -1147,7 +1193,11 @@ class _BagTypesSection extends StatelessWidget {
       key: const ValueKey('home-section-bag-types'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeading(kicker: 'ELIGE TU FORMA', title: 'Tipo de bolsas'),
+        const SectionHeading(
+          kicker: 'ELIGE TU FORMA',
+          title: 'Tipo de bolsas',
+          animateKickerColor: true,
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(
@@ -1207,61 +1257,154 @@ class _BagTypeTile extends StatelessWidget {
   }
 }
 
-class _BrandsSection extends StatelessWidget {
+class _BrandsSection extends StatefulWidget {
   const _BrandsSection({required this.brands});
 
   final List<HomeBrandCard> brands;
 
   @override
+  State<_BrandsSection> createState() => _BrandsSectionState();
+}
+
+Duration _brandEntranceDuration(int brandCount) {
+  final lastRow = brandCount <= 1 ? 0 : (brandCount - 1) ~/ 2;
+  return kEnter + Duration(milliseconds: lastRow * 70);
+}
+
+class _BrandsSectionState extends State<_BrandsSection>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: _brandEntranceDuration(widget.brands.length),
+  );
+  ScrollPosition? _scrollPosition;
+  bool _checkScheduled = false;
+  bool _started = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final nextPosition = Scrollable.maybeOf(context)?.position;
+    if (nextPosition != _scrollPosition) {
+      _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+      _scrollPosition = nextPosition;
+      _scrollPosition?.addListener(_scheduleVisibilityCheck);
+    }
+    if (reduceMotion(context)) {
+      _started = true;
+      _controller.value = 1;
+    } else {
+      _scheduleVisibilityCheck();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _BrandsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_started && oldWidget.brands.length != widget.brands.length) {
+      _controller.duration = _brandEntranceDuration(widget.brands.length);
+    }
+  }
+
+  void _scheduleVisibilityCheck() {
+    if (_started || _checkScheduled || !mounted) return;
+    _checkScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkScheduled = false;
+      if (!mounted || _started) return;
+      final renderObject = context.findRenderObject();
+      if (renderObject is! RenderBox || !renderObject.attached) return;
+      final top = renderObject.localToGlobal(Offset.zero).dy;
+      final bottom = top + renderObject.size.height;
+      final viewportHeight = MediaQuery.sizeOf(context).height;
+      if (bottom <= 0 || top >= viewportHeight) return;
+      _started = true;
+      _controller.forward();
+    });
+  }
+
+  Animation<Offset> _entranceFor(int index) {
+    final totalMilliseconds = _controller.duration!.inMilliseconds;
+    final startMilliseconds = (index ~/ 2) * 70;
+    final endMilliseconds = startMilliseconds + kEnter.inMilliseconds;
+    final begin = (startMilliseconds / totalMilliseconds).clamp(0.0, 1.0);
+    final end = (endMilliseconds / totalMilliseconds).clamp(begin, 1.0);
+    final direction = index.isEven ? -1.2 : 1.2;
+    return Tween<Offset>(
+      begin: Offset(direction, 0),
+      end: Offset.zero,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(begin, end, curve: kMotionCurve),
+      ),
+    );
+  }
+
+  @override
+  void dispose() {
+    _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    if (brands.isEmpty) return const SizedBox.shrink();
+    if (widget.brands.isEmpty) return const SizedBox.shrink();
     return Column(
       key: const ValueKey('home-section-brands'),
       children: [
         const SectionHeading(
           kicker: 'NUESTRA SELECCIÓN',
           title: 'Todas las marcas',
+          animateKickerColor: true,
         ),
-        GridView.builder(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          physics: const NeverScrollableScrollPhysics(),
-          shrinkWrap: true,
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 2.45,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-          ),
-          itemCount: brands.length,
-          itemBuilder: (context, index) {
-            final brand = brands[index];
-            return Semantics(
-              button: true,
-              label: 'Ver ${brand.title}',
-              child: Material(
-                key: ValueKey('home-brand-${brand.handle}'),
-                color: Colors.white,
-                elevation: 2,
-                shadowColor: Colors.black.withValues(alpha: .16),
-                borderRadius: BorderRadius.circular(28),
-                clipBehavior: Clip.antiAlias,
-                child: InkWell(
-                  onTap: () => openCollection(
-                    context,
-                    CollectionScreen(
-                      title: brand.title,
-                      filter: CollectionFilter(brand: brand.brand),
+        ClipRect(
+          child: GridView.builder(
+            padding: const EdgeInsets.symmetric(horizontal: 12),
+            physics: const NeverScrollableScrollPhysics(),
+            shrinkWrap: true,
+            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+              crossAxisCount: 2,
+              childAspectRatio: 2.45,
+              crossAxisSpacing: 8,
+              mainAxisSpacing: 8,
+            ),
+            itemCount: widget.brands.length,
+            itemBuilder: (context, index) {
+              final brand = widget.brands[index];
+              return SlideTransition(
+                key: ValueKey('home-brand-entrance-${brand.handle}'),
+                position: _entranceFor(index),
+                child: Semantics(
+                  button: true,
+                  label: 'Ver ${brand.title}',
+                  child: Material(
+                    key: ValueKey('home-brand-${brand.handle}'),
+                    color: Colors.white,
+                    elevation: 2,
+                    shadowColor: Colors.black.withValues(alpha: .16),
+                    borderRadius: BorderRadius.circular(28),
+                    clipBehavior: Clip.antiAlias,
+                    child: InkWell(
+                      onTap: () => openCollection(
+                        context,
+                        CollectionScreen(
+                          title: brand.title,
+                          filter: CollectionFilter(brand: brand.brand),
+                        ),
+                      ),
+                      child: _HomeImage(
+                        imageUrl: brand.imageUrl,
+                        fallbackAsset: brand.fallbackAsset,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
-                  child: _HomeImage(
-                    imageUrl: brand.imageUrl,
-                    fallbackAsset: brand.fallbackAsset,
-                    fit: BoxFit.cover,
-                  ),
                 ),
-              ),
-            );
-          },
+              );
+            },
+          ),
         ),
       ],
     );
@@ -1289,6 +1432,7 @@ class _AboutMonettaSection extends StatelessWidget {
         const SectionHeading(
           kicker: 'NUESTRA HISTORIA',
           title: 'Más sobre Monetta',
+          animateKickerColor: true,
         ),
         Container(
           key: const ValueKey('home-about-card'),
@@ -1385,7 +1529,11 @@ class _SocialSection extends StatelessWidget {
       key: const ValueKey('home-section-social'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeading(kicker: 'SÍGUENOS', title: 'Nuestras redes'),
+        const SectionHeading(
+          kicker: 'SÍGUENOS',
+          title: 'Nuestras redes',
+          animateKickerColor: true,
+        ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12),
           child: Row(

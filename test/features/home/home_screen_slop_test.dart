@@ -43,7 +43,8 @@ void main() {
     await tester.pump();
     expect(find.byKey(const ValueKey('home-search-bar')), findsOneWidget);
     expect(find.byKey(const ValueKey('home-offers-rail')), findsOneWidget);
-    expect(find.text('Ofertas de hoy'), findsOneWidget);
+    expect(find.text('PARA COMPRAR, ESTRENAR O CRECER'), findsOneWidget);
+    expect(find.text('Lo mejor de Monetta, hoy'), findsOneWidget);
     expect(find.text('VER LA PIEZA'), findsNothing);
     expect(find.text('Novedades'), findsNothing);
     expect(find.text('Piezas originales, elegidas una por una.'), findsNothing);
@@ -95,7 +96,19 @@ void main() {
     expect(find.byKey(const ValueKey('home-offer-card-1')), findsOneWidget);
     expect(find.text('BIENVENID@'), findsNothing);
     expect(find.text('20% en bolsos seleccionados'), findsOneWidget);
-    expect(find.text('Comprar ahora'), findsWidgets);
+    expect(find.text('Ver la selección'), findsOneWidget);
+    expect(find.text('No requiere código.'), findsNothing);
+    final offerCard = find.byKey(const ValueKey('home-offer-card-0'));
+    final offerMedia = find.descendant(
+      of: offerCard,
+      matching: find.byKey(const ValueKey('home-offer-media')),
+    );
+    final offerContent = find.descendant(
+      of: offerCard,
+      matching: find.byKey(const ValueKey('home-offer-content')),
+    );
+    expect(tester.getRect(offerMedia).height, closeTo(250, .1));
+    expect(tester.getRect(offerContent).height, closeTo(250, .1));
     expect(
       tester
           .getTopLeft(find.byKey(const ValueKey('home-section-collections')))
@@ -105,6 +118,29 @@ void main() {
       ),
     );
     expect(find.byKey(const ValueKey('campaign-slide-media-0')), findsNothing);
+  });
+
+  testWidgets('mayoreo editorial card opens the partner view', (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 2000);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    await tester.pumpWidget(_app(store));
+    await tester.pump();
+
+    await tester.drag(
+      find.byKey(const ValueKey('home-offers-rail')),
+      const Offset(-620, 0),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Conocer mayoreo'));
+    await tester.pumpAndSettle();
+
+    expect(
+      find.byKey(const ValueKey('partner-hub-scroll')),
+      findsOneWidget,
+    );
   });
 
   testWidgets(

@@ -54,6 +54,7 @@ class CustomerExperiencesSection extends StatelessWidget {
           key: ValueKey('customer-experiences-heading'),
           kicker: 'LO QUE DICEN',
           title: 'Experiencias de clientes',
+          animateKickerColor: true,
         ),
         Align(
           alignment: Alignment.topCenter,

@@ -60,14 +60,27 @@ void main() {
           body: SectionHeading(
             kicker: 'LO QUE DICEN',
             title: 'Experiencias de clientes',
+            animateKickerColor: true,
           ),
         ),
       ),
     );
+
+    AnimatedDefaultTextStyle kickerStyle() => tester.widget(
+          find.descendant(
+            of: find.byType(SectionHeading),
+            matching: find.byType(AnimatedDefaultTextStyle),
+          ),
+        );
+
+    // Even when motion is disabled in widget tests, completion is reported on
+    // the following frame: the kicker can never get ahead of its title.
+    expect(kickerStyle().style.color, kGold);
     await tester.pump();
 
     expect(find.byType(EditorialTitleReveal), findsOneWidget);
     expect(find.text('Experiencias de clientes'), findsOneWidget);
     expect(find.text('LO QUE DICEN'), findsOneWidget);
+    expect(kickerStyle().style.color, kPurple);
   });
 }

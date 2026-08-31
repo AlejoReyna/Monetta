@@ -1,99 +1,238 @@
 # Panel administrativo nativo de Monetta
 
-> Plan de implementación para agentes: `docs/ADMIN_CONTROL_PLANE_IMPLEMENTATION_PLAN.md`. Ese documento define la arquitectura, seguridad, conexión con Shopify, paquetes de trabajo, validación y despliegue. Este documento describe la interfaz y el contrato preliminar existentes.
+Este documento explica la arquitectura y la operación del control plane. La
+guía de uso diario, escrita para la persona propietaria de la tienda, está en
+[`OWNER_ADMIN_GUIDE.md`](OWNER_ADMIN_GUIDE.md).
 
-## Objetivo
+El plan histórico y la matriz de aceptación están en
+[`ADMIN_CONTROL_PLANE_IMPLEMENTATION_PLAN.md`](ADMIN_CONTROL_PLANE_IMPLEMENTATION_PLAN.md).
 
-El propietario administra Monetta desde la misma app Flutter y con el mismo
-lenguaje visual del escaparate. El acceso aparece dentro de **Mi cuenta** sólo
-para correos autorizados.
+## Qué resuelve
+
+La administración vive dentro de la misma app Flutter que usa el escaparate.
+La app del propietario nunca recibe secretos de Shopify, Postgres ni del
+monitor externo. Envía únicamente su sesión de Monetta o su token de Shopify
+Customer al servicio `accounts_orders`, que vuelve a autenticar y autorizar
+cada petición.
 
 ```text
-Producto propio
-App del dueño → servicio administrativo → Shopify Admin API
-                                      ↘ Storefront API → app de clientes
+Mi cuenta → AdminScreen → accounts_orders
+                              ├─ Postgres: principal, auditoría, idempotencia y jobs
+                              ├─ Shopify Admin API: productos, publicación y metaobjetos
+                              └─ catalog_monitor: políticas y sync firmados con HMAC
 
-Artículo externo
-App del dueño → servicio administrativo → catalog_monitor → app de clientes
+Clientes → Storefront API / caché local
+              ├─ productos canónicos de Shopify
+              ├─ colección manual monetta-todays-picks
+              └─ metaobjeto $app:storefront_config / monetta
 ```
 
-Shopify continúa como fuente de verdad de productos propios. El monitor externo
-continúa como fuente de candidatos de compra: no agrega automáticamente esos
-artículos al inventario, carrito o checkout de Shopify.
+El panel no es la fuente de verdad del escaparate. Después de una mutación, el
+backend lee la representación canónica y la app refresca sus repositorios
+normales. Los demás clientes reciben el cambio en su siguiente refresh o al
+vencer su caché.
 
-## Experiencia incluida
+## Fuentes de verdad
 
-- Resumen de productos, stock y candidatos externos.
-- Estado separado de Shopify, app y fuentes externas.
-- Búsqueda y edición de nombre, precio y visibilidad de productos Shopify.
-- Configuración del aviso superior y secciones de portada.
-- Activación, cupo y comisión variable por proveedor.
-- Comisión menor para artículos que superan el umbral configurable, inicialmente
-  `$4,000 MXN`.
-- Sincronización manual de los tres canales.
-- Confirmación antes de cada cambio y actividad reciente dentro del panel.
-- Vista previa segura cuando todavía no existe un backend administrativo.
+| Dato | Fuente canónica | Qué puede cambiar el panel |
+|---|---|---|
+| Nombre y precio de producto | Shopify | Título y precio de una variante explícita |
+| Visibilidad Monetta | Publicación Headless de Shopify | Publicar o despublicar |
+| Catálogo de hoy | Colección manual de Shopify | Membresía y orden, máximo 12 |
+| Aviso y secciones de portada | Metaobjeto app-owned de Shopify | Mensaje y cuatro interruptores |
+| Política de fuente externa | `catalog_monitor` + Postgres | Estado, cupo, umbral y comisiones |
+| Campañas y automatizaciones | `accounts_orders` + Postgres | Borrador, audiencia, prueba y envío |
+| Historial administrativo | Postgres | Sólo lectura desde el panel |
 
-## Acceso del propietario
+Los artículos externos son candidatos de investigación y compra manual. El
+panel no los crea en Shopify, no compra, no abre checkout y no intenta evadir
+CAPTCHA o bloqueos del proveedor.
 
-La entrada se habilita mediante `--dart-define`:
+## Autenticación y autorización
 
-```bash
-flutter run \
-  --dart-define=OWNER_ADMIN_EMAILS=duena@monetta.mx \
-  --dart-define=ADMIN_API_BASE_URL=https://admin-api.example.com
+Hay dos capas deliberadamente separadas:
+
+1. Flutter muestra la entrada sólo a una sesión iniciada cuyo correo esté en
+   `OWNER_ADMIN_EMAILS`, o en un build de preview. Esta lista es comodidad de
+   interfaz, no una frontera de seguridad.
+2. El servidor resuelve el bearer token como `app_account` o
+   `shopify_customer`, busca un registro activo en `admin_principals` y exige
+   el rol `owner` en cada endpoint protegido.
+
+`GET /admin/me` devuelve las capacidades efectivas. Un correo o rol enviado
+por Flutter nunca concede acceso. No se enlazan identidades sólo porque sus
+correos coincidan.
+
+El primer propietario se debe provisionar por ID estable. La opción preferida
+es registrar/iniciar sesión con la cuenta de staging, obtener su UUID de
+`app_accounts` y crear un `admin_principals` con:
+
+```text
+subject_type = app_account
+subject_id   = <UUID estable de la cuenta>
+role         = owner
+active       = true
+created_by   = operator:<referencia auditable>
 ```
 
-Para revisar únicamente el diseño sin publicar cambios:
+Como bootstrap controlado, el servidor también puede crear ese principal la
+primera vez que una cuenta autenticada coincide con `OWNER_ADMIN_EMAILS` o
+`OWNER_SHOPIFY_CUSTOMER_IDS` del servidor. Una revocación explícita nunca se
+reactiva por bootstrap.
 
-```bash
-flutter run \
-  --dart-define=ENABLE_OWNER_ADMIN_PREVIEW=true
-```
+## Modos de interfaz
 
-`OWNER_ADMIN_EMAILS` acepta varios correos separados por coma. La lista sólo
-controla la visibilidad en la app; no reemplaza autorización del servidor. En
-modo en vivo la sesión de primera parte o el token de Shopify Customer se
-verifica en el servicio administrativo; la app nunca recibe credenciales de
-Shopify Admin.
+- **CONTROL EN VIVO**: existe `ADMIN_API_BASE_URL` y la app usa el backend.
+  Cada cambio exige confirmación y puede estar bloqueado por los kill switches.
+- **VISTA PREVIA**: `ENABLE_OWNER_ADMIN_PREVIEW=true`. Sirve para revisar la
+  interfaz; los cambios sólo viven en memoria y no llegan a Shopify ni a los
+  servicios.
 
-## Contrato del servicio administrativo
+La banda superior siempre indica el modo. Un build de producción no debe
+habilitar preview.
 
-| Ruta | Efecto esperado |
+## Contrato HTTP
+
+Todas las rutas requieren `Authorization: Bearer <sesión>` salvo los probes de
+salud. Las respuestas de error incluyen un código estable y `requestId` cuando
+está disponible.
+
+| Ruta | Propósito |
 |---|---|
-| `GET /admin/control-plane` | Estado consolidado del panel. |
-| `PATCH /admin/products/:id` | Actualiza Shopify; la app vuelve a sincronizar Storefront. |
-| `PUT /admin/storefront-config` | Guarda portada y configuración compartida. |
-| `PUT /admin/external-policy/:id` | Guarda fuente, cupo, umbral y comisiones. |
-| `POST /admin/sync` | Reconciliación explícita de Shopify, app y monitor. |
+| `GET /admin/me` | Actor, entorno, rol y capacidades efectivas. |
+| `GET /admin/control-plane` | Salud consolidada, productos, portada, fuentes y actividad reciente. |
+| `GET /admin/audit` | Historial paginado con cursor opaco. |
+| `PATCH /admin/products/:productGid` | Cambia el título con control de versión. |
+| `PATCH /admin/products/:productGid/variants/:variantGid` | Cambia sólo la variante indicada. |
+| `PUT /admin/products/:productGid/publication` | Publica/despublica en la publicación Headless configurada. |
+| `GET /admin/featured-catalog` | Colección de hoy, elegibles, orden y salud. |
+| `PUT /admin/featured-catalog/products/:productGid` | Agrega o quita una pieza. |
+| `PUT /admin/featured-catalog` | Reemplaza el orden completo; puede devolver un job. |
+| `GET /admin/featured-catalog/jobs/:jobId` | Reconciliación de un reorder asíncrono. |
+| `PUT /admin/storefront-config` | Upsert completo del metaobjeto con versión. |
+| `GET/PUT /admin/external-policy/:sourceId` | Lee o cambia una política del monitor. |
+| `POST /admin/sync` | Inicia sync de un canal permitido. |
+| `GET /admin/sync/jobs/:jobId` | Consulta el resultado del sync. |
 
-La app envía el token corto de la sesión del dueño. El servicio debe validar
-identidad y rol, aplicar rate limit y guardar auditoría. El adaptador hacia
-`catalog_monitor` usa una firma HMAC de servicio con timestamp y nonce; nunca
-se envía esa credencial a Flutter.
-El token de Shopify Admin, secretos y credenciales de Postgres viven únicamente
-en el servidor.
+Las campañas y automatizaciones usan las rutas `/admin/notifications/*`,
+`/admin/notification-campaigns/*` y `/admin/notification-rules`; comparten la
+misma autorización de propietario.
 
-## Permisos de Shopify pendientes de habilitar
+## Secuencia de una escritura
 
+Una escritura normal sigue este orden:
+
+1. Autenticar la sesión y resolver el principal activo.
+2. Confirmar que la clase de mutación está habilitada.
+3. Validar payload, límites y `Idempotency-Key`.
+4. Aplicar rate limit por actor.
+5. Leer el recurso actual y rechazar una versión obsoleta con `409`.
+6. Ejecutar una sola mutación contra Shopify o el servicio interno.
+7. Leer la representación canónica; no asumir éxito por un `200` parcial.
+8. Registrar resultado y `requestId` en auditoría.
+9. Devolver el estado canónico para refrescar Flutter.
+10. Usar webhooks idempotentes como reconciliación posterior.
+
+No se reintenta ciegamente una mutación Shopify cuyo resultado sea ambiguo.
+Los `userErrors`, rate limits y fallos upstream se convierten en errores
+acotados sin exponer payloads ni secretos.
+
+## Guardas y kill switches
+
+| Variable | Alcance |
+|---|---|
+| `ADMIN_MUTATIONS_ENABLED` | Interruptor maestro de toda escritura administrativa. |
+| `ADMIN_SHOPIFY_WRITES_ENABLED` | Productos, publicación, Catálogo de hoy y portada. |
+| `ADMIN_EXTERNAL_WRITES_ENABLED` | Políticas y acciones mutables del monitor externo. |
+| `NOTIFICATIONS_ENABLED` | Campañas, entregas y automatizaciones. |
+
+El orden seguro de activación es: lecturas, portada, Catálogo de hoy, producto,
+publicación, fuentes externas y notificaciones. Para apagar rápidamente, basta
+deshabilitar el interruptor maestro; las lecturas y la auditoría permanecen
+disponibles.
+
+## Recursos Shopify
+
+El app config declara estos scopes mínimos:
+
+- `read_orders`, `read_customers`
 - `read_products`, `write_products`
 - `read_publications`, `write_publications`
-- `read_metaobjects`, `write_metaobjects` para la configuración compartida
-- permiso Storefront para leer el metaobject y la colección manual
+- `read_metaobjects`, `write_metaobjects`
 
-No se necesita `write_inventory`, `write_orders` ni `write_customers` para el
-primer release. Los permisos se habilitan por endpoint después de validar la
-mutación en staging; editar un TOML no concede permisos por sí mismo.
+No se solicitan `write_inventory`, `write_orders` ni `write_customers`.
 
-Los permisos se habilitan por endpoint después de validar la mutación en la
-tienda de staging. No se deben conceder todos de una vez.
+La portada usa la definición app-owned `$app:storefront_config`, handle
+`monetta`, con `merchant_read_write` en Admin y `public_read` en Storefront.
+Contiene `announcement`, `show_hero`, `show_newest`,
+`show_todays_picks`, `show_external_picks` y `version`.
 
-## Guardas obligatorias
+El Catálogo de hoy usa una sola colección manual:
 
-- Producción requiere confirmación explícita y una entrada de auditoría.
-- El backend repite la autorización del dueño en cada petición.
-- Un fallo de Shopify no se presenta como publicación exitosa en la app.
-- Desactivar una fuente conserva historial; no elimina productos.
-- Nunca hay una acción para evadir CAPTCHA o forzar un proveedor bloqueado.
-- Un producto externo sólo entra a Shopify tras compra, recepción y aprobación
-  manual del propietario.
+```text
+title:      Today's Picks
+handle:     monetta-todays-picks
+sortOrder:  MANUAL
+channel:    Monetta Staging Headless (en staging)
+```
+
+Sólo son elegibles productos activos y ya publicados en Headless. Seleccionar
+una pieza no la publica silenciosamente. El runtime falla de forma explícita
+si faltan la colección o la publicación; nunca crea recursos desde un guardado
+ordinario del propietario.
+
+Los webhooks apuntan al backend estable, verifican HMAC con el client secret de
+la app y procesan entregas de forma idempotente. El secreto vive sólo en
+`SHOPIFY_WEBHOOK_SECRET` del servidor.
+
+## Staging actual
+
+| Componente | Valor |
+|---|---|
+| Backend | `https://monetta-accounts-staging.fly.dev` |
+| Base de datos | Proyecto Neon separado `monetta-staging` |
+| Tienda | `monetta-staging.myshopify.com` |
+| App release | `monetta-staging-4` |
+| Colección | `monetta-todays-picks`, manual y publicada a Headless |
+| Portada | Metaobjeto `monetta`, creado con defaults seguros |
+
+Las mutaciones administrativas de staging permanecen apagadas hasta
+provisionar un propietario estable y completar la verificación owner/non-owner.
+El monitor externo puede mostrarse degradado o no disponible sin romper las
+secciones Shopify.
+
+## Operación y diagnóstico
+
+Pruebas rápidas del backend:
+
+```bash
+curl -fsS https://monetta-accounts-staging.fly.dev/livez
+curl -fsS https://monetta-accounts-staging.fly.dev/healthz
+flyctl status --app monetta-accounts-staging
+flyctl secrets list --app monetta-accounts-staging
+```
+
+`flyctl secrets list` sólo debe usarse para nombres/digests; nunca imprimir
+valores. Para diagnosticar una acción, buscar el `requestId` mostrado por la
+app en los logs y en `admin_audit_events`.
+
+Interpretación de errores comunes:
+
+| Código/estado | Acción |
+|---|---|
+| `401 UNAUTHORIZED` | Renovar la sesión o volver a iniciar sesión. |
+| `403 FORBIDDEN` | Revisar el principal estable; no ampliar permisos desde Flutter. |
+| `409 STALE_RESOURCE` | Refrescar, revisar el valor nuevo y decidir otra vez. |
+| `429` | Esperar; no repetir el botón rápidamente. |
+| `FEATURED_COLLECTION_NOT_CONFIGURED` | Revisar IDs/handle y publicación Headless del deployment. |
+| `503` de una integración | Mantener el resto del panel; revisar sólo ese upstream. |
+| Escrituras deshabilitadas | Revisar kill switches y la fase del rollout. |
+
+## Producción
+
+Producción es un despliegue separado: app Shopify, base de datos, secretos,
+colección, publicación, metaobjeto, propietarios y auditoría propios. No se
+copian GIDs de staging. La ruta de bajo costo documentada usa un VPS Ubuntu con
+Postgres privado, Caddy/TLS, backups cifrados fuera del host y health checks.
+El detalle y el orden de habilitación están en la sección WP-10 de
+[`ADMIN_CONTROL_PLANE_IMPLEMENTATION_PLAN.md`](ADMIN_CONTROL_PLANE_IMPLEMENTATION_PLAN.md).

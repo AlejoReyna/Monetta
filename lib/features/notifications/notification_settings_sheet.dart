@@ -1,4 +1,4 @@
-/// Shopper-facing consent controls. The OS prompt only appears after Save.
+/// Granular notification controls for explicit preference-management flows.
 library;
 
 import 'package:flutter/material.dart';

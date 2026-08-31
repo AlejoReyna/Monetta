@@ -89,6 +89,11 @@ void main() {
     expect(menuText('Todas las marcas'), findsOneWidget);
     expect(menuText('Mayoreo'), findsOneWidget);
     expect(menuText('Contacto'), findsOneWidget);
+    expect(menuText('TIENDA'), findsNothing);
+    expect(menuText('MÁS DE MONETTA'), findsNothing);
+    expect(menuText('Mis notificaciones'), findsNothing);
+    expect(menuText('Apariencia'), findsNothing);
+    expect(find.byKey(const Key('side-menu-appearance')), findsOneWidget);
     expect(find.text('Todo lo que buscas,\nen un solo lugar.'), findsNothing);
     expect(find.text('Explorar catálogo'), findsNothing);
     expect(find.text('Mi bolsa'), findsNothing);

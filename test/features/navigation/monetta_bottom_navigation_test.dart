@@ -25,6 +25,8 @@ void main() {
     expect(find.byKey(const Key('bottom-nav-catalog')), findsOneWidget);
     expect(find.byKey(const Key('bottom-nav-bag')), findsOneWidget);
     expect(find.byKey(const Key('bottom-nav-account')), findsOneWidget);
+    expect(find.text('Carrito'), findsOneWidget);
+    expect(find.text('Bolsa'), findsNothing);
     expect(find.text('2'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
@@ -94,7 +96,16 @@ void main() {
     final surfaceDecoration =
         tester.widget<DecoratedBox>(surface).decoration as BoxDecoration;
     expect(surfaceDecoration.color, MonettaColors.light.navigationSurface);
+    expect(surfaceDecoration.color, const Color(0xFFF7F7F7));
     expect(surfaceDecoration.border, isNotNull);
+
+    final homeCenter = tester.getCenter(
+      find.byKey(const Key('bottom-nav-home')),
+    );
+    final catalogCenter = tester.getCenter(
+      find.byKey(const Key('bottom-nav-catalog')),
+    );
+    expect(catalogCenter.dx - homeCenter.dx, 105);
   });
 }
 

@@ -8,6 +8,7 @@ import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../domain/catalog_item.dart' show Money;
+import 'motion.dart';
 import 'shopper_copy.dart';
 
 // ---------------------------------------------------------------------------
@@ -23,6 +24,12 @@ const Color kInkMuted = Color(0xFF737373);
 
 /// Monetta's accent, rationed. See the library note.
 const Color kGold = Color(0xFFAA7D44);
+
+/// Purple used when an animated home-section title has fully resolved.
+const Color kPurple = Color(0xFF725A82);
+
+/// A lighter counterpart that keeps small purple copy legible on dark canvas.
+const Color kPurpleOnDark = Color(0xFFB79AC7);
 
 /// Pale ground used for catalog photography and quiet footer surfaces.
 const Color kMist = Color(0xFFF5F5F5);
@@ -111,7 +118,7 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     warningSurface: Color(0xFFF7F0E6),
     successSurface: Color(0xFFEAF4EC),
     scrim: Color(0x52000000),
-    navigationSurface: Color(0xFFFBFAF7),
+    navigationSurface: Color(0xFFF7F7F7),
     navigationSelection: Color(0x24AA7D44),
     navigationForeground: Color(0xFF3A3937),
   );
@@ -484,11 +491,13 @@ class EditorialTitleReveal extends StatefulWidget {
   const EditorialTitleReveal({
     required this.text,
     required this.style,
+    this.onCompleted,
     super.key,
   });
 
   final String text;
   final TextStyle style;
+  final VoidCallback? onCompleted;
 
   @override
   State<EditorialTitleReveal> createState() => _EditorialTitleRevealState();
@@ -503,12 +512,32 @@ class _EditorialTitleRevealState extends State<EditorialTitleReveal>
   ScrollPosition? _scrollPosition;
   bool _checkScheduled = false;
   bool _started = false;
+  bool _completionNotified = false;
 
   bool get _motionDisabled {
     final media = MediaQuery.maybeOf(context);
     return WidgetsBinding.instance.runtimeType.toString().contains('Test') ||
         media?.disableAnimations == true ||
         media?.accessibleNavigation == true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addStatusListener(_handleStatus);
+  }
+
+  void _handleStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) return;
+    _notifyCompleted();
+  }
+
+  void _notifyCompleted() {
+    if (_completionNotified) return;
+    _completionNotified = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onCompleted?.call();
+    });
   }
 
   @override
@@ -587,21 +616,41 @@ class _EditorialTitleRevealState extends State<EditorialTitleReveal>
 }
 
 /// Section opener: tracked kicker over a serif title, on the 64px rhythm.
-class SectionHeading extends StatelessWidget {
+class SectionHeading extends StatefulWidget {
   const SectionHeading({
     required this.kicker,
     required this.title,
     this.trailing,
+    this.animateKickerColor = false,
     super.key,
   });
 
   final String kicker;
   final String title;
   final Widget? trailing;
+  final bool animateKickerColor;
+
+  @override
+  State<SectionHeading> createState() => _SectionHeadingState();
+}
+
+class _SectionHeadingState extends State<SectionHeading> {
+  bool _titleRevealed = false;
+
+  void _handleTitleRevealed() {
+    if (_titleRevealed || !mounted) return;
+    setState(() => _titleRevealed = true);
+  }
 
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
+    final completedKickerColor = Theme.of(context).brightness == Brightness.dark
+        ? kPurpleOnDark
+        : kPurple;
+    final kickerColor = widget.animateKickerColor
+        ? (_titleRevealed ? completedKickerColor : colors.accent)
+        : colors.contentMuted;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: Row(
@@ -611,19 +660,23 @@ class SectionHeading extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  kicker.toUpperCase(),
-                  style: eyebrow(color: colors.contentMuted),
+                AnimatedDefaultTextStyle(
+                  duration: reduceMotion(context) ? Duration.zero : kSwap,
+                  curve: kMotionCurve,
+                  style: eyebrow(color: kickerColor),
+                  child: Text(widget.kicker.toUpperCase()),
                 ),
                 const SizedBox(height: 8),
                 EditorialTitleReveal(
-                  text: title,
+                  text: widget.title,
                   style: editorial(25, color: colors.contentPrimary),
+                  onCompleted:
+                      widget.animateKickerColor ? _handleTitleRevealed : null,
                 ),
               ],
             ),
           ),
-          if (trailing != null) trailing!,
+          if (widget.trailing != null) widget.trailing!,
         ],
       ),
     );
