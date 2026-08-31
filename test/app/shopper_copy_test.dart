@@ -9,6 +9,15 @@ void main() {
     );
   });
 
+  test('Shopify descriptions preserve readable fact rows', () {
+    expect(
+      shopifyDescriptionText(
+        '<p>Marca: Guess<br>Color: Negro</p><p>Medidas:<br>20 × 10 cm</p>',
+      ),
+      'Marca: Guess\nColor: Negro\nMedidas:\n20 × 10 cm',
+    );
+  });
+
   test('factualDescription is inventory language, not poetry', () {
     final text = factualDescription(
       title: 'Bolsa Guess Crossbody',
@@ -34,6 +43,13 @@ void main() {
       cardPieceName(title: 'Bolsa tote negra', colorSlug: 'negro'),
       'Bolsa tote negra',
     );
+  });
+
+  test('internal tokens never leak into shopper-facing names', () {
+    expect(humanizeCatalogValue('michael_kors'), 'Michael Kors');
+    expect(humanizeCatalogValue('coach_coach'), 'Coach');
+    expect(shopperProductName('jet_set_jet_bag'), 'Jet Set Jet Bag');
+    expect(shopperProductName('Bolsa  Bolsa Guess'), 'Bolsa Guess');
   });
 
   test('partner quote carries the wholesale terms and source', () {

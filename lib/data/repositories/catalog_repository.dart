@@ -100,14 +100,43 @@ class CatalogRepository {
         metadata.source != CatalogCacheSource.legacyCache) {
       return;
     }
-    final cachedIds = (await cache.allProducts()).map((p) => p.id).toSet();
-    if (cachedIds.isEmpty) return;
+    final cachedProducts = await cache.allProducts();
+    final cachedById = {
+      for (final product in cachedProducts) product.id: product,
+    };
+    if (cachedById.isEmpty) return;
 
-    final missing = (catalogJson['products'] as List<dynamic>)
+    final repairs = (catalogJson['products'] as List<dynamic>)
         .map((e) => productFromCatalogSnapshot(e as Map<String, dynamic>))
-        .where((product) => !cachedIds.contains(product.id))
+        .map((assetProduct) {
+          final cached = cachedById[assetProduct.id];
+          if (cached == null) return assetProduct;
+          if (cached.descriptionHtml.trim().isNotEmpty ||
+              assetProduct.descriptionHtml.trim().isEmpty) {
+            return null;
+          }
+          // Backfill only the newly preserved description. Keep every other
+          // cached field so a bundled fallback cannot roll catalog data back.
+          return Product(
+            id: cached.id,
+            handle: cached.handle,
+            title: cached.title,
+            vendor: cached.vendor,
+            productType: cached.productType,
+            tags: cached.tags,
+            variants: cached.variants,
+            images: cached.images,
+            createdAt: cached.createdAt,
+            updatedAt: cached.updatedAt,
+            descriptionHtml: assetProduct.descriptionHtml,
+            collectionHandles: cached.collectionHandles,
+            brandOverride: cached.brandOverride,
+            categoryOverride: cached.categoryOverride,
+          );
+        })
+        .whereType<Product>()
         .toList();
-    await cache.upsertProducts(missing);
+    await cache.upsertProducts(repairs);
   }
 
   Future<CatalogCacheMetadata?> loadOrCreateMetadata(
@@ -210,6 +239,9 @@ Product productFromCatalogSnapshot(Map<String, dynamic> json) => Product(
       productType: json['product_type'] as String,
       tags: (json['tags'] as List<dynamic>).cast<String>(),
       images: (json['images'] as List<dynamic>).cast<String>(),
+      descriptionHtml: json['description_html'] as String? ??
+          json['body_html'] as String? ??
+          '',
       createdAt: DateTime.parse(json['created_at'] as String),
       updatedAt: DateTime.parse(json['updated_at'] as String),
       variants: (json['variants'] as List<dynamic>).map((v) {

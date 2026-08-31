@@ -115,6 +115,16 @@ void main() {
       find.byKey(const Key('catalog-section-transition')),
       findsOneWidget,
     );
+    final switcher = tester.widget<AnimatedSwitcher>(
+      find.byKey(const Key('catalog-section-transition')),
+    );
+    const current = SizedBox(key: ValueKey('current'));
+    const previous = SizedBox(key: ValueKey('previous'));
+    expect(
+      switcher.layoutBuilder(current, const [previous]),
+      same(current),
+      reason: 'the outgoing product grid must not remain in the layout',
+    );
     expect(
       find.byKey(const ValueKey('catalog-section-Colección')),
       findsOneWidget,
@@ -131,6 +141,20 @@ void main() {
       find.byKey(const ValueKey('catalog-section-Monetta')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('humanizes canonical brand and product tokens', (tester) async {
+    await _pump(
+      tester,
+      CatalogBrowseScreen(
+        items: [_external(1, title: 'jet_set_bag', brand: 'michael_kors')],
+      ),
+    );
+
+    expect(find.text('Michael Kors'), findsOneWidget);
+    expect(find.text('Jet Set Bag'), findsOneWidget);
+    expect(find.text('michael_kors'), findsNothing);
+    expect(find.text('jet_set_bag'), findsNothing);
   });
 
   testWidgets(

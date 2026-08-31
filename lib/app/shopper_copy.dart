@@ -69,19 +69,60 @@ const Map<String, String> kPatternLabels = {
 };
 
 String categoryLabel(String? slug) =>
-    slug == null ? '' : (kCategoryLabels[slug] ?? slug);
+    slug == null ? '' : (kCategoryLabels[slug] ?? humanizeCatalogValue(slug));
 
 String categoryPlural(String? slug) =>
-    slug == null ? '' : (kCategoryPlural[slug] ?? slug);
+    slug == null ? '' : (kCategoryPlural[slug] ?? humanizeCatalogValue(slug));
 
 String silhouetteLabel(String? slug) =>
-    slug == null ? '' : (kSilhouetteLabels[slug] ?? slug);
+    slug == null ? '' : (kSilhouetteLabels[slug] ?? humanizeCatalogValue(slug));
 
 String colorLabel(String? slug) =>
-    slug == null ? '' : (kColorLabels[slug] ?? slug);
+    slug == null ? '' : (kColorLabels[slug] ?? humanizeCatalogValue(slug));
 
 String patternLabel(String? slug) =>
-    slug == null ? '' : (kPatternLabels[slug] ?? slug);
+    slug == null ? '' : (kPatternLabels[slug] ?? humanizeCatalogValue(slug));
+
+/// Converts an internal catalog token into shopper-facing text.
+///
+/// Canonical facets intentionally use values such as `michael_kors` and
+/// `animal_print`. Those values are stable identifiers but must never leak
+/// into the catalog UI. Consecutive duplicate tokens are also collapsed so
+/// malformed input such as `coach_coach` does not become "Coach Coach".
+String humanizeCatalogValue(String value) {
+  final rawWords = value
+      .trim()
+      .replaceAll(RegExp(r'[_]+'), ' ')
+      .replaceAll(RegExp(r'\s+'), ' ')
+      .split(' ')
+      .where((word) => word.isNotEmpty);
+  final words = <String>[];
+  for (final word in rawWords) {
+    if (words.isNotEmpty && words.last.toLowerCase() == word.toLowerCase()) {
+      continue;
+    }
+    words.add(word);
+  }
+  return words
+      .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
+      .join(' ');
+}
+
+/// Cleans a source title for presentation without replacing Shopify's value.
+String shopperProductName(String title) {
+  final normalized = title.trim().replaceAll(RegExp(r'\s+'), ' ');
+  if (normalized.isEmpty) return '';
+  if (normalized.contains('_')) return humanizeCatalogValue(normalized);
+
+  final words = <String>[];
+  for (final word in normalized.split(' ')) {
+    if (words.isNotEmpty && words.last.toLowerCase() == word.toLowerCase()) {
+      continue;
+    }
+    words.add(word);
+  }
+  return words.join(' ');
+}
 
 String stripHtml(String html) {
   final withoutTags = html.replaceAll(RegExp(r'<[^>]+>'), ' ');
@@ -92,6 +133,31 @@ String stripHtml(String html) {
       .replaceAll('&#39;', "'")
       .replaceAll(RegExp(r'\s+'), ' ')
       .trim();
+}
+
+/// Plain-text Shopify description that preserves the authored fact hierarchy.
+///
+/// Catalog descriptions commonly use `<br>` and paragraphs for brand, color,
+/// type and dimensions. [stripHtml] is useful for excerpts, but flattening all
+/// of those facts into one line makes a product page difficult to scan.
+String shopifyDescriptionText(String html) {
+  final withBreaks = html
+      .replaceAll(RegExp(r'<\s*br\s*/?\s*>', caseSensitive: false), '\n')
+      .replaceAll(
+        RegExp(r'</\s*(?:p|div|li|h[1-6])\s*>', caseSensitive: false),
+        '\n',
+      )
+      .replaceAll(RegExp(r'<\s*li\b[^>]*>', caseSensitive: false), '• ')
+      .replaceAll(RegExp(r'<[^>]+>'), ' ')
+      .replaceAll('&nbsp;', ' ')
+      .replaceAll('&amp;', '&')
+      .replaceAll('&quot;', '"')
+      .replaceAll('&#39;', "'");
+  return withBreaks
+      .split(RegExp(r'[\r\n]+'))
+      .map((line) => line.replaceAll(RegExp(r'[ \t]+'), ' ').trim())
+      .where((line) => line.isNotEmpty)
+      .join('\n');
 }
 
 /// One factual sentence when Shopify has no description.
@@ -119,7 +185,7 @@ String? factualDescription({
     buffer.write(kind[0].toUpperCase());
     buffer.write(kind.substring(1));
   } else {
-    buffer.write(title);
+    buffer.write(shopperProductName(title));
   }
   if (brand != null) buffer.write(' $brand');
   if (color.isNotEmpty) buffer.write(' en ${color.toLowerCase()}');
@@ -182,6 +248,7 @@ const List<String> kTrustRows = [
 /// already in the string. Hierarchy on the card is letter-case, not extra
 /// words.
 String cardPieceName({required String title, String? colorSlug}) {
+  title = shopperProductName(title);
   final color = colorLabel(colorSlug);
   if (color.isEmpty) return title;
   final lower = title.toLowerCase();

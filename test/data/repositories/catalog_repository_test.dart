@@ -125,6 +125,7 @@ void main() {
             'vendor': 'Monetta',
             'product_type': 'Bolsa',
             'tags': <String>[],
+            'description_html': '<p>Descripción Shopify</p>',
             'images': <String>[],
             'created_at': '2026-01-01T00:00:00Z',
             'updated_at': '2026-01-01T00:00:00Z',
@@ -148,6 +149,7 @@ void main() {
         seeded.single.variants.single.id,
         'gid://shopify/ProductVariant/11',
       );
+      expect(seeded.single.descriptionHtml, '<p>Descripción Shopify</p>');
       final metadata = await cache.metadata();
       expect(metadata?.source, CatalogCacheSource.asset);
       expect(metadata?.productCount, seeded.length);
@@ -172,6 +174,54 @@ void main() {
         ],
       });
       expect(await cache.allProducts(), hasLength(1));
+    });
+
+    test('asset repair backfills only a missing cached description', () async {
+      final cache = CatalogCacheStore(db);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: SyncCursorStore(db),
+        rules: _emptyRules(),
+      );
+      await repo.seedFromAssetIfEmpty({
+        'products': [
+          {
+            'id': 1,
+            'handle': 'cached-handle',
+            'title': 'Nombre guardado',
+            'vendor': 'Monetta',
+            'product_type': 'Bolsa',
+            'tags': <String>[],
+            'images': <String>[],
+            'created_at': '2026-01-01T00:00:00Z',
+            'updated_at': '2026-08-30T00:00:00Z',
+            'variants': <Map<String, dynamic>>[],
+          },
+        ],
+      });
+
+      await repo.addMissingFromAsset({
+        'products': [
+          {
+            'id': 1,
+            'handle': 'older-asset-handle',
+            'title': 'Nombre obsoleto',
+            'vendor': 'Monetta',
+            'product_type': 'Bolsa',
+            'tags': <String>[],
+            'description_html': '<p>Descripción recuperada</p>',
+            'images': <String>[],
+            'created_at': '2026-01-01T00:00:00Z',
+            'updated_at': '2026-01-01T00:00:00Z',
+            'variants': <Map<String, dynamic>>[],
+          },
+        ],
+      });
+
+      final repaired = (await cache.allProducts()).single;
+      expect(repaired.title, 'Nombre guardado');
+      expect(repaired.handle, 'cached-handle');
+      expect(repaired.descriptionHtml, '<p>Descripción recuperada</p>');
     });
 
     test('the bundled asset cannot mutate an authoritative remote cache',

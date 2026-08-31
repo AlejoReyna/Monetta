@@ -12,6 +12,7 @@ library;
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
 import '../product/external_product_screen.dart';
@@ -246,7 +247,7 @@ class _ExternalCardState extends State<_ExternalCard> {
           ),
           const SizedBox(height: 6),
           Text(
-            widget.item.title,
+            shopperProductName(widget.item.title),
             maxLines: 2,
             overflow: TextOverflow.ellipsis,
             style: display(14, weight: FontWeight.w400, height: 1.35),

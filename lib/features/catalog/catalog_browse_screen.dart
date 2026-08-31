@@ -11,6 +11,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
 import '../../main.dart';
@@ -329,11 +330,17 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       body: ClipRect(
         child: AnimatedSwitcher(
           key: const Key('catalog-section-transition'),
-          duration: reduceMotion(context) ? Duration.zero : kSettle,
+          duration: reduceMotion(context) ? Duration.zero : kSwap,
           switchInCurve: kMotionCurve,
           switchOutCurve: kMotionCurve,
+          // The default layout stacks outgoing and incoming grids, which made
+          // the previous category remain visible beneath the new products.
+          layoutBuilder: (currentChild, previousChildren) =>
+              currentChild ?? const SizedBox.shrink(),
           transitionBuilder: (child, animation) => FadeTransition(
-            opacity: animation,
+            // Start mostly visible: the new category is immediate, while the
+            // final 22% of opacity gives the change a quiet sense of motion.
+            opacity: Tween<double>(begin: 0.78, end: 1).animate(animation),
             child: SlideTransition(
               position: Tween<Offset>(
                 begin: const Offset(0, 0.012),
@@ -378,6 +385,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                     gridDelegate: _gridDelegate,
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _BrowseTile(
+                        key: ValueKey(visibleItems[index].sourceScopedId),
                         item: visibleItems[index],
                         openExternalLink: widget.openExternalLink,
                       ),
@@ -1059,7 +1067,11 @@ class _EmptyCatalogState extends StatelessWidget {
 }
 
 class _BrowseTile extends StatelessWidget {
-  const _BrowseTile({required this.item, required this.openExternalLink});
+  const _BrowseTile({
+    required this.item,
+    required this.openExternalLink,
+    super.key,
+  });
 
   final CatalogItem item;
   final ExternalLinkOpener openExternalLink;
@@ -1092,9 +1104,10 @@ class _BrowseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final displayTitle = shopperProductName(item.title);
     return Semantics(
       button: true,
-      label: '${item.merchant}, ${item.title}',
+      label: '${item.merchant}, $displayTitle',
       child: GestureDetector(
         behavior: HitTestBehavior.opaque,
         onTap: () => _tap(context),
@@ -1110,7 +1123,8 @@ class _BrowseTile extends StatelessWidget {
                   children: [
                     MonettaImage(
                       url: item.imageUrl,
-                      fallbackLabel: item.imageUrl == null ? null : item.title,
+                      fallbackLabel:
+                          item.imageUrl == null ? null : displayTitle,
                     ),
                     if (item.isExternal)
                       const Positioned(
@@ -1141,7 +1155,7 @@ class _BrowseTile extends StatelessWidget {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    item.title,
+                    displayTitle,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: sans(
@@ -1232,7 +1246,9 @@ int _comparePriceAsc(CatalogItem a, CatalogItem b) {
 
 String _brandFor(CatalogItem item) {
   final brand = item.brand.trim();
-  return brand.isEmpty ? item.merchant.trim() : brand;
+  return humanizeCatalogValue(
+    brand.isEmpty ? item.merchant.trim() : brand,
+  );
 }
 
 String? _bagTypeFor(CatalogItem item) {

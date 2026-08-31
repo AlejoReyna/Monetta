@@ -9,6 +9,7 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
 import '../catalog/extracted_badge.dart';
@@ -132,7 +133,10 @@ class _ExternalProductScreenState extends State<ExternalProductScreen> {
                   style: eyebrow(size: 10.5),
                 ),
                 const SizedBox(height: 12),
-                Text(widget.item.title, style: display(26)),
+                Text(
+                  shopperProductName(widget.item.title),
+                  style: display(26),
+                ),
                 const SizedBox(height: 16),
                 Text(
                   formatCatalogMoney(_price),

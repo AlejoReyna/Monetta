@@ -79,6 +79,9 @@ Map<String, Object?> _normalizeProduct(Map<String, dynamic> product) => {
       'created_at': product['created_at'],
       'updated_at': product['updated_at'],
       'tags': product['tags'],
+      // Shopify exposes this as `body_html`. Preserve it in the normalized
+      // snapshot so cache-first/offline product pages keep their descriptions.
+      'description_html': product['body_html'],
       'images': [
         for (final image in product['images'] as List<dynamic>)
           (image as Map)['src'],

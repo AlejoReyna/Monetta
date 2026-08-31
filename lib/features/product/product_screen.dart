@@ -134,18 +134,20 @@ class _ProductScreenState extends State<ProductScreen> {
     final onSale = compare != null && compare > price;
     final inStock = selected?.available ?? product.isInStock;
     final images = product.images.isEmpty ? <String?>[null] : product.images;
-    final description = () {
-      final html = stripHtml(product.descriptionHtml);
-      if (html.isNotEmpty) return html;
-      return factualDescription(
-        title: product.title,
-        brandSlug: facets?.brand?.value,
-        categorySlug: facets?.category?.value,
-        silhouetteSlug: facets?.silhouette?.value,
-        colorSlug:
-            facets?.colors.isEmpty == true ? null : facets!.colors.first.value,
-      );
-    }();
+    final shopifyDescription = shopifyDescriptionText(product.descriptionHtml);
+    // Shopify remains the primary source of truth. When it is genuinely empty,
+    // compose one conservative sentence from normalized catalog facts.
+    final description = shopifyDescription.isNotEmpty
+        ? shopifyDescription
+        : factualDescription(
+            title: product.title,
+            brandSlug: facets?.brand?.value,
+            categorySlug: facets?.category?.value,
+            silhouetteSlug: facets?.silhouette?.value,
+            colorSlug: facets?.colors.isEmpty == true
+                ? null
+                : facets!.colors.first.value,
+          );
     final recent = store.recentlyViewed(excluding: product.id);
     final related = facets?.brand?.value == null
         ? const <Product>[]
@@ -229,7 +231,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   ],
                   Reveal(
                     child: Text(
-                      product.title,
+                      shopperProductName(product.title),
                       maxLines: 3,
                       overflow: TextOverflow.ellipsis,
                       style: display(26),
@@ -317,7 +319,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       ],
                     ),
                   ],
-                  if (description != null) ...[
+                  if (description != null && description.isNotEmpty) ...[
                     const SizedBox(height: 28),
                     Text(description, style: sans(size: 13.5, height: 1.6)),
                   ],
