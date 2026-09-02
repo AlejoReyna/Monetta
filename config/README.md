@@ -17,10 +17,12 @@ make run-staging
    real values, and leave the real file gitignored.
 4. Real production values also belong in CI secret stores / hosting dashboards,
    not only on a laptop.
-5. `APP_ENV` is mandatory. A bare `flutter run` intentionally stops on a
-   configuration screen instead of silently serving a potentially stale
-   bundled catalog. Offline-only development must opt in with
-   `APP_ENV=local` and `ALLOW_OFFLINE_CATALOG=true`.
+5. `APP_ENV` is mandatory for staging and production builds. A bare Debug
+   launch (for example, the Xcode Run button) uses the bundled catalog in an
+   explicit local/offline mode so the app remains usable without pointing at
+   a remote environment. Use `make run-staging` for the authoritative staging
+   catalog; release builds without an environment still stop on the
+   configuration screen.
 
 ## Files
 

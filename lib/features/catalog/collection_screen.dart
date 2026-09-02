@@ -5,6 +5,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../app/catalog_store.dart';
 import '../../app/mixed_feed.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
@@ -19,6 +20,64 @@ import 'catalog_browse_screen.dart';
 import 'product_card.dart';
 
 enum _Sort { newest, priceAsc, priceDesc }
+
+/// Sections intentionally mirror the product catalog's filter panel, while
+/// only offering facets that exist in the collection being viewed.
+enum _CollectionFilterSection { sort, type, brand, availability }
+
+extension on _CollectionFilterSection {
+  String get label => switch (this) {
+        _CollectionFilterSection.sort => 'Ordenar por',
+        _CollectionFilterSection.type => 'Tipo de bolsa',
+        _CollectionFilterSection.brand => 'Marca',
+        _CollectionFilterSection.availability => 'Disponibilidad',
+      };
+}
+
+/// The choices a shopper can make without changing the collection route.
+///
+/// A [CollectionFilter] describes the destination that was opened (for
+/// example, Bolsas or a specific brand). This value describes only the
+/// temporary controls in the filter sheet, so cancelling the sheet never
+/// changes the product grid.
+class _CollectionFilters {
+  const _CollectionFilters({
+    this.sort = _Sort.newest,
+    this.inStockOnly = false,
+    this.brand,
+    this.silhouette,
+  });
+
+  final _Sort sort;
+  final bool inStockOnly;
+  final String? brand;
+  final String? silhouette;
+
+  _CollectionFilters copyWith({
+    _Sort? sort,
+    bool? inStockOnly,
+    Object? brand = _unchanged,
+    Object? silhouette = _unchanged,
+  }) {
+    return _CollectionFilters(
+      sort: sort ?? this.sort,
+      inStockOnly: inStockOnly ?? this.inStockOnly,
+      brand: identical(brand, _unchanged) ? this.brand : brand as String?,
+      silhouette: identical(silhouette, _unchanged)
+          ? this.silhouette
+          : silhouette as String?,
+    );
+  }
+
+  /// Mirrors the catalog's badge convention: ordering is not a filter, while
+  /// availability, brand, and bag type are.
+  int activeCountComparedTo(_CollectionFilters baseline) =>
+      (inStockOnly ? 1 : 0) +
+      (brand != baseline.brand ? 1 : 0) +
+      (silhouette != baseline.silhouette ? 1 : 0);
+}
+
+const Object _unchanged = Object();
 
 class CollectionFilter {
   const CollectionFilter({
@@ -53,25 +112,20 @@ class CollectionScreen extends StatefulWidget {
 }
 
 class _CollectionScreenState extends State<CollectionScreen> {
-  String? _brand;
-  String? _silhouette;
-  bool _inStockOnly = false;
-  _Sort _sort = _Sort.newest;
+  late _CollectionFilters _filters;
+
+  _CollectionFilters get _initialFilters => _CollectionFilters(
+        brand: widget.filter.brand,
+        silhouette: widget.filter.silhouette,
+      );
 
   @override
   void initState() {
     super.initState();
-    _brand = widget.filter.brand;
-    _silhouette = widget.filter.silhouette;
+    _filters = _initialFilters;
   }
 
-  String get _sortLabel => switch (_sort) {
-        _Sort.newest => 'Más nuevas',
-        _Sort.priceAsc => 'Menor precio',
-        _Sort.priceDesc => 'Mayor precio',
-      };
-
-  List<Product> _items() {
+  List<Product> _scopedItems() {
     final store = StoreScope.of(context);
     final queryTerms = <String>{
       if (widget.filter.query?.trim().toLowerCase() case final query?
@@ -80,7 +134,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
       for (final term in widget.filter.queryTerms)
         if (term.trim().isNotEmpty) term.trim().toLowerCase(),
     };
-    final items = store.products.where((product) {
+    return store.products.where((product) {
       final facets = store.facetsFor(product.id);
       if (widget.filter.category != null &&
           facets?.category?.value != widget.filter.category) {
@@ -91,11 +145,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
           !product.collectionHandles.contains(widget.filter.collectionHandle)) {
         return false;
       }
-      if (_brand != null && facets?.brand?.value != _brand) return false;
-      if (_silhouette != null && facets?.silhouette?.value != _silhouette) {
-        return false;
-      }
-      if (_inStockOnly && !product.isInStock) return false;
       if (queryTerms.isEmpty) return true;
       final brand = facets?.brand?.value == null
           ? ''
@@ -108,10 +157,26 @@ class _CollectionScreenState extends State<CollectionScreen> {
         ...product.collectionHandles,
       ].join(' ').toLowerCase();
       return queryTerms.any(searchable.contains);
+    }).toList(growable: false);
+  }
+
+  List<Product> _items([_CollectionFilters? filters]) {
+    final selection = filters ?? _filters;
+    final store = StoreScope.of(context);
+    final items = _scopedItems().where((product) {
+      final facets = store.facetsFor(product.id);
+      if (selection.brand != null && facets?.brand?.value != selection.brand) {
+        return false;
+      }
+      if (selection.silhouette != null &&
+          facets?.silhouette?.value != selection.silhouette) {
+        return false;
+      }
+      return !selection.inStockOnly || product.isInStock;
     }).toList();
 
     items.sort((a, b) {
-      switch (_sort) {
+      switch (selection.sort) {
         case _Sort.priceAsc:
           return a.price.compareTo(b.price);
         case _Sort.priceDesc:
@@ -154,93 +219,78 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   void _clearFilters() {
-    setState(() {
-      _inStockOnly = false;
-      _sort = _Sort.newest;
-      _brand = widget.filter.brand;
-      _silhouette = widget.filter.silhouette;
-    });
+    setState(() => _filters = _initialFilters);
+  }
+
+  List<String> _brandsFor(Iterable<Product> products, CatalogStore store) {
+    final brands = <String>{
+      for (final product in products)
+        if (store.facetsFor(product.id)?.brand?.value case final value?) value,
+    }.toList();
+    brands.sort(
+      (a, b) => brandLabel(a).toLowerCase().compareTo(
+            brandLabel(b).toLowerCase(),
+          ),
+    );
+    return brands;
+  }
+
+  List<String> _silhouettesFor(
+    Iterable<Product> products,
+    CatalogStore store,
+  ) {
+    final silhouettes = <String>{
+      for (final product in products)
+        if (store.facetsFor(product.id)?.silhouette?.value case final value?)
+          value,
+    }.toList();
+    silhouettes.sort(
+      (a, b) => silhouetteLabel(a).toLowerCase().compareTo(
+            silhouetteLabel(b).toLowerCase(),
+          ),
+    );
+    return silhouettes;
   }
 
   Future<void> _openFilterSheet() async {
     final store = StoreScope.of(context);
-    final brands = store.availableBrands;
-    final silhouettes = {
-      for (final product in store.products)
-        if (store.facetsFor(product.id)?.silhouette?.value case final value?)
-          value,
-    }.toList()
-      ..sort();
-
-    await showModalBottomSheet<void>(
+    final scopedItems = _scopedItems();
+    final result = await showModalBottomSheet<_CollectionFilters>(
       context: context,
-      backgroundColor: context.monettaColors.surfaceRaised,
       isScrollControlled: true,
-      builder: (sheetContext) {
-        return StoreScope(
-          notifier: store,
-          child: _FilterSheet(
-            sort: _sort,
-            inStockOnly: _inStockOnly,
-            brand: _brand,
-            silhouette: _silhouette,
-            brands: brands,
-            silhouettes:
-                widget.filter.category == 'bolsa' ? silhouettes : const [],
-            countOf: _items,
-            onChanged: (sort, inStock, brand, silhouette) {
-              setState(() {
-                _sort = sort;
-                _inStockOnly = inStock;
-                _brand = brand;
-                _silhouette = silhouette;
-              });
-            },
-            onReset: () {
-              _clearFilters();
-              Navigator.of(sheetContext).pop();
-            },
-            onApply: () => Navigator.of(sheetContext).pop(),
-          ),
-        );
-      },
+      backgroundColor: Colors.transparent,
+      barrierColor: context.monettaColors.scrim,
+      builder: (_) => StoreScope(
+        notifier: store,
+        child: _CollectionFilterSheet(
+          initial: _filters,
+          reset: _initialFilters,
+          brands: _brandsFor(scopedItems, store),
+          silhouettes: _silhouettesFor(scopedItems, store),
+          resultCount: (selection) => _items(selection).length,
+        ),
+      ),
     );
+    if (result != null && mounted) setState(() => _filters = result);
   }
 
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
     final items = _items();
-    final silhouettes = {
-      for (final product in store.products)
-        if (store.facetsFor(product.id)?.silhouette?.value case final value?)
-          value,
-    }.toList()
-      ..sort();
-
-    final applied = <(String, VoidCallback)>[
-      if (_inStockOnly)
-        ('En stock', () => setState(() => _inStockOnly = false)),
-      if (_brand != null)
-        (
-          brandLabel(_brand!),
-          () => setState(() => _brand = null),
-        ),
-      if (_silhouette != null && widget.filter.category == 'bolsa')
-        (
-          silhouetteLabel(_silhouette!),
-          () => setState(() => _silhouette = null),
-        ),
-    ];
-
-    final countLabel = items.length == 1
-        ? '1 pieza ordenada por '
-        : '${items.length} piezas ordenadas por ';
+    final scopedItems = _scopedItems();
+    final silhouettes = _silhouettesFor(scopedItems, store);
 
     return Scaffold(
       extendBody: true,
       appBar: AppBar(
         title: Text(widget.title, style: display(16, weight: FontWeight.w500)),
+        actions: [
+          _CollectionFilterIconButton(
+            activeCount: _filters.activeCountComparedTo(_initialFilters),
+            onPressed: _openFilterSheet,
+          ),
+        ],
         bottom: const PreferredSize(
           preferredSize: Size.fromHeight(0.5),
           child: Divider(height: 0.5),
@@ -249,70 +299,22 @@ class _CollectionScreenState extends State<CollectionScreen> {
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (widget.filter.category == 'bolsa' && silhouettes.isNotEmpty)
+          if (silhouettes.isNotEmpty)
             _SilhouetteSiblingRail(
               slugs: silhouettes,
-              selected: _silhouette,
+              selected: _filters.silhouette,
               onSelected: (slug) => setState(() {
-                _silhouette = _silhouette == slug ? null : slug;
+                _filters = _filters.copyWith(
+                  silhouette: _filters.silhouette == slug ? null : slug,
+                );
               }),
-            ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 8),
-            child: Wrap(
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  countLabel,
-                  style: sans(
-                    size: 12.5,
-                    color: context.monettaColors.contentMuted,
-                  ),
-                ),
-                UnderlineLink(
-                  label: _sortLabel,
-                  onTap: _openFilterSheet,
-                  size: 12,
-                ),
-              ],
-            ),
-          ),
-          if (applied.isNotEmpty)
-            SizedBox(
-              height: 40,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.fromLTRB(16, 0, 16, 8),
-                itemCount: applied.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 8),
-                itemBuilder: (context, index) {
-                  final chip = applied[index];
-                  return GestureDetector(
-                    onTap: chip.$2,
-                    child: Container(
-                      alignment: Alignment.center,
-                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                      decoration: BoxDecoration(
-                        border: Border.all(
-                          color: context.monettaColors.divider,
-                          width: 0.5,
-                        ),
-                      ),
-                      child: Text(
-                        '${chip.$1}  ×',
-                        style: sans(size: 12),
-                      ),
-                    ),
-                  );
-                },
-              ),
             ),
           const Divider(height: 0.5),
           Expanded(
             child: items.isEmpty
                 ? _EmptyFilter(
                     onClear: _clearFilters,
-                    suggestions: store.products.take(4).toList(),
+                    suggestions: scopedItems.take(4).toList(),
                   )
                 : GridView.builder(
                     padding: const EdgeInsets.fromLTRB(12, 20, 12, 40),
@@ -464,203 +466,459 @@ class _EmptyFilter extends StatelessWidget {
   }
 }
 
-class _FilterSheet extends StatefulWidget {
-  const _FilterSheet({
-    required this.sort,
-    required this.inStockOnly,
-    required this.brand,
-    required this.silhouette,
-    required this.brands,
-    required this.silhouettes,
-    required this.countOf,
-    required this.onChanged,
-    required this.onReset,
-    required this.onApply,
+class _CollectionFilterIconButton extends StatelessWidget {
+  const _CollectionFilterIconButton({
+    required this.activeCount,
+    required this.onPressed,
   });
 
-  final _Sort sort;
-  final bool inStockOnly;
-  final String? brand;
-  final String? silhouette;
-  final List<String> brands;
-  final List<String> silhouettes;
-  final List<Product> Function() countOf;
-  final void Function(
-    _Sort sort,
-    bool inStock,
-    String? brand,
-    String? silhouette,
-  ) onChanged;
-  final VoidCallback onReset;
-  final VoidCallback onApply;
-
-  @override
-  State<_FilterSheet> createState() => _FilterSheetState();
-}
-
-class _FilterSheetState extends State<_FilterSheet> {
-  late _Sort _sort = widget.sort;
-  late bool _inStockOnly = widget.inStockOnly;
-  late String? _brand = widget.brand;
-  late String? _silhouette = widget.silhouette;
-
-  void _push() {
-    widget.onChanged(_sort, _inStockOnly, _brand, _silhouette);
-  }
+  final int activeCount;
+  final VoidCallback onPressed;
 
   @override
   Widget build(BuildContext context) {
-    return SafeArea(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 14, 20, 16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        IconButton(
+          key: const Key('collection-filter-button'),
+          tooltip: 'Filtrar y ordenar',
+          onPressed: onPressed,
+          icon: const Icon(Icons.tune_rounded, size: 24),
+        ),
+        if (activeCount > 0)
+          Positioned(
+            right: 3,
+            top: 5,
+            child: IgnorePointer(
               child: Container(
-                width: 36,
-                height: 2,
-                color: context.monettaColors.divider,
-              ),
-            ),
-            const SizedBox(height: 18),
-            Text('Ordenar'.toUpperCase(), style: eyebrow()),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 8,
-              runSpacing: 8,
-              children: [
-                for (final option in _Sort.values)
-                  _SheetChip(
-                    label: switch (option) {
-                      _Sort.newest => 'Más nuevas',
-                      _Sort.priceAsc => 'Menor precio',
-                      _Sort.priceDesc => 'Mayor precio',
-                    },
-                    selected: _sort == option,
-                    onTap: () {
-                      setState(() => _sort = option);
-                      _push();
-                    },
-                  ),
-              ],
-            ),
-            const SizedBox(height: 24),
-            Text('Filtrar'.toUpperCase(), style: eyebrow()),
-            const SizedBox(height: 12),
-            _SheetChip(
-              label: 'En stock',
-              selected: _inStockOnly,
-              onTap: () {
-                setState(() => _inStockOnly = !_inStockOnly);
-                _push();
-              },
-            ),
-            if (widget.brands.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final brand in widget.brands.take(8))
-                    _SheetChip(
-                      label: brandLabel(brand),
-                      selected: _brand == brand,
-                      onTap: () {
-                        setState(
-                          () => _brand = _brand == brand ? null : brand,
-                        );
-                        _push();
-                      },
-                    ),
-                ],
-              ),
-            ],
-            if (widget.silhouettes.isNotEmpty) ...[
-              const SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  for (final slug in widget.silhouettes)
-                    _SheetChip(
-                      label: silhouetteLabel(slug),
-                      selected: _silhouette == slug,
-                      onTap: () {
-                        setState(
-                          () => _silhouette = _silhouette == slug ? null : slug,
-                        );
-                        _push();
-                      },
-                    ),
-                ],
-              ),
-            ],
-            const SizedBox(height: 24),
-            Row(
-              children: [
-                TextButton(
-                  onPressed: widget.onReset,
-                  child: Text('Limpiar', style: sans(size: 13)),
+                key: const Key('collection-filter-count'),
+                constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                decoration: BoxDecoration(
+                  color: context.monettaColors.contentPrimary,
+                  shape: BoxShape.circle,
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: FilledButton(
-                    onPressed: widget.onApply,
-                    child: Text(
-                      'Ver ${widget.countOf().length} piezas'.toUpperCase(),
-                    ),
+                child: Text(
+                  '$activeCount',
+                  style: sans(
+                    size: 9,
+                    color: context.monettaColors.canvas,
+                    weight: FontWeight.w700,
+                    height: 1,
                   ),
                 ),
-              ],
+              ),
             ),
-          ],
+          ),
+      ],
+    );
+  }
+}
+
+class _CollectionFilterSheet extends StatefulWidget {
+  const _CollectionFilterSheet({
+    required this.initial,
+    required this.reset,
+    required this.brands,
+    required this.silhouettes,
+    required this.resultCount,
+  });
+
+  final _CollectionFilters initial;
+  final _CollectionFilters reset;
+  final List<String> brands;
+  final List<String> silhouettes;
+  final int Function(_CollectionFilters filters) resultCount;
+
+  @override
+  State<_CollectionFilterSheet> createState() => _CollectionFilterSheetState();
+}
+
+class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
+  late _CollectionFilters _selection = widget.initial;
+  final Set<_CollectionFilterSection> _expanded = {
+    _CollectionFilterSection.sort,
+  };
+
+  void _toggleExpanded(_CollectionFilterSection section) {
+    setState(() {
+      _expanded.contains(section)
+          ? _expanded.remove(section)
+          : _expanded.add(section);
+    });
+  }
+
+  void _clear() => setState(() => _selection = widget.reset);
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.monettaColors;
+    final resultCount = widget.resultCount(_selection);
+    return FractionallySizedBox(
+      heightFactor: 0.94,
+      child: Material(
+        color: context.monettaColors.surfaceRaised,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            children: [
+              SizedBox(
+                width: double.infinity,
+                height: 74,
+                child: Stack(
+                  alignment: Alignment.center,
+                  children: [
+                    Text(
+                      'Filtrar y ordenar',
+                      style: display(20, weight: FontWeight.w600),
+                    ),
+                    Positioned(
+                      right: 12,
+                      child: IconButton(
+                        key: const Key('collection-filter-close'),
+                        tooltip: 'Cerrar filtros',
+                        onPressed: () => Navigator.of(context).pop(),
+                        icon: const Icon(Icons.close_rounded, size: 28),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 0.5, color: context.monettaColors.divider),
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 18),
+                  child: Column(
+                    children: [
+                      _CollectionFilterAccordion(
+                        section: _CollectionFilterSection.sort,
+                        expanded:
+                            _expanded.contains(_CollectionFilterSection.sort),
+                        onTap: () =>
+                            _toggleExpanded(_CollectionFilterSection.sort),
+                        child: Column(
+                          children: [
+                            for (final option in _Sort.values)
+                              _CollectionFilterChoiceRow(
+                                key: Key(
+                                  'collection-filter-sort-${option.name}',
+                                ),
+                                label: switch (option) {
+                                  _Sort.newest => 'Más nuevas',
+                                  _Sort.priceAsc => 'Menor precio',
+                                  _Sort.priceDesc => 'Mayor precio',
+                                },
+                                selected: _selection.sort == option,
+                                radio: true,
+                                onTap: () => setState(
+                                  () => _selection = _selection.copyWith(
+                                    sort: option,
+                                  ),
+                                ),
+                              ),
+                          ],
+                        ),
+                      ),
+                      if (widget.silhouettes.isNotEmpty)
+                        _CollectionFilterAccordion(
+                          section: _CollectionFilterSection.type,
+                          expanded:
+                              _expanded.contains(_CollectionFilterSection.type),
+                          onTap: () =>
+                              _toggleExpanded(_CollectionFilterSection.type),
+                          child: Column(
+                            children: [
+                              for (final slug in widget.silhouettes)
+                                _CollectionFilterChoiceRow(
+                                  key: Key(
+                                    'collection-filter-silhouette-$slug',
+                                  ),
+                                  label: silhouetteLabel(slug),
+                                  selected: _selection.silhouette == slug,
+                                  radio: true,
+                                  onTap: () => setState(
+                                    () => _selection = _selection.copyWith(
+                                      silhouette: _selection.silhouette == slug
+                                          ? null
+                                          : slug,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      if (widget.brands.isNotEmpty)
+                        _CollectionFilterAccordion(
+                          section: _CollectionFilterSection.brand,
+                          expanded: _expanded
+                              .contains(_CollectionFilterSection.brand),
+                          onTap: () =>
+                              _toggleExpanded(_CollectionFilterSection.brand),
+                          child: Column(
+                            children: [
+                              for (final brand in widget.brands)
+                                _CollectionFilterChoiceRow(
+                                  key: Key('collection-filter-brand-$brand'),
+                                  label: brandLabel(brand),
+                                  selected: _selection.brand == brand,
+                                  radio: true,
+                                  onTap: () => setState(
+                                    () => _selection = _selection.copyWith(
+                                      brand: _selection.brand == brand
+                                          ? null
+                                          : brand,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                      _CollectionFilterAccordion(
+                        section: _CollectionFilterSection.availability,
+                        expanded: _expanded.contains(
+                          _CollectionFilterSection.availability,
+                        ),
+                        onTap: () => _toggleExpanded(
+                          _CollectionFilterSection.availability,
+                        ),
+                        child: _CollectionFilterChoiceRow(
+                          key: const Key('collection-filter-stock'),
+                          label: 'En existencia',
+                          selected: _selection.inStockOnly,
+                          onTap: () => setState(
+                            () => _selection = _selection.copyWith(
+                              inStockOnly: !_selection.inStockOnly,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              DecoratedBox(
+                decoration: BoxDecoration(
+                  color: context.monettaColors.surfaceRaised,
+                  border: Border(
+                    top: BorderSide(
+                      color: context.monettaColors.divider,
+                      width: 0.5,
+                    ),
+                  ),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
+                  child: Row(
+                    children: [
+                      TextButton(
+                        key: const Key('collection-filter-clear'),
+                        onPressed: _clear,
+                        style: TextButton.styleFrom(
+                          foregroundColor: context.monettaColors.contentPrimary,
+                        ),
+                        child: Text(
+                          'Limpiar',
+                          style: sans(
+                            size: 13,
+                            weight: FontWeight.w600,
+                            decoration: TextDecoration.underline,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: FilledButton(
+                          key: const Key('collection-filter-apply'),
+                          onPressed: () =>
+                              Navigator.of(context).pop(_selection),
+                          style: FilledButton.styleFrom(
+                            backgroundColor: colors.navigationSelection,
+                            foregroundColor: colors.accentContent,
+                            side: BorderSide(
+                              color: colors.accent.withValues(alpha: 0.48),
+                            ),
+                            minimumSize: const Size.fromHeight(56),
+                            shape: const StadiumBorder(),
+                          ),
+                          child: Text(
+                            resultCount == 1
+                                ? 'Ver 1 artículo'
+                                : 'Ver $resultCount artículos',
+                            style: sans(
+                              size: 15,
+                              color: colors.accentContent,
+                              weight: FontWeight.w700,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _SheetChip extends StatelessWidget {
-  const _SheetChip({
+class _CollectionFilterAccordion extends StatelessWidget {
+  const _CollectionFilterAccordion({
+    required this.section,
+    required this.expanded,
+    required this.onTap,
+    required this.child,
+  });
+
+  final _CollectionFilterSection section;
+  final bool expanded;
+  final VoidCallback onTap;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: 0.5),
+        ),
+      ),
+      child: Column(
+        children: [
+          Semantics(
+            button: true,
+            expanded: expanded,
+            child: InkWell(
+              key: Key('collection-filter-${section.name}'),
+              onTap: onTap,
+              child: SizedBox(
+                height: 78,
+                child: Row(
+                  children: [
+                    Expanded(
+                      child: Text(
+                        section.label,
+                        style: sans(size: 17, weight: FontWeight.w600),
+                      ),
+                    ),
+                    Icon(
+                      expanded ? Icons.remove_rounded : Icons.add_rounded,
+                      size: 26,
+                    ),
+                    const SizedBox(width: 8),
+                  ],
+                ),
+              ),
+            ),
+          ),
+          if (expanded)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(10, 0, 8, 20),
+              child: child,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CollectionFilterChoiceRow extends StatelessWidget {
+  const _CollectionFilterChoiceRow({
+    super.key,
     required this.label,
     required this.selected,
     required this.onTap,
+    this.radio = false,
   });
 
   final String label;
   final bool selected;
   final VoidCallback onTap;
+  final bool radio;
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: AnimatedContainer(
-        duration: reduceMotion(context) ? Duration.zero : kSnap,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
-        decoration: BoxDecoration(
-          color: selected
-              ? context.monettaColors.contentPrimary
-              : context.monettaColors.surface,
-          border: Border.all(
-            color: selected
-                ? context.monettaColors.contentPrimary
-                : context.monettaColors.divider,
-            width: 0.5,
-          ),
-        ),
-        child: Text(
-          label.toUpperCase(),
-          style: eyebrow(
-            size: 8.5,
-            color: selected
-                ? context.monettaColors.canvas
-                : context.monettaColors.contentPrimary,
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: InkWell(
+        onTap: onTap,
+        child: SizedBox(
+          height: 52,
+          child: Row(
+            children: [
+              _CollectionSelectionMark(selected: selected, radio: radio),
+              const SizedBox(width: 14),
+              Expanded(
+                child: Text(
+                  label,
+                  style: sans(
+                    size: 15,
+                    color: selected
+                        ? context.monettaColors.contentPrimary
+                        : context.monettaColors.contentMuted,
+                    weight: selected ? FontWeight.w600 : FontWeight.w400,
+                  ),
+                ),
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+}
+
+class _CollectionSelectionMark extends StatelessWidget {
+  const _CollectionSelectionMark({
+    required this.selected,
+    required this.radio,
+  });
+
+  final bool selected;
+  final bool radio;
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedContainer(
+      duration: reduceMotion(context) ? Duration.zero : kSnap,
+      width: 28,
+      height: 28,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: selected
+            ? context.monettaColors.contentPrimary
+            : context.monettaColors.surface,
+        shape: radio ? BoxShape.circle : BoxShape.rectangle,
+        borderRadius: radio ? null : BorderRadius.circular(4),
+        border: Border.all(
+          color: selected
+              ? context.monettaColors.contentPrimary
+              : context.monettaColors.divider,
+          width: 1.5,
+        ),
+      ),
+      child: selected
+          ? radio
+              ? DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: context.monettaColors.canvas,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const SizedBox(width: 9, height: 9),
+                )
+              : Icon(
+                  Icons.check_rounded,
+                  size: 18,
+                  color: context.monettaColors.canvas,
+                )
+          : null,
     );
   }
 }

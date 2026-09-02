@@ -57,10 +57,23 @@ class AppDatabase extends _$AppDatabase {
           if (from < 3) await migrator.createTable(appPreferences);
           if (from < 4) await migrator.createTable(catalogStates);
           if (from < 5) {
-            await migrator.addColumn(
-              appPreferences,
-              appPreferences.onboardingState,
+            // `createTable` is intentionally idempotent, but `addColumn` is
+            // not. A partially upgraded install (or a fixture that carries a
+            // newer table while retaining an older user_version) can already
+            // have this column. Inspect the actual SQLite schema before
+            // issuing the ALTER TABLE so reopening it remains safe.
+            final columns = await customSelect(
+              'PRAGMA table_info(${appPreferences.actualTableName})',
+            ).get();
+            final hasOnboardingState = columns.any(
+              (row) => row.read<String>('name') == 'onboarding_state',
             );
+            if (!hasOnboardingState) {
+              await migrator.addColumn(
+                appPreferences,
+                appPreferences.onboardingState,
+              );
+            }
           }
         },
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),

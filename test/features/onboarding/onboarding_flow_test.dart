@@ -8,7 +8,7 @@ import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
 
 void main() {
-  testWidgets('first run offers optional onboarding and persists skip', (
+  testWidgets('first run does not open onboarding automatically', (
     tester,
   ) async {
     final db = openTestDatabase();
@@ -38,11 +38,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Elige marcas'), findsOneWidget);
-    await tester.tap(find.byTooltip('Cerrar'));
-    await tester.pumpAndSettle();
-
-    expect(onboarding.state, OnboardingState.skipped);
     expect(find.text('Elige marcas'), findsNothing);
+    expect(onboarding.state, OnboardingState.pending);
   });
 }

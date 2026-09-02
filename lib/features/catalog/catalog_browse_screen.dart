@@ -415,12 +415,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              SliverToBoxAdapter(
-                child: _CatalogSummary(
-                  count: visibleItems.length,
-                  sort: _filters.sort,
-                ),
-              ),
               if (visibleItems.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -539,37 +533,6 @@ class _FilterIconButton extends StatelessWidget {
             ),
           ),
       ],
-    );
-  }
-}
-
-class _CatalogSummary extends StatelessWidget {
-  const _CatalogSummary({required this.count, required this.sort});
-
-  final int count;
-  final _CatalogSort sort;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 15, 14, 14),
-      child: Row(
-        children: [
-          Text(
-            count == 1 ? '1 artículo' : '$count artículos',
-            style: sans(size: 12.5, color: context.monettaColors.contentMuted),
-          ),
-          const Spacer(),
-          Text(
-            sort.label,
-            style: sans(
-              size: 12.5,
-              color: context.monettaColors.contentPrimary,
-              weight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
     );
   }
 }

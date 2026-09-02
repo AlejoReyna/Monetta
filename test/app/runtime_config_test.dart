@@ -70,4 +70,18 @@ void main() {
       isNull,
     );
   });
+
+  test('a bare Debug launch safely defaults to the local catalog', () {
+    final config = RuntimeConfig.fromEnvironment(debugMode: true);
+
+    expect(config.environment, AppEnvironment.local);
+    expect(config.allowOfflineCatalog, isTrue);
+  });
+
+  test('a bare release launch remains blocked', () {
+    final config = RuntimeConfig.fromEnvironment(debugMode: false);
+
+    expect(config.environment, isNull);
+    expect(config.allowOfflineCatalog, isFalse);
+  });
 }

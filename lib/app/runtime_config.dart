@@ -1,6 +1,8 @@
 /// Build-environment guardrails for catalog authority.
 library;
 
+import 'package:flutter/foundation.dart';
+
 import '../data/firestore/firestore_catalog_config.dart';
 
 enum AppEnvironment { local, staging, production }
@@ -14,16 +16,21 @@ class RuntimeConfig {
   final AppEnvironment? environment;
   final bool allowOfflineCatalog;
 
-  factory RuntimeConfig.fromEnvironment() {
+  factory RuntimeConfig.fromEnvironment({bool debugMode = kDebugMode}) {
     const raw = String.fromEnvironment('APP_ENV');
+    final normalized = raw.trim().toLowerCase();
+    final hasExplicitEnvironment = normalized.isNotEmpty;
     return RuntimeConfig(
-      environment: switch (raw.trim().toLowerCase()) {
+      environment: switch (normalized) {
         'local' => AppEnvironment.local,
         'staging' => AppEnvironment.staging,
         'production' => AppEnvironment.production,
+        _ when debugMode && !hasExplicitEnvironment => AppEnvironment.local,
         _ => null,
       },
-      allowOfflineCatalog: const bool.fromEnvironment('ALLOW_OFFLINE_CATALOG'),
+      allowOfflineCatalog:
+          const bool.fromEnvironment('ALLOW_OFFLINE_CATALOG') ||
+              (debugMode && !hasExplicitEnvironment),
     );
   }
 

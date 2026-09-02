@@ -89,6 +89,8 @@ void main() {
     expect(find.byKey(const Key('catalog-category-monetta')), findsNothing);
     expect(find.byKey(const Key('catalog-search-button')), findsOneWidget);
     expect(find.byIcon(Icons.search_rounded), findsOneWidget);
+    expect(find.textContaining('artículos'), findsNothing);
+    expect(find.text('Destacados'), findsNothing);
 
     final collection = tester.widget<ChoiceChip>(
       find.byKey(const Key('catalog-category-collection')),

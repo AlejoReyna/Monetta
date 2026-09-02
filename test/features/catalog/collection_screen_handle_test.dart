@@ -35,7 +35,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('$bagCount piezas ordenadas por '), findsOneWidget);
+    expect(find.text('$bagCount piezas ordenadas por '), findsNothing);
     expect(bagCount, greaterThan(0));
   });
 }

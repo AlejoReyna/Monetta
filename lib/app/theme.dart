@@ -241,7 +241,7 @@ const double kSectionGap = 52;
 ///
 /// Keep navigation wordmarks on this token so routes and scroll states cannot
 /// silently render the Monetta identity at different sizes.
-const double kAppBarWordmarkHeight = 20;
+const double kAppBarWordmarkHeight = 24;
 
 /// Matches the store's `money_format` of `$ {{amount}}` in MXN.
 final NumberFormat kMoney = NumberFormat.currency(

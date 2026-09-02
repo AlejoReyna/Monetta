@@ -25,8 +25,8 @@ class HomeAccountInvitation extends StatelessWidget {
       width: double.infinity,
       decoration: BoxDecoration(
         color: colors.surfaceMuted,
-        border: Border.symmetric(
-          horizontal: BorderSide(color: colors.divider, width: .5),
+        border: Border(
+          top: BorderSide(color: colors.divider, width: .5),
         ),
       ),
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 44),

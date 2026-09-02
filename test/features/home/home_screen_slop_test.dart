@@ -277,7 +277,8 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('home-search-bar')));
     await tester.pumpAndSettle();
 
-    expect(find.text('BÚSQUEDAS FRECUENTES'), findsOneWidget);
-    expect(find.text('Buscar'), findsOneWidget);
+    expect(find.byKey(const ValueKey('search-query-field')), findsOneWidget);
+    expect(find.byKey(const ValueKey('search-empty-state')), findsOneWidget);
+    expect(find.text('BÚSQUEDAS FRECUENTES'), findsNothing);
   });
 }

@@ -17,6 +17,7 @@ import '../../app/onboarding_controller.dart';
 import '../../app/product_telemetry.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../app/theme_controller.dart';
 import '../../data/media/media_url.dart';
 import '../../domain/campaign.dart';
 import '../../domain/editorial_content.dart';
@@ -34,7 +35,6 @@ import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
 import '../onboarding/onboarding_sheet.dart';
-import '../settings/appearance_sheet.dart';
 import '../partner/partner_hub_screen.dart';
 import 'customer_experiences_section.dart';
 import 'customer_experiences_screen.dart';
@@ -63,10 +63,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   double _heroHeight = double.infinity;
   bool _foreground = true;
   bool _onboardingRequested = false;
+  late String _searchPrompt;
 
   @override
   void initState() {
     super.initState();
+    _searchPrompt = nextSearchPrompt();
     WidgetsBinding.instance.addObserver(this);
     _scroll.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
@@ -83,11 +85,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Future<void> _prepareFirstRunExperience() async {
-    await _showFirstRunOnboarding();
-    if (!mounted) return;
+    // The onboarding panel remains in the code for a future explicit entry
+    // point, but it is intentionally not opened automatically on startup.
     await NotificationScope.maybeOf(context)?.requestSystemPermission();
   }
 
+  // Retained so the onboarding experience and its persistence flow remain
+  // available if the product decides to expose it explicitly later.
+  // ignore: unused_element
   Future<void> _showFirstRunOnboarding() async {
     if (!mounted || _onboardingRequested) return;
     final onboarding = OnboardingScope.maybeOf(context);
@@ -130,7 +135,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeAppLifecycleState(AppLifecycleState state) {
     final active = state == AppLifecycleState.resumed;
     if (active == _foreground) return;
-    setState(() => _foreground = active);
+    setState(() {
+      _foreground = active;
+      if (active) _searchPrompt = nextSearchPrompt();
+    });
     _syncHeroPlayback();
     if (active) {
       unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
@@ -150,6 +158,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         _foreground && (!_scroll.hasClients || _scroll.offset < _heroHeight);
     if (_heroPlaying.value == shouldPlay) return;
     _heroPlaying.value = shouldPlay;
+  }
+
+  void _openSearch() {
+    final prompt = _searchPrompt;
+    unawaited(
+      openSearch(context, prompt: prompt).whenComplete(() {
+        if (!mounted) return;
+        setState(() => _searchPrompt = nextSearchPrompt());
+      }),
+    );
   }
 
   void _precacheRail() {
@@ -360,7 +378,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   builder: (context, playing, child) => _HomeDiscoveryHeader(
                     collapse: _collapse,
                     playing: playing,
-                    onSearch: () => openSearch(context),
+                    onSearch: _openSearch,
+                    searchPrompt: _searchPrompt,
                   ),
                 ),
               ),
@@ -430,7 +449,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
             ),
-            const SizedBox(height: 72),
+            // The home body extends beneath the persistent navigation. Keep
+            // that trailing scroll clearance in the invitation's surface so
+            // its background reaches the navigation divider instead of
+            // revealing the scaffold's white canvas.
+            ColoredBox(
+              key: const ValueKey('home-account-invitation-bottom-bleed'),
+              color: context.monettaColors.surfaceMuted,
+              child: const SizedBox(height: 72),
+            ),
           ],
         );
       },
@@ -520,7 +547,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   Widget _buildSideMenu(CatalogStore store) {
     return MonettaSideMenu(
-      onSearch: () => openSearch(context),
+      onSearch: _openSearch,
       onCatalog: _openFullCatalog,
       onBags: () => _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
       onWallets: () =>
@@ -534,11 +561,18 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         title: 'Maquillaje y skincare',
         queryTerms: const ['maquillaje', 'skincare'],
       ),
-      onAppearance: () => unawaited(openAppearanceSettings(context)),
+      onToggleTheme: _toggleTheme,
       onAbout: _openAbout,
       onPartner: _openPartner,
       onSupport: () => _openWhatsApp(conciergeWhatsAppUri()),
     );
+  }
+
+  void _toggleTheme() {
+    final nextMode = Theme.of(context).brightness == Brightness.dark
+        ? ThemeMode.light
+        : ThemeMode.dark;
+    unawaited(ThemeScope.of(context).setMode(nextMode));
   }
 
   PreferredSizeWidget _buildAppBar({
@@ -626,7 +660,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 child: IconButton(
                   key: const ValueKey('home-appbar-search-button'),
                   tooltip: 'Buscar',
-                  onPressed: () => openSearch(context),
+                  onPressed: _openSearch,
                   icon: const Icon(Icons.search, size: 24),
                 ),
               ),
@@ -651,6 +685,7 @@ class _HomeDiscoveryHeader extends StatelessWidget {
     required this.collapse,
     required this.playing,
     required this.onSearch,
+    required this.searchPrompt,
   });
 
   static const double estimatedHeight = 280;
@@ -658,6 +693,7 @@ class _HomeDiscoveryHeader extends StatelessWidget {
   final ValueListenable<double> collapse;
   final bool playing;
   final VoidCallback onSearch;
+  final String searchPrompt;
 
   @override
   Widget build(BuildContext context) {
@@ -724,7 +760,10 @@ class _HomeDiscoveryHeader extends StatelessWidget {
                           ),
                         );
                       },
-                      child: _HomeSearchBar(onTap: onSearch),
+                      child: _HomeSearchBar(
+                        onTap: onSearch,
+                        prompt: searchPrompt,
+                      ),
                     ),
                   ),
                 ],
@@ -738,9 +777,10 @@ class _HomeDiscoveryHeader extends StatelessWidget {
 }
 
 class _HomeSearchBar extends StatelessWidget {
-  const _HomeSearchBar({required this.onTap});
+  const _HomeSearchBar({required this.onTap, required this.prompt});
 
   final VoidCallback onTap;
+  final String prompt;
 
   @override
   Widget build(BuildContext context) {
@@ -771,9 +811,13 @@ class _HomeSearchBar extends StatelessWidget {
             children: [
               Icon(Icons.search, size: 20, color: colors.contentPrimary),
               const SizedBox(width: 11),
-              Text(
-                '¿Buscas algo?',
-                style: sans(size: 12.5, color: colors.contentMuted),
+              Expanded(
+                child: Text(
+                  prompt,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: sans(size: 12.5, color: colors.contentMuted),
+                ),
               ),
             ],
           ),
