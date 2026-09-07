@@ -3,6 +3,7 @@ import type {
   AppAccountsRepository,
   CustomersRepository,
   OrdersRepository,
+  PrivacyRequestsRepository,
   PushTokensRepository,
   WebhookEventsRepository,
 } from '../../src/domain/ports.js';
@@ -14,7 +15,9 @@ import type {
   CustomerRecord,
   MirroredOrder,
   OrderRecord,
+  PrivacyDataRequestRecord,
   PushTokenRecord,
+  WebhookDeliveryStatus,
   WebhookEventRecord,
 } from '../../src/domain/types.js';
 
@@ -129,8 +132,18 @@ export class InMemoryOrdersRepository implements OrdersRepository {
     if (order.shopifyOrderId !== null) {
       const existing = this.rows.find((r) => r.shopifyOrderId === order.shopifyOrderId);
       if (existing) {
+        const existingTs = existing.shopifyUpdatedAt?.getTime();
+        const incomingTs = order.shopifyUpdatedAt?.getTime();
+        if (
+          existingTs !== undefined &&
+          incomingTs !== undefined &&
+          incomingTs < existingTs
+        ) {
+          return;
+        }
         Object.assign(existing, order, {
           attributionCode: order.attributionCode ?? existing.attributionCode,
+          shopifyUpdatedAt: order.shopifyUpdatedAt ?? existing.shopifyUpdatedAt,
         });
         return;
       }
@@ -168,20 +181,96 @@ export class InMemoryOrdersRepository implements OrdersRepository {
   }
 }
 
-export class InMemoryWebhookEventsRepository implements WebhookEventsRepository {
-  readonly byWebhookId = new Map<string, WebhookEventRecord & { processedAt: Date | null }>();
+export type StoredWebhookEvent = {
+  webhookId: string;
+  topic: string;
+  shopifyResourceId: string | null;
+  payloadHash: string;
+  shopDomain?: string | null;
+  status: WebhookDeliveryStatus;
+  attemptCount: number;
+  processedAt: Date | null;
+  lastError: string | null;
+  claimedAt: Date | null;
+};
 
-  async recordIfNew(event: WebhookEventRecord): Promise<boolean> {
-    if (this.byWebhookId.has(event.webhookId)) return false;
-    this.byWebhookId.set(event.webhookId, { ...event, processedAt: null });
+export class InMemoryWebhookEventsRepository implements WebhookEventsRepository {
+  readonly byWebhookId = new Map<string, StoredWebhookEvent>();
+
+  /** Test hook: force a claim to look stale so reclaim paths can be exercised. */
+  staleClaimAfterMs = 5 * 60 * 1000;
+
+  async tryClaim(event: WebhookEventRecord): Promise<boolean> {
+    const existing = this.byWebhookId.get(event.webhookId);
+    const now = new Date();
+    if (!existing) {
+      this.byWebhookId.set(event.webhookId, {
+        webhookId: event.webhookId,
+        topic: event.topic,
+        shopifyResourceId: event.shopifyResourceId,
+        payloadHash: event.payloadHash,
+        shopDomain: event.shopDomain ?? null,
+        status: 'processing',
+        attemptCount: 1,
+        processedAt: null,
+        lastError: null,
+        claimedAt: now,
+      });
+      return true;
+    }
+    const stale =
+      existing.status === 'processing' &&
+      existing.claimedAt !== null &&
+      now.getTime() - existing.claimedAt.getTime() >= this.staleClaimAfterMs;
+    if (existing.status === 'completed') return false;
+    if (existing.status === 'processing' && !stale) return false;
+    existing.status = 'processing';
+    existing.attemptCount += 1;
+    existing.claimedAt = now;
+    existing.payloadHash = event.payloadHash;
+    existing.topic = event.topic;
+    existing.shopifyResourceId = event.shopifyResourceId ?? existing.shopifyResourceId;
+    existing.shopDomain = event.shopDomain ?? existing.shopDomain;
+    existing.lastError = null;
+    existing.processedAt = null;
     return true;
   }
 
-  async markProcessed(webhookId: string): Promise<void> {
+  async markCompleted(webhookId: string): Promise<void> {
     const row = this.byWebhookId.get(webhookId);
-    if (row) row.processedAt = new Date();
+    if (row) {
+      row.status = 'completed';
+      row.processedAt = new Date();
+      row.lastError = null;
+    }
+  }
+
+  async markFailed(webhookId: string, error: string): Promise<void> {
+    const row = this.byWebhookId.get(webhookId);
+    if (row && row.status === 'processing') {
+      row.status = 'failed';
+      row.lastError = error.slice(0, 2000);
+      row.processedAt = null;
+    }
   }
 }
+
+export class InMemoryPrivacyRequestsRepository implements PrivacyRequestsRepository {
+  readonly byWebhookId = new Map<
+    string,
+    PrivacyDataRequestRecord & { status: 'open' | 'fulfilled' | 'cancelled'; receivedAt: Date }
+  >();
+
+  async openDataRequest(record: PrivacyDataRequestRecord): Promise<void> {
+    if (this.byWebhookId.has(record.webhookId)) return;
+    this.byWebhookId.set(record.webhookId, {
+      ...record,
+      status: 'open',
+      receivedAt: new Date(),
+    });
+  }
+}
+
 
 export class InMemoryPushTokensRepository implements PushTokensRepository {
   readonly byDeviceId = new Map<string, PushTokenRecord>();

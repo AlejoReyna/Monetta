@@ -144,7 +144,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
+| **Status** | `closed` |
 | **Evidence** | `handlers.ts` `claimDelivery` → `recordIfNew` INSERT … ON CONFLICT DO NOTHING before effects; on conflict returns false without checking `processed_at`. Failed order upsert leaves row claimed; retry skipped. |
 | **Planned change** | Durable inbox with states/retries; mark processed only after durable effects; concurrent-safe. |
 | **Regression test** | To-add (invert backend probe): fail after claim → retry processes; full duplicate does not double-apply. |
@@ -177,7 +177,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
+| **Status** | `closed` |
 | **Evidence** | `pgOrdersRepository.ts` ON CONFLICT always overwrites `financial_status` / `fulfillment_status` and sets `updated_at = now()` with no comparison to Shopify updated_at / version. Shop domain not validated in order upsert path beyond webhook HMAC. |
 | **Planned change** | Temporal versioning / canonical read; verify expected shop; metrics + replay. |
 | **Regression test** | To-add: paid→refunded then stale paid delivery keeps refunded. |
@@ -331,7 +331,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
+| **Status** | `partial` |
 | **Evidence** | `handleCustomersDataRequest` only `logger.warn` then `markProcessed` — no export queue. Redact deletes mirror PII/engagement/tokens. `/healthz` and `/livez` return ok without PostgreSQL check; no `readyz`. |
 | **Planned change** | Tracked data-request/export workflow; readiness probes; backup/restore drill; business policy owner. |
 | **Regression test** | To-add: data_request leaves durable open task; readiness fails when DB down. |
@@ -368,7 +368,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 1. **F03 (P0, remediated in WIP)** — external catalog retired from product; live infra decommission pending owner approval.
 2. **F04 (P1, open)** — `product_screen.dart` calls `addToBag(product)`; store picks cheapest available; `BagLines` PK is `productId`.
 3. **F05 (P1, open)** — staging Storefront token empty; cart composition gated by `StorefrontConfig.isUsable`.
-4. **F12 (P1, open)** — webhook `recordIfNew` claims before effects; retries skipped (`pgWebhookEventsRepository.ts` / `handlers.ts`).
+4. **F12 (P1, closed)** — durable webhook inbox with pending/processing/completed/failed; claim-then-fail retries; completed not double-applied.
 5. **F08 (P1, open)** — full sync only `upsertProducts`; never deletes absent products (`catalog_repository.dart`).
 
 Note: **F01/F02** remain P0 but are `partial` in uncommitted WIP — finish wiring/tests before treating closed.
@@ -383,3 +383,11 @@ Note: **F01/F02** remain P0 but are `partial` in uncommitted WIP — finish wiri
 - Commit: `2350c3eb26833d05fb7bf3dceaa7a4491a1d4b18`
 - F01/F02/F19 remediated in `services/accounts_orders` with HTTP + disposable PG tests (75/75 green; typecheck exit 0).
 - Owner action: explicitly provision legitimate owners via `admin_principals` SQL in `PHASE_A_NOTES.md`; set `LEGACY_ACCOUNT_REGISTRATION_ENABLED=false` in production when ready; configure `OWNER_SHOPIFY_CUSTOMER_IDS` for verified Shopify bootstrap.
+
+
+## Phase E / WP-05 status (appended)
+
+- F12 closed: `tryClaim` / `markCompleted` / `markFailed` durable inbox (`010_webhook_durable_inbox.sql`, `pgWebhookEventsRepository.ts`, `handlers.ts`). Claimed-but-failed deliveries retry; completed deliveries do not re-apply effects. Concurrent in-flight claims are ignored until stale (5m).
+- F15 closed (backend): `orders_mirror.shopify_updated_at` refuses stale out-of-order overwrites; webhook route rejects unexpected `X-Shopify-Shop-Domain` when `SHOPIFY_STORE_DOMAIN` is configured.
+- F29 partial: `privacy_requests` durable open task for `customers/data_request`; `/readyz` probes PostgreSQL. Full export/fulfill workflow + backup drill still open.
+- Still open in Phase E: F13 (Customer Account history / UI empty-vs-error), F14 (Flutter logout race — deferred to avoid Phase B `lib/` conflict), F17 (post-checkout UX — Flutter/checkout), F18.

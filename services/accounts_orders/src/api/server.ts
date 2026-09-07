@@ -13,6 +13,7 @@ import { PgAppAccountsRepository } from '../db/pgAppAccountsRepository.js';
 import { PgOrdersRepository } from '../db/pgOrdersRepository.js';
 import { PgPushTokensRepository } from '../db/pgPushTokensRepository.js';
 import { PgWebhookEventsRepository } from '../db/pgWebhookEventsRepository.js';
+import { PgPrivacyRequestsRepository } from '../db/pgPrivacyRequestsRepository.js';
 import { EngagementService } from '../engagement/application/engagementService.js';
 import { registerEngagementRoutes, type EngagementRouteDeps } from '../engagement/api/routes.js';
 import { registerInternalCatalogRoute } from '../engagement/api/internalCatalogRoute.js';
@@ -67,6 +68,10 @@ import { AccountRegistrationConflictError } from '../domain/accountErrors.js';
 
 export interface ServerDeps extends HandlerDeps {
   readonly webhookSecret: string;
+  /** When set, webhooks must present matching X-Shopify-Shop-Domain (F15). */
+  readonly expectedShopDomain?: string;
+  /** Optional readiness probe against PostgreSQL (F29). */
+  readonly checkDatabase?: () => Promise<boolean>;
   readonly appAccounts: import('../domain/ports.js').AppAccountsRepository;
   readonly customerTokenVerifier: CustomerTokenVerifier;
   readonly adminAuthorizer?: AdminAuthorizer;
@@ -200,18 +205,29 @@ async function passwordMatches(password: string, encoded: string): Promise<boole
   }
 }
 
+function normalizeShopDomain(value: string): string {
+  return value.trim().toLowerCase().replace(/^https?:\/\//, '').replace(/\/$/, '');
+}
+
 /**
  * Wraps a webhook route: verifies the HMAC against the *raw* body (captured
  * by `express.raw()` below — a JSON body-parser would already have
  * consumed and re-encoded it, and re-serializing is not guaranteed to
- * reproduce the exact bytes Shopify signed), extracts the required
- * `X-Shopify-Webhook-Id` header, and only then parses JSON and hands off to
- * `handler`. A missing/invalid signature or webhook id gets a 401/400 and
+ * reproduce the exact bytes Shopify signed), validates the expected shop
+ * when configured, extracts the required `X-Shopify-Webhook-Id` header,
+ * and only then parses JSON and hands off to `handler`. A missing/invalid
+ * signature, unexpected shop, or missing webhook id gets a 401/400 and
  * never reaches application logic.
  */
 function shopifyWebhookRoute<Payload>(
   deps: ServerDeps,
-  handler: (deps: ServerDeps, webhookId: string, payload: Payload, rawBody: Buffer) => Promise<void>,
+  handler: (
+    deps: ServerDeps,
+    webhookId: string,
+    payload: Payload,
+    rawBody: Buffer,
+    shopDomain: string | null,
+  ) => Promise<void>,
 ) {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
@@ -222,6 +238,16 @@ function shopifyWebhookRoute<Payload>(
         return;
       }
 
+      const shopHeader = req.header('X-Shopify-Shop-Domain') ?? null;
+      if (deps.expectedShopDomain && deps.expectedShopDomain.trim() !== '') {
+        const expected = normalizeShopDomain(deps.expectedShopDomain);
+        const received = shopHeader ? normalizeShopDomain(shopHeader) : '';
+        if (received !== expected) {
+          res.status(401).json({ error: 'unexpected_shop' });
+          return;
+        }
+      }
+
       const webhookId = req.header('X-Shopify-Webhook-Id');
       if (!webhookId) {
         res.status(400).json({ error: 'missing_webhook_id' });
@@ -229,7 +255,7 @@ function shopifyWebhookRoute<Payload>(
       }
 
       const payload = JSON.parse(rawBody.toString('utf8')) as Payload;
-      await handler(deps, webhookId, payload, rawBody);
+      await handler(deps, webhookId, payload, rawBody, shopHeader);
       res.status(200).json({ status: 'ok' });
     } catch (error) {
       next(error);
@@ -271,55 +297,72 @@ export function createApp(deps: ServerDeps): Express {
     res.status(200).json({ status: 'ok' });
   });
 
+  app.get('/readyz', async (_req: Request, res: Response) => {
+    if (!deps.checkDatabase) {
+      res.status(200).json({ status: 'ok', database: 'unchecked' });
+      return;
+    }
+    try {
+      const ok = await deps.checkDatabase();
+      if (!ok) {
+        res.status(503).json({ status: 'not_ready', database: 'down' });
+        return;
+      }
+      res.status(200).json({ status: 'ok', database: 'up' });
+    } catch {
+      res.status(503).json({ status: 'not_ready', database: 'down' });
+    }
+  });
+
   const raw = express.raw({ type: 'application/json', limit: '2mb' });
 
   app.post(
     '/webhooks/orders/create',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyOrderWebhookPayload, body) =>
-      handleOrdersWebhook(d, id, 'orders/create', payload, body),
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyOrderWebhookPayload, body, shop) =>
+      handleOrdersWebhook(d, id, 'orders/create', payload, body, shop),
     ),
   );
   app.post(
     '/webhooks/orders/updated',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyOrderWebhookPayload, body) =>
-      handleOrdersWebhook(d, id, 'orders/updated', payload, body),
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyOrderWebhookPayload, body, shop) =>
+      handleOrdersWebhook(d, id, 'orders/updated', payload, body, shop),
     ),
   );
   app.post(
     '/webhooks/products/create',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyProductWebhookPayload, body) =>
-      handleProductsWebhook(d, id, 'products/create', payload, body),
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyProductWebhookPayload, body, shop) =>
+      handleProductsWebhook(d, id, 'products/create', payload, body, shop),
     ),
   );
   app.post(
     '/webhooks/products/update',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyProductWebhookPayload, body) =>
-      handleProductsWebhook(d, id, 'products/update', payload, body),
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyProductWebhookPayload, body, shop) =>
+      handleProductsWebhook(d, id, 'products/update', payload, body, shop),
     ),
   );
   app.post(
     '/webhooks/customers/data_request',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyCustomerDataRequestWebhookPayload, body) =>
-      handleCustomersDataRequest(d, id, payload, body),
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyCustomerDataRequestWebhookPayload, body, shop) =>
+      handleCustomersDataRequest(d, id, payload, body, shop),
     ),
   );
   app.post(
     '/webhooks/customers/redact',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyCustomerRedactWebhookPayload, body) =>
-      handleCustomersRedact(d, id, payload, body),
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyCustomerRedactWebhookPayload, body, shop) =>
+      handleCustomersRedact(d, id, payload, body, shop),
     ),
   );
   app.post(
     '/webhooks/shop/redact',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyShopRedactWebhookPayload, body) =>
-      handleShopRedact(d, id, payload, body),
+    shopifyWebhookRoute(deps, (d, id, payload: ShopifyShopRedactWebhookPayload, body, shop) =>
+      handleShopRedact(d, id, payload, body, shop),
     ),
   );
 
@@ -685,7 +728,13 @@ if (isMain) {
     orders: new PgOrdersRepository(pool),
     webhookEvents: new PgWebhookEventsRepository(pool),
     pushTokens: new PgPushTokensRepository(pool),
+    privacyRequests: new PgPrivacyRequestsRepository(pool),
     webhookSecret: config.webhookSecret,
+    expectedShopDomain: config.shopDomain !== '' ? config.shopDomain : undefined,
+    checkDatabase: async () => {
+      const result = await pool.query('SELECT 1 AS ok');
+      return (result.rowCount ?? 0) > 0;
+    },
     customerTokenVerifier,
     adminAuthorizer,
     adminEnvironment: config.adminEnvironment,

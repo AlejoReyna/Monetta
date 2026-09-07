@@ -79,6 +79,9 @@ describe('accounts_orders API', () => {
   it('/livez and /healthz report ok', async () => {
     expect((await fetch(`${baseUrl}/livez`)).status).toBe(200);
     expect((await fetch(`${baseUrl}/healthz`)).status).toBe(200);
+    const ready = await fetch(`${baseUrl}/readyz`);
+    expect(ready.status).toBe(200);
+    expect(await ready.json()).toEqual({ status: 'ok', database: 'unchecked' });
   });
 
   it('registers a first-party account and authenticates its opaque session', async () => {
@@ -201,6 +204,84 @@ describe('accounts_orders API', () => {
     });
 
     expect(response.status).toBe(400);
+  });
+
+  it('rejects a correctly signed webhook from an unexpected shop domain', async () => {
+    await new Promise<void>((resolve, reject) => {
+      server.close((err) => (err ? reject(err) : resolve()));
+    });
+    const lockedDeps: ServerDeps = {
+      appAccounts,
+      customers,
+      orders,
+      webhookEvents,
+      pushTokens,
+      webhookSecret: secret,
+      expectedShopDomain: 'monetta-staging.myshopify.com',
+      customerTokenVerifier,
+    };
+    const lockedApp = createApp(lockedDeps);
+    await new Promise<void>((resolve) => {
+      server = lockedApp.listen(0, '127.0.0.1', resolve);
+    });
+    const address = server.address();
+    if (address === null || typeof address === 'string') throw new Error('no address');
+    baseUrl = `http://127.0.0.1:${address.port}`;
+
+    const body = JSON.stringify({ id: 9, customer: { id: 1 } });
+    const wrongShop = await fetch(`${baseUrl}/webhooks/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Hmac-Sha256': sign(body),
+        'X-Shopify-Webhook-Id': randomUUID(),
+        'X-Shopify-Shop-Domain': 'other-shop.myshopify.com',
+      },
+      body,
+    });
+    expect(wrongShop.status).toBe(401);
+    expect(await wrongShop.json()).toEqual({ error: 'unexpected_shop' });
+    expect(orders.rows).toHaveLength(0);
+
+    const okShop = await fetch(`${baseUrl}/webhooks/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Hmac-Sha256': sign(body),
+        'X-Shopify-Webhook-Id': randomUUID(),
+        'X-Shopify-Shop-Domain': 'monetta-staging.myshopify.com',
+      },
+      body,
+    });
+    expect(okShop.status).toBe(200);
+    expect(orders.rows).toHaveLength(1);
+  });
+
+  it('/readyz fails when the database check returns false', async () => {
+    await new Promise<void>((resolve, reject) => {
+      server.close((err) => (err ? reject(err) : resolve()));
+    });
+    const readyDeps: ServerDeps = {
+      appAccounts,
+      customers,
+      orders,
+      webhookEvents,
+      pushTokens,
+      webhookSecret: secret,
+      customerTokenVerifier,
+      checkDatabase: async () => false,
+    };
+    const readyApp = createApp(readyDeps);
+    await new Promise<void>((resolve) => {
+      server = readyApp.listen(0, '127.0.0.1', resolve);
+    });
+    const address = server.address();
+    if (address === null || typeof address === 'string') throw new Error('no address');
+    baseUrl = `http://127.0.0.1:${address.port}`;
+
+    const response = await fetch(`${baseUrl}/readyz`);
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ status: 'not_ready', database: 'down' });
   });
 
   it('processes the three mandatory compliance webhook topics', async () => {

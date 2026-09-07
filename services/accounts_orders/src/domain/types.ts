@@ -24,6 +24,8 @@ export interface OrderRecord {
   readonly attributionDeviceId: string | null;
   readonly attributionRecoSource: string | null;
   readonly placedAt: Date | null;
+  /** Shopify order updated_at; used to ignore stale out-of-order webhooks (F15). */
+  readonly shopifyUpdatedAt?: Date | null;
 }
 
 /** A row as read back out — `OrderRecord` plus the fields only the database assigns. */
@@ -32,11 +34,19 @@ export interface MirroredOrder extends OrderRecord {
   readonly updatedAt: Date;
 }
 
+export type WebhookDeliveryStatus = 'pending' | 'processing' | 'completed' | 'failed';
+
 export interface WebhookEventRecord {
   readonly webhookId: string;
   readonly topic: string;
   readonly shopifyResourceId: string | null;
   readonly payloadHash: string;
+  readonly shopDomain?: string | null;
+}
+
+export interface PrivacyDataRequestRecord {
+  readonly webhookId: string;
+  readonly shopifyCustomerId: string;
 }
 
 export type Platform = 'ios' | 'android';

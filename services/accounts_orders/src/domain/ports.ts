@@ -7,6 +7,7 @@ import type {
   MirroredOrder,
   OrderRecord,
   PushTokenRecord,
+  PrivacyDataRequestRecord,
   WebhookEventRecord,
 } from './types.js';
 
@@ -66,9 +67,20 @@ export interface OrdersRepository {
 }
 
 export interface WebhookEventsRepository {
-  /** False when `webhookId` was already recorded — a retried delivery of the same event. */
-  recordIfNew(event: WebhookEventRecord): Promise<boolean>;
-  markProcessed(webhookId: string): Promise<void>;
+  /**
+   * Atomically claim a delivery for processing (F12).
+   * Returns true when this caller owns the work.
+   * Returns false when the delivery is already completed or actively processing
+   * (concurrent duplicate). Failed / stale processing claims are reclaimed.
+   */
+  tryClaim(event: WebhookEventRecord): Promise<boolean>;
+  markCompleted(webhookId: string): Promise<void>;
+  markFailed(webhookId: string, error: string): Promise<void>;
+}
+
+export interface PrivacyRequestsRepository {
+  /** Opens a durable follow-up task for customers/data_request (F29). Idempotent per webhookId. */
+  openDataRequest(record: PrivacyDataRequestRecord): Promise<void>;
 }
 
 export interface PushTokensRepository {

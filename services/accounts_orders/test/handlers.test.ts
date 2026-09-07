@@ -8,10 +8,12 @@ import {
 import {
   InMemoryCustomersRepository,
   InMemoryOrdersRepository,
+  InMemoryPrivacyRequestsRepository,
   InMemoryPushTokensRepository,
   InMemoryWebhookEventsRepository,
 } from './support/inMemoryRepositories.js';
 import type { ShopifyOrderWebhookPayload } from '../src/webhooks/payloads.js';
+import type { OrderRecord } from '../src/domain/types.js';
 
 function orderPayload(overrides: Partial<ShopifyOrderWebhookPayload> = {}): ShopifyOrderWebhookPayload {
   return {
@@ -22,6 +24,7 @@ function orderPayload(overrides: Partial<ShopifyOrderWebhookPayload> = {}): Shop
     current_total_price: '1749.00',
     currency: 'MXN',
     created_at: '2026-08-01T10:00:00-06:00',
+    updated_at: '2026-08-01T10:00:00-06:00',
     customer: {
       id: 42,
       email: 'shopper@example.com',
@@ -42,11 +45,13 @@ describe('webhook handlers', () => {
   let orders: InMemoryOrdersRepository;
   let webhookEvents: InMemoryWebhookEventsRepository;
   let pushTokens: InMemoryPushTokensRepository;
+  let privacyRequests: InMemoryPrivacyRequestsRepository;
   let deps: {
     customers: InMemoryCustomersRepository;
     orders: InMemoryOrdersRepository;
     webhookEvents: InMemoryWebhookEventsRepository;
     pushTokens: InMemoryPushTokensRepository;
+    privacyRequests: InMemoryPrivacyRequestsRepository;
   };
 
   beforeEach(() => {
@@ -54,7 +59,8 @@ describe('webhook handlers', () => {
     orders = new InMemoryOrdersRepository();
     webhookEvents = new InMemoryWebhookEventsRepository();
     pushTokens = new InMemoryPushTokensRepository();
-    deps = { customers, orders, webhookEvents, pushTokens };
+    privacyRequests = new InMemoryPrivacyRequestsRepository();
+    deps = { customers, orders, webhookEvents, pushTokens, privacyRequests };
   });
 
   describe('handleOrdersWebhook', () => {
@@ -76,6 +82,7 @@ describe('webhook handlers', () => {
       expect(order.attributionDeviceId).toBe('device-abc');
       expect(order.attributionRecoSource).toBe('profile');
       expect(customers.byId.get('42')?.email).toBe('shopper@example.com');
+      expect(webhookEvents.byWebhookId.get('wh-1')?.status).toBe('completed');
     });
 
     it('classifies an order carrying a valid MN- apartado tag as whatsapp_apartado', async () => {
@@ -113,6 +120,66 @@ describe('webhook handlers', () => {
       await handleOrdersWebhook(deps, 'wh-4', 'orders/create', payload, Buffer.from('raw'));
 
       expect(orders.rows).toHaveLength(1);
+      expect(webhookEvents.byWebhookId.get('wh-4')?.attemptCount).toBe(1);
+    });
+
+    it('F12: claim-then-fail leaves delivery failed so Shopify retry reprocesses', async () => {
+      let failNext = true;
+      const failingOrders = {
+        ...orders,
+        rows: orders.rows,
+        async upsertByShopifyOrderId(order: OrderRecord): Promise<void> {
+          if (failNext) {
+            failNext = false;
+            throw new Error('simulated upsert failure');
+          }
+          return orders.upsertByShopifyOrderId(order);
+        },
+        linkApartadoByAttributionCode: orders.linkApartadoByAttributionCode.bind(orders),
+        detachCustomer: orders.detachCustomer.bind(orders),
+        listForCustomer: orders.listForCustomer.bind(orders),
+        deleteAll: orders.deleteAll.bind(orders),
+      };
+
+      const failingDeps = { ...deps, orders: failingOrders };
+      const payload = orderPayload();
+
+      await expect(
+        handleOrdersWebhook(failingDeps, 'wh-fail', 'orders/create', payload, Buffer.from('raw-a')),
+      ).rejects.toThrow('simulated upsert failure');
+
+      expect(orders.rows).toHaveLength(0);
+      expect(webhookEvents.byWebhookId.get('wh-fail')?.status).toBe('failed');
+
+      await handleOrdersWebhook(failingDeps, 'wh-fail', 'orders/create', payload, Buffer.from('raw-a'));
+
+      expect(orders.rows).toHaveLength(1);
+      expect(orders.rows[0]!.shopifyOrderId).toBe('555');
+      expect(webhookEvents.byWebhookId.get('wh-fail')?.status).toBe('completed');
+      expect(webhookEvents.byWebhookId.get('wh-fail')?.attemptCount).toBe(2);
+    });
+
+    it('F12: completed delivery is not double-applied on duplicate', async () => {
+      let upsertCalls = 0;
+      const countingOrders = {
+        rows: orders.rows,
+        async upsertByShopifyOrderId(order: OrderRecord): Promise<void> {
+          upsertCalls += 1;
+          return orders.upsertByShopifyOrderId(order);
+        },
+        linkApartadoByAttributionCode: orders.linkApartadoByAttributionCode.bind(orders),
+        detachCustomer: orders.detachCustomer.bind(orders),
+        listForCustomer: orders.listForCustomer.bind(orders),
+        deleteAll: orders.deleteAll.bind(orders),
+      };
+      const countingDeps = { ...deps, orders: countingOrders };
+      const payload = orderPayload();
+
+      await handleOrdersWebhook(countingDeps, 'wh-dup', 'orders/create', payload, Buffer.from('raw'));
+      await handleOrdersWebhook(countingDeps, 'wh-dup', 'orders/create', payload, Buffer.from('raw'));
+
+      expect(upsertCalls).toBe(1);
+      expect(orders.rows).toHaveLength(1);
     });
 
     it('an orders/updated delivery updates the same mirrored row rather than duplicating it', async () => {
@@ -120,19 +187,61 @@ describe('webhook handlers', () => {
         deps,
         'wh-5',
         'orders/create',
-        orderPayload({ financial_status: 'pending' }),
+        orderPayload({
+          financial_status: 'pending',
+          updated_at: '2026-08-01T10:00:00-06:00',
+        }),
         Buffer.from('raw'),
       );
       await handleOrdersWebhook(
         deps,
         'wh-6',
         'orders/updated',
-        orderPayload({ financial_status: 'paid' }),
+        orderPayload({
+          financial_status: 'paid',
+          updated_at: '2026-08-01T11:00:00-06:00',
+        }),
         Buffer.from('raw'),
       );
 
       expect(orders.rows).toHaveLength(1);
       expect(orders.rows[0]!.financialStatus).toBe('paid');
+    });
+
+    it('F15: stale out-of-order delivery does not regress financial status', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-paid',
+        'orders/updated',
+        orderPayload({
+          financial_status: 'paid',
+          updated_at: '2026-08-01T10:00:00-06:00',
+        }),
+        Buffer.from('raw-paid'),
+      );
+      await handleOrdersWebhook(
+        deps,
+        'wh-refund',
+        'orders/updated',
+        orderPayload({
+          financial_status: 'refunded',
+          updated_at: '2026-08-01T12:00:00-06:00',
+        }),
+        Buffer.from('raw-refund'),
+      );
+      await handleOrdersWebhook(
+        deps,
+        'wh-stale-paid',
+        'orders/updated',
+        orderPayload({
+          financial_status: 'paid',
+          updated_at: '2026-08-01T10:00:00-06:00',
+        }),
+        Buffer.from('raw-stale'),
+      );
+
+      expect(orders.rows).toHaveLength(1);
+      expect(orders.rows[0]!.financialStatus).toBe('refunded');
     });
 
     it('unifies real checkout and apartado orders for the same customer in one list', async () => {
@@ -196,11 +305,13 @@ describe('webhook handlers', () => {
   });
 
   describe('handleCustomersDataRequest', () => {
-    it('records the request for manual follow-up without throwing', async () => {
+    it('records a durable open privacy task without throwing', async () => {
       await expect(
         handleCustomersDataRequest(deps, 'wh-dr', { customer: { id: 42 } }, Buffer.from('raw')),
       ).resolves.toBeUndefined();
-      expect(webhookEvents.byWebhookId.get('wh-dr')?.processedAt).not.toBeNull();
+      expect(webhookEvents.byWebhookId.get('wh-dr')?.status).toBe('completed');
+      expect(privacyRequests.byWebhookId.get('wh-dr')?.status).toBe('open');
+      expect(privacyRequests.byWebhookId.get('wh-dr')?.shopifyCustomerId).toBe('42');
     });
   });
 
