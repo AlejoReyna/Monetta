@@ -1,7 +1,7 @@
 # F01–F30 remediation tracking — 2026-09-07
 
 **Branch:** `monetta/audit-remediation-wip`  
-**Revalidated against:** current worktree on `monetta/audit-remediation-wip` (uncommitted WIP touches F01/F02 authorizer + PG register; other findings unchanged). Tracking commit includes this file only.  
+**Revalidated against:** tip `b19da2a` on `monetta/audit-remediation-wip` (Phases A–G committed). Closeout 2026-09-07 CT.
 **Sources:** `docs/AUDITORIA_FLUJOS_2026-09-07.md`, `docs/GROK_HANDOFF_FLUJOS_2026-09-07.md`, live code under `lib/`, `services/accounts_orders/`, `api/`, `functions/`, `shopify/`, `config/`, CI  
 **Scope of this doc:** tracking only — no remediations implemented here.
 
@@ -9,10 +9,10 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Count | Status |
 |------:|:-------|
-| 26 | open |
-| 0 | fixed |
+| 0 | open |
+| 19 | fixed/done/closed/remediated |
 | 0 | disproved |
-| 3 | partial |
+| 10 | partial |
 | 1 | pending |
 
 ---
@@ -23,8 +23,8 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `partial` |
-| **Evidence** | Uncommitted WIP in worktree: `authorizer.ts` now forces `bootstrapOwner=false` for Monetta `app_account` subjects and documents that self-declared emails must never bootstrap. Shopify customer-id allowlist bootstrap remains. **Incomplete:** `server.ts` / `adminApi.test.ts` still construct `ServerAdminAuthorizer` with `ownerEmails` (likely type/build break until callers updated); durable principal provisioning/CLI + regression tests not landed; register still creates unverified emails. |
+| **Status** | `fixed` |
+| **Evidence** | Phase A commit `2350c3e`: ServerAdminAuthorizer no longer bootstraps owners from Monetta self-declared emails; OWNER_SHOPIFY_CUSTOMER_IDS + explicit admin_principals only. HTTP+PG regression tests green (closeout: 86/86). **Owner action remaining:** provision legitimate principals per PHASE_A_NOTES.md. |
 | **Planned change** | Finish wiring (drop `ownerEmails` from authorizer call sites), provision owners via Shopify customer id / CLI principals only, migrate/review bootstrap-created principals, add inverted regression tests. |
 | **Regression test** | To-add: allowlisted Monetta email with `emailVerified=false` must not get `role=owner`. Invert `backend_probes.mts.txt`. Update `adminApi.test.ts` constructor. |
 | **Integration/E2E** | Unverified Monetta register → `/admin/me` 403; provisioned Shopify owner works; deactivated principal stays revoked. |
@@ -34,8 +34,8 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `partial` |
-| **Evidence** | Uncommitted WIP: `pgAppAccountsRepository.ts` now refuses register when `device_id` already has a session (`AccountRegistrationConflictError`) and only INSERTs new accounts — no credential overwrite. New `domain/accountErrors.ts`. **Still open:** `test/support/inMemoryRepositories.ts` still overwrites by deviceId; `/accounts/register` in `server.ts` does not yet map `AccountRegistrationConflictError` to a stable 409 body (still only handles email `23505`); no inverted regression test committed. |
+| **Status** | `fixed` |
+| **Evidence** | Phase A commit `2350c3e`: register creates only; known deviceId returns 409 registration_conflict without credential overwrite; in-memory fake + API mapping aligned; WP-01 tests green. |
 | **Planned change** | Mirror PG semantics in in-memory fake; map device/email conflicts in API; separate authenticated credential change; add tests that prove A's identity unchanged. |
 | **Regression test** | To-add: known deviceId register does not change A's email/password/Shopify link/sessions. Invert backend probe. |
 | **Integration/E2E** | Concurrent register retries; PostgreSQL path + API 409. |
@@ -46,7 +46,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 | Field | Value |
 |---|---|
 | **Status** | `remediated` |
-| **Evidence** | `config/dart_defines.staging.json`: `ENABLE_EXTERNAL_CATALOG=true`, `EXTERNAL_CATALOG_BASE_URL=https://catalog.monetta.mx`. Wiring still present: `lib/main.dart` ExternalCatalogScope, `lib/app/external_catalog_*.dart`, `lib/features/home/external_catalog_section.dart`, `admin_screen.dart` requires ExternalCatalogController, mixed feed / collections consume external items. |
+| **Evidence** | Phase B `71900b4`: ExternalCatalogConfig forced off; ENABLE_EXTERNAL_CATALOG rejected by RuntimeConfig/validators; admin syncAll omits external-status. Live monitor/DNS decommission still owner-gated — EXTERNAL_CATALOG_DECOMMISSION.md. |
 | **Planned change** | Remove product wiring, admin coupling, CI/config; inventory deploys of `catalog_monitor` without deleting prod infra blindly. |
 | **Regression test** | To-add: home/search/admin make zero requests to external catalog when flag false; production validator rejects enable. |
 | **Integration/E2E** | Staging/production builds with flag off; admin sync without monitor. |
@@ -145,7 +145,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 | Field | Value |
 |---|---|
 | **Status** | `closed` |
-| **Evidence** | `handlers.ts` `claimDelivery` → `recordIfNew` INSERT … ON CONFLICT DO NOTHING before effects; on conflict returns false without checking `processed_at`. Failed order upsert leaves row claimed; retry skipped. |
+| **Evidence** | Phase E `0508541`: durable inbox tryClaim/markCompleted/markFailed (`010_webhook_durable_inbox.sql`); claim-then-fail retries; completed deliveries not re-applied. |
 | **Planned change** | Durable inbox with states/retries; mark processed only after durable effects; concurrent-safe. |
 | **Regression test** | To-add (invert backend probe): fail after claim → retry processes; full duplicate does not double-apply. |
 | **Integration/E2E** | Shopify webhook retry against staging backend. |
@@ -178,7 +178,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 | Field | Value |
 |---|---|
 | **Status** | `closed` |
-| **Evidence** | `pgOrdersRepository.ts` ON CONFLICT always overwrites `financial_status` / `fulfillment_status` and sets `updated_at = now()` with no comparison to Shopify updated_at / version. Shop domain not validated in order upsert path beyond webhook HMAC. |
+| **Evidence** | Phase E `0508541`: orders_mirror.shopify_updated_at refuses stale overwrites; unexpected X-Shopify-Shop-Domain rejected when SHOPIFY_STORE_DOMAIN configured. |
 | **Planned change** | Temporal versioning / canonical read; verify expected shop; metrics + replay. |
 | **Regression test** | To-add: paid→refunded then stale paid delivery keeps refunded. |
 | **Integration/E2E** | Out-of-order Shopify webhook deliveries on staging. |
@@ -221,8 +221,8 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `/accounts/register` + `/accounts/login` still live (`server.ts`). Rate limiter (`SlidingWindowAdminRateLimiter`) applies to admin mutations only — not login/register. UI primary path is Shopify Customer Accounts. |
+| **Status** | `partial` |
+| **Evidence** | Phase A: validation + rate limits on register/login; LEGACY_ACCOUNT_REGISTRATION_ENABLED closes new signups when false; UI primary path is Shopify Customer Accounts. Prod flag still default-open in example env; legacy inventory/migration remains owner ops. |
 | **Planned change** | Harden or flag-disable new legacy registration; rate-limit auth endpoints; migrate/link with proof, not email alone; backup/rollback plan. |
 | **Regression test** | To-add: rate limit; register disabled flag; no email-only order linking. |
 | **Integration/E2E** | Legacy user retains history after migration. |
@@ -309,8 +309,8 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | Product/partner flows open WhatsApp (and Canva/Drive links); webhook recognizes `MN-` apartado tags but reservation/payment remain manual. No auto hold/deposit/expiry in app. |
+| **Status** | `partial` |
+| **Evidence** | Phase G `b19da2a`: APARTADO_AND_RESELLER_SOP.md + honest shopper/partner copy; WhatsApp/Canva/Drive do not reserve/charge/create orders. Manual ops unchanged by design. |
 | **Planned change** | Document owner SOP (response, reserve, charge, link order, deliver); do not claim “apartado confirmado” from WhatsApp open alone. |
 | **Regression test** | Message payload includes correct variant/qty (unit). |
 | **Integration/E2E** | Operator creates/links Shopify order; stock/state verifiable. |
@@ -321,7 +321,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 | Field | Value |
 |---|---|
 | **Status** | `partial` |
-| **Evidence** | Notification stack present (`notification_config.dart` reads `NOTIFICATIONS_ENABLED`; controllers/API/worker exist). Staging dart-defines omit `NOTIFICATIONS_ENABLED` (defaults false). Deep-link collection→category filter issue called out in audit still relevant to verify in `main.dart`. |
+| **Evidence** | Phase G: collection deep link keeps collectionHandle; reject external: engagement keys/events/product routes. Device push (APNs/FCM/App Check) still owner-gated; NOTIFICATIONS_ENABLED off in staging templates. |
 | **Planned change** | Enable with App Check/APNs/FCM per app id; fix collection deep links; remove external catalog triggers; wire useful checkout telemetry without mistaking completion for capture. |
 | **Regression test** | Existing notification unit tests; to-add: opt-out respected; collection deep link opens handle. |
 | **Integration/E2E** | Cold start + foreground push on real devices. |
@@ -332,7 +332,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 | Field | Value |
 |---|---|
 | **Status** | `partial` |
-| **Evidence** | `handleCustomersDataRequest` only `logger.warn` then `markProcessed` — no export queue. Redact deletes mirror PII/engagement/tokens. `/healthz` and `/livez` return ok without PostgreSQL check; no `readyz`. |
+| **Evidence** | Phase E+G: privacy_requests durable open task; /readyz probes PG; admin privacy list/fulfill + migration 012; redact evidence. Full export package + backup restore drill still operator-run (ACCOUNTS_ORDERS_OPS.md). |
 | **Planned change** | Tracked data-request/export workflow; readiness probes; backup/restore drill; business policy owner. |
 | **Regression test** | To-add: data_request leaves durable open task; readiness fails when DB down. |
 | **Integration/E2E** | Test request export/close; restore rehearsal. |
@@ -342,8 +342,8 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `.github/workflows/quality.yml` formats `lib test integration_test` but `integration_test/` missing. `config/dart_defines.ci.json` is tracked; `bin/check_no_secrets.sh` fails any `config/dart_defines*.json` that is not `*.example`. Audit noted analyze infos + format drift on some files (re-run at gate time). |
+| **Status** | `partial` |
+| **Evidence** | Phase G: integration_test harness present; narrow CI fixture exception with content validation (check_no_secrets exit 0 on closeout tip); home tests drop ExternalCatalogScope. Full flutter/CI suite green not claimed this closeout. |
 | **Planned change** | Fix format/lints; narrow CI fixture exception with content validation; add real integration tests; update CI; prefer FVM pin. |
 | **Regression test** | CI green on final commit: format, analyze, flutter/test suites, secrets scanner, builds. |
 | **Integration/E2E** | Replace missing `integration_test` with useful flows (catalog/checkout fakes). |
@@ -365,13 +365,13 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 ## Top highest-severity still-open findings
 
-1. **F03 (P0, remediated in WIP)** — external catalog retired from product; live infra decommission pending owner approval.
-2. **F04 (P1, open)** — `product_screen.dart` calls `addToBag(product)`; store picks cheapest available; `BagLines` PK is `productId`.
-3. **F05 (P1, open)** — staging Storefront token empty; cart composition gated by `StorefrontConfig.isUsable`.
-4. **F12 (P1, closed)** — durable webhook inbox with pending/processing/completed/failed; claim-then-fail retries; completed not double-applied.
-5. **F08 (P1, open)** — full sync only `upsertProducts`; never deletes absent products (`catalog_repository.dart`).
+1. **F05 (P1, partial)** — staging/production Storefront token / same-shop config still required for live carts.
+2. **F16 (P1, pending)** — payment method matrix on simulator/physical devices not run.
+3. **F13 (P1, partial)** — CAA-primary UI in code; live pre-install/post-checkout history unverified.
+4. **F03 (P0, remediated)** — product path retired; live monitor/DNS decommission still needs owner approval.
+5. **F01/F19 (owner ops)** — code fixed/partial; legitimate owner provisioning + legacy flag still owner actions.
 
-Note: **F01/F02** remain P0 but are `partial` in uncommitted WIP — finish wiring/tests before treating closed.
+Note: F04/F08/F12 code remediations landed in Phase C/E; do not treat stale bullet text above as current defects.
 
 ---
 
@@ -419,10 +419,17 @@ Note: **F01/F02** remain P0 but are `partial` in uncommitted WIP — finish wiri
 - F14 marked `fixed` (generation guard already present from Phase D; regression test added).
 - Live shop verification of pre-install history and post-checkout appearance still open.
 
-## Phase G / WP-07 status (dirty WIP — not yet committed by Phase G)
+## Phase G / WP-07 status (committed `b19da2a`)
 
 - F27 partial: honest SOP + UI/WhatsApp copy; manual ops unchanged by design.
 - F28 partial: collection deep links + external event rejection in code; device push config still owner-gated.
 - F29 partial: privacy fulfill/list + redact evidence + ops docs; `/readyz` from Phase E; export package still operator-run.
 - F30 partial: integration_test harness, narrow CI fixture exception, ExternalCatalogScope test cleanup, format paths.
-- Dirty paths include shopper_copy/cart_attribution/editorial/partner_hub and accounts_orders privacy/engagement/admin files — do not treat as committed until Phase G pushes.
+- Closeout tip includes Phase G. See PHASE_G_NOTES.md + FINAL_DELIVERABLES.md.
+
+
+## Closeout refresh (appended)
+
+- Tip `b19da2a`. Tracking cells reconciled to Phases A–G + closeout evidence.
+- Local: accounts_orders typecheck 0; vitest 86/86; check_no_secrets 0; focused flutter subset 0.
+- See J01-J11_RESULTS.md and FINAL_DELIVERABLES.md. Code / dev-store / production remain SEPARATE statuses.
