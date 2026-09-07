@@ -1,4 +1,5 @@
 import type pg from 'pg';
+import { AccountRegistrationConflictError } from '../domain/accountErrors.js';
 import type { AppAccountsRepository } from '../domain/ports.js';
 import type {
   AppAccountCredentials,
@@ -33,50 +34,48 @@ function fromRow(row: AppAccountRow): AppAccountRecord {
 export class PgAppAccountsRepository implements AppAccountsRepository {
   constructor(private readonly pool: pg.Pool) {}
 
+  /**
+   * Creates a brand-new account and binds a session to the device. Never
+   * updates an existing account's email, password, Shopify linkage, or other
+   * fields based on deviceId. A device that already has a session, or an
+   * email that is already registered, conflicts.
+   */
   async register(record: AppAccountRegistration): Promise<AppAccountRecord> {
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');
       // Serialize registrations for one device so concurrent retries cannot
-      // create an orphan account before the UNIQUE(device_id) upsert wins.
+      // race past the device-session uniqueness check.
       await client.query('SELECT pg_advisory_xact_lock(hashtext($1))', [record.deviceId]);
-      const existing = await client.query<AppAccountRow>(
-        `SELECT a.id, a.email, a.display_name, a.email_verified, a.shopify_customer_id,
-                a.created_at, a.updated_at
-           FROM app_accounts a
-           JOIN app_sessions s ON s.account_id = a.id
-          WHERE s.device_id = $1
-          FOR UPDATE OF a`,
+
+      const existingDevice = await client.query<{ account_id: string }>(
+        `SELECT account_id FROM app_sessions WHERE device_id = $1 FOR UPDATE`,
         [record.deviceId],
       );
+      if (existingDevice.rows[0] !== undefined) {
+        throw new AccountRegistrationConflictError('device');
+      }
 
-      const accountId = existing.rows[0]?.id ?? record.accountId;
-      const account = existing.rows[0] === undefined
-        ? await client.query<AppAccountRow>(
-            `INSERT INTO app_accounts (id, email, display_name, password_hash)
-             VALUES ($1, $2, $3, $4)
-             RETURNING id, email, display_name, email_verified, shopify_customer_id,
-                       created_at, updated_at`,
-            [accountId, record.email, record.displayName, record.passwordHash],
-          )
-        : await client.query<AppAccountRow>(
-            `UPDATE app_accounts
-                SET email = $2, display_name = $3, password_hash = $4, updated_at = now()
-              WHERE id = $1
-              RETURNING id, email, display_name, email_verified, shopify_customer_id,
-                        created_at, updated_at`,
-            [accountId, record.email, record.displayName, record.passwordHash],
-          );
+      let account;
+      try {
+        account = await client.query<AppAccountRow>(
+          `INSERT INTO app_accounts (id, email, display_name, password_hash)
+           VALUES ($1, $2, $3, $4)
+           RETURNING id, email, display_name, email_verified, shopify_customer_id,
+                     created_at, updated_at`,
+          [record.accountId, record.email, record.displayName, record.passwordHash],
+        );
+      } catch (error) {
+        if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
+          throw new AccountRegistrationConflictError('email');
+        }
+        throw error;
+      }
 
       await client.query(
         `INSERT INTO app_sessions (token_hash, account_id, device_id, expires_at)
-         VALUES ($1, $2, $3, $4)
-         ON CONFLICT (device_id) DO UPDATE SET
-           token_hash = EXCLUDED.token_hash,
-           account_id = EXCLUDED.account_id,
-           expires_at = EXCLUDED.expires_at,
-           created_at = now()`,
-        [record.tokenHash, accountId, record.deviceId, record.expiresAt],
+         VALUES ($1, $2, $3, $4)`,
+        [record.tokenHash, record.accountId, record.deviceId, record.expiresAt],
       );
       await client.query('COMMIT');
       return fromRow(account.rows[0]!);

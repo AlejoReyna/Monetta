@@ -11,7 +11,12 @@ import type {
 } from './types.js';
 
 export interface AppAccountsRepository {
-  /** Creates an account, or updates the account already bound to this device. */
+  /**
+   * Creates a new account and device session. Must never alter an existing
+   * account's email, password, Shopify linkage, role, or sessions merely
+   * because the request reused a known deviceId. Conflicts raise
+   * AccountRegistrationConflictError.
+   */
   register(record: AppAccountRegistration): Promise<AppAccountRecord>;
 
   /** Reads the password verifier used by first-party email login. */

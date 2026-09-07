@@ -63,6 +63,7 @@ import type {
   ShopifyShopRedactWebhookPayload,
 } from '../webhooks/payloads.js';
 import type { Platform } from '../domain/types.js';
+import { AccountRegistrationConflictError } from '../domain/accountErrors.js';
 
 export interface ServerDeps extends HandlerDeps {
   readonly webhookSecret: string;
@@ -76,6 +77,10 @@ export interface ServerDeps extends HandlerDeps {
   readonly audit?: AdminAuditLogger;
   readonly auditReader?: AdminAuditReader;
   readonly rateLimiter?: AdminMutationRateLimiter;
+  /** Sliding-window limiter for /accounts/register and /accounts/login. */
+  readonly authRateLimiter?: AdminMutationRateLimiter;
+  /** When false, first-party registration is closed; login remains for legacy users. */
+  readonly legacyAccountRegistrationEnabled?: boolean;
   readonly mutationsEnabled?: boolean;
   readonly shopifyWritesEnabled?: boolean;
   readonly externalCatalog?: ExternalCatalogAdminClient;
@@ -86,6 +91,28 @@ export interface ServerDeps extends HandlerDeps {
 
 const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
 const scryptAsync = promisify(scrypt);
+
+function clientKey(req: Request): string {
+  const forwarded = req.header('x-forwarded-for');
+  if (typeof forwarded === 'string' && forwarded.trim() !== '') {
+    return forwarded.split(',')[0]!.trim().slice(0, 128);
+  }
+  return (req.socket.remoteAddress ?? 'unknown').slice(0, 128);
+}
+
+function asNonEmptyString(value: unknown, max: number): string | null {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (trimmed === '' || trimmed.length > max) return null;
+  return trimmed;
+}
+
+function allowAuth(deps: ServerDeps, req: Request, operation: string, res: Response): boolean {
+  if (deps.authRateLimiter === undefined) return true;
+  if (deps.authRateLimiter.allow(clientKey(req), operation)) return true;
+  res.status(429).json({ error: 'rate_limited' });
+  return false;
+}
 
 function hashToken(token: string): string {
   return hashAdminBearerToken(token);
@@ -330,26 +357,45 @@ export function createApp(deps: ServerDeps): Express {
     registerEngagementRoutes(app, deps.engagement);
   }
 
-  // First-party, device-bound Monetta registration. Email is intentionally
-  // unverified and is profile metadata only: this endpoint does not claim
-  // email ownership or provide cross-device recovery. The opaque bearer
-  // token is the credential and only its SHA-256 hash is stored.
+  // First-party Monetta registration. Email is unverified profile metadata
+  // only — never a claim of ownership and never an admin bootstrap signal.
+  // Registration creates a new account; it never mutates an existing one via
+  // deviceId (F02). Set legacyAccountRegistrationEnabled=false to close new
+  // signups while preserving login for existing users (F19).
   app.post('/accounts/register', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email, password, displayName, deviceId } = req.body as {
-        email?: string;
-        password?: string;
-        displayName?: string | null;
-        deviceId?: string;
-      };
-      const normalizedEmail = email?.trim().toLowerCase() ?? '';
-      const normalizedName = displayName?.trim() || null;
+      if (deps.legacyAccountRegistrationEnabled === false) {
+        res.status(403).json({ error: 'registration_disabled' });
+        return;
+      }
+      if (!allowAuth(deps, req, 'accounts.register', res)) return;
+
+      if (req.body === null || typeof req.body !== 'object' || Array.isArray(req.body)) {
+        res.status(400).json({ error: 'invalid_request' });
+        return;
+      }
+      const body = req.body as Record<string, unknown>;
+      const emailRaw = asNonEmptyString(body.email, 254);
+      const password = typeof body.password === 'string' ? body.password : null;
+      const deviceId = asNonEmptyString(body.deviceId, 200);
+      const displayNameRaw = body.displayName;
+      const normalizedName = displayNameRaw === undefined || displayNameRaw === null
+        ? null
+        : asNonEmptyString(displayNameRaw, 120);
+      if (
+        displayNameRaw !== undefined && displayNameRaw !== null &&
+        typeof displayNameRaw !== 'string'
+      ) {
+        res.status(400).json({ error: 'invalid_request' });
+        return;
+      }
+      const normalizedEmail = emailRaw?.toLowerCase() ?? '';
       const emailLooksValid = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail);
       if (
-        !emailLooksValid || normalizedEmail.length > 254 ||
-        !password || password.length < 8 || password.length > 128 ||
-        !deviceId || deviceId.length > 200 ||
-        (normalizedName !== null && normalizedName.length > 120)
+        !emailLooksValid ||
+        password === null || password.length < 8 || password.length > 128 ||
+        deviceId === null ||
+        (displayNameRaw !== undefined && displayNameRaw !== null && normalizedName === null)
       ) {
         res.status(400).json({ error: 'invalid_request' });
         return;
@@ -376,8 +422,13 @@ export function createApp(deps: ServerDeps): Express {
         session: { token, expiresAt: expiresAt.toISOString() },
       });
     } catch (error) {
+      if (error instanceof AccountRegistrationConflictError) {
+        // Same response for device and email conflicts: avoid account enumeration.
+        res.status(409).json({ error: 'registration_conflict' });
+        return;
+      }
       if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505') {
-        res.status(409).json({ error: 'email_already_registered' });
+        res.status(409).json({ error: 'registration_conflict' });
         return;
       }
       next(error);
@@ -386,13 +437,21 @@ export function createApp(deps: ServerDeps): Express {
 
   app.post('/accounts/login', async (req: Request, res: Response, next: NextFunction) => {
     try {
-      const { email, password, deviceId } = req.body as {
-        email?: string;
-        password?: string;
-        deviceId?: string;
-      };
-      const normalizedEmail = email?.trim().toLowerCase() ?? '';
-      if (!normalizedEmail || !password || password.length > 128 || !deviceId || deviceId.length > 200) {
+      if (!allowAuth(deps, req, 'accounts.login', res)) return;
+
+      if (req.body === null || typeof req.body !== 'object' || Array.isArray(req.body)) {
+        res.status(400).json({ error: 'invalid_request' });
+        return;
+      }
+      const body = req.body as Record<string, unknown>;
+      const emailRaw = asNonEmptyString(body.email, 254);
+      const password = typeof body.password === 'string' ? body.password : null;
+      const deviceId = asNonEmptyString(body.deviceId, 200);
+      const normalizedEmail = emailRaw?.toLowerCase() ?? '';
+      if (
+        normalizedEmail === '' || password === null || password.length === 0 ||
+        password.length > 128 || deviceId === null
+      ) {
         res.status(400).json({ error: 'invalid_request' });
         return;
       }
@@ -556,9 +615,9 @@ if (isMain) {
     appAccounts,
     customerTokenVerifier,
     principals: adminPrincipals,
-    ownerEmails: config.ownerEmails,
     ownerShopifyCustomerIds: config.ownerShopifyCustomerIds,
   });
+  const authRateLimiter = new SlidingWindowAdminRateLimiter(20, 60_000);
   let shopifyAdmin: ShopifyAdminClient | undefined;
   if (
     config.shopDomain !== '' && config.shopifyAppClientId !== '' &&
@@ -639,6 +698,8 @@ if (isMain) {
     featuredJobs: adminFeaturedJobs,
     syncJobs: adminSyncJobs,
     rateLimiter: adminRateLimiter,
+    authRateLimiter,
+    legacyAccountRegistrationEnabled: config.legacyAccountRegistrationEnabled,
     mutationsEnabled: config.adminMutationsEnabled,
     shopifyWritesEnabled: config.adminShopifyWritesEnabled,
     ...(externalCatalog === undefined ? {} : { externalCatalog }),

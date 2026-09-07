@@ -1,3 +1,4 @@
+import { AccountRegistrationConflictError } from '../../src/domain/accountErrors.js';
 import type {
   AppAccountsRepository,
   CustomersRepository,
@@ -26,29 +27,30 @@ export class InMemoryAppAccountsRepository implements AppAccountsRepository {
   private readonly passwordHashById = new Map<string, string>();
 
   async register(record: AppAccountRegistration): Promise<AppAccountRecord> {
-    const existingId = this.accountIdByDeviceId.get(record.deviceId);
-    const id = existingId ?? record.accountId;
-    const existing = this.byId.get(id);
+    if (this.accountIdByDeviceId.has(record.deviceId)) {
+      throw new AccountRegistrationConflictError('device');
+    }
+    const emailTaken = [...this.byId.values()].some(
+      (candidate) => candidate.email.toLowerCase() === record.email.toLowerCase(),
+    );
+    if (emailTaken) {
+      throw new AccountRegistrationConflictError('email');
+    }
     const now = new Date();
     const account: AppAccountRecord = {
-      id,
+      id: record.accountId,
       email: record.email,
       displayName: record.displayName,
-      emailVerified: existing?.emailVerified ?? false,
-      shopifyCustomerId: existing?.shopifyCustomerId ?? null,
-      createdAt: existing?.createdAt ?? now,
+      emailVerified: false,
+      shopifyCustomerId: null,
+      createdAt: now,
       updatedAt: now,
     };
-    const oldTokenHash = this.tokenHashByDeviceId.get(record.deviceId);
-    if (oldTokenHash !== undefined) {
-      this.accountIdByTokenHash.delete(oldTokenHash);
-      this.expiresAtByTokenHash.delete(oldTokenHash);
-    }
-    this.byId.set(id, account);
-    this.passwordHashById.set(id, record.passwordHash);
-    this.accountIdByDeviceId.set(record.deviceId, id);
+    this.byId.set(record.accountId, account);
+    this.passwordHashById.set(record.accountId, record.passwordHash);
+    this.accountIdByDeviceId.set(record.deviceId, record.accountId);
     this.tokenHashByDeviceId.set(record.deviceId, record.tokenHash);
-    this.accountIdByTokenHash.set(record.tokenHash, id);
+    this.accountIdByTokenHash.set(record.tokenHash, record.accountId);
     this.expiresAtByTokenHash.set(record.tokenHash, record.expiresAt);
     return account;
   }

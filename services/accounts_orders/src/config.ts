@@ -32,9 +32,19 @@ export interface AccountsOrdersConfig {
   readonly firebasePrivateKey: string;
   readonly pushTokenEncryptionSecret: string;
   readonly internalCatalogEventSecret: string;
+  /**
+   * Candidate owner emails for the reviewable provisionOwners CLI only.
+   * Never used at request time to bootstrap admin privileges (F01).
+   */
   readonly ownerEmails: ReadonlySet<string>;
+  /** Verified Shopify Customer ids allowed to bootstrap an owner principal. */
   readonly ownerShopifyCustomerIds: ReadonlySet<string>;
   readonly adminEnvironment: 'staging' | 'production';
+  /**
+   * When false, POST /accounts/register is closed. Existing legacy accounts
+   * still authenticate via /accounts/login.
+   */
+  readonly legacyAccountRegistrationEnabled: boolean;
 }
 
 function int(value: string | undefined, fallback: number): number {
@@ -50,6 +60,14 @@ function csv(value: string | undefined): ReadonlySet<string> {
       .map((item) => item.trim().toLowerCase())
       .filter((item) => item !== ''),
   );
+}
+
+function bool(value: string | undefined, fallback: boolean): boolean {
+  if (value === undefined || value === '') return fallback;
+  const normalized = value.trim().toLowerCase();
+  if (['1', 'true', 'yes', 'on'].includes(normalized)) return true;
+  if (['0', 'false', 'no', 'off'].includes(normalized)) return false;
+  return fallback;
 }
 
 export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrdersConfig {
@@ -120,5 +138,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     ownerEmails: csv(env.OWNER_ADMIN_EMAILS),
     ownerShopifyCustomerIds: csv(env.OWNER_SHOPIFY_CUSTOMER_IDS),
     adminEnvironment,
+    // Default on so existing local/staging clients keep working; production
+    // should set LEGACY_ACCOUNT_REGISTRATION_ENABLED=false once Shopify-only.
+    legacyAccountRegistrationEnabled: bool(
+      env.LEGACY_ACCOUNT_REGISTRATION_ENABLED,
+      true,
+    ),
   };
 }

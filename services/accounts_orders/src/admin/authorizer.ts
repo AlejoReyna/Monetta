@@ -6,7 +6,6 @@ import type {
   AdminActor,
   AdminAuthentication,
   AdminCapabilities,
-  AdminPrincipalRecord,
   AdminPrincipalSubject,
 } from './types.js';
 
@@ -50,31 +49,34 @@ export function hashAdminBearerToken(token: string): string {
   return createHash('sha256').update(token).digest('hex');
 }
 
+/**
+ * Authorizes admin access from durable principals. Monetta first-party emails
+ * are self-declared and never bootstrap owner privileges. Shopify Customer
+ * Account tokens may bootstrap from an explicit server allow-list of customer
+ * ids (a verified identity). Operators may also provision principals through
+ * the reviewable provisionOwners CLI — never by matching an unverified email.
+ */
 export class ServerAdminAuthorizer implements AdminAuthorizer {
   constructor({
     appAccounts,
     customerTokenVerifier,
     principals,
-    ownerEmails,
     ownerShopifyCustomerIds,
   }: {
     readonly appAccounts: AppAccountsRepository;
     readonly customerTokenVerifier: CustomerTokenVerifier;
     readonly principals: AdminPrincipalsRepository;
-    readonly ownerEmails: ReadonlySet<string>;
     readonly ownerShopifyCustomerIds: ReadonlySet<string>;
   }) {
     this.appAccounts = appAccounts;
     this.customerTokenVerifier = customerTokenVerifier;
     this.principals = principals;
-    this.ownerEmails = ownerEmails;
     this.ownerShopifyCustomerIds = ownerShopifyCustomerIds;
   }
 
   private readonly appAccounts: AppAccountsRepository;
   private readonly customerTokenVerifier: CustomerTokenVerifier;
   private readonly principals: AdminPrincipalsRepository;
-  private readonly ownerEmails: ReadonlySet<string>;
   private readonly ownerShopifyCustomerIds: ReadonlySet<string>;
 
   async resolve(bearerToken: string): Promise<AdminAuthentication | null> {
@@ -82,13 +84,15 @@ export class ServerAdminAuthorizer implements AdminAuthorizer {
       hashAdminBearerToken(bearerToken),
     );
     if (appAccount !== null) {
+      // First-party emails are unverified profile metadata. Never bootstrap
+      // owner from OWNER_ADMIN_EMAILS or any self-declared address.
       return this.resolveSubject(
         {
           type: 'app_account',
           id: appAccount.id,
         },
         'monetta',
-        this.ownerEmails.has(appAccount.email.trim().toLowerCase()),
+        false,
       );
     }
 

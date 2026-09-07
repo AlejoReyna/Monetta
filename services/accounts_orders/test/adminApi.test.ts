@@ -1,5 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Server } from 'node:http';
+import { randomUUID } from 'node:crypto';
 import { createApp, type ServerDeps } from '../src/api/server.js';
 import { ServerAdminAuthorizer } from '../src/admin/authorizer.js';
 import type { CustomerTokenVerifier } from '../src/auth/customerTokenVerifier.js';
@@ -35,7 +36,6 @@ describe('native admin capability API', () => {
       appAccounts,
       customerTokenVerifier,
       principals,
-      ownerEmails: new Set(['owner@monetta.mx']),
       ownerShopifyCustomerIds: new Set(['77']),
     });
     const deps: ServerDeps = {
@@ -105,16 +105,42 @@ describe('native admin capability API', () => {
     expect(principals.rows.size).toBe(0);
   });
 
-  it('bootstraps an owner by stable first-party account subject, not client claims', async () => {
+  it('does not bootstrap owner from an unverified allowlisted email (F01)', async () => {
     const token = await registerAccount('owner@monetta.mx', 'owner-device');
     const response = await fetch(`${baseUrl}/admin/me`, {
       headers: {
         Authorization: `Bearer ${token}`,
-        'X-Admin-Email': 'attacker@example.com',
-        'X-Admin-Role': 'shopper',
+        'X-Admin-Email': 'owner@monetta.mx',
+        'X-Admin-Role': 'owner',
       },
     });
 
+    expect(response.status).toBe(200);
+    expect(await response.json()).toMatchObject({
+      actor: { provider: 'monetta' },
+      roles: [],
+      capabilities: { openAdmin: false },
+    });
+    expect(principals.rows.size).toBe(0);
+  });
+
+  it('grants owner only from an explicit provisioned principal, and respects revocation', async () => {
+    const token = await registerAccount('owner@monetta.mx', 'owner-device');
+    const me = await fetch(`${baseUrl}/accounts/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    const account = (await me.json()) as { account: { id: string } };
+
+    await principals.createIfAbsent({
+      id: randomUUID(),
+      subject: { type: 'app_account', id: account.account.id },
+      role: 'owner',
+      createdBy: 'test:explicit-provision',
+    });
+
+    const response = await fetch(`${baseUrl}/admin/me`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     expect(response.status).toBe(200);
     const body = await response.json() as {
       actor: { id: string; provider: string };
@@ -128,7 +154,6 @@ describe('native admin capability API', () => {
       openAdmin: true,
       manageNotifications: true,
     });
-    expect(principals.rows.size).toBe(1);
 
     const principal = [...principals.rows.values()][0]!;
     principals.rows.set(`${principal.type}:${principal.id}`, {
