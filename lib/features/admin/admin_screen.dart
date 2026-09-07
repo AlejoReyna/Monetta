@@ -6,7 +6,6 @@ import 'package:flutter/material.dart';
 import '../../app/admin_controller.dart';
 import '../../app/admin_notification_controller.dart';
 import '../../app/catalog_store.dart';
-import '../../app/external_catalog_controller.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/theme.dart';
 import '../../domain/admin_control.dart';
@@ -18,14 +17,12 @@ class AdminScreen extends StatefulWidget {
     required this.controller,
     this.notificationController,
     required this.catalogStore,
-    required this.externalCatalogController,
     super.key,
   });
 
   final AdminController controller;
   final AdminNotificationController? notificationController;
   final CatalogStore catalogStore;
-  final ExternalCatalogController externalCatalogController;
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -50,7 +47,6 @@ class _AdminScreenState extends State<AdminScreen> {
   Future<void> _load() {
     return widget.controller.load(
       appProducts: widget.catalogStore.products,
-      externalSources: widget.externalCatalogController.sources,
     );
   }
 
@@ -64,7 +60,7 @@ class _AdminScreenState extends State<AdminScreen> {
     _toast(
       ok
           ? widget.controller.mode == AdminConnectionMode.live
-              ? 'Shopify, la app y las fuentes quedaron sincronizados.'
+              ? 'Shopify y la app quedaron sincronizados.'
               : 'Sincronización simulada en vista previa.'
           : widget.controller.lastError ?? 'No se pudo sincronizar.',
     );
@@ -119,10 +115,6 @@ class _AdminScreenState extends State<AdminScreen> {
                       ),
                       _StorefrontSection(
                         key: ValueKey(controller.storefront.hashCode),
-                        controller: controller,
-                        onMessage: _toast,
-                      ),
-                      _SourcesSection(
                         controller: controller,
                         onMessage: _toast,
                       ),
@@ -234,7 +226,6 @@ class _SectionPicker extends StatelessWidget {
     (Icons.grid_view_rounded, 'Resumen'),
     (Icons.inventory_2_outlined, 'Productos'),
     (Icons.storefront_outlined, 'Tienda'),
-    (Icons.language_rounded, 'Fuentes'),
     (Icons.notifications_outlined, 'Avisos'),
   ];
 
@@ -314,10 +305,6 @@ class _OverviewSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final inStock = controller.products.where((item) => item.inStock).length;
-    final externalItems = controller.sources.fold<int>(
-      0,
-      (total, source) => total + source.itemCount,
-    );
     final metadata = catalogStore.catalogMetadata;
     final catalogSource = switch (metadata?.source) {
       CatalogCacheSource.firestore => 'Firestore',
@@ -358,8 +345,7 @@ class _OverviewSection extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Catálogo, portada, comisiones e inventario conectados con '
-                'Shopify y la app.',
+                'Catálogo, portada e inventario conectados con Shopify y la app.',
                 style: sans(size: 12, color: const Color(0xFFCACACA)),
               ),
             ],
@@ -378,10 +364,6 @@ class _OverviewSection extends StatelessWidget {
             ),
             const SizedBox(width: 10),
             Expanded(child: _Metric(value: '$inStock', label: 'con stock')),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _Metric(value: '$externalItems', label: 'externos'),
-            ),
           ],
         ),
         const SizedBox(height: 28),
@@ -399,12 +381,6 @@ class _OverviewSection extends StatelessWidget {
           title: 'App Monetta',
           description: 'Catálogo y contenido visible',
           status: 'Activa',
-        ),
-        const _ChannelRow(
-          icon: Icons.language_rounded,
-          title: 'Fuentes externas',
-          description: 'Selección, comisión y disponibilidad',
-          status: 'Monitoreo',
         ),
         const SizedBox(height: 22),
         FilledButton.icon(
@@ -1177,7 +1153,6 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
   late bool _hero;
   late bool _newest;
   late bool _todaysPicks;
-  late bool _external;
 
   @override
   void initState() {
@@ -1188,7 +1163,6 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
     _hero = settings.showHero;
     _newest = settings.showNewest;
     _todaysPicks = settings.showTodaysPicks;
-    _external = settings.showExternalPicks;
   }
 
   @override
@@ -1245,19 +1219,13 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
           value: _todaysPicks,
           onChanged: (value) => setState(() => _todaysPicks = value),
         ),
-        _SettingSwitch(
-          title: 'Selección externa',
-          description: 'Bolsas y perfumes elegidos por el monitor',
-          value: _external,
-          onChanged: (value) => setState(() => _external = value),
-        ),
         const SizedBox(height: 22),
         _PhonePreview(
           announcement: _announcement.text,
           showHero: _hero,
           showNewest: _newest,
           showTodaysPicks: _todaysPicks,
-          showExternal: _external,
+          showExternal: false,
         ),
         const SizedBox(height: 20),
         FilledButton(
@@ -1282,7 +1250,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
         showHero: _hero,
         showNewest: _newest,
         showTodaysPicks: _todaysPicks,
-        showExternalPicks: _external,
+        showExternalPicks: false,
       ),
     );
     if (!mounted) return;
@@ -1448,331 +1416,6 @@ class _PreviewLine extends StatelessWidget {
         ],
       ),
     );
-  }
-}
-
-class _SourcesSection extends StatelessWidget {
-  const _SourcesSection({required this.controller, required this.onMessage});
-
-  final AdminController controller;
-  final ValueChanged<String> onMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return _AdminScroll(
-      children: [
-        Text('Fuentes', style: display(28)),
-        const SizedBox(height: 6),
-        Text(
-          'Decide qué proveedores monitorear y cuánto margen aplicar. Los '
-          'artículos externos no entran al inventario de Shopify.',
-          style: sans(size: 12, color: context.monettaColors.contentMuted),
-        ),
-        const SizedBox(height: 22),
-        for (final source in controller.sources)
-          _SourceCard(
-            source: source,
-            onTap: () => _openSource(context, source),
-          ),
-      ],
-    );
-  }
-
-  Future<void> _openSource(
-    BuildContext context,
-    AdminSourcePolicy source,
-  ) async {
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: context.monettaColors.surfaceRaised,
-      builder: (_) => _SourceEditor(source: source, controller: controller),
-    );
-    if (!context.mounted || saved != true) return;
-    onMessage(
-      controller.mode == AdminConnectionMode.live
-          ? 'Fuente actualizada en el monitor y la app.'
-          : 'Fuente guardada solamente en vista previa.',
-    );
-  }
-}
-
-class _SourceCard extends StatelessWidget {
-  const _SourceCard({required this.source, required this.onTap});
-
-  final AdminSourcePolicy source;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      key: ValueKey('admin-source-${source.id}'),
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: context.monettaColors.divider, width: .5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    source.merchant,
-                    style: sans(size: 14, weight: FontWeight.w600),
-                  ),
-                ),
-                _StatusPill(
-                  label: source.enabled ? 'Activa' : 'Pausada',
-                  muted: !source.enabled,
-                ),
-                const SizedBox(width: 6),
-                _StatusPill(
-                  label: switch (source.healthStatus) {
-                    'ready' => 'Al día',
-                    'degraded' => 'Revisar',
-                    _ => 'Sin conexión',
-                  },
-                  muted: source.healthStatus != 'ready',
-                ),
-                const SizedBox(width: 4),
-                Icon(
-                  Icons.chevron_right_rounded,
-                  color: context.monettaColors.contentMuted,
-                ),
-              ],
-            ),
-            const SizedBox(height: 13),
-            Row(
-              children: [
-                Expanded(
-                  child: _SourceMetric(
-                    value: '${source.itemCount}',
-                    label: 'en catálogo',
-                  ),
-                ),
-                Expanded(
-                  child: _SourceMetric(
-                    value: '${(source.baseCommissionRate * 100).round()}%',
-                    label: 'comisión base',
-                  ),
-                ),
-                Expanded(
-                  child: _SourceMetric(
-                    value: '${source.itemLimit}',
-                    label: 'máximo',
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SourceMetric extends StatelessWidget {
-  const _SourceMetric({required this.value, required this.label});
-
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(value, style: sans(size: 13, weight: FontWeight.w600)),
-        Text(
-          label,
-          style: sans(size: 9, color: context.monettaColors.contentMuted),
-        ),
-      ],
-    );
-  }
-}
-
-class _SourceEditor extends StatefulWidget {
-  const _SourceEditor({required this.source, required this.controller});
-
-  final AdminSourcePolicy source;
-  final AdminController controller;
-
-  @override
-  State<_SourceEditor> createState() => _SourceEditorState();
-}
-
-class _SourceEditorState extends State<_SourceEditor> {
-  late bool _enabled;
-  late final TextEditingController _limit;
-  late final TextEditingController _baseRate;
-  late final TextEditingController _highRate;
-  late final TextEditingController _threshold;
-
-  @override
-  void initState() {
-    super.initState();
-    final source = widget.source;
-    _enabled = source.enabled;
-    _limit = TextEditingController(text: '${source.itemLimit}');
-    _baseRate = TextEditingController(
-      text: '${(source.baseCommissionRate * 100).round()}',
-    );
-    _highRate = TextEditingController(
-      text: '${(source.highValueCommissionRate * 100).round()}',
-    );
-    _threshold = TextEditingController(
-      text: source.highValueThreshold.toStringAsFixed(0),
-    );
-  }
-
-  @override
-  void dispose() {
-    _limit.dispose();
-    _baseRate.dispose();
-    _highRate.dispose();
-    _threshold.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        16,
-        24,
-        MediaQuery.viewInsetsOf(context).bottom + 28,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _SheetHandle(),
-            Text(widget.source.merchant, style: display(26)),
-            const SizedBox(height: 5),
-            Text(
-              'Curaduría automática para el catálogo de la app.',
-              style: sans(size: 11, color: context.monettaColors.contentMuted),
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              title: Text('Monitorear esta fuente', style: sans(size: 13)),
-              value: _enabled,
-              onChanged: (value) => setState(() => _enabled = value),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _limit,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Máx. artículos',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _baseRate,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Comisión base',
-                      suffixText: '%',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _threshold,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Desde',
-                      prefixText: r'$ ',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _highRate,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Comisión alta gama',
-                      suffixText: '%',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'La comisión menor aplica cuando el precio supera el umbral.',
-              style: sans(size: 10, color: context.monettaColors.contentMuted),
-            ),
-            const SizedBox(height: 22),
-            FilledButton(
-              key: const ValueKey('admin-save-source'),
-              onPressed: widget.controller.saving ? null : _save,
-              child: const Text('REVISAR Y GUARDAR'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _save() async {
-    final limit = int.tryParse(_limit.text.trim());
-    final base = double.tryParse(_baseRate.text.trim());
-    final high = double.tryParse(_highRate.text.trim());
-    final threshold =
-        double.tryParse(_threshold.text.replaceAll(',', '').trim());
-    if (limit == null ||
-        limit < 1 ||
-        limit > 100 ||
-        base == null ||
-        base < 0 ||
-        base > 100 ||
-        high == null ||
-        high < 0 ||
-        high > 100 ||
-        threshold == null ||
-        threshold <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Revisa límites y porcentajes.')),
-      );
-      return;
-    }
-    final confirmed = await _confirmChange(
-      context,
-      title: '¿Actualizar esta fuente?',
-      description: 'El monitor usará estas reglas en su próxima ejecución.',
-    );
-    if (!confirmed || !mounted) return;
-    final ok = await widget.controller.saveSource(
-      widget.source.copyWith(
-        enabled: _enabled,
-        itemLimit: limit,
-        baseCommissionRate: base / 100,
-        highValueCommissionRate: high / 100,
-        highValueThreshold: threshold,
-      ),
-    );
-    if (mounted && ok) Navigator.pop(context, true);
   }
 }
 

@@ -190,12 +190,11 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
   void _openFullCatalog() {
     final store = StoreScope.of(context);
-    final external = ExternalCatalogScope.maybeOf(context)?.items ?? const [];
     openCatalogBrowse(
       context,
       items: fullDeduplicatedCatalog(
         monettaItems: store.catalogItems,
-        externalItems: external,
+        externalItems: const [],
       ),
     );
   }

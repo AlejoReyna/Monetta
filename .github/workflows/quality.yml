@@ -71,28 +71,16 @@ jobs:
       - run: npm audit --omit=dev --audit-level=moderate
         working-directory: services/accounts_orders
 
-  catalog-monitor:
+  # catalog_monitor product CI retired (WP-02 / F03)
+  # see docs/audits/2026-09-07/EXTERNAL_CATALOG_DECOMMISSION.md
+  catalog-monitor-retired:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD: "1"
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 24
-          cache: npm
-          cache-dependency-path: services/catalog_monitor/package-lock.json
-      - run: npm ci
-        working-directory: services/catalog_monitor
-      - run: npm test
-        working-directory: services/catalog_monitor
-      - run: npm run typecheck
-        working-directory: services/catalog_monitor
-      - run: npm run build
-        working-directory: services/catalog_monitor
-      - run: npm audit --omit=dev --audit-level=moderate
-        working-directory: services/catalog_monitor
+      - name: Confirm external catalog stays off in CI defines
+        run: |
+          python3 -c 'import json; assert json.load(open("config/dart_defines.ci.json"))["ENABLE_EXTERNAL_CATALOG"]=="false"'
 
   functions-and-web:
     runs-on: ubuntu-latest

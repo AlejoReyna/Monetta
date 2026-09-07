@@ -4,7 +4,6 @@ library;
 import 'package:flutter/foundation.dart';
 
 import '../data/admin/admin_client.dart';
-import '../data/external_catalog/external_catalog_models.dart';
 import '../domain/admin_control.dart';
 import '../domain/product.dart';
 import 'admin_config.dart';
@@ -50,7 +49,6 @@ class AdminController extends ChangeNotifier {
 
   Future<void> load({
     required List<Product> appProducts,
-    required List<ExternalCatalogSourceStatus> externalSources,
   }) async {
     products = appProducts
         .map(
@@ -78,7 +76,8 @@ class AdminController extends ChangeNotifier {
           ),
         )
         .toList();
-    sources = _fallbackSources(externalSources);
+    // External monitor sources retired (WP-02 / F03 / F22).
+    sources = const [];
     auditCursor = null;
     lastError = null;
     notifyListeners();
@@ -301,7 +300,7 @@ class AdminController extends ChangeNotifier {
         ];
       },
       description: 'Actualizó la fuente ${next.merchant}',
-      channels: const {AdminChannel.externalCatalog, AdminChannel.app},
+      channels: const {AdminChannel.app},
       refreshAfter: true,
     );
   }
@@ -315,7 +314,6 @@ class AdminController extends ChangeNotifier {
       channels: const {
         AdminChannel.shopify,
         AdminChannel.app,
-        AdminChannel.externalCatalog,
       },
       refreshAfter: true,
     );
@@ -393,46 +391,4 @@ class AdminController extends ChangeNotifier {
     }
   }
 
-  static List<AdminSourcePolicy> _fallbackSources(
-    List<ExternalCatalogSourceStatus> statuses,
-  ) {
-    const merchants = <String, String>{
-      'coach_us': 'Coach',
-      'michael_kors_us': 'Michael Kors',
-      'guess_us': 'Guess',
-      'steve_madden_us': 'Steve Madden',
-      'marc_jacobs_us': 'Marc Jacobs',
-      'tory_burch_us': 'Tory Burch',
-      'kate_spade_us': 'Kate Spade',
-      'guess_factory_us': 'Guess Factory',
-      'gp_mcallen_perfumes': 'GP McAllen · Perfumes',
-    };
-    return [
-      for (final entry in merchants.entries)
-        () {
-          ExternalCatalogSourceStatus? status;
-          for (final candidate in statuses) {
-            if (candidate.source == entry.key) {
-              status = candidate;
-              break;
-            }
-          }
-          return AdminSourcePolicy(
-            id: entry.key,
-            merchant: status?.merchant.isNotEmpty == true
-                ? status!.merchant
-                : entry.value,
-            enabled: true,
-            itemLimit: 12,
-            baseCommissionRate: .18,
-            highValueCommissionRate: .12,
-            highValueThreshold: 4000,
-            itemCount: status?.itemCount ?? 0,
-            lastSuccessfulRunAt: status?.lastSuccessfulRunAt,
-            healthStatus:
-                status?.lastSuccessfulRunAt == null ? 'degraded' : 'ready',
-          );
-        }(),
-    ];
-  }
 }

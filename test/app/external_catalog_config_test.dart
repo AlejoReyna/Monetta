@@ -3,34 +3,24 @@ import 'package:monetta_app/app/external_catalog_config.dart';
 import 'package:monetta_app/app/external_catalog_controller.dart';
 
 void main() {
-  group('ExternalCatalogConfig.fromEnvironment', () {
-    test('is disabled by default (no --dart-define passed in this test run)',
-        () {
+  group('ExternalCatalogConfig — retired (WP-02 / F03)', () {
+    test('fromEnvironment is always disabled', () {
       final config = ExternalCatalogConfig.fromEnvironment();
       expect(config.enabled, isFalse);
+      expect(config.baseUrl, isNull);
     });
 
-    test('ExternalCatalogConfig.disabled is the safe default value', () {
+    test('disabled constant remains the safe default', () {
       expect(ExternalCatalogConfig.disabled.enabled, isFalse);
       expect(ExternalCatalogConfig.disabled.baseUrl, isNull);
     });
 
-    test('a flag with no base URL is treated as disabled, not half-on', () {
+    test('controller stays inert even if constructed enabled without URL', () async {
       const config = ExternalCatalogConfig(enabled: true, baseUrl: null);
-      // Constructing directly with enabled:true + no URL is possible, but the
-      // controller must still refuse to build a repository — see below.
       final controller = ExternalCatalogController(config: config);
-      expect(controller.enabled, isFalse);
-    });
-  });
-
-  group('ExternalCatalogController — disabled by default', () {
-    test('items is empty and loadAndRefresh is a no-op', () async {
-      final controller =
-          ExternalCatalogController(config: ExternalCatalogConfig.disabled);
       await controller.loadAndRefresh();
-      expect(controller.items, isEmpty);
       expect(controller.enabled, isFalse);
+      expect(controller.items, isEmpty);
     });
   });
 }

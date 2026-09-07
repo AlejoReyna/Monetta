@@ -1,16 +1,9 @@
 name: Dashboard
+# WP-02: dashboard/catalog_monitor retired from customer product.
+# Automatic PR/push triggers disabled; manual dispatch only until authorized decommission.
+# See docs/audits/2026-09-07/EXTERNAL_CATALOG_DECOMMISSION.md
 
 on:
-  pull_request:
-    paths:
-      - dashboard/**
-      - services/catalog_monitor/src/selection/**
-      - .github/workflows/dashboard.yml
-  push:
-    branches: [main]
-    paths:
-      - dashboard/**
-      - services/catalog_monitor/src/selection/**
   workflow_dispatch:
 
 permissions:

@@ -27,11 +27,10 @@ test: ## Run all tests
 test-core: ## Run only the pure-Dart core tests (fast: no widget pump)
 	$(FLUTTER) test test/normalize test/reco
 
-test-services: ## Run tests and type checks for every TypeScript service
+test-services: ## Run tests and type checks for active TypeScript services
 	npm --prefix services/accounts_orders test
 	npm --prefix services/accounts_orders run typecheck
-	npm --prefix services/catalog_monitor test
-	npm --prefix services/catalog_monitor run typecheck
+	# catalog_monitor retired from product CI (WP-02); see docs/audits/2026-09-07/EXTERNAL_CATALOG_DECOMMISSION.md
 	npm --prefix functions test
 	npm --prefix functions run typecheck
 	npm run typecheck:api

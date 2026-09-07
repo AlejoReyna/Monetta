@@ -23,7 +23,7 @@ void main() {
     );
   });
 
-  test('staging requires Firestore and complete Firebase options', () {
+  test('staging allows Storefront-only without Firestore (F25)', () {
     const config = RuntimeConfig(
       environment: AppEnvironment.staging,
       allowOfflineCatalog: false,
@@ -32,10 +32,34 @@ void main() {
     expect(
       config.catalogConfigurationError(
         firestore: disabled,
+        hasFirebaseOptions: false,
+        hasShopify: true,
+      ),
+      isNull,
+    );
+    expect(
+      config.catalogConfigurationError(
+        firestore: disabled,
+        hasFirebaseOptions: false,
+        hasShopify: false,
+      ),
+      isNotNull,
+    );
+  });
+
+  test('staging may still use Firestore when configured', () {
+    const config = RuntimeConfig(
+      environment: AppEnvironment.staging,
+      allowOfflineCatalog: false,
+    );
+
+    expect(
+      config.catalogConfigurationError(
+        firestore: enabled,
         hasFirebaseOptions: true,
         hasShopify: false,
       ),
-      contains('FIRESTORE_CATALOG_ENABLED'),
+      isNull,
     );
     expect(
       config.catalogConfigurationError(
@@ -45,13 +69,23 @@ void main() {
       ),
       contains('Firebase'),
     );
+  });
+
+  test('external catalog dart-define is rejected at runtime (F03 bypass guard)',
+      () {
+    const config = RuntimeConfig(
+      environment: AppEnvironment.production,
+      allowOfflineCatalog: false,
+      externalCatalogRequested: true,
+    );
+
     expect(
       config.catalogConfigurationError(
-        firestore: enabled,
-        hasFirebaseOptions: true,
-        hasShopify: false,
+        firestore: disabled,
+        hasFirebaseOptions: false,
+        hasShopify: true,
       ),
-      isNull,
+      contains('catálogo externo'),
     );
   });
 

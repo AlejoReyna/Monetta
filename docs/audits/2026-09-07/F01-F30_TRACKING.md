@@ -45,12 +45,12 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
+| **Status** | `remediated` |
 | **Evidence** | `config/dart_defines.staging.json`: `ENABLE_EXTERNAL_CATALOG=true`, `EXTERNAL_CATALOG_BASE_URL=https://catalog.monetta.mx`. Wiring still present: `lib/main.dart` ExternalCatalogScope, `lib/app/external_catalog_*.dart`, `lib/features/home/external_catalog_section.dart`, `admin_screen.dart` requires ExternalCatalogController, mixed feed / collections consume external items. |
 | **Planned change** | Remove product wiring, admin coupling, CI/config; inventory deploys of `catalog_monitor` without deleting prod infra blindly. |
 | **Regression test** | To-add: home/search/admin make zero requests to external catalog when flag false; production validator rejects enable. |
 | **Integration/E2E** | Staging/production builds with flag off; admin sync without monitor. |
-| **Unresolved dependencies** | Owner approval to retire deployed monitor/cron/domain. |
+| **Unresolved dependencies** | Live monitor/DNS/cron decommission still needs owner approval — see EXTERNAL_CATALOG_DECOMMISSION.md. |
 
 ### F04 — P1 — Variante seleccionada no se compra
 
@@ -254,12 +254,12 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
+| **Status** | `remediated` |
 | **Evidence** | `HttpAdminClient.syncAll` always runs channels `shopify-products`, `storefront-content`, **`external-status`**; first failure rethrown. AdminController still lists `AdminChannel.externalCatalog` for syncAll. |
 | **Planned change** | Drop external channel; define each job’s completeness; durable progress/recovery; full catalog reconcile beyond first 100. |
 | **Regression test** | To-add: syncAll succeeds with no external backend. |
 | **Integration/E2E** | Created/edited/removed product reflected without monitor. |
-| **Unresolved dependencies** | Couples to F03 retirement. |
+| **Unresolved dependencies** | Full catalog reconcile beyond first 100 / durable job recovery remain for WP-06 admin hardening. |
 
 ### F23 — P2 — Guardar portada no refresca fuente del comprador
 
@@ -287,12 +287,12 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
+| **Status** | `partial` |
 | **Evidence** | Staging `FIRESTORE_CATALOG_ENABLED=true`. Duplicated mirrors: `server/catalog/catalog.ts` and `functions/src/catalog.ts` use `ACTIVE && publishedAt != null` (not Headless publication). `catalog_cache_store` documents callers must reject empty/invalid snapshots. |
 | **Planned change** | Storefront-direct as purchasable authority; if cache kept, never widen visibility; single writer per env. |
 | **Regression test** | To-add: Headless unpublish removes purchasable experience when on Storefront path. |
 | **Integration/E2E** | Compare Storefront vs Firestore visibility for same product. |
-| **Unresolved dependencies** | Architecture cutover (WP-02); do not replace with another scraper. |
+| **Unresolved dependencies** | Storefront-only staging allowed; Firestore mirror optional. Remaining: ensure Headless unpublish visibility parity when Storefront path is live. |
 
 ### F26 — P2 — Navegación/contexto comercial parcialmente estáticos
 
@@ -365,7 +365,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 ## Top highest-severity still-open findings
 
-1. **F03 (P0, open)** — staging `ENABLE_EXTERNAL_CATALOG=true` + ExternalCatalog wired in `main.dart` / home / admin.
+1. **F03 (P0, remediated in WIP)** — external catalog retired from product; live infra decommission pending owner approval.
 2. **F04 (P1, open)** — `product_screen.dart` calls `addToBag(product)`; store picks cheapest available; `BagLines` PK is `productId`.
 3. **F05 (P1, open)** — staging Storefront token empty; cart composition gated by `StorefrontConfig.isUsable`.
 4. **F12 (P1, open)** — webhook `recordIfNew` claims before effects; retries skipped (`pgWebhookEventsRepository.ts` / `handlers.ts`).

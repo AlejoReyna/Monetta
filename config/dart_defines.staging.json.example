@@ -10,7 +10,7 @@
   "ACCOUNTS_ORDERS_BASE_URL": "",
   "ADMIN_API_BASE_URL": "",
   "ENABLE_OWNER_ADMIN_PREVIEW": "false",
-  "FIRESTORE_CATALOG_ENABLED": "true",
+  "FIRESTORE_CATALOG_ENABLED": "false",
   "FIREBASE_ANDROID_API_KEY": "public_firebase_android_api_key",
   "FIREBASE_ANDROID_APP_ID": "firebase_android_app_id",
   "FIREBASE_IOS_API_KEY": "public_firebase_ios_api_key",

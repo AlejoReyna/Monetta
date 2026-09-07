@@ -110,7 +110,8 @@ void main() {
       ),
     );
 
-    await controller.load(appProducts: [_product()], externalSources: const []);
+    await controller.load(appProducts: [_product()]);
+    expect(controller.sources, isEmpty);
     final updated = controller.products.single.copyWith(price: 3100);
     final ok = await controller.saveProduct(updated);
 
@@ -150,7 +151,7 @@ void main() {
       refreshApp: () async => refreshes += 1,
     );
 
-    await controller.load(appProducts: [_product()], externalSources: const []);
+    await controller.load(appProducts: [_product()]);
     final changed = controller.products.single.copyWith(price: 3250);
     final ok = await controller.saveProduct(changed);
 
@@ -158,5 +159,31 @@ void main() {
     expect(client.savedProduct?.price, 3250);
     expect(refreshes, 1);
     expect(controller.audit.single.previewOnly, isFalse);
+  });
+
+  test('syncAll succeeds without external catalog channel (F22)', () async {
+    final snapshot = AdminSnapshot(
+      products: const [],
+      storefront: AdminStorefrontSettings.defaults,
+      sources: const [],
+    );
+    final client = _AdminClient(snapshot: snapshot);
+    final controller = AdminController(
+      config: AdminConfig(
+        baseUrl: Uri.parse('https://admin.monetta.test'),
+        ownerEmails: const {'duena@monetta.mx'},
+      ),
+      client: client,
+    );
+
+    await controller.load(appProducts: const []);
+    final ok = await controller.syncAll();
+
+    expect(ok, isTrue);
+    expect(client.syncCalls, 1);
+    expect(
+      controller.audit.single.channels,
+      isNot(contains(AdminChannel.externalCatalog)),
+    );
   });
 }

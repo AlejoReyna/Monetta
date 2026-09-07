@@ -39,7 +39,6 @@ import '../onboarding/onboarding_sheet.dart';
 import '../partner/partner_hub_screen.dart';
 import 'customer_experiences_section.dart';
 import 'customer_experiences_screen.dart';
-import 'external_catalog_section.dart';
 import 'home_account_invitation.dart';
 
 const int _kNewestCount = 8;
@@ -188,7 +187,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final account = AccountScope.of(context);
     final admin = AdminScope.of(context);
     final catalogStore = StoreScope.of(context);
-    final externalCatalog = ExternalCatalogScope.maybeOf(context);
     unawaited(
       openAccount(
         context,
@@ -198,19 +196,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           email: account.account?.email,
           authProvider: account.account?.authProvider,
         ),
-        onOpenAdmin: externalCatalog == null
-            ? null
-            : () => Navigator.of(context).push(
-                  MaterialPageRoute<void>(
-                    builder: (_) => AdminScreen(
-                      controller: admin,
-                      notificationController:
-                          AdminNotificationScope.maybeOf(context),
-                      catalogStore: catalogStore,
-                      externalCatalogController: externalCatalog,
-                    ),
-                  ),
+        onOpenAdmin: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => AdminScreen(
+                  controller: admin,
+                  notificationController:
+                      AdminNotificationScope.maybeOf(context),
+                  catalogStore: catalogStore,
                 ),
+              ),
+            ),
         onOpenPartner: _openPartner,
       ),
     );
@@ -266,12 +261,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
   void _openFullCatalog() {
     final store = StoreScope.of(context);
-    final external = ExternalCatalogScope.maybeOf(context)?.items ?? const [];
     openCatalogBrowse(
       context,
       items: fullDeduplicatedCatalog(
         monettaItems: store.catalogItems,
-        externalItems: external,
+        externalItems: const [],
       ),
     );
   }
@@ -318,11 +312,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
     final feed = store.feed();
-    // Read in build (not in a tap callback) so this rebuilds reactively once
-    // the background fetch in `ExternalCatalogController.loadAndRefresh`
-    // completes — a one-shot read at navigation time could catch it empty.
-    final externalCatalog = ExternalCatalogScope.maybeOf(context);
-    final externalItems = externalCatalog?.items ?? const [];
     final editorial = _editorialContent;
     final homeScope = HomeContentScope.maybeOf(context);
     final homeContent = homeScope?.content ?? HomeContent.fallback;
@@ -338,7 +327,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final showHero = storefront.showHero;
     final showNewest = storefront.showNewest;
     final showTodaysPicks = storefront.showTodaysPicks;
-    final showExternalPicks = storefront.showExternalPicks;
 
     if (feed.isEmpty) {
       return Scaffold(
@@ -400,21 +388,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
             ),
-            if (showExternalPicks && externalItems.isNotEmpty)
-              Padding(
-                key: const ValueKey('home-external-section-spacing'),
-                padding: const EdgeInsets.only(top: 72),
-                child: RevealOnScroll(
-                  key: const ValueKey('home-reveal-external-picks'),
-                  scrollController: _scroll,
-                  delay: const Duration(milliseconds: 80),
-                  offset: 0,
-                  child: ExternalCatalogSection(
-                    items: externalItems,
-                    generatedAt: externalCatalog?.generatedAt,
-                  ),
-                ),
-              ),
             for (var index = 0;
                 index < homeContent.sectionOrder.length;
                 index++)

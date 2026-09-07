@@ -24,8 +24,6 @@ import 'app/catalog_store.dart';
 import 'app/cart_controller.dart';
 import 'app/editorial_content_controller.dart';
 import 'app/featured_catalog_controller.dart';
-import 'app/external_catalog_config.dart';
-import 'app/external_catalog_controller.dart';
 import 'app/home_content_controller.dart';
 import 'app/notification_controller.dart';
 import 'app/onboarding_controller.dart';
@@ -75,7 +73,6 @@ import 'data/shopify/storefront_config.dart';
 import 'features/home/home_screen.dart';
 import 'features/catalog/collection_screen.dart';
 import 'features/product/product_screen.dart';
-import 'features/product/external_product_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -261,35 +258,6 @@ class StoreScope extends InheritedNotifier<CatalogStore> {
   }
 }
 
-/// Exposes the external-catalog prototype to the widget tree. Present in
-/// every build, but inert — `ExternalCatalogController.items` is always
-/// empty — unless the app was built with
-/// `--dart-define=ENABLE_EXTERNAL_CATALOG=true` and a base URL. See
-/// `app/external_catalog_config.dart`.
-class ExternalCatalogScope
-    extends InheritedNotifier<ExternalCatalogController> {
-  const ExternalCatalogScope({
-    required ExternalCatalogController super.notifier,
-    required super.child,
-    super.key,
-  });
-
-  static ExternalCatalogController of(BuildContext context) {
-    final scope =
-        context.dependOnInheritedWidgetOfExactType<ExternalCatalogScope>();
-    assert(
-      scope?.notifier != null,
-      'ExternalCatalogScope is missing from the tree',
-    );
-    return scope!.notifier!;
-  }
-
-  static ExternalCatalogController? maybeOf(BuildContext context) {
-    return context
-        .dependOnInheritedWidgetOfExactType<ExternalCatalogScope>()
-        ?.notifier;
-  }
-}
 
 /// Exposes owner-editable About and reseller content. The controller always
 /// contains a complete bundled fallback, so this scope never represents a
@@ -523,9 +491,6 @@ class _MonettaAppState extends State<MonettaApp> {
     catalogSync: _maybeCatalogSync(_storefrontTransport),
     realtimeSource: widget.realtimeCatalogSource,
   );
-  final ExternalCatalogController _externalCatalog = ExternalCatalogController(
-    config: ExternalCatalogConfig.fromEnvironment(),
-  );
   late final EditorialContentController _editorialContent =
       EditorialContentController(
     repository: _maybeEditorialRepository(_storefrontTransport),
@@ -721,7 +686,6 @@ class _MonettaAppState extends State<MonettaApp> {
       client: _adminClient,
       refreshApp: () async {
         await _store.syncWithShopify();
-        await _externalCatalog.loadAndRefresh();
         await _editorialContent.refresh();
         await _homeContent.refresh();
         await _featuredCatalog.refresh();
@@ -768,11 +732,7 @@ class _MonettaAppState extends State<MonettaApp> {
       unawaited(_account.revalidateSession());
     }
 
-    // Fire-and-forget: cache-first load, then a best-effort background
-    // refresh. A failed or slow external fetch must never block or affect
-    // the Monetta home screen — see ExternalCatalogRepository's contract.
-    // External catalog stays off in public builds unless explicitly enabled.
-    unawaited(_externalCatalog.loadAndRefresh());
+    // Fire-and-forget content refresh. External catalog retired (WP-02).
     unawaited(_editorialContent.refresh());
     unawaited(_homeContent.refresh());
     unawaited(_featuredCatalog.refresh());
@@ -784,18 +744,10 @@ class _MonettaAppState extends State<MonettaApp> {
     if (navigator == null) return;
     if (route.type == 'product' && route.productKey != null) {
       final key = route.productKey!;
+      // external:* notification routes are ignored — monitor catalog retired.
       if (key.startsWith('external:')) {
-        final sourceScopedId = key.substring('external:'.length);
-        for (final item in _externalCatalog.items) {
-          if (item.sourceScopedId == sourceScopedId) {
-            navigator.push(
-              MaterialPageRoute<void>(
-                builder: (_) => ExternalProductScreen(item: item),
-              ),
-            );
-            return;
-          }
-        }
+        navigator.popUntil((candidate) => candidate.isFirst);
+        return;
       }
       final rawId =
           key.startsWith('shopify:') ? key.substring('shopify:'.length) : key;
@@ -834,7 +786,6 @@ class _MonettaAppState extends State<MonettaApp> {
     _adminNotifications?.dispose();
     _shopifyCart?.controller.dispose();
     _store.dispose();
-    _externalCatalog.dispose();
     _editorialContent.dispose();
     _homeContent.dispose();
     _featuredCatalog.dispose();
@@ -887,15 +838,13 @@ class _MonettaAppState extends State<MonettaApp> {
           },
           home: StoreScope(
             notifier: _store,
-            child: ExternalCatalogScope(
-              notifier: _externalCatalog,
-              child: EditorialContentScope(
-                notifier: _editorialContent,
-                child: HomeContentScope(
-                  notifier: _homeContent,
-                  child: FeaturedCatalogScope(
-                    notifier: _featuredCatalog,
-                    child: FutureBuilder<void>(
+            child: EditorialContentScope(
+              notifier: _editorialContent,
+              child: HomeContentScope(
+                notifier: _homeContent,
+                child: FeaturedCatalogScope(
+                  notifier: _featuredCatalog,
+                  child: FutureBuilder<void>(
                       future: _loading,
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {
@@ -923,7 +872,6 @@ class _MonettaAppState extends State<MonettaApp> {
                 ),
               ),
             ),
-          ),
           ),
         ),
       ),

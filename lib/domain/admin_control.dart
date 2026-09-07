@@ -178,7 +178,7 @@ class AdminStorefrontSettings {
     announcement: r'ENVÍO GRATIS DESDE $1,499',
     showHero: true,
     showNewest: true,
-    showExternalPicks: true,
+    showExternalPicks: false,
   );
 
   final String announcement;
