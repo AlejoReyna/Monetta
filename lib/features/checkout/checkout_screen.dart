@@ -18,7 +18,6 @@ import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../data/shopify/cart/cart_repository.dart';
 import '../../data/shopify/cart/cart_session_store.dart';
-import '../../data/shopify/cart/cart_api.dart';
 import '../../data/shopify/cart/checkout_launcher.dart';
 import '../../domain/bag_line.dart';
 import '../../main.dart';
@@ -1084,9 +1083,8 @@ class _CheckoutField extends StatelessWidget {
     required this.label,
     required this.validator,
     this.keyboardType,
-    this.inputFormatters,
     this.autofillHints,
-  });
+  }) : inputFormatters = null;
 
   final TextEditingController controller;
   final String label;

@@ -47,7 +47,11 @@ void main() {
       final product = _product(
         variants: const [
           ProductVariant(
-              id: 'v1', title: 'Default Title', price: 1999, available: true),
+            id: 'v1',
+            title: 'Default Title',
+            price: 1999,
+            available: true,
+          ),
         ],
       );
       await store.upsertProducts([product]);
@@ -248,7 +252,10 @@ void main() {
       expect(byShopifyId?.localAccountId, 'acct-1');
 
       await devices.upsert(
-          deviceId: 'dev-1', platform: 'ios', appVersion: '1.0.0');
+        deviceId: 'dev-1',
+        platform: 'ios',
+        appVersion: '1.0.0',
+      );
       await devices.attachAccount('dev-1', 'acct-1');
       final device = await devices.byId('dev-1');
       expect(device?.accountId, 'acct-1');
@@ -287,7 +294,9 @@ void main() {
       final accounts = AccountStore(db);
       final sessions = SessionStore(db);
       await accounts.upsert(
-          localAccountId: 'acct-1', createdAt: DateTime.utc(2026, 1, 1));
+        localAccountId: 'acct-1',
+        createdAt: DateTime.utc(2026, 1, 1),
+      );
       await sessions.save(
         accountId: 'acct-1',
         secureStorageKeyRef: 'ref',

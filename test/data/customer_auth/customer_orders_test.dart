@@ -17,28 +17,30 @@ const _config = CustomerAccountConfig(
 void main() {
   group('HttpCustomerOrdersService.parseOrders', () {
     test('parses nodes into CustomerAccountOrder rows', () {
-      final body = utf8.encode(jsonEncode({
-        'data': {
-          'customer': {
-            'orders': {
-              'nodes': [
-                {
-                  'id': 'gid://shopify/Order/11',
-                  'name': '#1001',
-                  'number': 1001,
-                  'processedAt': '2026-08-01T12:00:00Z',
-                  'financialStatus': 'PAID',
-                  'fulfillmentStatus': 'FULFILLED',
-                  'totalPrice': {
-                    'amount': '1749.0',
-                    'currencyCode': 'MXN',
+      final body = utf8.encode(
+        jsonEncode({
+          'data': {
+            'customer': {
+              'orders': {
+                'nodes': [
+                  {
+                    'id': 'gid://shopify/Order/11',
+                    'name': '#1001',
+                    'number': 1001,
+                    'processedAt': '2026-08-01T12:00:00Z',
+                    'financialStatus': 'PAID',
+                    'fulfillmentStatus': 'FULFILLED',
+                    'totalPrice': {
+                      'amount': '1749.0',
+                      'currencyCode': 'MXN',
+                    },
                   },
-                },
-              ],
+                ],
+              },
             },
           },
-        },
-      }));
+        }),
+      );
 
       final orders = HttpCustomerOrdersService.parseOrders(body);
       expect(orders, hasLength(1));
@@ -50,14 +52,16 @@ void main() {
     });
 
     test('GraphQL UNAUTHENTICATED becomes sessionExpired', () {
-      final body = utf8.encode(jsonEncode({
-        'errors': [
-          {
-            'message': 'UNAUTHENTICATED',
-            'extensions': {'code': 'UNAUTHENTICATED'},
-          },
-        ],
-      }));
+      final body = utf8.encode(
+        jsonEncode({
+          'errors': [
+            {
+              'message': 'UNAUTHENTICATED',
+              'extensions': {'code': 'UNAUTHENTICATED'},
+            },
+          ],
+        }),
+      );
 
       expect(
         () => HttpCustomerOrdersService.parseOrders(body),
@@ -93,7 +97,7 @@ void main() {
           jsonEncode({
             'data': {
               'customer': {
-                'orders': {'nodes': []},
+                'orders': {'nodes': <Map<String, dynamic>>[]},
               },
             },
           }),

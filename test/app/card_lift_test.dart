@@ -17,10 +17,12 @@ void main() {
       );
 
   double shadowOpacity(WidgetTester tester) {
-    final surface = tester.widget<DecoratedBox>(find.descendant(
-      of: find.byType(MonettaCardLift),
-      matching: find.byType(DecoratedBox),
-    ));
+    final surface = tester.widget<DecoratedBox>(
+      find.descendant(
+        of: find.byType(MonettaCardLift),
+        matching: find.byType(DecoratedBox),
+      ),
+    );
     return (surface.decoration as BoxDecoration).boxShadow!.first.color.a;
   }
 

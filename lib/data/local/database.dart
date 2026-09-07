@@ -128,12 +128,11 @@ class AppDatabase extends _$AppDatabase {
     String column,
     String typeSql,
   ) async {
-    final columns =
-        await customSelect('PRAGMA table_info(' + table + ')').get();
+    final columns = await customSelect('PRAGMA table_info($table)').get();
     final exists = columns.any((row) => row.read<String>('name') == column);
     if (exists) return;
     await customStatement(
-      'ALTER TABLE ' + table + ' ADD COLUMN ' + column + ' ' + typeSql,
+      'ALTER TABLE $table ADD COLUMN $column $typeSql',
     );
   }
 

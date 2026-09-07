@@ -100,14 +100,13 @@ class OrderHistoryRepository {
     }
 
     List<CustomerAccountOrder>? caaOrders;
-    var caaFailed = false;
     if (tryCaa) {
       try {
-        caaOrders = await _customerOrders!.fetchOrders(
-          customerAccountAccessToken!,
+        caaOrders = await _customerOrders.fetchOrders(
+          customerAccountAccessToken,
         );
       } catch (_) {
-        caaFailed = true;
+        // CAA fetch failed; fall through with caaOrders == null.
       }
     }
 
@@ -115,7 +114,7 @@ class OrderHistoryRepository {
     var mirrorFailed = false;
     if (tryMirror) {
       try {
-        mirrorOrders = await _mirrorClient!.fetchOrders(backendAccessToken!);
+        mirrorOrders = await _mirrorClient.fetchOrders(backendAccessToken);
       } catch (_) {
         mirrorFailed = true;
       }

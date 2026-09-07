@@ -13,11 +13,17 @@ import 'package:http/http.dart' as http;
 import '../../domain/admin_control.dart';
 
 abstract interface class AdminClient {
-  Future<AdminSnapshot> fetchSnapshot(
-      {String? cursor, String? query, int? limit});
+  Future<AdminSnapshot> fetchSnapshot({
+    String? cursor,
+    String? query,
+    int? limit,
+  });
 
-  Future<AdminSnapshot> fetchProductsPage(
-      {String? cursor, String? query, int? limit});
+  Future<AdminSnapshot> fetchProductsPage({
+    String? cursor,
+    String? query,
+    int? limit,
+  });
 
   Future<AdminCapabilities> fetchMe();
 
@@ -156,8 +162,10 @@ class HttpAdminClient
         ? ''
         : '?${params.entries.map((e) => '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}').join('&')}';
     final response = await _send('GET', '/admin/products$qs');
-    return _snapshotFromRoot(_jsonObject(response.bodyBytes),
-        productsOnly: true);
+    return _snapshotFromRoot(
+      _jsonObject(response.bodyBytes),
+      productsOnly: true,
+    );
   }
 
   AdminSnapshot _snapshotFromRoot(

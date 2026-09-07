@@ -93,14 +93,18 @@ void main() {
           final facets = CanonicalFacets(
             productId: 'gid://shopify/Product/1',
             category: FacetValue(
-                '  ${cat.toUpperCase()}  ', FacetSource.metafieldOverride),
+              '  ${cat.toUpperCase()}  ',
+              FacetSource.metafieldOverride,
+            ),
             priceBand: 'alto',
             onSale: false,
             inStock: true,
             newArrival: false,
           );
-          final item = catalogItemFromShopifyProduct(_product(inStock: true),
-              facets: facets);
+          final item = catalogItemFromShopifyProduct(
+            _product(inStock: true),
+            facets: facets,
+          );
           expect(item.vertical, CatalogVertical.bagsWallets);
         });
       }
@@ -109,21 +113,25 @@ void main() {
         'perfume',
         'perfumes',
         'fragancia',
-        'fragancias'
+        'fragancias',
       ];
       for (final cat in perfumeCategories) {
         test('maps category "$cat" (spaces/caps) to perfumes', () {
           final facets = CanonicalFacets(
             productId: 'gid://shopify/Product/1',
             category: FacetValue(
-                '  ${cat.toUpperCase()}  ', FacetSource.metafieldOverride),
+              '  ${cat.toUpperCase()}  ',
+              FacetSource.metafieldOverride,
+            ),
             priceBand: 'alto',
             onSale: false,
             inStock: true,
             newArrival: false,
           );
-          final item = catalogItemFromShopifyProduct(_product(inStock: true),
-              facets: facets);
+          final item = catalogItemFromShopifyProduct(
+            _product(inStock: true),
+            facets: facets,
+          );
           expect(item.vertical, CatalogVertical.perfumes);
         });
       }
@@ -137,8 +145,10 @@ void main() {
           inStock: true,
           newArrival: false,
         );
-        final item = catalogItemFromShopifyProduct(_product(inStock: true),
-            facets: facets);
+        final item = catalogItemFromShopifyProduct(
+          _product(inStock: true),
+          facets: facets,
+        );
         expect(item.vertical, CatalogVertical.general);
       });
     });
@@ -163,7 +173,9 @@ void main() {
         final item = catalogItemFromShopifyProduct(product, facets: facets);
 
         expect(
-            facets.category?.value, 'perfume'); // Verified by normalizer config
+          facets.category?.value,
+          'perfume',
+        ); // Verified by normalizer config
         expect(item.vertical, CatalogVertical.perfumes);
       });
 

@@ -1,7 +1,6 @@
 /// Owns the persisted first-run onboarding decision.
 library;
 
-import 'package:flutter/foundation.dart';
 import 'package:flutter/widgets.dart';
 
 import '../data/local/onboarding_preference_store.dart';

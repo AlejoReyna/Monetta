@@ -239,7 +239,9 @@ void main() {
 
     expect(find.text('Aún no tienes pedidos.'), findsNothing);
     expect(
-        find.textContaining('No pudimos cargar tus pedidos'), findsOneWidget);
+      find.textContaining('No pudimos cargar tus pedidos'),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('refresh-orders')), findsOneWidget);
 
     controller.ordersStatus = OrderHistoryStatus.empty;

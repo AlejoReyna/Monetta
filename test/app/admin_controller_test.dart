@@ -9,7 +9,10 @@ class _AdminClient implements AdminClient {
   _AdminClient({
     required this.snapshot,
     this.capabilities = const AdminCapabilities(
-        openAdmin: true, manageProducts: true, manageStorefront: true),
+      openAdmin: true,
+      manageProducts: true,
+      manageStorefront: true,
+    ),
   });
 
   final AdminSnapshot snapshot;
@@ -28,13 +31,19 @@ class _AdminClient implements AdminClient {
   }
 
   @override
-  Future<AdminSnapshot> fetchSnapshot(
-          {String? cursor, String? query, int? limit}) async =>
+  Future<AdminSnapshot> fetchSnapshot({
+    String? cursor,
+    String? query,
+    int? limit,
+  }) async =>
       snapshot;
 
   @override
-  Future<AdminSnapshot> fetchProductsPage(
-          {String? cursor, String? query, int? limit}) async =>
+  Future<AdminSnapshot> fetchProductsPage({
+    String? cursor,
+    String? query,
+    int? limit,
+  }) async =>
       snapshot;
 
   @override

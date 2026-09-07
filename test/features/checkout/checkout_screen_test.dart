@@ -48,7 +48,7 @@ void main() {
       (tester) async {
     final store = await _loadedStore();
     final product = store.products.firstWhere((item) => item.isInStock);
-    store.addToBag(product);
+    await store.addToBag(product);
 
     await tester.pumpWidget(_app(store, const BagScreen()));
     await tester.pump();
@@ -90,7 +90,7 @@ void main() {
   testWidgets('guest contact never simulates payment without a Shopify bridge',
       (tester) async {
     final store = await _loadedStore();
-    store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    await store.addToBag(store.products.firstWhere((item) => item.isInStock));
 
     await tester.pumpWidget(_app(store, const CheckoutFlowScreen()));
     await tester.pump();
@@ -130,7 +130,7 @@ void main() {
   testWidgets('BagAction route inherits authenticated cart composition',
       (tester) async {
     final store = await _loadedStore();
-    store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    await store.addToBag(store.products.firstWhere((item) => item.isInStock));
     final database = openTestDatabase();
     final accountController = AccountController(
       accountStore: AccountStore(database),
@@ -188,7 +188,7 @@ void main() {
   testWidgets('bag refuses contact capture when secure checkout is unavailable',
       (tester) async {
     final store = await _loadedStore();
-    store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    await store.addToBag(store.products.firstWhere((item) => item.isInStock));
 
     await tester.pumpWidget(_app(store, const BagScreen()));
     await tester.pump();
@@ -210,7 +210,7 @@ void main() {
   testWidgets('configured cancellation preserves bag and never shows preview',
       (tester) async {
     final store = await _loadedStore();
-    store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    await store.addToBag(store.products.firstWhere((item) => item.isInStock));
     var launches = 0;
 
     await tester.pumpWidget(

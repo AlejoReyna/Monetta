@@ -9,9 +9,6 @@ import 'package:monetta_app/data/repositories/order_history_repository.dart';
 
 class _FakeMirror implements OrderHistoryClient {
   _FakeMirror(this.orders);
-  _FakeMirror.throwing()
-      : orders = const [],
-        shouldThrow = true;
 
   List<MirroredOrder> orders;
   bool shouldThrow = false;

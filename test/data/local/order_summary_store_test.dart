@@ -43,9 +43,15 @@ void main() {
       final store = OrderSummaryStore(db);
       await store.replaceAllForAccount('acct-1', [
         _order(
-            id: '1', accountId: 'acct-1', placedAt: DateTime.utc(2026, 1, 1)),
+          id: '1',
+          accountId: 'acct-1',
+          placedAt: DateTime.utc(2026, 1, 1),
+        ),
         _order(
-            id: '2', accountId: 'acct-1', placedAt: DateTime.utc(2026, 6, 1)),
+          id: '2',
+          accountId: 'acct-1',
+          placedAt: DateTime.utc(2026, 6, 1),
+        ),
       ]);
 
       final orders = await store.allForAccount('acct-1');
@@ -55,9 +61,13 @@ void main() {
     test('replaceAllForAccount fully replaces rather than appending', () async {
       final store = OrderSummaryStore(db);
       await store.replaceAllForAccount(
-          'acct-1', [_order(id: '1', accountId: 'acct-1')]);
+        'acct-1',
+        [_order(id: '1', accountId: 'acct-1')],
+      );
       await store.replaceAllForAccount(
-          'acct-1', [_order(id: '2', accountId: 'acct-1')]);
+        'acct-1',
+        [_order(id: '2', accountId: 'acct-1')],
+      );
 
       final orders = await store.allForAccount('acct-1');
       expect(orders.map((o) => o.id), ['2']);
@@ -78,8 +88,10 @@ void main() {
       ]);
 
       final orders = await store.allForAccount('acct-1');
-      expect(orders.map((o) => o.source).toSet(),
-          {'shopify_checkout', 'whatsapp_apartado'});
+      expect(
+        orders.map((o) => o.source).toSet(),
+        {'shopify_checkout', 'whatsapp_apartado'},
+      );
       expect(orders.firstWhere((o) => o.id == '2').attributionCode, 'MN-7K3Q');
     });
   });

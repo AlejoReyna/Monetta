@@ -104,7 +104,10 @@ void main() {
     bag = BagStore(db);
     secureStore = FakeSecureTokenStore();
     await devices.upsert(
-        deviceId: 'dev-1', platform: 'ios', appVersion: '1.0.0');
+      deviceId: 'dev-1',
+      platform: 'ios',
+      appVersion: '1.0.0',
+    );
   });
 
   tearDown(() => db.close());
@@ -154,7 +157,9 @@ void main() {
           accessToken: 'access-1',
           refreshToken: 'refresh-1',
           idToken: _fakeIdToken(
-              sub: 'gid://shopify/Customer/1', email: 'shopper@example.com'),
+            sub: 'gid://shopify/Customer/1',
+            email: 'shopper@example.com',
+          ),
           accessTokenExpiresAt: DateTime.utc(2026, 1, 1, 1),
         ),
       );
