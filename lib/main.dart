@@ -784,11 +784,11 @@ class _MonettaAppState extends State<MonettaApp> {
     navigator.popUntil((candidate) => candidate.isFirst);
   }
 
-  @override
   void _refreshAdminCapabilities() {
     unawaited(_admin?.refreshCapabilities());
   }
 
+  @override
   void dispose() {
     if (_adminCapListenerAttached) {
       _account.removeListener(_refreshAdminCapabilities);

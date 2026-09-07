@@ -145,6 +145,9 @@ export class InMemoryAdminSyncJobRepository implements AdminSyncJobRepository {
       ...input,
       status: 'pending',
       errorCode: null,
+      cursor: null,
+      pagesProcessed: 0,
+      productsSeen: 0,
       createdAt: now,
       updatedAt: now,
     };
@@ -160,14 +163,39 @@ export class InMemoryAdminSyncJobRepository implements AdminSyncJobRepository {
     readonly id: string;
     readonly status: AdminSyncJobStatus;
     readonly errorCode?: string | null;
+    readonly cursor?: string | null;
+    readonly pagesProcessed?: number;
+    readonly productsSeen?: number;
   }): Promise<void> {
     const existing = this.rows.get(input.id);
     if (existing === undefined) throw new Error('missing sync job');
     this.rows.set(input.id, {
       ...existing,
       status: input.status,
-      errorCode: input.errorCode ?? null,
+      errorCode: input.errorCode === undefined ? existing.errorCode : input.errorCode,
+      cursor: input.cursor === undefined ? existing.cursor : input.cursor,
+      pagesProcessed: input.pagesProcessed === undefined
+        ? existing.pagesProcessed
+        : input.pagesProcessed,
+      productsSeen: input.productsSeen === undefined
+        ? existing.productsSeen
+        : input.productsSeen,
       updatedAt: new Date(),
     });
+  }
+
+  async listRecoverable(input?: {
+    readonly olderThanMs?: number;
+    readonly limit?: number;
+  }): Promise<readonly AdminSyncJobRecord[]> {
+    const olderThanMs = input?.olderThanMs ?? 30_000;
+    const limit = Math.max(1, Math.min(100, input?.limit ?? 20));
+    const cutoff = Date.now() - olderThanMs;
+    return [...this.rows.values()]
+      .filter((job) =>
+        (job.status === 'pending' || job.status === 'running')
+        && job.updatedAt.getTime() < cutoff)
+      .sort((a, b) => a.updatedAt.getTime() - b.updatedAt.getTime())
+      .slice(0, limit);
   }
 }

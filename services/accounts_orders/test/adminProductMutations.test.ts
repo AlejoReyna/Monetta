@@ -271,7 +271,9 @@ class FakeShopifyAdminWriteClient implements ShopifyAdminWriteClient {
   lastVariantMutation: { productGid: string; variantGid: string; price: string } | null = null;
   userError = false;
 
-  async listProducts(_input: { readonly first: number; readonly after: string | null }): Promise<AdminProductsPage> {
+  async countProducts(): Promise<number | null> { return null; }
+
+  async listProducts(_input: { readonly first: number; readonly after: string | null; readonly query?: string | null }): Promise<AdminProductsPage> {
     return { currencyCode: 'MXN', products: [this.product], pageInfo: { hasNextPage: false, endCursor: null } };
   }
 

@@ -12,6 +12,9 @@ export interface AdminSyncJobRecord {
   readonly channel: AdminSyncChannel;
   readonly status: AdminSyncJobStatus;
   readonly errorCode: string | null;
+  readonly cursor: string | null;
+  readonly pagesProcessed: number;
+  readonly productsSeen: number;
   readonly createdAt: Date;
   readonly updatedAt: Date;
 }
@@ -27,5 +30,13 @@ export interface AdminSyncJobRepository {
     readonly id: string;
     readonly status: AdminSyncJobStatus;
     readonly errorCode?: string | null;
+    readonly cursor?: string | null;
+    readonly pagesProcessed?: number;
+    readonly productsSeen?: number;
   }): Promise<void>;
+  /** Jobs that were accepted but not finished — safe to resume after restart. */
+  listRecoverable(input?: {
+    readonly olderThanMs?: number;
+    readonly limit?: number;
+  }): Promise<readonly AdminSyncJobRecord[]>;
 }

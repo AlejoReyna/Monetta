@@ -240,13 +240,15 @@ class FakeFeaturedShopify implements ShopifyAdminWriteClient {
     showExternalPicks: true,
   };
 
-  async listProducts(input: { readonly first: number; readonly after: string | null }): Promise<AdminProductsPage> {
+  async listProducts(input: { readonly first: number; readonly after: string | null; readonly query?: string | null }): Promise<AdminProductsPage> {
     return {
       currencyCode: 'MXN',
       products: this.products.slice(0, input.first),
       pageInfo: { hasNextPage: false, endCursor: null },
     };
   }
+
+  async countProducts(): Promise<number | null> { return null; }
 
   async getProduct(productGid: string): Promise<AdminProductProjection | null> {
     return this.products.find((product) => product.id === productGid) ?? null;

@@ -6,7 +6,8 @@ import type {
   ExternalSourcePolicyInput,
   ExternalSourceProjection,
 } from '../src/admin/externalCatalogClient.js';
-import { ownerAdminCapabilities } from '../src/admin/authorizer.js';
+import type { ShopifyAdminReadClient } from '../src/admin/shopifyAdminClient.js';
+import type { AdminProductsPage } from '../src/admin/shopifyTypes.js';
 import {
   InMemoryAppAccountsRepository,
   InMemoryCustomersRepository,
@@ -24,9 +25,13 @@ describe('admin sync jobs', () => {
   let server: Server;
   let baseUrl: string;
   let externalCatalog: FakeExternalCatalogClient;
+  let shopify: FakeShopifyProductsClient;
+  let syncJobs: InMemoryAdminSyncJobRepository;
 
   beforeEach(async () => {
     externalCatalog = new FakeExternalCatalogClient();
+    shopify = new FakeShopifyProductsClient();
+    syncJobs = new InMemoryAdminSyncJobRepository();
     const app = createApp({
       appAccounts: new InMemoryAppAccountsRepository(),
       customers: new InMemoryCustomersRepository(),
@@ -46,8 +51,9 @@ describe('admin sync jobs', () => {
             }
           : null,
       },
+      shopifyAdmin: shopify,
       externalCatalog,
-      syncJobs: new InMemoryAdminSyncJobRepository(),
+      syncJobs,
       idempotency: new InMemoryAdminIdempotencyRepository(),
       audit: new InMemoryAdminAuditLogger(),
       mutationsEnabled: false,
@@ -66,6 +72,21 @@ describe('admin sync jobs', () => {
     });
   });
 
+  async function pollJob(jobId: string): Promise<any> {
+    let statusBody: any;
+    for (let attempt = 0; attempt < 40; attempt += 1) {
+      const status = await fetch(`${baseUrl}/admin/sync/jobs/${jobId}`, {
+        headers: { Authorization: 'Bearer owner-token' },
+      });
+      statusBody = await status.json();
+      if (statusBody.job.status !== 'pending' && statusBody.job.status !== 'running') {
+        return statusBody;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 5));
+    }
+    return statusBody;
+  }
+
   it('accepts an enum-scoped job, polls it, and replays the request without duplicating work', async () => {
     const payload = JSON.stringify({ channel: 'external-status' });
     const first = await fetch(`${baseUrl}/admin/sync`, {
@@ -81,15 +102,7 @@ describe('admin sync jobs', () => {
     const firstBody = await first.json();
     expect(firstBody.job).toMatchObject({ channel: 'external-status', status: 'pending' });
 
-    let statusBody: any;
-    for (let attempt = 0; attempt < 20; attempt += 1) {
-      const status = await fetch(`${baseUrl}/admin/sync/jobs/${firstBody.job.id}`, {
-        headers: { Authorization: 'Bearer owner-token' },
-      });
-      statusBody = await status.json();
-      if (statusBody.job.status !== 'pending' && statusBody.job.status !== 'running') break;
-      await new Promise((resolve) => setTimeout(resolve, 2));
-    }
+    const statusBody = await pollJob(firstBody.job.id);
     expect(statusBody.job).toMatchObject({ status: 'completed', errorCode: null });
     expect(externalCatalog.fetchCalls).toBe(1);
 
@@ -120,7 +133,120 @@ describe('admin sync jobs', () => {
     expect(response.status).toBe(422);
     expect(externalCatalog.fetchCalls).toBe(0);
   });
+
+  it('completes shopify-products only after reading every page (F22)', async () => {
+    shopify.pages = [
+      pageWith('cursor-1', true, 100, 1),
+      pageWith('cursor-2', true, 100, 101),
+      pageWith(null, false, 5, 201),
+    ];
+    const response = await fetch(`${baseUrl}/admin/sync`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer owner-token',
+        'Content-Type': 'application/json',
+        'Idempotency-Key': 'sync-products-full',
+      },
+      body: JSON.stringify({ channel: 'shopify-products' }),
+    });
+    expect(response.status).toBe(202);
+    const body = await response.json();
+    // HTTP 202 alone is not completion — poll until terminal.
+    expect(body.job.status).toBe('pending');
+
+    const done = await pollJob(body.job.id);
+    expect(done.job).toMatchObject({
+      status: 'completed',
+      errorCode: null,
+      pagesProcessed: 3,
+      productsSeen: 205,
+    });
+    expect(shopify.listCalls).toBe(3);
+  });
+
+  it('resumes an interrupted shopify-products job from the durable cursor (F22)', async () => {
+    shopify.pages = [
+      pageWith('cursor-1', true, 100, 1),
+      pageWith(null, false, 20, 101),
+    ];
+    // Seed a job as if the process died after page 1.
+    const seeded = await syncJobs.create({
+      id: '11111111-1111-4111-8111-111111111111',
+      actorId: 'principal-1',
+      channel: 'shopify-products',
+    });
+    await syncJobs.update({
+      id: seeded.id,
+      status: 'running',
+      cursor: 'cursor-1',
+      pagesProcessed: 1,
+      productsSeen: 100,
+    });
+    // Make it look stale so resume is meaningful.
+    const row = syncJobs.rows.get(seeded.id)!;
+    syncJobs.rows.set(seeded.id, {
+      ...row,
+      updatedAt: new Date(Date.now() - 60_000),
+    });
+
+    const done = await pollJob(seeded.id);
+    expect(done.job).toMatchObject({
+      status: 'completed',
+      pagesProcessed: 2,
+      productsSeen: 120,
+    });
+    // Only the remaining page after the durable cursor should be fetched.
+    expect(shopify.listCalls).toBe(1);
+    expect(shopify.lastAfter).toBe('cursor-1');
+  });
 });
+
+function pageWith(
+  endCursor: string | null,
+  hasNextPage: boolean,
+  count: number,
+  startId: number,
+): AdminProductsPage {
+  return {
+    currencyCode: 'MXN',
+    products: Array.from({ length: count }, (_, i) => ({
+      id: `gid://shopify/Product/${startId + i}`,
+      title: `P${startId + i}`,
+      updatedAt: '2026-09-07T00:00:00Z',
+      status: 'ACTIVE',
+      publishedOnPublication: true,
+      variants: [],
+    })),
+    pageInfo: { hasNextPage, endCursor },
+  };
+}
+
+class FakeShopifyProductsClient implements ShopifyAdminReadClient {
+  pages: AdminProductsPage[] = [pageWith(null, false, 1, 1)];
+  listCalls = 0;
+  lastAfter: string | null = null;
+
+  async listProducts(input: {
+    readonly first: number;
+    readonly after: string | null;
+    readonly query?: string | null;
+  }): Promise<AdminProductsPage> {
+    this.listCalls += 1;
+    this.lastAfter = input.after;
+    if (input.after === null) return this.pages[0]!;
+    // Map after cursor to the next page: pages[i].pageInfo.endCursor -> pages[i+1]
+    for (let i = 0; i < this.pages.length - 1; i += 1) {
+      if (this.pages[i]?.pageInfo.endCursor === input.after) {
+        return this.pages[i + 1]!;
+      }
+    }
+    return { currencyCode: 'MXN', products: [], pageInfo: { hasNextPage: false, endCursor: null } };
+  }
+
+  async countProducts(): Promise<number | null> {
+    return this.pages.reduce((sum, page) => sum + page.products.length, 0);
+  }
+}
 
 class FakeExternalCatalogClient implements ExternalCatalogAdminClient {
   readonly source: ExternalSourceProjection = {

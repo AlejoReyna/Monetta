@@ -5,6 +5,64 @@ enum AdminChannel { shopify, app, externalCatalog }
 
 enum AdminConnectionMode { preview, live }
 
+/// Server-authored capabilities from GET /admin/me (F20).
+class AdminCapabilities {
+  const AdminCapabilities({
+    required this.openAdmin,
+    this.manageFeaturedCatalog = false,
+    this.manageProducts = false,
+    this.manageStorefront = false,
+    this.manageExternalSources = false,
+    this.manageNotifications = false,
+  });
+
+  const AdminCapabilities.none()
+      : openAdmin = false,
+        manageFeaturedCatalog = false,
+        manageProducts = false,
+        manageStorefront = false,
+        manageExternalSources = false,
+        manageNotifications = false;
+
+  final bool openAdmin;
+  final bool manageFeaturedCatalog;
+  final bool manageProducts;
+  final bool manageStorefront;
+  final bool manageExternalSources;
+  final bool manageNotifications;
+
+  factory AdminCapabilities.fromJson(Map<String, dynamic> json) {
+    bool flag(String key) => json[key] == true;
+    return AdminCapabilities(
+      openAdmin: flag('openAdmin'),
+      manageFeaturedCatalog: flag('manageFeaturedCatalog'),
+      manageProducts: flag('manageProducts'),
+      manageStorefront: flag('manageStorefront'),
+      manageExternalSources: flag('manageExternalSources'),
+      manageNotifications: flag('manageNotifications'),
+    );
+  }
+}
+
+/// Distinguishes the currently loaded product page from the shop total (F21).
+class AdminProductsPageMeta {
+  const AdminProductsPageMeta({
+    required this.loadedCount,
+    required this.hasNextPage,
+    this.endCursor,
+    this.totalCount,
+    this.query,
+    this.limit = 50,
+  });
+
+  final int loadedCount;
+  final bool hasNextPage;
+  final String? endCursor;
+  final int? totalCount;
+  final String? query;
+  final int limit;
+}
+
 class AdminProductVariant {
   const AdminProductVariant({
     required this.id,
@@ -282,6 +340,7 @@ class AdminSnapshot {
     this.featured,
     this.shopifyHealthStatus,
     this.sourcesHealthStatus,
+    this.productsMeta,
   });
 
   final List<AdminProductRecord> products;
@@ -290,4 +349,5 @@ class AdminSnapshot {
   final AdminFeaturedCatalog? featured;
   final String? shopifyHealthStatus;
   final String? sourcesHealthStatus;
+  final AdminProductsPageMeta? productsMeta;
 }

@@ -26,6 +26,7 @@ import { PgShopifyCatalogEventProcessor } from '../engagement/infrastructure/pgS
 import { PgEngagementPrivacyRepository } from '../engagement/infrastructure/pgEngagementPrivacyRepository.js';
 import { ServerAdminAuthorizer, hashAdminBearerToken } from '../admin/authorizer.js';
 import { registerAdminRoutes } from '../admin/routes.js';
+import { resumeInterruptedSyncJobs } from '../admin/routes.js';
 import { PgAdminPrincipalsRepository } from '../admin/pgAdminPrincipalsRepository.js';
 import type { AdminAuthorizer } from '../admin/authorizer.js';
 import { ShopifyAdminClient } from '../admin/shopifyAdminClient.js';
@@ -761,6 +762,24 @@ if (isMain) {
   });
   const server = app.listen(config.port, () => {
     logger.info('accounts & orders API listening', { port: config.port });
+  });
+
+  // Phase F / F22: resume durable admin sync jobs left pending/running after restart.
+  void resumeInterruptedSyncJobs({
+    deps: {
+      authorizer: adminAuthorizer,
+      environment: config.adminEnvironment,
+      ...(shopifyAdmin === undefined ? {} : { shopify: shopifyAdmin }),
+      syncJobs: adminSyncJobs,
+      audit: adminAudit,
+    },
+    olderThanMs: 2_000,
+  }).then((count) => {
+    if (count > 0) logger.info('resumed interrupted admin sync jobs', { count });
+  }).catch((error) => {
+    logger.warn('failed to resume interrupted admin sync jobs', {
+      error: error instanceof Error ? error.message : String(error),
+    });
   });
 
   let shuttingDown = false;

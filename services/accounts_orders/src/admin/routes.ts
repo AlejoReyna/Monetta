@@ -187,10 +187,15 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
       adminError(res, 404, 'SYNC_JOB_NOT_FOUND', 'The sync job was not found.');
       return;
     }
-    const job = await deps.syncJobs.find(jobId);
+    let job = await deps.syncJobs.find(jobId);
     if (job === null || job.actorId !== owner.id) {
       adminError(res, 404, 'SYNC_JOB_NOT_FOUND', 'The sync job was not found.');
       return;
+    }
+    // Resume interrupted work when the process lost the in-memory runner.
+    if (job.status === 'pending' || job.status === 'running') {
+      void runSyncJob({ deps, owner, jobId: job.id, channel: job.channel });
+      job = (await deps.syncJobs.find(jobId)) ?? job;
     }
     res.status(200).json({ requestId: requestIdFor(res), job: syncJobJson(job) });
   }));
@@ -202,8 +207,10 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
     const fetchedAt = (deps.now ?? (() => new Date()))().toISOString();
     const limit = boundedLimit(req.query.limit);
     const cursor = nullableQueryString(req.query.cursor);
+    const searchQuery = nullableQueryString(req.query.q);
     let products: readonly AdminProductProjection[] = [];
     let pageInfo = { hasNextPage: false, endCursor: null as string | null };
+    let productsTotal: number | null = null;
     let shopifyStatus: 'ready' | 'degraded' | 'unavailable' = 'unavailable';
     let shopifyErrorCode: string | null = null;
     let featuredStatus: 'ready' | 'degraded' | 'unavailable' = 'unavailable';
@@ -218,9 +225,16 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
       shopifyErrorCode = 'SHOPIFY_NOT_CONFIGURED';
     } else {
       try {
-        const page = await deps.shopify.listProducts({ first: limit, after: cursor });
+        const page = await deps.shopify.listProducts({
+          first: limit,
+          after: cursor,
+          query: searchQuery,
+        });
         products = page.products;
         pageInfo = page.pageInfo;
+        if ('countProducts' in deps.shopify && typeof deps.shopify.countProducts === 'function') {
+          productsTotal = await deps.shopify.countProducts({ query: searchQuery });
+        }
         shopifyStatus = 'ready';
       } catch (error) {
         shopifyStatus = 'degraded';
@@ -298,9 +312,55 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
       // client while the later work packages add the typed nested sections.
       products: productRows,
       pageInfo,
+      productsMeta: {
+        loadedCount: productRows.length,
+        hasNextPage: pageInfo.hasNextPage,
+        endCursor: pageInfo.endCursor,
+        totalCount: productsTotal,
+        query: searchQuery,
+        limit,
+      },
       storefront: storefront === null ? null : storefrontJson(storefront),
       sources: sourceRows,
     });
+  }));
+
+  app.get('/admin/products', asyncRoute(async (req, res) => {
+    const owner = await requireOwner(req, res, deps.authorizer);
+    if (owner === null) return;
+    if (deps.shopify === undefined) {
+      adminError(res, 503, 'SHOPIFY_NOT_CONFIGURED', 'Shopify is not configured.');
+      return;
+    }
+    const limit = boundedLimit(req.query.limit);
+    const cursor = nullableQueryString(req.query.cursor);
+    const searchQuery = nullableQueryString(req.query.q);
+    try {
+      const page = await deps.shopify.listProducts({
+        first: limit,
+        after: cursor,
+        query: searchQuery,
+      });
+      let totalCount: number | null = null;
+      if ('countProducts' in deps.shopify && typeof deps.shopify.countProducts === 'function') {
+        totalCount = await deps.shopify.countProducts({ query: searchQuery });
+      }
+      res.status(200).json({
+        requestId: requestIdFor(res),
+        products: page.products.map(productJson),
+        pageInfo: page.pageInfo,
+        productsMeta: {
+          loadedCount: page.products.length,
+          hasNextPage: page.pageInfo.hasNextPage,
+          endCursor: page.pageInfo.endCursor,
+          totalCount,
+          query: searchQuery,
+          limit,
+        },
+      });
+    } catch (error) {
+      adminError(res, 503, shopifyErrorCodeFor(error), 'Shopify product listing is temporarily unavailable.');
+    }
   }));
 
   app.patch('/admin/products/:productGid', asyncRoute(async (req, res) => {
@@ -669,10 +729,21 @@ function syncJobJson(job: AdminSyncJobRecord) {
     channel: job.channel,
     status: job.status,
     errorCode: job.errorCode,
+    cursor: job.cursor,
+    pagesProcessed: job.pagesProcessed,
+    productsSeen: job.productsSeen,
     createdAt: job.createdAt.toISOString(),
     updatedAt: job.updatedAt.toISOString(),
   };
 }
+
+/** In-process lock so the same job is not double-executed after resume. */
+const activeSyncJobs = new Set<string>();
+
+/** Shopify Admin page size for product reconcile; completion requires exhausting pageInfo. */
+const SYNC_PRODUCT_PAGE_SIZE = 100;
+/** Hard stop to avoid unbounded loops; truncated jobs fail instead of claiming complete. */
+const SYNC_PRODUCT_MAX_PAGES = 500;
 
 async function runSyncJob(input: {
   readonly deps: AdminRouteDeps;
@@ -683,27 +754,96 @@ async function runSyncJob(input: {
   const { deps, owner, jobId, channel } = input;
   const jobs = deps.syncJobs;
   if (jobs === undefined) return;
+  if (activeSyncJobs.has(jobId)) return;
+  activeSyncJobs.add(jobId);
   try {
+    const existing = await jobs.find(jobId);
+    if (existing === null) return;
+    if (existing.status === 'completed' || existing.status === 'failed') return;
+
     await jobs.update({ id: jobId, status: 'running', errorCode: null });
     switch (channel) {
       case 'shopify-products': {
-        if (deps.shopify === undefined) throw new AdminRouteError(503, 'SHOPIFY_NOT_CONFIGURED', 'Shopify is not configured.');
-        await deps.shopify.listProducts({ first: 100, after: null });
+        if (deps.shopify === undefined) {
+          throw new AdminRouteError(503, 'SHOPIFY_NOT_CONFIGURED', 'Shopify is not configured.');
+        }
+        let cursor = existing.cursor;
+        let pagesProcessed = existing.pagesProcessed;
+        let productsSeen = existing.productsSeen;
+        for (;;) {
+          if (pagesProcessed >= SYNC_PRODUCT_MAX_PAGES) {
+            throw new AdminRouteError(
+              503,
+              'SYNC_TRUNCATED',
+              'Product sync stopped before the catalog was fully read.',
+            );
+          }
+          const page = await deps.shopify.listProducts({
+            first: SYNC_PRODUCT_PAGE_SIZE,
+            after: cursor,
+          });
+          pagesProcessed += 1;
+          productsSeen += page.products.length;
+          cursor = page.pageInfo.endCursor;
+          await jobs.update({
+            id: jobId,
+            status: 'running',
+            errorCode: null,
+            cursor,
+            pagesProcessed,
+            productsSeen,
+          });
+          if (!page.pageInfo.hasNextPage) break;
+          if (page.pageInfo.endCursor === null || page.pageInfo.endCursor === '') {
+            throw new AdminRouteError(
+              503,
+              'SYNC_TRUNCATED',
+              'Product sync received hasNextPage without an end cursor.',
+            );
+          }
+        }
         break;
       }
       case 'storefront-content': {
         const client = storefrontClient(deps);
-        if (client === null) throw new AdminRouteError(503, 'STOREFRONT_NOT_CONFIGURED', 'Storefront is not configured.');
+        if (client === null) {
+          throw new AdminRouteError(503, 'STOREFRONT_NOT_CONFIGURED', 'Storefront is not configured.');
+        }
         await client.getStorefrontConfig();
+        await jobs.update({
+          id: jobId,
+          status: 'running',
+          errorCode: null,
+          pagesProcessed: 1,
+          productsSeen: 0,
+        });
         break;
       }
       case 'external-status': {
-        if (deps.externalCatalog === undefined) throw new AdminRouteError(503, 'EXTERNAL_CATALOG_NOT_CONFIGURED', 'The external catalog is not configured.');
+        // Kept for idempotent replay of older clients; product syncAll no longer calls it.
+        if (deps.externalCatalog === undefined) {
+          throw new AdminRouteError(
+            503,
+            'EXTERNAL_CATALOG_NOT_CONFIGURED',
+            'The external catalog is not configured.',
+          );
+        }
         await deps.externalCatalog.fetchSources();
+        await jobs.update({
+          id: jobId,
+          status: 'running',
+          errorCode: null,
+          pagesProcessed: 1,
+          productsSeen: 0,
+        });
         break;
       }
       case 'shopify-orders':
-        throw new AdminRouteError(503, 'SYNC_CHANNEL_NOT_CONFIGURED', 'Shopify order reconciliation is not configured.');
+        throw new AdminRouteError(
+          503,
+          'SYNC_CHANNEL_NOT_CONFIGURED',
+          'Shopify order reconciliation is not configured.',
+        );
     }
     await jobs.update({ id: jobId, status: 'completed', errorCode: null });
     await recordSyncAudit(deps, owner, jobId, channel, 'success');
@@ -711,7 +851,36 @@ async function runSyncJob(input: {
     const errorCode = syncErrorCode(error);
     await jobs.update({ id: jobId, status: 'failed', errorCode });
     await recordSyncAudit(deps, owner, jobId, channel, 'failed', errorCode);
+  } finally {
+    activeSyncJobs.delete(jobId);
   }
+}
+
+/** Resume durable sync jobs that were left pending/running after a process restart. */
+export async function resumeInterruptedSyncJobs(input: {
+  readonly deps: AdminRouteDeps;
+  readonly olderThanMs?: number;
+}): Promise<number> {
+  const jobs = input.deps.syncJobs;
+  if (jobs === undefined || typeof jobs.listRecoverable !== 'function') return 0;
+  const recoverable = await jobs.listRecoverable({
+    olderThanMs: input.olderThanMs ?? 5_000,
+    limit: 20,
+  });
+  for (const job of recoverable) {
+    void runSyncJob({
+      deps: input.deps,
+      owner: {
+        id: job.actorId,
+        provider: 'monetta',
+        subject: { type: 'app_account', id: job.actorId },
+        role: 'owner',
+      },
+      jobId: job.id,
+      channel: job.channel,
+    });
+  }
+  return recoverable.length;
 }
 
 async function recordSyncAudit(

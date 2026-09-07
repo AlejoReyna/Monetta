@@ -130,9 +130,9 @@ fragment AdminProductFields on Product {
 }`;
 
 const adminProductsQuery = `${adminProductFields}
-query AdminProducts($first: Int!, $after: String, $publicationId: ID!) {
+query AdminProducts($first: Int!, $after: String, $query: String, $publicationId: ID!) {
   shop { currencyCode }
-  products(first: $first, after: $after, sortKey: ID) {
+  products(first: $first, after: $after, query: $query, sortKey: ID) {
     nodes { ...AdminProductFields }
     pageInfo { hasNextPage endCursor }
   }
@@ -147,7 +147,12 @@ query AdminProduct($id: ID!, $publicationId: ID!) {
 `;
 
 export interface ShopifyAdminReadClient {
-  listProducts(input: { readonly first: number; readonly after: string | null }): Promise<AdminProductsPage>;
+  listProducts(input: {
+    readonly first: number;
+    readonly after: string | null;
+    readonly query?: string | null;
+  }): Promise<AdminProductsPage>;
+  countProducts(input?: { readonly query?: string | null }): Promise<number | null>;
 }
 
 export interface ShopifyAdminWriteClient extends ShopifyAdminReadClient {
@@ -202,11 +207,16 @@ export class ShopifyAdminClient implements ShopifyAdminWriteClient {
   async listProducts(input: {
     readonly first: number;
     readonly after: string | null;
+    readonly query?: string | null;
   }): Promise<AdminProductsPage> {
     const first = Math.max(1, Math.min(100, Math.trunc(input.first)));
+    const query = typeof input.query === 'string' && input.query.trim() !== ''
+      ? input.query.trim().slice(0, 200)
+      : null;
     const data = await this.query<AdminProductsData>(adminProductsQuery, {
       first,
       after: input.after,
+      query,
       publicationId: this.options.headlessPublicationId,
     });
     const currencyCode = data.shop.currencyCode;
@@ -215,6 +225,27 @@ export class ShopifyAdminClient implements ShopifyAdminWriteClient {
       products: data.products.nodes.map((product) => normalizeProduct(product, currencyCode)),
       pageInfo: data.products.pageInfo,
     };
+  }
+
+  async countProducts(input?: { readonly query?: string | null }): Promise<number | null> {
+    const query = typeof input?.query === 'string' && input.query.trim() !== ''
+      ? input.query.trim().slice(0, 200)
+      : null;
+    try {
+      const data = await this.query<{
+        readonly productsCount: { readonly count: number } | null;
+      }>(
+        `query AdminProductsCount($query: String) {
+          productsCount(query: $query) { count }
+        }`,
+        { query },
+      );
+      const count = data.productsCount?.count;
+      return typeof count === 'number' && Number.isFinite(count) ? count : null;
+    } catch {
+      // Older Admin API versions may not expose productsCount — treat as unknown.
+      return null;
+    }
   }
 
   async getProduct(productGid: string): Promise<AdminProductProjection | null> {

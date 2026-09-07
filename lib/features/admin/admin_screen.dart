@@ -358,8 +358,12 @@ class _OverviewSection extends StatelessWidget {
           children: [
             Expanded(
               child: _Metric(
-                value: '${controller.products.length}',
-                label: 'productos',
+                value: controller.productsMeta?.totalCount != null
+                    ? '${controller.products.length}/${controller.productsMeta!.totalCount}'
+                    : '${controller.products.length}',
+                label: controller.productsMeta?.hasNextPage == true
+                    ? 'cargados (hay más)'
+                    : 'productos',
               ),
             ),
             const SizedBox(width: 10),
@@ -519,6 +523,18 @@ class _ProductsSectionState extends State<_ProductsSection> {
     return _buildProductEditor(context);
   }
 
+
+  String _productsCountLabel(int visibleCount) {
+    final meta = widget.controller.productsMeta;
+    if (meta?.totalCount != null) {
+      return '${widget.controller.products.length} CARGADOS DE ${meta!.totalCount}';
+    }
+    if (meta?.hasNextPage == true) {
+      return '${widget.controller.products.length} CARGADOS (HAY MÁS EN SHOPIFY)';
+    }
+    return '$visibleCount PRODUCTOS';
+  }
+
   Widget _subsectionPicker(BuildContext context) {
     return Wrap(
       spacing: 8,
@@ -559,6 +575,12 @@ class _ProductsSectionState extends State<_ProductsSection> {
         TextField(
           key: const ValueKey('admin-product-search'),
           onChanged: (value) => setState(() => _query = value),
+          onSubmitted: (value) {
+            if (widget.controller.mode == AdminConnectionMode.live) {
+              widget.controller.searchProducts(value);
+            }
+          },
+          textInputAction: TextInputAction.search,
           decoration: InputDecoration(
             hintText: 'Buscar producto',
             prefixIcon: Icon(Icons.search, size: 20),
@@ -568,12 +590,27 @@ class _ProductsSectionState extends State<_ProductsSection> {
           ),
         ),
         const SizedBox(height: 14),
-        Text('${products.length} PRODUCTOS', style: eyebrow(size: 9)),
+        Text(_productsCountLabel(products.length), style: eyebrow(size: 9)),
         const SizedBox(height: 6),
         for (final product in products)
           _ProductRow(
             product: product,
             onTap: () => _openEditor(product),
+          ),
+        if (widget.controller.productsMeta?.hasNextPage == true)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              key: const ValueKey('admin-products-load-more'),
+              onPressed: widget.controller.loadingMoreProducts
+                  ? null
+                  : widget.controller.loadMoreProducts,
+              child: Text(
+                widget.controller.loadingMoreProducts
+                    ? 'CARGANDO…'
+                    : 'CARGAR MÁS PRODUCTOS',
+              ),
+            ),
           ),
       ],
     );

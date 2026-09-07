@@ -232,56 +232,56 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | UI gate: `AdminController.canAccess` → `AdminConfig.allowsEmail` / preview (`admin_config.dart`, `home_screen.dart`). No Flutter consumer of `/admin/me` capabilities found. Staging defines omit `OWNER_ADMIN_EMAILS` / `ADMIN_API_BASE_URL`. |
+| **Status** | `closed` |
+| **Evidence** | Live `AdminController.canAccess` requires `serverCapabilities.openAdmin` from `GET /admin/me`; preview is explicit `ENABLE_OWNER_ADMIN_PREVIEW`. Mutations still `requireOwner` server-side. `main.dart` refreshes capabilities on account changes. |
 | **Planned change** | Drive navigation from `/admin/me` capabilities; keep server auth; separate preview from real owner. |
 | **Regression test** | To-add: server-authorized owner without compile-time email allowlist sees admin; normal user never. |
 | **Integration/E2E** | Revoke principal → actions fail; incomplete config does not fake live panel. |
-| **Unresolved dependencies** | Admin API base URL + provisioned principal. |
+| **Unresolved dependencies** | Admin API base URL + provisioned principal in each environment. |
 
 ### F21 — P2 — Admin sólo carga primera página
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `HttpAdminClient.fetchSnapshot` single GET `/admin/control-plane` — no product cursor. `loadMoreAudit` exists; no product loadMore. Backend defaults 50 / max 100. |
+| **Status** | `closed` |
+| **Evidence** | `GET /admin/products` + control-plane `cursor`/`limit`/`q` with `productsMeta` (loadedCount, hasNextPage, endCursor, totalCount). Flutter load-more + search; UI distinguishes loaded vs total. |
 | **Planned change** | Paginate product search/list; show real limits; keep deep ops in Shopify Admin. |
 | **Regression test** | To-add: product 51/101 discoverable via pagination. |
 | **Integration/E2E** | Shop with >100 products. |
-| **Unresolved dependencies** | Live Admin API credentials. |
+| **Unresolved dependencies** | Live Admin API credentials for shops >100 products. |
 
 ### F22 — P1 — «Sincronizar todo» requiere monitor
 
 | Field | Value |
 |---|---|
-| **Status** | `remediated` |
-| **Evidence** | `HttpAdminClient.syncAll` always runs channels `shopify-products`, `storefront-content`, **`external-status`**; first failure rethrown. AdminController still lists `AdminChannel.externalCatalog` for syncAll. |
+| **Status** | `closed` |
+| **Evidence** | Product `syncAll` omits external-status. `shopify-products` paginates all pages with durable cursor/pages/products (`011_admin_sync_job_progress.sql`); resume on job GET + process start; truncation fails with `SYNC_TRUNCATED` instead of claiming complete. |
 | **Planned change** | Drop external channel; define each job’s completeness; durable progress/recovery; full catalog reconcile beyond first 100. |
 | **Regression test** | To-add: syncAll succeeds with no external backend. |
 | **Integration/E2E** | Created/edited/removed product reflected without monitor. |
-| **Unresolved dependencies** | Full catalog reconcile beyond first 100 / durable job recovery remain for WP-06 admin hardening. |
+| **Unresolved dependencies** | None for code path; deploy migration on staging/prod hosts. |
 
 ### F23 — P2 — Guardar portada no refresca fuente del comprador
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `AdminController.saveStorefront` calls `_mutate` **without** `refreshAfter: true` (unlike `saveProduct` / `saveSource`). No HomeContent refresh hook on storefront save. |
+| **Status** | `closed` |
+| **Evidence** | `saveStorefront` uses `refreshAfter: true` → HomeContent/editorial/featured/catalog refresh. Featured reorder polls job to terminal then reloads canonical membership. Production/staging TOML define `$app:storefront_config` public_read. |
 | **Planned change** | Refresh HomeContent after save; validate metaobject namespace/permissions on real credentials. |
 | **Regression test** | To-add: saveStorefront triggers shopper-facing content reload path. |
 | **Integration/E2E** | Second client sees banner/section change without reinstall. |
-| **Unresolved dependencies** | Storefront metaobject published + Storefront token with access. |
+| **Unresolved dependencies** | Validate metaobject publication under real Admin + Storefront credentials. |
 
 ### F24 — P1 — TOML producción y permisos incompletos
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `shopify/shopify.app.production.toml`: `client_id` / host placeholders; scopes `read_orders,read_customers,read_products` only (writes exist in admin panel); `app/uninstalled` omitted by design until handler exists. |
+| **Status** | `closed` |
+| **Evidence** | `shopify/shopify.app.production.toml` scopes aligned with staging writes + storefront_config metaobject; placeholders remain. Ops left in Shopify Admin documented in `ADMIN_OPS_LEFT_IN_SHOPIFY.md`. Not deployed. |
 | **Planned change** | Link real app, minimal verified scopes for retained mutations, real hosts/webhooks; keep reviewable, do not auto-deploy. |
 | **Regression test** | Config validation tests; webhook route tests already partially cover compliance paths. |
 | **Integration/E2E** | Staging app install with read+write scopes needed for panel. |
-| **Unresolved dependencies** | Shopify Partner app + production host decisions. |
+| **Unresolved dependencies** | Partner app link + production host decisions before deploy. |
 
 ### F25 — P2 — Firestore vs Storefront semántica distinta
 
@@ -391,3 +391,14 @@ Note: **F01/F02** remain P0 but are `partial` in uncommitted WIP — finish wiri
 - F15 closed (backend): `orders_mirror.shopify_updated_at` refuses stale out-of-order overwrites; webhook route rejects unexpected `X-Shopify-Shop-Domain` when `SHOPIFY_STORE_DOMAIN` is configured.
 - F29 partial: `privacy_requests` durable open task for `customers/data_request`; `/readyz` probes PostgreSQL. Full export/fulfill workflow + backup drill still open.
 - Still open in Phase E: F13 (Customer Account history / UI empty-vs-error), F14 (Flutter logout race — deferred to avoid Phase B `lib/` conflict), F17 (post-checkout UX — Flutter/checkout), F18.
+
+
+## Phase F / WP-06 status (appended)
+
+- F20 closed: UI entry from `/admin/me` capabilities; preview separated; server still authorizes every action.
+- F21 closed: paginated `/admin/products` + `productsMeta`; Flutter load-more/search distinguishes loaded vs total.
+- F22 closed: full-page shopify-products sync with durable progress/resume; syncAll without external monitor.
+- F23 closed: storefront save refreshes shopper HomeContent; featured reorder waits for terminal job.
+- F24 closed as reviewable artifact: production TOML scopes/metaobject prepared; no production deploy.
+- See `PHASE_F_NOTES.md` and `ADMIN_OPS_LEFT_IN_SHOPIFY.md`.
+

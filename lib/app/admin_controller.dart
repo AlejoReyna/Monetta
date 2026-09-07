@@ -28,6 +28,14 @@ class AdminController extends ChangeNotifier {
   final Set<String> featuredPendingProductIds = <String>{};
   String? auditCursor;
   bool loadingAudit = false;
+  String? productsCursor;
+  bool loadingMoreProducts = false;
+  AdminProductsPageMeta? productsMeta;
+  String? productSearchQuery;
+
+  /// Server capabilities from GET /admin/me. Null until resolved in live mode.
+  AdminCapabilities? serverCapabilities;
+  bool loadingCapabilities = false;
 
   bool loading = false;
   bool saving = false;
@@ -38,13 +46,42 @@ class AdminController extends ChangeNotifier {
       ? AdminConnectionMode.live
       : AdminConnectionMode.preview;
 
+  /// Entry point is driven by `/admin/me` in live mode (F20). Preview is an
+  /// explicit design-review flag and must not fake a live owner panel.
   bool canAccess({
     required bool signedIn,
     required String? email,
     String? authProvider,
   }) {
     if (!signedIn) return false;
-    return config.allowsEmail(email) || config.previewEnabled;
+    if (mode == AdminConnectionMode.live) {
+      return serverCapabilities?.openAdmin == true;
+    }
+    if (config.previewEnabled) return true;
+    // Without a live API client, the compile-time email allow-list remains a
+    // soft local gate (no server session to resolve).
+    if (!config.hasLiveApi) return config.allowsEmail(email);
+    return false;
+  }
+
+  Future<void> refreshCapabilities() async {
+    final client = _client;
+    if (mode != AdminConnectionMode.live || client == null) {
+      serverCapabilities = null;
+      return;
+    }
+    if (loadingCapabilities) return;
+    loadingCapabilities = true;
+    try {
+      serverCapabilities = await client.fetchMe();
+      lastError = null;
+    } on Object catch (error) {
+      serverCapabilities = const AdminCapabilities.none();
+      lastError = _errorMessage(error);
+    } finally {
+      loadingCapabilities = false;
+      notifyListeners();
+    }
   }
 
   Future<void> load({
@@ -86,10 +123,13 @@ class AdminController extends ChangeNotifier {
     loading = true;
     notifyListeners();
     try {
-      final snapshot = await _client!.fetchSnapshot();
+      await refreshCapabilities();
+      final snapshot = await _client!.fetchSnapshot(query: productSearchQuery);
       if (snapshot.shopifyHealthStatus == null ||
           snapshot.shopifyHealthStatus == 'ready') {
         products = snapshot.products;
+        productsMeta = snapshot.productsMeta;
+        productsCursor = snapshot.productsMeta?.endCursor;
       }
       storefront = snapshot.storefront;
       if (snapshot.sourcesHealthStatus == null ||
@@ -267,6 +307,73 @@ class AdminController extends ChangeNotifier {
     }
   }
 
+  Future<void> loadMoreProducts() async {
+    final client = _client;
+    final cursor = productsCursor;
+    if (mode != AdminConnectionMode.live ||
+        client == null ||
+        cursor == null ||
+        loadingMoreProducts ||
+        productsMeta?.hasNextPage != true) {
+      return;
+    }
+    loadingMoreProducts = true;
+    notifyListeners();
+    try {
+      final page = await client.fetchProductsPage(
+        cursor: cursor,
+        query: productSearchQuery,
+        limit: productsMeta?.limit,
+      );
+      final seen = products.map((p) => p.id).toSet();
+      products = [
+        ...products,
+        for (final product in page.products)
+          if (!seen.contains(product.id)) product,
+      ];
+      productsMeta = AdminProductsPageMeta(
+        loadedCount: products.length,
+        hasNextPage: page.productsMeta?.hasNextPage ?? false,
+        endCursor: page.productsMeta?.endCursor,
+        totalCount: page.productsMeta?.totalCount ?? productsMeta?.totalCount,
+        query: productSearchQuery,
+        limit: page.productsMeta?.limit ?? productsMeta?.limit ?? 50,
+      );
+      productsCursor = productsMeta?.endCursor;
+    } on Object catch (error) {
+      lastError = _errorMessage(error);
+    } finally {
+      loadingMoreProducts = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> searchProducts(String query) async {
+    productSearchQuery = query.trim().isEmpty ? null : query.trim();
+    productsCursor = null;
+    final client = _client;
+    if (mode != AdminConnectionMode.live || client == null) {
+      notifyListeners();
+      return;
+    }
+    loading = true;
+    notifyListeners();
+    try {
+      final snapshot = await client.fetchProductsPage(
+        query: productSearchQuery,
+      );
+      products = snapshot.products;
+      productsMeta = snapshot.productsMeta;
+      productsCursor = snapshot.productsMeta?.endCursor;
+      lastError = null;
+    } on Object catch (error) {
+      lastError = _errorMessage(error);
+    } finally {
+      loading = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> saveStorefront(AdminStorefrontSettings next) async {
     return _mutate(
       action: () async {
@@ -281,6 +388,8 @@ class AdminController extends ChangeNotifier {
       },
       description: 'Actualizó la portada de la tienda',
       channels: const {AdminChannel.shopify, AdminChannel.app},
+      // F23: shopper HomeContent (and catalog) must refresh after content writes.
+      refreshAfter: true,
     );
   }
 

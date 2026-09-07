@@ -93,6 +93,91 @@ describe('admin control-plane read projection', () => {
     });
   });
 
+  it('paginates products and distinguishes loaded count from total (F21)', async () => {
+    shopify.totalCount = 101;
+    shopify.pages = [
+      {
+        currencyCode: 'MXN',
+        products: Array.from({ length: 50 }, (_, i) => ({
+          id: `gid://shopify/Product/${i + 1}`,
+          title: `Producto ${i + 1}`,
+          updatedAt: '2026-08-30T12:00:00Z',
+          status: 'ACTIVE',
+          publishedOnPublication: true,
+          variants: [],
+        })),
+        pageInfo: { hasNextPage: true, endCursor: '1' },
+      },
+      {
+        currencyCode: 'MXN',
+        products: Array.from({ length: 50 }, (_, i) => ({
+          id: `gid://shopify/Product/${i + 51}`,
+          title: `Producto ${i + 51}`,
+          updatedAt: '2026-08-30T12:00:00Z',
+          status: 'ACTIVE',
+          publishedOnPublication: true,
+          variants: [],
+        })),
+        pageInfo: { hasNextPage: true, endCursor: '2' },
+      },
+      {
+        currencyCode: 'MXN',
+        products: [{
+          id: 'gid://shopify/Product/101',
+          title: 'Producto 101',
+          updatedAt: '2026-08-30T12:00:00Z',
+          status: 'ACTIVE',
+          publishedOnPublication: true,
+          variants: [],
+        }],
+        pageInfo: { hasNextPage: false, endCursor: null },
+      },
+    ];
+
+    const first = await fetch(`${baseUrl}/admin/products?limit=50`, {
+      headers: { Authorization: 'Bearer owner-token' },
+    });
+    expect(first.status).toBe(200);
+    const firstBody = await first.json();
+    expect(firstBody.products).toHaveLength(50);
+    expect(firstBody.productsMeta).toMatchObject({
+      loadedCount: 50,
+      hasNextPage: true,
+      endCursor: '1',
+      totalCount: 101,
+    });
+
+    const second = await fetch(`${baseUrl}/admin/products?limit=50&cursor=1`, {
+      headers: { Authorization: 'Bearer owner-token' },
+    });
+    const secondBody = await second.json();
+    expect(secondBody.products).toHaveLength(50);
+    expect(secondBody.products[0].id).toBe('gid://shopify/Product/51');
+
+    const third = await fetch(`${baseUrl}/admin/products?limit=50&cursor=2`, {
+      headers: { Authorization: 'Bearer owner-token' },
+    });
+    const thirdBody = await third.json();
+    expect(thirdBody.products).toHaveLength(1);
+    expect(thirdBody.productsMeta).toMatchObject({
+      loadedCount: 1,
+      hasNextPage: false,
+      totalCount: 101,
+    });
+  });
+
+  it('supports product search via q without confusing loaded and total', async () => {
+    shopify.totalCount = 2;
+    const response = await fetch(`${baseUrl}/admin/control-plane?q=bolsa&limit=10`, {
+      headers: { Authorization: 'Bearer owner-token' },
+    });
+    expect(response.status).toBe(200);
+    expect(shopify.lastQuery).toBe('bolsa');
+    expect(await response.json()).toMatchObject({
+      productsMeta: { loadedCount: 1, totalCount: 2, query: 'bolsa', limit: 10 },
+    });
+  });
+
   it('keeps the panel usable when Shopify is unavailable', async () => {
     shopify.failure = true;
     const response = await fetch(`${baseUrl}/admin/control-plane`, {
@@ -113,9 +198,26 @@ class FakeShopifyAdminClient implements ShopifyAdminReadClient {
   lastInput: { first: number; after: string | null } | null = null;
   failure = false;
 
-  async listProducts(input: { readonly first: number; readonly after: string | null }): Promise<AdminProductsPage> {
-    this.lastInput = { ...input };
+  lastQuery: string | null = null;
+  totalCount = 1;
+  pages: AdminProductsPage[] | null = null;
+
+  async listProducts(input: {
+    readonly first: number;
+    readonly after: string | null;
+    readonly query?: string | null;
+  }): Promise<AdminProductsPage> {
+    this.lastInput = { first: input.first, after: input.after };
+    this.lastQuery = input.query ?? null;
     if (this.failure) throw new Error('upstream is down');
+    if (this.pages !== null) {
+      const index = input.after === null ? 0 : Number.parseInt(input.after, 10);
+      const page = this.pages[Number.isFinite(index) ? index : 0];
+      if (page === undefined) {
+        return { currencyCode: 'MXN', products: [], pageInfo: { hasNextPage: false, endCursor: null } };
+      }
+      return page;
+    }
     return {
       currencyCode: 'MXN',
       products: [{
@@ -150,5 +252,10 @@ class FakeShopifyAdminClient implements ShopifyAdminReadClient {
       }],
       pageInfo: { hasNextPage: false, endCursor: null },
     };
+  }
+
+  async countProducts(input?: { readonly query?: string | null }): Promise<number | null> {
+    this.lastQuery = input?.query ?? this.lastQuery;
+    return this.totalCount;
   }
 }

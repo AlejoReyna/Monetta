@@ -13,7 +13,11 @@ import 'package:http/http.dart' as http;
 import '../../domain/admin_control.dart';
 
 abstract interface class AdminClient {
-  Future<AdminSnapshot> fetchSnapshot();
+  Future<AdminSnapshot> fetchSnapshot({String? cursor, String? query, int? limit});
+
+  Future<AdminSnapshot> fetchProductsPage({String? cursor, String? query, int? limit});
+
+  Future<AdminCapabilities> fetchMe();
 
   Future<void> updateProduct(AdminProductRecord product);
 
@@ -37,6 +41,9 @@ abstract interface class FeaturedAdminClient {
     required List<String> productIds,
     required DateTime expectedCollectionUpdatedAt,
   });
+
+  /// Polls until the reorder job reaches a terminal status, then reloads membership.
+  Future<AdminFeaturedCatalog> waitForFeaturedJob(String jobId);
 }
 
 abstract interface class StorefrontAdminClient {
@@ -106,9 +113,54 @@ class HttpAdminClient
   final Random _random = Random.secure();
 
   @override
-  Future<AdminSnapshot> fetchSnapshot() async {
-    final response = await _send('GET', '/admin/control-plane');
+  Future<AdminCapabilities> fetchMe() async {
+    final response = await _send('GET', '/admin/me');
     final root = _jsonObject(response.bodyBytes);
+    final caps = root['capabilities'];
+    if (caps is! Map<String, dynamic>) {
+      return const AdminCapabilities.none();
+    }
+    return AdminCapabilities.fromJson(caps);
+  }
+
+  @override
+  Future<AdminSnapshot> fetchSnapshot({
+    String? cursor,
+    String? query,
+    int? limit,
+  }) async {
+    final params = <String, String>{};
+    if (cursor != null && cursor.isNotEmpty) params['cursor'] = cursor;
+    if (query != null && query.isNotEmpty) params['q'] = query;
+    if (limit != null) params['limit'] = '$limit';
+    final qs = params.isEmpty
+        ? ''
+        : '?${params.entries.map((e) => '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}').join('&')}';
+    final response = await _send('GET', '/admin/control-plane$qs');
+    return _snapshotFromRoot(_jsonObject(response.bodyBytes));
+  }
+
+  @override
+  Future<AdminSnapshot> fetchProductsPage({
+    String? cursor,
+    String? query,
+    int? limit,
+  }) async {
+    final params = <String, String>{};
+    if (cursor != null && cursor.isNotEmpty) params['cursor'] = cursor;
+    if (query != null && query.isNotEmpty) params['q'] = query;
+    if (limit != null) params['limit'] = '$limit';
+    final qs = params.isEmpty
+        ? ''
+        : '?${params.entries.map((e) => '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}').join('&')}';
+    final response = await _send('GET', '/admin/products$qs');
+    return _snapshotFromRoot(_jsonObject(response.bodyBytes), productsOnly: true);
+  }
+
+  AdminSnapshot _snapshotFromRoot(
+    Map<String, dynamic> root, {
+    bool productsOnly = false,
+  }) {
     final productRows = root['products'] as List<dynamic>? ?? const [];
     final sourceRows = root['sources'] as List<dynamic>? ?? const [];
     final storefront = root['storefront'];
@@ -116,20 +168,46 @@ class HttpAdminClient
     final healthMap = health is Map<String, dynamic> ? health : null;
     final shopifyHealth = healthMap?['shopify'];
     final sourcesHealth = healthMap?['sources'];
+    final meta = root['productsMeta'];
+    final pageInfo = root['pageInfo'];
+
+    AdminProductsPageMeta? productsMeta;
+    if (meta is Map<String, dynamic>) {
+      productsMeta = AdminProductsPageMeta(
+        loadedCount: (meta['loadedCount'] as num?)?.toInt() ?? productRows.length,
+        hasNextPage: meta['hasNextPage'] == true ||
+            (pageInfo is Map<String, dynamic> && pageInfo['hasNextPage'] == true),
+        endCursor: meta['endCursor'] as String? ??
+            (pageInfo is Map<String, dynamic> ? pageInfo['endCursor'] as String? : null),
+        totalCount: (meta['totalCount'] as num?)?.toInt(),
+        query: meta['query'] as String?,
+        limit: (meta['limit'] as num?)?.toInt() ?? 50,
+      );
+    } else if (pageInfo is Map<String, dynamic>) {
+      productsMeta = AdminProductsPageMeta(
+        loadedCount: productRows.length,
+        hasNextPage: pageInfo['hasNextPage'] == true,
+        endCursor: pageInfo['endCursor'] as String?,
+      );
+    }
 
     return AdminSnapshot(
       products: productRows
           .whereType<Map<String, dynamic>>()
           .map(_productFromJson)
           .toList(),
-      storefront: storefront is Map<String, dynamic>
-          ? _storefrontFromJson(storefront)
-          : AdminStorefrontSettings.defaults,
-      sources: sourceRows
-          .whereType<Map<String, dynamic>>()
-          .map(_sourceFromJson)
-          .toList(),
-      featured: root['featuredCatalog'] is Map<String, dynamic>
+      storefront: productsOnly
+          ? AdminStorefrontSettings.defaults
+          : storefront is Map<String, dynamic>
+              ? _storefrontFromJson(storefront)
+              : AdminStorefrontSettings.defaults,
+      sources: productsOnly
+          ? const []
+          : sourceRows
+              .whereType<Map<String, dynamic>>()
+              .map(_sourceFromJson)
+              .toList(),
+      featured: !productsOnly && root['featuredCatalog'] is Map<String, dynamic>
           ? _featuredFromJson(
               root['featuredCatalog'] as Map<String, dynamic>,
               root['health'],
@@ -141,6 +219,7 @@ class HttpAdminClient
       sourcesHealthStatus: sourcesHealth is Map<String, dynamic>
           ? sourcesHealth['status'] as String?
           : null,
+      productsMeta: productsMeta,
     );
   }
 
@@ -215,12 +294,36 @@ class HttpAdminClient
     );
     final root = _jsonObject(response.bodyBytes);
     final value = root['featuredCatalog'];
-    return AdminFeaturedMutationResult(
-      catalog: value is Map<String, dynamic>
-          ? _featuredFromJson(value, root['health'])
-          : null,
-      jobId: root['jobId'] as String?,
-    );
+    var catalog = value is Map<String, dynamic>
+        ? _featuredFromJson(value, root['health'])
+        : null;
+    final jobId = root['jobId'] as String?;
+    if (jobId != null && jobId.isNotEmpty) {
+      catalog = await waitForFeaturedJob(jobId);
+    }
+    return AdminFeaturedMutationResult(catalog: catalog, jobId: jobId);
+  }
+
+  @override
+  Future<AdminFeaturedCatalog> waitForFeaturedJob(String jobId) async {
+    for (var attempt = 0; attempt < 40; attempt += 1) {
+      final statusResponse = await _send(
+        'GET',
+        '/admin/featured-catalog/jobs/${Uri.encodeComponent(jobId)}',
+      );
+      final root = _jsonObject(statusResponse.bodyBytes);
+      final job = root['job'];
+      if (job is! Map) {
+        throw const AdminClientException('invalid featured job response');
+      }
+      final status = '${job['status'] ?? ''}';
+      if (status == 'completed' || status == 'degraded' || status == 'failed') {
+        // Reload canonical membership/order after the job reaches a terminal state.
+        return fetchFeaturedCatalog();
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    }
+    throw const AdminClientException('featured reorder did not finish in time');
   }
 
   @override
