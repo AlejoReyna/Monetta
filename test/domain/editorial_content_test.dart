@@ -40,4 +40,11 @@ void main() {
       isFalse,
     );
   });
+
+  test('partner apartado FAQ does not claim WhatsApp reserves stock', () {
+    final faq = MonettaEditorialContent.fallback.partner.faqs
+        .firstWhere((item) => item.question.toLowerCase().contains('apartado'));
+    expect(faq.answer.toLowerCase(), contains('manual'));
+    expect(faq.answer.toLowerCase(), contains('no reserva'));
+  });
 }

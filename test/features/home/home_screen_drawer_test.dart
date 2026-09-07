@@ -7,8 +7,6 @@ import 'package:monetta_app/app/admin_config.dart';
 import 'package:monetta_app/app/admin_controller.dart';
 import 'package:monetta_app/data/local/appearance_store.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/app/external_catalog_config.dart';
-import 'package:monetta_app/app/external_catalog_controller.dart';
 import 'package:monetta_app/features/catalog/search_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
@@ -24,12 +22,7 @@ Future<CatalogStore> _loadedStore() async {
 Widget _app(CatalogStore store, {AdminController? admin}) {
   final home = StoreScope(
     notifier: store,
-    child: ExternalCatalogScope(
-      notifier: ExternalCatalogController(
-        config: ExternalCatalogConfig.disabled,
-      ),
-      child: const HomeScreen(),
-    ),
+    child: const HomeScreen(),
   );
   return MaterialApp(
     home: admin == null
@@ -44,12 +37,7 @@ Widget _app(CatalogStore store, {AdminController? admin}) {
 Widget _themedApp(CatalogStore store, ThemeController themeController) {
   final home = StoreScope(
     notifier: store,
-    child: ExternalCatalogScope(
-      notifier: ExternalCatalogController(
-        config: ExternalCatalogConfig.disabled,
-      ),
-      child: const HomeScreen(),
-    ),
+    child: const HomeScreen(),
   );
   return ListenableBuilder(
     listenable: themeController,

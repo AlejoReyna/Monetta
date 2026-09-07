@@ -523,7 +523,6 @@ class _ProductsSectionState extends State<_ProductsSection> {
     return _buildProductEditor(context);
   }
 
-
   String _productsCountLabel(int visibleCount) {
     final meta = widget.controller.productsMeta;
     if (meta?.totalCount != null) {

@@ -435,7 +435,9 @@ function bucketValue(value: unknown): SignalCountBucket | null {
 }
 function productKeyValue(value: unknown): string | null {
   const key = shortString(value, 300);
-  return key !== null && /^(shopify|external):/.test(key) ? key : null;
+  // External-catalog product keys are retired (F03/F28). Only Shopify keys
+  // may drive alerts, campaigns, or deep links.
+  return key !== null && /^shopify:/.test(key) ? key : null;
 }
 
 function productAlertKind(value: unknown): ProductAlertKind | null {

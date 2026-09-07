@@ -155,22 +155,22 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | App uses `GET /customers/me/orders` (`order_history_client.dart`). Staging `ACCOUNTS_ORDERS_BASE_URL` empty. Admin channel `shopify-orders` throws `SYNC_CHANNEL_NOT_CONFIGURED` (`admin/routes.ts`). UI: `account_screen.dart` shows «Aún no tienes pedidos.» when not loading — no error differentiation. |
+| **Status** | `partial` |
+| **Evidence** | Overnight follow-up: Customer Account API is primary via `customer_orders.dart` + `OrderHistoryRepository.refresh` (CAA success merges mirror apartados only). UI distinguishes empty / unavailable / failed / stale-cache + explicit «Actualizar pedidos». Checkout still calls `loadOrders`. Unit/widget tests green. Live CAA scopes / pre-install history / staging backend still unverified. |
 | **Planned change** | Prefer Customer Account API for buyer history; or robust mirror backfill; distinguish empty / unconfigured / error / stale cache. |
-| **Regression test** | To-add: repository surfaces error states; UI does not map failure to empty. |
-| **Integration/E2E** | Pre-install orders visible; new order appears; backend down ≠ empty. |
-| **Unresolved dependencies** | Customer Account orders scopes or Admin backfill permissions. |
+| **Regression test** | Added: repository empty≠failed≠stale; CAA primary + apartado merge; account UI failed≠empty; controller generation discard. |
+| **Integration/E2E** | Still required: pre-install orders on real Customer Account session; new order after checkout; backend down ≠ empty. |
+| **Unresolved dependencies** | Customer Account protected data / orders scopes on target shop; staging Storefront + CAA credentials; optional mirror URL for apartados. |
 
 ### F14 — P1 — Respuesta tardía puede reponer pedidos tras logout
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `account_controller.dart` `loadOrders()` captures `current` then awaits cache/refresh and assigns `orders` / clears `ordersLoading` with **no** re-check that `account` is still the same. |
+| **Status** | `fixed` |
+| **Evidence** | `AccountController.loadOrders` uses `_ordersGeneration` + `_ordersStillCurrent` after every await; logout/sign-out clears orders and bumps generation. Regression test: delayed CAA response after logout does not repopulate UI. |
 | **Planned change** | Generation/cancel token + identity guard after each await; invalidate private state on session change. |
-| **Regression test** | To-add: delayed refresh for A after logout/login B discarded. |
-| **Integration/E2E** | Rapid logout during refresh. |
+| **Regression test** | Added in `account_controller_test.dart` (gated CAA after logout). |
+| **Integration/E2E** | Rapid logout during refresh on device still recommended. |
 | **Unresolved dependencies** | None for code fix. |
 
 ### F15 — P1 — Espejo acepta actualizaciones de pedidos fuera de orden
@@ -412,3 +412,17 @@ Note: **F01/F02** remain P0 but are `partial` in uncommitted WIP — finish wiri
 - F17 fixed: rebuild intent at present; clear purchased lines only; refresh orders; browser fallback not treated as paid.
 - F18 partial: hosted end-session with `id_token_hint` + local cleanup; profile/deletion still open.
 - Also: `AccountController.loadOrders` generation guard (F14 race) for safe post-checkout refresh.
+
+## Overnight F13/F14 follow-up (appended)
+
+- F13 advanced to `partial`: Customer Account API primary (`lib/data/customer_auth/customer_orders.dart`), repository status surface, account UI empty/unavailable/failed/stale-cache + refresh action; mirror apartados enrichment only after CAA success.
+- F14 marked `fixed` (generation guard already present from Phase D; regression test added).
+- Live shop verification of pre-install history and post-checkout appearance still open.
+
+## Phase G / WP-07 status (dirty WIP — not yet committed by Phase G)
+
+- F27 partial: honest SOP + UI/WhatsApp copy; manual ops unchanged by design.
+- F28 partial: collection deep links + external event rejection in code; device push config still owner-gated.
+- F29 partial: privacy fulfill/list + redact evidence + ops docs; `/readyz` from Phase E; export package still operator-run.
+- F30 partial: integration_test harness, narrow CI fixture exception, ExternalCatalogScope test cleanup, format paths.
+- Dirty paths include shopper_copy/cart_attribution/editorial/partner_hub and accounts_orders privacy/engagement/admin files — do not treat as committed until Phase G pushes.

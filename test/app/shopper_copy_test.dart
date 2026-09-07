@@ -93,5 +93,6 @@ void main() {
     expect(text, contains(r'$800 MXN'));
     expect(text, contains('20 días'));
     expect(text, contains('Origen: app'));
+    expect(text, contains('no aprueba mayoreo'));
   });
 }

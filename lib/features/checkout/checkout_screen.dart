@@ -1234,8 +1234,7 @@ class _ReviewPanel extends StatelessWidget {
         ),
         _ReviewBlock(
           title: 'Entrega y envío',
-          value:
-              'Se capturan en Shopify Checkout\n'
+          value: 'Se capturan en Shopify Checkout\n'
               'Estimado local previo: '
               '${shipping == 0 ? 'gratis' : kMoney.format(shipping)} '
               '(no final)',

@@ -15,7 +15,8 @@ void main() {
       expect(ExternalCatalogConfig.disabled.baseUrl, isNull);
     });
 
-    test('controller stays inert even if constructed enabled without URL', () async {
+    test('controller stays inert even if constructed enabled without URL',
+        () async {
       const config = ExternalCatalogConfig(enabled: true, baseUrl: null);
       final controller = ExternalCatalogController(config: config);
       await controller.loadAndRefresh();

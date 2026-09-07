@@ -499,5 +499,4 @@ class AdminController extends ChangeNotifier {
       // encounters an outage.
     }
   }
-
 }

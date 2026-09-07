@@ -8,7 +8,8 @@ import 'package:monetta_app/domain/product.dart';
 class _AdminClient implements AdminClient {
   _AdminClient({
     required this.snapshot,
-    this.capabilities = const AdminCapabilities(openAdmin: true, manageProducts: true, manageStorefront: true),
+    this.capabilities = const AdminCapabilities(
+        openAdmin: true, manageProducts: true, manageStorefront: true),
   });
 
   final AdminSnapshot snapshot;
@@ -27,11 +28,13 @@ class _AdminClient implements AdminClient {
   }
 
   @override
-  Future<AdminSnapshot> fetchSnapshot({String? cursor, String? query, int? limit}) async =>
+  Future<AdminSnapshot> fetchSnapshot(
+          {String? cursor, String? query, int? limit}) async =>
       snapshot;
 
   @override
-  Future<AdminSnapshot> fetchProductsPage({String? cursor, String? query, int? limit}) async =>
+  Future<AdminSnapshot> fetchProductsPage(
+          {String? cursor, String? query, int? limit}) async =>
       snapshot;
 
   @override
@@ -76,14 +79,16 @@ Product _product({double price = 2890}) {
 }
 
 void main() {
-  test('live access is driven by /admin/me capabilities, not email alone (F20)', () async {
+  test('live access is driven by /admin/me capabilities, not email alone (F20)',
+      () async {
     final client = _AdminClient(
       snapshot: AdminSnapshot(
         products: const [],
         storefront: AdminStorefrontSettings.defaults,
         sources: const [],
       ),
-      capabilities: const AdminCapabilities(openAdmin: true, manageProducts: true),
+      capabilities:
+          const AdminCapabilities(openAdmin: true, manageProducts: true),
     );
     final controller = AdminController(
       config: AdminConfig(
@@ -255,7 +260,6 @@ void main() {
       isNot(contains(AdminChannel.externalCatalog)),
     );
   });
-
 
   test('saveStorefront refreshes shopper content after write (F23)', () async {
     final snapshot = AdminSnapshot(

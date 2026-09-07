@@ -44,9 +44,32 @@ export interface WebhookEventRecord {
   readonly shopDomain?: string | null;
 }
 
+export type PrivacyRequestKind = 'customers/data_request' | 'customers/redact';
+export type PrivacyRequestStatus = 'open' | 'fulfilled' | 'cancelled';
+
 export interface PrivacyDataRequestRecord {
   readonly webhookId: string;
   readonly shopifyCustomerId: string;
+  readonly kind?: PrivacyRequestKind;
+}
+
+export interface PrivacyRequestView {
+  readonly webhookId: string;
+  readonly shopifyCustomerId: string;
+  readonly kind: PrivacyRequestKind;
+  readonly status: PrivacyRequestStatus;
+  readonly receivedAt: Date;
+  readonly fulfilledAt: Date | null;
+  readonly notes: string | null;
+  readonly exportArtifactRef: string | null;
+  readonly operator: string | null;
+}
+
+export interface PrivacyFulfillmentInput {
+  readonly webhookId: string;
+  readonly operator: string;
+  readonly notes?: string | null;
+  readonly exportArtifactRef?: string | null;
 }
 
 export type Platform = 'ios' | 'android';

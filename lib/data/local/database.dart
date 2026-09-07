@@ -80,7 +80,6 @@ class AppDatabase extends _$AppDatabase {
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),
       );
 
-
   /// Version 6 namespaces catalog authority by shop and rekeys bag/wishlist so
   /// variants and accounts cannot collide on the same device.
   Future<void> _migrateShopScopeAndBagVariantKeys() async {

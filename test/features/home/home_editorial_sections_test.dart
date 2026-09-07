@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:monetta_app/app/catalog_store.dart';
-import 'package:monetta_app/app/external_catalog_config.dart';
-import 'package:monetta_app/app/external_catalog_controller.dart';
 import 'package:monetta_app/app/home_content_controller.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/reviews/loox_reviews_repository.dart';
@@ -28,12 +26,7 @@ void main() {
       MaterialApp(
         home: StoreScope(
           notifier: store,
-          child: ExternalCatalogScope(
-            notifier: ExternalCatalogController(
-              config: ExternalCatalogConfig.disabled,
-            ),
-            child: const HomeScreen(),
-          ),
+          child: const HomeScreen(),
         ),
       ),
     );
@@ -92,12 +85,7 @@ void main() {
       MaterialApp(
         home: StoreScope(
           notifier: store,
-          child: ExternalCatalogScope(
-            notifier: ExternalCatalogController(
-              config: ExternalCatalogConfig.disabled,
-            ),
-            child: const HomeScreen(),
-          ),
+          child: const HomeScreen(),
         ),
       ),
     );
@@ -141,12 +129,7 @@ void main() {
       MaterialApp(
         home: StoreScope(
           notifier: store,
-          child: ExternalCatalogScope(
-            notifier: ExternalCatalogController(
-              config: ExternalCatalogConfig.disabled,
-            ),
-            child: const HomeScreen(),
-          ),
+          child: const HomeScreen(),
         ),
       ),
     );
@@ -209,12 +192,7 @@ void main() {
       MaterialApp(
         home: StoreScope(
           notifier: store,
-          child: ExternalCatalogScope(
-            notifier: ExternalCatalogController(
-              config: ExternalCatalogConfig.disabled,
-            ),
-            child: const HomeScreen(),
-          ),
+          child: const HomeScreen(),
         ),
       ),
     );
@@ -279,14 +257,9 @@ void main() {
       MaterialApp(
         home: StoreScope(
           notifier: store,
-          child: ExternalCatalogScope(
-            notifier: ExternalCatalogController(
-              config: ExternalCatalogConfig.disabled,
-            ),
-            child: HomeContentScope(
-              notifier: home,
-              child: const HomeScreen(),
-            ),
+          child: HomeContentScope(
+            notifier: home,
+            child: const HomeScreen(),
           ),
         ),
       ),

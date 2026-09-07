@@ -57,7 +57,6 @@ class OnboardingScope extends InheritedNotifier<OnboardingController> {
     super.key,
   });
 
-  static OnboardingController? maybeOf(BuildContext context) => context
-      .dependOnInheritedWidgetOfExactType<OnboardingScope>()
-      ?.notifier;
+  static OnboardingController? maybeOf(BuildContext context) =>
+      context.dependOnInheritedWidgetOfExactType<OnboardingScope>()?.notifier;
 }

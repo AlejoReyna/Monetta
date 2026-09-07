@@ -16,6 +16,8 @@ import type {
   MirroredOrder,
   OrderRecord,
   PrivacyDataRequestRecord,
+  PrivacyFulfillmentInput,
+  PrivacyRequestView,
   PushTokenRecord,
   WebhookDeliveryStatus,
   WebhookEventRecord,
@@ -256,18 +258,67 @@ export class InMemoryWebhookEventsRepository implements WebhookEventsRepository 
 }
 
 export class InMemoryPrivacyRequestsRepository implements PrivacyRequestsRepository {
-  readonly byWebhookId = new Map<
-    string,
-    PrivacyDataRequestRecord & { status: 'open' | 'fulfilled' | 'cancelled'; receivedAt: Date }
-  >();
+  readonly byWebhookId = new Map<string, PrivacyRequestView>();
 
   async openDataRequest(record: PrivacyDataRequestRecord): Promise<void> {
     if (this.byWebhookId.has(record.webhookId)) return;
     this.byWebhookId.set(record.webhookId, {
-      ...record,
+      webhookId: record.webhookId,
+      shopifyCustomerId: record.shopifyCustomerId,
+      kind: 'customers/data_request',
       status: 'open',
       receivedAt: new Date(),
+      fulfilledAt: null,
+      notes: null,
+      exportArtifactRef: null,
+      operator: null,
     });
+  }
+
+  async openRedactRequest(record: PrivacyDataRequestRecord): Promise<void> {
+    if (this.byWebhookId.has(record.webhookId)) return;
+    this.byWebhookId.set(record.webhookId, {
+      webhookId: record.webhookId,
+      shopifyCustomerId: record.shopifyCustomerId,
+      kind: 'customers/redact',
+      status: 'fulfilled',
+      receivedAt: new Date(),
+      fulfilledAt: new Date(),
+      notes: 'Automatic mirror/engagement/token redaction applied by webhook handler',
+      exportArtifactRef: null,
+      operator: 'webhook:customers/redact',
+    });
+  }
+
+  async listOpen(): Promise<readonly PrivacyRequestView[]> {
+    return [...this.byWebhookId.values()].filter((row) => row.status === 'open');
+  }
+
+  async markFulfilled(input: PrivacyFulfillmentInput): Promise<boolean> {
+    const row = this.byWebhookId.get(input.webhookId);
+    if (!row || row.status !== 'open') return false;
+    this.byWebhookId.set(input.webhookId, {
+      ...row,
+      status: 'fulfilled',
+      fulfilledAt: new Date(),
+      notes: input.notes ?? row.notes,
+      exportArtifactRef: input.exportArtifactRef ?? row.exportArtifactRef,
+      operator: input.operator,
+    });
+    return true;
+  }
+
+  async markCancelled(input: PrivacyFulfillmentInput): Promise<boolean> {
+    const row = this.byWebhookId.get(input.webhookId);
+    if (!row || row.status !== 'open') return false;
+    this.byWebhookId.set(input.webhookId, {
+      ...row,
+      status: 'cancelled',
+      fulfilledAt: new Date(),
+      notes: input.notes ?? row.notes,
+      operator: input.operator,
+    });
+    return true;
   }
 }
 

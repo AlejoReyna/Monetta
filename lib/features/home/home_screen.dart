@@ -199,15 +199,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           authProvider: account.account?.authProvider,
         ),
         onOpenAdmin: () => Navigator.of(context).push(
-              MaterialPageRoute<void>(
-                builder: (_) => AdminScreen(
-                  controller: admin,
-                  notificationController:
-                      AdminNotificationScope.maybeOf(context),
-                  catalogStore: catalogStore,
-                ),
-              ),
+          MaterialPageRoute<void>(
+            builder: (_) => AdminScreen(
+              controller: admin,
+              notificationController: AdminNotificationScope.maybeOf(context),
+              catalogStore: catalogStore,
             ),
+          ),
+        ),
         onOpenPartner: _openPartner,
       ),
     );

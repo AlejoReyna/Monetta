@@ -249,6 +249,9 @@ export async function handleCustomersRedact(
       await deps.pushTokens.deleteAllForCustomer(shopifyCustomerId);
       await deps.engagementPrivacy?.deleteForShopifyCustomer(shopifyCustomerId);
       await deps.customers.delete(shopifyCustomerId);
+      if (deps.privacyRequests) {
+        await deps.privacyRequests.openRedactRequest({ webhookId, shopifyCustomerId });
+      }
 
       logger.info('customer redacted', { shopifyCustomerId });
     },

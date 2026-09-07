@@ -13,9 +13,11 @@ import 'package:http/http.dart' as http;
 import '../../domain/admin_control.dart';
 
 abstract interface class AdminClient {
-  Future<AdminSnapshot> fetchSnapshot({String? cursor, String? query, int? limit});
+  Future<AdminSnapshot> fetchSnapshot(
+      {String? cursor, String? query, int? limit});
 
-  Future<AdminSnapshot> fetchProductsPage({String? cursor, String? query, int? limit});
+  Future<AdminSnapshot> fetchProductsPage(
+      {String? cursor, String? query, int? limit});
 
   Future<AdminCapabilities> fetchMe();
 
@@ -154,7 +156,8 @@ class HttpAdminClient
         ? ''
         : '?${params.entries.map((e) => '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}').join('&')}';
     final response = await _send('GET', '/admin/products$qs');
-    return _snapshotFromRoot(_jsonObject(response.bodyBytes), productsOnly: true);
+    return _snapshotFromRoot(_jsonObject(response.bodyBytes),
+        productsOnly: true);
   }
 
   AdminSnapshot _snapshotFromRoot(
@@ -174,11 +177,15 @@ class HttpAdminClient
     AdminProductsPageMeta? productsMeta;
     if (meta is Map<String, dynamic>) {
       productsMeta = AdminProductsPageMeta(
-        loadedCount: (meta['loadedCount'] as num?)?.toInt() ?? productRows.length,
+        loadedCount:
+            (meta['loadedCount'] as num?)?.toInt() ?? productRows.length,
         hasNextPage: meta['hasNextPage'] == true ||
-            (pageInfo is Map<String, dynamic> && pageInfo['hasNextPage'] == true),
+            (pageInfo is Map<String, dynamic> &&
+                pageInfo['hasNextPage'] == true),
         endCursor: meta['endCursor'] as String? ??
-            (pageInfo is Map<String, dynamic> ? pageInfo['endCursor'] as String? : null),
+            (pageInfo is Map<String, dynamic>
+                ? pageInfo['endCursor'] as String?
+                : null),
         totalCount: (meta['totalCount'] as num?)?.toInt(),
         query: meta['query'] as String?,
         limit: (meta['limit'] as num?)?.toInt() ?? 50,

@@ -29,9 +29,18 @@ for f in "${candidate_files[@]}"; do
 done
 
 # Filled dart-define files must not be candidates for a commit.
+# Narrow exception: config/dart_defines.ci.json is the public CI compile fixture
+# (empty tokens / flags only). Still validate its contents below; never widen
+# this to staging/production dart-defines (F30).
 for f in "${candidate_files[@]}"; do
   case "$f" in
     *.example) ;;
+    config/dart_defines.ci.json)
+      if ! python3 bin/validate_ci_dart_defines.py "$f"; then
+        echo "FAIL: public CI dart-defines fixture failed content validation: $f"
+        fail=1
+      fi
+      ;;
     config/dart_defines*.json)
       echo "FAIL: dart-define file is tracked or untracked-and-visible: $f"
       fail=1
@@ -54,7 +63,7 @@ patterns=(
 
 scan_files=()
 for f in "${candidate_files[@]}"; do
-  [[ "$f" == "bin/check_no_secrets.sh" ]] || scan_files+=("$f")
+  case "$f" in bin/check_no_secrets.sh|bin/validate_ci_dart_defines.py) ;; *) scan_files+=("$f") ;; esac
 done
 
 for pat in "${patterns[@]}"; do

@@ -394,6 +394,7 @@ export function createApp(deps: ServerDeps): Express {
       externalWritesEnabled: deps.externalWritesEnabled,
       featuredJobs: deps.featuredJobs,
       syncJobs: deps.syncJobs,
+      privacyRequests: deps.privacyRequests,
     });
   }
 

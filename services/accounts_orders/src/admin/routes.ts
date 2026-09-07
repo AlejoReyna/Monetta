@@ -33,6 +33,7 @@ import type {
   AdminSyncJobRecord,
   AdminSyncJobRepository,
 } from './syncPorts.js';
+import type { PrivacyRequestsRepository } from '../domain/ports.js';
 
 export interface AdminRouteDeps {
   readonly authorizer: AdminAuthorizer;
@@ -50,6 +51,7 @@ export interface AdminRouteDeps {
   readonly now?: () => Date;
   readonly externalWritesEnabled?: boolean;
   readonly syncJobs?: AdminSyncJobRepository;
+  readonly privacyRequests?: PrivacyRequestsRepository;
 }
 
 export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
@@ -705,6 +707,70 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
       requestId: requestIdFor(res),
       job: { id: jobId, status, errorCode },
     });
+  }));
+
+  app.get('/admin/privacy-requests', asyncRoute(async (req, res) => {
+    const owner = await requireOwner(req, res, deps.authorizer);
+    if (owner === null) return;
+    if (!deps.privacyRequests) {
+      adminError(res, 503, 'PRIVACY_TRACKING_UNAVAILABLE', 'Privacy request tracking is not configured.');
+      return;
+    }
+    const open = await deps.privacyRequests.listOpen();
+    res.status(200).json({
+      requests: open.map((row) => ({
+        webhookId: row.webhookId,
+        shopifyCustomerId: row.shopifyCustomerId,
+        kind: row.kind,
+        status: row.status,
+        receivedAt: row.receivedAt.toISOString(),
+        notes: row.notes,
+        exportArtifactRef: row.exportArtifactRef,
+        operator: row.operator,
+      })),
+    });
+  }));
+
+  app.post('/admin/privacy-requests/:webhookId/fulfill', asyncRoute(async (req, res) => {
+    const owner = await requireOwner(req, res, deps.authorizer);
+    if (owner === null) return;
+    if (!deps.privacyRequests) {
+      adminError(res, 503, 'PRIVACY_TRACKING_UNAVAILABLE', 'Privacy request tracking is not configured.');
+      return;
+    }
+    const webhookId = String(req.params.webhookId ?? '');
+    if (!webhookId) {
+      adminError(res, 400, 'INVALID_REQUEST', 'webhookId is required.');
+      return;
+    }
+    const body = req.body !== null && typeof req.body === 'object' && !Array.isArray(req.body)
+      ? req.body as Record<string, unknown>
+      : {};
+    const notes = typeof body.notes === 'string' ? body.notes.slice(0, 2000) : null;
+    const exportArtifactRef = typeof body.exportArtifactRef === 'string'
+      ? body.exportArtifactRef.slice(0, 500)
+      : null;
+    const ok = await deps.privacyRequests.markFulfilled({
+      webhookId,
+      operator: owner.id,
+      notes,
+      exportArtifactRef,
+    });
+    if (!ok) {
+      adminError(res, 404, 'PRIVACY_REQUEST_NOT_OPEN', 'No open privacy request for that webhook id.');
+      return;
+    }
+    if (deps.audit !== undefined) {
+      await deps.audit.record({
+        actor: owner,
+        requestId: requestIdFor(res),
+        action: 'privacy.request.fulfill',
+        targetType: 'privacy_request',
+        targetId: webhookId,
+        outcome: 'success',
+      });
+    }
+    res.status(200).json({ status: 'fulfilled', webhookId });
   }));
 }
 

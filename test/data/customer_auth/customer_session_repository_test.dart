@@ -470,8 +470,7 @@ void main() {
   });
 
   group('CustomerSessionRepository.logout', () {
-    test(
-        'opens hosted end-session, clears secure storage, and detaches device',
+    test('opens hosted end-session, clears secure storage, and detaches device',
         () async {
       final idToken = _fakeIdToken(sub: 'gid://shopify/Customer/1');
       final gateway = FakeCustomerAuthGateway(

@@ -186,6 +186,36 @@ describe('engagement API', () => {
     expect(messaging.sent[0]).toMatchObject({ registrationId: 'fcm-token-1' });
   });
 
+
+  it('rejects retired external-catalog event sources and product keys', async () => {
+    const payload = JSON.stringify({
+      eventId: 'event-external-1',
+      eventType: 'catalog.product.restocked',
+      source: 'external_coach',
+      productKey: 'external:coach_us:CU068',
+      occurredAt: '2026-08-25T12:00:00Z',
+      before: { available: false },
+      after: { available: true, title: 'External Bag' },
+    });
+    const timestamp = '2026-08-25T12:00:00.000Z';
+    const signature = createHmac('sha256', internalSecret)
+      .update(timestamp)
+      .update('.')
+      .update(payload)
+      .digest('hex');
+    const response = await fetch(`${baseUrl}/internal/catalog-events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Monetta-Timestamp': timestamp,
+        'X-Monetta-Signature': signature,
+      },
+      body: payload,
+    });
+    expect(response.status).toBe(400);
+    expect([...repository.campaigns.values()]).toHaveLength(0);
+  });
+
   it('verifies and deduplicates signed catalog events before creating restock campaigns', async () => {
     repository.rules.set('restock', { enabled: true, configuration: {} });
     await configuredDevice();

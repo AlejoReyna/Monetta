@@ -310,6 +310,9 @@ Uri partnerQuoteWhatsAppUri({String? category, String? catalogMode}) {
     'Entiendo que el mayoreo comienza desde 3 modelos, el anticipo es de '
         '\$800 MXN y puedo liquidar en hasta 20 días.',
     '',
+    'Sé que abrir WhatsApp no aprueba mayoreo, no reserva inventario ni '
+        'crea un pedido o comisión automáticamente.',
+    '',
     'Origen: app · Vende con Monetta',
   ].join('\n');
   return Uri.https('wa.me', '/$kWhatsAppE164', <String, String>{'text': text});
@@ -321,13 +324,14 @@ const int kApartadoDepositMxn = 400;
 const int kApartadoDays = 20;
 
 const String kApartadoSentence =
-    'Apártala con \$400 MXN. Tienes 20 días para liquidar.';
+    'Escríbenos por WhatsApp para solicitar apartado (\$400 MXN · 20 días). '
+    'Abrir el chat no reserva stock ni confirma el anticipo.';
 
 const List<String> kTrustRows = [
   'Piezas originales importadas de Estados Unidos',
   'Envío a todo México · gratis desde \$1,499',
   'Cambios por WhatsApp',
-  'Apartado con \$400 · 20 días',
+  'Apartado manual por WhatsApp · \$400 · 20 días',
 ];
 
 /// Card title: Shopify name, with the colourway folded in when it is not

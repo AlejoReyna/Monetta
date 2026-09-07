@@ -76,16 +76,9 @@ Shopify. Después de desplegar las configuraciones de `shopify/`, reinstalar o
 actualizar la app de Shopify para aceptar `read_products` y registrar las nuevas
 suscripciones.
 
-Para fuentes externas, configurar el monitor:
-
-```text
-NOTIFICATION_EVENTS_URL=https://accounts.example.com/internal/catalog-events
-NOTIFICATION_EVENTS_SECRET=... # igual al backend, 32+ caracteres
-```
-
-Los cambios se insertan en `notification_event_outbox` dentro de la misma
-transacción que el producto. El monitor firma cada intento con HMAC y reintenta
-con backoff; `accounts_orders` deduplica por `eventId`.
+El ingreso `/internal/catalog-events` **rechaza** fuentes/product keys
+`external:*` (catálogo externo retirado, F03/F28). No configurar
+`NOTIFICATION_EVENTS_URL` en `catalog_monitor`; ese camino ya no es producto.
 
 ## 5. Activación gradual
 

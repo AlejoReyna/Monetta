@@ -1,5 +1,6 @@
-/// Monetta's wholesale storefront: a brand-led path from discovery to a
-/// catalog share and a personal WhatsApp quote.
+/// Reseller hub: share catalogs and start a WhatsApp quote.
+/// Opening WhatsApp or a catalog link does not approve reseller status,
+/// reserve stock, charge a deposit, create an order, or post commissions.
 library;
 
 import 'package:flutter/material.dart';
@@ -28,9 +29,11 @@ const _aboutMonetta = 'https://monetta.mx/pages/contact';
 const _wholesaleDetails = <PartnerFaq>[
   PartnerFaq(
     question: 'Sistema de apartado',
-    answer: 'Aparta tus pedidos y liquida hasta en 20 días. El anticipo es de '
-        r'$800 MXN para mayoreo y $400 MXN para menudeo. Para apartar, '
-        'escríbenos por WhatsApp al 826 106 6868.',
+    answer: 'El apartado es un proceso manual por WhatsApp: Monetta confirma '
+        'disponibilidad, registra el anticipo y crea el pedido en Shopify. '
+        'Abrir el chat no reserva stock ni cobra. Anticipo de referencia: '
+        r'$800 MXN mayoreo / $400 MXN menudeo, liquidación hasta 20 días. '
+        'Escríbenos al 826 106 6868.',
   ),
   PartnerFaq(
     question: 'Productos originales',

@@ -291,6 +291,10 @@ describe('webhook handlers', () => {
       expect(pushTokens.byDeviceId.has('dev-1')).toBe(false);
       // The order itself is a business record and survives redaction.
       expect(orders.rows).toHaveLength(1);
+      const privacy = privacyRequests.byWebhookId.get('wh-redact-1');
+      expect(privacy?.kind).toBe('customers/redact');
+      expect(privacy?.status).toBe('fulfilled');
+      expect(privacy?.shopifyCustomerId).toBe('42');
     });
 
     it('is idempotent for a retried delivery', async () => {
@@ -312,6 +316,20 @@ describe('webhook handlers', () => {
       expect(webhookEvents.byWebhookId.get('wh-dr')?.status).toBe('completed');
       expect(privacyRequests.byWebhookId.get('wh-dr')?.status).toBe('open');
       expect(privacyRequests.byWebhookId.get('wh-dr')?.shopifyCustomerId).toBe('42');
+    });
+
+    it('fulfills an open data_request with operator evidence', async () => {
+      await privacyRequests.openDataRequest({ webhookId: 'wh-dr-2', shopifyCustomerId: '7' });
+      const ok = await privacyRequests.markFulfilled({
+        webhookId: 'wh-dr-2',
+        operator: 'owner-1',
+        notes: 'exported to ticket T-1',
+        exportArtifactRef: 'tickets/T-1',
+      });
+      expect(ok).toBe(true);
+      expect(privacyRequests.byWebhookId.get('wh-dr-2')?.status).toBe('fulfilled');
+      expect(privacyRequests.byWebhookId.get('wh-dr-2')?.exportArtifactRef).toBe('tickets/T-1');
+      expect(await privacyRequests.listOpen()).toHaveLength(0);
     });
   });
 

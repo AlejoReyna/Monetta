@@ -8,6 +8,8 @@ import type {
   OrderRecord,
   PushTokenRecord,
   PrivacyDataRequestRecord,
+  PrivacyFulfillmentInput,
+  PrivacyRequestView,
   WebhookEventRecord,
 } from './types.js';
 
@@ -81,6 +83,11 @@ export interface WebhookEventsRepository {
 export interface PrivacyRequestsRepository {
   /** Opens a durable follow-up task for customers/data_request (F29). Idempotent per webhookId. */
   openDataRequest(record: PrivacyDataRequestRecord): Promise<void>;
+  /** Opens/records a redact follow-up row (usually fulfilled after deletion). Idempotent per webhookId. */
+  openRedactRequest(record: PrivacyDataRequestRecord): Promise<void>;
+  listOpen(): Promise<readonly PrivacyRequestView[]>;
+  markFulfilled(input: PrivacyFulfillmentInput): Promise<boolean>;
+  markCancelled(input: PrivacyFulfillmentInput): Promise<boolean>;
 }
 
 export interface PushTokensRepository {

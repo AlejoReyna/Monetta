@@ -96,7 +96,8 @@ void main() {
     expect(b.variant.title, 'B');
     expect(b.variant.price, 200);
     expect(
-      store.bagLines.any((l) => l.variant.id == 'gid://shopify/ProductVariant/C'),
+      store.bagLines
+          .any((l) => l.variant.id == 'gid://shopify/ProductVariant/C'),
       isFalse,
     );
   });
@@ -110,7 +111,8 @@ void main() {
     await store.addToBag(product, variantId: 'gid://shopify/ProductVariant/A');
     await store.toggleWishlist(product.id);
     expect(
-      store.bagLines.any((l) => l.variant.id == 'gid://shopify/ProductVariant/A'),
+      store.bagLines
+          .any((l) => l.variant.id == 'gid://shopify/ProductVariant/A'),
       isTrue,
     );
     expect(store.wishlist, contains(product.id));

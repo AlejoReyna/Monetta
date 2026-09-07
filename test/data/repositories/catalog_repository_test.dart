@@ -352,7 +352,6 @@ void main() {
       );
     });
 
-
     test('full sync A+B then B-only removes A (F08)', () async {
       final cache = CatalogCacheStore(db);
       final cursorStore = SyncCursorStore(db);
@@ -571,6 +570,5 @@ void main() {
       expect((await cursorStore.load()).shopDomain, 'monetta.mx');
       expect((await cache.metadata())?.shopDomain, 'monetta.mx');
     });
-
   });
 }

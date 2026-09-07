@@ -55,10 +55,10 @@ analyze: ## Static analysis
 	$(FLUTTER) analyze
 
 format: ## Check formatting (CI-safe)
-	$(DART) format --set-exit-if-changed lib test
+	$(DART) format --output=none --set-exit-if-changed lib test integration_test
 
 fix: ## Apply formatting and automated fixes
-	$(DART) format lib test
+	$(DART) format lib test integration_test
 	$(DART) fix --apply
 
 validate-staging: ## Validate the local staging dart-defines

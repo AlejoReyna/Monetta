@@ -63,6 +63,7 @@ void main() {
       expect(request.message, contains('\$400 MXN'));
       expect(request.message, contains('20 días'));
       expect(request.message, contains('MN-7K3Q'));
+      expect(request.message, contains('no reserva inventario'));
       expect(request.message, contains('bolsa-guess-crossbody-negro'));
     });
 
