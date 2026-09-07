@@ -1,0 +1,29 @@
+# Disposable PostgreSQL for audit fixtures (legacy persona L, local accounts).
+# Intentionally separate from services/accounts_orders (port 5434) so overnight
+# audit work cannot wipe a developer's long-lived accounts_orders volume.
+#
+#   docker compose -f tools/audit/docker-compose.audit-pg.yml up -d
+#   docker compose -f tools/audit/docker-compose.audit-pg.yml down -v   # wipe
+#
+# Connection (host):
+#   postgres://monetta_audit:monetta_audit@127.0.0.1:5435/monetta_audit
+
+services:
+  audit-postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: monetta_audit
+      POSTGRES_PASSWORD: monetta_audit
+      POSTGRES_DB: monetta_audit
+    ports:
+      - "5435:5432"
+    volumes:
+      - monetta_audit_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U monetta_audit -d monetta_audit"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  monetta_audit_pgdata:

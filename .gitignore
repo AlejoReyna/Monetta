@@ -73,3 +73,10 @@ dashboard/dist/
 .env.local
 .vercel
 .env*
+
+# Audit fixture runs — manifests, synthetic passwords, local env (brief §4)
+.audit-runs/
+tools/audit/.env
+tools/audit/secrets/
+tools/audit/**/secrets.json
+*.audit-secrets.json
