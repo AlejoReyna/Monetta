@@ -84,11 +84,11 @@ class AccountController extends ChangeNotifier {
   /// be shown a platform error string.
   AccountError? lastError;
 
-  /// "Mis pedidos" — real Shopify checkout orders and hand-entered WhatsApp
-  /// apartado orders, unified (`docs/ACCOUNTS_AND_SYNC_PLAN.md` Phase 3).
-  /// Populated by [loadOrders]; empty (not loading, not an error) whenever
-  /// nobody is signed in.
+  /// "Mis pedidos" — Shopify Customer Account history (primary) plus
+  /// WhatsApp apartado enrichment from the Monetta mirror when available.
+  /// Populated by [loadOrders]; cleared on logout / account switch.
   List<local.OrderSummary> orders = const [];
+  OrderHistoryStatus ordersStatus = OrderHistoryStatus.unavailable;
   bool ordersLoading = false;
   int _ordersGeneration = 0;
 
@@ -127,7 +127,6 @@ class AccountController extends ChangeNotifier {
       return null;
     }
   }
-
 
   Future<void> _publishAccountScope() async {
     final callback = _onAccountScopeChanged;
@@ -206,6 +205,7 @@ class AccountController extends ChangeNotifier {
     await repository.logout(localAccountId);
     account = null;
     orders = const [];
+    ordersStatus = OrderHistoryStatus.unavailable;
     _ordersGeneration += 1;
     lastError = const AccountError(
       flow: AccountAuthFlow.shopify,
@@ -332,6 +332,7 @@ class AccountController extends ChangeNotifier {
       }
       account = null;
       orders = const [];
+      ordersStatus = OrderHistoryStatus.unavailable;
       _ordersGeneration += 1;
       await _publishAccountScope();
     } finally {
@@ -340,10 +341,10 @@ class AccountController extends ChangeNotifier {
     }
   }
 
-  /// Cache-first, same shape as everything else in this app: local rows
-  /// paint immediately, then a background refresh from
-  /// `services/accounts_orders` (a safe no-op if that service isn't
-  /// configured — see `OrderHistoryRepository.canRefresh`) replaces them.
+  /// Cache-first: account-bound local rows paint immediately, then a refresh
+  /// prefers Customer Account API (Shopify sessions) and optionally merges
+  /// mirror apartados. Unavailable / failed / stale-cache are distinct from
+  /// a confirmed empty list (F13).
   ///
   /// Each await re-checks that [account] is still the same generation so a
   /// delayed response for A cannot repopulate orders after logout or after B
@@ -360,22 +361,29 @@ class AccountController extends ChangeNotifier {
     try {
       final cached = await _orderHistoryRepository.loadCached(accountId);
       if (!_ordersStillCurrent(generation, accountId)) return;
-      orders = cached;
-      notifyListeners();
-
-      // The backend, not this local row, is authoritative for the Shopify
-      // linkage. This also lets a linked legacy Monetta account refresh orders
-      // even when its local cache does not yet contain the Shopify customer id.
-      final accessToken = await accessTokenForBackend();
-      if (!_ordersStillCurrent(generation, accountId)) return;
-      if (accessToken != null) {
-        await _orderHistoryRepository.refresh(
-          accountId: accountId,
-          accessToken: accessToken,
-        );
-        if (!_ordersStillCurrent(generation, accountId)) return;
-        orders = await _orderHistoryRepository.loadCached(accountId);
+      if (cached.isNotEmpty) {
+        orders = cached;
+        // Provisional until refresh settles — never call this "empty".
+        ordersStatus = OrderHistoryStatus.populated;
+        notifyListeners();
       }
+
+      final customerAccountToken = current.authProvider == 'shopify'
+          ? await accessTokenForShopifyCheckout()
+          : null;
+      if (!_ordersStillCurrent(generation, accountId)) return;
+
+      final backendToken = await accessTokenForBackend();
+      if (!_ordersStillCurrent(generation, accountId)) return;
+
+      final view = await _orderHistoryRepository.refresh(
+        accountId: accountId,
+        customerAccountAccessToken: customerAccountToken,
+        backendAccessToken: backendToken,
+      );
+      if (!_ordersStillCurrent(generation, accountId)) return;
+      orders = view.orders;
+      ordersStatus = view.status;
     } finally {
       if (_ordersStillCurrent(generation, accountId)) {
         ordersLoading = false;

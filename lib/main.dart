@@ -40,6 +40,7 @@ import 'data/admin/admin_client.dart';
 import 'data/customer_auth/customer_account_config.dart';
 import 'data/customer_auth/customer_auth_gateway.dart';
 import 'data/customer_auth/customer_identity.dart';
+import 'data/customer_auth/customer_orders.dart';
 import 'data/customer_auth/customer_session_repository.dart';
 import 'data/customer_auth/device_identity.dart';
 import 'data/customer_auth/secure_token_store.dart';
@@ -257,7 +258,6 @@ class StoreScope extends InheritedNotifier<CatalogStore> {
     return context.dependOnInheritedWidgetOfExactType<StoreScope>()?.notifier;
   }
 }
-
 
 /// Exposes owner-editable About and reseller content. The controller always
 /// contains a complete bundled fallback, so this scope never represents a
@@ -523,6 +523,7 @@ class _MonettaAppState extends State<MonettaApp> {
   /// before that future completes, and since a build without Customer Account
   /// credentials never creates one at all).
   HttpCustomerIdentityService? _customerIdentityService;
+  HttpCustomerOrdersService? _customerOrdersService;
   HttpAdminClient? _adminClient;
   bool _adminCapListenerAttached = false;
 
@@ -638,6 +639,10 @@ class _MonettaAppState extends State<MonettaApp> {
         config: customerConfig,
       );
       _customerIdentityService = identityService;
+      final ordersService = HttpCustomerOrdersService(
+        config: customerConfig,
+      );
+      _customerOrdersService = ordersService;
       customerSession = CustomerSessionRepository(
         authGateway: AppAuthCustomerGateway(config: customerConfig),
         identityService: identityService,
@@ -673,6 +678,7 @@ class _MonettaAppState extends State<MonettaApp> {
       orderHistoryRepository: OrderHistoryRepository(
         store: OrderSummaryStore(_database),
         config: accountsConfig,
+        customerOrders: _customerOrdersService,
       ),
       deviceId: deviceId,
       onAccountScopeChanged: (accountId) async {
@@ -803,6 +809,7 @@ class _MonettaAppState extends State<MonettaApp> {
     }
     _storefrontTransport?.close();
     _customerIdentityService?.close();
+    _customerOrdersService?.close();
     _adminClient?.close();
     _admin?.dispose();
     _notifications?.dispose();
@@ -826,48 +833,49 @@ class _MonettaAppState extends State<MonettaApp> {
         child: ThemeScope(
           notifier: _theme,
           child: MaterialApp(
-          navigatorKey: _navigatorKey,
-          title: 'Monetta',
-          debugShowCheckedModeBanner: false,
-          theme: buildLightTheme(),
-          darkTheme: buildDarkTheme(),
-          themeMode: _theme.mode,
-          builder: (context, navigator) {
-            final overlay = Theme.of(context).appBarTheme.systemOverlayStyle ??
-                SystemUiOverlayStyle.light;
-            return AnnotatedRegion<SystemUiOverlayStyle>(
-              value: overlay,
-              child: FutureBuilder<void>(
-                future: _loading,
-                builder: (context, snapshot) {
-                  if (snapshot.hasError) {
-                    return _ErrorScreen(error: '${snapshot.error}');
-                  }
-                  if (snapshot.connectionState != ConnectionState.done) {
-                    return const _SplashScreen();
-                  }
-                  return AppRouteScopes(
-                    accountController: _account,
-                    cartController: _shopifyCart?.controller,
-                    checkoutCoordinator: _shopifyCart?.checkout,
-                    catalogStore: _store,
-                    notificationController: _notifications,
-                    shopDomain: StorefrontConfig.fromEnvironment().shopDomain,
-                    child: navigator!,
-                  );
-                },
-              ),
-            );
-          },
-          home: StoreScope(
-            notifier: _store,
-            child: EditorialContentScope(
-              notifier: _editorialContent,
-              child: HomeContentScope(
-                notifier: _homeContent,
-                child: FeaturedCatalogScope(
-                  notifier: _featuredCatalog,
-                  child: FutureBuilder<void>(
+            navigatorKey: _navigatorKey,
+            title: 'Monetta',
+            debugShowCheckedModeBanner: false,
+            theme: buildLightTheme(),
+            darkTheme: buildDarkTheme(),
+            themeMode: _theme.mode,
+            builder: (context, navigator) {
+              final overlay =
+                  Theme.of(context).appBarTheme.systemOverlayStyle ??
+                      SystemUiOverlayStyle.light;
+              return AnnotatedRegion<SystemUiOverlayStyle>(
+                value: overlay,
+                child: FutureBuilder<void>(
+                  future: _loading,
+                  builder: (context, snapshot) {
+                    if (snapshot.hasError) {
+                      return _ErrorScreen(error: '${snapshot.error}');
+                    }
+                    if (snapshot.connectionState != ConnectionState.done) {
+                      return const _SplashScreen();
+                    }
+                    return AppRouteScopes(
+                      accountController: _account,
+                      cartController: _shopifyCart?.controller,
+                      checkoutCoordinator: _shopifyCart?.checkout,
+                      catalogStore: _store,
+                      notificationController: _notifications,
+                      shopDomain: StorefrontConfig.fromEnvironment().shopDomain,
+                      child: navigator!,
+                    );
+                  },
+                ),
+              );
+            },
+            home: StoreScope(
+              notifier: _store,
+              child: EditorialContentScope(
+                notifier: _editorialContent,
+                child: HomeContentScope(
+                  notifier: _homeContent,
+                  child: FeaturedCatalogScope(
+                    notifier: _featuredCatalog,
+                    child: FutureBuilder<void>(
                       future: _loading,
                       builder: (context, snapshot) {
                         if (snapshot.hasError) {

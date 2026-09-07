@@ -8,6 +8,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/account_controller.dart';
+import '../../data/repositories/order_history_repository.dart';
 import '../../app/theme.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
@@ -226,18 +227,48 @@ class _OrdersList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (controller.orders.isEmpty) {
-      return Text(
-        controller.ordersLoading ? 'Cargando…' : 'Aún no tienes pedidos.',
-        style: sans(size: 13, color: context.monettaColors.contentMuted),
-      );
+    final muted = sans(size: 13, color: context.monettaColors.contentMuted);
+    if (controller.ordersLoading && controller.orders.isEmpty) {
+      return Text('Cargando…', style: muted);
     }
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
+        if (_statusMessage(controller) case final message?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(message, style: muted),
+          ),
         for (final order in controller.orders) _OrderRow(order: order),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            key: const ValueKey('refresh-orders'),
+            onPressed:
+                controller.ordersLoading ? null : () => controller.loadOrders(),
+            child: Text(
+              controller.ordersLoading ? 'Actualizando…' : 'Actualizar pedidos',
+            ),
+          ),
+        ),
       ],
     );
+  }
+
+  String? _statusMessage(AccountController controller) {
+    switch (controller.ordersStatus) {
+      case OrderHistoryStatus.empty:
+        return controller.orders.isEmpty ? 'Aún no tienes pedidos.' : null;
+      case OrderHistoryStatus.populated:
+        return null;
+      case OrderHistoryStatus.unavailable:
+        return 'El historial de pedidos no está disponible en esta versión.';
+      case OrderHistoryStatus.failed:
+        return 'No pudimos cargar tus pedidos. Intenta actualizar.';
+      case OrderHistoryStatus.staleCache:
+        return 'Mostrando pedidos guardados. No pudimos actualizar ahora.';
+    }
   }
 }
 

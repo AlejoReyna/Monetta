@@ -203,4 +203,48 @@ void main() {
     expect(find.byType(TextFormField), findsNothing);
     expect(find.byType(SnackBar), findsNothing);
   });
+
+  testWidgets('orders UI distinguishes failed from empty', (tester) async {
+    final db = openTestDatabase();
+    addTearDown(db.close);
+    final gateway = _PendingShopGateway();
+    final controller = await _buildController(db, gateway);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: Builder(
+            builder: (context) => TextButton(
+              onPressed: () => unawaited(
+                openAccount(context, controller: controller),
+              ),
+              child: const Text('ACCOUNT'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    await tester.tap(find.text('ACCOUNT'));
+    await tester.pump();
+    gateway.succeed();
+    await tester.pumpAndSettle();
+
+    // Force a failed status with no rows — must not read as empty history.
+    controller.orders = const [];
+    controller.ordersStatus = OrderHistoryStatus.failed;
+    controller.ordersLoading = false;
+    controller.notifyListeners();
+    await tester.pump();
+
+    expect(find.text('Aún no tienes pedidos.'), findsNothing);
+    expect(
+        find.textContaining('No pudimos cargar tus pedidos'), findsOneWidget);
+    expect(find.byKey(const ValueKey('refresh-orders')), findsOneWidget);
+
+    controller.ordersStatus = OrderHistoryStatus.empty;
+    controller.notifyListeners();
+    await tester.pump();
+    expect(find.text('Aún no tienes pedidos.'), findsOneWidget);
+  });
 }

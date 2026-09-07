@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
@@ -15,6 +16,7 @@ import 'package:monetta_app/data/local/bag_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/local/wishlist_store.dart';
+import 'package:monetta_app/data/customer_auth/customer_orders.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
 
 class _FakeGateway implements CustomerAuthGateway {
@@ -368,4 +370,91 @@ void main() {
     expect(controller.account?.shopifyCustomerId, isNull);
     expect(controller.account?.authProvider, 'monetta');
   });
+
+  test('loadOrders discards stale response after logout (F14)', () async {
+    final gate = Completer<List<CustomerAccountOrder>>();
+    final caa = _GatedCaa(gate);
+    final controller = AccountController(
+      sessionRepository: CustomerSessionRepository(
+        authGateway: _FakeGateway(),
+        accountStore: accountStore,
+        sessionStore: SessionStore(db),
+        deviceStore: deviceStore,
+        wishlistStore: WishlistStore(db),
+        bagStore: BagStore(db),
+        secureStore: secureStore,
+        deviceId: 'dev-1',
+      ),
+      accountStore: accountStore,
+      deviceStore: deviceStore,
+      orderHistoryRepository: OrderHistoryRepository(
+        store: OrderSummaryStore(db),
+        config: AccountsOrdersConfig.disabled,
+        customerOrders: caa,
+      ),
+      config: const CustomerAccountConfig(
+        shopDomain: 'shop.example.com',
+        shopId: '1',
+        clientId: 'shp_x',
+        redirectUri: 'shop.1.oauth://c',
+      ),
+      deviceId: 'dev-1',
+    );
+
+    // First CAA call (login → loadOrders) returns empty immediately.
+    await controller.login();
+    expect(controller.isSignedIn, isTrue);
+
+    // Second call is gated so logout can race the in-flight refresh.
+    caa.blockNext = true;
+    final pending = controller.loadOrders();
+    await Future<void>.delayed(Duration.zero);
+    await controller.logout();
+    gate.complete([
+      CustomerAccountOrder(
+        id: 'gid://shopify/Order/1',
+        name: '#1',
+        number: 1,
+        processedAt: DateTime.utc(2026, 8, 1),
+        financialStatus: 'PAID',
+        fulfillmentStatus: null,
+        totalAmount: 10,
+        currencyCode: 'MXN',
+      ),
+    ]);
+    await pending;
+
+    expect(controller.isSignedIn, isFalse);
+    expect(controller.orders, isEmpty);
+    expect(controller.ordersStatus, OrderHistoryStatus.unavailable);
+    expect(controller.account, isNull);
+  });
+
+  test('loadOrders surfaces unavailable when no remote source is usable',
+      () async {
+    final controller = buildController();
+    await controller.login();
+    await controller.loadOrders();
+    expect(controller.ordersStatus, OrderHistoryStatus.unavailable);
+    expect(controller.orders, isEmpty);
+  });
+}
+
+class _GatedCaa implements CustomerOrdersService {
+  _GatedCaa(this.gate);
+
+  final Completer<List<CustomerAccountOrder>> gate;
+  bool blockNext = false;
+
+  @override
+  Future<List<CustomerAccountOrder>> fetchOrders(
+    String accessToken, {
+    int first = 25,
+  }) async {
+    if (blockNext) {
+      blockNext = false;
+      return gate.future;
+    }
+    return const [];
+  }
 }
