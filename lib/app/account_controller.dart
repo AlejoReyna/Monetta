@@ -57,13 +57,15 @@ class AccountController extends ChangeNotifier {
     required OrderHistoryRepository orderHistoryRepository,
     CustomerAccountConfig? config,
     required String deviceId,
+    Future<void> Function(String? accountId)? onAccountScopeChanged,
   })  : _sessionRepository = sessionRepository,
         _systemSessionRepository = systemSessionRepository,
         _accountStore = accountStore,
         _deviceStore = deviceStore,
         _orderHistoryRepository = orderHistoryRepository,
         _config = config,
-        _deviceId = deviceId;
+        _deviceId = deviceId,
+        _onAccountScopeChanged = onAccountScopeChanged;
 
   final CustomerSessionRepository? _sessionRepository;
   final SystemAccountSessionRepository? _systemSessionRepository;
@@ -72,6 +74,7 @@ class AccountController extends ChangeNotifier {
   final OrderHistoryRepository _orderHistoryRepository;
   final CustomerAccountConfig? _config;
   final String _deviceId;
+  final Future<void> Function(String? accountId)? _onAccountScopeChanged;
 
   local.Account? account;
   bool isLoading = false;
@@ -124,6 +127,13 @@ class AccountController extends ChangeNotifier {
     }
   }
 
+
+  Future<void> _publishAccountScope() async {
+    final callback = _onAccountScopeChanged;
+    if (callback == null) return;
+    await callback(account?.localAccountId);
+  }
+
   /// Restores whichever account this device was last signed into, if any —
   /// call once at startup so "still logged in" survives a restart. Cheap:
   /// reads local rows only, no network.
@@ -139,10 +149,12 @@ class AccountController extends ChangeNotifier {
       // every action fails. The guest bag and wishlist are untouched: they
       // are device-scoped rows, not account-scoped ones.
       await _deviceStore.detachAccount(_deviceId);
+      await _publishAccountScope();
       return;
     }
     account = restored;
     notifyListeners();
+    await _publishAccountScope();
   }
 
   Future<bool> _hasUsableSessionFor(
@@ -199,6 +211,7 @@ class AccountController extends ChangeNotifier {
       debugDetail: 'revalidation found no usable session',
     );
     notifyListeners();
+    await _publishAccountScope();
   }
 
   Future<void> login() async {
@@ -234,7 +247,10 @@ class AccountController extends ChangeNotifier {
     // a caller tearing the database down right after awaiting login().
     // `ordersLoading` is the separate flag that governs the order list's
     // own spinner.
-    if (isSignedIn) await loadOrders();
+    if (isSignedIn) {
+      await _publishAccountScope();
+      await loadOrders();
+    }
   }
 
   Future<void> register({
@@ -260,6 +276,7 @@ class AccountController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+    if (isSignedIn) await _publishAccountScope();
   }
 
   Future<void> loginWithSystemAccount({
@@ -282,7 +299,10 @@ class AccountController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
-    if (isSignedIn) await loadOrders();
+    if (isSignedIn) {
+      await _publishAccountScope();
+      await loadOrders();
+    }
   }
 
   /// The accounts service reports every failure as a status code inside an
@@ -310,6 +330,7 @@ class AccountController extends ChangeNotifier {
       }
       account = null;
       orders = const [];
+      await _publishAccountScope();
     } finally {
       isLoading = false;
       notifyListeners();

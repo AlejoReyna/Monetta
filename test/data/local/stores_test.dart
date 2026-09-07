@@ -136,11 +136,17 @@ void main() {
       await store.add('p3', accountId: 'other-account');
       await store.mergeDeviceItemsIntoAccount('acct-1');
 
-      final rows = await db.select(db.wishlistItems).get();
-      final byProduct = {for (final r in rows) r.productId: r.accountId};
-      expect(byProduct['p2'], 'acct-1');
-      // Already belonged to a different account — merge must not steal it.
-      expect(byProduct['p3'], 'other-account');
+      expect(await store.allProductIds(accountId: 'acct-1'), {'p2'});
+      expect(await store.allProductIds(accountId: 'other-account'), {'p3'});
+      expect(await store.allProductIds(), isEmpty);
+    });
+
+    test('account scopes never leak across reads', () async {
+      final store = WishlistStore(db);
+      await store.add('p1', accountId: 'acct-a');
+      await store.add('p2', accountId: 'acct-b');
+      expect(await store.allProductIds(accountId: 'acct-a'), {'p1'});
+      expect(await store.allProductIds(accountId: 'acct-b'), {'p2'});
     });
   });
 
@@ -151,18 +157,47 @@ void main() {
       await store.upsert(productId: 'p1', variantId: 'v1', quantity: 3);
 
       final all = await store.all();
-      expect(all['p1'], ('v1', 3));
+      expect(all, hasLength(1));
+      expect(all.single.variantId, 'v1');
+      expect(all.single.quantity, 3);
 
       await store.mergeDeviceItemsIntoAccount('acct-1');
-      final rows = await db.select(db.bagLines).get();
-      expect(rows.single.accountId, 'acct-1');
+      final scoped = await store.all(accountId: 'acct-1');
+      expect(scoped.single.variantId, 'v1');
+      expect(scoped.single.quantity, 3);
 
-      await store.remove('p1');
-      expect(await store.all(), isEmpty);
+      await store.remove('v1', accountId: 'acct-1');
+      expect(await store.all(accountId: 'acct-1'), isEmpty);
 
       await store.upsert(productId: 'p2', variantId: 'v2', quantity: 1);
       await store.clear();
       expect(await store.all(), isEmpty);
+    });
+
+    test('two variants of the same product coexist', () async {
+      final store = BagStore(db);
+      await store.upsert(productId: 'p1', variantId: 'v-a', quantity: 1);
+      await store.upsert(productId: 'p1', variantId: 'v-b', quantity: 2);
+      final all = await store.all();
+      expect(all.map((e) => e.variantId).toSet(), {'v-a', 'v-b'});
+    });
+
+    test('account scopes never leak across bag reads', () async {
+      final store = BagStore(db);
+      await store.upsert(
+        productId: 'p1',
+        variantId: 'v1',
+        quantity: 1,
+        accountId: 'acct-a',
+      );
+      await store.upsert(
+        productId: 'p1',
+        variantId: 'v1',
+        quantity: 9,
+        accountId: 'acct-b',
+      );
+      expect((await store.all(accountId: 'acct-a')).single.quantity, 1);
+      expect((await store.all(accountId: 'acct-b')).single.quantity, 9);
     });
   });
 

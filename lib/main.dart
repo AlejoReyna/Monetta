@@ -490,6 +490,9 @@ class _MonettaAppState extends State<MonettaApp> {
     database: _database,
     catalogSync: _maybeCatalogSync(_storefrontTransport),
     realtimeSource: widget.realtimeCatalogSource,
+    shopDomain: StorefrontConfig.fromEnvironment().shopDomain.trim().isEmpty
+        ? null
+        : StorefrontConfig.fromEnvironment().shopDomain.trim(),
   );
   late final EditorialContentController _editorialContent =
       EditorialContentController(
@@ -521,6 +524,7 @@ class _MonettaAppState extends State<MonettaApp> {
   /// credentials never creates one at all).
   HttpCustomerIdentityService? _customerIdentityService;
   HttpAdminClient? _adminClient;
+  bool _adminCapListenerAttached = false;
 
   static HttpStorefrontTransport? _maybeStorefrontTransport() {
     final config = StorefrontConfig.fromEnvironment();
@@ -671,6 +675,7 @@ class _MonettaAppState extends State<MonettaApp> {
         config: accountsConfig,
       ),
       deviceId: deviceId,
+      onAccountScopeChanged: _store.setAccountScope,
     );
 
     final adminConfig = AdminConfig.fromEnvironment();
@@ -691,6 +696,8 @@ class _MonettaAppState extends State<MonettaApp> {
         await _featuredCatalog.refresh();
       },
     );
+    _account.addListener(_refreshAdminCapabilities);
+    _adminCapListenerAttached = true;
     final notificationBaseUrl = widget.notificationConfig.apiBaseUrl;
     _notifications = NotificationController(
       config: widget.notificationConfig,
@@ -724,6 +731,7 @@ class _MonettaAppState extends State<MonettaApp> {
     );
     await _account.restore();
     if (_account.isSignedIn) {
+      unawaited(_admin?.refreshCapabilities());
       unawaited(_account.loadOrders());
       // Best-effort, never awaited: confirms with Shopify that the restored
       // refresh token still works, and drops to a clean guest state if it was
@@ -777,7 +785,15 @@ class _MonettaAppState extends State<MonettaApp> {
   }
 
   @override
+  void _refreshAdminCapabilities() {
+    unawaited(_admin?.refreshCapabilities());
+  }
+
   void dispose() {
+    if (_adminCapListenerAttached) {
+      _account.removeListener(_refreshAdminCapabilities);
+      _adminCapListenerAttached = false;
+    }
     _storefrontTransport?.close();
     _customerIdentityService?.close();
     _adminClient?.close();

@@ -296,8 +296,8 @@ class _BagContents extends StatelessWidget {
               _BagLineTile(
                 line: line,
                 onChanged: (quantity) =>
-                    store.updateBagQuantity(line.product.id, quantity),
-                onRemove: () => store.removeFromBag(line.product.id),
+                    store.updateBagQuantity(line.variant.id, quantity),
+                onRemove: () => store.removeFromBag(line.variant.id),
               ),
           ],
         );

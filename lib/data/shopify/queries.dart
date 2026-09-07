@@ -25,9 +25,11 @@ fragment ProductFields on Product {
   categoryOverride: metafield(namespace: "app", key: "category_override") { value }
   badge: metafield(namespace: "app", key: "badge") { value }
   images(first: 6) {
+    pageInfo { hasNextPage }
     edges { node { url(transform: {maxWidth: 1200}) } }
   }
-  variants(first: 20) {
+  variants(first: 50) {
+    pageInfo { hasNextPage }
     edges {
       node {
         id
@@ -39,7 +41,10 @@ fragment ProductFields on Product {
       }
     }
   }
-  collections(first: 10) { edges { node { handle } } }
+  collections(first: 25) {
+    pageInfo { hasNextPage }
+    edges { node { handle } }
+  }
 }
 ''';
 
@@ -99,7 +104,13 @@ query Collections($first: Int!, $after: String) {
 /// On a typical open this returns zero products and costs a few hundred bytes.
 const String kProductsDeltaQuery = '''
 $kProductFragment
-query ProductsDelta(\$first: Int!, \$after: String, \$query: String) {
+query ProductsDelta(
+  \$first: Int!
+  \$after: String
+  \$query: String
+  \$country: CountryCode
+  \$language: LanguageCode
+) @inContext(country: \$country, language: \$language) {
   products(first: \$first, after: \$after, query: \$query, sortKey: UPDATED_AT) {
     pageInfo { hasNextPage endCursor }
     edges { node { ...ProductFields } }

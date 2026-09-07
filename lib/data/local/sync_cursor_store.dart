@@ -27,6 +27,7 @@ class SyncCursorStore {
     return shopify.SyncCursor(
       lastUpdatedAt: row.lastUpdatedAt?.toUtc(),
       lastFullSyncAt: row.lastFullSyncAt?.toUtc(),
+      shopDomain: row.shopDomain,
     );
   }
 
@@ -36,7 +37,14 @@ class SyncCursorStore {
             id: const Value(_singletonId),
             lastUpdatedAt: Value(cursor.lastUpdatedAt),
             lastFullSyncAt: Value(cursor.lastFullSyncAt),
+            shopDomain: Value(cursor.shopDomain),
           ),
         );
+  }
+
+  Future<void> clear() {
+    return (_db.delete(_db.syncCursors)
+          ..where((t) => t.id.equals(_singletonId)))
+        .go();
   }
 }

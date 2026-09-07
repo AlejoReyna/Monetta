@@ -13,12 +13,19 @@ import 'storefront_client.dart';
 
 /// Where the last successful sync got to.
 class SyncCursor {
-  const SyncCursor({this.lastUpdatedAt, this.lastFullSyncAt});
+  const SyncCursor({
+    this.lastUpdatedAt,
+    this.lastFullSyncAt,
+    this.shopDomain,
+  });
 
   /// Highest `updatedAt` we have already stored. Null means "never synced".
   final DateTime? lastUpdatedAt;
 
   final DateTime? lastFullSyncAt;
+
+  /// Storefront shop host that produced this cursor. Null on legacy rows.
+  final String? shopDomain;
 
   bool get isFirstRun => lastUpdatedAt == null;
 
@@ -48,7 +55,11 @@ class SyncCursor {
         '${utc.second.toString().padLeft(2, '0')}Z';
   }
 
-  SyncCursor advancedTo(DateTime? highest, {DateTime? fullSyncAt}) {
+  SyncCursor advancedTo(
+    DateTime? highest, {
+    DateTime? fullSyncAt,
+    String? shopDomain,
+  }) {
     final current = lastUpdatedAt;
     final next = highest == null
         ? current
@@ -56,8 +67,15 @@ class SyncCursor {
     return SyncCursor(
       lastUpdatedAt: next,
       lastFullSyncAt: fullSyncAt ?? lastFullSyncAt,
+      shopDomain: shopDomain ?? this.shopDomain,
     );
   }
+
+  SyncCursor withShop(String shopDomain) => SyncCursor(
+        lastUpdatedAt: lastUpdatedAt,
+        lastFullSyncAt: lastFullSyncAt,
+        shopDomain: shopDomain,
+      );
 }
 
 class SyncResult {
@@ -78,6 +96,19 @@ class SyncResult {
   bool get hasChanges => products.isNotEmpty;
 }
 
+/// Raised when pagination or nested connections cannot be proven complete.
+///
+/// Callers must **not** advance successful-sync metadata (cursor / fullSyncAt /
+/// healthy provenance) when this is thrown — a truncated page set must never
+/// look like a successful sync, especially before a destructive full replace.
+class CatalogSyncIncompleteException implements Exception {
+  const CatalogSyncIncompleteException(this.message);
+  final String message;
+
+  @override
+  String toString() => 'CatalogSyncIncompleteException: $message';
+}
+
 class CatalogSync {
   const CatalogSync({
     required this.client,
@@ -91,9 +122,8 @@ class CatalogSync {
   /// Shopify's ceiling for this connection is 250.
   final int pageSize;
 
-  /// Hard stop on pagination. 271 products fit in two pages today; 20 pages
-  /// allows ~10× catalog growth while still guaranteeing the loop terminates
-  /// if a cursor ever misbehaves.
+  /// Hard stop on pagination. Hitting this with `hasNextPage` still true is an
+  /// incomplete sync, not success — see [CatalogSyncIncompleteException].
   final int maxPages;
 
   /// Even with a healthy cursor, do a full resync occasionally. Deletions and
@@ -111,25 +141,36 @@ class CatalogSync {
   /// Fetch everything that changed since [cursor].
   ///
   /// On a typical app open this makes one request that returns zero products.
+  /// Throws [CatalogSyncIncompleteException] when the page set cannot be proven
+  /// complete — callers must preserve last-known-good cache and cursor.
   Future<SyncResult> run({
     required SyncCursor cursor,
     required DateTime now,
   }) async {
     final full = needsFullSync(cursor, now);
     final filter = full ? null : cursor.deltaFilter;
+    final shopDomain = client.config.shopDomain;
 
     final products = <Product>[];
     String? after;
     var pages = 0;
     DateTime? highest;
 
-    while (pages < maxPages) {
+    while (true) {
+      if (pages >= maxPages) {
+        throw const CatalogSyncIncompleteException(
+          'Product pagination exceeded maxPages while hasNextPage was still true',
+        );
+      }
+
       final data = await client.query(
         kProductsDeltaQuery,
         variables: <String, dynamic>{
           'first': pageSize,
           if (after != null) 'after': after,
           if (filter != null) 'query': filter,
+          'country': client.config.country,
+          'language': client.config.language,
         },
       );
 
@@ -138,6 +179,7 @@ class CatalogSync {
       pages++;
 
       for (final node in nodes) {
+        _assertInnerConnectionsComplete(node);
         final product = productFromJson(node);
         products.add(product);
         if (highest == null || product.updatedAt.isAfter(highest)) {
@@ -146,19 +188,46 @@ class CatalogSync {
       }
 
       final pageInfo = connection is Map ? connection['pageInfo'] : null;
-      if (pageInfo is! Map || pageInfo['hasNextPage'] != true) break;
+      if (pageInfo is! Map || pageInfo['hasNextPage'] != true) {
+        break;
+      }
 
-      // Defensive: hasNextPage true with no cursor would spin forever.
       final endCursor = pageInfo['endCursor'];
-      if (endCursor is! String) break;
+      if (endCursor is! String || endCursor.isEmpty) {
+        throw const CatalogSyncIncompleteException(
+          'hasNextPage true but endCursor missing — refusing incomplete sync',
+        );
+      }
+      if (after != null && endCursor == after) {
+        throw const CatalogSyncIncompleteException(
+          'Repeated pagination cursor without advancing — refusing incomplete sync',
+        );
+      }
       after = endCursor;
     }
 
     return SyncResult(
       products: products,
-      cursor: cursor.advancedTo(highest, fullSyncAt: full ? now : null),
+      cursor: cursor.advancedTo(
+        highest,
+        fullSyncAt: full ? now : null,
+        shopDomain: shopDomain,
+      ),
       wasFullSync: full,
       pagesFetched: pages,
     );
+  }
+
+  static void _assertInnerConnectionsComplete(Map<String, dynamic> node) {
+    for (final field in const ['images', 'variants', 'collections']) {
+      final connection = node[field];
+      if (connection is! Map) continue;
+      final pageInfo = connection['pageInfo'];
+      if (pageInfo is Map && pageInfo['hasNextPage'] == true) {
+        throw CatalogSyncIncompleteException(
+          'Product ${node['id']} $field connection truncated (hasNextPage)',
+        );
+      }
+    }
   }
 }

@@ -83,9 +83,11 @@ class CatalogStore extends ChangeNotifier {
     required AppDatabase database,
     shopify.CatalogSync? catalogSync,
     CatalogRealtimeSource? realtimeSource,
+    String? shopDomain,
   })  : _database = database,
         _catalogSyncOverride = catalogSync,
         _realtimeSource = realtimeSource,
+        _shopDomain = shopDomain,
         _writeCoordinator = CatalogWriteCoordinator(
           expectsFirestore: realtimeSource != null,
         ),
@@ -101,6 +103,7 @@ class CatalogStore extends ChangeNotifier {
   final AppDatabase _database;
   final shopify.CatalogSync? _catalogSyncOverride;
   final CatalogRealtimeSource? _realtimeSource;
+  final String? _shopDomain;
   final CatalogWriteCoordinator _writeCoordinator;
   final CatalogCacheStore _cacheStore;
   final SyncCursorStore _cursorStore;
@@ -111,11 +114,19 @@ class CatalogStore extends ChangeNotifier {
   StreamSubscription<RealtimeCatalogUpdate>? _realtimeSubscription;
   Future<CatalogSyncResult>? _deltaSyncInFlight;
 
+  /// Empty string = guest. Matches Drift bag/wishlist scope keys.
+  String _accountScope = '';
+
   final List<InteractionEvent> _events = [];
   final Set<String> _viewed = {};
   final List<String> _recentIds = [];
   final Set<String> _wishlist = {};
+
+  /// variantId -> quantity for the current [_accountScope].
   final Map<String, int> _bagQuantities = {};
+
+  /// variantId -> productId for the current [_accountScope].
+  final Map<String, String> _bagProductByVariant = {};
 
   List<Product> products = const [];
   Map<String, CanonicalFacets> facetsById = const {};
@@ -138,13 +149,14 @@ class CatalogStore extends ChangeNotifier {
   /// lines and Shopify owns address and payment collection.
   List<BagLine> get bagLines => [
         for (final entry in _bagQuantities.entries)
-          if (_productById(entry.key) case final product?)
-            if (_availableVariant(product) case final variant?)
-              BagLine(
-                product: product,
-                variant: variant,
-                quantity: entry.value,
-              ),
+          if (_bagProductByVariant[entry.key] case final productId?)
+            if (_productById(productId) case final product?)
+              if (_exactVariant(product, entry.key) case final variant?)
+                BagLine(
+                  product: product,
+                  variant: variant,
+                  quantity: entry.value,
+                ),
       ];
 
   int get bagQuantity =>
@@ -166,6 +178,9 @@ class CatalogStore extends ChangeNotifier {
       cursorStore: _cursorStore,
       rules: rules,
       catalogSync: _catalogSyncOverride,
+      shopDomain: _shopDomain,
+      bagStore: _bagStore,
+      wishlistStore: _wishlistStore,
     );
 
     // `AssetBundle.loadString` moves files over 50 KB to a helper isolate.
@@ -203,17 +218,7 @@ class CatalogStore extends ChangeNotifier {
   }
 
   Future<void> _hydrateFromDrift() async {
-    final wishlisted = await _wishlistStore.allProductIds();
-    _wishlist
-      ..clear()
-      ..addAll(wishlisted);
-
-    final bagRows = await _bagStore.all();
-    _bagQuantities
-      ..clear()
-      ..addEntries(
-        bagRows.entries.map((e) => MapEntry(e.key, e.value.$2)),
-      );
+    await _hydrateBagAndWishlist();
 
     final events = await _eventStore.all();
     _events
@@ -225,6 +230,41 @@ class CatalogStore extends ChangeNotifier {
       }
     }
     _rebuildProfile();
+  }
+
+  Future<void> _hydrateBagAndWishlist() async {
+    final scope = _accountScope.isEmpty ? null : _accountScope;
+    final wishlisted = await _wishlistStore.allProductIds(accountId: scope);
+    _wishlist
+      ..clear()
+      ..addAll(wishlisted);
+
+    final bagRows = await _bagStore.all(accountId: scope);
+    _bagQuantities
+      ..clear()
+      ..addEntries(
+        bagRows.map((row) => MapEntry(row.variantId, row.quantity)),
+      );
+    _bagProductByVariant
+      ..clear()
+      ..addEntries(
+        bagRows.map((row) => MapEntry(row.variantId, row.productId)),
+      );
+  }
+
+  /// Rebinds bag/wishlist to [accountId] (null = guest) and rehydrates memory.
+  /// Call after login, logout, and session restore.
+  Future<void> setAccountScope(String? accountId) async {
+    final next = accountId ?? '';
+    if (next == _accountScope && ready) {
+      await _hydrateBagAndWishlist();
+      notifyListeners();
+      return;
+    }
+    _accountScope = next;
+    if (!ready) return;
+    await _hydrateBagAndWishlist();
+    notifyListeners();
   }
 
   static Future<String> _loadCatalogAsset() async {
@@ -277,7 +317,8 @@ class CatalogStore extends ChangeNotifier {
 
   Future<CatalogSyncResult> _syncWithShopifyFallback() async {
     final result = await _catalogRepository.sync();
-    if (result.outcome == CatalogSyncOutcome.updated) {
+    if (result.outcome == CatalogSyncOutcome.updated ||
+        result.outcome == CatalogSyncOutcome.upToDate) {
       final snapshot = await _catalogRepository.loadCached();
       products = snapshot.products;
       facetsById = snapshot.facetsById;
@@ -431,62 +472,68 @@ class CatalogStore extends ChangeNotifier {
     return null;
   }
 
-  void toggleWishlist(String productId) {
+  Future<void> toggleWishlist(String productId) async {
+    final scope = _accountScope.isEmpty ? null : _accountScope;
     final removing = _wishlist.contains(productId);
     if (removing) {
       _wishlist.remove(productId);
-      unawaited(_wishlistStore.remove(productId));
+      await _wishlistStore.remove(productId, accountId: scope);
       record(EventType.wishlistRemove, productId: productId);
     } else {
       _wishlist.add(productId);
-      unawaited(_wishlistStore.add(productId));
+      await _wishlistStore.add(productId, accountId: scope);
       record(EventType.wishlistAdd, productId: productId);
     }
   }
 
-  void addToBag(Product product) {
-    final variant = _availableVariant(product);
+  /// Adds exactly [variantId] when provided. Never silently substitutes a
+  /// different variant on stock changes. Legacy callers that omit [variantId]
+  /// get the first available variant (tests / single-SKU shortcuts only).
+  Future<void> addToBag(Product product, {String? variantId}) async {
+    final variant = _resolveAddVariant(product, variantId);
     if (variant == null) return;
+    final scope = _accountScope.isEmpty ? null : _accountScope;
+    _bagProductByVariant[variant.id] = product.id;
     _bagQuantities.update(
-      product.id,
+      variant.id,
       (quantity) => quantity + 1,
       ifAbsent: () => 1,
     );
-    unawaited(
-      _bagStore.upsert(
-        productId: product.id,
-        variantId: variant.id,
-        quantity: _bagQuantities[product.id]!,
-      ),
+    await _bagStore.upsert(
+      productId: product.id,
+      variantId: variant.id,
+      quantity: _bagQuantities[variant.id]!,
+      accountId: scope,
     );
     record(EventType.addToCart, productId: product.id);
   }
 
-  void updateBagQuantity(String productId, int quantity) {
+  Future<void> updateBagQuantity(String variantId, int quantity) async {
     if (quantity <= 0) {
-      removeFromBag(productId);
+      await removeFromBag(variantId);
       return;
     }
-    if (!_bagQuantities.containsKey(productId)) return;
+    if (!_bagQuantities.containsKey(variantId)) return;
     final clamped = quantity.clamp(1, 10);
-    _bagQuantities[productId] = clamped;
-    final product = _productById(productId);
-    final variant = product == null ? null : _availableVariant(product);
-    if (variant != null) {
-      unawaited(
-        _bagStore.upsert(
-          productId: productId,
-          variantId: variant.id,
-          quantity: clamped,
-        ),
+    _bagQuantities[variantId] = clamped;
+    final productId = _bagProductByVariant[variantId];
+    final scope = _accountScope.isEmpty ? null : _accountScope;
+    if (productId != null) {
+      await _bagStore.upsert(
+        productId: productId,
+        variantId: variantId,
+        quantity: clamped,
+        accountId: scope,
       );
     }
     notifyListeners();
   }
 
-  void removeFromBag(String productId) {
-    if (_bagQuantities.remove(productId) != null) {
-      unawaited(_bagStore.remove(productId));
+  Future<void> removeFromBag(String variantId) async {
+    if (_bagQuantities.remove(variantId) != null) {
+      _bagProductByVariant.remove(variantId);
+      final scope = _accountScope.isEmpty ? null : _accountScope;
+      await _bagStore.remove(variantId, accountId: scope);
       notifyListeners();
     }
   }
@@ -494,9 +541,11 @@ class CatalogStore extends ChangeNotifier {
   /// Clears durable and in-memory bag state after a trusted checkout event.
   /// Persistence completes first so a storage failure never hides the bag.
   Future<void> clearBagAfterCheckout() async {
-    await _bagStore.clear();
+    final scope = _accountScope.isEmpty ? null : _accountScope;
+    await _bagStore.clear(accountId: scope);
     if (_bagQuantities.isEmpty) return;
     _bagQuantities.clear();
+    _bagProductByVariant.clear();
     notifyListeners();
   }
 
@@ -507,15 +556,22 @@ class CatalogStore extends ChangeNotifier {
     return null;
   }
 
-  ProductVariant? _availableVariant(Product product) {
-    ProductVariant? cheapest;
+  /// Exact selected variant only — never auto-substitutes another SKU.
+  ProductVariant? _exactVariant(Product product, String variantId) {
     for (final variant in product.variants) {
-      if (!variant.available) continue;
-      if (cheapest == null || variant.price < cheapest.price) {
-        cheapest = variant;
-      }
+      if (variant.id == variantId) return variant;
     }
-    return cheapest;
+    return null;
+  }
+
+  ProductVariant? _resolveAddVariant(Product product, String? variantId) {
+    if (variantId != null) {
+      return _exactVariant(product, variantId);
+    }
+    for (final variant in product.variants) {
+      if (variant.available) return variant;
+    }
+    return product.variants.isEmpty ? null : product.variants.first;
   }
 
   void _rebuildProfile() {

@@ -142,6 +142,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _syncHeroPlayback();
     if (active) {
       unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
+      // General catalog (single-flight inside CatalogStore.syncWithShopify).
+      unawaited(StoreScope.maybeOf(context)?.syncWithShopify());
     }
   }
 

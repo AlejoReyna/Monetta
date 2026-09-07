@@ -27,6 +27,7 @@ class CatalogCacheMetadata {
     required this.fingerprint,
     required this.status,
     this.detail,
+    this.shopDomain,
   });
 
   factory CatalogCacheMetadata.forProducts({
@@ -35,6 +36,7 @@ class CatalogCacheMetadata {
     required DateTime? syncedAt,
     required CatalogCacheStatus status,
     String? detail,
+    String? shopDomain,
   }) =>
       CatalogCacheMetadata(
         source: source,
@@ -43,6 +45,7 @@ class CatalogCacheMetadata {
         fingerprint: catalogFingerprint(products),
         status: status,
         detail: detail,
+        shopDomain: shopDomain,
       );
 
   final CatalogCacheSource source;
@@ -51,6 +54,7 @@ class CatalogCacheMetadata {
   final String fingerprint;
   final CatalogCacheStatus status;
   final String? detail;
+  final String? shopDomain;
 
   CatalogCacheMetadata copyWith({
     CatalogCacheSource? source,
@@ -59,6 +63,7 @@ class CatalogCacheMetadata {
     String? fingerprint,
     CatalogCacheStatus? status,
     String? detail,
+    String? shopDomain,
   }) =>
       CatalogCacheMetadata(
         source: source ?? this.source,
@@ -67,6 +72,7 @@ class CatalogCacheMetadata {
         fingerprint: fingerprint ?? this.fingerprint,
         status: status ?? this.status,
         detail: detail,
+        shopDomain: shopDomain ?? this.shopDomain,
       );
 }
 
@@ -114,6 +120,7 @@ class CatalogCacheStore {
       fingerprint: row.fingerprint,
       status: CatalogCacheStatus.values.byName(row.status),
       detail: row.detail,
+      shopDomain: row.shopDomain,
     );
   }
 
@@ -140,17 +147,27 @@ class CatalogCacheStore {
   }
 
   /// Atomically replaces the complete catalog after a validated authoritative
-  /// Firestore snapshot. Callers must reject empty/invalid snapshots first.
+  /// snapshot. A legitimate empty [products] list clears the cache — failed
+  /// partial syncs must not call this.
   Future<void> replaceProducts(
     List<Product> products, {
     CatalogCacheMetadata? metadata,
   }) async {
-    if (products.isEmpty) return;
     await _db.transaction(() async {
       await _db.delete(_db.cachedVariants).go();
       await _db.delete(_db.cachedProducts).go();
-      await _upsertProducts(products);
+      if (products.isNotEmpty) await _upsertProducts(products);
       if (metadata != null) await _writeMetadata(metadata);
+    });
+  }
+
+  /// Drops every cached product/variant row without touching shopper bag or
+  /// wishlist state. Used when the configured shop domain changes.
+  Future<void> clearCatalog() async {
+    await _db.transaction(() async {
+      await _db.delete(_db.cachedVariants).go();
+      await _db.delete(_db.cachedProducts).go();
+      await _db.delete(_db.catalogStates).go();
     });
   }
 
@@ -167,6 +184,7 @@ class CatalogCacheStore {
             fingerprint: metadata.fingerprint,
             status: metadata.status.name,
             detail: Value(metadata.detail),
+            shopDomain: Value(metadata.shopDomain),
           ),
         );
   }

@@ -56,10 +56,10 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `product_screen.dart` keeps `_variantIndex` / `_selected()` for UI but add button calls `store.addToBag(product)` (no variant). `catalog_store.dart` `addToBag` picks `_availableVariant` (cheapest available). `BagLines` PK is `{productId}` only (`tables.dart`). |
+| **Status** | `done` |
+| **Evidence** | `product_screen` passes selected `variantId`; bag PK `(variantId, accountId)`; hydration uses exact variant (no cheapest swap). |
 | **Planned change** | Pass exact `variantId` through detail → bag → Cart API; line key by variant (+ account scope); no silent substitution. |
-| **Regression test** | To-add: two variants of same product → two lines; selected B survives restart; OOS does not auto-swap. |
+| **Regression test** | `test/app/catalog_store_bag_scope_test.dart`; bag store coexistence tests. |
 | **Integration/E2E** | Cart API line merchandise matches selected variant IDs. |
 | **Unresolved dependencies** | None for code fix. |
 
@@ -100,10 +100,10 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `catalog_repository.dart` `sync()` only `cache.upsertProducts(result.products)` even when sync was full; never deletes absent IDs. Audit probe confirmed. |
+| **Status** | `done` |
+| **Evidence** | Verified full sync calls `replaceProducts` (incl. empty); partial/incomplete preserves cache. |
 | **Planned change** | Atomic full replace after validated complete page set; preserve last good cache on partial failure. |
-| **Regression test** | To-add (invert flutter probe): full A+B then B-only → only B; valid empty full → empty. |
+| **Regression test** | `catalog_repository_test` A+B→B and empty full sync. |
 | **Integration/E2E** | Unpublish/delete product disappears after full sync. |
 | **Unresolved dependencies** | Must land after F09 completeness guard. |
 
@@ -111,10 +111,10 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `catalog_sync.dart`: loop stops at `maxPages` (20) or missing cursor, still returns `wasFullSync` + advances `fullSyncAt`. No incomplete/truncated outcome. |
+| **Status** | `done` |
+| **Evidence** | `CatalogSyncIncompleteException` on maxPages/missing/repeated cursor/inner truncation; cursor not advanced. |
 | **Planned change** | Abort without advancing cursor when truncated/repeated cursor; page or declare inner connection limits. |
-| **Regression test** | To-add (invert flutter probe): `hasNextPage` after maxPages → failure, cursor unchanged. |
+| **Regression test** | `catalog_sync_test` abort cases; `catalog_repository_test` incomplete pagination. |
 | **Integration/E2E** | Catalog > 20×250 products or forced truncation. |
 | **Unresolved dependencies** | Precedes destructive F08 replace. |
 
@@ -122,10 +122,10 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `SyncCursorStore` singleton `id=0`, no shop field. `database.dart` opens `monetta.sqlite` without shop namespace. Cart session scope has domain; catalog/accounts cache do not. |
+| **Status** | `done` |
+| **Evidence** | `shopDomain` on SyncCursors/CatalogStates; mismatch clears catalog/cursor/bag/wishlist before full sync. |
 | **Planned change** | Persist shop/source identity; reject incompatible cursor/catalog; force full sync on shop change. |
-| **Regression test** | To-add: shop A→B clears/rejects A products, cursors, carts. |
+| **Regression test** | `catalog_repository_test` shop domain mismatch. |
 | **Integration/E2E** | Rebuild with different `SHOPIFY_STORE_DOMAIN` does not buy with foreign variant IDs. |
 | **Unresolved dependencies** | Migration strategy for existing installs. |
 
@@ -133,10 +133,10 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `BagStore.all()` / `WishlistStore.allProductIds()` select all rows — no `accountId` filter. Writers accept optional `accountId` but readers ignore it. Flutter audit probe confirmed cross-account rows visible. |
+| **Status** | `done` |
+| **Evidence** | Bag/wishlist reads filter by account scope (`''` guest); CatalogStore.setAccountScope rehydrates; login callback wired. |
 | **Planned change** | Explicit guest vs account policy; filter reads; rehydrate CatalogStore on session change; safe merge on login. |
-| **Regression test** | To-add (invert flutter probe): A data invisible to B; guest does not inherit A. |
+| **Regression test** | `catalog_store_bag_scope_test` + stores account scope tests. |
 | **Integration/E2E** | Login/logout/login cycle on one device. |
 | **Unresolved dependencies** | Product decision on merge-vs-replace for guest bag. |
 
@@ -298,10 +298,10 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `kMenuQuery` / `kPredictiveSearchQuery` defined only in `lib/data/shopify/queries.dart` — no other Dart consumers. No `@inContext` usage under `lib/data/shopify`. Local normalization/rules still drive much of browse. |
+| **Status** | `partial` |
+| **Evidence** | Catalog delta query uses `@inContext(country, language)`; Home resumed triggers `syncWithShopify` single-flight. Menu/predictive search still unused; collections pagination not expanded. |
 | **Planned change** | Connect managed nav if required; paginate collections; apply MX/ES market context; refresh full catalog on foreground with single-flight. |
-| **Regression test** | To-add: inContext variables present on catalog queries when config set. |
+| **Regression test** | `catalog_sync_test` inContext variables. |
 | **Integration/E2E** | Currency/price align with MX checkout market. |
 | **Unresolved dependencies** | Product decision: local search vs Shopify predictive. |
 
@@ -357,7 +357,7 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 |----|----------|-------|
 | WP-01 | F01, F02, F19 | Security — first |
 | WP-02 | F03, F22, F25 | External catalog retirement |
-| WP-03 | F04, F08, F09, F10, F11, F26 | Order: F09 → F10 → F08 → variants/accounts |
+| WP-03 | F04, F08, F09, F10, F11, F26 | Phase C done in WIP (F26 partial: inContext + foreground catalog refresh) |
 | WP-04 | F05, F06, F07, F16, F17 | Checkout |
 | WP-05 | F12–F15, F18 | Orders / webhooks / logout |
 | WP-06 | F20–F24 | Admin operable |

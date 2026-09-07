@@ -5,7 +5,7 @@ library;
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/data/local/catalog_cache_store.dart';
-import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/data/local/database.dart' hide SyncCursor;
 import 'package:monetta_app/data/local/sync_cursor_store.dart';
 import 'package:monetta_app/data/normalize/rules.dart';
 import 'package:monetta_app/data/repositories/catalog_repository.dart';
@@ -68,10 +68,15 @@ Map<String, dynamic> _productNode({
       'collections': {'edges': <dynamic>[]},
     };
 
-Map<String, dynamic> _page(List<Map<String, dynamic>> nodes) => {
+Map<String, dynamic> _page(
+  List<Map<String, dynamic>> nodes, {
+  bool hasNextPage = false,
+  String? endCursor,
+}) =>
+    {
       'data': {
         'products': {
-          'pageInfo': {'hasNextPage': false, 'endCursor': null},
+          'pageInfo': {'hasNextPage': hasNextPage, 'endCursor': endCursor},
           'edges': nodes.map((n) => {'node': n}).toList(),
         },
       },
@@ -346,5 +351,226 @@ void main() {
         isTrue,
       );
     });
+
+
+    test('full sync A+B then B-only removes A (F08)', () async {
+      final cache = CatalogCacheStore(db);
+      final cursorStore = SyncCursorStore(db);
+      final transport = _FakeTransport([
+        _page([
+          _productNode(id: '101', updatedAt: '2026-08-01T00:00:00Z'),
+          _productNode(id: '102', updatedAt: '2026-08-02T00:00:00Z'),
+        ]),
+      ]);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: cursorStore,
+        rules: _emptyRules(),
+        catalogSync: CatalogSync(
+          client: StorefrontClient(
+            config: const StorefrontConfig(
+              shopDomain: 'monetta.mx',
+              accessToken: 'test-token',
+            ),
+            transport: transport.call,
+          ),
+          fullResyncInterval: Duration.zero,
+        ),
+        shopDomain: 'monetta.mx',
+      );
+
+      final first = await repo.sync();
+      expect(first.outcome, CatalogSyncOutcome.updated);
+      expect(
+        (await cache.allProducts()).map((p) => p.id).toSet(),
+        {
+          'gid://shopify/Product/101',
+          'gid://shopify/Product/102',
+        },
+      );
+
+      final transport2 = _FakeTransport([
+        _page([_productNode(id: '102', updatedAt: '2026-08-03T00:00:00Z')]),
+      ]);
+      final repo2 = CatalogRepository(
+        cache: cache,
+        cursorStore: cursorStore,
+        rules: _emptyRules(),
+        catalogSync: CatalogSync(
+          client: StorefrontClient(
+            config: const StorefrontConfig(
+              shopDomain: 'monetta.mx',
+              accessToken: 'test-token',
+            ),
+            transport: transport2.call,
+          ),
+          fullResyncInterval: Duration.zero,
+        ),
+        shopDomain: 'monetta.mx',
+      );
+      await repo2.sync();
+      final left = await cache.allProducts();
+      expect(left, hasLength(1));
+      expect(left.single.id, 'gid://shopify/Product/102');
+    });
+
+    test('valid empty full sync clears the catalog (F08)', () async {
+      final cache = CatalogCacheStore(db);
+      await cache.upsertProducts([
+        Product(
+          id: 'gid://shopify/Product/101',
+          handle: 'a',
+          title: 'A',
+          vendor: 'Monetta',
+          productType: '',
+          tags: const [],
+          variants: const [],
+          images: const [],
+          createdAt: DateTime.utc(2026),
+          updatedAt: DateTime.utc(2026),
+        ),
+      ]);
+      final cursorStore = SyncCursorStore(db);
+      final transport = _FakeTransport([_page([])]);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: cursorStore,
+        rules: _emptyRules(),
+        catalogSync: CatalogSync(
+          client: StorefrontClient(
+            config: const StorefrontConfig(
+              shopDomain: 'monetta.mx',
+              accessToken: 't',
+            ),
+            transport: transport.call,
+          ),
+          fullResyncInterval: Duration.zero,
+        ),
+        shopDomain: 'monetta.mx',
+      );
+      await repo.sync();
+      expect(await cache.allProducts(), isEmpty);
+    });
+
+    test('incomplete pagination does not advance cursor or delete (F09)',
+        () async {
+      final cache = CatalogCacheStore(db);
+      final cursorStore = SyncCursorStore(db);
+      await cursorStore.save(
+        SyncCursor(
+          lastUpdatedAt: DateTime.utc(2026, 8, 1),
+          lastFullSyncAt: DateTime.utc(2026, 8, 1),
+          shopDomain: 'monetta.mx',
+        ),
+      );
+      await cache.upsertProducts([
+        Product(
+          id: 'gid://shopify/Product/201',
+          handle: 'keep',
+          title: 'Keep',
+          vendor: 'Monetta',
+          productType: '',
+          tags: const [],
+          variants: const [],
+          images: const [],
+          createdAt: DateTime.utc(2026),
+          updatedAt: DateTime.utc(2026, 8, 1),
+        ),
+      ]);
+
+      final transport = _FakeTransport([
+        _page(
+          [_productNode(id: '1', updatedAt: '2026-08-05T00:00:00Z')],
+          hasNextPage: true,
+          endCursor: 'c1',
+        ),
+      ]);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: cursorStore,
+        rules: _emptyRules(),
+        catalogSync: CatalogSync(
+          client: StorefrontClient(
+            config: const StorefrontConfig(
+              shopDomain: 'monetta.mx',
+              accessToken: 't',
+            ),
+            transport: transport.call,
+          ),
+          maxPages: 1,
+          fullResyncInterval: const Duration(days: 7),
+        ),
+        shopDomain: 'monetta.mx',
+      );
+
+      final result = await repo.sync();
+      expect(result.outcome, CatalogSyncOutcome.failed);
+      expect(result.error, isA<CatalogSyncIncompleteException>());
+      final cursor = await cursorStore.load();
+      expect(cursor.lastUpdatedAt, DateTime.utc(2026, 8, 1));
+      expect(
+        (await cache.allProducts()).single.id,
+        'gid://shopify/Product/201',
+      );
+    });
+
+    test('shop domain mismatch clears foreign catalog and cursor (F10)',
+        () async {
+      final cache = CatalogCacheStore(db);
+      final cursorStore = SyncCursorStore(db);
+      await cursorStore.save(
+        const SyncCursor(shopDomain: 'old-shop.myshopify.com'),
+      );
+      await cache.replaceProducts(
+        [
+          Product(
+            id: 'gid://shopify/Product/301',
+            handle: 'old',
+            title: 'Old',
+            vendor: 'X',
+            productType: '',
+            tags: const [],
+            variants: const [],
+            images: const [],
+            createdAt: DateTime.utc(2026),
+            updatedAt: DateTime.utc(2026),
+          ),
+        ],
+        metadata: CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.shopify,
+          products: const [],
+          syncedAt: DateTime.utc(2026),
+          status: CatalogCacheStatus.healthy,
+          shopDomain: 'old-shop.myshopify.com',
+        ),
+      );
+
+      final transport = _FakeTransport([
+        _page([_productNode(id: '302', updatedAt: '2026-08-05T00:00:00Z')]),
+      ]);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: cursorStore,
+        rules: _emptyRules(),
+        catalogSync: CatalogSync(
+          client: StorefrontClient(
+            config: const StorefrontConfig(
+              shopDomain: 'monetta.mx',
+              accessToken: 't',
+            ),
+            transport: transport.call,
+          ),
+          fullResyncInterval: Duration.zero,
+        ),
+        shopDomain: 'monetta.mx',
+      );
+      await repo.sync();
+      final products = await cache.allProducts();
+      expect(products, hasLength(1));
+      expect(products.single.id, 'gid://shopify/Product/302');
+      expect((await cursorStore.load()).shopDomain, 'monetta.mx');
+      expect((await cache.metadata())?.shopDomain, 'monetta.mx');
+    });
+
   });
 }

@@ -1430,8 +1430,15 @@ class $SyncCursorsTable extends SyncCursors
   late final GeneratedColumn<DateTime> lastFullSyncAt =
       GeneratedColumn<DateTime>('last_full_sync_at', aliasedName, true,
           type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _shopDomainMeta =
+      const VerificationMeta('shopDomain');
   @override
-  List<GeneratedColumn> get $columns => [id, lastUpdatedAt, lastFullSyncAt];
+  late final GeneratedColumn<String> shopDomain = GeneratedColumn<String>(
+      'shop_domain', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns =>
+      [id, lastUpdatedAt, lastFullSyncAt, shopDomain];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1457,6 +1464,12 @@ class $SyncCursorsTable extends SyncCursors
           lastFullSyncAt.isAcceptableOrUnknown(
               data['last_full_sync_at']!, _lastFullSyncAtMeta));
     }
+    if (data.containsKey('shop_domain')) {
+      context.handle(
+          _shopDomainMeta,
+          shopDomain.isAcceptableOrUnknown(
+              data['shop_domain']!, _shopDomainMeta));
+    }
     return context;
   }
 
@@ -1472,6 +1485,8 @@ class $SyncCursorsTable extends SyncCursors
           DriftSqlType.dateTime, data['${effectivePrefix}last_updated_at']),
       lastFullSyncAt: attachedDatabase.typeMapping.read(
           DriftSqlType.dateTime, data['${effectivePrefix}last_full_sync_at']),
+      shopDomain: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}shop_domain']),
     );
   }
 
@@ -1485,7 +1500,12 @@ class SyncCursor extends DataClass implements Insertable<SyncCursor> {
   final int id;
   final DateTime? lastUpdatedAt;
   final DateTime? lastFullSyncAt;
-  const SyncCursor({required this.id, this.lastUpdatedAt, this.lastFullSyncAt});
+  final String? shopDomain;
+  const SyncCursor(
+      {required this.id,
+      this.lastUpdatedAt,
+      this.lastFullSyncAt,
+      this.shopDomain});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1495,6 +1515,9 @@ class SyncCursor extends DataClass implements Insertable<SyncCursor> {
     }
     if (!nullToAbsent || lastFullSyncAt != null) {
       map['last_full_sync_at'] = Variable<DateTime>(lastFullSyncAt);
+    }
+    if (!nullToAbsent || shopDomain != null) {
+      map['shop_domain'] = Variable<String>(shopDomain);
     }
     return map;
   }
@@ -1508,6 +1531,9 @@ class SyncCursor extends DataClass implements Insertable<SyncCursor> {
       lastFullSyncAt: lastFullSyncAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastFullSyncAt),
+      shopDomain: shopDomain == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shopDomain),
     );
   }
 
@@ -1518,6 +1544,7 @@ class SyncCursor extends DataClass implements Insertable<SyncCursor> {
       id: serializer.fromJson<int>(json['id']),
       lastUpdatedAt: serializer.fromJson<DateTime?>(json['lastUpdatedAt']),
       lastFullSyncAt: serializer.fromJson<DateTime?>(json['lastFullSyncAt']),
+      shopDomain: serializer.fromJson<String?>(json['shopDomain']),
     );
   }
   @override
@@ -1527,19 +1554,22 @@ class SyncCursor extends DataClass implements Insertable<SyncCursor> {
       'id': serializer.toJson<int>(id),
       'lastUpdatedAt': serializer.toJson<DateTime?>(lastUpdatedAt),
       'lastFullSyncAt': serializer.toJson<DateTime?>(lastFullSyncAt),
+      'shopDomain': serializer.toJson<String?>(shopDomain),
     };
   }
 
   SyncCursor copyWith(
           {int? id,
           Value<DateTime?> lastUpdatedAt = const Value.absent(),
-          Value<DateTime?> lastFullSyncAt = const Value.absent()}) =>
+          Value<DateTime?> lastFullSyncAt = const Value.absent(),
+          Value<String?> shopDomain = const Value.absent()}) =>
       SyncCursor(
         id: id ?? this.id,
         lastUpdatedAt:
             lastUpdatedAt.present ? lastUpdatedAt.value : this.lastUpdatedAt,
         lastFullSyncAt:
             lastFullSyncAt.present ? lastFullSyncAt.value : this.lastFullSyncAt,
+        shopDomain: shopDomain.present ? shopDomain.value : this.shopDomain,
       );
   SyncCursor copyWithCompanion(SyncCursorsCompanion data) {
     return SyncCursor(
@@ -1550,6 +1580,8 @@ class SyncCursor extends DataClass implements Insertable<SyncCursor> {
       lastFullSyncAt: data.lastFullSyncAt.present
           ? data.lastFullSyncAt.value
           : this.lastFullSyncAt,
+      shopDomain:
+          data.shopDomain.present ? data.shopDomain.value : this.shopDomain,
     );
   }
 
@@ -1558,56 +1590,66 @@ class SyncCursor extends DataClass implements Insertable<SyncCursor> {
     return (StringBuffer('SyncCursor(')
           ..write('id: $id, ')
           ..write('lastUpdatedAt: $lastUpdatedAt, ')
-          ..write('lastFullSyncAt: $lastFullSyncAt')
+          ..write('lastFullSyncAt: $lastFullSyncAt, ')
+          ..write('shopDomain: $shopDomain')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(id, lastUpdatedAt, lastFullSyncAt);
+  int get hashCode =>
+      Object.hash(id, lastUpdatedAt, lastFullSyncAt, shopDomain);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is SyncCursor &&
           other.id == this.id &&
           other.lastUpdatedAt == this.lastUpdatedAt &&
-          other.lastFullSyncAt == this.lastFullSyncAt);
+          other.lastFullSyncAt == this.lastFullSyncAt &&
+          other.shopDomain == this.shopDomain);
 }
 
 class SyncCursorsCompanion extends UpdateCompanion<SyncCursor> {
   final Value<int> id;
   final Value<DateTime?> lastUpdatedAt;
   final Value<DateTime?> lastFullSyncAt;
+  final Value<String?> shopDomain;
   const SyncCursorsCompanion({
     this.id = const Value.absent(),
     this.lastUpdatedAt = const Value.absent(),
     this.lastFullSyncAt = const Value.absent(),
+    this.shopDomain = const Value.absent(),
   });
   SyncCursorsCompanion.insert({
     this.id = const Value.absent(),
     this.lastUpdatedAt = const Value.absent(),
     this.lastFullSyncAt = const Value.absent(),
+    this.shopDomain = const Value.absent(),
   });
   static Insertable<SyncCursor> custom({
     Expression<int>? id,
     Expression<DateTime>? lastUpdatedAt,
     Expression<DateTime>? lastFullSyncAt,
+    Expression<String>? shopDomain,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (lastUpdatedAt != null) 'last_updated_at': lastUpdatedAt,
       if (lastFullSyncAt != null) 'last_full_sync_at': lastFullSyncAt,
+      if (shopDomain != null) 'shop_domain': shopDomain,
     });
   }
 
   SyncCursorsCompanion copyWith(
       {Value<int>? id,
       Value<DateTime?>? lastUpdatedAt,
-      Value<DateTime?>? lastFullSyncAt}) {
+      Value<DateTime?>? lastFullSyncAt,
+      Value<String?>? shopDomain}) {
     return SyncCursorsCompanion(
       id: id ?? this.id,
       lastUpdatedAt: lastUpdatedAt ?? this.lastUpdatedAt,
       lastFullSyncAt: lastFullSyncAt ?? this.lastFullSyncAt,
+      shopDomain: shopDomain ?? this.shopDomain,
     );
   }
 
@@ -1623,6 +1665,9 @@ class SyncCursorsCompanion extends UpdateCompanion<SyncCursor> {
     if (lastFullSyncAt.present) {
       map['last_full_sync_at'] = Variable<DateTime>(lastFullSyncAt.value);
     }
+    if (shopDomain.present) {
+      map['shop_domain'] = Variable<String>(shopDomain.value);
+    }
     return map;
   }
 
@@ -1631,7 +1676,8 @@ class SyncCursorsCompanion extends UpdateCompanion<SyncCursor> {
     return (StringBuffer('SyncCursorsCompanion(')
           ..write('id: $id, ')
           ..write('lastUpdatedAt: $lastUpdatedAt, ')
-          ..write('lastFullSyncAt: $lastFullSyncAt')
+          ..write('lastFullSyncAt: $lastFullSyncAt, ')
+          ..write('shopDomain: $shopDomain')
           ..write(')'))
         .toString();
   }
@@ -1683,9 +1729,23 @@ class $CatalogStatesTable extends CatalogStates
   late final GeneratedColumn<String> detail = GeneratedColumn<String>(
       'detail', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _shopDomainMeta =
+      const VerificationMeta('shopDomain');
   @override
-  List<GeneratedColumn> get $columns =>
-      [id, source, syncedAt, productCount, fingerprint, status, detail];
+  late final GeneratedColumn<String> shopDomain = GeneratedColumn<String>(
+      'shop_domain', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  @override
+  List<GeneratedColumn> get $columns => [
+        id,
+        source,
+        syncedAt,
+        productCount,
+        fingerprint,
+        status,
+        detail,
+        shopDomain
+      ];
   @override
   String get aliasedName => _alias ?? actualTableName;
   @override
@@ -1735,6 +1795,12 @@ class $CatalogStatesTable extends CatalogStates
       context.handle(_detailMeta,
           detail.isAcceptableOrUnknown(data['detail']!, _detailMeta));
     }
+    if (data.containsKey('shop_domain')) {
+      context.handle(
+          _shopDomainMeta,
+          shopDomain.isAcceptableOrUnknown(
+              data['shop_domain']!, _shopDomainMeta));
+    }
     return context;
   }
 
@@ -1758,6 +1824,8 @@ class $CatalogStatesTable extends CatalogStates
           .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
       detail: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}detail']),
+      shopDomain: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}shop_domain']),
     );
   }
 
@@ -1775,6 +1843,7 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
   final String fingerprint;
   final String status;
   final String? detail;
+  final String? shopDomain;
   const CatalogState(
       {required this.id,
       required this.source,
@@ -1782,7 +1851,8 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
       required this.productCount,
       required this.fingerprint,
       required this.status,
-      this.detail});
+      this.detail,
+      this.shopDomain});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
@@ -1796,6 +1866,9 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || detail != null) {
       map['detail'] = Variable<String>(detail);
+    }
+    if (!nullToAbsent || shopDomain != null) {
+      map['shop_domain'] = Variable<String>(shopDomain);
     }
     return map;
   }
@@ -1812,6 +1885,9 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
       status: Value(status),
       detail:
           detail == null && nullToAbsent ? const Value.absent() : Value(detail),
+      shopDomain: shopDomain == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shopDomain),
     );
   }
 
@@ -1826,6 +1902,7 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
       fingerprint: serializer.fromJson<String>(json['fingerprint']),
       status: serializer.fromJson<String>(json['status']),
       detail: serializer.fromJson<String?>(json['detail']),
+      shopDomain: serializer.fromJson<String?>(json['shopDomain']),
     );
   }
   @override
@@ -1839,6 +1916,7 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
       'fingerprint': serializer.toJson<String>(fingerprint),
       'status': serializer.toJson<String>(status),
       'detail': serializer.toJson<String?>(detail),
+      'shopDomain': serializer.toJson<String?>(shopDomain),
     };
   }
 
@@ -1849,7 +1927,8 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
           int? productCount,
           String? fingerprint,
           String? status,
-          Value<String?> detail = const Value.absent()}) =>
+          Value<String?> detail = const Value.absent(),
+          Value<String?> shopDomain = const Value.absent()}) =>
       CatalogState(
         id: id ?? this.id,
         source: source ?? this.source,
@@ -1858,6 +1937,7 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
         fingerprint: fingerprint ?? this.fingerprint,
         status: status ?? this.status,
         detail: detail.present ? detail.value : this.detail,
+        shopDomain: shopDomain.present ? shopDomain.value : this.shopDomain,
       );
   CatalogState copyWithCompanion(CatalogStatesCompanion data) {
     return CatalogState(
@@ -1871,6 +1951,8 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
           data.fingerprint.present ? data.fingerprint.value : this.fingerprint,
       status: data.status.present ? data.status.value : this.status,
       detail: data.detail.present ? data.detail.value : this.detail,
+      shopDomain:
+          data.shopDomain.present ? data.shopDomain.value : this.shopDomain,
     );
   }
 
@@ -1883,14 +1965,15 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
           ..write('productCount: $productCount, ')
           ..write('fingerprint: $fingerprint, ')
           ..write('status: $status, ')
-          ..write('detail: $detail')
+          ..write('detail: $detail, ')
+          ..write('shopDomain: $shopDomain')
           ..write(')'))
         .toString();
   }
 
   @override
-  int get hashCode => Object.hash(
-      id, source, syncedAt, productCount, fingerprint, status, detail);
+  int get hashCode => Object.hash(id, source, syncedAt, productCount,
+      fingerprint, status, detail, shopDomain);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
@@ -1901,7 +1984,8 @@ class CatalogState extends DataClass implements Insertable<CatalogState> {
           other.productCount == this.productCount &&
           other.fingerprint == this.fingerprint &&
           other.status == this.status &&
-          other.detail == this.detail);
+          other.detail == this.detail &&
+          other.shopDomain == this.shopDomain);
 }
 
 class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
@@ -1912,6 +1996,7 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
   final Value<String> fingerprint;
   final Value<String> status;
   final Value<String?> detail;
+  final Value<String?> shopDomain;
   const CatalogStatesCompanion({
     this.id = const Value.absent(),
     this.source = const Value.absent(),
@@ -1920,6 +2005,7 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
     this.fingerprint = const Value.absent(),
     this.status = const Value.absent(),
     this.detail = const Value.absent(),
+    this.shopDomain = const Value.absent(),
   });
   CatalogStatesCompanion.insert({
     this.id = const Value.absent(),
@@ -1929,6 +2015,7 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
     required String fingerprint,
     required String status,
     this.detail = const Value.absent(),
+    this.shopDomain = const Value.absent(),
   })  : source = Value(source),
         productCount = Value(productCount),
         fingerprint = Value(fingerprint),
@@ -1941,6 +2028,7 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
     Expression<String>? fingerprint,
     Expression<String>? status,
     Expression<String>? detail,
+    Expression<String>? shopDomain,
   }) {
     return RawValuesInsertable({
       if (id != null) 'id': id,
@@ -1950,6 +2038,7 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
       if (fingerprint != null) 'fingerprint': fingerprint,
       if (status != null) 'status': status,
       if (detail != null) 'detail': detail,
+      if (shopDomain != null) 'shop_domain': shopDomain,
     });
   }
 
@@ -1960,7 +2049,8 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
       Value<int>? productCount,
       Value<String>? fingerprint,
       Value<String>? status,
-      Value<String?>? detail}) {
+      Value<String?>? detail,
+      Value<String?>? shopDomain}) {
     return CatalogStatesCompanion(
       id: id ?? this.id,
       source: source ?? this.source,
@@ -1969,6 +2059,7 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
       fingerprint: fingerprint ?? this.fingerprint,
       status: status ?? this.status,
       detail: detail ?? this.detail,
+      shopDomain: shopDomain ?? this.shopDomain,
     );
   }
 
@@ -1996,6 +2087,9 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
     if (detail.present) {
       map['detail'] = Variable<String>(detail.value);
     }
+    if (shopDomain.present) {
+      map['shop_domain'] = Variable<String>(shopDomain.value);
+    }
     return map;
   }
 
@@ -2008,7 +2102,8 @@ class CatalogStatesCompanion extends UpdateCompanion<CatalogState> {
           ..write('productCount: $productCount, ')
           ..write('fingerprint: $fingerprint, ')
           ..write('status: $status, ')
-          ..write('detail: $detail')
+          ..write('detail: $detail, ')
+          ..write('shopDomain: $shopDomain')
           ..write(')'))
         .toString();
   }
@@ -2253,8 +2348,10 @@ class $WishlistItemsTable extends WishlistItems
       const VerificationMeta('accountId');
   @override
   late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
-      'account_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'account_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
   static const VerificationMeta _addedAtMeta =
       const VerificationMeta('addedAt');
   @override
@@ -2293,7 +2390,7 @@ class $WishlistItemsTable extends WishlistItems
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {productId};
+  Set<GeneratedColumn> get $primaryKey => {productId, accountId};
   @override
   WishlistItem map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -2301,7 +2398,7 @@ class $WishlistItemsTable extends WishlistItems
       productId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}product_id'])!,
       accountId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}account_id']),
+          .read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
       addedAt: attachedDatabase.typeMapping
           .read(DriftSqlType.dateTime, data['${effectivePrefix}added_at'])!,
     );
@@ -2315,17 +2412,17 @@ class $WishlistItemsTable extends WishlistItems
 
 class WishlistItem extends DataClass implements Insertable<WishlistItem> {
   final String productId;
-  final String? accountId;
+  final String accountId;
   final DateTime addedAt;
   const WishlistItem(
-      {required this.productId, this.accountId, required this.addedAt});
+      {required this.productId,
+      required this.accountId,
+      required this.addedAt});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['product_id'] = Variable<String>(productId);
-    if (!nullToAbsent || accountId != null) {
-      map['account_id'] = Variable<String>(accountId);
-    }
+    map['account_id'] = Variable<String>(accountId);
     map['added_at'] = Variable<DateTime>(addedAt);
     return map;
   }
@@ -2333,9 +2430,7 @@ class WishlistItem extends DataClass implements Insertable<WishlistItem> {
   WishlistItemsCompanion toCompanion(bool nullToAbsent) {
     return WishlistItemsCompanion(
       productId: Value(productId),
-      accountId: accountId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(accountId),
+      accountId: Value(accountId),
       addedAt: Value(addedAt),
     );
   }
@@ -2345,7 +2440,7 @@ class WishlistItem extends DataClass implements Insertable<WishlistItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return WishlistItem(
       productId: serializer.fromJson<String>(json['productId']),
-      accountId: serializer.fromJson<String?>(json['accountId']),
+      accountId: serializer.fromJson<String>(json['accountId']),
       addedAt: serializer.fromJson<DateTime>(json['addedAt']),
     );
   }
@@ -2354,18 +2449,16 @@ class WishlistItem extends DataClass implements Insertable<WishlistItem> {
     serializer ??= driftRuntimeOptions.defaultSerializer;
     return <String, dynamic>{
       'productId': serializer.toJson<String>(productId),
-      'accountId': serializer.toJson<String?>(accountId),
+      'accountId': serializer.toJson<String>(accountId),
       'addedAt': serializer.toJson<DateTime>(addedAt),
     };
   }
 
   WishlistItem copyWith(
-          {String? productId,
-          Value<String?> accountId = const Value.absent(),
-          DateTime? addedAt}) =>
+          {String? productId, String? accountId, DateTime? addedAt}) =>
       WishlistItem(
         productId: productId ?? this.productId,
-        accountId: accountId.present ? accountId.value : this.accountId,
+        accountId: accountId ?? this.accountId,
         addedAt: addedAt ?? this.addedAt,
       );
   WishlistItem copyWithCompanion(WishlistItemsCompanion data) {
@@ -2399,7 +2492,7 @@ class WishlistItem extends DataClass implements Insertable<WishlistItem> {
 
 class WishlistItemsCompanion extends UpdateCompanion<WishlistItem> {
   final Value<String> productId;
-  final Value<String?> accountId;
+  final Value<String> accountId;
   final Value<DateTime> addedAt;
   final Value<int> rowid;
   const WishlistItemsCompanion({
@@ -2431,7 +2524,7 @@ class WishlistItemsCompanion extends UpdateCompanion<WishlistItem> {
 
   WishlistItemsCompanion copyWith(
       {Value<String>? productId,
-      Value<String?>? accountId,
+      Value<String>? accountId,
       Value<DateTime>? addedAt,
       Value<int>? rowid}) {
     return WishlistItemsCompanion(
@@ -2493,8 +2586,10 @@ class $BagLinesTable extends BagLines with TableInfo<$BagLinesTable, BagLine> {
       const VerificationMeta('accountId');
   @override
   late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
-      'account_id', aliasedName, true,
-      type: DriftSqlType.string, requiredDuringInsert: false);
+      'account_id', aliasedName, false,
+      type: DriftSqlType.string,
+      requiredDuringInsert: false,
+      defaultValue: const Constant(''));
   static const VerificationMeta _quantityMeta =
       const VerificationMeta('quantity');
   @override
@@ -2540,7 +2635,7 @@ class $BagLinesTable extends BagLines with TableInfo<$BagLinesTable, BagLine> {
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {productId};
+  Set<GeneratedColumn> get $primaryKey => {variantId, accountId};
   @override
   BagLine map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -2550,7 +2645,7 @@ class $BagLinesTable extends BagLines with TableInfo<$BagLinesTable, BagLine> {
       variantId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}variant_id'])!,
       accountId: attachedDatabase.typeMapping
-          .read(DriftSqlType.string, data['${effectivePrefix}account_id']),
+          .read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
       quantity: attachedDatabase.typeMapping
           .read(DriftSqlType.int, data['${effectivePrefix}quantity'])!,
     );
@@ -2565,21 +2660,19 @@ class $BagLinesTable extends BagLines with TableInfo<$BagLinesTable, BagLine> {
 class BagLine extends DataClass implements Insertable<BagLine> {
   final String productId;
   final String variantId;
-  final String? accountId;
+  final String accountId;
   final int quantity;
   const BagLine(
       {required this.productId,
       required this.variantId,
-      this.accountId,
+      required this.accountId,
       required this.quantity});
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
     final map = <String, Expression>{};
     map['product_id'] = Variable<String>(productId);
     map['variant_id'] = Variable<String>(variantId);
-    if (!nullToAbsent || accountId != null) {
-      map['account_id'] = Variable<String>(accountId);
-    }
+    map['account_id'] = Variable<String>(accountId);
     map['quantity'] = Variable<int>(quantity);
     return map;
   }
@@ -2588,9 +2681,7 @@ class BagLine extends DataClass implements Insertable<BagLine> {
     return BagLinesCompanion(
       productId: Value(productId),
       variantId: Value(variantId),
-      accountId: accountId == null && nullToAbsent
-          ? const Value.absent()
-          : Value(accountId),
+      accountId: Value(accountId),
       quantity: Value(quantity),
     );
   }
@@ -2601,7 +2692,7 @@ class BagLine extends DataClass implements Insertable<BagLine> {
     return BagLine(
       productId: serializer.fromJson<String>(json['productId']),
       variantId: serializer.fromJson<String>(json['variantId']),
-      accountId: serializer.fromJson<String?>(json['accountId']),
+      accountId: serializer.fromJson<String>(json['accountId']),
       quantity: serializer.fromJson<int>(json['quantity']),
     );
   }
@@ -2611,7 +2702,7 @@ class BagLine extends DataClass implements Insertable<BagLine> {
     return <String, dynamic>{
       'productId': serializer.toJson<String>(productId),
       'variantId': serializer.toJson<String>(variantId),
-      'accountId': serializer.toJson<String?>(accountId),
+      'accountId': serializer.toJson<String>(accountId),
       'quantity': serializer.toJson<int>(quantity),
     };
   }
@@ -2619,12 +2710,12 @@ class BagLine extends DataClass implements Insertable<BagLine> {
   BagLine copyWith(
           {String? productId,
           String? variantId,
-          Value<String?> accountId = const Value.absent(),
+          String? accountId,
           int? quantity}) =>
       BagLine(
         productId: productId ?? this.productId,
         variantId: variantId ?? this.variantId,
-        accountId: accountId.present ? accountId.value : this.accountId,
+        accountId: accountId ?? this.accountId,
         quantity: quantity ?? this.quantity,
       );
   BagLine copyWithCompanion(BagLinesCompanion data) {
@@ -2662,7 +2753,7 @@ class BagLine extends DataClass implements Insertable<BagLine> {
 class BagLinesCompanion extends UpdateCompanion<BagLine> {
   final Value<String> productId;
   final Value<String> variantId;
-  final Value<String?> accountId;
+  final Value<String> accountId;
   final Value<int> quantity;
   final Value<int> rowid;
   const BagLinesCompanion({
@@ -2700,7 +2791,7 @@ class BagLinesCompanion extends UpdateCompanion<BagLine> {
   BagLinesCompanion copyWith(
       {Value<String>? productId,
       Value<String>? variantId,
-      Value<String?>? accountId,
+      Value<String>? accountId,
       Value<int>? quantity,
       Value<int>? rowid}) {
     return BagLinesCompanion(
@@ -5681,12 +5772,14 @@ typedef $$SyncCursorsTableCreateCompanionBuilder = SyncCursorsCompanion
   Value<int> id,
   Value<DateTime?> lastUpdatedAt,
   Value<DateTime?> lastFullSyncAt,
+  Value<String?> shopDomain,
 });
 typedef $$SyncCursorsTableUpdateCompanionBuilder = SyncCursorsCompanion
     Function({
   Value<int> id,
   Value<DateTime?> lastUpdatedAt,
   Value<DateTime?> lastFullSyncAt,
+  Value<String?> shopDomain,
 });
 
 class $$SyncCursorsTableFilterComposer
@@ -5707,6 +5800,9 @@ class $$SyncCursorsTableFilterComposer
   ColumnFilters<DateTime> get lastFullSyncAt => $composableBuilder(
       column: $table.lastFullSyncAt,
       builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => ColumnFilters(column));
 }
 
 class $$SyncCursorsTableOrderingComposer
@@ -5728,6 +5824,9 @@ class $$SyncCursorsTableOrderingComposer
   ColumnOrderings<DateTime> get lastFullSyncAt => $composableBuilder(
       column: $table.lastFullSyncAt,
       builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => ColumnOrderings(column));
 }
 
 class $$SyncCursorsTableAnnotationComposer
@@ -5747,6 +5846,9 @@ class $$SyncCursorsTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastFullSyncAt => $composableBuilder(
       column: $table.lastFullSyncAt, builder: (column) => column);
+
+  GeneratedColumn<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => column);
 }
 
 class $$SyncCursorsTableTableManager extends RootTableManager<
@@ -5775,21 +5877,25 @@ class $$SyncCursorsTableTableManager extends RootTableManager<
             Value<int> id = const Value.absent(),
             Value<DateTime?> lastUpdatedAt = const Value.absent(),
             Value<DateTime?> lastFullSyncAt = const Value.absent(),
+            Value<String?> shopDomain = const Value.absent(),
           }) =>
               SyncCursorsCompanion(
             id: id,
             lastUpdatedAt: lastUpdatedAt,
             lastFullSyncAt: lastFullSyncAt,
+            shopDomain: shopDomain,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
             Value<DateTime?> lastUpdatedAt = const Value.absent(),
             Value<DateTime?> lastFullSyncAt = const Value.absent(),
+            Value<String?> shopDomain = const Value.absent(),
           }) =>
               SyncCursorsCompanion.insert(
             id: id,
             lastUpdatedAt: lastUpdatedAt,
             lastFullSyncAt: lastFullSyncAt,
+            shopDomain: shopDomain,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -5819,6 +5925,7 @@ typedef $$CatalogStatesTableCreateCompanionBuilder = CatalogStatesCompanion
   required String fingerprint,
   required String status,
   Value<String?> detail,
+  Value<String?> shopDomain,
 });
 typedef $$CatalogStatesTableUpdateCompanionBuilder = CatalogStatesCompanion
     Function({
@@ -5829,6 +5936,7 @@ typedef $$CatalogStatesTableUpdateCompanionBuilder = CatalogStatesCompanion
   Value<String> fingerprint,
   Value<String> status,
   Value<String?> detail,
+  Value<String?> shopDomain,
 });
 
 class $$CatalogStatesTableFilterComposer
@@ -5860,6 +5968,9 @@ class $$CatalogStatesTableFilterComposer
 
   ColumnFilters<String> get detail => $composableBuilder(
       column: $table.detail, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => ColumnFilters(column));
 }
 
 class $$CatalogStatesTableOrderingComposer
@@ -5892,6 +6003,9 @@ class $$CatalogStatesTableOrderingComposer
 
   ColumnOrderings<String> get detail => $composableBuilder(
       column: $table.detail, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => ColumnOrderings(column));
 }
 
 class $$CatalogStatesTableAnnotationComposer
@@ -5923,6 +6037,9 @@ class $$CatalogStatesTableAnnotationComposer
 
   GeneratedColumn<String> get detail =>
       $composableBuilder(column: $table.detail, builder: (column) => column);
+
+  GeneratedColumn<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => column);
 }
 
 class $$CatalogStatesTableTableManager extends RootTableManager<
@@ -5958,6 +6075,7 @@ class $$CatalogStatesTableTableManager extends RootTableManager<
             Value<String> fingerprint = const Value.absent(),
             Value<String> status = const Value.absent(),
             Value<String?> detail = const Value.absent(),
+            Value<String?> shopDomain = const Value.absent(),
           }) =>
               CatalogStatesCompanion(
             id: id,
@@ -5967,6 +6085,7 @@ class $$CatalogStatesTableTableManager extends RootTableManager<
             fingerprint: fingerprint,
             status: status,
             detail: detail,
+            shopDomain: shopDomain,
           ),
           createCompanionCallback: ({
             Value<int> id = const Value.absent(),
@@ -5976,6 +6095,7 @@ class $$CatalogStatesTableTableManager extends RootTableManager<
             required String fingerprint,
             required String status,
             Value<String?> detail = const Value.absent(),
+            Value<String?> shopDomain = const Value.absent(),
           }) =>
               CatalogStatesCompanion.insert(
             id: id,
@@ -5985,6 +6105,7 @@ class $$CatalogStatesTableTableManager extends RootTableManager<
             fingerprint: fingerprint,
             status: status,
             detail: detail,
+            shopDomain: shopDomain,
           ),
           withReferenceMapper: (p0) => p0
               .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
@@ -6151,14 +6272,14 @@ typedef $$AppPreferencesTableProcessedTableManager = ProcessedTableManager<
 typedef $$WishlistItemsTableCreateCompanionBuilder = WishlistItemsCompanion
     Function({
   required String productId,
-  Value<String?> accountId,
+  Value<String> accountId,
   required DateTime addedAt,
   Value<int> rowid,
 });
 typedef $$WishlistItemsTableUpdateCompanionBuilder = WishlistItemsCompanion
     Function({
   Value<String> productId,
-  Value<String?> accountId,
+  Value<String> accountId,
   Value<DateTime> addedAt,
   Value<int> rowid,
 });
@@ -6247,7 +6368,7 @@ class $$WishlistItemsTableTableManager extends RootTableManager<
               $$WishlistItemsTableAnnotationComposer($db: db, $table: table),
           updateCompanionCallback: ({
             Value<String> productId = const Value.absent(),
-            Value<String?> accountId = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
             Value<DateTime> addedAt = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -6259,7 +6380,7 @@ class $$WishlistItemsTableTableManager extends RootTableManager<
           ),
           createCompanionCallback: ({
             required String productId,
-            Value<String?> accountId = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
             required DateTime addedAt,
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -6294,14 +6415,14 @@ typedef $$WishlistItemsTableProcessedTableManager = ProcessedTableManager<
 typedef $$BagLinesTableCreateCompanionBuilder = BagLinesCompanion Function({
   required String productId,
   required String variantId,
-  Value<String?> accountId,
+  Value<String> accountId,
   required int quantity,
   Value<int> rowid,
 });
 typedef $$BagLinesTableUpdateCompanionBuilder = BagLinesCompanion Function({
   Value<String> productId,
   Value<String> variantId,
-  Value<String?> accountId,
+  Value<String> accountId,
   Value<int> quantity,
   Value<int> rowid,
 });
@@ -6397,7 +6518,7 @@ class $$BagLinesTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> productId = const Value.absent(),
             Value<String> variantId = const Value.absent(),
-            Value<String?> accountId = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
             Value<int> quantity = const Value.absent(),
             Value<int> rowid = const Value.absent(),
           }) =>
@@ -6411,7 +6532,7 @@ class $$BagLinesTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String productId,
             required String variantId,
-            Value<String?> accountId = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
             required int quantity,
             Value<int> rowid = const Value.absent(),
           }) =>

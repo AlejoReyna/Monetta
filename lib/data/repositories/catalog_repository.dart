@@ -7,7 +7,9 @@
 /// could remember a cursor between app opens.
 library;
 
+import '../local/bag_store.dart';
 import '../local/catalog_cache_store.dart';
+import '../local/wishlist_store.dart';
 import '../local/sync_cursor_store.dart';
 import '../normalize/facets.dart';
 import '../normalize/normalizer.dart';
@@ -58,12 +60,23 @@ class CatalogRepository {
     required this.cursorStore,
     required this.rules,
     shopify.CatalogSync? catalogSync,
-  }) : _catalogSync = catalogSync;
+    this.shopDomain,
+    BagStore? bagStore,
+    WishlistStore? wishlistStore,
+  })  : _catalogSync = catalogSync,
+        _bagStore = bagStore,
+        _wishlistStore = wishlistStore;
 
   final CatalogCacheStore cache;
   final SyncCursorStore cursorStore;
   final NormalizationRules rules;
   final shopify.CatalogSync? _catalogSync;
+
+  /// Configured Storefront host. When set, cursors/metadata from another shop
+  /// are rejected and the local catalog is cleared before the next full sync.
+  final String? shopDomain;
+  final BagStore? _bagStore;
+  final WishlistStore? _wishlistStore;
 
   /// False whenever `StorefrontConfig.isUsable` was false at construction —
   /// see `app/catalog_store.dart` for how the caller decides this today.
@@ -178,6 +191,11 @@ class CatalogRepository {
   /// the cache. A no-op returning [CatalogSyncOutcome.skippedNotConfigured]
   /// when no token is configured — never throws for that case, since an
   /// unconfigured store is expected, not exceptional.
+  ///
+  /// Incomplete pagination (see [shopify.CatalogSyncIncompleteException]) and
+  /// any other failure leave the last-known-good cache and cursor untouched
+  /// aside from marking metadata unavailable. A verified full sync replaces
+  /// the catalog atomically — including a legitimate empty result.
   Future<CatalogSyncResult> sync() async {
     final catalogSync = _catalogSync;
     if (catalogSync == null) {
@@ -186,8 +204,28 @@ class CatalogRepository {
       );
     }
     try {
-      final cursor = await cursorStore.load();
+      final cursor = await _cursorForConfiguredShop();
       final result = await catalogSync.run(cursor: cursor, now: DateTime.now());
+      final shop = shopDomain ?? result.cursor.shopDomain;
+
+      if (result.wasFullSync) {
+        final metadata = CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.shopify,
+          products: result.products,
+          syncedAt: DateTime.now(),
+          status: CatalogCacheStatus.healthy,
+          shopDomain: shop,
+        );
+        await cache.replaceProducts(result.products, metadata: metadata);
+        await cursorStore.save(result.cursor);
+        return CatalogSyncResult(
+          outcome: result.hasChanges || metadata.productCount == 0
+              ? CatalogSyncOutcome.updated
+              : CatalogSyncOutcome.upToDate,
+          changedCount: result.products.length,
+        );
+      }
+
       if (result.hasChanges) {
         await cache.upsertProducts(result.products);
       }
@@ -199,6 +237,7 @@ class CatalogRepository {
           products: products,
           syncedAt: DateTime.now(),
           status: CatalogCacheStatus.healthy,
+          shopDomain: shop,
         ),
       );
       return CatalogSyncResult(
@@ -208,14 +247,16 @@ class CatalogRepository {
         changedCount: result.products.length,
       );
     } catch (error) {
-      // A failed sync must never clear or corrupt what's already cached —
-      // same contract as `ExternalCatalogRepository.refresh`.
+      // A failed / incomplete sync must never clear or corrupt what's already
+      // cached — same contract as `ExternalCatalogRepository.refresh`.
       final existing = await cache.metadata();
       if (existing != null) {
         await cache.saveMetadata(
           existing.copyWith(
             status: CatalogCacheStatus.unavailable,
-            detail: error.runtimeType.toString(),
+            detail: error is shopify.CatalogSyncIncompleteException
+                ? error.message
+                : error.runtimeType.toString(),
           ),
         );
       }
@@ -224,6 +265,32 @@ class CatalogRepository {
         error: error,
       );
     }
+  }
+
+  /// Rejects a cursor/catalog belonging to another shop before syncing.
+  Future<shopify.SyncCursor> _cursorForConfiguredShop() async {
+    final configured = shopDomain;
+    final cursor = await cursorStore.load();
+    if (configured == null || configured.isEmpty) return cursor;
+
+    final metadata = await cache.metadata();
+    final cursorShop = cursor.shopDomain;
+    final metaShop = metadata?.shopDomain;
+    final mismatch = (cursorShop != null && cursorShop != configured) ||
+        (metaShop != null && metaShop != configured);
+
+    if (!mismatch) {
+      if (cursor.shopDomain == null) {
+        return cursor.withShop(configured);
+      }
+      return cursor;
+    }
+
+    await cache.clearCatalog();
+    await cursorStore.clear();
+    await _bagStore?.clearAllScopes();
+    await _wishlistStore?.clearAllScopes();
+    return shopify.SyncCursor(shopDomain: configured);
   }
 }
 

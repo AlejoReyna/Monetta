@@ -74,10 +74,14 @@ class CachedCollections extends Table {
 
 /// Singleton row (id is always 0) holding the delta-sync high-water mark —
 /// the persisted form of `lib/data/shopify/catalog_sync.dart`'s `SyncCursor`.
+///
+/// [shopDomain] namespaces the cursor by Storefront host so a flavor or shop
+/// switch cannot resume against foreign product/variant IDs.
 class SyncCursors extends Table {
   IntColumn get id => integer().withDefault(const Constant(0))();
   DateTimeColumn get lastUpdatedAt => dateTime().nullable()();
   DateTimeColumn get lastFullSyncAt => dateTime().nullable()();
+  TextColumn get shopDomain => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -97,6 +101,7 @@ class CatalogStates extends Table {
   TextColumn get fingerprint => text()();
   TextColumn get status => text()();
   TextColumn get detail => text().nullable()();
+  TextColumn get shopDomain => text().nullable()();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -116,30 +121,32 @@ class AppPreferences extends Table {
 
 /// One product on a shopper's wishlist.
 ///
-/// `accountId` is nullable — a wishlist starts device-scoped (guest) and
-/// gets attached to an account on login (merge, per
-/// `docs/ACCOUNTS_AND_SYNC_PLAN.md` § 5). `productId` alone is the primary
-/// key: a product appears at most once regardless of scope, so login-merge
-/// is an UPDATE of `accountId` on the existing row, not an insert.
+/// Guest rows use empty-string [accountId]; signed-in rows use the local
+/// account id. The composite primary key keeps account A and account B
+/// isolated on the same device. Login merges guest (`''`) rows into the
+/// signed-in account (see `WishlistStore.mergeDeviceItemsIntoAccount`).
 class WishlistItems extends Table {
   TextColumn get productId => text()();
-  TextColumn get accountId => text().nullable()();
+  TextColumn get accountId => text().withDefault(const Constant(''))();
   DateTimeColumn get addedAt => dateTime()();
 
   @override
-  Set<Column> get primaryKey => {productId};
+  Set<Column> get primaryKey => {productId, accountId};
 }
 
 /// A line in the shopper's pre-checkout bag. Persisted so it survives an app
-/// restart — replaces `CatalogStore`'s in-memory `_bagQuantities` map.
+/// restart — replaces `CatalogStore`'s in-memory bag map.
+///
+/// Primary key is `(variantId, accountId)` so two variants of the same product
+/// can coexist, and account scopes stay isolated. Guest scope uses `''`.
 class BagLines extends Table {
   TextColumn get productId => text()();
   TextColumn get variantId => text()();
-  TextColumn get accountId => text().nullable()();
+  TextColumn get accountId => text().withDefault(const Constant(''))();
   IntColumn get quantity => integer()();
 
   @override
-  Set<Column> get primaryKey => {productId};
+  Set<Column> get primaryKey => {variantId, accountId};
 }
 
 /// One recorded `InteractionEvent` (`reco/events.dart`). Device-scoped only —

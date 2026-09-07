@@ -409,7 +409,10 @@ class _ProductScreenState extends State<ProductScreen> {
                         flex: 2,
                         child: FilledButton(
                           onPressed: () {
-                            store.addToBag(product);
+                            store.addToBag(
+                              product,
+                              variantId: _selected(product)?.id,
+                            );
                             NotificationScope.maybeOf(
                               context,
                             )?.recordPushOutcome('add_to_cart');

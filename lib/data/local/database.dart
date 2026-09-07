@@ -47,7 +47,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -75,9 +75,68 @@ class AppDatabase extends _$AppDatabase {
               );
             }
           }
+          if (from < 6) await _migrateShopScopeAndBagVariantKeys();
         },
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),
       );
+
+
+  /// Version 6 namespaces catalog authority by shop and rekeys bag/wishlist so
+  /// variants and accounts cannot collide on the same device.
+  Future<void> _migrateShopScopeAndBagVariantKeys() async {
+    await _addColumnIfMissing('sync_cursors', 'shop_domain', 'TEXT');
+    await _addColumnIfMissing('catalog_states', 'shop_domain', 'TEXT');
+
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS wishlist_items_v6 ('
+      'product_id TEXT NOT NULL, '
+      "account_id TEXT NOT NULL DEFAULT '', "
+      'added_at INTEGER NOT NULL, '
+      'PRIMARY KEY (product_id, account_id)'
+      ')',
+    );
+    await customStatement(
+      'INSERT OR IGNORE INTO wishlist_items_v6 (product_id, account_id, added_at) '
+      "SELECT product_id, COALESCE(account_id, ''), added_at FROM wishlist_items",
+    );
+    await customStatement('DROP TABLE wishlist_items');
+    await customStatement(
+      'ALTER TABLE wishlist_items_v6 RENAME TO wishlist_items',
+    );
+
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS bag_lines_v6 ('
+      'product_id TEXT NOT NULL, '
+      'variant_id TEXT NOT NULL, '
+      "account_id TEXT NOT NULL DEFAULT '', "
+      'quantity INTEGER NOT NULL, '
+      'PRIMARY KEY (variant_id, account_id)'
+      ')',
+    );
+    await customStatement(
+      'INSERT OR IGNORE INTO bag_lines_v6 ('
+      'product_id, variant_id, account_id, quantity'
+      ') '
+      "SELECT product_id, variant_id, COALESCE(account_id, ''), quantity "
+      'FROM bag_lines',
+    );
+    await customStatement('DROP TABLE bag_lines');
+    await customStatement('ALTER TABLE bag_lines_v6 RENAME TO bag_lines');
+  }
+
+  Future<void> _addColumnIfMissing(
+    String table,
+    String column,
+    String typeSql,
+  ) async {
+    final columns =
+        await customSelect('PRAGMA table_info(' + table + ')').get();
+    final exists = columns.any((row) => row.read<String>('name') == column);
+    if (exists) return;
+    await customStatement(
+      'ALTER TABLE ' + table + ' ADD COLUMN ' + column + ' ' + typeSql,
+    );
+  }
 
   /// Version 1 persisted ids from the bundled Ajax snapshot as decimal text.
   /// Storefront and Firestore use GIDs, so an upgraded installation must move
