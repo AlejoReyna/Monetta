@@ -50,6 +50,9 @@ class _PendingShopGateway implements CustomerAuthGateway {
   @override
   Future<CustomerAuthResult> refresh(String refreshToken) async =>
       _authResult();
+
+  @override
+  Future<void> endSession({required String idTokenHint}) async {}
 }
 
 CustomerAuthResult _authResult() {

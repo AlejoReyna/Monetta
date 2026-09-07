@@ -43,6 +43,7 @@ looking at.
 |---|---|---|
 | Refresh token | `flutter_secure_storage` (Keychain/Keystore), via `SecureTokenStore` | Long-lived; must survive a restart; must never sit in a plain SQLite file |
 | Access token | Nowhere — held in memory by the caller for the process lifetime | Short-lived by design; persisting it buys nothing and adds a second thing that can go stale |
+| Id token | `flutter_secure_storage` as `id_token_hint` for hosted logout only | Never used as an API credential; deleted on logout |
 | Everything else (email, `shopifyCustomerId`, session metadata) | `data/local`'s `Accounts`/`Sessions`/`Devices` tables | Not secret; same Drift database as the catalog cache |
 
 `Sessions.secureStorageKeyRef` is the seam: `data/local` knows a session exists and when its

@@ -90,6 +90,7 @@ class AccountController extends ChangeNotifier {
   /// nobody is signed in.
   List<local.OrderSummary> orders = const [];
   bool ordersLoading = false;
+  int _ordersGeneration = 0;
 
   bool get isSignedIn => account != null;
 
@@ -205,6 +206,7 @@ class AccountController extends ChangeNotifier {
     await repository.logout(localAccountId);
     account = null;
     orders = const [];
+    _ordersGeneration += 1;
     lastError = const AccountError(
       flow: AccountAuthFlow.shopify,
       kind: CustomerAuthErrorKind.sessionExpired,
@@ -330,6 +332,7 @@ class AccountController extends ChangeNotifier {
       }
       account = null;
       orders = const [];
+      _ordersGeneration += 1;
       await _publishAccountScope();
     } finally {
       isLoading = false;
@@ -341,31 +344,58 @@ class AccountController extends ChangeNotifier {
   /// paint immediately, then a background refresh from
   /// `services/accounts_orders` (a safe no-op if that service isn't
   /// configured — see `OrderHistoryRepository.canRefresh`) replaces them.
+  ///
+  /// Each await re-checks that [account] is still the same generation so a
+  /// delayed response for A cannot repopulate orders after logout or after B
+  /// signed in (F14 / post-checkout refresh safety).
   Future<void> loadOrders() async {
     final current = account;
     if (current == null) return;
+    final generation = ++_ordersGeneration;
+    final accountId = current.localAccountId;
 
     ordersLoading = true;
     notifyListeners();
 
-    orders = await _orderHistoryRepository.loadCached(current.localAccountId);
-    notifyListeners();
+    try {
+      final cached = await _orderHistoryRepository.loadCached(accountId);
+      if (!_ordersStillCurrent(generation, accountId)) return;
+      orders = cached;
+      notifyListeners();
 
-    // The backend, not this local row, is authoritative for the Shopify
-    // linkage. This also lets a linked legacy Monetta account refresh orders
-    // even when its local cache does not yet contain the Shopify customer id.
-    final accessToken = await accessTokenForBackend();
-    if (accessToken != null) {
-      await _orderHistoryRepository.refresh(
-        accountId: current.localAccountId,
-        accessToken: accessToken,
-      );
-      orders = await _orderHistoryRepository.loadCached(
-        current.localAccountId,
-      );
+      // The backend, not this local row, is authoritative for the Shopify
+      // linkage. This also lets a linked legacy Monetta account refresh orders
+      // even when its local cache does not yet contain the Shopify customer id.
+      final accessToken = await accessTokenForBackend();
+      if (!_ordersStillCurrent(generation, accountId)) return;
+      if (accessToken != null) {
+        await _orderHistoryRepository.refresh(
+          accountId: accountId,
+          accessToken: accessToken,
+        );
+        if (!_ordersStillCurrent(generation, accountId)) return;
+        orders = await _orderHistoryRepository.loadCached(accountId);
+      }
+    } finally {
+      if (_ordersStillCurrent(generation, accountId)) {
+        ordersLoading = false;
+        notifyListeners();
+      }
     }
+  }
 
-    ordersLoading = false;
-    notifyListeners();
+  bool _ordersStillCurrent(int generation, String accountId) =>
+      generation == _ordersGeneration && account?.localAccountId == accountId;
+
+  /// Fresh Customer Account access token for authenticated Shopify checkout.
+  /// Returns null for guests, legacy Monetta accounts, or refresh failures.
+  Future<String?> accessTokenForShopifyCheckout() async {
+    final current = account;
+    if (current == null || current.authProvider != 'shopify') return null;
+    try {
+      return await _sessionRepository?.accessTokenFor(current.localAccountId);
+    } on Object {
+      return null;
+    }
   }
 }

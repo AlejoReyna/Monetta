@@ -50,6 +50,9 @@ class _FakeGateway implements CustomerAuthGateway {
 
   @override
   Future<CustomerAuthResult> refresh(String refreshToken) => login();
+
+  @override
+  Future<void> endSession({required String idTokenHint}) async {}
 }
 
 /// Refuses every refresh the way Shopify does once a refresh token has been
@@ -62,6 +65,9 @@ class _RevokedGateway implements CustomerAuthGateway {
   @override
   Future<CustomerAuthResult> refresh(String refreshToken) =>
       throw const CustomerAuthException(CustomerAuthErrorKind.sessionExpired);
+
+  @override
+  Future<void> endSession({required String idTokenHint}) async {}
 }
 
 /// Fails every refresh the way a plane ride does.
@@ -73,6 +79,9 @@ class _OfflineGateway implements CustomerAuthGateway {
   @override
   Future<CustomerAuthResult> refresh(String refreshToken) =>
       throw const CustomerAuthException(CustomerAuthErrorKind.offline);
+
+  @override
+  Future<void> endSession({required String idTokenHint}) async {}
 }
 
 class _FakeSecureTokenStore implements SecureTokenStore {

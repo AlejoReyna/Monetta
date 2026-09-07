@@ -549,6 +549,23 @@ class CatalogStore extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Removes only the variants Shopify just checked out.
+  ///
+  /// Lines added while checkout was open (or otherwise absent from the
+  /// purchased cart) stay in the bag.
+  Future<void> clearPurchasedBagLines(Iterable<String> variantIds) async {
+    final purchased = {
+      for (final id in variantIds)
+        if (id.trim().isNotEmpty) id.trim(),
+    };
+    if (purchased.isEmpty) return;
+    for (final variantId in purchased.toList(growable: false)) {
+      if (_bagQuantities.containsKey(variantId)) {
+        await removeFromBag(variantId);
+      }
+    }
+  }
+
   Product? _productById(String id) {
     for (final product in products) {
       if (product.id == id) return product;

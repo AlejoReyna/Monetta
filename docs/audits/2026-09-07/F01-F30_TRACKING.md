@@ -67,10 +67,10 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | Staging dart-defines: `SHOPIFY_STOREFRONT_ACCESS_TOKEN` empty; `ACCOUNTS_ORDERS_BASE_URL` empty. `main.dart` only builds `ShopifyCartComposition.production` when `StorefrontConfig.isUsable`. User can still enter checkout capture/review; final button reports checkout unavailable. |
+| **Status** | `partial` |
+| **Evidence** | Phase D: bag CTA blocks contact capture when no secure launcher/`ShopifyCartComposition` (`checkout_screen.dart`). Staging token still empty — live cart/checkout needs matching Storefront config. |
 | **Planned change** | Coherent same-shop config; block checkout start before address if cart/checkout cannot complete. Do not mix real catalog IDs with staging cart. |
-| **Regression test** | To-add: unusable StorefrontConfig refuses launch earlier than payment step. |
+| **Regression test** | `checkout_screen_test` bag refuses contact when checkout unavailable. |
 | **Integration/E2E** | Staging build with matching shop token creates real cart + Checkout Kit sheet. |
 | **Unresolved dependencies** | Staging Storefront token + catalog from same shop (not Firestore mirror of production on staging cart). |
 
@@ -78,23 +78,23 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `checkout_screen.dart` always passes `GuestCartBuyerIdentity(email, phone, countryCode: 'MX')`. API supports `AuthenticatedCartBuyerIdentity` (`cart_api.dart`, `storefront_cart_api.dart`) but UI never uses it. |
+| **Status** | `fixed` |
+| **Evidence** | Phase D: `resolveCheckoutBuyerIdentity` + bag launcher; Shopify accounts use `AuthenticatedCartBuyerIdentity` via `accessTokenForShopifyCheckout`; guests/legacy Monetta stay Guest. Account scope change invalidates preloaded checkout (`main.dart`). |
 | **Planned change** | Pass fresh Customer Account access token as buyerIdentity for Shopify sessions; keep guest path; invalidate preload on logout/account switch. |
-| **Regression test** | To-add: signed-in path supplies AuthenticatedCartBuyerIdentity; guest still Guest. |
+| **Regression test** | `checkout_buyer_identity_test.dart`. |
 | **Integration/E2E** | Authenticated checkout recognized in Shopify; expired token refresh; logout invalidates prior cart. |
-| **Unresolved dependencies** | Working Customer Account client + scopes on target shop. |
+| **Unresolved dependencies** | Working Customer Account client + scopes on target shop for live E2E. |
 
 ### F07 — P1 — Dirección capturada no se transmite; estimaciones locales
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | Draft collects full address; launcher only sends email/phone/MX. `motion.dart`: `kFreeShippingThreshold = 1499`, `kStandardShippingFee = 149`; checkout UI shows “3 a 5 días” / local shipping estimates. |
+| **Status** | `fixed` |
+| **Evidence** | Phase D: removed redundant address capture; contact-only pre-checkout; address/shipping collected in Shopify Checkout. Local shipping labeled non-final; bag uses ShopifyCartSummary totals when remote cart exists. |
 | **Planned change** | Prefer Shopify-native address/shipping capture, or wire Cart API delivery address + costs; stop promising local constants as final. |
-| **Regression test** | To-add: buyerIdentity/cart update includes delivery address when using that path; UI labels estimates as non-final. |
+| **Regression test** | `checkout_screen_test` contact-only form. |
 | **Integration/E2E** | CP without coverage, threshold discount, tax/shipping match Checkout. |
-| **Unresolved dependencies** | Shopify shipping/markets config for MX. |
+| **Unresolved dependencies** | Shopify shipping/markets config for MX (live). |
 
 ### F08 — P1 — Full sync no elimina productos retirados
 
@@ -189,9 +189,9 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 | Field | Value |
 |---|---|
 | **Status** | `pending` |
-| **Evidence** | Native bridges present; `onCheckoutLinkClicked` / `checkoutDidClickLink` are empty stubs (“denied until audited return-link phase”) in Android/iOS ShopifyCheckoutBridge. No device/provider matrix executed in audit. |
+| **Evidence** | Phase D: still requires physical/simulator matrix. Native stubs unchanged; browser fallback explicitly does not confirm payment. |
 | **Planned change** | Verify enabled Shopify payment methods + 3DS/wallets/cancel/timeout/background; implement official link-return support only as needed. |
-| **Regression test** | To-add: bridge contract tests once return-link phase defined; do not treat sheet close as paid. |
+| **Regression test** | Coordinator tests: external fallback never marks completion; double-tap guarded. |
 | **Integration/E2E** | **Required:** iOS + Android evidence per enabled payment method (test mode). |
 | **Unresolved dependencies** | Payment methods enabled on shop; test cards; physical/simulator devices. |
 
@@ -199,23 +199,23 @@ Status legend: `open` | `fixed` | `disproved` | `partial` | `pending`
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | Checkout completion wires `onCompleted: store.clearBagAfterCheckout` only — no `loadOrders`, no order confirmation surface. External browser fallback does not confirm completion. |
+| **Status** | `fixed` |
+| **Evidence** | Phase D: rebuild live bag intent at present; `onCompleted(purchasedVariantIds)` → `clearPurchasedBagLines` + `loadOrders`; truthful completion snackbar; browser fallback copy states it does not confirm payment; double-tap still single-flight. |
 | **Planned change** | Result state + canonical recovery; refresh order history; rebuild intent from current variants; never treat browser return as paid. |
-| **Regression test** | To-add: complete clears purchased lines only; cancel keeps bag; completion triggers orders refresh. |
-| **Integration/E2E** | Guest + auth purchase; browser fallback path. |
-| **Unresolved dependencies** | Depends on F05/F06 working checkout. |
+| **Regression test** | `shopify_checkout_coordinator_test` purchased IDs; cancel/fail preserve bag. |
+| **Integration/E2E** | Guest + auth purchase; browser fallback path on device. |
+| **Unresolved dependencies** | Live Shopify + order mirror for post-purchase history visibility. |
 
 ### F18 — P2 — Cuenta incompleta y logout sólo local
 
 | Field | Value |
 |---|---|
-| **Status** | `open` |
-| **Evidence** | `customer_session_repository.dart` `logout` deletes local secure token/session only; comments explicitly note no Shopify `end_session`. `_resolveIdentity` falls back to decoding idToken claims when identity fetch fails (except sessionExpired). No in-app profile/address CRUD or account deletion flow found. |
+| **Status** | `partial` |
+| **Evidence** | Phase D: persist `id_token` for RP-initiated logout; `CustomerAuthGateway.endSession`; logout attempts hosted end-session then local cleanup; preload invalidated on account scope change. Profile/address CRUD and account deletion still open. Identity authorized-API preference already present with claims fallback. |
 | **Planned change** | Hosted logout where supported; resolve identity via authorized API before linking; profile/addresses or portal link; account deletion process. |
-| **Regression test** | To-add: logout clears local session; identity fetch failure does not forge inconsistent link when token rejected. |
-| **Integration/E2E** | A logout → B login without silent A cookie confusion (document Shopify cookie behavior). |
-| **Unresolved dependencies** | Shopify Customer Account logout UX constraints (`id_token_hint`). |
+| **Regression test** | `customer_session_repository_test` hosted end-session + cancel still clears local. |
+| **Integration/E2E** | A logout → B login without silent A cookie confusion on device. |
+| **Unresolved dependencies** | Profile/portal/deletion UX; live Shopify end-session behavior. |
 
 ### F19 — P1 — Cuentas heredadas sin transición segura
 
@@ -402,3 +402,13 @@ Note: **F01/F02** remain P0 but are `partial` in uncommitted WIP — finish wiri
 - F24 closed as reviewable artifact: production TOML scopes/metaobject prepared; no production deploy.
 - See `PHASE_F_NOTES.md` and `ADMIN_OPS_LEFT_IN_SHOPIFY.md`.
 
+
+## Phase D / WP-04 status (appended)
+
+- F05 partial: unavailable checkout blocked before contact capture; staging Storefront token still required for live carts.
+- F06 fixed: authenticated Shopify buyerIdentity + guest/legacy guest path; preload invalidated on account switch.
+- F07 fixed: contact-only pre-checkout; address/shipping delegated to Shopify; estimates labeled non-final.
+- F16 pending: payment method / external link matrix still needs physical devices.
+- F17 fixed: rebuild intent at present; clear purchased lines only; refresh orders; browser fallback not treated as paid.
+- F18 partial: hosted end-session with `id_token_hint` + local cleanup; profile/deletion still open.
+- Also: `AccountController.loadOrders` generation guard (F14 race) for safe post-checkout refresh.

@@ -199,7 +199,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
               const SizedBox(height: 22),
               FilledButton(
                 onPressed: widget.onContinue,
-                child: const Text('CONTINUAR A ENTREGA'),
+                child: const Text('CONTINUAR A CONTACTO'),
               ),
             ],
           ),

@@ -7,7 +7,9 @@ import '../data/shopify/cart/cart_session_store.dart';
 import '../data/shopify/cart/checkout_launcher.dart';
 import 'cart_controller.dart';
 
-typedef CheckoutCompletion = Future<void> Function();
+typedef CheckoutCompletion = Future<void> Function(
+  Set<String> purchasedVariantIds,
+);
 
 final class ShopifyCheckoutCoordinator {
   ShopifyCheckoutCoordinator({
@@ -94,10 +96,13 @@ final class ShopifyCheckoutCoordinator {
       final result = await _launcher.present(validated);
       if (result is CheckoutCompleted) {
         _latestUrl = null;
+        final purchasedVariantIds = {
+          for (final line in cart.lines) line.variantId,
+        };
         // Deleting the remote session first is fail-safe: if local persistence
         // cannot clear, the visible bag remains instead of disappearing early.
         await _sessions.delete(scope);
-        await onCompleted();
+        await onCompleted(purchasedVariantIds);
         try {
           await _launcher.invalidate();
         } on Exception {

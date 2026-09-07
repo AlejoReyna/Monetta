@@ -26,13 +26,17 @@ void main() {
     final sessions = InMemoryCartSessionStore();
     await sessions.write(scope, SensitiveCartId(_opaque('cart-session')));
     var cleanupCalls = 0;
+    Set<String>? purchasedIds;
     final coordinator = _coordinator(launcher, sessions);
 
     final result = await coordinator.present(
       controller: controller,
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async => cleanupCalls += 1,
+      onCompleted: (ids) async {
+        cleanupCalls += 1;
+        purchasedIds = ids;
+      },
     );
 
     expect(result, isA<CheckoutCompleted>());
@@ -40,6 +44,7 @@ void main() {
     expect(launcher.presentCalls, 1);
     expect(launcher.invalidateCalls, 1);
     expect(cleanupCalls, 1);
+    expect(purchasedIds, {shopifyVariantGid(1)});
     expect(await sessions.read(scope), isNull);
   });
 
@@ -65,7 +70,7 @@ void main() {
         controller: controller,
         scope: scope,
         localIntent: localIntent,
-        onCompleted: () async => cleanupCalls += 1,
+        onCompleted: (_) async => cleanupCalls += 1,
       );
 
       expect(result.runtimeType, terminal.runtimeType);
@@ -88,13 +93,13 @@ void main() {
       controller: controller,
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async => cleanupCalls += 1,
+      onCompleted: (_) async => cleanupCalls += 1,
     );
     final duplicate = await coordinator.present(
       controller: controller,
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async => cleanupCalls += 1,
+      onCompleted: (_) async => cleanupCalls += 1,
     ) as CheckoutFailed;
     reconciliation.complete(_authoritativeCart());
 
@@ -115,7 +120,7 @@ void main() {
       controller: CartController(reconciler: _CheckoutReconciler(invalid)),
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async {},
+      onCompleted: (_) async {},
     );
 
     expect(result, isA<CheckoutFailed>());
@@ -145,7 +150,7 @@ void main() {
       controller: controller,
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async => cleanupCalls += 1,
+      onCompleted: (_) async => cleanupCalls += 1,
     );
 
     expect(opener.calls, 0);
@@ -175,7 +180,7 @@ void main() {
       ),
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async {},
+      onCompleted: (_) async {},
     );
 
     expect(result, isA<CheckoutCancelled>());
@@ -203,7 +208,7 @@ void main() {
       controller: CartController(reconciler: _CheckoutReconciler(partial)),
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async {},
+      onCompleted: (_) async {},
     );
 
     expect(result, isA<CheckoutFailed>());
@@ -251,7 +256,7 @@ void main() {
       ),
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async {},
+      onCompleted: (_) async {},
     ) as CheckoutFailed;
 
     expect(result.code, CheckoutFailureCode.unavailable);

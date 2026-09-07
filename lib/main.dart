@@ -675,7 +675,12 @@ class _MonettaAppState extends State<MonettaApp> {
         config: accountsConfig,
       ),
       deviceId: deviceId,
-      onAccountScopeChanged: _store.setAccountScope,
+      onAccountScopeChanged: (accountId) async {
+        await _store.setAccountScope(accountId);
+        // Login/logout/account switch must never reuse a preloaded checkout
+        // document that belonged to a previous buyer identity (F06/F18).
+        await _shopifyCart?.checkout.invalidate();
+      },
     );
 
     final adminConfig = AdminConfig.fromEnvironment();
@@ -771,11 +776,13 @@ class _MonettaAppState extends State<MonettaApp> {
     }
     if (route.type == 'collection' && route.collectionHandle != null) {
       final handle = route.collectionHandle!;
+      // Collection identity is the Shopify handle, not a facet category slug.
+      // Using category here opened the wrong (or empty) result set (F28).
       navigator.push(
         MaterialPageRoute<void>(
           builder: (_) => CollectionScreen(
             title: handle,
-            filter: CollectionFilter(category: handle),
+            filter: CollectionFilter(collectionHandle: handle),
           ),
         ),
       );

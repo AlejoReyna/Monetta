@@ -20,7 +20,10 @@ class FakeCustomerAuthGateway implements CustomerAuthGateway {
   CustomerAuthResult? refreshResult;
   int loginCalls = 0;
   int refreshCalls = 0;
+  int endSessionCalls = 0;
   String? lastRefreshTokenRequested;
+  String? lastEndSessionIdTokenHint;
+  Object? endSessionError;
 
   @override
   Future<CustomerAuthResult> login() async {
@@ -33,6 +36,13 @@ class FakeCustomerAuthGateway implements CustomerAuthGateway {
     refreshCalls++;
     lastRefreshTokenRequested = refreshToken;
     return refreshResult ?? loginResult;
+  }
+
+  @override
+  Future<void> endSession({required String idTokenHint}) async {
+    endSessionCalls++;
+    lastEndSessionIdTokenHint = idTokenHint;
+    if (endSessionError != null) throw endSessionError!;
   }
 }
 
@@ -461,13 +471,14 @@ void main() {
 
   group('CustomerSessionRepository.logout', () {
     test(
-        'clears the secure-storage entry, deletes the session, and detaches the device',
+        'opens hosted end-session, clears secure storage, and detaches device',
         () async {
+      final idToken = _fakeIdToken(sub: 'gid://shopify/Customer/1');
       final gateway = FakeCustomerAuthGateway(
         loginResult: CustomerAuthResult(
           accessToken: 'access-1',
           refreshToken: 'refresh-1',
-          idToken: _fakeIdToken(sub: 'gid://shopify/Customer/1'),
+          idToken: idToken,
           accessTokenExpiresAt: DateTime.utc(2026, 1, 1, 1),
         ),
       );
@@ -477,6 +488,8 @@ void main() {
 
       await repo.logout(localAccountId);
 
+      expect(gateway.endSessionCalls, 1);
+      expect(gateway.lastEndSessionIdTokenHint, idToken);
       expect(await sessions.latestFor(localAccountId), isNull);
       expect(secureStore.values, isEmpty);
       final device = await devices.byId('dev-1');
@@ -484,6 +497,29 @@ void main() {
 
       // The account itself survives logout — signing back in resumes it.
       expect(await accounts.byLocalId(localAccountId), isNotNull);
+    });
+
+    test('still clears local state when hosted end-session is cancelled',
+        () async {
+      final gateway = FakeCustomerAuthGateway(
+        loginResult: CustomerAuthResult(
+          accessToken: 'access-1',
+          refreshToken: 'refresh-1',
+          idToken: _fakeIdToken(sub: 'gid://shopify/Customer/2'),
+          accessTokenExpiresAt: DateTime.utc(2026, 1, 1, 1),
+        ),
+      )..endSessionError = const CustomerAuthException(
+          CustomerAuthErrorKind.cancelled,
+        );
+      final repo = repoWith(gateway);
+      final session = await repo.login();
+      final localAccountId = session.account.localAccountId;
+
+      await repo.logout(localAccountId);
+
+      expect(gateway.endSessionCalls, 1);
+      expect(await sessions.latestFor(localAccountId), isNull);
+      expect(secureStore.values, isEmpty);
     });
   });
 }

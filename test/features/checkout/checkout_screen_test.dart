@@ -55,7 +55,7 @@ void main() {
 
     expect(find.text('Tu bolsa'), findsOneWidget);
     expect(find.text(product.title), findsOneWidget);
-    expect(find.text('CONTINUAR A ENTREGA'), findsOneWidget);
+    expect(find.text('CONTINUAR A CONTACTO'), findsOneWidget);
 
     final headingRow = find.byKey(const ValueKey('bag-heading-row'));
     expect(
@@ -87,7 +87,7 @@ void main() {
     expect(find.text('2'), findsWidgets);
   });
 
-  testWidgets('guest delivery never simulates payment without a Shopify bridge',
+  testWidgets('guest contact never simulates payment without a Shopify bridge',
       (tester) async {
     final store = await _loadedStore();
     store.addToBag(store.products.firstWhere((item) => item.isInStock));
@@ -96,24 +96,16 @@ void main() {
     await tester.pump();
 
     expect(find.text('SEGURO'), findsOneWidget);
-    expect(find.text('¿Dónde lo enviamos?'), findsOneWidget);
+    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
     expect(
-      find.text(
-        'Compra como invitado. Solo pedimos lo necesario para entregar tu pedido.',
-      ),
+      find.textContaining('dirección y el envío se capturan en el checkout'),
       findsOneWidget,
     );
 
     final fields = find.byType(TextFormField);
-    expect(fields, findsNWidgets(8));
+    expect(fields, findsNWidgets(2));
     await tester.enterText(fields.at(0), 'ana@example.com');
     await tester.enterText(fields.at(1), '8112345678');
-    await tester.enterText(fields.at(2), 'Ana García');
-    await tester.enterText(fields.at(3), 'Río Pánuco 123');
-    await tester.enterText(fields.at(4), 'Del Valle');
-    await tester.enterText(fields.at(5), '66220');
-    await tester.enterText(fields.at(6), 'San Pedro Garza García');
-    await tester.enterText(fields.at(7), 'Nuevo León');
 
     await tester.ensureVisible(find.text('REVISAR PEDIDO'));
     await tester.tap(find.text('REVISAR PEDIDO'));
@@ -193,6 +185,28 @@ void main() {
     await database.close();
   });
 
+  testWidgets('bag refuses contact capture when secure checkout is unavailable',
+      (tester) async {
+    final store = await _loadedStore();
+    store.addToBag(store.products.firstWhere((item) => item.isInStock));
+
+    await tester.pumpWidget(_app(store, const BagScreen()));
+    await tester.pump();
+
+    final cta = find.text('CONTINUAR A CONTACTO');
+    await tester.scrollUntilVisible(cta, 300);
+    await tester.pumpAndSettle();
+    await tester.tap(cta);
+    await tester.pumpAndSettle();
+
+    expect(
+      find.textContaining('El checkout seguro no está disponible'),
+      findsOneWidget,
+    );
+    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(store.bagQuantity, 1);
+  });
+
   testWidgets('configured cancellation preserves bag and never shows preview',
       (tester) async {
     final store = await _loadedStore();
@@ -211,14 +225,9 @@ void main() {
       ),
     );
     final fields = find.byType(TextFormField);
+    expect(fields, findsNWidgets(2));
     await tester.enterText(fields.at(0), 'buyer@example.invalid');
     await tester.enterText(fields.at(1), '8112345678');
-    await tester.enterText(fields.at(2), 'Persona');
-    await tester.enterText(fields.at(3), 'Calle 1');
-    await tester.enterText(fields.at(4), 'Centro');
-    await tester.enterText(fields.at(5), '64000');
-    await tester.enterText(fields.at(6), 'Monterrey');
-    await tester.enterText(fields.at(7), 'Nuevo León');
     await tester.ensureVisible(find.text('REVISAR PEDIDO'));
     await tester.tap(find.text('REVISAR PEDIDO'));
     await tester.pumpAndSettle();

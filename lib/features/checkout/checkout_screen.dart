@@ -9,9 +9,9 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-
 import '../../app/media/monetta_image.dart';
 import '../../app/cart_controller.dart';
+import '../../app/checkout_buyer_identity.dart';
 import '../../app/motion.dart';
 import '../../app/shopify_checkout_coordinator.dart';
 import '../../app/theme.dart';
@@ -33,24 +33,12 @@ class CheckoutDraft {
   const CheckoutDraft({
     required this.lines,
     required this.email,
-    required this.name,
     required this.phone,
-    required this.street,
-    required this.neighborhood,
-    required this.postalCode,
-    required this.city,
-    required this.state,
   });
 
   final List<BagLine> lines;
   final String email;
-  final String name;
   final String phone;
-  final String street;
-  final String neighborhood;
-  final String postalCode;
-  final String city;
-  final String state;
 }
 
 typedef SecureCheckoutLauncher = Future<CheckoutResult> Function(
@@ -234,26 +222,58 @@ class _BagContents extends StatelessWidget {
       final controller = cartController;
       final scope = cartScope;
       final checkout = checkoutCoordinator;
+      final accountController = AccountScope.maybeOf(context);
       final productionLauncher =
           controller == null || scope == null || checkout == null
               ? null
-              : (CheckoutDraft draft) => checkout.present(
+              : (CheckoutDraft draft) async {
+                  // Rebuild intent from the live bag immediately before
+                  // Shopify reconciliation — never reuse the bag snapshot that
+                  // existed when this screen was first opened (F17).
+                  final currentIntent = [
+                    for (final line in store.bagLines)
+                      LocalCartIntent(
+                        variantId: line.variant.id,
+                        quantity: line.quantity,
+                      ),
+                  ];
+                  final buyerIdentity = await resolveCheckoutBuyerIdentity(
+                    account: accountController?.account,
+                    shopifyAccessToken:
+                        accountController?.accessTokenForShopifyCheckout,
+                    email: draft.email,
+                    phone: draft.phone,
+                  );
+                  return checkout.present(
                     controller: controller,
                     scope: scope,
-                    localIntent: localIntent,
-                    buyerIdentity: GuestCartBuyerIdentity(
-                      email: draft.email,
-                      phone: draft.phone,
-                      countryCode: 'MX',
-                    ),
-                    onCompleted: store.clearBagAfterCheckout,
+                    localIntent: currentIntent,
+                    buyerIdentity: buyerIdentity,
+                    onCompleted: (purchasedVariantIds) async {
+                      await store.clearPurchasedBagLines(purchasedVariantIds);
+                      await accountController?.loadOrders();
+                    },
                   );
+                };
+      final launcher = launchSecureCheckout ?? productionLauncher;
+      // F05: refuse to collect delivery/contact when checkout cannot finish.
+      if (launcher == null) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'El checkout seguro no está disponible en esta configuración. '
+              'Tu bolsa se conserva.',
+            ),
+          ),
+        );
+        return;
+      }
       Navigator.of(context).push(
         MaterialPageRoute<void>(
           builder: (_) => StoreScope(
             notifier: store,
             child: CheckoutFlowScreen(
-              launchSecureCheckout: launchSecureCheckout ?? productionLauncher,
+              launchSecureCheckout: launcher,
               // The coordinator decides at invocation time whether the fresh
               // reconciled URL is available; do not snapshot that state before
               // the checkout screen performs its final reconciliation.
@@ -316,7 +336,7 @@ class _BagContents extends StatelessWidget {
             : _OrderSummary(
                 subtotal: subtotal,
                 shipping: shipping,
-                ctaLabel: 'Continuar a entrega',
+                ctaLabel: 'Continuar a contacto',
                 onContinue: continueToCheckout,
               );
 
@@ -378,27 +398,28 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
   final _email = TextEditingController();
-  final _name = TextEditingController();
   final _phone = TextEditingController();
-  final _postalCode = TextEditingController();
-  final _street = TextEditingController();
-  final _neighborhood = TextEditingController();
-  final _city = TextEditingController();
-  final _state = TextEditingController();
   bool _reviewing = false;
   bool _launching = false;
+  bool _didPrefillContact = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_didPrefillContact) return;
+    _didPrefillContact = true;
+    final account = AccountScope.maybeOf(context)?.account;
+    final email = account?.email?.trim();
+    if (email != null && email.isNotEmpty && _email.text.isEmpty) {
+      _email.text = email;
+    }
+  }
 
   @override
   void dispose() {
     _scrollController.dispose();
     _email.dispose();
-    _name.dispose();
     _phone.dispose();
-    _postalCode.dispose();
-    _street.dispose();
-    _neighborhood.dispose();
-    _city.dispose();
-    _state.dispose();
     super.dispose();
   }
 
@@ -423,18 +444,20 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
           CheckoutDraft(
             lines: lines,
             email: _email.text.trim(),
-            name: _name.text.trim(),
             phone: _phone.text.trim(),
-            street: _street.text.trim(),
-            neighborhood: _neighborhood.text.trim(),
-            postalCode: _postalCode.text.trim(),
-            city: _city.text.trim(),
-            state: _state.text.trim(),
           ),
         );
         if (!mounted) return;
         switch (result) {
           case CheckoutCompleted():
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(
+                content: Text(
+                  'Shopify confirmó tu compra. Revisaremos Mis pedidos; '
+                  'artículos no comprados se conservan en tu bolsa.',
+                ),
+              ),
+            );
             Navigator.of(context).popUntil((route) => route.isFirst);
           case CheckoutCancelled():
             ScaffoldMessenger.of(context).showSnackBar(
@@ -446,7 +469,12 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             final fallback = widget.openExternalCheckout;
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
-                content: Text(userMessage),
+                content: Text(
+                  fallback == null
+                      ? userMessage
+                      : '$userMessage Abrir el navegador no confirma el pago; '
+                          'revisa Mis pedidos si terminaste ahí.',
+                ),
                 action: fallback == null
                     ? null
                     : SnackBarAction(
@@ -503,25 +531,16 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                 final form = _reviewing
                     ? _ReviewPanel(
                         email: _email.text,
-                        name: _name.text,
                         phone: _phone.text,
                         shipping: _shippingFor(store.bagSubtotal),
-                        address:
-                            '${_street.text}, ${_neighborhood.text}\n${_postalCode.text} ${_city.text}, ${_state.text}',
                         launching: _launching,
                         onEdit: () => setState(() => _reviewing = false),
                         onPay: () => unawaited(_pay()),
                       )
-                    : _DeliveryForm(
+                    : _ContactForm(
                         formKey: _formKey,
                         email: _email,
-                        name: _name,
                         phone: _phone,
-                        postalCode: _postalCode,
-                        street: _street,
-                        neighborhood: _neighborhood,
-                        city: _city,
-                        state: _state,
                         shipping: _shippingFor(store.bagSubtotal),
                         onContinue: _review,
                       );
@@ -625,7 +644,7 @@ class _CheckoutProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Bolsa', 'Entrega', 'Pago'];
+    const labels = ['Bolsa', 'Contacto', 'Pago'];
     return Container(
       color: context.monettaColors.surfaceMuted,
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
@@ -991,30 +1010,18 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-class _DeliveryForm extends StatelessWidget {
-  const _DeliveryForm({
+class _ContactForm extends StatelessWidget {
+  const _ContactForm({
     required this.formKey,
     required this.email,
-    required this.name,
     required this.phone,
-    required this.postalCode,
-    required this.street,
-    required this.neighborhood,
-    required this.city,
-    required this.state,
     required this.shipping,
     required this.onContinue,
   });
 
   final GlobalKey<FormState> formKey;
   final TextEditingController email;
-  final TextEditingController name;
   final TextEditingController phone;
-  final TextEditingController postalCode;
-  final TextEditingController street;
-  final TextEditingController neighborhood;
-  final TextEditingController city;
-  final TextEditingController state;
   final double shipping;
   final VoidCallback onContinue;
 
@@ -1028,10 +1035,12 @@ class _DeliveryForm extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('¿Dónde lo enviamos?', style: display(30)),
+          Text('¿Cómo te contactamos?', style: display(30)),
           const SizedBox(height: 8),
           Text(
-            'Compra como invitado. Solo pedimos lo necesario para entregar tu pedido.',
+            'La dirección y el envío se capturan en el checkout seguro de '
+            'Shopify para no pedirlos dos veces. Totales finales también '
+            'vienen de Shopify.',
             style: sans(size: 12.5, color: context.monettaColors.contentMuted),
           ),
           const SizedBox(height: 30),
@@ -1054,64 +1063,6 @@ class _DeliveryForm extends StatelessWidget {
             label: 'Teléfono',
             keyboardType: TextInputType.phone,
             autofillHints: const [AutofillHints.telephoneNumber],
-            validator: _required,
-          ),
-          const SizedBox(height: 28),
-          Text('Dirección de entrega'.toUpperCase(), style: eyebrow(size: 9)),
-          const SizedBox(height: 14),
-          _CheckoutField(
-            controller: name,
-            label: 'Nombre completo',
-            autofillHints: const [AutofillHints.name],
-            validator: _required,
-          ),
-          const SizedBox(height: 14),
-          _CheckoutField(
-            controller: street,
-            label: 'Calle y número',
-            autofillHints: const [AutofillHints.streetAddressLine1],
-            validator: _required,
-          ),
-          const SizedBox(height: 14),
-          _CheckoutField(
-            controller: neighborhood,
-            label: 'Colonia',
-            validator: _required,
-          ),
-          const SizedBox(height: 14),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: _CheckoutField(
-                  controller: postalCode,
-                  label: 'Código postal',
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  autofillHints: const [AutofillHints.postalCode],
-                  validator: (value) {
-                    final required = _required(value);
-                    if (required != null) return required;
-                    return value!.length == 5 ? null : 'Usa 5 dígitos';
-                  },
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: _CheckoutField(
-                  controller: city,
-                  label: 'Ciudad',
-                  autofillHints: const [AutofillHints.addressCity],
-                  validator: _required,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 14),
-          _CheckoutField(
-            controller: state,
-            label: 'Estado',
-            autofillHints: const [AutofillHints.addressState],
             validator: _required,
           ),
           const SizedBox(height: 26),
@@ -1249,20 +1200,16 @@ class _DeliveryOption extends StatelessWidget {
 class _ReviewPanel extends StatelessWidget {
   const _ReviewPanel({
     required this.email,
-    required this.name,
     required this.phone,
     required this.shipping,
-    required this.address,
     required this.launching,
     required this.onEdit,
     required this.onPay,
   });
 
   final String email;
-  final String name;
   final String phone;
   final double shipping;
-  final String address;
   final bool launching;
   final VoidCallback onEdit;
   final VoidCallback onPay;
@@ -1275,7 +1222,8 @@ class _ReviewPanel extends StatelessWidget {
         Text('Todo listo', style: display(30)),
         const SizedBox(height: 8),
         Text(
-          'Revisa tu entrega antes de continuar al pago protegido.',
+          'Revisa tu contacto. Dirección, envío e impuestos finales se '
+          'confirman en Shopify.',
           style: sans(size: 12.5, color: context.monettaColors.contentMuted),
         ),
         const SizedBox(height: 30),
@@ -1285,14 +1233,12 @@ class _ReviewPanel extends StatelessWidget {
           onEdit: onEdit,
         ),
         _ReviewBlock(
-          title: 'Entrega',
-          value: '$name\n$address',
-          onEdit: onEdit,
-        ),
-        _ReviewBlock(
-          title: 'Método',
+          title: 'Entrega y envío',
           value:
-              'Envío estándar · 3 a 5 días hábiles\n${shipping == 0 ? 'Estimado: gratis' : 'Estimado: ${kMoney.format(shipping)}'}',
+              'Se capturan en Shopify Checkout\n'
+              'Estimado local previo: '
+              '${shipping == 0 ? 'gratis' : kMoney.format(shipping)} '
+              '(no final)',
         ),
         const SizedBox(height: 24),
         FilledButton.icon(
@@ -1307,13 +1253,14 @@ class _ReviewPanel extends StatelessWidget {
                   ),
                 )
               : const Icon(Icons.lock_outline, size: 16),
-          label: const Text('CONTINUAR AL PAGO SEGURO'),
+          label: Text(
+            launching ? 'ABRIENDO…' : 'CONTINUAR AL PAGO SEGURO',
+          ),
         ),
         const SizedBox(height: 14),
         Text(
-          'Shopify procesa el pago. Monetta nunca ve ni guarda los datos de tu tarjeta.',
-          textAlign: TextAlign.center,
-          style: sans(size: 10.5, color: context.monettaColors.contentMuted),
+          'Shopify procesa el pago. Monetta nunca ve los datos de tu tarjeta.',
+          style: sans(size: 11.5, color: context.monettaColors.contentMuted),
         ),
       ],
     );
