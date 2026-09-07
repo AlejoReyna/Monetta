@@ -14,6 +14,7 @@
     "start": "tsx --env-file-if-exists=.env src/api/server.ts",
     "monitor": "tsx --env-file-if-exists=.env src/monitor/scheduler.ts",
     "crawl": "tsx --env-file-if-exists=.env src/cli/manualCrawl.ts",
+    "dashboard:passphrase": "tsx src/cli/dashboardPassphrase.ts",
     "seed-demo": "tsx --env-file-if-exists=.env src/cli/seedDemoData.ts",
     "test": "vitest run",
     "test:watch": "vitest"

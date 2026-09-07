@@ -54,6 +54,107 @@ cd ../..            && flutter analyze && flutter test         # app
 
 ---
 
+## 0.1 Audited baseline, pre-production target, and gap analysis (2026-09-02)
+
+### 0.1.1 Audited baseline (2026-09-02)
+
+An audit of the codebase, migration history, server environment, and operations log establishes the following facts:
+
+1. **Host and TLS baseline**:
+   - The Atlantic.Net server in Texas (`209.23.11.117`) is operational.
+   - `catalog.monetta.mx` has a valid public DNS A-record and Let's Encrypt TLS terminated by Caddy, proxying to `monetta-catalog-api:8081`.
+   - `GET https://catalog.monetta.mx/livez` returns HTTP 200 (`{"status":"ok"}`). Process liveness is functioning.
+   - `GET https://catalog.monetta.mx/healthz` returns HTTP 503 (`status: "degraded"`). No live crawl has completed successfully on this host.
+   - The API currently serves 16 static fallback items from `src/catalog/curatedUsCatalog.ts` (`dataOrigin: "curated_us_snapshot"`, dated 2026-08-12). No live inventory exists or is served.
+
+2. **Crawl status and failure history**:
+   - Real source smoke crawls executed on 2026-08-28 from Texas produced zero valid live inventory:
+     - Coach (`coach_us`): `partial` status, 3,197 URLs discovered, 5 pages fetched, 0 parsed, 6 4xx responses.
+     - Michael Kors (`michael_kors_us`): `blocked` status, 643 URLs discovered, 1 page fetched, 0 parsed, halted on `captcha_or_block`.
+   - Following the strict no-stealth policy (§ 2), scheduled crawling was immediately disabled (`LIVE_CRAWL_ENABLED=false`), and `monetta-catalog-monitor.service` was stopped and disabled.
+   - Scheduled crawling is disabled, and no real crawl data may be represented as production-ready.
+
+3. **Database migrations baseline**:
+   - `services/catalog_monitor/src/db/migrations/` already contains migrations `001` through `007`:
+     - `001_init.sql` (initial schema)
+     - `002_add_guess_and_steve_madden.sql`
+     - `003_add_product_variants.sql`
+     - `004_add_curated_brand_and_perfume_sources.sql`
+     - `005_notification_event_outbox.sql`
+     - `006_external_source_policies.sql`
+     - `007_internal_admin_request_replays.sql`
+   - The earlier planning draft proposed a migration numbered 004 for selection, which collided with real history (`004_add_curated_brand_and_perfume_sources.sql`) and is obsolete. Selection migrations must start post-`007`:
+     - `008_selection.sql`: selection document versions, product selection state/placements/tiers, crawl run selection columns.
+     - `009_events_and_alerts.sql`: `product_events` and `alert_state`.
+     - `010_dashboard_sessions.sql`: `dashboard_sessions` (browser dashboard session storage).
+
+4. **Mobile app rail baseline**:
+   - The Flutter client contains `ExternalCatalogConfig` and `ExternalCatalogController`.
+   - The rail is gated behind `ENABLE_EXTERNAL_CATALOG` (`bool.fromEnvironment`) and `EXTERNAL_CATALOG_BASE_URL`.
+   - Off by default in production app builds (`ENABLE_EXTERNAL_CATALOG=false`). When off, no HTTP client is constructed, no local cache file is touched, and `controller.items` is empty.
+   - Public production app builds must strictly remain `ENABLE_EXTERNAL_CATALOG=false`.
+
+5. **Administrative control plane and ownership boundary**:
+   - The native Monetta app contains an owner admin screen (`lib/features/admin/admin_screen.dart`) with a "Fuentes" tab (`_SourcesSection`).
+   - "Fuentes" manages *source-level operational policy* (`enabled`, `itemLimit`, commission rates) via `accounts_orders` (`HttpExternalCatalogAdminClient`) talking to `catalog_monitor`'s signed internal admin endpoints (`/internal/admin/sources/:sourceId`).
+   - It is NOT the product-selection dashboard!
+   - The planned browser dashboard (`docs/CATALOG_DASHBOARD.md`) is the *sole product-selection authority* (managing `selection.json`, Stage A/B rules, Stage C pin/hide).
+   - The effective visibility rule across both systems is:
+     `source policy enabled && selection match && placement not hidden`.
+
+6. **Current API vs target API transition**:
+   - Current implementation: `GET /v1/external-catalog` in `src/api/server.ts` is unauthenticated and emits `Cache-Control: public, max-age=60`. It filters by configured `ENABLED_SOURCE_IDS`, but does **not** yet filter served rows or health by persisted `external_source_policies.enabled`. Internal admin endpoints require signed HMAC headers (`X-Monetta-Signature`).
+   - Target implementation: `GET /v1/external-catalog` requires Bearer token authentication (`CATALOG_API_TOKENS`) for client app builds, returns `Cache-Control: private`, and enforces the complete effective-visibility rule before serving a row. The browser dashboard accesses `/admin/*` endpoints authenticated via session tokens (`POST /admin/session`) protected by exact-origin CORS (`DASHBOARD_ORIGINS`).
+
+7. **Implementation gaps (work not yet built)**:
+    - Pure TypeScript selection engine (`src/selection/` with `types.ts`, `document.ts`, `glob.ts`, `engine.ts`) is implemented (WP-11), integrated into discovery via Stage-A candidate filtering (WP-12), and Stage B product filtering with selection-aware snapshot diff invariants I1–I6 is implemented (WP-13).
+    - `008_selection.sql` now establishes the selection schema (WP-10), with repository mapping and selection-aware persistence implemented in catalog monitor (WP-13), but selection DB version persistence/CLI/admin API remain pending (WP-14/15). `009_events_and_alerts.sql` and `010_dashboard_sessions.sql` do not exist.
+   - Selection persistence and CLI (`npm run selection:*`) do not exist.
+   - Two-tier scheduler (watch run, pinned watch run) does not exist.
+   - Change events endpoint (`/v1/external-catalog/changes`) does not exist.
+   - Bearer token authentication middleware and exact-origin CORS do not exist.
+   - React/Vite dashboard in `dashboard/` does not exist.
+   - Automated Resend email alerting does not exist.
+   - Work packages are NOT marked `done` merely because a related prototype or deployment artifact exists.
+
+### 0.1.2 Private pre-production target environment
+
+To make the external catalog plans implementation-ready without risking public production disruption, all upcoming development and deployment targets a **private pre-production environment**:
+
+- **Separate staging hostname and origin**:
+  - Ingress configured on a distinct pre-production hostname/route (e.g. `catalog.staging.monetta.mx` or dedicated pre-production reverse proxy port/route) with its own Caddy TLS configuration.
+  - Web dashboard deployed to a dedicated staging origin (e.g. Vercel staging preview or `dash.staging.monetta.mx`), allowlisted in `DASHBOARD_ORIGINS`.
+- **Isolated database and service configuration**:
+  - Independent database (`monetta_catalog_staging` or isolated pre-production schema) with dedicated role and credentials, preventing test runs, rollback drills, and mock data from polluting production state.
+  - Dedicated configuration file (`.env.staging`) specifying isolated cron schedules, independent auth tokens (`CATALOG_API_TOKENS`), unique dashboard passphrase verifier, and `LIVE_CRAWL_ENABLED=false` by default.
+  - Pre-production migrations, seed CLI, and restore drills operate strictly within this isolated environment.
+- **Internal-only app builds**:
+  - App staging builds compiled exclusively using `config/dart_defines.staging.json`, setting `ENABLE_EXTERNAL_CATALOG=true` and pointing `EXTERNAL_CATALOG_BASE_URL` to the pre-production backend.
+  - Distributed only to internal owner test devices.
+- **Public production app flag strictly preserved**:
+  - Production app releases strictly keep `ENABLE_EXTERNAL_CATALOG=false`.
+  - Under no circumstances is the external catalog rail enabled in public App Store builds until all go-live criteria (§ 11) are satisfied.
+
+### 0.1.3 Durability, operational standards, and feature completeness
+
+- **Operational requirements preserved**:
+  - Automated TLS on all external endpoints.
+  - Nightly database dumps with 14-day retention and mandatory restore rehearsal into a scratch database with row-count verification.
+  - Multi-tier kill switches (§ 14) fully functional and testable over SSH.
+  - Strict rate limits: minimum request delay `REQUEST_DELAY_MS >= 1000` (floor of 1 req/s per domain), daily crawl page budget (`DAILY_PAGE_BUDGET`).
+  - Selection auditability: immutable version history recording `version`, `hash`, `applied_at`, `applied_by`, and `note`.
+  - Zero tolerance for crawler evasion: CAPTCHAs, 403s, or regional redirects (`wrong_market`) are stop signals, triggering immediate source pause. No proxy rotation, no UA spoofing, no CAPTCHA solvers.
+- **Ownership boundary and effective visibility rule**:
+  - Source policy (`external_source_policies`, migration `006`) is a coarse operational gate managed via the native "Fuentes" screen. In the current baseline it prevents future scheduled crawls only; WP-16 extends the read path so a paused source also cannot be served or counted in overall health.
+  - Selection document (`selection_versions`, migration `008`) is the sole product selection authority managed via the dashboard / CLI.
+  - Effective visibility rule:
+    $$\text{Effective Visibility} = (\text{source policy enabled}) \land (\text{selection match}) \land (\text{placement} \neq \text{'hidden'}).$$
+- **Feature completeness without live crawling**:
+  - The external catalog software pipeline (selection engine, diff logic, watch runs, admin API, dashboard console, mobile client display) can and must be brought to full feature completeness using synthetic fixtures and captured offline payloads even while every live merchant source is disabled, blocked, or degraded.
+  - Under no circumstances may curated snapshot data (`dataOrigin: "curated_us_snapshot"`), test fixtures, or demo records be represented or presented as live merchant inventory.
+
+---
+
 ## 1. What is being built, in one paragraph
 
 Today the monitor discovers **every** product URL in a brand's sitemap, fetches
@@ -173,21 +274,32 @@ Crawling 8 000 Coach URLs every three hours is not a product, it is an incident.
 | `availability` | C | stored row | no |
 | `placements` / `hidden` | C | stored row | no |
 
-**Stage A is the cost lever.** Stage B rules are legitimate but must be
+**Stage A is the cost lever and sole candidate gate.** Stage B rules are legitimate but must be
 documented in the CLI output as "costs a fetch per candidate", so an owner never
 believes `priceUsdRange` alone narrows the crawl. Stage C changes take effect on
 the next API response — no crawl, no deploy, no restart.
 
+**Stage composition semantics**:
+- **Stage A gates fetch candidates**: Only Stage-A rules (`externalId`, `urlExact`, `urlPattern`, `all`) match URL candidates in discovery. Stage-A includes are OR-ed in source rule order. A source with no Stage-A include produces zero candidates, even if it defines Stage-B/C rules. To crawl/inspect an entire source, the owner must explicitly write `{"kind": "all"}`.
+- **Stage B & C filter Stage-A candidates**: If a source has one or more Stage-B include rules, the extracted product must match at least one of them. If a source has one or more Stage-C include rules, the product must match at least one of them. A matching exclude at any stage rejects the product. No Stage-B or Stage-C rule can create a candidate on its own.
+- **Metadata ownership**: The winning Stage-A include rule exclusively owns the candidate's output metadata (`placements`, `priority`, `tier`). Stage-B and Stage-C rules are pure filters and cannot carry `placements`, `priority`, or `tier`.
+- **URL-stage contract**: `matchUrl(sourceId, url)` evaluates URL candidates (`selected: true` means "fetch candidate", not final app display). It emits `requiresProductEvaluation: boolean` (`true` whenever the source defines any Stage-B or Stage-C rules). `matchProduct(sourceId, product)` performs the final evaluation: re-evaluating Stage A from `product.canonicalUrl`, then applying Stage-B and Stage-C filters.
+
 ### 4.2 Precedence and the fail-closed default
 
-Evaluated in this order, first match wins:
+Evaluated in two composable steps:
 
-1. an `include` rule with `"tier": "pinned"` → **selected** (the only thing that
-   beats an exclude; pins are how the owner keeps one SKU inside a broad exclude)
-2. any `exclude` match → **not selected**
-3. any `include` match → **selected**, carrying that rule's `placements`,
-   `priority` and `tier`
-4. otherwise → **not selected**
+**Step 1: Stage-A gating (URL / external-ID candidate)**
+1. A Stage-A `include` rule with `"tier": "pinned"` matches → **selected immediately** (bypasses all exclusions and B/C filters; pins are how the owner guarantees visibility for specific SKUs).
+2. Any Stage-A `exclude` match → **not selected**.
+3. Any normal Stage-A `include` match → candidate passes Stage A, carrying that Stage-A rule's `placements`, `priority` and `tier`.
+4. Otherwise → **not selected**.
+
+**Step 2: Stage-B and Stage-C filtering (for normal Stage-A candidates)**
+1. Any matching Stage-B or Stage-C `exclude` → **not selected**.
+2. If source has Stage-B include rules and product fails to match at least one → **not selected**.
+3. If source has Stage-C include rules and product fails to match at least one → **not selected**.
+4. Otherwise → **selected**, carrying the winning Stage-A rule's metadata.
 
 **A source with zero include rules selects zero products.** Never "everything".
 An empty, malformed or unparseable document must abort the run with
@@ -268,12 +380,21 @@ availability, variants, `last_seen_at`, `fingerprint` and append
 **I6 — partial means untouched.** Unchanged from today: `blocked`, `partial` and
 `failed` discovery runs write nothing to `products`.
 
+**Selection-aware persistence (WP-13):** As of WP-13, the temporary write suppression from WP-12 is replaced by selection-aware snapshot reconciliation implementing invariants I1–I6. Full snapshots under selection persist matching products with selection metadata, version-scoped missing baselines prevent spurious deactivations, version bumps stamp carried-over rows and deselect unselected active rows (preserving history and `isActive`), and partial/blocked/failed runs make zero product writes.
+
 ---
 
 ## 6. Schema changes
 
+> **Migration sequence correction (2026-09-02):** The `services/catalog_monitor`
+> database currently has migrations `001` through `007` applied in repository
+> history (`001_init.sql` through `007_internal_admin_request_replays.sql`).
+> Selection work must safely begin at `008_selection.sql`. Event/alert tables
+> land in `009_events_and_alerts.sql`, followed by dashboard session storage in
+> `010_dashboard_sessions.sql` ([`CATALOG_DASHBOARD.md`](CATALOG_DASHBOARD.md) § 9).
+
 ```sql
--- src/db/migrations/004_selection.sql
+-- src/db/migrations/008_selection.sql
 CREATE TABLE IF NOT EXISTS selection_versions (
   version    BIGSERIAL PRIMARY KEY,
   document   JSONB       NOT NULL,
@@ -313,7 +434,7 @@ ALTER TABLE crawl_runs
 ```
 
 ```sql
--- src/db/migrations/005_events_and_alerts.sql
+-- src/db/migrations/009_events_and_alerts.sql
 CREATE TABLE IF NOT EXISTS product_events (
   id          BIGSERIAL PRIMARY KEY,
   source_id   TEXT        NOT NULL REFERENCES sources(id),
@@ -336,18 +457,40 @@ CREATE TABLE IF NOT EXISTS alert_state (
 );
 ```
 
-`ADD COLUMN IF NOT EXISTS` + defaults keeps both migrations online-safe on a
+`ADD COLUMN IF NOT EXISTS` + defaults keeps these migrations online-safe on a
 table this size; the existing `migrate.ts` runs each file in one transaction.
 
 ---
 
 ## 7. API surface after this plan
 
+### 7.1 Current vs target transition
+
+- **Current baseline**: `GET /v1/external-catalog` is unauthenticated and emits
+  `Cache-Control: public, max-age=60`. Internal administrative control exists only
+  via signed HMAC endpoints (`/internal/admin/sources*` requiring
+  `X-Monetta-Signature`) consumed by `accounts_orders` for coarse source-level
+  policy (the native app's "Fuentes" screen).
+- **Target transition**:
+  1. App access to `GET /v1/external-catalog` transitions to authenticated Bearer
+     tokens (`CATALOG_API_TOKENS`) with `Cache-Control: private`.
+  2. Browser dashboard access to `/admin/*` routes is session-authenticated via
+     `POST /admin/session` (passphrase verified by scrypt) and protected by
+     exact-origin CORS (`DASHBOARD_ORIGINS`), eliminating static tokens from
+     the browser bundle.
+  3. Staging app feed preview is available directly to the dashboard session at
+     `GET /admin/feed-preview`, returning byte-for-byte the active client payload.
+  4. The signed `/internal/admin/sources*` endpoints remain dedicated to
+     `accounts_orders` operational source policy, maintaining a strict boundary
+     between source policy and product selection.
+
+### 7.2 Route specifications
+
 | Route | Auth | Notes |
 |---|---|---|
 | `GET /livez` | none | process liveness, unchanged |
 | `GET /healthz` | none | terse: per-source status + reasons; 503 if any enabled source is unhealthy |
-| `GET /v1/external-catalog` | `Bearer` (`CATALOG_API_TOKENS`) | + `placements`, `watchTier`, `matchedRuleId`, `selectionVersion`; ETag/304 kept |
+| `GET /v1/external-catalog` | `Bearer` (`CATALOG_API_TOKENS`) | + `placements`, `watchTier`, `matchedRuleId`, `selectionVersion`; `Cache-Control: private`; ETag/304 kept |
 | `GET /v1/external-catalog/changes?since=<iso>` | `Bearer` | `product_events` since a timestamp, capped at 500, newest first |
 | `GET /admin/status` | `Bearer` (`ADMIN_API_TOKENS`) | full run metrics, budgets, selection version, per-source counts |
 | `GET /admin/selection` | admin | current document + version + hash |
@@ -692,10 +835,14 @@ disallowed-path refusal.
 
 ### Phase 1 — Selection
 
-#### WP-10 · Migration 004
-**Depends on** WP-01 · **Touches** `src/db/migrations/004_selection.sql`
+#### WP-10 · Migration 008 (Selection schema)
+**Depends on** Migration baseline 001–007 · **Touches** `src/db/migrations/008_selection.sql`
 
-Exactly the DDL in § 6. Defaults chosen so existing rows keep serving.
+Applies the selection DDL specified in § 6 as migration `008_selection.sql`,
+following real migrations `001` through `007`. Schema defaults ensure existing
+rows continue serving uninterrupted. Developing and validating the migration
+against the isolated pre-production database does not require live crawls.
+
 **Acceptance** · `npm run migrate` applies once and is a no-op on re-run; a
 second `npm run migrate` prints `applied: []`.
 **Verify** `npm run migrate && npm run migrate`
@@ -730,18 +877,19 @@ pages and leaves `products` untouched.
 **Verify** `npm test -- runner`
 
 #### WP-13 · Stage B filtering and selection-aware diff
-**Depends on** WP-12 · **Touches** `src/crawl/runner.ts`, `src/crawl/snapshotDiff.ts`, `src/crawl/ports.ts`, `src/db/pgProductRepository.ts`, `test/snapshot.test.ts`
+**Depends on** WP-12 · **Touches** `src/crawl/runner.ts`, `src/crawl/snapshotDiff.ts`, `src/crawl/ports.ts`, `src/db/pgProductRepository.ts`, `src/db/pgCrawlRunRepository.ts`, `test/snapshot.test.ts`, `test/runner.test.ts`
 
 Apply `matchProduct` after extraction (drop non-matching, count them). Implement
 invariants **I1–I6** from § 5, including `suppressDeactivation` on a version
 change and the `deselected` state transition. `ProductRepository` grows
 `getSelectedActiveProducts(sourceId, selectionVersion)` and
-`markDeselected(records)`; the in-memory fake keeps parity.
+the atomic `applySelectionSnapshot(diff: SelectionSnapshotPersistence)`; the in-memory fake keeps parity.
 
 **Acceptance** · A test proves narrowing the selection from 100 to 5 items
 deactivates **nothing** and deselects 95; a second run at the same version still
 deactivates nothing; an item genuinely missing for two full runs at a stable
 version does go inactive.
+**Status** · Completed. Invariants I1–I6 implemented, pure diff path `diffSelectionSnapshot` verified, repository ports extended, and all 10 required test scenarios covered with unit and multi-run runner tests.
 **Verify** `npm test -- snapshot runner`
 
 #### WP-14 · Selection persistence, seed file and CLI
@@ -772,16 +920,17 @@ leaves the current version in force.
 **Verify** `npm test -- api.admin`
 
 #### WP-16 · Stage C: serve-time selection and placements
-**Depends on** WP-13 · **Touches** `src/api/server.ts`, `src/api/schema.ts`, `src/catalog/curatedUsCatalog.ts`, `test/api.test.ts`
+**Depends on** WP-13 · **Touches** `src/api/server.ts`, `src/api/schema.ts`, `src/catalog/curatedUsCatalog.ts`, `src/admin/sourcePolicy.ts`, `test/api.test.ts`
 
-`/v1/external-catalog` serves only `selection_state = 'selected' AND is_active`,
+`/v1/external-catalog` serves only `source_policy.enabled AND selection_state = 'selected' AND is_active`,
 adds `placements`, `watchTier`, `matchedRuleId` and `selectionVersion`
 (additive — no `schemaVersion` bump), and filters the curated floor through the
 same selection. `CURATED_FLOOR_ENABLED=false` removes the floor entirely.
 
-**Acceptance** · A deselected row never appears in the response; ETag changes
-when the selection version changes; the floor respects both the flag and the
-selection.
+**Acceptance** · A deselected row and every row from a paused source never
+appear in the response; paused sources are excluded from overall health; ETag
+changes when the selection version or source-policy state changes; the floor
+respects both the flag and the selection.
 **Verify** `npm test -- api`
 
 ### Phase 2 — Always live
@@ -802,11 +951,11 @@ enforced independently.
 **Verify** `npm test -- watchRun scheduler`
 
 #### WP-21 · Change events endpoint
-**Depends on** WP-20 · **Touches** `src/api/server.ts`, `src/db/pgEventRepository.ts`, `test/api.events.test.ts`
+**Depends on** WP-20 · **Touches** `src/db/migrations/009_events_and_alerts.sql`, `src/api/server.ts`, `src/db/pgEventRepository.ts`, `test/api.events.test.ts`
 
 `GET /v1/external-catalog/changes?since=<iso>&limit=<n≤500>`. Invalid or missing
 `since` defaults to 24 h ago; the response carries `nextSince` so a client can
-page without gaps.
+page without gaps. Persisted via migration `009_events_and_alerts.sql`.
 
 **Acceptance** · Events are newest-first, bounded, and never leak internal ids
 or fingerprints.
@@ -855,12 +1004,14 @@ every new env var appears in `.env.example` with a comment; no secret values.
 **Verify** `docker compose -f services/catalog_monitor/deploy/atlantic/compose.yml config >/dev/null`
 
 #### WP-31 · Operations runbook
-**Depends on** WP-30 · **Touches** `docs/OPERATIONS.md` (new), `services/catalog_monitor/README.md`
+**Depends on** WP-30 · **Touches** `docs/OPERATIONS.md`, `services/catalog_monitor/README.md`
 
-`src/monitor/scheduler.ts` already points at `docs/OPERATIONS.md`, which does
-not exist — this WP makes that reference true. Contents: first-time provisioning
-(role/db, network, env files, DNS), deploy, rollback, the four kill switches,
-backup/restore drill, log locations, what to do when a source is blocked.
+An initial operational runbook was created for the base host setup on 2026-08-28.
+This WP updates and validates the runbook for the selection and authenticated
+pre-production environment: isolated pre-production configuration, migration
+verification from baseline 007 through 010, the multi-tier kill switches, the
+backup/restore drill into a scratch database, log inspection, and the explicit
+pause procedure for blocked sources.
 
 **Acceptance** · Every command in the runbook was actually executed on the
 server, and its real output (redacted) is pasted in.
@@ -956,13 +1107,13 @@ Execute § 11 end to end, record the evidence, then flip
 
 | WP | Title | Status | Owner | Notes |
 |---|---|---|---|---|
-| WP-00 | Egress and market check | todo | | blocks everything |
+| WP-00 | Egress and market check | todo | | blocks enabling a live merchant source; does not block fixture-based pre-production work |
 | WP-01 | Capped smoke crawls | todo | | |
 | WP-02 | Structured endpoints | todo | | optional per source |
-| WP-10 | Migration 004 | todo | | |
-| WP-11 | Selection engine | todo | | |
-| WP-12 | Stage A filtering | todo | | |
-| WP-13 | Stage B + diff invariants | todo | | highest-risk WP |
+| WP-10 | Migration 008 (Selection schema) | done | | Added 008_selection.sql (selection_versions table, products selection/placement columns, crawl_runs columns) |
+| WP-11 | Selection engine | done | | Pure TypeScript selection engine: document parser, glob compiler, browser-compatible canonical hash, and precedence engine |
+| WP-12 | Stage A filtering | done | | Stage-A candidate filtering in discovery, budget enforcement, urlsSelected metrics, and diff-suppression safeguard |
+| WP-13 | Stage B + diff invariants | done | | Stage B filtering, selection-aware snapshot diff (invariants I1–I6), deselection transitions, and version-scoped deactivation |
 | WP-14 | Persistence, seed, CLI | todo | | |
 | WP-15 | Admin API | todo | | |
 | WP-16 | Serve-time + placements | todo | | |
@@ -971,7 +1122,7 @@ Execute § 11 end to end, record the evidence, then flip
 | WP-22 | API auth | todo | | |
 | WP-23 | Alerting + health | todo | | |
 | WP-30 | Deployment assets | todo | | |
-| WP-31 | Operations runbook | todo | | creates `docs/OPERATIONS.md` |
+| WP-31 | Operations runbook | todo | | updates/validates `docs/OPERATIONS.md` for selection/pre-prod |
 | WP-32 | CI | todo | | |
 | WP-40 | Client config + refresh | todo | | |
 | WP-41 | Placements → surfaces | todo | | |
@@ -1000,6 +1151,7 @@ Execute § 11 end to end, record the evidence, then flip
 
 | Switch | Effect | Blast radius |
 |---|---|---|
+| Native app "Fuentes" screen / `PUT /internal/admin/sources/:sourceId` (`enabled: false`) | coarse operational source-level pause; scheduler skips future runs. After WP-16, API/health also omit the source. | one source; current scheduler effect begins on its next run, API/health effect lands with WP-16 |
 | `selection.json` → `"enabled": false` on a source, then `selection:apply` | that source stops being crawled **and** stops being served | one source, seconds, no deploy |
 | `LIVE_CRAWL_ENABLED=false` + restart `monetta-catalog-monitor` | all crawling stops; the API keeps serving stored rows | all sources, one restart |
 | `docker compose stop monetta-catalog-api` | the feed goes away; the app falls back to its local cache | app shows slightly stale data, never a blank screen |

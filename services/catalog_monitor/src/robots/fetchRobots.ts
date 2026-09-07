@@ -79,13 +79,16 @@ export async function recordRobotsFailureRun(
     endedAt: now(),
     status: 'failed',
     isFullSnapshot: false,
+    selectionVersion: null,
     urlsDiscovered: 0,
+    urlsSelected: 0,
     pagesFetched: 0,
     successfulParses: 0,
     newItems: 0,
     changedItems: 0,
     missingItems: 0,
     inactiveItems: 0,
+    deselectedItems: 0,
     errorsByType: { robots_unavailable: 1 },
   });
   logger.error('robots.txt unavailable — refusing to crawl this source', { sourceId, reason });

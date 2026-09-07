@@ -109,6 +109,13 @@ PLAYWRIGHT_FALLBACK_ENABLED=false
 USER_AGENT=MonettaCatalogMonitor/0.1 (+https://monetta.mx; internal research prototype; contact: <real-monitored-mailbox>)
 REQUEST_DELAY_MS=1000
 CATALOG_CRON=17 3 * * *
+DASHBOARD_ORIGINS=https://dash.staging.monetta.mx
+DASHBOARD_PASSPHRASE_VERIFIER=<paste-from-dashboard-passphrase-cli>
+DASHBOARD_SESSION_TTL_HOURS=12
+# Staging API isolation (plan §0.1.2): pre-production uses its own hostname,
+# database (monetta_catalog_staging) and .env.staging with
+# LIVE_CRAWL_ENABLED=false. Never point the dashboard at the public
+# catalog.monetta.mx from a staging deployment.
 ```
 
 ```bash
@@ -118,6 +125,36 @@ sudo -n chmod 0600 /opt/monetta-catalog/.env
 `USER_AGENT` debe llevar el correo real y monitoreado antes de arrancar el
 monitor. El API recibe `LIVE_CRAWL_ENABLED=false` de forma fija; sólo el
 monitor recibe `true`.
+
+### 2b. Dashboard: segundo proyecto Vercel + allowlist de origen
+
+Crear un **segundo proyecto Vercel** desde el mismo repositorio con
+**Root Directory = `dashboard`** (Vercel lee `dashboard/vercel.json` e ignora
+el `vercel.json` de la raíz, que sigue compilando `web/`). Única variable
+pública y no secreta en ese proyecto:
+
+```bash
+VITE_CATALOG_API_BASE_URL=https://catalog.monetta.mx
+```
+
+Nada más va en el env de Vercel: si un valor sería un problema en un
+`view-source`, no pertenece a ese proyecto.
+
+Añadir un origen (producción o un preview concreto — nunca `*` ni
+`*.vercel.app`):
+
+```bash
+# En el servidor, editar /opt/monetta-catalog/.env:
+DASHBOARD_ORIGINS=https://dash.staging.monetta.mx
+# reiniciar sólo el API y verificar:
+curl -s -o /dev/null -w '%{http_code}\n' https://catalog.monetta.mx/livez
+curl -H 'Origin: https://evil.example' -i https://catalog.monetta.mx/admin/overview \
+  | grep -i 'access-control-allow-origin' && echo 'ALLOWLIST BROKEN' || echo 'evil origin blocked (sin headers CORS)'
+```
+
+Aceptación: el origen productivo carga, hace login y muestra 304s en la
+pestaña de red; un deployment preview queda **bloqueado** por CORS, lo que
+prueba que el allowlist es exacto.
 
 ### 3. Red y primer arranque
 
@@ -337,6 +374,15 @@ Modificar únicamente el archivo local ignorado
   "EXTERNAL_CATALOG_BASE_URL": "https://catalog.monetta.mx"
 }
 ```
+
+> **Nota de transición pre-producción (2026-09-02):** En la línea base actual
+> de investigación, `/v1/external-catalog` es público. Una vez implementada la
+> autenticación en el API (WP-22 / WP-40), este archivo añadirá
+> `"EXTERNAL_CATALOG_TOKEN": "<staging-catalog-token>"`. La visibilidad efectiva
+> de los artículos se rige por la regla:
+> `política de fuente activa && coincide con selección && colocación no oculta`.
+> Las migraciones de selección inician en `008_selection.sql` sobre la línea base
+> `001`–`007` ya instalada.
 
 Conservar todos los demás defines staging existentes y no introducir tokens
 secretos. Compilar e instalar en el iPhone 16e:

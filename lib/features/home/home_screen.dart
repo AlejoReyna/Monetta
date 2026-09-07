@@ -8,6 +8,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/card_lift.dart';
 import '../../app/catalog_store.dart';
 import '../../app/home_content_controller.dart';
 import '../../app/media/monetta_video.dart';
@@ -909,6 +910,7 @@ class _HomeOffersSection extends StatelessWidget {
           child: ListView.separated(
             key: const PageStorageKey<String>('home-offers-scroll'),
             scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             itemCount: _offers.length,
             separatorBuilder: (_, __) => const SizedBox(width: 12),
@@ -965,100 +967,102 @@ class _OfferCard extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            color: colors.surfaceRaised,
-            border: Border.all(color: colors.divider, width: .8),
-          ),
-          child: Column(
-            children: [
-              Expanded(
-                child: SizedBox.expand(
-                  key: const ValueKey('home-offer-media'),
-                  child: Image.asset(
-                    data.imageAsset,
-                    fit: BoxFit.cover,
-                    alignment: Alignment.center,
+        child: MonettaCardLift(
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: colors.surfaceRaised,
+              border: Border.all(color: colors.divider, width: .8),
+            ),
+            child: Column(
+              children: [
+                Expanded(
+                  child: SizedBox.expand(
+                    key: const ValueKey('home-offer-media'),
+                    child: Image.asset(
+                      data.imageAsset,
+                      fit: BoxFit.cover,
+                      alignment: Alignment.center,
+                    ),
                   ),
                 ),
-              ),
-              Expanded(
-                child: Padding(
-                  key: const ValueKey('home-offer-content'),
-                  padding: const EdgeInsets.fromLTRB(22, 21, 22, 20),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        data.eyebrow,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: eyebrow(
-                          size: 8.5,
-                          color: colors.accentContent,
+                Expanded(
+                  child: Padding(
+                    key: const ValueKey('home-offer-content'),
+                    padding: const EdgeInsets.fromLTRB(22, 21, 22, 20),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          data.eyebrow,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: eyebrow(
+                            size: 8.5,
+                            color: colors.accentContent,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 9),
-                      Text(
-                        data.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: editorial(
-                          22,
-                          color: colors.contentPrimary,
-                          height: 1.08,
+                        const SizedBox(height: 9),
+                        Text(
+                          data.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: editorial(
+                            22,
+                            color: colors.contentPrimary,
+                            height: 1.08,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        data.description,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: sans(
-                          size: 11.5,
-                          color: colors.contentMuted,
-                          height: 1.35,
+                        const SizedBox(height: 8),
+                        Text(
+                          data.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: sans(
+                            size: 11.5,
+                            color: colors.contentMuted,
+                            height: 1.35,
+                          ),
                         ),
-                      ),
-                      const Spacer(),
-                      Container(
-                        key: ValueKey(
-                          'home-offer-action-${data.destination.name}',
-                        ),
-                        height: 44,
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(horizontal: 18),
-                        alignment: Alignment.center,
-                        color: colors.inverseSurface,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Flexible(
-                              child: Text(
-                                data.actionLabel,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: sans(
-                                  size: 12,
-                                  color: colors.onInverseSurface,
-                                  weight: FontWeight.w600,
+                        const Spacer(),
+                        Container(
+                          key: ValueKey(
+                            'home-offer-action-${data.destination.name}',
+                          ),
+                          height: 44,
+                          width: double.infinity,
+                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          alignment: Alignment.center,
+                          color: colors.inverseSurface,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Flexible(
+                                child: Text(
+                                  data.actionLabel,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: sans(
+                                    size: 12,
+                                    color: colors.onInverseSurface,
+                                    weight: FontWeight.w600,
+                                  ),
                                 ),
                               ),
-                            ),
-                            const SizedBox(width: 9),
-                            Icon(
-                              Icons.arrow_forward,
-                              size: 15,
-                              color: colors.onInverseSurface,
-                            ),
-                          ],
+                              const SizedBox(width: 9),
+                              Icon(
+                                Icons.arrow_forward,
+                                size: 15,
+                                color: colors.onInverseSurface,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1090,6 +1094,7 @@ class _HomeCollectionsSection extends StatelessWidget {
           height: cardHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
+            clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(horizontal: 14),
             itemCount: cards.length,
             separatorBuilder: (_, __) => const SizedBox(width: 14),
@@ -1117,51 +1122,53 @@ class _CollectionEditorialCard extends StatelessWidget {
       child: GestureDetector(
         key: ValueKey('home-collection-card-${card.handle}'),
         onTap: () => _openHomeCollection(context, card),
-        child: ClipRect(
-          child: Stack(
-            fit: StackFit.expand,
-            children: [
-              _HomeImage(
-                imageUrl: card.imageUrl,
-                fallbackAsset: card.fallbackAsset,
-              ),
-              const IgnorePointer(
-                child: DecoratedBox(
-                  decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topCenter,
-                      end: Alignment.bottomCenter,
-                      colors: [
-                        Color(0x00000000),
-                        Color(0x08000000),
-                        Color(0xB8000000),
-                      ],
-                      stops: [.46, .64, 1],
+        child: MonettaCardLift(
+          child: ClipRect(
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                _HomeImage(
+                  imageUrl: card.imageUrl,
+                  fallbackAsset: card.fallbackAsset,
+                ),
+                const IgnorePointer(
+                  child: DecoratedBox(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Color(0x00000000),
+                          Color(0x08000000),
+                          Color(0xB8000000),
+                        ],
+                        stops: [.46, .64, 1],
+                      ),
                     ),
                   ),
                 ),
-              ),
-              Positioned(
-                left: 20,
-                right: 16,
-                bottom: 18,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: Text(
-                        card.title,
-                        style: display(24, color: Colors.white),
+                Positioned(
+                  left: 20,
+                  right: 16,
+                  bottom: 18,
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: Text(
+                          card.title,
+                          style: display(24, color: Colors.white),
+                        ),
                       ),
-                    ),
-                    const Icon(
-                      Icons.arrow_forward,
-                      size: 21,
-                      color: Colors.white,
-                    ),
-                  ],
+                      const Icon(
+                        Icons.arrow_forward,
+                        size: 21,
+                        color: Colors.white,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),
@@ -1271,30 +1278,32 @@ class _BagTypeTile extends StatelessWidget {
       label: 'Ver ${card.title}',
       child: GestureDetector(
         onTap: () => _openHomeCollection(context, card),
-        child: Column(
-          children: [
-            AspectRatio(
-              aspectRatio: 1,
-              child: Container(
-                decoration: BoxDecoration(
-                  border: Border.all(color: context.monettaColors.divider),
-                ),
-                padding: const EdgeInsets.all(8),
-                child: _HomeImage(
-                  imageUrl: card.imageUrl,
-                  fallbackAsset: card.fallbackAsset,
-                  fit: BoxFit.contain,
+        child: MonettaCardLift(
+          child: Column(
+            children: [
+              AspectRatio(
+                aspectRatio: 1,
+                child: Container(
+                  decoration: BoxDecoration(
+                    border: Border.all(color: context.monettaColors.divider),
+                  ),
+                  padding: const EdgeInsets.all(8),
+                  child: _HomeImage(
+                    imageUrl: card.imageUrl,
+                    fallbackAsset: card.fallbackAsset,
+                    fit: BoxFit.contain,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 12),
-            Text(
-              card.title.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: eyebrow(size: 8.5),
-            ),
-          ],
+              const SizedBox(height: 12),
+              Text(
+                card.title.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: eyebrow(size: 8.5),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -1403,26 +1412,28 @@ class _BrandsSectionState extends State<_BrandsSection>
           title: 'Todas las marcas',
           animateKickerColor: true,
         ),
-        ClipRect(
-          child: GridView.builder(
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            physics: const NeverScrollableScrollPhysics(),
-            shrinkWrap: true,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 2.45,
-              crossAxisSpacing: 8,
-              mainAxisSpacing: 8,
-            ),
-            itemCount: widget.brands.length,
-            itemBuilder: (context, index) {
-              final brand = widget.brands[index];
-              return SlideTransition(
-                key: ValueKey('home-brand-entrance-${brand.handle}'),
-                position: _entranceFor(index),
-                child: Semantics(
-                  button: true,
-                  label: 'Ver ${brand.title}',
+        GridView.builder(
+          clipBehavior: Clip.none,
+          padding: const EdgeInsets.symmetric(horizontal: 12),
+          physics: const NeverScrollableScrollPhysics(),
+          shrinkWrap: true,
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            childAspectRatio: 2.45,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+          ),
+          itemCount: widget.brands.length,
+          itemBuilder: (context, index) {
+            final brand = widget.brands[index];
+            return SlideTransition(
+              key: ValueKey('home-brand-entrance-${brand.handle}'),
+              position: _entranceFor(index),
+              child: Semantics(
+                button: true,
+                label: 'Ver ${brand.title}',
+                child: MonettaCardLift(
+                  borderRadius: BorderRadius.circular(28),
                   child: Material(
                     key: ValueKey('home-brand-${brand.handle}'),
                     color: Colors.white,
@@ -1446,9 +1457,9 @@ class _BrandsSectionState extends State<_BrandsSection>
                     ),
                   ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ],
     );
@@ -1478,81 +1489,84 @@ class _AboutMonettaSection extends StatelessWidget {
           title: 'Más sobre Monetta',
           animateKickerColor: true,
         ),
-        Container(
-          key: const ValueKey('home-about-card'),
-          width: double.infinity,
-          decoration: BoxDecoration(
-            border: Border.all(color: context.monettaColors.divider),
-          ),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final wide = constraints.maxWidth >= 720;
-              final image = SizedBox(
-                key: const ValueKey('home-about-image'),
-                height: 360,
-                width: double.infinity,
-                child: _HomeImage(
-                  imageUrl: imageUrl,
-                  fallbackAsset: 'assets/images/home_about.webp',
-                  fit: BoxFit.cover,
-                ),
-              );
-              final copy = Padding(
-                key: const ValueKey('home-about-monetta'),
-                padding: EdgeInsets.all(wide ? 36 : 24),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'BIENVENID@',
-                      style: display(
-                        wide ? 31 : 27,
-                        color: context.monettaColors.accent,
-                      ),
-                    ),
-                    const SizedBox(height: 14),
-                    Text(content.headline, style: display(wide ? 27 : 23)),
-                    const SizedBox(height: 14),
-                    Text(
-                      content.body,
-                      style: sans(
-                        size: 13,
-                        color: context.monettaColors.contentMuted,
-                        height: 1.55,
-                      ),
-                    ),
-                    const SizedBox(height: 24),
-                    Wrap(
-                      spacing: 26,
-                      runSpacing: 18,
-                      children: [
-                        UnderlineLink(
-                          label: 'Conoce nuestra historia',
-                          onTap: onOpen,
+        MonettaCardLift(
+          mouseCursor: MouseCursor.defer,
+          child: Container(
+            key: const ValueKey('home-about-card'),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              border: Border.all(color: context.monettaColors.divider),
+            ),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                final wide = constraints.maxWidth >= 720;
+                final image = SizedBox(
+                  key: const ValueKey('home-about-image'),
+                  height: 360,
+                  width: double.infinity,
+                  child: _HomeImage(
+                    imageUrl: imageUrl,
+                    fallbackAsset: 'assets/images/home_about.webp',
+                    fit: BoxFit.cover,
+                  ),
+                );
+                final copy = Padding(
+                  key: const ValueKey('home-about-monetta'),
+                  padding: EdgeInsets.all(wide ? 36 : 24),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'BIENVENID@',
+                        style: display(
+                          wide ? 31 : 27,
+                          color: context.monettaColors.accent,
                         ),
-                        UnderlineLink(
-                          key: const ValueKey('home-open-partner'),
-                          label: 'Vende con Monetta',
-                          onTap: onOpenPartner,
+                      ),
+                      const SizedBox(height: 14),
+                      Text(content.headline, style: display(wide ? 27 : 23)),
+                      const SizedBox(height: 14),
+                      Text(
+                        content.body,
+                        style: sans(
+                          size: 13,
+                          color: context.monettaColors.contentMuted,
+                          height: 1.55,
                         ),
-                      ],
-                    ),
-                  ],
-                ),
-              );
-              if (!wide) return Column(children: [image, copy]);
-              return SizedBox(
-                height: 360,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Expanded(child: image),
-                    Expanded(child: copy),
-                  ],
-                ),
-              );
-            },
+                      ),
+                      const SizedBox(height: 24),
+                      Wrap(
+                        spacing: 26,
+                        runSpacing: 18,
+                        children: [
+                          UnderlineLink(
+                            label: 'Conoce nuestra historia',
+                            onTap: onOpen,
+                          ),
+                          UnderlineLink(
+                            key: const ValueKey('home-open-partner'),
+                            label: 'Vende con Monetta',
+                            onTap: onOpenPartner,
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                );
+                if (!wide) return Column(children: [image, copy]);
+                return SizedBox(
+                  height: 360,
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Expanded(child: image),
+                      Expanded(child: copy),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ),
       ],
@@ -1610,29 +1624,32 @@ class _SocialTile extends StatelessWidget {
       label: 'Abrir ${link.label}',
       child: GestureDetector(
         onTap: uri == null ? null : () => onOpen(uri),
-        child: AspectRatio(
-          aspectRatio: .82,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: context.monettaColors.divider),
-            ),
-            padding: const EdgeInsets.symmetric(horizontal: 6),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Icon(
-                  _socialIcon(link.id),
-                  color: context.monettaColors.accent,
-                  size: 28,
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  link.label.toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: eyebrow(size: 8),
-                ),
-              ],
+        child: MonettaCardLift(
+          enabled: uri != null,
+          child: AspectRatio(
+            aspectRatio: .82,
+            child: Container(
+              decoration: BoxDecoration(
+                border: Border.all(color: context.monettaColors.divider),
+              ),
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    _socialIcon(link.id),
+                    color: context.monettaColors.accent,
+                    size: 28,
+                  ),
+                  const SizedBox(height: 18),
+                  Text(
+                    link.label.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: eyebrow(size: 8),
+                  ),
+                ],
+              ),
             ),
           ),
         ),
@@ -1715,6 +1732,7 @@ class _CatalogGrid extends StatelessWidget {
                 ? 3
                 : 2;
         return GridView.builder(
+          clipBehavior: Clip.none,
           padding: const EdgeInsets.symmetric(horizontal: 12),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,

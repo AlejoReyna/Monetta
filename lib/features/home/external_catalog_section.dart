@@ -11,6 +11,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/card_lift.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
@@ -89,6 +90,7 @@ class _ExternalRail extends StatelessWidget {
       // Match the regular 4:5 product image and compact three-line card copy.
       height: width / 0.8 + 96,
       child: ListView.separated(
+        clipBehavior: Clip.none,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 12),
         itemCount: items.length,
@@ -128,46 +130,48 @@ class _ExternalCard extends StatelessWidget {
     return Semantics(
       button: true,
       label: '$brand, $title',
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _openDetail(context),
-        // Deliberately no favorite or bag affordance: this card opens the
-        // read-only detail and cannot enter Monetta checkout.
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 4 / 5,
-              child: ColoredBox(
-                color: context.monettaColors.surfaceMuted,
-                child: MonettaImage(
-                  url: item.imageUrl,
-                  fit: BoxFit.cover,
-                  cacheWidth: MediaUrl.cardWidth,
-                  fallbackLabel: '$brand · $title',
+      child: MonettaCardLift(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _openDetail(context),
+          // Deliberately no favorite or bag affordance: this card opens the
+          // read-only detail and cannot enter Monetta checkout.
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AspectRatio(
+                aspectRatio: 4 / 5,
+                child: ColoredBox(
+                  color: context.monettaColors.surfaceMuted,
+                  child: MonettaImage(
+                    url: item.imageUrl,
+                    fit: BoxFit.cover,
+                    cacheWidth: MediaUrl.cardWidth,
+                    fallbackLabel: '$brand · $title',
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(height: 11),
-            Text(
-              brand.toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: sans(size: 12, height: 1.3).copyWith(letterSpacing: 0.6),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              title,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: sans(size: 12, height: 1.35),
-            ),
-            const SizedBox(height: 2),
-            Text(
-              formatCatalogMoney(item.price),
-              style: sans(size: 12, height: 1.3),
-            ),
-          ],
+              const SizedBox(height: 11),
+              Text(
+                brand.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: sans(size: 12, height: 1.3).copyWith(letterSpacing: 0.6),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: sans(size: 12, height: 1.35),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                formatCatalogMoney(item.price),
+                style: sans(size: 12, height: 1.3),
+              ),
+            ],
+          ),
         ),
       ),
     );

@@ -22,6 +22,11 @@ function record(
     lastChangedAt: new Date('2026-08-25T12:00:00Z'),
     isActive: true,
     consecutiveMissingSnapshots: 0,
+    selectionState: 'selected',
+    selectionVersion: null,
+    watchTier: 'standard',
+    placements: [],
+    matchedRuleId: null,
     ...overrides,
   };
 }

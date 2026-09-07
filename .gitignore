@@ -62,6 +62,11 @@ shopify/.shopify/
 web/node_modules/
 web/dist/
 
+# Catalog dashboard SPA: second Vercel project builds from source
+# (dashboard/vercel.json) — same rule as web/.
+dashboard/node_modules/
+dashboard/dist/
+
 # Generated code is COMMITTED on purpose (see docs/ARCHITECTURE.md § Codegen),
 # so no *.g.dart / *.freezed.dart ignores here.
 .vercel/

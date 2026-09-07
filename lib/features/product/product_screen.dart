@@ -462,6 +462,7 @@ class _Rail extends StatelessWidget {
     return SizedBox(
       height: MediaQuery.sizeOf(context).width * 0.52 / 0.82 + 120,
       child: ListView.separated(
+        clipBehavior: Clip.none,
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: products.length,

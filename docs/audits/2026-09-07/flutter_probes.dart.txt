@@ -1,0 +1,40 @@
+// Temporary audit probes: assert CURRENT defects, not desired behavior.
+import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/data/local/database.dart' hide SyncCursor;
+import 'package:monetta_app/data/local/catalog_cache_store.dart';
+import 'package:monetta_app/data/local/sync_cursor_store.dart';
+import 'package:monetta_app/data/local/bag_store.dart';
+import 'package:monetta_app/data/local/wishlist_store.dart';
+import 'package:monetta_app/data/normalize/rules.dart';
+import 'package:monetta_app/data/repositories/catalog_repository.dart';
+import 'package:monetta_app/data/shopify/catalog_sync.dart';
+import 'package:monetta_app/data/shopify/storefront_client.dart';
+import 'package:monetta_app/data/shopify/storefront_config.dart';
+import 'shopify/catalog_sync_test.dart' as fixture;
+void main() {
+ test('AUDIT full sync does not remove absent products', () async {
+  final db=openTestDatabase();
+  addTearDown(db.close);
+  final transport=fixture.FakeTransport([fixture.page([fixture.productNode(id:'1',updatedAt:'2026-08-01T00:00:00Z')]),fixture.page([])]);
+  final repo=CatalogRepository(cache:CatalogCacheStore(db),cursorStore:SyncCursorStore(db),rules:NormalizationRules.fromJson({}),catalogSync:CatalogSync(client:StorefrontClient(config:const StorefrontConfig(shopDomain:'example.myshopify.com',accessToken:'fake'),transport:transport.call),fullResyncInterval:Duration.zero));
+  await repo.sync();
+  await repo.sync();
+  expect((await repo.cache.allProducts()).length,1);
+ });
+ test('AUDIT truncated pagination is labelled successful full sync', () async {
+  final transport=fixture.FakeTransport([fixture.page([fixture.productNode(id:'1',updatedAt:'2026-08-01T00:00:00Z')],hasNextPage:true,endCursor:'still-more')]);
+  final sync=CatalogSync(client:StorefrontClient(config:const StorefrontConfig(shopDomain:'example.myshopify.com',accessToken:'fake'),transport:transport.call),maxPages:1);
+  final result=await sync.run(cursor:const SyncCursor(),now:DateTime.utc(2026,9,7));
+  expect(result.wasFullSync,true);
+  expect(result.cursor.lastFullSyncAt,isNotNull);
+ });
+ test('AUDIT bag and wishlist readers include another account rows', () async {
+  final db=openTestDatabase(); addTearDown(db.close);
+  final bag=BagStore(db); final wishes=WishlistStore(db);
+  await bag.upsert(productId:'product-A',variantId:'variant-A',quantity:1,accountId:'customer-A');
+  await wishes.add('product-A',accountId:'customer-A');
+  expect((await bag.all()).keys,contains('product-A'));
+  expect(await wishes.allProductIds(),contains('product-A'));
+  // Neither reader accepts the current account. Both return A to any caller.
+ });
+}

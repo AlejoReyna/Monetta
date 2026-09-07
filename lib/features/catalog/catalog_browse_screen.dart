@@ -8,6 +8,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../app/card_lift.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
@@ -425,7 +426,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(4, 0, 4, 44),
+                  padding: const EdgeInsets.fromLTRB(4, 10, 4, 44),
                   sliver: SliverGrid(
                     gridDelegate: _gridDelegate,
                     delegate: SliverChildBuilderDelegate(
@@ -1124,71 +1125,73 @@ class _BrowseTile extends StatelessWidget {
     return Semantics(
       button: true,
       label: '${item.merchant}, $displayTitle',
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _tap(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 3 / 4,
-              child: ColoredBox(
-                color: context.monettaColors.surfaceMuted,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    MonettaImage(
-                      url: item.imageUrl,
-                      fallbackLabel:
-                          item.imageUrl == null ? null : displayTitle,
-                    ),
-                    if (item.isExternal)
-                      const Positioned(
-                        top: 8,
-                        left: 8,
-                        child: ExtractedBadge(),
+      child: MonettaCardLift(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _tap(context),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AspectRatio(
+                aspectRatio: 3 / 4,
+                child: ColoredBox(
+                  color: context.monettaColors.surfaceMuted,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      MonettaImage(
+                        url: item.imageUrl,
+                        fallbackLabel:
+                            item.imageUrl == null ? null : displayTitle,
                       ),
+                      if (item.isExternal)
+                        const Positioned(
+                          top: 8,
+                          left: 8,
+                          child: ExtractedBadge(),
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(10, 11, 8, 0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _brandFor(item),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: sans(
+                        size: 11.5,
+                        color: item.isExternal
+                            ? context.monettaColors.accent
+                            : context.monettaColors.contentPrimary,
+                        weight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      displayTitle,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: sans(
+                        size: 13,
+                        color: context.monettaColors.contentMuted,
+                        height: 1.35,
+                      ),
+                    ),
+                    const SizedBox(height: 7),
+                    Text(
+                      formatCatalogMoney(item.price),
+                      style: sans(size: 13.5, weight: FontWeight.w700),
+                    ),
                   ],
                 ),
               ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 11, 8, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _brandFor(item),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: sans(
-                      size: 11.5,
-                      color: item.isExternal
-                          ? context.monettaColors.accent
-                          : context.monettaColors.contentPrimary,
-                      weight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    displayTitle,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: sans(
-                      size: 13,
-                      color: context.monettaColors.contentMuted,
-                      height: 1.35,
-                    ),
-                  ),
-                  const SizedBox(height: 7),
-                  Text(
-                    formatCatalogMoney(item.price),
-                    style: sans(size: 13.5, weight: FontWeight.w700),
-                  ),
-                ],
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

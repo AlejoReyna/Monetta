@@ -62,6 +62,11 @@ describe('signed catalog-monitor admin adapter', () => {
       lastChangedAt: now,
       isActive: true,
       consecutiveMissingSnapshots: 0,
+      selectionState: 'selected',
+      selectionVersion: 1,
+      watchTier: 'standard',
+      placements: [],
+      matchedRuleId: null,
     }]);
     const crawlRuns = new InMemoryCrawlRunRepository();
     crawlRuns.seedRun({
@@ -70,13 +75,16 @@ describe('signed catalog-monitor admin adapter', () => {
       endedAt: now,
       status: 'success',
       isFullSnapshot: true,
+      selectionVersion: 1,
       urlsDiscovered: 1,
+      urlsSelected: 1,
       pagesFetched: 1,
       successfulParses: 1,
       newItems: 1,
       changedItems: 0,
       missingItems: 0,
       inactiveItems: 0,
+      deselectedItems: 0,
       errorsByType: {},
     });
     const app = createApp({

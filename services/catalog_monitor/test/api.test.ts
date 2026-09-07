@@ -26,6 +26,11 @@ function activeProduct(overrides: Partial<CatalogProductRecord> = {}): CatalogPr
     lastChangedAt: now,
     isActive: true,
     consecutiveMissingSnapshots: 0,
+    selectionState: 'selected',
+    selectionVersion: null,
+    watchTier: 'standard',
+    placements: [],
+    matchedRuleId: null,
     ...overrides,
   };
 }
@@ -46,13 +51,16 @@ describe('GET /v1/external-catalog and /healthz', () => {
         endedAt: now,
         status: 'success',
         isFullSnapshot: true,
+        selectionVersion: null,
         urlsDiscovered: 1,
+        urlsSelected: 1,
         pagesFetched: 1,
         successfulParses: 1,
         newItems: 1,
         changedItems: 0,
         missingItems: 0,
         inactiveItems: 0,
+        deselectedItems: 0,
         errorsByType: {},
       });
     }
@@ -253,6 +261,7 @@ describe('GET /v1/external-catalog and /healthz', () => {
       status: 'success',
       isFullSnapshot: true,
       urlsDiscovered: 1,
+      urlsSelected: 1,
       pagesFetched: 1,
       successfulParses: 1,
       newItems: 0,

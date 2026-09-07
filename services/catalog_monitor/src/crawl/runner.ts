@@ -3,19 +3,30 @@ import { discoverProductUrlsFromCatalogPages } from '../discovery/catalogPages.j
 import { isAllowedByRobots, type RobotsRules } from '../robots/robotsTxt.js';
 import { extractProduct } from '../parsing/productExtractor.js';
 import { looksLikeCaptchaOrBlock } from './blockDetection.js';
-import { diffFullSnapshot } from './snapshotDiff.js';
+import {
+  diffFullSnapshot,
+  diffSelectionSnapshot,
+  type MatchedExtractedProduct,
+} from './snapshotDiff.js';
 import { withRetry, type RetryOptions } from './retry.js';
 import { DomainRateLimiter, domainOf } from './rateLimiter.js';
 import { MIN_REQUIRED_FIELD_COVERAGE } from '../monitor/health.js';
 import { validateFetchedMarket } from './marketGuard.js';
 import type { BrandAdapter } from '../adapters/types.js';
-import type { CrawlRunRepository, ProductRepository } from './ports.js';
+import type {
+  CrawlRunFinishParams,
+  CrawlRunRepository,
+  ProductRepository,
+  SelectionSnapshotCommitter,
+  SelectionSnapshotPersistence,
+} from './ports.js';
 import type {
   CrawlRunStatus,
   ErrorType,
   ExtractedProduct,
   ExtractedProductVariant,
 } from '../domain/types.js';
+import type { CompiledSelection } from '../selection/types.js';
 
 export interface PageFetchResult {
   readonly status: number;
@@ -33,6 +44,8 @@ export interface RunCrawlParams {
   readonly robots: RobotsRules;
   readonly products: ProductRepository;
   readonly crawlRuns: CrawlRunRepository;
+  /** Required to persist a selected full snapshot: it shares one transaction with successful run finalization. */
+  readonly selectionSnapshotCommitter?: SelectionSnapshotCommitter;
   readonly now?: () => Date;
   /** Caps the number of product pages fetched — used by `--limit` and capped smoke tests. Forces `isFullSnapshot: false`. */
   readonly limit?: number;
@@ -44,6 +57,9 @@ export interface RunCrawlParams {
   readonly playwrightFallbackEnabled?: boolean;
   /** When true, nothing is written to the database — used by `--dry-run`. */
   readonly dryRun?: boolean;
+  readonly selection?: CompiledSelection;
+  readonly maxSelectedUrlsPerSource?: number;
+  readonly maxPagesPerRun?: number;
 }
 
 export interface RenderedPage {
@@ -54,13 +70,16 @@ export interface RenderedPage {
 export interface RunCrawlResult {
   readonly status: CrawlRunStatus;
   readonly isFullSnapshot: boolean;
+  readonly selectionVersion: number | null;
   readonly urlsDiscovered: number;
+  readonly urlsSelected: number;
   readonly pagesFetched: number;
   readonly successfulParses: number;
   readonly newItems: number;
   readonly changedItems: number;
   readonly missingItems: number;
   readonly inactiveItems: number;
+  readonly deselectedItems: number;
   readonly errorsByType: Partial<Record<ErrorType, number>>;
   readonly items: readonly ExtractedProduct[];
 }
@@ -105,13 +124,16 @@ class RetryableHttpError extends Error {
 }
 
 const EMPTY_FINISH_METRICS = {
+  selectionVersion: null,
   urlsDiscovered: 0,
+  urlsSelected: 0,
   pagesFetched: 0,
   successfulParses: 0,
   newItems: 0,
   changedItems: 0,
   missingItems: 0,
   inactiveItems: 0,
+  deselectedItems: 0,
 } as const;
 
 export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> {
@@ -134,6 +156,7 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
   // Tracked outside the try block so a fatal exception can still finalize the
   // run record with whatever real progress was made, rather than all zeros.
   let urlsDiscoveredCount = 0;
+  let urlsSelectedCount = 0;
   let pagesFetched = 0;
   let successfulParses = 0;
 
@@ -160,16 +183,110 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
     discovery.errors.forEach((error) => recordError(classifySitemapErrorMessage(error.message)));
 
     const classified = discovery.productUrls.filter((url) => params.adapter.isProductUrl(url));
-    const robotsAllowed = classified.filter((url) => {
+    urlsDiscoveredCount = classified.length;
+
+    const selectedUrls = params.selection
+      ? classified.filter((url) => params.selection!.matchUrl(params.adapter.source.id, url).selected)
+      : classified;
+    urlsSelectedCount = selectedUrls.length;
+
+    if (
+      params.maxSelectedUrlsPerSource !== undefined &&
+      urlsSelectedCount > params.maxSelectedUrlsPerSource
+    ) {
+      recordError('selection_over_budget');
+      const status: CrawlRunStatus = 'partial';
+      const isFullSnapshot = false;
+      if (runId !== null) {
+        await params.crawlRuns.finish(runId, {
+          endedAt: now(),
+          status,
+          isFullSnapshot,
+          selectionVersion: params.selection?.version ?? null,
+          urlsDiscovered: urlsDiscoveredCount,
+          urlsSelected: urlsSelectedCount,
+          pagesFetched: 0,
+          successfulParses: 0,
+          newItems: 0,
+          changedItems: 0,
+          missingItems: 0,
+          inactiveItems: 0,
+          deselectedItems: 0,
+          errorsByType,
+        });
+      }
+      return {
+        status,
+        isFullSnapshot,
+        selectionVersion: params.selection?.version ?? null,
+        urlsDiscovered: urlsDiscoveredCount,
+        urlsSelected: urlsSelectedCount,
+        pagesFetched: 0,
+        successfulParses: 0,
+        newItems: 0,
+        changedItems: 0,
+        missingItems: 0,
+        inactiveItems: 0,
+        deselectedItems: 0,
+        errorsByType,
+        items: [],
+      };
+    }
+
+    const robotsAllowed = selectedUrls.filter((url) => {
       const path = safePathname(url);
       return path !== null && isAllowedByRobots(params.robots, path);
     });
-    urlsDiscoveredCount = robotsAllowed.length;
+
+    if (
+      params.maxPagesPerRun !== undefined &&
+      robotsAllowed.length > params.maxPagesPerRun
+    ) {
+      recordError('selection_over_budget');
+      const status: CrawlRunStatus = 'partial';
+      const isFullSnapshot = false;
+      if (runId !== null) {
+        await params.crawlRuns.finish(runId, {
+          endedAt: now(),
+          status,
+          isFullSnapshot,
+          selectionVersion: params.selection?.version ?? null,
+          urlsDiscovered: urlsDiscoveredCount,
+          urlsSelected: urlsSelectedCount,
+          pagesFetched: 0,
+          successfulParses: 0,
+          newItems: 0,
+          changedItems: 0,
+          missingItems: 0,
+          inactiveItems: 0,
+          deselectedItems: 0,
+          errorsByType,
+        });
+      }
+      return {
+        status,
+        isFullSnapshot,
+        selectionVersion: params.selection?.version ?? null,
+        urlsDiscovered: urlsDiscoveredCount,
+        urlsSelected: urlsSelectedCount,
+        pagesFetched: 0,
+        successfulParses: 0,
+        newItems: 0,
+        changedItems: 0,
+        missingItems: 0,
+        inactiveItems: 0,
+        deselectedItems: 0,
+        errorsByType,
+        items: [],
+      };
+    }
 
     const limited = params.limit !== undefined && robotsAllowed.length > params.limit;
     const toFetch = params.limit !== undefined ? robotsAllowed.slice(0, params.limit) : robotsAllowed;
 
-    const itemsById = new Map<string, ExtractedProduct>();
+    const selectedItemsById = new Map<string, MatchedExtractedProduct>();
+    const rejectedProductsById = new Map<string, ExtractedProduct>();
+    const legacyItemsById = new Map<string, ExtractedProduct>();
     let blocked = false;
 
     for (const url of toFetch) {
@@ -268,19 +385,55 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
 
       if (extraction.complete && extraction.product) {
         successfulParses++;
-        const previous = itemsById.get(extraction.product.externalId);
-        itemsById.set(
-          extraction.product.externalId,
-          previous
-            ? mergeProductVariants(previous, extraction.product)
-            : extraction.product,
-        );
+        if (params.selection !== undefined) {
+          const decision = params.selection.matchProduct(
+            params.adapter.source.id,
+            extraction.product,
+          );
+          if (decision.selected) {
+            const matched: MatchedExtractedProduct = {
+              ...extraction.product,
+              watchTier: decision.tier,
+              placements: decision.placements,
+              matchedRuleId: decision.ruleId,
+            };
+            const previous = selectedItemsById.get(extraction.product.externalId);
+            if (previous) {
+              const merged = mergeProductVariants(previous, extraction.product);
+              const mergedDecision = params.selection.matchProduct(
+                params.adapter.source.id,
+                merged,
+              );
+              selectedItemsById.set(extraction.product.externalId, {
+                ...merged,
+                watchTier: mergedDecision.selected ? mergedDecision.tier : decision.tier,
+                placements: mergedDecision.selected ? mergedDecision.placements : decision.placements,
+                matchedRuleId: mergedDecision.selected ? mergedDecision.ruleId : decision.ruleId,
+              });
+            } else {
+              selectedItemsById.set(extraction.product.externalId, matched);
+            }
+          } else {
+            rejectedProductsById.set(extraction.product.externalId, extraction.product);
+          }
+        } else {
+          const previous = legacyItemsById.get(extraction.product.externalId);
+          legacyItemsById.set(
+            extraction.product.externalId,
+            previous
+              ? mergeProductVariants(previous, extraction.product)
+              : extraction.product,
+          );
+        }
       } else {
         recordError('parse_missing_fields');
       }
     }
 
-    const items = [...itemsById.values()];
+    const items =
+      params.selection !== undefined
+        ? [...selectedItemsById.values()]
+        : [...legacyItemsById.values()];
     const allAttempted = !blocked && pagesFetched === toFetch.length;
     const coverage = pagesFetched > 0 ? successfulParses / pagesFetched : 0;
     const coverageOk = pagesFetched > 0 && coverage >= MIN_REQUIRED_FIELD_COVERAGE;
@@ -326,6 +479,8 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
     let changedItems = 0;
     let missingItems = 0;
     let inactiveItems = 0;
+    let deselectedItems = 0;
+    let selectionSnapshot: SelectionSnapshotPersistence | null = null;
 
     // `--dry-run` touches the repositories not at all — no read, no write —
     // so it can run against a live site with zero database infrastructure.
@@ -334,45 +489,110 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
     // does not do. Runs below the coverage/attempt/discovery bar never reach
     // this branch because `isFullSnapshot` is already false for them.
     if (isFullSnapshot && !params.dryRun) {
-      const previousActive = await params.products.getActiveProducts(params.adapter.source.id);
-      const diff = diffFullSnapshot(params.adapter.source.id, previousActive, items, now());
-      newItems = diff.newItemCount;
-      changedItems = diff.changedItemCount;
-      missingItems = diff.missingButStillActive.length + diff.newlyInactive.length;
-      inactiveItems = diff.newlyInactive.length;
-      await params.products.upsertMany([
-        ...diff.toUpsert,
-        ...diff.missingButStillActive,
-        ...diff.newlyInactive,
-      ]);
+      if (params.selection !== undefined) {
+        const selectionVersion = params.selection.version;
+        const lastRun = await params.crawlRuns.lastSuccessfulFullSnapshotRun(
+          params.adapter.source.id,
+        );
+        const isVersionChange =
+          lastRun === null || lastRun.selectionVersion !== selectionVersion;
+        const suppressDeactivation = isVersionChange;
+
+        const previousActive = await params.products.getActiveProducts(
+          params.adapter.source.id,
+        );
+        const sameVersionBaseline = await params.products.getSelectedActiveProducts(
+          params.adapter.source.id,
+          selectionVersion,
+        );
+
+        const diff = diffSelectionSnapshot({
+          sourceId: params.adapter.source.id,
+          selectionVersion,
+          selection: params.selection,
+          selectedItems: [...selectedItemsById.values()],
+          rejectedProducts: [...rejectedProductsById.values()],
+          previousActive,
+          sameVersionBaseline,
+          now: now(),
+          suppressDeactivation,
+        });
+
+        newItems = diff.newItemCount;
+        changedItems = diff.changedItemCount;
+        missingItems = diff.missingButStillActive.length + diff.newlyInactive.length;
+        inactiveItems = diff.newlyInactive.length;
+        deselectedItems = diff.deselectedItemCount;
+
+        selectionSnapshot = diff;
+      } else {
+        const previousActive = await params.products.getActiveProducts(
+          params.adapter.source.id,
+        );
+        const diff = diffFullSnapshot(params.adapter.source.id, previousActive, items, now());
+        newItems = diff.newItemCount;
+        changedItems = diff.changedItemCount;
+        missingItems = diff.missingButStillActive.length + diff.newlyInactive.length;
+        inactiveItems = diff.newlyInactive.length;
+        await params.products.upsertMany([
+          ...diff.toUpsert,
+          ...diff.missingButStillActive,
+          ...diff.newlyInactive,
+        ]);
+      }
     }
 
     if (runId !== null) {
-      await params.crawlRuns.finish(runId, {
+      const completion: CrawlRunFinishParams = {
         endedAt: now(),
         status,
         isFullSnapshot,
-        urlsDiscovered: robotsAllowed.length,
+        selectionVersion: params.selection?.version ?? null,
+        urlsDiscovered: urlsDiscoveredCount,
+        urlsSelected: urlsSelectedCount,
         pagesFetched,
         successfulParses,
         newItems,
         changedItems,
         missingItems,
         inactiveItems,
+        deselectedItems,
         errorsByType,
-      });
+      };
+
+      if (selectionSnapshot !== null) {
+        if (params.selectionSnapshotCommitter === undefined) {
+          throw new Error(
+            'A SelectionSnapshotCommitter is required for a selected full snapshot',
+          );
+        }
+        await params.selectionSnapshotCommitter.commit({
+          diff: selectionSnapshot,
+          runId,
+          completion: {
+            ...completion,
+            status: 'success',
+            isFullSnapshot: true,
+          },
+        });
+      } else {
+        await params.crawlRuns.finish(runId, completion);
+      }
     }
 
     return {
       status,
       isFullSnapshot,
-      urlsDiscovered: robotsAllowed.length,
+      selectionVersion: params.selection?.version ?? null,
+      urlsDiscovered: urlsDiscoveredCount,
+      urlsSelected: urlsSelectedCount,
       pagesFetched,
       successfulParses,
       newItems,
       changedItems,
       missingItems,
       inactiveItems,
+      deselectedItems,
       errorsByType,
       items,
     };
@@ -388,7 +608,9 @@ export async function runCrawl(params: RunCrawlParams): Promise<RunCrawlResult> 
         status: 'failed',
         isFullSnapshot: false,
         ...EMPTY_FINISH_METRICS,
+        selectionVersion: params.selection?.version ?? null,
         urlsDiscovered: urlsDiscoveredCount,
+        urlsSelected: urlsSelectedCount,
         pagesFetched,
         successfulParses,
         errorsByType,

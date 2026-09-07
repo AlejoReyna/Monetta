@@ -3,6 +3,7 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../../app/card_lift.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
@@ -35,100 +36,103 @@ class ProductCard extends StatelessWidget {
     final brand = facets?.brand?.value;
     final wishlisted = store.wishlist.contains(product.id);
 
-    return GestureDetector(
-      onTap: () => openProduct(context, product),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: 4 / 5,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _CardImage(
-                  urls: product.images,
-                  fallbackLabel: brand == null
-                      ? product.title
-                      : '${brandLabel(brand)} · ${product.title}',
-                ),
-                if (!product.isInStock)
-                  ColoredBox(
-                    color: Colors.white.withValues(alpha: 0.68),
-                    child: Center(child: Text('AGOTADO', style: eyebrow())),
+    return MonettaCardLift(
+      child: GestureDetector(
+        onTap: () => openProduct(context, product),
+        behavior: HitTestBehavior.opaque,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            AspectRatio(
+              aspectRatio: 4 / 5,
+              child: Stack(
+                fit: StackFit.expand,
+                children: [
+                  _CardImage(
+                    urls: product.images,
+                    fallbackLabel: brand == null
+                        ? product.title
+                        : '${brandLabel(brand)} · ${product.title}',
                   ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: IconButton(
-                    tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
-                    onPressed: () => store.toggleWishlist(product.id),
-                    constraints:
-                        const BoxConstraints.tightFor(width: 34, height: 34),
-                    padding: EdgeInsets.zero,
-                    icon: Icon(
-                      wishlisted ? Icons.favorite : Icons.favorite_border,
-                      size: 19,
-                      color: wishlisted
-                          ? context.monettaColors.accent
-                          : context.monettaColors.contentPrimary,
+                  if (!product.isInStock)
+                    ColoredBox(
+                      color: Colors.white.withValues(alpha: 0.68),
+                      child: Center(child: Text('AGOTADO', style: eyebrow())),
+                    ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: IconButton(
+                      tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
+                      onPressed: () => store.toggleWishlist(product.id),
+                      constraints:
+                          const BoxConstraints.tightFor(width: 34, height: 34),
+                      padding: EdgeInsets.zero,
+                      icon: Icon(
+                        wishlisted ? Icons.favorite : Icons.favorite_border,
+                        size: 19,
+                        color: wishlisted
+                            ? context.monettaColors.accent
+                            : context.monettaColors.contentPrimary,
+                      ),
                     ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
-          ),
-          const SizedBox(height: 11),
-          if (urgency != null) ...[
+            const SizedBox(height: 11),
+            if (urgency != null) ...[
+              Text(
+                urgency!.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: eyebrow(size: 8.5, color: context.monettaColors.sale),
+              ),
+              const SizedBox(height: 6),
+            ],
+            if (brand != null) ...[
+              Text(
+                brandLabel(brand).toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: sans(size: 12, height: 1.3).copyWith(letterSpacing: 0.6),
+              ),
+              const SizedBox(height: 2),
+            ],
             Text(
-              urgency!.toUpperCase(),
-              maxLines: 1,
+              cardPieceName(
+                title: product.title,
+                colorSlug: facets?.colors.isEmpty == true
+                    ? null
+                    : facets!.colors.first.value,
+              ),
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
-              style: eyebrow(size: 8.5, color: context.monettaColors.sale),
-            ),
-            const SizedBox(height: 6),
-          ],
-          if (brand != null) ...[
-            Text(
-              brandLabel(brand).toUpperCase(),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: sans(size: 12, height: 1.3).copyWith(letterSpacing: 0.6),
+              style: sans(size: 12, height: 1.35),
             ),
             const SizedBox(height: 2),
-          ],
-          Text(
-            cardPieceName(
-              title: product.title,
-              colorSlug: facets?.colors.isEmpty == true
-                  ? null
-                  : facets!.colors.first.value,
-            ),
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: sans(size: 12, height: 1.35),
-          ),
-          const SizedBox(height: 2),
-          Wrap(
-            spacing: 7,
-            runSpacing: 2,
-            children: [
-              Text(
-                kMoney.format(product.price),
-                style: sans(size: 12, height: 1.3),
-              ),
-              if (product.isOnSale)
+            Wrap(
+              spacing: 7,
+              runSpacing: 2,
+              children: [
                 Text(
-                  kMoney.format(product.compareAtPrice),
-                  style: sans(
-                    size: 12,
-                    color: context.monettaColors.contentMuted,
-                    height: 1.3,
-                    decoration: TextDecoration.lineThrough,
-                  ),
+                  kMoney.format(product.price),
+                  style: sans(size: 12, height: 1.3),
                 ),
-            ],
-          ),
-        ],
+                if (product.isOnSale)
+                  Text(
+                    kMoney.format(product.compareAtPrice),
+                    style: sans(
+                      size: 12,
+                      color: context.monettaColors.contentMuted,
+                      height: 1.3,
+                      decoration: TextDecoration.lineThrough,
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

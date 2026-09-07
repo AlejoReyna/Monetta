@@ -5,11 +5,15 @@ import { DomainRateLimiter } from '../src/crawl/rateLimiter.js';
 import {
   InMemoryCrawlRunRepository,
   InMemoryProductRepository,
+  InMemorySelectionSnapshotCommitter,
 } from './support/inMemoryRepositories.js';
 import { readFixture } from './support/fixtures.js';
 import type { ExtractedProduct } from '../src/domain/types.js';
-import type { ProductRepository } from '../src/crawl/ports.js';
+import type { ProductRepository, SelectionSnapshotPersistence } from '../src/crawl/ports.js';
 import type { SitemapFetcher } from '../src/discovery/sitemap.js';
+import { compileSelection } from '../src/selection/engine.js';
+import { parseSelectionDocument } from '../src/selection/document.js';
+import type { SelectionDocument } from '../src/selection/types.js';
 
 const SITEMAP_INDEX = `<?xml version="1.0"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -47,6 +51,11 @@ function seedRecord(externalId: string): ReturnType<InMemoryProductRepository['a
     lastChangedAt: new Date('2026-08-01T00:00:00Z'),
     isActive: true,
     consecutiveMissingSnapshots: 0,
+    selectionState: 'selected',
+    selectionVersion: null,
+    watchTier: 'standard',
+    placements: [],
+    matchedRuleId: null,
   };
 }
 
@@ -68,6 +77,7 @@ describe('runCrawl happy path', () => {
     expect(result.status).toBe('success');
     expect(result.isFullSnapshot).toBe(true);
     expect(result.urlsDiscovered).toBe(2);
+    expect(result.urlsSelected).toBe(2);
     expect(result.pagesFetched).toBe(2);
     expect(result.successfulParses).toBe(2);
     expect(result.newItems).toBe(2);
@@ -78,6 +88,8 @@ describe('runCrawl happy path', () => {
     const runs = await crawlRuns.recentRuns('coach_us', 1);
     expect(runs[0]!.status).toBe('success');
     expect(runs[0]!.isFullSnapshot).toBe(true);
+    expect(runs[0]!.urlsDiscovered).toBe(2);
+    expect(runs[0]!.urlsSelected).toBe(2);
   });
 });
 
@@ -259,6 +271,7 @@ describe('runCrawl failure handling', () => {
     expect(result.status).toBe('partial');
     expect(result.isFullSnapshot).toBe(false);
     expect(result.urlsDiscovered).toBe(0);
+    expect(result.urlsSelected).toBe(0);
     expect(await products.getActiveProducts('coach_us')).toHaveLength(1); // preserved
   });
 
@@ -289,6 +302,7 @@ describe('runCrawl failure handling', () => {
     expect(result.status).toBe('partial');
     expect(result.isFullSnapshot).toBe(false);
     expect(result.urlsDiscovered).toBe(0);
+    expect(result.urlsSelected).toBe(0);
     expect(await products.getActiveProducts('coach_us')).toHaveLength(1); // preserved
   });
 
@@ -493,5 +507,780 @@ describe('runCrawl confirmed removal across consecutive full snapshots', () => {
     // No longer active — confirmed removed after two consecutive full misses.
     expect(gone).toBeUndefined();
     expect(second.inactiveItems).toBe(1);
+  });
+});
+
+describe('WP-12 Stage-A filtering in discovery', () => {
+  const threeTabbyUrls = [
+    'https://www.coach.com/products/tabby/CU001.html',
+    'https://www.coach.com/products/tabby/CU002.html',
+    'https://www.coach.com/products/tabby/CU003.html',
+  ];
+  const thousandUrls = [
+    ...threeTabbyUrls,
+    ...Array.from({ length: 997 }, (_, i) => `https://www.coach.com/products/satchel/C${i + 4}.html`),
+  ];
+  const thousandUrlSitemapXml = `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${thousandUrls
+    .map((loc) => `<url><loc>${loc}</loc></url>`)
+    .join('')}</urlset>`;
+
+  const tabbySelectionDoc = parseSelectionDocument({
+    version: 1,
+    sources: {
+      coach_us: {
+        enabled: true,
+        include: [
+          {
+            id: 'tabby-only',
+            kind: 'urlPattern',
+            value: '/products/tabby/*',
+          },
+        ],
+      },
+    },
+  }) as SelectionDocument;
+  const tabbySelection = compileSelection(tabbySelectionDoc);
+
+  it('synthetic 1,000-URL sitemap with a Stage-A rule matching exactly 3 URLs', async () => {
+    const products = new InMemoryProductRepository();
+    products.seed([seedRecord('PRE_EXISTING')]);
+    const crawlRuns = new InMemoryCrawlRunRepository();
+    const fetchedUrls: string[] = [];
+
+    const result = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(thousandUrlSitemapXml),
+      fetchPage: async (url) => {
+        fetchedUrls.push(url);
+        return {
+          status: 200,
+          body: PAGES['https://www.coach.com/products/tabby-shoulder-bag-26/CEN52.html']!,
+        };
+      },
+      robots: openRobots,
+      products,
+      crawlRuns,
+      selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+      rateLimiter: noRateDelayLimiter(),
+      selection: tabbySelection,
+    });
+
+    expect(result.urlsDiscovered).toBe(1000);
+    expect(result.urlsSelected).toBe(3);
+    expect(result.pagesFetched).toBe(3);
+    expect(fetchedUrls).toEqual(threeTabbyUrls);
+    expect(result.items).toHaveLength(3);
+    expect(result.isFullSnapshot).toBe(true);
+    expect(result.selectionVersion).toBe(tabbySelection.version);
+
+    // Lifecycle changes persisted with selection metadata; pre-existing unselected item is deselected
+    const activeProducts = await products.getActiveProducts('coach_us');
+    expect(activeProducts).toHaveLength(4);
+    const selectedActive = await products.getSelectedActiveProducts('coach_us', tabbySelection.version);
+    expect(selectedActive).toHaveLength(3);
+
+    const deselected = activeProducts.find((p) => p.externalId === 'PRE_EXISTING');
+    expect(deselected).toBeDefined();
+    expect(deselected!.selectionState).toBe('deselected');
+    expect(deselected!.isActive).toBe(true);
+
+    const runs = await crawlRuns.recentRuns('coach_us', 1);
+    expect(runs[0]!.urlsDiscovered).toBe(1000);
+    expect(runs[0]!.urlsSelected).toBe(3);
+    expect(runs[0]!.pagesFetched).toBe(3);
+    expect(runs[0]!.isFullSnapshot).toBe(true);
+    expect(runs[0]!.selectionVersion).toBe(tabbySelection.version);
+    expect(runs[0]!.deselectedItems).toBe(1);
+  });
+
+  it('maxSelectedUrlsPerSource exceeded aborts before fetching any pages', async () => {
+    const products = new InMemoryProductRepository();
+    products.seed([seedRecord('PRE_EXISTING')]);
+    const crawlRuns = new InMemoryCrawlRunRepository();
+    const fetchedUrls: string[] = [];
+
+    const result = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(thousandUrlSitemapXml),
+      fetchPage: async (url) => {
+        fetchedUrls.push(url);
+        return {
+          status: 200,
+          body: PAGES['https://www.coach.com/products/tabby-shoulder-bag-26/CEN52.html']!,
+        };
+      },
+      robots: openRobots,
+      products,
+      crawlRuns,
+      rateLimiter: noRateDelayLimiter(),
+      selection: tabbySelection,
+      maxSelectedUrlsPerSource: 2,
+    });
+
+    expect(result.status).toBe('partial');
+    expect(result.isFullSnapshot).toBe(false);
+    expect(result.pagesFetched).toBe(0);
+    expect(fetchedUrls).toHaveLength(0);
+    expect(result.errorsByType.selection_over_budget).toBe(1);
+
+    // Seeded products remain unchanged
+    const activeProducts = await products.getActiveProducts('coach_us');
+    expect(activeProducts).toHaveLength(1);
+    expect(activeProducts[0]!.externalId).toBe('PRE_EXISTING');
+
+    // Persisted crawl run metrics record urlsDiscovered and urlsSelected
+    const runs = await crawlRuns.recentRuns('coach_us', 1);
+    expect(runs[0]!.urlsDiscovered).toBe(1000);
+    expect(runs[0]!.urlsSelected).toBe(3);
+    expect(runs[0]!.pagesFetched).toBe(0);
+    expect(runs[0]!.status).toBe('partial');
+    expect(runs[0]!.isFullSnapshot).toBe(false);
+    expect(runs[0]!.errorsByType.selection_over_budget).toBe(1);
+  });
+
+  it('maxPagesPerRun exceeded after robots filtering aborts before fetching', async () => {
+    const fourTabbyUrls = [
+      'https://www.coach.com/products/tabby/CU001.html',
+      'https://www.coach.com/products/tabby/CU002.html',
+      'https://www.coach.com/products/tabby/CU003.html',
+      'https://www.coach.com/products/tabby/CU004.html',
+    ];
+    const sitemapXml = `<?xml version="1.0"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${fourTabbyUrls
+      .map((loc) => `<url><loc>${loc}</loc></url>`)
+      .join('')}</urlset>`;
+
+    const products = new InMemoryProductRepository();
+    products.seed([seedRecord('PRE_EXISTING')]);
+    const crawlRuns = new InMemoryCrawlRunRepository();
+    const fetchedUrls: string[] = [];
+
+    // Robots blocks CU004, so 3 pass robots
+    const robotsWithBlock = {
+      disallow: ['/products/tabby/CU004.html'],
+      allow: [],
+    };
+
+    const result = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(sitemapXml),
+      fetchPage: async (url) => {
+        fetchedUrls.push(url);
+        return {
+          status: 200,
+          body: PAGES['https://www.coach.com/products/tabby-shoulder-bag-26/CEN52.html']!,
+        };
+      },
+      robots: robotsWithBlock,
+      products,
+      crawlRuns,
+      rateLimiter: noRateDelayLimiter(),
+      selection: tabbySelection,
+      maxSelectedUrlsPerSource: 10, // selected candidate count (4) is within selection budget (10)
+      maxPagesPerRun: 2, // selected robots-allowed count (3) exceeds page budget (2)
+    });
+
+    expect(result.status).toBe('partial');
+    expect(result.isFullSnapshot).toBe(false);
+    expect(result.pagesFetched).toBe(0);
+    expect(fetchedUrls).toHaveLength(0);
+    expect(result.errorsByType.selection_over_budget).toBe(1);
+    expect(result.urlsSelected).toBe(4);
+    expect(result.urlsDiscovered).toBe(4);
+
+    const activeProducts = await products.getActiveProducts('coach_us');
+    expect(activeProducts).toHaveLength(1);
+    expect(activeProducts[0]!.externalId).toBe('PRE_EXISTING');
+
+    const runs = await crawlRuns.recentRuns('coach_us', 1);
+    expect(runs[0]!.urlsSelected).toBe(4);
+    expect(runs[0]!.pagesFetched).toBe(0);
+    expect(runs[0]!.status).toBe('partial');
+    expect(runs[0]!.errorsByType.selection_over_budget).toBe(1);
+  });
+
+  it('source with no Stage-A include rules selects zero pages and writes no products', async () => {
+    const docNoStageA = parseSelectionDocument({
+      version: 1,
+      sources: {
+        coach_us: {
+          enabled: true,
+          include: [
+            { id: 'price-only', kind: 'priceUsdRange', value: [100, 500] },
+          ],
+        },
+      },
+    }) as SelectionDocument;
+    const selectionNoStageA = compileSelection(docNoStageA);
+
+    const products = new InMemoryProductRepository();
+    products.seed([seedRecord('PRE_EXISTING')]);
+    const crawlRuns = new InMemoryCrawlRunRepository();
+    const fetchedUrls: string[] = [];
+
+    const result = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(thousandUrlSitemapXml),
+      fetchPage: async (url) => {
+        fetchedUrls.push(url);
+        return { status: 200, body: '' };
+      },
+      robots: openRobots,
+      products,
+      crawlRuns,
+      rateLimiter: noRateDelayLimiter(),
+      selection: selectionNoStageA,
+    });
+
+    expect(result.urlsDiscovered).toBe(1000);
+    expect(result.urlsSelected).toBe(0);
+    expect(result.pagesFetched).toBe(0);
+    expect(fetchedUrls).toHaveLength(0);
+    expect(result.status).toBe('partial');
+    expect(result.isFullSnapshot).toBe(false);
+    expect(result.items).toHaveLength(0);
+
+    const activeProducts = await products.getActiveProducts('coach_us');
+    expect(activeProducts).toHaveLength(1);
+    expect(activeProducts[0]!.externalId).toBe('PRE_EXISTING');
+  });
+});
+
+describe('WP-13 Stage-B product filtering and selection lifecycle invariants', () => {
+  const threeUrlsSitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.coach.com/products/tabby-shoulder-bag-26/CEN52.html</loc></url>
+  <url><loc>https://www.coach.com/products/wristlet-small/W0001.html</loc></url>
+</urlset>`;
+
+  const tabbyHtml = PAGES['https://www.coach.com/products/tabby-shoulder-bag-26/CEN52.html']!;
+  // Wristlet HTML: price $150, category 'Small Leather Goods'
+  const wristletHtml = tabbyHtml
+    .replace('CEN52', 'W0001')
+    .replace('Tabby Shoulder Bag 26', 'Small Wristlet')
+    .replace('350.00', '150.00')
+    .replace('$350', '$150');
+
+  it('Stage-B include/exclude rules run after extraction; rejected products are excluded from selected snapshot output but count for coverage', async () => {
+    // Stage A: include all /products/**
+    // Stage B: exclude items with priceUsd <= 200
+    const selectionDoc = parseSelectionDocument({
+      version: 1,
+      sources: {
+        coach_us: {
+          enabled: true,
+          include: [
+            { id: 'all-products', kind: 'urlPattern', value: '/products/**' },
+          ],
+          exclude: [
+            { id: 'cheap-items', kind: 'priceUsdRange', value: [0, 200] },
+          ],
+        },
+      },
+    }) as SelectionDocument;
+    const selection = compileSelection(selectionDoc);
+
+    const products = new InMemoryProductRepository();
+    const crawlRuns = new InMemoryCrawlRunRepository();
+
+    const result = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(threeUrlsSitemapXml),
+      fetchPage: async (url) => {
+        if (url.includes('CEN52')) return { status: 200, body: tabbyHtml };
+        if (url.includes('W0001')) return { status: 200, body: wristletHtml };
+        return { status: 404, body: '' };
+      },
+      robots: openRobots,
+      products,
+      crawlRuns,
+      selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+      rateLimiter: noRateDelayLimiter(),
+      selection,
+    });
+
+    // Both 2 pages were attempted and parsed successfully -> coverage is 2/2 = 100%
+    expect(result.urlsDiscovered).toBe(2);
+    expect(result.urlsSelected).toBe(2);
+    expect(result.pagesFetched).toBe(2);
+    expect(result.successfulParses).toBe(2);
+    expect(result.isFullSnapshot).toBe(true);
+
+    // Only CEN52 ($350) is selected; W0001 ($150) was rejected by Stage B
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]!.externalId).toBe('CEN52');
+    expect(result.newItems).toBe(1);
+
+    // Repository has only the selected item
+    const selectedActive = await products.getSelectedActiveProducts('coach_us', 1);
+    expect(selectedActive).toHaveLength(1);
+    expect(selectedActive[0]!.externalId).toBe('CEN52');
+    expect(selectedActive[0]!.selectionState).toBe('selected');
+    expect(selectedActive[0]!.selectionVersion).toBe(1);
+  });
+
+  it('a pinned Stage-A product remains selected even if it fails a Stage-B rule', async () => {
+    // Stage A: pin tabby
+    // Stage B: exclude priceUsd [300, 400] (which CEN52 falls into)
+    const selectionDoc = parseSelectionDocument({
+      version: 1,
+      sources: {
+        coach_us: {
+          enabled: true,
+          include: [
+            {
+              id: 'pin-tabby',
+              kind: 'urlPattern',
+              value: '/products/tabby**',
+              tier: 'pinned',
+              placements: ['home_rail'],
+            },
+          ],
+          exclude: [
+            { id: 'exclude-350', kind: 'priceUsdRange', value: [300, 400] },
+          ],
+        },
+      },
+    }) as SelectionDocument;
+    const selection = compileSelection(selectionDoc);
+
+    const products = new InMemoryProductRepository();
+    const crawlRuns = new InMemoryCrawlRunRepository();
+
+    const result = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(threeUrlsSitemapXml),
+      fetchPage: async (url) => ({ status: 200, body: tabbyHtml }),
+      robots: openRobots,
+      products,
+      crawlRuns,
+      selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+      rateLimiter: noRateDelayLimiter(),
+      selection,
+    });
+
+    expect(result.items).toHaveLength(1);
+    expect(result.items[0]!.externalId).toBe('CEN52');
+
+    const selectedActive = await products.getSelectedActiveProducts('coach_us', 1);
+    expect(selectedActive).toHaveLength(1);
+    expect(selectedActive[0]!.watchTier).toBe('pinned');
+    expect(selectedActive[0]!.placements).toEqual(['home_rail']);
+    expect(selectedActive[0]!.matchedRuleId).toBe('pin-tabby');
+  });
+
+  it('partial, blocked, and failed selected runs leave product state completely untouched (I6)', async () => {
+    const selectionDoc = parseSelectionDocument({
+      version: 2,
+      sources: {
+        coach_us: {
+          enabled: true,
+          include: [{ id: 'all', kind: 'urlPattern', value: '/products/**' }],
+        },
+      },
+    }) as SelectionDocument;
+    const selection = compileSelection(selectionDoc);
+
+    const products = new InMemoryProductRepository();
+    const baseline = seedRecord('PRE_EXISTING');
+    baseline.selectionState = 'selected';
+    baseline.selectionVersion = 1;
+    products.seed([baseline]);
+
+    const crawlRuns = new InMemoryCrawlRunRepository();
+
+    // 1. Blocked run
+    const blockedResult = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(threeUrlsSitemapXml),
+      fetchPage: async () => ({
+        status: 403,
+        body: '<html><title>Access Denied - Cloudflare Captcha</title></html>',
+      }),
+      robots: openRobots,
+      products,
+      crawlRuns,
+      rateLimiter: noRateDelayLimiter(),
+      selection,
+    });
+
+    expect(blockedResult.status).toBe('blocked');
+    expect(blockedResult.isFullSnapshot).toBe(false);
+
+    // Product untouched:
+    let stored = products.all();
+    expect(stored).toHaveLength(1);
+    expect(stored[0]!.externalId).toBe('PRE_EXISTING');
+    expect(stored[0]!.selectionVersion).toBe(1);
+    expect(stored[0]!.selectionState).toBe('selected');
+    expect(stored[0]!.consecutiveMissingSnapshots).toBe(0);
+
+    // 2. Partial run (poor coverage: fetch succeeds but body is empty HTML so parsing fails)
+    const partialResult = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(threeUrlsSitemapXml),
+      fetchPage: async () => ({ status: 200, body: '<html><body>Empty</body></html>' }),
+      robots: openRobots,
+      products,
+      crawlRuns,
+      rateLimiter: noRateDelayLimiter(),
+      selection,
+    });
+
+    expect(partialResult.status).toBe('partial');
+    expect(partialResult.isFullSnapshot).toBe(false);
+
+    stored = products.all();
+    expect(stored).toHaveLength(1);
+    expect(stored[0]!.selectionVersion).toBe(1);
+    expect(stored[0]!.selectionState).toBe('selected');
+    expect(stored[0]!.consecutiveMissingSnapshots).toBe(0);
+
+    // 3. Failed run (fatal adapter error throws)
+    await expect(
+      runCrawl({
+        adapter: {
+          ...coachAdapter,
+          isProductUrl: () => {
+            throw new Error('Fatal adapter error');
+          },
+        },
+        fetchSitemap: sitemapOf(threeUrlsSitemapXml),
+        fetchPage: async () => ({ status: 200, body: '' }),
+        robots: openRobots,
+        products,
+        crawlRuns,
+        rateLimiter: noRateDelayLimiter(),
+        selection,
+      }),
+    ).rejects.toThrow('Fatal adapter error');
+
+    stored = products.all();
+    expect(stored).toHaveLength(1);
+    expect(stored[0]!.selectionVersion).toBe(1);
+    expect(stored[0]!.selectionState).toBe('selected');
+    expect(stored[0]!.consecutiveMissingSnapshots).toBe(0);
+  });
+
+  it('end-to-end multi-run lifecycle: version change carries over and deselects without deactivating, then stable version applies 2-strike deactivation', async () => {
+    const products = new InMemoryProductRepository();
+    const crawlRuns = new InMemoryCrawlRunRepository();
+
+    // 100 items previously active at version 1
+    const initial100: CatalogProductRecord[] = Array.from({ length: 100 }, (_, i) => ({
+      ...seedRecord(`ITEM${i}`),
+      canonicalUrl:
+        i < 5
+          ? `https://www.coach.com/products/tabby/ITEM${i}.html`
+          : `https://www.coach.com/products/wristlet/ITEM${i}.html`,
+      selectionState: 'selected',
+      selectionVersion: 1,
+      consecutiveMissingSnapshots: 0,
+    }));
+    products.seed(initial100);
+
+    // Version 2 selection: includes only ITEM0 through ITEM4
+    const v2Doc = parseSelectionDocument({
+      version: 2,
+      sources: {
+        coach_us: {
+          enabled: true,
+          include: [
+            { id: 'v2-items', kind: 'urlPattern', value: '/products/tabby/**' },
+          ],
+        },
+      },
+    }) as SelectionDocument;
+    const v2Selection = compileSelection(v2Doc);
+
+    const sitemapV2Xml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.coach.com/products/tabby/ITEM0.html</loc></url>
+  <url><loc>https://www.coach.com/products/tabby/ITEM1.html</loc></url>
+  <url><loc>https://www.coach.com/products/tabby/ITEM2.html</loc></url>
+  <url><loc>https://www.coach.com/products/tabby/ITEM3.html</loc></url>
+  <url><loc>https://www.coach.com/products/tabby/ITEM4.html</loc></url>
+</urlset>`;
+
+    const pageFor = (id: string) =>
+      tabbyHtml
+        .replace('CEN52', id)
+        .replace('/products/tabby-shoulder-bag-26/CEN52.html', `/products/tabby/${id}.html`);
+
+    // --- RUN 1 (Version 2 first run): Version Bump ---
+    const run1 = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(sitemapV2Xml),
+      fetchPage: async (url) => {
+        const match = /ITEM(\d+)\.html/i.exec(url);
+        return { status: 200, body: pageFor(`ITEM${match![1]}`) };
+      },
+      robots: openRobots,
+      products,
+      crawlRuns,
+      selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+      rateLimiter: noRateDelayLimiter(),
+      selection: v2Selection,
+    });
+
+    expect(run1.isFullSnapshot).toBe(true);
+    expect(run1.selectionVersion).toBe(2);
+    expect(run1.newItems).toBe(0); // None genuinely new (all were in catalog)
+    expect(run1.deselectedItems).toBe(95);
+    expect(run1.missingItems).toBe(0); // Zero missing from v2 baseline
+    expect(run1.inactiveItems).toBe(0); // Zero deactivated
+
+    // All 100 products remain active!
+    const allActiveAfterRun1 = await products.getActiveProducts('coach_us');
+    expect(allActiveAfterRun1).toHaveLength(100);
+
+    const selectedV2 = await products.getSelectedActiveProducts('coach_us', 2);
+    expect(selectedV2).toHaveLength(5);
+
+    // --- RUN 2 (Version 2 second run): Stable Version Full Crawl ---
+    const run2 = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(sitemapV2Xml),
+      fetchPage: async (url) => {
+        const match = /ITEM(\d+)\.html/i.exec(url);
+        return { status: 200, body: pageFor(`ITEM${match![1]}`) };
+      },
+      robots: openRobots,
+      products,
+      crawlRuns,
+      selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+      rateLimiter: noRateDelayLimiter(),
+      selection: v2Selection,
+    });
+
+    expect(run2.isFullSnapshot).toBe(true);
+    expect(run2.selectionVersion).toBe(2);
+    expect(run2.deselectedItems).toBe(0);
+    expect(run2.missingItems).toBe(0);
+    expect(run2.inactiveItems).toBe(0);
+
+    // --- RUN 3 (Version 2 third run): ITEM4 missing once from sitemap ---
+    const sitemapMissingItem4 = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.coach.com/products/tabby/ITEM0.html</loc></url>
+  <url><loc>https://www.coach.com/products/tabby/ITEM1.html</loc></url>
+  <url><loc>https://www.coach.com/products/tabby/ITEM2.html</loc></url>
+  <url><loc>https://www.coach.com/products/tabby/ITEM3.html</loc></url>
+</urlset>`;
+
+    const run3 = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(sitemapMissingItem4),
+      fetchPage: async (url) => {
+        const match = /ITEM(\d+)\.html/i.exec(url);
+        return { status: 200, body: pageFor(`ITEM${match![1]}`) };
+      },
+      robots: openRobots,
+      products,
+      crawlRuns,
+      selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+      rateLimiter: noRateDelayLimiter(),
+      selection: v2Selection,
+    });
+
+    expect(run3.isFullSnapshot).toBe(true);
+    expect(run3.missingItems).toBe(1); // ITEM4 missing
+    expect(run3.inactiveItems).toBe(0); // Not deactivated yet (1 miss < 2)
+
+    const item4AfterRun3 = (await products.getActiveProducts('coach_us')).find((p) => p.externalId === 'ITEM4');
+    expect(item4AfterRun3).toBeDefined();
+    expect(item4AfterRun3!.consecutiveMissingSnapshots).toBe(1);
+    expect(item4AfterRun3!.isActive).toBe(true);
+
+    // --- RUN 4 (Version 2 fourth run): ITEM4 missing a second time ---
+    const run4 = await runCrawl({
+      adapter: coachAdapter,
+      fetchSitemap: sitemapOf(sitemapMissingItem4),
+      fetchPage: async (url) => {
+        const match = /ITEM(\d+)\.html/i.exec(url);
+        return { status: 200, body: pageFor(`ITEM${match![1]}`) };
+      },
+      robots: openRobots,
+      products,
+      crawlRuns,
+      selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+      rateLimiter: noRateDelayLimiter(),
+      selection: v2Selection,
+    });
+
+    expect(run4.isFullSnapshot).toBe(true);
+    expect(run4.missingItems).toBe(1);
+    expect(run4.inactiveItems).toBe(1); // Deactivated after 2 consecutive misses!
+
+    const item4AfterRun4 = products.all().find((p) => p.externalId === 'ITEM4');
+    expect(item4AfterRun4!.isActive).toBe(false);
+    expect(item4AfterRun4!.consecutiveMissingSnapshots).toBe(2);
+
+    // Check crawl run records in DB
+    const runs = await crawlRuns.recentRuns('coach_us', 4);
+    expect(runs[0]!.selectionVersion).toBe(2);
+    expect(runs[0]!.inactiveItems).toBe(1);
+    expect(runs[3]!.selectionVersion).toBe(2);
+    expect(runs[3]!.deselectedItems).toBe(95);
+  });
+
+  it('atomic selected-reconciliation failure rolls back cleanly and leaves product state byte-for-byte unchanged', async () => {
+    // 1. Seed selected version-1 rows:
+    // Row A: will match version 2 and would be stamped/upserted to version 2
+    // Row B: will NOT match version 2 and would be deselected
+    const initialRows: CatalogProductRecord[] = [
+      {
+        ...seedRecord('TABBYRETAINED'),
+        canonicalUrl: 'https://www.coach.com/products/tabby/TABBYRETAINED.html',
+        selectionState: 'selected',
+        selectionVersion: 1,
+        consecutiveMissingSnapshots: 0,
+      },
+      {
+        ...seedRecord('WRISTLET001'),
+        canonicalUrl: 'https://www.coach.com/products/wristlet/WRISTLET001.html',
+        selectionState: 'selected',
+        selectionVersion: 1,
+        consecutiveMissingSnapshots: 0,
+      },
+    ];
+
+    class FailingDuringApplyProductRepository extends InMemoryProductRepository {
+      override async applySelectionSnapshot(diff: SelectionSnapshotPersistence): Promise<void> {
+        // Assert that diff contains both deselections and upserts/stamps
+        expect(diff.toDeselect.length).toBeGreaterThan(0);
+        expect(diff.toUpsert.length).toBeGreaterThan(0);
+        // Simulate a database failure / constraint violation during the atomic operation
+        throw new Error('Database transaction abort / constraint violation');
+      }
+    }
+
+    const products = new FailingDuringApplyProductRepository();
+    products.seed(initialRows);
+
+    // Capture serialized snapshot of initial product state
+    const beforeState = JSON.stringify(products.all());
+
+    const crawlRuns = new InMemoryCrawlRunRepository();
+
+    // Version 2 selection: includes only /products/tabby/**
+    const v2Doc = parseSelectionDocument({
+      version: 2,
+      sources: {
+        coach_us: {
+          enabled: true,
+          include: [
+            { id: 'tabby-rule', kind: 'urlPattern', value: '/products/tabby/**' },
+          ],
+        },
+      },
+    }) as SelectionDocument;
+    const v2Selection = compileSelection(v2Doc);
+
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.coach.com/products/tabby/TABBYRETAINED.html</loc></url>
+</urlset>`;
+
+    const tabbyPageHtml = tabbyHtml
+      .replace('CEN52', 'TABBYRETAINED')
+      .replace('/products/tabby-shoulder-bag-26/CEN52.html', '/products/tabby/TABBYRETAINED.html');
+
+    // 2. Execute crawl and assert it rejects with the error
+    await expect(
+      runCrawl({
+        adapter: coachAdapter,
+        fetchSitemap: sitemapOf(sitemapXml),
+        fetchPage: async () => ({ status: 200, body: tabbyPageHtml }),
+        robots: openRobots,
+        products,
+        crawlRuns,
+        selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+        rateLimiter: noRateDelayLimiter(),
+        selection: v2Selection,
+      }),
+    ).rejects.toThrow('Database transaction abort / constraint violation');
+
+    // 3. Assert the crawl was recorded as failed with selection version
+    const runs = await crawlRuns.recentRuns('coach_us', 1);
+    expect(runs).toHaveLength(1);
+    expect(runs[0]!.status).toBe('failed');
+    expect(runs[0]!.isFullSnapshot).toBe(false);
+    expect(runs[0]!.selectionVersion).toBe(2);
+
+    // 4. Assert product state is byte-for-byte unchanged:
+    // - no deselections (WRISTLET_DESELECTED is still selected at v1)
+    // - no selection-version stamps (TABBY_RETAINED is still selected at v1)
+    // - no missing-count changes (consecutiveMissingSnapshots is still 0)
+    // - no inactive rows (both remain isActive: true)
+    // - no new rows (total length remains 2)
+    const afterState = JSON.stringify(products.all());
+    expect(afterState).toBe(beforeState);
+    expect(products.all()).toEqual(initialRows);
+  });
+
+  it('rolls back selected product state when successful run finalization fails', async () => {
+    const initialRows: CatalogProductRecord[] = [{
+      ...seedRecord('TABBYRETAINED'),
+      canonicalUrl: 'https://www.coach.com/products/tabby/TABBYRETAINED.html',
+      selectionState: 'selected',
+      selectionVersion: 1,
+      consecutiveMissingSnapshots: 0,
+    }];
+    const products = new InMemoryProductRepository();
+    products.seed(initialRows);
+    const beforeState = JSON.stringify(products.all());
+
+    class FailsSuccessfulFinalization extends InMemoryCrawlRunRepository {
+      override async finish(
+        runId: number,
+        params: Parameters<InMemoryCrawlRunRepository['finish']>[1],
+      ): Promise<void> {
+        if (params.status === 'success') {
+          throw new Error('simulated successful finalization failure');
+        }
+        await super.finish(runId, params);
+      }
+    }
+    const crawlRuns = new FailsSuccessfulFinalization();
+
+    const selection = compileSelection(parseSelectionDocument({
+      version: 2,
+      sources: {
+        coach_us: {
+          enabled: true,
+          include: [{ id: 'tabby-rule', kind: 'urlPattern', value: '/products/tabby/**' }],
+        },
+      },
+    }) as SelectionDocument);
+    const sitemapXml = `<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://www.coach.com/products/tabby/TABBYRETAINED.html</loc></url>
+</urlset>`;
+    const tabbyPageHtml = tabbyHtml
+      .replace('CEN52', 'TABBYRETAINED')
+      .replace('/products/tabby-shoulder-bag-26/CEN52.html', '/products/tabby/TABBYRETAINED.html');
+
+    await expect(
+      runCrawl({
+        adapter: coachAdapter,
+        fetchSitemap: sitemapOf(sitemapXml),
+        fetchPage: async () => ({ status: 200, body: tabbyPageHtml }),
+        robots: openRobots,
+        products,
+        crawlRuns,
+        selectionSnapshotCommitter: new InMemorySelectionSnapshotCommitter(products, crawlRuns),
+        rateLimiter: noRateDelayLimiter(),
+        selection,
+      }),
+    ).rejects.toThrow('simulated successful finalization failure');
+
+    expect(JSON.stringify(products.all())).toBe(beforeState);
+    expect(products.all()).toEqual(initialRows);
+
+    const runs = await crawlRuns.recentRuns('coach_us', 1);
+    expect(runs).toHaveLength(1);
+    expect(runs[0]!.status).toBe('failed');
+    expect(runs[0]!.isFullSnapshot).toBe(false);
+    expect(runs[0]!.selectionVersion).toBe(2);
   });
 });
