@@ -6,16 +6,45 @@ import 'package:monetta_app/domain/admin_control.dart';
 import 'package:monetta_app/domain/product.dart';
 
 class _AdminClient implements AdminClient {
-  _AdminClient({required this.snapshot});
+  _AdminClient({
+    required this.snapshot,
+    this.capabilities = const AdminCapabilities(
+      openAdmin: true,
+      manageProducts: true,
+      manageStorefront: true,
+    ),
+  });
 
   final AdminSnapshot snapshot;
+  AdminCapabilities capabilities;
   AdminProductRecord? savedProduct;
   AdminStorefrontSettings? savedStorefront;
   AdminSourcePolicy? savedSource;
   int syncCalls = 0;
+  int meCalls = 0;
+  int refreshTracked = 0;
 
   @override
-  Future<AdminSnapshot> fetchSnapshot() async => snapshot;
+  Future<AdminCapabilities> fetchMe() async {
+    meCalls += 1;
+    return capabilities;
+  }
+
+  @override
+  Future<AdminSnapshot> fetchSnapshot({
+    String? cursor,
+    String? query,
+    int? limit,
+  }) async =>
+      snapshot;
+
+  @override
+  Future<AdminSnapshot> fetchProductsPage({
+    String? cursor,
+    String? query,
+    int? limit,
+  }) async =>
+      snapshot;
 
   @override
   Future<void> syncAll() async => syncCalls += 1;
@@ -59,14 +88,84 @@ Product _product({double price = 2890}) {
 }
 
 void main() {
-  test('only configured owner emails can open live administration', () {
+  test('live access is driven by /admin/me capabilities, not email alone (F20)',
+      () async {
+    final client = _AdminClient(
+      snapshot: AdminSnapshot(
+        products: const [],
+        storefront: AdminStorefrontSettings.defaults,
+        sources: const [],
+      ),
+      capabilities:
+          const AdminCapabilities(openAdmin: true, manageProducts: true),
+    );
     final controller = AdminController(
       config: AdminConfig(
         baseUrl: Uri.parse('https://admin.monetta.test'),
-        ownerEmails: const {'duena@monetta.mx'},
+        ownerEmails: const {}, // email allow-list intentionally empty
       ),
+      client: client,
     );
 
+    expect(
+      controller.canAccess(
+        signedIn: true,
+        email: 'anyone@example.com',
+        authProvider: 'shopify',
+      ),
+      isFalse,
+      reason: 'capabilities not resolved yet',
+    );
+
+    await controller.refreshCapabilities();
+    expect(client.meCalls, 1);
+    expect(
+      controller.canAccess(
+        signedIn: true,
+        email: 'anyone@example.com',
+        authProvider: 'shopify',
+      ),
+      isTrue,
+    );
+
+    client.capabilities = const AdminCapabilities.none();
+    await controller.refreshCapabilities();
+    expect(
+      controller.canAccess(
+        signedIn: true,
+        email: 'duena@monetta.mx',
+        authProvider: 'shopify',
+      ),
+      isFalse,
+    );
+  });
+
+  test('preview mode stays separate from live owner capabilities (F20)', () {
+    final controller = AdminController(
+      config: const AdminConfig(
+        baseUrl: null,
+        ownerEmails: {},
+        previewEnabled: true,
+      ),
+    );
+    expect(
+      controller.canAccess(
+        signedIn: true,
+        email: 'preview@example.com',
+        authProvider: 'shopify',
+      ),
+      isTrue,
+    );
+    expect(controller.mode, AdminConnectionMode.preview);
+  });
+
+  test('without live API, email allow-list remains a soft local gate', () {
+    final controller = AdminController(
+      config: const AdminConfig(
+        baseUrl: null,
+        ownerEmails: {'duena@monetta.mx'},
+      ),
+    );
     expect(
       controller.canAccess(
         signedIn: true,
@@ -83,22 +182,6 @@ void main() {
       ),
       isFalse,
     );
-    expect(
-      controller.canAccess(
-        signedIn: false,
-        email: 'duena@monetta.mx',
-        authProvider: 'shopify',
-      ),
-      isFalse,
-    );
-    expect(
-      controller.canAccess(
-        signedIn: true,
-        email: 'duena@monetta.mx',
-        authProvider: 'monetta',
-      ),
-      isFalse,
-    );
   });
 
   test('preview changes stay local and are marked in audit', () async {
@@ -110,7 +193,8 @@ void main() {
       ),
     );
 
-    await controller.load(appProducts: [_product()], externalSources: const []);
+    await controller.load(appProducts: [_product()]);
+    expect(controller.sources, isEmpty);
     final updated = controller.products.single.copyWith(price: 3100);
     final ok = await controller.saveProduct(updated);
 
@@ -150,7 +234,7 @@ void main() {
       refreshApp: () async => refreshes += 1,
     );
 
-    await controller.load(appProducts: [_product()], externalSources: const []);
+    await controller.load(appProducts: [_product()]);
     final changed = controller.products.single.copyWith(price: 3250);
     final ok = await controller.saveProduct(changed);
 
@@ -158,5 +242,56 @@ void main() {
     expect(client.savedProduct?.price, 3250);
     expect(refreshes, 1);
     expect(controller.audit.single.previewOnly, isFalse);
+  });
+
+  test('syncAll succeeds without external catalog channel (F22)', () async {
+    final snapshot = AdminSnapshot(
+      products: const [],
+      storefront: AdminStorefrontSettings.defaults,
+      sources: const [],
+    );
+    final client = _AdminClient(snapshot: snapshot);
+    final controller = AdminController(
+      config: AdminConfig(
+        baseUrl: Uri.parse('https://admin.monetta.test'),
+        ownerEmails: const {'duena@monetta.mx'},
+      ),
+      client: client,
+    );
+
+    await controller.load(appProducts: const []);
+    final ok = await controller.syncAll();
+
+    expect(ok, isTrue);
+    expect(client.syncCalls, 1);
+    expect(
+      controller.audit.single.channels,
+      isNot(contains(AdminChannel.externalCatalog)),
+    );
+  });
+
+  test('saveStorefront refreshes shopper content after write (F23)', () async {
+    final snapshot = AdminSnapshot(
+      products: const [],
+      storefront: AdminStorefrontSettings.defaults,
+      sources: const [],
+    );
+    final client = _AdminClient(snapshot: snapshot);
+    var refreshes = 0;
+    final controller = AdminController(
+      config: AdminConfig(
+        baseUrl: Uri.parse('https://admin.monetta.test'),
+        ownerEmails: const {'duena@monetta.mx'},
+      ),
+      client: client,
+      refreshApp: () async => refreshes += 1,
+    );
+    await controller.refreshCapabilities();
+    await controller.load(appProducts: const []);
+    final ok = await controller.saveStorefront(
+      AdminStorefrontSettings.defaults.copyWith(announcement: 'Hola'),
+    );
+    expect(ok, isTrue);
+    expect(refreshes, 1);
   });
 }

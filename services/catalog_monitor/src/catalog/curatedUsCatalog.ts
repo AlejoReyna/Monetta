@@ -664,6 +664,11 @@ function toCuratedRecord(listing: CuratedListing): PresentedCatalogProduct {
     lastChangedAt: CURATED_US_CATALOG_OBSERVED_AT,
     isActive: true,
     consecutiveMissingSnapshots: 0,
+    selectionState: 'selected',
+    selectionVersion: null,
+    watchTier: 'standard',
+    placements: [],
+    matchedRuleId: null,
     dataOrigin: 'curated_us_snapshot',
   };
 }

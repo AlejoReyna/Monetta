@@ -48,7 +48,8 @@ void main() {
       );
     });
 
-    test('headers carry the public token and Spanish locale, never logs token in toString',
+    test(
+        'headers carry the public token and Spanish locale, never logs token in toString',
         () {
       const config = StorefrontConfig(
         shopDomain: 'monetta.mx',

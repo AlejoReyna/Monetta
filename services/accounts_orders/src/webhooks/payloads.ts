@@ -16,6 +16,8 @@ export interface ShopifyOrderWebhookPayload {
   readonly current_total_price?: string | null;
   readonly currency?: string | null;
   readonly created_at?: string | null;
+  /** Shopify's order updated_at — used for out-of-order protection (F15). */
+  readonly updated_at?: string | null;
   readonly customer?: {
     readonly id: number;
     readonly email?: string | null;

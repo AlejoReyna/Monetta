@@ -1,4 +1,5 @@
 /** Shared domain types for the catalog monitor. Pure types, no I/O. */
+import type { Placement, WatchTier } from '../selection/types.js';
 
 export type SourceId =
   | 'coach_us'
@@ -185,6 +186,11 @@ export interface CatalogProductRecord extends ExtractedProduct {
   readonly lastChangedAt: Date;
   readonly isActive: boolean;
   readonly consecutiveMissingSnapshots: number;
+  readonly selectionState: 'selected' | 'deselected';
+  readonly selectionVersion: number | null;
+  readonly watchTier: WatchTier;
+  readonly placements: readonly Placement[];
+  readonly matchedRuleId: string | null;
 }
 
 export type ErrorType =
@@ -198,6 +204,7 @@ export type ErrorType =
   | 'render_failed'
   | 'wrong_market'
   | 'robots_unavailable'
+  | 'selection_over_budget'
   | 'other';
 
 export type CrawlRunStatus = 'running' | 'success' | 'partial' | 'failed' | 'blocked';
@@ -208,13 +215,16 @@ export interface CrawlRunMetrics {
   readonly endedAt: Date | null;
   readonly status: CrawlRunStatus;
   readonly isFullSnapshot: boolean;
+  readonly selectionVersion: number | null;
   readonly urlsDiscovered: number;
+  readonly urlsSelected: number;
   readonly pagesFetched: number;
   readonly successfulParses: number;
   readonly newItems: number;
   readonly changedItems: number;
   readonly missingItems: number;
   readonly inactiveItems: number;
+  readonly deselectedItems: number;
   readonly errorsByType: Partial<Record<ErrorType, number>>;
 }
 

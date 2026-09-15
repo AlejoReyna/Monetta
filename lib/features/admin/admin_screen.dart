@@ -6,10 +6,10 @@ import 'package:flutter/material.dart';
 import '../../app/admin_controller.dart';
 import '../../app/admin_notification_controller.dart';
 import '../../app/catalog_store.dart';
-import '../../app/external_catalog_controller.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/theme.dart';
 import '../../domain/admin_control.dart';
+import '../../data/local/catalog_cache_store.dart';
 import '../../data/notifications/admin_notification_client.dart';
 
 class AdminScreen extends StatefulWidget {
@@ -17,14 +17,12 @@ class AdminScreen extends StatefulWidget {
     required this.controller,
     this.notificationController,
     required this.catalogStore,
-    required this.externalCatalogController,
     super.key,
   });
 
   final AdminController controller;
   final AdminNotificationController? notificationController;
   final CatalogStore catalogStore;
-  final ExternalCatalogController externalCatalogController;
 
   @override
   State<AdminScreen> createState() => _AdminScreenState();
@@ -32,6 +30,10 @@ class AdminScreen extends StatefulWidget {
 
 class _AdminScreenState extends State<AdminScreen> {
   int _section = 0;
+  late final Listenable _refresh = Listenable.merge([
+    widget.controller,
+    widget.catalogStore,
+  ]);
 
   @override
   void initState() {
@@ -45,7 +47,6 @@ class _AdminScreenState extends State<AdminScreen> {
   Future<void> _load() {
     return widget.controller.load(
       appProducts: widget.catalogStore.products,
-      externalSources: widget.externalCatalogController.sources,
     );
   }
 
@@ -59,7 +60,7 @@ class _AdminScreenState extends State<AdminScreen> {
     _toast(
       ok
           ? widget.controller.mode == AdminConnectionMode.live
-              ? 'Shopify, la app y las fuentes quedaron sincronizados.'
+              ? 'Shopify y la app quedaron sincronizados.'
               : 'Sincronización simulada en vista previa.'
           : widget.controller.lastError ?? 'No se pudo sincronizar.',
     );
@@ -84,7 +85,7 @@ class _AdminScreenState extends State<AdminScreen> {
       ),
       body: SafeArea(
         child: ListenableBuilder(
-          listenable: widget.controller,
+          listenable: _refresh,
           builder: (context, _) {
             final controller = widget.controller;
             return Column(
@@ -103,17 +104,17 @@ class _AdminScreenState extends State<AdminScreen> {
                   child: IndexedStack(
                     index: _section,
                     children: [
-                      _OverviewSection(controller: controller, onSync: _sync),
+                      _OverviewSection(
+                        controller: controller,
+                        catalogStore: widget.catalogStore,
+                        onSync: _sync,
+                      ),
                       _ProductsSection(
                         controller: controller,
                         onMessage: _toast,
                       ),
                       _StorefrontSection(
                         key: ValueKey(controller.storefront.hashCode),
-                        controller: controller,
-                        onMessage: _toast,
-                      ),
-                      _SourcesSection(
                         controller: controller,
                         onMessage: _toast,
                       ),
@@ -150,7 +151,9 @@ class _AdminHeader extends StatelessWidget {
     final live = mode == AdminConnectionMode.live;
     return Container(
       width: double.infinity,
-      color: live ? const Color(0xFFEAF4EC) : const Color(0xFFF7F0E6),
+      color: live
+          ? context.monettaColors.successSurface
+          : context.monettaColors.warningSurface,
       padding: const EdgeInsets.fromLTRB(20, 12, 20, 12),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -161,7 +164,9 @@ class _AdminHeader extends StatelessWidget {
             margin: const EdgeInsets.only(top: 5),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: live ? const Color(0xFF3B7B4A) : kGold,
+              color: live
+                  ? context.monettaColors.success
+                  : context.monettaColors.accent,
             ),
           ),
           const SizedBox(width: 10),
@@ -173,7 +178,9 @@ class _AdminHeader extends StatelessWidget {
                   live ? 'CONTROL EN VIVO' : 'VISTA PREVIA',
                   style: eyebrow(
                     size: 9,
-                    color: live ? const Color(0xFF2F633B) : kGold,
+                    color: live
+                        ? context.monettaColors.success
+                        : context.monettaColors.accent,
                     weight: FontWeight.w700,
                   ),
                 ),
@@ -185,7 +192,11 @@ class _AdminHeader extends StatelessWidget {
                               'en la app.'
                           : 'Puedes revisar el panel; los cambios todavía no '
                               'se publican.'),
-                  style: sans(size: 11, color: kInkMuted, height: 1.35),
+                  style: sans(
+                    size: 11,
+                    color: context.monettaColors.contentMuted,
+                    height: 1.35,
+                  ),
                 ),
               ],
             ),
@@ -215,7 +226,6 @@ class _SectionPicker extends StatelessWidget {
     (Icons.grid_view_rounded, 'Resumen'),
     (Icons.inventory_2_outlined, 'Productos'),
     (Icons.storefront_outlined, 'Tienda'),
-    (Icons.language_rounded, 'Fuentes'),
     (Icons.notifications_outlined, 'Avisos'),
   ];
 
@@ -243,20 +253,30 @@ class _SectionPicker extends StatelessWidget {
                 decoration: BoxDecoration(
                   border: Border(
                     bottom: BorderSide(
-                      color: active ? kGold : Colors.transparent,
+                      color: active
+                          ? context.monettaColors.accent
+                          : Colors.transparent,
                       width: 1.5,
                     ),
                   ),
                 ),
                 child: Column(
                   children: [
-                    Icon(item.$1, size: 19, color: active ? kInk : kInkMuted),
+                    Icon(
+                      item.$1,
+                      size: 19,
+                      color: active
+                          ? context.monettaColors.contentPrimary
+                          : context.monettaColors.contentMuted,
+                    ),
                     const SizedBox(height: 5),
                     Text(
                       item.$2,
                       style: sans(
                         size: 10,
-                        color: active ? kInk : kInkMuted,
+                        color: active
+                            ? context.monettaColors.contentPrimary
+                            : context.monettaColors.contentMuted,
                         weight: active ? FontWeight.w600 : FontWeight.w400,
                       ),
                     ),
@@ -272,18 +292,40 @@ class _SectionPicker extends StatelessWidget {
 }
 
 class _OverviewSection extends StatelessWidget {
-  const _OverviewSection({required this.controller, required this.onSync});
+  const _OverviewSection({
+    required this.controller,
+    required this.catalogStore,
+    required this.onSync,
+  });
 
   final AdminController controller;
+  final CatalogStore catalogStore;
   final VoidCallback onSync;
 
   @override
   Widget build(BuildContext context) {
     final inStock = controller.products.where((item) => item.inStock).length;
-    final externalItems = controller.sources.fold<int>(
-      0,
-      (total, source) => total + source.itemCount,
-    );
+    final metadata = catalogStore.catalogMetadata;
+    final catalogSource = switch (metadata?.source) {
+      CatalogCacheSource.firestore => 'Firestore',
+      CatalogCacheSource.shopify => 'Shopify',
+      CatalogCacheSource.asset => 'Respaldo incluido',
+      CatalogCacheSource.legacyCache => 'Caché heredado',
+      null => 'Procedencia pendiente',
+    };
+    final catalogStatus = switch (catalogStore.realtimeStatus) {
+      CatalogRealtimeStatus.live => 'Al día',
+      CatalogRealtimeStatus.connecting => 'Conectando',
+      CatalogRealtimeStatus.reconnecting => 'Sin conexión',
+      CatalogRealtimeStatus.empty => 'Vacío',
+      CatalogRealtimeStatus.invalid => 'Inválido',
+      CatalogRealtimeStatus.disabled =>
+        metadata?.status == CatalogCacheStatus.healthy ? 'Al día' : 'Respaldo',
+    };
+    final catalogDescription = metadata == null
+        ? catalogSource
+        : '$catalogSource · ${metadata.productCount} productos'
+            '${metadata.syncedAt == null ? '' : ' · ${metadata.syncedAt!.toIso8601String().split('T').first}'}';
     return _AdminScroll(
       children: [
         Container(
@@ -294,7 +336,7 @@ class _OverviewSection extends StatelessWidget {
             children: [
               Text(
                 'ADMINISTRACIÓN',
-                style: eyebrow(size: 9, color: kGold),
+                style: eyebrow(size: 9, color: context.monettaColors.accent),
               ),
               const SizedBox(height: 10),
               Text(
@@ -303,8 +345,7 @@ class _OverviewSection extends StatelessWidget {
               ),
               const SizedBox(height: 12),
               Text(
-                'Catálogo, portada, comisiones e inventario conectados con '
-                'Shopify y la app.',
+                'Catálogo, portada e inventario conectados con Shopify y la app.',
                 style: sans(size: 12, color: const Color(0xFFCACACA)),
               ),
             ],
@@ -317,26 +358,27 @@ class _OverviewSection extends StatelessWidget {
           children: [
             Expanded(
               child: _Metric(
-                value: '${controller.products.length}',
-                label: 'productos',
+                value: controller.productsMeta?.totalCount != null
+                    ? '${controller.products.length}/${controller.productsMeta!.totalCount}'
+                    : '${controller.products.length}',
+                label: controller.productsMeta?.hasNextPage == true
+                    ? 'cargados (hay más)'
+                    : 'productos',
               ),
             ),
             const SizedBox(width: 10),
             Expanded(child: _Metric(value: '$inStock', label: 'con stock')),
-            const SizedBox(width: 10),
-            Expanded(
-              child: _Metric(value: '$externalItems', label: 'externos'),
-            ),
           ],
         ),
         const SizedBox(height: 28),
         Text('CANALES', style: eyebrow()),
         const SizedBox(height: 10),
-        const _ChannelRow(
+        _ChannelRow(
+          key: const ValueKey('admin-catalog-health'),
           icon: Icons.shopping_bag_outlined,
-          title: 'Shopify',
-          description: 'Precios, publicación e inventario',
-          status: 'Conectado',
+          title: 'Catálogo de la app',
+          description: catalogDescription,
+          status: catalogStatus,
         ),
         const _ChannelRow(
           icon: Icons.phone_iphone_rounded,
@@ -344,23 +386,17 @@ class _OverviewSection extends StatelessWidget {
           description: 'Catálogo y contenido visible',
           status: 'Activa',
         ),
-        const _ChannelRow(
-          icon: Icons.language_rounded,
-          title: 'Fuentes externas',
-          description: 'Selección, comisión y disponibilidad',
-          status: 'Monitoreo',
-        ),
         const SizedBox(height: 22),
         FilledButton.icon(
           key: const ValueKey('admin-sync-all'),
           onPressed: controller.saving ? null : onSync,
           icon: controller.saving
-              ? const SizedBox(
+              ? SizedBox(
                   width: 16,
                   height: 16,
                   child: CircularProgressIndicator(
                     strokeWidth: 1.5,
-                    color: Colors.white,
+                    color: context.monettaColors.canvas,
                   ),
                 )
               : const Icon(Icons.sync_rounded, size: 18),
@@ -371,6 +407,17 @@ class _OverviewSection extends StatelessWidget {
           Text('ACTIVIDAD RECIENTE', style: eyebrow()),
           const SizedBox(height: 8),
           for (final event in controller.audit) _AuditRow(event: event),
+          if (controller.auditCursor != null)
+            Align(
+              alignment: Alignment.centerLeft,
+              child: TextButton(
+                onPressed:
+                    controller.loadingAudit ? null : controller.loadMoreAudit,
+                child: Text(
+                  controller.loadingAudit ? 'CARGANDO…' : 'CARGAR MÁS',
+                ),
+              ),
+            ),
         ],
       ],
     );
@@ -388,13 +435,18 @@ class _Metric extends StatelessWidget {
     return Container(
       height: 92,
       padding: const EdgeInsets.all(14),
-      decoration: BoxDecoration(border: Border.all(color: kLine, width: .5)),
+      decoration: BoxDecoration(
+        border: Border.all(color: context.monettaColors.divider, width: .5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Text(value, style: display(24)),
-          Text(label, style: sans(size: 10, color: kInkMuted)),
+          Text(
+            label,
+            style: sans(size: 10, color: context.monettaColors.contentMuted),
+          ),
         ],
       ),
     );
@@ -407,6 +459,7 @@ class _ChannelRow extends StatelessWidget {
     required this.title,
     required this.description,
     required this.status,
+    super.key,
   });
 
   final IconData icon;
@@ -418,8 +471,10 @@ class _ChannelRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 14),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: kLine, width: .5)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: .5),
+        ),
       ),
       child: Row(
         children: [
@@ -430,7 +485,13 @@ class _ChannelRow extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(title, style: sans(size: 13, weight: FontWeight.w600)),
-                Text(description, style: sans(size: 10, color: kInkMuted)),
+                Text(
+                  description,
+                  style: sans(
+                    size: 10,
+                    color: context.monettaColors.contentMuted,
+                  ),
+                ),
               ],
             ),
           ),
@@ -453,9 +514,44 @@ class _ProductsSection extends StatefulWidget {
 
 class _ProductsSectionState extends State<_ProductsSection> {
   String _query = '';
+  String _filter = 'Todos';
+  int _subsection = 0;
 
   @override
   Widget build(BuildContext context) {
+    if (_subsection == 0) return _buildTodaysPicks(context);
+    return _buildProductEditor(context);
+  }
+
+  String _productsCountLabel(int visibleCount) {
+    final meta = widget.controller.productsMeta;
+    if (meta?.totalCount != null) {
+      return '${widget.controller.products.length} CARGADOS DE ${meta!.totalCount}';
+    }
+    if (meta?.hasNextPage == true) {
+      return '${widget.controller.products.length} CARGADOS (HAY MÁS EN SHOPIFY)';
+    }
+    return '$visibleCount PRODUCTOS';
+  }
+
+  Widget _subsectionPicker(BuildContext context) {
+    return Wrap(
+      spacing: 8,
+      children: [
+        for (final entry in const [
+          (0, 'Catálogo de hoy'),
+          (1, 'Editar productos'),
+        ])
+          ChoiceChip(
+            label: Text(entry.$2),
+            selected: _subsection == entry.$1,
+            onSelected: (_) => setState(() => _subsection = entry.$1),
+          ),
+      ],
+    );
+  }
+
+  Widget _buildProductEditor(BuildContext context) {
     final query = _query.trim().toLowerCase();
     final products = widget.controller.products
         .where(
@@ -466,33 +562,233 @@ class _ProductsSectionState extends State<_ProductsSection> {
     return _AdminScroll(
       children: [
         Text('Catálogo', style: display(28)),
+        const SizedBox(height: 12),
+        _subsectionPicker(context),
         const SizedBox(height: 6),
         Text(
           'Cambios de precio y visibilidad se envían a Shopify y después se '
           'actualizan en la app.',
-          style: sans(size: 12, color: kInkMuted),
+          style: sans(size: 12, color: context.monettaColors.contentMuted),
         ),
         const SizedBox(height: 18),
         TextField(
           key: const ValueKey('admin-product-search'),
           onChanged: (value) => setState(() => _query = value),
-          decoration: const InputDecoration(
+          onSubmitted: (value) {
+            if (widget.controller.mode == AdminConnectionMode.live) {
+              widget.controller.searchProducts(value);
+            }
+          },
+          textInputAction: TextInputAction.search,
+          decoration: InputDecoration(
             hintText: 'Buscar producto',
             prefixIcon: Icon(Icons.search, size: 20),
             filled: true,
-            fillColor: kSearchFill,
+            fillColor: context.monettaColors.inputFill,
             border: OutlineInputBorder(borderSide: BorderSide.none),
           ),
         ),
         const SizedBox(height: 14),
-        Text('${products.length} PRODUCTOS', style: eyebrow(size: 9)),
+        Text(_productsCountLabel(products.length), style: eyebrow(size: 9)),
         const SizedBox(height: 6),
         for (final product in products)
           _ProductRow(
             product: product,
             onTap: () => _openEditor(product),
           ),
+        if (widget.controller.productsMeta?.hasNextPage == true)
+          Align(
+            alignment: Alignment.centerLeft,
+            child: TextButton(
+              key: const ValueKey('admin-products-load-more'),
+              onPressed: widget.controller.loadingMoreProducts
+                  ? null
+                  : widget.controller.loadMoreProducts,
+              child: Text(
+                widget.controller.loadingMoreProducts
+                    ? 'CARGANDO…'
+                    : 'CARGAR MÁS PRODUCTOS',
+              ),
+            ),
+          ),
       ],
+    );
+  }
+
+  Widget _buildTodaysPicks(BuildContext context) {
+    final catalog = widget.controller.featuredCatalog;
+    final query = _query.trim().toLowerCase();
+    final filtered = (catalog?.eligibleProducts ?? const <AdminProductRecord>[])
+        .where((product) {
+      if (query.isNotEmpty && !product.title.toLowerCase().contains(query)) {
+        return false;
+      }
+      return switch (_filter) {
+        'Con stock' => product.inStock,
+        'Mostrándose hoy' =>
+          catalog?.selectedProductIds.contains(product.id) ?? false,
+        'Sin descripción' => !product.hasShopifyDescription,
+        _ => true,
+      };
+    }).toList();
+    final selected = [
+      for (final id in catalog?.selectedProductIds ?? const <String>[])
+        for (final product
+            in catalog?.eligibleProducts ?? const <AdminProductRecord>[])
+          if (product.id == id) product,
+    ];
+    return _AdminScroll(
+      children: [
+        Text('Catálogo de hoy', style: display(28)),
+        const SizedBox(height: 12),
+        _subsectionPicker(context),
+        const SizedBox(height: 10),
+        Text(
+          'Selecciona productos publicados en Shopify. Cada cambio se confirma antes de aparecer en la tienda.',
+          style: sans(size: 12, color: context.monettaColors.contentMuted),
+        ),
+        const SizedBox(height: 16),
+        if (catalog?.healthStatus != 'ready')
+          _AdminNotice(
+            message: catalog?.healthErrorCode ==
+                    'FEATURED_COLLECTION_NOT_CONFIGURED'
+                ? 'Configura la colección manual monetta-todays-picks para activar esta sección.'
+                : 'La selección de hoy no está disponible todavía.',
+          ),
+        if (selected.isNotEmpty) ...[
+          Row(
+            children: [
+              Text(
+                '${selected.length} MOSTRÁNDOSE HOY',
+                style: eyebrow(size: 9),
+              ),
+              const Spacer(),
+              if (widget.controller.saving)
+                Text(
+                  'Ordenando…',
+                  style: sans(
+                    size: 11,
+                    color: context.monettaColors.contentMuted,
+                  ),
+                ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          ReorderableListView.builder(
+            key: const ValueKey('admin-featured-selection'),
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: selected.length,
+            onReorderItem: (oldIndex, newIndex) =>
+                _reorder(selected, oldIndex, newIndex),
+            itemBuilder: (context, index) => ListTile(
+              key: ValueKey('admin-featured-selected-${selected[index].id}'),
+              dense: true,
+              leading: SizedBox(
+                width: 38,
+                height: 44,
+                child: MonettaImage(
+                  url: selected[index].imageUrl,
+                  fallbackLabel: selected[index].title,
+                ),
+              ),
+              title: Text(
+                selected[index].title,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              trailing: const Icon(Icons.drag_handle),
+            ),
+          ),
+          const SizedBox(height: 12),
+        ],
+        TextField(
+          key: const ValueKey('admin-featured-search'),
+          onChanged: (value) => setState(() => _query = value),
+          decoration: InputDecoration(
+            hintText: 'Buscar producto',
+            prefixIcon: const Icon(Icons.search, size: 20),
+            filled: true,
+            fillColor: context.monettaColors.inputFill,
+            border: const OutlineInputBorder(borderSide: BorderSide.none),
+          ),
+        ),
+        const SizedBox(height: 10),
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: [
+              for (final filter in const [
+                'Todos',
+                'Con stock',
+                'Mostrándose hoy',
+                'Sin descripción',
+              ]) ...[
+                ChoiceChip(
+                  label: Text(filter),
+                  selected: _filter == filter,
+                  onSelected: (_) => setState(() => _filter = filter),
+                ),
+                const SizedBox(width: 6),
+              ],
+            ],
+          ),
+        ),
+        const SizedBox(height: 12),
+        Text('${filtered.length} PRODUCTOS ELEGIBLES', style: eyebrow(size: 9)),
+        const SizedBox(height: 6),
+        for (final product in filtered)
+          _FeaturedProductRow(
+            product: product,
+            selected: catalog?.selectedProductIds.contains(product.id) ?? false,
+            pending: widget.controller.featuredPendingProductIds
+                .contains(product.id),
+            onToggle: catalog?.collectionUpdatedAt == null
+                ? null
+                : () => _toggleFeatured(
+                      product,
+                      catalog!.selectedProductIds.contains(product.id),
+                    ),
+          ),
+      ],
+    );
+  }
+
+  Future<void> _toggleFeatured(
+    AdminProductRecord product,
+    bool currentlySelected,
+  ) async {
+    final ok = await widget.controller.setProductFeatured(
+      product,
+      featured: !currentlySelected,
+    );
+    if (!mounted) return;
+    if (ok) {
+      widget.onMessage(
+        !currentlySelected
+            ? 'Producto confirmado en Catálogo de hoy.'
+            : 'Producto quitado de Catálogo de hoy.',
+      );
+    } else if (widget.controller.lastError != null) {
+      widget.onMessage(widget.controller.lastError!);
+    }
+  }
+
+  Future<void> _reorder(
+    List<AdminProductRecord> selected,
+    int oldIndex,
+    int newIndex,
+  ) async {
+    final next = [...selected];
+    final item = next.removeAt(oldIndex);
+    next.insert(newIndex, item);
+    final ok = await widget.controller
+        .replaceFeaturedOrder(next.map((p) => p.id).toList());
+    if (!mounted) return;
+    widget.onMessage(
+      ok
+          ? 'Orden actualizado en Shopify.'
+          : widget.controller.lastError ?? 'No se pudo ordenar la selección.',
     );
   }
 
@@ -500,7 +796,7 @@ class _ProductsSectionState extends State<_ProductsSection> {
     final saved = await showModalBottomSheet<bool>(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.white,
+      backgroundColor: context.monettaColors.surfaceRaised,
       builder: (_) => _ProductEditor(
         product: product,
         controller: widget.controller,
@@ -528,8 +824,10 @@ class _ProductRow extends StatelessWidget {
       onTap: onTap,
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: const BoxDecoration(
-          border: Border(bottom: BorderSide(color: kLine, width: .5)),
+        decoration: BoxDecoration(
+          border: Border(
+            bottom: BorderSide(color: context.monettaColors.divider, width: .5),
+          ),
         ),
         child: Row(
           children: [
@@ -568,9 +866,132 @@ class _ProductRow extends StatelessWidget {
                 ],
               ),
             ),
-            const Icon(Icons.chevron_right_rounded, color: kInkMuted),
+            Icon(
+              Icons.chevron_right_rounded,
+              color: context.monettaColors.contentMuted,
+            ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _FeaturedProductRow extends StatelessWidget {
+  const _FeaturedProductRow({
+    required this.product,
+    required this.selected,
+    required this.pending,
+    required this.onToggle,
+  });
+
+  final AdminProductRecord product;
+  final bool selected;
+  final bool pending;
+  final VoidCallback? onToggle;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: .5),
+        ),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            width: 62,
+            height: 72,
+            child: MonettaImage(
+              url: product.imageUrl,
+              fallbackLabel: product.title,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  product.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: sans(size: 13, weight: FontWeight.w600),
+                ),
+                const SizedBox(height: 4),
+                Text(kMoney.format(product.price), style: sans(size: 12)),
+                const SizedBox(height: 5),
+                Wrap(
+                  spacing: 5,
+                  runSpacing: 5,
+                  children: [
+                    _StatusPill(
+                      label: product.inStock ? 'Con stock' : 'Agotado',
+                      muted: !product.inStock,
+                    ),
+                    if (!product.hasShopifyDescription)
+                      const _StatusPill(
+                        label: 'Sin descripción en Shopify',
+                        muted: true,
+                      ),
+                    if (product.hasShopifyDescription &&
+                        product.descriptionExcerpt.isNotEmpty)
+                      Text(
+                        product.descriptionExcerpt,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: sans(
+                          size: 10,
+                          color: context.monettaColors.contentMuted,
+                        ),
+                      ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 8),
+          SizedBox(
+            width: 112,
+            child: OutlinedButton(
+              key: ValueKey('admin-featured-toggle-${product.id}'),
+              onPressed: pending ? null : onToggle,
+              child: pending
+                  ? const SizedBox(
+                      width: 16,
+                      height: 16,
+                      child: CircularProgressIndicator(strokeWidth: 1.5),
+                    )
+                  : Text(
+                      selected ? 'Quitar de hoy' : 'Mostrar hoy',
+                      textAlign: TextAlign.center,
+                    ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _AdminNotice extends StatelessWidget {
+  const _AdminNotice({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      color: context.monettaColors.warningSurface,
+      child: Text(
+        message,
+        style: sans(size: 11, color: context.monettaColors.contentMuted),
       ),
     );
   }
@@ -589,15 +1010,28 @@ class _ProductEditor extends StatefulWidget {
 class _ProductEditorState extends State<_ProductEditor> {
   late final TextEditingController _title;
   late final TextEditingController _price;
+  String? _variantId;
   late bool _visible;
 
   @override
   void initState() {
     super.initState();
     _title = TextEditingController(text: widget.product.title);
-    _price =
-        TextEditingController(text: widget.product.price.toStringAsFixed(2));
+    _variantId = widget.product.variants.length == 1
+        ? widget.product.variants.first.id
+        : null;
+    final selectedVariant = _selectedVariant;
+    _price = TextEditingController(
+      text: (selectedVariant?.price ?? widget.product.price).toStringAsFixed(2),
+    );
     _visible = widget.product.visible;
+  }
+
+  AdminProductVariant? get _selectedVariant {
+    for (final variant in widget.product.variants) {
+      if (variant.id == _variantId) return variant;
+    }
+    return null;
   }
 
   @override
@@ -626,7 +1060,7 @@ class _ProductEditorState extends State<_ProductEditor> {
             const SizedBox(height: 5),
             Text(
               'Se actualizará en Shopify y en la app Monetta.',
-              style: sans(size: 11, color: kInkMuted),
+              style: sans(size: 11, color: context.monettaColors.contentMuted),
             ),
             const SizedBox(height: 22),
             TextField(
@@ -646,13 +1080,39 @@ class _ProductEditorState extends State<_ProductEditor> {
                 suffixText: 'MXN',
               ),
             ),
+            if (widget.product.variants.length > 1) ...[
+              const SizedBox(height: 14),
+              DropdownButtonFormField<String>(
+                key: const ValueKey('admin-product-variant'),
+                initialValue: _variantId,
+                decoration: const InputDecoration(labelText: 'Variante'),
+                items: [
+                  for (final variant in widget.product.variants)
+                    DropdownMenuItem(
+                      value: variant.id,
+                      child: Text(variant.title),
+                    ),
+                ],
+                onChanged: (value) {
+                  if (value == null) return;
+                  final variant = widget.product.variants.firstWhere(
+                    (item) => item.id == value,
+                  );
+                  setState(() {
+                    _variantId = value;
+                    _price.text = variant.price.toStringAsFixed(2);
+                  });
+                },
+              ),
+            ],
             const SizedBox(height: 10),
             SwitchListTile.adaptive(
               contentPadding: EdgeInsets.zero,
               title: Text('Visible en la tienda', style: sans(size: 13)),
               subtitle: Text(
                 _visible ? 'Publicado' : 'Oculto para clientes',
-                style: sans(size: 11, color: kInkMuted),
+                style:
+                    sans(size: 11, color: context.monettaColors.contentMuted),
               ),
               value: _visible,
               onChanged: (value) => setState(() => _visible = value),
@@ -678,14 +1138,33 @@ class _ProductEditorState extends State<_ProductEditor> {
       );
       return;
     }
+    if (widget.product.variants.length > 1 && _variantId == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Selecciona una variante.')),
+      );
+      return;
+    }
     final confirmed = await _confirmChange(
       context,
       title: '¿Guardar este producto?',
       description: 'El cambio afectará Shopify y el catálogo de la app.',
     );
     if (!confirmed || !mounted) return;
+    final variants = widget.product.variants.isEmpty
+        ? null
+        : [
+            for (final variant in widget.product.variants)
+              variant.id == _variantId
+                  ? variant.copyWith(price: price)
+                  : variant,
+          ];
     final ok = await widget.controller.saveProduct(
-      widget.product.copyWith(title: title, price: price, visible: _visible),
+      widget.product.copyWith(
+        title: title,
+        price: price,
+        variants: variants,
+        visible: _visible,
+      ),
     );
     if (mounted && ok) Navigator.pop(context, true);
   }
@@ -709,7 +1188,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
   late final TextEditingController _announcement;
   late bool _hero;
   late bool _newest;
-  late bool _external;
+  late bool _todaysPicks;
 
   @override
   void initState() {
@@ -719,7 +1198,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
     _announcement.addListener(_refreshPreview);
     _hero = settings.showHero;
     _newest = settings.showNewest;
-    _external = settings.showExternalPicks;
+    _todaysPicks = settings.showTodaysPicks;
   }
 
   @override
@@ -741,7 +1220,7 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
         const SizedBox(height: 6),
         Text(
           'Controla lo que ven tus clientes sin salir de Monetta.',
-          style: sans(size: 12, color: kInkMuted),
+          style: sans(size: 12, color: context.monettaColors.contentMuted),
         ),
         const SizedBox(height: 24),
         Text('AVISO SUPERIOR', style: eyebrow()),
@@ -771,17 +1250,18 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
           onChanged: (value) => setState(() => _newest = value),
         ),
         _SettingSwitch(
-          title: 'Selección externa',
-          description: 'Bolsas y perfumes elegidos por el monitor',
-          value: _external,
-          onChanged: (value) => setState(() => _external = value),
+          title: 'Catálogo de hoy',
+          description: 'Selección manual publicada desde Productos',
+          value: _todaysPicks,
+          onChanged: (value) => setState(() => _todaysPicks = value),
         ),
         const SizedBox(height: 22),
         _PhonePreview(
           announcement: _announcement.text,
           showHero: _hero,
           showNewest: _newest,
-          showExternal: _external,
+          showTodaysPicks: _todaysPicks,
+          showExternal: false,
         ),
         const SizedBox(height: 20),
         FilledButton(
@@ -805,7 +1285,8 @@ class _StorefrontSectionState extends State<_StorefrontSection> {
         announcement: _announcement.text.trim(),
         showHero: _hero,
         showNewest: _newest,
-        showExternalPicks: _external,
+        showTodaysPicks: _todaysPicks,
+        showExternalPicks: false,
       ),
     );
     if (!mounted) return;
@@ -837,7 +1318,10 @@ class _SettingSwitch extends StatelessWidget {
     return SwitchListTile.adaptive(
       contentPadding: EdgeInsets.zero,
       title: Text(title, style: sans(size: 13, weight: FontWeight.w600)),
-      subtitle: Text(description, style: sans(size: 10, color: kInkMuted)),
+      subtitle: Text(
+        description,
+        style: sans(size: 10, color: context.monettaColors.contentMuted),
+      ),
       value: value,
       onChanged: onChanged,
     );
@@ -849,19 +1333,21 @@ class _PhonePreview extends StatelessWidget {
     required this.announcement,
     required this.showHero,
     required this.showNewest,
+    required this.showTodaysPicks,
     required this.showExternal,
   });
 
   final String announcement;
   final bool showHero;
   final bool showNewest;
+  final bool showTodaysPicks;
   final bool showExternal;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.all(18),
-      color: kMist,
+      color: context.monettaColors.surfaceMuted,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -871,8 +1357,11 @@ class _PhonePreview extends StatelessWidget {
             child: Container(
               width: 190,
               decoration: BoxDecoration(
-                color: Colors.white,
-                border: Border.all(color: kInk, width: 1.5),
+                color: context.monettaColors.surfaceRaised,
+                border: Border.all(
+                  color: context.monettaColors.contentPrimary,
+                  width: 1.5,
+                ),
                 borderRadius: BorderRadius.circular(18),
               ),
               clipBehavior: Clip.antiAlias,
@@ -881,14 +1370,17 @@ class _PhonePreview extends StatelessWidget {
                   Container(
                     height: 22,
                     width: double.infinity,
-                    color: kInk,
+                    color: context.monettaColors.contentPrimary,
                     alignment: Alignment.center,
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     child: Text(
                       announcement.isEmpty ? 'MONETTA' : announcement,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: eyebrow(size: 5, color: Colors.white),
+                      style: eyebrow(
+                        size: 5,
+                        color: context.monettaColors.canvas,
+                      ),
                     ),
                   ),
                   const Padding(
@@ -899,16 +1391,24 @@ class _PhonePreview extends StatelessWidget {
                     Container(
                       height: 92,
                       width: double.infinity,
-                      color: const Color(0xFFEAE4DC),
+                      color: context.monettaColors.surfaceMuted,
                       alignment: Alignment.center,
                       child: Text('CAMPAÑA', style: eyebrow(size: 6)),
                     ),
                   if (showNewest)
-                    _PreviewLine(label: 'NOVEDADES', color: kGold),
+                    _PreviewLine(
+                      label: 'NOVEDADES',
+                      color: context.monettaColors.accent,
+                    ),
+                  if (showTodaysPicks)
+                    _PreviewLine(
+                      label: 'CATÁLOGO DE HOY',
+                      color: context.monettaColors.accent,
+                    ),
                   if (showExternal)
-                    const _PreviewLine(
+                    _PreviewLine(
                       label: 'SELECCIÓN ESPECIAL',
-                      color: kInk,
+                      color: context.monettaColors.contentPrimary,
                     ),
                   const SizedBox(height: 10),
                 ],
@@ -940,323 +1440,18 @@ class _PreviewLine extends StatelessWidget {
             children: [
               for (var i = 0; i < 3; i++) ...[
                 if (i > 0) const SizedBox(width: 4),
-                Expanded(child: Container(height: 38, color: kMist)),
+                Expanded(
+                  child: Container(
+                    height: 38,
+                    color: context.monettaColors.surfaceMuted,
+                  ),
+                ),
               ],
             ],
           ),
         ],
       ),
     );
-  }
-}
-
-class _SourcesSection extends StatelessWidget {
-  const _SourcesSection({required this.controller, required this.onMessage});
-
-  final AdminController controller;
-  final ValueChanged<String> onMessage;
-
-  @override
-  Widget build(BuildContext context) {
-    return _AdminScroll(
-      children: [
-        Text('Fuentes', style: display(28)),
-        const SizedBox(height: 6),
-        Text(
-          'Decide qué proveedores monitorear y cuánto margen aplicar. Los '
-          'artículos externos no entran al inventario de Shopify.',
-          style: sans(size: 12, color: kInkMuted),
-        ),
-        const SizedBox(height: 22),
-        for (final source in controller.sources)
-          _SourceCard(
-            source: source,
-            onTap: () => _openSource(context, source),
-          ),
-      ],
-    );
-  }
-
-  Future<void> _openSource(
-    BuildContext context,
-    AdminSourcePolicy source,
-  ) async {
-    final saved = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      builder: (_) => _SourceEditor(source: source, controller: controller),
-    );
-    if (!context.mounted || saved != true) return;
-    onMessage(
-      controller.mode == AdminConnectionMode.live
-          ? 'Fuente actualizada en el monitor y la app.'
-          : 'Fuente guardada solamente en vista previa.',
-    );
-  }
-}
-
-class _SourceCard extends StatelessWidget {
-  const _SourceCard({required this.source, required this.onTap});
-
-  final AdminSourcePolicy source;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      key: ValueKey('admin-source-${source.id}'),
-      onTap: onTap,
-      child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          border: Border.all(color: kLine, width: .5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    source.merchant,
-                    style: sans(size: 14, weight: FontWeight.w600),
-                  ),
-                ),
-                _StatusPill(
-                  label: source.enabled ? 'Activa' : 'Pausada',
-                  muted: !source.enabled,
-                ),
-                const SizedBox(width: 4),
-                const Icon(Icons.chevron_right_rounded, color: kInkMuted),
-              ],
-            ),
-            const SizedBox(height: 13),
-            Row(
-              children: [
-                Expanded(
-                  child: _SourceMetric(
-                    value: '${source.itemCount}',
-                    label: 'en catálogo',
-                  ),
-                ),
-                Expanded(
-                  child: _SourceMetric(
-                    value: '${(source.baseCommissionRate * 100).round()}%',
-                    label: 'comisión base',
-                  ),
-                ),
-                Expanded(
-                  child: _SourceMetric(
-                    value: '${source.itemLimit}',
-                    label: 'máximo',
-                  ),
-                ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SourceMetric extends StatelessWidget {
-  const _SourceMetric({required this.value, required this.label});
-
-  final String value;
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(value, style: sans(size: 13, weight: FontWeight.w600)),
-        Text(label, style: sans(size: 9, color: kInkMuted)),
-      ],
-    );
-  }
-}
-
-class _SourceEditor extends StatefulWidget {
-  const _SourceEditor({required this.source, required this.controller});
-
-  final AdminSourcePolicy source;
-  final AdminController controller;
-
-  @override
-  State<_SourceEditor> createState() => _SourceEditorState();
-}
-
-class _SourceEditorState extends State<_SourceEditor> {
-  late bool _enabled;
-  late final TextEditingController _limit;
-  late final TextEditingController _baseRate;
-  late final TextEditingController _highRate;
-  late final TextEditingController _threshold;
-
-  @override
-  void initState() {
-    super.initState();
-    final source = widget.source;
-    _enabled = source.enabled;
-    _limit = TextEditingController(text: '${source.itemLimit}');
-    _baseRate = TextEditingController(
-      text: '${(source.baseCommissionRate * 100).round()}',
-    );
-    _highRate = TextEditingController(
-      text: '${(source.highValueCommissionRate * 100).round()}',
-    );
-    _threshold = TextEditingController(
-      text: source.highValueThreshold.toStringAsFixed(0),
-    );
-  }
-
-  @override
-  void dispose() {
-    _limit.dispose();
-    _baseRate.dispose();
-    _highRate.dispose();
-    _threshold.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.fromLTRB(
-        24,
-        16,
-        24,
-        MediaQuery.viewInsetsOf(context).bottom + 28,
-      ),
-      child: SingleChildScrollView(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const _SheetHandle(),
-            Text(widget.source.merchant, style: display(26)),
-            const SizedBox(height: 5),
-            Text(
-              'Curaduría automática para el catálogo de la app.',
-              style: sans(size: 11, color: kInkMuted),
-            ),
-            const SizedBox(height: 16),
-            SwitchListTile.adaptive(
-              contentPadding: EdgeInsets.zero,
-              title: Text('Monitorear esta fuente', style: sans(size: 13)),
-              value: _enabled,
-              onChanged: (value) => setState(() => _enabled = value),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _limit,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Máx. artículos',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _baseRate,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Comisión base',
-                      suffixText: '%',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 14),
-            Row(
-              children: [
-                Expanded(
-                  child: TextField(
-                    controller: _threshold,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Desde',
-                      prefixText: r'$ ',
-                    ),
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: TextField(
-                    controller: _highRate,
-                    keyboardType: TextInputType.number,
-                    decoration: const InputDecoration(
-                      labelText: 'Comisión alta gama',
-                      suffixText: '%',
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'La comisión menor aplica cuando el precio supera el umbral.',
-              style: sans(size: 10, color: kInkMuted),
-            ),
-            const SizedBox(height: 22),
-            FilledButton(
-              key: const ValueKey('admin-save-source'),
-              onPressed: widget.controller.saving ? null : _save,
-              child: const Text('REVISAR Y GUARDAR'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Future<void> _save() async {
-    final limit = int.tryParse(_limit.text.trim());
-    final base = double.tryParse(_baseRate.text.trim());
-    final high = double.tryParse(_highRate.text.trim());
-    final threshold =
-        double.tryParse(_threshold.text.replaceAll(',', '').trim());
-    if (limit == null ||
-        limit < 1 ||
-        limit > 100 ||
-        base == null ||
-        base < 0 ||
-        base > 100 ||
-        high == null ||
-        high < 0 ||
-        high > 100 ||
-        threshold == null ||
-        threshold <= 0) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Revisa límites y porcentajes.')),
-      );
-      return;
-    }
-    final confirmed = await _confirmChange(
-      context,
-      title: '¿Actualizar esta fuente?',
-      description: 'El monitor usará estas reglas en su próxima ejecución.',
-    );
-    if (!confirmed || !mounted) return;
-    final ok = await widget.controller.saveSource(
-      widget.source.copyWith(
-        enabled: _enabled,
-        itemLimit: limit,
-        baseCommissionRate: base / 100,
-        highValueCommissionRate: high / 100,
-        highValueThreshold: threshold,
-      ),
-    );
-    if (mounted && ok) Navigator.pop(context, true);
   }
 }
 
@@ -1301,7 +1496,7 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
           const SizedBox(height: 8),
           Text(
             'Configura la URL del servicio para crear campañas y activar automatizaciones.',
-            style: sans(size: 12, color: kInkMuted),
+            style: sans(size: 12, color: context.monettaColors.contentMuted),
           ),
         ],
       );
@@ -1315,7 +1510,11 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
           Text(
             'El servidor decide la audiencia con consentimiento, horario '
             'silencioso, límite de frecuencia y perfil resumido.',
-            style: sans(size: 12, color: kInkMuted, height: 1.45),
+            style: sans(
+              size: 12,
+              color: context.monettaColors.contentMuted,
+              height: 1.45,
+            ),
           ),
           if (controller.loading) ...[
             const SizedBox(height: 18),
@@ -1417,7 +1616,7 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
               _openProduct
                   ? 'La notificación abre la pieza.'
                   : 'Abre la portada.',
-              style: sans(size: 11, color: kInkMuted),
+              style: sans(size: 11, color: context.monettaColors.contentMuted),
             ),
             value: _openProduct,
             onChanged: controller.pendingCampaign == null
@@ -1470,7 +1669,8 @@ class _NotificationsSectionState extends State<_NotificationsSection> {
               title: Text(_ruleLabel(rule.key), style: sans(size: 13)),
               subtitle: Text(
                 _ruleDescription(rule.key),
-                style: sans(size: 10.5, color: kInkMuted),
+                style:
+                    sans(size: 10.5, color: context.monettaColors.contentMuted),
               ),
               value: rule.enabled,
               onChanged: controller.saving
@@ -1608,8 +1808,8 @@ class _CampaignReview extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF7F0E6),
-        border: Border.all(color: kLine, width: .5),
+        color: context.monettaColors.warningSurface,
+        border: Border.all(color: context.monettaColors.divider, width: .5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1652,8 +1852,10 @@ class _CampaignRow extends StatelessWidget {
         : (campaign.openedCount * 100 / campaign.acceptedCount).round();
     return Container(
       padding: const EdgeInsets.symmetric(vertical: 12),
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: kLine, width: .5)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: .5),
+        ),
       ),
       child: Row(
         children: [
@@ -1664,7 +1866,8 @@ class _CampaignRow extends StatelessWidget {
                 Text(campaign.title, style: sans(size: 12.5)),
                 Text(
                   '${campaign.acceptedCount} enviados · ${campaign.openedCount} abiertos · $openRate%',
-                  style: sans(size: 10, color: kInkMuted),
+                  style:
+                      sans(size: 10, color: context.monettaColors.contentMuted),
                 ),
               ],
             ),
@@ -1689,10 +1892,10 @@ class _AuditRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(
+          Icon(
             Icons.check_circle_outline_rounded,
             size: 18,
-            color: kGold,
+            color: context.monettaColors.accent,
           ),
           const SizedBox(width: 10),
           Expanded(
@@ -1703,7 +1906,8 @@ class _AuditRow extends StatelessWidget {
                 Text(
                   '${event.createdAt.hour}:$minute · '
                   '${event.previewOnly ? 'Vista previa' : 'Publicado'}',
-                  style: sans(size: 9, color: kInkMuted),
+                  style:
+                      sans(size: 9, color: context.monettaColors.contentMuted),
                 ),
               ],
             ),
@@ -1725,12 +1929,19 @@ class _StatusPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: muted ? kMist : const Color(0xFFF4EEE6),
+        color: muted
+            ? context.monettaColors.surfaceMuted
+            : context.monettaColors.warningSurface,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Text(
         label,
-        style: sans(size: 8, color: muted ? kInkMuted : kGold),
+        style: sans(
+          size: 8,
+          color: muted
+              ? context.monettaColors.contentMuted
+              : context.monettaColors.accent,
+        ),
       ),
     );
   }
@@ -1746,7 +1957,7 @@ class _SheetHandle extends StatelessWidget {
         width: 36,
         height: 3,
         margin: const EdgeInsets.only(bottom: 22),
-        color: kLine,
+        color: context.monettaColors.divider,
       ),
     );
   }
@@ -1785,7 +1996,10 @@ Future<bool> _confirmChange(
         context: context,
         builder: (context) => AlertDialog(
           title: Text(title, style: display(22)),
-          content: Text(description, style: sans(size: 12, color: kInkMuted)),
+          content: Text(
+            description,
+            style: sans(size: 12, color: context.monettaColors.contentMuted),
+          ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),

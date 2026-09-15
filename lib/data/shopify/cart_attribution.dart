@@ -120,13 +120,14 @@ class ApartadoRequest {
   /// customer arrives already knowing them, which is what makes the
   /// conversation short.
   String get message => '''
-¡Hola Monetta! Me interesa apartar este producto:
+¡Hola Monetta! Quiero solicitar apartado de este producto:
 
 *$productTitle*
 Precio: \$${price.toStringAsFixed(2)} MXN
 https://monetta.mx/products/$productHandle
 
 Entiendo que el anticipo es de \$$depositMxn MXN y que puedo liquidar en hasta 20 días.
+Sé que este mensaje no reserva inventario ni confirma el anticipo hasta que Monetta responda y registre el pedido.
 
 Código: $attributionCode''';
 

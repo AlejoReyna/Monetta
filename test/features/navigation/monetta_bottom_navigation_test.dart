@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
 
 void main() {
@@ -24,6 +25,8 @@ void main() {
     expect(find.byKey(const Key('bottom-nav-catalog')), findsOneWidget);
     expect(find.byKey(const Key('bottom-nav-bag')), findsOneWidget);
     expect(find.byKey(const Key('bottom-nav-account')), findsOneWidget);
+    expect(find.text('Carrito'), findsOneWidget);
+    expect(find.text('Bolsa'), findsNothing);
     expect(find.text('2'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
@@ -50,7 +53,7 @@ void main() {
     );
     expect(
       (activeFill.decoration as BoxDecoration).color,
-      const Color(0xFFE7E5E0),
+      const Color(0x24AA7D44),
     );
 
     await tester.tap(catalog);
@@ -89,6 +92,20 @@ void main() {
     expect(surfaceRect.right, 800);
     expect(surfaceRect.bottom, 600);
     expect(surfaceRect.height, 70);
+
+    final surfaceDecoration =
+        tester.widget<DecoratedBox>(surface).decoration as BoxDecoration;
+    expect(surfaceDecoration.color, MonettaColors.light.navigationSurface);
+    expect(surfaceDecoration.color, const Color(0xFFF7F7F7));
+    expect(surfaceDecoration.border, isNotNull);
+
+    final homeCenter = tester.getCenter(
+      find.byKey(const Key('bottom-nav-home')),
+    );
+    final catalogCenter = tester.getCenter(
+      find.byKey(const Key('bottom-nav-catalog')),
+    );
+    expect(catalogCenter.dx - homeCenter.dx, 105);
   });
 }
 

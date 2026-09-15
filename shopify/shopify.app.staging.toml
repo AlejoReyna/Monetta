@@ -10,14 +10,45 @@
 
 client_id = "4a29ba522a35bd476f3d1f467749234f"
 name = "monetta-staging"
-# Ephemeral cloudflared quick-tunnel URL — changes every time the tunnel
-# restarts. Re-run `shopify app deploy --config staging` after each change.
-application_url = "https://shopify.dev/apps/default-app-home"
+# Staging backend. The Fly app is provisioned before this config is released.
+application_url = "https://monetta-accounts-staging.fly.dev"
 embedded = false
 handle = "monetta-staging"
 
 [access_scopes]
-scopes = "read_orders,read_customers,read_products"
+scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects"
+
+# App-owned singleton for the native admin control plane. The $app type keeps
+# the schema under this app's ownership while allowing the merchant to update
+# its one entry through the app.
+[metaobjects.app.storefront_config]
+name = "Monetta Storefront Configuration"
+access.admin = "merchant_read_write"
+access.storefront = "public_read"
+
+[metaobjects.app.storefront_config.fields.announcement]
+name = "Announcement"
+type = "single_line_text_field"
+
+[metaobjects.app.storefront_config.fields.show_hero]
+name = "Show hero"
+type = "boolean"
+
+[metaobjects.app.storefront_config.fields.show_newest]
+name = "Show newest"
+type = "boolean"
+
+[metaobjects.app.storefront_config.fields.show_todays_picks]
+name = "Show Today's Picks"
+type = "boolean"
+
+[metaobjects.app.storefront_config.fields.show_external_picks]
+name = "Show external picks"
+type = "boolean"
+
+[metaobjects.app.storefront_config.fields.version]
+name = "Version"
+type = "number_integer"
 
 [auth]
 redirect_urls = [
@@ -30,34 +61,34 @@ api_version = "2026-07"
 
 [[webhooks.subscriptions]]
 topics = ["orders/create"]
-uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/orders/create"
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/orders/create"
 
 [[webhooks.subscriptions]]
 topics = ["orders/updated"]
-uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/orders/updated"
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/orders/updated"
 
 [[webhooks.subscriptions]]
 topics = ["products/create"]
-uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/products/create"
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/products/create"
 
 [[webhooks.subscriptions]]
 topics = ["products/update"]
-uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/products/update"
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/products/update"
 
 # Compliance topics must be separate absolute paths — the server has no
 # catch-all /webhooks route. app/uninstalled is intentionally omitted until
 # Phase 6 adds a handler (otherwise Shopify would POST to a 404).
 [[webhooks.subscriptions]]
 compliance_topics = ["customers/data_request"]
-uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/customers/data_request"
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/customers/data_request"
 
 [[webhooks.subscriptions]]
 compliance_topics = ["customers/redact"]
-uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/customers/redact"
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/customers/redact"
 
 [[webhooks.subscriptions]]
 compliance_topics = ["shop/redact"]
-uri = "https://katie-bowling-considered-accountability.trycloudflare.com/webhooks/shop/redact"
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/shop/redact"
 
 [build]
 automatically_update_urls_on_dev = false

@@ -1,26 +1,29 @@
 /// Full-catalog browsing for Monetta's bags and accessories.
 ///
 /// Photography owns the screen. Filtering is handled by a single expandable
-/// sheet with bag-specific facets and horizontal category pills instead of
-/// search.
+/// sheet with bag-specific facets, search, and horizontal category pills.
 library;
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 
-import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
 import '../../main.dart';
+import '../../reco/external_facets.dart';
 import '../account/account_screen.dart';
+import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
 import '../product/product_screen.dart';
+import 'catalog_controls.dart';
 import 'extracted_badge.dart';
+import 'product_tile.dart';
+import 'search_screen.dart';
 
 enum _CatalogSort { featured, newest, priceAsc, priceDesc }
 
@@ -103,6 +106,80 @@ const Map<String, List<String>> _colorTerms = {
   'Plateado': ['plateado', 'silver'],
 };
 
+const Map<String, String> _catalogCategoryLabels = {
+  'bolsa': 'Bolsas',
+  'cartera': 'Carteras',
+  'monedero': 'Monederos',
+  'tarjetero': 'Tarjeteros',
+  'reloj': 'Relojes',
+  'cosmetiquera': 'Cosmetiqueras',
+  'set': 'Sets',
+  'accesorio': 'Accesorios',
+  'perfume': 'Perfumes',
+  'otros': 'Otros',
+};
+
+const List<String> _catalogCategoryOrder = [
+  'bolsa',
+  'cartera',
+  'monedero',
+  'tarjetero',
+  'reloj',
+  'cosmetiquera',
+  'set',
+  'accesorio',
+  'perfume',
+  'otros',
+];
+
+String _categoryLabel(String category) =>
+    _catalogCategoryLabels[category] ?? categoryPlural(category);
+
+String _categoryFor(CatalogItem item) {
+  final externalCategory =
+      item.isExternal ? externalItemFacets(item).category?.value : null;
+  final rawCategory = (externalCategory ?? item.category)?.trim().toLowerCase();
+
+  final category = switch (rawCategory) {
+    'bolsas' || 'handbag' || 'handbags' => 'bolsa',
+    'carteras' || 'wallet' || 'wallets' => 'cartera',
+    'monederos' => 'monedero',
+    'tarjeteros' || 'card case' || 'card cases' => 'tarjetero',
+    'relojes' || 'watch' || 'watches' => 'reloj',
+    'cosmetiqueras' || 'cosmetic case' || 'cosmetic cases' => 'cosmetiquera',
+    'sets' => 'set',
+    'accesorios' || 'accessory' || 'accessories' => 'accesorio',
+    'perfumes' ||
+    'fragancia' ||
+    'fragancias' ||
+    'fragrance' ||
+    'fragrances' =>
+      'perfume',
+    final value? when value.isNotEmpty => value,
+    _ => null,
+  };
+  if (category != null) return category;
+
+  if (item.vertical == CatalogVertical.perfumes) return 'perfume';
+  if (item.vertical == CatalogVertical.bagsWallets) {
+    final terms = item.title.toLowerCase();
+    if (RegExp(r'\b(?:wallet|billfold|cartera)\b').hasMatch(terms)) {
+      return 'cartera';
+    }
+    if (RegExp(r'\b(?:card case|card holder|tarjeter[oa])\b').hasMatch(terms)) {
+      return 'tarjetero';
+    }
+    if (RegExp(r'\b(?:monedero|coin purse)\b').hasMatch(terms)) {
+      return 'monedero';
+    }
+    if (RegExp(r'\b(?:cosmetiquera|cosmetic case)\b').hasMatch(terms)) {
+      return 'cosmetiquera';
+    }
+    return 'bolsa';
+  }
+  return 'otros';
+}
+
 class CatalogBrowseScreen extends StatefulWidget {
   const CatalogBrowseScreen({
     required this.items,
@@ -120,15 +197,23 @@ class CatalogBrowseScreen extends StatefulWidget {
 }
 
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
-  static const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 2,
-    childAspectRatio: 0.50,
-    crossAxisSpacing: 4,
-    mainAxisSpacing: 26,
-  );
-
   _CatalogFilters _filters = const _CatalogFilters();
-  String _activeCategory = 'Colección';
+  String? _activeCategory;
+
+  List<String> get _availableCategories {
+    final categories = {
+      for (final item in widget.items) _categoryFor(item),
+    };
+    final ordered = [
+      for (final category in _catalogCategoryOrder)
+        if (categories.remove(category)) category,
+      ...categories.toList()
+        ..sort(
+          (a, b) => _categoryLabel(a).compareTo(_categoryLabel(b)),
+        ),
+    ];
+    return ordered;
+  }
 
   List<CatalogItem> _visibleItems([_CatalogFilters? filters]) {
     final baseFilters = filters ?? _filters;
@@ -138,15 +223,10 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       filters: baseFilters,
     );
 
-    if (_activeCategory == 'Monetta') {
-      items = items.where((i) => !i.isExternal).toList();
-    } else if (_activeCategory == 'Bolsas') {
-      items = items
-          .where((i) => i.vertical == CatalogVertical.bagsWallets)
-          .toList();
-    } else if (_activeCategory == 'Perfumes') {
+    final activeCategory = _activeCategory;
+    if (activeCategory != null) {
       items =
-          items.where((i) => i.vertical == CatalogVertical.perfumes).toList();
+          items.where((item) => _categoryFor(item) == activeCategory).toList();
     }
     return items;
   }
@@ -155,93 +235,94 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _filters = const _CatalogFilters();
-      _activeCategory = 'Colección';
+      _activeCategory = null;
     });
   }
 
-  Future<void> _openFilters() async {
+  Future<void> _openFilters([_FilterSection? section]) async {
     FocusManager.instance.primaryFocus?.unfocus();
     final result = await showModalBottomSheet<_CatalogFilters>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      barrierColor: Colors.black.withValues(alpha: 0.46),
+      barrierColor: context.monettaColors.scrim,
       builder: (sheetContext) => _CatalogFilterSheet(
         items: widget.items,
         initial: _filters,
+        initialSection: section ?? _FilterSection.sort,
         visibleCount: (draft) => _visibleItems(draft).length,
       ),
     );
+    // Dismissing the sheet keeps the filters that were already applied.
     if (result != null && mounted) setState(() => _filters = result);
-  }
-
-  int _countForCategory(String category) {
-    final items = _filterCatalog(
-      widget.items,
-      query: '',
-      filters: _filters,
-    );
-    if (category == 'Monetta') {
-      return items.where((i) => !i.isExternal).length;
-    } else if (category == 'Bolsas') {
-      return items
-          .where((i) => i.vertical == CatalogVertical.bagsWallets)
-          .length;
-    } else if (category == 'Perfumes') {
-      return items.where((i) => i.vertical == CatalogVertical.perfumes).length;
-    }
-    return items.length;
   }
 
   Widget _buildCategoryPill({
     required String title,
     required String keyName,
-    bool showCount = true,
+    required String? category,
   }) {
-    final isSelected = _activeCategory == title;
-    final count = _countForCategory(title);
-    final labelColor = isSelected ? kInk : Colors.white;
+    final isSelected = _activeCategory == category;
+    final colors = context.monettaColors;
+    final animationsDisabled = reduceMotion(context);
+    final labelColor =
+        isSelected ? colors.accentContent : colors.contentPrimary;
 
     return Padding(
       padding: const EdgeInsets.only(right: 8),
-      child: ChoiceChip(
-        key: Key(keyName),
-        label: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: sans(
-                size: 13,
-                weight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: labelColor,
-              ),
-            ),
-            if (showCount && isSelected)
+      child: AnimatedScale(
+        key: Key('$keyName-motion'),
+        scale: isSelected ? 1.025 : 1,
+        duration: animationsDisabled ? Duration.zero : kSnap,
+        curve: kMotionCurve,
+        child: ChoiceChip(
+          key: Key(keyName),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
               Text(
-                ' $count',
-                style: sans(size: 13, color: labelColor),
+                title,
+                style: boutiqueText(
+                  size: 13,
+                  weight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                  color: labelColor,
+                ),
               ),
-          ],
+            ],
+          ),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) setState(() => _activeCategory = category);
+          },
+          color: WidgetStateProperty.resolveWith<Color>((states) {
+            return states.contains(WidgetState.selected)
+                ? colors.navigationSelection
+                : Colors.transparent;
+          }),
+          backgroundColor: Colors.transparent,
+          selectedColor: colors.navigationSelection,
+          surfaceTintColor: Colors.transparent,
+          side: BorderSide(
+            color: isSelected
+                ? colors.accent.withValues(alpha: 0.48)
+                : colors.divider,
+          ),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          showCheckmark: false,
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          chipAnimationStyle: ChipAnimationStyle(
+            selectAnimation: animationsDisabled
+                ? AnimationStyle.noAnimation
+                : const AnimationStyle(
+                    curve: kMotionCurve,
+                    duration: kSwap,
+                    reverseCurve: kMotionCurve,
+                    reverseDuration: kSnap,
+                  ),
+          ),
         ),
-        selected: isSelected,
-        onSelected: (selected) {
-          if (selected) setState(() => _activeCategory = title);
-        },
-        color: WidgetStateProperty.resolveWith<Color>((states) {
-          return states.contains(WidgetState.selected) ? kGold : kInk;
-        }),
-        backgroundColor: kInk,
-        selectedColor: kGold,
-        surfaceTintColor: Colors.transparent,
-        side: BorderSide(
-          color: isSelected
-              ? Colors.transparent
-              : Colors.white.withValues(alpha: 0.3),
-        ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-        showCheckmark: false,
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       ),
     );
   }
@@ -251,21 +332,43 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     final visibleItems = _visibleItems();
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      // Never `extendBody`: the last row of products must not sit under the
+      // navigation bar, and this screen has no floating bar competing with it.
+      extendBody: false,
+      backgroundColor: context.boutique.canvas,
       appBar: AppBar(
-        toolbarHeight: 68,
-        backgroundColor: Colors.white,
-        foregroundColor: kInk,
+        toolbarHeight: 76,
+        backgroundColor: context.boutique.canvas,
+        foregroundColor: context.boutique.ink,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: true,
-        systemOverlayStyle: SystemUiOverlayStyle.dark,
-        title: Text(
-          'Productos',
-          style: display(20, weight: FontWeight.w600, height: 1.1),
+        centerTitle: false,
+        titleSpacing: BoutiqueSpace.gutter,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Productos',
+              style: boutiqueDisplay(24, color: context.boutique.ink),
+            ),
+            const SizedBox(height: 2),
+            // Counted from the very list the grid renders below.
+            CatalogResultCount(
+              count: visibleItems.length,
+              noun: 'pieza',
+              pluralNoun: 'piezas',
+            ),
+          ],
         ),
         actions: [
+          IconButton(
+            key: const Key('catalog-search-button'),
+            tooltip: 'Buscar productos',
+            onPressed: () => openSearch(context),
+            icon: const Icon(Icons.search_rounded, size: 27),
+          ),
           _FilterIconButton(
             activeCount: _filters.activeCount,
             onPressed: _openFilters,
@@ -275,7 +378,8 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
           child: Container(
-            color: kInk,
+            key: const Key('catalog-category-rail'),
+            color: context.boutique.canvas,
             height: 60,
             child: ListView(
               scrollDirection: Axis.horizontal,
@@ -284,72 +388,93 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 _buildCategoryPill(
                   title: 'Colección',
                   keyName: 'catalog-category-collection',
+                  category: null,
                 ),
-                _buildCategoryPill(
-                  title: 'Monetta',
-                  keyName: 'catalog-category-monetta',
-                ),
-                _buildCategoryPill(
-                  title: 'Bolsas',
-                  keyName: 'catalog-category-bags',
-                ),
-                _buildCategoryPill(
-                  title: 'Perfumes',
-                  keyName: 'catalog-category-perfumes',
-                  showCount: false,
-                ),
+                for (final category in _availableCategories)
+                  _buildCategoryPill(
+                    title: _categoryLabel(category),
+                    keyName: 'catalog-category-$category',
+                    category: category,
+                  ),
               ],
             ),
           ),
         ),
       ),
-      body: CustomScrollView(
-        keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-        slivers: [
-          if (_activeCategory == 'Monetta')
-            const SliverToBoxAdapter(
-              child: Padding(
-                padding: EdgeInsets.only(top: 24),
-                child: SectionHeading(
-                  kicker: 'Monetta',
-                  title: 'Selección Monetta',
-                ),
-              ),
-            ),
-          SliverToBoxAdapter(
-            child: _CatalogSummary(
-              count: visibleItems.length,
-              sort: _filters.sort,
+      body: ClipRect(
+        child: AnimatedSwitcher(
+          key: const Key('catalog-section-transition'),
+          duration: reduceMotion(context) ? Duration.zero : kSwap,
+          switchInCurve: kMotionCurve,
+          switchOutCurve: kMotionCurve,
+          // The default layout stacks outgoing and incoming grids, which made
+          // the previous category remain visible beneath the new products.
+          layoutBuilder: (currentChild, previousChildren) =>
+              currentChild ?? const SizedBox.shrink(),
+          transitionBuilder: (child, animation) => FadeTransition(
+            // Start mostly visible: the new category is immediate, while the
+            // final 22% of opacity gives the change a quiet sense of motion.
+            opacity: Tween<double>(begin: 0.78, end: 1).animate(animation),
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(0, 0.012),
+                end: Offset.zero,
+              ).animate(animation),
+              child: child,
             ),
           ),
-          if (visibleItems.isEmpty)
-            SliverFillRemaining(
-              hasScrollBody: false,
-              child: _EmptyCatalogState(
-                hasActiveFilter: _filters.activeCount > 0,
-                onReset: _resetAll,
-              ),
-            )
-          else
-            SliverPadding(
-              padding: const EdgeInsets.fromLTRB(4, 0, 4, 44),
-              sliver: SliverGrid(
-                gridDelegate: _gridDelegate,
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) => _BrowseTile(
-                    item: visibleItems[index],
-                    openExternalLink: widget.openExternalLink,
-                  ),
-                  childCount: visibleItems.length,
+          child: CustomScrollView(
+            key: ValueKey('catalog-section-${_activeCategory ?? 'collection'}'),
+            primary: false,
+            keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+            slivers: [
+              SliverToBoxAdapter(
+                child: _QuickFilterRail(
+                  items: widget.items,
+                  filters: _filters,
+                  onOpen: _openFilters,
                 ),
               ),
-            ),
-        ],
+              if (visibleItems.isEmpty)
+                SliverFillRemaining(
+                  hasScrollBody: false,
+                  child: _EmptyCatalogState(
+                    hasActiveFilter: _filters.activeCount > 0,
+                    onReset: _resetAll,
+                  ),
+                )
+              else
+                SliverPadding(
+                  padding: const EdgeInsets.fromLTRB(
+                    BoutiqueSpace.gutter,
+                    BoutiqueSpace.lg,
+                    BoutiqueSpace.gutter,
+                    BoutiqueSpace.xxl,
+                  ),
+                  sliver: SliverGrid(
+                    gridDelegate: productGridDelegate(
+                      context,
+                      availableWidth: MediaQuery.sizeOf(context).width -
+                          BoutiqueSpace.gutter * 2,
+                    ),
+                    delegate: SliverChildBuilderDelegate(
+                      (context, index) => _BrowseTile(
+                        key: ValueKey(visibleItems[index].sourceScopedId),
+                        item: visibleItems[index],
+                        openExternalLink: widget.openExternalLink,
+                      ),
+                      childCount: visibleItems.length,
+                    ),
+                  ),
+                ),
+            ],
+          ),
+        ),
       ),
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.catalog,
         bagCount: widget.bagCount,
-        surfaceColor: Colors.white,
+        surfaceColor: context.monettaColors.navigationSurface,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
@@ -420,15 +545,15 @@ class _FilterIconButton extends StatelessWidget {
                 constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
                 alignment: Alignment.center,
                 padding: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: const BoxDecoration(
-                  color: kInk,
+                decoration: BoxDecoration(
+                  color: context.monettaColors.contentPrimary,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   '$activeCount',
-                  style: sans(
+                  style: boutiqueText(
                     size: 9,
-                    color: Colors.white,
+                    color: context.monettaColors.canvas,
                     weight: FontWeight.w700,
                     height: 1,
                   ),
@@ -441,46 +566,19 @@ class _FilterIconButton extends StatelessWidget {
   }
 }
 
-class _CatalogSummary extends StatelessWidget {
-  const _CatalogSummary({required this.count, required this.sort});
-
-  final int count;
-  final _CatalogSort sort;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(14, 15, 14, 14),
-      child: Row(
-        children: [
-          Text(
-            count == 1 ? '1 artículo' : '$count artículos',
-            style: sans(size: 12.5, color: kInkMuted),
-          ),
-          const Spacer(),
-          Text(
-            sort.label,
-            style: sans(
-              size: 12.5,
-              color: kInk,
-              weight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _CatalogFilterSheet extends StatefulWidget {
   const _CatalogFilterSheet({
     required this.items,
     required this.initial,
     required this.visibleCount,
+    this.initialSection = _FilterSection.sort,
   });
 
   final List<CatalogItem> items;
   final _CatalogFilters initial;
+
+  /// The section a quick-filter chip asked for, already open.
+  final _FilterSection initialSection;
   final int Function(_CatalogFilters filters) visibleCount;
 
   @override
@@ -495,7 +593,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   late Set<String> _colors;
   late bool _inStockOnly;
 
-  final Set<_FilterSection> _expanded = {_FilterSection.sort};
+  late final Set<_FilterSection> _expanded = {widget.initialSection};
 
   @override
   void initState() {
@@ -582,6 +680,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     final typeOptions = _typeOptions;
     final brandOptions = _brandOptions;
     final priceOptions = _priceOptions;
@@ -591,7 +690,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
     return FractionallySizedBox(
       heightFactor: 0.94,
       child: Material(
-        color: Colors.white,
+        color: context.boutique.canvas,
         clipBehavior: Clip.antiAlias,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
         child: SafeArea(
@@ -599,13 +698,14 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
           child: Column(
             children: [
               SizedBox(
+                width: double.infinity,
                 height: 74,
                 child: Stack(
                   alignment: Alignment.center,
                   children: [
                     Text(
                       'Filtrar y ordenar',
-                      style: display(20, weight: FontWeight.w600),
+                      style: boutiqueDisplay(20, weight: FontWeight.w600),
                     ),
                     Positioned(
                       right: 12,
@@ -619,7 +719,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                   ],
                 ),
               ),
-              const Divider(height: 0.5, color: kLine),
+              Divider(height: 0.5, color: context.monettaColors.divider),
               Expanded(
                 child: SingleChildScrollView(
                   padding: const EdgeInsets.symmetric(horizontal: 18),
@@ -724,9 +824,14 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                 ),
               ),
               DecoratedBox(
-                decoration: const BoxDecoration(
-                  color: Colors.white,
-                  border: Border(top: BorderSide(color: kLine, width: 0.5)),
+                decoration: BoxDecoration(
+                  color: context.boutique.canvas,
+                  border: Border(
+                    top: BorderSide(
+                      color: context.monettaColors.divider,
+                      width: 0.5,
+                    ),
+                  ),
                 ),
                 child: Padding(
                   padding: const EdgeInsets.fromLTRB(18, 14, 18, 12),
@@ -735,10 +840,12 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                       TextButton(
                         key: const Key('catalog-filter-clear'),
                         onPressed: _clear,
-                        style: TextButton.styleFrom(foregroundColor: kInk),
+                        style: TextButton.styleFrom(
+                          foregroundColor: context.monettaColors.contentPrimary,
+                        ),
                         child: Text(
                           'Limpiar',
-                          style: sans(
+                          style: boutiqueText(
                             size: 13,
                             weight: FontWeight.w600,
                             decoration: TextDecoration.underline,
@@ -752,8 +859,11 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                           onPressed: () =>
                               Navigator.of(context).pop(_selection),
                           style: FilledButton.styleFrom(
-                            backgroundColor: kInk,
-                            foregroundColor: Colors.white,
+                            backgroundColor: colors.navigationSelection,
+                            foregroundColor: colors.accentContent,
+                            side: BorderSide(
+                              color: colors.accent.withValues(alpha: 0.48),
+                            ),
                             minimumSize: const Size.fromHeight(56),
                             shape: const StadiumBorder(),
                           ),
@@ -761,9 +871,9 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                             resultCount == 1
                                 ? 'Ver 1 artículo'
                                 : 'Ver $resultCount artículos',
-                            style: sans(
+                            style: boutiqueText(
                               size: 15,
-                              color: Colors.white,
+                              color: colors.accentContent,
                               weight: FontWeight.w700,
                             ),
                           ),
@@ -797,8 +907,10 @@ class _FilterAccordion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DecoratedBox(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: kLine, width: 0.5)),
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: context.monettaColors.divider, width: 0.5),
+        ),
       ),
       child: Column(
         children: [
@@ -815,7 +927,7 @@ class _FilterAccordion extends StatelessWidget {
                     Expanded(
                       child: Text(
                         section.label,
-                        style: sans(
+                        style: boutiqueText(
                           size: 17,
                           weight: FontWeight.w600,
                         ),
@@ -874,7 +986,7 @@ class _FilterChoiceRow extends StatelessWidget {
                 decoration: BoxDecoration(
                   color: swatch,
                   shape: BoxShape.circle,
-                  border: Border.all(color: kLine),
+                  border: Border.all(color: context.monettaColors.divider),
                 ),
               ),
             ],
@@ -882,9 +994,11 @@ class _FilterChoiceRow extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: sans(
+                style: boutiqueText(
                   size: 15,
-                  color: selected ? kInk : kInkMuted,
+                  color: selected
+                      ? context.monettaColors.contentPrimary
+                      : context.monettaColors.contentMuted,
                   weight: selected ? FontWeight.w600 : FontWeight.w400,
                 ),
               ),
@@ -910,21 +1024,32 @@ class _SelectionMark extends StatelessWidget {
       height: 28,
       alignment: Alignment.center,
       decoration: BoxDecoration(
-        color: selected ? kInk : Colors.white,
+        color: selected
+            ? context.monettaColors.contentPrimary
+            : context.monettaColors.surface,
         shape: radio ? BoxShape.circle : BoxShape.rectangle,
         borderRadius: radio ? null : BorderRadius.circular(4),
-        border: Border.all(color: selected ? kInk : kLine, width: 1.5),
+        border: Border.all(
+          color: selected
+              ? context.monettaColors.contentPrimary
+              : context.monettaColors.divider,
+          width: 1.5,
+        ),
       ),
       child: selected
           ? radio
-              ? const DecoratedBox(
+              ? DecoratedBox(
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: context.monettaColors.canvas,
                     shape: BoxShape.circle,
                   ),
                   child: SizedBox(width: 9, height: 9),
                 )
-              : const Icon(Icons.check_rounded, size: 18, color: Colors.white)
+              : Icon(
+                  Icons.check_rounded,
+                  size: 18,
+                  color: context.monettaColors.canvas,
+                )
           : null,
     );
   }
@@ -946,11 +1071,15 @@ class _EmptyCatalogState extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          const Icon(Icons.search_off_rounded, size: 30, color: kInkMuted),
+          Icon(
+            Icons.search_off_rounded,
+            size: 30,
+            color: context.monettaColors.contentMuted,
+          ),
           const SizedBox(height: 18),
           Text(
             'Sin resultados',
-            style: display(24, weight: FontWeight.w600),
+            style: boutiqueDisplay(24, weight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
@@ -958,7 +1087,11 @@ class _EmptyCatalogState extends StatelessWidget {
                 ? 'Intenta usar otros filtros o quita los actuales.'
                 : 'Muy pronto encontrarás nuevas piezas aquí.',
             textAlign: TextAlign.center,
-            style: sans(size: 13, color: kInkMuted, height: 1.5),
+            style: boutiqueText(
+              size: 13,
+              color: context.monettaColors.contentMuted,
+              height: 1.5,
+            ),
           ),
           if (hasActiveFilter) ...[
             const SizedBox(height: 22),
@@ -966,7 +1099,7 @@ class _EmptyCatalogState extends StatelessWidget {
               onPressed: onReset,
               child: Text(
                 'Limpiar filtros',
-                style: sans(
+                style: boutiqueText(
                   size: 13,
                   weight: FontWeight.w600,
                   decoration: TextDecoration.underline,
@@ -981,7 +1114,11 @@ class _EmptyCatalogState extends StatelessWidget {
 }
 
 class _BrowseTile extends StatelessWidget {
-  const _BrowseTile({required this.item, required this.openExternalLink});
+  const _BrowseTile({
+    required this.item,
+    required this.openExternalLink,
+    super.key,
+  });
 
   final CatalogItem item;
   final ExternalLinkOpener openExternalLink;
@@ -1014,69 +1151,83 @@ class _BrowseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: '${item.merchant}, ${item.title}',
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: () => _tap(context),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 3 / 4,
-              child: ColoredBox(
-                color: kMist,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    MonettaImage(
-                      url: item.imageUrl,
-                      fallbackLabel: item.imageUrl == null ? null : item.title,
-                    ),
-                    if (item.isExternal)
-                      const Positioned(
-                        top: 8,
-                        left: 8,
-                        child: ExtractedBadge(),
-                      ),
-                  ],
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(10, 11, 8, 0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _brandFor(item),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: sans(
-                      size: 11.5,
-                      color: item.isExternal ? kGold : kInk,
-                      weight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    item.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: sans(size: 13, color: kInkMuted, height: 1.35),
-                  ),
-                  const SizedBox(height: 7),
-                  Text(
-                    formatCatalogMoney(item.price),
-                    style: sans(size: 13.5, weight: FontWeight.w700),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    // The same presentation the product grids use. A [CatalogItem] is not
+    // turned into a [Product] — currency, origin and purchase destination
+    // would be lost — only its view data is adapted.
+    return MonettaProductTile(
+      data: ProductTileData.fromCatalogItem(item),
+      onTap: () => _tap(context),
+      // No favourite here: an external listing has no Monetta product id to
+      // save, and this screen renders without a wishlist-bearing store.
+      imageOverlay: item.isExternal ? const ExtractedBadge() : null,
+    );
+  }
+}
+
+/// Fig. 05's quick filters. Each chip opens the sheet on its own section, so
+/// there is exactly one place where a filter is applied or cancelled.
+///
+/// A chip only appears when the visible catalog actually offers that facet,
+/// and ordering is a chip but never counts as an active filter — the same
+/// convention the badge on the filter icon uses.
+class _QuickFilterRail extends StatelessWidget {
+  const _QuickFilterRail({
+    required this.items,
+    required this.filters,
+    required this.onOpen,
+  });
+
+  final List<CatalogItem> items;
+  final _CatalogFilters filters;
+  final ValueChanged<_FilterSection> onOpen;
+
+  bool _hasBrands() => items.any((item) => _brandFor(item).isNotEmpty);
+
+  bool _hasPrices() => items.any((item) => _priceBandFor(item) != null);
+
+  bool _hasColors() => items.any((item) => _colorsFor(item).isNotEmpty);
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <Widget>[
+      if (_hasBrands())
+        MonettaCapsuleChip(
+          key: const Key('catalog-quick-brand'),
+          label: 'Marca',
+          showCaret: true,
+          selected: filters.brands.isNotEmpty,
+          badgeCount: filters.brands.length,
+          onTap: () => onOpen(_FilterSection.brand),
         ),
+      if (_hasPrices())
+        MonettaCapsuleChip(
+          key: const Key('catalog-quick-price'),
+          label: 'Precio',
+          showCaret: true,
+          selected: filters.priceBands.isNotEmpty,
+          badgeCount: filters.priceBands.length,
+          onTap: () => onOpen(_FilterSection.price),
+        ),
+      if (_hasColors())
+        MonettaCapsuleChip(
+          key: const Key('catalog-quick-color'),
+          label: 'Color',
+          showCaret: true,
+          selected: filters.colors.isNotEmpty,
+          badgeCount: filters.colors.length,
+          onTap: () => onOpen(_FilterSection.color),
+        ),
+      MonettaCapsuleChip(
+        key: const Key('catalog-quick-sort'),
+        label: 'Ordenar',
+        showCaret: true,
+        onTap: () => onOpen(_FilterSection.sort),
       ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(top: BoutiqueSpace.sm),
+      child: MonettaChipRail(children: chips),
     );
   }
 }
@@ -1148,7 +1299,9 @@ int _comparePriceAsc(CatalogItem a, CatalogItem b) {
 
 String _brandFor(CatalogItem item) {
   final brand = item.brand.trim();
-  return brand.isEmpty ? item.merchant.trim() : brand;
+  return humanizeCatalogValue(
+    brand.isEmpty ? item.merchant.trim() : brand,
+  );
 }
 
 String? _bagTypeFor(CatalogItem item) {
@@ -1225,5 +1378,5 @@ Color _colorSwatch(String value) => switch (value) {
       'Naranja' => const Color(0xFFD67B3B),
       'Dorado' => const Color(0xFFB9904F),
       'Plateado' => const Color(0xFFB8B8B8),
-      _ => kMist,
+      _ => const Color(0xFF999999),
     };

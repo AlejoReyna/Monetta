@@ -20,7 +20,10 @@ class FakeCustomerAuthGateway implements CustomerAuthGateway {
   CustomerAuthResult? refreshResult;
   int loginCalls = 0;
   int refreshCalls = 0;
+  int endSessionCalls = 0;
   String? lastRefreshTokenRequested;
+  String? lastEndSessionIdTokenHint;
+  Object? endSessionError;
 
   @override
   Future<CustomerAuthResult> login() async {
@@ -33,6 +36,13 @@ class FakeCustomerAuthGateway implements CustomerAuthGateway {
     refreshCalls++;
     lastRefreshTokenRequested = refreshToken;
     return refreshResult ?? loginResult;
+  }
+
+  @override
+  Future<void> endSession({required String idTokenHint}) async {
+    endSessionCalls++;
+    lastEndSessionIdTokenHint = idTokenHint;
+    if (endSessionError != null) throw endSessionError!;
   }
 }
 
@@ -69,7 +79,8 @@ class FakeSecureTokenStore implements SecureTokenStore {
 }
 
 String _fakeIdToken({required String sub, String? email}) {
-  String segment(Map<String, dynamic> json) => base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
+  String segment(Map<String, dynamic> json) =>
+      base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
   final header = segment({'alg': 'none'});
   final payload = segment({'sub': sub, if (email != null) 'email': email});
   return '$header.$payload.signature';
@@ -92,7 +103,11 @@ void main() {
     wishlist = WishlistStore(db);
     bag = BagStore(db);
     secureStore = FakeSecureTokenStore();
-    await devices.upsert(deviceId: 'dev-1', platform: 'ios', appVersion: '1.0.0');
+    await devices.upsert(
+      deviceId: 'dev-1',
+      platform: 'ios',
+      appVersion: '1.0.0',
+    );
   });
 
   tearDown(() => db.close());
@@ -132,7 +147,8 @@ void main() {
   }
 
   group('CustomerSessionRepository.login', () {
-    test('creates an account, a session, and merges device-scoped wishlist/bag', () async {
+    test('creates an account, a session, and merges device-scoped wishlist/bag',
+        () async {
       await wishlist.add('p1');
       await bag.upsert(productId: 'p2', variantId: 'v2', quantity: 1);
 
@@ -140,7 +156,10 @@ void main() {
         loginResult: CustomerAuthResult(
           accessToken: 'access-1',
           refreshToken: 'refresh-1',
-          idToken: _fakeIdToken(sub: 'gid://shopify/Customer/1', email: 'shopper@example.com'),
+          idToken: _fakeIdToken(
+            sub: 'gid://shopify/Customer/1',
+            email: 'shopper@example.com',
+          ),
           accessTokenExpiresAt: DateTime.utc(2026, 1, 1, 1),
         ),
       );
@@ -159,13 +178,17 @@ void main() {
       final bagRows = await db.select(db.bagLines).get();
       expect(bagRows.single.accountId, session.account.localAccountId);
 
-      final storedSession = await sessions.latestFor(session.account.localAccountId);
+      final storedSession =
+          await sessions.latestFor(session.account.localAccountId);
       expect(storedSession, isNotNull);
-      final storedRefreshToken = await secureStore.read(storedSession!.secureStorageKeyRef);
+      final storedRefreshToken =
+          await secureStore.read(storedSession!.secureStorageKeyRef);
       expect(storedRefreshToken, 'refresh-1');
     });
 
-    test('logging in twice with the same sub claim reuses the same local account', () async {
+    test(
+        'logging in twice with the same sub claim reuses the same local account',
+        () async {
       final gateway = FakeCustomerAuthGateway(
         loginResult: CustomerAuthResult(
           accessToken: 'access-1',
@@ -183,7 +206,9 @@ void main() {
       expect(await db.select(db.accounts).get(), hasLength(1));
     });
 
-    test('a missing refresh token does not crash — the shopper is signed in without one', () async {
+    test(
+        'a missing refresh token does not crash — the shopper is signed in without one',
+        () async {
       final gateway = FakeCustomerAuthGateway(
         loginResult: CustomerAuthResult(
           accessToken: 'access-1',
@@ -246,7 +271,8 @@ void main() {
       expect(session.account.email, 'shopper@example.com');
     });
 
-    test('a rejected access token fails the login instead of creating an account',
+    test(
+        'a rejected access token fails the login instead of creating an account',
         () async {
       final identityService = FakeCustomerIdentityService(
         error: const CustomerAuthException(
@@ -398,7 +424,8 @@ void main() {
   });
 
   group('CustomerSessionRepository.refreshAccessToken', () {
-    test('exchanges the stored refresh token and updates the session in place', () async {
+    test('exchanges the stored refresh token and updates the session in place',
+        () async {
       final gateway = FakeCustomerAuthGateway(
         loginResult: CustomerAuthResult(
           accessToken: 'access-1',
@@ -417,13 +444,16 @@ void main() {
         accessTokenExpiresAt: DateTime.utc(2026, 1, 1, 2),
       );
 
-      final newAccessToken = await repo.refreshAccessToken(session.account.localAccountId);
+      final newAccessToken =
+          await repo.refreshAccessToken(session.account.localAccountId);
 
       expect(newAccessToken, 'access-2');
       expect(gateway.lastRefreshTokenRequested, 'refresh-1');
       expect(await db.select(db.sessions).get(), hasLength(1));
-      final storedSession = await sessions.latestFor(session.account.localAccountId);
-      final storedRefreshToken = await secureStore.read(storedSession!.secureStorageKeyRef);
+      final storedSession =
+          await sessions.latestFor(session.account.localAccountId);
+      final storedRefreshToken =
+          await secureStore.read(storedSession!.secureStorageKeyRef);
       expect(storedRefreshToken, 'refresh-2');
     });
 
@@ -445,12 +475,14 @@ void main() {
   });
 
   group('CustomerSessionRepository.logout', () {
-    test('clears the secure-storage entry, deletes the session, and detaches the device', () async {
+    test('opens hosted end-session, clears secure storage, and detaches device',
+        () async {
+      final idToken = _fakeIdToken(sub: 'gid://shopify/Customer/1');
       final gateway = FakeCustomerAuthGateway(
         loginResult: CustomerAuthResult(
           accessToken: 'access-1',
           refreshToken: 'refresh-1',
-          idToken: _fakeIdToken(sub: 'gid://shopify/Customer/1'),
+          idToken: idToken,
           accessTokenExpiresAt: DateTime.utc(2026, 1, 1, 1),
         ),
       );
@@ -460,6 +492,8 @@ void main() {
 
       await repo.logout(localAccountId);
 
+      expect(gateway.endSessionCalls, 1);
+      expect(gateway.lastEndSessionIdTokenHint, idToken);
       expect(await sessions.latestFor(localAccountId), isNull);
       expect(secureStore.values, isEmpty);
       final device = await devices.byId('dev-1');
@@ -467,6 +501,29 @@ void main() {
 
       // The account itself survives logout — signing back in resumes it.
       expect(await accounts.byLocalId(localAccountId), isNotNull);
+    });
+
+    test('still clears local state when hosted end-session is cancelled',
+        () async {
+      final gateway = FakeCustomerAuthGateway(
+        loginResult: CustomerAuthResult(
+          accessToken: 'access-1',
+          refreshToken: 'refresh-1',
+          idToken: _fakeIdToken(sub: 'gid://shopify/Customer/2'),
+          accessTokenExpiresAt: DateTime.utc(2026, 1, 1, 1),
+        ),
+      )..endSessionError = const CustomerAuthException(
+          CustomerAuthErrorKind.cancelled,
+        );
+      final repo = repoWith(gateway);
+      final session = await repo.login();
+      final localAccountId = session.account.localAccountId;
+
+      await repo.logout(localAccountId);
+
+      expect(gateway.endSessionCalls, 1);
+      expect(await sessions.latestFor(localAccountId), isNull);
+      expect(secureStore.values, isEmpty);
     });
   });
 }

@@ -172,15 +172,15 @@ class _CustomerExperiencesScreenState extends State<CustomerExperiencesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: context.monettaColors.surface,
       appBar: AppBar(
         title: Text(
           'Experiencias',
           style: display(20, weight: FontWeight.w500, height: 1.1),
         ),
-        bottom: const PreferredSize(
+        bottom: PreferredSize(
           preferredSize: Size.fromHeight(0.5),
-          child: Divider(height: 0.5, color: kLine),
+          child: Divider(height: 0.5, color: context.monettaColors.divider),
         ),
       ),
       body: CustomScrollView(
@@ -254,7 +254,11 @@ class _CustomerExperiencesScreenState extends State<CustomerExperiencesScreen> {
               Text(
                 'Historias reales de quienes ya compraron en Monetta.',
                 textAlign: TextAlign.center,
-                style: sans(size: 14, color: kInkMuted, height: 1.55),
+                style: sans(
+                  size: 14,
+                  color: context.monettaColors.contentMuted,
+                  height: 1.55,
+                ),
               ),
               if (_average != null || _count != null) ...[
                 const SizedBox(height: 18),
@@ -269,12 +273,12 @@ class _CustomerExperiencesScreenState extends State<CustomerExperiencesScreen> {
 
   Widget _buildFooter() {
     if (_initialLoading || _loadingMore) {
-      return const Padding(
+      return Padding(
         padding: EdgeInsets.symmetric(vertical: 24),
         child: Center(
           child: CircularProgressIndicator(
             strokeWidth: 2,
-            color: kGold,
+            color: context.monettaColors.accent,
           ),
         ),
       );
@@ -287,7 +291,7 @@ class _CustomerExperiencesScreenState extends State<CustomerExperiencesScreen> {
             Text(
               'No pudimos actualizar las reseñas.',
               textAlign: TextAlign.center,
-              style: sans(size: 13, color: kInkMuted),
+              style: sans(size: 13, color: context.monettaColors.contentMuted),
             ),
             TextButton(
               key: const ValueKey('customer-experiences-retry-initial'),
@@ -306,7 +310,7 @@ class _CustomerExperiencesScreenState extends State<CustomerExperiencesScreen> {
             Text(
               'No pudimos cargar más reseñas.',
               textAlign: TextAlign.center,
-              style: sans(size: 13, color: kInkMuted),
+              style: sans(size: 13, color: context.monettaColors.contentMuted),
             ),
             TextButton(
               key: const ValueKey('customer-experiences-retry-more'),
@@ -324,7 +328,7 @@ class _CustomerExperiencesScreenState extends State<CustomerExperiencesScreen> {
             ? 'Has visto todas las reseñas disponibles.'
             : 'Has visto $_total reseñas.',
         textAlign: TextAlign.center,
-        style: sans(size: 12, color: kInkMuted),
+        style: sans(size: 12, color: context.monettaColors.contentMuted),
       ),
     );
   }
@@ -347,7 +351,7 @@ class _ReviewListCard extends StatelessWidget {
           return Container(
             clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: kMist,
+              color: context.monettaColors.surfaceMuted,
               borderRadius: BorderRadius.circular(_kReviewCardRadius),
             ),
             child: wide
@@ -400,8 +404,8 @@ class _ReviewListPhoto extends StatelessWidget {
           else if (review.fallbackAsset.isNotEmpty)
             Image.asset(review.fallbackAsset, fit: BoxFit.cover)
           else
-            const ColoredBox(
-              color: kMist,
+            ColoredBox(
+              color: context.monettaColors.surfaceMuted,
               child: Center(child: MonettaWordmark(height: 20)),
             ),
           const IgnorePointer(
@@ -430,7 +434,7 @@ class _ReviewListCopy extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      color: Colors.white,
+      color: context.monettaColors.surfaceRaised,
       padding: EdgeInsets.fromLTRB(wide ? 36 : 24, 26, wide ? 36 : 24, 28),
       child: Column(
         crossAxisAlignment:
@@ -457,7 +461,7 @@ class _ReviewListCopy extends StatelessWidget {
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               textAlign: wide ? TextAlign.start : TextAlign.center,
-              style: sans(size: 12, color: kInkMuted),
+              style: sans(size: 12, color: context.monettaColors.contentMuted),
             ),
           ],
           const SizedBox(height: 12),
@@ -502,7 +506,7 @@ class _ReviewStars extends StatelessWidget {
             if (index > 0) const SizedBox(width: 3),
             Icon(
               index < rating ? Icons.star : Icons.star_border,
-              color: kGold,
+              color: context.monettaColors.accent,
               size: 18,
             ),
           ],
@@ -530,7 +534,10 @@ class _ReviewTrustSummary extends StatelessWidget {
         ],
         if (count != null) ...[
           const SizedBox(width: 8),
-          Text('$count reseñas', style: sans(size: 15, color: kInkMuted)),
+          Text(
+            '$count reseñas',
+            style: sans(size: 15, color: context.monettaColors.contentMuted),
+          ),
         ],
       ],
     );
@@ -546,7 +553,7 @@ class _ReviewSkeleton extends StatelessWidget {
       height: 330,
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
-        color: kMist,
+        color: context.monettaColors.surfaceMuted,
         borderRadius: BorderRadius.circular(_kReviewCardRadius),
       ),
     );

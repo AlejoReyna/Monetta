@@ -17,27 +17,35 @@ class MonettaBottomNavigation extends StatelessWidget {
     required this.current,
     required this.bagCount,
     required this.onSelected,
-    this.surfaceColor = const Color(0xFFFBFAF7),
-    this.selectedColor = const Color(0xFFE7E5E0),
-    this.selectedIconColor = kGold,
-    this.selectedForegroundColor = const Color(0xFF3A3937),
-    this.unselectedColor = kInkMuted,
-    this.dividerColor = kLine,
+    this.surfaceColor,
+    this.selectedColor,
+    this.selectedIconColor,
+    this.selectedForegroundColor,
+    this.unselectedColor,
+    this.dividerColor,
     super.key,
   });
 
   final MonettaBottomDestination current;
   final int bagCount;
   final ValueChanged<MonettaBottomDestination> onSelected;
-  final Color surfaceColor;
-  final Color selectedColor;
-  final Color selectedIconColor;
-  final Color selectedForegroundColor;
-  final Color unselectedColor;
-  final Color dividerColor;
+  final Color? surfaceColor;
+  final Color? selectedColor;
+  final Color? selectedIconColor;
+  final Color? selectedForegroundColor;
+  final Color? unselectedColor;
+  final Color? dividerColor;
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
+    final resolvedSurface = surfaceColor ?? colors.navigationSurface;
+    final resolvedSelection = selectedColor ?? colors.navigationSelection;
+    final resolvedSelectedIcon = selectedIconColor ?? colors.accent;
+    final resolvedSelectedForeground =
+        selectedForegroundColor ?? colors.navigationForeground;
+    final resolvedUnselected = unselectedColor ?? colors.contentMuted;
+    final resolvedDivider = dividerColor ?? colors.divider;
     final media = MediaQuery.maybeOf(context);
     final animationsDisabled =
         media?.disableAnimations == true || media?.accessibleNavigation == true;
@@ -47,106 +55,113 @@ class MonettaBottomNavigation extends StatelessWidget {
     return DecoratedBox(
       key: const Key('bottom-nav-surface'),
       decoration: BoxDecoration(
-        color: surfaceColor,
-        border: Border(top: BorderSide(color: dividerColor, width: 0.5)),
+        color: resolvedSurface,
+        border: Border(top: BorderSide(color: resolvedDivider, width: 0.5)),
       ),
       child: Material(
         color: Colors.transparent,
         child: Padding(
-          padding: EdgeInsets.fromLTRB(8, 0, 8, bottomPadding),
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final itemWidth =
-                  constraints.maxWidth / MonettaBottomDestination.values.length;
-              const indicatorInset = 6.0;
+          padding: EdgeInsets.fromLTRB(20, 0, 20, bottomPadding),
+          child: Align(
+            alignment: Alignment.topCenter,
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 420),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final itemWidth = constraints.maxWidth /
+                      MonettaBottomDestination.values.length;
+                  const indicatorInset = 6.0;
 
-              return SizedBox(
-                height: 52,
-                child: Stack(
-                  children: [
-                    AnimatedPositioned(
-                      key: const Key('bottom-nav-selection-indicator'),
-                      duration: animationsDisabled ? Duration.zero : kSwap,
-                      curve: kMotionCurve,
-                      left: (itemWidth * current.index) + indicatorInset,
-                      top: 4,
-                      bottom: 4,
-                      width: itemWidth - (indicatorInset * 2),
-                      child: HeroMode(
-                        enabled: !animationsDisabled,
-                        child: Hero(
-                          tag: _MonettaNavHero.selectionIndicator,
-                          createRectTween: (begin, end) => RectTween(
-                            begin: begin,
-                            end: end,
-                          ),
-                          child: DecoratedBox(
-                            key: const Key('bottom-nav-selection-fill'),
-                            decoration: BoxDecoration(
-                              color: selectedColor,
-                              borderRadius: BorderRadius.circular(16),
+                  return SizedBox(
+                    height: 52,
+                    child: Stack(
+                      children: [
+                        AnimatedPositioned(
+                          key: const Key('bottom-nav-selection-indicator'),
+                          duration: animationsDisabled ? Duration.zero : kSwap,
+                          curve: kMotionCurve,
+                          left: (itemWidth * current.index) + indicatorInset,
+                          top: 4,
+                          bottom: 4,
+                          width: itemWidth - (indicatorInset * 2),
+                          child: HeroMode(
+                            enabled: !animationsDisabled,
+                            child: Hero(
+                              tag: _MonettaNavHero.selectionIndicator,
+                              createRectTween: (begin, end) => RectTween(
+                                begin: begin,
+                                end: end,
+                              ),
+                              child: DecoratedBox(
+                                key: const Key('bottom-nav-selection-fill'),
+                                decoration: BoxDecoration(
+                                  color: resolvedSelection,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    ),
-                    Row(
-                      children: [
-                        _NavItem(
-                          destination: MonettaBottomDestination.home,
-                          current: current,
-                          icon: _MonettaNavIcon.home,
-                          label: 'Home',
-                          selectedColor: selectedColor,
-                          selectedIconColor: selectedIconColor,
-                          selectedForegroundColor: selectedForegroundColor,
-                          unselectedColor: unselectedColor,
-                          animationsDisabled: animationsDisabled,
-                          onSelected: onSelected,
-                        ),
-                        _NavItem(
-                          destination: MonettaBottomDestination.catalog,
-                          current: current,
-                          icon: _MonettaNavIcon.catalog,
-                          label: 'Catálogo',
-                          selectedColor: selectedColor,
-                          selectedIconColor: selectedIconColor,
-                          selectedForegroundColor: selectedForegroundColor,
-                          unselectedColor: unselectedColor,
-                          animationsDisabled: animationsDisabled,
-                          onSelected: onSelected,
-                        ),
-                        _NavItem(
-                          destination: MonettaBottomDestination.bag,
-                          current: current,
-                          icon: _MonettaNavIcon.bag,
-                          label: 'Bolsa',
-                          badge: bagCount,
-                          selectedColor: selectedColor,
-                          selectedIconColor: selectedIconColor,
-                          selectedForegroundColor: selectedForegroundColor,
-                          unselectedColor: unselectedColor,
-                          animationsDisabled: animationsDisabled,
-                          onSelected: onSelected,
-                        ),
-                        _NavItem(
-                          destination: MonettaBottomDestination.account,
-                          current: current,
-                          icon: _MonettaNavIcon.account,
-                          label: 'Cuenta',
-                          selectedColor: selectedColor,
-                          selectedIconColor: selectedIconColor,
-                          selectedForegroundColor: selectedForegroundColor,
-                          unselectedColor: unselectedColor,
-                          animationsDisabled: animationsDisabled,
-                          onSelected: onSelected,
+                        Row(
+                          children: [
+                            _NavItem(
+                              destination: MonettaBottomDestination.home,
+                              current: current,
+                              icon: _MonettaNavIcon.home,
+                              label: 'Home',
+                              selectedIconColor: resolvedSelectedIcon,
+                              selectedForegroundColor:
+                                  resolvedSelectedForeground,
+                              unselectedColor: resolvedUnselected,
+                              animationsDisabled: animationsDisabled,
+                              onSelected: onSelected,
+                            ),
+                            _NavItem(
+                              destination: MonettaBottomDestination.catalog,
+                              current: current,
+                              icon: _MonettaNavIcon.catalog,
+                              label: 'Catálogo',
+                              selectedIconColor: resolvedSelectedIcon,
+                              selectedForegroundColor:
+                                  resolvedSelectedForeground,
+                              unselectedColor: resolvedUnselected,
+                              animationsDisabled: animationsDisabled,
+                              onSelected: onSelected,
+                            ),
+                            _NavItem(
+                              destination: MonettaBottomDestination.bag,
+                              current: current,
+                              icon: _MonettaNavIcon.bag,
+                              label: 'Carrito',
+                              badge: bagCount,
+                              selectedIconColor: resolvedSelectedIcon,
+                              selectedForegroundColor:
+                                  resolvedSelectedForeground,
+                              unselectedColor: resolvedUnselected,
+                              animationsDisabled: animationsDisabled,
+                              onSelected: onSelected,
+                            ),
+                            _NavItem(
+                              destination: MonettaBottomDestination.account,
+                              current: current,
+                              icon: _MonettaNavIcon.account,
+                              label: 'Cuenta',
+                              selectedIconColor: resolvedSelectedIcon,
+                              selectedForegroundColor:
+                                  resolvedSelectedForeground,
+                              unselectedColor: resolvedUnselected,
+                              animationsDisabled: animationsDisabled,
+                              onSelected: onSelected,
+                            ),
+                          ],
                         ),
                       ],
                     ),
-                  ],
-                ),
-              );
-            },
+                  );
+                },
+              ),
+            ),
           ),
         ),
       ),
@@ -160,7 +175,6 @@ class _NavItem extends StatelessWidget {
     required this.current,
     required this.icon,
     required this.label,
-    required this.selectedColor,
     required this.selectedIconColor,
     required this.selectedForegroundColor,
     required this.unselectedColor,
@@ -173,7 +187,6 @@ class _NavItem extends StatelessWidget {
   final MonettaBottomDestination current;
   final _MonettaNavIcon icon;
   final String label;
-  final Color selectedColor;
   final Color selectedIconColor;
   final Color selectedForegroundColor;
   final Color unselectedColor;
@@ -200,54 +213,54 @@ class _NavItem extends StatelessWidget {
               curve: kMotionCurve,
               tween: Tween(end: selected ? 1 : 0),
               builder: (context, progress, _) {
-                final iconColor = Color.lerp(
-                  unselectedColor,
-                  selectedIconColor,
-                  progress,
-                )!;
                 final labelColor = Color.lerp(
                   unselectedColor,
                   selectedForegroundColor,
                   progress,
                 )!;
-                return Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SizedBox(
-                      height: 27,
-                      child: Stack(
-                        clipBehavior: Clip.none,
-                        alignment: Alignment.center,
-                        children: [
-                          _NavGlyph(icon: icon, color: iconColor),
-                          if (badge > 0)
-                            Positioned(
-                              top: -4,
-                              right: 17,
-                              child: _BagBadge(
-                                count: badge,
-                                color: selected
-                                    ? selectedIconColor
-                                    : selectedColor,
-                                textColor: selected
-                                    ? selectedColor
-                                    : selectedForegroundColor,
+                return Transform.translate(
+                  offset: const Offset(0, 2),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      SizedBox(
+                        height: 27,
+                        child: Stack(
+                          clipBehavior: Clip.none,
+                          alignment: Alignment.center,
+                          children: [
+                            Transform.scale(
+                              scale: 1 + (progress * 0.05),
+                              child: _NavGlyph(
+                                icon: icon,
+                                color: selectedIconColor,
                               ),
                             ),
-                        ],
+                            if (badge > 0)
+                              Positioned(
+                                top: -4,
+                                right: 17,
+                                child: _BagBadge(
+                                  count: badge,
+                                  color: selectedIconColor,
+                                  textColor: context.monettaColors.canvas,
+                                ),
+                              ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 1),
-                    Text(
-                      label,
-                      style: sans(
-                        size: 9.5,
-                        color: labelColor,
-                        weight: selected ? FontWeight.w600 : FontWeight.w400,
-                        height: 1.1,
+                      const SizedBox(height: 1),
+                      Text(
+                        label,
+                        style: sans(
+                          size: 9.5,
+                          color: labelColor,
+                          weight: selected ? FontWeight.w600 : FontWeight.w400,
+                          height: 1.1,
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 );
               },
             ),

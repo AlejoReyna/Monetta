@@ -1,0 +1,29 @@
+name: Catalog health
+
+on:
+  pull_request:
+    paths:
+      - assets/catalog/catalog.json
+      - bin/refresh_catalog_snapshot.dart
+      - bin/verify_catalog_snapshot.dart
+      - .github/workflows/catalog-health.yml
+  schedule:
+    - cron: "17 10 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - run: flutter pub get
+      - name: Verify freshness and every product image
+        run: dart run bin/verify_catalog_snapshot.dart --remote

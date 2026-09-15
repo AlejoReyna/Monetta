@@ -5,6 +5,7 @@ library;
 import 'dart:convert';
 
 import '../../domain/collection.dart';
+import '../../domain/admin_control.dart';
 import '../../domain/home_content.dart';
 import 'mappers.dart';
 import 'queries.dart';
@@ -24,10 +25,13 @@ class HomeContentRepository {
         : const <Object?, Object?>{};
     final collections = edgeNodes(data['collections'])
         .map(collectionFromJson)
-        .where((item) => !item.isEmpty)
         .toList(growable: false);
-    final byHandle = <String, Collection>{
+    final allByHandle = <String, Collection>{
       for (final item in collections) item.handle.toLowerCase(): item,
+    };
+    final byHandle = <String, Collection>{
+      for (final item in collections)
+        if (!item.isEmpty) item.handle.toLowerCase(): item,
     };
 
     return fallback.copyWith(
@@ -45,13 +49,29 @@ class HomeContentRepository {
         fallback.bagTypes,
         byHandle,
       ),
+      // Brand logos remain useful navigation and merchandising artwork even
+      // when their Shopify collection is temporarily empty.
+      brands: _brands(fallback.brands, allByHandle),
       socialLinks: _socialLinks(
         metafieldValue(shop['socialLinks']),
         fallback.socialLinks,
       ),
       aboutImageUrl:
           _url(metafieldValue(shop['aboutImageUrl'])) ?? fallback.aboutImageUrl,
+      storefront: _storefront(data['storefrontConfig'], fallback.storefront),
     );
+  }
+
+  List<HomeBrandCard> _brands(
+    List<HomeBrandCard> fallback,
+    Map<String, Collection> byHandle,
+  ) {
+    return List.unmodifiable([
+      for (final seed in fallback)
+        seed.copyWith(
+          imageUrl: _url(byHandle[seed.handle.toLowerCase()]?.imageUrl),
+        ),
+    ]);
   }
 
   List<HomeSectionId> _sectionOrder(
@@ -171,5 +191,31 @@ class HomeContentRepository {
         .where((word) => word.isNotEmpty)
         .map((word) => '${word[0].toUpperCase()}${word.substring(1)}')
         .join(' ');
+  }
+
+  AdminStorefrontSettings _storefront(
+    Object? raw,
+    AdminStorefrontSettings fallback,
+  ) {
+    if (raw is! Map) return fallback;
+    final fields = <String, String>{};
+    final values = raw['fields'];
+    if (values is List) {
+      for (final field in values.whereType<Map<Object?, Object?>>()) {
+        final key = field['key'];
+        final value = field['value'];
+        if (key is String && value is String) fields[key] = value;
+      }
+    }
+    bool value(String key, bool fallbackValue) =>
+        fields[key] == null ? fallbackValue : fields[key] != 'false';
+    return AdminStorefrontSettings(
+      announcement: fields['announcement'] ?? fallback.announcement,
+      showHero: value('show_hero', fallback.showHero),
+      showNewest: value('show_newest', fallback.showNewest),
+      showTodaysPicks: value('show_todays_picks', fallback.showTodaysPicks),
+      showExternalPicks:
+          value('show_external_picks', fallback.showExternalPicks),
+    );
   }
 }

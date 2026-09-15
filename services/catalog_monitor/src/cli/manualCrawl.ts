@@ -22,6 +22,7 @@ import { logger } from '../logger.js';
 import { getPool, closePool } from '../db/pool.js';
 import { PgProductRepository } from '../db/pgProductRepository.js';
 import { PgCrawlRunRepository } from '../db/pgCrawlRunRepository.js';
+import { PgSelectionSnapshotCommitter } from '../db/pgSelectionSnapshotCommitter.js';
 import { adapterFor } from '../adapters/registry.js';
 import { crawlSourceWithRobotsGate } from '../crawl/guardedCrawl.js';
 import { DomainRateLimiter } from '../crawl/rateLimiter.js';
@@ -107,6 +108,7 @@ async function main(): Promise<void> {
   const pool = getPool();
   const products = new PgProductRepository(pool);
   const crawlRuns = new PgCrawlRunRepository(pool);
+  const selectionSnapshotCommitter = new PgSelectionSnapshotCommitter(pool);
   const rateLimiter = new DomainRateLimiter(config.requestDelayMs);
 
   for (const sourceId of sourceIds) {
@@ -132,6 +134,7 @@ async function main(): Promise<void> {
       },
       products,
       crawlRuns,
+      selectionSnapshotCommitter,
       rateLimiter,
       limit: args.limit,
       dryRun: args.dryRun,
@@ -157,13 +160,16 @@ async function main(): Promise<void> {
           source: sourceId,
           status: result.status,
           isFullSnapshot: result.isFullSnapshot,
+          selectionVersion: result.selectionVersion,
           urlsDiscovered: result.urlsDiscovered,
+          urlsSelected: result.urlsSelected,
           pagesFetched: result.pagesFetched,
           successfulParses: result.successfulParses,
           newItems: result.newItems,
           changedItems: result.changedItems,
           missingItems: result.missingItems,
           inactiveItems: result.inactiveItems,
+          deselectedItems: result.deselectedItems,
           errorsByType: result.errorsByType,
           sampleItems: result.items.slice(0, 3),
         },

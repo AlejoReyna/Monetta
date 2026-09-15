@@ -27,6 +27,8 @@ part 'database.g.dart';
     CachedVariants,
     CachedCollections,
     SyncCursors,
+    CatalogStates,
+    AppPreferences,
     WishlistItems,
     BagLines,
     InteractionEvents,
@@ -34,6 +36,7 @@ part 'database.g.dart';
     Accounts,
     Sessions,
     OrderSummaries,
+    CheckoutReceipts,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -45,16 +48,107 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
         onCreate: (migrator) => migrator.createAll(),
         onUpgrade: (migrator, from, to) async {
           if (from < 2) await _migrateShopifyIdsToGids();
+          if (from < 3) await migrator.createTable(appPreferences);
+          if (from < 4) await migrator.createTable(catalogStates);
+          if (from < 5) {
+            // `createTable` is intentionally idempotent, but `addColumn` is
+            // not. A partially upgraded install (or a fixture that carries a
+            // newer table while retaining an older user_version) can already
+            // have this column. Inspect the actual SQLite schema before
+            // issuing the ALTER TABLE so reopening it remains safe.
+            final columns = await customSelect(
+              'PRAGMA table_info(${appPreferences.actualTableName})',
+            ).get();
+            final hasOnboardingState = columns.any(
+              (row) => row.read<String>('name') == 'onboarding_state',
+            );
+            if (!hasOnboardingState) {
+              await migrator.addColumn(
+                appPreferences,
+                appPreferences.onboardingState,
+              );
+            }
+          }
+          if (from < 6) await _migrateShopScopeAndBagVariantKeys();
+          if (from < 7) {
+            await migrator.createTable(checkoutReceipts);
+            // History is a remote cache. Rebuild its key without reinterpreting
+            // the old display-number-as-ID values as canonical identities.
+            await customStatement(
+              'ALTER TABLE order_summaries RENAME TO order_summaries_v6',
+            );
+            await migrator.createTable(orderSummaries);
+            await customStatement(
+              'INSERT INTO order_summaries (id, account_id, shopify_order_id, display_number, source, attribution_code, status, total_amount, currency_code, placed_at) SELECT id, account_id, CASE WHEN id LIKE \'gid://shopify/Order/%\' THEN id ELSE shopify_order_id END, CASE WHEN id LIKE \'gid://shopify/Order/%\' THEN shopify_order_id ELSE NULL END, source, attribution_code, status, total_amount, currency_code, placed_at FROM order_summaries_v6',
+            );
+            await customStatement('DROP TABLE order_summaries_v6');
+          }
         },
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),
       );
+
+  /// Version 6 namespaces catalog authority by shop and rekeys bag/wishlist so
+  /// variants and accounts cannot collide on the same device.
+  Future<void> _migrateShopScopeAndBagVariantKeys() async {
+    await _addColumnIfMissing('sync_cursors', 'shop_domain', 'TEXT');
+    await _addColumnIfMissing('catalog_states', 'shop_domain', 'TEXT');
+
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS wishlist_items_v6 ('
+      'product_id TEXT NOT NULL, '
+      "account_id TEXT NOT NULL DEFAULT '', "
+      'added_at INTEGER NOT NULL, '
+      'PRIMARY KEY (product_id, account_id)'
+      ')',
+    );
+    await customStatement(
+      'INSERT OR IGNORE INTO wishlist_items_v6 (product_id, account_id, added_at) '
+      "SELECT product_id, COALESCE(account_id, ''), added_at FROM wishlist_items",
+    );
+    await customStatement('DROP TABLE wishlist_items');
+    await customStatement(
+      'ALTER TABLE wishlist_items_v6 RENAME TO wishlist_items',
+    );
+
+    await customStatement(
+      'CREATE TABLE IF NOT EXISTS bag_lines_v6 ('
+      'product_id TEXT NOT NULL, '
+      'variant_id TEXT NOT NULL, '
+      "account_id TEXT NOT NULL DEFAULT '', "
+      'quantity INTEGER NOT NULL, '
+      'PRIMARY KEY (variant_id, account_id)'
+      ')',
+    );
+    await customStatement(
+      'INSERT OR IGNORE INTO bag_lines_v6 ('
+      'product_id, variant_id, account_id, quantity'
+      ') '
+      "SELECT product_id, variant_id, COALESCE(account_id, ''), quantity "
+      'FROM bag_lines',
+    );
+    await customStatement('DROP TABLE bag_lines');
+    await customStatement('ALTER TABLE bag_lines_v6 RENAME TO bag_lines');
+  }
+
+  Future<void> _addColumnIfMissing(
+    String table,
+    String column,
+    String typeSql,
+  ) async {
+    final columns = await customSelect('PRAGMA table_info($table)').get();
+    final exists = columns.any((row) => row.read<String>('name') == column);
+    if (exists) return;
+    await customStatement(
+      'ALTER TABLE $table ADD COLUMN $column $typeSql',
+    );
+  }
 
   /// Version 1 persisted ids from the bundled Ajax snapshot as decimal text.
   /// Storefront and Firestore use GIDs, so an upgraded installation must move

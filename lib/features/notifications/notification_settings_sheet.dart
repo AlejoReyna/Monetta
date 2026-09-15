@@ -1,4 +1,4 @@
-/// Shopper-facing consent controls. The OS prompt only appears after Save.
+/// Granular notification controls for explicit preference-management flows.
 library;
 
 import 'package:flutter/material.dart';
@@ -14,7 +14,7 @@ Future<void> openNotificationSettings(
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: Colors.white,
+    backgroundColor: context.monettaColors.surfaceRaised,
     builder: (_) => _NotificationSettingsSheet(controller: controller),
   );
 }
@@ -42,6 +42,7 @@ class _NotificationSettingsSheetState
   @override
   Widget build(BuildContext context) {
     final bottom = MediaQuery.viewInsetsOf(context).bottom;
+    final colors = context.monettaColors;
     return SafeArea(
       child: Padding(
         padding: EdgeInsets.fromLTRB(24, 14, 24, bottom + 28),
@@ -56,7 +57,7 @@ class _NotificationSettingsSheetState
                   width: 38,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: kLine,
+                    color: colors.divider,
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
@@ -68,7 +69,7 @@ class _NotificationSettingsSheetState
                 'Tú eliges qué recibir. Tu navegación detallada se queda en '
                 'este dispositivo; sólo sincronizamos intereses resumidos '
                 'cuando activas ofertas personalizadas.',
-                style: sans(size: 12, color: kInkMuted, height: 1.5),
+                style: sans(size: 12, color: colors.contentMuted, height: 1.5),
               ),
               const SizedBox(height: 20),
               _PreferenceSwitch(
@@ -102,20 +103,20 @@ class _NotificationSettingsSheetState
               const SizedBox(height: 10),
               Text(
                 'Horario silencioso: 9:00 p.m. a 9:00 a.m.',
-                style: sans(size: 11, color: kInkMuted),
+                style: sans(size: 11, color: colors.contentMuted),
               ),
               if (!widget.controller.available) ...[
                 const SizedBox(height: 12),
                 Text(
                   'Las notificaciones aún no están configuradas en esta versión.',
-                  style: sans(size: 11, color: kInkMuted),
+                  style: sans(size: 11, color: colors.contentMuted),
                 ),
               ],
               if (widget.controller.lastError != null) ...[
                 const SizedBox(height: 12),
                 Text(
                   widget.controller.lastError!,
-                  style: sans(size: 11, color: Colors.red.shade700),
+                  style: sans(size: 11, color: colors.sale),
                 ),
               ],
               const SizedBox(height: 18),
@@ -126,12 +127,12 @@ class _NotificationSettingsSheetState
                         ? null
                         : _save,
                 child: widget.controller.saving
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 18,
                         height: 18,
                         child: CircularProgressIndicator(
                           strokeWidth: 1.5,
-                          color: Colors.white,
+                          color: colors.canvas,
                         ),
                       )
                     : const Text('GUARDAR PREFERENCIAS'),
@@ -172,12 +173,13 @@ class _PreferenceSwitch extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
     return SwitchListTile.adaptive(
       contentPadding: EdgeInsets.zero,
       title: Text(title, style: sans(size: 13, weight: FontWeight.w600)),
       subtitle: Text(
         description,
-        style: sans(size: 11, color: kInkMuted, height: 1.35),
+        style: sans(size: 11, color: colors.contentMuted, height: 1.35),
       ),
       value: value,
       onChanged: onChanged,

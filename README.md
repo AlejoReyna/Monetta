@@ -52,6 +52,10 @@ decisions taken *and rejected*, gotchas, and how to extend it.
   catalog stays research, not dropshipping
 - [`docs/EDITORIAL_CONTENT_METAOBJECTS.md`](docs/EDITORIAL_CONTENT_METAOBJECTS.md) —
   Shopify content fields for Conoce Monetta and Vende con Monetta
+- [`docs/OWNER_ADMIN_GUIDE.md`](docs/OWNER_ADMIN_GUIDE.md) — instrucciones diarias
+  para la persona propietaria
+- [`docs/ADMIN_CONTROL_PANEL.md`](docs/ADMIN_CONTROL_PANEL.md) — arquitectura,
+  seguridad, endpoints y operación del control plane
 - [`lib/data/normalize/README.md`](lib/data/normalize/README.md) — catalog repair, and the
   measured data problems it exists to solve
 - [`lib/reco/README.md`](lib/reco/README.md) — the scoring model, in business terms

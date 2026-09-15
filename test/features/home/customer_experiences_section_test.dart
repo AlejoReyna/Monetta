@@ -89,7 +89,18 @@ void main() {
     await tester.pumpWidget(_app(testimonials: liveReviews));
     await tester.pump();
 
-    expect(find.text('EXPERIENCIAS DE CLIENTES'), findsOneWidget);
+    expect(find.text('LO QUE DICEN'), findsOneWidget);
+    expect(find.text('Experiencias de clientes'), findsOneWidget);
+    final headingLeft = tester
+        .getTopLeft(
+          find.byKey(const ValueKey('customer-experiences-heading')),
+        )
+        .dx;
+    expect(tester.getTopLeft(find.text('LO QUE DICEN')).dx - headingLeft, 20);
+    expect(
+      tester.getTopLeft(find.text('Experiencias de clientes')).dx - headingLeft,
+      20,
+    );
     expect(find.text('Gaby E.'), findsWidgets);
     expect(find.textContaining('100% original'), findsOneWidget);
     expect(find.text('139 reseñas'), findsOneWidget);
@@ -256,7 +267,7 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Gaby E.'), findsNothing);
-    expect(find.text('EXPERIENCIAS DE CLIENTES'), findsOneWidget);
+    expect(find.text('Experiencias de clientes'), findsOneWidget);
   });
 
   testWidgets('empty live response keeps the title and no cards',
@@ -271,7 +282,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('EXPERIENCIAS DE CLIENTES'), findsOneWidget);
+    expect(find.text('Experiencias de clientes'), findsOneWidget);
     expect(find.text('Gaby E.'), findsNothing);
     expect(
       find.byKey(const ValueKey('customer-experiences-carousel')),
@@ -393,7 +404,7 @@ void main() {
     await tester.pumpWidget(_app(testimonials: liveReviews));
     await tester.pump();
 
-    expect(find.text('EXPERIENCIAS DE CLIENTES'), findsOneWidget);
+    expect(find.text('Experiencias de clientes'), findsOneWidget);
     expect(
       tester
           .getSemantics(

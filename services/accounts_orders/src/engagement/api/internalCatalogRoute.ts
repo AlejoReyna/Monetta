@@ -86,6 +86,13 @@ function parseCatalogEvent(value: unknown): CatalogEventInput | null {
   ) {
     return null;
   }
+  // F28: do not accept retired external-catalog event sources or keys.
+  if (source === 'external' || source.startsWith('external') || productKey.startsWith('external:')) {
+    return null;
+  }
+  if (!productKey.startsWith('shopify:')) {
+    return null;
+  }
   return { eventId, eventType, source, productKey, occurredAt, before, after };
 }
 

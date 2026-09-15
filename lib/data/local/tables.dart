@@ -74,10 +74,46 @@ class CachedCollections extends Table {
 
 /// Singleton row (id is always 0) holding the delta-sync high-water mark —
 /// the persisted form of `lib/data/shopify/catalog_sync.dart`'s `SyncCursor`.
+///
+/// [shopDomain] namespaces the cursor by Storefront host so a flavor or shop
+/// switch cannot resume against foreign product/variant IDs.
 class SyncCursors extends Table {
   IntColumn get id => integer().withDefault(const Constant(0))();
   DateTimeColumn get lastUpdatedAt => dateTime().nullable()();
   DateTimeColumn get lastFullSyncAt => dateTime().nullable()();
+  TextColumn get shopDomain => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Singleton provenance and health record for the catalog cached on device.
+///
+/// Counts are observations, never release constants. The fingerprint makes it
+/// possible to compare snapshots without persisting URLs or product payloads
+/// in logs, while [source] prevents the bundled fallback from mutating a cache
+/// that has already been replaced by an authoritative remote snapshot.
+class CatalogStates extends Table {
+  IntColumn get id => integer().withDefault(const Constant(0))();
+  TextColumn get source => text()();
+  DateTimeColumn get syncedAt => dateTime().nullable()();
+  IntColumn get productCount => integer()();
+  TextColumn get fingerprint => text()();
+  TextColumn get status => text()();
+  TextColumn get detail => text().nullable()();
+  TextColumn get shopDomain => text().nullable()();
+
+  @override
+  Set<Column> get primaryKey => {id};
+}
+
+/// Device-scoped, non-sensitive application preferences. The singleton row
+/// survives sign-in and sign-out so appearance never depends on an account.
+class AppPreferences extends Table {
+  IntColumn get id => integer().withDefault(const Constant(0))();
+  TextColumn get themeMode => text().withDefault(const Constant('system'))();
+  TextColumn get onboardingState =>
+      text().withDefault(const Constant('pending'))();
 
   @override
   Set<Column> get primaryKey => {id};
@@ -85,30 +121,32 @@ class SyncCursors extends Table {
 
 /// One product on a shopper's wishlist.
 ///
-/// `accountId` is nullable — a wishlist starts device-scoped (guest) and
-/// gets attached to an account on login (merge, per
-/// `docs/ACCOUNTS_AND_SYNC_PLAN.md` § 5). `productId` alone is the primary
-/// key: a product appears at most once regardless of scope, so login-merge
-/// is an UPDATE of `accountId` on the existing row, not an insert.
+/// Guest rows use empty-string [accountId]; signed-in rows use the local
+/// account id. The composite primary key keeps account A and account B
+/// isolated on the same device. Login merges guest (`''`) rows into the
+/// signed-in account (see `WishlistStore.mergeDeviceItemsIntoAccount`).
 class WishlistItems extends Table {
   TextColumn get productId => text()();
-  TextColumn get accountId => text().nullable()();
+  TextColumn get accountId => text().withDefault(const Constant(''))();
   DateTimeColumn get addedAt => dateTime()();
 
   @override
-  Set<Column> get primaryKey => {productId};
+  Set<Column> get primaryKey => {productId, accountId};
 }
 
 /// A line in the shopper's pre-checkout bag. Persisted so it survives an app
-/// restart — replaces `CatalogStore`'s in-memory `_bagQuantities` map.
+/// restart — replaces `CatalogStore`'s in-memory bag map.
+///
+/// Primary key is `(variantId, accountId)` so two variants of the same product
+/// can coexist, and account scopes stay isolated. Guest scope uses `''`.
 class BagLines extends Table {
   TextColumn get productId => text()();
   TextColumn get variantId => text()();
-  TextColumn get accountId => text().nullable()();
+  TextColumn get accountId => text().withDefault(const Constant(''))();
   IntColumn get quantity => integer()();
 
   @override
-  Set<Column> get primaryKey => {productId};
+  Set<Column> get primaryKey => {variantId, accountId};
 }
 
 /// One recorded `InteractionEvent` (`reco/events.dart`). Device-scoped only —
@@ -163,8 +201,8 @@ class Accounts extends Table {
 /// `Session` entity.
 class Sessions extends Table {
   IntColumn get id => integer().autoIncrement()();
-  TextColumn get accountId =>
-      text().references(Accounts, #localAccountId, onDelete: KeyAction.cascade)();
+  TextColumn get accountId => text()
+      .references(Accounts, #localAccountId, onDelete: KeyAction.cascade)();
   TextColumn get secureStorageKeyRef => text()();
 
   /// The *access* token's expiry, not the id token's — they carry separate
@@ -179,11 +217,14 @@ class Sessions extends Table {
 /// `docs/ACCOUNTS_AND_SYNC_PLAN.md`.
 class OrderSummaries extends Table {
   TextColumn get id => text()();
-  TextColumn get accountId =>
-      text().references(Accounts, #localAccountId, onDelete: KeyAction.cascade)();
+  TextColumn get accountId => text()
+      .references(Accounts, #localAccountId, onDelete: KeyAction.cascade)();
 
   /// Null for an apartado order — those have no Shopify order id until the
   /// owner manually enters one, and some never get one recorded here at all.
+  TextColumn get displayNumber => text().nullable()();
+  TextColumn get fulfillmentStatus => text().nullable()();
+
   TextColumn get shopifyOrderId => text().nullable()();
 
   /// `shopifyCheckout` | `whatsappApartado`.
@@ -199,5 +240,14 @@ class OrderSummaries extends Table {
   DateTimeColumn get placedAt => dateTime()();
 
   @override
-  Set<Column> get primaryKey => {id};
+  Set<Column> get primaryKey => {id, accountId};
+}
+
+/// Receipt and bag subtraction commit together, making repeated callbacks safe.
+class CheckoutReceipts extends Table {
+  TextColumn get operationId => text()();
+  TextColumn get shopDomain => text()();
+  TextColumn get accountId => text()();
+  @override
+  Set<Column> get primaryKey => {operationId};
 }

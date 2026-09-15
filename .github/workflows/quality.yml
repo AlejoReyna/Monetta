@@ -1,0 +1,129 @@
+name: Quality
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.8
+          cache: true
+      - run: flutter pub get
+      - name: Formatting
+        run: dart format --output=none --set-exit-if-changed lib test integration_test
+      - name: Static analysis
+        run: flutter analyze
+      - name: Flutter tests
+        run: flutter test
+      - name: Catalog and secret gates
+        run: |
+          dart run bin/verify_catalog_snapshot.dart
+          ./bin/check_no_secrets.sh
+      - name: Android staging compile
+        run: flutter build apk --debug --flavor staging --dart-define-from-file=config/dart_defines.ci.json
+
+  ios-compile:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.44.8
+          cache: true
+      - run: flutter pub get
+      - name: iOS staging simulator compile
+        run: flutter build ios --simulator --debug --dart-define-from-file=config/dart_defines.ci.json
+
+  accounts-orders:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports: [5432:5432]
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 5s --health-timeout 5s --health-retries 10
+    env:
+      WP01_PG_ADMIN_URL: postgres://postgres:postgres@localhost:5432/postgres
+      REQUIRE_POSTGRES_TESTS: "1"
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: services/accounts_orders/package-lock.json
+      - run: npm ci
+        working-directory: services/accounts_orders
+      - run: node --test tools/audit/test/*.test.mjs
+      - run: npm test
+        working-directory: services/accounts_orders
+      - run: npm run typecheck
+        working-directory: services/accounts_orders
+      - run: npm run build
+        working-directory: services/accounts_orders
+      - run: npm audit --omit=dev --audit-level=moderate
+        working-directory: services/accounts_orders
+
+  # catalog_monitor product CI retired (WP-02 / F03)
+  # see docs/audits/2026-09-07/EXTERNAL_CATALOG_DECOMMISSION.md
+  catalog-monitor-retired:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Confirm external catalog stays off in CI defines
+        run: |
+          python3 -c 'import json; assert json.load(open("config/dart_defines.ci.json"))["ENABLE_EXTERNAL_CATALOG"]=="false"'
+
+  functions-and-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            package-lock.json
+            functions/package-lock.json
+            web/package-lock.json
+      - run: npm ci
+      - run: npm ci
+        working-directory: functions
+      - run: npm ci
+        working-directory: web
+      - run: npm test
+        working-directory: functions
+      - run: npm run typecheck
+        working-directory: functions
+      - run: npm run build
+        working-directory: functions
+      - run: npm run typecheck:api
+      - run: npm run build:web
+      - run: npm audit --omit=dev --audit-level=moderate
+      - run: npm audit --omit=dev --audit-level=moderate
+        working-directory: functions

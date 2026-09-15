@@ -1,8 +1,16 @@
-/// The signed-in account page.
+/// Mi cuenta (paquete E): identidad, saldo, accesos y cierre de sesión.
 ///
-/// Signed-out shoppers never see a Flutter login page: [openAccount] launches
-/// Shopify's hosted authentication first and only pushes this route after a
-/// successful callback.
+/// La autenticación sigue alojada en Shopify: [openAccount] lanza el flujo
+/// hospedado antes de presentar esta ruta, igual que antes. Secciones:
+/// 1. identidad (nombre, correo, proveedor verificado),
+/// 2. saldo Monetta (presentación reutilizable, datos de F),
+/// 3. accesos (pedidos, favoritos, notificaciones, contacto, mayoreo, admin),
+/// 4. cierre de sesión.
+///
+/// La figura de la lámina numera mal sus encabezados; se sigue su contenido:
+/// perfil de Ana, filas de Mis pedidos / Favoritos / Notificaciones /
+/// contacto y cierre de sesión. La fila antigua de "320 puntos / Nivel Plata"
+/// no se implementa: Miguel la sustituyó por saldo en pesos.
 library;
 
 import 'package:flutter/material.dart';
@@ -11,16 +19,29 @@ import '../../app/account_controller.dart';
 import '../../app/theme.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
+import '../../data/repositories/order_history_repository.dart';
+import '../contact/contact_screen.dart';
+import '../favorites/favorites_screen.dart';
+import '../notifications/notification_inbox.dart';
+import '../notifications/notifications_screen.dart';
+import '../orders/order_status.dart';
+import '../orders/orders_screen.dart';
+import '../rewards/rewards_section.dart';
+import 'account_boutique.dart';
+import '../boutique/boutique_tokens.dart';
 
-/// Opens the hosted Shopify flow when needed, then presents the signed-in
-/// account. Keeping authentication before the route push prevents the old
-/// in-app login design from flashing underneath the system browser.
+/// Abre el flujo hospedado de Shopify cuando hace falta y luego presenta la
+/// cuenta. La autenticación siempre ocurre antes del push de la ruta para que
+/// el diseño anterior de login en la app nunca parpadee bajo el navegador.
 Future<void> openAccount(
   BuildContext context, {
   required AccountController controller,
   bool Function()? canOpenAdmin,
   VoidCallback? onOpenAdmin,
   VoidCallback? onOpenPartner,
+  RewardsReader? rewardsReader,
+  NotificationInbox? notificationInbox,
+  VoidCallback? onOpenInvite,
 }) async {
   if (controller.isLoading) return;
 
@@ -52,6 +73,9 @@ Future<void> openAccount(
         canOpenAdmin: canOpenAdmin,
         onOpenAdmin: onOpenAdmin,
         onOpenPartner: onOpenPartner,
+        rewardsReader: rewardsReader,
+        notificationInbox: notificationInbox,
+        onOpenInvite: onOpenInvite,
       ),
     ),
   );
@@ -69,21 +93,54 @@ class AccountScreen extends StatelessWidget {
     this.canOpenAdmin,
     this.onOpenAdmin,
     this.onOpenPartner,
+    this.rewardsReader,
+    this.notificationInbox,
+    this.onOpenInvite,
     super.key,
   });
 
   final AccountController controller;
 
-  /// Owner administration remains an optional capability so account flows
-  /// stay reusable in tests and in builds without a configured control plane.
+  /// La administración del propietario sigue siendo una capacidad opcional
+  /// para que los flujos de cuenta se reutilicen en pruebas y en builds sin
+  /// control plane configurado.
   final bool Function()? canOpenAdmin;
   final VoidCallback? onOpenAdmin;
   final VoidCallback? onOpenPartner;
 
+  /// Lector Rewards (paquete F) fijo, normalmente un fixture de prueba. Nulo
+  /// = la sección lo resuelve del backend configurado o muestra el estado
+  /// honesto de no disponible. Nunca un saldo ficticio.
+  final RewardsReader? rewardsReader;
+
+  /// Bandeja de notificaciones. Nula hasta que la integración global la
+  /// alimente (ver parche en `PAQUETE_E_ENTREGA.md`); entonces los avisos
+  /// aparecen aislados por cuenta.
+  final NotificationInbox? notificationInbox;
+
+  /// Punto de entrada público de F para invitar/referidos. Nulo = la fila
+  /// no se muestra (no se inventa un programa de invitados).
+  final VoidCallback? onOpenInvite;
+
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Scaffold(
-      appBar: AppBar(title: const MonettaWordmark.appBar()),
+      backgroundColor: palette.canvas,
+      appBar: AppBar(
+        backgroundColor: palette.canvas,
+        foregroundColor: palette.ink,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text(
+          'Mi cuenta',
+          style: boutiqueTitle(size: 15, color: palette.ink),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(.5),
+          child: Container(height: .5, color: palette.hairline),
+        ),
+      ),
       body: SafeArea(
         child: ListenableBuilder(
           listenable: controller,
@@ -93,6 +150,9 @@ class AccountScreen extends StatelessWidget {
                   showAdmin: canOpenAdmin?.call() == true,
                   onOpenAdmin: onOpenAdmin,
                   onOpenPartner: onOpenPartner,
+                  rewardsReader: rewardsReader,
+                  notificationInbox: notificationInbox,
+                  onOpenInvite: onOpenInvite,
                 )
               : const SizedBox.shrink(),
         ),
@@ -107,12 +167,18 @@ class _SignedIn extends StatelessWidget {
     required this.showAdmin,
     required this.onOpenAdmin,
     required this.onOpenPartner,
+    required this.rewardsReader,
+    required this.notificationInbox,
+    required this.onOpenInvite,
   });
 
   final AccountController controller;
   final bool showAdmin;
   final VoidCallback? onOpenAdmin;
   final VoidCallback? onOpenPartner;
+  final RewardsReader? rewardsReader;
+  final NotificationInbox? notificationInbox;
+  final VoidCallback? onOpenInvite;
 
   Future<void> _logout(BuildContext context) async {
     await controller.logout();
@@ -124,116 +190,367 @@ class _SignedIn extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final account = controller.account!;
-    return ListView(
-      padding: const EdgeInsets.all(24),
-      children: [
-        Text('Sesión iniciada', style: display(20)),
-        const SizedBox(height: 8),
-        Text(
-          account.displayName ?? account.email ?? 'Tu cuenta',
-          style: sans(size: 14, color: kInkMuted),
-        ),
-        if (account.displayName != null && account.email != null) ...[
-          const SizedBox(height: 2),
-          Text(account.email!, style: sans(size: 12, color: kInkMuted)),
-        ],
-        if (showAdmin && onOpenAdmin != null) ...[
-          const SizedBox(height: 24),
-          InkWell(
-            key: const ValueKey('open-owner-admin'),
-            onTap: onOpenAdmin,
-            child: Container(
-              padding: const EdgeInsets.all(18),
-              decoration: BoxDecoration(
-                color: kInk,
-                border: Border.all(color: kGold, width: .6),
+    final palette = context.boutique;
+    // Desplazamiento con construcción total (no diferida): los accesos de
+    // administración y partner hub deben existir en el árbol aunque queden
+    // bajo el primer pantallazo, igual que antes del rediseño.
+    return SingleChildScrollView(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          _IdentityCard(
+            controller: controller,
+            onRelogin: controller.isLoading ? null : () => controller.login(),
+          ),
+          const SizedBox(height: BoutiqueSpace.lg),
+          AutoRewardsSection(
+            controller: controller,
+            reader: rewardsReader,
+          ),
+          if (onOpenInvite != null) ...[
+            const SizedBox(height: BoutiqueSpace.md),
+            ECard(
+              children: [
+                EAccessRow(
+                  key: const ValueKey('account-invite'),
+                  icon: Icons.card_giftcard_outlined,
+                  title: 'Invitar a Monetta',
+                  subtitle: 'Comparte tu enlace y gana saldo con referidos',
+                  onTap: onOpenInvite,
+                ),
+              ],
+            ),
+          ],
+          const SizedBox(height: BoutiqueSpace.sectionGapTight),
+          const ESectionTitle(title: 'Mis accesos'),
+          const SizedBox(height: BoutiqueSpace.sm),
+          ECard(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+            children: [
+              EAccessRow(
+                key: const ValueKey('account-open-orders'),
+                icon: Icons.shopping_bag_outlined,
+                title: 'Mis pedidos',
+                subtitle: _ordersSubtitle(),
+                onTap: () => openOrders(
+                  context,
+                  controller: controller,
+                  rewardsReader: rewardsReader,
+                ),
               ),
-              child: Row(
-                children: [
-                  const Icon(
-                    Icons.admin_panel_settings_outlined,
-                    color: kGold,
-                    size: 23,
+              EAccessRow(
+                key: const ValueKey('account-open-favorites'),
+                icon: Icons.favorite_border_rounded,
+                title: 'Favoritos',
+                subtitle: 'Tus piezas guardadas',
+                onTap: () => openFavorites(context),
+              ),
+              EAccessRow(
+                key: const ValueKey('account-open-notifications'),
+                icon: Icons.notifications_none_rounded,
+                title: 'Notificaciones',
+                subtitle: 'Avisos de pedidos y saldo',
+                onTap: () => openNotifications(
+                  context,
+                  inbox: notificationInbox ?? _sharedAccountInbox,
+                  ownerId: account.localAccountId,
+                  accountController: controller,
+                  rewardsReader: rewardsReader,
+                ),
+              ),
+              EAccessRow(
+                key: const ValueKey('account-open-contact'),
+                icon: Icons.chat_outlined,
+                title: 'Contacto y ayuda',
+                subtitle: 'WhatsApp, sitio y redes',
+                onTap: () => openContact(context),
+              ),
+            ],
+          ),
+          const SizedBox(height: BoutiqueSpace.sectionGapTight),
+          const ESectionTitle(title: 'Mis pedidos recientes'),
+          const SizedBox(height: BoutiqueSpace.sm),
+          _OrdersPreview(controller: controller),
+          if (showAdmin && onOpenAdmin != null) ...[
+            const SizedBox(height: BoutiqueSpace.sectionGapTight),
+            InkWell(
+              key: const ValueKey('open-owner-admin'),
+              onTap: onOpenAdmin,
+              child: Container(
+                padding: const EdgeInsets.all(18),
+                decoration: BoxDecoration(
+                  color: kInk,
+                  borderRadius: BoutiqueRadius.card,
+                  border: Border.all(
+                    color: context.monettaColors.accent,
+                    width: .6,
                   ),
-                  const SizedBox(width: 14),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'ADMINISTRAR MONETTA',
-                          style: eyebrow(
-                            size: 9,
-                            color: kGold,
-                            weight: FontWeight.w700,
+                ),
+                child: Row(
+                  children: [
+                    const Icon(
+                      Icons.admin_panel_settings_outlined,
+                      color: kGold,
+                      size: 23,
+                    ),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'ADMINISTRAR MONETTA',
+                            style: eyebrow(
+                              size: 9,
+                              color: kGold,
+                              weight: FontWeight.w700,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 3),
-                        Text(
-                          'Productos, portada, fuentes y sincronización',
-                          style: sans(
-                            size: 11,
-                            color: const Color(0xFFD2D2D2),
+                          const SizedBox(height: 3),
+                          Text(
+                            'Productos, portada, fuentes y sincronización',
+                            style: sans(
+                              size: 11,
+                              color: const Color(0xFFD2D2D2),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
+                    ),
+                    const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: Colors.white,
+                      size: 19,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+          if (onOpenPartner != null) ...[
+            const SizedBox(height: BoutiqueSpace.md),
+            _PartnerAccountLink(onTap: onOpenPartner!),
+          ],
+          const SizedBox(height: BoutiqueSpace.sectionGapTight),
+          BoutiqueButton(
+            key: const ValueKey('account-logout'),
+            label: 'Cerrar sesión',
+            filled: false,
+            onPressed: controller.isLoading ? null : () => _logout(context),
+          ),
+          if (controller.isLoading) ...[
+            const SizedBox(height: BoutiqueSpace.md),
+            Center(
+              child: SizedBox(
+                width: 18,
+                height: 18,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: palette.inkMuted,
+                ),
+              ),
+            ),
+          ],
+          const SizedBox(height: BoutiqueSpace.sm),
+          Center(
+            child: TextButton(
+              onPressed: controller.isLoading ? null : () => _logout(context),
+              child: controller.isLoading
+                  ? const Text('Cerrando…')
+                  : const Text('CERRAR SESIÓN'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String? _ordersSubtitle() {
+    final count = controller.orders.length;
+    if (controller.ordersLoading && count == 0) return 'Cargando…';
+    if (count == 0) return 'Tu historial aparecerá aquí';
+    return count == 1 ? '1 pedido' : '$count pedidos';
+  }
+}
+
+/// Bandeja compartida de respaldo hasta que la integración global alimente
+/// una por sesión. Aislada por cuenta igual que cualquier otra.
+final NotificationInbox _sharedAccountInbox = NotificationInbox();
+
+class _IdentityCard extends StatelessWidget {
+  const _IdentityCard({
+    required this.controller,
+    required this.onRelogin,
+  });
+
+  final AccountController controller;
+  final VoidCallback? onRelogin;
+
+  @override
+  Widget build(BuildContext context) {
+    final account = controller.account!;
+    final palette = context.boutique;
+    final name = account.displayName ?? account.email ?? 'Tu cuenta';
+    final initial =
+        name.trim().isEmpty ? 'M' : name.trim().substring(0, 1).toUpperCase();
+    final provider = account.authProvider == 'monetta'
+        ? 'Cuenta Monetta verificada'
+        : 'Cuenta Shopify verificada';
+    final sessionExpired =
+        controller.lastError?.kind == CustomerAuthErrorKind.sessionExpired;
+    return ECard(
+      children: [
+        Row(
+          children: [
+            Container(
+              width: 56,
+              height: 56,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: palette.surfaceDeep,
+                border: Border.all(color: palette.gold, width: 1),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                initial,
+                style: boutiqueDisplay(24, color: palette.ink),
+              ),
+            ),
+            const SizedBox(width: BoutiqueSpace.lg),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Sesión iniciada',
+                    style: boutiqueEyebrow(
+                      size: 11,
+                      color: palette.goldText,
                     ),
                   ),
-                  const Icon(
-                    Icons.arrow_forward_rounded,
-                    color: Colors.white,
-                    size: 19,
+                  const SizedBox(height: 2),
+                  Text(
+                    name,
+                    style: boutiqueTitle(size: 17, color: palette.ink),
+                  ),
+                  if (account.displayName != null && account.email != null) ...[
+                    const SizedBox(height: 2),
+                    Text(
+                      account.email!,
+                      style: boutiqueText(
+                        size: 12,
+                        color: palette.inkMuted,
+                      ),
+                    ),
+                  ],
+                  const SizedBox(height: 4),
+                  Row(
+                    children: [
+                      Icon(
+                        Icons.verified_outlined,
+                        size: 14,
+                        color: palette.goldText,
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          provider,
+                          style: boutiqueText(
+                            size: 12,
+                            color: palette.inkMuted,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
             ),
+          ],
+        ),
+        if (sessionExpired) ...[
+          const SizedBox(height: BoutiqueSpace.md),
+          ENotice(
+            message: 'Tu sesión terminó. Inicia sesión de nuevo para '
+                'actualizar tus pedidos y tu saldo.',
+            actionLabel: 'Iniciar sesión',
+            onAction: onRelogin,
+            icon: Icons.lock_outline_rounded,
           ),
         ],
-        if (onOpenPartner != null) ...[
-          const SizedBox(height: 18),
-          _PartnerAccountLink(onTap: onOpenPartner!),
-        ],
-        const SizedBox(height: 28),
-        FilledButton(
-          onPressed: controller.isLoading ? null : () => _logout(context),
-          child: controller.isLoading
-              ? const SizedBox(
-                  width: 18,
-                  height: 18,
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                )
-              : const Text('CERRAR SESIÓN'),
-        ),
-        const SizedBox(height: 36),
-        const Divider(height: 0.5),
-        const SizedBox(height: 20),
-        Text('Mis pedidos'.toUpperCase(), style: eyebrow()),
-        const SizedBox(height: 16),
-        _OrdersList(controller: controller),
       ],
     );
   }
 }
 
-class _OrdersList extends StatelessWidget {
-  const _OrdersList({required this.controller});
+/// Vista previa del historial dentro de Cuenta. Conserva los mensajes y la
+/// acción de actualización existentes; el historial completo vive en
+/// [OrdersScreen].
+class _OrdersPreview extends StatelessWidget {
+  const _OrdersPreview({required this.controller});
 
   final AccountController controller;
 
   @override
   Widget build(BuildContext context) {
-    if (controller.orders.isEmpty) {
-      return Text(
-        controller.ordersLoading ? 'Cargando…' : 'Aún no tienes pedidos.',
-        style: sans(size: 13, color: kInkMuted),
+    final muted = sans(size: 13, color: context.monettaColors.contentMuted);
+    if (controller.ordersLoading && controller.orders.isEmpty) {
+      return ECard(
+        children: [Text('Cargando…', style: muted)],
       );
     }
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.stretch,
+
+    return ECard(
       children: [
-        for (final order in controller.orders) _OrderRow(order: order),
+        if (_statusMessage(controller) case final message?)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Text(message, style: muted),
+          ),
+        for (final order in controller.orders.take(3)) _OrderRow(order: order),
+        Row(
+          children: [
+            Expanded(
+              child: TextButton(
+                key: const ValueKey('refresh-orders'),
+                onPressed: controller.ordersLoading
+                    ? null
+                    : () => controller.loadOrders(),
+                child: Text(
+                  controller.ordersLoading
+                      ? 'Actualizando…'
+                      : 'Actualizar pedidos',
+                ),
+              ),
+            ),
+            TextButton(
+              key: const ValueKey('account-view-all-orders'),
+              onPressed: () => openOrders(
+                context,
+                controller: controller,
+              ),
+              child: const Text('Ver todos'),
+            ),
+          ],
+        ),
       ],
     );
+  }
+
+  String? _statusMessage(AccountController controller) {
+    switch (controller.ordersStatus) {
+      case OrderHistoryStatus.empty:
+        return controller.orders.isEmpty ? 'Aún no tienes pedidos.' : null;
+      case OrderHistoryStatus.populated:
+        return null;
+      case OrderHistoryStatus.unavailable:
+        return 'El historial de pedidos no está disponible en esta versión.';
+      case OrderHistoryStatus.failed:
+        return 'No pudimos cargar tus pedidos. Intenta actualizar.';
+      case OrderHistoryStatus.staleCache:
+        return 'Mostrando pedidos guardados. No pudimos actualizar ahora.';
+    }
   }
 }
 
@@ -244,52 +561,38 @@ class _OrderRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isApartado = order.source == 'whatsapp_apartado';
+    final status = orderDisplayStatus(order);
+    // Wrap, no Row con total fijo: a texto ampliado el importe baja a su
+    // propia línea en vez de comprimir la identidad del pedido.
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Row(
+      child: Wrap(
+        alignment: WrapAlignment.spaceBetween,
+        crossAxisAlignment: WrapCrossAlignment.center,
+        spacing: BoutiqueSpace.sm,
+        runSpacing: 2,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  isApartado ? 'Apartado · WhatsApp' : 'Pedido',
-                  style: sans(size: 13, weight: FontWeight.w600),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                orderLabelOf(order),
+                style: sans(size: 13, weight: FontWeight.w600),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                '${orderDateLabel(order.placedAt)} · ${status.label}',
+                style: sans(
+                  size: 11,
+                  color: context.monettaColors.contentMuted,
                 ),
-                const SizedBox(height: 2),
-                Text(
-                  _placedAtLabel(order.placedAt),
-                  style: sans(size: 11, color: kInkMuted),
-                ),
-              ],
-            ),
+              ),
+            ],
           ),
           Text(kMoney.format(order.totalAmount), style: sans(size: 13)),
         ],
       ),
     );
-  }
-
-  String _placedAtLabel(DateTime placedAt) {
-    // Kept a plain manual format rather than adding another `intl`
-    // formatter for one field — this is the only place in the app that
-    // renders a bare date without a time component.
-    const months = [
-      'ene',
-      'feb',
-      'mar',
-      'abr',
-      'may',
-      'jun',
-      'jul',
-      'ago',
-      'sep',
-      'oct',
-      'nov',
-      'dic',
-    ];
-    return '${placedAt.day} ${months[placedAt.month - 1]} ${placedAt.year}';
   }
 }
 
@@ -306,12 +609,17 @@ class _PartnerAccountLink extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.all(16),
         decoration: BoxDecoration(
-          color: kMist,
-          border: Border.all(color: kLine),
+          color: context.monettaColors.surfaceMuted,
+          borderRadius: BoutiqueRadius.card,
+          border: Border.all(color: context.monettaColors.divider),
         ),
         child: Row(
           children: [
-            const Icon(Icons.storefront_outlined, size: 21, color: kGold),
+            Icon(
+              Icons.storefront_outlined,
+              size: 21,
+              color: context.monettaColors.accent,
+            ),
             const SizedBox(width: 13),
             Expanded(
               child: Column(
@@ -321,7 +629,10 @@ class _PartnerAccountLink extends StatelessWidget {
                   const SizedBox(height: 3),
                   Text(
                     'Catálogos y cotizaciones para tu negocio',
-                    style: sans(size: 11.5, color: kInkMuted),
+                    style: sans(
+                      size: 11.5,
+                      color: context.monettaColors.contentMuted,
+                    ),
                   ),
                 ],
               ),
@@ -337,8 +648,8 @@ class _PartnerAccountLink extends StatelessWidget {
 String _shopifyErrorMessage(CustomerAuthErrorKind kind) {
   switch (kind) {
     case CustomerAuthErrorKind.cancelled:
-      // Never rendered — `AccountError.isSilent` filters this out before the
-      // UI asks for a sentence. Present so this switch stays exhaustive.
+      // Nunca se muestra — `AccountError.isSilent` lo filtra antes de que la
+      // UI pida una frase. Presente para que el switch siga exhaustivo.
       return '';
     case CustomerAuthErrorKind.offline:
       return 'Sin conexión. Revisa tu internet e inténtalo de nuevo.';

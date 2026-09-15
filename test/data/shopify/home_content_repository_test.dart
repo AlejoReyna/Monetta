@@ -12,6 +12,7 @@ void main() {
       HomeContent.fallback.sectionOrder,
       const [
         HomeSectionId.collections,
+        HomeSectionId.todaysPicks,
         HomeSectionId.newProducts,
         HomeSectionId.bagTypes,
         HomeSectionId.brands,
@@ -19,6 +20,32 @@ void main() {
         HomeSectionId.social,
         HomeSectionId.testimonials,
       ],
+    );
+  });
+
+  test('offline brands mirror every brand shown on monetta.mx', () {
+    expect(
+      HomeContent.fallback.brands.map((brand) => brand.handle),
+      const [
+        'coach',
+        'michael-kors',
+        'anne-klein',
+        'guess-1',
+        'steve-madden',
+        'tommy-hilfiger',
+        'olalplex',
+        'christian-dior',
+        'the-ordinary',
+        'summer-fridays',
+        'laneige',
+        'rhode',
+      ],
+    );
+    expect(
+      HomeContent.fallback.brands.every(
+        (brand) => brand.fallbackAsset.startsWith('assets/images/brands/'),
+      ),
+      isTrue,
     );
   });
 
@@ -54,6 +81,15 @@ void main() {
                 'aboutImageUrl': {
                   'value': 'https://cdn.shopify.com/about.jpg',
                 },
+              },
+              'storefrontConfig': {
+                'fields': [
+                  {'key': 'announcement', 'value': 'Envío gratis'},
+                  {'key': 'show_hero', 'value': 'false'},
+                  {'key': 'show_newest', 'value': 'true'},
+                  {'key': 'show_todays_picks', 'value': 'true'},
+                  {'key': 'show_external_picks', 'value': 'false'},
+                ],
               },
               'collections': {
                 'edges': [
@@ -93,6 +129,21 @@ void main() {
                       },
                     },
                   },
+                  {
+                    'node': {
+                      'id': 'gid://Collection/3',
+                      'handle': 'coach',
+                      'title': 'COACH',
+                      'description': '',
+                      'image': {
+                        'url': 'https://cdn.shopify.com/coach-logo.png',
+                      },
+                      'products': {
+                        'pageInfo': {'hasNextPage': false},
+                        'edges': <Object>[],
+                      },
+                    },
+                  },
                 ],
               },
             },
@@ -123,6 +174,14 @@ void main() {
       'https://instagram.com/monetta-synced',
     );
     expect(content.aboutImageUrl, 'https://cdn.shopify.com/about.jpg');
+    expect(content.storefront.announcement, 'Envío gratis');
+    expect(content.storefront.showHero, isFalse);
+    expect(content.storefront.showExternalPicks, isFalse);
+    expect(content.brands, hasLength(12));
+    expect(
+      content.brands.first.imageUrl,
+      'https://cdn.shopify.com/coach-logo.png',
+    );
     expect(requestBody, contains('home_sections'));
     expect(requestBody, contains('collections(first: 50'));
   });

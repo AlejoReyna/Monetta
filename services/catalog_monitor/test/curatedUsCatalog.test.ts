@@ -27,6 +27,11 @@ function liveProduct(overrides: Partial<CatalogProductRecord> = {}): CatalogProd
     lastChangedAt: observedAt,
     isActive: true,
     consecutiveMissingSnapshots: 0,
+    selectionState: 'selected',
+    selectionVersion: null,
+    watchTier: 'standard',
+    placements: [],
+    matchedRuleId: null,
     ...overrides,
   };
 }

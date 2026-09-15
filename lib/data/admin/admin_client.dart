@@ -6,13 +6,26 @@
 library;
 
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
 import '../../domain/admin_control.dart';
 
 abstract interface class AdminClient {
-  Future<AdminSnapshot> fetchSnapshot();
+  Future<AdminSnapshot> fetchSnapshot({
+    String? cursor,
+    String? query,
+    int? limit,
+  });
+
+  Future<AdminSnapshot> fetchProductsPage({
+    String? cursor,
+    String? query,
+    int? limit,
+  });
+
+  Future<AdminCapabilities> fetchMe();
 
   Future<void> updateProduct(AdminProductRecord product);
 
@@ -23,17 +36,77 @@ abstract interface class AdminClient {
   Future<void> syncAll();
 }
 
+abstract interface class FeaturedAdminClient {
+  Future<AdminFeaturedCatalog> fetchFeaturedCatalog();
+
+  Future<AdminFeaturedCatalog> setProductFeatured({
+    required String productId,
+    required bool featured,
+    required DateTime expectedCollectionUpdatedAt,
+  });
+
+  Future<AdminFeaturedMutationResult> replaceFeaturedCatalog({
+    required List<String> productIds,
+    required DateTime expectedCollectionUpdatedAt,
+  });
+
+  /// Polls until the reorder job reaches a terminal status, then reloads membership.
+  Future<AdminFeaturedCatalog> waitForFeaturedJob(String jobId);
+}
+
+abstract interface class StorefrontAdminClient {
+  Future<AdminStorefrontSettings> updateStorefrontCanonical(
+    AdminStorefrontSettings settings,
+  );
+}
+
+abstract interface class ProductAdminClient {
+  Future<AdminProductRecord> updateProductCanonical({
+    required AdminProductRecord before,
+    required AdminProductRecord next,
+  });
+}
+
+abstract interface class ExternalSourceAdminClient {
+  Future<AdminSourcePolicy> updateSourceCanonical(AdminSourcePolicy source);
+}
+
+class AdminAuditPage {
+  const AdminAuditPage({required this.events, this.nextCursor});
+
+  final List<AdminAuditEvent> events;
+  final String? nextCursor;
+}
+
+abstract interface class AuditAdminClient {
+  Future<AdminAuditPage> fetchAudit({String? cursor});
+}
+
 class AdminClientException implements Exception {
-  const AdminClientException(this.message, {this.statusCode});
+  const AdminClientException(
+    this.message, {
+    this.statusCode,
+    this.code,
+    this.requestId,
+  });
 
   final String message;
   final int? statusCode;
+  final String? code;
+  final String? requestId;
 
   @override
   String toString() => 'AdminClientException($statusCode, $message)';
 }
 
-class HttpAdminClient implements AdminClient {
+class HttpAdminClient
+    implements
+        AdminClient,
+        FeaturedAdminClient,
+        StorefrontAdminClient,
+        ProductAdminClient,
+        ExternalSourceAdminClient,
+        AuditAdminClient {
   HttpAdminClient({
     required this.baseUrl,
     required this.accessTokenProvider,
@@ -45,62 +118,373 @@ class HttpAdminClient implements AdminClient {
   final Future<String?> Function() accessTokenProvider;
   final http.Client _client;
   final bool _ownsClient;
+  final Random _random = Random.secure();
 
   @override
-  Future<AdminSnapshot> fetchSnapshot() async {
-    final response = await _send('GET', '/admin/control-plane');
+  Future<AdminCapabilities> fetchMe() async {
+    final response = await _send('GET', '/admin/me');
     final root = _jsonObject(response.bodyBytes);
+    final caps = root['capabilities'];
+    if (caps is! Map<String, dynamic>) {
+      return const AdminCapabilities.none();
+    }
+    return AdminCapabilities.fromJson(caps);
+  }
+
+  @override
+  Future<AdminSnapshot> fetchSnapshot({
+    String? cursor,
+    String? query,
+    int? limit,
+  }) async {
+    final params = <String, String>{};
+    if (cursor != null && cursor.isNotEmpty) params['cursor'] = cursor;
+    if (query != null && query.isNotEmpty) params['q'] = query;
+    if (limit != null) params['limit'] = '$limit';
+    final qs = params.isEmpty
+        ? ''
+        : '?${params.entries.map((e) => '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}').join('&')}';
+    final response = await _send('GET', '/admin/control-plane$qs');
+    return _snapshotFromRoot(_jsonObject(response.bodyBytes));
+  }
+
+  @override
+  Future<AdminSnapshot> fetchProductsPage({
+    String? cursor,
+    String? query,
+    int? limit,
+  }) async {
+    final params = <String, String>{};
+    if (cursor != null && cursor.isNotEmpty) params['cursor'] = cursor;
+    if (query != null && query.isNotEmpty) params['q'] = query;
+    if (limit != null) params['limit'] = '$limit';
+    final qs = params.isEmpty
+        ? ''
+        : '?${params.entries.map((e) => '${Uri.encodeQueryComponent(e.key)}=${Uri.encodeQueryComponent(e.value)}').join('&')}';
+    final response = await _send('GET', '/admin/products$qs');
+    return _snapshotFromRoot(
+      _jsonObject(response.bodyBytes),
+      productsOnly: true,
+    );
+  }
+
+  AdminSnapshot _snapshotFromRoot(
+    Map<String, dynamic> root, {
+    bool productsOnly = false,
+  }) {
     final productRows = root['products'] as List<dynamic>? ?? const [];
     final sourceRows = root['sources'] as List<dynamic>? ?? const [];
     final storefront = root['storefront'];
+    final health = root['health'];
+    final healthMap = health is Map<String, dynamic> ? health : null;
+    final shopifyHealth = healthMap?['shopify'];
+    final sourcesHealth = healthMap?['sources'];
+    final meta = root['productsMeta'];
+    final pageInfo = root['pageInfo'];
+
+    AdminProductsPageMeta? productsMeta;
+    if (meta is Map<String, dynamic>) {
+      productsMeta = AdminProductsPageMeta(
+        loadedCount:
+            (meta['loadedCount'] as num?)?.toInt() ?? productRows.length,
+        hasNextPage: meta['hasNextPage'] == true ||
+            (pageInfo is Map<String, dynamic> &&
+                pageInfo['hasNextPage'] == true),
+        endCursor: meta['endCursor'] as String? ??
+            (pageInfo is Map<String, dynamic>
+                ? pageInfo['endCursor'] as String?
+                : null),
+        totalCount: (meta['totalCount'] as num?)?.toInt(),
+        query: meta['query'] as String?,
+        limit: (meta['limit'] as num?)?.toInt() ?? 50,
+      );
+    } else if (pageInfo is Map<String, dynamic>) {
+      productsMeta = AdminProductsPageMeta(
+        loadedCount: productRows.length,
+        hasNextPage: pageInfo['hasNextPage'] == true,
+        endCursor: pageInfo['endCursor'] as String?,
+      );
+    }
 
     return AdminSnapshot(
       products: productRows
           .whereType<Map<String, dynamic>>()
           .map(_productFromJson)
           .toList(),
-      storefront: storefront is Map<String, dynamic>
-          ? _storefrontFromJson(storefront)
-          : AdminStorefrontSettings.defaults,
-      sources: sourceRows
-          .whereType<Map<String, dynamic>>()
-          .map(_sourceFromJson)
-          .toList(),
+      storefront: productsOnly
+          ? AdminStorefrontSettings.defaults
+          : storefront is Map<String, dynamic>
+              ? _storefrontFromJson(storefront)
+              : AdminStorefrontSettings.defaults,
+      sources: productsOnly
+          ? const []
+          : sourceRows
+              .whereType<Map<String, dynamic>>()
+              .map(_sourceFromJson)
+              .toList(),
+      featured: !productsOnly && root['featuredCatalog'] is Map<String, dynamic>
+          ? _featuredFromJson(
+              root['featuredCatalog'] as Map<String, dynamic>,
+              root['health'],
+            )
+          : null,
+      shopifyHealthStatus: shopifyHealth is Map<String, dynamic>
+          ? shopifyHealth['status'] as String?
+          : null,
+      sourcesHealthStatus: sourcesHealth is Map<String, dynamic>
+          ? sourcesHealth['status'] as String?
+          : null,
+      productsMeta: productsMeta,
     );
+  }
+
+  @override
+  Future<AdminAuditPage> fetchAudit({String? cursor}) async {
+    final query =
+        cursor == null ? '' : '?cursor=${Uri.encodeQueryComponent(cursor)}';
+    final response = await _send('GET', '/admin/audit$query');
+    final root = _jsonObject(response.bodyBytes);
+    final rows = root['events'];
+    if (rows is! List) {
+      throw const AdminClientException('invalid audit response');
+    }
+    return AdminAuditPage(
+      events: rows
+          .whereType<Map<String, dynamic>>()
+          .map(_auditFromJson)
+          .toList(growable: false),
+      nextCursor: root['nextCursor'] as String?,
+    );
+  }
+
+  @override
+  Future<AdminFeaturedCatalog> fetchFeaturedCatalog() async {
+    final response = await _send('GET', '/admin/featured-catalog');
+    final root = _jsonObject(response.bodyBytes);
+    final featured = root['featuredCatalog'];
+    if (featured is! Map<String, dynamic>) {
+      throw const AdminClientException('invalid featured catalog response');
+    }
+    return _featuredFromJson(featured, root['health']);
+  }
+
+  @override
+  Future<AdminFeaturedCatalog> setProductFeatured({
+    required String productId,
+    required bool featured,
+    required DateTime expectedCollectionUpdatedAt,
+  }) async {
+    final response = await _send(
+      'PUT',
+      '/admin/featured-catalog/products/${Uri.encodeComponent(productId)}',
+      idempotencyKey: _newIdempotencyKey(),
+      body: {
+        'featured': featured,
+        'expectedCollectionUpdatedAt':
+            expectedCollectionUpdatedAt.toUtc().toIso8601String(),
+      },
+    );
+    final root = _jsonObject(response.bodyBytes);
+    final value = root['featuredCatalog'];
+    if (value is! Map<String, dynamic>) {
+      throw const AdminClientException('featured catalog ordering is pending');
+    }
+    return _featuredFromJson(value, root['health']);
+  }
+
+  @override
+  Future<AdminFeaturedMutationResult> replaceFeaturedCatalog({
+    required List<String> productIds,
+    required DateTime expectedCollectionUpdatedAt,
+  }) async {
+    final response = await _send(
+      'PUT',
+      '/admin/featured-catalog',
+      idempotencyKey: _newIdempotencyKey(),
+      body: {
+        'productIds': productIds,
+        'expectedCollectionUpdatedAt':
+            expectedCollectionUpdatedAt.toUtc().toIso8601String(),
+      },
+    );
+    final root = _jsonObject(response.bodyBytes);
+    final value = root['featuredCatalog'];
+    var catalog = value is Map<String, dynamic>
+        ? _featuredFromJson(value, root['health'])
+        : null;
+    final jobId = root['jobId'] as String?;
+    if (jobId != null && jobId.isNotEmpty) {
+      catalog = await waitForFeaturedJob(jobId);
+    }
+    return AdminFeaturedMutationResult(catalog: catalog, jobId: jobId);
+  }
+
+  @override
+  Future<AdminFeaturedCatalog> waitForFeaturedJob(String jobId) async {
+    for (var attempt = 0; attempt < 40; attempt += 1) {
+      final statusResponse = await _send(
+        'GET',
+        '/admin/featured-catalog/jobs/${Uri.encodeComponent(jobId)}',
+      );
+      final root = _jsonObject(statusResponse.bodyBytes);
+      final job = root['job'];
+      if (job is! Map) {
+        throw const AdminClientException('invalid featured job response');
+      }
+      final status = '${job['status'] ?? ''}';
+      if (status == 'completed' || status == 'degraded' || status == 'failed') {
+        // Reload canonical membership/order after the job reaches a terminal state.
+        return fetchFeaturedCatalog();
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+    }
+    throw const AdminClientException('featured reorder did not finish in time');
   }
 
   @override
   Future<void> updateProduct(AdminProductRecord product) async {
-    await _send(
+    await updateProductCanonical(before: product, next: product);
+  }
+
+  @override
+  Future<AdminProductRecord> updateProductCanonical({
+    required AdminProductRecord before,
+    required AdminProductRecord next,
+  }) async {
+    var canonical = before;
+    final expectedUpdatedAt = canonical.updatedAt;
+    if (expectedUpdatedAt == null) {
+      throw const AdminClientException('producto sin versión de Shopify');
+    }
+
+    if (before.title != next.title) {
+      canonical = await _updateProductTitle(
+        productId: next.id,
+        title: next.title,
+        expectedUpdatedAt: canonical.updatedAt ?? expectedUpdatedAt,
+      );
+    }
+
+    if (before.variants.length == 1 && next.variants.length == 1) {
+      final oldVariant = before.variants.first;
+      final nextVariant = next.variants.first;
+      if (oldVariant.id == nextVariant.id &&
+          oldVariant.price != nextVariant.price) {
+        canonical = await _updateVariantPrice(
+          productId: next.id,
+          variantId: nextVariant.id,
+          price: nextVariant.price,
+          expectedProductUpdatedAt: canonical.updatedAt ?? expectedUpdatedAt,
+        );
+      }
+    }
+
+    if (before.publishedToMonetta != next.publishedToMonetta) {
+      canonical = await _updatePublication(
+        productId: next.id,
+        published: next.publishedToMonetta,
+        expectedUpdatedAt: canonical.updatedAt ?? expectedUpdatedAt,
+      );
+    }
+    return canonical;
+  }
+
+  Future<AdminProductRecord> _updateProductTitle({
+    required String productId,
+    required String title,
+    required DateTime expectedUpdatedAt,
+  }) async {
+    final response = await _send(
       'PATCH',
-      '/admin/products/${Uri.encodeComponent(product.id)}',
+      '/admin/products/${Uri.encodeComponent(productId)}',
+      idempotencyKey: _newIdempotencyKey(),
       body: {
-        'title': product.title,
-        'price': product.price,
-        'visible': product.visible,
+        'title': title,
+        'expectedUpdatedAt': expectedUpdatedAt.toUtc().toIso8601String(),
       },
     );
+    return _productFromResponse(response);
+  }
+
+  Future<AdminProductRecord> _updateVariantPrice({
+    required String productId,
+    required String variantId,
+    required double price,
+    required DateTime expectedProductUpdatedAt,
+  }) async {
+    final response = await _send(
+      'PATCH',
+      '/admin/products/${Uri.encodeComponent(productId)}/variants/${Uri.encodeComponent(variantId)}',
+      idempotencyKey: _newIdempotencyKey(),
+      body: {
+        'price': price.toStringAsFixed(2),
+        'expectedProductUpdatedAt':
+            expectedProductUpdatedAt.toUtc().toIso8601String(),
+      },
+    );
+    return _productFromResponse(response);
+  }
+
+  Future<AdminProductRecord> _updatePublication({
+    required String productId,
+    required bool published,
+    required DateTime expectedUpdatedAt,
+  }) async {
+    final response = await _send(
+      'PUT',
+      '/admin/products/${Uri.encodeComponent(productId)}/publication',
+      idempotencyKey: _newIdempotencyKey(),
+      body: {
+        'published': published,
+        'expectedUpdatedAt': expectedUpdatedAt.toUtc().toIso8601String(),
+      },
+    );
+    return _productFromResponse(response);
   }
 
   @override
   Future<void> updateStorefront(AdminStorefrontSettings settings) async {
-    await _send(
+    await updateStorefrontCanonical(settings);
+  }
+
+  @override
+  Future<AdminStorefrontSettings> updateStorefrontCanonical(
+    AdminStorefrontSettings settings,
+  ) async {
+    final response = await _send(
       'PUT',
-      '/admin/shop-config',
+      '/admin/storefront-config',
+      idempotencyKey: _newIdempotencyKey(),
       body: {
         'announcement': settings.announcement,
         'showHero': settings.showHero,
         'showNewest': settings.showNewest,
+        'showTodaysPicks': settings.showTodaysPicks,
         'showExternalPicks': settings.showExternalPicks,
+        'expectedVersion': settings.version,
       },
     );
+    final root = _jsonObject(response.bodyBytes);
+    final value = root['storefront'];
+    if (value is! Map<String, dynamic>) {
+      throw const AdminClientException('invalid storefront response');
+    }
+    return _storefrontFromJson(value);
   }
 
   @override
   Future<void> updateSource(AdminSourcePolicy source) async {
-    await _send(
+    await updateSourceCanonical(source);
+  }
+
+  @override
+  Future<AdminSourcePolicy> updateSourceCanonical(
+    AdminSourcePolicy source,
+  ) async {
+    final response = await _send(
       'PUT',
       '/admin/external-policy/${Uri.encodeComponent(source.id)}',
+      idempotencyKey: _newIdempotencyKey(),
       body: {
         'enabled': source.enabled,
         'itemLimit': source.itemLimit,
@@ -109,15 +493,79 @@ class HttpAdminClient implements AdminClient {
         'highValueThreshold': source.highValueThreshold,
       },
     );
+    final root = _jsonObject(response.bodyBytes);
+    final value = root['source'];
+    if (value is! Map<String, dynamic>) {
+      throw const AdminClientException('invalid external source response');
+    }
+    return _sourceFromJson(value);
   }
 
   @override
-  Future<void> syncAll() async => _send('POST', '/admin/sync');
+  Future<void> syncAll() async {
+    AdminClientException? firstFailure;
+    // external-status retired with catalog_monitor (WP-02 / F22).
+    for (final channel in const [
+      'shopify-products',
+      'storefront-content',
+    ]) {
+      try {
+        await _runSyncChannel(channel);
+      } on AdminClientException catch (error) {
+        firstFailure ??= error;
+      }
+    }
+    if (firstFailure != null) throw firstFailure;
+  }
+
+  Future<void> _runSyncChannel(String channel) async {
+    final response = await _send(
+      'POST',
+      '/admin/sync',
+      idempotencyKey: _newIdempotencyKey(),
+      body: {'channel': channel},
+    );
+    var root = _jsonObject(response.bodyBytes);
+    final rawJob = root['job'];
+    if (rawJob is! Map) {
+      throw const AdminClientException('invalid sync response');
+    }
+    var job = Map<String, Object?>.from(rawJob);
+    for (var attempt = 0; attempt < 20; attempt += 1) {
+      final status = '${job['status'] ?? ''}';
+      if (status == 'completed') return;
+      if (status == 'failed') {
+        throw AdminClientException(
+          'sync failed',
+          code: job['errorCode'] is String ? job['errorCode'] as String : null,
+          requestId:
+              root['requestId'] is String ? root['requestId'] as String : null,
+        );
+      }
+      await Future<void>.delayed(const Duration(milliseconds: 250));
+      final jobId = job['id'];
+      if (jobId is! String || jobId.isEmpty) {
+        throw const AdminClientException('invalid sync job response');
+      }
+      final statusResponse = await _send(
+        'GET',
+        '/admin/sync/jobs/${Uri.encodeComponent(jobId)}',
+      );
+      root = _jsonObject(statusResponse.bodyBytes);
+      final nextRawJob = root['job'];
+      if (nextRawJob is! Map) {
+        throw const AdminClientException('invalid sync job response');
+      }
+      job = Map<String, Object?>.from(nextRawJob);
+    }
+    throw const AdminClientException('sync did not finish in time');
+  }
 
   Future<http.Response> _send(
     String method,
     String path, {
     Map<String, Object?>? body,
+    String? idempotencyKey,
   }) async {
     final token = await accessTokenProvider();
     if (token == null || token.isEmpty) {
@@ -127,6 +575,7 @@ class HttpAdminClient implements AdminClient {
     final headers = <String, String>{
       'Accept': 'application/json',
       'Authorization': 'Bearer $token',
+      if (idempotencyKey != null) 'Idempotency-Key': idempotencyKey,
       if (body != null) 'Content-Type': 'application/json',
     };
     final encoded = body == null ? null : jsonEncode(body);
@@ -138,9 +587,23 @@ class HttpAdminClient implements AdminClient {
       _ => throw AdminClientException('unsupported method $method'),
     };
     if (response.statusCode < 200 || response.statusCode >= 300) {
+      String? code;
+      String? requestId;
+      try {
+        final decoded = jsonDecode(utf8.decode(response.bodyBytes));
+        if (decoded is Map && decoded['error'] is Map) {
+          final error = decoded['error'] as Map;
+          code = error['code'] as String?;
+          requestId = error['requestId'] as String?;
+        }
+      } on Object {
+        // Preserve the bounded generic error for malformed upstream bodies.
+      }
       throw AdminClientException(
         'control-plane request failed',
         statusCode: response.statusCode,
+        code: code,
+        requestId: requestId,
       );
     }
     return response;
@@ -155,6 +618,10 @@ class HttpAdminClient implements AdminClient {
   }
 
   static AdminProductRecord _productFromJson(Map<String, dynamic> json) {
+    final variants = (json['variants'] as List<dynamic>? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(_variantFromJson)
+        .toList(growable: false);
     return AdminProductRecord(
       id: '${json['id'] ?? ''}',
       title: '${json['title'] ?? ''}',
@@ -163,7 +630,76 @@ class HttpAdminClient implements AdminClient {
       inStock: json['inStock'] as bool? ?? false,
       visible: json['visible'] as bool? ?? true,
       variantCount: (json['variantCount'] as num?)?.toInt() ?? 0,
+      descriptionHtml: '${json['descriptionHtml'] ?? ''}',
+      status: '${json['status'] ?? 'ACTIVE'}',
+      publishedToMonetta: json['publishedToMonetta'] as bool? ??
+          json['visible'] as bool? ??
+          true,
+      updatedAt: DateTime.tryParse('${json['updatedAt'] ?? ''}'),
+      variants: variants,
     );
+  }
+
+  static AdminProductRecord _productFromResponse(http.Response response) {
+    final root = _jsonObject(response.bodyBytes);
+    final product = root['product'];
+    if (product is! Map<String, dynamic>) {
+      throw const AdminClientException('invalid product response');
+    }
+    return _productFromJson(product);
+  }
+
+  static AdminProductVariant _variantFromJson(Map<String, dynamic> json) {
+    final rawPrice = json['price'];
+    final rawCompare = json['compareAtPrice'];
+    return AdminProductVariant(
+      id: '${json['id'] ?? ''}',
+      title: '${json['title'] ?? ''}',
+      price: rawPrice is num
+          ? rawPrice.toDouble()
+          : double.tryParse('$rawPrice') ?? 0,
+      compareAtPrice: rawCompare is num
+          ? rawCompare.toDouble()
+          : double.tryParse('$rawCompare'),
+      availableForSale: json['availableForSale'] as bool? ?? false,
+      currencyCode: '${json['currencyCode'] ?? 'MXN'}',
+    );
+  }
+
+  static AdminFeaturedCatalog _featuredFromJson(
+    Map<String, dynamic> json,
+    Object? healthJson,
+  ) {
+    final collection = json['collection'];
+    final eligible = (json['eligibleProducts'] as List<dynamic>? ?? const [])
+        .whereType<Map<String, dynamic>>()
+        .map(_productFromJson)
+        .toList(growable: false);
+    final health = healthJson is Map ? healthJson : const <Object?, Object?>{};
+    return AdminFeaturedCatalog(
+      eligibleProducts: eligible,
+      selectedProductIds:
+          (json['selectedProductIds'] as List<dynamic>? ?? const [])
+              .whereType<String>()
+              .toList(growable: false),
+      collectionId: collection is Map ? collection['id'] as String? : null,
+      collectionHandle: collection is Map
+          ? '${collection['handle'] ?? 'monetta-todays-picks'}'
+          : 'monetta-todays-picks',
+      collectionTitle: collection is Map
+          ? '${collection['title'] ?? "Today's Picks"}'
+          : "Today's Picks",
+      collectionUpdatedAt: collection is Map
+          ? DateTime.tryParse('${collection['updatedAt'] ?? ''}')
+          : null,
+      healthStatus: health['status'] as String? ?? 'ready',
+      healthErrorCode: health['errorCode'] as String?,
+    );
+  }
+
+  String _newIdempotencyKey() {
+    final entropy = _random.nextInt(1 << 32).toRadixString(16).padLeft(8, '0');
+    return 'flutter-${DateTime.now().toUtc().microsecondsSinceEpoch}-$entropy';
   }
 
   static AdminStorefrontSettings _storefrontFromJson(
@@ -173,11 +709,15 @@ class HttpAdminClient implements AdminClient {
       announcement: '${json['announcement'] ?? ''}',
       showHero: json['showHero'] as bool? ?? true,
       showNewest: json['showNewest'] as bool? ?? true,
+      showTodaysPicks: json['showTodaysPicks'] as bool? ?? true,
       showExternalPicks: json['showExternalPicks'] as bool? ?? true,
+      version: (json['version'] as num?)?.toInt() ?? 0,
     );
   }
 
   static AdminSourcePolicy _sourceFromJson(Map<String, dynamic> json) {
+    final health = json['health'];
+    final healthMap = health is Map<String, dynamic> ? health : null;
     return AdminSourcePolicy(
       id: '${json['id'] ?? ''}',
       merchant: '${json['merchant'] ?? ''}',
@@ -193,6 +733,29 @@ class HttpAdminClient implements AdminClient {
       lastSuccessfulRunAt: DateTime.tryParse(
         '${json['lastSuccessfulRunAt'] ?? ''}',
       ),
+      healthStatus: '${healthMap?['status'] ?? 'unavailable'}',
+      healthErrorCode: healthMap?['errorCode'] as String?,
+    );
+  }
+
+  static AdminAuditEvent _auditFromJson(Map<String, dynamic> json) {
+    final channels = <AdminChannel>{};
+    switch ('${json['targetType'] ?? ''}') {
+      case 'shopify_product':
+      case 'shopify_collection':
+      case 'shopify_metaobject':
+        channels.add(AdminChannel.shopify);
+      case 'external_source':
+        channels.add(AdminChannel.externalCatalog);
+      default:
+        channels.add(AdminChannel.app);
+    }
+    return AdminAuditEvent(
+      description: '${json['action'] ?? 'Cambio administrativo'}',
+      channels: channels,
+      createdAt:
+          DateTime.tryParse('${json['createdAt'] ?? ''}') ?? DateTime.now(),
+      previewOnly: false,
     );
   }
 

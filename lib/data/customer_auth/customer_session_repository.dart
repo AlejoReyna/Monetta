@@ -240,24 +240,38 @@ class CustomerSessionRepository {
     return await _secureStore.read(session.secureStorageKeyRef) != null;
   }
 
-  /// Clears the local session. The device stays known (install history,
-  /// push token via `DeviceStore`) but is no longer attributed to the
-  /// account that just signed out; the account row itself is untouched, so
-  /// signing back in later resumes the same [Account.localAccountId].
-  /// Local only: this does not end the shopper's session inside Shopify's
-  /// hosted pages. Shopify's end-session endpoint needs an `id_token_hint`
-  /// and opens a browser, and this app keeps no id token past login — see
-  /// `README.md` § 8 for that gap. Signing out here means the next login
-  /// re-opens the hosted page and may not ask for credentials again.
+  /// Clears the local session and, when an id token is still available,
+  /// opens Shopify's hosted end-session page so cookies for the previous
+  /// shopper are not silently reused on the next login.
+  ///
+  /// The device stays known (install history, push token via `DeviceStore`)
+  /// but is no longer attributed to the account that just signed out; the
+  /// account row itself is untouched so signing back in later resumes the
+  /// same [Account.localAccountId]. Hosted logout cancellation or failure
+  /// never blocks local cleanup.
   Future<void> logout(String localAccountId) async {
     final session = await _sessionStore.latestFor(localAccountId);
+    final idTokenKey = _idTokenKey(localAccountId);
+    final idTokenHint = await _secureStore.read(idTokenKey);
+    if (idTokenHint != null && idTokenHint.isNotEmpty) {
+      try {
+        await _authGateway.endSession(idTokenHint: idTokenHint);
+      } on Object {
+        // Local cleanup below remains authoritative even when the hosted
+        // browser sheet is cancelled or Shopify end-session is unavailable.
+      }
+    }
     if (session != null) {
       await _secureStore.delete(session.secureStorageKeyRef);
     }
+    await _secureStore.delete(idTokenKey);
     await _sessionStore.deleteFor(localAccountId);
     await _deviceStore.detachAccount(_deviceId);
     _forgetAccessToken();
   }
+
+  static String _idTokenKey(String localAccountId) =>
+      'customer_auth/id_token/$localAccountId';
 
   void _forgetAccessToken() {
     _accessToken = null;
@@ -272,6 +286,14 @@ class CustomerSessionRepository {
     _accessToken = result.accessToken;
     _accessTokenExpiresAt = result.accessTokenExpiresAt;
     _accessTokenAccountId = localAccountId;
+
+    final idToken = result.idToken?.trim();
+    final idTokenKey = _idTokenKey(localAccountId);
+    if (idToken != null && idToken.isNotEmpty) {
+      // Kept only for RP-initiated logout (`id_token_hint`). Never used as
+      // an API credential and never decoded after the login identity pass.
+      await _secureStore.write(idTokenKey, idToken);
+    }
 
     final refreshToken = result.refreshToken;
     if (refreshToken == null) {

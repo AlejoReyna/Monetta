@@ -63,7 +63,10 @@ dependencies:
   intl: ^0.20.2 # pinned by flutter_localizations
   collection: ^1.19.0
   uuid: ^4.5.1
+  package_info_plus: ^8.1.4
+  firebase_crashlytics: ^4.3.10
 
+  crypto: ^3.0.7
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -94,4 +97,5 @@ flutter:
   assets:
     - assets/rules/
     - assets/images/
+    - assets/images/brands/
     - assets/catalog/

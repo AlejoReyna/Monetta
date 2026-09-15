@@ -1,0 +1,56 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/features/catalog/search_history.dart';
+import 'package:monetta_app/features/catalog/search_history_persistence.dart';
+
+class PendingRestore implements SearchHistoryPersistence {
+  PendingRestore(this.disk);
+  final SearchHistoryFilePersistence disk;
+  final release = Completer<List<String>>();
+  @override Future<List<String>> load(String key) => release.future;
+  @override Future<void> save(String key, List<String> queries) => disk.save(key, queries);
+}
+void main() {
+  test('listener mutation wins even if merged snapshot path resolves later', () async {
+    final dir = await Directory.systemTemp.createTemp('monetta-fifo-');
+    addTearDown(() => dir.delete(recursive: true));
+    var holdNextPath = false;
+    final pathStarted = Completer<void>();
+    final releasePath = Completer<void>();
+    final disk = SearchHistoryFilePersistence(directoryProvider: () async {
+      if (holdNextPath) {
+        holdNextPath = false;
+        pathStarted.complete();
+        await releasePath.future;
+      }
+      return dir;
+    });
+    final pending = PendingRestore(disk);
+    final history = SearchHistory(persistence: pending);
+    final loading = history.setScope('a');
+    await history.remember('new query');
+    Future<void>? listenerSave;
+    var reacted = false;
+    history.addListener(() {
+      if (!reacted && history.queries.contains('older query')) {
+        reacted = true;
+        listenerSave = history.remember('listener query');
+      }
+    });
+    holdNextPath = true;
+    pending.release.complete(['older query']);
+    await pathStarted.future;
+    await Future.any<void>([
+      listenerSave!,
+      Future<void>.delayed(const Duration(milliseconds: 100)),
+    ]);
+    releasePath.complete();
+    await Future.wait<void>([loading, listenerSave!]);
+    final expected = ['listener query', 'new query', 'older query'];
+    expect(history.queries, expected, reason: 'live state');
+    final restarted = SearchHistory(persistence: disk);
+    await restarted.setScope('a');
+    expect(restarted.queries, expected, reason: 'newer listener mutation must survive restart');
+  });
+}

@@ -18,7 +18,7 @@ class ExtractedBadge extends StatelessWidget {
       label: 'Artículo extraído de un sitio externo',
       child: DecoratedBox(
         decoration: BoxDecoration(
-          color: kInk.withValues(alpha: 0.86),
+          color: context.monettaColors.contentPrimary.withValues(alpha: 0.86),
           borderRadius: BorderRadius.circular(2),
         ),
         child: Padding(

@@ -7,11 +7,19 @@ import type {
   MirroredOrder,
   OrderRecord,
   PushTokenRecord,
+  PrivacyDataRequestRecord,
+  PrivacyFulfillmentInput,
+  PrivacyRequestView,
   WebhookEventRecord,
 } from './types.js';
 
 export interface AppAccountsRepository {
-  /** Creates an account, or updates the account already bound to this device. */
+  /**
+   * Creates a new account and device session. Must never alter an existing
+   * account's email, password, Shopify linkage, role, or sessions merely
+   * because the request reused a known deviceId. Conflicts raise
+   * AccountRegistrationConflictError.
+   */
   register(record: AppAccountRegistration): Promise<AppAccountRecord>;
 
   /** Reads the password verifier used by first-party email login. */
@@ -61,9 +69,25 @@ export interface OrdersRepository {
 }
 
 export interface WebhookEventsRepository {
-  /** False when `webhookId` was already recorded — a retried delivery of the same event. */
-  recordIfNew(event: WebhookEventRecord): Promise<boolean>;
-  markProcessed(webhookId: string): Promise<void>;
+  /**
+   * Atomically claim a delivery for processing (F12).
+   * Returns true when this caller owns the work.
+   * Returns false only when the delivery is completed. Busy claims throw a
+   * retryable error; interrupted/failed claims may be recovered by a new owner.
+   */
+  tryClaim(event: WebhookEventRecord): Promise<boolean>;
+  markCompleted(webhookId: string): Promise<void>;
+  markFailed(webhookId: string, error: string): Promise<void>;
+}
+
+export interface PrivacyRequestsRepository {
+  /** Opens a durable follow-up task for customers/data_request (F29). Idempotent per webhookId. */
+  openDataRequest(record: PrivacyDataRequestRecord): Promise<void>;
+  /** Opens/records a redact follow-up row (usually fulfilled after deletion). Idempotent per webhookId. */
+  openRedactRequest(record: PrivacyDataRequestRecord): Promise<void>;
+  listOpen(): Promise<readonly PrivacyRequestView[]>;
+  markFulfilled(input: PrivacyFulfillmentInput): Promise<boolean>;
+  markCancelled(input: PrivacyFulfillmentInput): Promise<boolean>;
 }
 
 export interface PushTokensRepository {

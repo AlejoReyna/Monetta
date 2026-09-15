@@ -1,5 +1,7 @@
-# Monetta Shopify app — production.
-# Do not deploy this config until the staging acceptance suite passes
+# Monetta Shopify app — production (REVIEWABLE ARTIFACT — do not auto-deploy).
+# Phase F / F24: scopes aligned with staging admin panel mutations. Fill
+# placeholders after Partner Dashboard linking; never copy staging secrets.
+# Do not deploy until staging acceptance passes
 # (docs/SHOPIFY_PRODUCTION_IMPLEMENTATION_PLAN.md § 6 Phase 7).
 # Every mutating CLI command MUST use: --config production
 
@@ -9,8 +11,43 @@ application_url = "https://REPLACE_PRODUCTION_BACKEND_HOST"
 embedded = false
 handle = "monetta"
 
+# Minimal verified scopes for retained admin panel + order mirror + content.
+# write_* are required for product title/price/publication and storefront
+# metaobject updates implemented under services/accounts_orders admin routes.
 [access_scopes]
-scopes = "read_orders,read_customers,read_products"
+scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects"
+
+# App-owned singleton for the native admin control plane. Must match the
+# Storefront consumer handle `$app:storefront_config` / `monetta` used by
+# ShopifyAdminClient.getStorefrontConfig and HomeContentRepository.
+[metaobjects.app.storefront_config]
+name = "Monetta Storefront Configuration"
+access.admin = "merchant_read_write"
+access.storefront = "public_read"
+
+[metaobjects.app.storefront_config.fields.announcement]
+name = "Announcement"
+type = "single_line_text_field"
+
+[metaobjects.app.storefront_config.fields.show_hero]
+name = "Show hero"
+type = "boolean"
+
+[metaobjects.app.storefront_config.fields.show_newest]
+name = "Show newest"
+type = "boolean"
+
+[metaobjects.app.storefront_config.fields.show_todays_picks]
+name = "Show Today's Picks"
+type = "boolean"
+
+[metaobjects.app.storefront_config.fields.show_external_picks]
+name = "Show external picks"
+type = "boolean"
+
+[metaobjects.app.storefront_config.fields.version]
+name = "Version"
+type = "number_integer"
 
 [auth]
 redirect_urls = [
@@ -37,9 +74,9 @@ topics = ["products/update"]
 uri = "https://REPLACE_PRODUCTION_BACKEND_HOST/webhooks/products/update"
 
 # Compliance topics must be separate absolute paths — the server has no
-# catch-all /webhooks route. app/uninstalled is intentionally omitted until
-# a handler exists (otherwise Shopify would POST to a 404). Kept in sync
-# with staging and with src/api/server.ts by
+# catch-all /webhooks route. app/uninstalled remains omitted until a durable
+# handler exists (otherwise Shopify would POST to a 404). Kept in sync with
+# staging and with src/api/server.ts by
 # services/accounts_orders/test/webhookRoutes.test.ts.
 [[webhooks.subscriptions]]
 compliance_topics = ["customers/data_request"]

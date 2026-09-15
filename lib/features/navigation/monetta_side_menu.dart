@@ -14,7 +14,7 @@ class MonettaSideMenu extends StatelessWidget {
     required this.onWatches,
     required this.onPerfumes,
     required this.onBeauty,
-    this.onNotifications,
+    required this.onToggleTheme,
     required this.onAbout,
     required this.onPartner,
     required this.onSupport,
@@ -28,7 +28,12 @@ class MonettaSideMenu extends StatelessWidget {
   final VoidCallback onWatches;
   final VoidCallback onPerfumes;
   final VoidCallback onBeauty;
-  final VoidCallback? onNotifications;
+
+  /// Switches immediately between the light and dark storefront themes.
+  ///
+  /// This deliberately does not use [_select]: changing appearance should not
+  /// dismiss the drawer or route the shopper to a separate selection view.
+  final VoidCallback onToggleTheme;
   final VoidCallback onAbout;
   final VoidCallback onPartner;
   final VoidCallback onSupport;
@@ -41,12 +46,13 @@ class MonettaSideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width.clamp(300.0, 366.0);
+    final colors = context.monettaColors;
 
     return Drawer(
       key: const Key('monetta-side-menu'),
       width: width,
       elevation: 0,
-      backgroundColor: const Color(0xFFFAF8F4),
+      backgroundColor: colors.surfaceRaised,
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.horizontal(right: Radius.circular(30)),
       ),
@@ -56,10 +62,26 @@ class MonettaSideMenu extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(24, 22, 14, 0),
+              padding: const EdgeInsets.fromLTRB(20, 22, 14, 0),
               child: Row(
                 children: [
-                  const Expanded(child: MonettaWordmark(height: 21)),
+                  // Keep the mark anchored to the drawer's editorial grid,
+                  // rather than centring it inside the remaining header space.
+                  const MonettaWordmark(height: 21),
+                  const Spacer(),
+                  IconButton(
+                    key: const Key('side-menu-appearance'),
+                    tooltip: Theme.of(context).brightness == Brightness.dark
+                        ? 'Activar modo claro'
+                        : 'Activar modo oscuro',
+                    onPressed: onToggleTheme,
+                    icon: Icon(
+                      Theme.of(context).brightness == Brightness.dark
+                          ? Icons.dark_mode_outlined
+                          : Icons.light_mode_outlined,
+                      size: 21,
+                    ),
+                  ),
                   IconButton(
                     key: const Key('close-side-menu'),
                     tooltip: 'Cerrar menú',
@@ -73,7 +95,7 @@ class MonettaSideMenu extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 18),
               child: Material(
-                color: const Color(0xFFF0ECE5),
+                color: colors.inputFill,
                 borderRadius: BorderRadius.circular(16),
                 child: InkWell(
                   key: const Key('side-menu-search'),
@@ -102,7 +124,6 @@ class MonettaSideMenu extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 22),
                 children: [
-                  const _MenuSectionLabel('TIENDA'),
                   _MenuLink(
                     key: const Key('side-menu-bags'),
                     label: 'Bolsas',
@@ -136,16 +157,7 @@ class MonettaSideMenu extends StatelessWidget {
                     label: 'Contacto',
                     onTap: () => _select(context, onSupport),
                   ),
-                  const Padding(
-                    padding: EdgeInsets.symmetric(vertical: 10),
-                    child: Divider(height: 1),
-                  ),
-                  const _MenuSectionLabel('MÁS DE MONETTA'),
-                  if (onNotifications != null)
-                    _MenuLink(
-                      label: 'Mis notificaciones',
-                      onTap: () => _select(context, onNotifications!),
-                    ),
+                  const SizedBox(height: 28),
                   _MenuLink(
                     label: 'Nuestra historia',
                     onTap: () => _select(context, onAbout),
@@ -156,20 +168,6 @@ class MonettaSideMenu extends StatelessWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-class _MenuSectionLabel extends StatelessWidget {
-  const _MenuSectionLabel(this.label);
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(6, 6, 6, 8),
-      child: Text(label, style: eyebrow(size: 8.5)),
     );
   }
 }
@@ -186,24 +184,32 @@ class _MenuLink extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 14),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  label,
-                  style: editorial(18),
+    final colors = context.monettaColors;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(
+          bottom: BorderSide(color: colors.divider, width: .5),
+        ),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 14),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    label,
+                    style: editorial(18, color: colors.contentPrimary),
+                  ),
                 ),
-              ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward_ios_rounded, size: 13),
-            ],
+                const SizedBox(width: 8),
+                const Icon(Icons.arrow_forward_ios_rounded, size: 13),
+              ],
+            ),
           ),
         ),
       ),

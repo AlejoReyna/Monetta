@@ -1,0 +1,82 @@
+:root {
+  color: #e8edf5;
+  background: #0b1020;
+  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-synthesis: none;
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; min-width: 320px; min-height: 100vh; background: #0b1020; }
+button, input, select, textarea { font: inherit; }
+button { cursor: pointer; }
+
+.app-shell { min-height: 100vh; }
+.app-nav {
+  position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 28px;
+  min-height: 66px; padding: 0 5vw; border-bottom: 1px solid #24304a;
+  background: rgb(11 16 32 / 92%); backdrop-filter: blur(16px);
+}
+.app-brand { color: #f8fbff; font-size: 15px; font-weight: 800; letter-spacing: -.03em; text-decoration: none; white-space: nowrap; }
+.app-brand span { color: #62d8b0; }
+.app-links { display: flex; gap: 5px; overflow-x: auto; }
+.app-links a { color: #aebbd1; font-size: 13px; font-weight: 700; padding: 8px 10px; border-radius: 8px; text-decoration: none; white-space: nowrap; }
+.app-links a:hover, .app-links a:focus-visible { color: #ecfff8; background: #17342d; outline: none; }
+.app-content { width: min(1180px, 100% - 40px); margin: 0 auto; padding: 42px 0 72px; }
+
+section[aria-label] > h2 { margin: 0 0 8px; color: #f7f9ff; font-size: clamp(26px, 4vw, 34px); letter-spacing: -.05em; }
+section[aria-label] > h2 + p { margin-top: 0; color: #91a0bb; }
+h3 { color: #f4f7fb; font-size: 16px; margin: 0 0 12px; }
+h4 { margin: 0 0 8px; font-size: 13px; }
+p { line-height: 1.6; }
+a { color: #72dfbb; }
+
+[role="status"] { margin: 20px 0; padding: 12px 15px; border: 1px solid #694d25; border-radius: 10px; color: #ffd99a; background: #2b2115; font-size: 13px; font-weight: 600; }
+[aria-label^="status:"] { display: inline-flex; align-items: center; gap: 5px; color: #ffc36c; font-size: 12px; font-weight: 800; letter-spacing: .01em; text-transform: capitalize; }
+[aria-label="status: healthy"], [aria-label="status: success"] { color: #62d8b0; }
+[aria-label="status: running"] { color: #8fb9ff; }
+
+article[aria-label^="source"] { margin-top: 18px; padding: 22px; border: 1px solid #26324c; border-radius: 14px; background: linear-gradient(135deg, #141c31, #101728); box-shadow: 0 12px 26px rgb(0 0 0 / 12%); }
+article[aria-label^="source"] > p { margin: 8px 0; color: #acb8ca; font-size: 13px; }
+article[aria-label^="source"] > div { display: grid; grid-template-columns: repeat(5, minmax(90px, 1fr)); gap: 10px; margin-top: 19px; }
+.metric-card { min-width: 0; padding: 13px; border: 1px solid #293650; border-radius: 10px; background: #0d1425; }
+.metric-card__label { color: #8e9db8; font-size: 11px; font-weight: 700; letter-spacing: .07em; text-transform: uppercase; }
+.metric-card__value { margin-top: 4px; color: #f5f8ff; font-size: 23px; font-weight: 800; line-height: 1.15; }
+.metric-card__sub { color: #8e9db8; font-size: 12px; }
+
+[aria-label="page budget"], [aria-label="alerts"], [aria-label="coverage sparkline"], [aria-label="preview"], [aria-label="apply"] { margin-top: 22px; padding: 20px 22px; border: 1px solid #26324c; border-radius: 14px; background: #11182a; }
+[aria-label="page budget"] p { margin: 0 0 10px; color: #c7d2e3; font-size: 14px; }
+progress { width: min(430px, 100%); height: 8px; accent-color: #62d8b0; }
+
+form, section > div:not([aria-label]) { margin: 20px 0; }
+input, select, textarea { color: #edf3fb; border: 1px solid #33415e; border-radius: 8px; background: #0c1322; }
+input, select { min-height: 38px; padding: 0 11px; }
+textarea { display: block; width: 100%; margin-top: 8px; padding: 12px; font-family: "DM Mono", ui-monospace, monospace; font-size: 12px; line-height: 1.6; resize: vertical; }
+label { color: #b9c5d8; font-size: 13px; font-weight: 700; }
+button { min-height: 37px; padding: 0 13px; color: #04251d; border: 0; border-radius: 8px; background: #62d8b0; font-size: 13px; font-weight: 800; }
+button:hover { background: #83e6c5; }
+button:disabled { cursor: not-allowed; opacity: .5; }
+input:focus, select:focus, textarea:focus { border-color: #62d8b0; outline: 3px solid rgb(98 216 176 / 18%); }
+
+table { width: 100%; margin-top: 20px; border: 1px solid #26324c; border-collapse: separate; border-spacing: 0; border-radius: 12px; overflow: hidden; background: #101728; font-size: 13px; }
+th { color: #91a0bb; background: #171f33; font-size: 11px; letter-spacing: .06em; text-align: left; text-transform: uppercase; }
+th, td { padding: 12px 14px; border-bottom: 1px solid #26324c; vertical-align: middle; }
+tbody tr:last-child td { border-bottom: 0; }
+tbody tr:hover { background: #172137; }
+td img { margin-right: 8px; border-radius: 5px; vertical-align: middle; }
+td button { min-height: 31px; margin: 2px; padding: 0 9px; font-size: 11px; }
+
+ol, ul { padding-left: 22px; color: #c7d2e3; }
+li { margin: 7px 0; line-height: 1.5; }
+pre { overflow: auto; padding: 12px; border-radius: 8px; color: #dce6f7; background: #080d19; font-family: "DM Mono", monospace; font-size: 12px; }
+aside[aria-label="run detail"] { position: fixed; right: 24px; bottom: 24px; width: min(420px, calc(100vw - 48px)); padding: 22px; border: 1px solid #3b4c6e; border-radius: 14px; background: #151f35; box-shadow: 0 24px 60px rgb(0 0 0 / 42%); }
+dl { color: #becae0; font-size: 13px; } dt { margin-top: 12px; color: #8392ad; font-weight: 800; } dd { margin: 3px 0; }
+
+main[aria-label="Login"] { width: min(420px, calc(100% - 40px)); margin: 14vh auto; padding: 34px; border: 1px solid #2b3855; border-radius: 16px; background: linear-gradient(145deg, #18233c, #101728); box-shadow: 0 24px 70px rgb(0 0 0 / 35%); }
+main[aria-label="Login"] h1 { margin: 0; letter-spacing: -.05em; } main[aria-label="Login"] p { color: #aab8cc; font-size: 14px; } main[aria-label="Login"] label { display: grid; gap: 8px; } main[aria-label="Login"] button { width: 100%; margin-top: 16px; }
+
+@media (max-width: 700px) {
+  .app-nav { gap: 14px; padding: 0 20px; } .app-content { width: min(100% - 28px, 1180px); padding-top: 28px; }
+  .app-brand { display: none; } .app-links { width: 100%; }
+  article[aria-label^="source"] > div { grid-template-columns: repeat(2, 1fr); }
+  table { display: block; overflow-x: auto; white-space: nowrap; }
+}

@@ -57,6 +57,7 @@ Map<String, dynamic> productNode({
         ],
       },
       'variants': {
+        'pageInfo': {'hasNextPage': false, 'endCursor': null},
         'edges': [
           {
             'node': {
@@ -70,7 +71,10 @@ Map<String, dynamic> productNode({
           },
         ],
       },
-      'collections': {'edges': <dynamic>[]},
+      'collections': {
+        'pageInfo': {'hasNextPage': false, 'endCursor': null},
+        'edges': <dynamic>[],
+      },
     };
 
 Map<String, dynamic> page(
@@ -188,9 +192,7 @@ void main() {
       expect(transport.requestedVariables[1]['after'], 'cursor-1');
     });
 
-    test('stops rather than looping when hasNextPage lies about a cursor',
-        () async {
-      // hasNextPage true with a null endCursor would otherwise spin forever.
+    test('aborts when hasNextPage is true without an endCursor', () async {
       final transport = FakeTransport([
         page(
           [productNode(id: '1', updatedAt: '2026-08-01T00:00:00Z')],
@@ -198,12 +200,62 @@ void main() {
         ),
       ]);
 
-      final result = await syncWith(transport).run(
-        cursor: const SyncCursor(),
-        now: now,
+      await expectLater(
+        syncWith(transport).run(cursor: const SyncCursor(), now: now),
+        throwsA(isA<CatalogSyncIncompleteException>()),
       );
+    });
 
-      expect(result.pagesFetched, 1);
+    test('aborts when maxPages is hit with hasNextPage still true', () async {
+      final transport = FakeTransport([
+        page(
+          [productNode(id: '1', updatedAt: '2026-08-01T00:00:00Z')],
+          hasNextPage: true,
+          endCursor: 'cursor-1',
+        ),
+      ]);
+
+      await expectLater(
+        CatalogSync(
+          client: StorefrontClient(
+            config: const StorefrontConfig(
+              shopDomain: 'monetta.mx',
+              accessToken: 'test-token',
+            ),
+            transport: transport.call,
+          ),
+          maxPages: 1,
+        ).run(cursor: const SyncCursor(), now: now),
+        throwsA(isA<CatalogSyncIncompleteException>()),
+      );
+    });
+
+    test('aborts on a repeated pagination cursor', () async {
+      final transport = FakeTransport([
+        page(
+          [productNode(id: '1', updatedAt: '2026-08-01T00:00:00Z')],
+          hasNextPage: true,
+          endCursor: 'same',
+        ),
+        page(
+          [productNode(id: '2', updatedAt: '2026-08-02T00:00:00Z')],
+          hasNextPage: true,
+          endCursor: 'same',
+        ),
+      ]);
+
+      await expectLater(
+        syncWith(transport).run(cursor: const SyncCursor(), now: now),
+        throwsA(isA<CatalogSyncIncompleteException>()),
+      );
+    });
+
+    test('passes country and language into @inContext variables', () async {
+      final transport = FakeTransport([page([])]);
+      await syncWith(transport).run(cursor: const SyncCursor(), now: now);
+      final vars = transport.requestedVariables.single;
+      expect(vars['country'], 'MX');
+      expect(vars['language'], 'ES');
     });
 
     test('forces a full resync after 7 days to catch deletions', () async {

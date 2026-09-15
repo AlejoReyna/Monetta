@@ -9,62 +9,15 @@
 /// "External catalog prototype" for why this boundary exists.
 library;
 
-import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 
+import '../../app/card_lift.dart';
+import '../../app/media/monetta_image.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../data/media/media_url.dart';
 import '../../domain/catalog_item.dart';
 import '../product/external_product_screen.dart';
-
-String externalSourceBadge(CatalogSourceType source) {
-  switch (source) {
-    case CatalogSourceType.coachUs:
-      return 'Coach US · USD';
-    case CatalogSourceType.michaelKorsUs:
-      return 'Michael Kors US · USD';
-    case CatalogSourceType.guessUs:
-      return 'GUESS US · USD';
-    case CatalogSourceType.steveMaddenUs:
-      return 'Steve Madden US · USD';
-    case CatalogSourceType.marcJacobsUs:
-      return 'Marc Jacobs US · USD';
-    case CatalogSourceType.toryBurchUs:
-      return 'Tory Burch US · USD';
-    case CatalogSourceType.kateSpadeUs:
-      return 'Kate Spade US · USD';
-    case CatalogSourceType.guessFactoryUs:
-      return 'GUESS Factory US · USD';
-    case CatalogSourceType.gpMcallenPerfumes:
-      return 'GP McAllen · USD';
-    case CatalogSourceType.monettaShopify:
-      return '';
-  }
-}
-
-String externalCtaLabel(CatalogSourceType source) {
-  switch (source) {
-    case CatalogSourceType.coachUs:
-      return 'Ver en Coach';
-    case CatalogSourceType.michaelKorsUs:
-      return 'Ver en Michael Kors';
-    case CatalogSourceType.guessUs:
-      return 'Ver en GUESS';
-    case CatalogSourceType.steveMaddenUs:
-      return 'Ver en Steve Madden';
-    case CatalogSourceType.marcJacobsUs:
-      return 'Ver en Marc Jacobs';
-    case CatalogSourceType.toryBurchUs:
-      return 'Ver en Tory Burch';
-    case CatalogSourceType.kateSpadeUs:
-      return 'Ver en Kate Spade';
-    case CatalogSourceType.guessFactoryUs:
-      return 'Ver en GUESS Factory';
-    case CatalogSourceType.gpMcallenPerfumes:
-      return 'Ver en GP McAllen';
-    case CatalogSourceType.monettaShopify:
-      return '';
-  }
-}
 
 class ExternalCatalogSection extends StatelessWidget {
   const ExternalCatalogSection({
@@ -101,6 +54,7 @@ class ExternalCatalogSection extends StatelessWidget {
           const SectionHeading(
             kicker: 'Bolsas y carteras · Estados Unidos',
             title: 'Selección de marcas originales',
+            animateKickerColor: true,
           ),
           _ExternalRail(items: bagAndWalletItems, openLink: openLink),
         ],
@@ -109,6 +63,7 @@ class ExternalCatalogSection extends StatelessWidget {
           const SectionHeading(
             kicker: 'Perfumería · GP McAllen',
             title: 'Perfumes seleccionados',
+            animateKickerColor: true,
           ),
           _ExternalRail(items: perfumeItems, openLink: openLink),
         ],
@@ -128,16 +83,18 @@ class _ExternalRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width * 0.56;
+    final viewportWidth = MediaQuery.sizeOf(context).width;
+    final width = ((viewportWidth - 32) / 2).clamp(156.0, 220.0);
 
     return SizedBox(
-      // Room for source provenance plus the optional color-variant rail.
-      height: width / 0.75 + 218,
+      // Match the regular 4:5 product image and compact three-line card copy.
+      height: width / 0.8 + 96,
       child: ListView.separated(
+        clipBehavior: Clip.none,
         scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 20),
+        padding: const EdgeInsets.symmetric(horizontal: 12),
         itemCount: items.length,
-        separatorBuilder: (_, __) => const SizedBox(width: 14),
+        separatorBuilder: (_, __) => const SizedBox(width: 8),
         itemBuilder: (context, index) => SizedBox(
           width: width,
           child: _ExternalCard(item: items[index], openLink: openLink),
@@ -147,183 +104,78 @@ class _ExternalRail extends StatelessWidget {
   }
 }
 
-class _ExternalCard extends StatefulWidget {
+class _ExternalCard extends StatelessWidget {
   const _ExternalCard({required this.item, required this.openLink});
 
   final CatalogItem item;
   final ExternalLinkOpener openLink;
 
-  @override
-  State<_ExternalCard> createState() => _ExternalCardState();
-}
-
-class _ExternalCardState extends State<_ExternalCard> {
-  int _selectedVariantIndex = 0;
-
-  CatalogVariant? get _selectedVariant => widget.item.variants.isEmpty
-      ? null
-      : widget.item.variants[_selectedVariantIndex];
-
-  String get _detailUrl => _selectedVariant?.detailUrl ?? widget.item.detailUrl;
-  String? get _imageUrl => _selectedVariant?.imageUrl ?? widget.item.imageUrl;
-  Money? get _price => _selectedVariant?.price ?? widget.item.price;
-
   void _openDetail(BuildContext context) {
     showExternalProductDetail(
       context,
-      item: widget.item,
-      openLink: widget.openLink,
-      initialVariantIndex: _selectedVariantIndex,
+      item: item,
+      openLink: openLink,
     );
-  }
-
-  Future<void> _openMerchant(BuildContext context) async {
-    // Re-validated here, independent of whatever the backend already
-    // checked — scheme must be HTTPS and the host must actually belong to
-    // this item's declared source. See `domain/catalog_item.dart`.
-    if (!isValidExternalDetailUrlForSource(widget.item.source, _detailUrl)) {
-      if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Enlace no válido para ${widget.item.merchant}'),
-          ),
-        );
-      }
-      return;
-    }
-    final uri = Uri.parse(_detailUrl);
-    final launched = await widget.openLink(uri);
-    if (!launched && context.mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('No se pudo abrir ${widget.item.merchant}')),
-      );
-    }
   }
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => _openDetail(context),
-      // Deliberately no favorite icon, no "add to bag" affordance — this
-      // This card only opens a read-only detail; it can never enter cart.
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          AspectRatio(
-            aspectRatio: 3 / 4,
-            child: ColoredBox(
-              color: kMist,
-              child: _imageUrl == null
-                  ? const Center(
-                      child: Icon(
-                        Icons.image_not_supported_outlined,
-                        size: 18,
-                        color: kInkMuted,
-                      ),
-                    )
-                  : CachedNetworkImage(
-                      key: ValueKey(_imageUrl),
-                      imageUrl: _imageUrl!,
-                      fit: BoxFit.cover,
-                      fadeInDuration: const Duration(milliseconds: 240),
-                      placeholder: (_, __) => const ColoredBox(color: kMist),
-                      errorWidget: (_, __, ___) => const Center(
-                        child: Icon(
-                          Icons.broken_image_outlined,
-                          size: 18,
-                          color: kInkMuted,
-                        ),
-                      ),
-                    ),
-            ),
-          ),
-          const SizedBox(height: 10),
-          Text(
-            externalSourceBadge(widget.item.source).toUpperCase(),
-            style: eyebrow(size: 9.5),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            widget.item.title,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: display(14, weight: FontWeight.w400, height: 1.35),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            formatCatalogMoney(_price),
-            style: sans(size: 12.5, weight: FontWeight.w500),
-          ),
-          if (widget.item.variants.length > 1) ...[
-            const SizedBox(height: 7),
-            Text(
-              'Color: ${_selectedVariant!.displayName}',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: sans(size: 10.5, weight: FontWeight.w500),
-            ),
-            const SizedBox(height: 5),
-            SizedBox(
-              height: 30,
-              child: ListView.separated(
-                scrollDirection: Axis.horizontal,
-                itemCount: widget.item.variants.length,
-                separatorBuilder: (_, __) => const SizedBox(width: 5),
-                itemBuilder: (context, index) {
-                  final variant = widget.item.variants[index];
-                  return ChoiceChip(
-                    key: ValueKey(variant.variantId),
-                    label: Text(variant.displayName),
-                    selected: index == _selectedVariantIndex,
-                    onSelected: (_) {
-                      setState(() => _selectedVariantIndex = index);
-                    },
-                    labelStyle: sans(
-                      size: 9.5,
-                      color:
-                          index == _selectedVariantIndex ? Colors.white : kInk,
-                    ),
-                    selectedColor: kInk,
-                    backgroundColor: kMist,
-                    side: BorderSide.none,
-                    padding: const EdgeInsets.symmetric(horizontal: 5),
-                    visualDensity: VisualDensity.compact,
-                    showCheckmark: false,
-                  );
-                },
+    final brand = humanizeCatalogValue(
+      item.brand.trim().isEmpty ? item.merchant : item.brand,
+    );
+    final title = externalProductName(
+      title: item.title,
+      category: item.category,
+    );
+    return Semantics(
+      button: true,
+      label: '$brand, $title',
+      child: MonettaCardLift(
+        child: GestureDetector(
+          behavior: HitTestBehavior.opaque,
+          onTap: () => _openDetail(context),
+          // Deliberately no favorite or bag affordance: this card opens the
+          // read-only detail and cannot enter Monetta checkout.
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AspectRatio(
+                aspectRatio: 4 / 5,
+                child: ColoredBox(
+                  color: context.monettaColors.surfaceMuted,
+                  child: MonettaImage(
+                    url: item.imageUrl,
+                    fit: BoxFit.cover,
+                    cacheWidth: MediaUrl.cardWidth,
+                    fallbackLabel: '$brand · $title',
+                  ),
+                ),
               ),
-            ),
-          ],
-          const SizedBox(height: 4),
-          Text(
-            'Candidato de compra · origen EE. UU.',
-            style: sans(size: 10.5, color: kInkMuted),
+              const SizedBox(height: 11),
+              Text(
+                brand.toUpperCase(),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: sans(size: 12, height: 1.3).copyWith(letterSpacing: 0.6),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                title,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: sans(size: 12, height: 1.35),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                formatCatalogMoney(item.price),
+                style: sans(size: 12, height: 1.3),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          // Where this listing's data actually came from — shown as text in
-          // the description itself, not only reachable by tapping the CTA.
-          Text(
-            _sourceLabel(_detailUrl),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: sans(size: 10, color: kInkMuted),
-          ),
-          const SizedBox(height: 6),
-          UnderlineLink(
-            label: externalCtaLabel(widget.item.source),
-            onTap: () => _openMerchant(context),
-            size: 11,
-          ),
-        ],
+        ),
       ),
     );
   }
-}
-
-String _sourceLabel(String detailUrl) {
-  final uri = Uri.tryParse(detailUrl);
-  if (uri == null || uri.host.isEmpty) return detailUrl;
-  return '${uri.host}${uri.path}';
 }
 
 class _Disclosure extends StatelessWidget {
@@ -340,9 +192,9 @@ class _Disclosure extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Text(
-        'Candidatos para compra manual del propietario. Precio y disponibilidad '
-        'pueden haber cambiado en el sitio del comercio.$stamp',
-        style: sans(size: 10.5, color: kInkMuted),
+        'Selección en EE. UU. para compra manual. Precio y disponibilidad por '
+        'confirmar.$stamp',
+        style: sans(size: 10.5, color: context.monettaColors.contentMuted),
       ),
     );
   }

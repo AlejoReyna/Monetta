@@ -10,7 +10,7 @@ to the Texas server** over HTTPS — no second backend, no snapshot, no mock dat
 > packages continue the same numbering (WP-60…) and the same rules apply: doc
 > and code disagree ⇒ one of them is a bug, fix both in the same commit.
 
-Written 16 August 2026.
+Written 16 August 2026; audited and revised 2 September 2026 for private pre-production readiness.
 
 ---
 
@@ -43,7 +43,29 @@ Three properties this design is built around:
 
 ---
 
-## 2. Two blocking prerequisites
+## 1.1 Current baseline and target environment (2026-09-02)
+
+### Current baseline
+- **Host & TLS**: `catalog.monetta.mx` is live with Let's Encrypt TLS terminated by Caddy, proxying to `monetta-catalog-api:8081` on the Texas server. Process probe `GET /livez` returns HTTP 200. Pre-production staging uses the isolated `catalog.staging.monetta.mx` hostname and database (production plan §0.1.2); the dashboard CSP, Vercel env and runbook all target staging, never the public host.
+- **Data & Crawl Status**: `GET /healthz` returns HTTP 503 (`status: "degraded"`). The API serves 16 static fallback records from `src/catalog/curatedUsCatalog.ts` (`dataOrigin: "curated_us_snapshot"`); zero live crawl inventory exists. Scheduled crawling is disabled (`LIVE_CRAWL_ENABLED=false`) following failed smoke crawls on 2026-08-28.
+- **Dashboard & admin API (WP-60–68 landed, uncommitted)**: the browser dashboard in `dashboard/` is built (shell, login, Overview, Runs, Selection, Products, Events, Feed preview) with session auth + exact-origin CORS, read endpoints, and the selection console API (`008_selection.sql` applied at the schema level; `009_events_and_alerts.sql` and `010_dashboard_sessions.sql` — note `010` exists as a file, `009` is still absent). The pure TypeScript selection engine (`services/catalog_monitor/src/selection/`) is implemented (WP-11), integrated into discovery via Stage-A filtering in `runCrawl` (WP-12), and Stage-B product filtering with selection-aware snapshot lifecycle invariants (I1–I6) is implemented (WP-13).
+- **End-to-end gate (not yet): selection writes do not move product visibility.** The console versions documents, but the scheduler does not load versions into crawls (WP-14/WP-20 scope) and the feed builder does not filter by selection state or placement (WP-16 scope). Until those land, Apply/pin/hide are recorded, never served. The real-browser CORS proof (WP-67 acceptance) is also still pending.
+- **Unauthenticated public feed**: the current `/v1/external-catalog` endpoint is unauthenticated with public cache (`Cache-Control: public, max-age=60`). The dashboard session route (`POST /admin/session`), admin API, and exact-origin CORS middleware now exist behind `DASHBOARD_PASSPHRASE_VERIFIER`.
+
+### Target pre-production environment
+- **Private deployment**: The dashboard is a private, session-authenticated console deployed to a dedicated pre-production/staging origin (e.g., Vercel staging preview or `dash.staging.monetta.mx`).
+- **Strict CORS & No Long-Lived Secrets**: The pre-production API allowlists only the exact staging origin in `DASHBOARD_ORIGINS` (never wildcards like `*` or `*.vercel.app`). No long-lived admin tokens (`ADMIN_API_TOKENS`) or API secrets are ever placed in Vercel environment variables or compiled into client JavaScript.
+- **Session Lifecycles**: The owner logs in using a secret passphrase verified on the server via `scrypt`; the server issues a short-lived opaque session token stored strictly in `sessionStorage` (dies when the browser tab closes, never in `localStorage`).
+- **Coexistence with Native App "Fuentes" Screen**:
+  - The native Flutter app includes an administrative screen (`lib/features/admin/admin_screen.dart`, "Fuentes" tab) that manages coarse *source-level operational policy* (`enabled`, `itemLimit`, commission rates) via `accounts_orders` signed internal requests. It does not perform product selection.
+  - This web dashboard is the *sole product-selection authority* (editing `selection.json`, Stage A/B rules, Stage C product pin/hide).
+  - The two systems operate on distinct tables (`external_source_policies` vs `selection_versions` / `placements`) with no competing write paths.
+  - The current feed does not yet apply persisted source policy at serve time. After WP-16, overall item visibility is governed by the effective visibility rule:
+    $$\text{Effective Visibility} = (\text{source policy enabled}) \land (\text{selection match}) \land (\text{placement} \neq \text{'hidden'}).$$
+
+---
+
+## 2. Four blocking prerequisites
 
 **P1 — the API must have a real HTTPS hostname.** A page served from
 `https://…vercel.app` cannot call `http://209.23.11.117:8081`; browsers block
@@ -57,6 +79,17 @@ originally said *"no CORS headers (this is not a browser API)"*. That is no
 longer true and the main plan has been corrected: it **is** a browser API now,
 for exactly one allowlisted origin. WP-60 implements this; nothing in the SPA
 works until it lands.
+
+**P3 — the selection engine module must exist (satisfied).** The pure
+TypeScript selection validation and evaluation module in
+`services/catalog_monitor/src/selection/` is now implemented (WP-11) and ready
+to be imported directly via Vite path alias. The dashboard application itself
+remains unbuilt.
+
+**P4 — the post-007 migration baseline must be applied.** Database tables for
+selection (`008_selection.sql`), events/alerts (`009_events_and_alerts.sql`),
+and dashboard sessions (`010_dashboard_sessions.sql`) must be migrated before
+the session and admin read routes can function.
 
 ---
 
@@ -223,12 +256,26 @@ Timeline of `product_events`: price drops and rises, restocks, new matches,
 deselections. This is the screen that makes "always live" visible; if it is
 empty for a day, the watch tier is not running.
 
-### 6.6 Feed preview — "what will the app show?"
+### 6.6 Feed preview — canonical staging app payload
 
-Renders `/admin/feed-preview` grouped by placement (`home_rail`,
-`catalog_browse`, `collection:<slug>`, `hidden`), so the owner sees the app's
-rails before opening the app. Closes the loop between the selection document and
-the phone.
+Renders `/admin/feed-preview`, defined as the byte-for-byte canonical staging app
+payload that the Monetta Flutter client receives from `GET /v1/external-catalog`.
+This screen closes the loop between the selection document, operational policies,
+and the phone:
+
+- **Grouped by placement**: Items partitioned into their active surfaces
+  (`home_rail`, `catalog_browse`, `collection:<slug>`, and `hidden`). Items marked
+  `hidden` are visually flagged as suppressed from the app.
+- **Freshness & data origin badges**: Each item and source header displays its
+  exact provenance:
+  - `live_crawl`: Green indicator with human-readable relative age (*"actualizado hace 2 h"*),
+    verifying active extraction.
+  - `curated_us_snapshot`: Amber warning badge (*"Snapshot de referencia · 2026-08-12"*),
+    verifying that the item is a static fallback and never claiming it as live inventory.
+- **Commercial & pricing accuracy**: USD price is always explicit; items without an
+  extracted price render `Consultar precio` (strictly never `$0`).
+- **Traceability**: Shows the `matchedRuleId` and active `selectionVersion`, so
+  the operator can inspect exactly why a product is visible.
 
 ---
 
@@ -316,7 +363,7 @@ repository with **Root Directory = `dashboard`**; Vercel then reads
       "source": "/(.*)",
       "headers": [
         { "key": "Content-Security-Policy",
-          "value": "default-src 'self'; connect-src 'self' https://catalog.monetta.mx; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'" },
+          "value": "default-src 'self'; connect-src 'self' https://catalog.staging.monetta.mx; img-src 'self' https: data:; style-src 'self' 'unsafe-inline'; frame-ancestors 'none'" },
         { "key": "X-Frame-Options", "value": "DENY" },
         { "key": "X-Content-Type-Options", "value": "nosniff" },
         { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
@@ -332,7 +379,8 @@ repository with **Root Directory = `dashboard`**; Vercel then reads
   merchant CDNs whose hostnames change. Narrow it to those four hosts if you
   prefer; do not narrow it to `'self'` or the table loses its images.
 - Environment variable, public and non-secret:
-  `VITE_CATALOG_API_BASE_URL=https://catalog.monetta.mx`.
+  `VITE_CATALOG_API_BASE_URL=https://catalog.staging.monetta.mx` (staging API
+  per the production plan §0.1.2 — never the public host from staging).
 - **Nothing else goes in Vercel env.** If a value would be a problem in a
   `view-source`, it does not belong in this project.
 
@@ -355,7 +403,7 @@ These land in `services/catalog_monitor` and are already reflected in
   app — which is where WP-22's limiter already is.
 - § 8.5 — new env vars: `DASHBOARD_ORIGINS`,
   `DASHBOARD_PASSPHRASE_VERIFIER`, `DASHBOARD_SESSION_TTL_HOURS`.
-- Migration `006_dashboard_sessions.sql`.
+- Migration `010_dashboard_sessions.sql` (sequenced after current baseline `001`–`007`, selection `008`, and events/alerts `009`).
 
 ```sql
 CREATE TABLE IF NOT EXISTS dashboard_sessions (
@@ -376,7 +424,7 @@ Expired rows are deleted by the daily backup timer, not by a separate job.
 ## 10. Work packages
 
 ### WP-60 · Session auth + CORS
-**Depends on** WP-22 · **Touches** `src/api/{auth,session,cors}.ts`, `src/db/migrations/006_dashboard_sessions.sql`, `src/db/pgSessionRepository.ts`, `src/cli/dashboardPassphrase.ts`, `test/{auth,cors}.test.ts`
+**Depends on** WP-22 · **Touches** `src/api/{auth,session,cors}.ts`, `src/db/migrations/010_dashboard_sessions.sql`, `src/db/pgSessionRepository.ts`, `src/cli/dashboardPassphrase.ts`, `test/{auth,cors}.test.ts`
 
 Session issue/verify/revoke reusing the `accounts_orders` scrypt + SHA-256
 pattern. CORS middleware per § 4. A `npm run dashboard:passphrase` CLI that
@@ -463,7 +511,7 @@ Second Vercel project with Root Directory `dashboard`, CSP and headers per § 8,
 **Acceptance** · The production origin loads, logs in, and polls with 304s
 visible in the network tab; a preview deployment is *blocked* by CORS, proving
 the allowlist is exact; the runbook documents adding an origin.
-**Verify** browser devtools network tab + `curl -H 'Origin: https://evil.example' -i https://catalog.monetta.mx/admin/overview`
+**Verify** browser devtools network tab + `curl -H 'Origin: https://evil.example' -i https://catalog.staging.monetta.mx/admin/overview`
 
 ### WP-68 · CI
 **Depends on** WP-63 · **Touches** `.github/workflows/dashboard.yml`
@@ -500,15 +548,20 @@ for one service is a framework built for zero.
 
 | WP | Title | Status |
 |---|---|---|
-| WP-60 | Session auth + CORS | todo |
-| WP-61 | Read endpoints | todo |
-| WP-62 | Selection console endpoints | todo |
-| WP-63 | Scaffold, client, login | todo |
-| WP-64 | Overview + Runs | todo |
-| WP-65 | Selection console | todo |
-| WP-66 | Products, Events, Feed preview | todo |
-| WP-67 | Deploy + origin wiring | todo |
-| WP-68 | CI | todo |
+| WP-60 | Session auth + CORS | done (audit: H1 XFF rate-limit bypass + M1 CLI argv still open) |
+| WP-61 | Read endpoints | done (audit: 009-contract + doc-debt notes open) |
+| WP-62 | Selection console endpoints | done (this loop; If-Match 412 added in fixup) |
+| WP-63 | Scaffold, client, login | done (this loop; 10 tests, build green) |
+| WP-64 | Overview + Runs | done (this loop; 5 screen tests) |
+| WP-65 | Selection console | done (this loop; rule-id errors, diff-first, dual confirm) |
+| WP-66 | Products, Events, Feed preview | done (this loop; money never $0, pin/hide reconcile) |
+| WP-67 | Deploy + origin wiring | done, corrected to staging API host (browser proof still manual) |
+| WP-68 | CI | done (this loop; YAML valid, coupling proven) |
+
+Deploy-ready requires two gates outside WP-60–68 acceptance: the WP-14/WP-20
+scheduler selection wiring plus WP-16 serve-time filtering (without them,
+console writes do not move app visibility), and the real-browser CORS proof
+from WP-67 acceptance.
 
 ## 13. Non-goals
 

@@ -9,6 +9,15 @@ void main() {
     );
   });
 
+  test('Shopify descriptions preserve readable fact rows', () {
+    expect(
+      shopifyDescriptionText(
+        '<p>Marca: Guess<br>Color: Negro</p><p>Medidas:<br>20 × 10 cm</p>',
+      ),
+      'Marca: Guess\nColor: Negro\nMedidas:\n20 × 10 cm',
+    );
+  });
+
   test('factualDescription is inventory language, not poetry', () {
     final text = factualDescription(
       title: 'Bolsa Guess Crossbody',
@@ -36,6 +45,41 @@ void main() {
     );
   });
 
+  test('internal tokens never leak into shopper-facing names', () {
+    expect(humanizeCatalogValue('michael_kors'), 'Michael Kors');
+    expect(humanizeCatalogValue('coach_coach'), 'Coach');
+    expect(shopperProductName('jet_set_jet_bag'), 'Jet Set Jet Bag');
+    expect(shopperProductName('Bolsa  Bolsa Guess'), 'Bolsa Guess');
+  });
+
+  test('US merchant titles follow Monetta card naming', () {
+    expect(
+      externalProductName(
+        title: 'Tabby Shoulder Bag 26',
+        category: 'Handbags',
+      ),
+      'Bolsa Tabby 26 de hombro',
+    );
+    expect(
+      externalProductName(
+        title: 'Jet Set Crossbody',
+        category: 'Handbags',
+      ),
+      'Bolsa Jet Set crossbody',
+    );
+    expect(
+      externalProductName(
+        title: 'Small Zip Around Wallet',
+        category: 'Wallets',
+      ),
+      'Cartera Pequeña con cierre',
+    );
+    expect(
+      externalProductName(title: 'Unclassified Original', category: null),
+      'Unclassified Original',
+    );
+  });
+
   test('partner quote carries the wholesale terms and source', () {
     final uri = partnerQuoteWhatsAppUri(
       category: 'Perfumes',
@@ -49,5 +93,6 @@ void main() {
     expect(text, contains(r'$800 MXN'));
     expect(text, contains('20 días'));
     expect(text, contains('Origen: app'));
+    expect(text, contains('no aprueba mayoreo'));
   });
 }

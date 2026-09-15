@@ -20,12 +20,19 @@ class RealtimeCatalogUpdate {
   const RealtimeCatalogUpdate._(
     this.outcome, {
     this.products = const [],
+    this.metadata,
     this.invalidDocumentIds = const [],
     this.error,
   });
 
-  const RealtimeCatalogUpdate.applied(List<Product> products)
-      : this._(RealtimeCatalogOutcome.applied, products: products);
+  const RealtimeCatalogUpdate.applied(
+    List<Product> products,
+    CatalogCacheMetadata metadata,
+  ) : this._(
+          RealtimeCatalogOutcome.applied,
+          products: products,
+          metadata: metadata,
+        );
 
   const RealtimeCatalogUpdate.empty() : this._(RealtimeCatalogOutcome.empty);
 
@@ -43,6 +50,7 @@ class RealtimeCatalogUpdate {
 
   final RealtimeCatalogOutcome outcome;
   final List<Product> products;
+  final CatalogCacheMetadata? metadata;
   final List<String> invalidDocumentIds;
   final Object? error;
 }
@@ -110,10 +118,16 @@ class RealtimeCatalogRepository {
       return RealtimeCatalogUpdate.invalid(invalidDocumentIds);
     }
 
-    await _writeCoordinator.runFirestoreWrite(
-      () => _cache.replaceProducts(products),
+    final metadata = CatalogCacheMetadata.forProducts(
+      source: CatalogCacheSource.firestore,
+      products: products,
+      syncedAt: DateTime.now(),
+      status: CatalogCacheStatus.healthy,
     );
-    return RealtimeCatalogUpdate.applied(products);
+    await _writeCoordinator.runFirestoreWrite(
+      () => _cache.replaceProducts(products, metadata: metadata),
+    );
+    return RealtimeCatalogUpdate.applied(products, metadata);
   }
 
   static Product _productFromDocument(CatalogRealtimeDocument document) {

@@ -1,0 +1,27 @@
+import assert from 'node:assert/strict';
+import { ServerAdminAuthorizer, hashAdminBearerToken } from './services/accounts_orders/src/admin/authorizer.ts';
+import { InMemoryAppAccountsRepository, InMemoryCustomersRepository, InMemoryOrdersRepository, InMemoryWebhookEventsRepository, InMemoryPushTokensRepository } from './services/accounts_orders/test/support/inMemoryRepositories.ts';
+import { InMemoryAdminPrincipalsRepository } from './services/accounts_orders/test/support/inMemoryAdminPrincipalsRepository.ts';
+import { handleOrdersWebhook } from './services/accounts_orders/src/webhooks/handlers.ts';
+const accounts = new InMemoryAppAccountsRepository();
+await accounts.register({accountId:'audit-user',email:'owner@example.test',displayName:null,passwordHash:'test',deviceId:'audit-device',tokenHash:hashAdminBearerToken('audit-token'),expiresAt:new Date(Date.now()+60000)});
+const auth = new ServerAdminAuthorizer({appAccounts:accounts,customerTokenVerifier:{resolveCustomerId:async()=>null},principals:new InMemoryAdminPrincipalsRepository(),ownerEmails:new Set(['owner@example.test']),ownerShopifyCustomerIds:new Set()});
+const resolved = await auth.resolve('audit-token');
+assert.equal(accounts.byId.get('audit-user')?.emailVerified,false);
+assert.equal(resolved?.actor.role,'owner');
+console.log('CONFIRMED: unverified allowlisted email receives owner role. Local fake repositories only.');
+const orders = new InMemoryOrdersRepository();
+const original = orders.upsertByShopifyOrderId.bind(orders);
+let calls=0;
+orders.upsertByShopifyOrderId=async(record)=>{calls++; if(calls===1) throw Error('simulated temporary DB failure'); return original(record)};
+const deps={customers:new InMemoryCustomersRepository(),orders,webhookEvents:new InMemoryWebhookEventsRepository(),pushTokens:new InMemoryPushTokensRepository()};
+const payload={id:123,customer:{id:456},created_at:'2026-09-07T00:00:00Z',current_total_price:'100',currency:'MXN',financial_status:'paid'};
+try{await handleOrdersWebhook(deps,'audit-delivery','orders/create',payload,Buffer.from('{}'))}catch{}
+await handleOrdersWebhook(deps,'audit-delivery','orders/create',payload,Buffer.from('{}'));
+assert.equal(calls,1);
+console.log('CONFIRMED: retry after failed order upsert is skipped; processing not retried.');
+await accounts.register({accountId:'new-id',email:'changed@example.test',displayName:null,passwordHash:'replacement-hash',deviceId:'audit-device',tokenHash:hashAdminBearerToken('replacement-token'),expiresAt:new Date(Date.now()+60000)});
+const changed=await accounts.findCredentialsByEmail('changed@example.test');
+assert.equal(changed?.id,'audit-user');
+assert.equal(changed?.passwordHash,'replacement-hash');
+console.log('CONFIRMED: register with known deviceId replaces existing account credentials without prior credential. SQL path separately inspected.');

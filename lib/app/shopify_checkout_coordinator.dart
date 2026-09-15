@@ -1,13 +1,28 @@
 /// Reconciles Shopify immediately before checkout and owns terminal effects.
 library;
 
+import 'dart:convert';
+import 'package:crypto/crypto.dart';
 import '../data/shopify/cart/cart_api.dart';
 import '../data/shopify/cart/cart_repository.dart';
 import '../data/shopify/cart/cart_session_store.dart';
 import '../data/shopify/cart/checkout_launcher.dart';
 import 'cart_controller.dart';
 
-typedef CheckoutCompletion = Future<void> Function();
+typedef CheckoutCompletion = Future<void> Function(
+  CheckoutPurchase purchase,
+);
+
+final class CheckoutPurchase {
+  CheckoutPurchase({
+    required this.scope,
+    required this.operationId,
+    required Map<String, int> quantities,
+  }) : quantities = Map.unmodifiable(quantities);
+  final CartSessionScope scope;
+  final String operationId;
+  final Map<String, int> quantities;
+}
 
 final class ShopifyCheckoutCoordinator {
   ShopifyCheckoutCoordinator({
@@ -24,6 +39,9 @@ final class ShopifyCheckoutCoordinator {
   final CheckoutUrlPolicy _urlPolicy;
   final CartSessionStore _sessions;
   final ExternalCheckoutOpener? _externalOpener;
+
+  Future<void> Function()? _pendingCompletion;
+  CartSessionScope? _pendingScope;
 
   bool _presenting = false;
   bool _openingFallback = false;
@@ -67,9 +85,22 @@ final class ShopifyCheckoutCoordinator {
     _presenting = true;
     _latestUrl = null;
     try {
+      final pending = _pendingCompletion;
+      if (pending != null) {
+        final completedScope = _pendingScope;
+        await pending();
+        _pendingCompletion = null;
+        _pendingScope = null;
+        if (completedScope != scope) {
+          return _unavailable(
+            'Se actualizó una compra de otra cuenta. Revisa tu bolsa e intenta de nuevo.',
+          );
+        }
+        return const CheckoutCompleted();
+      }
       final refreshed = await controller.reconcileLocalBag(
         scope: scope,
-        localIntent: localIntent,
+        localIntent: List<LocalCartIntent>.unmodifiable(localIntent),
         buyerIdentity: buyerIdentity,
       );
       if (refreshed == null ||
@@ -94,10 +125,32 @@ final class ShopifyCheckoutCoordinator {
       final result = await _launcher.present(validated);
       if (result is CheckoutCompleted) {
         _latestUrl = null;
-        // Deleting the remote session first is fail-safe: if local persistence
-        // cannot clear, the visible bag remains instead of disappearing early.
-        await _sessions.delete(scope);
-        await onCompleted();
+        final quantities = <String, int>{};
+        for (final line in cart.lines) {
+          quantities.update(
+            line.variantId,
+            (value) => value + line.quantity,
+            ifAbsent: () => line.quantity,
+          );
+        }
+        final purchase = CheckoutPurchase(
+          scope: scope,
+          operationId: sha256
+              .convert(utf8.encode('${scope.shopDomain}:${cart.id}'))
+              .toString(),
+          quantities: quantities,
+        );
+        // Keep the captured completion retryable without opening another
+        // checkout. The local receipt makes retry after session-delete failure
+        // safe as well as retry after a failed bag transaction.
+        _pendingScope = scope;
+        _pendingCompletion = () async {
+          await onCompleted(purchase);
+          await _sessions.delete(scope);
+        };
+        await _pendingCompletion!();
+        _pendingCompletion = null;
+        _pendingScope = null;
         try {
           await _launcher.invalidate();
         } on Exception {
@@ -113,7 +166,9 @@ final class ShopifyCheckoutCoordinator {
       );
     } on Exception {
       return _unavailable(
-        'No fue posible abrir el checkout. Tu bolsa se conserva.',
+        _pendingCompletion != null
+            ? 'Shopify confirmó tu compra. Reintenta para actualizar tu bolsa sin volver a pagar.'
+            : 'No fue posible abrir el checkout. Tu bolsa se conserva.',
       );
     } finally {
       _presenting = false;

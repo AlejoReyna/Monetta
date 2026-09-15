@@ -26,7 +26,12 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.text('Empieza en tres pasos'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Tu negocio, paso a paso'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Tu negocio, paso a paso'), findsOneWidget);
     expect(find.byKey(const ValueKey('share-bags-wholesale')), findsNothing);
 
     final openButton = find.byKey(const ValueKey('open-bags-suggested'));
@@ -80,6 +85,46 @@ void main() {
     expect(launched.last.host, 'wa.me');
     expect(launched.last.queryParameters['text'], contains(r'$800 MXN'));
     expect(launched.last.queryParameters['text'], contains('Origen: app'));
+  });
+
+  testWidgets('includes reference content without excluded sections', (
+    tester,
+  ) async {
+    await tester.binding.setSurfaceSize(const Size(390, 844));
+    addTearDown(() => tester.binding.setSurfaceSize(null));
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: PartnerHubScreen(
+          content: MonettaEditorialContent.fallback.partner,
+          launchUri: (_) async => true,
+          shareCatalog: (_, __) async {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('DESCUENTOS DE MAYOREO'),
+      400,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('DESCUENTOS DE MAYOREO'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('Sistema de apartado'),
+      700,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('Sistema de apartado'), findsOneWidget);
+    await tester.scrollUntilVisible(
+      find.text('GRUPOS DE MONETTA'),
+      700,
+      scrollable: find.byType(Scrollable).first,
+    );
+    expect(find.text('GRUPOS DE MONETTA'), findsOneWidget);
+    expect(find.text('CALENDARIO DE PEDIDOS'), findsNothing);
+    expect(find.text('NUESTROS PRODUCTOS'), findsNothing);
+    expect(find.text('REGÍSTRATE'), findsNothing);
   });
 
   testWidgets('catalog and steps remain responsive at tablet width', (

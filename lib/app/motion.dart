@@ -132,6 +132,7 @@ class RevealOnScroll extends StatefulWidget {
     required this.scrollController,
     this.delay = Duration.zero,
     this.offset = 10,
+    this.fade = true,
     super.key,
   });
 
@@ -139,6 +140,7 @@ class RevealOnScroll extends StatefulWidget {
   final ScrollController scrollController;
   final Duration delay;
   final double offset;
+  final bool fade;
 
   @override
   State<RevealOnScroll> createState() => _RevealOnScrollState();
@@ -224,16 +226,15 @@ class _RevealOnScrollState extends State<RevealOnScroll>
 
   @override
   Widget build(BuildContext context) {
-    return FadeTransition(
-      opacity: _opacity,
-      child: AnimatedBuilder(
-        animation: _translation,
-        child: widget.child,
-        builder: (context, child) => Transform.translate(
-          offset: Offset(0, _translation.value),
-          child: child,
-        ),
+    final translatedChild = AnimatedBuilder(
+      animation: _translation,
+      child: widget.child,
+      builder: (context, child) => Transform.translate(
+        offset: Offset(0, _translation.value),
+        child: child,
       ),
     );
+    if (!widget.fade) return translatedChild;
+    return FadeTransition(opacity: _opacity, child: translatedChild);
   }
 }

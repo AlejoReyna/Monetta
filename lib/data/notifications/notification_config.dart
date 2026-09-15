@@ -13,6 +13,7 @@ class NotificationConfig {
     required this.firebaseProjectId,
     required this.firebaseMessagingSenderId,
     required this.firebaseStorageBucket,
+    required this.iosBundleId,
     required this.timezone,
   });
 
@@ -23,6 +24,7 @@ class NotificationConfig {
   final String firebaseProjectId;
   final String firebaseMessagingSenderId;
   final String firebaseStorageBucket;
+  final String iosBundleId;
   final String timezone;
 
   bool get isUsable => enabled && apiBaseUrl != null && hasFirebaseOptions;
@@ -42,7 +44,7 @@ class NotificationConfig {
         projectId: firebaseProjectId,
         storageBucket:
             firebaseStorageBucket.isEmpty ? null : firebaseStorageBucket,
-        iosBundleId: 'mx.monetta.monettaApp',
+        iosBundleId: iosBundleId,
       );
 
   factory NotificationConfig.fromEnvironment({
@@ -61,6 +63,7 @@ class NotificationConfig {
         String.fromEnvironment('FIREBASE_ANDROID_APP_ID');
     const iosFirebaseApiKey = String.fromEnvironment('FIREBASE_IOS_API_KEY');
     const iosFirebaseAppId = String.fromEnvironment('FIREBASE_IOS_APP_ID');
+    const appEnvironment = String.fromEnvironment('APP_ENV');
     final rawBaseUrl =
         notificationBaseUrl.isEmpty ? fallbackBaseUrl : notificationBaseUrl;
     final platform = targetPlatform ?? defaultTargetPlatform;
@@ -86,6 +89,9 @@ class NotificationConfig {
           const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
       firebaseStorageBucket:
           const String.fromEnvironment('FIREBASE_STORAGE_BUCKET'),
+      iosBundleId: appEnvironment == 'staging'
+          ? 'mx.monetta.monettaApp.staging'
+          : 'mx.monetta.monettaApp',
       timezone: const String.fromEnvironment(
         'NOTIFICATIONS_TIMEZONE',
         defaultValue: 'America/Monterrey',
@@ -117,6 +123,7 @@ class NotificationConfig {
     firebaseProjectId: '',
     firebaseMessagingSenderId: '',
     firebaseStorageBucket: '',
+    iosBundleId: 'mx.monetta.monettaApp',
     timezone: 'America/Monterrey',
   );
 }

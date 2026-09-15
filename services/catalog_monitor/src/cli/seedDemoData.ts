@@ -139,6 +139,11 @@ async function main(): Promise<void> {
     lastChangedAt: now,
     isActive: true,
     consecutiveMissingSnapshots: 0,
+    selectionState: 'selected',
+    selectionVersion: null,
+    watchTier: 'standard',
+    placements: [],
+    matchedRuleId: null,
   }));
 
   await products.upsertMany(records);
@@ -153,13 +158,16 @@ async function main(): Promise<void> {
       // /healthz report a source as healthy or become a diffing baseline.
       status: 'partial',
       isFullSnapshot: false,
+      selectionVersion: null,
       urlsDiscovered: count,
+      urlsSelected: count,
       pagesFetched: count,
       successfulParses: count,
       newItems: count,
       changedItems: 0,
       missingItems: 0,
       inactiveItems: 0,
+      deselectedItems: 0,
       errorsByType: {},
     });
   }

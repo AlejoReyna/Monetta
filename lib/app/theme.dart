@@ -4,21 +4,32 @@
 library;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:intl/intl.dart';
 
 import '../domain/catalog_item.dart' show Money;
+import 'motion.dart';
 import 'shopper_copy.dart';
 
 // ---------------------------------------------------------------------------
 // Palette
 // ---------------------------------------------------------------------------
 
+/// Fixed light-palette values retained for brand artwork, media overlays, and
+/// backwards-compatible callers while feature UI migrates to [MonettaColors].
+/// Theme-dependent widgets should read `context.monettaColors` instead.
 const Color kInk = Color(0xFF111111);
 
 const Color kInkMuted = Color(0xFF737373);
 
 /// Monetta's accent, rationed. See the library note.
 const Color kGold = Color(0xFFAA7D44);
+
+/// Purple used when an animated home-section title has fully resolved.
+const Color kPurple = Color(0xFF725A82);
+
+/// A lighter counterpart that keeps small purple copy legible on dark canvas.
+const Color kPurpleOnDark = Color(0xFFB79AC7);
 
 /// Pale ground used for catalog photography and quiet footer surfaces.
 const Color kMist = Color(0xFFF5F5F5);
@@ -38,13 +49,199 @@ const BorderRadius kSquare = BorderRadius.zero;
 /// which is the whole point — a 1.0 border looks drawn, a 0.5 looks printed.
 const BorderSide kHairline = BorderSide(color: kLine, width: 0.5);
 
+/// Monetta's semantic colors. Unlike the legacy `kInk`/`kMist` constants,
+/// these describe intent and can therefore change with brightness.
+@immutable
+class MonettaColors extends ThemeExtension<MonettaColors> {
+  const MonettaColors({
+    required this.canvas,
+    required this.surface,
+    required this.surfaceRaised,
+    required this.surfaceMuted,
+    required this.mediaPlaceholder,
+    required this.contentPrimary,
+    required this.contentMuted,
+    required this.divider,
+    required this.inputFill,
+    required this.inverseSurface,
+    required this.onInverseSurface,
+    required this.accent,
+    required this.accentContent,
+    required this.sale,
+    required this.success,
+    required this.warningSurface,
+    required this.successSurface,
+    required this.scrim,
+    required this.navigationSurface,
+    required this.navigationSelection,
+    required this.navigationForeground,
+  });
+
+  final Color canvas;
+  final Color surface;
+  final Color surfaceRaised;
+  final Color surfaceMuted;
+  final Color mediaPlaceholder;
+  final Color contentPrimary;
+  final Color contentMuted;
+  final Color divider;
+  final Color inputFill;
+  final Color inverseSurface;
+  final Color onInverseSurface;
+  final Color accent;
+  final Color accentContent;
+  final Color sale;
+  final Color success;
+  final Color warningSurface;
+  final Color successSurface;
+  final Color scrim;
+  final Color navigationSurface;
+  final Color navigationSelection;
+  final Color navigationForeground;
+
+  static const light = MonettaColors(
+    canvas: Color(0xFFFFFFFF),
+    surface: Color(0xFFFFFFFF),
+    surfaceRaised: Color(0xFFFFFFFF),
+    surfaceMuted: Color(0xFFF5F5F5),
+    mediaPlaceholder: Color(0xFFF5F5F5),
+    contentPrimary: Color(0xFF111111),
+    contentMuted: Color(0xFF737373),
+    divider: Color(0x26111111),
+    inputFill: Color(0xFFF1F1F1),
+    inverseSurface: Color(0xFF111111),
+    onInverseSurface: Color(0xFFFFFFFF),
+    accent: kGold,
+    accentContent: Color(0xFF8F6838),
+    sale: kSale,
+    success: Color(0xFF3B7B4A),
+    warningSurface: Color(0xFFF7F0E6),
+    successSurface: Color(0xFFEAF4EC),
+    scrim: Color(0x52000000),
+    navigationSurface: Color(0xFFF7F7F7),
+    navigationSelection: Color(0x24AA7D44),
+    navigationForeground: Color(0xFF3A3937),
+  );
+
+  static const dark = MonettaColors(
+    canvas: Color(0xFF11100F),
+    surface: Color(0xFF171615),
+    surfaceRaised: Color(0xFF201E1C),
+    surfaceMuted: Color(0xFF282521),
+    mediaPlaceholder: Color(0xFF242220),
+    contentPrimary: Color(0xFFF5F2EC),
+    contentMuted: Color(0xFFB9B3AA),
+    divider: Color(0x33FFFFFF),
+    inputFill: Color(0xFF242220),
+    inverseSurface: Color(0xFFF5F2EC),
+    onInverseSurface: Color(0xFF171615),
+    accent: Color(0xFFC49A65),
+    accentContent: Color(0xFFC49A65),
+    sale: Color(0xFFE48176),
+    success: Color(0xFF9ABC75),
+    warningSurface: Color(0xFF33281D),
+    successSurface: Color(0xFF1C3022),
+    scrim: Color(0xA6000000),
+    navigationSurface: Color(0xFF201E1C),
+    navigationSelection: Color(0x3DC49A65),
+    navigationForeground: Color(0xFFF5F2EC),
+  );
+
+  @override
+  MonettaColors copyWith({
+    Color? canvas,
+    Color? surface,
+    Color? surfaceRaised,
+    Color? surfaceMuted,
+    Color? mediaPlaceholder,
+    Color? contentPrimary,
+    Color? contentMuted,
+    Color? divider,
+    Color? inputFill,
+    Color? inverseSurface,
+    Color? onInverseSurface,
+    Color? accent,
+    Color? accentContent,
+    Color? sale,
+    Color? success,
+    Color? warningSurface,
+    Color? successSurface,
+    Color? scrim,
+    Color? navigationSurface,
+    Color? navigationSelection,
+    Color? navigationForeground,
+  }) {
+    return MonettaColors(
+      canvas: canvas ?? this.canvas,
+      surface: surface ?? this.surface,
+      surfaceRaised: surfaceRaised ?? this.surfaceRaised,
+      surfaceMuted: surfaceMuted ?? this.surfaceMuted,
+      mediaPlaceholder: mediaPlaceholder ?? this.mediaPlaceholder,
+      contentPrimary: contentPrimary ?? this.contentPrimary,
+      contentMuted: contentMuted ?? this.contentMuted,
+      divider: divider ?? this.divider,
+      inputFill: inputFill ?? this.inputFill,
+      inverseSurface: inverseSurface ?? this.inverseSurface,
+      onInverseSurface: onInverseSurface ?? this.onInverseSurface,
+      accent: accent ?? this.accent,
+      accentContent: accentContent ?? this.accentContent,
+      sale: sale ?? this.sale,
+      success: success ?? this.success,
+      warningSurface: warningSurface ?? this.warningSurface,
+      successSurface: successSurface ?? this.successSurface,
+      scrim: scrim ?? this.scrim,
+      navigationSurface: navigationSurface ?? this.navigationSurface,
+      navigationSelection: navigationSelection ?? this.navigationSelection,
+      navigationForeground: navigationForeground ?? this.navigationForeground,
+    );
+  }
+
+  @override
+  MonettaColors lerp(ThemeExtension<MonettaColors>? other, double t) {
+    if (other is! MonettaColors) return this;
+    return MonettaColors(
+      canvas: Color.lerp(canvas, other.canvas, t)!,
+      surface: Color.lerp(surface, other.surface, t)!,
+      surfaceRaised: Color.lerp(surfaceRaised, other.surfaceRaised, t)!,
+      surfaceMuted: Color.lerp(surfaceMuted, other.surfaceMuted, t)!,
+      mediaPlaceholder:
+          Color.lerp(mediaPlaceholder, other.mediaPlaceholder, t)!,
+      contentPrimary: Color.lerp(contentPrimary, other.contentPrimary, t)!,
+      contentMuted: Color.lerp(contentMuted, other.contentMuted, t)!,
+      divider: Color.lerp(divider, other.divider, t)!,
+      inputFill: Color.lerp(inputFill, other.inputFill, t)!,
+      inverseSurface: Color.lerp(inverseSurface, other.inverseSurface, t)!,
+      onInverseSurface:
+          Color.lerp(onInverseSurface, other.onInverseSurface, t)!,
+      accent: Color.lerp(accent, other.accent, t)!,
+      accentContent: Color.lerp(accentContent, other.accentContent, t)!,
+      sale: Color.lerp(sale, other.sale, t)!,
+      success: Color.lerp(success, other.success, t)!,
+      warningSurface: Color.lerp(warningSurface, other.warningSurface, t)!,
+      successSurface: Color.lerp(successSurface, other.successSurface, t)!,
+      scrim: Color.lerp(scrim, other.scrim, t)!,
+      navigationSurface:
+          Color.lerp(navigationSurface, other.navigationSurface, t)!,
+      navigationSelection:
+          Color.lerp(navigationSelection, other.navigationSelection, t)!,
+      navigationForeground:
+          Color.lerp(navigationForeground, other.navigationForeground, t)!,
+    );
+  }
+}
+
+extension MonettaThemeContext on BuildContext {
+  MonettaColors get monettaColors =>
+      Theme.of(this).extension<MonettaColors>() ?? MonettaColors.light;
+}
+
 const double kSectionGap = 52;
 
 /// Canonical logo height for every top navigation bar.
 ///
 /// Keep navigation wordmarks on this token so routes and scroll states cannot
 /// silently render the Monetta identity at different sizes.
-const double kAppBarWordmarkHeight = 20;
+const double kAppBarWordmarkHeight = 24;
 
 /// Matches the store's `money_format` of `$ {{amount}}` in MXN.
 final NumberFormat kMoney = NumberFormat.currency(
@@ -102,7 +299,7 @@ const List<String> _editorialFallback = <String>[
 /// Editorial headline. Clean geometric sans with restrained tracking.
 TextStyle display(
   double size, {
-  Color color = kInk,
+  Color? color,
   FontWeight weight = FontWeight.w300,
   double height = 1.3,
 }) =>
@@ -118,7 +315,7 @@ TextStyle display(
 
 TextStyle editorial(
   double size, {
-  Color color = kInk,
+  Color? color,
   FontWeight weight = FontWeight.w400,
   double height = 1.2,
 }) =>
@@ -133,7 +330,7 @@ TextStyle editorial(
     );
 
 /// Text fallback for the bitmap wordmark.
-TextStyle wordmark({double size = 19, Color color = kInk}) => TextStyle(
+TextStyle wordmark({double size = 19, Color? color}) => TextStyle(
       fontFamily: _displayFamily,
       fontFamilyFallback: _displayFallback,
       fontSize: size,
@@ -147,7 +344,7 @@ TextStyle wordmark({double size = 19, Color color = kInk}) => TextStyle(
 /// reaches a screen reader stays readable.
 TextStyle eyebrow({
   double size = 10,
-  Color color = kInkMuted,
+  Color? color,
   FontWeight weight = FontWeight.w500,
 }) =>
     TextStyle(
@@ -161,7 +358,7 @@ TextStyle eyebrow({
 /// Running text and UI labels — the geometric-sans half of the pairing.
 TextStyle sans({
   double size = 13,
-  Color color = kInk,
+  Color? color,
   FontWeight weight = FontWeight.w400,
   double height = 1.5,
   TextDecoration? decoration,
@@ -186,30 +383,34 @@ class UnderlineLink extends StatelessWidget {
   const UnderlineLink({
     required this.label,
     required this.onTap,
-    this.color = kInk,
+    this.color,
     this.size = 12,
     super.key,
   });
 
   final String label;
   final VoidCallback onTap;
-  final Color color;
+  final Color? color;
   final double size;
 
   @override
   Widget build(BuildContext context) {
+    final resolvedColor = color ?? context.monettaColors.contentPrimary;
     return GestureDetector(
       onTap: onTap,
       behavior: HitTestBehavior.opaque,
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(label, style: sans(size: size, color: color, height: 1.2)),
+          Text(
+            label,
+            style: sans(size: size, color: resolvedColor, height: 1.2),
+          ),
           const SizedBox(height: 4),
           Container(
             width: label.length * size * 0.55,
             height: 0.8,
-            color: color,
+            color: resolvedColor,
           ),
         ],
       ),
@@ -248,8 +449,13 @@ class MonettaWordmark extends StatelessWidget {
       fit: BoxFit.contain,
       filterQuality: FilterQuality.medium,
       semanticLabel: 'Monetta',
-      errorBuilder: (context, _, __) =>
-          Text('MONETTA', style: wordmark(size: height * 0.82)),
+      errorBuilder: (context, _, __) => Text(
+        'MONETTA',
+        style: wordmark(
+          size: height * 0.82,
+          color: context.monettaColors.contentPrimary,
+        ),
+      ),
     );
   }
 }
@@ -276,21 +482,175 @@ class MonettaTrustRows extends StatelessWidget {
   }
 }
 
+/// A continuous left-to-right glyph reveal for editorial titles.
+///
+/// The soft mask lets each letter resolve progressively instead of appearing
+/// in discrete typewriter steps. It runs once, only when the text reaches the
+/// viewport, and leaves the underlying [Text] intact for layout and semantics.
+class EditorialTitleReveal extends StatefulWidget {
+  const EditorialTitleReveal({
+    required this.text,
+    required this.style,
+    this.onCompleted,
+    super.key,
+  });
+
+  final String text;
+  final TextStyle style;
+  final VoidCallback? onCompleted;
+
+  @override
+  State<EditorialTitleReveal> createState() => _EditorialTitleRevealState();
+}
+
+class _EditorialTitleRevealState extends State<EditorialTitleReveal>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller = AnimationController(
+    vsync: this,
+    duration: const Duration(milliseconds: 920),
+  );
+  ScrollPosition? _scrollPosition;
+  bool _checkScheduled = false;
+  bool _started = false;
+  bool _completionNotified = false;
+
+  bool get _motionDisabled {
+    final media = MediaQuery.maybeOf(context);
+    return WidgetsBinding.instance.runtimeType.toString().contains('Test') ||
+        media?.disableAnimations == true ||
+        media?.accessibleNavigation == true;
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller.addStatusListener(_handleStatus);
+  }
+
+  void _handleStatus(AnimationStatus status) {
+    if (status != AnimationStatus.completed) return;
+    _notifyCompleted();
+  }
+
+  void _notifyCompleted() {
+    if (_completionNotified) return;
+    _completionNotified = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) widget.onCompleted?.call();
+    });
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final nextPosition = Scrollable.maybeOf(context)?.position;
+    if (nextPosition != _scrollPosition) {
+      _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+      _scrollPosition = nextPosition;
+      _scrollPosition?.addListener(_scheduleVisibilityCheck);
+    }
+    if (_motionDisabled) {
+      _started = true;
+      _controller.value = 1;
+    } else {
+      _scheduleVisibilityCheck();
+    }
+  }
+
+  void _scheduleVisibilityCheck() {
+    if (_started || _checkScheduled || !mounted) return;
+    _checkScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkScheduled = false;
+      if (!mounted || _started) return;
+      final renderObject = context.findRenderObject();
+      if (renderObject is! RenderBox || !renderObject.attached) return;
+      final top = renderObject.localToGlobal(Offset.zero).dy;
+      final bottom = top + renderObject.size.height;
+      final viewportHeight = MediaQuery.sizeOf(context).height;
+      if (bottom <= 0 || top >= viewportHeight - 20) return;
+      _started = true;
+      _controller.forward();
+    });
+  }
+
+  @override
+  void dispose() {
+    _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      child: Text(widget.text, style: widget.style),
+      builder: (context, child) {
+        final progress = Curves.easeOutCubic.transform(_controller.value);
+        final revealEdge = (progress * 1.16).clamp(0.0, 1.16);
+        final solidUntil = (revealEdge - .16).clamp(0.0, 1.0);
+        final fadeUntil = revealEdge.clamp(0.0, 1.0);
+        return Transform.translate(
+          offset: Offset(0, 5 * (1 - progress)),
+          child: Opacity(
+            opacity: (progress * 3).clamp(0.0, 1.0),
+            child: ShaderMask(
+              blendMode: BlendMode.dstIn,
+              shaderCallback: (bounds) => LinearGradient(
+                colors: const [
+                  Colors.white,
+                  Colors.white,
+                  Colors.transparent,
+                  Colors.transparent,
+                ],
+                stops: [0, solidUntil, fadeUntil, 1],
+              ).createShader(bounds),
+              child: child,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
 /// Section opener: tracked kicker over a serif title, on the 64px rhythm.
-class SectionHeading extends StatelessWidget {
+class SectionHeading extends StatefulWidget {
   const SectionHeading({
     required this.kicker,
     required this.title,
     this.trailing,
+    this.animateKickerColor = false,
     super.key,
   });
 
   final String kicker;
   final String title;
   final Widget? trailing;
+  final bool animateKickerColor;
+
+  @override
+  State<SectionHeading> createState() => _SectionHeadingState();
+}
+
+class _SectionHeadingState extends State<SectionHeading> {
+  bool _titleRevealed = false;
+
+  void _handleTitleRevealed() {
+    if (_titleRevealed || !mounted) return;
+    setState(() => _titleRevealed = true);
+  }
 
   @override
   Widget build(BuildContext context) {
+    final colors = context.monettaColors;
+    final completedKickerColor = Theme.of(context).brightness == Brightness.dark
+        ? kPurpleOnDark
+        : kPurple;
+    final kickerColor = widget.animateKickerColor
+        ? (_titleRevealed ? completedKickerColor : colors.accent)
+        : colors.contentMuted;
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
       child: Row(
@@ -300,13 +660,23 @@ class SectionHeading extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(kicker.toUpperCase(), style: eyebrow()),
+                AnimatedDefaultTextStyle(
+                  duration: reduceMotion(context) ? Duration.zero : kSwap,
+                  curve: kMotionCurve,
+                  style: eyebrow(color: kickerColor),
+                  child: Text(widget.kicker.toUpperCase()),
+                ),
                 const SizedBox(height: 8),
-                Text(title, style: editorial(25)),
+                EditorialTitleReveal(
+                  text: widget.title,
+                  style: editorial(25, color: colors.contentPrimary),
+                  onCompleted:
+                      widget.animateKickerColor ? _handleTitleRevealed : null,
+                ),
               ],
             ),
           ),
-          if (trailing != null) trailing!,
+          if (widget.trailing != null) widget.trailing!,
         ],
       ),
     );
@@ -317,60 +687,93 @@ class SectionHeading extends StatelessWidget {
 // ThemeData
 // ---------------------------------------------------------------------------
 
-ThemeData buildTheme() {
+ThemeData buildTheme({Brightness brightness = Brightness.light}) {
+  final colors =
+      brightness == Brightness.dark ? MonettaColors.dark : MonettaColors.light;
   final scheme = ColorScheme.fromSeed(
-    seedColor: kGold,
-    primary: kInk,
-    secondary: kGold,
-    surface: Colors.white,
-    brightness: Brightness.light,
+    seedColor: colors.accent,
+    primary: colors.contentPrimary,
+    onPrimary: colors.canvas,
+    secondary: colors.accent,
+    surface: colors.surface,
+    onSurface: colors.contentPrimary,
+    error: colors.sale,
+    brightness: brightness,
   );
 
   return ThemeData(
     useMaterial3: true,
+    brightness: brightness,
     colorScheme: scheme,
-    scaffoldBackgroundColor: Colors.white,
+    extensions: <ThemeExtension<dynamic>>[colors],
+    scaffoldBackgroundColor: colors.canvas,
     splashFactory: NoSplash.splashFactory,
     highlightColor: Colors.transparent,
-    dividerTheme: const DividerThemeData(
-      color: kLine,
+    dividerColor: colors.divider,
+    dividerTheme: DividerThemeData(
+      color: colors.divider,
       thickness: 0.5,
       space: 0.5,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: Colors.white,
+      backgroundColor: colors.surface,
       surfaceTintColor: Colors.transparent,
-      foregroundColor: kInk,
+      foregroundColor: colors.contentPrimary,
       elevation: 0,
       scrolledUnderElevation: 0,
       centerTitle: true,
-      titleTextStyle: wordmark(),
-      iconTheme: const IconThemeData(color: kInk, size: 21),
+      titleTextStyle: wordmark(color: colors.contentPrimary),
+      iconTheme: IconThemeData(color: colors.contentPrimary, size: 21),
+      systemOverlayStyle: SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness:
+            brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: brightness,
+        systemNavigationBarColor: colors.canvas,
+        systemNavigationBarDividerColor: colors.divider,
+        systemNavigationBarIconBrightness:
+            brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+      ),
     ),
     textTheme: TextTheme(
-      displayLarge: display(34),
-      displayMedium: display(28),
-      titleLarge: display(22),
-      titleMedium: sans(size: 14, weight: FontWeight.w500),
-      bodyMedium: sans(),
-      bodySmall: sans(size: 12, color: kInkMuted),
-      labelSmall: eyebrow(),
+      displayLarge: display(34, color: colors.contentPrimary),
+      displayMedium: display(28, color: colors.contentPrimary),
+      titleLarge: display(22, color: colors.contentPrimary),
+      titleMedium: sans(
+        size: 14,
+        weight: FontWeight.w500,
+        color: colors.contentPrimary,
+      ),
+      bodyMedium: sans(color: colors.contentPrimary),
+      bodySmall: sans(size: 12, color: colors.contentMuted),
+      labelSmall: eyebrow(color: colors.contentMuted),
     ),
-    chipTheme: const ChipThemeData(
+    iconTheme: IconThemeData(color: colors.contentPrimary),
+    chipTheme: ChipThemeData(
       backgroundColor: Colors.transparent,
-      side: kHairline,
-      shape: RoundedRectangleBorder(borderRadius: kSquare),
-      labelStyle: TextStyle(fontSize: 11, color: kInk, letterSpacing: 0.3),
-      padding: EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      selectedColor: colors.contentPrimary,
+      side: BorderSide(color: colors.divider, width: 0.5),
+      shape: const RoundedRectangleBorder(borderRadius: kSquare),
+      labelStyle: TextStyle(
+        fontSize: 11,
+        color: colors.contentPrimary,
+        letterSpacing: 0.3,
+      ),
+      secondaryLabelStyle: TextStyle(
+        fontSize: 11,
+        color: colors.canvas,
+        letterSpacing: 0.3,
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
     ),
     // Ink, not gold. Dior's committing action is the darkest thing on screen;
     // reserving gold for the apartado makes that CTA the one that stands out.
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: kInk,
-        foregroundColor: Colors.white,
-        disabledBackgroundColor: kLine,
-        disabledForegroundColor: kInkMuted,
+        backgroundColor: colors.contentPrimary,
+        foregroundColor: colors.canvas,
+        disabledBackgroundColor: colors.surfaceMuted,
+        disabledForegroundColor: colors.contentMuted,
         shape: const RoundedRectangleBorder(borderRadius: kSquare),
         minimumSize: const Size.fromHeight(52),
         textStyle: const TextStyle(
@@ -382,8 +785,8 @@ ThemeData buildTheme() {
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: kGold,
-        side: const BorderSide(color: kGold, width: 0.8),
+        foregroundColor: colors.accentContent,
+        side: BorderSide(color: colors.accent, width: 0.8),
         shape: const RoundedRectangleBorder(borderRadius: kSquare),
         minimumSize: const Size.fromHeight(52),
         textStyle: const TextStyle(
@@ -394,15 +797,62 @@ ThemeData buildTheme() {
       ),
     ),
     snackBarTheme: SnackBarThemeData(
-      backgroundColor: kInk,
-      contentTextStyle: sans(size: 12.5, color: Colors.white),
+      backgroundColor: colors.inverseSurface,
+      contentTextStyle: sans(size: 12.5, color: colors.onInverseSurface),
       shape: const RoundedRectangleBorder(borderRadius: kSquare),
       behavior: SnackBarBehavior.floating,
     ),
-    bottomSheetTheme: const BottomSheetThemeData(
-      backgroundColor: Colors.white,
+    bottomSheetTheme: BottomSheetThemeData(
+      backgroundColor: colors.surfaceRaised,
       surfaceTintColor: Colors.transparent,
-      shape: RoundedRectangleBorder(borderRadius: kSquare),
+      modalBackgroundColor: colors.surfaceRaised,
+      modalBarrierColor: colors.scrim,
+      shape: const RoundedRectangleBorder(borderRadius: kSquare),
+    ),
+    dialogTheme: DialogThemeData(
+      backgroundColor: colors.surfaceRaised,
+      surfaceTintColor: Colors.transparent,
+    ),
+    inputDecorationTheme: InputDecorationTheme(
+      filled: true,
+      fillColor: colors.inputFill,
+      labelStyle: sans(size: 12.5, color: colors.contentMuted),
+      hintStyle: sans(size: 12.5, color: colors.contentMuted),
+      enabledBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: colors.divider, width: 0.5),
+      ),
+      focusedBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: colors.contentPrimary),
+      ),
+      errorBorder: UnderlineInputBorder(
+        borderSide: BorderSide(color: colors.sale),
+      ),
+    ),
+    switchTheme: SwitchThemeData(
+      thumbColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? colors.surface
+            : colors.contentMuted,
+      ),
+      trackColor: WidgetStateProperty.resolveWith(
+        (states) => states.contains(WidgetState.selected)
+            ? colors.accent
+            : colors.surfaceMuted,
+      ),
+    ),
+    progressIndicatorTheme: ProgressIndicatorThemeData(
+      color: colors.accent,
+      linearTrackColor: colors.surfaceMuted,
+      circularTrackColor: colors.surfaceMuted,
+    ),
+    textSelectionTheme: TextSelectionThemeData(
+      cursorColor: colors.contentPrimary,
+      selectionColor: colors.accent.withValues(alpha: 0.28),
+      selectionHandleColor: colors.accent,
     ),
   );
 }
+
+ThemeData buildLightTheme() => buildTheme();
+
+ThemeData buildDarkTheme() => buildTheme(brightness: Brightness.dark);

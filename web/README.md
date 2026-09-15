@@ -22,7 +22,9 @@ Select a thumbnail to inspect the full-resolution capture. The canvas supports
 fit, zoom, keyboard shortcuts and drag-to-pan in the palette. Detail mode fits
 one centered device inside the available viewport without vertical scrolling;
 select screens also include restrained leader-line annotations where context is
-useful.
+useful. The sidebar also includes an expandable history row dated with the
+current day. Its snapshot cards use the same selection and detail behavior while
+remaining separate from the current UI group.
 
 ## Local
 

@@ -42,8 +42,16 @@ void main() {
     test('allForAccount returns newest first', () async {
       final store = OrderSummaryStore(db);
       await store.replaceAllForAccount('acct-1', [
-        _order(id: '1', accountId: 'acct-1', placedAt: DateTime.utc(2026, 1, 1)),
-        _order(id: '2', accountId: 'acct-1', placedAt: DateTime.utc(2026, 6, 1)),
+        _order(
+          id: '1',
+          accountId: 'acct-1',
+          placedAt: DateTime.utc(2026, 1, 1),
+        ),
+        _order(
+          id: '2',
+          accountId: 'acct-1',
+          placedAt: DateTime.utc(2026, 6, 1),
+        ),
       ]);
 
       final orders = await store.allForAccount('acct-1');
@@ -52,14 +60,22 @@ void main() {
 
     test('replaceAllForAccount fully replaces rather than appending', () async {
       final store = OrderSummaryStore(db);
-      await store.replaceAllForAccount('acct-1', [_order(id: '1', accountId: 'acct-1')]);
-      await store.replaceAllForAccount('acct-1', [_order(id: '2', accountId: 'acct-1')]);
+      await store.replaceAllForAccount(
+        'acct-1',
+        [_order(id: '1', accountId: 'acct-1')],
+      );
+      await store.replaceAllForAccount(
+        'acct-1',
+        [_order(id: '2', accountId: 'acct-1')],
+      );
 
       final orders = await store.allForAccount('acct-1');
       expect(orders.map((o) => o.id), ['2']);
     });
 
-    test('unifies shopify_checkout and whatsapp_apartado sources for the same account', () async {
+    test(
+        'unifies shopify_checkout and whatsapp_apartado sources for the same account',
+        () async {
       final store = OrderSummaryStore(db);
       await store.replaceAllForAccount('acct-1', [
         _order(id: '1', accountId: 'acct-1'),
@@ -72,7 +88,10 @@ void main() {
       ]);
 
       final orders = await store.allForAccount('acct-1');
-      expect(orders.map((o) => o.source).toSet(), {'shopify_checkout', 'whatsapp_apartado'});
+      expect(
+        orders.map((o) => o.source).toSet(),
+        {'shopify_checkout', 'whatsapp_apartado'},
+      );
       expect(orders.firstWhere((o) => o.id == '2').attributionCode, 'MN-7K3Q');
     });
   });

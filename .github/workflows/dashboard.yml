@@ -1,0 +1,36 @@
+name: Dashboard
+# WP-02: dashboard/catalog_monitor retired from customer product.
+# Automatic PR/push triggers disabled; manual dispatch only until authorized decommission.
+# See docs/audits/2026-09-07/EXTERNAL_CATALOG_DECOMMISSION.md
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: dashboard-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  dashboard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: dashboard
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: dashboard/package-lock.json
+      - run: npm ci
+      # Typecheck first: it covers the shared `@selection` import, so a type
+      # error in the server's selection module fails this job too — that
+      # coupling is the point (CATALOG_DASHBOARD § 7.2, WP-68).
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm run build

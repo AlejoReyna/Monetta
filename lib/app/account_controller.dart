@@ -57,13 +57,15 @@ class AccountController extends ChangeNotifier {
     required OrderHistoryRepository orderHistoryRepository,
     CustomerAccountConfig? config,
     required String deviceId,
+    Future<void> Function(String? accountId)? onAccountScopeChanged,
   })  : _sessionRepository = sessionRepository,
         _systemSessionRepository = systemSessionRepository,
         _accountStore = accountStore,
         _deviceStore = deviceStore,
         _orderHistoryRepository = orderHistoryRepository,
         _config = config,
-        _deviceId = deviceId;
+        _deviceId = deviceId,
+        _onAccountScopeChanged = onAccountScopeChanged;
 
   final CustomerSessionRepository? _sessionRepository;
   final SystemAccountSessionRepository? _systemSessionRepository;
@@ -72,6 +74,7 @@ class AccountController extends ChangeNotifier {
   final OrderHistoryRepository _orderHistoryRepository;
   final CustomerAccountConfig? _config;
   final String _deviceId;
+  final Future<void> Function(String? accountId)? _onAccountScopeChanged;
 
   local.Account? account;
   bool isLoading = false;
@@ -81,12 +84,13 @@ class AccountController extends ChangeNotifier {
   /// be shown a platform error string.
   AccountError? lastError;
 
-  /// "Mis pedidos" — real Shopify checkout orders and hand-entered WhatsApp
-  /// apartado orders, unified (`docs/ACCOUNTS_AND_SYNC_PLAN.md` Phase 3).
-  /// Populated by [loadOrders]; empty (not loading, not an error) whenever
-  /// nobody is signed in.
+  /// "Mis pedidos" — Shopify Customer Account history (primary) plus
+  /// WhatsApp apartado enrichment from the Monetta mirror when available.
+  /// Populated by [loadOrders]; cleared on logout / account switch.
   List<local.OrderSummary> orders = const [];
+  OrderHistoryStatus ordersStatus = OrderHistoryStatus.unavailable;
   bool ordersLoading = false;
+  int _ordersGeneration = 0;
 
   bool get isSignedIn => account != null;
 
@@ -101,20 +105,10 @@ class AccountController extends ChangeNotifier {
   bool get canRegister => _systemSessionRepository?.canRegister == true;
   bool get canSystemLogin => _systemSessionRepository?.canLogin == true;
 
-  /// Short-lived Shopify Customer token for first-party services acting on
-  /// behalf of the signed-in owner. This never exposes an Admin API token:
-  /// the control-plane service validates this customer token, checks the
-  /// owner role server-side, and keeps Shopify Admin credentials to itself.
-  Future<String?> accessTokenForAdmin() async {
-    final current = account;
-    final repository = _sessionRepository;
-    if (current == null ||
-        repository == null ||
-        current.authProvider != 'shopify') {
-      return null;
-    }
-    return repository.accessTokenFor(current.localAccountId);
-  }
+  /// Credential for the owner control plane. Both first-party Monetta sessions
+  /// and Shopify Customer sessions are accepted; the server resolves the
+  /// subject and role, and Shopify Admin credentials never enter the app.
+  Future<String?> accessTokenForAdmin() => accessTokenForBackend();
 
   /// Credential for customer-scoped Monetta backend routes. Shopify accounts
   /// use their short-lived Customer Account token; legacy Monetta accounts use
@@ -124,14 +118,20 @@ class AccountController extends ChangeNotifier {
     if (current == null) return null;
     try {
       if (current.authProvider == 'monetta') {
-        return _systemSessionRepository?.accessTokenFor(
+        return await _systemSessionRepository?.accessTokenFor(
           current.localAccountId,
         );
       }
-      return _sessionRepository?.accessTokenFor(current.localAccountId);
+      return await _sessionRepository?.accessTokenFor(current.localAccountId);
     } catch (_) {
       return null;
     }
+  }
+
+  Future<void> _publishAccountScope() async {
+    final callback = _onAccountScopeChanged;
+    if (callback == null) return;
+    await callback(account?.localAccountId);
   }
 
   /// Restores whichever account this device was last signed into, if any —
@@ -149,10 +149,12 @@ class AccountController extends ChangeNotifier {
       // every action fails. The guest bag and wishlist are untouched: they
       // are device-scoped rows, not account-scoped ones.
       await _deviceStore.detachAccount(_deviceId);
+      await _publishAccountScope();
       return;
     }
     account = restored;
     notifyListeners();
+    await _publishAccountScope();
   }
 
   Future<bool> _hasUsableSessionFor(
@@ -203,12 +205,15 @@ class AccountController extends ChangeNotifier {
     await repository.logout(localAccountId);
     account = null;
     orders = const [];
+    ordersStatus = OrderHistoryStatus.unavailable;
+    _ordersGeneration += 1;
     lastError = const AccountError(
       flow: AccountAuthFlow.shopify,
       kind: CustomerAuthErrorKind.sessionExpired,
       debugDetail: 'revalidation found no usable session',
     );
     notifyListeners();
+    await _publishAccountScope();
   }
 
   Future<void> login() async {
@@ -244,7 +249,10 @@ class AccountController extends ChangeNotifier {
     // a caller tearing the database down right after awaiting login().
     // `ordersLoading` is the separate flag that governs the order list's
     // own spinner.
-    if (isSignedIn) await loadOrders();
+    if (isSignedIn) {
+      await _publishAccountScope();
+      await loadOrders();
+    }
   }
 
   Future<void> register({
@@ -270,6 +278,7 @@ class AccountController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
+    if (isSignedIn) await _publishAccountScope();
   }
 
   Future<void> loginWithSystemAccount({
@@ -292,7 +301,10 @@ class AccountController extends ChangeNotifier {
       isLoading = false;
       notifyListeners();
     }
-    if (isSignedIn) await loadOrders();
+    if (isSignedIn) {
+      await _publishAccountScope();
+      await loadOrders();
+    }
   }
 
   /// The accounts service reports every failure as a status code inside an
@@ -320,41 +332,78 @@ class AccountController extends ChangeNotifier {
       }
       account = null;
       orders = const [];
+      ordersStatus = OrderHistoryStatus.unavailable;
+      _ordersGeneration += 1;
+      await _publishAccountScope();
     } finally {
       isLoading = false;
       notifyListeners();
     }
   }
 
-  /// Cache-first, same shape as everything else in this app: local rows
-  /// paint immediately, then a background refresh from
-  /// `services/accounts_orders` (a safe no-op if that service isn't
-  /// configured — see `OrderHistoryRepository.canRefresh`) replaces them.
+  /// Cache-first: account-bound local rows paint immediately, then a refresh
+  /// prefers Customer Account API (Shopify sessions) and optionally merges
+  /// mirror apartados. Unavailable / failed / stale-cache are distinct from
+  /// a confirmed empty list (F13).
+  ///
+  /// Each await re-checks that [account] is still the same generation so a
+  /// delayed response for A cannot repopulate orders after logout or after B
+  /// signed in (F14 / post-checkout refresh safety).
   Future<void> loadOrders() async {
     final current = account;
     if (current == null) return;
+    final generation = ++_ordersGeneration;
+    final accountId = current.localAccountId;
 
     ordersLoading = true;
     notifyListeners();
 
-    orders = await _orderHistoryRepository.loadCached(current.localAccountId);
-    notifyListeners();
+    try {
+      final cached = await _orderHistoryRepository.loadCached(accountId);
+      if (!_ordersStillCurrent(generation, accountId)) return;
+      if (cached.isNotEmpty) {
+        orders = cached;
+        // Provisional until refresh settles — never call this "empty".
+        ordersStatus = OrderHistoryStatus.populated;
+        notifyListeners();
+      }
 
-    // The backend, not this local row, is authoritative for the Shopify
-    // linkage. This also lets a linked legacy Monetta account refresh orders
-    // even when its local cache does not yet contain the Shopify customer id.
-    final accessToken = await accessTokenForBackend();
-    if (accessToken != null) {
-      await _orderHistoryRepository.refresh(
-        accountId: current.localAccountId,
-        accessToken: accessToken,
+      final customerAccountToken = current.authProvider == 'shopify'
+          ? await accessTokenForShopifyCheckout()
+          : null;
+      if (!_ordersStillCurrent(generation, accountId)) return;
+
+      final backendToken = await accessTokenForBackend();
+      if (!_ordersStillCurrent(generation, accountId)) return;
+
+      final view = await _orderHistoryRepository.refresh(
+        accountId: accountId,
+        customerAccountAccessToken: customerAccountToken,
+        backendAccessToken: backendToken,
       );
-      orders = await _orderHistoryRepository.loadCached(
-        current.localAccountId,
-      );
+      if (!_ordersStillCurrent(generation, accountId)) return;
+      orders = view.orders;
+      ordersStatus = view.status;
+    } finally {
+      if (_ordersStillCurrent(generation, accountId)) {
+        ordersLoading = false;
+        notifyListeners();
+      }
     }
+  }
 
-    ordersLoading = false;
-    notifyListeners();
+  bool _ordersStillCurrent(int generation, String accountId) =>
+      generation == _ordersGeneration && account?.localAccountId == accountId;
+
+  /// Fresh Customer Account access token for authenticated Shopify checkout.
+  /// Returns null for guests, legacy Monetta accounts, or refresh failures.
+  Future<String?> accessTokenForShopifyCheckout() async {
+    final current = account;
+    if (current == null || current.authProvider != 'shopify') return null;
+    try {
+      return await _sessionRepository?.accessTokenFor(current.localAccountId);
+    } on Object {
+      return null;
+    }
   }
 }

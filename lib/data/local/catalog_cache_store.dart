@@ -15,10 +15,118 @@ import '../../domain/collection.dart' as domain;
 import '../../domain/product.dart';
 import 'database.dart';
 
+enum CatalogCacheSource { asset, legacyCache, firestore, shopify }
+
+enum CatalogCacheStatus { fallback, healthy, unavailable, invalid }
+
+class CatalogCacheMetadata {
+  const CatalogCacheMetadata({
+    required this.source,
+    required this.syncedAt,
+    required this.productCount,
+    required this.fingerprint,
+    required this.status,
+    this.detail,
+    this.shopDomain,
+  });
+
+  factory CatalogCacheMetadata.forProducts({
+    required CatalogCacheSource source,
+    required List<Product> products,
+    required DateTime? syncedAt,
+    required CatalogCacheStatus status,
+    String? detail,
+    String? shopDomain,
+  }) =>
+      CatalogCacheMetadata(
+        source: source,
+        syncedAt: syncedAt?.toUtc(),
+        productCount: products.length,
+        fingerprint: catalogFingerprint(products),
+        status: status,
+        detail: detail,
+        shopDomain: shopDomain,
+      );
+
+  final CatalogCacheSource source;
+  final DateTime? syncedAt;
+  final int productCount;
+  final String fingerprint;
+  final CatalogCacheStatus status;
+  final String? detail;
+  final String? shopDomain;
+
+  CatalogCacheMetadata copyWith({
+    CatalogCacheSource? source,
+    DateTime? syncedAt,
+    int? productCount,
+    String? fingerprint,
+    CatalogCacheStatus? status,
+    String? detail,
+    String? shopDomain,
+  }) =>
+      CatalogCacheMetadata(
+        source: source ?? this.source,
+        syncedAt: syncedAt ?? this.syncedAt,
+        productCount: productCount ?? this.productCount,
+        fingerprint: fingerprint ?? this.fingerprint,
+        status: status ?? this.status,
+        detail: detail,
+        shopDomain: shopDomain ?? this.shopDomain,
+      );
+}
+
 class CatalogCacheStore {
   CatalogCacheStore(this._db);
 
   final AppDatabase _db;
+
+  Future<T> transaction<T>(Future<T> Function() action) =>
+      _db.transaction(action);
+
+  Future<bool> hasShopSpecificState() async {
+    final row = await _db
+        .customSelect('SELECT EXISTS('
+            'SELECT 1 FROM accounts UNION ALL SELECT 1 FROM sessions '
+            'UNION ALL SELECT 1 FROM bag_lines UNION ALL SELECT 1 FROM wishlist_items'
+            ') AS present')
+        .getSingle();
+    return row.read<int>('present') != 0;
+  }
+
+  /// Quarantine a foreign/unknown shop before any catalog or account restore.
+  /// Token references are removed with accounts; old secure entries become
+  /// unreachable. Cart storage uses a new, shop-scoped namespace.
+  Future<void> resetShopState(String shop) => _db.transaction(() async {
+        await clearCatalog();
+        await _db.delete(_db.cachedCollections).go();
+        await _db.delete(_db.syncCursors).go();
+        await _db.delete(_db.bagLines).go();
+        await _db.delete(_db.wishlistItems).go();
+        await _db.delete(_db.interactionEvents).go();
+        await _db
+            .update(_db.devices)
+            .write(const DevicesCompanion(accountId: Value(null)));
+        await _db.delete(_db.sessions).go();
+        await _db.delete(_db.orderSummaries).go();
+        await _db.delete(_db.accounts).go();
+        await saveMetadata(
+          CatalogCacheMetadata.forProducts(
+            source: CatalogCacheSource.shopify,
+            products: [],
+            syncedAt: null,
+            status: CatalogCacheStatus.invalid,
+            shopDomain: shop,
+            detail: 'Full sync required after shop migration.',
+          ),
+        );
+        await _db.into(_db.syncCursors).insert(
+              SyncCursorsCompanion.insert(
+                id: const Value(0),
+                shopDomain: Value(shop),
+              ),
+            );
+      });
 
   /// True on a brand-new install — nothing has ever been written here.
   Future<bool> isEmpty() async {
@@ -47,6 +155,22 @@ class CatalogCacheStore {
     return [for (final row in rows) _collectionFromRow(row)];
   }
 
+  Future<CatalogCacheMetadata?> metadata() async {
+    final row = await (_db.select(_db.catalogStates)
+          ..where((table) => table.id.equals(0)))
+        .getSingleOrNull();
+    if (row == null) return null;
+    return CatalogCacheMetadata(
+      source: CatalogCacheSource.values.byName(row.source),
+      syncedAt: row.syncedAt?.toUtc(),
+      productCount: row.productCount,
+      fingerprint: row.fingerprint,
+      status: CatalogCacheStatus.values.byName(row.status),
+      detail: row.detail,
+      shopDomain: row.shopDomain,
+    );
+  }
+
   /// Replaces the stored rows for every product in [products] — an insert or
   /// a full overwrite of an existing row, never a partial patch. Variants are
   /// replaced wholesale per product so a removed variant disappears from the
@@ -54,23 +178,68 @@ class CatalogCacheStore {
   Future<void> upsertProducts(List<Product> products) async {
     if (products.isEmpty) return;
     await _db.transaction(() async {
-      for (final product in products) {
-        await _upsertProduct(product);
-      }
+      await _upsertProducts(products);
+    });
+  }
+
+  Future<void> seedProducts(
+    List<Product> products,
+    CatalogCacheMetadata metadata,
+  ) async {
+    if (products.isEmpty) return;
+    await _db.transaction(() async {
+      await _upsertProducts(products);
+      await _writeMetadata(metadata);
     });
   }
 
   /// Atomically replaces the complete catalog after a validated authoritative
-  /// Firestore snapshot. Callers must reject empty/invalid snapshots first.
-  Future<void> replaceProducts(List<Product> products) async {
-    if (products.isEmpty) return;
+  /// snapshot. A legitimate empty [products] list clears the cache — failed
+  /// partial syncs must not call this.
+  Future<void> replaceProducts(
+    List<Product> products, {
+    CatalogCacheMetadata? metadata,
+  }) async {
     await _db.transaction(() async {
       await _db.delete(_db.cachedVariants).go();
       await _db.delete(_db.cachedProducts).go();
-      for (final product in products) {
-        await _upsertProduct(product);
-      }
+      if (products.isNotEmpty) await _upsertProducts(products);
+      if (metadata != null) await _writeMetadata(metadata);
     });
+  }
+
+  /// Drops every cached product/variant row without touching shopper bag or
+  /// wishlist state. Used when the configured shop domain changes.
+  Future<void> clearCatalog() async {
+    await _db.transaction(() async {
+      await _db.delete(_db.cachedVariants).go();
+      await _db.delete(_db.cachedProducts).go();
+      await _db.delete(_db.catalogStates).go();
+    });
+  }
+
+  Future<void> saveMetadata(CatalogCacheMetadata metadata) =>
+      _writeMetadata(metadata);
+
+  Future<void> _writeMetadata(CatalogCacheMetadata metadata) {
+    return _db.into(_db.catalogStates).insertOnConflictUpdate(
+          CatalogStatesCompanion.insert(
+            id: const Value(0),
+            source: metadata.source.name,
+            syncedAt: Value(metadata.syncedAt),
+            productCount: metadata.productCount,
+            fingerprint: metadata.fingerprint,
+            status: metadata.status.name,
+            detail: Value(metadata.detail),
+            shopDomain: Value(metadata.shopDomain),
+          ),
+        );
+  }
+
+  Future<void> _upsertProducts(List<Product> products) async {
+    for (final product in products) {
+      await _upsertProduct(product);
+    }
   }
 
   Future<void> _upsertProduct(Product product) async {
@@ -192,3 +361,19 @@ List<String> _decodeStringList(String jsonText) =>
     (jsonDecode(jsonText) as List<dynamic>).cast<String>();
 
 String _encodeStringList(List<String> values) => jsonEncode(values);
+
+/// Stable, non-cryptographic identity for one catalog observation.
+String catalogFingerprint(List<Product> products) {
+  final ordered = [...products]..sort((a, b) => a.id.compareTo(b.id));
+  var hash = 0x811c9dc5;
+  for (final product in ordered) {
+    final value =
+        '${product.id}\u001f${product.updatedAt.toUtc().toIso8601String()}'
+        '\u001f${product.images.join('\u001e')}';
+    for (final unit in value.codeUnits) {
+      hash ^= unit;
+      hash = (hash * 0x01000193) & 0xffffffff;
+    }
+  }
+  return hash.toRadixString(16).padLeft(8, '0');
+}

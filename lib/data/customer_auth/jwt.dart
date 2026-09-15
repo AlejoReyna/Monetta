@@ -18,7 +18,9 @@ import 'dart:convert';
 Map<String, dynamic> decodeIdTokenClaims(String idToken) {
   final segments = idToken.split('.');
   if (segments.length != 3) {
-    throw const FormatException('Not a JWT: expected three "."-separated segments');
+    throw const FormatException(
+      'Not a JWT: expected three "."-separated segments',
+    );
   }
   final normalized = base64Url.normalize(segments[1]);
   final payload = utf8.decode(base64Url.decode(normalized));

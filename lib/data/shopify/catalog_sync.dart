@@ -13,12 +13,19 @@ import 'storefront_client.dart';
 
 /// Where the last successful sync got to.
 class SyncCursor {
-  const SyncCursor({this.lastUpdatedAt, this.lastFullSyncAt});
+  const SyncCursor({
+    this.lastUpdatedAt,
+    this.lastFullSyncAt,
+    this.shopDomain,
+  });
 
   /// Highest `updatedAt` we have already stored. Null means "never synced".
   final DateTime? lastUpdatedAt;
 
   final DateTime? lastFullSyncAt;
+
+  /// Storefront shop host that produced this cursor. Null on legacy rows.
+  final String? shopDomain;
 
   bool get isFirstRun => lastUpdatedAt == null;
 
@@ -48,7 +55,11 @@ class SyncCursor {
         '${utc.second.toString().padLeft(2, '0')}Z';
   }
 
-  SyncCursor advancedTo(DateTime? highest, {DateTime? fullSyncAt}) {
+  SyncCursor advancedTo(
+    DateTime? highest, {
+    DateTime? fullSyncAt,
+    String? shopDomain,
+  }) {
     final current = lastUpdatedAt;
     final next = highest == null
         ? current
@@ -56,8 +67,15 @@ class SyncCursor {
     return SyncCursor(
       lastUpdatedAt: next,
       lastFullSyncAt: fullSyncAt ?? lastFullSyncAt,
+      shopDomain: shopDomain ?? this.shopDomain,
     );
   }
+
+  SyncCursor withShop(String shopDomain) => SyncCursor(
+        lastUpdatedAt: lastUpdatedAt,
+        lastFullSyncAt: lastFullSyncAt,
+        shopDomain: shopDomain,
+      );
 }
 
 class SyncResult {
@@ -78,6 +96,19 @@ class SyncResult {
   bool get hasChanges => products.isNotEmpty;
 }
 
+/// Raised when pagination or nested connections cannot be proven complete.
+///
+/// Callers must **not** advance successful-sync metadata (cursor / fullSyncAt /
+/// healthy provenance) when this is thrown — a truncated page set must never
+/// look like a successful sync, especially before a destructive full replace.
+class CatalogSyncIncompleteException implements Exception {
+  const CatalogSyncIncompleteException(this.message);
+  final String message;
+
+  @override
+  String toString() => 'CatalogSyncIncompleteException: $message';
+}
+
 class CatalogSync {
   const CatalogSync({
     required this.client,
@@ -91,9 +122,8 @@ class CatalogSync {
   /// Shopify's ceiling for this connection is 250.
   final int pageSize;
 
-  /// Hard stop on pagination. 271 products fit in two pages today; 20 pages
-  /// allows ~10× catalog growth while still guaranteeing the loop terminates
-  /// if a cursor ever misbehaves.
+  /// Hard stop on pagination. Hitting this with `hasNextPage` still true is an
+  /// incomplete sync, not success — see [CatalogSyncIncompleteException].
   final int maxPages;
 
   /// Even with a healthy cursor, do a full resync occasionally. Deletions and
@@ -111,34 +141,45 @@ class CatalogSync {
   /// Fetch everything that changed since [cursor].
   ///
   /// On a typical app open this makes one request that returns zero products.
+  /// Throws [CatalogSyncIncompleteException] when the page set cannot be proven
+  /// complete — callers must preserve last-known-good cache and cursor.
   Future<SyncResult> run({
     required SyncCursor cursor,
     required DateTime now,
   }) async {
     final full = needsFullSync(cursor, now);
     final filter = full ? null : cursor.deltaFilter;
+    final shopDomain = client.config.shopDomain;
 
     final products = <Product>[];
     String? after;
     var pages = 0;
     DateTime? highest;
 
-    while (pages < maxPages) {
+    while (true) {
+      if (pages >= maxPages) {
+        throw const CatalogSyncIncompleteException(
+          'Product pagination exceeded maxPages while hasNextPage was still true',
+        );
+      }
+
       final data = await client.query(
         kProductsDeltaQuery,
         variables: <String, dynamic>{
           'first': pageSize,
           if (after != null) 'after': after,
           if (filter != null) 'query': filter,
+          'country': client.config.country,
+          'language': client.config.language,
         },
       );
 
       final connection = data['products'];
-      final nodes = edgeNodes(connection);
+      final nodes = _validatedNodes(connection);
       pages++;
 
       for (final node in nodes) {
-        final product = productFromJson(node);
+        final product = await completeProduct(node);
         products.add(product);
         if (highest == null || product.updatedAt.isAfter(highest)) {
           highest = product.updatedAt;
@@ -146,19 +187,114 @@ class CatalogSync {
       }
 
       final pageInfo = connection is Map ? connection['pageInfo'] : null;
-      if (pageInfo is! Map || pageInfo['hasNextPage'] != true) break;
+      if (pageInfo is! Map || pageInfo['hasNextPage'] != true) {
+        break;
+      }
 
-      // Defensive: hasNextPage true with no cursor would spin forever.
       final endCursor = pageInfo['endCursor'];
-      if (endCursor is! String) break;
+      if (endCursor is! String || endCursor.isEmpty) {
+        throw const CatalogSyncIncompleteException(
+          'hasNextPage true but endCursor missing — refusing incomplete sync',
+        );
+      }
+      if (after != null && endCursor == after) {
+        throw const CatalogSyncIncompleteException(
+          'Repeated pagination cursor without advancing — refusing incomplete sync',
+        );
+      }
       after = endCursor;
     }
 
     return SyncResult(
       products: products,
-      cursor: cursor.advancedTo(highest, fullSyncAt: full ? now : null),
+      cursor: cursor.advancedTo(
+        highest,
+        fullSyncAt: full ? now : null,
+        shopDomain: shopDomain,
+      ),
       wasFullSync: full,
       pagesFetched: pages,
     );
+  }
+
+  /// All cache writers, including focused featured reads, must use this
+  /// before replacing a product's authoritative variants/membership.
+  Future<Product> completeProduct(Map<String, dynamic> node) async {
+    await _completeRequiredConnections(node);
+    return productFromJson(node);
+  }
+
+  // Images are an intentional six-image display preview. Variants and
+  // collection membership are authoritative and must be fully fetched.
+  Future<void> _completeRequiredConnections(Map<String, dynamic> node) async {
+    for (final field in const ['variants', 'collections']) {
+      var connection = node[field];
+      final nodes = _validatedNodes(connection);
+      final seen = <String>{};
+      var pages = 1;
+      while (((connection as Map)['pageInfo'] as Map)['hasNextPage'] == true) {
+        final after = (connection['pageInfo'] as Map)['endCursor'] as String;
+        if (!seen.add(after) || pages++ >= maxPages) {
+          throw const CatalogSyncIncompleteException(
+            'Nested pagination did not complete',
+          );
+        }
+        final data = await client.query(
+          productConnectionQuery(field),
+          variables: {
+            'id': node['id'],
+            'after': after,
+            'country': client.config.country,
+            'language': client.config.language,
+          },
+        );
+        final product = data['product'];
+        connection = product is Map ? product[field] : null;
+        nodes.addAll(_validatedNodes(connection));
+      }
+      node[field] = {
+        'edges': [
+          for (final n in nodes) {'node': n},
+        ],
+        'pageInfo': {'hasNextPage': false, 'endCursor': null},
+      };
+    }
+  }
+
+  static List<Map<String, dynamic>> _validatedNodes(dynamic connection) {
+    const invalid = CatalogSyncIncompleteException(
+      'Invalid connection or pagination metadata',
+    );
+    if (connection is! Map) throw invalid;
+    final info = connection['pageInfo'];
+    if (info is! Map ||
+        !info.containsKey('endCursor') ||
+        info['hasNextPage'] is! bool ||
+        (info['endCursor'] != null && info['endCursor'] is! String) ||
+        (info['hasNextPage'] == true &&
+            (info['endCursor'] is! String ||
+                (info['endCursor'] as String).isEmpty))) {
+      throw invalid;
+    }
+    final List<Map<String, dynamic>> nodes;
+    if (connection.containsKey('nodes')) {
+      final raw = connection['nodes'];
+      if (raw is! List ||
+          raw.any((n) => n is! Map || n.keys.any((k) => k is! String))) {
+        throw invalid;
+      }
+      nodes = [for (final n in raw) Map<String, dynamic>.from(n as Map)];
+    } else {
+      final raw = connection['edges'];
+      if (raw is! List ||
+          raw.any((e) => e is! Map || e['node'] is! Map<String, dynamic>)) {
+        throw invalid;
+      }
+      nodes = [
+        for (final edge in raw)
+          Map<String, dynamic>.from((edge as Map)['node'] as Map),
+      ];
+    }
+    return nodes;
   }
 }

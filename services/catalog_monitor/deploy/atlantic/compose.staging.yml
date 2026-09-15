@@ -1,0 +1,109 @@
+# Isolated pre-production topology for the Texas host.
+#
+# Run with:
+#   docker compose --project-name monetta-catalog-staging \
+#     --env-file /opt/monetta-catalog-staging/.env \
+#     -f /opt/monetta-catalog-staging/compose.yml up -d --build
+#
+# It deliberately shares only the Caddy edge network with production. Its
+# database, containers, image tag, and internal network are distinct.
+
+services:
+  monetta-catalog-staging-postgres:
+    image: postgres:16-alpine
+    container_name: monetta-catalog-staging-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-monetta_catalog_staging}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD must be set in the deployment environment}
+      POSTGRES_DB: ${POSTGRES_DB:-monetta_catalog_staging}
+    volumes:
+      - monetta_catalog_staging_pgdata:/var/lib/postgresql/data
+    networks:
+      - catalog_staging_internal
+    mem_limit: 768m
+    cpus: "0.50"
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 10s
+
+  monetta-catalog-staging-migrate:
+    build:
+      context: ${CATALOG_BUILD_CONTEXT:-../repo/services/catalog_monitor}
+      dockerfile: deploy/atlantic/Dockerfile
+    image: monetta-catalog-staging:${CATALOG_IMAGE_TAG:-current}
+    container_name: monetta-catalog-staging-migrate
+    restart: "no"
+    command: ["node", "dist/db/migrate.js"]
+    depends_on:
+      monetta-catalog-staging-postgres:
+        condition: service_healthy
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set in the deployment environment}
+    networks:
+      - catalog_staging_internal
+    mem_limit: 256m
+    cpus: "0.25"
+
+  monetta-catalog-staging-api:
+    build:
+      context: ${CATALOG_BUILD_CONTEXT:-../repo/services/catalog_monitor}
+      dockerfile: deploy/atlantic/Dockerfile
+    image: monetta-catalog-staging:${CATALOG_IMAGE_TAG:-current}
+    container_name: monetta-catalog-staging-api
+    init: true
+    restart: unless-stopped
+    command: ["node", "dist/api/server.js"]
+    depends_on:
+      monetta-catalog-staging-postgres:
+        condition: service_healthy
+      monetta-catalog-staging-migrate:
+        condition: service_completed_successfully
+    environment:
+      DATABASE_URL: ${DATABASE_URL:?DATABASE_URL must be set in the deployment environment}
+      PORT: ${PORT:-8081}
+      LIVE_CRAWL_ENABLED: "false"
+      PLAYWRIGHT_FALLBACK_ENABLED: "false"
+      ENABLED_SOURCE_IDS: ${ENABLED_SOURCE_IDS:?ENABLED_SOURCE_IDS must be set in the deployment environment}
+      DASHBOARD_ORIGINS: ${DASHBOARD_ORIGINS:?DASHBOARD_ORIGINS must be set in the deployment environment}
+      DASHBOARD_PASSPHRASE_VERIFIER: ${DASHBOARD_PASSPHRASE_VERIFIER:?DASHBOARD_PASSPHRASE_VERIFIER must be set in the deployment environment}
+      DASHBOARD_SESSION_TTL_HOURS: ${DASHBOARD_SESSION_TTL_HOURS:-12}
+      DAILY_PAGE_BUDGET: ${DAILY_PAGE_BUDGET:-3000}
+    networks:
+      catalog_staging_internal:
+      catalog_edge:
+        aliases:
+          - monetta-catalog-staging-api
+    mem_limit: 256m
+    cpus: "0.25"
+    stop_grace_period: 15s
+    healthcheck:
+      test:
+        - CMD
+        - node
+        - -e
+        - >-
+          fetch('http://127.0.0.1:8081/livez').then((r) => {
+          if (!r.ok) process.exit(1);
+          }).catch(() => process.exit(1))
+      interval: 20s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
+
+volumes:
+  monetta_catalog_staging_pgdata:
+    name: monetta_catalog_staging_pgdata
+
+networks:
+  catalog_staging_internal:
+    name: monetta_catalog_staging_internal
+    internal: true
+  catalog_edge:
+    name: monetta_catalog_edge
+    external: true

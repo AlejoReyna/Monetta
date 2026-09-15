@@ -152,6 +152,39 @@ class NotificationController extends ChangeNotifier {
     }
   }
 
+  /// Shows the operating system's notification prompt once and registers the
+  /// device when the shopper accepts. Personalized offers and product alerts
+  /// remain opt-in at their own points of intent.
+  Future<bool> requestSystemPermission() async {
+    if (!available || saving) return false;
+    if (permission != NotificationPermissionState.notDetermined) {
+      return permission.canReceive;
+    }
+    saving = true;
+    lastError = null;
+    notifyListeners();
+    try {
+      permission = await _gateway!.requestPermission();
+      if (!permission.canReceive) return false;
+
+      preferences = preferences.copyWith(announcements: true);
+      // Persist consent before registration so a temporary network failure is
+      // retried by restore() on the next launch without another OS prompt.
+      await _persistPreferences();
+      await _ensureInstallation();
+      await _syncEndpoint();
+      await _syncPreferences(source: 'permission_prompt');
+      await _updateCartReminder();
+      return true;
+    } catch (error) {
+      lastError = _friendlyError(error);
+      return false;
+    } finally {
+      saving = false;
+      notifyListeners();
+    }
+  }
+
   Future<bool> createRestockAlert(String rawProductId) async {
     if (!available || saving) return false;
     saving = true;

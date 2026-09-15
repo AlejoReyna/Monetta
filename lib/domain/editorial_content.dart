@@ -239,10 +239,10 @@ class MonettaEditorialContent {
     ),
     partner: PartnerProgramContent(
       eyebrow: 'VENDE CON MONETTA',
-      headline: 'Comparte el catálogo. Tú eliges cómo ganar.',
-      body: 'Usa nuestros catálogos para mostrar productos originales a tus '
-          'clientes. Cuando elijan sus favoritos, prepara tu pedido y '
-          'cotízalo con Monetta.',
+      headline: 'Convierte tu buen gusto en un negocio.',
+      body: 'Comparte más de 3,000 productos originales con tus clientes y '
+          'accede a precios de mayoreo desde tres piezas. Tú eliges qué '
+          'vender; Monetta te acompaña para hacerlo crecer.',
       steps: <PartnerStep>[
         PartnerStep(
           number: '01',
@@ -368,15 +368,17 @@ class MonettaEditorialContent {
         ),
         PartnerFaq(
           question: '¿Necesito registrarme?',
-          answer: 'No. Puedes abrir y compartir los catálogos de inmediato. '
-              'Cuando tengas un pedido, escríbenos para cotizarlo.',
+          answer: 'No hay registro ni aprobación automática de revendedor en '
+              'la app. Puedes abrir y compartir los catálogos públicos. '
+              'Cuando tengas un pedido, escríbenos por WhatsApp para cotizarlo.',
         ),
         PartnerFaq(
           question: '¿Cómo funciona el apartado?',
           answer:
-              'El anticipo de mayoreo es de \$800 MXN y tienes hasta 20 días '
-              'para liquidar. Monetta confirma disponibilidad y condiciones '
-              'al preparar la cotización.',
+              'Es un proceso manual. El anticipo de referencia de mayoreo es '
+              'de \$800 MXN y tienes hasta 20 días para liquidar. Abrir '
+              'WhatsApp no reserva ni cobra: Monetta confirma disponibilidad, '
+              'recibe el anticipo y registra el pedido en Shopify.',
         ),
       ],
     ),

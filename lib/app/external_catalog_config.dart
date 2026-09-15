@@ -1,15 +1,9 @@
-/// Build-time switch for the external-catalog prototype.
+/// Build-time switch for the retired external-catalog prototype.
 ///
-/// Off by default, on purpose — this feature makes a network call to an
-/// internal-only service and shows research listings from other merchants'
-/// sites. It must be an explicit, visible choice at build time, not
-/// something that can turn on by accident:
-///
-/// ```
-/// flutter run \
-///   --dart-define=ENABLE_EXTERNAL_CATALOG=true \
-///   --dart-define=EXTERNAL_CATALOG_BASE_URL=http://localhost:8081
-/// ```
+/// Product decision (WP-02 / F03): Monetta sells its own Shopify products
+/// only. Third-party extraction via `catalog_monitor` / `dashboard` is not
+/// part of the customer storefront. This config always reports disabled so
+/// builds that bypass Makefile validation still cannot admit the flag.
 library;
 
 class ExternalCatalogConfig {
@@ -18,17 +12,18 @@ class ExternalCatalogConfig {
   final bool enabled;
   final String? baseUrl;
 
-  /// [enabled] is true only when both the flag is set *and* a base URL was
-  /// provided — a flag with nowhere to point at is not really "on."
+  /// Always disabled. `ENABLE_EXTERNAL_CATALOG` / `EXTERNAL_CATALOG_BASE_URL`
+  /// dart-defines are ignored so production and staging cannot re-enable the
+  /// retired monitor path by accident.
   factory ExternalCatalogConfig.fromEnvironment() {
-    const flag = bool.fromEnvironment('ENABLE_EXTERNAL_CATALOG');
-    const rawBaseUrl = String.fromEnvironment('EXTERNAL_CATALOG_BASE_URL');
-    final baseUrl = rawBaseUrl.isEmpty ? null : rawBaseUrl;
-    return ExternalCatalogConfig(
-      enabled: flag && baseUrl != null,
-      baseUrl: baseUrl,
-    );
+    return ExternalCatalogConfig.disabled;
   }
+
+  /// True when a build still passes `--dart-define=ENABLE_EXTERNAL_CATALOG=true`.
+  /// Used by [RuntimeConfig] / validators to fail closed rather than silently
+  /// ignore a forbidden flag in release configs.
+  static bool get flagRequestedInEnvironment =>
+      const bool.fromEnvironment('ENABLE_EXTERNAL_CATALOG');
 
   static const ExternalCatalogConfig disabled = ExternalCatalogConfig(
     enabled: false,

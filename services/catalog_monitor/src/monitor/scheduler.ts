@@ -4,6 +4,7 @@ import { logger } from '../logger.js';
 import { getPool, closePool } from '../db/pool.js';
 import { PgProductRepository } from '../db/pgProductRepository.js';
 import { PgCrawlRunRepository } from '../db/pgCrawlRunRepository.js';
+import { PgSelectionSnapshotCommitter } from '../db/pgSelectionSnapshotCommitter.js';
 import { adapterFor } from '../adapters/registry.js';
 import { crawlSourceWithRobotsGate } from '../crawl/guardedCrawl.js';
 import { DomainRateLimiter } from '../crawl/rateLimiter.js';
@@ -13,6 +14,7 @@ import { withDbLock, SOURCE_LOCK_KEYS } from '../db/advisoryLock.js';
 import type { BrandAdapter } from '../adapters/types.js';
 import type pg from 'pg';
 import { CatalogEventOutbox } from '../notifications/catalogEventOutbox.js';
+import { PgSourcePolicyRepository } from '../db/pgSourcePolicyRepository.js';
 
 /**
  * The one place a daily cron job gets registered. If `LIVE_CRAWL_ENABLED`
@@ -34,6 +36,8 @@ export async function startScheduler(): Promise<void> {
   const pool = getPool();
   const products = new PgProductRepository(pool);
   const crawlRuns = new PgCrawlRunRepository(pool);
+  const selectionSnapshotCommitter = new PgSelectionSnapshotCommitter(pool);
+  const policies = new PgSourcePolicyRepository(pool);
   const rateLimiter = new DomainRateLimiter(config.requestDelayMs);
   const outbox = config.notificationEventsUrl !== null && config.notificationEventsSecret !== null
     ? new CatalogEventOutbox(
@@ -63,10 +67,24 @@ export async function startScheduler(): Promise<void> {
     // A failure attempting one source (thrown exception, lock contention,
     // robots failure) must never prevent the other source from being
     // attempted — each source is fully isolated.
+    const configuredPolicies = new Map(
+      (await policies.list()).map((policy) => [policy.sourceId, policy]),
+    );
     for (const sourceId of config.enabledSourceIds) {
+      if (configuredPolicies.get(sourceId)?.enabled === false) {
+        logger.info('skipped disabled source policy', { source: sourceId });
+        continue;
+      }
       const adapter = adapterFor(sourceId);
       try {
-        await runOneSourceLocked(adapter, { pool, products, crawlRuns, rateLimiter, config });
+        await runOneSourceLocked(adapter, {
+          pool,
+          products,
+          crawlRuns,
+          selectionSnapshotCommitter,
+          rateLimiter,
+          config,
+        });
       } catch (error) {
         logger.error('scheduled crawl run failed for source', {
           source: adapter.source.id,
@@ -116,6 +134,7 @@ async function runOneSourceLocked(
     pool: pg.Pool;
     products: PgProductRepository;
     crawlRuns: PgCrawlRunRepository;
+    selectionSnapshotCommitter: PgSelectionSnapshotCommitter;
     rateLimiter: DomainRateLimiter;
     config: ReturnType<typeof loadConfig>;
   },
@@ -134,6 +153,7 @@ async function runOneSource(
   deps: {
     products: PgProductRepository;
     crawlRuns: PgCrawlRunRepository;
+    selectionSnapshotCommitter: PgSelectionSnapshotCommitter;
     rateLimiter: DomainRateLimiter;
     config: ReturnType<typeof loadConfig>;
   },
@@ -152,6 +172,7 @@ async function runOneSource(
     },
     products: deps.products,
     crawlRuns: deps.crawlRuns,
+    selectionSnapshotCommitter: deps.selectionSnapshotCommitter,
     rateLimiter: deps.rateLimiter,
     playwrightFallbackEnabled: deps.config.playwrightFallbackEnabled,
     renderWithPlaywright: deps.config.playwrightFallbackEnabled ? renderWithPlaywright : undefined,
@@ -170,13 +191,16 @@ async function runOneSource(
     source: adapter.source.id,
     status: result.status,
     isFullSnapshot: result.isFullSnapshot,
+    selectionVersion: result.selectionVersion,
     urlsDiscovered: result.urlsDiscovered,
+    urlsSelected: result.urlsSelected,
     pagesFetched: result.pagesFetched,
     successfulParses: result.successfulParses,
     newItems: result.newItems,
     changedItems: result.changedItems,
     missingItems: result.missingItems,
     inactiveItems: result.inactiveItems,
+    deselectedItems: result.deselectedItems,
     errorsByType: result.errorsByType,
   });
 }

@@ -16,6 +16,7 @@ interface OrderRow {
   attribution_device_id: string | null;
   attribution_reco_source: string | null;
   placed_at: Date | null;
+  shopify_updated_at: Date | null;
   updated_at: Date;
 }
 
@@ -36,6 +37,7 @@ function fromRow(row: OrderRow): MirroredOrder {
     attributionDeviceId: row.attribution_device_id,
     attributionRecoSource: row.attribution_reco_source,
     placedAt: row.placed_at,
+    shopifyUpdatedAt: row.shopify_updated_at,
     updatedAt: row.updated_at,
   };
 }
@@ -48,12 +50,16 @@ export class PgOrdersRepository implements OrdersRepository {
     // NULLs as conflicting, so this correctly *inserts* a new row for each
     // apartado order that has no Shopify order yet, rather than colliding
     // them into one.
+    //
+    // F15: the WHERE clause on DO UPDATE refuses to apply a stale delivery
+    // when both sides carry shopify_updated_at and the incoming one is older.
     await this.pool.query(
       `INSERT INTO orders_mirror
          (shopify_order_id, customer_id, source, attribution_code, tags,
           financial_status, fulfillment_status, total_amount, currency_code,
-          attribution_device_id, attribution_reco_source, placed_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, now())
+          attribution_device_id, attribution_reco_source, placed_at,
+          shopify_updated_at, updated_at)
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now())
        ON CONFLICT (shopify_order_id) DO UPDATE SET
          customer_id = EXCLUDED.customer_id,
          source = EXCLUDED.source,
@@ -63,7 +69,11 @@ export class PgOrdersRepository implements OrdersRepository {
          fulfillment_status = EXCLUDED.fulfillment_status,
          total_amount = EXCLUDED.total_amount,
          currency_code = EXCLUDED.currency_code,
-         updated_at = now()`,
+         shopify_updated_at = COALESCE(EXCLUDED.shopify_updated_at, orders_mirror.shopify_updated_at),
+         updated_at = now()
+       WHERE orders_mirror.shopify_updated_at IS NULL
+          OR EXCLUDED.shopify_updated_at IS NULL
+          OR EXCLUDED.shopify_updated_at >= orders_mirror.shopify_updated_at`,
       [
         order.shopifyOrderId,
         order.customerId,
@@ -77,6 +87,7 @@ export class PgOrdersRepository implements OrdersRepository {
         order.attributionDeviceId,
         order.attributionRecoSource,
         order.placedAt,
+        order.shopifyUpdatedAt ?? null,
       ],
     );
   }

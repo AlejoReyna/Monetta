@@ -15,9 +15,10 @@ import 'package:flutter_appauth/flutter_appauth.dart';
 import 'customer_account_config.dart';
 import 'customer_auth_error.dart';
 
-/// The subset of a token response this app actually persists. `idToken` is
-/// kept only long enough to read claims from it
-/// (`jwt.dart#decodeIdTokenClaims`) — never stored.
+/// Tokens returned by the OAuth exchange.
+///
+/// `idToken` is decoded once for login claims and may be stored securely as
+/// an `id_token_hint` for hosted logout. It is never used as an API credential.
 class CustomerAuthResult {
   const CustomerAuthResult({
     required this.accessToken,
@@ -46,6 +47,10 @@ abstract class CustomerAuthGateway {
   Future<CustomerAuthResult> login();
 
   Future<CustomerAuthResult> refresh(String refreshToken);
+
+  /// Opens Shopify's hosted end-session page when an [idTokenHint] is available.
+  /// Local cleanup must still succeed even if this call is cancelled or fails.
+  Future<void> endSession({required String idTokenHint});
 }
 
 class AppAuthCustomerGateway implements CustomerAuthGateway {
@@ -99,6 +104,34 @@ class AppAuthCustomerGateway implements CustomerAuthGateway {
       throw _classified(error);
     }
     return _fromResponse(response, fallbackRefreshToken: refreshToken);
+  }
+
+  @override
+  Future<void> endSession({required String idTokenHint}) async {
+    if (!config.isUsable) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'CustomerAccountConfig is not usable',
+      );
+    }
+    final hint = idTokenHint.trim();
+    if (hint.isEmpty) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'missing id_token_hint for end session',
+      );
+    }
+    try {
+      await _appAuth.endSession(
+        EndSessionRequest(
+          idTokenHint: hint,
+          postLogoutRedirectUrl: config.redirectUri,
+          discoveryUrl: config.openIdConfigurationEndpoint.toString(),
+        ),
+      );
+    } catch (error) {
+      throw _classified(error);
+    }
   }
 
   /// Deliberately drops the original exception rather than chaining it: an

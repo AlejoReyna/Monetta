@@ -6,6 +6,7 @@ build/
 .flutter-plugins-dependencies
 .fvm/flutter_sdk
 coverage/
+scratch/
 
 # IDE
 .idea/
@@ -61,9 +62,21 @@ shopify/.shopify/
 web/node_modules/
 web/dist/
 
+# Catalog dashboard SPA: second Vercel project builds from source
+# (dashboard/vercel.json) — same rule as web/.
+dashboard/node_modules/
+dashboard/dist/
+
 # Generated code is COMMITTED on purpose (see docs/ARCHITECTURE.md § Codegen),
 # so no *.g.dart / *.freezed.dart ignores here.
 .vercel/
 .env.local
 .vercel
 .env*
+
+# Audit fixture runs — manifests, synthetic passwords, local env (brief §4)
+.audit-runs/
+tools/audit/.env
+tools/audit/secrets/
+tools/audit/**/secrets.json
+*.audit-secrets.json

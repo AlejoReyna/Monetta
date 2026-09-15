@@ -82,7 +82,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Brooklyn Shoulder Bag 28'), findsOneWidget);
+    expect(find.text('Bolsa Brooklyn 28 de hombro'), findsOneWidget);
     expect(find.text('\$295 USD'), findsOneWidget);
     expect(find.text('DISPONIBLE'), findsOneWidget);
     expect(openedUri, isNull);

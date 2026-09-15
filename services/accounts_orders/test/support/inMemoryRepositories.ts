@@ -1,7 +1,9 @@
+import { AccountRegistrationConflictError } from '../../src/domain/accountErrors.js';
 import type {
   AppAccountsRepository,
   CustomersRepository,
   OrdersRepository,
+  PrivacyRequestsRepository,
   PushTokensRepository,
   WebhookEventsRepository,
 } from '../../src/domain/ports.js';
@@ -13,7 +15,11 @@ import type {
   CustomerRecord,
   MirroredOrder,
   OrderRecord,
+  PrivacyDataRequestRecord,
+  PrivacyFulfillmentInput,
+  PrivacyRequestView,
   PushTokenRecord,
+  WebhookDeliveryStatus,
   WebhookEventRecord,
 } from '../../src/domain/types.js';
 
@@ -26,29 +32,30 @@ export class InMemoryAppAccountsRepository implements AppAccountsRepository {
   private readonly passwordHashById = new Map<string, string>();
 
   async register(record: AppAccountRegistration): Promise<AppAccountRecord> {
-    const existingId = this.accountIdByDeviceId.get(record.deviceId);
-    const id = existingId ?? record.accountId;
-    const existing = this.byId.get(id);
+    if (this.accountIdByDeviceId.has(record.deviceId)) {
+      throw new AccountRegistrationConflictError('device');
+    }
+    const emailTaken = [...this.byId.values()].some(
+      (candidate) => candidate.email.toLowerCase() === record.email.toLowerCase(),
+    );
+    if (emailTaken) {
+      throw new AccountRegistrationConflictError('email');
+    }
     const now = new Date();
     const account: AppAccountRecord = {
-      id,
+      id: record.accountId,
       email: record.email,
       displayName: record.displayName,
-      emailVerified: existing?.emailVerified ?? false,
-      shopifyCustomerId: existing?.shopifyCustomerId ?? null,
-      createdAt: existing?.createdAt ?? now,
+      emailVerified: false,
+      shopifyCustomerId: null,
+      createdAt: now,
       updatedAt: now,
     };
-    const oldTokenHash = this.tokenHashByDeviceId.get(record.deviceId);
-    if (oldTokenHash !== undefined) {
-      this.accountIdByTokenHash.delete(oldTokenHash);
-      this.expiresAtByTokenHash.delete(oldTokenHash);
-    }
-    this.byId.set(id, account);
-    this.passwordHashById.set(id, record.passwordHash);
-    this.accountIdByDeviceId.set(record.deviceId, id);
+    this.byId.set(record.accountId, account);
+    this.passwordHashById.set(record.accountId, record.passwordHash);
+    this.accountIdByDeviceId.set(record.deviceId, record.accountId);
     this.tokenHashByDeviceId.set(record.deviceId, record.tokenHash);
-    this.accountIdByTokenHash.set(record.tokenHash, id);
+    this.accountIdByTokenHash.set(record.tokenHash, record.accountId);
     this.expiresAtByTokenHash.set(record.tokenHash, record.expiresAt);
     return account;
   }
@@ -127,8 +134,18 @@ export class InMemoryOrdersRepository implements OrdersRepository {
     if (order.shopifyOrderId !== null) {
       const existing = this.rows.find((r) => r.shopifyOrderId === order.shopifyOrderId);
       if (existing) {
+        const existingTs = existing.shopifyUpdatedAt?.getTime();
+        const incomingTs = order.shopifyUpdatedAt?.getTime();
+        if (
+          existingTs !== undefined &&
+          incomingTs !== undefined &&
+          incomingTs < existingTs
+        ) {
+          return;
+        }
         Object.assign(existing, order, {
           attributionCode: order.attributionCode ?? existing.attributionCode,
+          shopifyUpdatedAt: order.shopifyUpdatedAt ?? existing.shopifyUpdatedAt,
         });
         return;
       }
@@ -166,20 +183,145 @@ export class InMemoryOrdersRepository implements OrdersRepository {
   }
 }
 
-export class InMemoryWebhookEventsRepository implements WebhookEventsRepository {
-  readonly byWebhookId = new Map<string, WebhookEventRecord & { processedAt: Date | null }>();
+export type StoredWebhookEvent = {
+  webhookId: string;
+  topic: string;
+  shopifyResourceId: string | null;
+  payloadHash: string;
+  shopDomain?: string | null;
+  status: WebhookDeliveryStatus;
+  attemptCount: number;
+  processedAt: Date | null;
+  lastError: string | null;
+  claimedAt: Date | null;
+};
 
-  async recordIfNew(event: WebhookEventRecord): Promise<boolean> {
-    if (this.byWebhookId.has(event.webhookId)) return false;
-    this.byWebhookId.set(event.webhookId, { ...event, processedAt: null });
+export class InMemoryWebhookEventsRepository implements WebhookEventsRepository {
+  readonly byWebhookId = new Map<string, StoredWebhookEvent>();
+
+  /** Test hook: force a claim to look stale so reclaim paths can be exercised. */
+  staleClaimAfterMs = 5 * 60 * 1000;
+
+  async tryClaim(event: WebhookEventRecord): Promise<boolean> {
+    const existing = this.byWebhookId.get(event.webhookId);
+    const now = new Date();
+    if (!existing) {
+      this.byWebhookId.set(event.webhookId, {
+        webhookId: event.webhookId,
+        topic: event.topic,
+        shopifyResourceId: event.shopifyResourceId,
+        payloadHash: event.payloadHash,
+        shopDomain: event.shopDomain ?? null,
+        status: 'processing',
+        attemptCount: 1,
+        processedAt: null,
+        lastError: null,
+        claimedAt: now,
+      });
+      return true;
+    }
+    const stale =
+      existing.status === 'processing' &&
+      existing.claimedAt !== null &&
+      now.getTime() - existing.claimedAt.getTime() >= this.staleClaimAfterMs;
+    if (existing.status === 'completed') return false;
+    if (existing.status === 'processing' && !stale) throw new Error('Webhook busy; retry');
+    existing.status = 'processing';
+    existing.attemptCount += 1;
+    existing.claimedAt = now;
+    existing.payloadHash = event.payloadHash;
+    existing.topic = event.topic;
+    existing.shopifyResourceId = event.shopifyResourceId ?? existing.shopifyResourceId;
+    existing.shopDomain = event.shopDomain ?? existing.shopDomain;
+    existing.lastError = null;
+    existing.processedAt = null;
     return true;
   }
 
-  async markProcessed(webhookId: string): Promise<void> {
+  async markCompleted(webhookId: string): Promise<void> {
     const row = this.byWebhookId.get(webhookId);
-    if (row) row.processedAt = new Date();
+    if (row) {
+      row.status = 'completed';
+      row.processedAt = new Date();
+      row.lastError = null;
+    }
+  }
+
+  async markFailed(webhookId: string, error: string): Promise<void> {
+    const row = this.byWebhookId.get(webhookId);
+    if (row && row.status === 'processing') {
+      row.status = 'failed';
+      row.lastError = error.slice(0, 2000);
+      row.processedAt = null;
+    }
   }
 }
+
+export class InMemoryPrivacyRequestsRepository implements PrivacyRequestsRepository {
+  readonly byWebhookId = new Map<string, PrivacyRequestView>();
+
+  async openDataRequest(record: PrivacyDataRequestRecord): Promise<void> {
+    if (this.byWebhookId.has(record.webhookId)) return;
+    this.byWebhookId.set(record.webhookId, {
+      webhookId: record.webhookId,
+      shopifyCustomerId: record.shopifyCustomerId,
+      kind: 'customers/data_request',
+      status: 'open',
+      receivedAt: new Date(),
+      fulfilledAt: null,
+      notes: null,
+      exportArtifactRef: null,
+      operator: null,
+    });
+  }
+
+  async openRedactRequest(record: PrivacyDataRequestRecord): Promise<void> {
+    if (this.byWebhookId.has(record.webhookId)) return;
+    this.byWebhookId.set(record.webhookId, {
+      webhookId: record.webhookId,
+      shopifyCustomerId: record.shopifyCustomerId,
+      kind: 'customers/redact',
+      status: 'fulfilled',
+      receivedAt: new Date(),
+      fulfilledAt: new Date(),
+      notes: 'Automatic mirror/engagement/token redaction applied by webhook handler',
+      exportArtifactRef: null,
+      operator: 'webhook:customers/redact',
+    });
+  }
+
+  async listOpen(): Promise<readonly PrivacyRequestView[]> {
+    return [...this.byWebhookId.values()].filter((row) => row.status === 'open');
+  }
+
+  async markFulfilled(input: PrivacyFulfillmentInput): Promise<boolean> {
+    const row = this.byWebhookId.get(input.webhookId);
+    if (!row || row.status !== 'open') return false;
+    this.byWebhookId.set(input.webhookId, {
+      ...row,
+      status: 'fulfilled',
+      fulfilledAt: new Date(),
+      notes: input.notes ?? row.notes,
+      exportArtifactRef: input.exportArtifactRef ?? row.exportArtifactRef,
+      operator: input.operator,
+    });
+    return true;
+  }
+
+  async markCancelled(input: PrivacyFulfillmentInput): Promise<boolean> {
+    const row = this.byWebhookId.get(input.webhookId);
+    if (!row || row.status !== 'open') return false;
+    this.byWebhookId.set(input.webhookId, {
+      ...row,
+      status: 'cancelled',
+      fulfilledAt: new Date(),
+      notes: input.notes ?? row.notes,
+      operator: input.operator,
+    });
+    return true;
+  }
+}
+
 
 export class InMemoryPushTokensRepository implements PushTokensRepository {
   readonly byDeviceId = new Map<string, PushTokenRecord>();

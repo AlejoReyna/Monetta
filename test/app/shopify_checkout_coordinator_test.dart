@@ -2,6 +2,8 @@ import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/cart_controller.dart';
+import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/data/local/bag_store.dart';
 import 'package:monetta_app/app/shopify_checkout_coordinator.dart';
 import 'package:monetta_app/data/shopify/cart/cart_api.dart';
 import 'package:monetta_app/data/shopify/cart/cart_repository.dart';
@@ -18,6 +20,73 @@ void main() {
     LocalCartIntent(variantId: shopifyVariantGid(1), quantity: 1),
   ];
 
+  test(
+      'R5 delayed native completion retains A scope and retries failed persistence without reopening',
+      () async {
+    final db = openTestDatabase();
+    addTearDown(db.close);
+    final bags = BagStore(db);
+    final variant = shopifyVariantGid(1);
+    await bags.upsert(
+      productId: shopifyProductGid(1),
+      variantId: variant,
+      quantity: 2,
+      accountId: 'A',
+    );
+    await bags.upsert(
+      productId: shopifyProductGid(1),
+      variantId: variant,
+      quantity: 3,
+      accountId: 'B',
+    );
+    final launcher = _DelayedLauncher();
+    final coordinator = _coordinator(launcher, InMemoryCartSessionStore());
+    final controller =
+        CartController(reconciler: _CheckoutReconciler(_authoritativeCart()));
+    const a = CartSessionScope.authenticated(
+      shopDomain: 'checkout.invalid',
+      localAccountId: 'A',
+    );
+    var activeAccount = 'A';
+    var failPersistence = true;
+    final first = coordinator.present(
+      controller: controller,
+      scope: a,
+      localIntent: localIntent,
+      onCompleted: (purchase) async {
+        expect(activeAccount, 'B');
+        expect(purchase.scope, a);
+        if (failPersistence) throw Exception('storage temporarily unavailable');
+        await bags.applyPurchase(
+          operationId: purchase.operationId,
+          shopDomain: purchase.scope.shopDomain,
+          accountId: purchase.scope.buyerKey,
+          quantities: purchase.quantities,
+        );
+      },
+    );
+    await launcher.entered.future;
+    activeAccount = 'B';
+    launcher.result.complete(const CheckoutCompleted());
+    expect(await first, isA<CheckoutFailed>());
+    expect((await bags.all(accountId: 'A')).single.quantity, 2);
+    failPersistence = false;
+    final retry = await coordinator.present(
+      controller: controller,
+      scope: const CartSessionScope.authenticated(
+        shopDomain: 'checkout.invalid',
+        localAccountId: 'B',
+      ),
+      localIntent: localIntent,
+      onCompleted: (_) async => fail('Must use original captured callback'),
+    );
+    expect(retry, isA<CheckoutFailed>());
+    expect((retry as CheckoutFailed).userMessage, contains('otra cuenta'));
+    expect(launcher.presentCalls, 1);
+    expect((await bags.all(accountId: 'A')).single.quantity, 1);
+    expect((await bags.all(accountId: 'B')).single.quantity, 3);
+  });
+
   test('refreshes immediately before present and completes cleanup once',
       () async {
     final reconciler = _CheckoutReconciler(_authoritativeCart());
@@ -26,13 +95,17 @@ void main() {
     final sessions = InMemoryCartSessionStore();
     await sessions.write(scope, SensitiveCartId(_opaque('cart-session')));
     var cleanupCalls = 0;
+    Set<String>? purchasedIds;
     final coordinator = _coordinator(launcher, sessions);
 
     final result = await coordinator.present(
       controller: controller,
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async => cleanupCalls += 1,
+      onCompleted: (ids) async {
+        cleanupCalls += 1;
+        purchasedIds = ids.quantities.keys.toSet();
+      },
     );
 
     expect(result, isA<CheckoutCompleted>());
@@ -40,6 +113,7 @@ void main() {
     expect(launcher.presentCalls, 1);
     expect(launcher.invalidateCalls, 1);
     expect(cleanupCalls, 1);
+    expect(purchasedIds, {shopifyVariantGid(1)});
     expect(await sessions.read(scope), isNull);
   });
 
@@ -65,7 +139,7 @@ void main() {
         controller: controller,
         scope: scope,
         localIntent: localIntent,
-        onCompleted: () async => cleanupCalls += 1,
+        onCompleted: (_) async => cleanupCalls += 1,
       );
 
       expect(result.runtimeType, terminal.runtimeType);
@@ -88,13 +162,13 @@ void main() {
       controller: controller,
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async => cleanupCalls += 1,
+      onCompleted: (_) async => cleanupCalls += 1,
     );
     final duplicate = await coordinator.present(
       controller: controller,
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async => cleanupCalls += 1,
+      onCompleted: (_) async => cleanupCalls += 1,
     ) as CheckoutFailed;
     reconciliation.complete(_authoritativeCart());
 
@@ -115,7 +189,7 @@ void main() {
       controller: CartController(reconciler: _CheckoutReconciler(invalid)),
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async {},
+      onCompleted: (_) async {},
     );
 
     expect(result, isA<CheckoutFailed>());
@@ -145,7 +219,7 @@ void main() {
       controller: controller,
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async => cleanupCalls += 1,
+      onCompleted: (_) async => cleanupCalls += 1,
     );
 
     expect(opener.calls, 0);
@@ -175,7 +249,7 @@ void main() {
       ),
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async {},
+      onCompleted: (_) async {},
     );
 
     expect(result, isA<CheckoutCancelled>());
@@ -203,7 +277,7 @@ void main() {
       controller: CartController(reconciler: _CheckoutReconciler(partial)),
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async {},
+      onCompleted: (_) async {},
     );
 
     expect(result, isA<CheckoutFailed>());
@@ -251,7 +325,7 @@ void main() {
       ),
       scope: scope,
       localIntent: localIntent,
-      onCompleted: () async {},
+      onCompleted: (_) async {},
     ) as CheckoutFailed;
 
     expect(result.code, CheckoutFailureCode.unavailable);
@@ -394,3 +468,19 @@ String _opaque(String suffix) => String.fromCharCodes([
       101,
       ...suffix.codeUnits,
     ]);
+
+final class _DelayedLauncher implements CheckoutLauncher {
+  final entered = Completer<void>();
+  final result = Completer<CheckoutResult>();
+  int presentCalls = 0;
+  @override
+  Future<void> preload(ValidatedCheckoutUrl url) async {}
+  @override
+  Future<void> invalidate() async {}
+  @override
+  Future<CheckoutResult> present(ValidatedCheckoutUrl url) {
+    presentCalls++;
+    entered.complete();
+    return result.future;
+  }
+}

@@ -400,6 +400,31 @@ FROM crawl_runs ORDER BY started_at DESC LIMIT 10;
 }
 ```
 
+## Signed admin adapter
+
+The accounts service may read source health and durable policy through the
+server-only signed boundary:
+
+- `GET /internal/admin/sources`
+- `GET /internal/admin/sources/:sourceId`
+- `PUT /internal/admin/sources/:sourceId`
+
+These routes require `X-Monetta-Timestamp`, `X-Monetta-Request-Id`, and an
+HMAC-SHA256 `X-Monetta-Signature` over the timestamp, request id, method, path,
+and canonical JSON body. Requests outside the five-minute clock window or with
+a reused request id are rejected. Policy writes are bounded and durable, but
+they only affect future scheduler decisions; they never force a crawl, bypass
+robots/CAPTCHA protections, or authorize supplier/procurement actions.
+
+This signed adapter manages coarse source-level operational policy
+(`external_source_policies`, migration `006`) from `accounts_orders` as used by
+the native Monetta admin app ("Fuentes"). It does not perform product-level
+selection. Fine-grained product selection is governed by the selection engine
+(`selection.json`, post-007 migrations starting at `008_selection.sql`) and
+catalog dashboard per `docs/EXTERNAL_CATALOG_PRODUCTION_PLAN.md` and
+`docs/CATALOG_DASHBOARD.md`. Overall item visibility is governed by:
+`source policy enabled && selection match && placement not hidden`.
+
 ## Disabling the external feed
 
 - **Backend**: set `LIVE_CRAWL_ENABLED=false` (the default) and stop the

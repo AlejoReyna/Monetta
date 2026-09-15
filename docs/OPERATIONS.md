@@ -27,7 +27,7 @@ flutter test
 ```
 
 El preflight de esta entrega pasó: typecheck, 181 tests del monitor, análisis
-de Flutter y 419 tests Flutter. El servidor no tenía contenedor de catálogo,
+de Flutter y 455 tests Flutter. El servidor no tenía contenedor de catálogo,
 no escuchaba `8081` y `catalog.monetta.mx` aún no tenía un registro A al
 momento de la preparación.
 
@@ -47,6 +47,13 @@ deshabilitada temporalmente y `LIVE_CRAWL_ENABLED=false`; el payload curado
 que pudiera quedar en el API no es evidencia de catálogo real.
 No se ejecutó crawl persistente ni se declarará éxito hasta tener un crawl
 permitido por cada fuente y `dataOrigin: "live_crawl"`.
+
+El 30 de agosto de 2026 se publicó `catalog.monetta.mx` en GoDaddy con un
+registro A a `209.23.11.117` (sin AAAA), se obtuvo el certificado de Let's
+Encrypt y se validó `/livez` por HTTPS. `/healthz` permanece correctamente en
+`503 degraded`: el API sirve 16 elementos `curated_us_snapshot`, pero todavía
+no tiene elementos `live_crawl`. El DNS/TLS ya no es un bloqueo; el bloqueo
+restante es la política de fuentes descrita arriba.
 
 ## Primera instalación
 
@@ -102,6 +109,13 @@ PLAYWRIGHT_FALLBACK_ENABLED=false
 USER_AGENT=MonettaCatalogMonitor/0.1 (+https://monetta.mx; internal research prototype; contact: <real-monitored-mailbox>)
 REQUEST_DELAY_MS=1000
 CATALOG_CRON=17 3 * * *
+DASHBOARD_ORIGINS=https://dash.staging.monetta.mx
+DASHBOARD_PASSPHRASE_VERIFIER=<paste-from-dashboard-passphrase-cli>
+DASHBOARD_SESSION_TTL_HOURS=12
+# Staging API isolation (plan §0.1.2): pre-production uses its own hostname,
+# database (monetta_catalog_staging) and .env.staging with
+# LIVE_CRAWL_ENABLED=false. Never point the dashboard at the public
+# catalog.monetta.mx from a staging deployment.
 ```
 
 ```bash
@@ -111,6 +125,36 @@ sudo -n chmod 0600 /opt/monetta-catalog/.env
 `USER_AGENT` debe llevar el correo real y monitoreado antes de arrancar el
 monitor. El API recibe `LIVE_CRAWL_ENABLED=false` de forma fija; sólo el
 monitor recibe `true`.
+
+### 2b. Dashboard: segundo proyecto Vercel + allowlist de origen
+
+Crear un **segundo proyecto Vercel** desde el mismo repositorio con
+**Root Directory = `dashboard`** (Vercel lee `dashboard/vercel.json` e ignora
+el `vercel.json` de la raíz, que sigue compilando `web/`). Única variable
+pública y no secreta en ese proyecto:
+
+```bash
+VITE_CATALOG_API_BASE_URL=https://catalog.monetta.mx
+```
+
+Nada más va en el env de Vercel: si un valor sería un problema en un
+`view-source`, no pertenece a ese proyecto.
+
+Añadir un origen (producción o un preview concreto — nunca `*` ni
+`*.vercel.app`):
+
+```bash
+# En el servidor, editar /opt/monetta-catalog/.env:
+DASHBOARD_ORIGINS=https://dash.staging.monetta.mx
+# reiniciar sólo el API y verificar:
+curl -s -o /dev/null -w '%{http_code}\n' https://catalog.monetta.mx/livez
+curl -H 'Origin: https://evil.example' -i https://catalog.monetta.mx/admin/overview \
+  | grep -i 'access-control-allow-origin' && echo 'ALLOWLIST BROKEN' || echo 'evil origin blocked (sin headers CORS)'
+```
+
+Aceptación: el origen productivo carga, hace login y muestra 304s en la
+pestaña de red; un deployment preview queda **bloqueado** por CORS, lo que
+prueba que el allowlist es exacto.
 
 ### 3. Red y primer arranque
 
@@ -143,16 +187,23 @@ modificar las reglas de los servicios existentes.
 
 Conectar el Caddy existente a la red nueva, añadir el contenido de
 `Caddyfile.snippet` a `/opt/artisanalbrew/Caddyfile`, y validar antes de
-recargar:
+recargar. Preservar todos los bloques existentes (actualmente `cafe` y
+`alice-storage`): nunca reemplazar el Caddyfile completo con el snippet.
+
+El Caddyfile está montado como archivo. Editarlo *in place*; `install`, `mv` o
+una escritura atómica pueden cambiar el inode y dejar al contenedor leyendo la
+versión anterior. Comprobar que el contenedor ve los tres hosts antes de la
+recarga:
 
 ```bash
 docker network connect monetta_catalog_edge artisanalbrew-caddy-1
+docker exec artisanalbrew-caddy-1 grep -E '^(cafe|alice-storage|catalog)\.' /etc/caddy/Caddyfile
 docker exec artisanalbrew-caddy-1 caddy validate --config /etc/caddy/Caddyfile --adapter caddyfile
 docker exec artisanalbrew-caddy-1 caddy reload --config /etc/caddy/Caddyfile --adapter caddyfile
 ```
 
 La zona DNS de `monetta.mx` usa actualmente los nameservers de GoDaddy. Crear
-este registro A, sin un registro AAAA:
+o confirmar este registro A, sin un registro AAAA:
 
 ```text
 catalog.monetta.mx.  A  209.23.11.117
@@ -323,6 +374,15 @@ Modificar únicamente el archivo local ignorado
   "EXTERNAL_CATALOG_BASE_URL": "https://catalog.monetta.mx"
 }
 ```
+
+> **Nota de transición pre-producción (2026-09-02):** En la línea base actual
+> de investigación, `/v1/external-catalog` es público. Una vez implementada la
+> autenticación en el API (WP-22 / WP-40), este archivo añadirá
+> `"EXTERNAL_CATALOG_TOKEN": "<staging-catalog-token>"`. La visibilidad efectiva
+> de los artículos se rige por la regla:
+> `política de fuente activa && coincide con selección && colocación no oculta`.
+> Las migraciones de selección inician en `008_selection.sql` sobre la línea base
+> `001`–`007` ya instalada.
 
 Conservar todos los demás defines staging existentes y no introducir tokens
 secretos. Compilar e instalar en el iPhone 16e:

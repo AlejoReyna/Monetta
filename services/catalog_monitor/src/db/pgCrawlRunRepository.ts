@@ -1,5 +1,5 @@
 import type pg from 'pg';
-import type { CrawlRunRepository } from '../crawl/ports.js';
+import type { CrawlRunFinishParams, CrawlRunRepository } from '../crawl/ports.js';
 import type { CrawlRunMetrics, CrawlRunStatus, SourceId } from '../domain/types.js';
 
 interface CrawlRunRow {
@@ -9,13 +9,16 @@ interface CrawlRunRow {
   ended_at: Date | null;
   status: CrawlRunStatus;
   is_full_snapshot: boolean;
+  selection_version?: string | number | null;
   urls_discovered: number;
+  urls_selected?: number;
   pages_fetched: number;
   successful_parses: number;
   new_items: number;
   changed_items: number;
   missing_items: number;
   inactive_items: number;
+  deselected_items?: number;
   errors_by_type: Record<string, number>;
 }
 
@@ -26,15 +29,59 @@ function fromRow(row: CrawlRunRow): CrawlRunMetrics {
     endedAt: row.ended_at,
     status: row.status,
     isFullSnapshot: row.is_full_snapshot,
+    selectionVersion:
+      row.selection_version === null || row.selection_version === undefined
+        ? null
+        : typeof row.selection_version === 'string'
+          ? Number.parseInt(row.selection_version, 10)
+          : row.selection_version,
     urlsDiscovered: row.urls_discovered,
+    urlsSelected: row.urls_selected ?? 0,
     pagesFetched: row.pages_fetched,
     successfulParses: row.successful_parses,
     newItems: row.new_items,
     changedItems: row.changed_items,
     missingItems: row.missing_items,
     inactiveItems: row.inactive_items,
+    deselectedItems: row.deselected_items ?? 0,
     errorsByType: row.errors_by_type,
   };
+}
+
+type PgQueryClient = Pick<pg.PoolClient, 'query'>;
+
+/** Updates a run using a caller-owned connection, including a shared transaction. */
+export async function finishCrawlRunWithClient(
+  client: PgQueryClient,
+  runId: number,
+  params: CrawlRunFinishParams,
+): Promise<void> {
+  await client.query(
+    `UPDATE crawl_runs SET
+       ended_at = $2, status = $3, is_full_snapshot = $4, selection_version = $5,
+       urls_discovered = $6, urls_selected = $7, pages_fetched = $8,
+       successful_parses = $9, new_items = $10, changed_items = $11,
+       missing_items = $12, inactive_items = $13, deselected_items = $14,
+       errors_by_type = $15
+     WHERE id = $1`,
+    [
+      runId,
+      params.endedAt,
+      params.status,
+      params.isFullSnapshot,
+      params.selectionVersion,
+      params.urlsDiscovered,
+      params.urlsSelected,
+      params.pagesFetched,
+      params.successfulParses,
+      params.newItems,
+      params.changedItems,
+      params.missingItems,
+      params.inactiveItems,
+      params.deselectedItems,
+      JSON.stringify(params.errorsByType),
+    ],
+  );
 }
 
 export class PgCrawlRunRepository implements CrawlRunRepository {
@@ -51,41 +98,9 @@ export class PgCrawlRunRepository implements CrawlRunRepository {
 
   async finish(
     runId: number,
-    params: {
-      endedAt: Date;
-      status: CrawlRunStatus;
-      isFullSnapshot: boolean;
-      urlsDiscovered: number;
-      pagesFetched: number;
-      successfulParses: number;
-      newItems: number;
-      changedItems: number;
-      missingItems: number;
-      inactiveItems: number;
-      errorsByType: Partial<Record<string, number>>;
-    },
+    params: CrawlRunFinishParams,
   ): Promise<void> {
-    await this.pool.query(
-      `UPDATE crawl_runs SET
-         ended_at = $2, status = $3, is_full_snapshot = $4, urls_discovered = $5,
-         pages_fetched = $6, successful_parses = $7, new_items = $8, changed_items = $9,
-         missing_items = $10, inactive_items = $11, errors_by_type = $12
-       WHERE id = $1`,
-      [
-        runId,
-        params.endedAt,
-        params.status,
-        params.isFullSnapshot,
-        params.urlsDiscovered,
-        params.pagesFetched,
-        params.successfulParses,
-        params.newItems,
-        params.changedItems,
-        params.missingItems,
-        params.inactiveItems,
-        JSON.stringify(params.errorsByType),
-      ],
-    );
+    await finishCrawlRunWithClient(this.pool, runId, params);
   }
 
   async recentRuns(sourceId: SourceId, limit: number): Promise<CrawlRunMetrics[]> {

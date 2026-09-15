@@ -29,6 +29,7 @@ export interface CatalogMonitorConfig {
   readonly enabledSourceIds: readonly SourceId[];
   readonly notificationEventsUrl: string | null;
   readonly notificationEventsSecret: string | null;
+  readonly internalServiceSecret: string | null;
 }
 
 function bool(value: string | undefined, fallback: boolean): boolean {
@@ -107,6 +108,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): CatalogMonitor
   const userAgent = env.USER_AGENT ?? PLACEHOLDER_CONTACT_USER_AGENT;
   const notificationEventsUrl = nonEmpty(env.NOTIFICATION_EVENTS_URL);
   const notificationEventsSecret = nonEmpty(env.NOTIFICATION_EVENTS_SECRET);
+  const internalServiceSecret = nonEmpty(env.CATALOG_MONITOR_SERVICE_SECRET);
 
   if (notificationEventsUrl !== null) {
     const parsed = new URL(notificationEventsUrl);
@@ -116,6 +118,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): CatalogMonitor
     if (notificationEventsSecret === null || notificationEventsSecret.length < 32) {
       throw new Error('NOTIFICATION_EVENTS_SECRET must be at least 32 characters');
     }
+  }
+  if (internalServiceSecret !== null && internalServiceSecret.length < 32) {
+    throw new Error('CATALOG_MONITOR_SERVICE_SECRET must be at least 32 characters');
   }
 
   if (/mozilla|chrome|safari|webkit|gecko/i.test(userAgent) && !/monetta/i.test(userAgent)) {
@@ -161,6 +166,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): CatalogMonitor
     enabledSourceIds: enabledSources(env.ENABLED_SOURCE_IDS),
     notificationEventsUrl,
     notificationEventsSecret,
+    internalServiceSecret,
   };
 }
 

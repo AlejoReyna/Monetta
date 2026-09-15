@@ -1,4 +1,4 @@
-/// Authoritative Shopify cart costs and accessible discount controls.
+/// Costos autoritativos del Cart Shopify + controles de descuento accesibles.
 library;
 
 import 'dart:async';
@@ -6,10 +6,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../app/cart_controller.dart';
-import '../../app/theme.dart';
 import '../../data/shopify/cart/cart_repository.dart';
 import '../../data/shopify/cart/cart_session_store.dart';
 import '../../domain/cart.dart';
+import '../boutique/boutique_tokens.dart';
 
 class ShopifyCartSummary extends StatefulWidget {
   const ShopifyCartSummary({
@@ -47,6 +47,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
             ? widget.controller.snapshot?.cart
             : null;
         if (cart == null) return const SizedBox.shrink();
+        final palette = context.boutique;
         final applying = widget.controller.discountStatus ==
             CartDiscountUpdateStatus.applying;
         final allocatedApplications = cart.discountApplications
@@ -61,13 +62,20 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
 
         return Container(
           key: const ValueKey('shopify-cart-summary'),
-          color: kMist,
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(20),
+          decoration: BoxDecoration(
+            color: palette.surface,
+            borderRadius: BoutiqueRadius.card,
+            border: Border.all(color: palette.hairline, width: .5),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Resumen', style: display(22, weight: FontWeight.w400)),
-              const SizedBox(height: 22),
+              Text(
+                'Resumen de compra',
+                style: boutiqueTitle(color: palette.ink),
+              ),
+              const SizedBox(height: 18),
               _MoneyRow(
                 label: cart.cost.subtotalEstimated
                     ? 'Subtotal de Shopify (estimado)'
@@ -75,7 +83,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                 money: cart.cost.subtotal,
               ),
               if (allocatedApplications.isNotEmpty) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 for (final application in allocatedApplications)
                   _MoneyRow(
                     label: application.kind ==
@@ -89,20 +97,20 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
               if (cart.discountApplications.any(
                 (item) => item.kind == CartDiscountApplicationKind.automatic,
               )) ...[
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 Text(
                   'Incluye descuentos automáticos de Shopify',
-                  style: sans(size: 11.5, color: kInkMuted),
+                  style: boutiqueText(size: 11, color: palette.inkMuted),
                 ),
               ],
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               _SummaryTextRow(
                 label: 'Envío',
                 value: 'Se calcula en Shopify',
               ),
-              const Padding(
-                padding: EdgeInsets.symmetric(vertical: 18),
-                child: Divider(),
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                child: Container(height: .5, color: palette.hairline),
               ),
               _MoneyRow(
                 label: cart.cost.totalEstimated
@@ -111,34 +119,53 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                 money: cart.cost.total,
                 prominent: true,
               ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 20),
               TextField(
                 key: const ValueKey('discount-code-field'),
                 controller: _code,
                 enabled: !applying,
                 textCapitalization: TextCapitalization.characters,
-                decoration: const InputDecoration(
+                style: boutiqueText(size: 14, color: palette.ink),
+                decoration: InputDecoration(
                   labelText: 'Código de descuento',
                   hintText: 'Escribe tu código',
+                  labelStyle: boutiqueText(size: 12, color: palette.inkMuted),
+                  hintStyle: boutiqueText(size: 12, color: palette.inkMuted),
+                  filled: true,
+                  fillColor: palette.surfaceDeep,
+                  contentPadding: const EdgeInsets.fromLTRB(14, 16, 14, 14),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BoutiqueRadius.control,
+                    borderSide: BorderSide(color: palette.hairline, width: .5),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BoutiqueRadius.control,
+                    borderSide: BorderSide(color: palette.ink, width: 1),
+                  ),
                 ),
                 onSubmitted: applying ? null : (_) => _apply(),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 10),
               SizedBox(
                 width: double.infinity,
-                child: OutlinedButton(
+                child: BoutiqueButton(
                   key: const ValueKey('apply-discount-button'),
+                  label: applying ? 'APLICANDO…' : 'APLICAR CÓDIGO',
+                  filled: false,
                   onPressed: applying ? null : _apply,
-                  child: Text(applying ? 'APLICANDO…' : 'APLICAR CÓDIGO'),
                 ),
               ),
               for (final discount in cart.discountCodes)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   dense: true,
-                  title: Text(discount.code),
+                  title: Text(
+                    discount.code,
+                    style: boutiqueText(size: 13, color: palette.ink),
+                  ),
                   subtitle: Text(
                     discount.applicable ? 'Aplicado' : 'Válido, no aplicable',
+                    style: boutiqueText(size: 11, color: palette.inkMuted),
                   ),
                   trailing: IconButton(
                     tooltip: 'Eliminar código ${discount.code}',
@@ -151,19 +178,23 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                                 code: discount.code,
                               ),
                             ),
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, size: 18),
                   ),
                 ),
               for (final code in unconfirmedCodes)
                 ListTile(
                   contentPadding: EdgeInsets.zero,
                   dense: true,
-                  title: Text(code),
+                  title: Text(
+                    code,
+                    style: boutiqueText(size: 13, color: palette.ink),
+                  ),
                   subtitle: Text(
                     widget.controller.discountStatus ==
                             CartDiscountUpdateStatus.error
                         ? 'No confirmado'
                         : 'Inválido',
+                    style: boutiqueText(size: 11, color: palette.inkMuted),
                   ),
                   trailing: IconButton(
                     tooltip: 'Eliminar código $code',
@@ -176,24 +207,24 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                                 code: code,
                               ),
                             ),
-                    icon: const Icon(Icons.close),
+                    icon: const Icon(Icons.close, size: 18),
                   ),
                 ),
               if (widget.controller.discountMessage case final message?) ...[
-                const SizedBox(height: 8),
+                const SizedBox(height: 6),
                 Semantics(
                   liveRegion: true,
                   child: Text(
                     message,
                     key: const ValueKey('discount-status-message'),
-                    style: sans(size: 11.5, color: kInkMuted),
+                    style: boutiqueText(size: 11, color: palette.inkMuted),
                   ),
                 ),
               ],
-              const SizedBox(height: 22),
-              FilledButton(
+              const SizedBox(height: 18),
+              BoutiqueButton(
+                label: 'Continuar al checkout',
                 onPressed: widget.onContinue,
-                child: const Text('CONTINUAR A ENTREGA'),
               ),
             ],
           ),
@@ -247,24 +278,29 @@ class _SummaryTextRow extends StatelessWidget {
   final bool prominent;
 
   @override
-  Widget build(BuildContext context) => Row(
-        children: [
-          Expanded(
-            child: Text(
-              label,
-              style: sans(
-                size: prominent ? 14 : 12.5,
-                weight: prominent ? FontWeight.w600 : FontWeight.w400,
-              ),
-            ),
-          ),
-          Text(
-            value,
-            style: sans(
-              size: prominent ? 15 : 12.5,
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Row(
+      children: [
+        Expanded(
+          child: Text(
+            label,
+            style: boutiqueText(
+              size: prominent ? 15 : 13,
               weight: prominent ? FontWeight.w600 : FontWeight.w400,
+              color: palette.ink,
             ),
           ),
-        ],
-      );
+        ),
+        Text(
+          value,
+          style: boutiqueText(
+            size: prominent ? 16 : 13,
+            weight: prominent ? FontWeight.w700 : FontWeight.w500,
+            color: palette.ink,
+          ),
+        ),
+      ],
+    );
+  }
 }

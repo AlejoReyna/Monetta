@@ -12,19 +12,22 @@ class SilhouetteCutout extends StatelessWidget {
   const SilhouetteCutout({
     required this.kind,
     this.size = 36,
-    this.color = kInk,
+    this.color,
     super.key,
   });
 
   final SilhouetteCutoutKind kind;
   final double size;
-  final Color color;
+  final Color? color;
 
   @override
   Widget build(BuildContext context) {
     return CustomPaint(
       size: Size.square(size),
-      painter: _SilhouettePainter(kind: kind, color: color),
+      painter: _SilhouettePainter(
+        kind: kind,
+        color: color ?? context.monettaColors.contentPrimary,
+      ),
     );
   }
 }
