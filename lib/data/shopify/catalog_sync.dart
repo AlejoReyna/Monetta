@@ -175,12 +175,11 @@ class CatalogSync {
       );
 
       final connection = data['products'];
-      final nodes = edgeNodes(connection);
+      final nodes = _validatedNodes(connection);
       pages++;
 
       for (final node in nodes) {
-        _assertInnerConnectionsComplete(node);
-        final product = productFromJson(node);
+        final product = await completeProduct(node);
         products.add(product);
         if (highest == null || product.updatedAt.isAfter(highest)) {
           highest = product.updatedAt;
@@ -218,16 +217,84 @@ class CatalogSync {
     );
   }
 
-  static void _assertInnerConnectionsComplete(Map<String, dynamic> node) {
-    for (final field in const ['images', 'variants', 'collections']) {
-      final connection = node[field];
-      if (connection is! Map) continue;
-      final pageInfo = connection['pageInfo'];
-      if (pageInfo is Map && pageInfo['hasNextPage'] == true) {
-        throw CatalogSyncIncompleteException(
-          'Product ${node['id']} $field connection truncated (hasNextPage)',
+  /// All cache writers, including focused featured reads, must use this
+  /// before replacing a product's authoritative variants/membership.
+  Future<Product> completeProduct(Map<String, dynamic> node) async {
+    await _completeRequiredConnections(node);
+    return productFromJson(node);
+  }
+
+  // Images are an intentional six-image display preview. Variants and
+  // collection membership are authoritative and must be fully fetched.
+  Future<void> _completeRequiredConnections(Map<String, dynamic> node) async {
+    for (final field in const ['variants', 'collections']) {
+      var connection = node[field];
+      final nodes = _validatedNodes(connection);
+      final seen = <String>{};
+      var pages = 1;
+      while (((connection as Map)['pageInfo'] as Map)['hasNextPage'] == true) {
+        final after = (connection['pageInfo'] as Map)['endCursor'] as String;
+        if (!seen.add(after) || pages++ >= maxPages) {
+          throw const CatalogSyncIncompleteException(
+            'Nested pagination did not complete',
+          );
+        }
+        final data = await client.query(
+          productConnectionQuery(field),
+          variables: {
+            'id': node['id'],
+            'after': after,
+            'country': client.config.country,
+            'language': client.config.language,
+          },
         );
+        final product = data['product'];
+        connection = product is Map ? product[field] : null;
+        nodes.addAll(_validatedNodes(connection));
       }
+      node[field] = {
+        'edges': [
+          for (final n in nodes) {'node': n},
+        ],
+        'pageInfo': {'hasNextPage': false, 'endCursor': null},
+      };
     }
+  }
+
+  static List<Map<String, dynamic>> _validatedNodes(dynamic connection) {
+    const invalid = CatalogSyncIncompleteException(
+      'Invalid connection or pagination metadata',
+    );
+    if (connection is! Map) throw invalid;
+    final info = connection['pageInfo'];
+    if (info is! Map ||
+        !info.containsKey('endCursor') ||
+        info['hasNextPage'] is! bool ||
+        (info['endCursor'] != null && info['endCursor'] is! String) ||
+        (info['hasNextPage'] == true &&
+            (info['endCursor'] is! String ||
+                (info['endCursor'] as String).isEmpty))) {
+      throw invalid;
+    }
+    final List<Map<String, dynamic>> nodes;
+    if (connection.containsKey('nodes')) {
+      final raw = connection['nodes'];
+      if (raw is! List ||
+          raw.any((n) => n is! Map || n.keys.any((k) => k is! String))) {
+        throw invalid;
+      }
+      nodes = [for (final n in raw) Map<String, dynamic>.from(n as Map)];
+    } else {
+      final raw = connection['edges'];
+      if (raw is! List ||
+          raw.any((e) => e is! Map || e['node'] is! Map<String, dynamic>)) {
+        throw invalid;
+      }
+      nodes = [
+        for (final edge in raw)
+          Map<String, dynamic>.from((edge as Map)['node'] as Map),
+      ];
+    }
+    return nodes;
   }
 }

@@ -7,10 +7,10 @@ import 'package:monetta_app/data/local/onboarding_preference_store.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
 
+/// The home is a store, not a questionnaire. Personalisation is reachable only
+/// through the first-visit welcome — see `test/features/welcome/`.
 void main() {
-  testWidgets('first run does not open onboarding automatically', (
-    tester,
-  ) async {
+  testWidgets('the home never opens onboarding by itself', (tester) async {
     final db = openTestDatabase();
     final store = CatalogStore(database: db);
     final onboarding = OnboardingController(
@@ -38,7 +38,8 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Elige marcas'), findsNothing);
+    expect(find.text('Personaliza tu experiencia'), findsNothing);
+    expect(find.byKey(const ValueKey('onboarding-continue')), findsNothing);
     expect(onboarding.state, OnboardingState.pending);
   });
 }

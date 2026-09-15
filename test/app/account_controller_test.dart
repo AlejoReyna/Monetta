@@ -90,8 +90,14 @@ class _FakeSecureTokenStore implements SecureTokenStore {
   final Map<String, String> values = {};
   @override
   Future<void> write(String key, String value) async => values[key] = value;
+  bool failReads = false;
   @override
-  Future<String?> read(String key) async => values[key];
+  Future<String?> read(String key) async {
+    await Future<void>.delayed(Duration.zero);
+    if (failReads) throw StateError('asynchronous secure storage failure');
+    return values[key];
+  }
+
   @override
   Future<void> delete(String key) async => values.remove(key);
 }
@@ -352,6 +358,25 @@ void main() {
       expect(controller.isSignedIn, isTrue);
       expect(controller.lastError, isNull);
     });
+  });
+
+  test('backend token catches asynchronous Shopify session rejection',
+      () async {
+    final controller = buildController();
+    await controller.login();
+    secureStore.failReads = true;
+    expect(await controller.accessTokenForBackend(), isNull);
+  });
+
+  test('backend token catches asynchronous Monetta session rejection',
+      () async {
+    final controller = buildController(systemClient: _FakeSystemClient());
+    await controller.register(
+      email: 'test@example.invalid',
+      password: 'test-password',
+    );
+    secureStore.failReads = true;
+    expect(await controller.accessTokenForBackend(), isNull);
   });
 
   test('register() creates and selects a first-party account without Shopify',

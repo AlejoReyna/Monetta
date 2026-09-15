@@ -40,3 +40,49 @@ No tratar un log de webhook como prueba de cumplimiento.
 2. Migraciones SQL son additive (`IF NOT EXISTS` / `ADD COLUMN IF NOT EXISTS`); no borrar tablas en rollback automático.
 3. Si una migración nueva falló a medias, no marcar el deploy sano hasta `/readyz` verde y smoke de webhooks HMAC.
 4. Feature flags: `NOTIFICATIONS_ENABLED`, `LEGACY_ACCOUNT_REGISTRATION_ENABLED`, writes admin — apagar antes de rollback de esquema si el binario viejo no entiende columnas nuevas (columnas nullable son seguras).
+
+## PR7 R4 recovery update (supersedes the five-minute claim policy)
+
+Delivery recovery uses **HTTP retries**, not an unimplemented inbox worker.
+`tryClaim=false` means completed only. A live concurrent claim raises
+`WebhookBusyError`; the route returns **503** with `Retry-After: 5`. No 200 is
+sent before effects and the completion record finish successfully.
+
+A transaction-scoped PostgreSQL advisory lock owns each webhook ID. A slow live
+worker is not overtaken by a timer. Process/connection loss rolls back the claim
+transaction and releases the lock; the next signed delivery can recover at once.
+The former durable `processing` rows are reclaimable when there is no current
+lock, without waiting five minutes. A dedicated claim pool (maximum four) keeps
+capacity in the effects pool, including during bursts. Transaction pooling is
+supported because an open transaction pins its backend connection. Do not set
+an idle-in-transaction timeout shorter than the legitimate maximum handler work.
+
+Completed and failed rows persist on commit. In-progress claim writes remain
+uncommitted; inspecting `webhook_events.status` alone is not a live-worker monitor.
+Use request errors/latency and PostgreSQL lock activity. Effects must retain
+business-key idempotency: unique Shopify order upserts, ordered update guards,
+privacy webhook keys, and catalog event/outbox deduplication. After a crash
+between effect commit and acknowledgement, replay may repeat an idempotent write.
+This is at-least-once delivery with idempotent effects, not a distributed exactly-
+once transaction. A disconnected old claimant cannot commit completion through
+its dead connection. Conflicting payload hash/shop for an existing delivery is
+rejected rather than acknowledged.
+
+Recovery drill: signed duplicate while processing -> 503; terminate the claim
+connection -> deliver again; verify one mirrored order and completed row; replay
+again -> 200 with no new row. The disposable PostgreSQL tests also check effect
+failure, stale order events, and eight deliveries with a one-connection effects
+pool. Keep HMAC and exact configured shop checks enabled.
+
+If Shopify's delivery retries are exhausted, reconcile the failed/missing event
+with the authorized development/Admin source and replay the original signed
+payload through the normal path. Do not mark inbox rows completed manually.
+No payload is retained as a durable replay queue in this design. Monitor failures
+promptly and keep an operator recovery procedure; do not promise unattended
+recovery after the upstream retry window has ended.
+
+Rollout/rollback: no new server migration is needed; schema 010 remains readable.
+Drain/stop old workers before installing this locking implementation because old
+five-minute claims do not participate in the new locks. Never run mixed versions.
+Rolling back reintroduces the busy-ACK defect and is not an acceptable recovery
+for interrupted events. Reconcile in-flight deliveries before any rollback.

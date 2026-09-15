@@ -160,10 +160,16 @@ void main() {
 
       final adminEntry = find.byKey(const ValueKey('open-owner-admin'));
       expect(adminEntry, findsOneWidget);
+      // La página boutique desplaza: llevar a vista antes de tocar.
+      await tester.scrollUntilVisible(adminEntry, 400);
+      await tester.pumpAndSettle();
       await tester.tap(adminEntry);
       expect(openedAdmin, isTrue);
 
-      await tester.tap(find.text('CERRAR SESIÓN'));
+      final logout = find.text('CERRAR SESIÓN');
+      await tester.scrollUntilVisible(logout, 400);
+      await tester.pumpAndSettle();
+      await tester.tap(logout);
       await tester.pumpAndSettle();
       expect(find.text('ACCOUNT'), findsOneWidget);
       expect(find.text('Inicia sesión'), findsNothing);

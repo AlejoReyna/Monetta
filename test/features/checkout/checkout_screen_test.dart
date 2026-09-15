@@ -53,13 +53,13 @@ void main() {
     await tester.pumpWidget(_app(store, const BagScreen()));
     await tester.pump();
 
-    expect(find.text('Tu bolsa'), findsOneWidget);
+    expect(find.text('Mi bolsa'), findsOneWidget);
     expect(find.text(product.title), findsOneWidget);
-    expect(find.text('CONTINUAR A CONTACTO'), findsOneWidget);
+    expect(find.text('Continuar al checkout'), findsOneWidget);
 
     final headingRow = find.byKey(const ValueKey('bag-heading-row'));
     expect(
-      find.descendant(of: headingRow, matching: find.text('Tu bolsa')),
+      find.descendant(of: headingRow, matching: find.text('Mi bolsa')),
       findsOneWidget,
     );
     expect(
@@ -73,10 +73,11 @@ void main() {
 
     final summary = find.byKey(const ValueKey('bag-order-summary'));
     expect(summary, findsOneWidget);
-    expect(tester.getTopLeft(summary).dx, 0);
+    // Boutique card: 20pt page margins, not full-bleed.
+    expect(tester.getTopLeft(summary).dx, 20);
     expect(
       tester.getSize(summary).width,
-      tester.getSize(find.byType(Scaffold).first).width,
+      tester.getSize(find.byType(Scaffold).first).width - 40,
     );
     expect(store.bagQuantity, 1);
 
@@ -193,7 +194,7 @@ void main() {
     await tester.pumpWidget(_app(store, const BagScreen()));
     await tester.pump();
 
-    final cta = find.text('CONTINUAR A CONTACTO');
+    final cta = find.text('Continuar al checkout');
     await tester.scrollUntilVisible(cta, 300);
     await tester.pumpAndSettle();
     await tester.tap(cta);

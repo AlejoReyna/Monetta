@@ -78,6 +78,42 @@ class BagStore {
   /// Clears every bag line regardless of account — used on shop switch.
   Future<void> clearAllScopes() => _db.delete(_db.bagLines).go();
 
+  Future<void> applyPurchase({
+    required String operationId,
+    required String shopDomain,
+    required String? accountId,
+    required Map<String, int> quantities,
+  }) =>
+      _db.transaction(() async {
+        final existing = await (_db.select(_db.checkoutReceipts)
+              ..where((t) => t.operationId.equals(operationId)))
+            .getSingleOrNull();
+        if (existing != null) return;
+        final rows = await all(accountId: accountId);
+        for (final row in rows) {
+          final purchased = quantities[row.variantId] ?? 0;
+          if (purchased <= 0) continue;
+          final remaining = row.quantity - purchased;
+          if (remaining <= 0) {
+            await remove(row.variantId, accountId: accountId);
+          } else {
+            await upsert(
+              productId: row.productId,
+              variantId: row.variantId,
+              quantity: remaining,
+              accountId: accountId,
+            );
+          }
+        }
+        await _db.into(_db.checkoutReceipts).insert(
+              CheckoutReceiptsCompanion.insert(
+                operationId: operationId,
+                shopDomain: shopDomain,
+                accountId: scopeKey(accountId),
+              ),
+            );
+      });
+
   /// Guest rows (`accountId == ''`) become [accountId]. Rows already belonging
   /// to a different account are left untouched.
   Future<void> mergeDeviceItemsIntoAccount(String accountId) async {

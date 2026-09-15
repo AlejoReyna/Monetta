@@ -42,6 +42,9 @@ async function canReachPostgres(): Promise<boolean> {
 }
 
 const pgAvailable = await canReachPostgres();
+if (!pgAvailable && (process.env.CI || process.env.REQUIRE_POSTGRES_TESTS === '1')) {
+  throw new Error('PostgreSQL persistence tests are mandatory in CI');
+}
 
 describe.skipIf(!pgAvailable)('WP-01 PostgreSQL persistence (F01/F02)', () => {
   let pool: pg.Pool;
@@ -56,8 +59,9 @@ describe.skipIf(!pgAvailable)('WP-01 PostgreSQL persistence (F01/F02)', () => {
     await admin.query(`CREATE DATABASE ${dbName}`);
     await admin.end();
 
-    const databaseUrl = `postgres://${adminUser}@localhost:5432/${dbName}`;
-    pool = new pg.Pool({ connectionString: databaseUrl });
+    const databaseUrl = new URL(adminUrl);
+    databaseUrl.pathname = `/${dbName}`;
+    pool = new pg.Pool({ connectionString: databaseUrl.toString() });
     const migrationsDir = join(dirname(fileURLToPath(import.meta.url)), '../src/db/migrations');
     await pool.query(`
       CREATE TABLE IF NOT EXISTS schema_migrations (

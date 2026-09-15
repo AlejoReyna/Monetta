@@ -501,9 +501,11 @@ void main() {
 
     expect(find.text('Filtrar y ordenar'), findsOneWidget);
     expect(find.text('Tipo de bolsa'), findsOneWidget);
-    expect(find.text('Marca'), findsOneWidget);
-    expect(find.text('Precio'), findsOneWidget);
-    expect(find.text('Color'), findsNothing);
+    // Asserted by key: "Marca" and "Precio" also name the quick-filter chips
+    // on the screen behind the sheet, so the section itself is the subject.
+    expect(find.byKey(const Key('catalog-filter-brand')), findsOneWidget);
+    expect(find.byKey(const Key('catalog-filter-price')), findsOneWidget);
+    expect(find.byKey(const Key('catalog-filter-color')), findsNothing);
     expect(find.text('Tipo de fit'), findsNothing);
     expect(find.text('Talla'), findsNothing);
 
@@ -613,9 +615,12 @@ void main() {
     );
     expect(find.byKey(const Key('catalog-category-cartera')), findsOneWidget);
 
-    final categoryRail = find.byWidgetPredicate(
-      (widget) =>
-          widget is ListView && widget.scrollDirection == Axis.horizontal,
+    final categoryRail = find.ancestor(
+      of: find.byKey(const Key('catalog-category-collection')),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is ListView && widget.scrollDirection == Axis.horizontal,
+      ),
     );
     await tester.drag(categoryRail, const Offset(-300, 0));
     await tester.pumpAndSettle();

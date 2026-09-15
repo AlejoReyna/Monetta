@@ -3,6 +3,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../boutique/boutique_tokens.dart';
+
 import '../../app/theme.dart';
 
 /// Gives shoppers a clear account entry point without breaking the editorial
@@ -19,17 +21,22 @@ class HomeAccountInvitation extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.monettaColors;
+    final palette = context.boutique;
     return Container(
       key: const ValueKey('home-account-invitation'),
       width: double.infinity,
       decoration: BoxDecoration(
-        color: colors.surfaceMuted,
+        color: palette.surfaceDeep,
         border: Border(
-          top: BorderSide(color: colors.divider, width: .5),
+          top: BorderSide(color: palette.hairline, width: .5),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(20, 48, 20, 44),
+      padding: const EdgeInsets.fromLTRB(
+        BoutiqueSpace.gutter,
+        BoutiqueSpace.xxl,
+        BoutiqueSpace.gutter,
+        BoutiqueSpace.xxl,
+      ),
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 620),
@@ -38,42 +45,32 @@ class HomeAccountInvitation extends StatelessWidget {
               Text(
                 isSignedIn ? 'TU CUENTA' : 'REGÍSTRATE',
                 textAlign: TextAlign.center,
-                style: editorial(31, color: colors.contentPrimary),
+                style: boutiqueDisplay(28, color: palette.ink),
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: BoutiqueSpace.md),
               Text(
                 isSignedIn
                     ? 'Consulta tus pedidos y datos de compra'
                     : 'Obtén envío gratis en tu primer pedido',
                 textAlign: TextAlign.center,
-                style: eyebrow(
-                  size: 9.5,
-                  color: colors.contentMuted,
-                  weight: FontWeight.w600,
-                ),
+                style: boutiqueText(size: 14, color: palette.inkMuted),
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: BoutiqueSpace.xl),
               ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 420),
-                child: FilledButton(
+                child: BoutiqueButton(
                   key: const ValueKey('home-register-button'),
+                  label: isSignedIn ? 'VER MI CUENTA' : 'REGISTRARME AHORA',
                   onPressed: onRegister,
-                  child: Text(
-                    isSignedIn ? 'VER MI CUENTA' : 'REGISTRARME AHORA',
-                  ),
                 ),
               ),
-              const SizedBox(height: 34),
+              const SizedBox(height: BoutiqueSpace.xxl),
               Text(
                 'ENVÍOS RÁPIDOS Y PAGOS SEGUROS',
                 textAlign: TextAlign.center,
-                style: eyebrow(
-                  size: 9,
-                  color: colors.contentMuted,
-                  weight: FontWeight.w500,
-                ),
+                style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: BoutiqueSpace.lg),
               const _PaymentMethods(),
             ],
           ),

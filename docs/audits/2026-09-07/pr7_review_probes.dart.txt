@@ -1,0 +1,76 @@
+// Temporary audit probes: these assertions describe current defects.
+import 'dart:convert';
+import 'dart:io';
+import 'package:monetta_app/app/catalog_store.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/data/local/database.dart' hide SyncCursor;
+import 'package:monetta_app/data/local/catalog_cache_store.dart';
+import 'package:monetta_app/data/local/sync_cursor_store.dart';
+import 'package:monetta_app/data/normalize/rules.dart';
+import 'package:monetta_app/data/repositories/catalog_repository.dart';
+import 'package:monetta_app/data/shopify/catalog_sync.dart';
+import 'package:monetta_app/data/shopify/storefront_client.dart';
+import 'package:monetta_app/data/shopify/storefront_config.dart';
+import 'shopify/catalog_sync_test.dart' as fixture;
+void main(){
+ TestWidgetsFlutterBinding.ensureInitialized();
+ final snapshot=jsonDecode(File('assets/catalog/catalog.json').readAsStringSync()) as Map<String,dynamic>;
+ final seed={'products':[snapshot['products'][0]]};
+ CatalogRepository repository(AppDatabase db, Map<String,dynamic> response) => CatalogRepository(cache:CatalogCacheStore(db),cursorStore:SyncCursorStore(db),rules:NormalizationRules.fromJson({}),shopDomain:'monetta.mx',catalogSync:CatalogSync(client:StorefrontClient(config:const StorefrontConfig(shopDomain:'monetta.mx',accessToken:'fake'),transport:(_,__,___) async=>response)));
+ test('AUDIT seven images abort otherwise valid catalog sync',() async{
+  final node=fixture.productNode(id:'1',updatedAt:'2026-09-07T00:00:00Z');
+  node['images']=<String,dynamic>{...(node['images'] as Map<String,dynamic>),'pageInfo':{'hasNextPage':true}};
+  final db=openTestDatabase(); addTearDown(db.close);
+  final repo=repository(db,fixture.page([node]));
+  await repo.seedFromAssetIfEmpty(seed);
+  final result=await repo.sync();
+  expect(result.outcome,CatalogSyncOutcome.failed);
+  expect(result.error,isA<CatalogSyncIncompleteException>());
+ });
+ test('AUDIT null product connection erases valid cache as successful full sync',() async{
+  final db=openTestDatabase(); addTearDown(db.close);
+  final repo=repository(db,{'data':{'products':null}});
+  await repo.seedFromAssetIfEmpty(seed);
+  final result=await repo.sync();
+  expect(result.outcome,CatalogSyncOutcome.updated);
+  expect(await repo.cache.allProducts(),isEmpty);
+ });
+ test('AUDIT empty authoritative catalog gets resurrected from asset on restart',() async{
+  final db=openTestDatabase(); addTearDown(db.close);
+  final repo=repository(db,fixture.page([]));
+  await repo.seedFromAssetIfEmpty(seed);
+  await repo.sync();
+  expect(await repo.cache.allProducts(),isEmpty);
+  await repo.seedFromAssetIfEmpty(seed);
+  expect((await repo.cache.allProducts()).length,1);
+  // A subsequent successful full sync removes the resurrected asset again;
+  // before that, or while offline, the cache contains an unpublished product.
+ });
+ test('AUDIT pre-upgrade cursor without shop provenance is reused for new shop',() async{
+  final db=openTestDatabase(); addTearDown(db.close);
+  final repo=repository(db,fixture.page([]));
+  await repo.seedFromAssetIfEmpty(seed);
+  await repo.cursorStore.save(SyncCursor(lastUpdatedAt:DateTime.now().toUtc(),lastFullSyncAt:DateTime.now().toUtc()));
+  await repo.sync();
+  expect((await repo.cache.allProducts()).length,1);
+  expect((await repo.cursorStore.load()).shopDomain,'monetta.mx');
+ });
+ test('AUDIT old checkout completion removes current account bag',() async {
+  final db=openTestDatabase();
+  final store=CatalogStore(database:db,shopDomain:'monetta.mx');
+  addTearDown(store.dispose);
+  await store.loadFromAsset();
+  final product=store.products.firstWhere((p)=>p.variants.any((v)=>v.available));
+  final variant=product.variants.firstWhere((v)=>v.available);
+  await store.setAccountScope('audit-A');
+  await store.addToBag(product,variantId:variant.id);
+  final purchasedIds={variant.id}; // captured by checkout A
+  await store.setAccountScope('audit-B');
+  await store.addToBag(product,variantId:variant.id);
+  await store.clearPurchasedBagLines(purchasedIds); // delayed completion A
+  expect(store.bagLines,isEmpty); // B loses its unpurchased item
+  await store.setAccountScope('audit-A');
+  expect(store.bagLines.length,1); // A retains purchased item
+ });
+
+}

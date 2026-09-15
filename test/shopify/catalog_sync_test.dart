@@ -57,6 +57,7 @@ Map<String, dynamic> productNode({
         ],
       },
       'variants': {
+        'pageInfo': {'hasNextPage': false, 'endCursor': null},
         'edges': [
           {
             'node': {
@@ -70,7 +71,10 @@ Map<String, dynamic> productNode({
           },
         ],
       },
-      'collections': {'edges': <dynamic>[]},
+      'collections': {
+        'pageInfo': {'hasNextPage': false, 'endCursor': null},
+        'edges': <dynamic>[],
+      },
     };
 
 Map<String, dynamic> page(

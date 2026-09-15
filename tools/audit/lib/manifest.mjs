@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile, access } from 'node:fs/promises';
+import { mkdir, readFile, writeFile, access, rename } from 'node:fs/promises';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -56,7 +56,9 @@ export async function writeManifest(runId, manifest) {
   await ensureRunDir(runId);
   manifest.updated_at = new Date().toISOString();
   const p = manifestPath(runId);
-  await writeFile(p, `${JSON.stringify(manifest, null, 2)}\n`, 'utf8');
+  const temp = `${p}.${process.pid}.tmp`;
+  await writeFile(temp, `${JSON.stringify(manifest, null, 2)}\n`, {encoding: 'utf8', mode: 0o600});
+  await rename(temp, p);
   return p;
 }
 

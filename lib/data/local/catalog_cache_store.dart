@@ -81,6 +81,53 @@ class CatalogCacheStore {
 
   final AppDatabase _db;
 
+  Future<T> transaction<T>(Future<T> Function() action) =>
+      _db.transaction(action);
+
+  Future<bool> hasShopSpecificState() async {
+    final row = await _db
+        .customSelect('SELECT EXISTS('
+            'SELECT 1 FROM accounts UNION ALL SELECT 1 FROM sessions '
+            'UNION ALL SELECT 1 FROM bag_lines UNION ALL SELECT 1 FROM wishlist_items'
+            ') AS present')
+        .getSingle();
+    return row.read<int>('present') != 0;
+  }
+
+  /// Quarantine a foreign/unknown shop before any catalog or account restore.
+  /// Token references are removed with accounts; old secure entries become
+  /// unreachable. Cart storage uses a new, shop-scoped namespace.
+  Future<void> resetShopState(String shop) => _db.transaction(() async {
+        await clearCatalog();
+        await _db.delete(_db.cachedCollections).go();
+        await _db.delete(_db.syncCursors).go();
+        await _db.delete(_db.bagLines).go();
+        await _db.delete(_db.wishlistItems).go();
+        await _db.delete(_db.interactionEvents).go();
+        await _db
+            .update(_db.devices)
+            .write(const DevicesCompanion(accountId: Value(null)));
+        await _db.delete(_db.sessions).go();
+        await _db.delete(_db.orderSummaries).go();
+        await _db.delete(_db.accounts).go();
+        await saveMetadata(
+          CatalogCacheMetadata.forProducts(
+            source: CatalogCacheSource.shopify,
+            products: [],
+            syncedAt: null,
+            status: CatalogCacheStatus.invalid,
+            shopDomain: shop,
+            detail: 'Full sync required after shop migration.',
+          ),
+        );
+        await _db.into(_db.syncCursors).insert(
+              SyncCursorsCompanion.insert(
+                id: const Value(0),
+                shopDomain: Value(shop),
+              ),
+            );
+      });
+
   /// True on a brand-new install — nothing has ever been written here.
   Future<bool> isEmpty() async {
     final row = await _db.select(_db.cachedProducts).get();

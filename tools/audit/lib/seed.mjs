@@ -1,3 +1,5 @@
+import { withRunLock } from './runLock.mjs';
+import { ShopifyAuditAdapter } from './shopifyAdapter.mjs';
 import { planPersonaResources } from './personas.mjs';
 import { planCatalogOrderResources } from './fixtures.mjs';
 import {
@@ -15,7 +17,7 @@ import { assertRemoteWriteAllowed, loadGuardConfig, describeGuardStatus } from '
  * Remote writes are refused unless allowlist + EXPECTED_SHOP_ID match and
  * AUDIT_ALLOW_REMOTE_WRITES=1 with AUDIT_DRY_RUN=0.
  */
-export async function seedRun({
+async function seedRunUnlocked({
   runId,
   environment = process.env.AUDIT_ENVIRONMENT || 'local',
   forceLive = false,
@@ -63,6 +65,12 @@ export async function seedRun({
     });
   }
 
+  const adapter = liveWrite ? new ShopifyAuditAdapter() : null;
+  if (adapter) {
+    const identity = await adapter.verify();
+    if (manifest.verified_shop && manifest.verified_shop.id !== identity.id) throw new Error('Run belongs to another shop');
+    manifest.verified_shop = identity;
+  }
   manifest.environment = environment;
   manifest.expected_shop_id = config.expectedShopId || manifest.expected_shop_id;
   manifest.resource_prefix = prefix;
@@ -78,20 +86,21 @@ export async function seedRun({
     ...planPersonaResources(prefix),
     ...planCatalogOrderResources(prefix),
   ]) {
-    const status = liveWrite ? 'seeded' : 'planned';
-    // Live adapters are not implemented yet — even "live" marks planned stubs
-    // and records that remote adapters must be filled in later. Never invent
-    // remote IDs.
-    upsertResource(manifest, {
-      ...resource,
-      status: liveWrite ? 'skipped' : status,
-      environment,
-      meta: {
-        ...resource.meta,
-        seed_mode: liveWrite ? 'live-adapter-pending' : 'dry-run',
-        remote_write_attempted: false,
-      },
-    });
+    const existing = manifest.resources.find(r => r.id === resource.id);
+    if (existing?.status === 'created') continue;
+    if (!adapter) {
+      if (!existing) upsertResource(manifest, {...resource, status: 'planned', environment});
+      continue;
+    }
+    const target = existing ?? resource;
+    // Persist write intent first. If the process dies after Shopify commits,
+    // recover by exact run tag, never blindly create a second resource.
+    upsertResource(manifest, {...target, status: 'creating', environment});
+    await writeManifest(runId, manifest);
+    const result = await adapter.create(target, manifest);
+    upsertResource(manifest, {...target, ...result, environment});
+    await writeManifest(runId, manifest);
+
   }
 
   if (!liveWrite) {
@@ -108,4 +117,8 @@ export async function seedRun({
     guard: guardProbe,
     writeDecision,
   };
+}
+
+export async function seedRun(args) {
+  return withRunLock(args.runId, () => seedRunUnlocked(args));
 }

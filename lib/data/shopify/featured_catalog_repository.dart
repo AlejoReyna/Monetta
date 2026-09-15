@@ -3,6 +3,7 @@ library;
 
 import '../../domain/product.dart';
 import 'mappers.dart';
+import 'catalog_sync.dart';
 import 'queries.dart';
 import 'storefront_client.dart';
 
@@ -20,12 +21,16 @@ class FeaturedCatalogRepository {
         'after': null,
         'sortKey': null,
         'reverse': null,
+        'country': client.config.country,
+        'language': client.config.language,
       },
     );
     final collection = data['collection'];
     if (collection is! Map<String, dynamic>) return const [];
-    return edgeNodes(collection['products'])
-        .map(productFromJson)
-        .toList(growable: false);
+    final sync = CatalogSync(client: client);
+    return [
+      for (final node in edgeNodes(collection['products']))
+        await sync.completeProduct(node),
+    ];
   }
 }

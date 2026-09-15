@@ -32,6 +32,7 @@ import 'app/runtime_config.dart';
 import 'app/shopify_cart_composition.dart';
 import 'app/shopify_checkout_coordinator.dart';
 import 'app/theme.dart';
+import 'app/startup_reveal.dart';
 import 'app/theme_controller.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
 import 'data/accounts_orders/system_account_client.dart';
@@ -71,9 +72,12 @@ import 'data/shopify/home_content_repository.dart';
 import 'data/shopify/http_storefront_transport.dart';
 import 'data/shopify/storefront_client.dart';
 import 'data/shopify/storefront_config.dart';
-import 'features/home/home_screen.dart';
 import 'features/catalog/collection_screen.dart';
+import 'features/catalog/search_history.dart';
+import 'features/catalog/search_history_persistence.dart';
+import 'features/home/home_screen.dart';
 import 'features/product/product_screen.dart';
+import 'features/welcome/welcome_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -591,6 +595,15 @@ class _MonettaAppState extends State<MonettaApp> {
 
   Future<void> _load() async {
     await Future.wait([_theme.restore(), _onboarding.restore()]);
+    // Recent searches survive a restart via a file adapter (no Drift schema
+    // bump). Best-effort: search still works session-scoped if this fails.
+    try {
+      SearchHistory.configureSharedPersistence(
+        SearchHistoryFilePersistence(),
+      );
+    } on Object {
+      // Keep the in-memory default.
+    }
     final buildMetadata = await AppBuildMetadata.load();
 
     // Seeds/hydrates the Drift database both `CatalogStore` and account
@@ -683,6 +696,7 @@ class _MonettaAppState extends State<MonettaApp> {
       deviceId: deviceId,
       onAccountScopeChanged: (accountId) async {
         await _store.setAccountScope(accountId);
+        await SearchHistory.instance.setScope(accountId);
         // Login/logout/account switch must never reuse a preloaded checkout
         // document that belonged to a previous buyer identity (F06/F18).
         await _shopifyCart?.checkout.invalidate();
@@ -756,6 +770,7 @@ class _MonettaAppState extends State<MonettaApp> {
     unawaited(_homeContent.refresh());
     unawaited(_featuredCatalog.refresh());
     await _notifications!.restore();
+    await _store.waitForInitialCatalog();
   }
 
   void _openNotificationRoute(NotificationRouteData route) {
@@ -851,17 +866,22 @@ class _MonettaAppState extends State<MonettaApp> {
                     if (snapshot.hasError) {
                       return _ErrorScreen(error: '${snapshot.error}');
                     }
-                    if (snapshot.connectionState != ConnectionState.done) {
-                      return const _SplashScreen();
-                    }
-                    return AppRouteScopes(
-                      accountController: _account,
-                      cartController: _shopifyCart?.controller,
-                      checkoutCoordinator: _shopifyCart?.checkout,
-                      catalogStore: _store,
-                      notificationController: _notifications,
-                      shopDomain: StorefrontConfig.fromEnvironment().shopDomain,
-                      child: navigator!,
+                    final ready =
+                        snapshot.connectionState == ConnectionState.done;
+                    return StartupReveal(
+                      ready: ready,
+                      child: ready
+                          ? AppRouteScopes(
+                              accountController: _account,
+                              cartController: _shopifyCart?.controller,
+                              checkoutCoordinator: _shopifyCart?.checkout,
+                              catalogStore: _store,
+                              notificationController: _notifications,
+                              shopDomain:
+                                  StorefrontConfig.fromEnvironment().shopDomain,
+                              child: navigator!,
+                            )
+                          : const SizedBox.expand(),
                     );
                   },
                 ),
@@ -875,68 +895,34 @@ class _MonettaAppState extends State<MonettaApp> {
                   notifier: _homeContent,
                   child: FeaturedCatalogScope(
                     notifier: _featuredCatalog,
-                    child: FutureBuilder<void>(
-                      future: _loading,
-                      builder: (context, snapshot) {
-                        if (snapshot.hasError) {
-                          return const SizedBox.shrink();
-                        }
-                        if (snapshot.connectionState != ConnectionState.done) {
-                          return const SizedBox.shrink();
-                        }
-                        return NotificationScope(
-                          notifier: _notifications!,
-                          child: AdminNotificationScope(
-                            notifier: _adminNotifications!,
-                            child: AdminScope(
-                              notifier: _admin!,
-                              child: OnboardingScope(
-                                notifier: _onboarding,
-                                child: const HomeScreen(),
+                    child: Builder(
+                      builder: (context) => NotificationScope(
+                        notifier: _notifications!,
+                        child: AdminNotificationScope(
+                          notifier: _adminNotifications!,
+                          child: AdminScope(
+                            notifier: _admin!,
+                            // PACKAGE A — startup integration point.
+                            // `WelcomeGate` decides, from the persisted
+                            // onboarding state alone, whether this launch is a
+                            // first visit. It renders the home immediately
+                            // underneath either way, so nothing here waits on
+                            // it. See features/welcome/welcome_gate.dart.
+                            child: OnboardingScope(
+                              notifier: _onboarding,
+                              child: const WelcomeGate(
+                                child: HomeScreen(),
                               ),
                             ),
                           ),
-                        );
-                      },
+                        ),
+                      ),
                     ),
                   ),
                 ),
               ),
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-/// Wordmark centred over a thin gold rule instead of a spinner. A Material
-/// spinner is the loudest possible "this is an app" signal, and this is the
-/// first frame the shopper ever sees.
-class _SplashScreen extends StatelessWidget {
-  const _SplashScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.monettaColors;
-    return Scaffold(
-      body: Center(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const MonettaWordmark(height: 34),
-            const SizedBox(height: 18),
-            Text(
-              'Originales importados'.toUpperCase(),
-              style: eyebrow(color: colors.contentMuted),
-            ),
-            const SizedBox(height: 36),
-            const SizedBox(
-              width: 64,
-              height: 1,
-              child: ColoredBox(color: kGold),
-            ),
-          ],
         ),
       ),
     );

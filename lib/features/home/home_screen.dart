@@ -3,7 +3,7 @@ library;
 
 import 'dart:async';
 
-import 'package:flutter/foundation.dart' show ValueListenable;
+import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -11,16 +11,13 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/card_lift.dart';
 import '../../app/catalog_store.dart';
 import '../../app/home_content_controller.dart';
-import '../../app/media/monetta_video.dart';
 import '../../app/motion.dart';
 import '../../app/mixed_feed.dart';
-import '../../app/onboarding_controller.dart';
-import '../../app/product_telemetry.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
 import '../../data/media/media_url.dart';
-import '../../domain/campaign.dart';
+import '../../domain/admin_control.dart';
 import '../../domain/editorial_content.dart';
 import '../../domain/home_content.dart';
 import '../../domain/product.dart';
@@ -33,15 +30,37 @@ import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
+import '../product/quick_view.dart';
+import '../boutique/boutique_tokens.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
-import '../onboarding/onboarding_sheet.dart';
 import '../partner/partner_hub_screen.dart';
+import '../welcome/welcome_gate.dart';
 import 'customer_experiences_section.dart';
 import 'customer_experiences_screen.dart';
 import 'home_account_invitation.dart';
+import 'home_boutique_sections.dart';
 
 const int _kNewestCount = 8;
+
+/// Search field height plus the padding around it — used only to decide when
+/// the banner film has scrolled out of view.
+const double _kSearchFieldBlockHeight =
+    BoutiqueSpace.control + BoutiqueSpace.md + BoutiqueSpace.lg;
+
+/// The redesign's opening rhythm: what is new, then how to shop it, then the
+/// editorial tail. Applied only when the storefront still carries the bundled
+/// default order — see `_resolveSectionOrder`.
+const List<HomeSectionId> _kBoutiqueSectionOrder = <HomeSectionId>[
+  HomeSectionId.newProducts,
+  HomeSectionId.bagTypes,
+  HomeSectionId.collections,
+  HomeSectionId.todaysPicks,
+  HomeSectionId.brands,
+  HomeSectionId.about,
+  HomeSectionId.social,
+  HomeSectionId.testimonials,
+];
 
 Duration _homeSectionDelay(int index) =>
     Duration(milliseconds: (index * 70).clamp(0, 350));
@@ -62,7 +81,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Timer? _featuredRefreshTimer;
   double _heroHeight = double.infinity;
   bool _foreground = true;
-  bool _onboardingRequested = false;
+  bool _firstRunPrepared = false;
   late String _searchPrompt;
 
   @override
@@ -73,7 +92,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     _scroll.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _precacheRail();
-      unawaited(_prepareFirstRunExperience());
       unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
       _featuredRefreshTimer = Timer.periodic(
         const Duration(seconds: 60),
@@ -84,41 +102,24 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     });
   }
 
-  Future<void> _prepareFirstRunExperience() async {
-    // The onboarding panel remains in the code for a future explicit entry
-    // point, but it is intentionally not opened automatically on startup.
-    await NotificationScope.maybeOf(context)?.requestSystemPermission();
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _maybePrepareFirstRunExperience();
   }
 
-  // Retained so the onboarding experience and its persistence flow remain
-  // available if the product decides to expose it explicitly later.
-  // ignore: unused_element
-  Future<void> _showFirstRunOnboarding() async {
-    if (!mounted || _onboardingRequested) return;
-    final onboarding = OnboardingScope.maybeOf(context);
-    if (onboarding == null || !onboarding.shouldShow) return;
-    _onboardingRequested = true;
-    final store = StoreScope.of(context);
-    final completed = await showModalBottomSheet<bool>(
-      context: context,
-      isScrollControlled: true,
-      isDismissible: false,
-      enableDrag: false,
-      builder: (_) => StoreScope(
-        notifier: store,
-        child: const OnboardingSheet(),
-      ),
-    );
-    if (!mounted) return;
-    if (completed == true) {
-      await onboarding.complete();
+  /// Notification permission is asked for once, on the home, and deliberately
+  /// **not** from the onboarding panel: a personalisation tap must never turn
+  /// into a system prompt. It also waits for the first-visit welcome to close
+  /// (`features/welcome/welcome_gate.dart`), so the OS dialog never lands on
+  /// top of the brand's first screen.
+  void _maybePrepareFirstRunExperience() {
+    if (_firstRunPrepared || WelcomeScope.isVisible(context)) return;
+    _firstRunPrepared = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;
-      logProductEvent(context, ProductEvent.onboardingCompleted);
-    } else {
-      await onboarding.skip();
-      if (!mounted) return;
-      logProductEvent(context, ProductEvent.onboardingSkipped);
-    }
+      unawaited(NotificationScope.maybeOf(context)?.requestSystemPermission());
+    });
   }
 
   @override
@@ -326,12 +327,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         ? AdminScope.maybeOf(context)?.storefront ?? homeContent.storefront
         : homeContent.storefront;
     final showHero = storefront.showHero;
-    final showNewest = storefront.showNewest;
-    final showTodaysPicks = storefront.showTodaysPicks;
 
     if (feed.isEmpty) {
       return Scaffold(
         extendBody: true,
+        backgroundColor: context.boutique.canvas,
         drawer: _buildSideMenu(store),
         drawerScrimColor: context.monettaColors.scrim,
         appBar: _buildAppBar(),
@@ -353,32 +353,65 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       bagCount: store.bagQuantity,
       onSelected: _handleBottomNavigation,
     );
+    final sections = _resolveSectionOrder(homeContent, storefront);
     final body = LayoutBuilder(
       builder: (context, constraints) {
-        _heroHeight = _HomeDiscoveryHeader.estimatedHeight;
+        _heroHeight = homeBannerHeight(context) + _kSearchFieldBlockHeight;
         return ListView(
           controller: _scroll,
           padding: EdgeInsets.zero,
           children: [
-            if (showHero)
-              KeyedSubtree(
-                key: const ValueKey('home-reveal-hero'),
-                child: ValueListenableBuilder<bool>(
-                  valueListenable: _heroPlaying,
-                  builder: (context, playing, child) => _HomeDiscoveryHeader(
-                    collapse: _collapse,
-                    playing: playing,
-                    onSearch: _openSearch,
-                    searchPrompt: _searchPrompt,
+            Column(
+              key: const ValueKey('home-discovery-header'),
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                ValueListenableBuilder<double>(
+                  valueListenable: _collapse,
+                  builder: (context, value, child) {
+                    final visibility = 1 -
+                        Curves.easeInCubic.transform(
+                          ((value - .08) / .78).clamp(0.0, 1.0),
+                        );
+                    return IgnorePointer(
+                      ignoring: visibility < .25,
+                      child: ExcludeSemantics(
+                        excluding: visibility < .25,
+                        child: Opacity(
+                          key: const ValueKey('home-search-bar-transition'),
+                          opacity: visibility,
+                          child: child,
+                        ),
+                      ),
+                    );
+                  },
+                  child: HomeSearchField(
+                    onTap: _openSearch,
+                    prompt: _searchPrompt,
                   ),
                 ),
+                if (showHero)
+                  ValueListenableBuilder<bool>(
+                    valueListenable: _heroPlaying,
+                    builder: (context, playing, _) => HomeEditorialBanner(
+                      playing: playing,
+                      onOpenNew: _openFullCatalog,
+                    ),
+                  ),
+              ],
+            ),
+            for (var index = 0; index < sections.length; index++)
+              _buildHomeSection(
+                sections[index],
+                index: index,
+                store: store,
+                content: homeContent,
+                editorial: editorial,
+                fresh: fresh,
+                featuredProducts: featured?.products ?? const [],
+                reviewsStatus: reviewsStatus,
               ),
             Padding(
-              padding: const EdgeInsets.only(top: 28),
-              child: _HomeCollectionsSection(cards: homeContent.collections),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(top: 72),
+              padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
               child: RevealOnScroll(
                 key: const ValueKey('home-reveal-offers'),
                 scrollController: _scroll,
@@ -389,29 +422,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
             ),
-            for (var index = 0;
-                index < homeContent.sectionOrder.length;
-                index++)
-              if (homeContent.sectionOrder[index] !=
-                      HomeSectionId.collections &&
-                  (showNewest ||
-                      homeContent.sectionOrder[index] !=
-                          HomeSectionId.newProducts) &&
-                  (showTodaysPicks ||
-                      homeContent.sectionOrder[index] !=
-                          HomeSectionId.todaysPicks))
-                _buildHomeSection(
-                  homeContent.sectionOrder[index],
-                  index: index,
-                  store: store,
-                  content: homeContent,
-                  editorial: editorial,
-                  fresh: fresh,
-                  featuredProducts: featured?.products ?? const [],
-                  reviewsStatus: reviewsStatus,
-                ),
             Padding(
-              padding: const EdgeInsets.only(top: 72),
+              padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
               child: RevealOnScroll(
                 key: const ValueKey('home-reveal-account-invitation'),
                 scrollController: _scroll,
@@ -427,7 +439,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             // The home body extends beneath the persistent navigation. Keep
             // that trailing scroll clearance in the invitation's surface so
             // its background reaches the navigation divider instead of
-            // revealing the scaffold's white canvas.
+            // revealing the scaffold's canvas.
             ColoredBox(
               key: const ValueKey('home-account-invitation-bottom-bleed'),
               color: context.monettaColors.surfaceMuted,
@@ -444,22 +456,51 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       // therefore does not rebuild or relayout the full home content tree.
       child: body,
       builder: (context, collapse, child) {
-        final searchCollapse = showHero ? collapse : 1.0;
         return Scaffold(
           extendBody: true,
-          extendBodyBehindAppBar: showHero,
+          backgroundColor: context.boutique.canvas,
           drawer: drawer,
           drawerScrimColor: context.monettaColors.scrim,
-          appBar: _buildAppBar(
-            height: 68 - 16 * collapse,
-            searchCollapse: searchCollapse,
-            surfaceCollapse: showHero ? collapse : 1,
-          ),
+          appBar: _buildAppBar(searchCollapse: showHero ? collapse : 1),
           body: child,
           bottomNavigationBar: bottomNavigation,
         );
       },
     );
+  }
+
+  /// The configured order wins whenever an owner has actually set one.
+  ///
+  /// `HomeContent.sectionOrder` arrives from Shopify; until someone edits it,
+  /// every install carries the bundled default. The redesign needs a different
+  /// opening rhythm — new arrivals and silhouettes before the editorial tail —
+  /// so the bundled default (and only the bundled default) is remapped. A
+  /// storefront that has published its own order is left exactly as configured.
+  List<HomeSectionId> _resolveSectionOrder(
+    HomeContent content,
+    AdminStorefrontSettings storefront,
+  ) {
+    final configured = content.sectionOrder;
+    final isBundledDefault = const ListEquality<HomeSectionId>().equals(
+      configured,
+      HomeContent.fallback.sectionOrder,
+    );
+    final order = isBundledDefault ? _kBoutiqueSectionOrder : configured;
+    return <HomeSectionId>[
+      for (final section in order)
+        if (_isSectionEnabled(section, storefront)) section,
+    ];
+  }
+
+  bool _isSectionEnabled(
+    HomeSectionId section,
+    AdminStorefrontSettings storefront,
+  ) {
+    return switch (section) {
+      HomeSectionId.newProducts => storefront.showNewest,
+      HomeSectionId.todaysPicks => storefront.showTodaysPicks,
+      _ => true,
+    };
   }
 
   Widget _buildHomeSection(
@@ -472,8 +513,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     required List<Product> featuredProducts,
     required HomeReviewsStatus reviewsStatus,
   }) {
+    // 24–32px between modules instead of the old 64–72: the page reads as one
+    // boutique rather than a stack of separate posters, and a shopper reaches
+    // the next thing to buy without a screen of empty canvas in between.
     return Padding(
-      padding: const EdgeInsets.only(top: 72),
+      padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
       child: RevealOnScroll(
         key: ValueKey('home-reveal-${section.name}'),
         scrollController: _scroll,
@@ -490,11 +534,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           HomeSectionId.todaysPicks => _TodaysPicksSection(
               products: featuredProducts,
             ),
-          HomeSectionId.newProducts => _NewestProductsSection(
+          HomeSectionId.newProducts => HomeNewArrivalsRail(
               products: fresh,
               onOpenAll: _openFullCatalog,
             ),
-          HomeSectionId.bagTypes => _BagTypesSection(cards: content.bagTypes),
+          HomeSectionId.bagTypes => HomeShopByStyle(
+              cards: content.bagTypes,
+              onOpen: (card) => _openHomeCollection(context, card),
+              onSeeAll: () =>
+                  _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
+            ),
           HomeSectionId.brands => _BrandsSection(
               brands: content.brands,
             ),
@@ -550,75 +599,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     unawaited(ThemeScope.of(context).setMode(nextMode));
   }
 
-  PreferredSizeWidget _buildAppBar({
-    double height = 68,
-    double searchCollapse = 1,
-    double surfaceCollapse = 1,
-  }) {
-    final colors = context.monettaColors;
+  /// Compact header: menu, wordmark, and the search action that takes over
+  /// once the in-page field has scrolled away. Opaque from the first frame —
+  /// the banner is now an inset card, not a full-bleed hero to float over.
+  PreferredSizeWidget _buildAppBar({double searchCollapse = 1}) {
+    final palette = context.boutique;
     final searchProgress = Curves.easeOutCubic.transform(
       ((searchCollapse - .34) / .66).clamp(0.0, 1.0),
     );
-    final surfaceProgress = Curves.easeOutCubic.transform(
-      ((surfaceCollapse - .08) / .72).clamp(0.0, 1.0),
-    );
-    final foreground = Color.lerp(
-      Colors.white,
-      colors.contentPrimary,
-      surfaceProgress,
-    )!;
-    final collapsedBrightness = Theme.of(context).brightness == Brightness.dark
-        ? Brightness.light
-        : Brightness.dark;
+    final dark = Theme.of(context).brightness == Brightness.dark;
     return AppBar(
       automaticallyImplyLeading: false,
-      toolbarHeight: height,
-      backgroundColor: Color.lerp(
-        Colors.transparent,
-        colors.surface,
-        surfaceProgress,
-      ),
-      foregroundColor: foreground,
-      iconTheme: IconThemeData(color: foreground, size: 21),
+      toolbarHeight: 60,
+      backgroundColor: palette.canvas,
+      surfaceTintColor: Colors.transparent,
+      foregroundColor: palette.ink,
+      iconTheme: IconThemeData(color: palette.ink, size: 22),
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness:
-            surfaceProgress < .55 ? Brightness.light : collapsedBrightness,
-        statusBarBrightness: surfaceProgress < .55
-            ? Brightness.dark
-            : Theme.of(context).brightness,
+        statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: dark ? Brightness.dark : Brightness.light,
       ),
       centerTitle: true,
       titleSpacing: 0,
-      leadingWidth: 58,
+      leadingWidth: 56,
       leading: Builder(
-        builder: (scaffoldContext) => Padding(
-          padding: const EdgeInsets.all(9),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Color.lerp(
-                Colors.black.withValues(alpha: .42),
-                Colors.transparent,
-                surfaceProgress,
-              ),
-              border: Border.all(
-                color: Color.lerp(
-                  Colors.white.withValues(alpha: .48),
-                  Colors.transparent,
-                  surfaceProgress,
-                )!,
-                width: .5,
-              ),
-            ),
-            child: IconButton(
-              key: const Key('home-menu-button'),
-              tooltip: 'Abrir menú',
-              padding: EdgeInsets.zero,
-              onPressed: () => Scaffold.of(scaffoldContext).openDrawer(),
-              icon: const Icon(Icons.menu_rounded, size: 21),
-            ),
-          ),
+        builder: (scaffoldContext) => IconButton(
+          key: const Key('home-menu-button'),
+          tooltip: 'Abrir menú',
+          onPressed: () => Scaffold.of(scaffoldContext).openDrawer(),
+          icon: const Icon(Icons.menu_rounded, size: 22),
         ),
       ),
       title: const MonettaWordmark.appBar(),
@@ -630,173 +640,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             child: Opacity(
               key: const ValueKey('home-appbar-search-transition'),
               opacity: searchProgress,
-              child: Transform.scale(
-                scale: .76 + .24 * searchProgress,
-                child: IconButton(
-                  key: const ValueKey('home-appbar-search-button'),
-                  tooltip: 'Buscar',
-                  onPressed: _openSearch,
-                  icon: const Icon(Icons.search, size: 24),
-                ),
+              child: IconButton(
+                key: const ValueKey('home-appbar-search-button'),
+                tooltip: 'Buscar',
+                onPressed: _openSearch,
+                icon: const Icon(Icons.search, size: 22),
               ),
             ),
           ),
         ),
-        const SizedBox(width: 4),
+        const SizedBox(width: BoutiqueSpace.xs),
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0.5),
-        child: Divider(
-          height: 0.5,
-          color: colors.divider.withValues(alpha: surfaceProgress),
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeDiscoveryHeader extends StatelessWidget {
-  const _HomeDiscoveryHeader({
-    required this.collapse,
-    required this.playing,
-    required this.onSearch,
-    required this.searchPrompt,
-  });
-
-  static const double estimatedHeight = 280;
-
-  final ValueListenable<double> collapse;
-  final bool playing;
-  final VoidCallback onSearch;
-  final String searchPrompt;
-
-  @override
-  Widget build(BuildContext context) {
-    return Reveal(
-      offset: 8,
-      child: Column(
-        key: const ValueKey('home-discovery-header'),
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            key: const ValueKey('home-compact-hero'),
-            height: 280,
-            child: ClipRect(
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  MonettaVideo(
-                    campaign: CampaignMedia.monettaHome,
-                    playing: playing,
-                  ),
-                  const DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0x24000000),
-                          Color(0x08000000),
-                          Color(0xA3000000),
-                        ],
-                        stops: [0, .48, 1],
-                      ),
-                    ),
-                  ),
-                  Positioned(
-                    left: 20,
-                    right: 20,
-                    bottom: 18,
-                    child: ValueListenableBuilder<double>(
-                      valueListenable: collapse,
-                      builder: (context, value, child) {
-                        final visibility = 1 -
-                            Curves.easeInCubic.transform(
-                              ((value - .08) / .78).clamp(0.0, 1.0),
-                            );
-                        return IgnorePointer(
-                          ignoring: visibility < .25,
-                          child: ExcludeSemantics(
-                            excluding: visibility < .25,
-                            child: Opacity(
-                              key: const ValueKey(
-                                'home-search-bar-transition',
-                              ),
-                              opacity: visibility,
-                              child: Transform.translate(
-                                offset: Offset(0, -8 * (1 - visibility)),
-                                child: Transform.scale(
-                                  alignment: Alignment.centerRight,
-                                  scale: .94 + .06 * visibility,
-                                  child: child,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
-                      },
-                      child: _HomeSearchBar(
-                        onTap: onSearch,
-                        prompt: searchPrompt,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _HomeSearchBar extends StatelessWidget {
-  const _HomeSearchBar({required this.onTap, required this.prompt});
-
-  final VoidCallback onTap;
-  final String prompt;
-
-  @override
-  Widget build(BuildContext context) {
-    final colors = context.monettaColors;
-    return Semantics(
-      button: true,
-      label: 'Buscar productos',
-      child: GestureDetector(
-        key: const ValueKey('home-search-bar'),
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
-        child: Container(
-          height: 50,
-          padding: const EdgeInsets.symmetric(horizontal: 17),
-          decoration: BoxDecoration(
-            color: colors.surfaceRaised,
-            borderRadius: BorderRadius.circular(25),
-            border: Border.all(color: colors.divider, width: .5),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: .12),
-                blurRadius: 14,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Icon(Icons.search, size: 20, color: colors.contentPrimary),
-              const SizedBox(width: 11),
-              Expanded(
-                child: Text(
-                  prompt,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: sans(size: 12.5, color: colors.contentMuted),
-                ),
-              ),
-            ],
-          ),
-        ),
+        child: Divider(height: 0.5, color: palette.hairline),
       ),
     );
   }
@@ -847,47 +704,23 @@ class _HomeOffersSection extends StatelessWidget {
       key: const ValueKey('home-section-offers'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(20, 0, 20, 18),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'PARA COMPRAR, ESTRENAR O CRECER',
-                      style: eyebrow(
-                        size: 8.5,
-                        color: context.monettaColors.accentContent,
-                      ),
-                    ),
-                    const SizedBox(height: 7),
-                    Text('Lo mejor de Monetta, hoy', style: editorial(25)),
-                  ],
-                ),
-              ),
-              Text(
-                'DESLIZA',
-                style: eyebrow(
-                  size: 8,
-                  color: context.monettaColors.contentMuted,
-                ),
-              ),
-            ],
-          ),
+        const BoutiqueSectionHeader(
+          kicker: 'Para comprar, estrenar o crecer',
+          title: 'Lo mejor de Monetta, hoy',
         ),
         SizedBox(
           key: const ValueKey('home-offers-rail'),
-          height: 500,
+          height: 430,
           child: ListView.separated(
             key: const PageStorageKey<String>('home-offers-scroll'),
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+            padding: const EdgeInsets.symmetric(
+              horizontal: BoutiqueSpace.gutter,
+            ),
             itemCount: _offers.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 12),
+            separatorBuilder: (_, __) =>
+                const SizedBox(width: BoutiqueSpace.md),
             itemBuilder: (context, index) => SizedBox(
               width: cardWidth,
               child: _OfferCard(
@@ -933,7 +766,7 @@ class _OfferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.monettaColors;
+    final palette = context.boutique;
     return Semantics(
       button: true,
       label: '${data.eyebrow}. ${data.title}. ${data.description}. '
@@ -942,14 +775,18 @@ class _OfferCard extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: MonettaCardLift(
-          child: DecoratedBox(
+          borderRadius: BoutiqueRadius.card,
+          child: Container(
+            clipBehavior: Clip.antiAlias,
             decoration: BoxDecoration(
-              color: colors.surfaceRaised,
-              border: Border.all(color: colors.divider, width: .8),
+              color: palette.surface,
+              borderRadius: BoutiqueRadius.card,
+              border: Border.all(color: palette.hairline, width: 1),
             ),
             child: Column(
               children: [
                 Expanded(
+                  flex: 11,
                   child: SizedBox.expand(
                     key: const ValueKey('home-offer-media'),
                     child: Image.asset(
@@ -960,9 +797,15 @@ class _OfferCard extends StatelessWidget {
                   ),
                 ),
                 Expanded(
+                  flex: 10,
                   child: Padding(
                     key: const ValueKey('home-offer-content'),
-                    padding: const EdgeInsets.fromLTRB(22, 21, 22, 20),
+                    padding: const EdgeInsets.fromLTRB(
+                      BoutiqueSpace.lg,
+                      BoutiqueSpace.lg,
+                      BoutiqueSpace.lg,
+                      BoutiqueSpace.lg,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -970,30 +813,26 @@ class _OfferCard extends StatelessWidget {
                           data.eyebrow,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: eyebrow(
-                            size: 8.5,
-                            color: colors.accentContent,
+                          style: boutiqueEyebrow(
+                            size: 11,
+                            color: palette.goldText,
                           ),
                         ),
-                        const SizedBox(height: 9),
+                        const SizedBox(height: BoutiqueSpace.sm),
                         Text(
                           data.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: editorial(
-                            22,
-                            color: colors.contentPrimary,
-                            height: 1.08,
-                          ),
+                          style: boutiqueDisplay(22, color: palette.ink),
                         ),
-                        const SizedBox(height: 8),
+                        const SizedBox(height: BoutiqueSpace.sm),
                         Text(
                           data.description,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: sans(
-                            size: 11.5,
-                            color: colors.contentMuted,
+                          style: boutiqueText(
+                            size: 13,
+                            color: palette.inkMuted,
                             height: 1.35,
                           ),
                         ),
@@ -1002,11 +841,16 @@ class _OfferCard extends StatelessWidget {
                           key: ValueKey(
                             'home-offer-action-${data.destination.name}',
                           ),
-                          height: 44,
+                          height: BoutiqueSpace.tapTarget,
                           width: double.infinity,
-                          padding: const EdgeInsets.symmetric(horizontal: 18),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: BoutiqueSpace.lg,
+                          ),
                           alignment: Alignment.center,
-                          color: colors.inverseSurface,
+                          decoration: BoxDecoration(
+                            color: palette.ink,
+                            borderRadius: BoutiqueRadius.control,
+                          ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -1015,18 +859,18 @@ class _OfferCard extends StatelessWidget {
                                   data.actionLabel,
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
-                                  style: sans(
-                                    size: 12,
-                                    color: colors.onInverseSurface,
+                                  style: boutiqueText(
+                                    size: 13,
+                                    color: palette.canvas,
                                     weight: FontWeight.w600,
                                   ),
                                 ),
                               ),
-                              const SizedBox(width: 9),
+                              const SizedBox(width: BoutiqueSpace.sm),
                               Icon(
                                 Icons.arrow_forward,
-                                size: 15,
-                                color: colors.onInverseSurface,
+                                size: 16,
+                                color: palette.canvas,
                               ),
                             ],
                           ),
@@ -1059,19 +903,18 @@ class _HomeCollectionsSection extends StatelessWidget {
       key: const ValueKey('home-section-collections'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeading(
-          kicker: 'DESCUBRE',
-          title: 'Colecciones',
-          animateKickerColor: true,
-        ),
+        const BoutiqueSectionHeader(title: 'Colecciones'),
         SizedBox(
           height: cardHeight,
           child: ListView.separated(
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(horizontal: 14),
+            padding: const EdgeInsets.symmetric(
+              horizontal: BoutiqueSpace.gutter,
+            ),
             itemCount: cards.length,
-            separatorBuilder: (_, __) => const SizedBox(width: 14),
+            separatorBuilder: (_, __) =>
+                const SizedBox(width: BoutiqueSpace.md),
             itemBuilder: (context, index) => SizedBox(
               width: cardWidth,
               child: _CollectionEditorialCard(card: cards[index]),
@@ -1097,7 +940,9 @@ class _CollectionEditorialCard extends StatelessWidget {
         key: ValueKey('home-collection-card-${card.handle}'),
         onTap: () => _openHomeCollection(context, card),
         child: MonettaCardLift(
-          child: ClipRect(
+          borderRadius: BoutiqueRadius.card,
+          child: ClipRRect(
+            borderRadius: BoutiqueRadius.card,
             child: Stack(
               fit: StackFit.expand,
               children: [
@@ -1130,7 +975,10 @@ class _CollectionEditorialCard extends StatelessWidget {
                       Expanded(
                         child: Text(
                           card.title,
-                          style: display(24, color: Colors.white),
+                          style: boutiqueDisplay(
+                            24,
+                            color: context.boutique.onDark,
+                          ),
                         ),
                       ),
                       const Icon(
@@ -1150,40 +998,6 @@ class _CollectionEditorialCard extends StatelessWidget {
   }
 }
 
-class _NewestProductsSection extends StatelessWidget {
-  const _NewestProductsSection({
-    required this.products,
-    required this.onOpenAll,
-  });
-
-  final List<Product> products;
-  final VoidCallback onOpenAll;
-
-  @override
-  Widget build(BuildContext context) {
-    if (products.isEmpty) return const SizedBox.shrink();
-    return Column(
-      key: const ValueKey('home-section-new-products'),
-      children: [
-        SectionHeading(
-          kicker: 'Novedades',
-          title: 'Nuevos productos',
-          animateKickerColor: true,
-          trailing: UnderlineLink(label: 'Ver todos', onTap: onOpenAll),
-        ),
-        _CatalogGrid(products: products.take(4).toList()),
-        const SizedBox(height: 26),
-        Center(
-          child: UnderlineLink(
-            label: 'Todos los productos',
-            onTap: onOpenAll,
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _TodaysPicksSection extends StatelessWidget {
   const _TodaysPicksSection({required this.products});
 
@@ -1195,91 +1009,12 @@ class _TodaysPicksSection extends StatelessWidget {
     return Column(
       key: const ValueKey('home-section-todays-picks'),
       children: [
-        const SectionHeading(
-          kicker: 'SELECCIÓN MONETTA',
+        const BoutiqueSectionHeader(
+          kicker: 'Selección Monetta',
           title: 'Catálogo de hoy',
-          animateKickerColor: true,
         ),
         _CatalogGrid(products: products.take(4).toList()),
       ],
-    );
-  }
-}
-
-class _BagTypesSection extends StatelessWidget {
-  const _BagTypesSection({required this.cards});
-
-  final List<HomeCollectionCard> cards;
-
-  @override
-  Widget build(BuildContext context) {
-    if (cards.isEmpty) return const SizedBox.shrink();
-    return Column(
-      key: const ValueKey('home-section-bag-types'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SectionHeading(
-          kicker: 'ELIGE TU FORMA',
-          title: 'Tipo de bolsas',
-          animateKickerColor: true,
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              for (var index = 0; index < cards.length; index++) ...[
-                if (index > 0) const SizedBox(width: 8),
-                Expanded(child: _BagTypeTile(card: cards[index])),
-              ],
-            ],
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _BagTypeTile extends StatelessWidget {
-  const _BagTypeTile({required this.card});
-
-  final HomeCollectionCard card;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Ver ${card.title}',
-      child: GestureDetector(
-        onTap: () => _openHomeCollection(context, card),
-        child: MonettaCardLift(
-          child: Column(
-            children: [
-              AspectRatio(
-                aspectRatio: 1,
-                child: Container(
-                  decoration: BoxDecoration(
-                    border: Border.all(color: context.monettaColors.divider),
-                  ),
-                  padding: const EdgeInsets.all(8),
-                  child: _HomeImage(
-                    imageUrl: card.imageUrl,
-                    fallbackAsset: card.fallbackAsset,
-                    fit: BoxFit.contain,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              Text(
-                card.title.toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: eyebrow(size: 8.5),
-              ),
-            ],
-          ),
-        ),
-      ),
     );
   }
 }
@@ -1381,21 +1116,19 @@ class _BrandsSectionState extends State<_BrandsSection>
     return Column(
       key: const ValueKey('home-section-brands'),
       children: [
-        const SectionHeading(
-          kicker: 'NUESTRA SELECCIÓN',
-          title: 'Todas las marcas',
-          animateKickerColor: true,
-        ),
+        const BoutiqueSectionHeader(title: 'Marcas'),
         GridView.builder(
           clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: BoutiqueSpace.gutter,
+          ),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 2,
             childAspectRatio: 2.45,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
+            crossAxisSpacing: BoutiqueSpace.md,
+            mainAxisSpacing: BoutiqueSpace.md,
           ),
           itemCount: widget.brands.length,
           itemBuilder: (context, index) {
@@ -1407,13 +1140,20 @@ class _BrandsSectionState extends State<_BrandsSection>
                 button: true,
                 label: 'Ver ${brand.title}',
                 child: MonettaCardLift(
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BoutiqueRadius.card,
                   child: Material(
                     key: ValueKey('home-brand-${brand.handle}'),
-                    color: Colors.white,
-                    elevation: 2,
-                    shadowColor: Colors.black.withValues(alpha: .16),
-                    borderRadius: BorderRadius.circular(28),
+                    color: context.boutique.surface,
+                    // A logo is artwork, not photography: contain it inside a
+                    // hairline card instead of cropping it to fill, and drop
+                    // the drop shadow the brief rules out.
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BoutiqueRadius.card,
+                      side: BorderSide(
+                        color: context.boutique.hairline,
+                        width: 1,
+                      ),
+                    ),
                     clipBehavior: Clip.antiAlias,
                     child: InkWell(
                       onTap: () => openCollection(
@@ -1423,10 +1163,16 @@ class _BrandsSectionState extends State<_BrandsSection>
                           filter: CollectionFilter(brand: brand.brand),
                         ),
                       ),
-                      child: _HomeImage(
-                        imageUrl: brand.imageUrl,
-                        fallbackAsset: brand.fallbackAsset,
-                        fit: BoxFit.cover,
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: BoutiqueSpace.lg,
+                          vertical: BoutiqueSpace.md,
+                        ),
+                        child: _HomeImage(
+                          imageUrl: brand.imageUrl,
+                          fallbackAsset: brand.fallbackAsset,
+                          fit: BoxFit.contain,
+                        ),
                       ),
                     ),
                   ),
@@ -1458,19 +1204,17 @@ class _AboutMonettaSection extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeading(
-          kicker: 'NUESTRA HISTORIA',
-          title: 'Más sobre Monetta',
-          animateKickerColor: true,
-        ),
+        const BoutiqueSectionHeader(title: 'Más sobre Monetta'),
         MonettaCardLift(
           mouseCursor: MouseCursor.defer,
           child: Container(
             key: const ValueKey('home-about-card'),
             width: double.infinity,
             decoration: BoxDecoration(
-              border: Border.all(color: context.monettaColors.divider),
+              borderRadius: BoutiqueRadius.card,
+              border: Border.all(color: context.boutique.hairline),
             ),
+            clipBehavior: Clip.antiAlias,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final wide = constraints.maxWidth >= 720;
@@ -1561,17 +1305,15 @@ class _SocialSection extends StatelessWidget {
       key: const ValueKey('home-section-social'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SectionHeading(
-          kicker: 'SÍGUENOS',
-          title: 'Nuestras redes',
-          animateKickerColor: true,
-        ),
+        const BoutiqueSectionHeader(title: 'Nuestras redes'),
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: BoutiqueSpace.gutter,
+          ),
           child: Row(
             children: [
               for (var index = 0; index < links.length; index++) ...[
-                if (index > 0) const SizedBox(width: 8),
+                if (index > 0) const SizedBox(width: BoutiqueSpace.md),
                 Expanded(
                   child: _SocialTile(link: links[index], onOpen: onOpen),
                 ),
@@ -1707,18 +1449,28 @@ class _CatalogGrid extends StatelessWidget {
                 : 2;
         return GridView.builder(
           clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(horizontal: 12),
+          padding: const EdgeInsets.symmetric(
+            horizontal: BoutiqueSpace.gutter,
+          ),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
+          // 0.50 reserves ~115pt for the caption under a 4:5 photo plus the
+          // 12pt gap, matching the grid delegate's 112pt contract. 0.52
+          // overflowed by 5-8pt on two-line names.
           gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: columns,
-            childAspectRatio: 0.52,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 32,
+            childAspectRatio: 0.50,
+            crossAxisSpacing: BoutiqueSpace.md,
+            mainAxisSpacing: BoutiqueSpace.xxl,
           ),
           itemCount: products.length,
-          itemBuilder: (context, index) =>
-              ProductCard(product: products[index]),
+          itemBuilder: (context, index) {
+            final product = products[index];
+            return ProductCard(
+              product: product,
+              onQuickView: () => showProductQuickView(context, product),
+            );
+          },
         );
       },
     );

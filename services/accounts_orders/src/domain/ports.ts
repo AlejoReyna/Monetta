@@ -72,8 +72,8 @@ export interface WebhookEventsRepository {
   /**
    * Atomically claim a delivery for processing (F12).
    * Returns true when this caller owns the work.
-   * Returns false when the delivery is already completed or actively processing
-   * (concurrent duplicate). Failed / stale processing claims are reclaimed.
+   * Returns false only when the delivery is completed. Busy claims throw a
+   * retryable error; interrupted/failed claims may be recovered by a new owner.
    */
   tryClaim(event: WebhookEventRecord): Promise<boolean>;
   markCompleted(webhookId: string): Promise<void>;

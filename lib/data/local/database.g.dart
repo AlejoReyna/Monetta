@@ -4340,6 +4340,18 @@ class $OrderSummariesTable extends OrderSummaries
       requiredDuringInsert: true,
       defaultConstraints: GeneratedColumn.constraintIsAlways(
           'REFERENCES accounts (local_account_id) ON DELETE CASCADE'));
+  static const VerificationMeta _displayNumberMeta =
+      const VerificationMeta('displayNumber');
+  @override
+  late final GeneratedColumn<String> displayNumber = GeneratedColumn<String>(
+      'display_number', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _fulfillmentStatusMeta =
+      const VerificationMeta('fulfillmentStatus');
+  @override
+  late final GeneratedColumn<String> fulfillmentStatus =
+      GeneratedColumn<String>('fulfillment_status', aliasedName, true,
+          type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _shopifyOrderIdMeta =
       const VerificationMeta('shopifyOrderId');
   @override
@@ -4384,6 +4396,8 @@ class $OrderSummariesTable extends OrderSummaries
   List<GeneratedColumn> get $columns => [
         id,
         accountId,
+        displayNumber,
+        fulfillmentStatus,
         shopifyOrderId,
         source,
         attributionCode,
@@ -4412,6 +4426,18 @@ class $OrderSummariesTable extends OrderSummaries
           accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta));
     } else if (isInserting) {
       context.missing(_accountIdMeta);
+    }
+    if (data.containsKey('display_number')) {
+      context.handle(
+          _displayNumberMeta,
+          displayNumber.isAcceptableOrUnknown(
+              data['display_number']!, _displayNumberMeta));
+    }
+    if (data.containsKey('fulfillment_status')) {
+      context.handle(
+          _fulfillmentStatusMeta,
+          fulfillmentStatus.isAcceptableOrUnknown(
+              data['fulfillment_status']!, _fulfillmentStatusMeta));
     }
     if (data.containsKey('shopify_order_id')) {
       context.handle(
@@ -4463,7 +4489,7 @@ class $OrderSummariesTable extends OrderSummaries
   }
 
   @override
-  Set<GeneratedColumn> get $primaryKey => {id};
+  Set<GeneratedColumn> get $primaryKey => {id, accountId};
   @override
   OrderSummary map(Map<String, dynamic> data, {String? tablePrefix}) {
     final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
@@ -4472,6 +4498,10 @@ class $OrderSummariesTable extends OrderSummaries
           .read(DriftSqlType.string, data['${effectivePrefix}id'])!,
       accountId: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
+      displayNumber: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}display_number']),
+      fulfillmentStatus: attachedDatabase.typeMapping.read(
+          DriftSqlType.string, data['${effectivePrefix}fulfillment_status']),
       shopifyOrderId: attachedDatabase.typeMapping.read(
           DriftSqlType.string, data['${effectivePrefix}shopify_order_id']),
       source: attachedDatabase.typeMapping
@@ -4501,6 +4531,8 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
 
   /// Null for an apartado order — those have no Shopify order id until the
   /// owner manually enters one, and some never get one recorded here at all.
+  final String? displayNumber;
+  final String? fulfillmentStatus;
   final String? shopifyOrderId;
 
   /// `shopifyCheckout` | `whatsappApartado`.
@@ -4516,6 +4548,8 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
   const OrderSummary(
       {required this.id,
       required this.accountId,
+      this.displayNumber,
+      this.fulfillmentStatus,
       this.shopifyOrderId,
       required this.source,
       this.attributionCode,
@@ -4528,6 +4562,12 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
     final map = <String, Expression>{};
     map['id'] = Variable<String>(id);
     map['account_id'] = Variable<String>(accountId);
+    if (!nullToAbsent || displayNumber != null) {
+      map['display_number'] = Variable<String>(displayNumber);
+    }
+    if (!nullToAbsent || fulfillmentStatus != null) {
+      map['fulfillment_status'] = Variable<String>(fulfillmentStatus);
+    }
     if (!nullToAbsent || shopifyOrderId != null) {
       map['shopify_order_id'] = Variable<String>(shopifyOrderId);
     }
@@ -4546,6 +4586,12 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
     return OrderSummariesCompanion(
       id: Value(id),
       accountId: Value(accountId),
+      displayNumber: displayNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(displayNumber),
+      fulfillmentStatus: fulfillmentStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fulfillmentStatus),
       shopifyOrderId: shopifyOrderId == null && nullToAbsent
           ? const Value.absent()
           : Value(shopifyOrderId),
@@ -4566,6 +4612,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
     return OrderSummary(
       id: serializer.fromJson<String>(json['id']),
       accountId: serializer.fromJson<String>(json['accountId']),
+      displayNumber: serializer.fromJson<String?>(json['displayNumber']),
+      fulfillmentStatus:
+          serializer.fromJson<String?>(json['fulfillmentStatus']),
       shopifyOrderId: serializer.fromJson<String?>(json['shopifyOrderId']),
       source: serializer.fromJson<String>(json['source']),
       attributionCode: serializer.fromJson<String?>(json['attributionCode']),
@@ -4581,6 +4630,8 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
     return <String, dynamic>{
       'id': serializer.toJson<String>(id),
       'accountId': serializer.toJson<String>(accountId),
+      'displayNumber': serializer.toJson<String?>(displayNumber),
+      'fulfillmentStatus': serializer.toJson<String?>(fulfillmentStatus),
       'shopifyOrderId': serializer.toJson<String?>(shopifyOrderId),
       'source': serializer.toJson<String>(source),
       'attributionCode': serializer.toJson<String?>(attributionCode),
@@ -4594,6 +4645,8 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
   OrderSummary copyWith(
           {String? id,
           String? accountId,
+          Value<String?> displayNumber = const Value.absent(),
+          Value<String?> fulfillmentStatus = const Value.absent(),
           Value<String?> shopifyOrderId = const Value.absent(),
           String? source,
           Value<String?> attributionCode = const Value.absent(),
@@ -4604,6 +4657,11 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       OrderSummary(
         id: id ?? this.id,
         accountId: accountId ?? this.accountId,
+        displayNumber:
+            displayNumber.present ? displayNumber.value : this.displayNumber,
+        fulfillmentStatus: fulfillmentStatus.present
+            ? fulfillmentStatus.value
+            : this.fulfillmentStatus,
         shopifyOrderId:
             shopifyOrderId.present ? shopifyOrderId.value : this.shopifyOrderId,
         source: source ?? this.source,
@@ -4619,6 +4677,12 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
     return OrderSummary(
       id: data.id.present ? data.id.value : this.id,
       accountId: data.accountId.present ? data.accountId.value : this.accountId,
+      displayNumber: data.displayNumber.present
+          ? data.displayNumber.value
+          : this.displayNumber,
+      fulfillmentStatus: data.fulfillmentStatus.present
+          ? data.fulfillmentStatus.value
+          : this.fulfillmentStatus,
       shopifyOrderId: data.shopifyOrderId.present
           ? data.shopifyOrderId.value
           : this.shopifyOrderId,
@@ -4641,6 +4705,8 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
     return (StringBuffer('OrderSummary(')
           ..write('id: $id, ')
           ..write('accountId: $accountId, ')
+          ..write('displayNumber: $displayNumber, ')
+          ..write('fulfillmentStatus: $fulfillmentStatus, ')
           ..write('shopifyOrderId: $shopifyOrderId, ')
           ..write('source: $source, ')
           ..write('attributionCode: $attributionCode, ')
@@ -4653,14 +4719,26 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
   }
 
   @override
-  int get hashCode => Object.hash(id, accountId, shopifyOrderId, source,
-      attributionCode, status, totalAmount, currencyCode, placedAt);
+  int get hashCode => Object.hash(
+      id,
+      accountId,
+      displayNumber,
+      fulfillmentStatus,
+      shopifyOrderId,
+      source,
+      attributionCode,
+      status,
+      totalAmount,
+      currencyCode,
+      placedAt);
   @override
   bool operator ==(Object other) =>
       identical(this, other) ||
       (other is OrderSummary &&
           other.id == this.id &&
           other.accountId == this.accountId &&
+          other.displayNumber == this.displayNumber &&
+          other.fulfillmentStatus == this.fulfillmentStatus &&
           other.shopifyOrderId == this.shopifyOrderId &&
           other.source == this.source &&
           other.attributionCode == this.attributionCode &&
@@ -4673,6 +4751,8 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
 class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
   final Value<String> id;
   final Value<String> accountId;
+  final Value<String?> displayNumber;
+  final Value<String?> fulfillmentStatus;
   final Value<String?> shopifyOrderId;
   final Value<String> source;
   final Value<String?> attributionCode;
@@ -4684,6 +4764,8 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
   const OrderSummariesCompanion({
     this.id = const Value.absent(),
     this.accountId = const Value.absent(),
+    this.displayNumber = const Value.absent(),
+    this.fulfillmentStatus = const Value.absent(),
     this.shopifyOrderId = const Value.absent(),
     this.source = const Value.absent(),
     this.attributionCode = const Value.absent(),
@@ -4696,6 +4778,8 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
   OrderSummariesCompanion.insert({
     required String id,
     required String accountId,
+    this.displayNumber = const Value.absent(),
+    this.fulfillmentStatus = const Value.absent(),
     this.shopifyOrderId = const Value.absent(),
     required String source,
     this.attributionCode = const Value.absent(),
@@ -4714,6 +4798,8 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
   static Insertable<OrderSummary> custom({
     Expression<String>? id,
     Expression<String>? accountId,
+    Expression<String>? displayNumber,
+    Expression<String>? fulfillmentStatus,
     Expression<String>? shopifyOrderId,
     Expression<String>? source,
     Expression<String>? attributionCode,
@@ -4726,6 +4812,8 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     return RawValuesInsertable({
       if (id != null) 'id': id,
       if (accountId != null) 'account_id': accountId,
+      if (displayNumber != null) 'display_number': displayNumber,
+      if (fulfillmentStatus != null) 'fulfillment_status': fulfillmentStatus,
       if (shopifyOrderId != null) 'shopify_order_id': shopifyOrderId,
       if (source != null) 'source': source,
       if (attributionCode != null) 'attribution_code': attributionCode,
@@ -4740,6 +4828,8 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
   OrderSummariesCompanion copyWith(
       {Value<String>? id,
       Value<String>? accountId,
+      Value<String?>? displayNumber,
+      Value<String?>? fulfillmentStatus,
       Value<String?>? shopifyOrderId,
       Value<String>? source,
       Value<String?>? attributionCode,
@@ -4751,6 +4841,8 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     return OrderSummariesCompanion(
       id: id ?? this.id,
       accountId: accountId ?? this.accountId,
+      displayNumber: displayNumber ?? this.displayNumber,
+      fulfillmentStatus: fulfillmentStatus ?? this.fulfillmentStatus,
       shopifyOrderId: shopifyOrderId ?? this.shopifyOrderId,
       source: source ?? this.source,
       attributionCode: attributionCode ?? this.attributionCode,
@@ -4770,6 +4862,12 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     }
     if (accountId.present) {
       map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (displayNumber.present) {
+      map['display_number'] = Variable<String>(displayNumber.value);
+    }
+    if (fulfillmentStatus.present) {
+      map['fulfillment_status'] = Variable<String>(fulfillmentStatus.value);
     }
     if (shopifyOrderId.present) {
       map['shopify_order_id'] = Variable<String>(shopifyOrderId.value);
@@ -4803,6 +4901,8 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     return (StringBuffer('OrderSummariesCompanion(')
           ..write('id: $id, ')
           ..write('accountId: $accountId, ')
+          ..write('displayNumber: $displayNumber, ')
+          ..write('fulfillmentStatus: $fulfillmentStatus, ')
           ..write('shopifyOrderId: $shopifyOrderId, ')
           ..write('source: $source, ')
           ..write('attributionCode: $attributionCode, ')
@@ -4810,6 +4910,246 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
           ..write('totalAmount: $totalAmount, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('placedAt: $placedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CheckoutReceiptsTable extends CheckoutReceipts
+    with TableInfo<$CheckoutReceiptsTable, CheckoutReceipt> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CheckoutReceiptsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _operationIdMeta =
+      const VerificationMeta('operationId');
+  @override
+  late final GeneratedColumn<String> operationId = GeneratedColumn<String>(
+      'operation_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _shopDomainMeta =
+      const VerificationMeta('shopDomain');
+  @override
+  late final GeneratedColumn<String> shopDomain = GeneratedColumn<String>(
+      'shop_domain', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _accountIdMeta =
+      const VerificationMeta('accountId');
+  @override
+  late final GeneratedColumn<String> accountId = GeneratedColumn<String>(
+      'account_id', aliasedName, false,
+      type: DriftSqlType.string, requiredDuringInsert: true);
+  @override
+  List<GeneratedColumn> get $columns => [operationId, shopDomain, accountId];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checkout_receipts';
+  @override
+  VerificationContext validateIntegrity(Insertable<CheckoutReceipt> instance,
+      {bool isInserting = false}) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('operation_id')) {
+      context.handle(
+          _operationIdMeta,
+          operationId.isAcceptableOrUnknown(
+              data['operation_id']!, _operationIdMeta));
+    } else if (isInserting) {
+      context.missing(_operationIdMeta);
+    }
+    if (data.containsKey('shop_domain')) {
+      context.handle(
+          _shopDomainMeta,
+          shopDomain.isAcceptableOrUnknown(
+              data['shop_domain']!, _shopDomainMeta));
+    } else if (isInserting) {
+      context.missing(_shopDomainMeta);
+    }
+    if (data.containsKey('account_id')) {
+      context.handle(_accountIdMeta,
+          accountId.isAcceptableOrUnknown(data['account_id']!, _accountIdMeta));
+    } else if (isInserting) {
+      context.missing(_accountIdMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {operationId};
+  @override
+  CheckoutReceipt map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CheckoutReceipt(
+      operationId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}operation_id'])!,
+      shopDomain: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}shop_domain'])!,
+      accountId: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}account_id'])!,
+    );
+  }
+
+  @override
+  $CheckoutReceiptsTable createAlias(String alias) {
+    return $CheckoutReceiptsTable(attachedDatabase, alias);
+  }
+}
+
+class CheckoutReceipt extends DataClass implements Insertable<CheckoutReceipt> {
+  final String operationId;
+  final String shopDomain;
+  final String accountId;
+  const CheckoutReceipt(
+      {required this.operationId,
+      required this.shopDomain,
+      required this.accountId});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['operation_id'] = Variable<String>(operationId);
+    map['shop_domain'] = Variable<String>(shopDomain);
+    map['account_id'] = Variable<String>(accountId);
+    return map;
+  }
+
+  CheckoutReceiptsCompanion toCompanion(bool nullToAbsent) {
+    return CheckoutReceiptsCompanion(
+      operationId: Value(operationId),
+      shopDomain: Value(shopDomain),
+      accountId: Value(accountId),
+    );
+  }
+
+  factory CheckoutReceipt.fromJson(Map<String, dynamic> json,
+      {ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CheckoutReceipt(
+      operationId: serializer.fromJson<String>(json['operationId']),
+      shopDomain: serializer.fromJson<String>(json['shopDomain']),
+      accountId: serializer.fromJson<String>(json['accountId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'operationId': serializer.toJson<String>(operationId),
+      'shopDomain': serializer.toJson<String>(shopDomain),
+      'accountId': serializer.toJson<String>(accountId),
+    };
+  }
+
+  CheckoutReceipt copyWith(
+          {String? operationId, String? shopDomain, String? accountId}) =>
+      CheckoutReceipt(
+        operationId: operationId ?? this.operationId,
+        shopDomain: shopDomain ?? this.shopDomain,
+        accountId: accountId ?? this.accountId,
+      );
+  CheckoutReceipt copyWithCompanion(CheckoutReceiptsCompanion data) {
+    return CheckoutReceipt(
+      operationId:
+          data.operationId.present ? data.operationId.value : this.operationId,
+      shopDomain:
+          data.shopDomain.present ? data.shopDomain.value : this.shopDomain,
+      accountId: data.accountId.present ? data.accountId.value : this.accountId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CheckoutReceipt(')
+          ..write('operationId: $operationId, ')
+          ..write('shopDomain: $shopDomain, ')
+          ..write('accountId: $accountId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(operationId, shopDomain, accountId);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CheckoutReceipt &&
+          other.operationId == this.operationId &&
+          other.shopDomain == this.shopDomain &&
+          other.accountId == this.accountId);
+}
+
+class CheckoutReceiptsCompanion extends UpdateCompanion<CheckoutReceipt> {
+  final Value<String> operationId;
+  final Value<String> shopDomain;
+  final Value<String> accountId;
+  final Value<int> rowid;
+  const CheckoutReceiptsCompanion({
+    this.operationId = const Value.absent(),
+    this.shopDomain = const Value.absent(),
+    this.accountId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CheckoutReceiptsCompanion.insert({
+    required String operationId,
+    required String shopDomain,
+    required String accountId,
+    this.rowid = const Value.absent(),
+  })  : operationId = Value(operationId),
+        shopDomain = Value(shopDomain),
+        accountId = Value(accountId);
+  static Insertable<CheckoutReceipt> custom({
+    Expression<String>? operationId,
+    Expression<String>? shopDomain,
+    Expression<String>? accountId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (operationId != null) 'operation_id': operationId,
+      if (shopDomain != null) 'shop_domain': shopDomain,
+      if (accountId != null) 'account_id': accountId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CheckoutReceiptsCompanion copyWith(
+      {Value<String>? operationId,
+      Value<String>? shopDomain,
+      Value<String>? accountId,
+      Value<int>? rowid}) {
+    return CheckoutReceiptsCompanion(
+      operationId: operationId ?? this.operationId,
+      shopDomain: shopDomain ?? this.shopDomain,
+      accountId: accountId ?? this.accountId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (operationId.present) {
+      map['operation_id'] = Variable<String>(operationId.value);
+    }
+    if (shopDomain.present) {
+      map['shop_domain'] = Variable<String>(shopDomain.value);
+    }
+    if (accountId.present) {
+      map['account_id'] = Variable<String>(accountId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CheckoutReceiptsCompanion(')
+          ..write('operationId: $operationId, ')
+          ..write('shopDomain: $shopDomain, ')
+          ..write('accountId: $accountId, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -4834,6 +5174,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $AccountsTable accounts = $AccountsTable(this);
   late final $SessionsTable sessions = $SessionsTable(this);
   late final $OrderSummariesTable orderSummaries = $OrderSummariesTable(this);
+  late final $CheckoutReceiptsTable checkoutReceipts =
+      $CheckoutReceiptsTable(this);
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -4851,7 +5193,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         devices,
         accounts,
         sessions,
-        orderSummaries
+        orderSummaries,
+        checkoutReceipts
       ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules(
@@ -7576,6 +7919,8 @@ typedef $$OrderSummariesTableCreateCompanionBuilder = OrderSummariesCompanion
     Function({
   required String id,
   required String accountId,
+  Value<String?> displayNumber,
+  Value<String?> fulfillmentStatus,
   Value<String?> shopifyOrderId,
   required String source,
   Value<String?> attributionCode,
@@ -7589,6 +7934,8 @@ typedef $$OrderSummariesTableUpdateCompanionBuilder = OrderSummariesCompanion
     Function({
   Value<String> id,
   Value<String> accountId,
+  Value<String?> displayNumber,
+  Value<String?> fulfillmentStatus,
   Value<String?> shopifyOrderId,
   Value<String> source,
   Value<String?> attributionCode,
@@ -7631,6 +7978,13 @@ class $$OrderSummariesTableFilterComposer
   });
   ColumnFilters<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get displayNumber => $composableBuilder(
+      column: $table.displayNumber, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get fulfillmentStatus => $composableBuilder(
+      column: $table.fulfillmentStatus,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<String> get shopifyOrderId => $composableBuilder(
       column: $table.shopifyOrderId,
@@ -7688,6 +8042,14 @@ class $$OrderSummariesTableOrderingComposer
   ColumnOrderings<String> get id => $composableBuilder(
       column: $table.id, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get displayNumber => $composableBuilder(
+      column: $table.displayNumber,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get fulfillmentStatus => $composableBuilder(
+      column: $table.fulfillmentStatus,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<String> get shopifyOrderId => $composableBuilder(
       column: $table.shopifyOrderId,
       builder: (column) => ColumnOrderings(column));
@@ -7744,6 +8106,12 @@ class $$OrderSummariesTableAnnotationComposer
   });
   GeneratedColumn<String> get id =>
       $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get displayNumber => $composableBuilder(
+      column: $table.displayNumber, builder: (column) => column);
+
+  GeneratedColumn<String> get fulfillmentStatus => $composableBuilder(
+      column: $table.fulfillmentStatus, builder: (column) => column);
 
   GeneratedColumn<String> get shopifyOrderId => $composableBuilder(
       column: $table.shopifyOrderId, builder: (column) => column);
@@ -7813,6 +8181,8 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
           updateCompanionCallback: ({
             Value<String> id = const Value.absent(),
             Value<String> accountId = const Value.absent(),
+            Value<String?> displayNumber = const Value.absent(),
+            Value<String?> fulfillmentStatus = const Value.absent(),
             Value<String?> shopifyOrderId = const Value.absent(),
             Value<String> source = const Value.absent(),
             Value<String?> attributionCode = const Value.absent(),
@@ -7825,6 +8195,8 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
               OrderSummariesCompanion(
             id: id,
             accountId: accountId,
+            displayNumber: displayNumber,
+            fulfillmentStatus: fulfillmentStatus,
             shopifyOrderId: shopifyOrderId,
             source: source,
             attributionCode: attributionCode,
@@ -7837,6 +8209,8 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
           createCompanionCallback: ({
             required String id,
             required String accountId,
+            Value<String?> displayNumber = const Value.absent(),
+            Value<String?> fulfillmentStatus = const Value.absent(),
             Value<String?> shopifyOrderId = const Value.absent(),
             required String source,
             Value<String?> attributionCode = const Value.absent(),
@@ -7849,6 +8223,8 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
               OrderSummariesCompanion.insert(
             id: id,
             accountId: accountId,
+            displayNumber: displayNumber,
+            fulfillmentStatus: fulfillmentStatus,
             shopifyOrderId: shopifyOrderId,
             source: source,
             attributionCode: attributionCode,
@@ -7915,6 +8291,150 @@ typedef $$OrderSummariesTableProcessedTableManager = ProcessedTableManager<
     (OrderSummary, $$OrderSummariesTableReferences),
     OrderSummary,
     PrefetchHooks Function({bool accountId})>;
+typedef $$CheckoutReceiptsTableCreateCompanionBuilder
+    = CheckoutReceiptsCompanion Function({
+  required String operationId,
+  required String shopDomain,
+  required String accountId,
+  Value<int> rowid,
+});
+typedef $$CheckoutReceiptsTableUpdateCompanionBuilder
+    = CheckoutReceiptsCompanion Function({
+  Value<String> operationId,
+  Value<String> shopDomain,
+  Value<String> accountId,
+  Value<int> rowid,
+});
+
+class $$CheckoutReceiptsTableFilterComposer
+    extends Composer<_$AppDatabase, $CheckoutReceiptsTable> {
+  $$CheckoutReceiptsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get operationId => $composableBuilder(
+      column: $table.operationId, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get accountId => $composableBuilder(
+      column: $table.accountId, builder: (column) => ColumnFilters(column));
+}
+
+class $$CheckoutReceiptsTableOrderingComposer
+    extends Composer<_$AppDatabase, $CheckoutReceiptsTable> {
+  $$CheckoutReceiptsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get operationId => $composableBuilder(
+      column: $table.operationId, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get accountId => $composableBuilder(
+      column: $table.accountId, builder: (column) => ColumnOrderings(column));
+}
+
+class $$CheckoutReceiptsTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CheckoutReceiptsTable> {
+  $$CheckoutReceiptsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get operationId => $composableBuilder(
+      column: $table.operationId, builder: (column) => column);
+
+  GeneratedColumn<String> get shopDomain => $composableBuilder(
+      column: $table.shopDomain, builder: (column) => column);
+
+  GeneratedColumn<String> get accountId =>
+      $composableBuilder(column: $table.accountId, builder: (column) => column);
+}
+
+class $$CheckoutReceiptsTableTableManager extends RootTableManager<
+    _$AppDatabase,
+    $CheckoutReceiptsTable,
+    CheckoutReceipt,
+    $$CheckoutReceiptsTableFilterComposer,
+    $$CheckoutReceiptsTableOrderingComposer,
+    $$CheckoutReceiptsTableAnnotationComposer,
+    $$CheckoutReceiptsTableCreateCompanionBuilder,
+    $$CheckoutReceiptsTableUpdateCompanionBuilder,
+    (
+      CheckoutReceipt,
+      BaseReferences<_$AppDatabase, $CheckoutReceiptsTable, CheckoutReceipt>
+    ),
+    CheckoutReceipt,
+    PrefetchHooks Function()> {
+  $$CheckoutReceiptsTableTableManager(
+      _$AppDatabase db, $CheckoutReceiptsTable table)
+      : super(TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CheckoutReceiptsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CheckoutReceiptsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CheckoutReceiptsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback: ({
+            Value<String> operationId = const Value.absent(),
+            Value<String> shopDomain = const Value.absent(),
+            Value<String> accountId = const Value.absent(),
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CheckoutReceiptsCompanion(
+            operationId: operationId,
+            shopDomain: shopDomain,
+            accountId: accountId,
+            rowid: rowid,
+          ),
+          createCompanionCallback: ({
+            required String operationId,
+            required String shopDomain,
+            required String accountId,
+            Value<int> rowid = const Value.absent(),
+          }) =>
+              CheckoutReceiptsCompanion.insert(
+            operationId: operationId,
+            shopDomain: shopDomain,
+            accountId: accountId,
+            rowid: rowid,
+          ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ));
+}
+
+typedef $$CheckoutReceiptsTableProcessedTableManager = ProcessedTableManager<
+    _$AppDatabase,
+    $CheckoutReceiptsTable,
+    CheckoutReceipt,
+    $$CheckoutReceiptsTableFilterComposer,
+    $$CheckoutReceiptsTableOrderingComposer,
+    $$CheckoutReceiptsTableAnnotationComposer,
+    $$CheckoutReceiptsTableCreateCompanionBuilder,
+    $$CheckoutReceiptsTableUpdateCompanionBuilder,
+    (
+      CheckoutReceipt,
+      BaseReferences<_$AppDatabase, $CheckoutReceiptsTable, CheckoutReceipt>
+    ),
+    CheckoutReceipt,
+    PrefetchHooks Function()>;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -7945,4 +8465,6 @@ class $AppDatabaseManager {
       $$SessionsTableTableManager(_db, _db.sessions);
   $$OrderSummariesTableTableManager get orderSummaries =>
       $$OrderSummariesTableTableManager(_db, _db.orderSummaries);
+  $$CheckoutReceiptsTableTableManager get checkoutReceipts =>
+      $$CheckoutReceiptsTableTableManager(_db, _db.checkoutReceipts);
 }

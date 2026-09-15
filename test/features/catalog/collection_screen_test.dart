@@ -4,6 +4,7 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
+import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/main.dart';
 
@@ -41,9 +42,14 @@ void main() {
     expect(find.text('extracted'), findsNothing);
     expect(find.text('También en marcas de Estados Unidos'), findsNothing);
 
+    List<String> visibleIds() => tester
+        .widgetList<ProductCard>(find.byType(ProductCard))
+        .map((card) => card.product.id)
+        .toList();
+
     final silhouettePills = find.byWidgetPredicate(
       (widget) =>
-          widget is ChoiceChip &&
+          widget is MonettaCapsuleChip &&
           widget.key is ValueKey<String> &&
           (widget.key! as ValueKey<String>)
               .value
@@ -51,20 +57,48 @@ void main() {
     );
     expect(silhouettePills, findsWidgets);
 
+    final unfiltered = visibleIds();
+    expect(unfiltered, isNotEmpty);
+
+    // A silhouette chip must change the products on screen, not just its own
+    // appearance: the grid has to become exactly that silhouette's bags.
     final firstPill = silhouettePills.first;
-    expect(tester.widget<ChoiceChip>(firstPill).selected, isFalse);
+    final slug =
+        (tester.widget<MonettaCapsuleChip>(firstPill).key! as ValueKey<String>)
+            .value
+            .replaceFirst('collection-silhouette-', '');
+    final expected = store.products
+        .where(
+          (product) =>
+              store.facetsFor(product.id)?.category?.value == 'bolsa' &&
+              store.facetsFor(product.id)?.silhouette?.value == slug,
+        )
+        .map((product) => product.id)
+        .toSet();
+    expect(expected, isNotEmpty);
+
+    expect(tester.widget<MonettaCapsuleChip>(firstPill).selected, isFalse);
     await tester.tap(firstPill);
     await tester.pumpAndSettle();
-    expect(tester.widget<ChoiceChip>(firstPill).selected, isTrue);
+    expect(tester.widget<MonettaCapsuleChip>(firstPill).selected, isTrue);
+    // The grid is lazy, so assert containment rather than a full set match.
+    expect(visibleIds(), isNotEmpty);
+    expect(visibleIds().every(expected.contains), isTrue);
     expect(
-      tester
-          .widget<ChoiceChip>(firstPill)
-          .color
-          ?.resolve(const <WidgetState>{WidgetState.selected}),
-      MonettaColors.light.navigationSelection,
+      unfiltered.where((id) => !expected.contains(id)),
+      isNotEmpty,
+      reason: 'the chip must actually remove pieces, not only highlight',
     );
+
+    // Tapping it again returns to the collection, not to the whole catalog.
     await tester.tap(firstPill);
     await tester.pumpAndSettle();
+    expect(visibleIds().toSet(), unfiltered.toSet());
+    expect(
+      visibleIds().any((id) => !expected.contains(id)),
+      isTrue,
+      reason: 'clearing returns to the collection, not to the filtered view',
+    );
 
     await tester.tap(find.byKey(const Key('collection-filter-button')));
     await tester.pumpAndSettle();

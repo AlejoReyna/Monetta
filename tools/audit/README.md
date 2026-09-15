@@ -1,3 +1,5 @@
+> **Remediation update:** Runnable official Shopify adapters and a disposable local HTTP registration/login runner are now implemented. Use [REMEDIATION_USAGE.md](REMEDIATION_USAGE.md) for current commands, supported fixtures, guarded lifecycle operations, cleanup and precise live dependencies. The scaffolding notes below describe the original baseline and do not imply a live journey PASS.
+
 # Audit fixture seed / cleanup scaffolding
 
 Repeatable test-environment tooling for Monetta audit remediation (brief §4).

@@ -1,3 +1,5 @@
+> **PR7 review supersedes prior closure claims.** See [PR7_REMEDIATION.md](PR7_REMEDIATION.md) for the current finding-to-fix matrix and local validation. R1–R8 reopened F08/F09/F10/F12/F13/F17/F30; earlier “closed” entries below are historical. Local tests, CI, development Shopify and device journeys remain separate. No live Shopify journey or production launch is approved by this update.
+
 # F01–F30 remediation tracking — 2026-09-07
 
 **Branch:** `monetta/audit-remediation-wip`  

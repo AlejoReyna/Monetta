@@ -52,6 +52,7 @@ Map<String, dynamic> _productNode({
         ],
       },
       'variants': {
+        'pageInfo': {'hasNextPage': false, 'endCursor': null},
         'edges': [
           {
             'node': {
@@ -65,7 +66,10 @@ Map<String, dynamic> _productNode({
           },
         ],
       },
-      'collections': {'edges': <dynamic>[]},
+      'collections': {
+        'pageInfo': {'hasNextPage': false, 'endCursor': null},
+        'edges': <dynamic>[],
+      },
     };
 
 Map<String, dynamic> _page(
@@ -476,6 +480,16 @@ void main() {
           updatedAt: DateTime.utc(2026, 8, 1),
         ),
       ]);
+
+      await cache.saveMetadata(
+        CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.shopify,
+          products: await cache.allProducts(),
+          syncedAt: DateTime.utc(2026, 8, 1),
+          status: CatalogCacheStatus.healthy,
+          shopDomain: 'monetta.mx',
+        ),
+      );
 
       final transport = _FakeTransport([
         _page(

@@ -222,6 +222,9 @@ class OrderSummaries extends Table {
 
   /// Null for an apartado order — those have no Shopify order id until the
   /// owner manually enters one, and some never get one recorded here at all.
+  TextColumn get displayNumber => text().nullable()();
+  TextColumn get fulfillmentStatus => text().nullable()();
+
   TextColumn get shopifyOrderId => text().nullable()();
 
   /// `shopifyCheckout` | `whatsappApartado`.
@@ -237,5 +240,14 @@ class OrderSummaries extends Table {
   DateTimeColumn get placedAt => dateTime()();
 
   @override
-  Set<Column> get primaryKey => {id};
+  Set<Column> get primaryKey => {id, accountId};
+}
+
+/// Receipt and bag subtraction commit together, making repeated callbacks safe.
+class CheckoutReceipts extends Table {
+  TextColumn get operationId => text()();
+  TextColumn get shopDomain => text()();
+  TextColumn get accountId => text()();
+  @override
+  Set<Column> get primaryKey => {operationId};
 }

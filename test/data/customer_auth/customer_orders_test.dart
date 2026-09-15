@@ -15,6 +15,112 @@ const _config = CustomerAccountConfig(
 );
 
 void main() {
+  for (final count in [0, 26, 60]) {
+    test('R6 loads all $count orders with unique IDs', () async {
+      var calls = 0;
+      final service = HttpCustomerOrdersService(
+        config: _config,
+        client: MockClient((request) async {
+          if (request.method == 'GET') {
+            return http.Response(
+              jsonEncode({
+                'graphql_api':
+                    'https://shop.example.com/customer/api/2026-07/graphql',
+              }),
+              200,
+            );
+          }
+          final vars = (jsonDecode(request.body) as Map)['variables'] as Map;
+          final offset = int.parse(vars['after'] as String? ?? '0');
+          expect(offset, calls * 25);
+          calls++;
+          final end = (offset + 25).clamp(0, count);
+          return http.Response(
+            jsonEncode({
+              'data': {
+                'customer': {
+                  'orders': {
+                    'pageInfo': {
+                      'hasNextPage': end < count,
+                      'endCursor': '$end',
+                    },
+                    'nodes': [
+                      for (var i = offset; i < end; i++)
+                        {
+                          'id': 'gid://shopify/Order/$i',
+                          'name': '#${1000 + i}',
+                          'number': 1000 + i,
+                          'processedAt': '2026-09-01T00:00:00Z',
+                          'financialStatus': 'PAID',
+                          'totalPrice': {
+                            'amount': '100',
+                            'currencyCode': 'MXN',
+                          },
+                        },
+                    ],
+                  },
+                },
+              },
+            }),
+            200,
+          );
+        }),
+      );
+      final orders = await service.fetchOrders('test');
+      expect(orders, hasLength(count));
+      expect(orders.map((o) => o.id).toSet(), hasLength(count));
+      expect(calls, count == 0 ? 1 : (count / 25).ceil());
+    });
+  }
+
+  test(
+      'R6 second-page failure rejects partial history and retry starts from first page',
+      () async {
+    var fail = true;
+    final offsets = <Object?>[];
+    final service = HttpCustomerOrdersService(
+      config: _config,
+      client: MockClient((request) async {
+        if (request.method == 'GET') {
+          return http.Response(
+            jsonEncode({
+              'graphql_api':
+                  'https://shop.example.com/customer/api/2026-07/graphql',
+            }),
+            200,
+          );
+        }
+        final after =
+            ((jsonDecode(request.body) as Map)['variables'] as Map)['after'];
+        offsets.add(after);
+        if (after != null && fail) return http.Response('{}', 503);
+        return http.Response(
+          jsonEncode({
+            'data': {
+              'customer': {
+                'orders': {
+                  'pageInfo': {
+                    'hasNextPage': after == null,
+                    'endCursor': after == null ? 'next' : null,
+                  },
+                  'nodes': <dynamic>[],
+                },
+              },
+            },
+          }),
+          200,
+        );
+      }),
+    );
+    await expectLater(
+      service.fetchOrders('test'),
+      throwsA(isA<CustomerAuthException>()),
+    );
+    fail = false;
+    expect(await service.fetchOrders('test'), isEmpty);
+    expect(offsets, [null, 'next', null, 'next']);
+  });
+
   group('HttpCustomerOrdersService.parseOrders', () {
     test('parses nodes into CustomerAccountOrder rows', () {
       final body = utf8.encode(
@@ -22,6 +128,7 @@ void main() {
           'data': {
             'customer': {
               'orders': {
+                'pageInfo': {'hasNextPage': false, 'endCursor': null},
                 'nodes': [
                   {
                     'id': 'gid://shopify/Order/11',
@@ -97,7 +204,10 @@ void main() {
           jsonEncode({
             'data': {
               'customer': {
-                'orders': {'nodes': <Map<String, dynamic>>[]},
+                'orders': {
+                  'pageInfo': {'hasNextPage': false, 'endCursor': null},
+                  'nodes': <Map<String, dynamic>>[],
+                },
               },
             },
           }),

@@ -1,25 +1,51 @@
-/// One shopper card. Brand, title, price. No recommender sentences.
+/// One shopper card for a Monetta (Shopify) product.
+///
+/// This is the widget every package uses — Home's rails (A), the catalog
+/// surfaces here (B), the related grid on the product page (C) and Favourites
+/// (E). It is a thin, store-aware wrapper: the anatomy, proportions and
+/// typography live in [MonettaProductTile] so a [CatalogItem] renders
+/// identically without being forced into a [Product].
+///
+/// ## Contract
+///
+/// ```dart
+/// ProductCard(product: product)                       // two-column grid
+/// ProductCard(product: product, density: ProductTileDensity.compact)
+/// ProductCard(product: product, showWishlist: false)   // no favourite
+/// ProductCard(product: product, onQuickView: () {…})   // long press (C)
+/// ```
+///
+/// Every parameter except [product] is optional and defaults to the behaviour
+/// shipped before the redesign, so existing call sites need no edit.
 library;
 
 import 'package:flutter/material.dart';
 
-import '../../app/card_lift.dart';
-import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
-import '../../app/shopper_copy.dart';
-import '../../app/theme.dart';
-import '../../data/media/media_url.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/events.dart';
-import '../../reco/explainer.dart';
 import '../product/product_screen.dart';
+import 'product_tile.dart';
+
+export 'product_tile.dart'
+    show
+        MonettaProductTile,
+        ProductTileData,
+        ProductTileDensity,
+        ProductTileMetrics,
+        productGridColumns,
+        productGridDelegate;
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
     required this.product,
     this.urgency,
     this.wide = false,
+    this.density = ProductTileDensity.grid,
+    this.showWishlist = true,
+    this.onQuickView,
+    this.onTap,
     super.key,
   });
 
@@ -27,197 +53,118 @@ class ProductCard extends StatelessWidget {
 
   /// Restock or a real discount only. Never a "porque te gustan" line.
   final String? urgency;
+
+  /// Retained for source compatibility with callers that still pass it. It
+  /// has never changed this card's layout and still does not; density is the
+  /// supported control.
   final bool wide;
+
+  /// [ProductTileDensity.grid] (4:5 image, two-line name) is the default and
+  /// matches the card shipped before the redesign. [ProductTileDensity.compact]
+  /// squares the image and keeps the name to one line, for narrow rails.
+  final ProductTileDensity density;
+
+  /// Set false where a favourite would be meaningless or unsupported.
+  final bool showWishlist;
+
+  /// Reserved for package C. When given, a long press opens the quick view;
+  /// no button is added and tapping still opens the full product page.
+  final VoidCallback? onQuickView;
+
+  /// Overrides the default "open this product" navigation.
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
     final facets = store.facetsFor(product.id);
-    final brand = facets?.brand?.value;
     final wishlisted = store.wishlist.contains(product.id);
 
-    return MonettaCardLift(
-      child: GestureDetector(
-        onTap: () => openProduct(context, product),
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            AspectRatio(
-              aspectRatio: 4 / 5,
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  _CardImage(
-                    urls: product.images,
-                    fallbackLabel: brand == null
-                        ? product.title
-                        : '${brandLabel(brand)} · ${product.title}',
-                  ),
-                  if (!product.isInStock)
-                    ColoredBox(
-                      color: Colors.white.withValues(alpha: 0.68),
-                      child: Center(child: Text('AGOTADO', style: eyebrow())),
-                    ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: IconButton(
-                      tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
-                      onPressed: () => store.toggleWishlist(product.id),
-                      constraints:
-                          const BoxConstraints.tightFor(width: 34, height: 34),
-                      padding: EdgeInsets.zero,
-                      icon: Icon(
-                        wishlisted ? Icons.favorite : Icons.favorite_border,
-                        size: 19,
-                        color: wishlisted
-                            ? context.monettaColors.accent
-                            : context.monettaColors.contentPrimary,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 11),
-            if (urgency != null) ...[
-              Text(
-                urgency!.toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: eyebrow(size: 8.5, color: context.monettaColors.sale),
-              ),
-              const SizedBox(height: 6),
-            ],
-            if (brand != null) ...[
-              Text(
-                brandLabel(brand).toUpperCase(),
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: sans(size: 12, height: 1.3).copyWith(letterSpacing: 0.6),
-              ),
-              const SizedBox(height: 2),
-            ],
-            Text(
-              cardPieceName(
-                title: product.title,
-                colorSlug: facets?.colors.isEmpty == true
-                    ? null
-                    : facets!.colors.first.value,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: sans(size: 12, height: 1.35),
-            ),
-            const SizedBox(height: 2),
-            Wrap(
-              spacing: 7,
-              runSpacing: 2,
-              children: [
-                Text(
-                  kMoney.format(product.price),
-                  style: sans(size: 12, height: 1.3),
-                ),
-                if (product.isOnSale)
-                  Text(
-                    kMoney.format(product.compareAtPrice),
-                    style: sans(
-                      size: 12,
-                      color: context.monettaColors.contentMuted,
-                      height: 1.3,
-                      decoration: TextDecoration.lineThrough,
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
+    return MonettaProductTile(
+      data: ProductTileData.fromProduct(product, facets: facets),
+      density: density,
+      eyebrow: urgency,
+      wishlisted: wishlisted,
+      onToggleWishlist:
+          showWishlist ? () => store.toggleWishlist(product.id) : null,
+      onQuickView: onQuickView,
+      onTap: onTap ?? () => openProduct(context, product),
     );
   }
 }
 
-void openProduct(BuildContext context, Product product) {
+void openProduct(
+  BuildContext context,
+  Product product, {
+  int initialVariantIndex = 0,
+}) {
   final store = StoreScope.of(context);
   store.record(EventType.productView, productId: product.id);
   Navigator.of(context).push(
     monettaFadeRoute(
       StoreScope(
         notifier: store,
-        child: ProductScreen(productId: product.id),
+        child: ProductScreen(
+          productId: product.id,
+          initialVariantIndex: initialVariantIndex,
+        ),
       ),
     ),
   );
 }
 
-class _CardImage extends StatefulWidget {
-  const _CardImage({required this.urls, required this.fallbackLabel});
+/// The shared grid used by search results, the product list, collections and
+/// the brand page. Kept here so every consumer gets the same columns, spacing
+/// and text-scale behaviour from one import.
+class ProductCardGrid extends StatelessWidget {
+  const ProductCardGrid({
+    required this.products,
+    this.padding = EdgeInsets.zero,
+    this.density = ProductTileDensity.grid,
+    this.shrinkWrap = false,
+    this.physics,
+    this.controller,
+    this.onQuickView,
+    super.key,
+  });
 
-  final List<String> urls;
-  final String fallbackLabel;
-
-  @override
-  State<_CardImage> createState() => _CardImageState();
-}
-
-class _CardImageState extends State<_CardImage> {
-  int _activeIndex = 0;
-  bool _showSecond = false;
-
-  List<String> get _candidates => [
-        for (final url in widget.urls)
-          if (url.trim().isNotEmpty) url,
-      ];
-
-  void _advance() {
-    if (_activeIndex + 1 >= _candidates.length || !mounted) return;
-    setState(() {
-      _activeIndex += 1;
-      _showSecond = false;
-    });
-  }
-
-  @override
-  void didUpdateWidget(covariant _CardImage oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.urls != widget.urls) {
-      _activeIndex = 0;
-      _showSecond = false;
-    }
-  }
+  final List<Product> products;
+  final EdgeInsets padding;
+  final ProductTileDensity density;
+  final bool shrinkWrap;
+  final ScrollPhysics? physics;
+  final ScrollController? controller;
+  final void Function(Product product)? onQuickView;
 
   @override
   Widget build(BuildContext context) {
-    final candidates = _candidates;
-    final url = candidates.isEmpty ? null : candidates[_activeIndex];
-    return GestureDetector(
-      onLongPressStart: candidates.length < 2
-          ? null
-          : (_) => setState(() => _showSecond = true),
-      onLongPressEnd: candidates.length < 2
-          ? null
-          : (_) => setState(() => _showSecond = false),
-      child: ColoredBox(
-        color: context.monettaColors.surfaceMuted,
-        child: url == null
-            ? MonettaImage(
-                url: null,
-                fallbackLabel: widget.fallbackLabel,
-              )
-            : AnimatedSwitcher(
-                duration: reduceMotion(context) ? Duration.zero : kSwap,
-                child: MonettaImage(
-                  key: ValueKey(url),
-                  url: _showSecond && candidates.length > 1
-                      ? candidates[1]
-                      : url,
-                  cacheWidth: MediaUrl.cardWidth,
-                  fallbackLabel: widget.fallbackLabel,
-                  onFailed: _advance,
-                ),
-              ),
-      ),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final available = constraints.maxWidth - padding.left - padding.right;
+        return GridView.builder(
+          padding: padding,
+          controller: controller,
+          shrinkWrap: shrinkWrap,
+          physics: physics,
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          gridDelegate: productGridDelegate(
+            context,
+            availableWidth: available,
+            density: density,
+          ),
+          itemCount: products.length,
+          itemBuilder: (context, index) {
+            final product = products[index];
+            return ProductCard(
+              key: ValueKey('product-card-${product.id}'),
+              product: product,
+              density: density,
+              onQuickView:
+                  onQuickView == null ? null : () => onQuickView!(product),
+            );
+          },
+        );
+      },
     );
   }
 }

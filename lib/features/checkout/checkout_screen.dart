@@ -1,17 +1,22 @@
-/// Monetta's pre-checkout experience.
+/// Monetta's pre-checkout experience — paquete D (Fig.13 bolsa, Fig.14
+/// checkout, Fig.15 confirmación).
 ///
-/// The flow intentionally stops before card entry. Product review, delivery
-/// details and the final order check belong to Monetta; payment belongs to the
-/// Shopify checkout URL so card data never enters this application.
+/// El flujo se detiene antes de tarjeta: producto, entrega y revisión son de
+/// Monetta; el pago vive en la URL alojada de Shopify para que los datos de
+/// tarjeta nunca entren a la app. Nunca se inventan métodos (Oxxo/Meses/
+/// PayPal): el panel de pago solo lista opciones reales recibidas por config;
+/// sin config muestra el aviso alojado. Los totales finales son de Shopify;
+/// los locales van marcados como estimación.
 library;
 
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../app/media/monetta_image.dart';
+
 import '../../app/cart_controller.dart';
 import '../../app/checkout_buyer_identity.dart';
+import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/shopify_checkout_coordinator.dart';
 import '../../app/theme.dart';
@@ -21,13 +26,18 @@ import '../../data/shopify/cart/cart_session_store.dart';
 import '../../data/shopify/cart/checkout_launcher.dart';
 import '../../domain/bag_line.dart';
 import '../../main.dart';
+import '../account/account_screen.dart';
+import '../boutique/boutique_tokens.dart';
+import '../catalog/product_card.dart';
+import '../product/quick_view.dart';
+import 'order_confirmation_screen.dart';
 import 'shopify_cart_summary.dart';
 
-/// The transient data a real Shopify launcher needs to create the Cart and
-/// prefill buyer identity before opening `cart.checkoutUrl`.
+/// Datos transitorios que un launcher real necesita para crear el Cart y
+/// precargar buyer identity antes de abrir `cart.checkoutUrl`.
 ///
-/// It is never persisted by this feature. A launcher may send it directly to
-/// Shopify so the shopper does not type the delivery address twice.
+/// Nunca se persiste desde esta feature. Solo se envía directo a Shopify para
+/// no pedir la dirección dos veces. No guarda tarjeta.
 class CheckoutDraft {
   const CheckoutDraft({
     required this.lines,
@@ -51,8 +61,8 @@ Future<void> openBag(
 }) {
   final store = StoreScope.of(context);
   return Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => StoreScope(
+    monettaFadeRoute(
+      StoreScope(
         notifier: store,
         child: BagScreen(launchSecureCheckout: launchSecureCheckout),
       ),
@@ -60,7 +70,8 @@ Future<void> openBag(
   );
 }
 
-/// A reusable header action so home and product screens expose one live bag.
+/// Acción reutilizable para que home y producto expongan una sola bolsa viva.
+/// Contrato del orquestador: se conserva tal cual.
 class BagAction extends StatelessWidget {
   const BagAction({this.onPressed, super.key});
 
@@ -68,6 +79,7 @@ class BagAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     final count = StoreScope.of(context).bagQuantity;
     return IconButton(
       tooltip: count == 0 ? 'Mi bolsa' : 'Mi bolsa, $count artículos',
@@ -85,14 +97,14 @@ class BagAction extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 alignment: Alignment.center,
                 decoration: BoxDecoration(
-                  color: context.monettaColors.contentPrimary,
+                  color: palette.ink,
                   shape: BoxShape.circle,
                 ),
                 child: Text(
                   count > 9 ? '9+' : '$count',
-                  style: sans(
+                  style: boutiqueText(
                     size: 9,
-                    color: context.monettaColors.canvas,
+                    color: palette.canvas,
                     weight: FontWeight.w600,
                     height: 1,
                   ),
@@ -120,6 +132,7 @@ class _BagScreenState extends State<BagScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     final store = StoreScope.of(context);
     final lines = store.bagLines;
     final cartScope = CartScope.maybeOf(context);
@@ -146,24 +159,27 @@ class _BagScreenState extends State<BagScreen> {
     }
 
     return Scaffold(
-      appBar: _CheckoutAppBar(
-        showSecurityIndicator: false,
+      backgroundColor: palette.canvas,
+      appBar: _BoutiqueBar(
         leading: IconButton(
           tooltip: 'Volver',
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back, size: 20),
         ),
       ),
-      body: lines.isEmpty
-          ? const _EmptyBag()
-          : _BagContents(
-              lines: lines,
-              launchSecureCheckout: widget.launchSecureCheckout,
-              cartController: cartScope?.notifier,
-              checkoutCoordinator: cartScope?.checkoutCoordinator,
-              cartScope: sessionScope,
-              localIntent: localIntent,
-            ),
+      body: SafeArea(
+        bottom: true,
+        child: lines.isEmpty
+            ? const _EmptyBag()
+            : _BagContents(
+                lines: lines,
+                launchSecureCheckout: widget.launchSecureCheckout,
+                cartController: cartScope?.notifier,
+                checkoutCoordinator: cartScope?.checkoutCoordinator,
+                cartScope: sessionScope,
+                localIntent: localIntent,
+              ),
+      ),
     );
   }
 
@@ -226,9 +242,8 @@ class _BagContents extends StatelessWidget {
           controller == null || scope == null || checkout == null
               ? null
               : (CheckoutDraft draft) async {
-                  // Rebuild intent from the live bag immediately before
-                  // Shopify reconciliation — never reuse the bag snapshot that
-                  // existed when this screen was first opened (F17).
+                  // Reconstruye el intent desde la bolsa viva justo antes de
+                  // reconciliar — nunca reusa el snapshot de apertura (F17).
                   final currentIntent = [
                     for (final line in store.bagLines)
                       LocalCartIntent(
@@ -248,14 +263,14 @@ class _BagContents extends StatelessWidget {
                     scope: scope,
                     localIntent: currentIntent,
                     buyerIdentity: buyerIdentity,
-                    onCompleted: (purchasedVariantIds) async {
-                      await store.clearPurchasedBagLines(purchasedVariantIds);
+                    onCompleted: (purchase) async {
+                      await store.applyCheckoutPurchase(purchase);
                       await accountController?.loadOrders();
                     },
                   );
                 };
       final launcher = launchSecureCheckout ?? productionLauncher;
-      // F05: refuse to collect delivery/contact when checkout cannot finish.
+      // F05: no capturar contacto/entrega cuando el checkout no puede cerrar.
       if (launcher == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -268,14 +283,13 @@ class _BagContents extends StatelessWidget {
         return;
       }
       Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => StoreScope(
+        monettaFadeRoute(
+          StoreScope(
             notifier: store,
             child: CheckoutFlowScreen(
               launchSecureCheckout: launcher,
-              // The coordinator decides at invocation time whether the fresh
-              // reconciled URL is available; do not snapshot that state before
-              // the checkout screen performs its final reconciliation.
+              // El coordinador decide al invocar si hay URL fresca; no se
+              // congela estado antes de la reconciliación final.
               openExternalCheckout: checkout?.openExternalFallback,
             ),
           ),
@@ -286,31 +300,33 @@ class _BagContents extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= 860;
-        final list = Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            _CheckoutProgress(activeIndex: 0),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(24, 34, 24, 24),
-              child: Row(
-                key: const ValueKey('bag-heading-row'),
-                crossAxisAlignment: CrossAxisAlignment.baseline,
-                textBaseline: TextBaseline.alphabetic,
-                children: [
-                  Expanded(
-                    child: Text('Tu bolsa', style: display(wide ? 36 : 30)),
-                  ),
-                  const SizedBox(width: 16),
-                  Text(
-                    '$count ${count == 1 ? 'artículo' : 'artículos'}',
-                    style: sans(
-                      size: 12.5,
-                      color: context.monettaColors.contentMuted,
-                    ),
-                  ),
-                ],
+        final heading = Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          child: Row(
+            key: const ValueKey('bag-heading-row'),
+            crossAxisAlignment: CrossAxisAlignment.baseline,
+            textBaseline: TextBaseline.alphabetic,
+            children: [
+              Expanded(
+                child: Text(
+                  'Mi bolsa',
+                  style: boutiqueDisplay(wide ? 32 : 28),
+                ),
               ),
-            ),
+              const SizedBox(width: 16),
+              Text(
+                '$count ${count == 1 ? 'artículo' : 'artículos'}',
+                style: boutiqueText(
+                  size: 12,
+                  color: context.boutique.inkMuted,
+                ),
+              ),
+            ],
+          ),
+        );
+
+        final lineTiles = Column(
+          children: [
             for (final line in lines)
               _BagLineTile(
                 line: line,
@@ -319,6 +335,11 @@ class _BagContents extends StatelessWidget {
                 onRemove: () => store.removeFromBag(line.variant.id),
               ),
           ],
+        );
+
+        final incentive = Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: _FreeShippingBar(subtotal: subtotal),
         );
 
         final controller = cartController;
@@ -335,31 +356,52 @@ class _BagContents extends StatelessWidget {
             : _OrderSummary(
                 subtotal: subtotal,
                 shipping: shipping,
-                ctaLabel: 'Continuar a contacto',
+                ctaLabel: 'Continuar al checkout',
                 onContinue: continueToCheckout,
               );
 
+        final bagIds = {for (final line in lines) line.product.id};
+        final recommendations = _BagRecommendations(excludeIds: bagIds);
+
         if (wide) {
           return SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(32, 24, 32, 56),
+            padding: const EdgeInsets.fromLTRB(32, 12, 32, 48),
             child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 1180),
-                child: Row(
+                child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Expanded(
-                      flex: 7,
-                      child: list,
+                    const _CheckoutProgress(activeIndex: 0),
+                    const SizedBox(height: 8),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          flex: 7,
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [heading, lineTiles],
+                          ),
+                        ),
+                        const SizedBox(width: 48),
+                        Expanded(
+                          flex: 4,
+                          child: Padding(
+                            padding: const EdgeInsets.only(top: 64),
+                            child: Column(
+                              children: [
+                                _FreeShippingBar(subtotal: subtotal),
+                                const SizedBox(height: 16),
+                                summary,
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(width: 52),
-                    Expanded(
-                      flex: 4,
-                      child: Padding(
-                        padding: const EdgeInsets.only(top: 74),
-                        child: summary,
-                      ),
-                    ),
+                    recommendations,
+                    const SizedBox(height: 24),
                   ],
                 ),
               ),
@@ -368,10 +410,17 @@ class _BagContents extends StatelessWidget {
         }
 
         return ListView(
-          padding: EdgeInsets.zero,
+          padding: const EdgeInsets.only(bottom: 32),
           children: [
-            list,
-            summary,
+            const _CheckoutProgress(activeIndex: 0),
+            heading,
+            lineTiles,
+            incentive,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
+              child: summary,
+            ),
+            recommendations,
           ],
         );
       },
@@ -383,11 +432,17 @@ class CheckoutFlowScreen extends StatefulWidget {
   const CheckoutFlowScreen({
     this.launchSecureCheckout,
     this.openExternalCheckout,
+    this.availablePaymentMethods = const [],
     super.key,
   });
 
   final SecureCheckoutLauncher? launchSecureCheckout;
   final ExternalCheckoutFallback? openExternalCheckout;
+
+  /// Métodos reales configurados en Shopify (nombres oficiales). Vacío = no
+  /// hay evidencia de config, así que no se dibuja ningún radio inventado y
+  /// se muestra el aviso alojado. El orquestador los conecta cuando existan.
+  final List<String> availablePaymentMethods;
 
   @override
   State<CheckoutFlowScreen> createState() => _CheckoutFlowScreenState();
@@ -401,6 +456,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   bool _reviewing = false;
   bool _launching = false;
   bool _didPrefillContact = false;
+  String? _selectedPayment;
 
   @override
   void didChangeDependencies() {
@@ -434,30 +490,57 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   }
 
   Future<void> _pay() async {
-    final lines = StoreScope.of(context).bagLines;
+    final store = StoreScope.of(context);
+    final lines = store.bagLines;
     if (widget.launchSecureCheckout case final launcher?) {
       NotificationScope.maybeOf(context)?.recordPushOutcome('checkout_started');
       setState(() => _launching = true);
       try {
+        final email = _email.text.trim();
         final result = await launcher(
           CheckoutDraft(
             lines: lines,
-            email: _email.text.trim(),
+            email: email,
             phone: _phone.text.trim(),
           ),
         );
         if (!mounted) return;
         switch (result) {
           case CheckoutCompleted():
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text(
-                  'Shopify confirmó tu compra. Revisaremos Mis pedidos; '
-                  'artículos no comprados se conservan en tu bolsa.',
-                ),
-              ),
+            // Confirmación solo con evidencia del result. CheckoutCompleted no
+            // porta identidad de pedido y la sincronización de Mis pedidos
+            // puede aún no incluir el pedido nuevo: tomar el primer
+            // displayNumber atribuiría a la compra un pedido anterior. Se
+            // muestra el estado honesto sin número hasta correlacionar por
+            // identidad autoritativa.
+            final accountController = AccountScope.maybeOf(context);
+            final navigator = Navigator.of(context);
+            final controllerForOrders = accountController;
+            final signedIn = controllerForOrders?.isSignedIn == true;
+            if (!mounted) return;
+            await showOrderConfirmation(
+              context,
+              orderLabel: null,
+              email: email.isEmpty ? null : email,
+              onViewOrder: () {
+                navigator.popUntil((route) => route.isFirst);
+                final controller = controllerForOrders;
+                if (controller != null && signedIn) {
+                  unawaited(
+                    openAccount(navigator.context, controller: controller),
+                  );
+                } else {
+                  ScaffoldMessenger.maybeOf(navigator.context)?.showSnackBar(
+                    const SnackBar(
+                      content: Text(
+                        'Inicia sesión para ver Mis pedidos. Te enviamos la '
+                        'confirmación a tu correo.',
+                      ),
+                    ),
+                  );
+                }
+              },
             );
-            Navigator.of(context).popUntil((route) => route.isFirst);
           case CheckoutCancelled():
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -500,16 +583,19 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     final store = StoreScope.of(context);
     if (store.bagLines.isEmpty) {
       return Scaffold(
-        appBar: const _CheckoutAppBar(),
-        body: const _EmptyBag(),
+        backgroundColor: palette.canvas,
+        appBar: const _BoutiqueBar(),
+        body: const SafeArea(child: _EmptyBag()),
       );
     }
 
     return Scaffold(
-      appBar: _CheckoutAppBar(
+      backgroundColor: palette.canvas,
+      appBar: _BoutiqueBar(
         leading: IconButton(
           tooltip: 'Volver',
           onPressed: _reviewing
@@ -517,98 +603,110 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
               : () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back, size: 20),
         ),
+        title: 'Checkout',
       ),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        padding: const EdgeInsets.only(bottom: 44),
-        child: Column(
-          children: [
-            _CheckoutProgress(activeIndex: _reviewing ? 2 : 1),
-            LayoutBuilder(
-              builder: (context, constraints) {
-                final wide = constraints.maxWidth >= 900;
-                final form = _reviewing
-                    ? _ReviewPanel(
-                        email: _email.text,
-                        phone: _phone.text,
-                        shipping: _shippingFor(store.bagSubtotal),
-                        launching: _launching,
-                        onEdit: () => setState(() => _reviewing = false),
-                        onPay: () => unawaited(_pay()),
-                      )
-                    : _ContactForm(
-                        formKey: _formKey,
-                        email: _email,
-                        phone: _phone,
-                        shipping: _shippingFor(store.bagSubtotal),
-                        onContinue: _review,
-                      );
+      body: SafeArea(
+        bottom: true,
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.only(bottom: 40),
+          child: Column(
+            children: [
+              _CheckoutProgress(activeIndex: _reviewing ? 2 : 1),
+              LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 900;
+                  final form = _reviewing
+                      ? _ReviewPanel(
+                          email: _email.text,
+                          phone: _phone.text,
+                          shipping: _shippingFor(store.bagSubtotal),
+                          launching: _launching,
+                          paymentMethods: widget.availablePaymentMethods,
+                          selectedPayment: _selectedPayment,
+                          onSelectPayment: (value) =>
+                              setState(() => _selectedPayment = value),
+                          onEdit: () => setState(() => _reviewing = false),
+                          onPay: () => unawaited(_pay()),
+                        )
+                      : _ContactForm(
+                          formKey: _formKey,
+                          email: _email,
+                          phone: _phone,
+                          shipping: _shippingFor(store.bagSubtotal),
+                          onContinue: _review,
+                        );
 
-                final summary = _CheckoutSummary(
-                  lines: store.bagLines,
-                  subtotal: store.bagSubtotal,
-                );
-
-                if (!wide) {
-                  return Column(
-                    children: [
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 32, 20, 0),
-                        child: form,
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                        child: summary,
-                      ),
-                    ],
+                  final summary = _CheckoutSummary(
+                    lines: store.bagLines,
+                    subtotal: store.bagSubtotal,
                   );
-                }
-                return Center(
-                  child: ConstrainedBox(
-                    constraints: const BoxConstraints(maxWidth: 1120),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(32, 46, 32, 0),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Expanded(flex: 6, child: form),
-                          const SizedBox(width: 64),
-                          Expanded(flex: 4, child: summary),
-                        ],
+
+                  if (!wide) {
+                    return Column(
+                      children: [
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                          child: form,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                          child: summary,
+                        ),
+                      ],
+                    );
+                  }
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Expanded(flex: 6, child: form),
+                            const SizedBox(width: 56),
+                            Expanded(flex: 4, child: summary),
+                          ],
+                        ),
                       ),
                     ),
-                  ),
-                );
-              },
-            ),
-          ],
+                  );
+                },
+              ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-class _CheckoutAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _CheckoutAppBar({
-    this.leading,
-    this.showSecurityIndicator = true,
-  });
+class _BoutiqueBar extends StatelessWidget implements PreferredSizeWidget {
+  const _BoutiqueBar({this.leading, this.title});
 
   final Widget? leading;
-  final bool showSecurityIndicator;
+  final String? title;
 
   @override
-  Size get preferredSize => const Size.fromHeight(64.5);
+  Size get preferredSize => const Size.fromHeight(60.5);
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return AppBar(
-      toolbarHeight: 64,
+      toolbarHeight: 60,
       leading: leading,
       automaticallyImplyLeading: false,
-      title: const MonettaWordmark.appBar(),
+      backgroundColor: palette.canvas,
+      foregroundColor: palette.ink,
+      elevation: 0,
+      scrolledUnderElevation: 0,
       centerTitle: true,
-      actions: showSecurityIndicator
+      title: title == null
+          ? const MonettaWordmark.appBar()
+          : Text(title!, style: boutiqueTitle(size: 16, color: palette.ink)),
+      actions: title == 'Checkout'
           ? [
               Padding(
                 padding: const EdgeInsets.only(right: 18),
@@ -618,19 +716,16 @@ class _CheckoutAppBar extends StatelessWidget implements PreferredSizeWidget {
                     const SizedBox(width: 6),
                     Text(
                       'SEGURO',
-                      style: eyebrow(
-                        size: 8.5,
-                        color: context.monettaColors.contentPrimary,
-                      ),
+                      style: boutiqueEyebrow(size: 9, color: palette.ink),
                     ),
                   ],
                 ),
               ),
             ]
           : null,
-      bottom: const PreferredSize(
-        preferredSize: Size.fromHeight(.5),
-        child: Divider(height: .5),
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(.5),
+        child: Container(height: .5, color: palette.hairline),
       ),
     );
   }
@@ -643,23 +738,23 @@ class _CheckoutProgress extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const labels = ['Bolsa', 'Contacto', 'Pago'];
+    final palette = context.boutique;
+    const labels = ['Bolsa', 'Entrega', 'Pago', 'Confirmación'];
     return Container(
-      color: context.monettaColors.surfaceMuted,
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 18),
+      color: palette.surfaceDeep,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 520),
+          constraints: const BoxConstraints(maxWidth: 560),
           child: Row(
             children: [
               for (var index = 0; index < labels.length; index++) ...[
                 if (index > 0)
                   Expanded(
                     child: Container(
-                      height: .5,
-                      color: index <= activeIndex
-                          ? context.monettaColors.contentPrimary
-                          : context.monettaColors.divider,
+                      height: 1,
+                      color:
+                          index <= activeIndex ? palette.ink : palette.hairline,
                     ),
                   ),
                 _ProgressStep(
@@ -692,55 +787,127 @@ class _ProgressStep extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Semantics(
       label:
           '$label, ${active ? 'paso actual' : complete ? 'completado' : 'pendiente'}',
       child: Column(
         children: [
           Container(
-            width: 25,
-            height: 25,
+            width: 26,
+            height: 26,
             alignment: Alignment.center,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              color: active || complete
-                  ? context.monettaColors.contentPrimary
-                  : context.monettaColors.surface,
+              color: active || complete ? palette.ink : palette.surface,
               border: Border.all(
-                color: active || complete
-                    ? context.monettaColors.contentPrimary
-                    : context.monettaColors.divider,
+                color: active || complete ? palette.ink : palette.hairline,
               ),
             ),
             child: complete
-                ? Icon(
-                    Icons.check,
-                    size: 13,
-                    color: context.monettaColors.canvas,
-                  )
+                ? Icon(Icons.check, size: 13, color: palette.canvas)
                 : Text(
                     '$number',
-                    style: sans(
-                      size: 10,
-                      color: active
-                          ? context.monettaColors.canvas
-                          : context.monettaColors.contentMuted,
+                    style: boutiqueText(
+                      size: 11,
+                      color: active ? palette.canvas : palette.inkMuted,
                       weight: FontWeight.w600,
                       height: 1,
                     ),
                   ),
           ),
           const SizedBox(height: 5),
-          Text(
-            label.toUpperCase(),
-            style: eyebrow(
-              size: 8.5,
-              color: active || complete
-                  ? context.monettaColors.contentPrimary
-                  : context.monettaColors.contentMuted,
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 88),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                softWrap: false,
+                style: boutiqueEyebrow(
+                  size: 8,
+                  color: active || complete ? palette.ink : palette.inkMuted,
+                ).copyWith(letterSpacing: 1.0),
+              ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _FreeShippingBar extends StatelessWidget {
+  const _FreeShippingBar({required this.subtotal});
+
+  final double subtotal;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final remaining = remainingForFreeShipping(subtotal);
+    final progress =
+        (subtotal / kFreeShippingThreshold).clamp(0.0, 1.0).toDouble();
+    final done = remaining == 0;
+    return Semantics(
+      liveRegion: true,
+      label: done
+          ? 'Tienes envío gratis en este pedido'
+          : 'Te faltan ${kMoney.format(remaining)} para el envío gratis',
+      child: Container(
+        key: const ValueKey('free-shipping-incentive'),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BoutiqueRadius.card,
+          border: Border.all(color: palette.hairline, width: .5),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(
+                  done ? Icons.check_circle : Icons.local_shipping_outlined,
+                  size: 18,
+                  color: done ? palette.goldText : palette.ink,
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Text(
+                    done
+                        ? 'Tienes envío gratis en este pedido.'
+                        : 'Te faltan ${kMoney.format(remaining)} para el envío gratis',
+                    style: boutiqueText(
+                      size: 13,
+                      weight: FontWeight.w500,
+                      color: palette.ink,
+                      height: 1.35,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BoutiqueRadius.capsule,
+              child: LinearProgressIndicator(
+                value: progress,
+                minHeight: 6,
+                backgroundColor: palette.surfaceDeep,
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  done ? palette.gold : palette.ink,
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)}',
+              style: boutiqueText(size: 11, color: palette.inkMuted),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -759,70 +926,81 @@ class _BagLineTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     final store = StoreScope.of(context);
     final brand = store.facetsFor(line.product.id)?.brand?.value;
+    final wishlisted = store.wishlist.contains(line.product.id);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 22),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: context.monettaColors.divider,
-            width: 0.5,
-          ),
+          top: BorderSide(color: palette.hairline, width: 0.5),
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 108,
-            height: 132,
-            child: _ProductImage(url: line.product.primaryImage),
+          ClipRRect(
+            borderRadius: BoutiqueRadius.tile,
+            child: SizedBox(
+              width: 76,
+              height: 92,
+              child: _ProductImage(url: line.product.primaryImage),
+            ),
           ),
-          const SizedBox(width: 18),
+          const SizedBox(width: 14),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 if (brand != null) ...[
-                  Text(brand.toUpperCase(), style: eyebrow(size: 8.5)),
-                  const SizedBox(height: 7),
+                  Text(
+                    brand.toUpperCase(),
+                    style: boutiqueEyebrow(size: 9, color: palette.inkMuted),
+                  ),
+                  const SizedBox(height: 4),
                 ],
                 Text(
                   line.product.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: sans(size: 14, weight: FontWeight.w500, height: 1.35),
+                  style: boutiqueText(
+                    size: 14,
+                    weight: FontWeight.w500,
+                    height: 1.35,
+                  ),
                 ),
                 if (!line.variant.isDefault) ...[
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 3),
                   Text(
                     line.variant.title,
-                    style: sans(
-                      size: 11.5,
-                      color: context.monettaColors.contentMuted,
-                    ),
+                    style: boutiqueText(size: 12, color: palette.inkMuted),
                   ),
                 ],
-                const SizedBox(height: 10),
+                const SizedBox(height: 6),
                 Text(
                   kMoney.format(line.lineTotal),
-                  style: sans(size: 14, weight: FontWeight.w500),
+                  style: boutiqueText(size: 14, weight: FontWeight.w700),
                 ),
-                const SizedBox(height: 14),
+                const SizedBox(height: 10),
+                _QuantityStepper(
+                  quantity: line.quantity,
+                  onChanged: onChanged,
+                ),
+                const SizedBox(height: 4),
                 Wrap(
-                  spacing: 18,
+                  spacing: 16,
+                  runSpacing: 4,
                   crossAxisAlignment: WrapCrossAlignment.center,
                   children: [
-                    _QuantityControl(
-                      quantity: line.quantity,
-                      onChanged: onChanged,
-                    ),
-                    UnderlineLink(
+                    _BagTextAction(
                       label: 'Eliminar',
                       onTap: onRemove,
-                      size: 10.5,
-                      color: context.monettaColors.contentMuted,
+                    ),
+                    _BagTextAction(
+                      label: wishlisted ? 'Guardado ✓' : 'Guardar para después',
+                      onTap: () =>
+                          unawaited(store.toggleWishlist(line.product.id)),
                     ),
                   ],
                 ),
@@ -835,51 +1013,97 @@ class _BagLineTile extends StatelessWidget {
   }
 }
 
-class _QuantityControl extends StatelessWidget {
-  const _QuantityControl({required this.quantity, required this.onChanged});
+class _BagTextAction extends StatelessWidget {
+  const _BagTextAction({required this.label, required this.onTap});
+
+  final String label;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Semantics(
+      button: true,
+      label: label,
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: BoutiqueRadius.capsule,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BoutiqueRadius.capsule,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  label,
+                  style: boutiqueText(
+                    size: 12,
+                    color: palette.inkMuted,
+                    height: 1.2,
+                  ),
+                ),
+                const SizedBox(height: 3),
+                Container(height: .8, width: 48, color: palette.hairline),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Stepper unificado de la bolsa: una sola anatomía en Fig.13 y Fig.14.
+class _QuantityStepper extends StatelessWidget {
+  const _QuantityStepper({required this.quantity, required this.onChanged});
 
   final int quantity;
   final ValueChanged<int> onChanged;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: 38,
-      decoration: BoxDecoration(
-        border: Border.all(color: context.monettaColors.divider),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          _QuantityButton(
-            tooltip: 'Quitar uno',
-            icon: Icons.remove,
-            onPressed: () => onChanged(quantity - 1),
-          ),
-          Semantics(
-            label: 'Cantidad $quantity',
-            child: SizedBox(
-              width: 36,
+    final palette = context.boutique;
+    return Semantics(
+      label: 'Cantidad $quantity',
+      child: Container(
+        height: 40,
+        decoration: BoxDecoration(
+          border: Border.all(color: palette.hairline),
+          borderRadius: BoutiqueRadius.tile,
+          color: palette.surface,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _StepperButton(
+              tooltip: 'Quitar uno',
+              icon: Icons.remove,
+              onPressed: () => onChanged(quantity - 1),
+            ),
+            ConstrainedBox(
+              constraints: const BoxConstraints(minWidth: 36),
               child: Text(
                 '$quantity',
                 textAlign: TextAlign.center,
-                style: sans(size: 12, weight: FontWeight.w500),
+                style: boutiqueText(size: 13, weight: FontWeight.w600),
               ),
             ),
-          ),
-          _QuantityButton(
-            tooltip: 'Agregar uno',
-            icon: Icons.add,
-            onPressed: quantity >= 10 ? null : () => onChanged(quantity + 1),
-          ),
-        ],
+            _StepperButton(
+              tooltip: 'Agregar uno',
+              icon: Icons.add,
+              onPressed: quantity >= 10 ? null : () => onChanged(quantity + 1),
+            ),
+          ],
+        ),
       ),
     );
   }
 }
 
-class _QuantityButton extends StatelessWidget {
-  const _QuantityButton({
+class _StepperButton extends StatelessWidget {
+  const _StepperButton({
     required this.tooltip,
     required this.icon,
     required this.onPressed,
@@ -895,8 +1119,72 @@ class _QuantityButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       icon: Icon(icon, size: 15),
-      constraints: const BoxConstraints.tightFor(width: 36, height: 36),
+      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
       padding: EdgeInsets.zero,
+    );
+  }
+}
+
+class _BagRecommendations extends StatelessWidget {
+  const _BagRecommendations({required this.excludeIds});
+
+  final Set<String> excludeIds;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final store = StoreScope.of(context);
+    final feed = store
+        .feed(limit: 20)
+        .map((r) => r.product)
+        .where(
+          (p) => !excludeIds.contains(p.id) && p.isInStock,
+        )
+        .take(8)
+        .toList(growable: false);
+    final items = feed.isNotEmpty
+        ? feed
+        : store.products
+            .where((p) => !excludeIds.contains(p.id) && p.isInStock)
+            .take(8)
+            .toList(growable: false);
+    if (items.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(0, 28, 0, 0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 20),
+            child: Text(
+              'Recomendaciones',
+              style: boutiqueTitle(color: palette.ink),
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            key: const ValueKey('bag-recommendations'),
+            height: 252,
+            child: ListView.separated(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 20),
+              itemCount: items.length,
+              separatorBuilder: (_, __) => const SizedBox(width: 12),
+              itemBuilder: (context, index) {
+                final product = items[index];
+                return SizedBox(
+                  width: 148,
+                  child: ProductCard(
+                    product: product,
+                    density: ProductTileDensity.compact,
+                    onQuickView: () => showProductQuickView(context, product),
+                  ),
+                );
+              },
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -916,54 +1204,54 @@ class _OrderSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Container(
       key: const ValueKey('bag-order-summary'),
-      color: context.monettaColors.surfaceMuted,
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BoutiqueRadius.card,
+        border: Border.all(color: palette.hairline, width: .5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Resumen', style: display(22, weight: FontWeight.w400)),
-          const SizedBox(height: 22),
+          Text('Resumen de compra', style: boutiqueTitle(color: palette.ink)),
+          const SizedBox(height: 18),
+          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
+          const SizedBox(height: 10),
           _SummaryRow(
-            label: 'Subtotal local estimado',
-            value: kMoney.format(subtotal),
+            label: 'Envío',
+            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
           ),
-          const SizedBox(height: 12),
-          _SummaryRow(
-            label: 'Envío estimado',
-            value: shipping == 0
-                ? 'Estimado: gratis'
-                : 'Estimado: ${kMoney.format(shipping)}',
-          ),
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 18),
-            child: Divider(),
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            child: Container(height: .5, color: palette.hairline),
           ),
           _SummaryRow(
-            label: 'Estimación local',
+            label: 'Total',
             value: kMoney.format(subtotal + shipping),
             prominent: true,
           ),
-          const SizedBox(height: 22),
-          FilledButton(
-            onPressed: onContinue,
-            child: Text(ctaLabel.toUpperCase()),
+          const SizedBox(height: 6),
+          Text(
+            'Estimación local · totales finales en Shopify.',
+            style: boutiqueText(size: 11, color: palette.inkMuted),
           ),
-          const SizedBox(height: 13),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          const SizedBox(height: 18),
+          BoutiqueButton(label: ctaLabel, onPressed: onContinue),
+          const SizedBox(height: 12),
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            spacing: 7,
+            runSpacing: 4,
             children: [
-              Icon(
-                Icons.lock_outline,
-                size: 14,
-                color: context.monettaColors.contentMuted,
-              ),
-              const SizedBox(width: 7),
+              Icon(Icons.lock_outline, size: 14, color: palette.inkMuted),
               Text(
                 'Pago procesado de forma segura',
-                style:
-                    sans(size: 10.5, color: context.monettaColors.contentMuted),
+                textAlign: TextAlign.center,
+                style: boutiqueText(size: 11, color: palette.inkMuted),
               ),
             ],
           ),
@@ -986,22 +1274,25 @@ class _SummaryRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Row(
       children: [
         Expanded(
           child: Text(
             label,
-            style: sans(
-              size: prominent ? 14 : 12.5,
+            style: boutiqueText(
+              size: prominent ? 15 : 13,
               weight: prominent ? FontWeight.w600 : FontWeight.w400,
+              color: palette.ink,
             ),
           ),
         ),
         Text(
           value,
-          style: sans(
-            size: prominent ? 15 : 12.5,
-            weight: prominent ? FontWeight.w600 : FontWeight.w400,
+          style: boutiqueText(
+            size: prominent ? 16 : 13,
+            weight: prominent ? FontWeight.w700 : FontWeight.w500,
+            color: palette.ink,
           ),
         ),
       ],
@@ -1029,22 +1320,26 @@ class _ContactForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Form(
       key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('¿Cómo te contactamos?', style: display(30)),
+          Text('¿Cómo te contactamos?', style: boutiqueDisplay(28)),
           const SizedBox(height: 8),
           Text(
             'La dirección y el envío se capturan en el checkout seguro de '
             'Shopify para no pedirlos dos veces. Totales finales también '
             'vienen de Shopify.',
-            style: sans(size: 12.5, color: context.monettaColors.contentMuted),
+            style: boutiqueText(size: 13, color: palette.inkMuted),
           ),
-          const SizedBox(height: 30),
-          Text('Contacto'.toUpperCase(), style: eyebrow(size: 9)),
-          const SizedBox(height: 14),
+          const SizedBox(height: 28),
+          Text(
+            'Contacto'.toUpperCase(),
+            style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
+          ),
+          const SizedBox(height: 12),
           _CheckoutField(
             controller: email,
             label: 'Correo electrónico',
@@ -1056,7 +1351,7 @@ class _ContactForm extends StatelessWidget {
               return value!.contains('@') ? null : 'Ingresa un correo válido';
             },
           ),
-          const SizedBox(height: 14),
+          const SizedBox(height: 12),
           _CheckoutField(
             controller: phone,
             label: 'Teléfono',
@@ -1064,13 +1359,10 @@ class _ContactForm extends StatelessWidget {
             autofillHints: const [AutofillHints.telephoneNumber],
             validator: _required,
           ),
-          const SizedBox(height: 26),
+          const SizedBox(height: 24),
           _DeliveryOption(shipping: shipping),
-          const SizedBox(height: 26),
-          FilledButton(
-            onPressed: onContinue,
-            child: const Text('REVISAR PEDIDO'),
-          ),
+          const SizedBox(height: 24),
+          BoutiqueButton(label: 'REVISAR PEDIDO', onPressed: onContinue),
         ],
       ),
     );
@@ -1095,38 +1387,36 @@ class _CheckoutField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return TextFormField(
       controller: controller,
       validator: validator,
       keyboardType: keyboardType,
       inputFormatters: inputFormatters,
       autofillHints: autofillHints,
-      style: sans(size: 14),
+      style: boutiqueText(size: 14, color: palette.ink),
       decoration: InputDecoration(
         labelText: label,
-        labelStyle: sans(size: 12.5, color: context.monettaColors.contentMuted),
-        floatingLabelStyle:
-            sans(size: 11, color: context.monettaColors.contentPrimary),
+        labelStyle: boutiqueText(size: 13, color: palette.inkMuted),
+        floatingLabelStyle: boutiqueText(size: 11, color: palette.ink),
         filled: true,
-        fillColor: context.monettaColors.inputFill,
+        fillColor: palette.surfaceDeep,
         contentPadding: const EdgeInsets.fromLTRB(15, 17, 15, 14),
         enabledBorder: OutlineInputBorder(
-          borderRadius: kSquare,
-          borderSide:
-              BorderSide(color: context.monettaColors.divider, width: 0.5),
+          borderRadius: BoutiqueRadius.control,
+          borderSide: BorderSide(color: palette.hairline, width: 0.5),
         ),
         focusedBorder: OutlineInputBorder(
-          borderRadius: kSquare,
-          borderSide:
-              BorderSide(color: context.monettaColors.contentPrimary, width: 1),
+          borderRadius: BoutiqueRadius.control,
+          borderSide: BorderSide(color: palette.ink, width: 1),
         ),
         errorBorder: OutlineInputBorder(
-          borderRadius: kSquare,
-          borderSide: BorderSide(color: context.monettaColors.sale, width: .8),
+          borderRadius: BoutiqueRadius.control,
+          borderSide: BorderSide(color: palette.sale, width: .8),
         ),
         focusedErrorBorder: OutlineInputBorder(
-          borderRadius: kSquare,
-          borderSide: BorderSide(color: context.monettaColors.sale, width: 1),
+          borderRadius: BoutiqueRadius.control,
+          borderSide: BorderSide(color: palette.sale, width: 1),
         ),
       ),
     );
@@ -1140,44 +1430,47 @@ class _DeliveryOption extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        border: Border.all(
-          color: context.monettaColors.contentPrimary,
-          width: .8,
-        ),
+        color: palette.surface,
+        borderRadius: BoutiqueRadius.card,
+        border: Border.all(color: palette.ink, width: .8),
       ),
       child: Row(
         children: [
           Container(
-            width: 15,
-            height: 15,
+            width: 16,
+            height: 16,
             padding: const EdgeInsets.all(3),
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: context.monettaColors.contentPrimary),
+              border: Border.all(color: palette.ink),
             ),
             child: DecoratedBox(
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: context.monettaColors.contentPrimary,
+                color: palette.ink,
               ),
             ),
           ),
-          const SizedBox(width: 13),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   'Envío estándar',
-                  style: sans(size: 13, weight: FontWeight.w500),
+                  style: boutiqueText(
+                    size: 13,
+                    weight: FontWeight.w500,
+                    color: palette.ink,
+                  ),
                 ),
                 Text(
                   'Recíbelo en 3 a 5 días hábiles',
-                  style:
-                      sans(size: 11, color: context.monettaColors.contentMuted),
+                  style: boutiqueText(size: 11, color: palette.inkMuted),
                 ),
               ],
             ),
@@ -1186,8 +1479,7 @@ class _DeliveryOption extends StatelessWidget {
             shipping == 0
                 ? 'ESTIMADO: GRATIS'
                 : 'ESTIMADO: ${kMoney.format(shipping)}',
-            style:
-                eyebrow(size: 8.5, color: context.monettaColors.contentPrimary),
+            style: boutiqueEyebrow(size: 9, color: palette.ink),
           ),
         ],
       ),
@@ -1201,6 +1493,9 @@ class _ReviewPanel extends StatelessWidget {
     required this.phone,
     required this.shipping,
     required this.launching,
+    required this.paymentMethods,
+    required this.selectedPayment,
+    required this.onSelectPayment,
     required this.onEdit,
     required this.onPay,
   });
@@ -1209,91 +1504,282 @@ class _ReviewPanel extends StatelessWidget {
   final String phone;
   final double shipping;
   final bool launching;
+  final List<String> paymentMethods;
+  final String? selectedPayment;
+  final ValueChanged<String> onSelectPayment;
   final VoidCallback onEdit;
   final VoidCallback onPay;
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Todo listo', style: display(30)),
+        Text('Todo listo', style: boutiqueDisplay(28)),
         const SizedBox(height: 8),
         Text(
           'Revisa tu contacto. Dirección, envío e impuestos finales se '
           'confirman en Shopify.',
-          style: sans(size: 12.5, color: context.monettaColors.contentMuted),
+          style: boutiqueText(size: 13, color: palette.inkMuted),
         ),
-        const SizedBox(height: 30),
+        const SizedBox(height: 28),
         _ReviewBlock(
           title: 'Contacto',
           value: '$email\n$phone',
           onEdit: onEdit,
+          editLabel: 'Cambiar',
         ),
         _ReviewBlock(
-          title: 'Entrega y envío',
-          value: 'Se capturan en Shopify Checkout\n'
-              'Estimado local previo: '
-              '${shipping == 0 ? 'gratis' : kMoney.format(shipping)} '
-              '(no final)',
+          title: 'Dirección de envío',
+          value: 'Se captura en Shopify Checkout\n'
+              'No la pedimos aquí para no duplicarla.',
+        ),
+        _ReviewBlock(
+          title: 'Método de envío',
+          value: 'Envío estándar · 3 a 5 días hábiles\n'
+              'Estimado previo: ${shipping == 0 ? 'gratis' : kMoney.format(shipping)} (no final)',
+        ),
+        _PaymentBlock(
+          methods: paymentMethods,
+          selected: selectedPayment,
+          onSelect: onSelectPayment,
         ),
         const SizedBox(height: 24),
-        FilledButton.icon(
-          onPressed: launching ? null : onPay,
-          icon: launching
-              ? SizedBox(
-                  width: 14,
-                  height: 14,
-                  child: CircularProgressIndicator(
-                    strokeWidth: 1.5,
-                    color: context.monettaColors.canvas,
+        if (launching)
+          Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Semantics(
+              liveRegion: true,
+              label: 'Abriendo checkout seguro',
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2,
+                      color: palette.ink,
+                    ),
                   ),
-                )
-              : const Icon(Icons.lock_outline, size: 16),
-          label: Text(
-            launching ? 'ABRIENDO…' : 'CONTINUAR AL PAGO SEGURO',
+                  const SizedBox(width: 10),
+                  Text(
+                    'Abriendo checkout seguro…',
+                    style: boutiqueText(size: 12, color: palette.inkMuted),
+                  ),
+                ],
+              ),
+            ),
           ),
+        BoutiqueButton(
+          label: 'CONTINUAR AL PAGO SEGURO',
+          onPressed: launching ? null : onPay,
         ),
         const SizedBox(height: 14),
         Text(
           'Shopify procesa el pago. Monetta nunca ve los datos de tu tarjeta.',
-          style: sans(size: 11.5, color: context.monettaColors.contentMuted),
+          style: boutiqueText(size: 12, color: palette.inkMuted),
         ),
       ],
     );
   }
 }
 
+/// Pago Fig.14 sin inventar: solo dibuja radios cuando hay opciones reales
+/// configuradas. Sin config muestra el aviso alojado.
+class _PaymentBlock extends StatelessWidget {
+  const _PaymentBlock({
+    required this.methods,
+    required this.selected,
+    required this.onSelect,
+  });
+
+  final List<String> methods;
+  final String? selected;
+  final ValueChanged<String> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    if (methods.isEmpty) {
+      return Container(
+        key: const ValueKey('payment-hosted-notice'),
+        width: double.infinity,
+        margin: const EdgeInsets.only(top: 4),
+        padding: const EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          color: palette.surface,
+          borderRadius: BoutiqueRadius.card,
+          border: Border.all(color: palette.hairline, width: .5),
+        ),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(Icons.lock_outline, size: 18, color: palette.ink),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Método de pago',
+                    style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
+                  ),
+                  const SizedBox(height: 6),
+                  Text(
+                    'Pago seguro en Shopify',
+                    style: boutiqueText(
+                      size: 13,
+                      weight: FontWeight.w600,
+                      color: palette.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Elige tu método de pago en el checkout alojado. Monetta nunca ve los datos de tu tarjeta y no guarda métodos.',
+                    style: boutiqueText(size: 12, color: palette.inkMuted),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.only(top: 4),
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      decoration: BoxDecoration(
+        border: Border(
+          top: BorderSide(color: palette.hairline, width: 0.5),
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 10),
+            child: Text(
+              'MÉTODO DE PAGO',
+              style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
+            ),
+          ),
+          for (final method in methods)
+            _RealPaymentOption(
+              label: method,
+              selected: (selected ?? methods.first) == method,
+              onTap: () => onSelect(method),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _RealPaymentOption extends StatelessWidget {
+  const _RealPaymentOption({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Semantics(
+      button: true,
+      selected: selected,
+      label: 'Método de pago $label',
+      child: Material(
+        type: MaterialType.transparency,
+        borderRadius: BoutiqueRadius.tile,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BoutiqueRadius.tile,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12),
+            child: Row(
+              children: [
+                Container(
+                  width: 20,
+                  height: 20,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: palette.ink, width: 1.2),
+                  ),
+                  child: selected
+                      ? Center(
+                          child: Container(
+                            width: 10,
+                            height: 10,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: palette.ink,
+                            ),
+                          ),
+                        )
+                      : null,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    label,
+                    style: boutiqueText(size: 13, color: palette.ink),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _ReviewBlock extends StatelessWidget {
-  const _ReviewBlock({required this.title, required this.value, this.onEdit});
+  const _ReviewBlock({
+    required this.title,
+    required this.value,
+    this.onEdit,
+    this.editLabel = 'Editar',
+  });
 
   final String title;
   final String value;
   final VoidCallback? onEdit;
+  final String editLabel;
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 18),
+      padding: const EdgeInsets.symmetric(vertical: 16),
       decoration: BoxDecoration(
         border: Border(
-          top: BorderSide(
-            color: context.monettaColors.divider,
-            width: 0.5,
-          ),
+          top: BorderSide(color: palette.hairline, width: 0.5),
         ),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           SizedBox(
-            width: 92,
-            child: Text(title.toUpperCase(), style: eyebrow(size: 8.5)),
+            width: 108,
+            child: Text(
+              title.toUpperCase(),
+              style: boutiqueEyebrow(size: 9, color: palette.inkMuted),
+            ),
           ),
-          Expanded(child: Text(value, style: sans(size: 12.5))),
-          if (onEdit != null)
-            UnderlineLink(label: 'Editar', onTap: onEdit!, size: 10.5),
+          Expanded(
+            child:
+                Text(value, style: boutiqueText(size: 13, color: palette.ink)),
+          ),
+          if (onEdit != null) _BagTextAction(label: editLabel, onTap: onEdit!),
         ],
       ),
     );
@@ -1308,40 +1794,46 @@ class _CheckoutSummary extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     final shipping = _shippingFor(subtotal);
     return Container(
-      color: context.monettaColors.surfaceMuted,
-      padding: const EdgeInsets.all(22),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: palette.surface,
+        borderRadius: BoutiqueRadius.card,
+        border: Border.all(color: palette.hairline, width: .5),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
               Expanded(
-                child: Text(
-                  'Tu pedido',
-                  style: display(20, weight: FontWeight.w400),
-                ),
+                child:
+                    Text('Tu pedido', style: boutiqueTitle(color: palette.ink)),
               ),
               Text(
                 '${lines.fold(0, (sum, line) => sum + line.quantity)} ART.',
-                style: eyebrow(size: 8.5),
+                style: boutiqueEyebrow(size: 9, color: palette.inkMuted),
               ),
             ],
           ),
-          const SizedBox(height: 18),
+          const SizedBox(height: 16),
           for (final line in lines)
             Padding(
-              padding: const EdgeInsets.only(bottom: 14),
+              padding: const EdgeInsets.only(bottom: 12),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  SizedBox(
-                    width: 58,
-                    height: 70,
-                    child: _ProductImage(url: line.product.primaryImage),
+                  ClipRRect(
+                    borderRadius: BoutiqueRadius.tile,
+                    child: SizedBox(
+                      width: 52,
+                      height: 64,
+                      child: _ProductImage(url: line.product.primaryImage),
+                    ),
                   ),
-                  const SizedBox(width: 12),
+                  const SizedBox(width: 10),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1350,39 +1842,39 @@ class _CheckoutSummary extends StatelessWidget {
                           line.product.title,
                           maxLines: 2,
                           overflow: TextOverflow.ellipsis,
-                          style: sans(size: 11.5, weight: FontWeight.w500),
+                          style: boutiqueText(
+                            size: 12,
+                            weight: FontWeight.w500,
+                            color: palette.ink,
+                          ),
                         ),
                         Text(
                           'Cantidad ${line.quantity}',
-                          style: sans(
-                            size: 10.5,
-                            color: context.monettaColors.contentMuted,
-                          ),
+                          style:
+                              boutiqueText(size: 11, color: palette.inkMuted),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(width: 8),
-                  Text(kMoney.format(line.lineTotal), style: sans(size: 11.5)),
+                  Text(
+                    kMoney.format(line.lineTotal),
+                    style: boutiqueText(size: 12, color: palette.ink),
+                  ),
                 ],
               ),
             ),
-          const Divider(),
-          const SizedBox(height: 16),
-          _SummaryRow(
-            label: 'Subtotal local estimado',
-            value: kMoney.format(subtotal),
-          ),
-          const SizedBox(height: 10),
+          Container(height: .5, color: palette.hairline),
+          const SizedBox(height: 14),
+          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
+          const SizedBox(height: 8),
           _SummaryRow(
             label: 'Envío estimado',
-            value: shipping == 0
-                ? 'Estimado: gratis'
-                : 'Estimado: ${kMoney.format(shipping)}',
+            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 14),
           _SummaryRow(
-            label: 'Estimación local',
+            label: 'Total estimado',
             value: kMoney.format(subtotal + shipping),
             prominent: true,
           ),
@@ -1399,7 +1891,15 @@ class _ProductImage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MonettaImage(url: url, cacheWidth: MediaUrl.thumbWidth);
+    final palette = context.boutique;
+    return ColoredBox(
+      color: palette.surfaceDeep,
+      child: MonettaImage(
+        url: url,
+        cacheWidth: MediaUrl.thumbWidth,
+        fallbackLabel: 'Monetta',
+      ),
+    );
   }
 }
 
@@ -1408,28 +1908,41 @@ class _EmptyBag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.shopping_bag_outlined, size: 34),
+            Container(
+              width: 72,
+              height: 72,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: palette.surfaceDeep,
+                border: Border.all(color: palette.hairline, width: .5),
+              ),
+              child: Icon(
+                Icons.shopping_bag_outlined,
+                size: 30,
+                color: palette.ink,
+              ),
+            ),
             const SizedBox(height: 22),
-            Text('Tu bolsa está vacía', style: display(26)),
+            Text('Tu bolsa está vacía', style: boutiqueDisplay(26)),
             const SizedBox(height: 9),
             Text(
               'Encuentra una pieza que quieras llevar contigo.',
               textAlign: TextAlign.center,
-              style:
-                  sans(size: 12.5, color: context.monettaColors.contentMuted),
+              style: boutiqueText(size: 13, color: palette.inkMuted),
             ),
             const SizedBox(height: 26),
             SizedBox(
               width: 260,
-              child: FilledButton(
+              child: BoutiqueButton(
+                label: 'VOLVER A LA TIENDA',
                 onPressed: () => Navigator.of(context).pop(),
-                child: const Text('VOLVER A LA TIENDA'),
               ),
             ),
           ],

@@ -1,4 +1,7 @@
 #!/usr/bin/env node
+import { ShopifyAuditAdapter } from '../lib/shopifyAdapter.mjs';
+import { operateTestOrder, operateTestProduct } from '../lib/orderOperations.mjs';
+import { withRunLock } from '../lib/runLock.mjs';
 /**
  * Monetta audit fixture CLI — seed/cleanup scaffolding with shop allowlist guards.
  *
@@ -58,6 +61,8 @@ function parseArgs(argv) {
       args.flags.runId = argv[++i];
     } else if (a === '--env' || a === '--environment') {
       args.flags.environment = argv[++i];
+    } else if (['--resource','--action','--fulfillment-order-id','--transaction-id','--amount'].includes(a)) {
+      args.flags[a.slice(2)] = argv[++i];
     } else if (a === '--help' || a === '-h') {
       args.flags.help = true;
     } else if (a.startsWith('-')) {
@@ -202,6 +207,25 @@ async function main() {
   }
   const cmd = args._[0];
   switch (cmd) {
+    case 'operate':
+      if (!args.flags.live) throw new Error('Explicit --live required for test order operations');
+      await withRunLock(args.flags.runId, async () => {
+        const manifest = await readManifest(args.flags.runId);
+        const adapter = new ShopifyAuditAdapter();
+        const identity = await adapter.verify();
+        if (manifest.verified_shop?.id !== identity.id) throw new Error('Run shop mismatch');
+        const resource = manifest.resources.find(r => r.id === args.flags.resource);
+        if (!resource) throw new Error('Resource must be in this run manifest');
+        const result = adapter.kind(resource) === 'product'
+          ? await operateTestProduct(adapter,resource,args.flags.action)
+          : await operateTestOrder(adapter, resource, args.flags.action, {
+          fulfillmentOrderId: args.flags['fulfillment-order-id'], transactionId: args.flags['transaction-id'], amount: args.flags.amount,
+        });
+        resource.meta.operations = [...(resource.meta.operations ?? []), {action:args.flags.action,result,at:new Date().toISOString()}];
+        await writeManifest(args.flags.runId,manifest);
+        print({runId:args.flags.runId, resource:resource.id, action:args.flags.action, status:'submitted', note:'Confirm asynchronous job/final Shopify state before journey PASS'});
+      });
+      break;
     case 'init':
       await cmdInit(args.flags);
       break;

@@ -1,3 +1,5 @@
+import { withRunLock } from './runLock.mjs';
+import { ShopifyAuditAdapter } from './shopifyAdapter.mjs';
 import { readManifest, writeManifest, upsertResource, manifestExists } from './manifest.mjs';
 import { assertValidRunId } from './runId.mjs';
 import { assertRemoteWriteAllowed, loadGuardConfig } from './guards.mjs';
@@ -6,7 +8,7 @@ import { assertRemoteWriteAllowed, loadGuardConfig } from './guards.mjs';
  * Cleanup acts ONLY on resources listed in the run manifest.
  * Never unqualified delete-all against a shared DB or Shopify store.
  */
-export async function cleanupRun({ runId, forceLive = false }) {
+async function cleanupRunUnlocked({ runId, forceLive = false }) {
   assertValidRunId(runId);
 
   if (!(await manifestExists(runId))) {
@@ -47,51 +49,30 @@ export async function cleanupRun({ runId, forceLive = false }) {
     return { runId, manifestPath: path, cleaned: 0, skipped: 0, mode: 'empty' };
   }
 
+  const adapter = liveWrite ? new ShopifyAuditAdapter() : null;
+  if (adapter) {
+    const identity = await adapter.verify();
+    if (manifest.verified_shop?.id !== identity.id) throw new Error('Cleanup shop does not match verified run');
+  }
   let cleaned = 0;
   let skipped = 0;
-
-  for (const resource of manifest.resources) {
-    // Manifest-only policy: never invent targets. Only listed IDs.
-    if (!resource.remote_id && !resource.local_id) {
-      upsertResource(manifest, {
-        ...resource,
-        status: liveWrite ? 'cleaned' : 'planned',
-        meta: {
-          ...resource.meta,
-          cleanup_mode: liveWrite ? 'live-adapter-pending-no-remote-id' : 'dry-run',
-          cleanup_note: 'No remote_id/local_id recorded; nothing remote to delete.',
-        },
-      });
-      skipped += 1;
-      continue;
-    }
-
-    // Live adapters not yet wired — refuse silent remote deletes even with IDs
-    // until adapters exist. Record intent only.
-    upsertResource(manifest, {
-      ...resource,
-      status: liveWrite ? 'skipped' : resource.status,
-      meta: {
-        ...resource.meta,
-        cleanup_mode: liveWrite ? 'live-adapter-pending' : 'dry-run',
-        cleanup_note:
-          'Adapter pending: would delete ONLY this manifest-listed resource, never delete-all.',
-      },
-    });
-    cleaned += liveWrite ? 0 : 0;
-    skipped += 1;
+  // Orders first, then products/collections, then customer records.
+  const resources = [...manifest.resources].sort((a,b) => (a.kind === 'order' ? -1 : 0) - (b.kind === 'order' ? -1 : 0));
+  for (const resource of resources) {
+    if (!adapter || resource.status !== 'created' || !resource.remote_id) { skipped++; continue; }
+    if (await adapter.remove(resource)) {
+      upsertResource(manifest, {...resource, status: 'cleaned'});
+      await writeManifest(runId, manifest);
+      cleaned++;
+    } else { skipped++; }
   }
-
-  const anyRemote = manifest.resources.some((r) => r.remote_id || r.local_id);
   manifest.cleanup_status = liveWrite
-    ? anyRemote
-      ? 'partial'
-      : 'cleaned'
+    ? manifest.resources.some(r => r.status === 'created') ? 'partial' : 'cleaned'
     : 'dry-run-only';
   manifest.notes = manifest.notes || [];
   manifest.notes.push({
     at: new Date().toISOString(),
-    event: liveWrite ? 'cleanup-live-stub' : 'cleanup-dry-run',
+    event: liveWrite ? 'cleanup-live' : 'cleanup-dry-run',
     writeDecision,
     policy: 'manifest-only',
   });
@@ -103,7 +84,11 @@ export async function cleanupRun({ runId, forceLive = false }) {
     cleaned,
     skipped,
     resourceCount: manifest.resources.length,
-    mode: liveWrite ? 'live-adapter-pending' : 'dry-run',
+    mode: liveWrite ? 'live' : 'dry-run',
     writeDecision,
   };
+}
+
+export async function cleanupRun(args) {
+  return withRunLock(args.runId, () => cleanupRunUnlocked(args));
 }

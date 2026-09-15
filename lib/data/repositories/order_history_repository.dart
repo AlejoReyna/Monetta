@@ -51,6 +51,7 @@ class OrderHistoryRepository {
                 : null),
         _customerOrders = customerOrders;
 
+  final Map<String, int> _refreshGenerations = {};
   final OrderSummaryStore store;
   final OrderHistoryClient? _mirrorClient;
   final CustomerOrdersService? _customerOrders;
@@ -77,6 +78,8 @@ class OrderHistoryRepository {
     String? customerAccountAccessToken,
     String? backendAccessToken,
   }) async {
+    final generation = (_refreshGenerations[accountId] ?? 0) + 1;
+    _refreshGenerations[accountId] = generation;
     final cached = await store.allForAccount(accountId);
 
     final tryCaa = _customerOrders != null &&
@@ -118,6 +121,14 @@ class OrderHistoryRepository {
       } catch (_) {
         mirrorFailed = true;
       }
+    }
+
+    if (_refreshGenerations[accountId] != generation) {
+      final latest = await store.allForAccount(accountId);
+      return OrderHistoryView(
+        orders: latest,
+        status: OrderHistoryStatus.staleCache,
+      );
     }
 
     if (tryCaa) {
@@ -186,14 +197,32 @@ class OrderHistoryRepository {
     required List<CustomerAccountOrder> caaOrders,
     required List<MirroredOrder> apartados,
   }) {
-    final rows = <OrderSummariesCompanion>[
-      for (final order in caaOrders)
+    String? canonical(String? id) {
+      if (id == null || id.isEmpty) return null;
+      if (id.startsWith('gid://shopify/Order/')) return id;
+      return RegExp(r'^\d+$').hasMatch(id) ? 'gid://shopify/Order/$id' : null;
+    }
+
+    final mirrorById = {
+      for (final order in apartados)
+        if (canonical(order.shopifyOrderId) != null)
+          canonical(order.shopifyOrderId)!: order,
+    };
+    final seen = <String>{};
+    final rows = <OrderSummariesCompanion>[];
+    for (final order in caaOrders) {
+      final id = canonical(order.id) ?? order.id;
+      if (!seen.add(id)) continue;
+      final mirror = mirrorById[id];
+      rows.add(
         OrderSummariesCompanion.insert(
-          id: order.id,
+          id: id,
           accountId: accountId,
-          shopifyOrderId: Value(order.number.toString()),
-          source: 'shopify_checkout',
-          attributionCode: const Value(null),
+          shopifyOrderId: Value(id),
+          displayNumber: Value(order.name),
+          fulfillmentStatus: Value(order.fulfillmentStatus?.toLowerCase()),
+          source: mirror?.source ?? 'shopify_checkout',
+          attributionCode: Value(mirror?.attributionCode),
           status:
               (order.financialStatus ?? order.fulfillmentStatus ?? 'unknown')
                   .toLowerCase(),
@@ -201,15 +230,20 @@ class OrderHistoryRepository {
           currencyCode: order.currencyCode,
           placedAt: order.processedAt,
         ),
-    ];
+      );
+    }
     for (final order in apartados) {
+      final canonicalId = canonical(order.shopifyOrderId);
+      final id = canonicalId ?? 'apartado:${order.id}';
+      if (!seen.add(id)) continue;
       rows.add(
         OrderSummariesCompanion.insert(
-          id: 'apartado:${order.id}',
+          id: id,
           accountId: accountId,
-          shopifyOrderId: Value(order.shopifyOrderId),
+          shopifyOrderId: Value(canonicalId),
           source: order.source,
           attributionCode: Value(order.attributionCode),
+          fulfillmentStatus: Value(order.fulfillmentStatus),
           status: order.financialStatus ?? 'unknown',
           totalAmount: order.totalAmount ?? 0,
           currencyCode: order.currencyCode ?? 'MXN',

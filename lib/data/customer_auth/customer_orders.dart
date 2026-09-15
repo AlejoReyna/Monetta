@@ -70,9 +70,10 @@ class HttpCustomerOrdersService implements CustomerOrdersService {
   Future<Uri>? _discoveryInFlight;
 
   static const String ordersQuery = r'''
-query MonettaCustomerOrders($first: Int!) {
+query MonettaCustomerOrders($first: Int!, $after: String) {
   customer {
-    orders(first: $first, sortKey: PROCESSED_AT, reverse: true) {
+    orders(first: $first, after: $after, sortKey: PROCESSED_AT, reverse: true) {
+      pageInfo { hasNextPage endCursor }
       nodes {
         id
         name
@@ -95,55 +96,92 @@ query MonettaCustomerOrders($first: Int!) {
     int first = 25,
   }) async {
     final endpoint = await _resolveGraphQlEndpoint();
-    final http.Response response;
-    try {
-      response = await _client
-          .post(
-            endpoint,
-            headers: {
-              'Content-Type': 'application/json',
-              'Accept': 'application/json',
-              // Raw token — same Customer Account API rule as identity.
-              'Authorization': accessToken,
-            },
-            body: jsonEncode({
-              'query': ordersQuery,
-              'variables': {'first': first},
-            }),
-          )
-          .timeout(timeout);
-    } on TimeoutException {
-      throw const CustomerAuthException(
-        CustomerAuthErrorKind.offline,
-        debugDetail: 'customer orders request timed out',
-      );
-    } catch (error) {
-      throw CustomerAuthException(
-        CustomerAuthErrorKind.offline,
-        debugDetail: 'customer orders transport failure: ${error.runtimeType}',
-      );
-    }
+    final all = <String, CustomerAccountOrder>{};
+    final seen = <String>{};
+    String? after;
+    while (true) {
+      final http.Response response;
+      try {
+        response = await _client
+            .post(
+              endpoint,
+              headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json',
+                // Raw token — same Customer Account API rule as identity.
+                'Authorization': accessToken,
+              },
+              body: jsonEncode({
+                'query': ordersQuery,
+                'variables': {
+                  'first': first,
+                  if (after != null) 'after': after,
+                },
+              }),
+            )
+            .timeout(timeout);
+      } on TimeoutException {
+        throw const CustomerAuthException(
+          CustomerAuthErrorKind.offline,
+          debugDetail: 'customer orders request timed out',
+        );
+      } catch (error) {
+        throw CustomerAuthException(
+          CustomerAuthErrorKind.offline,
+          debugDetail:
+              'customer orders transport failure: ${error.runtimeType}',
+        );
+      }
 
-    if (response.statusCode == 401 || response.statusCode == 403) {
-      throw const CustomerAuthException(
-        CustomerAuthErrorKind.sessionExpired,
-        debugDetail: 'customer orders rejected the access token',
-      );
-    }
-    if (response.statusCode < 200 || response.statusCode >= 300) {
-      throw CustomerAuthException(
-        CustomerAuthErrorKind.server,
-        debugDetail: 'customer orders HTTP ${response.statusCode}',
-      );
-    }
-    if (response.bodyBytes.length > kMaxCustomerApiResponseBytes) {
-      throw const CustomerAuthException(
-        CustomerAuthErrorKind.server,
-        debugDetail: 'customer orders response exceeded size limit',
-      );
-    }
+      if (response.statusCode == 401 || response.statusCode == 403) {
+        throw const CustomerAuthException(
+          CustomerAuthErrorKind.sessionExpired,
+          debugDetail: 'customer orders rejected the access token',
+        );
+      }
+      if (response.statusCode < 200 || response.statusCode >= 300) {
+        throw CustomerAuthException(
+          CustomerAuthErrorKind.server,
+          debugDetail: 'customer orders HTTP ${response.statusCode}',
+        );
+      }
+      if (response.bodyBytes.length > kMaxCustomerApiResponseBytes) {
+        throw const CustomerAuthException(
+          CustomerAuthErrorKind.server,
+          debugDetail: 'customer orders response exceeded size limit',
+        );
+      }
 
-    return parseOrders(response.bodyBytes);
+      final page = parseOrders(response.bodyBytes);
+      final decoded = jsonDecode(utf8.decode(response.bodyBytes)) as Map;
+      final data = decoded['data'] as Map;
+      final customer = data['customer'] as Map;
+      final connection = customer['orders'] as Map;
+      final info = connection['pageInfo'];
+      if (info is! Map ||
+          info['hasNextPage'] is! bool ||
+          (info['endCursor'] != null && info['endCursor'] is! String)) {
+        throw const CustomerAuthException(
+          CustomerAuthErrorKind.server,
+          debugDetail: 'Invalid order pagination metadata',
+        );
+      }
+      for (final order in page) {
+        all[order.id] = order;
+      }
+      if (info['hasNextPage'] == false) return all.values.toList();
+      final next = info['endCursor'];
+      if (next is! String ||
+          next.isEmpty ||
+          !seen.add(next) ||
+          seen.length >= 1000) {
+        throw const CustomerAuthException(
+          CustomerAuthErrorKind.server,
+          debugDetail: 'Incomplete order pagination',
+        );
+      }
+      after = next;
+    }
   }
 
   Future<Uri> _resolveGraphQlEndpoint() {
@@ -314,6 +352,12 @@ query MonettaCustomerOrders($first: Int!) {
           totalAmount: amount,
           currencyCode: currency,
         ),
+      );
+    }
+    if (parsed.length != nodes.length) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'Malformed order row; refusing partial history',
       );
     }
     return parsed;

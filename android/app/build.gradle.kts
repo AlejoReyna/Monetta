@@ -21,6 +21,9 @@ val hasReleaseSigning = listOf(
 
 android {
     namespace = "mx.monetta.monetta_app"
+    buildFeatures {
+        resValues = true
+    }
     // Checkout Sheet Kit 3.6.1 requires compileSdk 35+ and minSdk 23.
     // Existing AndroidX/plugins in this app require compileSdk 36+.
     compileSdk = 36

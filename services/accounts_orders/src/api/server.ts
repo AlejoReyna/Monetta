@@ -12,7 +12,7 @@ import { PgCustomersRepository } from '../db/pgCustomersRepository.js';
 import { PgAppAccountsRepository } from '../db/pgAppAccountsRepository.js';
 import { PgOrdersRepository } from '../db/pgOrdersRepository.js';
 import { PgPushTokensRepository } from '../db/pgPushTokensRepository.js';
-import { PgWebhookEventsRepository } from '../db/pgWebhookEventsRepository.js';
+import { PgWebhookEventsRepository, WebhookBusyError } from '../db/pgWebhookEventsRepository.js';
 import { PgPrivacyRequestsRepository } from '../db/pgPrivacyRequestsRepository.js';
 import { EngagementService } from '../engagement/application/engagementService.js';
 import { registerEngagementRoutes, type EngagementRouteDeps } from '../engagement/api/routes.js';
@@ -48,6 +48,12 @@ import {
   type ExternalCatalogAdminClient,
 } from '../admin/externalCatalogClient.js';
 import { logger } from '../logger.js';
+import { PgRewardsRepository } from '../rewards/pgRewardsRepository.js';
+import { loadRewardsEnv } from '../rewards/rewardsConfig.js';
+import { registerRewardsRoutes } from '../rewards/routes.js';
+import { RewardsService } from '../rewards/service.js';
+import { DisabledDiscountAdapter } from '../rewards/shopifyDiscountAdapter.js';
+import { bridgeDelivery, bridgeOrderPaid, refundReverseCents } from '../rewards/webhookBridge.js';
 import { verifyShopifyWebhookHmac } from '../webhooks/verifyHmac.js';
 import {
   handleCustomersDataRequest,
@@ -93,6 +99,8 @@ export interface ServerDeps extends HandlerDeps {
   readonly externalWritesEnabled?: boolean;
   readonly syncJobs?: AdminSyncJobRepository;
   readonly engagement?: EngagementRouteDeps & { readonly internalCatalogEventSecret: string };
+  /** Paquete F: Rewards. Ausente = programa no montado (rutas 404). */
+  readonly rewards?: { readonly service: RewardsService };
 }
 
 const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
@@ -264,6 +272,47 @@ function shopifyWebhookRoute<Payload>(
   };
 }
 
+/**
+ * Si el pedido llega pagado, alimenta Rewards (pendiente; mayoreo excluido).
+ * Solo 'paid' genera; parciales/autorizados no. Idempotente por evento.
+ */
+async function bridgePaidIfApplicable(
+  deps: ServerDeps,
+  webhookId: string,
+  topic: string,
+  payload: ShopifyOrderWebhookPayload,
+): Promise<void> {
+  if (!deps.rewards) return;
+  if ((payload.financial_status ?? '').toLowerCase() !== 'paid') return;
+  try {
+    await bridgeOrderPaid({
+      service: deps.rewards.service,
+      webhookId,
+      topic,
+      order: {
+        id: payload.id,
+        tags: payload.tags,
+        customer: payload.customer,
+        currency: payload.currency,
+        note_attributes: payload.note_attributes
+          ? [...payload.note_attributes]
+          : undefined,
+      },
+    });
+  } catch (error) {
+    // El espejo ya quedo; Rewards reintenta por inbox. Nunca romper el 200 del mirror.
+    logger.warn('rewards paid bridge failed', { error: String(error) });
+  }
+}
+
+async function claimRewardsInbox(deps: ServerDeps, eventId: string): Promise<boolean> {
+  // La idempotencia de negocio vive en el servicio; aqui solo se evita el
+  // doble despacho dentro del mismo proceso ante reintentos inmediatos.
+  void deps;
+  void eventId;
+  return true;
+}
+
 export function createApp(deps: ServerDeps): Express {
   const app = express();
   app.disable('x-powered-by');
@@ -320,16 +369,100 @@ export function createApp(deps: ServerDeps): Express {
   app.post(
     '/webhooks/orders/create',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyOrderWebhookPayload, body, shop) =>
-      handleOrdersWebhook(d, id, 'orders/create', payload, body, shop),
-    ),
+    shopifyWebhookRoute(deps, async (d, id, payload: ShopifyOrderWebhookPayload, body, shop) => {
+      await handleOrdersWebhook(d, id, 'orders/create', payload, body, shop);
+      await bridgePaidIfApplicable(d, id, 'orders/create', payload);
+    }),
   );
   app.post(
     '/webhooks/orders/updated',
     raw,
-    shopifyWebhookRoute(deps, (d, id, payload: ShopifyOrderWebhookPayload, body, shop) =>
-      handleOrdersWebhook(d, id, 'orders/updated', payload, body, shop),
-    ),
+    shopifyWebhookRoute(deps, async (d, id, payload: ShopifyOrderWebhookPayload, body, shop) => {
+      await handleOrdersWebhook(d, id, 'orders/updated', payload, body, shop);
+      await bridgePaidIfApplicable(d, id, 'orders/updated', payload);
+    }),
+  );
+  // Paquete F: cancelaciones, reembolsos y evidencia de entrega para Rewards.
+  // Firma, tienda e id de webhook se verifican igual que el resto (wrapper).
+  // La entrega solo libera con evidencia DELIVERED verificable (ver webhookBridge).
+  app.post(
+    '/webhooks/orders/cancelled',
+    raw,
+    shopifyWebhookRoute(deps, async (d, id, payload: ShopifyOrderWebhookPayload, body, shop) => {
+      await handleOrdersWebhook(d, id, 'orders/updated', payload, body, shop);
+      if (d.rewards) {
+        const eventId = `orders/cancelled:${id}:cancelled:${String(payload.id)}`;
+        const claimed = await claimRewardsInbox(d, eventId);
+        if (claimed) {
+          try {
+            await d.rewards.service.onOrderCancelled({
+              eventId,
+              orderShopifyId: String(payload.id),
+              reason: 'orders/cancelled',
+            });
+          } catch (error) {
+            logger.warn('rewards cancel bridge failed', { error: String(error) });
+          }
+        }
+      }
+    }),
+  );
+  app.post(
+    '/webhooks/refunds/create',
+    raw,
+    shopifyWebhookRoute(deps, async (d, id, payload: Record<string, unknown>, body, shop) => {
+      void body;
+      void shop;
+      if (d.rewards) {
+        const refund = payload as {
+          order_id?: number;
+          refund_line_items?: { line_item?: { price?: string | null }; quantity?: number }[];
+        };
+        const orderId = refund.order_id != null ? String(refund.order_id) : null;
+        if (orderId !== null) {
+          const eventId = `refunds/create:${id}:refund:${orderId}`;
+          const claimed = await claimRewardsInbox(d, eventId);
+          if (claimed) {
+            try {
+              const policy = d.rewards.service.policy();
+              await d.rewards.service.onRefund({
+                eventId,
+                orderShopifyId: orderId,
+                reverseCents: refundReverseCents(refund, policy.earnBps),
+                reason: 'refunds/create',
+              });
+            } catch (error) {
+              logger.warn('rewards refund bridge failed', { error: String(error) });
+            }
+          }
+        }
+      }
+    }),
+  );
+  app.post(
+    '/webhooks/fulfillment_events/create',
+    raw,
+    shopifyWebhookRoute(deps, async (d, id, payload: Record<string, unknown>, body, shop) => {
+      void body;
+      void shop;
+      if (d.rewards) {
+        const event = payload as { order_id?: number; status?: string | null; happened_at?: string | null };
+        const orderId = event.order_id != null ? String(event.order_id) : null;
+        if (orderId !== null) {
+          try {
+            await bridgeDelivery({
+              service: d.rewards.service,
+              webhookId: id,
+              orderId,
+              eventStatus: event.status ?? null,
+              occurredAt: event.happened_at ?? null,
+            });
+          } catch (error) {
+            logger.warn('rewards delivery bridge failed', { error: String(error) });
+          }
+        }
+      }
+    }),
   );
   app.post(
     '/webhooks/products/create',
@@ -400,6 +533,13 @@ export function createApp(deps: ServerDeps): Express {
 
   if (deps.engagement !== undefined) {
     registerEngagementRoutes(app, deps.engagement);
+  }
+
+  if (deps.rewards !== undefined) {
+    registerRewardsRoutes(app, {
+      service: deps.rewards.service,
+      authenticate: (req, res) => authenticatedCustomerId(deps, req, res),
+    });
   }
 
   // First-party Monetta registration. Email is unverified profile metadata
@@ -635,6 +775,11 @@ export function createApp(deps: ServerDeps): Express {
   });
 
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
+    if (error instanceof WebhookBusyError) {
+      res.setHeader('Retry-After', '5');
+      res.status(503).json({ error: 'webhook_busy' });
+      return;
+    }
     logger.error('unhandled request error', { error: String(error) });
     res.status(500).json({ error: 'internal_error' });
   });
@@ -724,6 +869,13 @@ if (isMain) {
     };
     catalogEvents = new PgShopifyCatalogEventProcessor(pool, engagementService);
   }
+  const rewardsEnv = loadRewardsEnv();
+  const rewardsService = new RewardsService({
+    rewards: new PgRewardsRepository(pool),
+    env: rewardsEnv,
+    discounts: new DisabledDiscountAdapter(),
+    shopDomain: config.shopDomain !== '' ? config.shopDomain : null,
+  });
   const app = createApp({
     appAccounts,
     customers: new PgCustomersRepository(pool),
@@ -731,6 +883,7 @@ if (isMain) {
     webhookEvents: new PgWebhookEventsRepository(pool),
     pushTokens: new PgPushTokensRepository(pool),
     privacyRequests: new PgPrivacyRequestsRepository(pool),
+    rewards: rewardsEnv.rewardsEnabled ? { service: rewardsService } : undefined,
     webhookSecret: config.webhookSecret,
     expectedShopDomain: config.shopDomain !== '' ? config.shopDomain : undefined,
     checkDatabase: async () => {

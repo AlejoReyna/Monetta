@@ -78,7 +78,7 @@ async function withClaimedDelivery(
     shopDomain: args.shopDomain ?? null,
   });
   if (!claimed) {
-    logger.info('duplicate or in-progress webhook delivery ignored', {
+    logger.info('completed webhook delivery ignored', {
       webhookId: args.webhookId,
       topic: args.topic,
     });

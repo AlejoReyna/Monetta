@@ -78,6 +78,64 @@ void main() {
   tearDown(() => db.close());
 
   group('OrderHistoryRepository', () {
+    test(
+        'R7 canonical identity enriches once; CAA state and display stay authoritative',
+        () async {
+      final mirror = _FakeMirror([
+        const MirroredOrder(
+          id: 9,
+          shopifyOrderId: '1',
+          source: 'whatsapp_apartado',
+          attributionCode: 'MN-7K3Q',
+          financialStatus: 'pending',
+          fulfillmentStatus: null,
+          totalAmount: 400,
+          currencyCode: 'MXN',
+          placedAt: null,
+        ),
+      ]);
+      final repo = OrderHistoryRepository(
+        store: OrderSummaryStore(db),
+        config: AccountsOrdersConfig.disabled,
+        customerOrders: _FakeCaa([_caa(number: 1001)]),
+        mirrorClient: mirror,
+      );
+      final result = await repo.refresh(
+        accountId: 'acct-1',
+        customerAccountAccessToken: 'caa',
+        backendAccessToken: 'mirror',
+      );
+      expect(result.orders, hasLength(1));
+      final order = result.orders.single;
+      expect(order.shopifyOrderId, 'gid://shopify/Order/1');
+      expect(order.displayNumber, '#1001');
+      expect(order.source, 'whatsapp_apartado');
+      expect(order.attributionCode, 'MN-7K3Q');
+      expect(order.status, 'paid');
+      expect(order.totalAmount, 1749);
+      mirror.shouldThrow = true;
+      final offlineMirror = await repo.refresh(
+        accountId: 'acct-1',
+        customerAccountAccessToken: 'caa',
+        backendAccessToken: 'mirror',
+      );
+      expect(offlineMirror.orders, hasLength(1));
+      expect(offlineMirror.orders.single.shopifyOrderId, order.shopifyOrderId);
+      await db.into(db.accounts).insert(
+            AccountsCompanion.insert(
+              localAccountId: 'acct-2',
+              createdAt: DateTime.now(),
+              lastSeenAt: DateTime.now(),
+            ),
+          );
+      await repo.refresh(
+        accountId: 'acct-2',
+        customerAccountAccessToken: 'caa',
+      );
+      expect(await repo.loadCached('acct-1'), hasLength(1));
+      expect(await repo.loadCached('acct-2'), hasLength(1));
+    });
+
     test('unavailable when neither CAA nor mirror can run', () async {
       final repo = OrderHistoryRepository(
         store: OrderSummaryStore(db),

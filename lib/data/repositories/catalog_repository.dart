@@ -87,7 +87,14 @@ class CatalogRepository {
   /// write it in, so [loadCached] never returns nothing. A cache that
   /// already has rows is left untouched — this is a seed, not a reset.
   Future<void> seedFromAssetIfEmpty(Map<String, dynamic> catalogJson) async {
+    await prepareConfiguredShop();
     if (!await cache.isEmpty()) return;
+    final metadata = await cache.metadata();
+    final cursor = await cursorStore.load();
+    if (metadata?.source == CatalogCacheSource.shopify ||
+        cursor.lastFullSyncAt != null) {
+      return;
+    }
     final products = (catalogJson['products'] as List<dynamic>)
         .map((e) => productFromCatalogSnapshot(e as Map<String, dynamic>))
         .toList();
@@ -216,8 +223,10 @@ class CatalogRepository {
           status: CatalogCacheStatus.healthy,
           shopDomain: shop,
         );
-        await cache.replaceProducts(result.products, metadata: metadata);
-        await cursorStore.save(result.cursor);
+        await cache.transaction(() async {
+          await cache.replaceProducts(result.products, metadata: metadata);
+          await cursorStore.save(result.cursor);
+        });
         return CatalogSyncResult(
           outcome: result.hasChanges || metadata.productCount == 0
               ? CatalogSyncOutcome.updated
@@ -267,6 +276,10 @@ class CatalogRepository {
     }
   }
 
+  Future<void> prepareConfiguredShop() async {
+    await _cursorForConfiguredShop();
+  }
+
   /// Rejects a cursor/catalog belonging to another shop before syncing.
   Future<shopify.SyncCursor> _cursorForConfiguredShop() async {
     final configured = shopDomain;
@@ -276,18 +289,22 @@ class CatalogRepository {
     final metadata = await cache.metadata();
     final cursorShop = cursor.shopDomain;
     final metaShop = metadata?.shopDomain;
-    final mismatch = (cursorShop != null && cursorShop != configured) ||
-        (metaShop != null && metaShop != configured);
+    final mismatch = cursorShop != configured || metaShop != configured;
 
     if (!mismatch) {
-      if (cursor.shopDomain == null) {
-        return cursor.withShop(configured);
-      }
       return cursor;
     }
 
-    await cache.clearCatalog();
-    await cursorStore.clear();
+    // A genuinely fresh install may use the bundled offline preview. Any
+    // persisted commerce/session state without provenance requires migration.
+    if (metadata == null &&
+        cursor.lastUpdatedAt == null &&
+        cursor.lastFullSyncAt == null &&
+        await cache.isEmpty() &&
+        !await cache.hasShopSpecificState()) {
+      return shopify.SyncCursor(shopDomain: configured);
+    }
+    await cache.resetShopState(configured);
     await _bagStore?.clearAllScopes();
     await _wishlistStore?.clearAllScopes();
     return shopify.SyncCursor(shopDomain: configured);

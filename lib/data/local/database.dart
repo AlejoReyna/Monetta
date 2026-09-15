@@ -36,6 +36,7 @@ part 'database.g.dart';
     Accounts,
     Sessions,
     OrderSummaries,
+    CheckoutReceipts,
   ],
 )
 class AppDatabase extends _$AppDatabase {
@@ -47,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -76,6 +77,19 @@ class AppDatabase extends _$AppDatabase {
             }
           }
           if (from < 6) await _migrateShopScopeAndBagVariantKeys();
+          if (from < 7) {
+            await migrator.createTable(checkoutReceipts);
+            // History is a remote cache. Rebuild its key without reinterpreting
+            // the old display-number-as-ID values as canonical identities.
+            await customStatement(
+              'ALTER TABLE order_summaries RENAME TO order_summaries_v6',
+            );
+            await migrator.createTable(orderSummaries);
+            await customStatement(
+              'INSERT INTO order_summaries (id, account_id, shopify_order_id, display_number, source, attribution_code, status, total_amount, currency_code, placed_at) SELECT id, account_id, CASE WHEN id LIKE \'gid://shopify/Order/%\' THEN id ELSE shopify_order_id END, CASE WHEN id LIKE \'gid://shopify/Order/%\' THEN shopify_order_id ELSE NULL END, source, attribution_code, status, total_amount, currency_code, placed_at FROM order_summaries_v6',
+            );
+            await customStatement('DROP TABLE order_summaries_v6');
+          }
         },
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),
       );

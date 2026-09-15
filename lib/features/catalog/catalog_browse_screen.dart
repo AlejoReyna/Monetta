@@ -8,8 +8,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../../app/card_lift.dart';
-import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
@@ -17,11 +15,14 @@ import '../../domain/catalog_item.dart';
 import '../../main.dart';
 import '../../reco/external_facets.dart';
 import '../account/account_screen.dart';
+import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
 import '../product/product_screen.dart';
+import 'catalog_controls.dart';
 import 'extracted_badge.dart';
+import 'product_tile.dart';
 import 'search_screen.dart';
 
 enum _CatalogSort { featured, newest, priceAsc, priceDesc }
@@ -196,13 +197,6 @@ class CatalogBrowseScreen extends StatefulWidget {
 }
 
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
-  static const _gridDelegate = SliverGridDelegateWithFixedCrossAxisCount(
-    crossAxisCount: 2,
-    childAspectRatio: 0.50,
-    crossAxisSpacing: 4,
-    mainAxisSpacing: 26,
-  );
-
   _CatalogFilters _filters = const _CatalogFilters();
   String? _activeCategory;
 
@@ -245,7 +239,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     });
   }
 
-  Future<void> _openFilters() async {
+  Future<void> _openFilters([_FilterSection? section]) async {
     FocusManager.instance.primaryFocus?.unfocus();
     final result = await showModalBottomSheet<_CatalogFilters>(
       context: context,
@@ -255,9 +249,11 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       builder: (sheetContext) => _CatalogFilterSheet(
         items: widget.items,
         initial: _filters,
+        initialSection: section ?? _FilterSection.sort,
         visibleCount: (draft) => _visibleItems(draft).length,
       ),
     );
+    // Dismissing the sheet keeps the filters that were already applied.
     if (result != null && mounted) setState(() => _filters = result);
   }
 
@@ -286,7 +282,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             children: [
               Text(
                 title,
-                style: sans(
+                style: boutiqueText(
                   size: 13,
                   weight: isSelected ? FontWeight.w600 : FontWeight.w400,
                   color: labelColor,
@@ -336,19 +332,35 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     final visibleItems = _visibleItems();
 
     return Scaffold(
-      extendBody: true,
-      backgroundColor: context.monettaColors.surface,
+      // Never `extendBody`: the last row of products must not sit under the
+      // navigation bar, and this screen has no floating bar competing with it.
+      extendBody: false,
+      backgroundColor: context.boutique.canvas,
       appBar: AppBar(
-        toolbarHeight: 68,
-        backgroundColor: context.monettaColors.surface,
-        foregroundColor: context.monettaColors.contentPrimary,
+        toolbarHeight: 76,
+        backgroundColor: context.boutique.canvas,
+        foregroundColor: context.boutique.ink,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: true,
-        title: Text(
-          'Productos',
-          style: display(20, weight: FontWeight.w600, height: 1.1),
+        centerTitle: false,
+        titleSpacing: BoutiqueSpace.gutter,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              'Productos',
+              style: boutiqueDisplay(24, color: context.boutique.ink),
+            ),
+            const SizedBox(height: 2),
+            // Counted from the very list the grid renders below.
+            CatalogResultCount(
+              count: visibleItems.length,
+              noun: 'pieza',
+              pluralNoun: 'piezas',
+            ),
+          ],
         ),
         actions: [
           IconButton(
@@ -367,7 +379,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
           preferredSize: const Size.fromHeight(60),
           child: Container(
             key: const Key('catalog-category-rail'),
-            color: context.monettaColors.surface,
+            color: context.boutique.canvas,
             height: 60,
             child: ListView(
               scrollDirection: Axis.horizontal,
@@ -416,6 +428,13 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
+              SliverToBoxAdapter(
+                child: _QuickFilterRail(
+                  items: widget.items,
+                  filters: _filters,
+                  onOpen: _openFilters,
+                ),
+              ),
               if (visibleItems.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -426,9 +445,18 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(4, 10, 4, 44),
+                  padding: const EdgeInsets.fromLTRB(
+                    BoutiqueSpace.gutter,
+                    BoutiqueSpace.lg,
+                    BoutiqueSpace.gutter,
+                    BoutiqueSpace.xxl,
+                  ),
                   sliver: SliverGrid(
-                    gridDelegate: _gridDelegate,
+                    gridDelegate: productGridDelegate(
+                      context,
+                      availableWidth: MediaQuery.sizeOf(context).width -
+                          BoutiqueSpace.gutter * 2,
+                    ),
                     delegate: SliverChildBuilderDelegate(
                       (context, index) => _BrowseTile(
                         key: ValueKey(visibleItems[index].sourceScopedId),
@@ -523,7 +551,7 @@ class _FilterIconButton extends StatelessWidget {
                 ),
                 child: Text(
                   '$activeCount',
-                  style: sans(
+                  style: boutiqueText(
                     size: 9,
                     color: context.monettaColors.canvas,
                     weight: FontWeight.w700,
@@ -543,10 +571,14 @@ class _CatalogFilterSheet extends StatefulWidget {
     required this.items,
     required this.initial,
     required this.visibleCount,
+    this.initialSection = _FilterSection.sort,
   });
 
   final List<CatalogItem> items;
   final _CatalogFilters initial;
+
+  /// The section a quick-filter chip asked for, already open.
+  final _FilterSection initialSection;
   final int Function(_CatalogFilters filters) visibleCount;
 
   @override
@@ -561,7 +593,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   late Set<String> _colors;
   late bool _inStockOnly;
 
-  final Set<_FilterSection> _expanded = {_FilterSection.sort};
+  late final Set<_FilterSection> _expanded = {widget.initialSection};
 
   @override
   void initState() {
@@ -658,7 +690,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
     return FractionallySizedBox(
       heightFactor: 0.94,
       child: Material(
-        color: context.monettaColors.surfaceRaised,
+        color: context.boutique.canvas,
         clipBehavior: Clip.antiAlias,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
         child: SafeArea(
@@ -673,7 +705,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                   children: [
                     Text(
                       'Filtrar y ordenar',
-                      style: display(20, weight: FontWeight.w600),
+                      style: boutiqueDisplay(20, weight: FontWeight.w600),
                     ),
                     Positioned(
                       right: 12,
@@ -793,7 +825,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
               ),
               DecoratedBox(
                 decoration: BoxDecoration(
-                  color: context.monettaColors.surfaceRaised,
+                  color: context.boutique.canvas,
                   border: Border(
                     top: BorderSide(
                       color: context.monettaColors.divider,
@@ -813,7 +845,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                         ),
                         child: Text(
                           'Limpiar',
-                          style: sans(
+                          style: boutiqueText(
                             size: 13,
                             weight: FontWeight.w600,
                             decoration: TextDecoration.underline,
@@ -839,7 +871,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                             resultCount == 1
                                 ? 'Ver 1 artículo'
                                 : 'Ver $resultCount artículos',
-                            style: sans(
+                            style: boutiqueText(
                               size: 15,
                               color: colors.accentContent,
                               weight: FontWeight.w700,
@@ -895,7 +927,7 @@ class _FilterAccordion extends StatelessWidget {
                     Expanded(
                       child: Text(
                         section.label,
-                        style: sans(
+                        style: boutiqueText(
                           size: 17,
                           weight: FontWeight.w600,
                         ),
@@ -962,7 +994,7 @@ class _FilterChoiceRow extends StatelessWidget {
             Expanded(
               child: Text(
                 label,
-                style: sans(
+                style: boutiqueText(
                   size: 15,
                   color: selected
                       ? context.monettaColors.contentPrimary
@@ -1047,7 +1079,7 @@ class _EmptyCatalogState extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             'Sin resultados',
-            style: display(24, weight: FontWeight.w600),
+            style: boutiqueDisplay(24, weight: FontWeight.w600),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1055,7 +1087,7 @@ class _EmptyCatalogState extends StatelessWidget {
                 ? 'Intenta usar otros filtros o quita los actuales.'
                 : 'Muy pronto encontrarás nuevas piezas aquí.',
             textAlign: TextAlign.center,
-            style: sans(
+            style: boutiqueText(
               size: 13,
               color: context.monettaColors.contentMuted,
               height: 1.5,
@@ -1067,7 +1099,7 @@ class _EmptyCatalogState extends StatelessWidget {
               onPressed: onReset,
               child: Text(
                 'Limpiar filtros',
-                style: sans(
+                style: boutiqueText(
                   size: 13,
                   weight: FontWeight.w600,
                   decoration: TextDecoration.underline,
@@ -1119,81 +1151,83 @@ class _BrowseTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final displayTitle = item.isExternal
-        ? externalProductName(title: item.title, category: item.category)
-        : shopperProductName(item.title);
-    return Semantics(
-      button: true,
-      label: '${item.merchant}, $displayTitle',
-      child: MonettaCardLift(
-        child: GestureDetector(
-          behavior: HitTestBehavior.opaque,
-          onTap: () => _tap(context),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AspectRatio(
-                aspectRatio: 3 / 4,
-                child: ColoredBox(
-                  color: context.monettaColors.surfaceMuted,
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      MonettaImage(
-                        url: item.imageUrl,
-                        fallbackLabel:
-                            item.imageUrl == null ? null : displayTitle,
-                      ),
-                      if (item.isExternal)
-                        const Positioned(
-                          top: 8,
-                          left: 8,
-                          child: ExtractedBadge(),
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(10, 11, 8, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _brandFor(item),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: sans(
-                        size: 11.5,
-                        color: item.isExternal
-                            ? context.monettaColors.accent
-                            : context.monettaColors.contentPrimary,
-                        weight: FontWeight.w600,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      displayTitle,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: sans(
-                        size: 13,
-                        color: context.monettaColors.contentMuted,
-                        height: 1.35,
-                      ),
-                    ),
-                    const SizedBox(height: 7),
-                    Text(
-                      formatCatalogMoney(item.price),
-                      style: sans(size: 13.5, weight: FontWeight.w700),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
+    // The same presentation the product grids use. A [CatalogItem] is not
+    // turned into a [Product] — currency, origin and purchase destination
+    // would be lost — only its view data is adapted.
+    return MonettaProductTile(
+      data: ProductTileData.fromCatalogItem(item),
+      onTap: () => _tap(context),
+      // No favourite here: an external listing has no Monetta product id to
+      // save, and this screen renders without a wishlist-bearing store.
+      imageOverlay: item.isExternal ? const ExtractedBadge() : null,
+    );
+  }
+}
+
+/// Fig. 05's quick filters. Each chip opens the sheet on its own section, so
+/// there is exactly one place where a filter is applied or cancelled.
+///
+/// A chip only appears when the visible catalog actually offers that facet,
+/// and ordering is a chip but never counts as an active filter — the same
+/// convention the badge on the filter icon uses.
+class _QuickFilterRail extends StatelessWidget {
+  const _QuickFilterRail({
+    required this.items,
+    required this.filters,
+    required this.onOpen,
+  });
+
+  final List<CatalogItem> items;
+  final _CatalogFilters filters;
+  final ValueChanged<_FilterSection> onOpen;
+
+  bool _hasBrands() => items.any((item) => _brandFor(item).isNotEmpty);
+
+  bool _hasPrices() => items.any((item) => _priceBandFor(item) != null);
+
+  bool _hasColors() => items.any((item) => _colorsFor(item).isNotEmpty);
+
+  @override
+  Widget build(BuildContext context) {
+    final chips = <Widget>[
+      if (_hasBrands())
+        MonettaCapsuleChip(
+          key: const Key('catalog-quick-brand'),
+          label: 'Marca',
+          showCaret: true,
+          selected: filters.brands.isNotEmpty,
+          badgeCount: filters.brands.length,
+          onTap: () => onOpen(_FilterSection.brand),
         ),
+      if (_hasPrices())
+        MonettaCapsuleChip(
+          key: const Key('catalog-quick-price'),
+          label: 'Precio',
+          showCaret: true,
+          selected: filters.priceBands.isNotEmpty,
+          badgeCount: filters.priceBands.length,
+          onTap: () => onOpen(_FilterSection.price),
+        ),
+      if (_hasColors())
+        MonettaCapsuleChip(
+          key: const Key('catalog-quick-color'),
+          label: 'Color',
+          showCaret: true,
+          selected: filters.colors.isNotEmpty,
+          badgeCount: filters.colors.length,
+          onTap: () => onOpen(_FilterSection.color),
+        ),
+      MonettaCapsuleChip(
+        key: const Key('catalog-quick-sort'),
+        label: 'Ordenar',
+        showCaret: true,
+        onTap: () => onOpen(_FilterSection.sort),
       ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.only(top: BoutiqueSpace.sm),
+      child: MonettaChipRail(children: chips),
     );
   }
 }

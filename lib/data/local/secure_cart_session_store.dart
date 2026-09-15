@@ -39,6 +39,6 @@ final class SecureCartSessionStore implements CartSessionStore {
         scope.buyerKey == null ? 'guest' : 'account:${scope.buyerKey}',
       ),
     );
-    return 'shopify-cart-session-v1/$domain/$buyer';
+    return 'shopify-cart-session-v2/$domain/$buyer';
   }
 }

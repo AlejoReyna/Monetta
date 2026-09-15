@@ -219,9 +219,14 @@ void main() {
 
     expect(find.text('ENVÍO GRATIS ESTE FIN DE SEMANA'), findsNothing);
     expect(find.text('Novedades'), findsNothing);
+    // showHero:false hides the marketing banner, not the search entry: the
+    // discovery header (and its in-page search field, also used as the
+    // collapse-transition drag handle) stays so navigation never loses
+    // search; only the hero goes away.
     expect(
       find.byKey(const ValueKey('home-discovery-header')),
-      findsNothing,
+      findsOneWidget,
     );
+    expect(find.byKey(const ValueKey('home-compact-hero')), findsNothing);
   });
 }

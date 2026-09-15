@@ -1,0 +1,42 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/features/catalog/search_history.dart';
+import 'package:monetta_app/features/catalog/search_history_persistence.dart';
+
+class DelayedStorage implements SearchHistoryPersistence {
+  final restored = Completer<List<String>>();
+  @override Future<List<String>> load(String scopeKey) => restored.future;
+  @override Future<void> save(String scopeKey, List<String> queries) async {}
+}
+void main() {
+  test('a submitted query survives an in-flight history restore', () async {
+    final storage = DelayedStorage();
+    final history = SearchHistory(persistence: storage);
+    final loading = history.setScope('account-a');
+    await history.remember('new query');
+    storage.restored.complete(['older query']);
+    await loading;
+    expect(history.queries, contains('new query'));
+  });
+  test('concurrent saves retain both account scopes', () async {
+    final dir = await Directory.systemTemp.createTemp('monetta-audit-');
+    addTearDown(() => dir.delete(recursive: true));
+    final reads = Completer<void>();
+    var calls = 0;
+    final storage = SearchHistoryFilePersistence(directoryProvider: () async {
+      calls++;
+      if (calls <= 2) {
+        if (calls == 2) reads.complete();
+        await reads.future;
+      }
+      return dir;
+    });
+    await Future.wait([
+      storage.save('account-a', ['coach']),
+      storage.save('account-b', ['guess']),
+    ]);
+    expect(await storage.load('account-a'), ['coach']);
+    expect(await storage.load('account-b'), ['guess']);
+  });
+}

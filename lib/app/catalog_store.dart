@@ -20,6 +20,7 @@
 library;
 
 import 'dart:async';
+import 'shopify_checkout_coordinator.dart';
 import 'dart:convert';
 
 import 'package:flutter/foundation.dart';
@@ -217,6 +218,28 @@ class CatalogStore extends ChangeNotifier {
     if (_realtimeSource == null) unawaited(syncWithShopify());
   }
 
+  /// On a fresh install, the live catalog can arrive after local bootstrap.
+  /// Cached products remain immediately usable; offline starts stay bounded.
+  Future<void> waitForInitialCatalog({
+    Duration timeout = const Duration(seconds: 8),
+  }) async {
+    bool resolved() =>
+        products.isNotEmpty ||
+        realtimeStatus != CatalogRealtimeStatus.connecting;
+    if (resolved()) return;
+    final firstCatalog = Completer<void>();
+    void onChange() {
+      if (resolved() && !firstCatalog.isCompleted) firstCatalog.complete();
+    }
+
+    addListener(onChange);
+    try {
+      await firstCatalog.future.timeout(timeout, onTimeout: () {});
+    } finally {
+      removeListener(onChange);
+    }
+  }
+
   Future<void> _hydrateFromDrift() async {
     await _hydrateBagAndWishlist();
 
@@ -235,11 +258,12 @@ class CatalogStore extends ChangeNotifier {
   Future<void> _hydrateBagAndWishlist() async {
     final scope = _accountScope.isEmpty ? null : _accountScope;
     final wishlisted = await _wishlistStore.allProductIds(accountId: scope);
+    final bagRows = await _bagStore.all(accountId: scope);
+    if (_accountScope != (scope ?? '')) return;
     _wishlist
       ..clear()
       ..addAll(wishlisted);
 
-    final bagRows = await _bagStore.all(accountId: scope);
     _bagQuantities
       ..clear()
       ..addEntries(
@@ -553,16 +577,17 @@ class CatalogStore extends ChangeNotifier {
   ///
   /// Lines added while checkout was open (or otherwise absent from the
   /// purchased cart) stay in the bag.
-  Future<void> clearPurchasedBagLines(Iterable<String> variantIds) async {
-    final purchased = {
-      for (final id in variantIds)
-        if (id.trim().isNotEmpty) id.trim(),
-    };
-    if (purchased.isEmpty) return;
-    for (final variantId in purchased.toList(growable: false)) {
-      if (_bagQuantities.containsKey(variantId)) {
-        await removeFromBag(variantId);
-      }
+  Future<void> applyCheckoutPurchase(CheckoutPurchase purchase) async {
+    if (_shopDomain != null && purchase.scope.shopDomain != _shopDomain) return;
+    await _bagStore.applyPurchase(
+      operationId: purchase.operationId,
+      shopDomain: purchase.scope.shopDomain,
+      accountId: purchase.scope.buyerKey,
+      quantities: purchase.quantities,
+    );
+    if (_accountScope == (purchase.scope.buyerKey ?? '')) {
+      await _hydrateBagAndWishlist();
+      notifyListeners();
     }
   }
 

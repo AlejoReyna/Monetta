@@ -36,7 +36,9 @@ void main() {
       matching: find.byType(MonettaImage),
     );
     expect(heroImage, findsOneWidget);
-    expect(tester.widget<MonettaImage>(heroImage).fit, BoxFit.cover);
+    // Package C (Fig.07): the photo is contained so handles and straps are
+    // never cropped — `cover` is the bug this asserts against.
+    expect(tester.widget<MonettaImage>(heroImage).fit, BoxFit.contain);
   });
 
   testWidgets('product page sells with facts, not internal facets',
@@ -63,7 +65,9 @@ void main() {
     expect(find.text('AGREGAR A LA BOLSA'), findsOneWidget);
     expect(find.text('APARTAR'), findsOneWidget);
     expect(
-      find.text('Apártala con \$400 MXN. Tienes 20 días para liquidar.'),
+      find.text(
+        'Escríbenos por WhatsApp para solicitar apartado (\$400 MXN · 20 días). Abrir el chat no reserva stock ni confirma el anticipo.',
+      ),
       findsOneWidget,
     );
     expect(find.text('Escribir por WhatsApp'), findsOneWidget);

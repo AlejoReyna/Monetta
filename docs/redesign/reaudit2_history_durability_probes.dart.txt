@@ -1,0 +1,49 @@
+import 'dart:async';
+import 'dart:io';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/features/catalog/search_history.dart';
+import 'package:monetta_app/features/catalog/search_history_persistence.dart';
+
+class GatedRestore implements SearchHistoryPersistence {
+  GatedRestore(this.disk);
+  final SearchHistoryFilePersistence disk;
+  final started = Completer<void>();
+  final release = Completer<void>();
+  @override Future<List<String>> load(String scope) async {
+    final snapshot = await disk.load(scope);
+    started.complete();
+    await release.future;
+    return snapshot;
+  }
+  @override Future<void> save(String scope, List<String> entries) => disk.save(scope, entries);
+}
+void main() {
+  for (final action in ['remember', 'forget', 'clear']) {
+    test('$action during restore remains correct after restart', () async {
+      final dir = await Directory.systemTemp.createTemp('monetta-durable-');
+      addTearDown(() => dir.delete(recursive: true));
+      final disk = SearchHistoryFilePersistence(directoryProvider: () async => dir);
+      await disk.save('a', ['older query', 'coach']);
+      final gated = GatedRestore(disk);
+      final history = SearchHistory(persistence: gated);
+      final loading = history.setScope('a');
+      await gated.started.future;
+      switch (action) {
+        case 'remember': await history.remember('new query');
+        case 'forget': await history.forget('older query');
+        case 'clear': await history.clear();
+      }
+      gated.release.complete();
+      await loading;
+      final expected = switch(action) {
+        'remember' => ['new query', 'older query', 'coach'],
+        'forget' => ['coach'],
+        _ => <String>[],
+      };
+      expect(history.queries, expected, reason: 'live state');
+      final restarted = SearchHistory(persistence: disk);
+      await restarted.setScope('a');
+      expect(restarted.queries, expected, reason: 'durable state after restart');
+    });
+  }
+}

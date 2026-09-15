@@ -80,6 +80,37 @@ CatalogRealtimeDocument _document() => const CatalogRealtimeDocument(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
+  test('fresh startup waits for the first live catalog', () async {
+    final source = _ControlledSource();
+    final database = openTestDatabase();
+    final store = CatalogStore(database: database, realtimeSource: source);
+    await store.loadFromAsset();
+    store.products = const [];
+    var completed = false;
+    final waiting = store.waitForInitialCatalog().then((_) => completed = true);
+    await Future<void>.delayed(Duration.zero);
+    expect(completed, isFalse);
+    source.controller.add([_document()]);
+    await waiting;
+    expect(store.products, isNotEmpty);
+    store.dispose();
+    await source.controller.close();
+    await database.close();
+  });
+
+  test('startup wait is bounded when the live source stays silent', () async {
+    final source = _ControlledSource();
+    final database = openTestDatabase();
+    final store = CatalogStore(database: database, realtimeSource: source);
+    await store.loadFromAsset();
+    store.products = const [];
+    await store.waitForInitialCatalog(timeout: Duration.zero);
+    expect(store.realtimeStatus, CatalogRealtimeStatus.connecting);
+    store.dispose();
+    await source.controller.close();
+    await database.close();
+  });
+
   test('CatalogStore publishes a validated real-time snapshot', () async {
     final source = _ControlledSource();
     final transport = _CountingTransport();

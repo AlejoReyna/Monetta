@@ -118,11 +118,11 @@ class AccountController extends ChangeNotifier {
     if (current == null) return null;
     try {
       if (current.authProvider == 'monetta') {
-        return _systemSessionRepository?.accessTokenFor(
+        return await _systemSessionRepository?.accessTokenFor(
           current.localAccountId,
         );
       }
-      return _sessionRepository?.accessTokenFor(current.localAccountId);
+      return await _sessionRepository?.accessTokenFor(current.localAccountId);
     } catch (_) {
       return null;
     }

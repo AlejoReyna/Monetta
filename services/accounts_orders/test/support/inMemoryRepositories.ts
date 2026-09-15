@@ -225,7 +225,7 @@ export class InMemoryWebhookEventsRepository implements WebhookEventsRepository 
       existing.claimedAt !== null &&
       now.getTime() - existing.claimedAt.getTime() >= this.staleClaimAfterMs;
     if (existing.status === 'completed') return false;
-    if (existing.status === 'processing' && !stale) return false;
+    if (existing.status === 'processing' && !stale) throw new Error('Webhook busy; retry');
     existing.status = 'processing';
     existing.attemptCount += 1;
     existing.claimedAt = now;

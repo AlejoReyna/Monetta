@@ -27,6 +27,20 @@ void main() {
     );
     await tester.pump(const Duration(milliseconds: 500));
 
+    final homeScroll = find
+        .byWidgetPredicate(
+          (widget) =>
+              widget is Scrollable &&
+              widget.axisDirection == AxisDirection.down,
+        )
+        .first;
+    await tester.scrollUntilVisible(
+      find.byKey(const ValueKey('home-section-offers')),
+      800,
+      scrollable: homeScroll,
+    );
+    await tester.pump();
+
     expect(find.byKey(const ValueKey('home-section-offers')), findsOneWidget);
     expect(find.byType(ExternalCatalogSection), findsNothing);
   });

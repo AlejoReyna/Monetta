@@ -25,11 +25,11 @@ fragment ProductFields on Product {
   categoryOverride: metafield(namespace: "app", key: "category_override") { value }
   badge: metafield(namespace: "app", key: "badge") { value }
   images(first: 6) {
-    pageInfo { hasNextPage }
+    pageInfo { hasNextPage endCursor }
     edges { node { url(transform: {maxWidth: 1200}) } }
   }
   variants(first: 50) {
-    pageInfo { hasNextPage }
+    pageInfo { hasNextPage endCursor }
     edges {
       node {
         id
@@ -42,7 +42,7 @@ fragment ProductFields on Product {
     }
   }
   collections(first: 25) {
-    pageInfo { hasNextPage }
+    pageInfo { hasNextPage endCursor }
     edges { node { handle } }
   }
 }
@@ -127,7 +127,9 @@ query CollectionProducts(
   \$after: String
   \$sortKey: ProductCollectionSortKeys
   \$reverse: Boolean
-) {
+  \$country: CountryCode
+  \$language: LanguageCode
+) @inContext(country: \$country, language: \$language) {
   collection(handle: \$handle) {
     id
     handle
@@ -403,3 +405,24 @@ query HomeContent {
   }
 }
 ''';
+
+/// Required commerce connections are completed before publishing a sync.
+String productConnectionQuery(String field) {
+  final selection = switch (field) {
+    'variants' =>
+      'id title availableForSale price { amount currencyCode } compareAtPrice { amount } sku',
+    'collections' => 'handle',
+    _ => throw ArgumentError.value(field),
+  };
+  return '''
+query ProductConnection(\$id: ID!, \$after: String!, \$country: CountryCode, \$language: LanguageCode)
+@inContext(country: \$country, language: \$language) {
+  product(id: \$id) {
+    $field(first: 250, after: \$after) {
+      pageInfo { hasNextPage endCursor }
+      edges { node { $selection } }
+    }
+  }
+}
+''';
+}
