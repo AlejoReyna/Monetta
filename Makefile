@@ -1,4 +1,4 @@
-.PHONY: help setup gen gen-watch test test-core test-services test-all analyze format fix schema clean run-dev run-staging validate-staging validate-production build-staging-android build-production-android refresh-catalog verify-catalog verify-catalog-remote doctor
+.PHONY: help setup gen gen-watch test test-core test-services test-all analyze format fix clean run-dev run-staging validate-staging validate-production build-staging-android build-production-android refresh-catalog verify-catalog verify-catalog-remote doctor
 
 FLUTTER ?= flutter
 DART    ?= dart
@@ -12,14 +12,11 @@ doctor: ## Verify the toolchain is installed correctly
 setup: ## Install dependencies
 	$(FLUTTER) pub get
 
-gen: ## Run all code generation (freezed, drift, ferry, riverpod)
+gen: ## Run code generation (drift)
 	$(DART) run build_runner build --delete-conflicting-outputs
 
 gen-watch: ## Code generation in watch mode
 	$(DART) run build_runner watch --delete-conflicting-outputs
-
-schema: ## Download the Shopify Storefront API schema for ferry codegen
-	./scripts/fetch_schema.sh
 
 test: ## Run all tests
 	$(FLUTTER) test
@@ -33,6 +30,7 @@ test-services: ## Run tests and type checks for active TypeScript services
 	# catalog_monitor retired from product CI (WP-02); see docs/audits/2026-09-07/EXTERNAL_CATALOG_DECOMMISSION.md
 	npm --prefix functions test
 	npm --prefix functions run typecheck
+	npm run test:api
 	npm run typecheck:api
 	npm run build:web
 

@@ -52,7 +52,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | INV-13 | Notificaciones: controlador, bandeja y pantalla | `test/app/notification_controller_test.dart` · `test/features/notifications/` | RF-14, RF-31, RF-64 |
 | INV-14 | Normalización y recomendación | `test/normalize/golden_catalog_test.dart` · `test/reco/scorer_test.dart` | RF-40, RF-50 |
 | INV-15 | Backend: seguridad WP01, webhooks, ledger de Rewards, token de cliente | `services/accounts_orders/test/` (los `*.pg.test.ts` corren con G7) | RF-12, RF-13, RF-21, RF-70 |
-| INV-16 | Espejo de catálogo: HMAC, payload, reconcile | `server/catalog/*.test.ts` (`npm run test:api`; a CI desde RF-10) | RF-23, RF-71 |
+| INV-16 | Espejo de catálogo: HMAC, payload, reconcile | `server/catalog/*.test.ts` (`npm run test:api`; en CI y en `make test-services` desde RF-10) | RF-23, RF-71 |
 
 ## 3. Filas nuevas
 

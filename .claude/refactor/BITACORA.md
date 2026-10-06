@@ -235,3 +235,42 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - D-04: aprobar RF-00 con G6 iOS en rojo como parte de la base. RF-19 bloquea a RF-14, RF-17 y RF-20 y, por transitividad, a sus dependientes.
 - **Commit:** el que contiene esta entrada, en `refactor/rf-00-baseline`. RF-00 queda `cerrado`. Sin push.
 - **Siguiente paso:** RF-10, el primer WP pendiente con dependencias y decisiones listas; RF-19 va justo después.
+
+### 2026-10-06 · RF-10 · iteración 1 · APROBADO
+
+- **Agente(s):** orquestador (CI y Makefile).
+- **Base:** `833cf8f`. Rama `refactor/rf-10-ci-espejo`, creada desde `refactor/rf-00-baseline`.
+- **Archivos del diff:**
+  - `.github/workflows/quality.yml`: paso `npm run test:api` en el job `functions-and-web`, antes de `typecheck:api`.
+  - `Makefile`:
+    - `npm run test:api` en `test-services`;
+    - se quita el target `schema`, también de `.PHONY`;
+    - la descripción de `gen` pasa a «Run code generation (drift)».
+  - `.claude/refactor/PLAN.md`, `.claude/refactor/MATRIZ_DE_PRUEBAS.md` y esta entrada.
+- **Por qué se quitó `schema` en vez de arreglarlo:** llamaba a `scripts/fetch_schema.sh`, que no existe. El proyecto no genera código de GraphQL a propósito (`lib/data/shopify/README.md:102`, `docs/ARCHITECTURE.md:299`, `pubspec.yaml:24`). No hay directorio `scripts/` ni archivos `.graphql`, y nada usa un esquema descargado.
+- **Gates (ejecutados por el auditor):**
+  - G0 `git status --porcelain` · `git diff --stat` · `git diff --check` → sólo `quality.yml`, `Makefile` y los archivos de `.claude/refactor/`; `--check` limpio.
+  - G1 y G2 → no aplican: no hay cambios de Dart.
+  - G3 `npm run test:api` → 19 aprobadas en 5 archivos, igual que la base.
+  - Workflow: `YAML.safe_load` de Ruby sobre `quality.yml` parsea sin errores.
+    - En `functions-and-web`, `npm run test:api` es el paso 9 de 13, después del `npm ci` de la raíz (paso 3).
+    - Disparadores: `pull_request`, `push` y `workflow_dispatch`.
+  - Makefile:
+    - `make help` muestra `gen  Run code generation (drift)` y ya no lista `schema`;
+    - `make -n schema` → «No rule to make target `schema'»;
+    - `make -n test-services` incluye `npm run test:api`.
+  - G4: `npm ci` en `web/` → 14 paquetes añadidos; `make test-services` → exit 0 en 11 s.
+    - backend: 111 aprobadas y 9 omitidas; functions: 13; espejo: 19;
+    - typecheck de backend, functions y espejo en verde, y `build:web` compila;
+    - conteos iguales a la base.
+  - G5 `dart run bin/verify_catalog_snapshot.dart` → «Catálogo válido: 103 productos, 340 imágenes»; `./bin/check_no_secrets.sh` → exit 0.
+  - G6, G7 y G8 → no aplican.
+- **Filas de la matriz:** INV-16 en verde (19 de 19); ahora corre en CI y en `make test-services`.
+- **Aceptación:**
+  - `npm run test:api` pasa en local.
+  - Que el workflow lo ejecuta está verificado en su definición. La primera ejecución real en CI llegará con el próximo push de la persona.
+- **Hallazgos:** ninguno.
+- **Docs:** ningún documento vigente describe el CI ni los targets de `make`. Los que mencionan `test:api` son históricos (2026-09-07) y no se tocan.
+- **Decisiones de la persona en esta iteración:** ninguna.
+- **Commit:** el que contiene esta entrada, en `refactor/rf-10-ci-espejo`. Sin push.
+- **Siguiente paso:** RF-19 (mínimo iOS 15.0).
