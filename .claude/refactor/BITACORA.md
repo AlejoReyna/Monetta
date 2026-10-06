@@ -274,3 +274,34 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Decisiones de la persona en esta iteración:** ninguna.
 - **Commit:** el que contiene esta entrada, en `refactor/rf-10-ci-espejo`. Sin push.
 - **Siguiente paso:** RF-19 (mínimo iOS 15.0).
+
+### 2026-10-06 · RF-19 · iteración 1 · APROBADO
+
+- **Agente(s):** orquestador (configuración nativa). La persona ejecutó G6 en su terminal.
+- **Base:** `f7e7157`. Rama `refactor/rf-19-ios-15`, creada desde `refactor/rf-10-ci-espejo`.
+- **Archivos del diff:**
+  - `ios/Podfile`: `platform :ios, '15.0'`, y un `post_install` que sube a 15.0 cada pod con un mínimo menor, sin bajar ninguno.
+  - `ios/Runner.xcodeproj/project.pbxproj`: `IPHONEOS_DEPLOYMENT_TARGET = 15.0` en las 6 configuraciones.
+  - `ios/Podfile.lock`: sólo cambia `PODFILE CHECKSUM`; ninguna versión de pod.
+  - `.claude/refactor/PLAN.md`, `.claude/refactor/MATRIZ_DE_PRUEBAS.md` y esta entrada.
+- **Gates:**
+  - G0 `git status --porcelain` · `git diff --check` → sólo esos archivos; `--check` limpio.
+  - Validaciones de configuración:
+    - `ruby -c ios/Podfile` → «Syntax OK»;
+    - `plutil -lint ios/Runner.xcodeproj/project.pbxproj` → OK;
+    - las 6 configuraciones quedan en 15.0 y ninguna por debajo.
+  - G1, G2 y G4 → no aplican: no hay cambios de Dart ni de TypeScript, y el gate de esta área es G6.
+  - INV-07 `flutter test --no-pub test/platform/shopify_checkout_channel_test.dart test/app/shopify_checkout_coordinator_test.dart test/app/checkout_buyer_identity_test.dart test/app/shopify_cart_composition_test.dart` → 23 aprobadas.
+  - G5 → catálogo válido (103 productos, 340 imágenes); `./bin/check_no_secrets.sh` → exit 0.
+  - G6 iOS (ejecutado por la persona): `flutter build ios --simulator --debug --dart-define-from-file=config/dart_defines.ci.json -v > build/rf19_ios.log 2>&1` → exit 0.
+    - `pod install` corrió solo (22.6 s) y reescribió el checksum de `Podfile.lock`.
+    - `** BUILD SUCCEEDED **` (`build/rf19_ios.log:145502`) y `✓ Built build/ios/iphonesimulator/Runner.app`.
+    - 0 errores de deployment target. La única línea con `error:` (`:144800`) viene del script de Flutter que hace `plutil -extract NSBonjourServices` sobre una clave que no existe; no es un error del build.
+  - G6 Android (ejecutado por la persona): `flutter build apk --debug --flavor staging --dart-define-from-file=config/dart_defines.ci.json > build/rf19_apk.log 2>&1` → exit 0; `✓ Built build/app/outputs/flutter-apk/app-staging-debug.apk` en 24.5 s.
+  - G7 y G8 → no aplican.
+- **Filas de la matriz:** INV-07 en verde. En la sección 7, iOS ya compila desde este WP.
+- **Hallazgos:** ninguno nuevo. Siguen los Baja de RF-00: plugins que aplican KGP y `flutter_secure_storage` sin Swift Package Manager.
+- **Impacto de producto (D-03):** quien siga en iOS 13 o 14 ya no puede instalar la app. No queda fuera ningún modelo de iPhone ni de iPad.
+- **Decisiones de la persona en esta iteración:** ninguna nueva.
+- **Commit:** el que contiene esta entrada, en `refactor/rf-19-ios-15`. Sin push.
+- **Siguiente paso:** RF-11 (ficha: producto que desaparece).

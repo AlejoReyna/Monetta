@@ -164,4 +164,4 @@ Los midió el auditor el 2026-10-06. Las suites de backend se midieron con el WI
 | Functions | `npm --prefix functions test` | 13 aprobadas; 3 archivos |
 | G5 catálogo | `dart run bin/verify_catalog_snapshot.dart` | exit 0 con el snapshot del 2026-10-06 (`b749abb`), que tiene 103 productos. El del 2026-09-15 fallaba por antigüedad |
 | G5 secretos | `./bin/check_no_secrets.sh` | exit 0 |
-| G6 (ejecutado por la persona) | Android e iOS | Android compila. iOS **falla** con Xcode 27.0, porque el mínimo declarado es iOS 13.0; lo corrige RF-19 (D-03, D-04) |
+| G6 (ejecutado por la persona) | Android e iOS | Android compila. En la base, iOS **fallaba** con Xcode 27.0 porque el mínimo declarado era iOS 13.0 (D-03, D-04); compila desde RF-19 |
