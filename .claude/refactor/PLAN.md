@@ -50,7 +50,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-00 | Baseline y entorno | 0 | orquestador | — | E1, E2, E3, E5 (recoger; no bloquean la medición inicial) | cerrado |
 | RF-10 | CI: pruebas del espejo y Makefile | 1 | orquestador | RF-00 | — | cerrado |
 | RF-19 | Mínimo iOS 15.0 para Xcode 27 | 1 | orquestador (configuración nativa, menos de 30 líneas) | RF-00 | D-03 | cerrado |
-| RF-11 | Ficha: producto que desaparece | 1 | test-engineer → flutter-implementer | RF-00 | — | pendiente |
+| RF-11 | Ficha: producto que desaparece | 1 | test-engineer → flutter-implementer | RF-00 | — | cerrado |
 | RF-12 | Contrato del ID de pedido en Rewards | 1 | test-engineer → backend + flutter | RF-00 | — | pendiente |
 | RF-13 | Rewards apagado: JSON 404 y estado «no disponible» | 1 | test-engineer → backend + flutter | RF-00 | E7 | pendiente |
 | RF-14 | Timeouts y notificaciones fuera del arranque | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | — | pendiente |

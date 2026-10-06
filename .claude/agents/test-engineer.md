@@ -58,9 +58,9 @@ Eres el ingeniero de pruebas del refactor in situ de Monetta. Tu trabajo fija el
 1. Formato: `dart format --output=none --set-exit-if-changed test integration_test`. Si fallas, aplica `dart format` sobre tus archivos.
 2. `flutter analyze --no-pub` debe dar 0 issues.
 3. Ejecuta las pruebas nuevas por ruta y, después, la suite completa del área (`flutter test --no-pub`, o `npm --prefix services/accounts_orders test`, o `npm run test:api`).
+4. Las pruebas rojas sólo deben fallar ellas. El resto de la suite sigue verde.
 
 En el sandbox, Dart no tiene red: usa siempre `--no-pub` y, si hace falta resolver, `flutter pub get --offline`. Sin `--no-pub`, `flutter` se queda colgado en «Resolving dependencies...».
-4. Las pruebas rojas sólo deben fallar ellas. El resto de la suite sigue verde.
 
 Si un comando no puede ejecutarse por el sandbox o por el entorno, repórtalo como «no ejecutado», con el error exacto.
 

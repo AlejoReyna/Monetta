@@ -305,3 +305,46 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Decisiones de la persona en esta iteración:** ninguna nueva.
 - **Commit:** el que contiene esta entrada, en `refactor/rf-19-ios-15`. Sin push.
 - **Siguiente paso:** RF-11 (ficha: producto que desaparece).
+
+### 2026-10-06 · RF-11 · iteración 1 · APROBADO
+
+- **Agente(s):** `test-engineer` escribió la prueba roja CHAR-01 y `flutter-implementer` hizo la corrección. El orquestador redactó los encargos y auditó.
+- **Base:** `b5f46aa`. Rama `refactor/rf-11-ficha-no-disponible`, creada desde `refactor/rf-19-ios-15`.
+- **Archivos del diff:**
+  - `test/features/product/product_unavailable_test.dart` (nuevo, de `test-engineer`): 5 pruebas `CHAR-01`.
+  - `lib/features/product/product_screen.dart`: busca el producto sin lanzar y, si no lo encuentra, devuelve `ProductUnavailable`.
+  - `lib/features/product/product_unavailable.dart` (nuevo): el estado «Este artículo ya no está disponible».
+    - «Explorar el catálogo» vuelve a la primera ruta y «Volver» cierra la ficha.
+    - El atrás no registra `productView`.
+  - `.claude/agents/test-engineer.md` y `.claude/agents/flutter-implementer.md`: el párrafo del sandbox que se añadió en RF-00 partía la lista numerada; ahora va después de ella.
+  - `.claude/refactor/PLAN.md`, `.claude/refactor/MATRIZ_DE_PRUEBAS.md` y esta entrada.
+- **Fase roja (verificada por el auditor):**
+  - `flutter test --no-pub test/features/product/product_unavailable_test.dart --reporter expanded` → exit 1; las 5 pruebas fallan con `Actual: StateError:<Bad state: No element>`.
+  - **Origen:** una sonda temporal sin `takeException` (`test/zz_rf11_origin_probe_test.dart`, borrada al terminar) mostró `#1 _ProductScreenState.build (product_screen.dart:165:36)`.
+  - **Producción intacta en esa fase:** `git diff --quiet -- lib`.
+  - **La prueba roja no cambió después:** su última modificación (17:47:43) es anterior a la corrección (17:52:04) y conserva sus 310 líneas.
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo los archivos listados; `git diff --check` limpio.
+  - G1 `dart format --output=none --set-exit-if-changed lib test integration_test` → 302 archivos, 0 cambiados.
+  - G2 `flutter analyze --no-pub` → «No issues found!».
+  - G3 `flutter test --no-pub test/features/product/` → `+26 ~4: All tests passed!`.
+  - G4 `flutter test --no-pub` → `+710 ~5: All tests passed!`. Son las 705 de la base más las 5 CHAR-01, con las mismas omitidas.
+  - G5 → catálogo válido (103 productos); `./bin/check_no_secrets.sh` → exit 0.
+  - G6, G7 y G8 → no aplican: el cambio es sólo de presentación en Dart.
+  - `grep -rn "firstWhere" lib/features/` → sólo `admin_screen.dart:1098`, que es sobre variantes. Ninguno sobre `store.products`.
+  - `grep -rn "CHAR-01" test` → 6 coincidencias: los 5 nombres de prueba y el comentario del archivo.
+- **Filas de la matriz:** CHAR-01 → verde. INV-12 → verde, dentro de G4.
+- **Checklist:**
+  - el alcance es el del encargo;
+  - textos de UI en español y comentarios en inglés;
+  - las pruebas nuevas no usan `skip:`, `// ignore`, red ni reloj real;
+  - no hay secretos;
+  - no cambia ningún contrato ni la arquitectura, así que no hay docs que actualizar (`lib/features/product/` no tiene README).
+- **Hallazgos:**
+  - [Baja] `product_screen.dart:166-172` busca el producto con un bucle. El código vecino usa `where(...).firstOrNull` (`catalog_creator_document.dart:58`).
+  - [Baja] `product_unavailable.dart:50-89` repite el diseño de `EEmptyState` (`account_boutique.dart:348`), que sólo admite una acción. Si `EEmptyState` aceptara una acción secundaria opcional, se podría reutilizar.
+  - [Baja] Ninguna prueba demuestra que salir del estado de ausencia no registra `productView`. Se cumple por construcción: el widget no llama a `store.record`.
+  - [Baja] En `product_unavailable_test.dart:74-94`, `emit` espera hasta 1 s con un sondeo de tiempo real dentro de `runAsync`. Con el equipo cargado, la prueba podría volverse frágil.
+- **Decisiones de la persona en esta iteración:** ninguna. Los textos del estado y el comportamiento de las acciones los fijó el orquestador en el encargo, siguiendo el plan y el texto que ya usa favoritos.
+- **Commit:** el que contiene esta entrada, en `refactor/rf-11-ficha-no-disponible`. Sin push.
+- **Siguiente paso:** RF-12 (contrato del ID de pedido en Rewards).

@@ -45,9 +45,9 @@ Eres el implementador Flutter del refactor in situ de Monetta. Trabajas para el 
 1. Aplica el formato con `dart format lib test integration_test` y compruébalo con `dart format --output=none --set-exit-if-changed lib test integration_test`.
 2. `flutter analyze --no-pub` debe dar 0 issues.
 3. Ejecuta `flutter test --no-pub <pruebas del WP>` y después `flutter test --no-pub` completo.
+4. Ejecuta los comandos extra que pida el encargo.
 
 En el sandbox, Dart no tiene red: usa siempre `--no-pub` y, si hace falta resolver, `flutter pub get --offline`. Sin `--no-pub`, `flutter` se queda colgado en «Resolving dependencies...».
-4. Ejecuta los comandos extra que pida el encargo.
 
 Si un comando no puede ejecutarse (por ejemplo, el sandbox bloquea la escritura en la caché del SDK), **no lo declares aprobado**. Repórtalo como «no ejecutado» con el error exacto. Nunca inventes ni resumas resultados que no viste.
 

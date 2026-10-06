@@ -29,6 +29,7 @@ import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../checkout/checkout_screen.dart';
 import 'product_selection.dart';
+import 'product_unavailable.dart';
 import 'quick_view.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -162,7 +163,18 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
-    final product = store.products.firstWhere((p) => p.id == widget.productId);
+    Product? found;
+    for (final candidate in store.products) {
+      if (candidate.id == widget.productId) {
+        found = candidate;
+        break;
+      }
+    }
+    // The product can leave the catalog while the page is open (live sync) or
+    // never have been in it (stale link): show the unavailable state instead
+    // of throwing. If it returns, the next rebuild shows the page again.
+    if (found == null) return const ProductUnavailable();
+    final product = found;
     final facets = store.facetsFor(product.id);
     final wishlisted = store.wishlist.contains(product.id);
     final selectable = selectableVariants(product);
