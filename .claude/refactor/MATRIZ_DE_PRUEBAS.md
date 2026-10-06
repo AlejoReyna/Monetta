@@ -105,6 +105,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-16 | CHAR-03 a CHAR-07 | INV-02, INV-03, INV-04, INV-05 | — |
 | RF-17 | UI-01 a UI-04 | INV-12 | G6, G8 (DEV-03) |
 | RF-18 | — | INV-08, INV-06 | — |
+| RF-19 | — | INV-07 | G6 (iOS y Android, ejecutado por la persona) |
 | RF-20 | ARCH-03 | INV-11, INV-14 (se retira `mixed_feed_test`) | G6 |
 | RF-21 | — | INV-15 | — |
 | RF-22 | — | Todos | G6 |
@@ -161,6 +162,6 @@ Los midió el auditor el 2026-10-06. Las suites de backend se midieron con el WI
 | Herramienta de auditoría | `node --test tools/audit/test/shopifyAdapter.test.mjs` | 8 aprobadas |
 | Espejo | `npm run test:api` | 19 aprobadas; 5 archivos |
 | Functions | `npm --prefix functions test` | 13 aprobadas; 3 archivos |
-| G5 catálogo | `dart run bin/verify_catalog_snapshot.dart` | **Falla:** el snapshot es del 2026-09-15 y el límite es de 14 días |
+| G5 catálogo | `dart run bin/verify_catalog_snapshot.dart` | exit 0 con el snapshot del 2026-10-06 (`b749abb`), que tiene 103 productos. El del 2026-09-15 fallaba por antigüedad |
 | G5 secretos | `./bin/check_no_secrets.sh` | exit 0 |
-| G6 | Android e iOS | No ejecutado (sandbox y entorno; ver la bitácora) |
+| G6 (ejecutado por la persona) | Android e iOS | Android compila. iOS **falla** con Xcode 27.0, porque el mínimo declarado es iOS 13.0; lo corrige RF-19 (D-03, D-04) |

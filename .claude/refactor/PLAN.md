@@ -21,6 +21,8 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 |---|---|---|---|---|
 | D-01 | Refactor in situ, no rebuild | — | **tomada, 2026-10-06** | — |
 | D-02 | Sacar de RF-00 lo que depende de dispositivos o de la persona | Mover DEV-03 al paso 0 de RF-17; webhooks a RF-23, instalaciones a RF-60 y cuentas propias a RF-62 | **tomada, 2026-10-06:** como se recomienda | RF-00 |
+| D-03 | Mínimo de iOS: Xcode 27.0 sólo compila para iOS 15.0–27 | Subir a iOS 15.0 en RF-19 | **tomada, 2026-10-06:** subir a 15.0; ningún modelo de iPhone ni de iPad queda fuera | RF-19 |
+| D-04 | Aprobar RF-00 con G6 iOS en rojo como parte de la base | Sí; RF-19 bloquea a los WPs que exigen G6 | **tomada, 2026-10-06:** sí | RF-14, RF-17, RF-20 y sus dependientes |
 | E1 | ¿Lanzar tras las fases 1–2 y refactorizar sobre el producto vivo? | Sí | **tomada, 2026-10-06:** sí; las fases 3+ se hacen con la app publicada | Orden de las fases 3+ |
 | E2 | Eliminar del árbol el código del catálogo externo, con tag forense | Sí | **tomada, 2026-10-06:** sí, con tag forense (`baseline/48a6786` sirve de referencia) | RF-20, RF-21 |
 | E3 | Autoridad del catálogo en producción | Sólo `storefrontDirect`; el espejo queda experimental | **tomada, 2026-10-06:** sólo `storefrontDirect`; el espejo queda experimental | RF-42, RF-71 |
@@ -45,17 +47,18 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 
 | WP | Título | Fase | Agentes | Depende de | Decisiones | Estado |
 |---|---|---|---|---|---|---|
-| RF-00 | Baseline y entorno | 0 | orquestador | — | E1, E2, E3, E5 (recoger; no bloquean la medición inicial) | bloqueado: G6 iOS (Xcode 27.0 sólo acepta iOS 15.0 o más; el proyecto declara 13.0) |
+| RF-00 | Baseline y entorno | 0 | orquestador | — | E1, E2, E3, E5 (recoger; no bloquean la medición inicial) | cerrado |
 | RF-10 | CI: pruebas del espejo y Makefile | 1 | orquestador | RF-00 | — | pendiente |
+| RF-19 | Mínimo iOS 15.0 para Xcode 27 | 1 | orquestador (configuración nativa, menos de 30 líneas) | RF-00 | D-03 | pendiente |
 | RF-11 | Ficha: producto que desaparece | 1 | test-engineer → flutter-implementer | RF-00 | — | pendiente |
 | RF-12 | Contrato del ID de pedido en Rewards | 1 | test-engineer → backend + flutter | RF-00 | — | pendiente |
 | RF-13 | Rewards apagado: JSON 404 y estado «no disponible» | 1 | test-engineer → backend + flutter | RF-00 | E7 | pendiente |
-| RF-14 | Timeouts y notificaciones fuera del arranque | 1 | test-engineer → flutter-implementer | RF-00 | — | pendiente |
+| RF-14 | Timeouts y notificaciones fuera del arranque | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | — | pendiente |
 | RF-15 | Parsers estrictos de Rewards | 1 | test-engineer → flutter-implementer | RF-00 | — | pendiente |
 | RF-16 | Caracterización de reglas vigentes | 1 | test-engineer | RF-00 | — | pendiente |
-| RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00 | E-T1, E-T2 | pendiente |
+| RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | E-T1, E-T2 | pendiente |
 | RF-18 | Extracciones D02 y D03 | 1 | flutter-implementer | RF-00 | — | pendiente |
-| RF-20 | Eliminar el catálogo externo de la app | 2 | flutter-implementer | RF-16 | E2 | pendiente |
+| RF-20 | Eliminar el catálogo externo de la app | 2 | flutter-implementer | RF-16, RF-19 | E2 | pendiente |
 | RF-21 | Eliminar el catálogo externo del admin backend | 2 | backend-implementer | RF-00 | E2 | pendiente |
 | RF-22 | Dependencias sin uso, Makefile y docs | 2 | flutter-implementer | RF-20 | — | pendiente |
 | RF-23 | Retirar `functions/` | 2 | backend-implementer | RF-10 | Inventario de webhooks de ambas tiendas (D-02) | pendiente |
@@ -109,6 +112,8 @@ Los WPs de las fases 4 a 8 se detallan con este mismo formato antes de empezarlo
 8. **Capturas de referencia para DEV-03.** Por D-02 se movieron al paso 0 de RF-17.
 
 **Salida:** entrada RF-00 en la bitácora con los resultados y conteos base de cada suite, inventario, decisiones E1/E2/E3/E5 de la persona y estado de los demás entregables. Los gates no ejecutados se registran como tales y no permiten declarar el WP aprobado.
+
+**Cierre (2026-10-06):** por D-04, RF-00 se aprobó con G6 iOS en rojo como parte de la base. RF-19 lo corrige y bloquea a los WPs que exigen G6.
 
 ### RF-10 · CI: pruebas del espejo y Makefile
 
@@ -268,6 +273,24 @@ Lo pidió la persona.
 - Un componente común de fila de resumen, que reemplace a `shopify_cart_summary.dart:269` y `checkout_screen.dart:1264`.
 
 **Aceptación:** INV-08 e INV-06 verdes; las pruebas de discovery existentes cubren el servicio compartido.
+
+### RF-19 · Mínimo iOS 15.0 para Xcode 27
+
+Origen: G6 iOS de RF-00; decisión D-03.
+
+**Hecho:** Xcode 27.0 trata como error cualquier mínimo de iOS por debajo de 15.0. El proyecto declara 13.0, y sus pods, de 9.0 a 13.0 (`build/g6_ios.log` de RF-00).
+
+**Cambios:**
+- `ios/Podfile:2`: `platform :ios, '15.0'`.
+- En el `post_install` de `ios/Podfile`, subir a 15.0 cada pod con un mínimo menor, sin bajar los que ya piden más.
+- `ios/Runner.xcodeproj/project.pbxproj`: `IPHONEOS_DEPLOYMENT_TARGET = 15.0` en las 6 configuraciones (líneas 505, 687, 738, 846, 894 y 945).
+- `ios/Podfile.lock`: lo regenera `pod install`, que corre la persona porque el sandbox no tiene red.
+
+**Aceptación:**
+- G6 iOS y Android en verde, ejecutados por la persona, sin ningún `error:` de deployment target en el log;
+- G0, G1, G2, G4 y G5.
+
+**Impacto:** quien siga en iOS 13 o 14 ya no podrá instalar la app. No queda fuera ningún modelo de iPhone ni de iPad, porque iOS 15 corre en los mismos equipos que iOS 13.
 
 ### RF-20 · Eliminar el catálogo externo de la app
 

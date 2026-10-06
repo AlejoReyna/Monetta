@@ -203,3 +203,35 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Commit:** `b749abb` (catálogo) y el commit que contiene esta entrada. Sin push.
 - **Pendiente para aprobar RF-00:** G6 iOS.
 - **Siguiente paso:** confirmar la causa con la salida detallada del build de iOS; después, la persona elige la vía.
+
+### 2026-10-06 · RF-00 · iteración 3 · APROBADO
+
+- **Agente(s):** orquestador. La persona ejecutó en su terminal el build detallado de iOS.
+- **Base:** `5118da2` (`refactor/rf-00-baseline`).
+- **Archivos del diff:**
+  - `.claude/refactor/PLAN.md`: D-03, D-04, el WP nuevo RF-19, RF-19 como dependencia de RF-14, RF-17 y RF-20, y RF-00 cerrado.
+  - `.claude/refactor/MATRIZ_DE_PRUEBAS.md`: fila de RF-19 y conteos base finales de G5 y G6.
+  - Esta entrada.
+- **Gates:**
+  - **G6 iOS** (ejecutado por la persona): `flutter build ios --simulator --debug --dart-define-from-file=config/dart_defines.ci.json -v > build/g6_ios.log 2>&1` → exit 1. El log confirma la causa (`build/g6_ios.log:55330-55375`):
+    - todos los errores son `error: The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to <9.0–13.0>, but the range of supported deployment target versions is 15.0 to 27.0.x`, en el target `Runner` y en los pods;
+    - el build termina en `** BUILD FAILED **` («Building workspace Runner with scheme Runner and configuration Debug», 1 failure);
+    - no hay errores de otro tipo.
+  - Tras el build, `git status --porcelain` sale vacío.
+  - No hubo cambios de código desde la iteración 2, así que G1, G2, G4, G5 y G7 conservan sus resultados.
+  - **G0 de este commit:** `git diff --check` limpio; `./bin/check_no_secrets.sh` → exit 0.
+- **Base final de RF-00:** la sección 7 de la matriz. G5 de catálogo en verde; G6 Android en verde y G6 iOS en rojo (Xcode 27.0 con mínimo de iOS 13.0).
+- **Hallazgos:**
+  - [Alta] G6 iOS: lo corrige RF-19 (D-03).
+  - Siguen abiertos, fuera del alcance de RF-00:
+    - [Media] webhooks de Rewards sin suscripción declarada (`server.ts:389,411,443`);
+    - [Media] advisory lock del worker de Rewards (`worker.ts:24-44`);
+    - [Baja] 5 pruebas con `skip: true`;
+    - [Baja] Node 26 en local frente a Node 24 en CI;
+    - [Baja] las vulnerabilidades que reporta `npm ci`, sin auditar;
+    - [Baja] plugins que aplican KGP y `flutter_secure_storage` sin Swift Package Manager.
+- **Decisiones de la persona en esta iteración:**
+  - D-03: subir el mínimo a iOS 15.0 en el WP nuevo RF-19. Antes de decidir, la persona preguntó en qué iOS vamos: es iOS 27, e iOS 15 corre en los mismos equipos que iOS 13.
+  - D-04: aprobar RF-00 con G6 iOS en rojo como parte de la base. RF-19 bloquea a RF-14, RF-17 y RF-20 y, por transitividad, a sus dependientes.
+- **Commit:** el que contiene esta entrada, en `refactor/rf-00-baseline`. RF-00 queda `cerrado`. Sin push.
+- **Siguiente paso:** RF-10, el primer WP pendiente con dependencias y decisiones listas; RF-19 va justo después.
