@@ -42,6 +42,32 @@ Shopify, in Spanish, with the action to take.
 The pure-Dart core (`domain`, `data/normalize`, `reco`) is hand-written with **no codegen**
 on purpose, so it compiles and tests before `build_runner` has ever run.
 
+### Backend tests with PostgreSQL (G7)
+
+G7 requires Node 24 and **PostgreSQL 16 running locally on `localhost:5432`**, with
+user `postgres`, password `postgres`, and the administrative database `postgres`.
+The [backend README](services/accounts_orders/README.md#postgresql-16-on-macos-for-g7)
+explains how to install and start it on macOS with Homebrew, without Docker.
+
+Run from the repository root, after installing the backend dependencies:
+
+```bash
+npm --prefix services/accounts_orders ci
+REQUIRE_POSTGRES_TESTS=1 WP01_PG_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres npm --prefix services/accounts_orders test
+```
+
+`REQUIRE_POSTGRES_TESTS=1` makes an unavailable database fail the run rather than skip
+the PostgreSQL tests. G7 requires zero failures and zero skipped tests. The tests
+create, migrate, and delete their own temporary databases.
+
+### PostgreSQL in production
+
+Production requires a separate managed PostgreSQL 16 database, a dedicated role,
+verified TLS, and a private `DATABASE_URL` stored in the hosting platform's secrets.
+The credentials above belong to local test fixtures. See the
+[production configuration guide](services/accounts_orders/README.md#13-postgresql-in-production)
+for permissions, secret injection, migrations, readiness, and backups.
+
 ## Documentation
 
 Every module carries an explainable `README.md` next to its code — purpose, mechanism, the

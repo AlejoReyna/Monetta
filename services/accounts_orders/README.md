@@ -58,17 +58,78 @@ continues to work. A Shopify client secret must never end up in the Flutter app 
 
 ## 4. Local development
 
+### Application database with Docker
+
 ```bash
 cd services/accounts_orders
 cp .env.example .env
 docker compose up -d postgres
 npm install && npm run migrate
-npm test                # in-memory repositories, no network, no database
+npm test                 # PostgreSQL tests are optional outside CI; see G7 below
 npm start                # API on :8082
 ```
 
+This Compose database uses `localhost:5434`, user/password `accounts_orders`, and
+database `accounts_orders`, matching `.env.example`.
+
 Without `SHOPIFY_APP_CLIENT_SECRET` set, every Shopify webhook 401s while account
 registration remains available.
+
+### PostgreSQL 16 on macOS for G7
+
+G7 runs the backend suite with PostgreSQL persistence tests required, matching CI.
+It uses `localhost:5432`, user `postgres`, password `postgres`, and administrative
+database `postgres`. Node 24 and Homebrew are prerequisites for these instructions.
+
+Install PostgreSQL 16 and start it now and automatically at login:
+
+```bash
+brew install postgresql@16
+export PATH="$(brew --prefix postgresql@16)/bin:$PATH"
+brew services start postgresql@16
+```
+
+The `export` makes `psql` available in the current shell; add it to your shell profile
+if the PostgreSQL commands are not already on your PATH.
+
+On the default Homebrew cluster, configure the local test administrator once:
+
+```bash
+psql -d postgres -X -v ON_ERROR_STOP=1 <<'SQL'
+SELECT 'CREATE ROLE postgres WITH LOGIN SUPERUSER'
+WHERE NOT EXISTS (SELECT 1 FROM pg_roles WHERE rolname = 'postgres')
+\gexec
+SET password_encryption = 'scram-sha-256';
+ALTER ROLE postgres WITH LOGIN SUPERUSER PASSWORD 'postgres';
+SQL
+```
+
+Homebrew initially uses `trust` for local connections. To require the password over
+TCP, back up the authentication file, update its localhost `host` rules, and reload:
+
+```bash
+g7_pg_data="$(brew --prefix)/var/postgresql@16"
+cp -p "$g7_pg_data/pg_hba.conf" "$g7_pg_data/pg_hba.conf.before-g7"
+perl -i -pe 's/^(host\s+\S+\s+\S+\s+(?:127\.0\.0\.1\/32|::1\/128)\s+)trust\b/${1}scram-sha-256/' "$g7_pg_data/pg_hba.conf"
+psql -d postgres -X -v ON_ERROR_STOP=1 -c 'SELECT pg_reload_conf();'
+```
+
+Verify the connection and run G7 from the repository root:
+
+```bash
+PGPASSWORD=postgres psql -h localhost -p 5432 -U postgres -d postgres -X -v ON_ERROR_STOP=1 -c 'SELECT version(), current_user;'
+npm --prefix services/accounts_orders ci
+REQUIRE_POSTGRES_TESTS=1 WP01_PG_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres npm --prefix services/accounts_orders test
+```
+
+The tests create their own temporary databases, apply all SQL migrations, and delete
+the databases afterward. The `postgres` role needs administrative privileges for
+these fixtures. No application `.env` or manual migration is needed for G7.
+`REQUIRE_POSTGRES_TESTS=1` makes an unavailable database fail the run; G7 passes only
+with zero failures and zero skipped tests.
+
+To start the service again, use `brew services start postgresql@16`. To stop it and
+disable automatic startup, use `brew services stop postgresql@16`.
 
 ## 5. Registering the webhooks in Shopify
 
@@ -160,8 +221,11 @@ npm test
   deliberately wrong signature to each configured path: a real route answers 401, a missing
   one answers 404.
 
-All of them run against in-memory repositories (`test/support/inMemoryRepositories.ts`) — no
-database, no network.
+The tests listed above use in-memory repositories (`test/support/inMemoryRepositories.ts`)
+and local HTTP fixtures. The `*.pg.test.ts` suites exercise real PostgreSQL persistence
+for account security, webhook recovery, and the rewards ledger. Outside CI, they are
+skipped when PostgreSQL is unavailable unless `REQUIRE_POSTGRES_TESTS=1` is set. Use
+[G7](#postgresql-16-on-macos-for-g7) to require all PostgreSQL tests.
 
 ## 11. Deploy (staging)
 
@@ -226,3 +290,89 @@ regresos y bajas de precio. Está apagada salvo que
 La lista exacta de secretos, procesos, dart-defines y la secuencia de activación
 está en `../../docs/PUSH_NOTIFICATIONS_RUNBOOK.md`. En Fly hay que mantener un proceso
 `app` y uno `worker`; sólo el primero recibe HTTP.
+
+## 13. PostgreSQL in production
+
+Provision a managed **PostgreSQL 16** database for production; Neon is the provider
+used by the staging deployment above. Keep production infrastructure and credentials
+separate from staging and local G7 fixtures. The checked-in `fly.toml` targets
+`monetta-accounts-staging`; a production release needs its own Fly app and configuration.
+
+### Required settings
+
+| Setting | Production requirement |
+|---|---|
+| Database | Dedicated production database with a writable primary endpoint; use the `public` schema for the current unqualified SQL migrations. |
+| Role | Dedicated login with a generated password; database `CONNECT`, schema `USAGE`/`CREATE`, and ownership of the objects created by migrations. No PostgreSQL superuser, role-management, or database-creation privileges are required. |
+| Connection | Provider's remote hostname and port, reachable from the backend. Use a direct endpoint as the baseline for this service. |
+| TLS | `sslmode=verify-full`, with a valid hostname and a trusted server certificate. The application passes this URL to `pg.Pool`; retain certificate verification. |
+| Secrets | Store `DATABASE_URL` in the production hosting application's secret vault. Keep its value out of Git, documentation, logs, shell history, Docker images, and Flutter configuration. |
+| Runtime | Set `NODE_ENV=production`; configure the production Shopify domain and its own server-side secrets for enabled integrations. |
+| Recovery | Configure backup retention and recovery targets with the provider, and verify restoration into a separate database before launch. |
+
+Connection-string shape, with placeholders only:
+
+```text
+DATABASE_URL=postgresql://<app-role>:<url-encoded-password>@<direct-production-db-host>:5432/<production-db>?sslmode=verify-full
+```
+
+Use the provider's actual port if it differs from `5432`. Encode special characters in
+the role/password components as URL components. TLS handling is documented by
+[node-postgres](https://node-postgres.com/features/ssl).
+
+The current code uses the same `DATABASE_URL` for the API and the release migration
+command. That role therefore needs migration ownership/DDL permissions as well as
+application reads, writes, and sequence access. Separate migration and runtime roles
+require explicit deployment wiring; there is currently no separate migration URL setting.
+
+The Rewards maintenance worker uses session advisory locks, which are incompatible
+with transaction pooling ([PgBouncer compatibility](https://www.pgbouncer.org/features.html)).
+A direct endpoint avoids that pooler limitation. The current worker also acquires and
+releases its session lock through `pool.query`, which can select different connections;
+before enabling it in production, pin acquisition, maintenance, and release to the same
+checked-out client. A direct URL alone does not resolve that code limitation.
+
+### Injecting the secret without exposing it
+
+Use a trusted terminal with shell tracing disabled. The following Bash/zsh example
+reads the URL without echoing it and sends it through standard input to the production
+Fly app. Replace only the app-name placeholder in the command; enter the URL at the prompt:
+
+```bash
+set +x
+printf 'Production DATABASE_URL (hidden): ' >&2
+IFS= read -r -s monetta_prod_database_url
+printf '\n' >&2
+printf 'DATABASE_URL=%s\n' "$monetta_prod_database_url" | fly secrets import --app '<production-fly-app>' --stage
+unset monetta_prod_database_url
+```
+
+`--stage` stores the secret for the next deployment. Inspect secret names and status
+with `fly secrets list --app '<production-fly-app>'`; it does not return their values.
+See [Fly secrets](https://docs.fly.io/apps/secrets) and
+[`fly secrets import`](https://docs.fly.io/flyctl/cmd/fly_secrets_import).
+
+### Migrations and verification
+
+Use the service Dockerfile, which includes the SQL files in the runtime image, and
+configure the production release command as `node dist/db/migrate.js`. Run one
+migration process at a time before the new API receives traffic. `schema_migrations`
+tracks applied files, and each new migration runs in a transaction. Preserve existing
+migrations and add new files for schema changes.
+
+After a production release, verify the API's database readiness:
+
+```bash
+curl -fsS 'https://<production-api-host>/readyz'
+```
+
+Expect `{"status":"ok","database":"up"}`. `/livez` and `/healthz` confirm only that
+the HTTP service is alive. Run G7 against the local test instance; its fixtures create
+and delete databases.
+
+The base application pool currently allows 10 connections, and the webhook claim pool
+adds up to 4 per API process. Budget for every API replica, worker, release process,
+and administrative session within the provider's connection limit. Monitor readiness,
+connection exhaustion, failed migrations, and backup/restore health. When rotating the
+database password, update the hosting secret and restart the affected processes before
+revoking the previous credential.

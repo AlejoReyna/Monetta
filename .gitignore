@@ -15,6 +15,9 @@ scratch/
 *.swp
 .DS_Store
 
+# Claude Code — local sandbox settings stay on this machine
+.claude/settings.local.json
+
 # iOS
 ios/Pods/
 ios/.symlinks/
