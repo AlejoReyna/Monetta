@@ -20,6 +20,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | ID | Decisión | Recomendación | Estado | Bloquea |
 |---|---|---|---|---|
 | D-01 | Refactor in situ, no rebuild | — | **tomada, 2026-10-06** | — |
+| D-02 | Sacar de RF-00 lo que depende de dispositivos o de la persona | Mover DEV-03 al paso 0 de RF-17; webhooks a RF-23, instalaciones a RF-60 y cuentas propias a RF-62 | **tomada, 2026-10-06:** como se recomienda | RF-00 |
 | E1 | ¿Lanzar tras las fases 1–2 y refactorizar sobre el producto vivo? | Sí | **tomada, 2026-10-06:** sí; las fases 3+ se hacen con la app publicada | Orden de las fases 3+ |
 | E2 | Eliminar del árbol el código del catálogo externo, con tag forense | Sí | **tomada, 2026-10-06:** sí, con tag forense (`baseline/48a6786` sirve de referencia) | RF-20, RF-21 |
 | E3 | Autoridad del catálogo en producción | Sólo `storefrontDirect`; el espejo queda experimental | **tomada, 2026-10-06:** sólo `storefrontDirect`; el espejo queda experimental | RF-42, RF-71 |
@@ -44,7 +45,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 
 | WP | Título | Fase | Agentes | Depende de | Decisiones | Estado |
 |---|---|---|---|---|---|---|
-| RF-00 | Baseline y entorno | 0 | orquestador | — | E1, E2, E3, E5 (recoger; no bloquean la medición inicial) | bloqueado: G5 de catálogo, G6, DEV-03 e inventario (webhooks, instalaciones, cuentas) |
+| RF-00 | Baseline y entorno | 0 | orquestador | — | E1, E2, E3, E5 (recoger; no bloquean la medición inicial) | bloqueado: G6 iOS (Xcode 27.0 sólo acepta iOS 15.0 o más; el proyecto declara 13.0) |
 | RF-10 | CI: pruebas del espejo y Makefile | 1 | orquestador | RF-00 | — | pendiente |
 | RF-11 | Ficha: producto que desaparece | 1 | test-engineer → flutter-implementer | RF-00 | — | pendiente |
 | RF-12 | Contrato del ID de pedido en Rewards | 1 | test-engineer → backend + flutter | RF-00 | — | pendiente |
@@ -57,7 +58,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-20 | Eliminar el catálogo externo de la app | 2 | flutter-implementer | RF-16 | E2 | pendiente |
 | RF-21 | Eliminar el catálogo externo del admin backend | 2 | backend-implementer | RF-00 | E2 | pendiente |
 | RF-22 | Dependencias sin uso, Makefile y docs | 2 | flutter-implementer | RF-20 | — | pendiente |
-| RF-23 | Retirar `functions/` | 2 | backend-implementer | RF-10 | Confirmar despliegues (RF-00) | pendiente |
+| RF-23 | Retirar `functions/` | 2 | backend-implementer | RF-10 | Inventario de webhooks de ambas tiendas (D-02) | pendiente |
 | RF-30 | Composición fuera de `main.dart` y sobre el Navigator | 3 | flutter-implementer | RF-22 | E1, E11 | pendiente |
 | RF-31 | `AppDestination` y resolver de notificaciones | 3 | test-engineer → flutter-implementer | RF-30, RF-14 | E6 | pendiente |
 | RF-32 | `ShopperScope` y `ChangeAccountScope` | 3 | flutter-implementer | RF-30 | E11 | pendiente |
@@ -69,9 +70,9 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-50 | Separar `CatalogStore` tras una fachada | 5 | test-engineer → flutter-implementer | RF-43 | E4, E10 | pendiente |
 | RF-51 | `CompleteCheckout` y cierre de la DB | 5 | flutter-implementer | RF-50 | — | pendiente |
 | RF-52 | ViewModel del checkout | 5 | flutter-implementer | RF-51 | — | pendiente |
-| RF-60 | `Money` y esquema v8 | 6 | test-engineer → flutter + backend | RF-50 | — | pendiente |
+| RF-60 | `Money` y esquema v8 | 6 | test-engineer → flutter + backend | RF-50 | Inventario de instalaciones reales y su versión (D-02) | pendiente |
 | RF-61 | Modelo de dominio de pedidos y `OrderId` | 6 | flutter-implementer | RF-12 | — | pendiente |
-| RF-62 a RF-67 | Cuenta y pedidos, Rewards, notificaciones, admin, funciones de nicho, atribución | 6 | según el WP | RF-52 | E5, E8, E9 | pendiente |
+| RF-62 a RF-67 | Cuenta y pedidos, Rewards, notificaciones, admin, funciones de nicho, atribución | 6 | según el WP | RF-52 | E5, E8, E9; inventario de cuentas propias para RF-62 (D-02) | pendiente |
 | RF-70 a RF-72 | Backend: dividir `admin/routes.ts`, decisión del espejo, capacidades | 7 | backend-implementer | RF-13 | E3 | pendiente |
 | RF-80 a RF-81 | 404 de la galería; retiro operativo autorizado | 8 | según el WP | — | E12 | pendiente |
 
@@ -102,8 +103,10 @@ Los WPs de las fases 4 a 8 se detallan con este mismo formato antes de empezarlo
    - configuración real de producción;
    - si existen instalaciones reales y en qué versión;
    - cuentas propias reales.
+
+   Por D-02, RF-00 sólo registra los despliegues vivos y la configuración. Las suscripciones de webhooks pasan a requisito de RF-23, las instalaciones reales a RF-60 y las cuentas propias a RF-62.
 7. **Registrar las decisiones E1, E2, E3 y E5.**
-8. **Capturas de referencia para DEV-03,** las mismas pantallas y ajustes que se compararán en RF-17.
+8. **Capturas de referencia para DEV-03.** Por D-02 se movieron al paso 0 de RF-17.
 
 **Salida:** entrada RF-00 en la bitácora con los resultados y conteos base de cada suite, inventario, decisiones E1/E2/E3/E5 de la persona y estado de los demás entregables. Los gates no ejecutados se registran como tales y no permiten declarar el WP aprobado.
 
@@ -237,7 +240,9 @@ Lo pidió la persona.
 0. **Diagnóstico con la persona.**
    - Preguntar en qué dispositivo, pantalla y ajuste de texto lo ve.
    - Si la persona usa el zoom de pantalla de iOS o el tamaño de visualización de Android, todo se ve más grande, y eso no es un defecto de la app.
-   - Revisar las capturas de RF-00.
+   - **Capturas de referencia DEV-03** (movidas desde RF-00 por D-02), antes de cualquier cambio de tipografía:
+     - `test-engineer` escribe un `integration_test` que recorre inicio, colección, ficha, bolsa y cuenta, y captura cada pantalla con texto predeterminado, grande y máximo;
+     - la persona lo corre en un iPhone pequeño, un iPhone Pro Max y un Android, en simulador o dispositivo, porque el sandbox no puede operar simuladores.
 1. **`test-engineer` escribe las pruebas objetivo** UI-01, UI-02 y UI-03, a 1.0, 1.3 y la escala máxima de E-T1, en teléfonos de 375×812 y 440×956. Registra cuáles fallan hoy.
 2. **La persona decide E-T1 y E-T2.**
    - Las fuentes se obtienen de su fuente oficial (Google Fonts o el repositorio del autor), con su `OFL.txt`.
@@ -249,7 +254,7 @@ Lo pidió la persona.
    - La política de E-T1 en `MaterialApp.builder` con `MediaQuery.withClampedTextScaling`, y el tope de titulares con `TextScaler.clamp`.
    - Corrección de los contenedores que desborden.
    - Las fuentes variables sólo se aceptan con `FontVariation` y verificadas en dispositivo; si no, TTF estáticos.
-4. **Gates:** G6; G8 con DEV-03, comparado contra RF-00; UI-04, con los goldens nuevos aprobados por la persona.
+4. **Gates:** G6; G8 con DEV-03, comparado contra las capturas del paso 0; UI-04, con los goldens nuevos aprobados por la persona.
 
 **Aceptación:**
 - UI-01 a UI-04 en verde;
@@ -308,7 +313,7 @@ Origen: R04, H15.
 
 Origen: R07.
 
-**Requisito previo:** RF-00 confirmó que ninguna suscripción de webhook ni ningún despliegue usa Functions.
+**Requisito previo (D-02):** la persona confirma que ninguna suscripción de webhook ni ningún despliegue usa Functions. Para eso revisa Monetta Staging, Monetta real y sus apps instaladas, y registra topic, URL de destino y app responsable. RF-00 sólo registró que no hay Functions vivas conocidas y que ningún `shopify/*.toml` apunta a ellas.
 
 **Cambios:** retirar el directorio, `firebase.json` en lo que toque a Functions, el job del CI y `make test-services`.
 

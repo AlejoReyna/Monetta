@@ -5,6 +5,7 @@ El orquestador la sigue y la actualiza; los subagentes no editan este archivo.
 **Reglas generales**
 
 - **Evidencia.** Cuenta sólo la salida de un comando que el **auditor** ejecutó en su propia sesión. Un reporte de subagente no es evidencia.
+  - **Excepción de G6.** El sandbox no puede compilar Android ni iOS (bitácora de RF-00). La persona ejecuta los comandos de G6 en su terminal y pega la salida. La bitácora lo registra como «ejecutado por la persona», con las líneas finales, y el auditor revisa los cambios que el build deje en el árbol.
 - **Gates no ejecutados.** Un gate que no se ejecutó nunca cuenta como aprobado. Si el sandbox o el entorno lo impiden, márcalo «no ejecutado» y detente.
 - **Conteo de pruebas.**
   - RF-00 registra el conteo base de cada suite.
@@ -88,7 +89,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | UI-04 | OBJ | Goldens de referencia a escala 1.0 con las fuentes nuevas, aprobados por la persona | RF-17 | — |
 | DEV-01 | Manual | iOS: login con Shopify, checkout sheet, push en frío y en caliente, cierre de sesión | RF-14, RF-31, RF-51, RF-52, RF-62 | — |
 | DEV-02 | Manual | Android: lo mismo que DEV-01 | Igual que DEV-01 | — |
-| DEV-03 | Manual | Tipografía: capturas en iPhone pequeño, iPhone Pro Max y un Android, con texto predeterminado, grande y máximo; comparadas con las de RF-00 | RF-17 | — |
+| DEV-03 | Manual | Tipografía: capturas en iPhone pequeño, iPhone Pro Max y un Android, con texto predeterminado, grande y máximo; comparadas con las de referencia del paso 0 de RF-17 | RF-17 | — |
 
 ## 4. Asignación de filas por WP
 
@@ -134,7 +135,7 @@ Las filas de las fases 6 a 8 se añaden al planear cada WP, antes de empezarlo.
 1. Tres dispositivos: iPhone pequeño, iPhone Pro Max y un Android.
 2. Tres ajustes de texto del sistema: predeterminado, grande y máximo.
 3. Pantallas: inicio, colección, ficha, bolsa y cuenta.
-4. Comparar con las capturas de RF-00.
+4. Comparar con las capturas de referencia del paso 0 de RF-17.
 
 La persona aprueba o lista lo que sigue viéndose grande.
 

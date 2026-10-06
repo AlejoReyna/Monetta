@@ -159,3 +159,47 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   3. DEV-03: capturas de referencia.
   4. Inventario de webhooks, instalaciones reales y ubicación de las cuentas propias.
 - **Siguiente paso:** resolver los pendientes y cerrar RF-00 en la iteración 2. RF-10 a RF-18 esperan a que RF-00 esté aprobado.
+
+### 2026-10-06 · RF-00 · iteración 2 · BLOQUEADO
+
+- **Agente(s):** orquestador. La persona ejecutó en su terminal el refresco del catálogo y G6.
+- **Base:** `a05639b`; el catálogo quedó en `b749abb` (`refactor/rf-00-baseline`).
+- **Archivos del diff:**
+  - `assets/catalog/catalog.json`, en el commit `b749abb`.
+  - En este commit: `android/.gitignore` (añade `.kotlin/`), `.claude/refactor/PLAN.md` (D-02, requisitos movidos y estado de RF-00), `.claude/refactor/MATRIZ_DE_PRUEBAS.md` (excepción de G6; DEV-03 apunta al paso 0 de RF-17) y esta entrada.
+- **Entorno:**
+  - La persona instaló cmdline-tools 23.0, la plataforma `android-36` y el NDK `28.2.13676358`.
+  - `flutter doctor -v` en el sandbox: detecta el SDK y Java (JBR 25 de Android Studio), pero dice «Android license status unknown», que no se puede verificar desde aquí. El proyecto usa Gradle 9.1.0 y AGP 9.0.1, compatibles con Java 25.
+  - La persona ejecutó `sudo xcodebuild -runFirstLaunch` antes de G6. Sólo hay un Xcode instalado, el 27.0.
+  - `xcrun simctl list runtimes` no conecta con CoreSimulatorService dentro del sandbox. `emulator -list-avds` → `Medium_Phone_API_37.0`.
+- **Gates:**
+  - **G5 catálogo** `dart run bin/verify_catalog_snapshot.dart` → exit 0: «Catálogo válido: 103 productos, 340 imágenes». La persona refrescó el snapshot (2026-10-06) con `make refresh-catalog`.
+    - Revisión: salieron 33 productos y no entró ninguno. De esos 33, 31 tienen vendor «Monetta» (26 como «Monetta» y 5 como «Monetta », con espacio final), 1 Guess y 1 Steve Madden. Siguen las mismas 21 colecciones.
+    - La descarga está completa: el script exige HTTP 200 y para en la primera página con menos de 250 productos, y aquí hubo una sola.
+    - `git diff --check` limpio; `./bin/check_no_secrets.sh` → exit 0.
+  - **G4 Flutter** con el catálogo nuevo, `flutter test --no-pub --reporter expanded` → exit 0; 705 aprobadas y 5 omitidas, igual que la base.
+  - **G6 Android** (ejecutado por la persona): `flutter build apk --debug --flavor staging --dart-define-from-file=config/dart_defines.ci.json` → «✓ Built build/app/outputs/flutter-apk/app-staging-debug.apk» en 588.2 s. Gradle instaló por su cuenta Android SDK Platform 34 y 35 y CMake 3.22.1.
+  - **G6 iOS** (ejecutado por la persona): `flutter build ios --simulator --debug --dart-define-from-file=config/dart_defines.ci.json` → **falla** con «Failed to build iOS app» y «Encountered error while building for simulator».
+    - `pod install` tardó 801.4 s y Xcode, 15.5 s.
+    - Los únicos problemas listados son de «Target Integrity (Xcode)»: «The iOS Simulator deployment target 'IPHONEOS_DEPLOYMENT_TARGET' is set to 13.0 […] but the range of supported deployment target versions is 15.0 to 27.0.x», en `ios/Runner.xcodeproj`, y en `ios/Pods/Pods.xcodeproj` con valores de 9.0 a 13.0.
+    - El proyecto declara 13.0 en `ios/Podfile:2` y en las 6 configuraciones de `ios/Runner.xcodeproj/project.pbxproj`. El `post_install` sólo llama a `flutter_additional_ios_build_settings`.
+    - Causa probable, por confirmar con la salida detallada (`-v`): Xcode 27.0 no acepta mínimos de iOS por debajo de 15.0.
+  - **Efectos de los builds en el árbol:** sólo `android/.kotlin/`, el marcador de sesión del daemon de Kotlin, que ninguna regla ignoraba; se añadió `.kotlin/` a `android/.gitignore`. `pod install` no cambió `ios/Podfile.lock`.
+- **Hallazgos:**
+  - [Alta] G6 iOS no compila con Xcode 27.0, el único instalado. Bloquea la aprobación de RF-00 y el cierre de cualquier WP con G6. Vías posibles, a decidir por la persona:
+    - un WP que suba el mínimo a iOS 15.0;
+    - instalar la versión de Xcode del CI;
+    - usar el job `ios-compile` del CI como evidencia.
+  - [Baja] Avisos del build de Android:
+    - `firebase_analytics`, `firebase_remote_config`, `package_info_plus` y `share_plus` aplican el Kotlin Gradle Plugin («Future versions of Flutter will fail to build»);
+    - `flutter_secure_storage` no soporta Swift Package Manager.
+
+    No afectan a Flutter 3.44.8, pero importarán al actualizar la toolchain.
+  - **Resuelto:** el hallazgo Alta de la iteración 1 sobre G5 de catálogo, con `b749abb`.
+- **Decisiones de la persona en esta iteración:**
+  - D-02: DEV-03 pasa al paso 0 de RF-17; los webhooks, a RF-23; las instalaciones reales, a RF-60, y las cuentas propias, a RF-62.
+  - Commit del catálogo refrescado.
+  - G6 se ejecuta en su terminal.
+- **Commit:** `b749abb` (catálogo) y el commit que contiene esta entrada. Sin push.
+- **Pendiente para aprobar RF-00:** G6 iOS.
+- **Siguiente paso:** confirmar la causa con la salida detallada del build de iOS; después, la persona elige la vía.
