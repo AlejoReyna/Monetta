@@ -32,6 +32,9 @@ primary_region = "dfw"
 [env]
   PORT = "8082"
   NODE_ENV = "production"
+  # Rewards is off unless enabled explicitly; staging runs it for testing.
+  # Redemption stays off (REWARDS_REDEMPTION_ENABLED defaults to false).
+  REWARDS_ENABLED = "true"
 
 [processes]
   app = "node dist/api/server.js"

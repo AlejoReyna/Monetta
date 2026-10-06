@@ -10,7 +10,7 @@ const ORDER = '9001';
 
 function serviceWith(repo?: InMemoryRewardsRepository, env?: RewardsEnv): { service: RewardsService; repo: InMemoryRewardsRepository } {
   const r = repo ?? new InMemoryRewardsRepository();
-  const e = env ?? { ...loadRewardsEnv({} as NodeJS.ProcessEnv), redemptionEnabled: true };
+  const e = env ?? { ...loadRewardsEnv({} as NodeJS.ProcessEnv), rewardsEnabled: true, redemptionEnabled: true };
   return { service: new RewardsService({ rewards: r, env: e, discounts: new DisabledDiscountAdapter() }), repo: r };
 }
 
@@ -180,7 +180,7 @@ describe('rewards service (paquete F)', () => {
 
   it('canje deshabilitado tras bandera: quotes informan, redemptions bloquean', async () => {
     const off = serviceWith(undefined, {
-      ...loadRewardsEnv({} as NodeJS.ProcessEnv), redemptionEnabled: false,
+      ...loadRewardsEnv({} as NodeJS.ProcessEnv), rewardsEnabled: true, redemptionEnabled: false,
     });
     const q = await off.service.quote(CUSTOMER, {
       cartRevision: 'rev-1', lines: [{ quantity: 1, unitPriceCents: 90000, eligible: true }],

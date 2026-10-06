@@ -24,7 +24,9 @@ function int(value: string | undefined, fallback: number): number {
 
 export function loadRewardsEnv(env: NodeJS.ProcessEnv = process.env): RewardsEnv {
   return {
-    rewardsEnabled: bool(env.REWARDS_ENABLED, true),
+    // Programa apagado si falta la variable: montar rutas y puentes de
+    // webhook emite creditos, asi que cada entorno lo enciende explicitamente.
+    rewardsEnabled: bool(env.REWARDS_ENABLED, false),
     // Canje apagado por defecto: solo se enciende tras la prueba del adaptador
     // en el plan Shopify real. Ver docs del paquete F.
     redemptionEnabled: bool(env.REWARDS_REDEMPTION_ENABLED, false),

@@ -45,11 +45,7 @@ export interface AccountsOrdersConfig {
    * still authenticate via /accounts/login.
    */
   readonly legacyAccountRegistrationEnabled: boolean;
-  // Paquete F — Rewards (banderas; canje apagado por defecto).
-  readonly rewardsEnabled: boolean;
-  readonly rewardsRedemptionEnabled: boolean;
-  readonly rewardsReservationTtlMinutes: number;
-  readonly rewardsQuoteTtlMinutes: number;
+  // Rewards (paquete F) lee sus banderas en src/rewards/rewardsConfig.ts.
 }
 
 function int(value: string | undefined, fallback: number): number {
@@ -149,9 +145,5 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
       env.LEGACY_ACCOUNT_REGISTRATION_ENABLED,
       true,
     ),
-    rewardsEnabled: bool(env.REWARDS_ENABLED, true),
-    rewardsRedemptionEnabled: bool(env.REWARDS_REDEMPTION_ENABLED, false),
-    rewardsReservationTtlMinutes: int(env.REWARDS_RESERVATION_TTL_MINUTES, 30),
-    rewardsQuoteTtlMinutes: int(env.REWARDS_QUOTE_TTL_MINUTES, 10),
   };
 }
