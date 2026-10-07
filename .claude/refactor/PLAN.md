@@ -55,7 +55,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-12 | Contrato del ID de pedido en Rewards | 1 | test-engineer → backend + flutter | RF-00 | — | cerrado |
 | RF-13 | Rewards apagado: JSON 404 y estado «no disponible» | 1 | test-engineer → backend + flutter | RF-00 | E7 | cerrado |
 | RF-14 | Timeouts y notificaciones fuera del arranque | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | D-05 (G8) | bloqueado: G6 y G8 de la persona |
-| RF-15 | Parsers estrictos de Rewards | 1 | test-engineer → flutter-implementer | RF-00 | — | pendiente |
+| RF-15 | Parsers estrictos de Rewards | 1 | test-engineer → flutter-implementer | RF-00 | — | cerrado |
 | RF-16 | Caracterización de reglas vigentes | 1 | test-engineer | RF-00 | — | pendiente |
 | RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | E-T1, E-T2 | pendiente |
 | RF-18 | Extracciones D02 y D03 | 1 | flutter-implementer | RF-00 | — | pendiente |

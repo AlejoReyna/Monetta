@@ -159,6 +159,12 @@ Si la respuesta no trae un `error` en JSON, el cliente lo clasifica así:
 - `5xx` → `service_unavailable`;
 - fallo de transporte → `network`.
 
+`invalid_response` es un código del cliente, no del servidor: se usa cuando
+una respuesta 200/201 no cumple el contrato (cuerpo que no es JSON, no es
+objeto, falta un campo obligatorio, un tipo es incorrecto o una fecha no se
+puede leer). La app lo muestra como servicio caído («no responde en este
+momento»), no como fallo de conexión.
+
 Textos UI en `RewardsApiError.friendly` / `RewardsException.friendly`.
 
 ## 5. Flutter: lo que F entrega (listo para importar)

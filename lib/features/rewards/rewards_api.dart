@@ -70,6 +70,20 @@ class RewardsApi {
     throw RewardsApiError(code ?? _codeForStatus(status), message);
   }
 
+  /// Decodes a success body that must be a JSON object. Anything else (HTML
+  /// from a proxy, a list, an empty body) is a contract violation, not a
+  /// transport failure.
+  static Map<String, dynamic> _decodeObject(String body) {
+    final Object? json;
+    try {
+      json = jsonDecode(body);
+    } on FormatException {
+      throw const RewardsContractError('body');
+    }
+    if (json is Map<String, dynamic>) return json;
+    throw const RewardsContractError('body');
+  }
+
   static String _codeForStatus(int status) {
     if (status == 401 || status == 403) return 'unauthorized';
     if (status == 404) return 'not_found';
@@ -86,9 +100,7 @@ class RewardsApi {
       ),
     );
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
-    return RewardsSummary.fromJson(
-      jsonDecode(res.body) as Map<String, dynamic>,
-    );
+    return RewardsSummary.fromJson(_decodeObject(res.body));
   }
 
   Future<({List<RewardsMovement> movements, String? nextCursor})> activity({
@@ -104,12 +116,31 @@ class RewardsApi {
     final headers = await _headers();
     final res = await _send(() => _client.get(uri, headers: headers));
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
-    final json = jsonDecode(res.body) as Map<String, dynamic>;
-    final items = (json['movements'] as List? ?? [])
-        .whereType<Map<String, dynamic>>()
-        .map(RewardsMovement.fromJson)
-        .toList(growable: false);
-    return (movements: items, nextCursor: json['nextCursor'] as String?);
+    final json = _decodeObject(res.body);
+    final rawMovements = json['movements'];
+    if (rawMovements is! List) throw const RewardsContractError('movements');
+    // One invalid movement invalidates the whole page: dropping it silently
+    // would show a history that disagrees with the server.
+    final items = <RewardsMovement>[];
+    for (var i = 0; i < rawMovements.length; i++) {
+      final raw = rawMovements[i];
+      if (raw is! Map<String, dynamic>) {
+        throw RewardsContractError('movements[$i]');
+      }
+      try {
+        items.add(RewardsMovement.fromJson(raw));
+      } on RewardsContractError catch (error) {
+        throw RewardsContractError('movements[$i].${error.field}');
+      }
+    }
+    final nextCursor = json['nextCursor'];
+    if (nextCursor != null && nextCursor is! String) {
+      throw const RewardsContractError('nextCursor');
+    }
+    return (
+      movements: List<RewardsMovement>.unmodifiable(items),
+      nextCursor: nextCursor as String?,
+    );
   }
 
   static final RegExp _numericOrderIdPattern = RegExp(r'^[0-9]+$');
@@ -149,9 +180,7 @@ class RewardsApi {
     final headers = await _headers();
     final res = await _send(() => _client.get(uri, headers: headers));
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
-    return OrderRewardsState.fromJson(
-      jsonDecode(res.body) as Map<String, dynamic>,
-    );
+    return OrderRewardsState.fromJson(_decodeObject(res.body));
   }
 
   Future<RewardsQuote> quote({
@@ -172,9 +201,7 @@ class RewardsApi {
       ),
     );
     if (res.statusCode != 201) _throwFor(res.statusCode, res.body);
-    return RewardsQuote.fromJson(
-      jsonDecode(res.body) as Map<String, dynamic>,
-    );
+    return RewardsQuote.fromJson(_decodeObject(res.body));
   }
 
   Future<Map<String, dynamic>> redeem({

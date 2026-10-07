@@ -510,3 +510,43 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Estado:** RF-14 sigue `bloqueado: G6 y G8 de la persona` en `PLAN.md`. Cuando la persona ejecute G6 y G8, se registran aquí y el WP pasa a `cerrado`. Si algo falla, la corrección va en un commit nuevo sobre la misma rama.
 - **Rama:** `refactor/rf-14-timeouts-notificaciones`. Los WPs siguientes parten de esta rama.
 - **Fuera del commit:** `.claude/skills/refactor/SKILL.md` (cambio de la persona) y `.claude/settings.local.json`.
+
+### 2026-10-07 · RF-15 · iteración 1 · CERRADO
+
+- **Agentes:** `test-engineer` (CONTRACT-03) → `flutter-implementer`. Base `1072f10`, rama `refactor/rf-15-parsers-rewards`. Lanzado por el bucle `/loop /refactor siguiente`.
+- **Campos obligatorios:** se fijaron con el contrato (`REWARDS_CONTRACT_V1.md` §3) y el servidor (`service.ts:44-70`, `pgRewardsRepository.ts:94-103`). `balance.nextExpiry` puede ser `null`, y `orderShopifyId` y `reason` de un movimiento también.
+- **Fase roja (verificada por el auditor):**
+  - El archivo nuevo sólo no compilaba por la falta de `RewardsContractError`: 14 issues de analyze, todos derivados de esa clase.
+  - Con un stub temporal de la clase (revertido con `git checkout`), las pruebas fallaron por comportamiento:
+    - los DTO devolvían valores rellenados con `now`, `0` o `"null"` (40 casos);
+    - lanzaban `TypeError` o `FormatException` sin envolver;
+    - `activity` descartaba en silencio el movimiento inválido;
+    - la UI mostraba «Revisa tu conexión».
+- **Diff:**
+  - `rewards_models.dart`:
+    - `RewardsContractError extends RewardsApiError` (`invalid_response`, `field`, sin valores del cuerpo);
+    - lectores estrictos;
+    - texto amigable.
+  - `rewards_api.dart`:
+    - `_decodeObject`;
+    - `activity` valida cada movimiento (`movements[i].campo`) y `nextCursor`.
+  - `REWARDS_CONTRACT_V1.md` §4 documenta `invalid_response`.
+  - Pruebas: nuevo `rewards_strict_parsing_contract_test.dart`, con 86 pruebas. En `rewards_components_test.dart`, el cuerpo parcial se completó según el contrato y la aserción quedó igual.
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo los archivos listados; `git diff --check` limpio.
+  - G1 → 310 archivos, 0 cambiados.
+  - G2 → «No issues found!».
+  - G3 → `test/features/rewards` `+120: All tests passed!`.
+  - G4 → `+835 ~5: All tests passed!` (la base era 745).
+  - G5 → catálogo válido (103 productos, 340 imágenes); secretos OK.
+  - G6–G8 → no aplican.
+- **Checklist:**
+  - el alcance es el del encargo;
+  - el contrato HTTP no cambia: sólo se endurece la lectura en el cliente;
+  - el error no lleva valores del cuerpo;
+  - estado recuperable distinto de «sin conexión»;
+  - sin `skip` ni `// ignore`.
+- **Hallazgos:**
+  - [Baja] `redeem` y `releaseRedemption` siguen haciendo `jsonDecode(...) as Map` sin envolver, así que un 200 inválido se mostraría como `network`. Hoy el canje está apagado (`409 redemption_disabled`). Conviene cubrirlo cuando se active el canje.
+  - [Baja] `program` e `incentives` conservan el cast antiguo: un tipo incorrecto lanzaría `TypeError` y se mostraría como `network`. Es comportamiento vigente y queda fuera de R15.
+- **Veredicto:** aprobado y cerrado. Commit en `refactor/rf-15-parsers-rewards`.
