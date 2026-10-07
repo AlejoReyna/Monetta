@@ -474,7 +474,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.catalog,
         bagCount: widget.bagCount,
-        surfaceColor: context.monettaColors.navigationSurface,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
