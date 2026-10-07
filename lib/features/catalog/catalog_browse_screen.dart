@@ -74,6 +74,14 @@ class _CatalogFilters {
       (inStockOnly ? 1 : 0);
 }
 
+/// Gap at each end of the header, outside the 48pt button slots.
+const double _kHeaderEdgeInset = 4;
+
+/// Width reserved on both sides of the title: the two end buttons' slots plus
+/// the edge gap. The leading side reserves the same, empty or not.
+const double _kHeaderSlotWidth =
+    _kHeaderEdgeInset + BoutiqueSpace.tapTarget * 2;
+
 const Map<String, List<String>> _bagTypeTerms = {
   'Crossbody': ['crossbody', 'bandolera', 'messenger'],
   'Tote': ['tote'],
@@ -343,37 +351,57 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleSpacing: BoutiqueSpace.gutter,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Productos',
-              style: boutiqueDisplay(24, color: context.boutique.ink),
-            ),
-            const SizedBox(height: 2),
-            // Counted from the very list the grid renders below.
-            CatalogResultCount(
-              count: visibleItems.length,
-              noun: 'pieza',
-              pluralNoun: 'piezas',
-            ),
-          ],
+        // One button at the start and two at the end: a centred title meets
+        // the end buttons first and is pushed off centre. Both sides reserve
+        // the same slot, so "Productos" stays on the screen's centre.
+        centerTitle: true,
+        titleSpacing: BoutiqueSpace.sm,
+        leadingWidth: _kHeaderSlotWidth,
+        leading: const _HeaderBackSlot(),
+        // The FittedBox only shrinks the block when it does not fit between
+        // the slots; it never truncates it or runs it under a button.
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Productos',
+                textAlign: TextAlign.center,
+                style: boutiqueDisplay(24, color: context.boutique.ink),
+              ),
+              const SizedBox(height: 2),
+              // Counted from the very list the grid renders below.
+              CatalogResultCount(
+                count: visibleItems.length,
+                noun: 'pieza',
+                pluralNoun: 'piezas',
+              ),
+            ],
+          ),
         ),
         actions: [
-          IconButton(
-            key: const Key('catalog-search-button'),
-            tooltip: 'Buscar productos',
-            onPressed: () => openSearch(context),
-            icon: const Icon(Icons.search_rounded, size: 27),
+          SizedBox.square(
+            dimension: BoutiqueSpace.tapTarget,
+            child: Center(
+              child: IconButton(
+                key: const Key('catalog-search-button'),
+                tooltip: 'Buscar productos',
+                onPressed: () => openSearch(context),
+                icon: const Icon(Icons.search_rounded, size: 27),
+              ),
+            ),
           ),
-          _FilterIconButton(
-            activeCount: _filters.activeCount,
-            onPressed: _openFilters,
+          SizedBox.square(
+            dimension: BoutiqueSpace.tapTarget,
+            child: Center(
+              child: _FilterIconButton(
+                activeCount: _filters.activeCount,
+                onPressed: _openFilters,
+              ),
+            ),
           ),
-          const SizedBox(width: 6),
+          const SizedBox(width: _kHeaderEdgeInset),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(60),
@@ -445,25 +473,30 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
-                    BoutiqueSpace.gutter,
-                    BoutiqueSpace.lg,
-                    BoutiqueSpace.gutter,
-                    BoutiqueSpace.xxl,
-                  ),
-                  sliver: SliverGrid(
-                    gridDelegate: productGridDelegate(
-                      context,
-                      availableWidth: MediaQuery.sizeOf(context).width -
-                          BoutiqueSpace.gutter * 2,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _BrowseTile(
-                        key: ValueKey(visibleItems[index].sourceScopedId),
-                        item: visibleItems[index],
-                        openExternalLink: widget.openExternalLink,
+                  padding: const EdgeInsets.only(top: BoutiqueSpace.lg),
+                  // Photos run to the screen edges, so there is no horizontal
+                  // or bottom padding (each tile carries its own trailing
+                  // air). The safe area still applies sideways, for a notch
+                  // in landscape.
+                  sliver: SliverSafeArea(
+                    top: false,
+                    bottom: false,
+                    sliver: SliverLayoutBuilder(
+                      builder: (context, constraints) => SliverGrid(
+                        gridDelegate: productGridDelegate(
+                          context,
+                          availableWidth: constraints.crossAxisExtent,
+                          variant: ProductTileVariant.edgeToEdge,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => _BrowseTile(
+                            key: ValueKey(visibleItems[index].sourceScopedId),
+                            item: visibleItems[index],
+                            openExternalLink: widget.openExternalLink,
+                          ),
+                          childCount: visibleItems.length,
+                        ),
                       ),
-                      childCount: visibleItems.length,
                     ),
                   ),
                 ),
@@ -515,6 +548,24 @@ void openCatalogBrowse(
   );
 }
 
+class _HeaderBackSlot extends StatelessWidget {
+  const _HeaderBackSlot();
+
+  @override
+  Widget build(BuildContext context) {
+    final canLeave = ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: canLeave
+          ? const Padding(
+              padding: EdgeInsetsDirectional.only(start: _kHeaderEdgeInset),
+              child: BackButton(),
+            )
+          : null,
+    );
+  }
+}
+
 class _FilterIconButton extends StatelessWidget {
   const _FilterIconButton({
     required this.activeCount,
@@ -533,7 +584,7 @@ class _FilterIconButton extends StatelessWidget {
           key: const Key('catalog-filter-button'),
           tooltip: 'Filtrar y ordenar',
           onPressed: onPressed,
-          icon: const Icon(Icons.tune_rounded, size: 27),
+          icon: const AdjustmentsIcon(size: 25),
         ),
         if (activeCount > 0)
           Positioned(
@@ -1157,6 +1208,7 @@ class _BrowseTile extends StatelessWidget {
     return MonettaProductTile(
       data: ProductTileData.fromCatalogItem(item),
       onTap: () => _tap(context),
+      variant: ProductTileVariant.edgeToEdge,
       // No favourite here: an external listing has no Monetta product id to
       // save, and this screen renders without a wishlist-bearing store.
       imageOverlay: item.isExternal ? const ExtractedBadge() : null,

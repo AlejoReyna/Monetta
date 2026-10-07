@@ -34,6 +34,8 @@ export 'product_tile.dart'
         ProductTileData,
         ProductTileDensity,
         ProductTileMetrics,
+        ProductTileVariant,
+        ProductTileVariantMetrics,
         productGridColumns,
         productGridDelegate;
 
