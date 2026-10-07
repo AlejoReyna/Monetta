@@ -1,0 +1,18 @@
+{
+  "contract": "CONTRACT-02",
+  "description": "Rewards apagado y rutas desconocidas: errores en JSON con requestId; la app muestra «no disponible», nunca «revisa tu conexión».",
+  "disabled": {
+    "status": 404,
+    "error": "feature_disabled",
+    "routes": [
+      {"method": "GET", "path": "/customers/me/rewards"},
+      {"method": "GET", "path": "/customers/me/rewards/activity"},
+      {"method": "GET", "path": "/customers/me/orders/8001/rewards"},
+      {"method": "POST", "path": "/customers/me/rewards/quotes"},
+      {"method": "POST", "path": "/customers/me/rewards/redemptions"},
+      {"method": "POST", "path": "/customers/me/rewards/redemptions/r-1/release"}
+    ]
+  },
+  "unknownRoute": {"method": "GET", "path": "/no-such-route", "status": 404, "error": "not_found"},
+  "legacyHtml404": "<!DOCTYPE html><html><body><pre>Cannot GET /customers/me/rewards</pre></body></html>"
+}

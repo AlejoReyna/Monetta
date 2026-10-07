@@ -5,7 +5,9 @@
 /// es solo presentación con frescura explícita.
 library;
 
+import 'dart:async';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
@@ -32,22 +34,54 @@ class RewardsApi {
     };
   }
 
-  Never _throwFor(int status, String body) {
+  /// Runs one HTTP call and turns transport failures (no connectivity, DNS,
+  /// TLS, timeouts) into `RewardsApiError('network')`. Token lookup happens
+  /// outside this wrapper so its failures are not mislabelled as network.
+  Future<http.Response> _send(Future<http.Response> Function() request) async {
     try {
-      final json = jsonDecode(body) as Map<String, dynamic>;
-      final code = '${json['error'] ?? 'internal_error'}';
-      throw RewardsApiError(code, json['message'] as String?);
-    } on RewardsApiError {
-      rethrow;
-    } on Object {
-      throw RewardsApiError('internal_error');
+      return await request();
+    } on http.ClientException {
+      throw const RewardsApiError('network');
+    } on IOException {
+      throw const RewardsApiError('network');
+    } on TimeoutException {
+      throw const RewardsApiError('network');
     }
   }
 
+  /// Keeps the `error` code of a JSON body; otherwise derives it from the
+  /// status so an HTML 404 or a bare 503 still gets a meaningful code.
+  Never _throwFor(int status, String body) {
+    String? code;
+    String? message;
+    try {
+      final json = jsonDecode(body);
+      if (json is Map<String, dynamic>) {
+        final error = json['error'];
+        if (error is String && error.isNotEmpty) code = error;
+        final rawMessage = json['message'];
+        if (rawMessage is String) message = rawMessage;
+      }
+    } on FormatException {
+      // Non-JSON body: fall back to the status below.
+    }
+    throw RewardsApiError(code ?? _codeForStatus(status), message);
+  }
+
+  static String _codeForStatus(int status) {
+    if (status == 401 || status == 403) return 'unauthorized';
+    if (status == 404) return 'not_found';
+    if (status >= 500) return 'service_unavailable';
+    return 'internal_error';
+  }
+
   Future<RewardsSummary> summary() async {
-    final res = await _client.get(
-      Uri.parse('$baseUrl/customers/me/rewards'),
-      headers: await _headers(),
+    final headers = await _headers();
+    final res = await _send(
+      () => _client.get(
+        Uri.parse('$baseUrl/customers/me/rewards'),
+        headers: headers,
+      ),
     );
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
     return RewardsSummary.fromJson(
@@ -65,7 +99,8 @@ class RewardsApi {
         if (cursor != null) 'cursor': cursor,
       },
     );
-    final res = await _client.get(uri, headers: await _headers());
+    final headers = await _headers();
+    final res = await _send(() => _client.get(uri, headers: headers));
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
     final json = jsonDecode(res.body) as Map<String, dynamic>;
     final items = (json['movements'] as List? ?? [])
@@ -109,7 +144,8 @@ class RewardsApi {
         'rewards',
       ],
     );
-    final res = await _client.get(uri, headers: await _headers());
+    final headers = await _headers();
+    final res = await _send(() => _client.get(uri, headers: headers));
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
     return OrderRewardsState.fromJson(
       jsonDecode(res.body) as Map<String, dynamic>,
@@ -121,14 +157,17 @@ class RewardsApi {
     required List<Map<String, Object?>> lines,
     bool isWholesaleCart = false,
   }) async {
-    final res = await _client.post(
-      Uri.parse('$baseUrl/customers/me/rewards/quotes'),
-      headers: await _headers(),
-      body: jsonEncode({
-        'cartRevision': cartRevision,
-        'lines': lines,
-        'isWholesaleCart': isWholesaleCart,
-      }),
+    final headers = await _headers();
+    final res = await _send(
+      () => _client.post(
+        Uri.parse('$baseUrl/customers/me/rewards/quotes'),
+        headers: headers,
+        body: jsonEncode({
+          'cartRevision': cartRevision,
+          'lines': lines,
+          'isWholesaleCart': isWholesaleCart,
+        }),
+      ),
     );
     if (res.statusCode != 201) _throwFor(res.statusCode, res.body);
     return RewardsQuote.fromJson(
@@ -142,15 +181,18 @@ class RewardsApi {
     required String idempotencyKey,
     bool isWholesaleCart = false,
   }) async {
-    final res = await _client.post(
-      Uri.parse('$baseUrl/customers/me/rewards/redemptions'),
-      headers: await _headers(),
-      body: jsonEncode({
-        'quoteId': quoteId,
-        'amountCents': amountCents,
-        'idempotencyKey': idempotencyKey,
-        'isWholesaleCart': isWholesaleCart,
-      }),
+    final headers = await _headers();
+    final res = await _send(
+      () => _client.post(
+        Uri.parse('$baseUrl/customers/me/rewards/redemptions'),
+        headers: headers,
+        body: jsonEncode({
+          'quoteId': quoteId,
+          'amountCents': amountCents,
+          'idempotencyKey': idempotencyKey,
+          'isWholesaleCart': isWholesaleCart,
+        }),
+      ),
     );
     if (res.statusCode != 200 && res.statusCode != 201) {
       _throwFor(res.statusCode, res.body);
@@ -159,11 +201,14 @@ class RewardsApi {
   }
 
   Future<Map<String, dynamic>> releaseRedemption(String redemptionId) async {
-    final res = await _client.post(
-      Uri.parse(
-        '$baseUrl/customers/me/rewards/redemptions/$redemptionId/release',
+    final headers = await _headers();
+    final res = await _send(
+      () => _client.post(
+        Uri.parse(
+          '$baseUrl/customers/me/rewards/redemptions/$redemptionId/release',
+        ),
+        headers: headers,
       ),
-      headers: await _headers(),
     );
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
     return jsonDecode(res.body) as Map<String, dynamic>;

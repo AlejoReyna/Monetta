@@ -48,6 +48,20 @@ function canonicalShopifyOrderId(value: string): string | null {
   return gid?.[1] ?? null;
 }
 
+/**
+ * Mounted when the Rewards program is off. Every Rewards customer route answers
+ * a JSON 404 `feature_disabled` for any method, without authenticating: it is a
+ * server capability, not an account resource.
+ */
+export function registerRewardsDisabledRoutes(app: Express): void {
+  app.all(
+    ['/customers/me/rewards', '/customers/me/rewards/*', '/customers/me/orders/:id/rewards'],
+    (_req: Request, res: Response) => {
+      res.status(404).json({ error: 'feature_disabled', requestId: res.locals.requestId });
+    },
+  );
+}
+
 /** Rutas cliente Rewards V1. Identidad siempre del credential; jamas customer id del body. */
 export function registerRewardsRoutes(app: Express, deps: RewardsRouteDeps): void {
   app.get('/customers/me/rewards', asyncRoute(async (req, res) => {

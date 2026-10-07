@@ -392,3 +392,62 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Decisiones de la persona en esta iteración:** ninguna. El formato del cable y el rechazo los fijó el orquestador siguiendo R12 y el plan.
 - **Commit:** el que contiene esta entrada, en `refactor/rf-12-rewards-order-id`. Sin push.
 - **Siguiente paso:** RF-13 necesita la decisión E7. Si sigue pendiente, el siguiente WP sin bloqueos es RF-14.
+
+### 2026-10-06 · RF-13 · iteración 1 · APROBADO
+
+- **Agente(s):** `test-engineer` escribió CONTRACT-02, roja en los dos lados. Después, en serie, `backend-implementer` hizo el servidor y `flutter-implementer` el cliente. El orquestador redactó los encargos, actualizó el documento del contrato y auditó.
+- **Base:** `bc677a7`, el commit que registra E7. Rama `refactor/rf-13-rewards-apagado`.
+- **Decisión aplicada (E7):** con Rewards apagado se mantiene el estado vigente, «Monetta Rewards aún no está disponible».
+- **Archivos del diff:**
+  - `test/fixtures/contracts/rewards_disabled.json` (nuevo): el fixture único.
+  - Pruebas nuevas que leen ese fixture:
+    - `services/accounts_orders/test/rewardsDisabledContract.test.ts`, 3 casos;
+    - `test/features/rewards/rewards_disabled_contract_test.dart`, 14 casos.
+  - `services/accounts_orders/src/rewards/routes.ts`: `registerRewardsDisabledRoutes`. Para cualquier método y sin autenticar responde 404 `{error:'feature_disabled', requestId}` en `/customers/me/rewards`, `/customers/me/rewards/*` y `/customers/me/orders/:id/rewards`.
+  - `services/accounts_orders/src/api/server.ts`:
+    - monta esas rutas cuando no hay `deps.rewards`;
+    - añade un 404 en JSON `{error:'not_found', requestId}` justo antes del manejador de errores.
+  - `lib/features/rewards/rewards_api.dart`:
+    - `_send` convierte los fallos de transporte (`ClientException`, `IOException`, `TimeoutException`) en `RewardsApiError('network')`;
+    - `_throwFor` conserva el `error` del JSON. Si no lo hay, deriva el código del status: 401/403 → `unauthorized`, 404 → `not_found`, `>=500` → `service_unavailable`, cualquier otro → `internal_error`.
+  - `lib/features/rewards/rewards_error_kind.dart` (nuevo): un solo clasificador (`unavailable`, `session`, `network`, `serviceDown`) para la sección y la tarjeta.
+  - `lib/features/rewards/rewards_section.dart` y `lib/features/rewards/rewards_balance_card.dart`: cuatro estados distintos.
+    - «Servicio caído» lleva el texto nuevo «Monetta Rewards no responde en este momento…».
+    - En la tarjeta, la sesión vencida muestra «Tu sesión terminó…», sin reintento.
+  - `docs/redesign/REWARDS_CONTRACT_V1.md`:
+    - §2: programa apagado, ruta desconocida y `requestId`;
+    - §4: códigos nuevos y cómo los clasifica el cliente;
+    - se corrigió además la referencia rota a «§6», que debía apuntar a §4.
+  - `.claude/refactor/PLAN.md`, `.claude/refactor/MATRIZ_DE_PRUEBAS.md` y esta entrada.
+- **Fase roja (verificada por el auditor):**
+  - Producción intacta: `git diff --quiet -- lib services/accounts_orders/src`.
+  - TypeScript: 3 de 3 rojos con `expected 'text/html; charset=utf-8' to contain 'application/json'`.
+  - Dart: 11 rojos y 3 verdes (los casos 1, 8 y 12).
+    - Clasificación: `internal_error` donde se esperaba `not_found`, `service_unavailable` o `unauthorized`, y un `ClientException` crudo donde se esperaba `network`.
+    - Sección y tarjeta: «Revisa tu conexión» visible, o «Tu sesión terminó» ausente.
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo los archivos listados; `git diff --check` limpio.
+  - G1 → 305 archivos, 0 cambiados.
+  - G2 → «No issues found!».
+  - G3 → `flutter test --no-pub test/features/rewards/` da `+34: All tests passed!`; `rewardsDisabledContract.test.ts` da 3 de 3.
+  - G4 Flutter → `+729 ~5: All tests passed!`, es decir, 715 más 14.
+  - G4 backend → 119 aprobadas y 9 omitidas, es decir, 116 más 3. Typecheck y build → exit 0.
+  - G5 → catálogo válido; `./bin/check_no_secrets.sh` → exit 0.
+  - G7 → 24 archivos, 128 de 128, 0 omitidas.
+  - G6 y G8 → no aplican.
+  - `grep` de `ClientException`/`SocketException` en `lib/`: ningún consumidor de `RewardsApi` los atrapaba. Las coincidencias son del admin y de Loox, ajenas a Rewards.
+- **Filas de la matriz:** CONTRACT-02 → verde. INV-15 → verde, dentro de G7.
+- **Checklist:**
+  - el contrato es aditivo: sólo cambian respuestas que antes eran HTML;
+  - con Rewards encendido, sus rutas no cambian;
+  - se mantienen la autorización en el servidor y los cuerpos de los errores existentes;
+  - la UI distingue ausencia, sin conexión, servicio caído y sesión vencida, y no muestra excepciones crudas;
+  - textos en español; sin secretos;
+  - la doc del contrato está actualizada.
+- **Hallazgos:**
+  - [Baja] `rewards_section.dart` (`_RewardsError`) y `rewards_balance_card.dart` (`_CardError`) agrupan el caso `unavailable`, hoy inalcanzable, con el texto de conexión para que el `switch` sea exhaustivo. Si un llamador futuro les pasara ese error directamente, volvería el defecto R11.
+  - [Baja] Faltan pruebas de 403, de otros 5xx, de la red en métodos distintos de `summary` y del estado de sesión en la tarjeta sin reintento.
+  - [Baja] Una respuesta 200 con JSON inválido sigue saliendo como `FormatException`, que la UI clasifica como «sin conexión». Corresponde a RF-15 (CONTRACT-03).
+- **Decisiones de la persona en esta iteración:** E7, registrada en `bc677a7`.
+- **Commit:** el que contiene esta entrada, en `refactor/rf-13-rewards-apagado`. Sin push.
+- **Siguiente paso:** RF-14 (timeouts y notificaciones fuera del arranque).

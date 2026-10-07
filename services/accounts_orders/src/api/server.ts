@@ -50,7 +50,7 @@ import {
 import { logger } from '../logger.js';
 import { PgRewardsRepository } from '../rewards/pgRewardsRepository.js';
 import { loadRewardsEnv } from '../rewards/rewardsConfig.js';
-import { registerRewardsRoutes } from '../rewards/routes.js';
+import { registerRewardsDisabledRoutes, registerRewardsRoutes } from '../rewards/routes.js';
 import { RewardsService } from '../rewards/service.js';
 import { DisabledDiscountAdapter } from '../rewards/shopifyDiscountAdapter.js';
 import { bridgeDelivery, bridgeOrderPaid, refundReverseCents } from '../rewards/webhookBridge.js';
@@ -540,6 +540,8 @@ export function createApp(deps: ServerDeps): Express {
       service: deps.rewards.service,
       authenticate: (req, res) => authenticatedCustomerId(deps, req, res),
     });
+  } else {
+    registerRewardsDisabledRoutes(app);
   }
 
   // First-party Monetta registration. Email is unverified profile metadata
@@ -772,6 +774,11 @@ export function createApp(deps: ServerDeps): Express {
     } catch (error) {
       next(error);
     }
+  });
+
+  // Generic JSON 404 for unknown routes; must stay after every route.
+  app.use((_req: Request, res: Response) => {
+    res.status(404).json({ error: 'not_found', requestId: res.locals.requestId });
   });
 
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
