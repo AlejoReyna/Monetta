@@ -439,11 +439,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             // The home body extends beneath the persistent navigation. Keep
             // that trailing scroll clearance in the invitation's surface so
             // its background reaches the navigation divider instead of
-            // revealing the scaffold's canvas.
+            // revealing the scaffold's canvas. With `extendBody` the scaffold
+            // reports the bar's full height, safe area included, to this body
+            // as its bottom padding.
             ColoredBox(
               key: const ValueKey('home-account-invitation-bottom-bleed'),
               color: context.monettaColors.surfaceMuted,
-              child: const SizedBox(height: 72),
+              child: SizedBox(height: MediaQuery.paddingOf(context).bottom),
             ),
           ],
         );
@@ -611,7 +613,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return AppBar(
       automaticallyImplyLeading: false,
       toolbarHeight: 60,
-      backgroundColor: palette.canvas,
+      backgroundColor: palette.bar,
       surfaceTintColor: Colors.transparent,
       foregroundColor: palette.ink,
       iconTheme: IconThemeData(color: palette.ink, size: 22),

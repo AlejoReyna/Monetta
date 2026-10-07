@@ -75,6 +75,7 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     required this.navigationSurface,
     required this.navigationSelection,
     required this.navigationForeground,
+    required this.navigationForegroundMuted,
   });
 
   final Color canvas;
@@ -95,9 +96,17 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
   final Color warningSurface;
   final Color successSurface;
   final Color scrim;
+
+  /// Surface of the docked bottom navigation bar.
   final Color navigationSurface;
   final Color navigationSelection;
+
+  /// Icon and label of the current bottom navigation destination.
   final Color navigationForeground;
+
+  /// Icon and label of the other destinations; at least 4.5:1 on
+  /// [navigationSurface].
+  final Color navigationForegroundMuted;
 
   static const light = MonettaColors(
     canvas: Color(0xFFFFFFFF),
@@ -118,9 +127,10 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     warningSurface: Color(0xFFF7F0E6),
     successSurface: Color(0xFFEAF4EC),
     scrim: Color(0x52000000),
-    navigationSurface: Color(0xFFF7F7F7),
+    navigationSurface: Color(0xFFF5F5F5),
     navigationSelection: Color(0x24AA7D44),
-    navigationForeground: Color(0xFF3A3937),
+    navigationForeground: Color(0xFF222222),
+    navigationForegroundMuted: Color(0xFF6E6E6E),
   );
 
   static const dark = MonettaColors(
@@ -142,9 +152,10 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     warningSurface: Color(0xFF33281D),
     successSurface: Color(0xFF1C3022),
     scrim: Color(0xA6000000),
-    navigationSurface: Color(0xFF201E1C),
+    navigationSurface: Color(0xFF171615),
     navigationSelection: Color(0x3DC49A65),
     navigationForeground: Color(0xFFF5F2EC),
+    navigationForegroundMuted: Color(0xFF8E8A85),
   );
 
   @override
@@ -170,6 +181,7 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     Color? navigationSurface,
     Color? navigationSelection,
     Color? navigationForeground,
+    Color? navigationForegroundMuted,
   }) {
     return MonettaColors(
       canvas: canvas ?? this.canvas,
@@ -193,6 +205,8 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
       navigationSurface: navigationSurface ?? this.navigationSurface,
       navigationSelection: navigationSelection ?? this.navigationSelection,
       navigationForeground: navigationForeground ?? this.navigationForeground,
+      navigationForegroundMuted:
+          navigationForegroundMuted ?? this.navigationForegroundMuted,
     );
   }
 
@@ -226,6 +240,11 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
           Color.lerp(navigationSelection, other.navigationSelection, t)!,
       navigationForeground:
           Color.lerp(navigationForeground, other.navigationForeground, t)!,
+      navigationForegroundMuted: Color.lerp(
+        navigationForegroundMuted,
+        other.navigationForegroundMuted,
+        t,
+      )!,
     );
   }
 }
@@ -716,7 +735,10 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
       space: 0.5,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: colors.surface,
+      // Light app bars share the bottom bar's grey; dark keeps its surface.
+      backgroundColor: brightness == Brightness.dark
+          ? colors.surface
+          : colors.navigationSurface,
       surfaceTintColor: Colors.transparent,
       foregroundColor: colors.contentPrimary,
       elevation: 0,

@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
 
 /// Capsule control from the reference's component strip.
@@ -150,6 +151,9 @@ class MonettaChipRail extends StatelessWidget {
 }
 
 /// "124 piezas" — always computed from the very list being rendered.
+///
+/// An owner aid, not shopper copy: it renders only for a signed-in account
+/// that may open the admin panel, and collapses to nothing for everyone else.
 class CatalogResultCount extends StatelessWidget {
   const CatalogResultCount({
     required this.count,
@@ -164,6 +168,7 @@ class CatalogResultCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!_ownerIsViewing(context)) return const SizedBox.shrink();
     return Text(
       '$count ${count == 1 ? noun : pluralNoun}',
       style: boutiqueText(
@@ -173,6 +178,83 @@ class CatalogResultCount extends StatelessWidget {
       ),
     );
   }
+
+  static bool _ownerIsViewing(BuildContext context) {
+    final account = AccountScope.maybeOf(context);
+    final admin = AdminScope.maybeOf(context);
+    if (account == null || admin == null) return false;
+    return admin.canAccess(
+      signedIn: account.isSignedIn,
+      email: account.account?.email,
+      authProvider: account.account?.authProvider,
+    );
+  }
+}
+
+/// The filter-and-sort glyph: two slider rails with offset stops.
+///
+/// Painted rather than taken from an icon font so the stroke stays fine
+/// (1.5 units of a 24-unit grid) at the size the header uses. [size] and
+/// [color] fall back to the ambient [IconTheme], like an [Icon].
+class AdjustmentsIcon extends StatelessWidget {
+  const AdjustmentsIcon({this.size, this.color, super.key});
+
+  final double? size;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = IconTheme.of(context);
+    return SizedBox.square(
+      dimension: size ?? theme.size ?? 24,
+      child: CustomPaint(
+        painter: _AdjustmentsPainter(
+          color: color ?? theme.color ?? const Color(0xFF111111),
+        ),
+      ),
+    );
+  }
+}
+
+class _AdjustmentsPainter extends CustomPainter {
+  const _AdjustmentsPainter({required this.color});
+
+  final Color color;
+
+  /// Side of the design grid every coordinate below is expressed in.
+  static const double _grid = 24;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final scale = size.shortestSide / _grid;
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 1.5 * scale
+      ..strokeCap = StrokeCap.butt
+      ..isAntiAlias = true;
+
+    void line(double x1, double y1, double x2, double y2) {
+      canvas.drawLine(
+        Offset(x1 * scale, y1 * scale),
+        Offset(x2 * scale, y2 * scale),
+        paint,
+      );
+    }
+
+    // Upper rail with its stop at x = 8, a small gap beside the stop.
+    line(2, 8, 8, 8);
+    line(10, 8, 22, 8);
+    line(8, 4, 8, 12);
+    // Lower rail with its stop at x = 16.
+    line(2, 16, 14, 16);
+    line(16, 16, 22, 16);
+    line(16, 12, 16, 20);
+  }
+
+  @override
+  bool shouldRepaint(covariant _AdjustmentsPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 /// Height of an editorial banner: a share of the viewport, clamped so a short

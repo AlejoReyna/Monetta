@@ -1,7 +1,7 @@
 /// Full-catalog browsing for Monetta's bags and accessories.
 ///
 /// Photography owns the screen. Filtering is handled by a single expandable
-/// sheet with bag-specific facets, search, and horizontal category pills.
+/// sheet with category and bag-specific facets, and a quick-filter rail.
 library;
 
 import 'dart:async';
@@ -36,11 +36,12 @@ extension on _CatalogSort {
       };
 }
 
-enum _FilterSection { sort, type, brand, price, color, availability }
+enum _FilterSection { sort, category, type, brand, price, color, availability }
 
 extension on _FilterSection {
   String get label => switch (this) {
         _FilterSection.sort => 'Ordenar por',
+        _FilterSection.category => 'Categoría',
         _FilterSection.type => 'Tipo de bolsa',
         _FilterSection.brand => 'Marca',
         _FilterSection.price => 'Precio',
@@ -52,6 +53,7 @@ extension on _FilterSection {
 class _CatalogFilters {
   const _CatalogFilters({
     this.sort = _CatalogSort.featured,
+    this.categories = const <String>{},
     this.types = const <String>{},
     this.brands = const <String>{},
     this.priceBands = const <String>{},
@@ -60,6 +62,9 @@ class _CatalogFilters {
   });
 
   final _CatalogSort sort;
+
+  /// Canonical category keys as produced by [_categoryFor].
+  final Set<String> categories;
   final Set<String> types;
   final Set<String> brands;
   final Set<String> priceBands;
@@ -67,12 +72,21 @@ class _CatalogFilters {
   final bool inStockOnly;
 
   int get activeCount =>
+      categories.length +
       types.length +
       brands.length +
       priceBands.length +
       colors.length +
       (inStockOnly ? 1 : 0);
 }
+
+/// Gap at each end of the header, outside the 48pt button slots.
+const double _kHeaderEdgeInset = 4;
+
+/// Width reserved on both sides of the title: the two end buttons' slots plus
+/// the edge gap. The leading side reserves the same, empty or not.
+const double _kHeaderSlotWidth =
+    _kHeaderEdgeInset + BoutiqueSpace.tapTarget * 2;
 
 const Map<String, List<String>> _bagTypeTerms = {
   'Crossbody': ['crossbody', 'bandolera', 'messenger'],
@@ -180,6 +194,24 @@ String _categoryFor(CatalogItem item) {
   return 'otros';
 }
 
+/// Categories present in [items], in the canonical order and then
+/// alphabetically by label.
+List<String> _availableCategories(List<CatalogItem> items) {
+  final categories = {for (final item in items) _categoryFor(item)};
+  return [
+    for (final category in _catalogCategoryOrder)
+      if (categories.remove(category)) category,
+    ...categories.toList()
+      ..sort((a, b) => _categoryLabel(a).compareTo(_categoryLabel(b))),
+  ];
+}
+
+/// Identity of the product grid: it changes whenever the applied categories do.
+String _sectionKeySuffix(_CatalogFilters filters) {
+  if (filters.categories.isEmpty) return 'collection';
+  return (filters.categories.toList()..sort()).join('+');
+}
+
 class CatalogBrowseScreen extends StatefulWidget {
   const CatalogBrowseScreen({
     required this.items,
@@ -198,44 +230,17 @@ class CatalogBrowseScreen extends StatefulWidget {
 
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   _CatalogFilters _filters = const _CatalogFilters();
-  String? _activeCategory;
 
-  List<String> get _availableCategories {
-    final categories = {
-      for (final item in widget.items) _categoryFor(item),
-    };
-    final ordered = [
-      for (final category in _catalogCategoryOrder)
-        if (categories.remove(category)) category,
-      ...categories.toList()
-        ..sort(
-          (a, b) => _categoryLabel(a).compareTo(_categoryLabel(b)),
-        ),
-    ];
-    return ordered;
-  }
-
-  List<CatalogItem> _visibleItems([_CatalogFilters? filters]) {
-    final baseFilters = filters ?? _filters;
-    var items = _filterCatalog(
-      widget.items,
-      query: '',
-      filters: baseFilters,
-    );
-
-    final activeCategory = _activeCategory;
-    if (activeCategory != null) {
-      items =
-          items.where((item) => _categoryFor(item) == activeCategory).toList();
-    }
-    return items;
-  }
+  List<CatalogItem> _visibleItems([_CatalogFilters? filters]) => _filterCatalog(
+        widget.items,
+        query: '',
+        filters: filters ?? _filters,
+      );
 
   void _resetAll() {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
       _filters = const _CatalogFilters();
-      _activeCategory = null;
     });
   }
 
@@ -257,76 +262,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     if (result != null && mounted) setState(() => _filters = result);
   }
 
-  Widget _buildCategoryPill({
-    required String title,
-    required String keyName,
-    required String? category,
-  }) {
-    final isSelected = _activeCategory == category;
-    final colors = context.monettaColors;
-    final animationsDisabled = reduceMotion(context);
-    final labelColor =
-        isSelected ? colors.accentContent : colors.contentPrimary;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 8),
-      child: AnimatedScale(
-        key: Key('$keyName-motion'),
-        scale: isSelected ? 1.025 : 1,
-        duration: animationsDisabled ? Duration.zero : kSnap,
-        curve: kMotionCurve,
-        child: ChoiceChip(
-          key: Key(keyName),
-          label: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                title,
-                style: boutiqueText(
-                  size: 13,
-                  weight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                  color: labelColor,
-                ),
-              ),
-            ],
-          ),
-          selected: isSelected,
-          onSelected: (selected) {
-            if (selected) setState(() => _activeCategory = category);
-          },
-          color: WidgetStateProperty.resolveWith<Color>((states) {
-            return states.contains(WidgetState.selected)
-                ? colors.navigationSelection
-                : Colors.transparent;
-          }),
-          backgroundColor: Colors.transparent,
-          selectedColor: colors.navigationSelection,
-          surfaceTintColor: Colors.transparent,
-          side: BorderSide(
-            color: isSelected
-                ? colors.accent.withValues(alpha: 0.48)
-                : colors.divider,
-          ),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          showCheckmark: false,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          chipAnimationStyle: ChipAnimationStyle(
-            selectAnimation: animationsDisabled
-                ? AnimationStyle.noAnimation
-                : const AnimationStyle(
-                    curve: kMotionCurve,
-                    duration: kSwap,
-                    reverseCurve: kMotionCurve,
-                    reverseDuration: kSnap,
-                  ),
-          ),
-        ),
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final visibleItems = _visibleItems();
@@ -338,68 +273,63 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       backgroundColor: context.boutique.canvas,
       appBar: AppBar(
         toolbarHeight: 76,
-        backgroundColor: context.boutique.canvas,
+        backgroundColor: context.boutique.bar,
         foregroundColor: context.boutique.ink,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         scrolledUnderElevation: 0,
-        centerTitle: false,
-        titleSpacing: BoutiqueSpace.gutter,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              'Productos',
-              style: boutiqueDisplay(24, color: context.boutique.ink),
-            ),
-            const SizedBox(height: 2),
-            // Counted from the very list the grid renders below.
-            CatalogResultCount(
-              count: visibleItems.length,
-              noun: 'pieza',
-              pluralNoun: 'piezas',
-            ),
-          ],
+        // One button at the start and two at the end: a centred title meets
+        // the end buttons first and is pushed off centre. Both sides reserve
+        // the same slot, so "Productos" stays on the screen's centre.
+        centerTitle: true,
+        titleSpacing: BoutiqueSpace.sm,
+        leadingWidth: _kHeaderSlotWidth,
+        leading: const _HeaderBackSlot(),
+        // The FittedBox only shrinks the block when it does not fit between
+        // the slots; it never truncates it or runs it under a button.
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Productos',
+                textAlign: TextAlign.center,
+                style: boutiqueDisplay(24, color: context.boutique.ink),
+              ),
+              const SizedBox(height: 2),
+              // Counted from the very list the grid renders below.
+              CatalogResultCount(
+                count: visibleItems.length,
+                noun: 'pieza',
+                pluralNoun: 'piezas',
+              ),
+            ],
+          ),
         ),
         actions: [
-          IconButton(
-            key: const Key('catalog-search-button'),
-            tooltip: 'Buscar productos',
-            onPressed: () => openSearch(context),
-            icon: const Icon(Icons.search_rounded, size: 27),
-          ),
-          _FilterIconButton(
-            activeCount: _filters.activeCount,
-            onPressed: _openFilters,
-          ),
-          const SizedBox(width: 6),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(60),
-          child: Container(
-            key: const Key('catalog-category-rail'),
-            color: context.boutique.canvas,
-            height: 60,
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-              children: [
-                _buildCategoryPill(
-                  title: 'Colección',
-                  keyName: 'catalog-category-collection',
-                  category: null,
-                ),
-                for (final category in _availableCategories)
-                  _buildCategoryPill(
-                    title: _categoryLabel(category),
-                    keyName: 'catalog-category-$category',
-                    category: category,
-                  ),
-              ],
+          SizedBox.square(
+            dimension: BoutiqueSpace.tapTarget,
+            child: Center(
+              child: IconButton(
+                key: const Key('catalog-search-button'),
+                tooltip: 'Buscar productos',
+                onPressed: () => openSearch(context),
+                icon: const Icon(Icons.search_rounded, size: 27),
+              ),
             ),
           ),
-        ),
+          SizedBox.square(
+            dimension: BoutiqueSpace.tapTarget,
+            child: Center(
+              child: _FilterIconButton(
+                activeCount: _filters.activeCount,
+                onPressed: _openFilters,
+              ),
+            ),
+          ),
+          const SizedBox(width: _kHeaderEdgeInset),
+        ],
       ),
       body: ClipRect(
         child: AnimatedSwitcher(
@@ -424,7 +354,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             ),
           ),
           child: CustomScrollView(
-            key: ValueKey('catalog-section-${_activeCategory ?? 'collection'}'),
+            key: ValueKey('catalog-section-${_sectionKeySuffix(_filters)}'),
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
@@ -445,25 +375,30 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.fromLTRB(
-                    BoutiqueSpace.gutter,
-                    BoutiqueSpace.lg,
-                    BoutiqueSpace.gutter,
-                    BoutiqueSpace.xxl,
-                  ),
-                  sliver: SliverGrid(
-                    gridDelegate: productGridDelegate(
-                      context,
-                      availableWidth: MediaQuery.sizeOf(context).width -
-                          BoutiqueSpace.gutter * 2,
-                    ),
-                    delegate: SliverChildBuilderDelegate(
-                      (context, index) => _BrowseTile(
-                        key: ValueKey(visibleItems[index].sourceScopedId),
-                        item: visibleItems[index],
-                        openExternalLink: widget.openExternalLink,
+                  padding: const EdgeInsets.only(top: BoutiqueSpace.lg),
+                  // Photos run to the screen edges, so there is no horizontal
+                  // or bottom padding (each tile carries its own trailing
+                  // air). The safe area still applies sideways, for a notch
+                  // in landscape.
+                  sliver: SliverSafeArea(
+                    top: false,
+                    bottom: false,
+                    sliver: SliverLayoutBuilder(
+                      builder: (context, constraints) => SliverGrid(
+                        gridDelegate: productGridDelegate(
+                          context,
+                          availableWidth: constraints.crossAxisExtent,
+                          variant: ProductTileVariant.edgeToEdge,
+                        ),
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) => _BrowseTile(
+                            key: ValueKey(visibleItems[index].sourceScopedId),
+                            item: visibleItems[index],
+                            openExternalLink: widget.openExternalLink,
+                          ),
+                          childCount: visibleItems.length,
+                        ),
                       ),
-                      childCount: visibleItems.length,
                     ),
                   ),
                 ),
@@ -474,7 +409,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.catalog,
         bagCount: widget.bagCount,
-        surfaceColor: context.monettaColors.navigationSurface,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
@@ -515,6 +449,24 @@ void openCatalogBrowse(
   );
 }
 
+class _HeaderBackSlot extends StatelessWidget {
+  const _HeaderBackSlot();
+
+  @override
+  Widget build(BuildContext context) {
+    final canLeave = ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: canLeave
+          ? const Padding(
+              padding: EdgeInsetsDirectional.only(start: _kHeaderEdgeInset),
+              child: BackButton(),
+            )
+          : null,
+    );
+  }
+}
+
 class _FilterIconButton extends StatelessWidget {
   const _FilterIconButton({
     required this.activeCount,
@@ -533,7 +485,7 @@ class _FilterIconButton extends StatelessWidget {
           key: const Key('catalog-filter-button'),
           tooltip: 'Filtrar y ordenar',
           onPressed: onPressed,
-          icon: const Icon(Icons.tune_rounded, size: 27),
+          icon: const AdjustmentsIcon(size: 25),
         ),
         if (activeCount > 0)
           Positioned(
@@ -587,6 +539,7 @@ class _CatalogFilterSheet extends StatefulWidget {
 
 class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   late _CatalogSort _sort;
+  late Set<String> _categories;
   late Set<String> _types;
   late Set<String> _brands;
   late Set<String> _priceBands;
@@ -603,6 +556,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
 
   void _load(_CatalogFilters filters) {
     _sort = filters.sort;
+    _categories = {...filters.categories};
     _types = {...filters.types};
     _brands = {...filters.brands};
     _priceBands = {...filters.priceBands};
@@ -612,6 +566,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
 
   _CatalogFilters get _selection => _CatalogFilters(
         sort: _sort,
+        categories: _categories,
         types: _types,
         brands: _brands,
         priceBands: _priceBands,
@@ -681,6 +636,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
+    final categoryOptions = _availableCategories(widget.items);
     final typeOptions = _typeOptions;
     final brandOptions = _brandOptions;
     final priceOptions = _priceOptions;
@@ -741,6 +697,23 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                           ],
                         ),
                       ),
+                      if (categoryOptions.isNotEmpty)
+                        _FilterAccordion(
+                          section: _FilterSection.category,
+                          expanded: _expanded.contains(_FilterSection.category),
+                          onTap: () => _toggleExpanded(_FilterSection.category),
+                          child: Column(
+                            children: [
+                              for (final option in categoryOptions)
+                                _FilterChoiceRow(
+                                  key: Key('catalog-filter-category-$option'),
+                                  label: _categoryLabel(option),
+                                  selected: _categories.contains(option),
+                                  onTap: () => _toggle(_categories, option),
+                                ),
+                            ],
+                          ),
+                        ),
                       if (typeOptions.isNotEmpty)
                         _FilterAccordion(
                           section: _FilterSection.type,
@@ -918,7 +891,9 @@ class _FilterAccordion extends StatelessWidget {
             button: true,
             expanded: expanded,
             child: InkWell(
-              key: Key('catalog-filter-${section.name}'),
+              key: section == _FilterSection.category
+                  ? const Key('catalog-filter-section-category')
+                  : Key('catalog-filter-${section.name}'),
               onTap: onTap,
               child: SizedBox(
                 height: 78,
@@ -961,6 +936,7 @@ class _FilterChoiceRow extends StatelessWidget {
     required this.onTap,
     this.radio = false,
     this.swatch,
+    super.key,
   });
 
   final String label;
@@ -1157,6 +1133,7 @@ class _BrowseTile extends StatelessWidget {
     return MonettaProductTile(
       data: ProductTileData.fromCatalogItem(item),
       onTap: () => _tap(context),
+      variant: ProductTileVariant.edgeToEdge,
       // No favourite here: an external listing has no Monetta product id to
       // save, and this screen renders without a wishlist-bearing store.
       imageOverlay: item.isExternal ? const ExtractedBadge() : null,
@@ -1250,6 +1227,10 @@ List<CatalogItem> _filterCatalog(
       if (!searchable.contains(normalizedQuery)) return false;
     }
 
+    if (filters.categories.isNotEmpty &&
+        !filters.categories.contains(_categoryFor(item))) {
+      return false;
+    }
     if (filters.types.isNotEmpty &&
         !filters.types.contains(_bagTypeFor(item))) {
       return false;

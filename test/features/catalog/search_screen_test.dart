@@ -2,9 +2,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/account_controller.dart';
+import 'package:monetta_app/app/admin_config.dart';
+import 'package:monetta_app/app/admin_controller.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
+import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/data/local/order_summary_store.dart';
+import 'package:monetta_app/data/repositories/order_history_repository.dart';
 import 'package:monetta_app/features/catalog/catalog_query.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/search_history.dart';
@@ -17,16 +24,48 @@ Future<CatalogStore> _loadedStore() async {
   return store;
 }
 
-Widget _app(CatalogStore store, {SearchHistory? history}) => MaterialApp(
-      theme: buildTheme(),
-      home: StoreScope(
-        notifier: store,
-        child: SearchScreen(
-          prompt: 'Encuentra algo muy tú',
-          history: history ?? SearchHistory(),
-        ),
-      ),
+Widget _app(
+  CatalogStore store, {
+  SearchHistory? history,
+  AccountController? account,
+  AdminController? admin,
+}) {
+  Widget child = StoreScope(
+    notifier: store,
+    child: SearchScreen(
+      prompt: 'Encuentra algo muy tú',
+      history: history ?? SearchHistory(),
+    ),
+  );
+  if (account != null) child = AccountScope(notifier: account, child: child);
+  if (admin != null) child = AdminScope(notifier: admin, child: child);
+  return MaterialApp(theme: buildTheme(), home: child);
+}
+
+/// A signed-in account on the owner allow-list, with the admin state that
+/// recognises it: the only viewer for whom the result count renders.
+(AccountController, AdminController) _owner(AppDatabase db) {
+  const email = 'owner@example.com';
+  final account = AccountController(
+    accountStore: AccountStore(db),
+    deviceStore: DeviceStore(db),
+    orderHistoryRepository: OrderHistoryRepository(
+      store: OrderSummaryStore(db),
+      config: AccountsOrdersConfig.disabled,
+    ),
+    deviceId: 'dev-1',
+  )..account = Account(
+      localAccountId: 'acct-owner',
+      email: email,
+      authProvider: 'monetta',
+      createdAt: DateTime.utc(2026),
+      lastSeenAt: DateTime.utc(2026),
     );
+  final admin = AdminController(
+    config: const AdminConfig(baseUrl: null, ownerEmails: {email}),
+  );
+  return (account, admin);
+}
 
 Future<void> _type(WidgetTester tester, String text) async {
   await tester.enterText(
@@ -242,7 +281,35 @@ void main() {
     expect(find.byKey(const ValueKey('search-result-grid')), findsOneWidget);
   });
 
-  testWidgets('the result count matches the grid it labels', (tester) async {
+  testWidgets('for an owner, the result count matches the grid it labels',
+      (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+    final db = openTestDatabase();
+    addTearDown(db.close);
+    final (account, admin) = _owner(db);
+    addTearDown(account.dispose);
+    addTearDown(admin.dispose);
+    await tester.pumpWidget(_app(store, account: account, admin: admin));
+    await tester.pump();
+
+    await _type(tester, 'coach');
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+
+    final expected = searchProducts(store, 'coach').length;
+    expect(expected, greaterThan(0));
+    expect(
+      find.text(expected == 1 ? '1 pieza' : '$expected piezas'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets('a shopper sees results without a piece count', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1.0;
@@ -257,10 +324,10 @@ void main() {
     await tester.pumpAndSettle();
 
     final expected = searchProducts(store, 'coach').length;
-    expect(expected, greaterThan(0));
+    expect(find.byKey(const ValueKey('search-result-grid')), findsOneWidget);
     expect(
       find.text(expected == 1 ? '1 pieza' : '$expected piezas'),
-      findsOneWidget,
+      findsNothing,
     );
   });
 }
