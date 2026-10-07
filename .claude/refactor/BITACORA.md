@@ -550,3 +550,28 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Baja] `redeem` y `releaseRedemption` siguen haciendo `jsonDecode(...) as Map` sin envolver, así que un 200 inválido se mostraría como `network`. Hoy el canje está apagado (`409 redemption_disabled`). Conviene cubrirlo cuando se active el canje.
   - [Baja] `program` e `incentives` conservan el cast antiguo: un tipo incorrecto lanzaría `TypeError` y se mostraría como `network`. Es comportamiento vigente y queda fuera de R15.
 - **Veredicto:** aprobado y cerrado. Commit en `refactor/rf-15-parsers-rewards`.
+
+### 2026-10-07 · Sincronización con main · APROBADO
+
+- **Motivo:**
+  - La cadena del refactor salió de `main` en `48a6786`.
+  - Desde entonces `main` recibió dos PRs: el catálogo de borde a borde (#8) y la barra inferior plana (#9).
+  - El PR #10, todavía abierto, trae el fondo blanco, el total de piezas sólo para dueños y las categorías en el panel de filtros.
+  - Sin sincronizar, RF-16 habría fijado el catálogo viejo y RF-17 habría reescrito los mismos archivos de tema.
+  - La persona autorizó la sincronización y pidió seguir en bucle (D-06 y D-07).
+- **Rama:** `refactor/rf-16-caracterizacion`, desde `438e9b7`.
+  - El merge `cbeb237` trae `feat/fondo-blanco-main` (`b66e5c4`), que es `main` en `7e304b1` más el PR #10.
+  - Se hizo sin red, porque esa rama local es la cabeza del PR. Cuando el PR se fusione en GitHub, traer `main` sólo añadirá el commit de merge.
+- **Conflictos:**
+  - Sólo `assets/catalog/catalog.json`, dos refrescos de la misma tienda. Se queda el de `main`, del 2026-10-07.
+  - El cambio de iOS de RF-19 es idéntico en las dos ramas.
+- **Gates (ejecutados por el orquestador):**
+  - G0 → árbol limpio después del commit.
+  - G1 → 317 archivos, 0 cambiados.
+  - G2 → «No issues found!».
+  - G4 → `+960 ~5: All tests passed!`. Las bases eran 835 en el refactor y 834 en `main` con el PR #10.
+  - G5 → catálogo válido (103 productos, 340 imágenes); secretos OK.
+  - G6 a G8 → no aplican a la sincronización.
+- **Dispositivo:** la persona compiló e instaló en su iPhone 16e un build de release de staging de la rama del PR #10, con las variables de CI. Es el primer build de release en un dispositivo físico, aunque no cubre DEV-01 ni DEV-02.
+- **Fuera de la matriz:** las pruebas de los PRs #8 a #10 no tienen filas, porque son trabajo fuera del plan.
+- **Veredicto:** sincronización aprobada. RF-16 sigue en esta misma rama.
