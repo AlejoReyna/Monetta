@@ -5,12 +5,14 @@
 /// it, checks the owner role, writes Shopify/configuration, and records audit.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:math';
 
 import 'package:http/http.dart' as http;
 
 import '../../domain/admin_control.dart';
+import '../http/timeout_http_client.dart';
 
 abstract interface class AdminClient {
   Future<AdminSnapshot> fetchSnapshot({
@@ -111,7 +113,8 @@ class HttpAdminClient
     required this.baseUrl,
     required this.accessTokenProvider,
     http.Client? client,
-  })  : _client = client ?? http.Client(),
+    Duration timeout = kDefaultHttpTimeout,
+  })  : _client = TimeoutHttpClient(client ?? http.Client(), timeout: timeout),
         _ownsClient = client == null;
 
   final Uri baseUrl;
@@ -579,13 +582,18 @@ class HttpAdminClient
       if (body != null) 'Content-Type': 'application/json',
     };
     final encoded = body == null ? null : jsonEncode(body);
-    final response = switch (method) {
-      'GET' => await _client.get(uri, headers: headers),
-      'POST' => await _client.post(uri, headers: headers, body: encoded),
-      'PUT' => await _client.put(uri, headers: headers, body: encoded),
-      'PATCH' => await _client.patch(uri, headers: headers, body: encoded),
-      _ => throw AdminClientException('unsupported method $method'),
-    };
+    final http.Response response;
+    try {
+      response = switch (method) {
+        'GET' => await _client.get(uri, headers: headers),
+        'POST' => await _client.post(uri, headers: headers, body: encoded),
+        'PUT' => await _client.put(uri, headers: headers, body: encoded),
+        'PATCH' => await _client.patch(uri, headers: headers, body: encoded),
+        _ => throw AdminClientException('unsupported method $method'),
+      };
+    } on TimeoutException {
+      throw const AdminClientException('control-plane request timed out');
+    }
     if (response.statusCode < 200 || response.statusCode >= 300) {
       String? code;
       String? requestId;

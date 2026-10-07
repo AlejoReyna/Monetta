@@ -1,9 +1,12 @@
 /// First-party Monetta account registration over `services/accounts_orders`.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+
+import '../http/timeout_http_client.dart';
 
 class SystemAccountException implements Exception {
   SystemAccountException(this.message);
@@ -47,8 +50,14 @@ abstract class SystemAccountClient {
 }
 
 class HttpSystemAccountClient implements SystemAccountClient {
-  HttpSystemAccountClient({required this.baseUrl, http.Client? httpClient})
-      : _client = httpClient ?? http.Client();
+  HttpSystemAccountClient({
+    required this.baseUrl,
+    http.Client? httpClient,
+    Duration timeout = kDefaultHttpTimeout,
+  }) : _client = TimeoutHttpClient(
+          httpClient ?? http.Client(),
+          timeout: timeout,
+        );
 
   final String baseUrl;
   final http.Client _client;
@@ -60,19 +69,24 @@ class HttpSystemAccountClient implements SystemAccountClient {
     required String? displayName,
     required String deviceId,
   }) async {
-    final response = await _client.post(
-      Uri.parse('$baseUrl/accounts/register'),
-      headers: const {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        'displayName': displayName,
-        'deviceId': deviceId,
-      }),
-    );
+    final http.Response response;
+    try {
+      response = await _client.post(
+        Uri.parse('$baseUrl/accounts/register'),
+        headers: const {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'displayName': displayName,
+          'deviceId': deviceId,
+        }),
+      );
+    } on TimeoutException {
+      throw SystemAccountException('POST /accounts/register timed out');
+    }
     if (response.statusCode != 201) {
       throw SystemAccountException(
         'POST /accounts/register returned ${response.statusCode}',
@@ -88,18 +102,23 @@ class HttpSystemAccountClient implements SystemAccountClient {
     required String password,
     required String deviceId,
   }) async {
-    final response = await _client.post(
-      Uri.parse('$baseUrl/accounts/login'),
-      headers: const {
-        'Accept': 'application/json',
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-        'deviceId': deviceId,
-      }),
-    );
+    final http.Response response;
+    try {
+      response = await _client.post(
+        Uri.parse('$baseUrl/accounts/login'),
+        headers: const {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+        },
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+          'deviceId': deviceId,
+        }),
+      );
+    } on TimeoutException {
+      throw SystemAccountException('POST /accounts/login timed out');
+    }
     if (response.statusCode != 200) {
       throw SystemAccountException(
         'POST /accounts/login returned ${response.statusCode}',
@@ -110,13 +129,18 @@ class HttpSystemAccountClient implements SystemAccountClient {
 
   @override
   Future<void> logout(String sessionToken) async {
-    final response = await _client.post(
-      Uri.parse('$baseUrl/accounts/logout'),
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $sessionToken',
-      },
-    );
+    final http.Response response;
+    try {
+      response = await _client.post(
+        Uri.parse('$baseUrl/accounts/logout'),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $sessionToken',
+        },
+      );
+    } on TimeoutException {
+      throw SystemAccountException('POST /accounts/logout timed out');
+    }
     if (response.statusCode != 200 && response.statusCode != 401) {
       throw SystemAccountException(
         'POST /accounts/logout returned ${response.statusCode}',

@@ -14,6 +14,7 @@
 /// offline/error fallback, never mixed into a successful live payload.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:html/dom.dart' as html_dom;
@@ -21,6 +22,7 @@ import 'package:html/parser.dart' as html_parser;
 import 'package:http/http.dart' as http;
 
 import '../../domain/home_content.dart';
+import '../http/timeout_http_client.dart';
 
 typedef LooxGet = Future<http.Response> Function(Uri uri);
 
@@ -115,11 +117,26 @@ class LooxReviewsPage {
 }
 
 class LooxReviewsRepository {
-  LooxReviewsRepository({required this.config, LooxGet? get})
-      : _get = get ?? http.get;
+  LooxReviewsRepository({
+    required this.config,
+    LooxGet? get,
+    Duration timeout = kDefaultHttpTimeout,
+  })  : _get = get ?? http.get,
+        _timeout = timeout;
 
   final LooxConfig config;
   final LooxGet _get;
+  final Duration _timeout;
+
+  /// One bounded call to [_get]; a call that never answers fails as an
+  /// [http.ClientException], like any other transport failure here.
+  Future<http.Response> _getWithin(Uri uri) async {
+    try {
+      return await _get(uri).timeout(_timeout);
+    } on TimeoutException {
+      throw http.ClientException('Reviews request timed out', uri);
+    }
+  }
 
   Future<LooxReviewsPage> fetchPage({
     int page = 1,
@@ -149,7 +166,7 @@ class LooxReviewsRepository {
       limit: safeLimit,
       total: total,
     );
-    final response = await _get(endpoint);
+    final response = await _getWithin(endpoint);
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw http.ClientException(
         'Reviews page returned HTTP ${response.statusCode}',
@@ -186,7 +203,7 @@ class LooxReviewsRepository {
       return LooxReviewsResult(reviews: fallbackReviews);
     }
 
-    final response = await _get(config.reviewsEndpoint);
+    final response = await _getWithin(config.reviewsEndpoint);
     if (response.statusCode < 200 || response.statusCode >= 300) {
       throw http.ClientException(
         'Reviews returned HTTP ${response.statusCode}',
@@ -322,7 +339,7 @@ class LooxReviewsRepository {
 
   Future<({double? average, int? count})> _summary() async {
     try {
-      final response = await _get(config.summaryEndpoint);
+      final response = await _getWithin(config.summaryEndpoint);
       if (response.statusCode < 200 || response.statusCode >= 300) {
         return (average: null, count: null);
       }

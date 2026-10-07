@@ -29,7 +29,7 @@ El orquestador la sigue y la actualiza; los subagentes no editan este archivo.
 | G5 | Catálogo y secretos | `dart run bin/verify_catalog_snapshot.dart` · `./bin/check_no_secrets.sh` | Cierre del WP | exit 0 |
 | G6 | Compilación nativa | Android: `flutter build apk --no-pub --debug --flavor staging --dart-define-from-file=config/dart_defines.ci.json` · iOS: `flutter build ios --no-pub --simulator --debug --dart-define-from-file=config/dart_defines.ci.json` | WP que toca nativo, `pubspec`, assets o fuentes, plugins o composición de arranque | Ambos compilan |
 | G7 | Postgres | `REQUIRE_POSTGRES_TESTS=1 WP01_PG_ADMIN_URL=postgres://postgres:postgres@localhost:5432/postgres npm --prefix services/accounts_orders test` | WP que toca SQL, ledger, webhooks o outbox | 0 fallos y 0 omitidas |
-| G8 | Verificación en dispositivo | Checklist DEV-xx (sección 5) | WP que toca OAuth, checkout, push, almacenamiento seguro o tipografía | La persona confirma; su nota o captura queda en la bitácora |
+| G8 | Verificación en dispositivo | Checklist DEV-xx (sección 5), en los simuladores de la Mac (D-05) | WP que toca OAuth, checkout, push, almacenamiento seguro o tipografía | La persona confirma; su nota o captura queda en la bitácora |
 
 En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0–G5, más G6–G8 cuando apliquen.
 
@@ -74,6 +74,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | CHAR-07 | CAR | En el filtro de colección pasan los productos sin `collectionHandles` | RF-16; decisión en RF-40 | `collection_screen.dart:218-221` |
 | CHAR-08 | OBJ | El arranque con un cliente de notificaciones que nunca responde pinta el inicio igual; las notificaciones se inicializan después | RF-14 | `main.dart:772` · `notification_controller.dart:96` (R13) |
 | CHAR-09 | OBJ | Una notificación tocada en arranque en frío abre su destino una vez que el Navigator existe | RF-14, RF-31 | `notification_controller.dart:101-106` |
+| CHAR-10 | OBJ | Mientras `restore()` no termina, pedir el permiso del sistema espera el estado guardado: con el permiso ya concedido no vuelve a pedirlo ni pisa las preferencias | RF-14 | `home_screen.dart:115-123` · `notification_controller.dart:158-170` |
 | CONTRACT-01 | OBJ | ID de pedido de Rewards: el mismo fixture en el cliente y el servidor; el cliente envía un segmento válido y el servidor acepta GID o numérico | RF-12 | `rewards_api.dart:78-80` · `rewards/routes.ts:69` (R12) |
 | CONTRACT-02 | OBJ | Rewards apagado: el servidor responde JSON (`feature_disabled`); la ruta desconocida da `not_found` con `requestId`; el cliente muestra «no disponible» y nunca «revisa tu conexión» | RF-13 | `server.ts:538-543,777-787` (R11) |
 | CONTRACT-03 | OBJ | Los parsers de Rewards rechazan fechas inválidas, IDs ausentes y cantidades ausentes con un error de contrato tipado | RF-15 | `rewards_models.dart:47-162` (R15) |
@@ -100,7 +101,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-11 | CHAR-01 | INV-12 | — |
 | RF-12 | CONTRACT-01 | INV-09, INV-15 | G7 |
 | RF-13 | CONTRACT-02 | INV-15 | G7 |
-| RF-14 | CHAR-08, CHAR-09, CONTRACT-05 | INV-13, INV-08 | G6, G8 (DEV-01, DEV-02) |
+| RF-14 | CHAR-08, CHAR-09, CHAR-10, CONTRACT-05 | INV-13, INV-08 | G6, G8 (DEV-01, DEV-02) |
 | RF-15 | CONTRACT-03 | — | — |
 | RF-16 | CHAR-03 a CHAR-07 | INV-02, INV-03, INV-04, INV-05 | — |
 | RF-17 | UI-01 a UI-04 | INV-12 | G6, G8 (DEV-03) |
@@ -121,6 +122,14 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 Las filas de las fases 6 a 8 se añaden al planear cada WP, antes de empezarlo.
 
 ## 5. Checklists de dispositivo
+
+**Simuladores (D-05).** No hay dispositivos físicos; G8 se ejecuta en la Mac:
+- **iOS:** iOS Simulator 27.0. El simulador sólo ejecuta builds de debug.
+- **Android:** emulador `Medium_Phone_API_37.0`, con Google Play, que recibe FCM.
+- **Push en iOS:** `xcrun simctl push` simula un push local. El payload lleva `gcm.message_id`, para que Firebase Messaging lo trate como mensaje FCM.
+- **Push en Android:** necesita un FCM real; por ejemplo, la prueba de campaña del admin dirigida al dispositivo.
+- **Configuración:** `config/dart_defines.staging.json` con `NOTIFICATIONS_ENABLED` y `FIREBASE_APP_CHECK_DEBUG` en `true`. El token de depuración de App Check de cada simulador se registra en Firebase.
+- **Riesgo residual:** APNs de producción y dispositivos físicos quedan sin verificar; se repasan antes de publicar (E1).
 
 **DEV-01 iOS y DEV-02 Android** (build de staging):
 

@@ -50,6 +50,8 @@ class NotificationController extends ChangeNotifier {
   bool saving = false;
   String? lastError;
   String? _credential;
+  Future<void>? _restoring;
+  bool _disposed = false;
   int _profileVersion = 0;
   String? _lastProfileFingerprint;
   String? _activeDeliveryId;
@@ -62,12 +64,30 @@ class NotificationController extends ChangeNotifier {
 
   bool get available => config.isUsable && _gateway != null && _api != null;
 
-  Future<void> restore() async {
+  /// Loads the saved state, syncs with the service and delivers the route of a
+  /// notification that launched the app. Never throws: failures are kept in
+  /// [lastError] and [ready] always ends up `true`.
+  Future<void> restore() {
+    final running = _restore();
+    _restoring = running;
+    return running;
+  }
+
+  /// Waits for a [restore] that has already started, so the first-frame
+  /// permission prompt and the settings actions never read state that
+  /// [restore] has not loaded yet. Without a [restore] it returns at once.
+  Future<void> _awaitRestore() async {
+    final running = _restoring;
+    if (running != null) await running;
+  }
+
+  Future<void> _restore() async {
     if (!available) {
       ready = true;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
       return;
     }
+    NotificationRouteData? localInitial;
     try {
       _credential = await secureStore.read(_credentialKey);
       final rawPreferences = await secureStore.read(_preferencesKey);
@@ -82,7 +102,8 @@ class NotificationController extends ChangeNotifier {
           ) ??
           0;
       permission = await _gateway!.permissionState();
-      final localInitial = await _local?.initialize(_openRoute);
+      localInitial = await _local?.initialize(_openRoute);
+      if (_disposed) return;
       _listenToProviders();
 
       if (_credential != null) {
@@ -94,21 +115,29 @@ class NotificationController extends ChangeNotifier {
         }
       }
       _localConfig = await _api!.fetchConfig();
+      if (_disposed) return;
       catalogStore.addListener(_onCatalogChanged);
       await _updateCartReminder();
+    } catch (error) {
+      lastError = _friendlyError(error);
+    }
 
-      final firebaseInitial = await _gateway.takeInitialMessage();
+    // A tapped notification must open its route even when the steps above
+    // failed (for instance with no connectivity), so it is read on its own.
+    try {
+      if (_disposed) return;
+      final firebaseInitial = await _gateway!.takeInitialMessage();
       final initialRoute = firebaseInitial?.route ?? localInitial;
-      if (initialRoute != null) {
+      if (initialRoute != null && !_disposed) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          _openRoute(initialRoute);
+          if (!_disposed) _openRoute(initialRoute);
         });
       }
     } catch (error) {
-      lastError = _friendlyError(error);
+      lastError ??= _friendlyError(error);
     } finally {
       ready = true;
-      notifyListeners();
+      if (!_disposed) notifyListeners();
     }
   }
 
@@ -116,7 +145,10 @@ class NotificationController extends ChangeNotifier {
     NotificationPreferences next, {
     String source = 'settings',
   }) async {
-    if (!available || saving) return false;
+    // Only a restore() already under way is awaited; otherwise this stays
+    // synchronous up to the first real await, as before.
+    if (_restoring != null) await _awaitRestore();
+    if (_disposed || !available || saving) return false;
     saving = true;
     lastError = null;
     notifyListeners();
@@ -156,7 +188,10 @@ class NotificationController extends ChangeNotifier {
   /// device when the shopper accepts. Personalized offers and product alerts
   /// remain opt-in at their own points of intent.
   Future<bool> requestSystemPermission() async {
-    if (!available || saving) return false;
+    // Only a restore() already under way is awaited; otherwise this stays
+    // synchronous up to the first real await, as before.
+    if (_restoring != null) await _awaitRestore();
+    if (_disposed || !available || saving) return false;
     if (permission != NotificationPermissionState.notDetermined) {
       return permission.canReceive;
     }
@@ -186,7 +221,10 @@ class NotificationController extends ChangeNotifier {
   }
 
   Future<bool> createRestockAlert(String rawProductId) async {
-    if (!available || saving) return false;
+    // Only a restore() already under way is awaited; otherwise this stays
+    // synchronous up to the first real await, as before.
+    if (_restoring != null) await _awaitRestore();
+    if (_disposed || !available || saving) return false;
     saving = true;
     lastError = null;
     notifyListeners();
@@ -387,6 +425,7 @@ class NotificationController extends ChangeNotifier {
 
   @override
   void dispose() {
+    _disposed = true;
     catalogStore.removeListener(_onCatalogChanged);
     _profileDebounce?.cancel();
     unawaited(_tokenSubscription?.cancel());

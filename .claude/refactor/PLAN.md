@@ -23,6 +23,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | D-02 | Sacar de RF-00 lo que depende de dispositivos o de la persona | Mover DEV-03 al paso 0 de RF-17; webhooks a RF-23, instalaciones a RF-60 y cuentas propias a RF-62 | **tomada, 2026-10-06:** como se recomienda | RF-00 |
 | D-03 | Mínimo de iOS: Xcode 27.0 sólo compila para iOS 15.0–27 | Subir a iOS 15.0 en RF-19 | **tomada, 2026-10-06:** subir a 15.0; ningún modelo de iPhone ni de iPad queda fuera | RF-19 |
 | D-04 | Aprobar RF-00 con G6 iOS en rojo como parte de la base | Sí; RF-19 bloquea a los WPs que exigen G6 | **tomada, 2026-10-06:** sí | RF-14, RF-17, RF-20 y sus dependientes |
+| D-05 | G8 sin dispositivos físicos | Simuladores de la Mac: iOS Simulator 27.0 (iPhone 17, 17e y 18 Pro Max) y el emulador Android `Medium_Phone_API_37.0` con Google Play | **tomada, 2026-10-06:** simuladores. Riesgo residual: APNs de producción, builds de release en iOS y dispositivos físicos quedan sin verificar; repetir DEV-01 y DEV-02 en un dispositivo o en prueba interna antes de publicar (E1) | G8 de RF-14, RF-17, RF-31, RF-50–52 y RF-62 |
 | E1 | ¿Lanzar tras las fases 1–2 y refactorizar sobre el producto vivo? | Sí | **tomada, 2026-10-06:** sí; las fases 3+ se hacen con la app publicada | Orden de las fases 3+ |
 | E2 | Eliminar del árbol el código del catálogo externo, con tag forense | Sí | **tomada, 2026-10-06:** sí, con tag forense (`baseline/48a6786` sirve de referencia) | RF-20, RF-21 |
 | E3 | Autoridad del catálogo en producción | Sólo `storefrontDirect`; el espejo queda experimental | **tomada, 2026-10-06:** sólo `storefrontDirect`; el espejo queda experimental | RF-42, RF-71 |
@@ -53,7 +54,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-11 | Ficha: producto que desaparece | 1 | test-engineer → flutter-implementer | RF-00 | — | cerrado |
 | RF-12 | Contrato del ID de pedido en Rewards | 1 | test-engineer → backend + flutter | RF-00 | — | cerrado |
 | RF-13 | Rewards apagado: JSON 404 y estado «no disponible» | 1 | test-engineer → backend + flutter | RF-00 | E7 | cerrado |
-| RF-14 | Timeouts y notificaciones fuera del arranque | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | — | pendiente |
+| RF-14 | Timeouts y notificaciones fuera del arranque | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | D-05 (G8) | bloqueado: G6 y G8 de la persona |
 | RF-15 | Parsers estrictos de Rewards | 1 | test-engineer → flutter-implementer | RF-00 | — | pendiente |
 | RF-16 | Caracterización de reglas vigentes | 1 | test-engineer | RF-00 | — | pendiente |
 | RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | E-T1, E-T2 | pendiente |
@@ -181,7 +182,7 @@ Origen: R13.
 2. `flutter-implementer` aplica los cambios.
 
 **Cambios:**
-- Un transporte común con timeout configurable, que por defecto sea el mismo que ya usa Customer Account, para los 7 clientes HTTP sin límite:
+- Un transporte común con timeout configurable, que por defecto sea el mismo que ya usa Customer Account, para los 7 clientes HTTP sin límite. Customer Account usa dos valores: 15 s para la identidad y 20 s para los pedidos. El valor por defecto es 20 s, el mismo de los pedidos y del transporte de Storefront (`customer_orders.dart:60`, `http_storefront_transport.dart:23`). Los 7 clientes son:
   - notificaciones;
   - notificaciones de admin;
   - admin;

@@ -1,10 +1,12 @@
 /// HTTP client for anonymous installations and notification preferences.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../http/timeout_http_client.dart';
 import 'interest_profile_snapshot.dart';
 import 'notification_models.dart';
 
@@ -13,7 +15,8 @@ class NotificationApiClient {
     required this.baseUrl,
     required this.appCheckTokenProvider,
     http.Client? client,
-  })  : _client = client ?? http.Client(),
+    Duration timeout = kDefaultHttpTimeout,
+  })  : _client = TimeoutHttpClient(client ?? http.Client(), timeout: timeout),
         _ownsClient = client == null;
 
   final Uri baseUrl;
@@ -188,12 +191,20 @@ class NotificationApiClient {
     };
     final uri = baseUrl.resolve(path);
     final encoded = body == null ? null : jsonEncode(body);
-    final response = switch (method) {
-      'GET' => await _client.get(uri, headers: headers),
-      'POST' => await _client.post(uri, headers: headers, body: encoded),
-      'PUT' => await _client.put(uri, headers: headers, body: encoded),
-      _ => throw NotificationException('Método no soportado: $method'),
-    };
+    final http.Response response;
+    try {
+      response = switch (method) {
+        'GET' => await _client.get(uri, headers: headers),
+        'POST' => await _client.post(uri, headers: headers, body: encoded),
+        'PUT' => await _client.put(uri, headers: headers, body: encoded),
+        _ => throw NotificationException('Método no soportado: $method'),
+      };
+    } on TimeoutException {
+      throw const NotificationException(
+        'El servicio de notificaciones no respondió a tiempo. '
+        'Inténtalo de nuevo.',
+      );
+    }
     if (!acceptedStatuses.contains(response.statusCode)) {
       final error = _error(response.bodyBytes);
       throw NotificationException(

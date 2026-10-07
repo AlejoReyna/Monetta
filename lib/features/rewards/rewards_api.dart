@@ -11,6 +11,7 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+import '../../data/http/timeout_http_client.dart';
 import 'rewards_models.dart';
 
 typedef RewardsTokenProvider = Future<String?> Function();
@@ -20,7 +21,8 @@ class RewardsApi {
     required this.baseUrl,
     required this.tokenProvider,
     http.Client? client,
-  }) : _client = client ?? http.Client();
+    Duration timeout = kDefaultHttpTimeout,
+  }) : _client = TimeoutHttpClient(client ?? http.Client(), timeout: timeout);
 
   final String baseUrl;
   final RewardsTokenProvider tokenProvider;

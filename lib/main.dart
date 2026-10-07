@@ -769,13 +769,57 @@ class _MonettaAppState extends State<MonettaApp> {
     unawaited(_editorialContent.refresh());
     unawaited(_homeContent.refresh());
     unawaited(_featuredCatalog.refresh());
-    await _notifications!.restore();
+    // Notifications initialize in the background: restore() never throws and
+    // talks to the OS and the network, so the first paint must not wait on it.
+    // A route it delivers before the Navigator exists is held by
+    // `_openNotificationRoute`.
+    unawaited(_notifications!.restore());
     await _store.waitForInitialCatalog();
   }
 
+  /// Latest notification route that arrived before the Navigator existed.
+  NotificationRouteData? _pendingNotificationRoute;
+  bool _pendingNotificationRouteScheduled = false;
+
   void _openNotificationRoute(NotificationRouteData route) {
     final navigator = _navigatorKey.currentState;
+    if (navigator == null) {
+      // Cold start: the Navigator is only mounted once `_loading` finishes.
+      // Keep the latest route and open it after the frame that mounts it.
+      _pendingNotificationRoute = route;
+      if (!_pendingNotificationRouteScheduled) {
+        _pendingNotificationRouteScheduled = true;
+        unawaited(
+          _loading.then<void>(
+            (_) => WidgetsBinding.instance.addPostFrameCallback(
+              (_) => _openPendingNotificationRoute(),
+            ),
+            onError: (Object _, StackTrace __) {
+              _pendingNotificationRoute = null;
+            },
+          ),
+        );
+      }
+      return;
+    }
+    _pendingNotificationRoute = null;
+    _navigateToNotificationRoute(navigator, route);
+  }
+
+  void _openPendingNotificationRoute() {
+    final route = _pendingNotificationRoute;
+    _pendingNotificationRoute = null;
+    _pendingNotificationRouteScheduled = false;
+    if (route == null || !mounted) return;
+    final navigator = _navigatorKey.currentState;
     if (navigator == null) return;
+    _navigateToNotificationRoute(navigator, route);
+  }
+
+  void _navigateToNotificationRoute(
+    NavigatorState navigator,
+    NotificationRouteData route,
+  ) {
     if (route.type == 'product' && route.productKey != null) {
       final key = route.productKey!;
       // external:* notification routes are ignored — monitor catalog retired.

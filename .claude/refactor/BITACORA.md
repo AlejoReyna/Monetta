@@ -451,3 +451,62 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Decisiones de la persona en esta iteración:** E7, registrada en `bc677a7`.
 - **Commit:** el que contiene esta entrada, en `refactor/rf-13-rewards-apagado`. Sin push.
 - **Siguiente paso:** RF-14 (timeouts y notificaciones fuera del arranque).
+
+### 2026-10-06 · RF-14 · iteración 1 · PENDIENTE DE G6 Y G8
+
+- **Agente(s):** `test-engineer` escribió las pruebas rojas en dos rondas; `flutter-implementer` implementó. El orquestador redactó los encargos, verificó el rojo y auditó.
+- **Base:** `1bf3c64`. Rama `refactor/rf-14-timeouts-notificaciones`.
+- **Decisiones aplicadas:**
+  - D-05, tomada en esta sesión: G8 en los simuladores de la Mac.
+  - Timeout por defecto de 20 s, anotado en `PLAN.md`.
+- **Fila nueva:** CHAR-10, porque al quitar la espera de `restore()`, el primer frame del inicio pedía el permiso antes de cargar el estado guardado (`home_screen.dart:115-123`) y volvía a encender los anuncios.
+- **Fase roja (verificada por el auditor):**
+  - `lib/` intacto.
+  - 15 rojas, cada una por su razón:
+    - CHAR-08: `HomeScreen` no aparece.
+    - CHAR-09: `CollectionScreen` no aparece.
+    - CHAR-09 sin red: `takeInitialMessageCalls` 0, se esperaba 1.
+    - CHAR-10: `requestPermission` 1, se esperaba 0.
+    - CONTRACT-05, las 11: `Actual: <null>` a los 21 s.
+  - Una caracterización (CHAR-09 vigente) en verde.
+- **Archivos del diff:**
+  - `lib/data/http/timeout_http_client.dart` (nuevo): transporte con un plazo para cabeceras y cuerpo, con `Timer`.
+  - Los 7 clientes: parámetro `timeout` y traducción a su error tipado. Los mensajes de notificaciones están en español.
+  - `lib/app/notification_controller.dart`:
+    - `restore()` lee el mensaje inicial aunque falle la red;
+    - las acciones esperan a un `restore()` en curso;
+    - guardas tras `dispose()`.
+  - `lib/main.dart`:
+    - `restore()` sin `await`;
+    - la ruta que llega antes del Navigator se conserva y se abre una vez.
+  - Pruebas nuevas: `test/app/startup_notifications_test.dart`, `test/app/notification_restore_race_test.dart` y `test/data/http/http_timeout_contract_test.dart`.
+  - `.claude/refactor/PLAN.md`, `.claude/refactor/MATRIZ_DE_PRUEBAS.md` y esta entrada.
+  - Fuera del WP: `.claude/skills/refactor/SKILL.md` (la persona quitó `disable-model-invocation`). Queda fuera del commit de RF-14.
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo los archivos listados; `git diff --check` limpio, con los archivos nuevos incluidos.
+  - G1 → 309 archivos, 0 cambiados.
+  - G2 → «No issues found!».
+  - G3 → `+16: All tests passed!`.
+  - G4 → `+745 ~5: All tests passed!`, es decir, 729 más 16.
+  - G5 → catálogo válido (103 productos, 340 imágenes); `./bin/check_no_secrets.sh` → OK.
+  - G6 → **no ejecutado**: el WP toca la composición de arranque y le toca a la persona.
+  - G8 (DEV-01 y DEV-02, pasos de push, en simuladores) → **no ejecutado**: le toca a la persona.
+- **Checklist:**
+  - alcance correcto;
+  - INV-13 e INV-08 verdes en G4;
+  - el transporte no registra URLs, cabeceras ni tokens;
+  - firmas públicas conservadas, sólo con el parámetro opcional añadido;
+  - sin `skip` ni `// ignore`.
+- **Hallazgos:**
+  - [Baja] Un timeout antes de las cabeceras no aborta la petición subyacente; sólo se descarta su respuesta. En Loox, el `http.get` por defecto sigue en segundo plano.
+  - [Baja] Las guardas de `dispose()` en `NotificationController` no tienen prueba propia.
+  - [Baja] Abrir la ruta pendiente depende de que el post-frame que sigue a `_loading` monte el Navigator. CHAR-09 lo cubre, y RF-31 lo reemplaza con `AppDestination`.
+  - [Baja] Si `_local.initialize` falla, se pierde `localInitial` y no se escuchan los mensajes abiertos en esa sesión. Es comportamiento previo.
+- **Veredicto:** código aprobado. El WP queda en espera de G6 y G8; sin commit hasta cerrarlo.
+
+### 2026-10-07 · RF-14 · commit con G6 y G8 pendientes
+
+- **Motivo:** la persona pidió dejar el bucle `/refactor` corriendo solo. Para eso el árbol debe quedar limpio, así que autorizó hacer el commit del código aprobado antes de cerrar el WP.
+- **Estado:** RF-14 sigue `bloqueado: G6 y G8 de la persona` en `PLAN.md`. Cuando la persona ejecute G6 y G8, se registran aquí y el WP pasa a `cerrado`. Si algo falla, la corrección va en un commit nuevo sobre la misma rama.
+- **Rama:** `refactor/rf-14-timeouts-notificaciones`. Los WPs siguientes parten de esta rama.
+- **Fuera del commit:** `.claude/skills/refactor/SKILL.md` (cambio de la persona) y `.claude/settings.local.json`.

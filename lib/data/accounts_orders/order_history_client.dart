@@ -4,9 +4,12 @@
 /// injected-transport shape as `data/external_catalog/external_catalog_client.dart`.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
+
+import '../http/timeout_http_client.dart';
 
 class OrderHistoryException implements Exception {
   OrderHistoryException(this.message);
@@ -69,8 +72,14 @@ abstract class OrderHistoryClient {
 }
 
 class HttpOrderHistoryClient implements OrderHistoryClient {
-  HttpOrderHistoryClient({required this.baseUrl, http.Client? httpClient})
-      : _client = httpClient ?? http.Client();
+  HttpOrderHistoryClient({
+    required this.baseUrl,
+    http.Client? httpClient,
+    Duration timeout = kDefaultHttpTimeout,
+  }) : _client = TimeoutHttpClient(
+          httpClient ?? http.Client(),
+          timeout: timeout,
+        );
 
   final String baseUrl;
   final http.Client _client;
@@ -78,13 +87,18 @@ class HttpOrderHistoryClient implements OrderHistoryClient {
   @override
   Future<List<MirroredOrder>> fetchOrders(String accessToken) async {
     final uri = Uri.parse('$baseUrl/customers/me/orders');
-    final response = await _client.get(
-      uri,
-      headers: {
-        'Accept': 'application/json',
-        'Authorization': 'Bearer $accessToken',
-      },
-    );
+    final http.Response response;
+    try {
+      response = await _client.get(
+        uri,
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $accessToken',
+        },
+      );
+    } on TimeoutException {
+      throw OrderHistoryException('GET /customers/me/orders timed out');
+    }
 
     if (response.statusCode != 200) {
       throw OrderHistoryException(
