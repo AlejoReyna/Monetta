@@ -29,7 +29,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | E4 | Fusión invitado→cuenta y contador de la bolsa | Sumar con tope de 10; el contador cuenta sólo líneas visibles; aviso para artículos no disponibles | pendiente | RF-50 |
 | E5 | Cuenta propia Monetta | Congelar el registro; inventariar cuentas reales; evaluar la migración | **tomada, 2026-10-06:** congelar el registro, inventariar las cuentas reales (existen; cifra pendiente) y evaluar su migración | RF-62 |
 | E6 | ¿Universal links o App Links en la v1? | No: sin go_router por ahora | pendiente | Alcance de RF-31 |
-| E7 | Qué ve la persona si Rewards está apagado | Ocultar la sección o «próximamente», nunca un error | pendiente | Textos de RF-13 |
+| E7 | Qué ve la persona si Rewards está apagado | Ocultar la sección o «próximamente», nunca un error | **tomada, 2026-10-06:** mantener el estado vigente «Monetta Rewards aún no está disponible» (`rewards_section.dart:442`, `rewards_balance_card.dart:195`); nunca un error ni «revisa tu conexión» | Textos de RF-13 |
 | E8 | ¿El acuerdo comercial exige `_rec_source` y `_campaign`? | Confirmarlo con el contrato | pendiente | RF-67 |
 | E9 | Funciones de nicho en la v1 (partner, mayoreo, creador de catálogo, contacto, experiencias, admin) | Inventario con la persona | pendiente | RF-66 |
 | E10 | Política ante un catálogo vacío | No aplicar un vacío sin una segunda confirmación | pendiente | RF-42, RF-50 |
