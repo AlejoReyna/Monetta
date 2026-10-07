@@ -27,17 +27,17 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | E1 | ¿Lanzar tras las fases 1–2 y refactorizar sobre el producto vivo? | Sí | **tomada, 2026-10-06:** sí; las fases 3+ se hacen con la app publicada | Orden de las fases 3+ |
 | E2 | Eliminar del árbol el código del catálogo externo, con tag forense | Sí | **tomada, 2026-10-06:** sí, con tag forense (`baseline/48a6786` sirve de referencia) | RF-20, RF-21 |
 | E3 | Autoridad del catálogo en producción | Sólo `storefrontDirect`; el espejo queda experimental | **tomada, 2026-10-06:** sólo `storefrontDirect`; el espejo queda experimental | RF-42, RF-71 |
-| E4 | Fusión invitado→cuenta y contador de la bolsa | Sumar con tope de 10; el contador cuenta sólo líneas visibles; aviso para artículos no disponibles | pendiente | RF-50 |
+| E4 | Fusión invitado→cuenta y contador de la bolsa | Sumar con tope de 10; el contador cuenta sólo líneas visibles; aviso para artículos no disponibles | **tomada, 2026-10-07:** como se recomienda | RF-50 |
 | E5 | Cuenta propia Monetta | Congelar el registro; inventariar cuentas reales; evaluar la migración | **tomada, 2026-10-06:** congelar el registro, inventariar las cuentas reales (existen; cifra pendiente) y evaluar su migración | RF-62 |
-| E6 | ¿Universal links o App Links en la v1? | No: sin go_router por ahora | pendiente | Alcance de RF-31 |
+| E6 | ¿Universal links o App Links en la v1? | No: sin go_router por ahora | **tomada, 2026-10-07:** no en la v1; sin go_router por ahora | Alcance de RF-31 |
 | E7 | Qué ve la persona si Rewards está apagado | Ocultar la sección o «próximamente», nunca un error | **tomada, 2026-10-06:** mantener el estado vigente «Monetta Rewards aún no está disponible» (`rewards_section.dart:442`, `rewards_balance_card.dart:195`); nunca un error ni «revisa tu conexión» | Textos de RF-13 |
-| E8 | ¿El acuerdo comercial exige `_rec_source` y `_campaign`? | Confirmarlo con el contrato | pendiente | RF-67 |
+| E8 | ¿El acuerdo comercial exige `_rec_source` y `_campaign`? | Confirmarlo con el contrato | pendiente: la persona aún no lo sabe (consultado 2026-10-07) | RF-67 |
 | E9 | Funciones de nicho en la v1 (partner, mayoreo, creador de catálogo, contacto, experiencias, admin) | Inventario con la persona | pendiente | RF-66 |
-| E10 | Política ante un catálogo vacío | No aplicar un vacío sin una segunda confirmación | pendiente | RF-42, RF-50 |
-| E11 | Dominio canónico de la tienda | `monetta.mx`, como hoy, sin normalizarlo de otra forma | pendiente | RF-30, RF-32 |
+| E10 | Política ante un catálogo vacío | No aplicar un vacío sin una segunda confirmación | **tomada, 2026-10-07:** un vacío sólo se aplica cuando una segunda sincronización lo confirma; mientras, se muestra el último catálogo bueno | RF-42, RF-50 |
+| E11 | Dominio canónico de la tienda | `monetta.mx`, como hoy, sin normalizarlo de otra forma | **tomada, 2026-10-07:** `monetta.mx`, derivado y normalizado como hoy | RF-30, RF-32 |
 | E12 | ¿Galería web pública o privada? | — | pendiente | RF-80 |
-| E-T1 | Tope de escala de texto | Global 1.5 y titulares 1.2 | pendiente | RF-17 |
-| E-T2 | ¿Empaquetar Playfair Display e Inter (licencia OFL 1.1)? | Sí | pendiente | RF-17 |
+| E-T1 | Tope de escala de texto | Global 1.5 y titulares 1.2 | **tomada, 2026-10-07:** global 1.5 y titulares 1.2 | RF-17 |
+| E-T2 | ¿Empaquetar Playfair Display e Inter (licencia OFL 1.1)? | Sí | **tomada, 2026-10-07:** sí, empaquetarlas con su licencia | RF-17 |
 
 **Opciones de E-T1:**
 - **(a) Tope global de 1.3.** Prioriza el diseño y es el cambio más simple.
