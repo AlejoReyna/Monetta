@@ -6,11 +6,20 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/account_controller.dart';
+import 'package:monetta_app/app/admin_config.dart';
+import 'package:monetta_app/app/admin_controller.dart';
 import 'package:monetta_app/app/card_lift.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
+import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
+import 'package:monetta_app/data/local/account_store.dart';
+import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/data/local/order_summary_store.dart';
+import 'package:monetta_app/data/repositories/order_history_repository.dart';
 import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
+import 'package:monetta_app/main.dart';
 
 const _longName =
     'Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody';
@@ -124,27 +133,62 @@ void _setView(
   addTearDown(tester.view.reset);
 }
 
+const _ownerEmail = 'owner@example.com';
+
+/// Wraps [app] in a signed-in owner's session. The piece count under the
+/// title is an owner aid that shoppers never see.
+Widget _asOwner(Widget app) {
+  final db = openTestDatabase();
+  final account = AccountController(
+    accountStore: AccountStore(db),
+    deviceStore: DeviceStore(db),
+    orderHistoryRepository: OrderHistoryRepository(
+      store: OrderSummaryStore(db),
+      config: AccountsOrdersConfig.disabled,
+    ),
+    deviceId: 'dev-1',
+  )..account = Account(
+      localAccountId: 'acct-1',
+      email: _ownerEmail,
+      authProvider: 'monetta',
+      createdAt: DateTime.utc(2026),
+      lastSeenAt: DateTime.utc(2026),
+    );
+  final admin = AdminController(
+    config: const AdminConfig(baseUrl: null, ownerEmails: {_ownerEmail}),
+  );
+  addTearDown(() async {
+    admin.dispose();
+    account.dispose();
+    await db.close();
+  });
+  return AdminScope(
+    notifier: admin,
+    child: AccountScope(notifier: account, child: app),
+  );
+}
+
 Future<void> _pump(
   WidgetTester tester,
   List<CatalogItem> items, {
   TextScaler? textScaler,
   bool pushed = false,
+  bool owner = false,
 }) async {
   final navigator = GlobalKey<NavigatorState>();
-  await tester.pumpWidget(
-    MaterialApp(
-      navigatorKey: navigator,
-      builder: textScaler == null
-          ? null
-          : (context, child) => MediaQuery(
-                data: MediaQuery.of(context).copyWith(textScaler: textScaler),
-                child: child!,
-              ),
-      home: pushed
-          ? const Scaffold(body: SizedBox.shrink())
-          : CatalogBrowseScreen(items: items),
-    ),
+  final app = MaterialApp(
+    navigatorKey: navigator,
+    builder: textScaler == null
+        ? null
+        : (context, child) => MediaQuery(
+              data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+              child: child!,
+            ),
+    home: pushed
+        ? const Scaffold(body: SizedBox.shrink())
+        : CatalogBrowseScreen(items: items),
   );
+  await tester.pumpWidget(owner ? _asOwner(app) : app);
   if (pushed) {
     unawaited(
       navigator.currentState!.push(
@@ -365,6 +409,8 @@ void main() {
   });
 
   group('UI-CAT-04 the header is centred', () {
+    // Measured as an owner sees it: shoppers get the title alone, owners also
+    // get the piece count under it.
     for (final pushed in [true, false]) {
       for (final (label, scaler) in const [
         ('x1.0', TextScaler.noScaling),
@@ -383,6 +429,7 @@ void main() {
               _items(6),
               textScaler: scaler,
               pushed: pushed,
+              owner: true,
             );
 
             expect(errors.takeUnexpected(), isEmpty);
@@ -412,6 +459,7 @@ void main() {
               _items(6),
               textScaler: scaler,
               pushed: pushed,
+              owner: true,
             );
             final unexpected = errors.takeUnexpected();
 

@@ -168,7 +168,7 @@ class _BrandScreenState extends State<BrandScreen> {
     return Scaffold(
       backgroundColor: palette.canvas,
       appBar: AppBar(
-        backgroundColor: palette.canvas,
+        backgroundColor: palette.bar,
         foregroundColor: palette.ink,
         surfaceTintColor: Colors.transparent,
         elevation: 0,

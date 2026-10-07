@@ -698,7 +698,7 @@ class _BoutiqueBar extends StatelessWidget implements PreferredSizeWidget {
       toolbarHeight: 60,
       leading: leading,
       automaticallyImplyLeading: false,
-      backgroundColor: palette.canvas,
+      backgroundColor: palette.bar,
       foregroundColor: palette.ink,
       elevation: 0,
       scrolledUnderElevation: 0,

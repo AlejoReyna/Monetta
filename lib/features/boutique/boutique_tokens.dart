@@ -1,19 +1,30 @@
 /// Boutique layer for the welcome / onboarding / home package.
 ///
 /// The shared system in `app/theme.dart` is a *white* editorial theme with
-/// square corners. The boutique redesign asks for an ivory ground, softened
-/// rectangles and a lighter gold. Rather than repaint the whole app from a
-/// feature package — which would silently restyle checkout, account and the
-/// admin panel — this file is a **local** token layer used only by the screens
-/// this package owns.
+/// square corners. The boutique redesign asks for softened rectangles and a
+/// lighter gold on the same white ground, with soft neutral-grey bars at the
+/// top and bottom edges. Rather than repaint the whole app from a feature
+/// package — which would silently restyle checkout, account and the admin
+/// panel — this file is a **local** token layer used only by the screens this
+/// package owns.
 ///
-/// ## Pending global adoption
+/// ## Ground and bars
+///
+/// * Page ground ([BoutiquePalette.canvas]) is plain white. Panels and chips
+///   step down through neutral greys ([BoutiquePalette.surface],
+///   [BoutiquePalette.surfaceDeep]); the greys keep the luminance steps the
+///   previous warm ground had, so depth reads the same without any tint.
+/// * App bars use [BoutiquePalette.bar], the same grey as the bottom
+///   navigation (`MonettaColors.navigationSurface`), so the chrome reads as
+///   one band at each edge.
+/// * Gold, ink, the sale red and dark mode are unchanged.
+///
+/// ## Adoption
 ///
 /// Everything here is written so it can move into `app/theme.dart` verbatim
 /// once the orchestrator decides to flip the whole app:
 ///
-/// * `MonettaColors.light.canvas` → [_ivory], `surfaceMuted` → [_ivoryDeep],
-///   `accent` → [_gold], `accentContent` → [_goldText].
+/// * `MonettaColors.light.accent` → [_gold], `accentContent` → [_goldText].
 /// * `kSquare` → [BoutiqueRadius.card] / [BoutiqueRadius.control].
 /// * The font families below want `Playfair Display` and `Inter` registered in
 ///   `pubspec.yaml`. They are named *first* in every family list, so the moment
@@ -23,16 +34,12 @@
 /// Dark mode deliberately defers to [MonettaColors.dark] instead of inventing
 /// a second palette, so the existing dark theme stays usable.
 ///
-/// ## Where the values came from
+/// ## Where the gold came from
 ///
 /// Sampled from `docs/design-reference/monetta-client-layout.png` rather than
 /// copied from its printed swatch row, because the two disagree: the strip
-/// labels the ground `#FBF9F2` and the gold `#D4AF37`, while the screens
-/// themselves render `#F8F5EE` and `#C5A052`. The rendered values win — they
-/// are what the figures actually look like — and they are also the values the
-/// brief proposed. Other measured points, for anyone re-deriving this:
-/// card surface `#F6F5EC`, search field `#F6F0E9`, silhouette tile `#F5EEE6`,
-/// filter chip `#E6E2D8`, `NUEVO` badge `#DBBE93`.
+/// labels the gold `#D4AF37`, while the screens themselves render `#C5A052`.
+/// The rendered value wins, and it is also the value the brief proposed.
 library;
 
 import 'package:flutter/material.dart';
@@ -177,20 +184,33 @@ abstract final class BoutiqueRadius {
 // Colour
 // ---------------------------------------------------------------------------
 
+/// Warm white for type and marks that sit on photography (`onDark`). It is no
+/// longer used as a ground.
 const Color _ivory = Color(0xFFF8F5EE);
-const Color _ivoryDeep = Color(0xFFF0EBE2);
+
+/// Page ground.
+const Color _pageWhite = Color(0xFFFFFFFF);
+
+/// Cards and raised panels. 1.04:1 against [_pageWhite], a soft step.
+const Color _panelGrey = Color(0xFFFAFAFA);
+
+/// Chips, search fields and selected fills. 1.05:1 against the bar grey, so they
+/// stay distinguishable inside a bar as well as on the page.
+const Color _deepGrey = Color(0xFFF0F0F0);
+
 const Color _boutiqueInk = Color(0xFF111111);
 
-/// Ink at ~58%, warmed. Measured at 5.2:1 on [_ivory] — the app's legacy
-/// muted grey only reaches 4.1:1 there, which is why this is not reused.
+/// Ink at ~58%, warmed. Measured at 5.7:1 on [_pageWhite] and 5.2:1 on the bars
+/// — the app's legacy muted grey (`#737373`) drops to 4.35:1 on the bars, which
+/// is why this is not reused.
 const Color _mutedBoutiqueInk = Color(0xFF6B6660);
 
-/// The brief's dorado. Contrast on ivory is 2.3:1, so it is a *line and mark*
-/// colour only.
+/// The brief's dorado. Contrast is 2.5:1 on white and 2.3:1 on the bars, so it
+/// is a *line and mark* colour only.
 const Color _gold = Color(0xFFC5A052);
 
-/// The same hue taken to 4.6:1 on ivory, for gold text (kickers, prices in a
-/// sale state). Never use [_gold] for type.
+/// The same hue taken to 5.0:1 on white (4.6:1 on the bars), for gold text
+/// (kickers, prices in a sale state). Never use [_gold] for type.
 const Color _goldText = Color(0xFF8F6838);
 
 const Color _hairline = Color(0x1F111111);
@@ -202,6 +222,7 @@ class BoutiquePalette {
     required this.canvas,
     required this.surface,
     required this.surfaceDeep,
+    required this.bar,
     required this.ink,
     required this.inkMuted,
     required this.gold,
@@ -213,14 +234,22 @@ class BoutiquePalette {
     required this.onDark,
   });
 
-  /// Page ground. Ivory in light, the app's dark canvas in dark.
+  /// Page ground. White in light, the app's dark canvas in dark.
   final Color canvas;
 
-  /// Cards and raised panels.
+  /// Cards and raised panels. A very light neutral grey in light (1.04:1
+  /// against [canvas]).
   final Color surface;
 
-  /// Secondary surface: photo grounds, chips, search field.
+  /// Secondary surface: photo grounds, chips, search field. A light neutral
+  /// grey in light (1.05:1 against [bar]).
   final Color surfaceDeep;
+
+  /// Surface of the top bars (the app bars). In light it is the same grey as
+  /// the bottom navigation
+  /// (`MonettaColors.navigationSurface`, 1.09:1 against [canvas]), so the
+  /// chrome reads as a band at each edge. In dark it keeps the canvas.
+  final Color bar;
 
   final Color ink;
   final Color inkMuted;
@@ -247,6 +276,7 @@ class BoutiquePalette {
         canvas: shared.canvas,
         surface: shared.surfaceRaised,
         surfaceDeep: shared.surfaceMuted,
+        bar: shared.canvas,
         ink: shared.contentPrimary,
         inkMuted: shared.contentMuted,
         gold: shared.accent,
@@ -258,18 +288,19 @@ class BoutiquePalette {
         onDark: const Color(0xFFF8F5EE),
       );
     }
-    return const BoutiquePalette._(
-      canvas: _ivory,
-      surface: Color(0xFFFDFAF4),
-      surfaceDeep: _ivoryDeep,
+    return BoutiquePalette._(
+      canvas: _pageWhite,
+      surface: _panelGrey,
+      surfaceDeep: _deepGrey,
+      bar: shared.navigationSurface,
       ink: _boutiqueInk,
       inkMuted: _mutedBoutiqueInk,
       gold: _gold,
       goldText: _goldText,
       hairline: _hairline,
-      selectedFill: _ivoryDeep,
+      selectedFill: _deepGrey,
       selectedBorder: _boutiqueInk,
-      sale: Color(0xFFA3342B),
+      sale: const Color(0xFFA3342B),
       onDark: _ivory,
     );
   }
