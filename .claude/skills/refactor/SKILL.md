@@ -2,7 +2,6 @@
 name: refactor
 description: Conduce el refactor in situ de Monetta. Elige un WP del plan, lo delega a subagentes Sonnet 5.5 y lo audita contra la matriz de pruebas. Sólo cuando la persona invoca /refactor.
 argument-hint: "[estado | siguiente | RF-XX | auditar]"
-disable-model-invocation: true
 ---
 
 # /refactor — bucle orquestador–auditor
