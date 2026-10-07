@@ -79,20 +79,12 @@ class _StepTextScaler extends TextScaler {
   double get textScaleFactor => 2;
 }
 
-/// Layout errors raised while a test runs, minus the one known defect that
-/// does not belong to this screen: the bottom bar's destination column
-/// overflows by 4-18 pt from text scale 1.3 up (`monetta_bottom_navigation.dart`
-/// builds a 52 pt column). It predates this redesign and would otherwise turn
-/// every enlarged-text test red for a reason the redesign cannot touch.
+/// Layout errors raised while a test runs, the bottom bar's included: it is
+/// on screen in every test and has to hold at every text size as well.
 class _ErrorLog {
   _ErrorLog._(this._original) {
     FlutterError.onError = (details) {
-      // Described right away: once the tree is torn down the creator chain
-      // can no longer be read.
-      final description = details.toDiagnosticsNode().toStringDeep();
-      if (!description.contains('monetta_bottom_navigation.dart')) {
-        _unexpected.add(details.exceptionAsString());
-      }
+      _unexpected.add(details.exceptionAsString());
     };
   }
 
@@ -101,7 +93,7 @@ class _ErrorLog {
 
   /// Restores the framework's handler (it must be back in place before any
   /// `expect`, or a failing expectation is swallowed) and returns the errors
-  /// that are not the known bottom-bar defect.
+  /// raised meanwhile.
   List<String> takeUnexpected() {
     restore();
     return List.of(_unexpected);
