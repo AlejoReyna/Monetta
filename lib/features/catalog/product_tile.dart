@@ -4,6 +4,9 @@
 /// draw the same anatomy: a complete photograph on a neutral ground, an
 /// optional data-backed badge, an optional favourite, then brand, name and
 /// price. The screens differ in *what they scope*, never in how a piece looks.
+/// The one deliberate exception is the full catalog, which uses the
+/// [ProductTileVariant.edgeToEdge] variant: the same data in a continuous
+/// photographic grid.
 ///
 /// ## Why a presentation widget and not one model
 ///
@@ -63,6 +66,76 @@ extension ProductTileMetrics on ProductTileDensity {
   /// overflowed by 9pt); a compact caption peaks near 82pt when the price
   /// wraps under a narrow card (was 74pt and overflowed by up to 25pt).
   double get captionHeight => this == ProductTileDensity.compact ? 88 : 112;
+}
+
+/// Which presentation a [MonettaProductTile] takes. The data and the anatomy
+/// (photo, brand, name, price) are the same; only the framing differs.
+enum ProductTileVariant {
+  /// A standalone card: the photo is inset on a tinted, rounded ground and the
+  /// whole tile lifts when pressed. Used by Home, search, collections and
+  /// favourites, and the default.
+  card,
+
+  /// The full catalog's continuous photographic grid. Photos run to the edges
+  /// and meet 4pt apart, with no frame, radius, inset or lift; only the
+  /// caption is inset.
+  edgeToEdge,
+}
+
+// Caption typography shared by the tile and by the grid's height reserve, so
+// both read one source of truth.
+const double _brandLineHeight = 1.25;
+const double _nameLineHeight = 1.3;
+const double _priceLineHeight = 1.2;
+const double _brandGap = 2;
+const double _priceGap = BoutiqueSpace.xs;
+
+extension ProductTileVariantMetrics on ProductTileVariant {
+  bool get _edge => this == ProductTileVariant.edgeToEdge;
+
+  /// Horizontal gap between grid columns.
+  double get columnSpacing => _edge ? 4 : BoutiqueSpace.md;
+
+  /// Vertical gap between grid rows. The edge-to-edge tile carries its own
+  /// trailing air instead.
+  double get rowSpacing => _edge ? 0 : BoutiqueSpace.xl;
+
+  /// Space between the tile edge and the photograph.
+  double get photoInset => _edge ? 0 : BoutiqueSpace.sm;
+
+  BorderRadius get photoRadius =>
+      _edge ? BorderRadius.zero : BoutiqueRadius.tile;
+
+  /// Horizontal inset of the caption text.
+  double get captionInset => _edge ? BoutiqueSpace.sm : 0;
+
+  /// Gap between the photograph and the caption.
+  double get captionGap => _edge ? 10 : BoutiqueSpace.md;
+
+  /// Air inside the tile, under the caption (there is no row spacing).
+  double get captionTrailing => _edge ? BoutiqueSpace.xl + BoutiqueSpace.xs : 0;
+
+  /// Whether the tile rises when pressed.
+  bool get lifts => !_edge;
+
+  /// Height the grid reserves under the photograph.
+  ///
+  /// [ProductTileVariant.card] keeps the measured allowance. The edge-to-edge
+  /// tile reserves exactly brand, a two-line name and one price line. Each
+  /// font size is scaled on its own, so a non-linear scaler (Android 14+)
+  /// grows the reserve exactly as it grows the text.
+  double captionExtent(ProductTileDensity density, TextScaler textScaler) {
+    if (!_edge) return textScaler.scale(density.captionHeight);
+    return captionGap +
+        textScaler.scale(density.brandSize) * _brandLineHeight +
+        _brandGap +
+        textScaler.scale(density.nameSize) *
+            _nameLineHeight *
+            density.nameMaxLines +
+        _priceGap +
+        textScaler.scale(density.priceSize) * _priceLineHeight +
+        captionTrailing;
+  }
 }
 
 /// Why a badge is showing. Never decorative: each tone has one data source.
@@ -190,6 +263,7 @@ class MonettaProductTile extends StatelessWidget {
     required this.data,
     required this.onTap,
     this.density = ProductTileDensity.grid,
+    this.variant = ProductTileVariant.card,
     this.wishlisted = false,
     this.onToggleWishlist,
     this.onQuickView,
@@ -201,6 +275,9 @@ class MonettaProductTile extends StatelessWidget {
   final ProductTileData data;
   final VoidCallback onTap;
   final ProductTileDensity density;
+
+  /// See [ProductTileVariant]; the card by default.
+  final ProductTileVariant variant;
 
   /// Favourite state. The heart is only drawn when [onToggleWishlist] is
   /// given, so a surface without wishlist support never shows a dead control.
@@ -224,78 +301,104 @@ class MonettaProductTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
 
+    final tile = GestureDetector(
+      onTap: onTap,
+      onLongPress: onQuickView,
+      behavior: HitTestBehavior.opaque,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          AspectRatio(
+            aspectRatio: density.imageAspectRatio,
+            child: _TileImage(
+              data: data,
+              variant: variant,
+              wishlisted: wishlisted,
+              onToggleWishlist: onToggleWishlist,
+              onQuickView: onQuickView,
+              overlay: imageOverlay,
+            ),
+          ),
+          SizedBox(height: variant.captionGap),
+          Padding(
+            padding: EdgeInsets.symmetric(horizontal: variant.captionInset),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (eyebrow case final line? when line.trim().isNotEmpty) ...[
+                  Text(
+                    line.toUpperCase(),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: boutiqueEyebrow(size: 11, color: palette.sale),
+                  ),
+                  const SizedBox(height: BoutiqueSpace.xs),
+                ],
+                if (data.brand case final brand?) ...[
+                  Text(
+                    brand,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: boutiqueText(
+                      size: density.brandSize,
+                      weight: FontWeight.w600,
+                      color: palette.ink,
+                      height: _brandLineHeight,
+                    ),
+                  ),
+                  const SizedBox(height: _brandGap),
+                ],
+                Text(
+                  data.title,
+                  maxLines: density.nameMaxLines,
+                  overflow: TextOverflow.ellipsis,
+                  style: boutiqueText(
+                    size: density.nameSize,
+                    color: palette.inkMuted,
+                    height: _nameLineHeight,
+                  ),
+                ),
+                const SizedBox(height: _priceGap),
+                _PriceLine(data: data, density: density, variant: variant),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+
     return Semantics(
       button: true,
       label: data.semanticLabel,
-      child: MonettaCardLift(
-        borderRadius: BoutiqueRadius.tile,
-        child: GestureDetector(
-          onTap: onTap,
-          onLongPress: onQuickView,
-          behavior: HitTestBehavior.opaque,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              AspectRatio(
-                aspectRatio: density.imageAspectRatio,
-                child: _TileImage(
-                  data: data,
-                  wishlisted: wishlisted,
-                  onToggleWishlist: onToggleWishlist,
-                  onQuickView: onQuickView,
-                  overlay: imageOverlay,
-                ),
-              ),
-              const SizedBox(height: BoutiqueSpace.md),
-              if (eyebrow case final line? when line.trim().isNotEmpty) ...[
-                Text(
-                  line.toUpperCase(),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: boutiqueEyebrow(size: 11, color: palette.sale),
-                ),
-                const SizedBox(height: BoutiqueSpace.xs),
-              ],
-              if (data.brand case final brand?) ...[
-                Text(
-                  brand,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: boutiqueText(
-                    size: density.brandSize,
-                    weight: FontWeight.w600,
-                    color: palette.ink,
-                    height: 1.25,
-                  ),
-                ),
-                const SizedBox(height: 2),
-              ],
-              Text(
-                data.title,
-                maxLines: density.nameMaxLines,
-                overflow: TextOverflow.ellipsis,
-                style: boutiqueText(
-                  size: density.nameSize,
-                  color: palette.inkMuted,
-                  height: 1.3,
-                ),
-              ),
-              const SizedBox(height: BoutiqueSpace.xs),
-              _PriceLine(data: data, density: density),
-            ],
-          ),
-        ),
-      ),
+      child: variant.lifts
+          ? MonettaCardLift(borderRadius: BoutiqueRadius.tile, child: tile)
+          : tile,
     );
   }
 }
 
 class _PriceLine extends StatelessWidget {
-  const _PriceLine({required this.data, required this.density});
+  const _PriceLine({
+    required this.data,
+    required this.density,
+    required this.variant,
+  });
 
   final ProductTileData data;
   final ProductTileDensity density;
+  final ProductTileVariant variant;
+
+  /// On the edge-to-edge tile a price shrinks to fit its column rather than
+  /// ending in an ellipsis; a cut-off price is never acceptable.
+  Widget _fit(Widget text) => variant == ProductTileVariant.edgeToEdge
+      ? FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: AlignmentDirectional.centerStart,
+          child: text,
+        )
+      : text;
 
   @override
   Widget build(BuildContext context) {
@@ -309,29 +412,33 @@ class _PriceLine extends StatelessWidget {
       runSpacing: 2,
       crossAxisAlignment: WrapCrossAlignment.center,
       children: [
-        Text(
-          data.priceLabel,
-          maxLines: 1,
-          softWrap: false,
-          overflow: TextOverflow.ellipsis,
-          style: boutiqueText(
-            size: density.priceSize,
-            weight: FontWeight.w700,
-            color: palette.ink,
-            height: 1.2,
-          ),
-        ),
-        if (data.compareAtLabel case final before?)
+        _fit(
           Text(
-            before,
+            data.priceLabel,
             maxLines: 1,
             softWrap: false,
             overflow: TextOverflow.ellipsis,
             style: boutiqueText(
-              size: density.priceSize - 3,
-              color: palette.inkMuted,
-              height: 1.2,
-              decoration: TextDecoration.lineThrough,
+              size: density.priceSize,
+              weight: FontWeight.w700,
+              color: palette.ink,
+              height: _priceLineHeight,
+            ),
+          ),
+        ),
+        if (data.compareAtLabel case final before?)
+          _fit(
+            Text(
+              before,
+              maxLines: 1,
+              softWrap: false,
+              overflow: TextOverflow.ellipsis,
+              style: boutiqueText(
+                size: density.priceSize - 3,
+                color: palette.inkMuted,
+                height: _priceLineHeight,
+                decoration: TextDecoration.lineThrough,
+              ),
             ),
           ),
       ],
@@ -343,6 +450,7 @@ class _PriceLine extends StatelessWidget {
 class _TileImage extends StatefulWidget {
   const _TileImage({
     required this.data,
+    required this.variant,
     required this.wishlisted,
     required this.onToggleWishlist,
     required this.overlay,
@@ -350,6 +458,7 @@ class _TileImage extends StatefulWidget {
   });
 
   final ProductTileData data;
+  final ProductTileVariant variant;
   final bool wishlisted;
   final VoidCallback? onToggleWishlist;
   final VoidCallback? onQuickView;
@@ -385,81 +494,92 @@ class _TileImageState extends State<_TileImage> {
     final url = candidates.isEmpty ? null : candidates[_activeIndex];
     final badge = widget.data.badge;
 
-    return ClipRRect(
-      borderRadius: BoutiqueRadius.tile,
-      child: ColoredBox(
-        color: palette.surfaceDeep,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            // `contain` with a small inset: a handbag's handle and straps are
-            // the part a shopper recognises, and `cover` crops exactly those.
-            Padding(
-              padding: const EdgeInsets.all(BoutiqueSpace.sm),
-              child: MonettaImage(
-                key: ValueKey(url ?? 'fallback'),
-                url: url,
-                fit: BoxFit.contain,
-                cacheWidth: widget.data.imageCacheWidth,
-                fallbackLabel: widget.data.fallbackLabel,
-                onFailed: _advance,
-              ),
-            ),
-            if (!widget.data.inStock)
-              IgnorePointer(
-                child: ColoredBox(
-                  // Sold out has to read without relying on colour alone, and
-                  // it never blocks the tap that opens the piece.
-                  color: palette.canvas.withValues(alpha: 0.66),
-                  child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: BoutiqueSpace.md,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: palette.canvas,
-                        borderRadius: BoutiqueRadius.capsule,
-                        border: Border.all(color: palette.ink, width: 0.8),
-                      ),
-                      child: Text(
-                        'AGOTADO',
-                        style: boutiqueEyebrow(size: 10, color: palette.ink),
-                      ),
-                    ),
+    final edge = widget.variant == ProductTileVariant.edgeToEdge;
+
+    final photo = MonettaImage(
+      key: ValueKey(url ?? 'fallback'),
+      url: url,
+      fit: BoxFit.contain,
+      // Edge to edge: the widget inset is gone, but the white margin the file
+      // already carries stays. `cover` is chosen only when it crops less than
+      // that margin; otherwise the photo is contained whole.
+      maxCoverTrim: edge ? kPackshotMaxCoverTrim : null,
+      cacheWidth: widget.data.imageCacheWidth,
+      fallbackLabel: widget.data.fallbackLabel,
+      onFailed: _advance,
+    );
+
+    final stack = Stack(
+      fit: StackFit.expand,
+      children: [
+        // Card: `contain` with a small inset. A handbag's handle and straps
+        // are the part a shopper recognises, and `cover` crops exactly those.
+        if (edge)
+          photo
+        else
+          Padding(
+            padding: EdgeInsets.all(widget.variant.photoInset),
+            child: photo,
+          ),
+        if (!widget.data.inStock)
+          IgnorePointer(
+            child: ColoredBox(
+              // Sold out has to read without relying on colour alone, and
+              // it never blocks the tap that opens the piece.
+              color: palette.canvas.withValues(alpha: 0.66),
+              child: Center(
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: BoutiqueSpace.md,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: palette.canvas,
+                    borderRadius: BoutiqueRadius.capsule,
+                    border: Border.all(color: palette.ink, width: 0.8),
+                  ),
+                  child: Text(
+                    'AGOTADO',
+                    style: boutiqueEyebrow(size: 10, color: palette.ink),
                   ),
                 ),
               ),
-            if (badge != null)
-              Positioned(
-                top: BoutiqueSpace.sm,
-                left: BoutiqueSpace.sm,
-                child: _Badge(badge: badge),
-              ),
-            if (widget.overlay case final overlay?)
-              Positioned(
-                bottom: BoutiqueSpace.sm,
-                left: BoutiqueSpace.sm,
-                child: overlay,
-              ),
-            if (widget.onToggleWishlist case final toggle?)
-              Positioned(
-                top: 0,
-                right: 0,
-                child: _WishlistButton(
-                  wishlisted: widget.wishlisted,
-                  onPressed: toggle,
-                ),
-              ),
-            if (widget.onQuickView case final quickView?)
-              Positioned(
-                bottom: BoutiqueSpace.xs,
-                right: BoutiqueSpace.xs,
-                child: _QuickViewButton(onPressed: quickView),
-              ),
-          ],
-        ),
-      ),
+            ),
+          ),
+        if (badge != null)
+          Positioned(
+            top: BoutiqueSpace.sm,
+            left: BoutiqueSpace.sm,
+            child: _Badge(badge: badge),
+          ),
+        if (widget.overlay case final overlay?)
+          Positioned(
+            bottom: BoutiqueSpace.sm,
+            left: BoutiqueSpace.sm,
+            child: overlay,
+          ),
+        if (widget.onToggleWishlist case final toggle?)
+          Positioned(
+            top: 0,
+            right: 0,
+            child: _WishlistButton(
+              wishlisted: widget.wishlisted,
+              onPressed: toggle,
+            ),
+          ),
+        if (widget.onQuickView case final quickView?)
+          Positioned(
+            bottom: BoutiqueSpace.xs,
+            right: BoutiqueSpace.xs,
+            child: _QuickViewButton(onPressed: quickView),
+          ),
+      ],
+    );
+
+    if (edge) return stack;
+    return ClipRRect(
+      borderRadius: widget.variant.photoRadius,
+      child: ColoredBox(color: palette.surfaceDeep, child: stack),
     );
   }
 }
@@ -590,22 +710,24 @@ int productGridColumns(double width) {
 
 /// A grid delegate sized from the real tile width and the shopper's own text
 /// scale, so large type produces taller rows instead of clipped captions.
+///
+/// [spacing] and [rowSpacing] default to the [variant]'s own gaps.
 SliverGridDelegate productGridDelegate(
   BuildContext context, {
   required double availableWidth,
   ProductTileDensity density = ProductTileDensity.grid,
-  double spacing = BoutiqueSpace.md,
-  double rowSpacing = BoutiqueSpace.xl,
+  ProductTileVariant variant = ProductTileVariant.card,
+  double? spacing,
+  double? rowSpacing,
 }) {
   final columns = productGridColumns(availableWidth);
-  final tileWidth = (availableWidth - spacing * (columns - 1)) / columns;
-  final caption = MediaQuery.textScalerOf(context).scale(
-    density.captionHeight,
-  );
+  final columnSpacing = spacing ?? variant.columnSpacing;
+  final tileWidth = (availableWidth - columnSpacing * (columns - 1)) / columns;
   return SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: columns,
-    crossAxisSpacing: spacing,
-    mainAxisSpacing: rowSpacing,
-    mainAxisExtent: tileWidth * density.imageHeightFactor + caption,
+    crossAxisSpacing: columnSpacing,
+    mainAxisSpacing: rowSpacing ?? variant.rowSpacing,
+    mainAxisExtent: tileWidth * density.imageHeightFactor +
+        variant.captionExtent(density, MediaQuery.textScalerOf(context)),
   );
 }
