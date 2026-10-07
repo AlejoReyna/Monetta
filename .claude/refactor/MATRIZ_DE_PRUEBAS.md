@@ -147,6 +147,7 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | ID | Estado | WP | Entrada de bitácora |
 |---|---|---|---|
 | CHAR-01 | verde | RF-11 | 2026-10-06 · RF-11 · iteración 1 |
+| CONTRACT-01 | verde | RF-12 | 2026-10-06 · RF-12 · iteración 1 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)

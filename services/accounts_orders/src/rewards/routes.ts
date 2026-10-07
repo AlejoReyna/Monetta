@@ -41,6 +41,13 @@ function errorStatus(code: string): number {
   }
 }
 
+/** Accepts a numeric order id or an Order GID and returns the stored numeric id, or null. */
+function canonicalShopifyOrderId(value: string): string | null {
+  if (/^[0-9]+$/.test(value)) return value;
+  const gid = /^gid:\/\/shopify\/Order\/([0-9]+)$/.exec(value);
+  return gid?.[1] ?? null;
+}
+
 /** Rutas cliente Rewards V1. Identidad siempre del credential; jamas customer id del body. */
 export function registerRewardsRoutes(app: Express, deps: RewardsRouteDeps): void {
   app.get('/customers/me/rewards', asyncRoute(async (req, res) => {
@@ -69,8 +76,13 @@ export function registerRewardsRoutes(app: Express, deps: RewardsRouteDeps): voi
   app.get('/customers/me/orders/:id/rewards', asyncRoute(async (req, res) => {
     const customerId = await deps.authenticate(req, res);
     if (customerId === null) return;
-    const orderId = String(req.params.id ?? '').trim();
-    if (orderId === '' || orderId.length > 64) {
+    const rawOrderId = String(req.params.id ?? '').trim();
+    if (rawOrderId === '' || rawOrderId.length > 64) {
+      res.status(400).json({ error: 'invalid_request' });
+      return;
+    }
+    const orderId = canonicalShopifyOrderId(rawOrderId);
+    if (orderId === null) {
       res.status(400).json({ error: 'invalid_request' });
       return;
     }

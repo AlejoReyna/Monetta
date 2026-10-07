@@ -348,3 +348,47 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Decisiones de la persona en esta iteración:** ninguna. Los textos del estado y el comportamiento de las acciones los fijó el orquestador en el encargo, siguiendo el plan y el texto que ya usa favoritos.
 - **Commit:** el que contiene esta entrada, en `refactor/rf-11-ficha-no-disponible`. Sin push.
 - **Siguiente paso:** RF-12 (contrato del ID de pedido en Rewards).
+
+### 2026-10-06 · RF-12 · iteración 1 · APROBADO
+
+- **Agente(s):** `test-engineer` escribió CONTRACT-01, roja en los dos lados. Después, `backend-implementer` corrigió el servidor y `flutter-implementer` el cliente, en serie. El orquestador redactó los encargos, actualizó el documento del contrato y auditó.
+- **Base:** `e53af69`. Rama `refactor/rf-12-rewards-order-id`, creada desde `refactor/rf-11-ficha-no-disponible`.
+- **Archivos del diff:**
+  - `test/fixtures/contracts/rewards_order_id.json` (nuevo): el fixture único.
+  - `test/features/rewards/rewards_order_id_contract_test.dart` y `services/accounts_orders/test/rewardsOrderIdContract.test.ts` (nuevos): leen ese mismo fixture.
+  - `services/accounts_orders/src/rewards/routes.ts`: `canonicalShopifyOrderId` acepta el numérico o `gid://shopify/Order/<n>`; cualquier otro formato da 400 `{error:'invalid_request'}`. La validación de vacío y de más de 64 caracteres se conserva.
+  - `lib/features/rewards/rewards_api.dart`: `orderRewards` valida y normaliza al numérico, y construye la ruta con `pathSegments`. Ante formatos inválidos lanza `ArgumentError` antes de cualquier petición.
+  - `docs/redesign/REWARDS_CONTRACT_V1.md:79`: documenta el contrato del `:id`.
+  - `.claude/refactor/PLAN.md`, `.claude/refactor/MATRIZ_DE_PRUEBAS.md` y esta entrada.
+- **Fase roja (verificada por el auditor):**
+  - Producción intacta: `git diff --quiet -- lib services/accounts_orders/src`.
+  - **Dart:** 1 caso aprobado y 4 fallidos.
+    - GID: `Expected: '/customers/me/orders/8001/rewards'`, `Actual: '/customers/me/orders/gid://shopify/Order/8001/rewards'`.
+    - Rechazados: `Expected: throws <Instance of 'ArgumentError'>`; la petición se hizo.
+  - **TypeScript:** 1 caso aprobado y 4 fallidos.
+    - GID: `expected 404 to be 200`.
+    - Rechazados: `expected 404 to be 400`.
+  - `flutter-implementer` no ejecutó la roja antes de editar (paso 4 de su archivo). El rojo ya lo había verificado el auditor.
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo los archivos listados; `git diff --check` limpio.
+  - G1 → 303 archivos, 0 cambiados.
+  - G2 → «No issues found!».
+  - G3 → CONTRACT-01 en Dart `+5: All tests passed!`; en TypeScript `Tests 5 passed (5)`.
+  - G4 Flutter `flutter test --no-pub` → `+715 ~5: All tests passed!`, es decir, 710 más 5.
+  - G4 backend `npm --prefix services/accounts_orders test` → 116 aprobadas y 9 omitidas, es decir, 111 más 5. `run typecheck` y `run build` → exit 0.
+  - G5 → catálogo válido; `./bin/check_no_secrets.sh` → exit 0.
+  - G7 `REQUIRE_POSTGRES_TESTS=1 … test` → 23 archivos, 125 de 125, 0 omitidas.
+  - G6 y G8 → no aplican.
+- **Filas de la matriz:** CONTRACT-01 → verde. INV-09 e INV-15 → verdes, dentro de G4 y G7.
+- **Checklist:**
+  - el alcance es el de los tres encargos más el documento;
+  - identidad: la app conserva el GID como identidad canónica y sólo el borde HTTP de Rewards convierte al numérico;
+  - autorización: otra cuenta sigue recibiendo 404 (`rewardsApi.test.ts`);
+  - el contrato es aditivo para el numérico. Los formatos mal formados pasan de 404 a 400; está documentado y ningún cliente legítimo los envía;
+  - un `ArgumentError` lo atrapa `_safeLoad` (`rewards_section.dart:801-810`), así que no hay excepción cruda en la UI;
+  - `RewardsAccountService.forOrder` no tiene llamadores.
+- **Hallazgos:**
+  - [Baja] Proceso: `flutter-implementer` no confirmó la prueba roja antes de editar, como pide su archivo de agente.
+- **Decisiones de la persona en esta iteración:** ninguna. El formato del cable y el rechazo los fijó el orquestador siguiendo R12 y el plan.
+- **Commit:** el que contiene esta entrada, en `refactor/rf-12-rewards-order-id`. Sin push.
+- **Siguiente paso:** RF-13 necesita la decisión E7. Si sigue pendiente, el siguiente WP sin bloqueos es RF-14.

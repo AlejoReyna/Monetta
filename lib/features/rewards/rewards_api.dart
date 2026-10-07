@@ -75,11 +75,41 @@ class RewardsApi {
     return (movements: items, nextCursor: json['nextCursor'] as String?);
   }
 
-  Future<OrderRewardsState> orderRewards(String orderShopifyId) async {
-    final res = await _client.get(
-      Uri.parse('$baseUrl/customers/me/orders/$orderShopifyId/rewards'),
-      headers: await _headers(),
+  static final RegExp _numericOrderIdPattern = RegExp(r'^[0-9]+$');
+  static final RegExp _orderGidPattern = RegExp(
+    r'^gid://shopify/Order/([0-9]+)$',
+  );
+
+  /// Returns the numeric part of a Shopify order id, which is the canonical
+  /// wire format. Accepts `8001` or `gid://shopify/Order/8001`.
+  static String _numericOrderId(String orderShopifyId) {
+    if (_numericOrderIdPattern.hasMatch(orderShopifyId)) {
+      return orderShopifyId;
+    }
+    final gidMatch = _orderGidPattern.firstMatch(orderShopifyId);
+    if (gidMatch != null) return gidMatch.group(1)!;
+    throw ArgumentError.value(
+      orderShopifyId,
+      'orderShopifyId',
+      'Expected a numeric Shopify order id or gid://shopify/Order/<n>',
     );
+  }
+
+  Future<OrderRewardsState> orderRewards(String orderShopifyId) async {
+    // Validate before any request so malformed ids never reach the network.
+    final numericId = _numericOrderId(orderShopifyId);
+    final base = Uri.parse(baseUrl);
+    final uri = base.replace(
+      pathSegments: [
+        ...base.pathSegments.where((segment) => segment.isNotEmpty),
+        'customers',
+        'me',
+        'orders',
+        numericId,
+        'rewards',
+      ],
+    );
+    final res = await _client.get(uri, headers: await _headers());
     if (res.statusCode != 200) _throwFor(res.statusCode, res.body);
     return OrderRewardsState.fromJson(
       jsonDecode(res.body) as Map<String, dynamic>,

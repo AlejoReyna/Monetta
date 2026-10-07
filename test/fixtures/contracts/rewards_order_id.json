@@ -1,0 +1,8 @@
+{
+  "contract": "CONTRACT-01",
+  "description": "ID de pedido de Rewards entre la app y accounts_orders: el cliente envía el numérico como un solo segmento; el servidor acepta el numérico o el GID de pedido y normaliza al numérico guardado.",
+  "storedOrderId": "8001",
+  "requestPath": "/customers/me/orders/8001/rewards",
+  "acceptedIds": ["8001", "gid://shopify/Order/8001"],
+  "rejectedIds": ["gid://shopify/Product/8001", "8001abc", "gid://shopify/Order/"]
+}

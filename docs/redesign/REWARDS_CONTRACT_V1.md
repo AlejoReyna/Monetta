@@ -76,7 +76,12 @@ Este documento es el contrato. El código que lo cumple:
 
 ### `GET /customers/me/orders/:id/rewards`
 
-`:id` = **Shopify order id**. Sin snapshot o de otra cuenta → `404`.
+`:id` = **Shopify order id** numérico (`8001`), como un solo segmento de la ruta. La app lo envía siempre así.
+
+- El servidor también acepta el GID de pedido codificado como segmento (`gid%3A%2F%2Fshopify%2FOrder%2F8001`) y lo normaliza al numérico guardado.
+- Cualquier otro formato → `400 {"error":"invalid_request"}`.
+- Sin snapshot o de otra cuenta → `404`.
+- Contrato CONTRACT-01: un mismo fixture (`test/fixtures/contracts/rewards_order_id.json`) en `test/features/rewards/rewards_order_id_contract_test.dart` y en `services/accounts_orders/test/rewardsOrderIdContract.test.ts`.
 
 ```json
 { "orderShopifyId": "8001", "isWholesale": false,
