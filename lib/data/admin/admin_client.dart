@@ -33,8 +33,6 @@ abstract interface class AdminClient {
 
   Future<void> updateStorefront(AdminStorefrontSettings settings);
 
-  Future<void> updateSource(AdminSourcePolicy source);
-
   Future<void> syncAll();
 }
 
@@ -67,10 +65,6 @@ abstract interface class ProductAdminClient {
     required AdminProductRecord before,
     required AdminProductRecord next,
   });
-}
-
-abstract interface class ExternalSourceAdminClient {
-  Future<AdminSourcePolicy> updateSourceCanonical(AdminSourcePolicy source);
 }
 
 class AdminAuditPage {
@@ -107,7 +101,6 @@ class HttpAdminClient
         FeaturedAdminClient,
         StorefrontAdminClient,
         ProductAdminClient,
-        ExternalSourceAdminClient,
         AuditAdminClient {
   HttpAdminClient({
     required this.baseUrl,
@@ -176,12 +169,10 @@ class HttpAdminClient
     bool productsOnly = false,
   }) {
     final productRows = root['products'] as List<dynamic>? ?? const [];
-    final sourceRows = root['sources'] as List<dynamic>? ?? const [];
     final storefront = root['storefront'];
     final health = root['health'];
     final healthMap = health is Map<String, dynamic> ? health : null;
     final shopifyHealth = healthMap?['shopify'];
-    final sourcesHealth = healthMap?['sources'];
     final meta = root['productsMeta'];
     final pageInfo = root['pageInfo'];
 
@@ -219,12 +210,6 @@ class HttpAdminClient
           : storefront is Map<String, dynamic>
               ? _storefrontFromJson(storefront)
               : AdminStorefrontSettings.defaults,
-      sources: productsOnly
-          ? const []
-          : sourceRows
-              .whereType<Map<String, dynamic>>()
-              .map(_sourceFromJson)
-              .toList(),
       featured: !productsOnly && root['featuredCatalog'] is Map<String, dynamic>
           ? _featuredFromJson(
               root['featuredCatalog'] as Map<String, dynamic>,
@@ -233,9 +218,6 @@ class HttpAdminClient
           : null,
       shopifyHealthStatus: shopifyHealth is Map<String, dynamic>
           ? shopifyHealth['status'] as String?
-          : null,
-      sourcesHealthStatus: sourcesHealth is Map<String, dynamic>
-          ? sourcesHealth['status'] as String?
           : null,
       productsMeta: productsMeta,
     );
@@ -476,35 +458,6 @@ class HttpAdminClient
   }
 
   @override
-  Future<void> updateSource(AdminSourcePolicy source) async {
-    await updateSourceCanonical(source);
-  }
-
-  @override
-  Future<AdminSourcePolicy> updateSourceCanonical(
-    AdminSourcePolicy source,
-  ) async {
-    final response = await _send(
-      'PUT',
-      '/admin/external-policy/${Uri.encodeComponent(source.id)}',
-      idempotencyKey: _newIdempotencyKey(),
-      body: {
-        'enabled': source.enabled,
-        'itemLimit': source.itemLimit,
-        'baseCommissionRate': source.baseCommissionRate,
-        'highValueCommissionRate': source.highValueCommissionRate,
-        'highValueThreshold': source.highValueThreshold,
-      },
-    );
-    final root = _jsonObject(response.bodyBytes);
-    final value = root['source'];
-    if (value is! Map<String, dynamic>) {
-      throw const AdminClientException('invalid external source response');
-    }
-    return _sourceFromJson(value);
-  }
-
-  @override
   Future<void> syncAll() async {
     AdminClientException? firstFailure;
     // external-status was retired (WP-02 / F22).
@@ -720,29 +673,6 @@ class HttpAdminClient
       showTodaysPicks: json['showTodaysPicks'] as bool? ?? true,
       showExternalPicks: json['showExternalPicks'] as bool? ?? true,
       version: (json['version'] as num?)?.toInt() ?? 0,
-    );
-  }
-
-  static AdminSourcePolicy _sourceFromJson(Map<String, dynamic> json) {
-    final health = json['health'];
-    final healthMap = health is Map<String, dynamic> ? health : null;
-    return AdminSourcePolicy(
-      id: '${json['id'] ?? ''}',
-      merchant: '${json['merchant'] ?? ''}',
-      enabled: json['enabled'] as bool? ?? true,
-      itemLimit: (json['itemLimit'] as num?)?.toInt() ?? 12,
-      baseCommissionRate:
-          (json['baseCommissionRate'] as num?)?.toDouble() ?? .18,
-      highValueCommissionRate:
-          (json['highValueCommissionRate'] as num?)?.toDouble() ?? .12,
-      highValueThreshold:
-          (json['highValueThreshold'] as num?)?.toDouble() ?? 4000,
-      itemCount: (json['itemCount'] as num?)?.toInt() ?? 0,
-      lastSuccessfulRunAt: DateTime.tryParse(
-        '${json['lastSuccessfulRunAt'] ?? ''}',
-      ),
-      healthStatus: '${healthMap?['status'] ?? 'unavailable'}',
-      healthErrorCode: healthMap?['errorCode'] as String?,
     );
   }
 

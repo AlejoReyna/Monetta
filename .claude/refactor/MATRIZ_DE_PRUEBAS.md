@@ -81,6 +81,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | CONTRACT-03 | OBJ | Los parsers de Rewards rechazan fechas inválidas, IDs ausentes y cantidades ausentes con un error de contrato tipado | RF-15 | `rewards_models.dart:47-162` (R15) |
 | CONTRACT-04 | OBJ | Los atributos del carrito por escenario de origen siguen la decisión E8 | RF-67 | `cart_attribution.dart:46` (R03) |
 | CONTRACT-05 | OBJ | Cada cliente HTTP propio agota su tiempo máximo y lo traduce a un error tipado | RF-14 | 7 clientes sin timeout (R13) |
+| CONTRACT-06 | OBJ | Admin sin catálogo externo: `GET/PUT /admin/external-policy/:id` dan el 404 JSON `not_found` con `requestId`; `POST /admin/sync` con `external-status` da 422 `INVALID_SYNC_CHANNEL`; el control-plane no trae `sources` ni `health.sources`; `/admin/me` no trae `manageExternalSources`; `CATALOG_MONITOR_*` ya no se lee | RF-21 | `admin/routes.ts:270,502-544,787,888` · `config.ts:99-108` |
 | ARCH-01 | TRQ | Ningún archivo de `lib/features/` importa `main.dart` | RF-30 | 15 archivos hoy (R18) |
 | ARCH-02 | TRQ | `lib/features/` no importa implementaciones de `lib/data/`, salvo la lista explícita de helpers puros | RF-33 | 21 archivos hoy (H03) |
 | ARCH-03 | OBJ | Ningún archivo de `lib/` ni `test/` referencia el catálogo externo, salvo el guard de `RuntimeConfig` | RF-20 | R02 |
@@ -110,7 +111,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-19 | — | INV-07 | G6 (iOS y Android, ejecutado por la persona) |
 | RF-24 | CHAR-03, casos 7 y 8 en su versión objetivo (D-08); los demás casos de CHAR-03 sin cambios | INV-04, INV-05 | — |
 | RF-20 | ARCH-03, CHAR-11 | INV-11, INV-14 (se retira `mixed_feed_test`) | G6 |
-| RF-21 | — | INV-15 | — |
+| RF-21 | CONTRACT-06 y ampliación de ARCH-03 (fuentes externas del admin de la app) | INV-15, INV-11 | G7 |
 | RF-22 | — | Todos | G6 |
 | RF-23 | — | INV-16 | — |
 | RF-30 | ARCH-01, ARCH-04 | INV-02, INV-07, INV-11, INV-13 | G6 |
@@ -166,7 +167,8 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | CHAR-05 | verde (CAR; cambia según E4) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
 | CHAR-06 | verde (CAR; cambia según E10) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
 | CHAR-07 | verde (CAR; decisión en RF-40) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
-| ARCH-03 | verde (OBJ). Excepciones vivas: la guarda de `ENABLE_EXTERNAL_CATALOG` y, hasta RF-21, `AdminChannel.externalCatalog` | RF-20 | 2026-10-08 · RF-20 · iteración 1 |
+| ARCH-03 | verde (OBJ). Ampliada en RF-21 con la gestión de fuentes externas del admin. Excepciones vivas: la guarda de `ENABLE_EXTERNAL_CATALOG` y `AdminChannel.externalCatalog`, que etiqueta la auditoría histórica `external_source` | RF-20, RF-21 | 2026-10-08 · RF-20 · iteración 1 · 2026-10-08 · RF-21 · iteración 1 |
+| CONTRACT-06 | verde | RF-21 | 2026-10-08 · RF-21 · iteración 1 |
 | CHAR-11 | verde (CAR, D-10) | RF-20 | 2026-10-08 · RF-20 · iteración 1 |
 | Las demás | pendiente | — | — |
 

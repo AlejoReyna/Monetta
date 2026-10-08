@@ -4,12 +4,13 @@ import type {
   AdminSyncJobRecord,
   AdminSyncJobRepository,
   AdminSyncJobStatus,
+  StoredAdminSyncChannel,
 } from './syncPorts.js';
 
 interface SyncJobRow {
   id: string;
   actor_id: string;
-  channel: AdminSyncChannel;
+  channel: StoredAdminSyncChannel;
   status: AdminSyncJobStatus;
   error_code: string | null;
   cursor: string | null;

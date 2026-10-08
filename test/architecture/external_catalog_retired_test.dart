@@ -6,8 +6,8 @@
 ///
 /// * the permanent guard that keeps `ENABLE_EXTERNAL_CATALOG` rejected
 ///   (invariant 10), and
-/// * the admin channel enum value that still mirrors the backend contract
-///   until RF-21 removes it.
+/// * the admin channel enum value that labels the historical `external_source`
+///   audit entries.
 ///
 /// The allowance list is alive: an entry that no longer matches anything in
 /// its file fails the test and must be deleted from the list, so the list
@@ -60,6 +60,20 @@ const List<String> _forbidden = <String>[
   // The retired monitor service.
   'catalog_monitor',
   'catalogMonitor',
+  // The admin's external source management (decision E2, RF-21). Each name is
+  // exclusive to it: the source policy model, its client contract, the
+  // capability flag, the health status, the policy endpoint and the response
+  // keys. Generic words such as `sources` are deliberately not listed.
+  'AdminSourcePolicy',
+  'ExternalSourceAdminClient',
+  'updateSourceCanonical',
+  'updateSource',
+  'saveSource',
+  '_sourceFromJson',
+  'manageExternalSources',
+  'sourcesHealthStatus',
+  'external-policy',
+  "['sources']",
 ];
 
 /// One explicit exception: [file] may contain the spans [spans] finds.
@@ -133,7 +147,8 @@ final List<_Allowance> _allowances = <_Allowance>[
     'test/tooling/dart_defines_validation_test.dart',
     'ENABLE_EXTERNAL_CATALOG',
   ),
-  // Admin channel contract with the backend, until RF-21.
+  // Admin channel value that labels the historical `external_source` audit
+  // entries; it is not a way to manage external sources.
   _adminChannelEnumValue('lib/domain/admin_control.dart'),
   _token('lib/data/admin/admin_client.dart', 'AdminChannel.externalCatalog'),
   _token('test/app/admin_controller_test.dart', 'AdminChannel.externalCatalog'),
@@ -254,6 +269,41 @@ void main() {
       'lib/a.dart:3: ExternalCatalog',
       'lib/b.dart:2: externalCatalog',
       'lib/c.dart:1: ExternalCatalog',
+    ]);
+  });
+
+  test('ARCH-03 the admin external source management names are forbidden', () {
+    final violations = _scan(
+      {
+        'lib/a.dart': 'class AdminSourcePolicy {}\n'
+            'abstract interface class ExternalSourceAdminClient {}\n'
+            'await client.updateSourceCanonical(next);\n'
+            'await client.updateSource(next);\n'
+            'await saveSource(next);\n'
+            'final bool manageExternalSources = false;\n'
+            'final String? sourcesHealthStatus;\n'
+            "final path = '/admin/external-policy/\$id';\n"
+            "final rows = root['sources'];\n"
+            'AdminSourcePolicy _sourceFromJson(Map json) => throw 1;\n',
+        'lib/b.dart': 'final sources = <Object>[];\n'
+            "final status = 'external-status';\n"
+            'final showExternalPicks = true;\n',
+      },
+      const <_Allowance>[],
+    );
+    expect(violations, <String>[
+      'lib/a.dart:1: AdminSourcePolicy',
+      'lib/a.dart:2: ExternalSourceAdminClient',
+      'lib/a.dart:3: updateSourceCanonical',
+      'lib/a.dart:3: updateSource',
+      'lib/a.dart:4: updateSource',
+      'lib/a.dart:5: saveSource',
+      'lib/a.dart:6: manageExternalSources',
+      'lib/a.dart:7: sourcesHealthStatus',
+      'lib/a.dart:8: external-policy',
+      "lib/a.dart:9: ['sources']",
+      'lib/a.dart:10: AdminSourcePolicy',
+      'lib/a.dart:10: _sourceFromJson',
     ]);
   });
 }

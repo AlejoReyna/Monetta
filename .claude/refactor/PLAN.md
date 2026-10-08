@@ -66,7 +66,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-24 | Procedencia de tienda en la semilla y en Firestore | 1 | test-engineer → flutter-implementer | RF-16; empieza cuando el código de RF-18 esté aprobado (D-08) | D-08, D-09 | cerrado |
 | RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19, RF-18, RF-24 (orden de D-07 y D-08) | E-T1, E-T2 | pendiente |
 | RF-20 | Eliminar el catálogo externo de la app | 2 | test-engineer → flutter-implementer | RF-16, RF-19 | E2, D-10 | bloqueado: G6 de la persona (código aprobado y con commit) |
-| RF-21 | Eliminar el catálogo externo del admin backend | 2 | backend-implementer | RF-00 | E2 | pendiente |
+| RF-21 | Eliminar el catálogo externo del admin (backend y app) | 2 | test-engineer → flutter-implementer → backend-implementer | RF-00 | E2 | cerrado |
 | RF-22 | Dependencias sin uso, Makefile y docs | 2 | flutter-implementer | RF-20 | — | pendiente |
 | RF-23 | Retirar `functions/` | 2 | backend-implementer | RF-10 | Inventario de webhooks de ambas tiendas (D-02) | pendiente |
 | RF-30 | Composición fuera de `main.dart` y sobre el Navigator | 3 | flutter-implementer | RF-22 | E1, E11 | pendiente |
@@ -371,6 +371,30 @@ Origen: R02; requiere E2.
 **Cambios:** retirar `externalCatalogClient.ts`, sus rutas (`admin/routes.ts:270,506,888`), la configuración `catalogMonitor*` y sus pruebas.
 
 **Aceptación:** G4 del backend y G7.
+
+**Detalle (2026-10-08, al empezar el WP):**
+- **Hallazgo:** el admin de la app conserva la gestión de fuentes externas. Son `AdminSourcePolicy`, `ExternalSourceAdminClient` (`updateSourceCanonical` → `PUT /admin/external-policy/:id`), `AdminController.sources`/`saveSource`, `AdminControlSnapshot.sources`/`sourcesHealthStatus` y la capacidad `manageExternalSources`. RF-20 no la cubrió porque la lista de ARCH-03 no tenía esos nombres. No tiene interfaz: la capacidad siempre es `false`.
+- **Hechos del backend:**
+  - El control-plane devuelve `sources` y `health.sources`; la app los lee con valores por defecto.
+  - `GET/PUT /admin/external-policy/:id` responden con errores propios (`EXTERNAL_SOURCE_NOT_FOUND`, `EXTERNAL_CATALOG_NOT_CONFIGURED`).
+  - `POST /admin/sync` acepta `external-status` («para reintentos de clientes viejos»).
+  - `loadConfig` rechaza un `CATALOG_MONITOR_BASE_URL` inválido.
+  - La migración `009` permite `external-status` en un CHECK.
+- **Partes, en serie, en la misma rama:**
+  - **A · `test-engineer`:**
+    - amplía ARCH-03 con los nombres de fuentes externas del admin de la app;
+    - escribe CONTRACT-06 (OBJ) en el backend.
+  - **B · `flutter-implementer`:** retira de la app la gestión de fuentes externas. Va primero porque es aditivo: el backend todavía las sirve.
+  - **C · `backend-implementer`:**
+    - retira el cliente, las rutas, el canal `external-status`, la auditoría `external_source` que emitían esas rutas, la configuración `CATALOG_MONITOR_*`, `manageExternalSources` y sus pruebas;
+    - los trabajos de sync ya guardados con `external-status` deben seguir leyéndose.
+- **Se queda:**
+  - `showExternalPicks`: el backend lo exige en el PUT de ajustes del inicio. Quitarlo exige primero un backend que lo acepte opcional, desplegado antes que la app;
+  - `AdminChannel.externalCatalog`, que etiqueta la auditoría histórica `external_source`;
+  - la migración `009`, que no se edita (invariante 2).
+- **Gates:**
+  - App: G0–G5.
+  - Backend: G4 (`test`, `typecheck`, `build`) y G7, ejecutados por el orquestador si hay Postgres local.
 
 ### RF-22 · Dependencias sin uso, Makefile y docs
 

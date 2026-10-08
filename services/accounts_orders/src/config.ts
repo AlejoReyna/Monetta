@@ -14,9 +14,6 @@ export interface AccountsOrdersConfig {
   readonly shopifyFeaturedCollectionId: string;
   readonly adminMutationsEnabled: boolean;
   readonly adminShopifyWritesEnabled: boolean;
-  readonly adminExternalWritesEnabled: boolean;
-  readonly catalogMonitorBaseUrl: string;
-  readonly catalogMonitorServiceSecret: string;
 
   /**
    * The Shopify app's API secret key — NOT the Customer Account API mobile
@@ -96,18 +93,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     );
   }
 
-  const catalogMonitorBaseUrl = (env.CATALOG_MONITOR_BASE_URL ?? '').trim();
-  const catalogMonitorServiceSecret = env.CATALOG_MONITOR_SERVICE_SECRET ?? '';
-  if (catalogMonitorBaseUrl !== '') {
-    const parsed = new URL(catalogMonitorBaseUrl);
-    if (!['http:', 'https:'].includes(parsed.protocol)) {
-      throw new Error('CATALOG_MONITOR_BASE_URL must use HTTP or HTTPS');
-    }
-    if (catalogMonitorServiceSecret.length < 32) {
-      throw new Error('CATALOG_MONITOR_SERVICE_SECRET must be at least 32 characters');
-    }
-  }
-
   // Shopify integration is optional while first-party Monetta accounts are
   // the active identity system. An empty secret keeps every Shopify webhook
   // route closed (401) without preventing the accounts API from starting.
@@ -125,9 +110,6 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     shopifyFeaturedCollectionId: (env.SHOPIFY_FEATURED_COLLECTION_ID ?? '').trim(),
     adminMutationsEnabled: env.ADMIN_MUTATIONS_ENABLED === 'true',
     adminShopifyWritesEnabled: env.ADMIN_SHOPIFY_WRITES_ENABLED === 'true',
-    adminExternalWritesEnabled: env.ADMIN_EXTERNAL_WRITES_ENABLED === 'true',
-    catalogMonitorBaseUrl,
-    catalogMonitorServiceSecret,
     webhookSecret,
     notificationsEnabled,
     firebaseProjectId,

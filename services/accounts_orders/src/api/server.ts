@@ -43,10 +43,6 @@ import type { AdminFeaturedJobRepository } from '../admin/featuredPorts.js';
 import { PgAdminSyncJobRepository } from '../admin/pgSyncJobRepository.js';
 import type { AdminSyncJobRepository } from '../admin/syncPorts.js';
 import { SlidingWindowAdminRateLimiter } from '../admin/rateLimiter.js';
-import {
-  HttpExternalCatalogAdminClient,
-  type ExternalCatalogAdminClient,
-} from '../admin/externalCatalogClient.js';
 import { logger } from '../logger.js';
 import { PgRewardsRepository } from '../rewards/pgRewardsRepository.js';
 import { loadRewardsEnv } from '../rewards/rewardsConfig.js';
@@ -95,8 +91,6 @@ export interface ServerDeps extends HandlerDeps {
   readonly legacyAccountRegistrationEnabled?: boolean;
   readonly mutationsEnabled?: boolean;
   readonly shopifyWritesEnabled?: boolean;
-  readonly externalCatalog?: ExternalCatalogAdminClient;
-  readonly externalWritesEnabled?: boolean;
   readonly syncJobs?: AdminSyncJobRepository;
   readonly engagement?: EngagementRouteDeps & { readonly internalCatalogEventSecret: string };
   /** Paquete F: Rewards. Ausente = programa no montado (rutas 404). */
@@ -523,8 +517,6 @@ export function createApp(deps: ServerDeps): Express {
       rateLimiter: deps.rateLimiter,
       mutationsEnabled: deps.mutationsEnabled,
       shopifyWritesEnabled: deps.shopifyWritesEnabled,
-      externalCatalog: deps.externalCatalog,
-      externalWritesEnabled: deps.externalWritesEnabled,
       featuredJobs: deps.featuredJobs,
       syncJobs: deps.syncJobs,
       privacyRequests: deps.privacyRequests,
@@ -835,19 +827,6 @@ if (isMain) {
       });
     }
   }
-  let externalCatalog: ExternalCatalogAdminClient | undefined;
-  if (config.catalogMonitorBaseUrl !== '' && config.catalogMonitorServiceSecret !== '') {
-    try {
-      externalCatalog = new HttpExternalCatalogAdminClient({
-        baseUrl: config.catalogMonitorBaseUrl,
-        serviceSecret: config.catalogMonitorServiceSecret,
-      });
-    } catch (error) {
-      logger.warn('External catalog admin integration unavailable', {
-        errorType: error instanceof Error ? error.name : typeof error,
-      });
-    }
-  }
   let engagement: ServerDeps['engagement'];
   let catalogEvents: HandlerDeps['catalogEvents'];
   if (config.notificationsEnabled) {
@@ -913,8 +892,6 @@ if (isMain) {
     legacyAccountRegistrationEnabled: config.legacyAccountRegistrationEnabled,
     mutationsEnabled: config.adminMutationsEnabled,
     shopifyWritesEnabled: config.adminShopifyWritesEnabled,
-    ...(externalCatalog === undefined ? {} : { externalCatalog }),
-    externalWritesEnabled: config.adminExternalWritesEnabled,
     engagement,
     catalogEvents,
     engagementPrivacy: config.notificationsEnabled

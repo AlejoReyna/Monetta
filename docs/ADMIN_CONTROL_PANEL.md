@@ -10,22 +10,25 @@ El plan histórico y la matriz de aceptación están en
 ## Qué resuelve
 
 La administración vive dentro de la misma app Flutter que usa el escaparate.
-La app del propietario nunca recibe secretos de Shopify, Postgres ni del
-monitor externo. Envía únicamente su sesión de Monetta o su token de Shopify
+La app del propietario nunca recibe secretos de Shopify ni de Postgres. Envía únicamente su sesión de Monetta o su token de Shopify
 Customer al servicio `accounts_orders`, que vuelve a autenticar y autorizar
 cada petición.
 
 ```text
 Mi cuenta → AdminScreen → accounts_orders
                               ├─ Postgres: principal, auditoría, idempotencia y jobs
-                              ├─ Shopify Admin API: productos, publicación y metaobjetos
-                              └─ catalog_monitor: políticas y sync firmados con HMAC
+                              └─ Shopify Admin API: productos, publicación y metaobjetos
 
 Clientes → Storefront API / caché local
               ├─ productos canónicos de Shopify
               ├─ colección manual monetta-todays-picks
               └─ metaobjeto $app:storefront_config / monetta
 ```
+
+El catálogo externo de EE. UU. y su monitor (`catalog_monitor`) se retiraron
+(decisión E2; RF-20 en la app y RF-21 en el backend). Ya no existen las rutas
+`/admin/external-policy/*` ni el canal de sync `external-status`, y
+`CATALOG_MONITOR_*` ya no se lee.
 
 El panel no es la fuente de verdad del escaparate. Después de una mutación, el
 backend lee la representación canónica y la app refresca sus repositorios
@@ -40,7 +43,6 @@ vencer su caché.
 | Visibilidad Monetta | Publicación Headless de Shopify | Publicar o despublicar |
 | Catálogo de hoy | Colección manual de Shopify | Membresía y orden, máximo 12 |
 | Aviso y secciones de portada | Metaobjeto app-owned de Shopify | Mensaje y cuatro interruptores |
-| Política de fuente externa | `catalog_monitor` + Postgres | Estado, cupo, umbral y comisiones |
 | Campañas y automatizaciones | `accounts_orders` + Postgres | Borrador, audiencia, prueba y envío |
 | Historial administrativo | Postgres | Sólo lectura desde el panel |
 
@@ -100,7 +102,7 @@ está disponible.
 | Ruta | Propósito |
 |---|---|
 | `GET /admin/me` | Actor, entorno, rol y capacidades efectivas. |
-| `GET /admin/control-plane` | Salud consolidada, productos, portada, fuentes y actividad reciente. |
+| `GET /admin/control-plane` | Salud consolidada, productos, portada y actividad reciente. |
 | `GET /admin/audit` | Historial paginado con cursor opaco. |
 | `PATCH /admin/products/:productGid` | Cambia el título con control de versión. |
 | `PATCH /admin/products/:productGid/variants/:variantGid` | Cambia sólo la variante indicada. |
@@ -110,7 +112,6 @@ está disponible.
 | `PUT /admin/featured-catalog` | Reemplaza el orden completo; puede devolver un job. |
 | `GET /admin/featured-catalog/jobs/:jobId` | Reconciliación de un reorder asíncrono. |
 | `PUT /admin/storefront-config` | Upsert completo del metaobjeto con versión. |
-| `GET/PUT /admin/external-policy/:sourceId` | Lee o cambia una política del monitor. |
 | `POST /admin/sync` | Inicia sync de un canal permitido. |
 | `GET /admin/sync/jobs/:jobId` | Consulta el resultado del sync. |
 
@@ -143,11 +144,10 @@ acotados sin exponer payloads ni secretos.
 |---|---|
 | `ADMIN_MUTATIONS_ENABLED` | Interruptor maestro de toda escritura administrativa. |
 | `ADMIN_SHOPIFY_WRITES_ENABLED` | Productos, publicación, Catálogo de hoy y portada. |
-| `ADMIN_EXTERNAL_WRITES_ENABLED` | Políticas y acciones mutables del monitor externo. |
 | `NOTIFICATIONS_ENABLED` | Campañas, entregas y automatizaciones. |
 
 El orden seguro de activación es: lecturas, portada, Catálogo de hoy, producto,
-publicación, fuentes externas y notificaciones. Para apagar rápidamente, basta
+publicación y notificaciones. Para apagar rápidamente, basta
 deshabilitar el interruptor maestro; las lecturas y la auditoría permanecen
 disponibles.
 

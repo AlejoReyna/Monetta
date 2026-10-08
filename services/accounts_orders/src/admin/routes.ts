@@ -24,14 +24,10 @@ import type {
   AdminMutationRateLimiter,
 } from './mutationPorts.js';
 import type {
-  ExternalCatalogAdminClient,
-  ExternalSourcePolicyInput,
-  ExternalSourceProjection,
-} from './externalCatalogClient.js';
-import type {
   AdminSyncChannel,
   AdminSyncJobRecord,
   AdminSyncJobRepository,
+  StoredAdminSyncChannel,
 } from './syncPorts.js';
 import type { PrivacyRequestsRepository } from '../domain/ports.js';
 
@@ -47,9 +43,7 @@ export interface AdminRouteDeps {
   readonly mutationsEnabled?: boolean;
   readonly shopifyWritesEnabled?: boolean;
   readonly featuredJobs?: AdminFeaturedJobRepository;
-  readonly externalCatalog?: ExternalCatalogAdminClient;
   readonly now?: () => Date;
-  readonly externalWritesEnabled?: boolean;
   readonly syncJobs?: AdminSyncJobRepository;
   readonly privacyRequests?: PrivacyRequestsRepository;
 }
@@ -220,9 +214,6 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
     let storefront: AdminStorefrontConfigProjection | null = null;
     let storefrontStatus: 'ready' | 'degraded' | 'unavailable' = 'unavailable';
     let storefrontErrorCode: string | null = 'STOREFRONT_CONFIG_NOT_CONFIGURED';
-    let sourceRows: readonly ExternalSourceProjection[] = [];
-    let sourcesStatus: 'ready' | 'degraded' | 'unavailable' = 'unavailable';
-    let sourcesErrorCode: string | null = 'EXTERNAL_CATALOG_NOT_CONFIGURED';
     if (deps.shopify === undefined) {
       shopifyErrorCode = 'SHOPIFY_NOT_CONFIGURED';
     } else {
@@ -267,16 +258,6 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
         storefrontErrorCode = shopifyErrorCodeFor(error);
       }
     }
-    if (deps.externalCatalog !== undefined) {
-      try {
-        sourceRows = await deps.externalCatalog.fetchSources(requestIdFor(res));
-        sourcesStatus = 'ready';
-        sourcesErrorCode = null;
-      } catch (error) {
-        sourcesStatus = 'degraded';
-        sourcesErrorCode = errorCodeForExternal(error);
-      }
-    }
 
     const productRows = products.map(productJson);
     const auditStatus = auditReaderFor(deps) === null ? 'unavailable' : 'ready';
@@ -293,11 +274,6 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
           status: storefrontStatus,
           fetchedAt: storefrontStatus === 'ready' ? fetchedAt : null,
           errorCode: storefrontErrorCode,
-        },
-        sources: {
-          status: sourcesStatus,
-          fetchedAt: sourcesStatus === 'ready' ? fetchedAt : null,
-          errorCode: sourcesErrorCode,
         },
         audit: {
           status: auditStatus,
@@ -323,7 +299,6 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
         limit,
       },
       storefront: storefront === null ? null : storefrontJson(storefront),
-      sources: sourceRows,
     });
   }));
 
@@ -496,50 +471,6 @@ export function registerAdminRoutes(app: Express, deps: AdminRouteDeps): void {
       body: { announcement, showHero, showNewest, showTodaysPicks, showExternalPicks, expectedVersion },
       expectedVersion,
       client,
-    });
-  }));
-
-  app.get('/admin/external-policy/:sourceId', asyncRoute(async (req, res) => {
-    const owner = await requireOwner(req, res, deps.authorizer);
-    if (owner === null) return;
-    const sourceId = externalSourceIdValue(req.params.sourceId);
-    if (sourceId === null || deps.externalCatalog === undefined) {
-      adminError(res, 404, 'EXTERNAL_SOURCE_NOT_FOUND', 'The external source was not found.');
-      return;
-    }
-    try {
-      const source = await deps.externalCatalog.fetchSource(sourceId, requestIdFor(res));
-      res.status(200).json({ requestId: requestIdFor(res), source });
-    } catch (error) {
-      const mapped = mapExternalError(error);
-      adminError(res, mapped.status, mapped.code, mapped.message);
-    }
-  }));
-
-  app.put('/admin/external-policy/:sourceId', asyncRoute(async (req, res) => {
-    const owner = await requireOwner(req, res, deps.authorizer);
-    if (owner === null) return;
-    const sourceId = externalSourceIdValue(req.params.sourceId);
-    const body = plainObject(req.body) ?? {};
-    const policy = externalPolicyValue(body);
-    if (sourceId === null || policy === null) {
-      adminError(res, 422, 'VALIDATION_ERROR', 'A valid bounded external policy is required.');
-      return;
-    }
-    const client = deps.externalCatalog;
-    if (client === undefined) {
-      adminError(res, 503, 'EXTERNAL_CATALOG_NOT_CONFIGURED', 'The external catalog is not configured.');
-      return;
-    }
-    await runExternalPolicyMutation({
-      req,
-      res,
-      deps,
-      owner,
-      sourceId,
-      body: { sourceId, ...policy },
-      client,
-      policy,
     });
   }));
 
@@ -784,7 +715,7 @@ function asyncRoute(handler: AsyncHandler) {
 
 function syncChannelValue(value: unknown): AdminSyncChannel | null {
   return value === 'shopify-products' || value === 'shopify-orders' ||
-      value === 'storefront-content' || value === 'external-status'
+      value === 'storefront-content'
     ? value
     : null;
 }
@@ -815,7 +746,7 @@ async function runSyncJob(input: {
   readonly deps: AdminRouteDeps;
   readonly owner: Awaited<ReturnType<AdminAuthorizer['authenticate']>> & object;
   readonly jobId: string;
-  readonly channel: AdminSyncChannel;
+  readonly channel: StoredAdminSyncChannel;
 }): Promise<void> {
   const { deps, owner, jobId, channel } = input;
   const jobs = deps.syncJobs;
@@ -885,25 +816,14 @@ async function runSyncJob(input: {
         });
         break;
       }
-      case 'external-status': {
-        // Kept for idempotent replay of older clients; product syncAll no longer calls it.
-        if (deps.externalCatalog === undefined) {
-          throw new AdminRouteError(
-            503,
-            'EXTERNAL_CATALOG_NOT_CONFIGURED',
-            'The external catalog is not configured.',
-          );
-        }
-        await deps.externalCatalog.fetchSources();
-        await jobs.update({
-          id: jobId,
-          status: 'running',
-          errorCode: null,
-          pagesProcessed: 1,
-          productsSeen: 0,
-        });
-        break;
-      }
+      case 'external-status':
+        // The external catalog was retired. Jobs stored with this channel by
+        // older clients stay readable but can no longer run.
+        throw new AdminRouteError(
+          410,
+          'SYNC_CHANNEL_RETIRED',
+          'The external catalog sync channel was retired.',
+        );
       case 'shopify-orders':
         throw new AdminRouteError(
           503,
@@ -953,7 +873,7 @@ async function recordSyncAudit(
   deps: AdminRouteDeps,
   owner: Awaited<ReturnType<AdminAuthorizer['authenticate']>> & object,
   jobId: string,
-  channel: AdminSyncChannel,
+  channel: StoredAdminSyncChannel,
   outcome: 'success' | 'failed',
   errorCode?: string,
 ): Promise<void> {
@@ -1378,92 +1298,6 @@ async function runStorefrontMutation(input: {
   res.status(status).json(responseBody);
 }
 
-async function runExternalPolicyMutation(input: {
-  readonly req: Request;
-  readonly res: Response;
-  readonly deps: AdminRouteDeps;
-  readonly owner: Awaited<ReturnType<AdminAuthorizer['authenticate']>> & object;
-  readonly sourceId: string;
-  readonly body: Record<string, unknown>;
-  readonly policy: ExternalSourcePolicyInput;
-  readonly client: ExternalCatalogAdminClient;
-}): Promise<void> {
-  const { req, res, deps, owner, sourceId, body, policy, client } = input;
-  if (deps.mutationsEnabled !== true || deps.externalWritesEnabled !== true) {
-    adminError(res, 503, 'EXTERNAL_WRITES_DISABLED', 'External policy writes are disabled.');
-    return;
-  }
-  const idempotency = deps.idempotency;
-  if (idempotency === undefined) {
-    adminError(res, 503, 'MUTATIONS_NOT_CONFIGURED', 'Administrative writes are not configured.');
-    return;
-  }
-  const idempotencyKey = req.header('Idempotency-Key')?.trim() ?? '';
-  if (idempotencyKey === '' || idempotencyKey.length > 200 || /\s/.test(idempotencyKey)) {
-    adminError(res, 400, 'IDEMPOTENCY_KEY_REQUIRED', 'Every mutation requires an Idempotency-Key.');
-    return;
-  }
-  const operation = 'external-policy.update';
-  if (deps.rateLimiter !== undefined && !deps.rateLimiter.allow(owner.id, operation)) {
-    adminError(res, 429, 'RATE_LIMITED', 'Too many administrative changes.');
-    return;
-  }
-
-  const requestId = requestIdFor(res);
-  const claim = await idempotency.claim({
-    actorId: owner.id,
-    idempotencyKey,
-    operation,
-    bodyHash: hashJson(body),
-    requestId,
-    expiresAt: new Date((deps.now ?? (() => new Date()))().getTime() + 24 * 60 * 60 * 1_000),
-  });
-  if (claim.outcome === 'conflict') {
-    adminError(res, 409, 'IDEMPOTENCY_CONFLICT', 'The idempotency key was already used for another request.');
-    return;
-  }
-  if (claim.outcome === 'replay') {
-    res.status(claim.record.statusCode ?? 500).json(claim.record.responseBody);
-    return;
-  }
-
-  let status = 200;
-  let responseBody: unknown;
-  let outcome: 'success' | 'failed' = 'success';
-  let errorCode: string | undefined;
-  try {
-    const source = await client.updateSource({ sourceId, source: policy, requestId });
-    responseBody = { requestId, source };
-  } catch (error) {
-    outcome = 'failed';
-    const mapped = mapExternalError(error);
-    status = mapped.status;
-    errorCode = mapped.code;
-    responseBody = {
-      error: { code: mapped.code, message: mapped.message, fields: {}, requestId },
-    };
-  }
-  await idempotency.complete({
-    actorId: owner.id,
-    idempotencyKey,
-    statusCode: status,
-    responseBody,
-  });
-  if (deps.audit !== undefined) {
-    await deps.audit.record({
-      actor: owner,
-      requestId,
-      action: operation,
-      targetType: 'external_source',
-      targetId: sourceId,
-      outcome,
-      ...(errorCode === undefined ? {} : { errorCode }),
-      after: { enabled: policy.enabled, itemLimit: policy.itemLimit },
-    });
-  }
-  res.status(status).json(responseBody);
-}
-
 function featuredClient(deps: AdminRouteDeps): ShopifyAdminWriteClient | null {
   const candidate = deps.shopifyWrites;
   if (
@@ -1592,37 +1426,6 @@ function productIdsValue(value: unknown): string[] | null {
   const ids = value.filter((item): item is string => typeof item === 'string');
   if (ids.length !== value.length || new Set(ids).size !== ids.length) return null;
   return ids.every((id) => productGidValue(id) !== null) ? ids : null;
-}
-
-function externalSourceIdValue(value: string | undefined): string | null {
-  return value !== undefined && /^[a-z0-9_]{1,80}$/.test(value) ? value : null;
-}
-
-function externalPolicyValue(value: Record<string, unknown>): ExternalSourcePolicyInput | null {
-  const enabled = booleanValue(value.enabled);
-  const itemLimit = value.itemLimit;
-  const baseCommissionRate = value.baseCommissionRate;
-  const highValueCommissionRate = value.highValueCommissionRate;
-  const highValueThreshold = value.highValueThreshold;
-  if (
-    enabled === null ||
-    !Number.isInteger(itemLimit) || (itemLimit as number) < 0 || (itemLimit as number) > 50 ||
-    typeof baseCommissionRate !== 'number' || !Number.isFinite(baseCommissionRate) ||
-    baseCommissionRate < 0 || baseCommissionRate > 1 ||
-    typeof highValueCommissionRate !== 'number' || !Number.isFinite(highValueCommissionRate) ||
-    highValueCommissionRate < 0 || highValueCommissionRate > 1 ||
-    typeof highValueThreshold !== 'number' || !Number.isFinite(highValueThreshold) ||
-    highValueThreshold <= 0 || highValueThreshold > 1_000_000
-  ) {
-    return null;
-  }
-  return {
-    enabled,
-    itemLimit: itemLimit as number,
-    baseCommissionRate,
-    highValueCommissionRate,
-    highValueThreshold,
-  };
 }
 
 function integerValue(value: unknown): number | null {
@@ -1755,32 +1558,6 @@ function mapMutationError(error: unknown): {
     code: 'SHOPIFY_UPSTREAM_ERROR',
     message: 'Shopify could not confirm the change.',
     fields: {},
-  };
-}
-
-function errorCodeForExternal(error: unknown): string {
-  return error instanceof Error && 'code' in error && typeof error.code === 'string'
-    ? error.code
-    : 'EXTERNAL_CATALOG_UPSTREAM_ERROR';
-}
-
-function mapExternalError(error: unknown): {
-  status: number;
-  code: string;
-  message: string;
-} {
-  if (error instanceof AdminRouteError) {
-    return { status: error.status, code: error.code, message: error.message };
-  }
-  const statusCode = error instanceof Error && 'statusCode' in error &&
-      typeof error.statusCode === 'number'
-    ? error.statusCode
-    : undefined;
-  const code = errorCodeForExternal(error);
-  return {
-    status: statusCode === 401 ? 502 : statusCode === 429 ? 429 : 502,
-    code: statusCode === 429 ? 'EXTERNAL_CATALOG_THROTTLED' : code,
-    message: 'The external catalog could not confirm the request.',
   };
 }
 

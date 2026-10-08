@@ -28,7 +28,6 @@ export interface AdminCapabilities {
   readonly manageFeaturedCatalog: boolean;
   readonly manageProducts: boolean;
   readonly manageStorefront: boolean;
-  readonly manageExternalSources: boolean;
   readonly manageNotifications: boolean;
 }
 

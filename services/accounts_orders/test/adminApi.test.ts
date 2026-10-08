@@ -98,7 +98,6 @@ describe('native admin capability API', () => {
       capabilities: {
         openAdmin: false,
         manageProducts: false,
-        manageExternalSources: false,
       },
       environment: 'staging',
     });

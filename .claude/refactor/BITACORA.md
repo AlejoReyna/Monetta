@@ -833,3 +833,61 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Baja] RF-21 debe retirar del backend `external_source` y `showExternalPicks`, y después de la app `AdminChannel.externalCatalog` y `showExternalPicks`, con sus excepciones en ARCH-03.
 - **Commit:** autorizado en esta sesión, con G6 pendiente, como RF-18.
 - **Siguiente paso:** RF-17 sigue esperando el G6 de RF-18 y a la persona. El siguiente elegible es RF-21 (backend).
+
+### 2026-10-08 · RF-21 · iteración 1 · CERRADO
+
+- **Agentes:**
+  - `test-engineer` hizo la parte A: ARCH-03 ampliada y CONTRACT-06.
+  - `flutter-implementer` hizo la parte B (app).
+  - `backend-implementer` hizo la parte C (backend).
+  - El orquestador replanteó el WP, verificó el rojo, auditó, quitó un campo obsoleto y actualizó la documentación.
+- **Base:** `2cc1ed6`, rama `refactor/rf-21-catalogo-externo-admin`.
+- **Replanteamiento:**
+  - Al empezar se vio que el admin de la app conservaba la gestión de fuentes externas: `AdminSourcePolicy`, `ExternalSourceAdminClient`, `saveSource`, `sources`/`sourcesHealthStatus` y `manageExternalSources`.
+  - RF-20 no la cubrió porque la lista de ARCH-03 no tenía esos nombres.
+  - RF-21 pasó a abarcar backend y app. La app fue primero: el cambio es aditivo, porque el backend todavía servía esos datos.
+- **Fase roja (verificada por el auditor):**
+  - `lib/` y `services/accounts_orders/src/` intactos (0 líneas).
+  - ARCH-03 roja con 50 violaciones en los 4 archivos del admin; su autoprueba y su lista viva, verdes.
+  - Los 6 casos de CONTRACT-06, rojos cada uno por su razón:
+    - `external-policy` respondía con el error propio del admin (404 `EXTERNAL_SOURCE_NOT_FOUND` y 503);
+    - el sync aceptaba `external-status` (202);
+    - el control-plane traía `sources`;
+    - `/admin/me` traía `manageExternalSources`;
+    - `loadConfig` lanzaba con `CATALOG_MONITOR_BASE_URL='ftp://x'`.
+- **Diff:**
+  - **App (parte B):** sólo borrados (174 líneas) en `admin_control.dart`, `admin_client.dart` y `admin_controller.dart`. En `admin_controller_test.dart` se quitaron `sources:`, el fake de `updateSource` y la aserción sobre `controller.sources`, cuyo objeto se borró.
+  - **Backend (parte C):**
+    - borrados `externalCatalogClient.ts`, el cableado en `server.ts`, las rutas `GET/PUT /admin/external-policy/:id` y sus helpers (con la auditoría `external_source`), `sources` y `health.sources` del control-plane, el canal `external-status` aceptado, `manageExternalSources`, `catalogMonitor*` y `adminExternalWritesEnabled` en `config.ts` y `.env.example`;
+    - `StoredAdminSyncChannel` separa el canal aceptado del almacenado: los trabajos guardados con `external-status` siguen legibles, y uno pendiente termina `failed` con `SYNC_CHANNEL_RETIRED`, con prueba nueva;
+    - el orquestador quitó del todo `ServerDeps.externalWritesEnabled`, que el agente había dejado `@deprecated` sin efecto, junto con su línea en el fixture de CONTRACT-06. No cambia ninguna aserción.
+  - **Pruebas del backend:**
+    - borradas: `adminExternalCatalog.test.ts` (2) y `externalCatalogAdminClient.test.ts` (1);
+    - adaptadas: la prueba de idempotencia del sync pasa de `external-status` a `shopify-products` con las mismas aserciones, y se quitan `manageExternalSources` y `sources` de dos `toMatchObject`;
+    - nueva: trabajos guardados con el canal retirado.
+  - **Documentación:** `docs/ADMIN_CONTROL_PANEL.md` (diagrama, autoridades, rutas, banderas y orden de activación) con una nota del retiro. `docs/ADMIN_CONTROL_PLANE_IMPLEMENTATION_PLAN.md` queda como plan histórico.
+  - **No se tocaron:** la migración `009`, `fly.toml`, los `.env` reales y `showExternalPicks`.
+- **Contrato:**
+  - Sólo se retiran rutas y campos que la app ya no usa.
+  - `showExternalPicks` sigue exigido por el backend y lo envía la app.
+  - Los eventos de auditoría guardados con `external_source` siguen siendo legibles. `AdminChannel.externalCatalog` los etiqueta y conserva su excepción en ARCH-03.
+- **Gates (ejecutados por el auditor sobre el árbol final):**
+  - G0 → sólo `lib/`, `test/`, `services/accounts_orders/`, `docs/ADMIN_CONTROL_PANEL.md` y `.claude/refactor/`; `git diff --check` limpio.
+  - G1 → `Formatted 329 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → `test/architecture` 4/4; CONTRACT-06 6/6.
+  - G4 app → `+1118 ~5: All tests passed!` (base 1117, más la autoprueba nueva de ARCH-03).
+  - G4 backend → `Tests 123 passed | 9 skipped (132)` (antes del WP pasaban 119); `typecheck` y `build` limpios.
+  - G5 → catálogo válido; secretos OK.
+  - G6 → no aplica: no toca nativo, `pubspec` ni la composición.
+  - G7 → `REQUIRE_POSTGRES_TESTS=1 …` → `Tests 132 passed (132)`, 0 omitidas.
+  - G8 → no aplica.
+- **Invariantes:**
+  - 12 (admin): la autoridad sigue en el servidor; retirar una capacidad no amplía permisos.
+  - 2: no se editó ninguna migración.
+  - INV-15 verde con G7.
+- **Hallazgos:**
+  - [Baja] `showExternalPicks` sigue vivo en ambos lados, aunque ya no gobierna ninguna sección. Retirarlo exige desplegar primero un backend que lo acepte opcional y después la app. Queda para un WP posterior.
+  - [Baja] Quedan menciones históricas de `catalog_monitor` en comentarios del backend (`Dockerfile`, `logger.ts`, `README.md:214`, migraciones `001` y `009`) y en `docs/SYSTEM_IMPLEMENTATION.md` §741 y §839. Corresponden a RF-81 y RF-22.
+- **Commit:** en `refactor/rf-21-catalogo-externo-admin`, autorizado en esta sesión.
+- **Siguiente paso:** RF-22 (dependencias sin uso, Makefile y docs) depende de RF-20, que está bloqueado por G6. RF-23 necesita el inventario de webhooks de la persona. Las demás fases dependen de RF-22. Si la persona no ejecuta G6 ni entrega el inventario, el bucle se detiene aquí.

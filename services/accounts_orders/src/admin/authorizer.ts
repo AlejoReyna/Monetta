@@ -29,7 +29,6 @@ export const noAdminCapabilities: AdminCapabilities = {
   manageFeaturedCatalog: false,
   manageProducts: false,
   manageStorefront: false,
-  manageExternalSources: false,
   manageNotifications: false,
 };
 
@@ -38,10 +37,6 @@ export const ownerAdminCapabilities: AdminCapabilities = {
   manageFeaturedCatalog: true,
   manageProducts: true,
   manageStorefront: true,
-  // Source-policy writes remain a later work package. Keeping this false is
-  // intentional even for an owner until catalog_monitor has durable policy
-  // storage and a service-authenticated write path.
-  manageExternalSources: false,
   manageNotifications: true,
 };
 
