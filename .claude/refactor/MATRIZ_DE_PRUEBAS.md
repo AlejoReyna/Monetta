@@ -107,6 +107,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-17 | UI-01 a UI-04 | INV-12 | G6, G8 (DEV-03) |
 | RF-18 | — | INV-08, INV-06 | — |
 | RF-19 | — | INV-07 | G6 (iOS y Android, ejecutado por la persona) |
+| RF-24 | CHAR-03, casos 7 y 8 en su versión objetivo (D-08); los demás casos de CHAR-03 sin cambios | INV-04, INV-05 | — |
 | RF-20 | ARCH-03 | INV-11, INV-14 (se retira `mixed_feed_test`) | G6 |
 | RF-21 | — | INV-15 | — |
 | RF-22 | — | Todos | G6 |
@@ -159,6 +160,11 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | CONTRACT-01 | verde | RF-12 | 2026-10-06 · RF-12 · iteración 1 |
 | CONTRACT-02 | verde | RF-13 | 2026-10-06 · RF-13 · iteración 1 |
 | CONTRACT-03 | verde | RF-15 | 2026-10-07 · RF-15 · iteración 1 |
+| CHAR-03 | verde (CAR; casos 7 y 8 fijan defectos latentes, ver D-08) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
+| CHAR-04 | verde (CAR; cambia en RF-50 según E4) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
+| CHAR-05 | verde (CAR; cambia según E4) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
+| CHAR-06 | verde (CAR; cambia según E10) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
+| CHAR-07 | verde (CAR; decisión en RF-40) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)

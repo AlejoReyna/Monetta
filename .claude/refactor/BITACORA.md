@@ -575,3 +575,70 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Dispositivo:** la persona compiló e instaló en su iPhone 16e un build de release de staging de la rama del PR #10, con las variables de CI. Es el primer build de release en un dispositivo físico, aunque no cubre DEV-01 ni DEV-02.
 - **Fuera de la matriz:** las pruebas de los PRs #8 a #10 no tienen filas, porque son trabajo fuera del plan.
 - **Veredicto:** sincronización aprobada. RF-16 sigue en esta misma rama.
+
+### 2026-10-07 · RF-16 · iteración 1 · APROBADO
+
+- **Agente(s):** `test-engineer` escribió las pruebas. El orquestador redactó el encargo, auditó y corrigió dos comentarios. Lanzado por el bucle `/loop /refactor siguiente`.
+- **Base:** `d97b2d5`, rama `refactor/rf-16-caracterizacion`.
+- **Verificación previa:** antes del encargo, el orquestador releyó las líneas que citan CHAR-03 a CHAR-07 y siguen siendo correctas después del merge con `main`.
+- **Archivos del diff:**
+  - Nuevos:
+    - `test/fixtures/db/monetta_v7_monetta_mx.sql`: esquema v7 exacto, `user_version 7` y datos ficticios de `monetta.mx` en las 14 tablas;
+    - `test/data/local/shop_scope_characterization_test.dart` (CHAR-03, 8 pruebas);
+    - `test/data/local/bag_merge_characterization_test.dart` (CHAR-04, 4);
+    - `test/app/bag_counter_characterization_test.dart` (CHAR-05, 3);
+    - `test/app/empty_catalog_characterization_test.dart` (CHAR-06, 2);
+    - `test/features/catalog/collection_handle_characterization_test.dart` (CHAR-07, 2).
+  - `.claude/refactor/PLAN.md`, `.claude/refactor/MATRIZ_DE_PRUEBAS.md` y esta entrada.
+  - `lib/` intacto.
+- **Gates (ejecutados por el auditor sobre el árbol final, después de corregir los comentarios):**
+  - G0 → sólo archivos del alcance. `git diff --check` limpio, y `git diff --no-index --check` también sobre cada archivo nuevo.
+  - G1 → `Formatted 322 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → las 5 rutas nuevas: `+19: All tests passed!`.
+  - G4 → `+979 ~5: All tests passed!` (base 960, más 19).
+  - G5 → `Catálogo válido: 103 productos, 340 imágenes.`; `./bin/check_no_secrets.sh` → OK. El sandbox imprime un aviso de `python3` (`couldn't create cache file … Operation not permitted`), con exit 0.
+  - G6 a G8 → no aplican: el WP sólo añade pruebas.
+- **Filas de la matriz:** CHAR-03 a CHAR-07 → verde (CAR). Lo que fija cada una:
+  - **CHAR-03:**
+    - el fixture es v7 (esquema idéntico al del código y `user_version` 7);
+    - con el mismo dominio no se pierde ninguna fila, tampoco al reabrir;
+    - con otro dominio, o con uno que sólo difiere en mayúsculas, se hace el reset exacto de `resetShopState`. Se conservan `app_preferences`, `checkout_receipts` y el device (con `account_id` null). El asset no se siembra;
+    - con dominio `null` o vacío, no hay reset;
+    - una bolsa sin procedencia se borra al arrancar con dominio: es la regla de PR7 (R3, `catalog_repository.dart:298-299`), no un defecto;
+    - casos 7 y 8: defectos latentes (ver abajo).
+  - **CHAR-04:** la fila del invitado reemplaza la de la cuenta (cantidad y `productId`), sin tope (V×15). Se conservan las variantes que sólo tenía la cuenta y la cuenta B no cambia.
+  - **CHAR-05:** `bagQuantity` es 11 mientras `bagLines` tiene 1 línea y `bagSubtotal` sólo cuenta la visible. El tooltip de `BagAction` dice «Mi bolsa, 11 artículos».
+  - **CHAR-06:**
+    - Storefront: un full sync de 0 productos vacía el catálogo de inmediato, y el asset no vuelve al reabrir.
+    - Firestore: un snapshot vacío conserva el catálogo y la caché, y marca la metadata `invalid`/`Vacío`.
+  - **CHAR-07:** con `collectionHandle`, el producto sin handles pasa y el de otra colección no.
+- **Defectos de producción confirmados por las pruebas** (fuera del diff, sin corregir):
+  - [Alta, latente] **Firestore.** `realtime_catalog_repository.dart:121-129` escribe la metadata sin `shopDomain`. Con `FIRESTORE_CATALOG_ENABLED=true` y un dominio configurado, cada arranque posterior a un snapshot hace el reset completo: borra cuentas, sesiones, bolsa, favoritos y pedidos (CHAR-03, caso 7). Hoy Firestore está apagado en los ejemplos de staging y producción, y E3 lo deja experimental.
+  - [Media] **Primer arranque sin red.** La semilla del asset (`catalog_repository.dart:101-109`) tampoco guarda `shopDomain`. El primer `sync()` la toma por otra tienda (`:292`, `:300-307`) y la borra antes de fallar. La sesión sigue mostrando el asset en memoria, pero el segundo arranque sin red queda sin catálogo hasta un full sync correcto (CHAR-03, caso 8). Afecta la ruta de producción (`storefrontDirect`).
+  - Se registran como decisión D-08 en `PLAN.md`.
+- **Hallazgos del diff:**
+  - [Baja, corregido por el orquestador] `shop_scope_characterization_test.dart:1` citaba «INV-01», que en la matriz es otra invariante. Ahora cita «R10, decision E11».
+  - [Baja, corregido por el orquestador] El comentario del caso 8 atribuía al segundo `syncWithShopify()` lo que hizo el primero, que ya había esperado `_start`. Las aserciones no cambian.
+  - [Baja] CHAR-05 crea el store sin `shopDomain`, porque con dominio la bolsa sin procedencia se borraría (regla de PR7). La regla del contador no depende del dominio.
+  - [Baja] `CatalogRepository.sync()` usa `DateTime.now()` sin inyección (`catalog_repository.dart:215`). CHAR-06 fuerza el full sync con un cursor sin fechas. Queda como candidato para RF-40.
+- **Checklist:**
+  - el alcance es el del encargo;
+  - sin `skip`, sin `// ignore`, sin red y sin reloj real;
+  - cada prueba lleva su ID;
+  - el conteo es mayor que la base;
+  - el fixture no contiene secretos (`ana@example.com`, sin tokens);
+  - no hay cambios de contrato ni de arquitectura, así que no hay documentos que actualizar.
+- **Decisiones de la persona en esta iteración:** ninguna todavía. Quedan consultados el commit y D-08.
+- **Commit:** no autorizado en esta sesión.
+- **Siguiente paso:** con el árbol limpio, RF-18.
+
+### 2026-10-07 · RF-16 · decisiones y commit · CERRADO
+
+- **Decisiones de la persona** (respuestas a las preguntas del orquestador):
+  - **Commits:** autorizados en esta sesión. Cada WP aprobado va a su rama `refactor/rf-XX-…`, nunca a `main`, y no se hace push.
+  - **D-08:** se crea RF-24 en la fase 1, después de RF-18. El orquestador lo ordena antes que RF-17, porque RF-17 necesita a la persona (D-07). El detalle está en `PLAN.md`.
+  - **Firestore:** la persona no sabe si `FIRESTORE_CATALOG_ENABLED` está en `true` en sus archivos reales de dart-defines. El defecto del caso 7 se trata como latente; RF-24 lo corrige de todos modos.
+- **Matriz:** fila de asignación nueva para RF-24.
+- **Commit:** en `refactor/rf-16-caracterizacion`, con las pruebas, el fixture y los documentos del refactor. `.claude/settings.local.json` queda fuera.
+- **Siguiente paso:** RF-18, en una rama nueva que sale de esta.

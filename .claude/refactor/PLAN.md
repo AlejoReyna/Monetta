@@ -40,6 +40,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | E12 | ¿Galería web pública o privada? | — | pendiente | RF-80 |
 | E-T1 | Tope de escala de texto | Global 1.5 y titulares 1.2 | **tomada, 2026-10-07:** global 1.5 y titulares 1.2 | RF-17 |
 | E-T2 | ¿Empaquetar Playfair Display e Inter (licencia OFL 1.1)? | Sí | **tomada, 2026-10-07:** sí, empaquetarlas con su licencia | RF-17 |
+| D-08 | Defectos latentes del reset por tienda que confirmó CHAR-03 (casos 7 y 8): la semilla del asset y cada snapshot de Firestore guardan la metadata sin `shopDomain`, y el siguiente arranque o sync con `monetta.mx` lo toma por otra tienda | WP nuevo RF-24 en la fase 1, antes del lanzamiento (E1): conservar la procedencia de tienda en la semilla y en Firestore, cambiando CHAR-03 de forma explícita | **tomada, 2026-10-07:** como se recomienda; RF-24 va después de RF-18. El orquestador lo pone antes que RF-17, porque no necesita a la persona (D-07). La persona no sabe si `FIRESTORE_CATALOG_ENABLED` está en `true` en sus archivos reales; se trata como latente | RF-24; lanzamiento (E1) |
 
 **Opciones de E-T1:**
 - **(a) Tope global de 1.3.** Prioriza el diseño y es el cambio más simple.
@@ -58,9 +59,10 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-13 | Rewards apagado: JSON 404 y estado «no disponible» | 1 | test-engineer → backend + flutter | RF-00 | E7 | cerrado |
 | RF-14 | Timeouts y notificaciones fuera del arranque | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | D-05 (G8) | bloqueado: G6 y G8 de la persona |
 | RF-15 | Parsers estrictos de Rewards | 1 | test-engineer → flutter-implementer | RF-00 | — | cerrado |
-| RF-16 | Caracterización de reglas vigentes | 1 | test-engineer | RF-00 | — | pendiente |
-| RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | E-T1, E-T2 | pendiente |
+| RF-16 | Caracterización de reglas vigentes | 1 | test-engineer | RF-00 | — | cerrado |
 | RF-18 | Extracciones D02 y D03 | 1 | flutter-implementer | RF-00 | — | pendiente |
+| RF-24 | Procedencia de tienda en la semilla y en Firestore | 1 | test-engineer → flutter-implementer | RF-16, RF-18 | D-08 | pendiente |
+| RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19, RF-18, RF-24 (orden de D-07 y D-08) | E-T1, E-T2 | pendiente |
 | RF-20 | Eliminar el catálogo externo de la app | 2 | flutter-implementer | RF-16, RF-19 | E2 | pendiente |
 | RF-21 | Eliminar el catálogo externo del admin backend | 2 | backend-implementer | RF-00 | E2 | pendiente |
 | RF-22 | Dependencias sin uso, Makefile y docs | 2 | flutter-implementer | RF-20 | — | pendiente |
@@ -276,6 +278,39 @@ Lo pidió la persona.
 - Un componente común de fila de resumen, que reemplace a `shopify_cart_summary.dart:269` y `checkout_screen.dart:1264`.
 
 **Aceptación:** INV-08 e INV-06 verdes; las pruebas de discovery existentes cubren el servicio compartido.
+
+### RF-24 · Procedencia de tienda en la semilla y en Firestore
+
+Origen: D-08; casos 7 y 8 de CHAR-03 (RF-16).
+
+**Hechos (los confirmó CHAR-03):**
+- La semilla del asset (`catalog_repository.dart:101-109`) y cada snapshot de Firestore (`realtime_catalog_repository.dart:121-129`) guardan la metadata sin `shopDomain`. `_writeMetadata` (`catalog_cache_store.dart:224-237`) escribe ese `null`.
+- `_cursorForConfiguredShop` (`catalog_repository.dart:283-311`) compara el dominio configurado con el del cursor y con el de la metadata. Una metadata sin tienda cuenta como otra tienda y dispara `resetShopState`.
+- Efectos:
+  - con Firestore activo y dominio configurado, cada arranque posterior a un snapshot borra cuenta, sesión, bolsa, favoritos y pedidos (caso 7);
+  - en una instalación nueva, el primer sync borra la semilla antes de intentar la red. Si falla, el segundo arranque sin red queda sin catálogo (caso 8).
+- El asset declara su origen: `"_source": "https://monetta.mx/products.json?"` en `assets/catalog/catalog.json`.
+
+**Orden de trabajo:**
+1. `test-engineer` escribe la versión objetivo (roja) de los casos 7 y 8:
+   - tras un snapshot de Firestore, arrancar con la misma tienda no hace reset ni pierde filas;
+   - en una instalación nueva, un primer sync fallido conserva la semilla, y el segundo arranque sin red muestra ese catálogo.
+2. `flutter-implementer` hace la corrección.
+
+**Decisión de diseño:** qué tienda registra la metadata de la semilla (la del `_source` del asset o la configurada) y la de Firestore (la del cursor, la configurada o la de la metadata anterior). El orquestador la recomienda al empezar el WP y se la muestra a la persona.
+
+**Restricciones:**
+- Invariante 1: no cambia cómo se deriva ni cómo se normaliza el dominio configurado (E11).
+- Los demás casos de CHAR-03 siguen verdes sin cambios: reset ante otra tienda (también si sólo cambian las mayúsculas), ningún reset con dominio `null` y borrado del estado sin procedencia (regla de PR7).
+- Los casos 7 y 8 cambian de nombre y de aserciones de forma explícita, con la delta en la bitácora.
+- Firestore sigue experimental (E3): la corrección no lo activa.
+
+**Alcance:**
+- `lib/data/repositories/catalog_repository.dart` y `lib/data/repositories/realtime_catalog_repository.dart`;
+- `lib/app/catalog_store.dart`, sólo si hace falta pasarle la tienda;
+- sus pruebas, incluidos los casos 7 y 8 de `test/data/local/shop_scope_characterization_test.dart`.
+
+**Aceptación:** los casos 7 y 8 en su versión objetivo, en verde; el resto de CHAR-03 sin cambios; INV-04 e INV-05 verdes; G4.
 
 ### RF-19 · Mínimo iOS 15.0 para Xcode 27
 
