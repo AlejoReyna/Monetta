@@ -11,14 +11,14 @@ import '../../app/theme.dart';
 enum MonettaBottomDestination { home, catalog, bag, account }
 
 // Layout of the docked bar. The theme is the only source of its colors.
-const double _kBarMinHeight = 72;
+const double _kBarMinHeight = 56;
 const double _kBarSidePadding = 10;
 const double _kBarMaxContentWidth = 480;
 const double _kItemHorizontalPadding = 4;
-const double _kItemVerticalPadding = 8;
-const double _kIconBox = 30;
+const double _kItemVerticalPadding = 5;
+const double _kIconBox = 24;
 const double _kIconStroke = 1.7;
-const double _kIconLabelGap = 6;
+const double _kIconLabelGap = 3;
 const double _kLabelSize = 13;
 const double _kLabelHeight = 1.25;
 const double _kPressedOpacity = 0.55;
@@ -241,7 +241,7 @@ class _NavItemState extends State<_NavItem> {
                               ),
                               if (badge > 0)
                                 Positioned(
-                                  left: 22,
+                                  left: 16,
                                   top: -6,
                                   child: _BagBadge(count: badge),
                                 ),

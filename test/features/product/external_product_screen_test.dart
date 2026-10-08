@@ -82,7 +82,15 @@ void main() {
       ),
     );
 
-    expect(find.text('Bolsa Brooklyn 28 de hombro'), findsOneWidget);
+    // The header now repeats the name, so the content copy is scoped to the
+    // page list (still exactly one).
+    expect(
+      find.descendant(
+        of: find.byType(ListView),
+        matching: find.text('Bolsa Brooklyn 28 de hombro'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('\$295 USD'), findsOneWidget);
     expect(find.text('DISPONIBLE'), findsOneWidget);
     expect(openedUri, isNull);
@@ -97,11 +105,11 @@ void main() {
     expect(openedUri, isNull);
 
     await tester.scrollUntilVisible(
-      find.text('DESCRIPCIÓN DEL PRODUCTO'),
+      find.text('Descripción del producto'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('DESCRIPCIÓN DEL PRODUCTO'), findsOneWidget);
+    expect(find.text('Descripción del producto'), findsOneWidget);
     expect(find.text('CU068 B4/TF'), findsOneWidget);
 
     await tester.tap(find.text('VER EN COACH'));

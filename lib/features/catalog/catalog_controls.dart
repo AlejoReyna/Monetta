@@ -168,7 +168,7 @@ class CatalogResultCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (!_ownerIsViewing(context)) return const SizedBox.shrink();
+    if (!visibleFor(context)) return const SizedBox.shrink();
     return Text(
       '$count ${count == 1 ? noun : pluralNoun}',
       style: boutiqueText(
@@ -179,7 +179,9 @@ class CatalogResultCount extends StatelessWidget {
     );
   }
 
-  static bool _ownerIsViewing(BuildContext context) {
+  /// Whether the count renders at all for the viewer in [context]. Layouts
+  /// that would otherwise reserve space for it can collapse when it is hidden.
+  static bool visibleFor(BuildContext context) {
     final account = AccountScope.maybeOf(context);
     final admin = AdminScope.maybeOf(context);
     if (account == null || admin == null) return false;
@@ -374,7 +376,7 @@ class CatalogEditorialBanner extends StatelessWidget {
       Text(
         title,
         textAlign: align,
-        style: boutiqueDisplay(30, color: color),
+        style: boutiqueScreenTitle(color: color),
       ),
       if (description case final text? when text.trim().isNotEmpty) ...[
         const SizedBox(height: BoutiqueSpace.sm),
@@ -494,7 +496,7 @@ class CatalogEmptyState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(title, style: boutiqueDisplay(24, color: palette.ink)),
+          Text(title, style: boutiqueScreenTitle(color: palette.ink)),
           const SizedBox(height: BoutiqueSpace.sm),
           Text(
             body,

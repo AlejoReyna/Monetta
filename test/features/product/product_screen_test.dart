@@ -7,6 +7,8 @@ import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/main.dart';
 
+import '../../support/product_screen_harness.dart';
+
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
   await store.loadFromAsset();
@@ -62,8 +64,10 @@ void main() {
     await tester.pump();
 
     expect(find.text(product.title), findsWidgets);
-    expect(find.text('AGREGAR A LA BOLSA'), findsOneWidget);
-    expect(find.text('APARTAR'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
+    // "Apartar" lives in the secondary purchase section, below the fold.
+    await scrollTo(tester, find.text('Apartar'));
+    expect(find.text('Apartar'), findsOneWidget);
     expect(
       find.text(
         'Escríbenos por WhatsApp para solicitar apartado (\$400 MXN · 20 días). Abrir el chat no reserva stock ni confirma el anticipo.',
@@ -96,7 +100,7 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('AGREGAR A LA BOLSA'));
+    await tester.tap(find.text('Agregar al carrito'));
     await tester.pumpAndSettle();
 
     expect(store.bagQuantity, 1);

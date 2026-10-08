@@ -27,6 +27,7 @@ import '../../main.dart';
 import '../../reco/events.dart';
 import '../product/product_screen.dart';
 import 'product_tile.dart';
+import 'quick_add_button.dart';
 
 export 'product_tile.dart'
     show
@@ -46,6 +47,7 @@ class ProductCard extends StatelessWidget {
     this.wide = false,
     this.density = ProductTileDensity.grid,
     this.showWishlist = true,
+    this.showQuickAdd = true,
     this.onQuickView,
     this.onTap,
     super.key,
@@ -69,6 +71,10 @@ class ProductCard extends StatelessWidget {
   /// Set false where a favourite would be meaningless or unsupported.
   final bool showWishlist;
 
+  /// Whether a buyable card draws the "+" quick-add control. The bag turns it
+  /// off for its own recommendations.
+  final bool showQuickAdd;
+
   /// Reserved for package C. When given, a long press opens the quick view;
   /// no button is added and tapping still opens the full product page.
   final VoidCallback? onQuickView;
@@ -81,15 +87,26 @@ class ProductCard extends StatelessWidget {
     final store = StoreScope.of(context);
     final facets = store.facetsFor(product.id);
     final wishlisted = store.wishlist.contains(product.id);
+    final data = ProductTileData.fromProduct(product, facets: facets);
+    // Only a piece with something to buy gets the "+"; a sold-out one keeps
+    // the eye (when the surface wires it).
+    final canQuickAdd = showQuickAdd && product.isInStock;
 
     return MonettaProductTile(
-      data: ProductTileData.fromProduct(product, facets: facets),
+      data: data,
       density: density,
       eyebrow: urgency,
       wishlisted: wishlisted,
       onToggleWishlist:
           showWishlist ? () => store.toggleWishlist(product.id) : null,
       onQuickView: onQuickView,
+      quickAction: canQuickAdd
+          ? ProductQuickAddButton(
+              key: Key('quick-add-${product.id}'),
+              product: product,
+              productName: data.title,
+            )
+          : null,
       onTap: onTap ?? () => openProduct(context, product),
     );
   }

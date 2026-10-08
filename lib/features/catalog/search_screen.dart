@@ -561,7 +561,7 @@ class _SectionTitle extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: boutiqueDisplay(20, color: palette.ink),
+              style: boutiqueSectionHeading(color: palette.ink),
             ),
           ),
           if (actionLabel case final label? when onAction != null)
@@ -906,7 +906,7 @@ class _Results extends StatelessWidget {
                   '“$query”',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
-                  style: boutiqueDisplay(20, color: palette.ink),
+                  style: boutiqueScreenTitle(size: 22, color: palette.ink),
                 ),
               ),
               const SizedBox(width: BoutiqueSpace.md),

@@ -3,10 +3,12 @@
 /// Galería contenida (nunca recorta asas) con miniaturas, fav y compartir;
 /// marca + nombre + precio con `-X%` solo cuando `compare_at` lo respalda;
 /// swatches solo con mapeo fiable ([ProductOptionSelector]); envío y entrega
-/// estimadas; agregar + comprar ahora; confianza; acordeones
-/// Descripción–Detalles–Envíos; relacionados con la [ProductCard] compartida.
+/// estimadas; muelle inferior con «Agregar al carrito» y, al final de la
+/// información, «Otras formas de comprar» (comprar ahora y apartar); confianza;
+/// acordeones Descripción–Detalles–Envíos; relacionados con la [ProductCard]
+/// compartida.
 ///
-/// Agotado abre igual pero se distingue (sello + CTA de aviso). El corazón
+/// Agotado abre igual pero se distingue (sello + CTA de aviso en el muelle). El corazón
 /// solo guarda — jamás navega.
 library;
 
@@ -28,7 +30,10 @@ import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../checkout/checkout_screen.dart';
+import '../checkout/mini_cart.dart' show showMiniCart;
+import 'product_header.dart';
 import 'product_selection.dart';
+import 'purchase_dock.dart';
 import 'quick_view.dart';
 
 class ProductScreen extends StatefulWidget {
@@ -54,6 +59,10 @@ class _ProductScreenState extends State<ProductScreen> {
   int _page = 0;
   late int _variantIndex = widget.initialVariantIndex;
   final Set<String> _open = <String>{};
+
+  /// True while an add is in flight; blocks a second tap on any purchase
+  /// action so one tap never turns into two units.
+  bool _adding = false;
 
   @override
   void dispose() {
@@ -146,6 +155,44 @@ class _ProductScreenState extends State<ProductScreen> {
     );
   }
 
+  Future<void> _add(Product product) => _purchase(product, buyNow: false);
+
+  Future<void> _buyNow(Product product) => _purchase(product, buyNow: true);
+
+  /// Both purchase actions go through [tryAddSelectionToBag]; they differ only
+  /// in what follows a successful add. The selected variant is never changed,
+  /// whatever the outcome.
+  Future<void> _purchase(Product product, {required bool buyNow}) async {
+    if (_adding) return;
+    setState(() => _adding = true);
+    final result = await tryAddSelectionToBag(context, product, _variantIndex);
+    if (!mounted) return;
+    // Released before any feedback so the action is usable again as soon as
+    // the sheet or the snack bar appears.
+    setState(() => _adding = false);
+    switch (result.status) {
+      case BagAddStatus.added:
+        // Keeps the existing confirmation surface — a sheet, never a toast.
+        if (buyNow) {
+          await openBag(context);
+        } else {
+          await showMiniCart(context);
+        }
+      case BagAddStatus.soldOut:
+        _showMessage('Esta opción está agotada.');
+      case BagAddStatus.unavailable:
+        _showMessage('Esta pieza no está disponible por ahora.');
+      case BagAddStatus.failed:
+        _showMessage('No pudimos agregar la pieza. Intenta de nuevo.');
+    }
+  }
+
+  void _showMessage(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   void _goToPage(int index) {
     setState(() => _page = index);
     if (reduceMotion(context)) {
@@ -204,17 +251,14 @@ class _ProductScreenState extends State<ProductScreen> {
       },
       child: Scaffold(
         backgroundColor: palette.canvas,
-        appBar: AppBar(
-          backgroundColor: palette.bar,
-          foregroundColor: palette.ink,
-          leading: IconButton(
-            icon: const Icon(Icons.arrow_back, size: 20),
-            tooltip: 'Volver',
-            onPressed: _recordDwellAndPop,
-          ),
-          title: const MonettaWordmark.appBar(),
+        appBar: buildProductDetailAppBar(
+          context,
+          title: shopperProductName(product.title),
+          onBack: _recordDwellAndPop,
+          actionSlots: 2,
           actions: [
             IconButton(
+              key: const Key('product-header-favorite'),
               tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
               icon: Icon(
                 wishlisted ? Icons.favorite : Icons.favorite_border,
@@ -225,10 +269,6 @@ class _ProductScreenState extends State<ProductScreen> {
             ),
             const BagAction(),
           ],
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(0.5),
-            child: Divider(height: 0.5, color: palette.hairline),
-          ),
         ),
         body: SafeArea(
           top: false,
@@ -274,9 +314,7 @@ class _ProductScreenState extends State<ProductScreen> {
                     ],
                     Text(
                       shopperProductName(product.title),
-                      maxLines: 3,
-                      overflow: TextOverflow.ellipsis,
-                      style: boutiqueDisplay(24, color: palette.ink),
+                      style: boutiqueProductName(color: palette.ink),
                     ),
                     const SizedBox(height: BoutiqueSpace.lg),
                     Wrap(
@@ -402,6 +440,13 @@ class _ProductScreenState extends State<ProductScreen> {
                     ),
                     const SizedBox(height: BoutiqueSpace.sm),
                     _WhatsAppLink(onTap: () => _openConcierge(product)),
+                    const SizedBox(height: BoutiqueSpace.xl),
+                    _PurchaseSection(
+                      inStock: inStock,
+                      adding: _adding,
+                      onBuyNow: () => _buyNow(product),
+                      onApartado: () => _openApartado(product),
+                    ),
                   ],
                 ),
               ),
@@ -418,7 +463,7 @@ class _ProductScreenState extends State<ProductScreen> {
                     facets?.brand == null
                         ? 'Más piezas'
                         : 'Más de ${brandLabel(facets!.brand!.value)}',
-                    style: boutiqueTitle(color: palette.ink),
+                    style: boutiqueSectionHeading(color: palette.ink),
                   ),
                 ),
                 _Rail(products: related),
@@ -434,7 +479,7 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                   child: Text(
                     'Vistas hace un momento',
-                    style: boutiqueTitle(color: palette.ink),
+                    style: boutiqueSectionHeading(color: palette.ink),
                   ),
                 ),
                 _Rail(products: recent),
@@ -443,18 +488,28 @@ class _ProductScreenState extends State<ProductScreen> {
             ],
           ),
         ),
-        bottomNavigationBar: _PurchaseBar(
-          product: product,
-          variantIndex: _variantIndex,
-          price: price,
-          compare: compare,
-          onSale: onSale,
-          inStock: inStock,
-          notificationsSaving: notifications?.saving == true,
-          onAdd: () => addToBagAndShowMiniCart(context, product, _variantIndex),
-          onBuyNow: () => buyNowOpenBag(context, product, _variantIndex),
-          onApartado: () => _openApartado(product),
-          onRestock: () => _createRestockAlert(product),
+        bottomNavigationBar: PurchaseDock(
+          child: inStock
+              ? PurchaseDockButton(
+                  key: const Key('purchase-dock-primary'),
+                  label: _adding ? 'Agregando…' : 'Agregar al carrito',
+                  pending: _adding,
+                  onPressed: _adding ? null : () => _add(product),
+                )
+              // The restock alert keeps its historical key; the button keeps
+              // the dock key in every state.
+              : KeyedSubtree(
+                  key: const ValueKey('create-restock-alert'),
+                  child: PurchaseDockButton(
+                    key: const Key('purchase-dock-primary'),
+                    label: notifications?.saving == true
+                        ? 'Guardando…'
+                        : 'Avísame cuando vuelva',
+                    onPressed: notifications?.saving == true
+                        ? null
+                        : () => _createRestockAlert(product),
+                  ),
+                ),
         ),
       ),
     );
@@ -910,11 +965,7 @@ class _BoutiqueAccordion extends StatelessWidget {
                     Expanded(
                       child: Text(
                         label,
-                        style: boutiqueText(
-                          size: 14,
-                          weight: FontWeight.w600,
-                          color: palette.ink,
-                        ),
+                        style: boutiqueSectionHeading(color: palette.ink),
                       ),
                     ),
                     AnimatedRotation(
@@ -988,6 +1039,62 @@ class _WhatsAppLink extends StatelessWidget {
   }
 }
 
+/// "Otras formas de comprar": the secondary purchase actions, after the
+/// information and before the related rails. The primary action lives in the
+/// dock. A sold-out selection offers only "Apartar".
+class _PurchaseSection extends StatelessWidget {
+  const _PurchaseSection({
+    required this.inStock,
+    required this.adding,
+    required this.onBuyNow,
+    required this.onApartado,
+  });
+
+  final bool inStock;
+  final bool adding;
+  final VoidCallback onBuyNow;
+  final VoidCallback onApartado;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Column(
+      key: const Key('purchase-section'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          'Otras formas de comprar',
+          style: boutiqueSectionHeading(color: palette.ink),
+        ),
+        const SizedBox(height: BoutiqueSpace.md),
+        if (inStock) ...[
+          BoutiqueButton(
+            key: const Key('purchase-buy-now'),
+            label: 'Comprar ahora',
+            onPressed: adding ? null : onBuyNow,
+            filled: false,
+          ),
+          const SizedBox(height: BoutiqueSpace.sm),
+        ],
+        Center(
+          child: TextButton(
+            key: const Key('purchase-apartar'),
+            onPressed: onApartado,
+            style: TextButton.styleFrom(
+              minimumSize: const Size(48, BoutiqueSpace.tapTarget),
+              foregroundColor: palette.ink,
+            ),
+            child: Text(
+              'Apartar',
+              style: boutiqueText(size: 14, weight: FontWeight.w600),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
 class _Details extends StatelessWidget {
   const _Details({required this.facets});
 
@@ -1055,10 +1162,12 @@ class _Rail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tileWidth = MediaQuery.sizeOf(context).width * 0.52;
+    // 12pt photo gap plus ~120pt for brand, two-line name and price, matching
+    // the grid caption contract. The caption is text, so it grows with the
+    // text scale; the gap does not.
+    final caption = MediaQuery.textScalerOf(context).scale(120);
     return SizedBox(
-      // 132 reserves the 12pt photo gap plus ~120pt for brand, two-line name
-      // and price, matching the grid caption contract.
-      height: tileWidth * 1.25 + 132,
+      height: tileWidth * 1.25 + 12 + caption,
       child: ListView.separated(
         clipBehavior: Clip.none,
         scrollDirection: Axis.horizontal,
@@ -1075,143 +1184,6 @@ class _Rail extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-}
-
-// ---------------------------------------------------------------------------
-// Sticky purchase bar
-// ---------------------------------------------------------------------------
-
-class _PurchaseBar extends StatelessWidget {
-  const _PurchaseBar({
-    required this.product,
-    required this.variantIndex,
-    required this.price,
-    required this.compare,
-    required this.onSale,
-    required this.inStock,
-    required this.notificationsSaving,
-    required this.onAdd,
-    required this.onBuyNow,
-    required this.onApartado,
-    required this.onRestock,
-  });
-
-  final Product product;
-  final int variantIndex;
-  final double price;
-  final double? compare;
-  final bool onSale;
-  final bool inStock;
-  final bool notificationsSaving;
-  final VoidCallback onAdd;
-  final VoidCallback onBuyNow;
-  final VoidCallback onApartado;
-  final VoidCallback onRestock;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Container(
-      decoration: BoxDecoration(
-        color: palette.surface,
-        border: Border(
-          top: BorderSide(color: palette.hairline, width: 1),
-        ),
-      ),
-      child: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(
-          BoutiqueSpace.gutter,
-          BoutiqueSpace.md,
-          BoutiqueSpace.gutter,
-          BoutiqueSpace.md,
-        ),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Price + availability stack vertically so 2x text scale
-            // wraps instead of overflowing a Row.
-            Wrap(
-              spacing: BoutiqueSpace.sm,
-              runSpacing: 2,
-              crossAxisAlignment: WrapCrossAlignment.center,
-              children: [
-                Text(
-                  kMoney.format(price),
-                  style: boutiqueText(
-                    size: 17,
-                    weight: FontWeight.w700,
-                    color: inStock ? palette.ink : palette.inkMuted,
-                  ),
-                ),
-                if (onSale && compare != null)
-                  Text(
-                    kMoney.format(compare),
-                    style: boutiqueText(
-                      size: 13,
-                      color: palette.inkMuted,
-                      decoration: TextDecoration.lineThrough,
-                    ),
-                  ),
-              ],
-            ),
-            const SizedBox(height: 4),
-            Text(
-              inStock ? 'Disponible' : 'Agotado',
-              style: boutiqueEyebrow(
-                size: 10,
-                color: inStock ? const Color(0xFF3B7B4A) : palette.sale,
-              ),
-            ),
-            const SizedBox(height: BoutiqueSpace.md),
-            if (inStock) ...[
-              BoutiqueButton(label: 'AGREGAR A LA BOLSA', onPressed: onAdd),
-              const SizedBox(height: BoutiqueSpace.sm),
-              BoutiqueButton(
-                label: 'COMPRAR AHORA',
-                onPressed: onBuyNow,
-                filled: false,
-              ),
-              Center(
-                child: TextButton(
-                  onPressed: onApartado,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(48, BoutiqueSpace.tapTarget),
-                    foregroundColor: palette.inkMuted,
-                  ),
-                  child: Text(
-                    'APARTAR',
-                    style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
-                  ),
-                ),
-              ),
-            ] else ...[
-              BoutiqueButton(
-                label: notificationsSaving
-                    ? 'GUARDANDO…'
-                    : 'AVÍSAME CUANDO VUELVA',
-                key: const ValueKey('create-restock-alert'),
-                onPressed: notificationsSaving ? null : onRestock,
-              ),
-              Center(
-                child: TextButton(
-                  onPressed: onApartado,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(48, BoutiqueSpace.tapTarget),
-                    foregroundColor: palette.inkMuted,
-                  ),
-                  child: Text(
-                    'APARTAR',
-                    style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
-                  ),
-                ),
-              ),
-            ],
-          ],
-        ),
       ),
     );
   }
