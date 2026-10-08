@@ -345,8 +345,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
     final palette = context.boutique;
     final store = StoreScope.of(context);
     final items = _items();
-    final scopedItems = _scopedItems();
-    final silhouettes = _silhouettesFor(scopedItems, store);
     final activeCount = _filters.activeCountComparedTo(_initialFilters);
 
     return Scaffold(
@@ -373,33 +371,10 @@ class _CollectionScreenState extends State<CollectionScreen> {
                 description: widget.description,
               ),
             ),
-          if (silhouettes.isNotEmpty)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.only(top: BoutiqueSpace.lg),
-                child: MonettaChipRail(
-                  children: [
-                    for (final slug in silhouettes)
-                      MonettaCapsuleChip(
-                        key: Key('collection-silhouette-$slug'),
-                        label: silhouetteLabel(slug),
-                        selected: _filters.silhouette == slug,
-                        onTap: () => setState(() {
-                          _filters = _filters.copyWith(
-                            silhouette:
-                                _filters.silhouette == slug ? null : slug,
-                          );
-                        }),
-                      ),
-                  ],
-                ),
-              ),
-            ),
           SliverToBoxAdapter(
             child: _CollectionToolbar(
               count: items.length,
               activeCount: activeCount,
-              onFilters: _openFilterSheet,
               onClear: activeCount == 0 ? null : _clearFilters,
               // Only when the destination really is one brand; a mixed
               // collection has no single marca to open.
@@ -526,7 +501,7 @@ class _CollectionAppBar extends StatelessWidget {
       title: showTitle
           ? Text(
               title,
-              style: boutiqueDisplay(19, color: palette.ink),
+              style: boutiqueHeaderName(color: palette.ink),
             )
           : null,
       actions: [
@@ -541,12 +516,13 @@ class _CollectionAppBar extends StatelessWidget {
   }
 }
 
-/// Count, ordering and the way back to the unfiltered destination.
+/// Count, brand link and the way back to the unfiltered destination. It takes
+/// no space at all when there is nothing to show: the filter button in the
+/// bar is the only entry to ordering and filtering.
 class _CollectionToolbar extends StatelessWidget {
   const _CollectionToolbar({
     required this.count,
     required this.activeCount,
-    required this.onFilters,
     required this.onClear,
     required this.brandSlug,
     required this.onOpenBrand,
@@ -554,7 +530,6 @@ class _CollectionToolbar extends StatelessWidget {
 
   final int count;
   final int activeCount;
-  final VoidCallback onFilters;
   final VoidCallback? onClear;
   final String? brandSlug;
   final VoidCallback? onOpenBrand;
@@ -562,6 +537,12 @@ class _CollectionToolbar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    final showCount = CatalogResultCount.visibleFor(context);
+    final brand = brandSlug;
+    final showBrand = brand != null && onOpenBrand != null;
+    if (!showCount && !showBrand && onClear == null) {
+      return const SizedBox.shrink();
+    }
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BoutiqueSpace.gutter,
@@ -570,75 +551,62 @@ class _CollectionToolbar extends StatelessWidget {
         0,
       ),
       // Wrap instead of Row+Spacer: on a narrow phone the count, the brand
-      // link, the clear action and the sort chip can exceed 350pt together.
-      // Wrapping flows the actions below instead of overflowing the row.
+      // link and the clear action can exceed 350pt together. Wrapping flows
+      // the actions below instead of overflowing the row.
       child: Wrap(
         spacing: BoutiqueSpace.md,
         runSpacing: BoutiqueSpace.sm,
         alignment: WrapAlignment.spaceBetween,
         crossAxisAlignment: WrapCrossAlignment.center,
         children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              CatalogResultCount(count: count),
-              if (brandSlug case final slug? when onOpenBrand != null) ...[
-                const SizedBox(width: BoutiqueSpace.md),
-                Flexible(
-                  child: TextButton(
-                    key: const Key('collection-open-brand'),
-                    onPressed: onOpenBrand,
-                    style: TextButton.styleFrom(
-                      minimumSize: const Size(0, BoutiqueSpace.tapTarget),
-                      padding: EdgeInsets.zero,
-                      foregroundColor: palette.goldText,
-                    ),
-                    child: Text(
-                      'Ver ${brandLabel(slug)}',
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: boutiqueText(
-                        size: 13,
-                        weight: FontWeight.w600,
-                        color: palette.goldText,
+          if (showCount || showBrand)
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (showCount) CatalogResultCount(count: count),
+                if (showCount && showBrand)
+                  const SizedBox(width: BoutiqueSpace.md),
+                if (showBrand)
+                  Flexible(
+                    child: TextButton(
+                      key: const Key('collection-open-brand'),
+                      onPressed: onOpenBrand,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+                        padding: EdgeInsets.zero,
+                        foregroundColor: palette.goldText,
+                      ),
+                      child: Text(
+                        'Ver ${brandLabel(brand)}',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: boutiqueText(
+                          size: 13,
+                          weight: FontWeight.w600,
+                          color: palette.goldText,
+                        ),
                       ),
                     ),
                   ),
-                ),
               ],
-            ],
-          ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (onClear != null)
-                TextButton(
-                  key: const Key('collection-clear-inline'),
-                  onPressed: onClear,
-                  style: TextButton.styleFrom(
-                    minimumSize: const Size(0, BoutiqueSpace.tapTarget),
-                    foregroundColor: palette.inkMuted,
-                  ),
-                  child: Text(
-                    'Limpiar ($activeCount)',
-                    style: boutiqueText(
-                      size: 13,
-                      weight: FontWeight.w600,
-                      color: palette.inkMuted,
-                    ),
-                  ),
-                ),
-              const SizedBox(width: BoutiqueSpace.sm),
-              // The chip names the control, not the current choice: the sheet
-              // is the one place that shows and changes the ordering.
-              MonettaCapsuleChip(
-                key: const Key('collection-sort-chip'),
-                label: 'Ordenar',
-                showCaret: true,
-                onTap: onFilters,
+            ),
+          if (onClear != null)
+            TextButton(
+              key: const Key('collection-clear-inline'),
+              onPressed: onClear,
+              style: TextButton.styleFrom(
+                minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+                foregroundColor: palette.inkMuted,
               ),
-            ],
-          ),
+              child: Text(
+                'Limpiar ($activeCount)',
+                style: boutiqueText(
+                  size: 13,
+                  weight: FontWeight.w600,
+                  color: palette.inkMuted,
+                ),
+              ),
+            ),
         ],
       ),
     );
@@ -785,7 +753,7 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                   children: [
                     Text(
                       'Filtrar y ordenar',
-                      style: boutiqueDisplay(20, color: palette.ink),
+                      style: boutiqueTitle(size: 20, color: palette.ink),
                     ),
                     Positioned(
                       left: BoutiqueSpace.sm,

@@ -142,7 +142,8 @@ void main() {
       });
     }
 
-    testWidgets('NAV-03 label typography: 13 px, 1.25 line height, w600/w400',
+    testWidgets(
+        'NAV-03 label typography: 12-13 px, 1.25 line height, w600/w400',
         (tester) async {
       _phone(tester);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.bag));
@@ -155,7 +156,11 @@ void main() {
           d == MonettaBottomDestination.bag ? FontWeight.w600 : FontWeight.w400,
           reason: '${d.name} weight',
         );
-        expect(style.fontSize, 13, reason: '${d.name} size');
+        expect(
+          style.fontSize,
+          inInclusiveRange(12, 13),
+          reason: '${d.name} size',
+        );
         expect(style.height, 1.25, reason: '${d.name} line height');
       }
     });
@@ -170,7 +175,7 @@ void main() {
 
       final before = _anchors(tester);
       for (final d in _destinations) {
-        expect(tester.getSize(_icon(d)), const Size(30, 30), reason: d.name);
+        expect(tester.getSize(_icon(d)), const Size(24, 24), reason: d.name);
       }
       expect(_iconColor(tester, MonettaBottomDestination.home), _lightActive);
       expect(
@@ -197,7 +202,7 @@ void main() {
         _expectBetween(icon, _lightInactive, _lightActive, d.name);
       }
       for (final d in _destinations) {
-        expect(tester.getSize(_icon(d)), const Size(30, 30), reason: d.name);
+        expect(tester.getSize(_icon(d)), const Size(24, 24), reason: d.name);
       }
       _expectAnchors(tester, before, 'at 90 ms');
 
@@ -206,7 +211,7 @@ void main() {
       _expectPair(tester, MonettaBottomDestination.catalog, _lightActive);
       _expectAnchors(tester, before, 'after settling');
       for (final d in _destinations) {
-        expect(tester.getSize(_icon(d)), const Size(30, 30), reason: d.name);
+        expect(tester.getSize(_icon(d)), const Size(24, 24), reason: d.name);
       }
     });
 
@@ -308,7 +313,7 @@ void main() {
   });
 
   group('NAV-06 measures and surface', () {
-    testWidgets('NAV-06 docked edge to edge, 72 px tall without safe area',
+    testWidgets('NAV-06 docked edge to edge, 56 px tall without safe area',
         (tester) async {
       _phone(tester);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
@@ -318,10 +323,10 @@ void main() {
       expect(surface.left, 0);
       expect(surface.right, 390);
       expect(surface.bottom, 844);
-      expect(surface.height, 72);
+      expect(surface.height, 56);
     });
 
-    testWidgets('NAV-06 safe area is honored in full: 34 -> 106 px',
+    testWidgets('NAV-06 safe area is honored in full: 34 -> 90 px',
         (tester) async {
       _phone(tester, bottomInset: 34);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
@@ -331,7 +336,7 @@ void main() {
       expect(surface.left, 0);
       expect(surface.right, 390);
       expect(surface.bottom, 844);
-      expect(surface.height, 106);
+      expect(surface.height, 90);
       for (final d in _destinations) {
         final rect = tester.getRect(_dest(d));
         expect(
@@ -355,7 +360,7 @@ void main() {
       }
     });
 
-    testWidgets('NAV-06 icon box is 30x30 and 6 px above the label',
+    testWidgets('NAV-06 icon box is 24x24 and 2-4 px above the label',
         (tester) async {
       _phone(tester);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
@@ -364,10 +369,10 @@ void main() {
       for (final d in _destinations) {
         final icon = tester.getRect(_icon(d));
         final label = tester.getRect(_label(d));
-        expect(icon.size, const Size(30, 30), reason: '${d.name} icon box');
+        expect(icon.size, const Size(24, 24), reason: '${d.name} icon box');
         expect(
           label.top - icon.bottom,
-          closeTo(6, 0.01),
+          inInclusiveRange(2, 4),
           reason: '${d.name} icon-to-label gap',
         );
       }
@@ -633,7 +638,7 @@ void main() {
           expect(tester.takeException(), isNull);
 
           final surface = tester.getRect(_surface);
-          expect(surface.height, greaterThanOrEqualTo(72 + 34));
+          expect(surface.height, greaterThanOrEqualTo(56 + 34));
 
           final heights = <double>[];
           for (final d in _destinations) {

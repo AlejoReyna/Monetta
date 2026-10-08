@@ -524,12 +524,29 @@ class CatalogStore extends ChangeNotifier {
       (quantity) => quantity + 1,
       ifAbsent: () => 1,
     );
-    await _bagStore.upsert(
-      productId: product.id,
-      variantId: variant.id,
-      quantity: _bagQuantities[variant.id]!,
-      accountId: scope,
-    );
+    try {
+      await _bagStore.upsert(
+        productId: product.id,
+        variantId: variant.id,
+        quantity: _bagQuantities[variant.id]!,
+        accountId: scope,
+      );
+    } catch (_) {
+      // Memory moves before the write, so a failed write must take back only
+      // the unit this call added; concurrent adds keep theirs. After an
+      // account switch the memory belongs to another account: leave it alone.
+      final current = _bagQuantities[variant.id];
+      if (current != null && _accountScope == (scope ?? '')) {
+        if (current > 1) {
+          _bagQuantities[variant.id] = current - 1;
+        } else {
+          _bagQuantities.remove(variant.id);
+          _bagProductByVariant.remove(variant.id);
+        }
+        notifyListeners();
+      }
+      rethrow;
+    }
     record(EventType.addToCart, productId: product.id);
   }
 

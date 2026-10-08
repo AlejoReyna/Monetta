@@ -1178,6 +1178,7 @@ class _BagRecommendations extends StatelessWidget {
                   child: ProductCard(
                     product: product,
                     density: ProductTileDensity.compact,
+                    showQuickAdd: false,
                     onQuickView: () => showProductQuickView(context, product),
                   ),
                 );

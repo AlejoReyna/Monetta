@@ -11,6 +11,8 @@ import 'package:monetta_app/features/product/product_selection.dart';
 import 'package:monetta_app/features/product/quick_view.dart';
 import 'package:monetta_app/main.dart';
 
+import '../../support/product_screen_harness.dart';
+
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
   await store.loadFromAsset();
@@ -80,9 +82,12 @@ void main() {
     expect(find.textContaining('Entrega estimada'), findsWidgets);
 
     // Purchase bar: same labels the catalog flow already honours.
-    expect(find.text('AGREGAR A LA BOLSA'), findsOneWidget);
-    expect(find.text('COMPRAR AHORA'), findsOneWidget);
-    expect(find.text('APARTAR'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
+    // The secondary actions live in the purchase section, below the fold.
+    await scrollTo(tester, find.text('Comprar ahora'));
+    expect(find.text('Comprar ahora'), findsOneWidget);
+    await scrollTo(tester, find.text('Apartar'));
+    expect(find.text('Apartar'), findsOneWidget);
   });
 
   testWidgets('descuento solo con compare_at real', (tester) async {
@@ -193,8 +198,8 @@ void main() {
     await tester.tap(find.text(unavailable.title.toUpperCase()));
     await tester.pump();
     expect(find.text('AGOTADO'), findsWidgets);
-    expect(find.text('AVÍSAME CUANDO VUELVA'), findsOneWidget);
-    expect(find.text('AGREGAR A LA BOLSA'), findsNothing);
+    expect(find.text('Avísame cuando vuelva'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsNothing);
   });
 
   testWidgets('ficha sin foto no rompe y permite comprar', (tester) async {
@@ -227,7 +232,7 @@ void main() {
     ];
     await _pumpFicha(tester, store, 'test-sin-foto');
     expect(find.text('Bolsa Test Sin Foto'), findsWidgets);
-    expect(find.text('AGREGAR A LA BOLSA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
   });
 
   testWidgets('quick-view Fig.06: ver, agregar y volver', (tester) async {
@@ -264,12 +269,12 @@ void main() {
 
     // Sheet: drag handle, close X, brand–name–price, no fake urgency.
     expect(find.byTooltip('Cerrar vista rápida'), findsOneWidget);
-    expect(find.text('AGREGAR A LA BOLSA'), findsOneWidget);
-    expect(find.text('VER PRODUCTO'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
+    expect(find.text('Ver producto'), findsOneWidget);
     expect(find.textContaining('Últimas'), findsNothing);
 
     // Same add-to-bag as the ficha: closes, then confirms with mini-cart.
-    await tester.tap(find.text('AGREGAR A LA BOLSA'));
+    await tester.tap(find.byKey(const Key('quick-view-primary')));
     await tester.pumpAndSettle();
     expect(store.bagQuantity, 1);
     expect(find.text('En tu bolsa'), findsOneWidget);
@@ -307,10 +312,11 @@ void main() {
     await tester.tap(find.text('ABRIR'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('VER PRODUCTO'));
+    await tester.tap(find.text('Ver producto'));
     await tester.pumpAndSettle();
     expect(find.byType(ProductScreen), findsOneWidget);
-    expect(find.text('COMPRAR AHORA'), findsOneWidget);
+    await scrollTo(tester, find.text('Comprar ahora'));
+    expect(find.text('Comprar ahora'), findsOneWidget);
   });
 
   testWidgets('ficha aguanta texto ampliado y modo oscuro', (tester) async {
@@ -338,7 +344,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('AGREGAR A LA BOLSA'), findsOneWidget);
+    expect(find.text('Agregar al carrito'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

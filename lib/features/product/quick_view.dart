@@ -33,12 +33,16 @@ import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../checkout/mini_cart.dart';
 import 'product_selection.dart';
+import 'purchase_dock.dart';
+
+const String _kChooseLabel = 'Elige una opción';
 
 /// Opens the quick-view for [product] without leaving the current surface.
 Future<void> showProductQuickView(
   BuildContext context,
   Product product, {
   int initialVariantIndex = 0,
+  bool requireChoice = false,
 }) {
   final store = StoreScope.of(context);
   store.record(EventType.galleryInteraction, productId: product.id);
@@ -52,6 +56,7 @@ Future<void> showProductQuickView(
       child: _QuickViewSheet(
         product: product,
         initialVariantIndex: initialVariantIndex,
+        requireChoice: requireChoice,
         parentContext: context,
       ),
     ),
@@ -63,11 +68,16 @@ class _QuickViewSheet extends StatefulWidget {
     required this.product,
     required this.parentContext,
     this.initialVariantIndex = 0,
+    this.requireChoice = false,
   });
 
   final Product product;
   final BuildContext parentContext;
   final int initialVariantIndex;
+
+  /// Open with no option chosen so the shopper picks one explicitly (the "+"
+  /// of a card with several variants).
+  final bool requireChoice;
 
   @override
   State<_QuickViewSheet> createState() => _QuickViewSheetState();
@@ -75,18 +85,26 @@ class _QuickViewSheet extends StatefulWidget {
 
 class _QuickViewSheetState extends State<_QuickViewSheet> {
   late final PageController _gallery;
-  late int _variantIndex;
+
+  /// The chosen option; null while the shopper still has to pick one.
+  int? _variantIndex;
   int _page = 0;
+  bool _adding = false;
+  String? _error;
 
   @override
   void initState() {
     super.initState();
     _gallery = PageController();
     final selectable = selectableVariants(widget.product);
-    _variantIndex = (widget.initialVariantIndex >= 0 &&
-            widget.initialVariantIndex < selectable.length)
-        ? widget.initialVariantIndex
-        : 0;
+    if (widget.requireChoice && selectable.length > 1) {
+      _variantIndex = null;
+    } else {
+      _variantIndex = (widget.initialVariantIndex >= 0 &&
+              widget.initialVariantIndex < selectable.length)
+          ? widget.initialVariantIndex
+          : 0;
+    }
   }
 
   @override
@@ -105,9 +123,28 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   }
 
   Future<void> _addToBag() async {
+    final index = _variantIndex;
+    if (index == null || _adding) return;
     final parent = widget.parentContext;
-    await addSelectionToBag(context, widget.product, _variantIndex);
+    setState(() {
+      _adding = true;
+      _error = null;
+    });
+    final result = await tryAddSelectionToBag(context, widget.product, index);
     if (!mounted) return;
+    if (result.status != BagAddStatus.added) {
+      // The sheet stays open and the choice is kept so the shopper can retry.
+      setState(() {
+        _adding = false;
+        _error = switch (result.status) {
+          BagAddStatus.soldOut => 'Esta opción está agotada.',
+          BagAddStatus.unavailable =>
+            'Esta pieza no está disponible por ahora.',
+          _ => 'No pudimos agregar la pieza. Intenta de nuevo.',
+        };
+      });
+      return;
+    }
     NotificationScope.maybeOf(context)?.recordPushOutcome('add_to_cart');
     Navigator.of(context).pop();
     // Same confirmation as the ficha — one modal at a time.
@@ -119,7 +156,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
   void _viewFullProduct() {
     final product = widget.product;
     final parent = widget.parentContext;
-    final variantIndex = _variantIndex;
+    final variantIndex = _variantIndex ?? 0;
     Navigator.of(context).pop();
     if (parent.mounted) {
       openProduct(parent, product, initialVariantIndex: variantIndex);
@@ -150,17 +187,81 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     );
   }
 
+  /// The purchase bar, pinned under the scrolling content. It paints down to
+  /// the screen edge and keeps the safe inset inside itself, once.
+  Widget _buildActionBar(BoutiquePalette palette, {required bool inStock}) {
+    final chosen = _variantIndex;
+    final String label;
+    final VoidCallback? onPressed;
+    if (chosen == null) {
+      label = _kChooseLabel;
+      onPressed = null;
+    } else if (!inStock) {
+      label = 'Avísame cuando vuelva';
+      onPressed = () => _requestRestock(widget.product);
+    } else {
+      label = _adding ? 'Agregando…' : 'Agregar al carrito';
+      onPressed = _addToBag;
+    }
+    return DecoratedBox(
+      key: const Key('quick-view-actions'),
+      decoration: BoxDecoration(
+        color: palette.canvas,
+        border: Border(top: BorderSide(color: palette.hairline, width: 0.5)),
+      ),
+      child: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(
+            BoutiqueSpace.gutter,
+            12,
+            BoutiqueSpace.gutter,
+            12,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              if (_error case final message?) ...[
+                Semantics(
+                  key: const Key('quick-view-error'),
+                  liveRegion: true,
+                  child: Text(
+                    message,
+                    style: boutiqueText(size: 13, color: palette.sale),
+                  ),
+                ),
+                const SizedBox(height: BoutiqueSpace.sm),
+              ],
+              PurchaseDockButton(
+                key: const Key('quick-view-primary'),
+                label: label,
+                pending: _adding,
+                onPressed: onPressed,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final product = widget.product;
     final store = StoreScope.of(context);
     final facets = store.facetsFor(product.id);
-    final price = selectionPrice(product, _variantIndex);
-    final compare = selectionCompareAt(product, _variantIndex);
-    final onSale = selectionOnSale(product, _variantIndex);
-    final discount = selectionDiscountPercent(product, _variantIndex);
-    final inStock = selectionInStock(product, _variantIndex);
+    final chosen = _variantIndex;
+    // Until an option is chosen the sheet shows the piece's own price and no
+    // sale or availability claim: those belong to one variant.
+    final price =
+        chosen == null ? product.price : selectionPrice(product, chosen);
+    final compare = chosen == null ? null : selectionCompareAt(product, chosen);
+    final onSale = chosen != null && selectionOnSale(product, chosen);
+    final discount =
+        chosen == null ? 0 : selectionDiscountPercent(product, chosen);
+    final inStock = chosen == null || selectionInStock(product, chosen);
     final images = product.images.isEmpty ? <String?>[null] : product.images;
 
     return DraggableScrollableSheet(
@@ -176,8 +277,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
             color: palette.canvas,
             borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
           ),
-          child: SafeArea(
-            top: false,
+          child: AnimatedPadding(
+            // Keeps the pinned bar on top of the keyboard.
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.viewInsetsOf(context).bottom,
+            ),
+            duration: reduceMotion(context) ? Duration.zero : kSnap,
             child: Column(
               children: [
                 const SizedBox(height: BoutiqueSpace.sm),
@@ -364,7 +469,10 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         shopperProductName(product.title),
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: boutiqueDisplay(20, color: palette.ink),
+                        style: boutiqueProductName(
+                          color: palette.ink,
+                          size: 22,
+                        ),
                       ),
                       const SizedBox(height: BoutiqueSpace.sm),
                       Wrap(
@@ -418,33 +526,40 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       // quantity the catalog does not carry, so it is
                       // deliberately never rendered here.
                       Text(
-                        inStock
-                            ? 'Disponible · envío 3 a 5 días'
-                            : 'Agotado · te avisamos cuando vuelva',
+                        chosen == null
+                            ? 'Elige una opción para ver la disponibilidad'
+                            : inStock
+                                ? 'Disponible · envío 3 a 5 días'
+                                : 'Agotado · te avisamos cuando vuelva',
                         style: boutiqueText(size: 12, color: palette.inkMuted),
                       ),
                       if (selectableVariants(product).isNotEmpty) ...[
                         const SizedBox(height: BoutiqueSpace.lg),
+                        if (chosen == null) ...[
+                          Text(
+                            _kChooseLabel,
+                            key: const Key('quick-view-choose-hint'),
+                            style: boutiqueText(
+                              size: 14,
+                              weight: FontWeight.w600,
+                              color: palette.ink,
+                            ),
+                          ),
+                          const SizedBox(height: BoutiqueSpace.sm),
+                        ],
                         ProductOptionSelector(
                           product: product,
-                          selectedIndex: _variantIndex,
-                          onSelect: (i) => setState(() => _variantIndex = i),
+                          selectedIndex: chosen,
+                          onSelect: (i) => setState(() {
+                            _variantIndex = i;
+                            _error = null;
+                          }),
                         ),
                       ],
                       const SizedBox(height: BoutiqueSpace.xl),
-                      if (inStock)
-                        BoutiqueButton(
-                          label: 'AGREGAR A LA BOLSA',
-                          onPressed: _addToBag,
-                        )
-                      else
-                        BoutiqueButton(
-                          label: 'AVÍSAME CUANDO VUELVA',
-                          onPressed: () => _requestRestock(product),
-                        ),
-                      const SizedBox(height: BoutiqueSpace.sm),
                       BoutiqueButton(
-                        label: 'VER PRODUCTO',
+                        key: const Key('quick-view-view-product'),
+                        label: 'Ver producto',
                         onPressed: _viewFullProduct,
                         filled: false,
                       ),
@@ -452,6 +567,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                     ],
                   ),
                 ),
+                _buildActionBar(palette, inStock: inStock),
               ],
             ),
           ),

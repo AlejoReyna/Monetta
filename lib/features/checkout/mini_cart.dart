@@ -81,12 +81,18 @@ class MiniCartSheet extends StatelessWidget {
                       child: Icon(Icons.check, size: 16, color: palette.gold),
                     ),
                     const SizedBox(width: 12),
-                    Expanded(
+                    // Both sides may wrap at large text scales instead of
+                    // overflowing the row; the count stays on the right edge.
+                    Flexible(
+                      flex: 2,
                       child: Text('En tu bolsa', style: boutiqueDisplay(22)),
                     ),
-                    Text(
-                      '$count ${count == 1 ? 'artículo' : 'artículos'}',
-                      style: boutiqueText(size: 12, color: palette.inkMuted),
+                    Expanded(
+                      child: Text(
+                        '$count ${count == 1 ? 'artículo' : 'artículos'}',
+                        textAlign: TextAlign.end,
+                        style: boutiqueText(size: 12, color: palette.inkMuted),
+                      ),
                     ),
                   ],
                 ),
