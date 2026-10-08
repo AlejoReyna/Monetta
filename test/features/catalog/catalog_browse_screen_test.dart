@@ -262,8 +262,9 @@ void main() {
   });
 
   testWidgets(
-      'the quick filter rail still offers Marca, Precio, Color, Ordenar',
-      (tester) async {
+      'FLT-01 there is no quick filter rail; Marca, Precio, Color and Ordenar '
+      'live in the filter panel', (tester) async {
+    _useTallPhone(tester);
     await _pump(
       tester,
       CatalogBrowseScreen(
@@ -274,16 +275,28 @@ void main() {
       ),
     );
 
+    // The duplicated pills are gone from the body ...
+    for (final key in [
+      'catalog-quick-brand',
+      'catalog-quick-price',
+      'catalog-quick-color',
+      'catalog-quick-sort',
+    ]) {
+      expect(find.byKey(Key(key)), findsNothing, reason: key);
+    }
+
+    // ... and every capability they offered is a section of the panel.
+    await _openFilterPanel(tester);
     for (final entry in {
-      'catalog-quick-brand': 'Marca',
-      'catalog-quick-price': 'Precio',
-      'catalog-quick-color': 'Color',
-      'catalog-quick-sort': 'Ordenar',
+      'catalog-filter-sort': 'Ordenar por',
+      'catalog-filter-brand': 'Marca',
+      'catalog-filter-price': 'Precio',
+      'catalog-filter-color': 'Color',
     }.entries) {
-      final chip = find.byKey(Key(entry.key));
-      expect(chip, findsOneWidget, reason: entry.key);
+      final section = find.byKey(Key(entry.key));
+      expect(section, findsOneWidget, reason: entry.key);
       expect(
-        find.descendant(of: chip, matching: find.text(entry.value)),
+        find.descendant(of: section, matching: find.text(entry.value)),
         findsOneWidget,
         reason: entry.key,
       );
@@ -883,7 +896,7 @@ void main() {
 
     expect(openedUri, isNull);
     expect(find.byType(ExternalProductScreen), findsOneWidget);
-    expect(find.text('DESCRIPCIÓN DEL PRODUCTO'), findsOneWidget);
+    expect(find.text('Descripción del producto'), findsOneWidget);
 
     await tester.tap(find.text('VER EN COACH'));
     await tester.pumpAndSettle();

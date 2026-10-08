@@ -308,11 +308,11 @@ void main() {
     expect(openCount, 0);
     expect(find.byType(ExternalProductScreen), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('DESCRIPCIÓN DEL PRODUCTO'),
+      find.text('Descripción del producto'),
       300,
       scrollable: find.byType(Scrollable).last,
     );
-    expect(find.text('DESCRIPCIÓN DEL PRODUCTO'), findsOneWidget);
+    expect(find.text('Descripción del producto'), findsOneWidget);
     expect(find.text('VER EN COACH'), findsOneWidget);
   });
 

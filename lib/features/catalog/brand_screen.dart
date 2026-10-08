@@ -340,7 +340,7 @@ class _BrandHeader extends StatelessWidget {
                 child: Text(
                   title,
                   textAlign: TextAlign.center,
-                  style: boutiqueDisplay(30, color: palette.ink),
+                  style: boutiqueScreenTitle(color: palette.ink),
                 ),
               ),
             ),
@@ -451,7 +451,7 @@ class _BrandStory extends StatelessWidget {
         children: [
           Text(
             'Sobre la marca',
-            style: boutiqueDisplay(22, color: palette.ink),
+            style: boutiqueSectionHeading(color: palette.ink),
           ),
           const SizedBox(height: BoutiqueSpace.md),
           Text(

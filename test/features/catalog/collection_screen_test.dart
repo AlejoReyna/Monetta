@@ -4,7 +4,6 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
-import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/main.dart';
 
@@ -15,8 +14,9 @@ Future<CatalogStore> _loadedStore() async {
 }
 
 void main() {
-  testWidgets('collection hides count metadata and filters reduce the grid',
-      (tester) async {
+  testWidgets(
+      'FLT-02c collection hides count metadata and the panel filters the grid '
+      'by silhouette', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -47,26 +47,32 @@ void main() {
         .map((card) => card.product.id)
         .toList();
 
-    final silhouettePills = find.byWidgetPredicate(
-      (widget) =>
-          widget is MonettaCapsuleChip &&
-          widget.key is ValueKey<String> &&
-          (widget.key! as ValueKey<String>)
-              .value
-              .startsWith('collection-silhouette-'),
-    );
-    expect(silhouettePills, findsWidgets);
-
     final unfiltered = visibleIds();
     expect(unfiltered, isNotEmpty);
 
-    // A silhouette chip must change the products on screen, not just its own
-    // appearance: the grid has to become exactly that silhouette's bags.
-    final firstPill = silhouettePills.first;
-    final slug =
-        (tester.widget<MonettaCapsuleChip>(firstPill).key! as ValueKey<String>)
-            .value
-            .replaceFirst('collection-silhouette-', '');
+    // The silhouette is chosen in the panel's "Tipo de bolsa" section: the
+    // collection page itself carries no silhouette pills.
+    Future<void> openTypeSection() async {
+      await tester.tap(find.byKey(const Key('collection-filter-button')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('collection-filter-type')));
+      await tester.pumpAndSettle();
+    }
+
+    final silhouetteRows = find.byWidgetPredicate(
+      (widget) =>
+          widget.key is ValueKey<String> &&
+          (widget.key! as ValueKey<String>)
+              .value
+              .startsWith('collection-filter-silhouette-'),
+    );
+
+    await openTypeSection();
+    expect(silhouetteRows, findsWidgets);
+    final firstRow = silhouetteRows.first;
+    final slug = (tester.widget(firstRow).key! as ValueKey<String>)
+        .value
+        .replaceFirst('collection-filter-silhouette-', '');
     final expected = store.products
         .where(
           (product) =>
@@ -77,23 +83,39 @@ void main() {
         .toSet();
     expect(expected, isNotEmpty);
 
-    expect(tester.widget<MonettaCapsuleChip>(firstPill).selected, isFalse);
-    await tester.tap(firstPill);
+    // Picking it in the panel changes nothing until the shopper applies.
+    await tester.tap(firstRow);
     await tester.pumpAndSettle();
-    expect(tester.widget<MonettaCapsuleChip>(firstPill).selected, isTrue);
-    // The grid is lazy, so assert containment rather than a full set match.
+    expect(visibleIds(), unfiltered);
+    await tester.tap(find.byKey(const Key('collection-filter-apply')));
+    await tester.pumpAndSettle();
+
+    // The grid has to become exactly that silhouette's bags. It is lazy, so
+    // assert containment rather than a full set match.
     expect(visibleIds(), isNotEmpty);
     expect(visibleIds().every(expected.contains), isTrue);
     expect(
       unfiltered.where((id) => !expected.contains(id)),
       isNotEmpty,
-      reason: 'the chip must actually remove pieces, not only highlight',
+      reason: 'the silhouette must actually remove pieces',
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('collection-filter-count')),
+        matching: find.text('1'),
+      ),
+      findsOneWidget,
     );
 
-    // Tapping it again returns to the collection, not to the whole catalog.
-    await tester.tap(firstPill);
+    // Choosing the same silhouette again returns to the collection, not to
+    // the whole catalog.
+    await openTypeSection();
+    await tester.tap(silhouetteRows.first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('collection-filter-apply')));
     await tester.pumpAndSettle();
     expect(visibleIds().toSet(), unfiltered.toSet());
+    expect(find.byKey(const Key('collection-filter-count')), findsNothing);
     expect(
       visibleIds().any((id) => !expected.contains(id)),
       isTrue,

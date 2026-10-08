@@ -267,6 +267,7 @@ class MonettaProductTile extends StatelessWidget {
     this.wishlisted = false,
     this.onToggleWishlist,
     this.onQuickView,
+    this.quickAction,
     this.imageOverlay,
     this.eyebrow,
     super.key,
@@ -288,6 +289,11 @@ class MonettaProductTile extends StatelessWidget {
   /// visible "Vista rápida" action appears on the photo for accessibility;
   /// nothing changes when it is null.
   final VoidCallback? onQuickView;
+
+  /// Purchase control pinned to the lower right corner of the photograph (the
+  /// "+"). It takes the slot of the "Vista rápida" eye: a tile never draws
+  /// both. A long press still opens the quick view through [onQuickView].
+  final Widget? quickAction;
 
   /// Extra marker pinned to the top-left of the photograph, e.g. the
   /// external-source badge. Drawn under the discount badge's slot.
@@ -317,6 +323,7 @@ class MonettaProductTile extends StatelessWidget {
               wishlisted: wishlisted,
               onToggleWishlist: onToggleWishlist,
               onQuickView: onQuickView,
+              quickAction: quickAction,
               overlay: imageOverlay,
             ),
           ),
@@ -455,6 +462,7 @@ class _TileImage extends StatefulWidget {
     required this.onToggleWishlist,
     required this.overlay,
     this.onQuickView,
+    this.quickAction,
   });
 
   final ProductTileData data;
@@ -462,6 +470,7 @@ class _TileImage extends StatefulWidget {
   final bool wishlisted;
   final VoidCallback? onToggleWishlist;
   final VoidCallback? onQuickView;
+  final Widget? quickAction;
   final Widget? overlay;
 
   @override
@@ -567,7 +576,13 @@ class _TileImageState extends State<_TileImage> {
               onPressed: toggle,
             ),
           ),
-        if (widget.onQuickView case final quickView?)
+        if (widget.quickAction case final action?)
+          Positioned(
+            bottom: BoutiqueSpace.xs,
+            right: BoutiqueSpace.xs,
+            child: action,
+          )
+        else if (widget.onQuickView case final quickView?)
           Positioned(
             bottom: BoutiqueSpace.xs,
             right: BoutiqueSpace.xs,

@@ -11,7 +11,11 @@ import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/catalog/search_history.dart';
 import 'package:monetta_app/features/catalog/search_history_persistence.dart';
 import 'package:monetta_app/features/checkout/order_confirmation_screen.dart';
+import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/main.dart';
+
+import '../support/product_screen_harness.dart';
+import '../support/quick_add_harness.dart';
 
 Widget _app(Widget child) {
   return MaterialApp(theme: buildTheme(), home: Scaffold(body: child));
@@ -98,40 +102,74 @@ void main() {
     );
   });
 
+  // FICHA-T3: the visible corner action of a card is the "+" for a piece that
+  // Monetta sells (it adds a single-variant piece straight away and never opens
+  // the quick view for it) and stays the eye ("Vista rápida") for a sold-out
+  // piece. Same intent as before: a visible, accessible, 48 px corner action.
   testWidgets('P2: tile exposes a visible, accessible quick-view action',
       (tester) async {
+    mockPathProvider();
     final db = openTestDatabase();
     addTearDown(db.close);
     final store = CatalogStore(database: db);
     addTearDown(store.dispose);
     await store.loadFromAsset();
-    final product = store.products.first;
+    final soldOut = soldOutProduct();
+    addProducts(store, [soldOut]);
+    final product = singleVariantAssetProduct(store);
 
-    var quickViews = 0;
-    await tester.pumpWidget(
-      MaterialApp(
-        theme: buildTheme(),
-        home: Scaffold(
-          body: SizedBox(
-            width: 200,
-            child: StoreScope(
-              notifier: store,
-              child: ProductCard(
-                product: product,
-                onQuickView: () => quickViews++,
+    Future<void> mount(Product piece, VoidCallback onQuickView) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(),
+          home: Scaffold(
+            body: SizedBox(
+              width: 200,
+              child: StoreScope(
+                notifier: store,
+                child: ProductCard(
+                  product: piece,
+                  onQuickView: onQuickView,
+                ),
               ),
             ),
           ),
         ),
-      ),
-    );
-    await tester.pump();
+      );
+      await tester.pump();
+    }
 
-    final button = find.byTooltip('Vista rápida');
-    expect(button, findsOneWidget);
-    await tester.tap(button);
-    await tester.pumpAndSettle();
-    expect(quickViews, 1);
+    await withSemantics(tester, () async {
+      // (a) A buyable piece: the "+" is the corner action, 48x48 and named.
+      var quickViews = 0;
+      await mount(product, () => quickViews++);
+
+      final plus = find.byKey(quickAddKey(product.id));
+      expect(plus, findsOneWidget);
+      expect(tester.getSize(plus).width, greaterThanOrEqualTo(48 - 0.01));
+      expect(tester.getSize(plus).height, greaterThanOrEqualTo(48 - 0.01));
+      expect(
+        tester.getSemantics(plus).label,
+        addLabelFor(store, product),
+      );
+      expect(find.byTooltip('Vista rápida'), findsNothing);
+
+      await tester.tap(plus);
+      await tester.pumpAndSettle();
+      expect(quickViews, 0, reason: 'one variant: it adds, no quick view');
+      expect(store.bagQuantity, 1);
+
+      // (b) A sold-out piece keeps the visible "Vista rápida" action.
+      await dismissMiniCart(tester);
+      await mount(soldOut, () => quickViews++);
+
+      expect(find.byKey(quickAddKey(soldOut.id)), findsNothing);
+      final button = find.byTooltip('Vista rápida');
+      expect(button, findsOneWidget);
+      await tester.tap(button);
+      await tester.pumpAndSettle();
+      expect(quickViews, 1);
+    });
   });
 
   test('P2: search history survives a restart per scope', () async {

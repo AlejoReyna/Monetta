@@ -12,7 +12,10 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
+import '../boutique/boutique_tokens.dart';
 import '../catalog/extracted_badge.dart';
+import 'product_header.dart';
+import 'purchase_dock.dart';
 
 typedef ExternalLinkOpener = Future<bool> Function(Uri uri);
 
@@ -99,12 +102,13 @@ class _ExternalProductScreenState extends State<ExternalProductScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const MonettaWordmark.appBar(),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0.5),
-          child: Divider(height: 0.5),
+      appBar: buildProductDetailAppBar(
+        context,
+        title: externalProductName(
+          title: widget.item.title,
+          category: widget.item.category,
         ),
+        onBack: () => Navigator.of(context).maybePop(),
       ),
       body: ListView(
         padding: EdgeInsets.zero,
@@ -138,7 +142,9 @@ class _ExternalProductScreenState extends State<ExternalProductScreen> {
                     title: widget.item.title,
                     category: widget.item.category,
                   ),
-                  style: display(26),
+                  style: boutiqueProductName(
+                    color: context.monettaColors.contentPrimary,
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
@@ -191,10 +197,12 @@ class _ExternalProductScreenState extends State<ExternalProductScreen> {
           const SizedBox(height: 32),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.fromLTRB(20, 14, 20, 14),
+      bottomNavigationBar: PurchaseDock(
         child: FilledButton(
           onPressed: _openMerchant,
+          style: FilledButton.styleFrom(
+            minimumSize: const Size.fromHeight(kPurchaseDockButtonHeight),
+          ),
           child: Text('Ver en ${widget.item.merchant}'.toUpperCase()),
         ),
       ),
@@ -292,8 +300,12 @@ class _ProductInformation extends StatelessWidget {
       children: [
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 14),
-          child:
-              Text('Descripción del producto'.toUpperCase(), style: eyebrow()),
+          child: Text(
+            'Descripción del producto',
+            style: boutiqueSectionHeading(
+              color: context.monettaColors.contentPrimary,
+            ),
+          ),
         ),
         Padding(
           padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),

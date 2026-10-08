@@ -215,40 +215,95 @@ bool hasReliableColorOptions(Product product) {
 // Shared purchase actions
 // ---------------------------------------------------------------------------
 
-/// Adds the current selection to the bag. Returns the added variant id, or
-/// null when there is nothing purchasable (empty variants).
-Future<String?> addSelectionToBag(
+/// Outcome of [tryAddSelectionToBag].
+enum BagAddStatus {
+  /// One unit of the chosen variant is now in the bag.
+  added,
+
+  /// The chosen variant exists but is sold out; the bag was not touched.
+  soldOut,
+
+  /// There is no variant to buy; the bag was not touched.
+  unavailable,
+
+  /// The store threw while adding; [BagAddResult.error] carries the cause.
+  failed,
+}
+
+/// Typed result of [tryAddSelectionToBag] so every purchase surface reports
+/// the same outcomes instead of guessing from a nullable id.
+class BagAddResult {
+  const BagAddResult(this.status, {this.variantId, this.error});
+
+  final BagAddStatus status;
+
+  /// The variant that was added; only set when [status] is
+  /// [BagAddStatus.added].
+  final String? variantId;
+
+  /// The failure that stopped the add; only set when [status] is
+  /// [BagAddStatus.failed].
+  final Object? error;
+}
+
+/// The single path that puts the current selection into the bag.
+///
+/// Guards stock here because `CatalogStore.addToBag` resolves the exact
+/// variant even when it is sold out. The variant is never substituted: the
+/// one at [variantIndex] is added or nothing is.
+Future<BagAddResult> tryAddSelectionToBag(
   BuildContext context,
   Product product,
   int variantIndex,
 ) async {
   final store = StoreScope.of(context);
   final variant = selectedVariant(product, variantIndex);
-  await store.addToBag(product, variantId: variant?.id);
-  return variant?.id;
+  if (variant == null) {
+    return const BagAddResult(BagAddStatus.unavailable);
+  }
+  if (!variant.available) {
+    return const BagAddResult(BagAddStatus.soldOut);
+  }
+  try {
+    await store.addToBag(product, variantId: variant.id);
+  } catch (error) {
+    return BagAddResult(BagAddStatus.failed, error: error);
+  }
+  return BagAddResult(BagAddStatus.added, variantId: variant.id);
 }
 
-/// Ficha primary: add + confirm with the shared mini-cart sheet.
+/// Adds the current selection to the bag. Returns the added variant id, or
+/// null when nothing was added (no variant, sold out, or a failed write).
+Future<String?> addSelectionToBag(
+  BuildContext context,
+  Product product,
+  int variantIndex,
+) async {
+  final result = await tryAddSelectionToBag(context, product, variantIndex);
+  return result.status == BagAddStatus.added ? result.variantId : null;
+}
+
+/// Primary add: add + confirm with the shared mini-cart sheet. Nothing is
+/// confirmed unless the unit really went into the bag.
 Future<void> addToBagAndShowMiniCart(
   BuildContext context,
   Product product,
   int variantIndex,
 ) async {
-  await addSelectionToBag(context, product, variantIndex);
-  if (!context.mounted) return;
+  final result = await tryAddSelectionToBag(context, product, variantIndex);
+  if (result.status != BagAddStatus.added || !context.mounted) return;
   // Keeps the existing confirmation surface — a sheet, never a toast.
   await showMiniCart(context);
 }
 
-/// Ficha secondary ("Comprar ahora"): add + open the bag.
+/// "Comprar ahora": add + open the bag. The bag opens only after a real add.
 Future<void> buyNowOpenBag(
   BuildContext context,
   Product product,
   int variantIndex,
 ) async {
-  await addSelectionToBag(context, product, variantIndex);
-  if (!context.mounted) return;
-  // ignore: use_build_context_synchronously
+  final result = await tryAddSelectionToBag(context, product, variantIndex);
+  if (result.status != BagAddStatus.added || !context.mounted) return;
   await openBag(context);
 }
 
@@ -280,7 +335,10 @@ class ProductOptionSelector extends StatelessWidget {
   });
 
   final Product product;
-  final int selectedIndex;
+
+  /// The chosen option. Null means none is chosen yet (the quick view opened
+  /// to make the shopper pick); an out-of-range index falls back to the first.
+  final int? selectedIndex;
   final ValueChanged<int> onSelect;
 
   @override
@@ -288,12 +346,16 @@ class ProductOptionSelector extends StatelessWidget {
     final palette = context.boutique;
     final selectable = selectableVariants(product);
     if (selectable.isEmpty) return const SizedBox.shrink();
-    final safeIndex = (selectedIndex < 0 || selectedIndex >= selectable.length)
-        ? 0
-        : selectedIndex;
+    final chosen = selectedIndex;
+    final int? safeIndex = chosen == null
+        ? null
+        : (chosen < 0 || chosen >= selectable.length)
+            ? 0
+            : chosen;
 
     if (hasReliableColorOptions(product)) {
-      final selectedTitle = selectable[safeIndex].title;
+      final selectedTitle =
+          safeIndex == null ? null : selectable[safeIndex].title;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -302,11 +364,13 @@ class ProductOptionSelector extends StatelessWidget {
             style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
           ),
           const SizedBox(height: BoutiqueSpace.sm),
-          Text(
-            selectedTitle,
-            style: boutiqueText(size: 13, color: palette.ink),
-          ),
-          const SizedBox(height: BoutiqueSpace.sm),
+          if (selectedTitle != null) ...[
+            Text(
+              selectedTitle,
+              style: boutiqueText(size: 13, color: palette.ink),
+            ),
+            const SizedBox(height: BoutiqueSpace.sm),
+          ],
           Wrap(
             spacing: BoutiqueSpace.sm,
             runSpacing: BoutiqueSpace.sm,

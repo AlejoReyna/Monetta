@@ -1,7 +1,8 @@
 /// Full-catalog browsing for Monetta's bags and accessories.
 ///
 /// Photography owns the screen. Filtering is handled by a single expandable
-/// sheet with category and bag-specific facets, and a quick-filter rail.
+/// sheet with category and bag-specific facets; the header's filter button is
+/// the only entry to it.
 library;
 
 import 'dart:async';
@@ -12,6 +13,7 @@ import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/catalog_item.dart';
+import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/external_facets.dart';
 import '../account/account_screen.dart';
@@ -23,6 +25,7 @@ import '../product/product_screen.dart';
 import 'catalog_controls.dart';
 import 'extracted_badge.dart';
 import 'product_tile.dart';
+import 'quick_add_button.dart';
 import 'search_screen.dart';
 
 enum _CatalogSort { featured, newest, priceAsc, priceDesc }
@@ -244,7 +247,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     });
   }
 
-  Future<void> _openFilters([_FilterSection? section]) async {
+  Future<void> _openFilters() async {
     FocusManager.instance.primaryFocus?.unfocus();
     final result = await showModalBottomSheet<_CatalogFilters>(
       context: context,
@@ -254,7 +257,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       builder: (sheetContext) => _CatalogFilterSheet(
         items: widget.items,
         initial: _filters,
-        initialSection: section ?? _FilterSection.sort,
         visibleCount: (draft) => _visibleItems(draft).length,
       ),
     );
@@ -295,7 +297,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
               Text(
                 'Productos',
                 textAlign: TextAlign.center,
-                style: boutiqueDisplay(24, color: context.boutique.ink),
+                style: boutiqueScreenTitle(color: context.boutique.ink),
               ),
               const SizedBox(height: 2),
               // Counted from the very list the grid renders below.
@@ -358,13 +360,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              SliverToBoxAdapter(
-                child: _QuickFilterRail(
-                  items: widget.items,
-                  filters: _filters,
-                  onOpen: _openFilters,
-                ),
-              ),
               if (visibleItems.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
@@ -375,7 +370,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.only(top: BoutiqueSpace.lg),
+                  padding: const EdgeInsets.only(top: BoutiqueSpace.md),
                   // Photos run to the screen edges, so there is no horizontal
                   // or bottom padding (each tile carries its own trailing
                   // air). The safe area still applies sideways, for a notch
@@ -523,14 +518,11 @@ class _CatalogFilterSheet extends StatefulWidget {
     required this.items,
     required this.initial,
     required this.visibleCount,
-    this.initialSection = _FilterSection.sort,
   });
 
   final List<CatalogItem> items;
   final _CatalogFilters initial;
 
-  /// The section a quick-filter chip asked for, already open.
-  final _FilterSection initialSection;
   final int Function(_CatalogFilters filters) visibleCount;
 
   @override
@@ -546,7 +538,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   late Set<String> _colors;
   late bool _inStockOnly;
 
-  late final Set<_FilterSection> _expanded = {widget.initialSection};
+  late final Set<_FilterSection> _expanded = {_FilterSection.sort};
 
   @override
   void initState() {
@@ -661,7 +653,8 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                   children: [
                     Text(
                       'Filtrar y ordenar',
-                      style: boutiqueDisplay(20, weight: FontWeight.w600),
+                      style:
+                          boutiqueTitle(size: 20, color: context.boutique.ink),
                     ),
                     Positioned(
                       right: 12,
@@ -1055,7 +1048,7 @@ class _EmptyCatalogState extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             'Sin resultados',
-            style: boutiqueDisplay(24, weight: FontWeight.w600),
+            style: boutiqueScreenTitle(color: context.boutique.ink),
           ),
           const SizedBox(height: 8),
           Text(
@@ -1125,86 +1118,44 @@ class _BrowseTile extends StatelessWidget {
     );
   }
 
+  /// The Monetta product behind this tile when it can be bought from here.
+  ///
+  /// Reads the store without subscribing to it and degrades to null when the
+  /// screen is mounted without a [StoreScope]; external, unknown and sold-out
+  /// pieces have nothing to add.
+  Product? _buyableProduct(BuildContext context) {
+    if (item.isExternal) return null;
+    final productId = item.shopifyProductId;
+    if (productId == null) return null;
+    final store = context.getInheritedWidgetOfExactType<StoreScope>()?.notifier;
+    if (store == null) return null;
+    for (final product in store.products) {
+      if (product.id == productId) return product.isInStock ? product : null;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     // The same presentation the product grids use. A [CatalogItem] is not
     // turned into a [Product] — currency, origin and purchase destination
     // would be lost — only its view data is adapted.
+    final data = ProductTileData.fromCatalogItem(item);
+    final product = _buyableProduct(context);
     return MonettaProductTile(
-      data: ProductTileData.fromCatalogItem(item),
+      data: data,
       onTap: () => _tap(context),
       variant: ProductTileVariant.edgeToEdge,
+      quickAction: product == null
+          ? null
+          : ProductQuickAddButton(
+              key: Key('quick-add-${product.id}'),
+              product: product,
+              productName: data.title,
+            ),
       // No favourite here: an external listing has no Monetta product id to
       // save, and this screen renders without a wishlist-bearing store.
       imageOverlay: item.isExternal ? const ExtractedBadge() : null,
-    );
-  }
-}
-
-/// Fig. 05's quick filters. Each chip opens the sheet on its own section, so
-/// there is exactly one place where a filter is applied or cancelled.
-///
-/// A chip only appears when the visible catalog actually offers that facet,
-/// and ordering is a chip but never counts as an active filter — the same
-/// convention the badge on the filter icon uses.
-class _QuickFilterRail extends StatelessWidget {
-  const _QuickFilterRail({
-    required this.items,
-    required this.filters,
-    required this.onOpen,
-  });
-
-  final List<CatalogItem> items;
-  final _CatalogFilters filters;
-  final ValueChanged<_FilterSection> onOpen;
-
-  bool _hasBrands() => items.any((item) => _brandFor(item).isNotEmpty);
-
-  bool _hasPrices() => items.any((item) => _priceBandFor(item) != null);
-
-  bool _hasColors() => items.any((item) => _colorsFor(item).isNotEmpty);
-
-  @override
-  Widget build(BuildContext context) {
-    final chips = <Widget>[
-      if (_hasBrands())
-        MonettaCapsuleChip(
-          key: const Key('catalog-quick-brand'),
-          label: 'Marca',
-          showCaret: true,
-          selected: filters.brands.isNotEmpty,
-          badgeCount: filters.brands.length,
-          onTap: () => onOpen(_FilterSection.brand),
-        ),
-      if (_hasPrices())
-        MonettaCapsuleChip(
-          key: const Key('catalog-quick-price'),
-          label: 'Precio',
-          showCaret: true,
-          selected: filters.priceBands.isNotEmpty,
-          badgeCount: filters.priceBands.length,
-          onTap: () => onOpen(_FilterSection.price),
-        ),
-      if (_hasColors())
-        MonettaCapsuleChip(
-          key: const Key('catalog-quick-color'),
-          label: 'Color',
-          showCaret: true,
-          selected: filters.colors.isNotEmpty,
-          badgeCount: filters.colors.length,
-          onTap: () => onOpen(_FilterSection.color),
-        ),
-      MonettaCapsuleChip(
-        key: const Key('catalog-quick-sort'),
-        label: 'Ordenar',
-        showCaret: true,
-        onTap: () => onOpen(_FilterSection.sort),
-      ),
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.only(top: BoutiqueSpace.sm),
-      child: MonettaChipRail(children: chips),
     );
   }
 }

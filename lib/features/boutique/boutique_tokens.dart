@@ -112,6 +112,35 @@ TextStyle boutiqueTitle({
       color: color,
     );
 
+/// Sizes of the product-related title roles below.
+const double kBoutiqueScreenTitleSize = 24;
+const double kBoutiqueHeaderNameSize = 19;
+const double kBoutiqueProductNameSize = 24;
+const double kBoutiqueSectionHeadingSize = 17;
+
+/// Title of a product-related screen or banner (Productos, a collection, a
+/// brand). Same face as the card names.
+TextStyle boutiqueScreenTitle({
+  Color? color,
+  double size = kBoutiqueScreenTitleSize,
+}) =>
+    boutiqueTitle(size: size, color: color);
+
+/// A product name set in a bar, next to the back and bag actions.
+TextStyle boutiqueHeaderName({Color? color}) =>
+    boutiqueTitle(size: kBoutiqueHeaderNameSize, color: color);
+
+/// The main name of a product on its page or quick view.
+TextStyle boutiqueProductName({
+  Color? color,
+  double size = kBoutiqueProductNameSize,
+}) =>
+    boutiqueTitle(size: size, color: color);
+
+/// Heading of a section inside a product page or a catalog screen.
+TextStyle boutiqueSectionHeading({Color? color}) =>
+    boutiqueTitle(size: kBoutiqueSectionHeadingSize, color: color);
+
 /// Running copy, labels, prices. Floor of 12 for secondary, 14 for body.
 TextStyle boutiqueText({
   double size = 14,
