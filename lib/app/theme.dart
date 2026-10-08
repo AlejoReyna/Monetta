@@ -127,10 +127,10 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     warningSurface: Color(0xFFF7F0E6),
     successSurface: Color(0xFFEAF4EC),
     scrim: Color(0x52000000),
-    navigationSurface: Color(0xFFFFFFFF),
+    navigationSurface: Color(0xFFF5F5F5),
     navigationSelection: Color(0x24AA7D44),
-    navigationForeground: Color(0xFF292B2D),
-    navigationForegroundMuted: Color(0xFF747474),
+    navigationForeground: Color(0xFF222222),
+    navigationForegroundMuted: Color(0xFF6E6E6E),
   );
 
   static const dark = MonettaColors(
@@ -735,7 +735,10 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
       space: 0.5,
     ),
     appBarTheme: AppBarTheme(
-      backgroundColor: colors.surface,
+      // Light app bars share the bottom bar's grey; dark keeps its surface.
+      backgroundColor: brightness == Brightness.dark
+          ? colors.surface
+          : colors.navigationSurface,
       surfaceTintColor: Colors.transparent,
       foregroundColor: colors.contentPrimary,
       elevation: 0,

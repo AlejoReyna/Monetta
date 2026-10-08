@@ -613,7 +613,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return AppBar(
       automaticallyImplyLeading: false,
       toolbarHeight: 60,
-      backgroundColor: palette.canvas,
+      backgroundColor: palette.bar,
       surfaceTintColor: Colors.transparent,
       foregroundColor: palette.ink,
       iconTheme: IconThemeData(color: palette.ink, size: 22),

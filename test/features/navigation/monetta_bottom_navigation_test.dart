@@ -20,8 +20,8 @@ const _labels = {
   MonettaBottomDestination.account: 'Cuenta',
 };
 
-const _lightActive = Color(0xFF292B2D);
-const _lightInactive = Color(0xFF747474);
+const _lightActive = Color(0xFF222222);
+const _lightInactive = Color(0xFF6E6E6E);
 const _darkActive = Color(0xFFF5F2EC);
 const _darkInactive = Color(0xFF8E8A85);
 
@@ -375,7 +375,7 @@ void main() {
 
     for (final dark in [false, true]) {
       testWidgets(
-          'NAV-06 flat surface: white/dark, no shadow, hairline top border '
+          'NAV-06 flat surface: light grey/dark, no shadow, hairline top border '
           '(${dark ? 'dark' : 'light'})', (tester) async {
         _phone(tester);
         await tester.pumpWidget(
@@ -389,7 +389,7 @@ void main() {
         final decoration = _surfaceDecoration(tester);
         expect(
           decoration.color,
-          dark ? MonettaColors.dark.surface : const Color(0xFFFFFFFF),
+          dark ? MonettaColors.dark.surface : const Color(0xFFF5F5F5),
         );
         expect(decoration.boxShadow ?? const <BoxShadow>[], isEmpty);
         final border = decoration.border;

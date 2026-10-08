@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
 
 /// Capsule control from the reference's component strip.
@@ -150,6 +151,9 @@ class MonettaChipRail extends StatelessWidget {
 }
 
 /// "124 piezas" — always computed from the very list being rendered.
+///
+/// An owner aid, not shopper copy: it renders only for a signed-in account
+/// that may open the admin panel, and collapses to nothing for everyone else.
 class CatalogResultCount extends StatelessWidget {
   const CatalogResultCount({
     required this.count,
@@ -164,6 +168,7 @@ class CatalogResultCount extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    if (!_ownerIsViewing(context)) return const SizedBox.shrink();
     return Text(
       '$count ${count == 1 ? noun : pluralNoun}',
       style: boutiqueText(
@@ -171,6 +176,17 @@ class CatalogResultCount extends StatelessWidget {
         color: context.boutique.inkMuted,
         height: 1.2,
       ),
+    );
+  }
+
+  static bool _ownerIsViewing(BuildContext context) {
+    final account = AccountScope.maybeOf(context);
+    final admin = AdminScope.maybeOf(context);
+    if (account == null || admin == null) return false;
+    return admin.canAccess(
+      signedIn: account.isSignedIn,
+      email: account.account?.email,
+      authProvider: account.account?.authProvider,
     );
   }
 }
