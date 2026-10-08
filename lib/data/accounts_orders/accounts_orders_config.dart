@@ -1,5 +1,5 @@
-/// Build-time switch for the `services/accounts_orders` client — same shape
-/// as `app/external_catalog_config.dart`'s `ExternalCatalogConfig`.
+/// Build-time switch for the `services/accounts_orders` client, read from
+/// `--dart-define` values.
 ///
 /// The same base URL powers first-party Monetta account registration and
 /// order history. Off only when no service URL was supplied.

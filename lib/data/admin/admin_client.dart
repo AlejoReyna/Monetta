@@ -507,7 +507,7 @@ class HttpAdminClient
   @override
   Future<void> syncAll() async {
     AdminClientException? firstFailure;
-    // external-status retired with catalog_monitor (WP-02 / F22).
+    // external-status was retired (WP-02 / F22).
     for (final channel in const [
       'shopify-products',
       'storefront-content',

@@ -68,7 +68,7 @@ class StorefrontConfig {
   /// ```
   ///
   /// Empty strings mean "not configured" — the same pattern as
-  /// `ExternalCatalogConfig` and `CustomerAccountConfig`.
+  /// `CustomerAccountConfig`.
   factory StorefrontConfig.fromEnvironment() {
     const shopDomain = String.fromEnvironment('SHOPIFY_STORE_DOMAIN');
     const accessToken =

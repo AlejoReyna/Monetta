@@ -16,62 +16,22 @@ import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
-import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
 import 'package:monetta_app/main.dart';
 
+import '../../support/catalog_browse_fixtures.dart';
+
 const _longName =
     'Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody';
-const _price = Money(amount: 11624, currency: Currency.mxn);
+const double _price = 11624;
 const _priceLabel = r'$11,624 MXN';
 
-CatalogItem _monetta(
-  int i, {
-  String? title,
-  Money price = const Money(amount: 1999, currency: Currency.mxn),
-}) =>
-    CatalogItem(
-      sourceScopedId: 'monetta:$i',
-      source: CatalogSourceType.monettaShopify,
-      merchant: 'Monetta',
-      title: title ?? 'Monetta Item $i',
-      brand: 'Guess',
-      category: null,
-      imageUrl: null,
-      price: price,
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://monetta.mx/products/item-$i',
-      marketRestriction: MarketRestriction.mexico,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.monettaCheckout,
-      shopifyProductId: '$i',
-      vertical: CatalogVertical.general,
-    );
+BrowseEntry _monetta(int i, {String? title, double price = 1999}) =>
+    browseEntry(i, title: title, price: price);
 
-CatalogItem _external(int i) => CatalogItem(
-      sourceScopedId: 'coach_us:$i',
-      source: CatalogSourceType.coachUs,
-      merchant: 'Coach',
-      title: 'External Item $i',
-      brand: 'Coach',
-      category: 'Handbags',
-      imageUrl: null,
-      price: const Money(amount: 300, currency: Currency.usd),
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://www.coach.com/products/item-$i/C$i.html',
-      marketRestriction: MarketRestriction.unitedStates,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.externalResearch,
-    );
-
-List<CatalogItem> _items(int count, {String? title, Money? price}) => [
+List<BrowseEntry> _items(int count, {String? title, double? price}) => [
       for (var i = 1; i <= count; i++)
-        _monetta(
-          i,
-          title: title,
-          price: price ?? const Money(amount: 1999, currency: Currency.mxn),
-        ),
+        _monetta(i, title: title, price: price ?? 1999),
     ];
 
 /// A text scaler that is deliberately not a single multiplier: small type
@@ -170,7 +130,7 @@ Widget _asOwner(Widget app) {
 
 Future<void> _pump(
   WidgetTester tester,
-  List<CatalogItem> items, {
+  List<BrowseEntry> items, {
   TextScaler? textScaler,
   bool pushed = false,
   bool owner = false,
@@ -184,16 +144,15 @@ Future<void> _pump(
               data: MediaQuery.of(context).copyWith(textScaler: textScaler),
               child: child!,
             ),
-    home: pushed
-        ? const Scaffold(body: SizedBox.shrink())
-        : CatalogBrowseScreen(items: items),
+    home:
+        pushed ? const Scaffold(body: SizedBox.shrink()) : browseScreen(items),
   );
   await tester.pumpWidget(owner ? _asOwner(app) : app);
   if (pushed) {
     unawaited(
       navigator.currentState!.push(
         MaterialPageRoute<void>(
-          builder: (_) => CatalogBrowseScreen(items: items),
+          builder: (_) => browseScreen(items),
         ),
       ),
     );
@@ -549,7 +508,10 @@ void main() {
       '(holds today and after)',
       (tester) async {
         _setView(tester, const Size(800, 1600), dpr: 1);
-        await _pump(tester, [_monetta(1), _external(1)]);
+        await _pump(tester, [
+          _monetta(1),
+          browseEntry(2, title: 'Bolsa de mano 2', category: 'bolsa'),
+        ]);
 
         final size = tester.getSize(button);
         expect(size.width, greaterThanOrEqualTo(48));

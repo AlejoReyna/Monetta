@@ -3,11 +3,11 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
-import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
 import 'package:monetta_app/main.dart';
+
+import '../../support/catalog_browse_fixtures.dart';
 
 // RESP-01: the catalog, the collections and the bare bar mount without a
 // layout error at every phone width and text scale of the matrix, with a
@@ -19,22 +19,7 @@ const _scales = [1.0, 2.0];
 const _height = 844.0;
 const _inset = 34.0;
 
-CatalogItem _item(int i) => CatalogItem(
-      sourceScopedId: 'monetta:$i',
-      source: CatalogSourceType.monettaShopify,
-      merchant: 'Monetta',
-      title: 'Monetta Item $i',
-      brand: 'Guess',
-      category: null,
-      imageUrl: null,
-      price: Money(amount: 1000.0 + i, currency: Currency.mxn),
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://monetta.mx/products/item-$i',
-      marketRestriction: MarketRestriction.mexico,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.monettaCheckout,
-      shopifyProductId: '$i',
-    );
+BrowseEntry _item(int i) => browseEntry(i, price: 1000.0 + i);
 
 void _view(WidgetTester tester, double width) {
   addTearDown(tester.view.reset);
@@ -83,9 +68,7 @@ void main() {
         _view(tester, width);
         await tester.pumpWidget(
           _app(
-            CatalogBrowseScreen(
-              items: [for (var i = 1; i <= 12; i++) _item(i)],
-            ),
+            browseScreen([for (var i = 1; i <= 12; i++) _item(i)]),
             scale,
           ),
         );

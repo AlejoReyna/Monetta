@@ -2,12 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/features/home/external_catalog_section.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
 
 void main() {
-  testWidgets('home no longer mounts the retired external catalog section', (
+  testWidgets('home still renders the offers section after scrolling to it', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 3000));
@@ -42,6 +41,5 @@ void main() {
     await tester.pump();
 
     expect(find.byKey(const ValueKey('home-section-offers')), findsOneWidget);
-    expect(find.byType(ExternalCatalogSection), findsNothing);
   });
 }

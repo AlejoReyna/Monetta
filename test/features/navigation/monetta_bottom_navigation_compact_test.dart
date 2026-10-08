@@ -4,12 +4,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
-import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
 import 'package:monetta_app/main.dart';
+
+import '../../support/catalog_browse_fixtures.dart';
 
 // Contract of the compact bottom bar (FICHA-T1, BRIEF 2.1): 56 px of
 // interactive content plus the real bottom inset, applied once, with the
@@ -82,22 +82,7 @@ Future<void> _pumpBar(
   await tester.pump();
 }
 
-CatalogItem _item(int i) => CatalogItem(
-      sourceScopedId: 'monetta:$i',
-      source: CatalogSourceType.monettaShopify,
-      merchant: 'Monetta',
-      title: 'Monetta Item $i',
-      brand: 'Guess',
-      category: null,
-      imageUrl: null,
-      price: Money(amount: 1000.0 + i, currency: Currency.mxn),
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://monetta.mx/products/item-$i',
-      marketRestriction: MarketRestriction.mexico,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.monettaCheckout,
-      shopifyProductId: '$i',
-    );
+BrowseEntry _item(int i) => browseEntry(i, price: 1000.0 + i);
 
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
@@ -423,9 +408,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: buildLightTheme(),
-          home: CatalogBrowseScreen(
-            items: [for (var i = 1; i <= 30; i++) _item(i)],
-          ),
+          home: browseScreen([for (var i = 1; i <= 30; i++) _item(i)]),
         ),
       );
       await tester.pump();
@@ -480,7 +463,7 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: buildLightTheme(),
-          home: CatalogBrowseScreen(items: [_item(1), _item(2), _item(3)]),
+          home: browseScreen([_item(1), _item(2), _item(3)]),
         ),
       );
       await tester.pump();

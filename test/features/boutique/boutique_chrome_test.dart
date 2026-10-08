@@ -8,7 +8,6 @@ import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/account/account_screen.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/catalog/brand_screen.dart';
@@ -26,6 +25,8 @@ import 'package:monetta_app/features/orders/orders_screen.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
 import 'package:monetta_app/main.dart';
+
+import '../../support/catalog_browse_fixtures.dart';
 
 /// The grey the owner asked for on both bars, light mode.
 const Color _barGrey = Color(0xFFF5F5F5);
@@ -94,22 +95,8 @@ Color? _bottomBarColor(WidgetTester tester) {
   return (decoration as BoxDecoration).color;
 }
 
-CatalogItem _monettaItem(int i, String category) => CatalogItem(
-      sourceScopedId: 'monetta:$i',
-      source: CatalogSourceType.monettaShopify,
-      merchant: 'Monetta',
-      title: 'Monetta Item $i',
-      brand: 'Guess',
-      category: category,
-      imageUrl: null,
-      price: const Money(amount: 1999, currency: Currency.mxn),
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://monetta.mx/products/item-$i',
-      marketRestriction: MarketRestriction.mexico,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.monettaCheckout,
-      shopifyProductId: '$i',
-    );
+BrowseEntry _monettaItem(int i, String category) =>
+    browseEntry(i, category: category);
 
 OrderSummary _order() => OrderSummary(
       id: 'gid://shopify/Order/1',
@@ -156,13 +143,11 @@ Future<void> _mountCatalog(WidgetTester tester, ThemeData theme) async {
   await tester.pumpWidget(
     _app(
       theme,
-      CatalogBrowseScreen(
-        items: [
-          _monettaItem(1, 'cartera'),
-          _monettaItem(2, 'reloj'),
-          _monettaItem(3, 'perfume'),
-        ],
-      ),
+      browseScreen([
+        _monettaItem(1, 'cartera'),
+        _monettaItem(2, 'reloj'),
+        _monettaItem(3, 'perfume'),
+      ]),
     ),
   );
   await _settle(tester);

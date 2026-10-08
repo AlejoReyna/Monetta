@@ -269,7 +269,7 @@ class CatalogRepository {
       );
     } catch (error) {
       // A failed / incomplete sync must never clear or corrupt what's already
-      // cached — same contract as `ExternalCatalogRepository.refresh`.
+      // cached.
       final existing = await cache.metadata();
       if (existing != null) {
         await cache.saveMetadata(

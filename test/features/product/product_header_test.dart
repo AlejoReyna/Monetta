@@ -3,20 +3,17 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/app/theme.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
-import 'package:monetta_app/features/product/external_product_screen.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 
 import '../../support/product_screen_harness.dart';
 
 // FICHA-T2, HDR-xx: the header of the ficha carries the identity of the
-// product instead of the Monetta wordmark (BRIEF 2.4), for the Monetta ficha
-// and for the external one.
+// product instead of the Monetta wordmark (BRIEF 2.4).
 //
 // The Ahem test font draws squares, so everything visual here is read from
 // the style handed to the `Text`, from rects, or from the semantics tree.
@@ -46,24 +43,9 @@ Future<String> _mountMonetta(
   return shopperProductName(title);
 }
 
-/// Mounts the external ficha for a piece called [title]. Returns the text the
-/// header must show for it.
-Future<String> _mountExternal(
-  WidgetTester tester,
-  String title, {
-  double width = 390,
-  double scale = 1.0,
-  bool settle = true,
-}) async {
-  setPhoneView(tester, width: width);
-  final item = externalItem(title: title);
-  await pumpExternal(tester, item: item, scale: scale, settle: settle);
-  return externalProductName(title: item.title, category: item.category);
-}
-
 /// A home with one button that pushes [screen], to give the ficha somewhere
 /// to go back to.
-Widget _launcher(CatalogStore? store, Widget screen) {
+Widget _launcher(CatalogStore store, Widget screen) {
   Widget home() => Builder(
         builder: (context) => Scaffold(
           body: Center(
@@ -76,7 +58,7 @@ Widget _launcher(CatalogStore? store, Widget screen) {
           ),
         ),
       );
-  return store == null ? externalApp(home()) : fichaApp(store, home());
+  return fichaApp(store, home());
 }
 
 void _expectInsideAppBar(WidgetTester tester, Rect rect) {
@@ -87,29 +69,11 @@ void _expectInsideAppBar(WidgetTester tester, Rect rect) {
   expect(rect.bottom, lessThanOrEqualTo(bar.bottom + 0.01), reason: 'bottom');
 }
 
-CatalogItem _monettaItem(String productId, String title) => CatalogItem(
-      sourceScopedId: 'monetta:$productId',
-      source: CatalogSourceType.monettaShopify,
-      merchant: 'Monetta',
-      title: title,
-      brand: 'Guess',
-      category: null,
-      imageUrl: null,
-      price: const Money(amount: 1000, currency: Currency.mxn),
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://monetta.mx/products/item',
-      marketRestriction: MarketRestriction.mexico,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.monettaCheckout,
-      shopifyProductId: productId,
-    );
-
 void main() {
   setUpAll(mockPathProvider);
 
   final subjects = <String, _Mount>{
     'ficha Monetta': _mountMonetta,
-    'ficha externa': _mountExternal,
   };
 
   for (final MapEntry(key: label, value: mount) in subjects.entries) {
@@ -329,43 +293,6 @@ void main() {
     });
   });
 
-  group('HDR ficha externa actions', () {
-    testWidgets('HDR-03 has a working back button and neither heart nor bag',
-        (tester) async {
-      setPhoneView(tester);
-      await tester.pumpWidget(
-        _launcher(null, ExternalProductScreen(item: externalItem())),
-      );
-      await tester.tap(find.text('ABRIR'));
-      await tester.pumpAndSettle();
-
-      final back = find.byKey(kHeaderBackKey);
-      expect(back, findsOneWidget);
-      expect(inAppBar(find.byTooltip('Volver')), findsOneWidget);
-      expect(tester.getSize(back).width, greaterThanOrEqualTo(48));
-      expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
-
-      expect(find.byKey(kHeaderFavoriteKey), findsNothing);
-      expect(find.byType(BagAction), findsNothing);
-      expect(inAppBar(find.byTooltip('Guardar')), findsNothing);
-      expect(
-        inAppBar(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Tooltip &&
-                (widget.message ?? '').startsWith('Mi bolsa'),
-          ),
-        ),
-        findsNothing,
-      );
-
-      await tester.tap(back);
-      await tester.pumpAndSettle();
-      expect(find.byType(ExternalProductScreen), findsNothing);
-      expect(find.text('ABRIR'), findsOneWidget);
-    });
-  });
-
   group('HDR-06 each screen restores its own title on return', () {
     testWidgets('CatalogBrowseScreen keeps "Productos" after a ficha',
         (tester) async {
@@ -376,7 +303,8 @@ void main() {
         fichaApp(
           store,
           CatalogBrowseScreen(
-            items: [_monettaItem(product.id, product.title)],
+            products: [product],
+            facetsById: store.facetsById,
           ),
         ),
       );

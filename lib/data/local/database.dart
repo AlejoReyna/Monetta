@@ -4,9 +4,7 @@
 ///
 /// The connection is injected (see [openConnection] vs the constructor)
 /// rather than owned, so tests run against `NativeDatabase.memory()` with no
-/// disk I/O and no plugin channel — the same DI shape as
-/// `data/external_catalog/external_catalog_cache.dart`'s injected
-/// `directoryProvider`.
+/// disk I/O and no plugin channel.
 library;
 
 import 'dart:io';

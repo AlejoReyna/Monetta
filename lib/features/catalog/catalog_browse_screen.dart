@@ -12,18 +12,15 @@ import 'package:flutter/material.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
-import '../../domain/catalog_item.dart';
+import '../../data/normalize/facets.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
-import '../../reco/external_facets.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
-import '../product/external_product_screen.dart';
 import '../product/product_screen.dart';
 import 'catalog_controls.dart';
-import 'extracted_badge.dart';
 import 'product_tile.dart';
 import 'quick_add_button.dart';
 import 'search_screen.dart';
@@ -152,12 +149,13 @@ const List<String> _catalogCategoryOrder = [
 String _categoryLabel(String category) =>
     _catalogCategoryLabels[category] ?? categoryPlural(category);
 
-String _categoryFor(CatalogItem item) {
-  final externalCategory =
-      item.isExternal ? externalItemFacets(item).category?.value : null;
-  final rawCategory = (externalCategory ?? item.category)?.trim().toLowerCase();
+String _categoryFor(CanonicalFacets? facets) {
+  final rawCategory = facets?.category?.value.trim().toLowerCase();
 
-  final category = switch (rawCategory) {
+  // A piece without a category facet has no bag/wallet/perfume vertical to
+  // fall back on (the vertical was itself derived from the category), so it
+  // is simply "otros".
+  return switch (rawCategory) {
     'bolsas' || 'handbag' || 'handbags' => 'bolsa',
     'carteras' || 'wallet' || 'wallets' => 'cartera',
     'monederos' => 'monedero',
@@ -173,34 +171,19 @@ String _categoryFor(CatalogItem item) {
     'fragrances' =>
       'perfume',
     final value? when value.isNotEmpty => value,
-    _ => null,
+    _ => 'otros',
   };
-  if (category != null) return category;
-
-  if (item.vertical == CatalogVertical.perfumes) return 'perfume';
-  if (item.vertical == CatalogVertical.bagsWallets) {
-    final terms = item.title.toLowerCase();
-    if (RegExp(r'\b(?:wallet|billfold|cartera)\b').hasMatch(terms)) {
-      return 'cartera';
-    }
-    if (RegExp(r'\b(?:card case|card holder|tarjeter[oa])\b').hasMatch(terms)) {
-      return 'tarjetero';
-    }
-    if (RegExp(r'\b(?:monedero|coin purse)\b').hasMatch(terms)) {
-      return 'monedero';
-    }
-    if (RegExp(r'\b(?:cosmetiquera|cosmetic case)\b').hasMatch(terms)) {
-      return 'cosmetiquera';
-    }
-    return 'bolsa';
-  }
-  return 'otros';
 }
 
-/// Categories present in [items], in the canonical order and then
+/// Categories present in [products], in the canonical order and then
 /// alphabetically by label.
-List<String> _availableCategories(List<CatalogItem> items) {
-  final categories = {for (final item in items) _categoryFor(item)};
+List<String> _availableCategories(
+  List<Product> products,
+  Map<String, CanonicalFacets> facetsById,
+) {
+  final categories = {
+    for (final product in products) _categoryFor(facetsById[product.id]),
+  };
   return [
     for (final category in _catalogCategoryOrder)
       if (categories.remove(category)) category,
@@ -217,14 +200,17 @@ String _sectionKeySuffix(_CatalogFilters filters) {
 
 class CatalogBrowseScreen extends StatefulWidget {
   const CatalogBrowseScreen({
-    required this.items,
-    this.openExternalLink = defaultExternalLinkOpener,
+    required this.products,
+    required this.facetsById,
     this.bagCount = 0,
     super.key,
   });
 
-  final List<CatalogItem> items;
-  final ExternalLinkOpener openExternalLink;
+  final List<Product> products;
+
+  /// Canonical facets by product id; a product without an entry simply has no
+  /// category or brand facet.
+  final Map<String, CanonicalFacets> facetsById;
   final int bagCount;
 
   @override
@@ -234,8 +220,9 @@ class CatalogBrowseScreen extends StatefulWidget {
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   _CatalogFilters _filters = const _CatalogFilters();
 
-  List<CatalogItem> _visibleItems([_CatalogFilters? filters]) => _filterCatalog(
-        widget.items,
+  List<Product> _visibleProducts([_CatalogFilters? filters]) => _filterCatalog(
+        widget.products,
+        widget.facetsById,
         query: '',
         filters: filters ?? _filters,
       );
@@ -255,9 +242,10 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       backgroundColor: Colors.transparent,
       barrierColor: context.monettaColors.scrim,
       builder: (sheetContext) => _CatalogFilterSheet(
-        items: widget.items,
+        products: widget.products,
+        facetsById: widget.facetsById,
         initial: _filters,
-        visibleCount: (draft) => _visibleItems(draft).length,
+        visibleCount: (draft) => _visibleProducts(draft).length,
       ),
     );
     // Dismissing the sheet keeps the filters that were already applied.
@@ -266,7 +254,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final visibleItems = _visibleItems();
+    final visibleProducts = _visibleProducts();
 
     return Scaffold(
       // Never `extendBody`: the last row of products must not sit under the
@@ -302,7 +290,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
               const SizedBox(height: 2),
               // Counted from the very list the grid renders below.
               CatalogResultCount(
-                count: visibleItems.length,
+                count: visibleProducts.length,
                 noun: 'pieza',
                 pluralNoun: 'piezas',
               ),
@@ -360,7 +348,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (visibleItems.isEmpty)
+              if (visibleProducts.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: _EmptyCatalogState(
@@ -386,12 +374,15 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                           variant: ProductTileVariant.edgeToEdge,
                         ),
                         delegate: SliverChildBuilderDelegate(
-                          (context, index) => _BrowseTile(
-                            key: ValueKey(visibleItems[index].sourceScopedId),
-                            item: visibleItems[index],
-                            openExternalLink: widget.openExternalLink,
-                          ),
-                          childCount: visibleItems.length,
+                          (context, index) {
+                            final product = visibleProducts[index];
+                            return _BrowseTile(
+                              key: ValueKey('monetta:${product.id}'),
+                              product: product,
+                              facets: widget.facetsById[product.id],
+                            );
+                          },
+                          childCount: visibleProducts.length,
                         ),
                       ),
                     ),
@@ -428,7 +419,8 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
 
 void openCatalogBrowse(
   BuildContext context, {
-  required List<CatalogItem> items,
+  required List<Product> products,
+  required Map<String, CanonicalFacets> facetsById,
 }) {
   final store = StoreScope.of(context);
   Navigator.of(context).push(
@@ -436,7 +428,8 @@ void openCatalogBrowse(
       StoreScope(
         notifier: store,
         child: CatalogBrowseScreen(
-          items: items,
+          products: products,
+          facetsById: facetsById,
           bagCount: store.bagQuantity,
         ),
       ),
@@ -515,12 +508,14 @@ class _FilterIconButton extends StatelessWidget {
 
 class _CatalogFilterSheet extends StatefulWidget {
   const _CatalogFilterSheet({
-    required this.items,
+    required this.products,
+    required this.facetsById,
     required this.initial,
     required this.visibleCount,
   });
 
-  final List<CatalogItem> items;
+  final List<Product> products;
+  final Map<String, CanonicalFacets> facetsById;
   final _CatalogFilters initial;
 
   final int Function(_CatalogFilters filters) visibleCount;
@@ -568,13 +563,14 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
 
   List<String> get _typeOptions => _optionsWithMatches(
         _bagTypeTerms.keys,
-        (item, value) => _bagTypeFor(item) == value,
+        (product, facets, value) => _bagTypeFor(product, facets) == value,
       );
 
   List<String> get _brandOptions {
     final values = {
-      for (final item in widget.items)
-        if (_brandFor(item).isNotEmpty) _brandFor(item),
+      for (final product in widget.products)
+        if (_brandFor(product, widget.facetsById[product.id]).isNotEmpty)
+          _brandFor(product, widget.facetsById[product.id]),
     }.toList();
     values.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return values;
@@ -586,25 +582,27 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
           'mxn-1000-2499',
           'mxn-2500-4999',
           'mxn-5000-plus',
-          'usd-under-100',
-          'usd-100-249',
-          'usd-250-499',
-          'usd-500-plus',
         ],
-        (item, value) => _priceBandFor(item) == value,
+        (product, facets, value) => _priceBandFor(product) == value,
       );
 
   List<String> get _colorOptions => _optionsWithMatches(
         _colorTerms.keys,
-        (item, value) => _colorsFor(item).contains(value),
+        (product, facets, value) => _colorsFor(product, facets).contains(value),
       );
 
   List<String> _optionsWithMatches(
     Iterable<String> candidates,
-    bool Function(CatalogItem item, String value) matches,
+    bool Function(Product product, CanonicalFacets? facets, String value)
+        matches,
   ) =>
       candidates
-          .where((value) => widget.items.any((item) => matches(item, value)))
+          .where(
+            (value) => widget.products.any(
+              (product) =>
+                  matches(product, widget.facetsById[product.id], value),
+            ),
+          )
           .toList(growable: false);
 
   void _toggleExpanded(_FilterSection section) {
@@ -628,7 +626,8 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
-    final categoryOptions = _availableCategories(widget.items);
+    final categoryOptions =
+        _availableCategories(widget.products, widget.facetsById);
     final typeOptions = _typeOptions;
     final brandOptions = _brandOptions;
     final priceOptions = _priceOptions;
@@ -1084,124 +1083,106 @@ class _EmptyCatalogState extends StatelessWidget {
 
 class _BrowseTile extends StatelessWidget {
   const _BrowseTile({
-    required this.item,
-    required this.openExternalLink,
+    required this.product,
+    required this.facets,
     super.key,
   });
 
-  final CatalogItem item;
-  final ExternalLinkOpener openExternalLink;
+  final Product product;
+  final CanonicalFacets? facets;
 
   void _tap(BuildContext context) {
-    if (!item.isExternal) {
-      final productId = item.shopifyProductId;
-      if (productId == null) return;
-      unawaited(
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => StoreScope(
-              notifier: StoreScope.of(context),
-              child: ProductScreen(productId: productId),
-            ),
+    unawaited(
+      Navigator.of(context).push(
+        MaterialPageRoute<void>(
+          builder: (_) => StoreScope(
+            notifier: StoreScope.of(context),
+            child: ProductScreen(productId: product.id),
           ),
         ),
-      );
-      return;
-    }
-
-    unawaited(
-      showExternalProductDetail(
-        context,
-        item: item,
-        openLink: openExternalLink,
       ),
     );
   }
 
-  /// The Monetta product behind this tile when it can be bought from here.
+  /// The store's current copy of this product when it can be bought from here.
   ///
   /// Reads the store without subscribing to it and degrades to null when the
-  /// screen is mounted without a [StoreScope]; external, unknown and sold-out
-  /// pieces have nothing to add.
+  /// screen is mounted without a [StoreScope]; unknown and sold-out pieces
+  /// have nothing to add.
   Product? _buyableProduct(BuildContext context) {
-    if (item.isExternal) return null;
-    final productId = item.shopifyProductId;
-    if (productId == null) return null;
     final store = context.getInheritedWidgetOfExactType<StoreScope>()?.notifier;
     if (store == null) return null;
-    for (final product in store.products) {
-      if (product.id == productId) return product.isInStock ? product : null;
+    for (final candidate in store.products) {
+      if (candidate.id == product.id) {
+        return candidate.isInStock ? candidate : null;
+      }
     }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    // The same presentation the product grids use. A [CatalogItem] is not
-    // turned into a [Product] — currency, origin and purchase destination
-    // would be lost — only its view data is adapted.
-    final data = ProductTileData.fromCatalogItem(item);
-    final product = _buyableProduct(context);
+    // The same presentation the product grids use; only its view data is
+    // adapted, with the browser's plain-price rules.
+    final data = ProductTileData.forCatalogBrowse(product, facets: facets);
+    final buyable = _buyableProduct(context);
     return MonettaProductTile(
       data: data,
       onTap: () => _tap(context),
       variant: ProductTileVariant.edgeToEdge,
-      quickAction: product == null
+      quickAction: buyable == null
           ? null
           : ProductQuickAddButton(
-              key: Key('quick-add-${product.id}'),
-              product: product,
+              key: Key('quick-add-${buyable.id}'),
+              product: buyable,
               productName: data.title,
             ),
-      // No favourite here: an external listing has no Monetta product id to
-      // save, and this screen renders without a wishlist-bearing store.
-      imageOverlay: item.isExternal ? const ExtractedBadge() : null,
+      // No favourite here: this screen renders without a wishlist-bearing
+      // store.
     );
   }
 }
 
-List<CatalogItem> _filterCatalog(
-  List<CatalogItem> items, {
+List<Product> _filterCatalog(
+  List<Product> products,
+  Map<String, CanonicalFacets> facetsById, {
   required String query,
   required _CatalogFilters filters,
 }) {
   final normalizedQuery = query.trim().toLowerCase();
-  final result = items.where((item) {
+  final result = products.where((product) {
+    final facets = facetsById[product.id];
     if (normalizedQuery.isNotEmpty) {
       final searchable = [
-        item.title,
-        item.brand,
-        item.merchant,
-        item.category ?? '',
-        ...item.variants.map((variant) => variant.displayName),
+        product.title,
+        facets?.brand?.value ?? product.vendor,
+        'Monetta',
+        facets?.category?.value ?? '',
       ].join(' ').toLowerCase();
       if (!searchable.contains(normalizedQuery)) return false;
     }
 
     if (filters.categories.isNotEmpty &&
-        !filters.categories.contains(_categoryFor(item))) {
+        !filters.categories.contains(_categoryFor(facets))) {
       return false;
     }
     if (filters.types.isNotEmpty &&
-        !filters.types.contains(_bagTypeFor(item))) {
+        !filters.types.contains(_bagTypeFor(product, facets))) {
       return false;
     }
     if (filters.brands.isNotEmpty &&
-        !filters.brands.contains(_brandFor(item))) {
+        !filters.brands.contains(_brandFor(product, facets))) {
       return false;
     }
     if (filters.priceBands.isNotEmpty &&
-        !filters.priceBands.contains(_priceBandFor(item))) {
+        !filters.priceBands.contains(_priceBandFor(product))) {
       return false;
     }
     if (filters.colors.isNotEmpty &&
-        filters.colors.intersection(_colorsFor(item)).isEmpty) {
+        filters.colors.intersection(_colorsFor(product, facets)).isEmpty) {
       return false;
     }
-    if (filters.inStockOnly &&
-        item.availability != CatalogAvailability.inStock) {
-      return false;
-    }
+    if (filters.inStockOnly && !product.isInStock) return false;
     return true;
   }).toList(growable: false);
 
@@ -1209,7 +1190,7 @@ List<CatalogItem> _filterCatalog(
     case _CatalogSort.featured:
       break;
     case _CatalogSort.newest:
-      result.sort((a, b) => b.lastObservedAt.compareTo(a.lastObservedAt));
+      result.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
     case _CatalogSort.priceAsc:
       result.sort(_comparePriceAsc);
     case _CatalogSort.priceDesc:
@@ -1218,48 +1199,24 @@ List<CatalogItem> _filterCatalog(
   return result;
 }
 
-int _comparePriceAsc(CatalogItem a, CatalogItem b) {
-  final aPrice = a.price;
-  final bPrice = b.price;
-  if (aPrice == null && bPrice == null) return 0;
-  if (aPrice == null) return 1;
-  if (bPrice == null) return -1;
-  final currencyOrder = aPrice.currency.index.compareTo(bPrice.currency.index);
-  if (currencyOrder != 0) return currencyOrder;
-  return aPrice.amount.compareTo(bPrice.amount);
-}
+int _comparePriceAsc(Product a, Product b) => a.price.compareTo(b.price);
 
-String _brandFor(CatalogItem item) {
-  final brand = item.brand.trim();
-  return humanizeCatalogValue(
-    brand.isEmpty ? item.merchant.trim() : brand,
-  );
-}
+String _brandFor(Product product, CanonicalFacets? facets) =>
+    catalogBrowseBrand(product, facets);
 
-String? _bagTypeFor(CatalogItem item) {
-  final terms = '${item.category ?? ''} ${item.title}'.toLowerCase();
+String? _bagTypeFor(Product product, CanonicalFacets? facets) {
+  final terms =
+      '${facets?.category?.value ?? ''} ${product.title}'.toLowerCase();
   for (final entry in _bagTypeTerms.entries) {
     if (entry.value.any(terms.contains)) return entry.key;
   }
   return null;
 }
 
-Set<String> _colorsFor(CatalogItem item) {
-  // External variant names often append hardware finishes (for example
-  // "Café/Dorado"). Those should not make a brown bag appear under a gold
-  // body-colour filter, so metallic hardware words are ignored in variants;
-  // a genuinely gold or silver bag still matches when its product title says
-  // so explicitly.
-  final variantColors = item.variants.map(
-    (variant) => variant.displayName.toLowerCase().replaceAll(
-          RegExp(r'\b(dorado|dorada|plateado|plateada|gold|silver)\b'),
-          '',
-        ),
-  );
+Set<String> _colorsFor(Product product, CanonicalFacets? facets) {
   final terms = [
-    item.title,
-    item.category ?? '',
-    ...variantColors,
+    product.title,
+    facets?.category?.value ?? '',
   ].join(' ').toLowerCase();
   return {
     for (final entry in _colorTerms.entries)
@@ -1267,19 +1224,12 @@ Set<String> _colorsFor(CatalogItem item) {
   };
 }
 
-String? _priceBandFor(CatalogItem item) {
-  final price = item.price;
-  if (price == null) return null;
-  if (price.currency == Currency.mxn) {
-    if (price.amount < 1000) return 'mxn-under-1000';
-    if (price.amount < 2500) return 'mxn-1000-2499';
-    if (price.amount < 5000) return 'mxn-2500-4999';
-    return 'mxn-5000-plus';
-  }
-  if (price.amount < 100) return 'usd-under-100';
-  if (price.amount < 250) return 'usd-100-249';
-  if (price.amount < 500) return 'usd-250-499';
-  return 'usd-500-plus';
+String _priceBandFor(Product product) {
+  final amount = product.price;
+  if (amount < 1000) return 'mxn-under-1000';
+  if (amount < 2500) return 'mxn-1000-2499';
+  if (amount < 5000) return 'mxn-2500-4999';
+  return 'mxn-5000-plus';
 }
 
 String _priceBandLabel(String value) => switch (value) {
@@ -1287,10 +1237,6 @@ String _priceBandLabel(String value) => switch (value) {
       'mxn-1000-2499' => '\$1,000 – \$2,499 MXN',
       'mxn-2500-4999' => '\$2,500 – \$4,999 MXN',
       'mxn-5000-plus' => '\$5,000 MXN o más',
-      'usd-under-100' => 'Menos de \$100 USD',
-      'usd-100-249' => '\$100 – \$249 USD',
-      'usd-250-499' => '\$250 – \$499 USD',
-      'usd-500-plus' => '\$500 USD o más',
       _ => value,
     };
 

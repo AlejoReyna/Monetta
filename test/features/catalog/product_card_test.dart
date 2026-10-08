@@ -4,7 +4,6 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/normalize/facets.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
@@ -103,44 +102,16 @@ void main() {
       expect(data.fallbackLabel, 'Bolsa Tabby');
     });
 
-    test('a catalog item keeps its currency and never becomes \$0', () {
-      final item = CatalogItem(
-        sourceScopedId: 'coach_us:1',
-        source: CatalogSourceType.coachUs,
-        merchant: 'Coach',
-        title: 'Willow Tote',
-        brand: 'Coach',
-        category: 'Handbags',
-        imageUrl: null,
-        price: const Money(amount: 350, currency: Currency.usd),
-        availability: CatalogAvailability.inStock,
-        detailUrl: 'https://www.coach.com/products/item-1/C1.html',
-        marketRestriction: MarketRestriction.unitedStates,
-        lastObservedAt: DateTime.utc(2026, 8, 10),
-        purchaseMode: PurchaseMode.externalResearch,
+    test('the catalog browser keeps the plain MXN price, with no discount', () {
+      final data = ProductTileData.forCatalogBrowse(
+        _product(price: 4900, compareAt: 6490),
+        facets: _facets(newArrival: true),
       );
-      final data = ProductTileData.fromCatalogItem(item);
-      expect(data.priceLabel, contains('USD'));
-      expect(data.badge, isNull, reason: 'no compare_at exists on a feed item');
-
-      final unknownPrice = ProductTileData.fromCatalogItem(
-        CatalogItem(
-          sourceScopedId: 'coach_us:2',
-          source: CatalogSourceType.coachUs,
-          merchant: 'Coach',
-          title: 'Willow Tote',
-          brand: 'Coach',
-          category: 'Handbags',
-          imageUrl: null,
-          price: null,
-          availability: CatalogAvailability.unknown,
-          detailUrl: 'https://www.coach.com/products/item-2/C2.html',
-          marketRestriction: MarketRestriction.unitedStates,
-          lastObservedAt: DateTime.utc(2026, 8, 10),
-          purchaseMode: PurchaseMode.externalResearch,
-        ),
-      );
-      expect(unknownPrice.priceLabel, kUnknownPriceLabel);
+      expect(data.priceLabel, r'$4,900 MXN');
+      expect(data.compareAtLabel, isNull);
+      expect(data.badge, isNull);
+      expect(data.brand, 'Coach');
+      expect(data.inStock, isTrue);
     });
   });
 

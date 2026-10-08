@@ -61,8 +61,8 @@ test files and every screen read `.products`, `.bagLines`, `.wishlist` mid-frame
 from Drift once, at startup (seeding from the bundled catalog snapshot first if the cache is
 empty), and every mutating method (`toggleWishlist`, `addToBag`, `record`, …) updates the
 in-memory field immediately and fires an `unawaited()` write to the matching store alongside
-it — the same fire-and-forget shape `main.dart` already used for
-`ExternalCatalogController.loadAndRefresh()` before this module existed.
+it — the same fire-and-forget shape `main.dart` already used for its other background loads
+before this module existed.
 
 The one place that pattern was wrong was `AccountController.login()` firing
 `unawaited(loadOrders())` — a dangling, untracked Future that could still be touching the

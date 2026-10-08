@@ -3,14 +3,14 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
-import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
 import 'package:monetta_app/features/home/home_account_invitation.dart';
 import 'package:monetta_app/main.dart';
+
+import '../../support/catalog_browse_fixtures.dart';
 
 // Product-related titles share the family and fallback chain of the card
 // names (`boutiqueText`): Inter + the platform sans (FICHA-T1, BRIEF 2.3).
@@ -19,22 +19,7 @@ import 'package:monetta_app/main.dart';
 // These tests read the style handed to each `Text`, so the Ahem test font is
 // irrelevant to them.
 
-CatalogItem _item(int i) => CatalogItem(
-      sourceScopedId: 'monetta:$i',
-      source: CatalogSourceType.monettaShopify,
-      merchant: 'Monetta',
-      title: 'Monetta Item $i',
-      brand: 'Guess',
-      category: null,
-      imageUrl: null,
-      price: Money(amount: 1000.0 + i, currency: Currency.mxn),
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://monetta.mx/products/item-$i',
-      marketRestriction: MarketRestriction.mexico,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.monettaCheckout,
-      shopifyProductId: '$i',
-    );
+BrowseEntry _item(int i) => browseEntry(i, price: 1000.0 + i);
 
 void _view(WidgetTester tester, {double height = 1600}) {
   addTearDown(tester.view.reset);
@@ -58,8 +43,8 @@ TextStyle _styleOf(WidgetTester tester, Finder finder) {
 }
 
 /// The style the first card of the screen gives to its product name.
-TextStyle _cardNameStyle(WidgetTester tester, CatalogItem item) {
-  final name = ProductTileData.fromCatalogItem(item).title;
+TextStyle _cardNameStyle(WidgetTester tester, BrowseEntry item) {
+  final name = item.tileData.title;
   return _styleOf(
     tester,
     find.descendant(
@@ -99,7 +84,7 @@ void main() {
         (tester) async {
       _view(tester);
       final items = [_item(1), _item(2), _item(3)];
-      await tester.pumpWidget(_app(CatalogBrowseScreen(items: items)));
+      await tester.pumpWidget(_app(browseScreen(items)));
       await tester.pump();
 
       final title = _styleOf(tester, find.text('Productos'));
@@ -111,7 +96,7 @@ void main() {
     testWidgets('TYPE-01b "Sin resultados" of the empty catalog is sans w600',
         (tester) async {
       _view(tester);
-      await tester.pumpWidget(_app(const CatalogBrowseScreen(items: [])));
+      await tester.pumpWidget(_app(browseScreen(const [])));
       await tester.pump();
 
       _expectSans(
@@ -142,7 +127,7 @@ void main() {
         (tester) async {
       _view(tester);
       final items = [_item(1), _item(2), _item(3)];
-      await tester.pumpWidget(_app(CatalogBrowseScreen(items: items)));
+      await tester.pumpWidget(_app(browseScreen(items)));
       await tester.pump();
       await _openCatalogPanel(tester);
 

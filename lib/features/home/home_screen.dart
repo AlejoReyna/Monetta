@@ -12,7 +12,6 @@ import '../../app/card_lift.dart';
 import '../../app/catalog_store.dart';
 import '../../app/home_content_controller.dart';
 import '../../app/motion.dart';
-import '../../app/mixed_feed.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
@@ -265,10 +264,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final store = StoreScope.of(context);
     openCatalogBrowse(
       context,
-      items: fullDeduplicatedCatalog(
-        monettaItems: store.catalogItems,
-        externalItems: const [],
-      ),
+      products: store.products,
+      facetsById: store.facetsById,
     );
   }
 

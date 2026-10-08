@@ -166,6 +166,8 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | CHAR-05 | verde (CAR; cambia según E4) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
 | CHAR-06 | verde (CAR; cambia según E10) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
 | CHAR-07 | verde (CAR; decisión en RF-40) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
+| ARCH-03 | verde (OBJ). Excepciones vivas: la guarda de `ENABLE_EXTERNAL_CATALOG` y, hasta RF-21, `AdminChannel.externalCatalog` | RF-20 | 2026-10-08 · RF-20 · iteración 1 |
+| CHAR-11 | verde (CAR, D-10) | RF-20 | 2026-10-08 · RF-20 · iteración 1 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)

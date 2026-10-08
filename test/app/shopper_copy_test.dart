@@ -52,34 +52,6 @@ void main() {
     expect(shopperProductName('Bolsa  Bolsa Guess'), 'Bolsa Guess');
   });
 
-  test('US merchant titles follow Monetta card naming', () {
-    expect(
-      externalProductName(
-        title: 'Tabby Shoulder Bag 26',
-        category: 'Handbags',
-      ),
-      'Bolsa Tabby 26 de hombro',
-    );
-    expect(
-      externalProductName(
-        title: 'Jet Set Crossbody',
-        category: 'Handbags',
-      ),
-      'Bolsa Jet Set crossbody',
-    );
-    expect(
-      externalProductName(
-        title: 'Small Zip Around Wallet',
-        category: 'Wallets',
-      ),
-      'Cartera Pequeña con cierre',
-    );
-    expect(
-      externalProductName(title: 'Unclassified Original', category: null),
-      'Unclassified Original',
-    );
-  });
-
   test('partner quote carries the wholesale terms and source', () {
     final uri = partnerQuoteWhatsAppUri(
       category: 'Perfumes',

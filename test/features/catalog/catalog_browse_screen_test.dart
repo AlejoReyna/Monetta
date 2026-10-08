@@ -1,55 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/theme.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
-import 'package:monetta_app/features/product/external_product_screen.dart';
 
-CatalogItem _monetta(
-  int i, {
-  String? title,
-  String? category,
-  CatalogVertical vertical = CatalogVertical.general,
-}) =>
-    CatalogItem(
-      sourceScopedId: 'monetta:$i',
-      source: CatalogSourceType.monettaShopify,
-      merchant: 'Monetta',
-      title: title ?? 'Monetta Item $i',
-      brand: 'Guess',
-      category: category,
-      imageUrl: null,
-      price: const Money(amount: 1999, currency: Currency.mxn),
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://monetta.mx/products/item-$i',
-      marketRestriction: MarketRestriction.mexico,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.monettaCheckout,
-      shopifyProductId: '$i',
-      vertical: vertical,
-    );
+import '../../support/catalog_browse_fixtures.dart';
 
-CatalogItem _external(
-  int i, {
-  String? title,
-  String brand = 'Coach',
-  double price = 300,
-}) =>
-    CatalogItem(
-      sourceScopedId: 'coach_us:$i',
-      source: CatalogSourceType.coachUs,
-      merchant: 'Coach',
-      title: title ?? 'External Item $i',
-      brand: brand,
-      category: 'Handbags',
-      imageUrl: null,
-      price: Money(amount: price, currency: Currency.usd),
-      availability: CatalogAvailability.inStock,
-      detailUrl: 'https://www.coach.com/products/item-$i/C$i.html',
-      marketRestriction: MarketRestriction.unitedStates,
-      lastObservedAt: DateTime.utc(2026, 8, 10),
-      purchaseMode: PurchaseMode.externalResearch,
-    );
+BrowseEntry _monetta(int i, {String? title, String? category}) =>
+    browseEntry(i, title: title, category: category);
+
+/// A Monetta bag: its category facet is `bolsa`.
+BrowseEntry _bag(int i, {String? title}) =>
+    browseEntry(i, title: title, category: 'bolsa');
 
 Future<void> _pump(WidgetTester tester, Widget child) {
   return tester.pumpWidget(
@@ -146,98 +107,44 @@ void _expectGridShows(Set<String> shown, Iterable<String> all) {
 
 const _perfumeTitle = 'Monetta Perfume 1';
 const _bagTitle = 'Monetta Item 2';
-const _externalBagTitle = 'External Item 3';
+const _secondBagTitle = 'Monetta Bag 3';
 const _generalTitle = 'Monetta General 4';
 const _walletTitle = 'Monetta Wallet 5';
 const _watchTitle = 'Monetta Watch 6';
 const _mixedTitles = [
   _perfumeTitle,
   _bagTitle,
-  _externalBagTitle,
+  _secondBagTitle,
   _generalTitle,
   _walletTitle,
   _watchTitle,
 ];
 
-CatalogItem _uncategorized(
-  String id, {
-  required String title,
-  required CatalogVertical vertical,
-  CatalogSourceType source = CatalogSourceType.monettaShopify,
-}) {
-  final isExternal = source != CatalogSourceType.monettaShopify;
-  return CatalogItem(
-    sourceScopedId: id,
-    source: source,
-    merchant: isExternal ? 'Coach' : 'Monetta',
-    title: title,
-    brand: isExternal ? 'Coach' : 'Guess',
-    category: null,
-    imageUrl: null,
-    price: const Money(amount: 1999, currency: Currency.mxn),
-    availability: CatalogAvailability.inStock,
-    detailUrl: 'https://monetta.mx/products/$id',
-    marketRestriction: MarketRestriction.mexico,
-    lastObservedAt: DateTime.utc(2026, 8, 10),
-    purchaseMode: isExternal
-        ? PurchaseMode.externalResearch
-        : PurchaseMode.monettaCheckout,
-    shopifyProductId: isExternal ? null : id,
-    vertical: vertical,
-  );
-}
-
-/// One product per category the screen can derive: perfume (by vertical),
-/// bolsa (Monetta and external, by vertical), otros (no vertical, no category),
-/// cartera and reloj (by the category field).
-List<CatalogItem> _mixedCatalog() => [
-      _uncategorized(
-        'perfume:1',
-        title: _perfumeTitle,
-        vertical: CatalogVertical.perfumes,
-      ),
-      _uncategorized(
-        'bag:2',
-        title: _bagTitle,
-        vertical: CatalogVertical.bagsWallets,
-      ),
-      _uncategorized(
-        'ext:3',
-        title: _externalBagTitle,
-        vertical: CatalogVertical.bagsWallets,
-        source: CatalogSourceType.coachUs,
-      ),
-      _uncategorized(
-        'general:4',
-        title: _generalTitle,
-        vertical: CatalogVertical.general,
-      ),
-      _monetta(
-        5,
-        title: _walletTitle,
-        category: 'cartera',
-        vertical: CatalogVertical.bagsWallets,
-      ),
+/// One product per category the screen can derive: perfume, bolsa (two
+/// pieces), otros (no category facet), cartera and reloj.
+List<BrowseEntry> _mixedCatalog() => [
+      _monetta(1, title: _perfumeTitle, category: 'perfume'),
+      _bag(2, title: _bagTitle),
+      _bag(3, title: _secondBagTitle),
+      _monetta(4, title: _generalTitle),
+      _monetta(5, title: _walletTitle, category: 'cartera'),
       _monetta(6, title: _watchTitle, category: 'reloj'),
     ];
 
 void main() {
   testWidgets('shows an empty state for zero items', (tester) async {
-    await _pump(tester, const CatalogBrowseScreen(items: []));
+    await _pump(tester, browseScreen(const []));
     expect(find.text('Sin resultados'), findsOneWidget);
   });
 
   testWidgets('shows the header and no category rail or pills', (tester) async {
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [
-          _external(1),
-          _monetta(1, category: 'cartera'),
-          _monetta(2, category: 'reloj'),
-          _monetta(3, category: 'perfume'),
-        ],
-      ),
+      browseScreen([
+        _monetta(1, category: 'cartera'),
+        _monetta(2, category: 'reloj'),
+        _monetta(3, category: 'perfume'),
+      ]),
     );
 
     expect(find.text('Productos'), findsOneWidget);
@@ -267,12 +174,9 @@ void main() {
     _useTallPhone(tester);
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [
-          _monetta(1, title: 'Cartera Negra', category: 'cartera'),
-          _external(1),
-        ],
-      ),
+      browseScreen([
+        _monetta(1, title: 'Cartera Negra', category: 'cartera'),
+      ]),
     );
 
     // The duplicated pills are gone from the body ...
@@ -307,19 +211,17 @@ void main() {
       'the filter panel offers the present categories in canonical order',
       (tester) async {
     _useTallPhone(tester);
-    // Deliberately listed out of canonical order; the external bag is a
-    // "Handbags" listing so the "Tipo de bolsa" section exists too.
+    // Deliberately listed out of canonical order; the bag is a tote so the
+    // "Tipo de bolsa" section exists too.
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [
-          _monetta(1, category: 'perfume'),
-          _monetta(2, category: 'reloj'),
-          _monetta(3, category: 'cartera'),
-          _external(1),
-          _monetta(4),
-        ],
-      ),
+      browseScreen([
+        _monetta(1, category: 'perfume'),
+        _monetta(2, category: 'reloj'),
+        _monetta(3, category: 'cartera'),
+        _bag(5, title: 'Bolsa Tote'),
+        _monetta(4),
+      ]),
     );
 
     await _openFilterPanel(tester);
@@ -374,21 +276,17 @@ void main() {
 
   testWidgets('category options show no article counts', (tester) async {
     _useTallPhone(tester);
-    final cafe = _external(1, title: 'Bolsa Tote Café');
-    final negra = _external(2, title: 'Crossbody Negra');
-    final monettaBag = _uncategorized(
-      'monetta:3',
-      title: 'Bolsa Monetta Café',
-      vertical: CatalogVertical.bagsWallets,
-    );
-    final monettaPerfume = _uncategorized(
-      'monetta:4',
+    final cafe = _bag(1, title: 'Bolsa Tote Café');
+    final negra = _bag(2, title: 'Crossbody Negra');
+    final monettaBag = _bag(3, title: 'Bolsa Monetta Café');
+    final monettaPerfume = _monetta(
+      4,
       title: 'Perfume Monetta',
-      vertical: CatalogVertical.perfumes,
+      category: 'perfume',
     );
     await _pump(
       tester,
-      CatalogBrowseScreen(items: [cafe, negra, monettaBag, monettaPerfume]),
+      browseScreen([cafe, negra, monettaBag, monettaPerfume]),
     );
 
     Future<void> expectBareLabels() async {
@@ -427,9 +325,10 @@ void main() {
     _useTallPhone(tester);
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [_monetta(1, category: 'cartera'), _external(1)],
-      ),
+      browseScreen([
+        _monetta(1, category: 'cartera'),
+        _bag(2, title: _secondBagTitle),
+      ]),
     );
 
     final switcherFinder = find.byKey(const Key('catalog-section-transition'));
@@ -454,7 +353,7 @@ void main() {
       reason: 'a new category must swap the grid through the transition',
     );
     expect(find.text('Monetta Item 1'), findsOneWidget);
-    expect(find.text('Bolsa External Item 1'), findsNothing);
+    expect(find.text(_secondBagTitle), findsNothing);
 
     // Changing the applied categories again swaps the grid again.
     final keyAfterFirst = switcherAfter.child?.key;
@@ -463,19 +362,24 @@ void main() {
       tester.widget<AnimatedSwitcher>(switcherFinder).child?.key,
       isNot(keyAfterFirst),
     );
-    expect(find.text('Bolsa External Item 1'), findsOneWidget);
+    expect(find.text(_secondBagTitle), findsOneWidget);
   });
 
   testWidgets('humanizes canonical brand and product tokens', (tester) async {
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [_external(1, title: 'jet_set_bag', brand: 'michael_kors')],
-      ),
+      browseScreen([
+        browseEntry(
+          1,
+          title: 'jet_set_bag',
+          category: 'bolsa',
+          brand: 'michael_kors',
+        ),
+      ]),
     );
 
     expect(find.text('Michael Kors'), findsOneWidget);
-    expect(find.text('Bolsa Jet Set'), findsOneWidget);
+    expect(find.text('Jet Set Bag'), findsOneWidget);
     expect(find.text('michael_kors'), findsNothing);
     expect(find.text('jet_set_bag'), findsNothing);
   });
@@ -483,10 +387,8 @@ void main() {
   testWidgets(
       'uses a lazily-built CustomScrollView/SliverGrid so a large catalog never eagerly renders every tile',
       (tester) async {
-    final items = [
-      for (var i = 0; i < 500; i++) (i.isEven ? _monetta(i) : _external(i)),
-    ];
-    await _pump(tester, CatalogBrowseScreen(items: items));
+    final items = [for (var i = 0; i < 500; i++) _monetta(i)];
+    await _pump(tester, browseScreen(items));
     await tester.pump();
 
     // A top-level CustomScrollView (not a shrinkWrap-forced grid nested in
@@ -497,52 +399,24 @@ void main() {
     expect(builtTitles, lessThan(100));
   });
 
-  testWidgets('uses one uninterrupted photography grid for every source',
-      (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(800, 4000);
-    tester.view.devicePixelRatio = 1.0;
-
-    final items = [_monetta(1), _monetta(2), _external(1), _external(2)];
-    await _pump(tester, CatalogBrowseScreen(items: items));
-    await tester.pump();
-
-    expect(find.text('Selección Monetta'), findsNothing);
-    expect(find.text('Edición internacional'), findsNothing);
-    expect(find.text('Monetta Item 1'), findsOneWidget);
-    expect(find.text('Bolsa External Item 1'), findsOneWidget);
-    expect(find.text('extracted'), findsNWidgets(2));
-  });
-
-  testWidgets('keeps the same grid chrome when there are only external items',
-      (tester) async {
-    final items = [_external(1)];
-    await _pump(tester, CatalogBrowseScreen(items: items));
-    await tester.pump();
-
-    expect(find.text('Selección Monetta'), findsNothing);
-    expect(find.text('Edición internacional'), findsNothing);
-    expect(find.text('Bolsa External Item 1'), findsOneWidget);
-  });
-
   testWidgets('filters by the categories applied in the panel', (tester) async {
     _useTallPhone(tester);
     final catalog = _mixedCatalog();
 
     // Nothing marked means everything.
-    await _pump(tester, CatalogBrowseScreen(items: catalog));
+    await _pump(tester, browseScreen(catalog));
     _expectGridShows({..._mixedTitles}, _mixedTitles);
     _expectFilterBadge(null);
 
     const expectations = {
       'cartera': {_walletTitle},
-      'bolsa': {_bagTitle, _externalBagTitle},
+      'bolsa': {_bagTitle, _secondBagTitle},
       'reloj': {_watchTitle},
       'perfume': {_perfumeTitle},
       'otros': {_generalTitle},
     };
     for (final entry in expectations.entries) {
-      await _pumpFresh(tester, CatalogBrowseScreen(items: catalog));
+      await _pumpFresh(tester, browseScreen(catalog));
       await _applyCategories(tester, [entry.key]);
 
       expect(find.byKey(const Key('catalog-filter-apply')), findsNothing);
@@ -555,7 +429,7 @@ void main() {
   testWidgets('several categories show the union of their products',
       (tester) async {
     _useTallPhone(tester);
-    await _pump(tester, CatalogBrowseScreen(items: _mixedCatalog()));
+    await _pump(tester, browseScreen(_mixedCatalog()));
 
     await _applyCategories(tester, ['cartera', 'reloj']);
     _expectGridShows({_walletTitle, _watchTitle}, _mixedTitles);
@@ -583,13 +457,11 @@ void main() {
     _useTallPhone(tester);
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [
-          _monetta(1, title: 'Cartera Negra', category: 'cartera'),
-          _monetta(2, title: 'Cartera Café', category: 'cartera'),
-          _monetta(3, title: 'Reloj Negro', category: 'reloj'),
-        ],
-      ),
+      browseScreen([
+        _monetta(1, title: 'Cartera Negra', category: 'cartera'),
+        _monetta(2, title: 'Cartera Café', category: 'cartera'),
+        _monetta(3, title: 'Reloj Negro', category: 'reloj'),
+      ]),
     );
 
     await _openFilterPanel(tester);
@@ -611,13 +483,11 @@ void main() {
     _useTallPhone(tester);
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [
-          _monetta(1, title: 'Cartera Uno', category: 'cartera'),
-          _monetta(2, title: 'Cartera Dos', category: 'cartera'),
-          _monetta(3, title: 'Reloj Tres', category: 'reloj'),
-        ],
-      ),
+      browseScreen([
+        _monetta(1, title: 'Cartera Uno', category: 'cartera'),
+        _monetta(2, title: 'Cartera Dos', category: 'cartera'),
+        _monetta(3, title: 'Reloj Tres', category: 'reloj'),
+      ]),
     );
 
     await _openFilterPanel(tester);
@@ -644,7 +514,7 @@ void main() {
   testWidgets('clearing in the panel also removes the categories',
       (tester) async {
     _useTallPhone(tester);
-    await _pump(tester, CatalogBrowseScreen(items: _mixedCatalog()));
+    await _pump(tester, browseScreen(_mixedCatalog()));
 
     await _applyCategories(tester, ['cartera', 'reloj']);
     _expectFilterBadge(2);
@@ -669,12 +539,10 @@ void main() {
     _useTallPhone(tester);
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [
-          _monetta(1, title: 'Cartera Café', category: 'cartera'),
-          _monetta(2, title: 'Reloj Negro', category: 'reloj'),
-        ],
-      ),
+      browseScreen([
+        _monetta(1, title: 'Cartera Café', category: 'cartera'),
+        _monetta(2, title: 'Reloj Negro', category: 'reloj'),
+      ]),
     );
 
     // A wallet in black does not exist: the combination is empty.
@@ -713,7 +581,7 @@ void main() {
 
     await _pump(
       tester,
-      CatalogBrowseScreen(items: [_monetta(1), _external(1)]),
+      browseScreen([_monetta(1), _bag(2, title: 'Bolsa de mano 2')]),
     );
 
     await tester.tap(find.byKey(const Key('catalog-filter-button')));
@@ -757,7 +625,7 @@ void main() {
     await tester.tap(find.byKey(const Key('catalog-filter-apply')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Bolsa External Item 1'), findsOneWidget);
+    expect(find.text('Bolsa de mano 2'), findsOneWidget);
     expect(find.text('Monetta Item 1'), findsNothing);
     expect(find.byKey(const Key('catalog-filter-count')), findsOneWidget);
   });
@@ -768,9 +636,9 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
 
-    final cafe = _external(1, title: 'Bolsa Tote Café');
-    final negra = _external(2, title: 'Crossbody Negra');
-    await _pump(tester, CatalogBrowseScreen(items: [cafe, negra]));
+    final cafe = _bag(1, title: 'Bolsa Tote Café');
+    final negra = _bag(2, title: 'Crossbody Negra');
+    await _pump(tester, browseScreen([cafe, negra]));
 
     await tester.tap(find.byKey(const Key('catalog-filter-button')));
     await tester.pumpAndSettle();
@@ -788,8 +656,8 @@ void main() {
 
     await tester.tap(find.byKey(const Key('catalog-filter-apply')));
     await tester.pumpAndSettle();
-    expect(find.text('Bolsa Bolsa Café tote'), findsOneWidget);
-    expect(find.text('Bolsa Negra crossbody'), findsNothing);
+    expect(find.text('Bolsa Tote Café'), findsOneWidget);
+    expect(find.text('Crossbody Negra'), findsNothing);
   });
 
   testWidgets('the filter sheet fits a compact phone without overflow',
@@ -800,9 +668,7 @@ void main() {
 
     await _pump(
       tester,
-      CatalogBrowseScreen(
-        items: [_external(1, title: 'Bolsa Tote Café')],
-      ),
+      browseScreen([_bag(1, title: 'Bolsa Tote Café')]),
     );
     await tester.tap(find.byKey(const Key('catalog-filter-button')));
     await tester.pumpAndSettle();
@@ -821,15 +687,13 @@ void main() {
 
       await _pump(
         tester,
-        CatalogBrowseScreen(
-          items: [
-            _external(1),
-            _monetta(1, category: 'cartera'),
-            _monetta(2, category: 'reloj'),
-            _monetta(3, category: 'perfume'),
-            _monetta(4),
-          ],
-        ),
+        browseScreen([
+          _bag(5),
+          _monetta(1, category: 'cartera'),
+          _monetta(2, category: 'reloj'),
+          _monetta(3, category: 'perfume'),
+          _monetta(4),
+        ]),
       );
       await tester.pump();
       expect(tester.takeException(), isNull, reason: 'screen without the rail');
@@ -854,66 +718,29 @@ void main() {
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
 
-    final items = [for (var i = 0; i < 30; i++) _external(i)];
-    await _pump(tester, CatalogBrowseScreen(items: items));
+    final items = [for (var i = 0; i < 30; i++) _monetta(i)];
+    await _pump(tester, browseScreen(items));
     await tester.pump();
 
-    expect(find.text('Bolsa External Item 0'), findsOneWidget);
+    expect(find.text('Monetta Item 0'), findsOneWidget);
 
     // Scroll to the bottom and confirm the last item eventually renders —
     // i.e. it was never excluded by a hidden cap.
     await tester.scrollUntilVisible(
-      find.text('Bolsa External Item 29'),
+      find.text('Monetta Item 29'),
       400,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Bolsa External Item 29'), findsOneWidget);
+    expect(find.text('Monetta Item 29'), findsOneWidget);
   });
 
-  testWidgets(
-      'tapping an external tile opens its in-app description; only its CTA opens the merchant',
-      (tester) async {
+  testWidgets('a catalog tile shows no wishlist affordance', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(800, 1600);
     tester.view.devicePixelRatio = 1.0;
 
-    Uri? openedUri;
-    final items = [_external(1)];
-    await _pump(
-      tester,
-      CatalogBrowseScreen(
-        items: items,
-        openExternalLink: (uri) async {
-          openedUri = uri;
-          return true;
-        },
-      ),
-    );
-    await tester.pump();
-
-    await tester.tap(find.text('Bolsa External Item 1'));
-    await tester.pumpAndSettle();
-
-    expect(openedUri, isNull);
-    expect(find.byType(ExternalProductScreen), findsOneWidget);
-    expect(find.text('Descripción del producto'), findsOneWidget);
-
-    await tester.tap(find.text('VER EN COACH'));
-    await tester.pumpAndSettle();
-
-    expect(
-      openedUri,
-      Uri.parse('https://www.coach.com/products/item-1/C1.html'),
-    );
-  });
-
-  testWidgets('an external tile shows no wishlist affordance', (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(800, 1600);
-    tester.view.devicePixelRatio = 1.0;
-
-    final items = [_external(1)];
-    await _pump(tester, CatalogBrowseScreen(items: items));
+    final items = [_monetta(1)];
+    await _pump(tester, browseScreen(items));
     await tester.pump();
 
     expect(find.byIcon(Icons.favorite), findsNothing);

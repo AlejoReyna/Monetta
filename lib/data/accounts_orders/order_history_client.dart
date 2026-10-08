@@ -1,7 +1,6 @@
 /// Injected client for `GET /customers/me/orders` on `services/accounts_orders`
 /// — the backend that unifies real Shopify checkout orders and hand-entered
-/// WhatsApp apartado orders (`docs/ACCOUNTS_AND_SYNC_PLAN.md` Phase 3). Same
-/// injected-transport shape as `data/external_catalog/external_catalog_client.dart`.
+/// WhatsApp apartado orders (`docs/ACCOUNTS_AND_SYNC_PLAN.md` Phase 3).
 library;
 
 import 'dart:async';

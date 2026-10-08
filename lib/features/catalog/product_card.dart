@@ -3,8 +3,8 @@
 /// This is the widget every package uses — Home's rails (A), the catalog
 /// surfaces here (B), the related grid on the product page (C) and Favourites
 /// (E). It is a thin, store-aware wrapper: the anatomy, proportions and
-/// typography live in [MonettaProductTile] so a [CatalogItem] renders
-/// identically without being forced into a [Product].
+/// typography live in [MonettaProductTile], so the full-catalog browser
+/// renders identically without this store-aware wrapper.
 ///
 /// ## Contract
 ///

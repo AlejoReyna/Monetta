@@ -7,7 +7,7 @@ import 'package:monetta_app/features/product/product_selection.dart';
 
 import '../../support/product_screen_harness.dart';
 
-// FICHA-T2, RESP-02 / A11Y-01: the ficha (Monetta and external) under the
+// FICHA-T2, RESP-02 / A11Y-01: the ficha under the
 // width and text-scale matrix with a real bottom inset, and the accessibility
 // contract of its header, dock and secondary actions.
 
@@ -94,17 +94,6 @@ void main() {
           await _expectMatrixContract(tester, width: width);
         });
       }
-
-      testWidgets('RESP-02 ficha externa, long name, $label', (tester) async {
-        setPhoneView(tester, width: width, inset: _inset);
-        await pumpExternal(
-          tester,
-          item: externalItem(title: kLongProductName),
-          scale: scale,
-        );
-
-        await _expectMatrixContract(tester, width: width);
-      });
     }
   }
 

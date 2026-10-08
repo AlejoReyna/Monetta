@@ -765,3 +765,71 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - CHAR-11 sigue verde sobre el código fusionado: el aspecto que fija D-10 no cambió con PR #11.
   - ARCH-03 sigue roja, ahora con 781 violaciones en 56 archivos (antes 714 en 47). Las nuevas vienen de las pruebas y los harnesses de PR #11, que construyen el navegador con `CatalogItem`.
 - **Veredicto:** sincronización aprobada. RF-20 continúa en esta rama.
+
+### 2026-10-08 · RF-20 · iteración 1 · PENDIENTE DE G6
+
+- **Agentes:**
+  - `test-engineer` hizo la parte A.
+  - `flutter-implementer` hizo las partes B y C en un solo encargo. Lo cortó el límite semanal de la API y se retomó con su contexto.
+  - El orquestador redactó los encargos, verificó el rojo, integró `main` a mitad del WP (ver la entrada de sincronización), auditó y borró un archivo huérfano.
+- **Base:** `e5cbbd1`, después `72471f3` tras el merge; rama `refactor/rf-20-catalogo-externo-app`.
+- **Decisiones:**
+  - D-10 (persona): conservar el aspecto de las tarjetas del catálogo completo.
+  - El contrato del admin (`showExternalPicks`, `AdminChannel.externalCatalog`, `external_source`) se queda hasta RF-21, para que los cambios sigan siendo aditivos.
+- **Parte A (verificada por el auditor):**
+  - `lib/` intacto.
+  - ARCH-03 roja por violaciones reales: 714 en 47 archivos antes del merge y 781 en 56 después.
+  - CHAR-11 verde antes y después del merge, sin nombrar nada prohibido.
+  - La lista de excepciones de ARCH-03 es viva y tiene autoprueba del escáner.
+- **Diff (partes B y C):**
+  - **Borrados de `lib/`:**
+    - `data/external_catalog/` (5 archivos);
+    - `app/external_catalog_controller.dart` y `app/mixed_feed.dart`;
+    - `features/home/external_catalog_section.dart` y `features/product/external_product_screen.dart`;
+    - `reco/external_facets.dart`;
+    - `domain/catalog_item.dart` y `data/shopify/catalog_item_mapper.dart`;
+    - `features/catalog/extracted_badge.dart` (orquestador: quedó huérfano y sólo marcaba artículos externos).
+  - **Navegador:** `CatalogBrowseScreen` y `openCatalogBrowse` reciben `List<Product>` más `Map<String, CanonicalFacets>` y se pueden montar sin `StoreScope`. `ProductTileData.forCatalogBrowse` sustituye a `fromCatalogItem` con la misma salida. El inicio y la colección pasan `store.products` y `store.facetsById`.
+  - **Dinero:** `lib/domain/money.dart` (`Money` y `Currency`) y `lib/app/money_format.dart` (`kMoney`, `kUnknownPriceLabel`, `formatCatalogMoney`), movidos sin cambios; `theme.dart` los reexporta.
+  - **Guarda:** `ExternalCatalogConfig` queda reducido a `flagRequestedInEnvironment`.
+  - **Comentarios:** reescritos sin referencias a módulos borrados, también en `lib/data/local/README.md` (orquestador).
+- **Equivalencia (revisada por el auditor campo por campo para productos de monetta.mx):**
+  - búsqueda, orden por novedad (`updatedAt` = el antiguo `lastObservedAt`), precio, marca (con respaldo `'Monetta'`), tipo de bolsa, colores, rangos MXN y disponibilidad;
+  - el toque abre `ProductScreen`; el agregado rápido y las claves `monetta:<id>` no cambian;
+  - el respaldo por `vertical` de `_categoryFor` era inalcanzable para un `Product`: la vertical salía de la misma categoría, y sin categoría daba `otros`, que es lo que devuelve ahora.
+- **Pruebas:**
+  - **Borradas:** 10 archivos dedicados (90 declaraciones; unas 100 en ejecución por las pruebas parametrizadas) y casos cuyo objeto era externo. Esos casos son:
+    - la configuración retirada (3);
+    - `externalProductName` (1);
+    - tres casos del navegador con artículos externos;
+    - USD y precio nulo (1);
+    - el agregado rápido externo (1);
+    - la ficha externa en `product_header` (13), `product_typography` (3), `product_layout_responsive` (8) y `purchase_dock` (3).
+  - **Nuevas:**
+    - `ProductTileData the catalog browser keeps the plain MXN price, with no discount`;
+    - `the flag is not requested in the test environment` (guarda, INV-11).
+  - **Adaptadas** sin perder aserciones: sólo cambió cómo se construyen los datos, con `Product` y facetas a través de `test/support/catalog_browse_fixtures.dart`.
+    - El auditor revisó las aserciones borradas archivo por archivo: todas tenían por objeto un artículo externo.
+    - En `catalog_browse_screen_test.dart` cambian algunos literales porque las piezas externas se sustituyen por bolsos de monetta.mx (`shopperProductName` en lugar de `externalProductName`); los predicados son los mismos.
+    - En `home_external_spacing_test.dart` se retira la aserción sobre un tipo que ya no existe; ARCH-03 garantiza su ausencia.
+  - **Delta medida:** 1251 pruebas (1245 tras el merge más las 6 de la parte A) → 1117. Neto −134: 136 borradas y 2 nuevas. La tabla del agente sumaba 34 casos sueltos en vez de 36; prevalece la medición del auditor.
+- **Gates (ejecutados por el auditor sobre el árbol final):**
+  - G0 → `lib/` y `test/` (más el README de `lib/data/local`); `git diff --check` limpio. El stash está vacío tras el incidente del agente, que hizo un `git stash` por error y lo deshizo; el contenido se verificó íntegro.
+  - G1 → `Formatted 329 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → ARCH-03, CHAR-11, INV-11, INV-12, INV-14 y la guarda: `+44: All tests passed!`.
+  - G4 → `+1117 ~5: All tests passed!`.
+  - G5 → catálogo válido (103 productos, 340 imágenes); secretos OK.
+  - G6 → **no ejecutado**: le toca a la persona.
+  - G7 y G8 → no aplican.
+- **Invariantes:**
+  - 10: `ENABLE_EXTERNAL_CATALOG` sigue rechazado (`runtime_config_test`, `dart_defines_validation_test` y `external_catalog_config_test`).
+  - 13: `lib/domain/money.dart` sin Flutter (`architecture_test`).
+- **Hallazgos:**
+  - [Baja] `formatCatalogMoney(null)`, `kUnknownPriceLabel` y `Currency.usd` quedaron sin uso alcanzable. Se movieron sin cambios; RF-60 rediseña `Money`.
+  - [Baja] `MonettaProductTile.imageOverlay` quedó sin llamadores. Es un parámetro genérico y se conserva.
+  - [Baja] `docs/ARCHITECTURE.md` y `docs/US_SOURCING_DURABILITY.md` aún describen el catálogo externo. Pasan a RF-22, que corrige la documentación.
+  - [Baja] El helper `externalApp` de `product_screen_harness.dart` y el nombre del archivo `home_external_spacing_test.dart` conservan «external»; ninguno se refiere ya al catálogo externo.
+  - [Baja] RF-21 debe retirar del backend `external_source` y `showExternalPicks`, y después de la app `AdminChannel.externalCatalog` y `showExternalPicks`, con sus excepciones en ARCH-03.
+- **Commit:** autorizado en esta sesión, con G6 pendiente, como RF-18.
+- **Siguiente paso:** RF-17 sigue esperando el G6 de RF-18 y a la persona. El siguiente elegible es RF-21 (backend).

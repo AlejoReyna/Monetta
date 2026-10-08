@@ -10,12 +10,10 @@
 ///
 /// ## Why a presentation widget and not one model
 ///
-/// [Product] (Shopify, MXN, Monetta checkout) and [CatalogItem] (source
-/// independent, possibly USD, possibly an external merchant) are genuinely
-/// different domain objects — collapsing them would lose currency, identity,
-/// origin and purchase destination. So the *view data* is shared and the two
-/// models keep their own small adapters:
-/// [ProductTileData.fromProduct] and [ProductTileData.fromCatalogItem].
+/// The tile never reads a [Product] itself: the *view data* is shared and each
+/// screen adapts what it knows through a small factory,
+/// [ProductTileData.fromProduct] for the product grids and
+/// [ProductTileData.forCatalogBrowse] for the full-catalog browser.
 library;
 
 import 'package:flutter/material.dart';
@@ -26,7 +24,7 @@ import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../data/normalize/facets.dart';
-import '../../domain/catalog_item.dart';
+import '../../domain/money.dart';
 import '../../domain/product.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
@@ -229,28 +227,32 @@ class ProductTileData {
     );
   }
 
-  /// Source-independent catalog item → tile.
+  /// Full-catalog browser → tile.
   ///
-  /// Currency stays explicit ([formatCatalogMoney] prints `MXN`/`USD`) and an
-  /// unknown price is never coerced to `$0`. No badge is derived here: a
-  /// [CatalogItem] carries no `compare_at`, and `sourcePrice` is the merchant's
-  /// own listing, not a Monetta discount.
-  factory ProductTileData.fromCatalogItem(CatalogItem item) {
+  /// Currency stays explicit ([formatCatalogMoney] prints `MXN`) and no badge
+  /// or struck-through price is derived here: the browser shows the plain
+  /// current price. [facets] supplies the brand, as in [catalogBrowseBrand].
+  factory ProductTileData.forCatalogBrowse(
+    Product product, {
+    CanonicalFacets? facets,
+  }) {
     return ProductTileData(
-      brand: _catalogBrandLabel(item),
-      title: item.isExternal
-          ? externalProductName(title: item.title, category: item.category)
-          : shopperProductName(item.title),
-      priceLabel: formatCatalogMoney(item.price),
-      imageUrls: [if (item.imageUrl case final url?) url],
-      inStock: item.availability != CatalogAvailability.outOfStock,
+      brand: catalogBrowseBrand(product, facets),
+      title: shopperProductName(product.title),
+      priceLabel: formatCatalogMoney(
+        Money(amount: product.price, currency: Currency.mxn),
+      ),
+      imageUrls: [if (product.primaryImage case final url?) url],
+      inStock: product.isInStock,
     );
   }
 }
 
-String _catalogBrandLabel(CatalogItem item) {
-  final brand = item.brand.trim();
-  return humanizeCatalogValue(brand.isEmpty ? item.merchant.trim() : brand);
+/// The humanized brand the full-catalog browser shows and filters by: the
+/// canonical brand facet, else the raw vendor, else the store name.
+String catalogBrowseBrand(Product product, CanonicalFacets? facets) {
+  final brand = (facets?.brand?.value ?? product.vendor).trim();
+  return humanizeCatalogValue(brand.isEmpty ? 'Monetta' : brand);
 }
 
 /// The shared card.
@@ -295,8 +297,8 @@ class MonettaProductTile extends StatelessWidget {
   /// both. A long press still opens the quick view through [onQuickView].
   final Widget? quickAction;
 
-  /// Extra marker pinned to the top-left of the photograph, e.g. the
-  /// external-source badge. Drawn under the discount badge's slot.
+  /// Extra marker pinned to the top-left of the photograph. Drawn under the
+  /// discount badge's slot.
   final Widget? imageOverlay;
 
   /// Optional short line above the brand — a real restock or discount reason,

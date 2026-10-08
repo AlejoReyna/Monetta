@@ -11,7 +11,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 import '../../app/catalog_store.dart';
-import '../../app/mixed_feed.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
@@ -258,10 +257,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
     final store = StoreScope.of(context);
     openCatalogBrowse(
       context,
-      items: fullDeduplicatedCatalog(
-        monettaItems: store.catalogItems,
-        externalItems: const [],
-      ),
+      products: store.products,
+      facetsById: store.facetsById,
     );
   }
 

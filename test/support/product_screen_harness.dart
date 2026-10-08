@@ -7,9 +7,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/domain/product.dart';
-import 'package:monetta_app/features/product/external_product_screen.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
 import 'package:monetta_app/main.dart';
@@ -162,55 +160,6 @@ Product singleVariantAssetProduct(CatalogStore store) => store.products
     .firstWhere((p) => p.isInStock && selectableVariants(p).isEmpty);
 
 // ---------------------------------------------------------------------------
-// External pieces
-// ---------------------------------------------------------------------------
-
-CatalogItem externalItem({
-  String title = 'Brooklyn Shoulder Bag 28',
-  String? category = 'Handbags',
-}) =>
-    CatalogItem(
-      sourceScopedId: 'coach_us:CU068',
-      source: CatalogSourceType.coachUs,
-      merchant: 'Coach',
-      title: title,
-      brand: 'Coach',
-      category: category,
-      imageUrl: null,
-      price: const Money(amount: 295, currency: Currency.usd),
-      availability: CatalogAvailability.inStock,
-      detailUrl:
-          'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068.html',
-      marketRestriction: MarketRestriction.unitedStates,
-      lastObservedAt: DateTime.utc(2026, 8, 12),
-      purchaseMode: PurchaseMode.ownerProcurement,
-      variants: const [
-        CatalogVariant(
-          variantId: 'CU068:B4BK',
-          sku: 'CU068 B4/BK',
-          colorName: 'Brass/Black',
-          colorCode: 'B4BK',
-          imageUrl: null,
-          price: Money(amount: 295, currency: Currency.usd),
-          availability: CatalogAvailability.inStock,
-          detailUrl:
-              'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068-B4%2FBK.html',
-        ),
-        CatalogVariant(
-          variantId: 'CU068:B4TF',
-          sku: 'CU068 B4/TF',
-          colorName: 'Brass/Toffee',
-          colorCode: 'B4TF',
-          imageUrl: null,
-          price: Money(amount: 206.5, currency: Currency.usd),
-          availability: CatalogAvailability.outOfStock,
-          detailUrl:
-              'https://www.coach.com/products/brooklyn-shoulder-bag-28/CU068%20B4%2FTF.html',
-        ),
-      ],
-    );
-
-// ---------------------------------------------------------------------------
 // View and mounting
 // ---------------------------------------------------------------------------
 
@@ -265,25 +214,6 @@ Future<void> pumpFicha(
 }) async {
   await tester.pumpWidget(
     fichaApp(store, ProductScreen(productId: productId), scale: scale),
-  );
-  if (settle) await tester.pump();
-}
-
-Future<void> pumpExternal(
-  WidgetTester tester, {
-  CatalogItem? item,
-  ExternalLinkOpener? openLink,
-  double scale = 1.0,
-  bool settle = true,
-}) async {
-  await tester.pumpWidget(
-    externalApp(
-      ExternalProductScreen(
-        item: item ?? externalItem(),
-        openLink: openLink ?? (uri) async => true,
-      ),
-      scale: scale,
-    ),
   );
   if (settle) await tester.pump();
 }

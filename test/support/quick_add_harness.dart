@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
+import 'package:monetta_app/data/normalize/facets.dart';
 import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
@@ -225,15 +225,22 @@ Widget gridApp(
     );
 
 /// [CatalogBrowseScreen] with the store above it, or without when [store] is
-/// null (the browse screen must degrade gracefully).
+/// null (the browse screen must degrade gracefully). Facets default to the
+/// store's own.
 Widget catalogApp(
   CatalogStore? store,
-  List<CatalogItem> items, {
+  List<Product> products, {
+  Map<String, CanonicalFacets>? facetsById,
   double scale = 1.0,
-}) =>
-    store == null
-        ? externalApp(CatalogBrowseScreen(items: items), scale: scale)
-        : fichaApp(store, CatalogBrowseScreen(items: items), scale: scale);
+}) {
+  final screen = CatalogBrowseScreen(
+    products: products,
+    facetsById: facetsById ?? store?.facetsById ?? const {},
+  );
+  return store == null
+      ? externalApp(screen, scale: scale)
+      : fichaApp(store, screen, scale: scale);
+}
 
 /// A host with one button that opens the quick view of [product].
 Widget quickViewApp(

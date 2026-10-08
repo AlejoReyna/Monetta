@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/domain/catalog_item.dart';
-import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/main.dart';
+
+import '../../support/catalog_browse_fixtures.dart';
 
 // The filter panel is the only entry to filtering (FICHA-T1, BRIEF 2.2): the
 // quick-filter pills of the catalog and the silhouette / sort pills of the
@@ -16,30 +16,22 @@ import 'package:monetta_app/main.dart';
 // works, from the panel. FLT-02 and FLT-03 characterize the panel as it is
 // today; FLT-01* are the target state and fail until the pills are removed.
 
-CatalogItem _item(
+BrowseEntry _item(
   int i, {
   required String title,
   required String brand,
   required double price,
-  String? category,
-  CatalogAvailability availability = CatalogAvailability.inStock,
+  String category = 'bolsa',
+  bool inStock = true,
 }) =>
-    CatalogItem(
-      sourceScopedId: 'monetta:$i',
-      source: CatalogSourceType.monettaShopify,
-      merchant: 'Monetta',
+    browseEntry(
+      i,
       title: title,
-      brand: brand,
+      vendor: brand,
       category: category,
-      imageUrl: null,
-      price: Money(amount: price, currency: Currency.mxn),
-      availability: availability,
-      detailUrl: 'https://monetta.mx/products/item-$i',
-      marketRestriction: MarketRestriction.mexico,
-      lastObservedAt: DateTime.utc(2026, 8, 10, i),
-      purchaseMode: PurchaseMode.monettaCheckout,
-      shopifyProductId: '$i',
-      vertical: CatalogVertical.bagsWallets,
+      price: price,
+      inStock: inStock,
+      updatedAt: DateTime.utc(2026, 8, 10, i),
     );
 
 /// Feed order is 1..6; prices are all different so any sort is unambiguous.
@@ -59,12 +51,12 @@ final _items = [
     title: 'Bolsa Crossbody Azul',
     brand: 'Michael Kors',
     price: 4000,
-    availability: CatalogAvailability.outOfStock,
+    inStock: false,
   ),
   _item(6, title: 'Bolsa Tote Negra', brand: 'Guess', price: 2000),
 ];
 
-String _name(int i) => ProductTileData.fromCatalogItem(_items[i - 1]).title;
+String _name(int i) => _items[i - 1].tileData.title;
 
 List<String> _feedOrder() => [for (var i = 1; i <= 6; i++) _name(i)];
 
@@ -87,11 +79,11 @@ Widget _app(Widget home, {double scale = 1.0}) => MaterialApp(
 
 Future<void> _pumpCatalog(
   WidgetTester tester, {
-  List<CatalogItem>? items,
+  List<BrowseEntry>? items,
   double scale = 1.0,
 }) async {
   await tester.pumpWidget(
-    _app(CatalogBrowseScreen(items: items ?? _items), scale: scale),
+    _app(browseScreen(items ?? _items), scale: scale),
   );
   await tester.pump();
 }

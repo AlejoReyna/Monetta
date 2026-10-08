@@ -7,7 +7,7 @@ import 'package:monetta_app/reco/explainer.dart';
 
 import '../../support/product_screen_harness.dart';
 
-// FICHA-T2, TYPE-01d: the product-related titles of both fichas use the face
+// FICHA-T2, TYPE-01d: the product-related titles of the ficha use the face
 // of the card names (`boutiqueText` family and fallback chain) instead of the
 // editorial serif (BRIEF 2.3). The style handed to each `Text` is read
 // directly, so the Ahem test font is irrelevant.
@@ -101,54 +101,6 @@ void main() {
         find.text('Otras formas de comprar'),
         reason: 'purchase section',
       );
-    });
-  });
-
-  group('TYPE-01d ficha externa', () {
-    final item = externalItem();
-    final name = externalProductName(
-      title: item.title,
-      category: item.category,
-    );
-
-    Future<void> mount(WidgetTester tester) async {
-      setPhoneView(tester);
-      await pumpExternal(tester, item: item);
-    }
-
-    testWidgets('TYPE-01d the main name is sans w600, 22-24', (tester) async {
-      await mount(tester);
-
-      await scrollTo(tester, contentNameText(name));
-      final style = styleOf(tester, contentNameText(name));
-      _expectSans(style, reason: 'main name');
-      expect(style.fontSize, inInclusiveRange(22, 24));
-    });
-
-    testWidgets('TYPE-01d "Descripción del producto" is a section heading',
-        (tester) async {
-      await mount(tester);
-
-      // Case-insensitive: the heading used to be set in capitals.
-      final heading = find.byWidgetPredicate(
-        (widget) =>
-            widget is Text &&
-            widget.data?.toLowerCase() == 'descripción del producto',
-      );
-      await _expectSectionHeading(
-        tester,
-        heading,
-        reason: 'Descripción del producto',
-      );
-    });
-
-    testWidgets('TYPE-01d the header title is 18-20', (tester) async {
-      await mount(tester);
-
-      expect(headerTitle(), findsOneWidget);
-      final style = styleOf(tester, headerTitle());
-      _expectSans(style, reason: 'header title');
-      expect(style.fontSize, inInclusiveRange(18, 20));
     });
   });
 }

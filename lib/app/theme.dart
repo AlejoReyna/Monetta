@@ -5,11 +5,11 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:intl/intl.dart';
 
-import '../domain/catalog_item.dart' show Money;
 import 'motion.dart';
 import 'shopper_copy.dart';
+
+export 'money_format.dart' show formatCatalogMoney, kMoney, kUnknownPriceLabel;
 
 // ---------------------------------------------------------------------------
 // Palette
@@ -261,35 +261,6 @@ const double kSectionGap = 52;
 /// Keep navigation wordmarks on this token so routes and scroll states cannot
 /// silently render the Monetta identity at different sizes.
 const double kAppBarWordmarkHeight = 24;
-
-/// Matches the store's `money_format` of `$ {{amount}}` in MXN.
-final NumberFormat kMoney = NumberFormat.currency(
-  locale: 'es_MX',
-  symbol: r'$ ',
-  decimalDigits: 2,
-);
-
-/// The neutral label shown in place of a price line when [Money] is `null` —
-/// an unknown price is never rendered as `$0`, which would read as "free."
-const String kUnknownPriceLabel = 'Consultar precio';
-
-/// Renders a mixed-feed [Money] with an explicit currency code — `$1,999
-/// MXN`, `$350 USD` — never converted, never inferred. `null` (a genuinely
-/// unknown price — see `domain/catalog_item.dart`) renders
-/// [kUnknownPriceLabel] rather than being coerced to a number. Used by the
-/// external research section (`features/home/external_catalog_section.dart`)
-/// and the unified feed/browse screens; the existing Monetta-only screens
-/// keep using [kMoney] unchanged.
-String formatCatalogMoney(Money? money) {
-  if (money == null) return kUnknownPriceLabel;
-  final isWhole = money.amount == money.amount.roundToDouble();
-  final formatter = NumberFormat.currency(
-    locale: 'en_US',
-    symbol: r'$',
-    decimalDigits: isWhole ? 0 : 2,
-  );
-  return '${formatter.format(money.amount)} ${money.currencyCode}';
-}
 
 // ---------------------------------------------------------------------------
 // Typography
