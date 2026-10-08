@@ -743,3 +743,25 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Baja] Si el host de `_source` del asset dejara de coincidir con el dominio configurado (por ejemplo `www.monetta.mx`), volvería el reset en el primer sync. `bin/refresh_catalog_snapshot.dart` genera hoy `https://monetta.mx/products.json?`.
 - **Commit:** en `refactor/rf-24-procedencia-tienda` (autorizado en esta sesión).
 - **Siguiente paso:** RF-17 está bloqueado por RF-18 (G6) y necesita a la persona. El siguiente elegible es RF-20.
+
+### 2026-10-08 · Sincronización con main (PR #10 y PR #11) · APROBADO
+
+- **Motivo:**
+  - La persona indicó que el trabajo de diseño ya estaba en `main`: PR #10 (`5430240`) y PR #11 (`6b91639`, que incluye `925f433`, con la barra compacta, la cabecera con nombre, el dock de compra y el agregado rápido).
+  - Pidió aplicar D-06 con `git merge origin/main`.
+  - Antes había simulado el merge con `git merge-tree`: un solo conflicto trivial en los imports de `product_screen.dart`.
+- **Procedimiento:**
+  - El trabajo en curso de RF-20 (parte A, el plan y la matriz) se apartó con `git stash --include-untracked`.
+  - Merge `64bbdb5` sobre `e5cbbd1`, en la rama `refactor/rf-20-catalogo-externo-app`.
+  - Conflicto único: los imports de `lib/features/product/product_screen.dart`. Se conservan `product_unavailable.dart` (RF-11) y `purchase_dock.dart` (PR #11). `catalog_store.dart` y `checkout_screen.dart` se fusionaron solos.
+  - Después se restauró el stash.
+- **Gates (ejecutados por el orquestador, sobre el árbol fusionado y antes del commit):**
+  - G1 → `Formatted 347 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G4 → `+1245 ~5: All tests passed!`: 1002 de la línea del refactor más 243 de PR #11.
+  - G5 → catálogo válido (103 productos, 340 imágenes); secretos OK.
+  - G6 a G8 → no aplican a la sincronización. Las compilaciones pendientes (RF-14 y RF-18) cubrirán también este código.
+- **Efecto en RF-20:**
+  - CHAR-11 sigue verde sobre el código fusionado: el aspecto que fija D-10 no cambió con PR #11.
+  - ARCH-03 sigue roja, ahora con 781 violaciones en 56 archivos (antes 714 en 47). Las nuevas vienen de las pruebas y los harnesses de PR #11, que construyen el navegador con `CatalogItem`.
+- **Veredicto:** sincronización aprobada. RF-20 continúa en esta rama.

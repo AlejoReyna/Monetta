@@ -42,6 +42,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | E-T2 | ¿Empaquetar Playfair Display e Inter (licencia OFL 1.1)? | Sí | **tomada, 2026-10-07:** sí, empaquetarlas con su licencia | RF-17 |
 | D-08 | Defectos latentes del reset por tienda que confirmó CHAR-03 (casos 7 y 8): la semilla del asset y cada snapshot de Firestore guardan la metadata sin `shopDomain`, y el siguiente arranque o sync con `monetta.mx` lo toma por otra tienda | WP nuevo RF-24 en la fase 1, antes del lanzamiento (E1): conservar la procedencia de tienda en la semilla y en Firestore, cambiando CHAR-03 de forma explícita | **tomada, 2026-10-07:** como se recomienda; RF-24 va después de RF-18. El orquestador lo pone antes que RF-17, porque no necesita a la persona (D-07). La persona no sabe si `FIRESTORE_CATALOG_ENABLED` está en `true` en sus archivos reales; se trata como latente | RF-24; lanzamiento (E1) |
 | D-09 | Diseño de RF-24: qué tienda registra la metadata del catálogo incluido y la de Firestore | Procedencia explícita: la semilla registra la tienda de su `_source` (monetta.mx), Firestore la configurada y una instalación nueva guarda su tienda en el cursor desde el primer arranque; la comparación exacta no cambia | **tomada, 2026-10-07:** como se recomienda. La persona confirmó que todo es del catálogo de monetta.mx; el catálogo externo de EE. UU. no participa | RF-24 |
+| D-10 | Aspecto de las tarjetas del catálogo completo cuando el navegador pase de `CatalogItem` a `Product` (RF-20) | Conservar el aspecto actual («$1,749 MXN», sin etiquetas): RF-20 es limpieza sin cambios visuales, y la alineación con las demás rejillas puede ir en RF-17 o en un PR de diseño | **tomada, 2026-10-08:** conservar el aspecto actual en RF-20 | RF-20 |
 
 **Opciones de E-T1:**
 - **(a) Tope global de 1.3.** Prioriza el diseño y es el cambio más simple.
@@ -64,7 +65,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-18 | Extracciones D02 y D03 | 1 | flutter-implementer | RF-00 | — | bloqueado: G6 de la persona (código aprobado y con commit) |
 | RF-24 | Procedencia de tienda en la semilla y en Firestore | 1 | test-engineer → flutter-implementer | RF-16; empieza cuando el código de RF-18 esté aprobado (D-08) | D-08, D-09 | cerrado |
 | RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19, RF-18, RF-24 (orden de D-07 y D-08) | E-T1, E-T2 | pendiente |
-| RF-20 | Eliminar el catálogo externo de la app | 2 | flutter-implementer | RF-16, RF-19 | E2 | pendiente |
+| RF-20 | Eliminar el catálogo externo de la app | 2 | test-engineer → flutter-implementer | RF-16, RF-19 | E2, D-10 | en curso |
 | RF-21 | Eliminar el catálogo externo del admin backend | 2 | backend-implementer | RF-00 | E2 | pendiente |
 | RF-22 | Dependencias sin uso, Makefile y docs | 2 | flutter-implementer | RF-20 | — | pendiente |
 | RF-23 | Retirar `functions/` | 2 | backend-implementer | RF-10 | Inventario de webhooks de ambas tiendas (D-02) | pendiente |
@@ -349,6 +350,19 @@ Origen: R02; requiere E2.
 - Mover `Money` y su formateo a un módulo propio, como antesala de RF-60.
 
 **Aceptación:** ARCH-03, con la delta del conteo de pruebas registrada.
+
+**Detalle (2026-10-08, al empezar el WP):**
+- **Hechos:**
+  - El catálogo externo ya está desconectado en ejecución: `ExternalCatalogConfig.fromEnvironment()` devuelve `disabled`, el inicio pasa `externalItems: const []` y `main.dart:831` ignora las rutas `external:*`. Es código muerto: unas 1 670 líneas en sus módulos.
+  - `CatalogItem` sigue vivo en el navegador del catálogo completo (`catalog_browse_screen.dart`), en `ProductTileData.fromCatalogItem` y en `CatalogStore.catalogItems`.
+  - Las tarjetas del navegador usan `formatCatalogMoney` («$1,749 MXN»), sin etiqueta de descuento, sin precio tachado y sin «NUEVO». Las demás rejillas usan `fromProduct` («$ 1,749.00», con descuento, «NUEVO» y color en el nombre).
+- **Partes, en serie, en el mismo árbol** (ARCH-03 queda en rojo hasta la última):
+  - **A · `test-engineer`:** ARCH-03 (OBJ) y una caracterización del navegador alcanzado desde la UI.
+  - **B · `flutter-implementer`:** borra los módulos externos y sus pruebas, y quita las ramas externas del navegador, de la tarjeta y del store.
+  - **C · `flutter-implementer`:** pasa el navegador, el inicio y la colección a `Product`; retira `CatalogItem` y su mapper; mueve `Money` y su formateo a un módulo propio.
+- **Contrato con el backend:** `showExternalPicks` (ajustes del inicio en el admin) y `AdminChannel.externalCatalog` (auditoría `external_source`) se quedan hasta RF-21. Quitarlos antes no sería aditivo. ARCH-03 los admite explícitamente hasta entonces, junto con la guarda de `RuntimeConfig` y de `dart_defines_validation`.
+- **Pendiente con la persona:** el aspecto de las tarjetas del catálogo completo (D-10).
+- **Gates:** G6, que ejecuta la persona.
 
 ### RF-21 · Eliminar el catálogo externo del admin backend
 

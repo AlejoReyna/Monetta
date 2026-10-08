@@ -75,6 +75,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | CHAR-08 | OBJ | El arranque con un cliente de notificaciones que nunca responde pinta el inicio igual; las notificaciones se inicializan después | RF-14 | `main.dart:772` · `notification_controller.dart:96` (R13) |
 | CHAR-09 | OBJ | Una notificación tocada en arranque en frío abre su destino una vez que el Navigator existe | RF-14, RF-31 | `notification_controller.dart:101-106` |
 | CHAR-10 | OBJ | Mientras `restore()` no termina, pedir el permiso del sistema espera el estado guardado: con el permiso ya concedido no vuelve a pedirlo ni pisa las preferencias | RF-14 | `home_screen.dart:115-123` · `notification_controller.dart:158-170` |
+| CHAR-11 | CAR | El catálogo completo (navegador abierto desde la UI) muestra los productos de la tienda con tarjetas «$N MXN», sin descuento, sin precio tachado y sin «NUEVO» (D-10), y su filtro de categoría deja sólo esa categoría | RF-20 | `catalog_browse_screen.dart` · `product_tile.dart:238` · `theme.dart` `formatCatalogMoney` |
 | CONTRACT-01 | OBJ | ID de pedido de Rewards: el mismo fixture en el cliente y el servidor; el cliente envía un segmento válido y el servidor acepta GID o numérico | RF-12 | `rewards_api.dart:78-80` · `rewards/routes.ts:69` (R12) |
 | CONTRACT-02 | OBJ | Rewards apagado: el servidor responde JSON (`feature_disabled`); la ruta desconocida da `not_found` con `requestId`; el cliente muestra «no disponible» y nunca «revisa tu conexión» | RF-13 | `server.ts:538-543,777-787` (R11) |
 | CONTRACT-03 | OBJ | Los parsers de Rewards rechazan fechas inválidas, IDs ausentes y cantidades ausentes con un error de contrato tipado | RF-15 | `rewards_models.dart:47-162` (R15) |
@@ -108,7 +109,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-18 | — (pruebas nuevas del servicio y de la fila con prefijo INV-08 o INV-06) | INV-08, INV-06 | G6, porque cambia la composición de Customer Account en `main.dart` |
 | RF-19 | — | INV-07 | G6 (iOS y Android, ejecutado por la persona) |
 | RF-24 | CHAR-03, casos 7 y 8 en su versión objetivo (D-08); los demás casos de CHAR-03 sin cambios | INV-04, INV-05 | — |
-| RF-20 | ARCH-03 | INV-11, INV-14 (se retira `mixed_feed_test`) | G6 |
+| RF-20 | ARCH-03, CHAR-11 | INV-11, INV-14 (se retira `mixed_feed_test`) | G6 |
 | RF-21 | — | INV-15 | — |
 | RF-22 | — | Todos | G6 |
 | RF-23 | — | INV-16 | — |
