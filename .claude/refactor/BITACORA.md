@@ -891,3 +891,66 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Baja] Quedan menciones históricas de `catalog_monitor` en comentarios del backend (`Dockerfile`, `logger.ts`, `README.md:214`, migraciones `001` y `009`) y en `docs/SYSTEM_IMPLEMENTATION.md` §741 y §839. Corresponden a RF-81 y RF-22.
 - **Commit:** en `refactor/rf-21-catalogo-externo-admin`, autorizado en esta sesión.
 - **Siguiente paso:** RF-22 (dependencias sin uso, Makefile y docs) depende de RF-20, que está bloqueado por G6. RF-23 necesita el inventario de webhooks de la persona. Las demás fases dependen de RF-22. Si la persona no ejecuta G6 ni entrega el inventario, el bucle se detiene aquí.
+
+### 2026-10-08 · RF-23 · verificación previa (D-02) · BLOQUEADO
+
+- **Pedido de la persona:** que el orquestador verifique si alguna suscripción de webhook o app instalada apunta a Firebase Functions.
+- **Lo verificado en el repositorio:**
+  - **TOMLs de apps de Shopify:** ninguno declara una suscripción hacia Functions.
+    - `shopify.app.catalog-mirror.toml` apunta a `https://monetta-catalog-staging.vercel.app/api`.
+    - `shopify.app.staging.toml`, a `monetta-accounts-staging.fly.dev/webhooks/*`.
+    - `shopify.app.production.toml` y `shopify.app.toml` tienen marcadores `REPLACE_*`.
+  - **URLs:** no hay ninguna de `cloudfunctions.net`, `run.app`, `firebaseapp.com` ni `web.app` en el repositorio (`.ts`, `.dart`, `.toml`, `.json`, `.yaml` y `.md`).
+  - **`functions/`:** expone `shopifyCatalogWebhook` (HTTPS), `processShopifyCatalogWebhook` (Firestore) y `reconcileShopifyCatalog` (programada). `firebase.json` declara el codebase `catalog-webhooks`.
+  - **Lo que deja la duda:** `docs/REALTIME_CATALOG_SETUP.md:135-172` describe cómo crear **por Admin API** (`webhookSubscriptionCreate`) cuatro suscripciones hacia el URL desplegado de `shopifyCatalogWebhook`. Esas suscripciones no quedan en el repositorio.
+- **Lo que no se puede verificar desde aquí:** las suscripciones vivas y el despliegue de Functions. Hacen falta credenciales de admin de Shopify y de Firebase, que el orquestador no tiene ni debe usar.
+- **Pasos para la persona:**
+  1. En cada tienda (Monetta Staging y Monetta real), consultar `webhookSubscriptions` con la app que las creó: GraphiQL de Admin API o `shopify app` sobre el TOML del espejo. Buscar `uri` con `cloudfunctions.net` o `run.app`.
+  2. Revisar también Configuración → Notificaciones → Webhooks de la tienda.
+  3. En la consola de Firebase, mirar en Functions si `shopifyCatalogWebhook` está desplegada y si tiene invocaciones recientes.
+- **Estado:** RF-23 bloqueado hasta esa verificación.
+
+### 2026-10-08 · RF-22 · inicio
+
+- **Decisión de la persona:** seguir con RF-22 tomando como base el código aprobado de RF-20, cuyo G6 sigue pendiente, como se hizo con RF-24 sobre RF-18. Una sola compilación al final cubrirá RF-14, RF-18, RF-20 y RF-22.
+- **Rama:** `refactor/rf-22-dependencias-docs`, desde `88b1989`.
+- **Verificación previa (orquestador):** las 10 dependencias (`flutter_riverpod`, `riverpod_annotation`, `riverpod_generator`, `riverpod_lint`, `custom_lint`, `go_router`, `freezed`, `freezed_annotation`, `json_serializable` y `json_annotation`) no tienen ningún import en `lib/`, `test/`, `integration_test/`, `bin/` ni `tool/`, ni anotaciones `@riverpod`, `@freezed` o `@JsonSerializable`. `analysis_options.yaml` no carga `custom_lint`.
+
+### 2026-10-08 · RF-22 · iteración 1 · PENDIENTE DE G6
+
+- **Agentes:** `flutter-implementer` se encargó de las dependencias. El orquestador reescribió la documentación y auditó.
+- **Base:** `88b1989`, rama `refactor/rf-22-dependencias-docs`. Sale del código aprobado de RF-20, por decisión de la persona.
+- **Diff:**
+  - **`pubspec.yaml`:** se quitan `flutter_riverpod`, `riverpod_annotation`, `go_router`, `freezed_annotation`, `json_annotation`, `freezed`, `json_serializable`, `riverpod_generator`, `custom_lint` y `riverpod_lint`, con dos comentarios de sección que quedaron vacíos.
+  - **`pubspec.lock`:** regenerado con `flutter pub get --offline`.
+  - **`analysis_options.yaml`:** sin la exclusión `**/*.freezed.dart` ni `invalid_annotation_target: ignore`; sigue en 0 issues.
+  - **`README.md`:** estado real del producto, toolchain fijado, piezas del repositorio (incluidas las retiradas), comandos de `make` sin conteos viejos y lista de documentación (`US_SOURCING_DURABILITY.md` marcado como histórico).
+  - **`docs/ARCHITECTURE.md`:** reescrito con hechos verificados en el código.
+    - Capas y composición en `main.dart`, con los scopes `InheritedNotifier`.
+    - Estado con `ChangeNotifier`, sin Riverpod; navegación con el Navigator, sin router (E6).
+    - Mapa de módulos actualizado: sin `core/` ni `data/external_catalog/`.
+    - Reglas: pureza (aplicada por prueba), ARCH-03 y la dirección de dependencias como meta de RF-30 y RF-33.
+    - Flujos de arranque (con la procedencia de tienda) y de checkout, con `_app_version` y `_campaign`.
+    - Codegen: sólo Drift. Registro de decisiones al día.
+    - Se retira la sección del catálogo externo.
+- **Verificación del auditor:**
+  - Las 10 dependencias no tenían imports ni anotaciones (antes del encargo).
+  - Comparación independiente de locks: 209 → 178 entradas; 31 quitadas; 0 añadidas; **0 cambios de versión**; `json_annotation` pasa de `direct main` a `transitive` (lo trae Drift).
+  - Nadie importa `package:test`, `test_core` ni `mockito`, y ni el CI ni el `Makefile` corren `dart test`.
+  - `build_runner`: el agente regeneró 639 salidas y `git diff --exit-code lib/data/local/database.g.dart` salió con 0. El auditor lo repitió sin cambios.
+- **Gates (ejecutados por el auditor):**
+  - G0 → `pubspec.yaml`, `pubspec.lock`, `analysis_options.yaml`, `README.md`, `docs/ARCHITECTURE.md` y `.claude/refactor/`; `git diff --check` limpio.
+  - G1 → `Formatted 329 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G4 → `+1118 ~5: All tests passed!`.
+  - G5 → catálogo válido; secretos OK.
+  - G6 → **no ejecutado**: cambia `pubspec`; le toca a la persona.
+- **Hallazgos:** [Baja] el aviso de `build_runner` («SDK language version 3.12.0 is newer than `analyzer` language version 3.11.0») viene del toolchain fijado y no afecta al resultado.
+- **Commit:** con G6 pendiente, como RF-18 y RF-20.
+- **Siguiente paso:** las fases 1 y 2 ya sólo dependen de la persona:
+  - G6 sobre esta rama (cubre RF-14, RF-18, RF-20 y RF-22);
+  - G8 de RF-14;
+  - la verificación de RF-23;
+  - RF-17 (capturas DEV-03 y fuentes).
+
+  Las fases 3 y siguientes esperan el lanzamiento (E1).
