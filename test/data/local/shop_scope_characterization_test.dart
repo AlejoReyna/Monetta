@@ -8,6 +8,7 @@
 /// changes one of these rules, the matching test must change explicitly.
 library;
 
+import 'dart:async';
 import 'dart:io';
 
 import 'package:drift/native.dart';
@@ -15,9 +16,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/firestore/catalog_realtime_source.dart';
 import 'package:monetta_app/data/local/catalog_cache_store.dart';
-import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/data/local/bag_store.dart';
+import 'package:monetta_app/data/local/database.dart' hide SyncCursor;
+import 'package:monetta_app/data/local/sync_cursor_store.dart';
+import 'package:monetta_app/data/local/wishlist_store.dart';
+import 'package:monetta_app/data/normalize/rules.dart';
 import 'package:monetta_app/data/repositories/catalog_repository.dart';
-import 'package:monetta_app/data/repositories/realtime_catalog_repository.dart';
 import 'package:monetta_app/data/shopify/catalog_sync.dart';
 
 import '../../shopify/catalog_sync_test.dart' show FakeTransport, syncWith;
@@ -211,11 +215,38 @@ void _expectShopReset(
   expect(state['synced_at'], isNull);
 }
 
-class _SilentSource implements CatalogRealtimeSource {
+class _ControlledSource implements CatalogRealtimeSource {
+  final controller = StreamController<List<CatalogRealtimeDocument>>();
+
   @override
-  Stream<List<CatalogRealtimeDocument>> watchProducts() =>
-      const Stream<List<CatalogRealtimeDocument>>.empty();
+  Stream<List<CatalogRealtimeDocument>> watchProducts() => controller.stream;
 }
+
+/// Lets the unawaited cache writes and stream events settle.
+Future<void> _settleUntil(bool Function() done) async {
+  for (var attempt = 0; attempt < 50 && !done(); attempt += 1) {
+    await pumpEventQueue();
+  }
+}
+
+/// A Storefront transport whose only page is malformed, so every sync fails.
+CatalogSync _failingSync() => syncWith(
+      FakeTransport([
+        {
+          'data': {'products': null},
+        },
+      ]),
+    );
+
+NormalizationRules _emptyRules() => NormalizationRules.fromJson(const {
+      'brands': <dynamic>[],
+      'categories': <dynamic>[],
+      'silhouettes': <dynamic>[],
+      'colors': <dynamic>[],
+      'patterns': <dynamic>[],
+      'facetWeights': <String, dynamic>{},
+      'newArrivalDays': 30,
+    });
 
 CatalogRealtimeDocument _firestoreDocument() => const CatalogRealtimeDocument(
       documentId: '987',
@@ -391,89 +422,203 @@ void main() {
   });
 
   test(
-      'CHAR-03 (vigente, defecto latente con Firestore activo) un snapshot '
-      'de Firestore deja la metadata sin tienda y el siguiente arranque con '
-      'monetta.mx hace el reset completo', () async {
+      'CHAR-03 (objetivo RF-24) un snapshot de Firestore registra la tienda '
+      'configurada y el siguiente arranque con monetta.mx no hace reset',
+      () async {
     final file = await _installFixture();
 
     var db = _open(file);
     final before = await _snapshot(db);
-    final repository = RealtimeCatalogRepository(
-      source: _SilentSource(),
-      cache: CatalogCacheStore(db),
+    final source = _ControlledSource();
+    var store = CatalogStore(
+      database: db,
+      shopDomain: 'monetta.mx',
+      realtimeSource: source,
     );
-    final update = await repository.applySnapshot([_firestoreDocument()]);
-    expect(update.outcome, RealtimeCatalogOutcome.applied);
+    await store.loadFromAsset();
+    source.controller.add([_firestoreDocument()]);
+    await _settleUntil(
+      () => store.products.any((p) => p.id == 'gid://shopify/Product/987'),
+    );
+    expect(store.products.map((p) => p.id), ['gid://shopify/Product/987']);
 
-    // The snapshot replaced the catalog and its metadata has no shop.
+    // The snapshot replaced the catalog and its metadata names the shop.
     final afterSnapshot = await _snapshot(db);
-    expect(afterSnapshot['cached_products']!.single['id'], contains('987'));
     final metadata = afterSnapshot['catalog_states']!.single;
     expect(metadata['source'], 'firestore');
-    expect(metadata['shop_domain'], isNull);
-    expect(afterSnapshot['sync_cursors'], equals(before['sync_cursors']));
-    expect(afterSnapshot['accounts'], hasLength(1));
-    expect(afterSnapshot['bag_lines'], hasLength(3));
+    expect(metadata['shop_domain'], 'monetta.mx');
+    expect(afterSnapshot['cached_products']!.single['id'], contains('987'));
     await db.close();
+    store.dispose();
+    await source.controller.close();
 
-    // Restarting on the very same shop now counts as "another shop".
+    // Restarting on the very same shop is not "another shop".
     db = _open(file);
-    final store = await _start(db, shopDomain: 'monetta.mx');
+    store = CatalogStore(database: db, shopDomain: 'monetta.mx');
+    await store.loadFromAsset();
+    await store.syncWithShopify();
     final after = await _snapshot(db);
-    _expectShopReset(before, after, shop: 'monetta.mx');
-    expect(store.products, isEmpty);
+    for (final table in const [
+      'accounts',
+      'sessions',
+      'bag_lines',
+      'wishlist_items',
+      'order_summaries',
+      'interaction_events',
+      'devices',
+    ]) {
+      expect(after[table], equals(before[table]), reason: '$table is kept');
+    }
+    expect(after['devices']!.single['account_id'], _accountId);
+    expect(
+      store.products.map((product) => product.id).toList(),
+      ['gid://shopify/Product/987'],
+    );
     await _shutdown(store, db);
   });
 
   test(
-      'CHAR-03 (vigente, defecto latente sin red en el primer arranque) '
-      'instalación nueva: el sync fallido tras sembrar el asset resetea la '
-      'caché y el segundo arranque queda sin catálogo', () async {
+      'CHAR-03 (objetivo RF-24) instalación nueva sin red en el primer '
+      'arranque: el sync fallido conserva el asset sembrado y el segundo '
+      'arranque sigue con catálogo', () async {
     final dir = await Directory.systemTemp.createTemp('monetta-char03-new-');
     addTearDown(() => dir.delete(recursive: true));
     final file = File('${dir.path}/monetta.sqlite');
 
     // First launch: empty database, no network.
     var db = _open(file);
-    final failing = FakeTransport([
-      {
-        'data': {'products': null},
-      },
-    ]);
     var store = await _start(
       db,
       shopDomain: 'monetta.mx',
-      catalogSync: syncWith(failing),
+      catalogSync: _failingSync(),
     );
     // `_start` seeded the asset and already awaited the first (failed) sync.
-    // A failed sync does not reload, so memory still shows the asset.
-    final firstLaunchProducts = store.products.length;
-    expect(firstLaunchProducts, greaterThan(0));
-    // A retry in the same session fails the same way and keeps it too.
-    final result = await store.syncWithShopify();
-    expect(result.outcome, CatalogSyncOutcome.failed);
-    expect(store.products, hasLength(firstLaunchProducts));
+    final firstLaunchIds = store.products.map((p) => p.id).toSet();
+    expect(firstLaunchIds, isNotEmpty);
 
-    // But the first sync ran the shop reset over the seeded asset before
-    // failing, because the asset metadata carries no shop domain.
+    // The failed sync must not run the shop reset over the seeded asset.
+    final afterFirst = await _snapshot(db);
+    expect(afterFirst['cached_products'], isNotEmpty);
+    expect(afterFirst['cached_variants'], isNotEmpty);
+    final state = afterFirst['catalog_states']!.single;
+    expect(state['source'], 'asset');
+    expect(state['status'], 'unavailable');
+    expect(state['shop_domain'], 'monetta.mx');
+    expect(afterFirst['sync_cursors'], hasLength(1));
+    final cursor = afterFirst['sync_cursors']!.single;
+    expect(cursor['shop_domain'], 'monetta.mx');
+    expect(cursor['last_updated_at'], isNull);
+    expect(cursor['last_full_sync_at'], isNull);
+    await _shutdown(store, db);
+
+    // Second launch, same shop, still offline: the catalog is still there.
+    db = _open(file);
+    store = await _start(db, shopDomain: 'monetta.mx');
+    expect(store.products, isNotEmpty);
+    expect(store.products.map((p) => p.id).toSet(), firstLaunchIds);
+    await _shutdown(store, db);
+  });
+
+  test(
+      'CHAR-03 (objetivo RF-24) instalación nueva: el primer arranque guarda '
+      'el cursor con la tienda configurada y la semilla registra su tienda',
+      () async {
+    final dir = await Directory.systemTemp.createTemp('monetta-char03-seed-');
+    addTearDown(() => dir.delete(recursive: true));
+    final file = File('${dir.path}/monetta.sqlite');
+
+    final db = _open(file);
+    final store = await _start(db, shopDomain: 'monetta.mx');
+    final after = await _snapshot(db);
+
+    expect(after['sync_cursors'], hasLength(1));
+    final cursor = after['sync_cursors']!.single;
+    expect(cursor['shop_domain'], 'monetta.mx');
+    expect(cursor['last_updated_at'], isNull);
+    expect(cursor['last_full_sync_at'], isNull);
+    final state = after['catalog_states']!.single;
+    expect(state['source'], 'asset');
+    expect(state['shop_domain'], 'monetta.mx');
+    expect(store.products, isNotEmpty);
+    await _shutdown(store, db);
+  });
+
+  test(
+      'CHAR-03 (guarda RF-24) instalación nueva con otra tienda configurada: '
+      'el asset de monetta.mx se borra en el primer sync y no vuelve',
+      () async {
+    final dir = await Directory.systemTemp.createTemp('monetta-char03-other-');
+    addTearDown(() => dir.delete(recursive: true));
+    final file = File('${dir.path}/monetta.sqlite');
+    const otherShop = 'fakcei-n9.myshopify.com';
+
+    var db = _open(file);
+    var store = await _start(
+      db,
+      shopDomain: otherShop,
+      catalogSync: _failingSync(),
+    );
     final afterFirst = await _snapshot(db);
     expect(afterFirst['cached_products'], isEmpty);
     expect(afterFirst['cached_variants'], isEmpty);
     final state = afterFirst['catalog_states']!.single;
     expect(state['source'], 'shopify');
     expect(state['status'], 'unavailable');
-    expect(state['product_count'], 0);
-    expect(state['shop_domain'], 'monetta.mx');
-    final cursor = afterFirst['sync_cursors']!.single;
-    expect(cursor['shop_domain'], 'monetta.mx');
-    expect(cursor['last_full_sync_at'], isNull);
+    expect(state['shop_domain'], otherShop);
     await _shutdown(store, db);
 
-    // Second launch, same shop: nothing is seeded any more.
     db = _open(file);
-    store = await _start(db, shopDomain: 'monetta.mx');
+    store = await _start(db, shopDomain: otherShop);
     expect(store.products, isEmpty);
     expect((await _snapshot(db))['cached_products'], isEmpty);
     await _shutdown(store, db);
+  });
+
+  test(
+      'CHAR-03 (guarda RF-24) asset sin _source: la semilla queda sin '
+      'procedencia y el primer sync la trata como otra tienda', () async {
+    final db = openTestDatabase();
+    addTearDown(db.close);
+    final cache = CatalogCacheStore(db);
+    final repository = CatalogRepository(
+      cache: cache,
+      cursorStore: SyncCursorStore(db),
+      rules: _emptyRules(),
+      catalogSync: _failingSync(),
+      shopDomain: 'monetta.mx',
+      bagStore: BagStore(db),
+      wishlistStore: WishlistStore(db),
+    );
+
+    await repository.seedFromAssetIfEmpty({
+      'products': [
+        {
+          'id': 1,
+          'handle': 'p1',
+          'title': 'Bolsa',
+          'vendor': 'Monetta',
+          'product_type': 'Bolsa',
+          'tags': <String>[],
+          'images': <String>[],
+          'created_at': '2026-07-01T00:00:00Z',
+          'updated_at': '2026-08-01T00:00:00Z',
+          'variants': [
+            {
+              'id': 11,
+              'title': 'Default Title',
+              'price': '100.00',
+              'available': true,
+            },
+          ],
+        },
+      ],
+    });
+    expect(await cache.isEmpty(), isFalse, reason: 'the asset was seeded');
+    expect((await cache.metadata())?.shopDomain, isNull);
+
+    final result = await repository.sync();
+    expect(result.outcome, CatalogSyncOutcome.failed);
+    expect(await cache.isEmpty(), isTrue);
+    expect((await cache.metadata())?.shopDomain, 'monetta.mx');
   });
 }

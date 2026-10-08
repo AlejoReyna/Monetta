@@ -105,8 +105,20 @@ class CatalogRepository {
         products: products,
         syncedAt: DateTime.tryParse('${catalogJson['_snapshot'] ?? ''}'),
         status: CatalogCacheStatus.fallback,
+        shopDomain: _assetShopDomain(catalogJson),
       ),
     );
+  }
+
+  /// Shop the bundled snapshot was taken from: the host of its `_source`
+  /// URL. Null when the asset does not declare a usable source, so the seed
+  /// then carries no provenance, as before.
+  static String? _assetShopDomain(Map<String, dynamic> catalogJson) {
+    final source = catalogJson['_source'];
+    if (source is! String) return null;
+    final host = Uri.tryParse(source)?.host;
+    if (host == null || host.isEmpty) return null;
+    return host;
   }
 
   /// Repairs an older local cache without replacing rows that may have been
@@ -302,7 +314,11 @@ class CatalogRepository {
         cursor.lastFullSyncAt == null &&
         await cache.isEmpty() &&
         !await cache.hasShopSpecificState()) {
-      return shopify.SyncCursor(shopDomain: configured);
+      // Persist the shop so the next launch finds matching provenance
+      // instead of treating the seeded catalog as another shop's.
+      final fresh = shopify.SyncCursor(shopDomain: configured);
+      await cursorStore.save(fresh);
+      return fresh;
     }
     await cache.resetShopState(configured);
     await _bagStore?.clearAllScopes();

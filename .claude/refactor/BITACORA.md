@@ -689,3 +689,57 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Decisión de la persona:** commit ahora y G6 después, como en RF-14.
 - **Estado:** RF-18 queda `bloqueado: G6 de la persona` en `PLAN.md`. Cuando la persona compile Android e iOS sobre esta rama, se registra aquí y RF-18 pasa a `cerrado`. Esa misma compilación cubre el G6 de RF-14, porque esta rama contiene su código. A RF-14 le sigue faltando G8 (DEV-01 y DEV-02, pasos de push).
 - **Rama:** `refactor/rf-18-extracciones`. RF-24 sale de esta rama: D-08 sólo exige que el código de RF-18 esté aprobado.
+
+### 2026-10-08 · RF-24 · iteración 1 · CERRADO
+
+- **Agente(s):**
+  - `test-engineer` escribió la fase roja. La primera sesión se cortó por el límite de uso de la API sin dejar cambios y se retomó con el mismo encargo.
+  - `flutter-implementer` hizo la corrección.
+  - El orquestador redactó los encargos, verificó el rojo, auditó y actualizó la documentación.
+- **Base:** `b86e08d`, rama `refactor/rf-24-procedencia-tienda`.
+- **Decisiones:**
+  - D-08: crear RF-24 antes del lanzamiento.
+  - D-09: procedencia explícita. La persona preguntó si se trataba del catálogo de EE. UU.; se le aclaró que todo es el catálogo de monetta.mx.
+- **Fase roja (verificada por el auditor):**
+  - `lib/` intacto (0 líneas de diff).
+  - En `shop_scope_characterization_test.dart`: `+8 -3`. Las tres rojas fallaron por la razón esperada:
+    - R1 (antes caso 7): `Expected: 'monetta.mx' Actual: <null>` en la metadata de Firestore;
+    - R2 (antes caso 8): `cached_products` vacía tras el sync fallido;
+    - R3: `sync_cursors` sin fila en una instalación nueva.
+  - Las guardas G1 (otra tienda configurada) y G2 (asset sin `_source`) y los seis casos anteriores pasaban.
+  - Formato y análisis limpios.
+- **Archivos del diff:**
+  - `catalog_repository.dart`:
+    - `_assetShopDomain` toma el host de `_source` para la metadata de la semilla;
+    - la rama de instalación nueva guarda `SyncCursor(shopDomain: configured)`.
+  - `realtime_catalog_repository.dart`: parámetro opcional `shopDomain`, que se escribe en la metadata de cada snapshot.
+  - `catalog_store.dart`: `_startRealtimeCatalog` pasa `_shopDomain` (1 línea).
+  - Pruebas:
+    - `shop_scope_characterization_test.dart`: casos 7 y 8 → R1 y R2; nuevas R3, G1 y G2;
+    - una prueba nueva en `catalog_repository_test.dart` y otra en `realtime_catalog_repository_test.dart` (`CHAR-03 (RF-24) …`).
+  - `docs/SYSTEM_IMPLEMENTATION.md`: §3.11 y §3.12 explican la procedencia de tienda; se refrescaron las referencias de línea de esos bloques.
+  - `.claude/refactor/` (plan, matriz y esta entrada).
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo archivos del alcance; `git diff --check` limpio.
+  - G1 → `Formatted 326 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → CHAR-03 y `test/data/repositories`: `+37: All tests passed!`.
+  - G4 → `+1002 ~5: All tests passed!` (base 997; +3 en CHAR-03, +2 unitarias).
+  - G5 → `Catálogo válido: 103 productos, 340 imágenes.`; secretos OK.
+  - G6 a G8 → no aplican: no toca nativo, `pubspec`, assets, plugins ni la composición de arranque.
+- **Filas:** CHAR-03 → verde, con los casos 7 y 8 en su versión objetivo.
+- **Invariantes:**
+  - Invariante 1: la comparación exacta y la derivación del dominio configurado no cambian; el reset ante otra tienda sigue (G1 y caso de mayúsculas).
+  - Invariante 5: Firestore sigue escribiendo a través de `CatalogWriteCoordinator`.
+  - INV-04 e INV-05 verdes en G4.
+- **Checklist:**
+  - alcance correcto;
+  - firmas públicas conservadas, sólo con el parámetro opcional;
+  - sin `skip` ni `// ignore`;
+  - sin red ni reloj real;
+  - documentación actualizada.
+- **Hallazgos:**
+  - [Baja] Las instalaciones que ya tengan metadata de Firestore sin tienda (sólo si Firestore estuvo activo) sufren un último reset en el primer arranque con este cambio. Después quedan consistentes. No hay migración, porque Firestore está apagado en los ejemplos y E3 lo deja experimental.
+  - [Baja] Si el host de `_source` del asset dejara de coincidir con el dominio configurado (por ejemplo `www.monetta.mx`), volvería el reset en el primer sync. `bin/refresh_catalog_snapshot.dart` genera hoy `https://monetta.mx/products.json?`.
+- **Commit:** en `refactor/rf-24-procedencia-tienda` (autorizado en esta sesión).
+- **Siguiente paso:** RF-17 está bloqueado por RF-18 (G6) y necesita a la persona. El siguiente elegible es RF-20.

@@ -103,6 +103,48 @@ void main() {
   tearDown(() => db.close());
 
   group('CatalogRepository', () {
+    test(
+        'CHAR-03 (RF-24) seed records the shop host of the asset _source, '
+        'and none when _source is missing or has no host', () async {
+      Map<String, dynamic> snapshot(Object? source) => {
+            if (source != null) '_source': source,
+            'products': [
+              {
+                'id': 1,
+                'handle': 'p1',
+                'title': 'Bolsa',
+                'vendor': 'Monetta',
+                'product_type': 'Bolsa',
+                'tags': <String>[],
+                'images': <String>[],
+                'created_at': '2026-01-01T00:00:00Z',
+                'updated_at': '2026-01-01T00:00:00Z',
+                'variants': <Map<String, dynamic>>[],
+              },
+            ],
+          };
+
+      Future<String?> seededShop(Object? source) async {
+        final database = openTestDatabase();
+        addTearDown(database.close);
+        final cache = CatalogCacheStore(database);
+        await CatalogRepository(
+          cache: cache,
+          cursorStore: SyncCursorStore(database),
+          rules: _emptyRules(),
+        ).seedFromAssetIfEmpty(snapshot(source));
+        return (await cache.metadata())?.shopDomain;
+      }
+
+      expect(
+        await seededShop('https://monetta.mx/products.json?'),
+        'monetta.mx',
+      );
+      expect(await seededShop(null), isNull);
+      expect(await seededShop(42), isNull);
+      expect(await seededShop('not a url'), isNull);
+    });
+
     test('sync() is a safe no-op when Shopify is not configured', () async {
       final repo = CatalogRepository(
         cache: CatalogCacheStore(db),

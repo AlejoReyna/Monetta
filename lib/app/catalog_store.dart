@@ -362,6 +362,7 @@ class CatalogStore extends ChangeNotifier {
       source: source,
       cache: _cacheStore,
       writeCoordinator: _writeCoordinator,
+      shopDomain: _shopDomain,
     );
     _realtimeSubscription = repository.watch().listen(_applyRealtimeUpdate);
   }

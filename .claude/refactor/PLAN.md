@@ -41,6 +41,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | E-T1 | Tope de escala de texto | Global 1.5 y titulares 1.2 | **tomada, 2026-10-07:** global 1.5 y titulares 1.2 | RF-17 |
 | E-T2 | ¿Empaquetar Playfair Display e Inter (licencia OFL 1.1)? | Sí | **tomada, 2026-10-07:** sí, empaquetarlas con su licencia | RF-17 |
 | D-08 | Defectos latentes del reset por tienda que confirmó CHAR-03 (casos 7 y 8): la semilla del asset y cada snapshot de Firestore guardan la metadata sin `shopDomain`, y el siguiente arranque o sync con `monetta.mx` lo toma por otra tienda | WP nuevo RF-24 en la fase 1, antes del lanzamiento (E1): conservar la procedencia de tienda en la semilla y en Firestore, cambiando CHAR-03 de forma explícita | **tomada, 2026-10-07:** como se recomienda; RF-24 va después de RF-18. El orquestador lo pone antes que RF-17, porque no necesita a la persona (D-07). La persona no sabe si `FIRESTORE_CATALOG_ENABLED` está en `true` en sus archivos reales; se trata como latente | RF-24; lanzamiento (E1) |
+| D-09 | Diseño de RF-24: qué tienda registra la metadata del catálogo incluido y la de Firestore | Procedencia explícita: la semilla registra la tienda de su `_source` (monetta.mx), Firestore la configurada y una instalación nueva guarda su tienda en el cursor desde el primer arranque; la comparación exacta no cambia | **tomada, 2026-10-07:** como se recomienda. La persona confirmó que todo es del catálogo de monetta.mx; el catálogo externo de EE. UU. no participa | RF-24 |
 
 **Opciones de E-T1:**
 - **(a) Tope global de 1.3.** Prioriza el diseño y es el cambio más simple.
@@ -61,7 +62,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-15 | Parsers estrictos de Rewards | 1 | test-engineer → flutter-implementer | RF-00 | — | cerrado |
 | RF-16 | Caracterización de reglas vigentes | 1 | test-engineer | RF-00 | — | cerrado |
 | RF-18 | Extracciones D02 y D03 | 1 | flutter-implementer | RF-00 | — | bloqueado: G6 de la persona (código aprobado y con commit) |
-| RF-24 | Procedencia de tienda en la semilla y en Firestore | 1 | test-engineer → flutter-implementer | RF-16; empieza cuando el código de RF-18 esté aprobado (D-08) | D-08 | pendiente |
+| RF-24 | Procedencia de tienda en la semilla y en Firestore | 1 | test-engineer → flutter-implementer | RF-16; empieza cuando el código de RF-18 esté aprobado (D-08) | D-08, D-09 | cerrado |
 | RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19, RF-18, RF-24 (orden de D-07 y D-08) | E-T1, E-T2 | pendiente |
 | RF-20 | Eliminar el catálogo externo de la app | 2 | flutter-implementer | RF-16, RF-19 | E2 | pendiente |
 | RF-21 | Eliminar el catálogo externo del admin backend | 2 | backend-implementer | RF-00 | E2 | pendiente |

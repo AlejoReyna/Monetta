@@ -160,7 +160,7 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | CONTRACT-01 | verde | RF-12 | 2026-10-06 · RF-12 · iteración 1 |
 | CONTRACT-02 | verde | RF-13 | 2026-10-06 · RF-13 · iteración 1 |
 | CONTRACT-03 | verde | RF-15 | 2026-10-07 · RF-15 · iteración 1 |
-| CHAR-03 | verde (CAR; casos 7 y 8 fijan defectos latentes, ver D-08) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
+| CHAR-03 | verde (CAR). Los casos 7 y 8, antes defectos latentes, pasaron a objetivo y quedaron verdes en RF-24 (D-08, D-09) | RF-16, RF-24 | 2026-10-07 · RF-16 · iteración 1 · 2026-10-08 · RF-24 · iteración 1 |
 | CHAR-04 | verde (CAR; cambia en RF-50 según E4) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
 | CHAR-05 | verde (CAR; cambia según E4) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
 | CHAR-06 | verde (CAR; cambia según E10) | RF-16 | 2026-10-07 · RF-16 · iteración 1 |
