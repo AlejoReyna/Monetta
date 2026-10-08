@@ -30,6 +30,7 @@ import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../product/quick_view.dart';
+import 'checkout_summary_row.dart';
 import 'order_confirmation_screen.dart';
 import 'shopify_cart_summary.dart';
 
@@ -1218,9 +1219,9 @@ class _OrderSummary extends StatelessWidget {
         children: [
           Text('Resumen de compra', style: boutiqueTitle(color: palette.ink)),
           const SizedBox(height: 18),
-          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
+          CheckoutSummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
           const SizedBox(height: 10),
-          _SummaryRow(
+          CheckoutSummaryRow(
             label: 'Envío',
             value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
           ),
@@ -1228,7 +1229,7 @@ class _OrderSummary extends StatelessWidget {
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Container(height: .5, color: palette.hairline),
           ),
-          _SummaryRow(
+          CheckoutSummaryRow(
             label: 'Total',
             value: kMoney.format(subtotal + shipping),
             prominent: true,
@@ -1257,45 +1258,6 @@ class _OrderSummary extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-class _SummaryRow extends StatelessWidget {
-  const _SummaryRow({
-    required this.label,
-    required this.value,
-    this.prominent = false,
-  });
-
-  final String label;
-  final String value;
-  final bool prominent;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: boutiqueText(
-              size: prominent ? 15 : 13,
-              weight: prominent ? FontWeight.w600 : FontWeight.w400,
-              color: palette.ink,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: boutiqueText(
-            size: prominent ? 16 : 13,
-            weight: prominent ? FontWeight.w700 : FontWeight.w500,
-            color: palette.ink,
-          ),
-        ),
-      ],
     );
   }
 }
@@ -1866,14 +1828,14 @@ class _CheckoutSummary extends StatelessWidget {
             ),
           Container(height: .5, color: palette.hairline),
           const SizedBox(height: 14),
-          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
+          CheckoutSummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
           const SizedBox(height: 8),
-          _SummaryRow(
+          CheckoutSummaryRow(
             label: 'Envío estimado',
             value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
           ),
           const SizedBox(height: 14),
-          _SummaryRow(
+          CheckoutSummaryRow(
             label: 'Total estimado',
             value: kMoney.format(subtotal + shipping),
             prominent: true,

@@ -475,11 +475,14 @@ customer {
 ```
 
 Referencia:
-[`customer_identity.dart:62`](../lib/data/customer_auth/customer_identity.dart#L62-L130).
+[`customer_identity.dart:69`](../lib/data/customer_auth/customer_identity.dart#L69-L138).
 
 El endpoint GraphQL tampoco está hardcodeado: se descubre desde
-`/.well-known/customer-account-api`, se valida que sea HTTPS y se cachea:
-[`customer_identity.dart:133`](../lib/data/customer_auth/customer_identity.dart#L133-L213).
+`/.well-known/customer-account-api`, se valida que sea HTTPS y se cachea.
+Las llamadas concurrentes comparten una sola petición y un fallo no se cachea.
+Identidad y pedidos usan la misma instancia de `CustomerApiDiscoveryService`,
+creada en `main.dart`, así que cada sesión de la app hace un solo discovery:
+[`customer_api_discovery.dart:34`](../lib/data/customer_auth/customer_api_discovery.dart#L34-L117).
 
 La identidad persistida proviene preferentemente de esa respuesta autenticada.
 Sólo si la consulta falla por un problema no relacionado con rechazo del token,

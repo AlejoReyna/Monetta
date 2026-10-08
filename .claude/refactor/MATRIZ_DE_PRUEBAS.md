@@ -105,7 +105,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-15 | CONTRACT-03 | — | — |
 | RF-16 | CHAR-03 a CHAR-07 | INV-02, INV-03, INV-04, INV-05 | — |
 | RF-17 | UI-01 a UI-04 | INV-12 | G6, G8 (DEV-03) |
-| RF-18 | — | INV-08, INV-06 | — |
+| RF-18 | — (pruebas nuevas del servicio y de la fila con prefijo INV-08 o INV-06) | INV-08, INV-06 | G6, porque cambia la composición de Customer Account en `main.dart` |
 | RF-19 | — | INV-07 | G6 (iOS y Android, ejecutado por la persona) |
 | RF-24 | CHAR-03, casos 7 y 8 en su versión objetivo (D-08); los demás casos de CHAR-03 sin cambios | INV-04, INV-05 | — |
 | RF-20 | ARCH-03 | INV-11, INV-14 (se retira `mixed_feed_test`) | G6 |

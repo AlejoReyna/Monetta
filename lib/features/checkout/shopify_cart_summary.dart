@@ -10,6 +10,7 @@ import '../../data/shopify/cart/cart_repository.dart';
 import '../../data/shopify/cart/cart_session_store.dart';
 import '../../domain/cart.dart';
 import '../boutique/boutique_tokens.dart';
+import 'checkout_summary_row.dart';
 
 class ShopifyCartSummary extends StatefulWidget {
   const ShopifyCartSummary({
@@ -104,7 +105,7 @@ class _ShopifyCartSummaryState extends State<ShopifyCartSummary> {
                 ),
               ],
               const SizedBox(height: 10),
-              _SummaryTextRow(
+              CheckoutSummaryRow(
                 label: 'Envío',
                 value: 'Se calcula en Shopify',
               ),
@@ -259,48 +260,9 @@ class _MoneyRow extends StatelessWidget {
   final bool prominent;
 
   @override
-  Widget build(BuildContext context) => _SummaryTextRow(
+  Widget build(BuildContext context) => CheckoutSummaryRow(
         label: label,
         value: '${negative ? '−' : ''}${money.amount} ${money.currencyCode}',
         prominent: prominent,
       );
-}
-
-class _SummaryTextRow extends StatelessWidget {
-  const _SummaryTextRow({
-    required this.label,
-    required this.value,
-    this.prominent = false,
-  });
-
-  final String label;
-  final String value;
-  final bool prominent;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: boutiqueText(
-              size: prominent ? 15 : 13,
-              weight: prominent ? FontWeight.w600 : FontWeight.w400,
-              color: palette.ink,
-            ),
-          ),
-        ),
-        Text(
-          value,
-          style: boutiqueText(
-            size: prominent ? 16 : 13,
-            weight: prominent ? FontWeight.w700 : FontWeight.w500,
-            color: palette.ink,
-          ),
-        ),
-      ],
-    );
-  }
 }

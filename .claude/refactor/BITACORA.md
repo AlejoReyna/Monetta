@@ -642,3 +642,50 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Matriz:** fila de asignación nueva para RF-24.
 - **Commit:** en `refactor/rf-16-caracterizacion`, con las pruebas, el fixture y los documentos del refactor. `.claude/settings.local.json` queda fuera.
 - **Siguiente paso:** RF-18, en una rama nueva que sale de esta.
+
+### 2026-10-07 · RF-18 · iteración 1 · PENDIENTE DE G6
+
+- **Agente(s):** `flutter-implementer`. El orquestador redactó el encargo, auditó, pasó a inglés los prefijos de las pruebas nuevas y actualizó la documentación.
+- **Base:** `f0a3115`, rama `refactor/rf-18-extracciones`.
+- **Archivos del diff:**
+  - Nuevos:
+    - `lib/data/customer_auth/customer_api_discovery.dart`: `CustomerApiDiscoveryService` con caché, una sola petición en vuelo y fallos sin cachear; el código se movió tal cual, con los mismos `debugDetail`;
+    - `lib/features/checkout/checkout_summary_row.dart` (`CheckoutSummaryRow`);
+    - `test/data/customer_auth/customer_api_discovery_test.dart` (16 pruebas);
+    - `test/features/checkout/checkout_summary_row_test.dart` (2).
+  - `customer_identity.dart` y `customer_orders.dart`:
+    - parámetro opcional `discovery`; sin él, cada servicio crea el suyo con su cliente y su timeout, sin cederle el cliente;
+    - se borraron las dos copias del discovery.
+  - `kMaxCustomerApiResponseBytes` se movió al archivo del discovery, para evitar una importación circular, y `customer_identity.dart` lo reexporta. La ruta pública no cambia.
+  - `main.dart`: una sola instancia, inyectada en identidad y en pedidos, y cerrada en `dispose()` (7 líneas).
+  - `checkout_screen.dart` y `shopify_cart_summary.dart`: usan `CheckoutSummaryRow`; se borraron `_SummaryRow` y `_SummaryTextRow`.
+  - `docs/SYSTEM_IMPLEMENTATION.md` §4.3: referencias nuevas y la nota sobre el discovery compartido.
+  - `.claude/refactor/PLAN.md`, `.claude/refactor/MATRIZ_DE_PRUEBAS.md` y esta entrada.
+- **Gates (ejecutados por el auditor sobre el árbol final):**
+  - G0 → sólo archivos del alcance. `git diff --check` limpio, y `git diff --no-index --check` también sobre cada archivo nuevo.
+  - G1 → `Formatted 326 files (0 changed)`. El renombrado de los prefijos exigió volver a formatear un archivo de prueba; después se repitieron todos los gates.
+  - G2 → «No issues found!».
+  - G3 → las dos pruebas nuevas: `+18: All tests passed!`.
+  - G4 → `+997 ~5: All tests passed!` (base 979, más 18).
+  - G5 → `Catálogo válido: 103 productos, 340 imágenes.`; secretos OK.
+  - G6 → **no ejecutado.** El WP cambia la composición de Customer Account en `main.dart`; le toca a la persona.
+  - G7 y G8 → no aplican.
+- **Invariantes:** INV-08 e INV-06 verdes en G4. El discovery no recibe tokens (invariante 3). Las firmas públicas no cambian; sólo se añade el parámetro opcional.
+- **Checklist:**
+  - alcance correcto, con la desviación declarada de la constante;
+  - sin `skip` ni `// ignore`;
+  - timeouts probados con `tester.pump`, sin reloj real;
+  - sin cambios de contrato HTTP;
+  - documentación actualizada.
+- **Hallazgos:**
+  - [Baja, corregido por el orquestador] Los prefijos `discovery compartido:` y `fila de resumen:` mezclaban español con descripciones en inglés. Ahora son `INV-08 shared discovery:` e `INV-06 summary row:`, como las pruebas vecinas.
+  - [Baja] **Comportamiento en producción.** El discovery compartido usa 15 s, el timeout de identidad. Para los pedidos baja de 20 s a 15 s, sólo en el discovery. Sin inyección, pedidos conserva sus 20 s (probado).
+  - [Baja] El cableado de `main.dart` no tiene prueba directa. Lo cubren el análisis y G6, y RF-30 moverá la composición.
+  - [Baja, de RF-16] Por indicación del encargo, las descripciones de CHAR-03 a CHAR-07 quedaron en español, a diferencia de la convención del repositorio («nombres en inglés, como el código vecino»). Quedan así. Los encargos siguientes piden descripciones en inglés después del ID.
+- **Veredicto:** código aprobado. RF-18 queda en espera de G6.
+
+### 2026-10-07 · RF-18 · commit con G6 pendiente
+
+- **Decisión de la persona:** commit ahora y G6 después, como en RF-14.
+- **Estado:** RF-18 queda `bloqueado: G6 de la persona` en `PLAN.md`. Cuando la persona compile Android e iOS sobre esta rama, se registra aquí y RF-18 pasa a `cerrado`. Esa misma compilación cubre el G6 de RF-14, porque esta rama contiene su código. A RF-14 le sigue faltando G8 (DEV-01 y DEV-02, pasos de push).
+- **Rama:** `refactor/rf-18-extracciones`. RF-24 sale de esta rama: D-08 sólo exige que el código de RF-18 esté aprobado.

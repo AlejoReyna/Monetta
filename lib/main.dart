@@ -39,6 +39,7 @@ import 'data/accounts_orders/system_account_client.dart';
 import 'data/accounts_orders/system_account_session_repository.dart';
 import 'data/admin/admin_client.dart';
 import 'data/customer_auth/customer_account_config.dart';
+import 'data/customer_auth/customer_api_discovery.dart';
 import 'data/customer_auth/customer_auth_gateway.dart';
 import 'data/customer_auth/customer_identity.dart';
 import 'data/customer_auth/customer_orders.dart';
@@ -526,6 +527,7 @@ class _MonettaAppState extends State<MonettaApp> {
   /// [_load] (nullable rather than `late final`, since [dispose] can run
   /// before that future completes, and since a build without Customer Account
   /// credentials never creates one at all).
+  CustomerApiDiscoveryService? _customerApiDiscovery;
   HttpCustomerIdentityService? _customerIdentityService;
   HttpCustomerOrdersService? _customerOrdersService;
   HttpAdminClient? _adminClient;
@@ -648,12 +650,16 @@ class _MonettaAppState extends State<MonettaApp> {
     final customerConfig = CustomerAccountConfig.fromEnvironment();
     CustomerSessionRepository? customerSession;
     if (customerConfig.isUsable) {
+      final discovery = CustomerApiDiscoveryService(config: customerConfig);
+      _customerApiDiscovery = discovery;
       final identityService = HttpCustomerIdentityService(
         config: customerConfig,
+        discovery: discovery,
       );
       _customerIdentityService = identityService;
       final ordersService = HttpCustomerOrdersService(
         config: customerConfig,
+        discovery: discovery,
       );
       _customerOrdersService = ordersService;
       customerSession = CustomerSessionRepository(
@@ -869,6 +875,7 @@ class _MonettaAppState extends State<MonettaApp> {
     _storefrontTransport?.close();
     _customerIdentityService?.close();
     _customerOrdersService?.close();
+    _customerApiDiscovery?.close();
     _adminClient?.close();
     _admin?.dispose();
     _notifications?.dispose();

@@ -60,8 +60,8 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-14 | Timeouts y notificaciones fuera del arranque | 1 | test-engineer → flutter-implementer | RF-00, RF-19 | D-05 (G8) | bloqueado: G6 y G8 de la persona |
 | RF-15 | Parsers estrictos de Rewards | 1 | test-engineer → flutter-implementer | RF-00 | — | cerrado |
 | RF-16 | Caracterización de reglas vigentes | 1 | test-engineer | RF-00 | — | cerrado |
-| RF-18 | Extracciones D02 y D03 | 1 | flutter-implementer | RF-00 | — | pendiente |
-| RF-24 | Procedencia de tienda en la semilla y en Firestore | 1 | test-engineer → flutter-implementer | RF-16, RF-18 | D-08 | pendiente |
+| RF-18 | Extracciones D02 y D03 | 1 | flutter-implementer | RF-00 | — | bloqueado: G6 de la persona (código aprobado y con commit) |
+| RF-24 | Procedencia de tienda en la semilla y en Firestore | 1 | test-engineer → flutter-implementer | RF-16; empieza cuando el código de RF-18 esté aprobado (D-08) | D-08 | pendiente |
 | RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19, RF-18, RF-24 (orden de D-07 y D-08) | E-T1, E-T2 | pendiente |
 | RF-20 | Eliminar el catálogo externo de la app | 2 | flutter-implementer | RF-16, RF-19 | E2 | pendiente |
 | RF-21 | Eliminar el catálogo externo del admin backend | 2 | backend-implementer | RF-00 | E2 | pendiente |
