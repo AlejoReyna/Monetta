@@ -954,3 +954,28 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - RF-17 (capturas DEV-03 y fuentes).
 
   Las fases 3 y siguientes esperan el lanzamiento (E1).
+
+### 2026-10-08 · RF-17 · paso 0 (diagnóstico y capturas DEV-03) · EN CURSO
+
+- **Diagnóstico de la persona:** lo ve en **iPhone con el texto predeterminado**. El problema apunta a la familia tipográfica, al tamaño nominal o a ambos, no a la escala de texto. Se registró en `PLAN.md`.
+- **Autorización:** la persona pidió preparar ya el test de capturas, para correrlo junto con el G6.
+- **Agente:** `test-engineer`. El orquestador auditó.
+- **Base:** `322a803`, rama `refactor/rf-17-tipografia`.
+- **Archivos nuevos:**
+  - `integration_test/dev03_typography_captures_test.dart` recorre inicio, una colección del inicio (`home-collection-card-*`), la ficha de la primera pieza con stock (`quick-add-*` → `product-card-*`, esperando `purchase-dock-primary`), la bolsa con una pieza agregada desde el dock y la cuenta.
+    - Captura cada pantalla a escala 1.0, 1.3 y la máxima (iOS 3.1, Android 2.0): 15 PNG por dispositivo.
+    - Esperas acotadas, sin `pumpAndSettle`. Cada pasada vuelve a la raíz. La escala se restaura en un `finally`.
+  - `test_driver/integration_test.dart`: `integrationDriver` guarda cada PNG en `build/dev03_captures/` (ignorado por git).
+- **Gates (ejecutados por el auditor):**
+  - G1 → `Formatted 331 files (0 changed)`, `test_driver/` incluido.
+  - G2 → «No issues found!».
+  - La suite de `flutter test` no cambia (el agente informó `+1118 ~5`; el test nuevo no corre ahí).
+  - `flutter drive` en simuladores → **no ejecutado**: lo corre la persona.
+    - El agente intentó correr el test en el host con `flutter test` y el sandbox lo bloqueó al descargar el framework de escritorio (`storage.googleapis.com` 403). En cualquier caso no aplica: las fuentes del host no son las del sistema.
+- **Riesgos de fragilidad** (el test nunca se ejecutó en vivo):
+  - Depende de que el inicio tenga una tarjeta de colección y de que esa colección tenga una pieza con stock y la variante 0 disponible.
+  - La bolsa persiste en el dispositivo: hay que desinstalar la app antes de cada corrida.
+  - Si un paso falla, el mensaje nombra el paso.
+- **Comandos para la persona:** están en la cabecera del test. Son `flutter devices` y luego `flutter drive --no-pub --driver=test_driver/integration_test.dart --target=integration_test/dev03_typography_captures_test.dart -d "<id>" --dart-define-from-file=config/dart_defines.ci.json --dart-define=DEV03_DEVICE=<iphone17e|iphone18promax|pixel_api37>`.
+- **Commit:** sólo el test y su driver, con `lib/` intacto. RF-17 sigue en curso.
+- **Siguiente paso:** cuando la persona entregue las capturas, `test-engineer` escribe UI-01 a UI-03 (paso 1) y se obtienen las fuentes (E-T2).
