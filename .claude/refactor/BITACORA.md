@@ -1173,3 +1173,32 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - la regla 4 fija las dos familias empaquetadas, `BoundedTextScaler` en la raíz y el uso de `textScaleFactorFor` para las alturas que contienen texto;
   - el registro de decisiones suma dos filas: tipografía (E-T2) y escala de texto (E-T1 y D-12).
 - `docs/SYSTEM_IMPLEMENTATION.md` no trata la tipografía, así que no cambia.
+
+### 2026-10-09 · RF-30 · paso 1 (ARCH-01, ARCH-04 y CHAR-15) · APROBADO
+
+- **Decisión de la persona:** D-14. La fase 3 empieza en ramas aparte que salen de `38d97cb`.
+- **Agente:** `test-engineer`. El orquestador auditó.
+- **Base:** worktree `.claude/worktrees/rf-30`, rama `refactor/rf-30-composicion`, desde `38d97cb`.
+- **Pruebas nuevas** (sin commit hasta que se implemente):
+  - `test/architecture/features_main_import_test.dart` (ARCH-01, TRQ): fija los 17 archivos de `lib/features/` que importan `main.dart`, e incluye una autoprueba del detector de imports.
+  - `test/architecture/composition_root_test.dart` (ARCH-04, TRQ):
+    - **Qué cuenta como implementación concreta:** una clase pública, no abstracta ni sellada, declarada en `lib/data/**`, cuyo nombre termine en uno de 14 sufijos de rol (`Client`, `Repository`, `Store`, …).
+    - **Mapa conocido:** 46 pares. Hay 31 en `lib/main.dart`, 8 en `catalog_store.dart`, 5 en `shopify_cart_composition.dart`, 1 en `customer_experiences_screen.dart` y 1 en `rewards_api.dart`.
+    - **Guardas:** una impide que la prueba pase en vacío y otra es la autoprueba del detector.
+  - `test/app/route_scopes_test.dart` (CHAR-15, OBJ): con `MonettaApp` montada, una ruta empujada debe ver cada scope que ve el inicio.
+- **Gates (ejecutados por el auditor en el worktree):**
+  - G0 → sólo 3 archivos nuevos en `test/`.
+  - G1 → `Formatted 344 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → `+9 -1` en `test/architecture/` más CHAR-15. ARCH-01 y ARCH-04 pasan.
+    - CHAR-15 falla por la razón descrita: a la ruta empujada le faltan `EditorialContentScope`, `HomeContentScope`, `FeaturedCatalogScope`, `AdminScope`, `AdminNotificationScope` y `OnboardingScope`.
+    - `CartScope` no lo ve ni el inicio, porque el arnés no configura Storefront.
+  - Suite → `+1209 ~5 -1`: sólo falla CHAR-15.
+  - El agente demostró, con copias temporales ya borradas, que los dos trinquetes fallan ante una violación nueva y ante una entrada que ya no existe.
+- **Hallazgos:**
+  - [Baja] El comentario de ARCH-04 dice que RF-30 debe vaciar el mapa. El plan reparte ARCH-04 entre RF-30 y RF-33, y las construcciones internas de `CatalogStore` corresponden a RF-50. Se corrige en la implementación.
+  - [Nota] Fuera de la definición de ARCH-04 quedan `MethodChannelCheckoutLauncher` (`lib/platform/`, que construye `shopify_cart_composition.dart:52`) y los clientes de Rewards de `lib/features/rewards/`. Se evalúan en RF-33.
+- **Decisiones del orquestador para la implementación:**
+  - `lib/app/shopify_cart_composition.dart` no se mueve en RF-30: `test/architecture_test.dart:83-120` (INV-12) exige esa ruta, y sus entradas de ARCH-04 quedan para RF-33.
+  - `AppRouteScopes` conserva su constructor, porque lo montan `checkout_screen_test.dart` y `account_package_e_test.dart`.
+- **Siguiente paso:** la implementación (`flutter-implementer`). Se espera `+1210 ~5`: ARCH-01 vacío, ARCH-04 sin `main.dart` y CHAR-15 en verde.
