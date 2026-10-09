@@ -1063,3 +1063,30 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Decisión del orquestador:** las pruebas de tema cubren también iOS (`CupertinoSystemText`), más allá del encargo. Se aceptan, porque la app corre en iOS.
 - **Commit:** sólo este registro y el plan. Las pruebas rojas siguen sin commit hasta el paso 3.
 - **Siguiente paso:** el paso 3 espera las capturas DEV-03 de la persona («antes de cualquier cambio de tipografía»).
+
+### 2026-10-09 · RF-17 · inicio del paso 3 y trabajo fuera del plan · EN CURSO
+
+- **Pedido de la persona** (antes de dormir): el máximo avance posible en lo que no la requiere.
+- **Lo que no puede avanzar sin ella:**
+  - el G6 de RF-14, RF-18, RF-20 y RF-22;
+  - el G8 de RF-14;
+  - la verificación de RF-23;
+  - las capturas DEV-03.
+  - Las fases 3 y siguientes esperan el lanzamiento (E1); no se empiezan sin su permiso.
+- **Decisión del orquestador: el paso 3 de RF-17 empieza antes de las capturas, sin perder el «antes».**
+  - El plan pide las capturas «antes de cualquier cambio de tipografía». Para que eso siga siendo posible se creó el worktree `.claude/worktrees/rf-17-antes`, separado en `e14d2e6`, con la receta del sandbox (sin `.claude/`) y `flutter pub get --offline`.
+  - Su `lib/` es idéntico al de RF-22, y trae el test de capturas con `--flavor staging`.
+  - La persona corre ahí los comandos de la cabecera del test.
+  - El paso 3 avanza en el checkout principal, sobre `refactor/rf-17-tipografia`.
+- **Asignación de familias del paso 3** (se deriva del plan: «roles unificados» con la serif y la sans de los tokens boutique):
+  - cada helper conserva su carácter: `editorial` pasa a Playfair Display y `display`, `wordmark`, `eyebrow` y `sans` pasan a Inter;
+  - no cambian ni pesos ni métricas;
+  - es reversible línea por línea, y la persona la revisa con DEV-03.
+- **Hecho técnico verificado:**
+  - `flutter test` arranca `flutter_tester` con `--disable-asset-fonts` (`flutter_tools/lib/src/test/flutter_tester_device.dart:119`), así que declarar las fuentes en `pubspec.yaml` no cambia ninguna prueba ni golden existente;
+  - UI-03 registra las fuentes reales con `FontLoader`.
+- **Trabajo fuera del plan: quitar el envío gratis desde $1,499**, pedido por la persona el 2026-10-08.
+  - Va en el worktree `.claude/worktrees/sin-envio-gratis-main`, rama `fix/sin-envio-gratis-main`, que sale de `origin/main` (`6b91639`). Commit `0703176`, sin push. El push y el PR los hace la persona.
+  - Pruebas SHIP-01 a SHIP-07 primero, con las dos pruebas viejas convertidas de forma explícita y la unitaria de las funciones retiradas quitada; después, la implementación.
+  - Gates del auditor en el worktree: G0 en alcance; G1 `Formatted 331 files (0 changed)`; G2 «No issues found!»; G4 `+1097 ~5: All tests passed!` (base 1077, +21, −1); G5 catálogo válido y secretos OK.
+  - **Integración futura (D-06):** la simulación `git merge-tree e14d2e6 0703176` da un solo conflicto, en `lib/features/checkout/checkout_screen.dart`. RF-18 reemplazó `_SummaryRow` por `CheckoutSummaryRow`, y el cambio del envío hace que esa fila parta un valor largo. Al integrar `main`, ese comportamiento pasa a `CheckoutSummaryRow`.

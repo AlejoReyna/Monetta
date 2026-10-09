@@ -66,7 +66,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-16 | Caracterización de reglas vigentes | 1 | test-engineer | RF-00 | — | cerrado |
 | RF-18 | Extracciones D02 y D03 | 1 | flutter-implementer | RF-00 | — | bloqueado: G6 de la persona (código aprobado y con commit) |
 | RF-24 | Procedencia de tienda en la semilla y en Firestore | 1 | test-engineer → flutter-implementer | RF-16; empieza cuando el código de RF-18 esté aprobado (D-08) | D-08, D-09 | cerrado |
-| RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19, RF-18, RF-24 (orden de D-07 y D-08) | E-T1, E-T2, D-11 | en curso: paso 0 (capturas DEV-03 de la persona) y, por D-11, pasos 1 y 2 |
+| RF-17 | Tipografía consistente y escala de texto acotada | 1 | test-engineer → flutter-implementer | RF-00, RF-19, RF-18, RF-24 (orden de D-07 y D-08) | E-T1, E-T2, D-11, D-12 | en curso: paso 3 (implementación) sobre `e14d2e6`; las capturas «antes» se toman en el worktree `.claude/worktrees/rf-17-antes` (2026-10-09) |
 | RF-20 | Eliminar el catálogo externo de la app | 2 | test-engineer → flutter-implementer | RF-16, RF-19 | E2, D-10 | bloqueado: G6 de la persona (código aprobado y con commit) |
 | RF-21 | Eliminar el catálogo externo del admin (backend y app) | 2 | test-engineer → flutter-implementer → backend-implementer | RF-00 | E2 | cerrado |
 | RF-22 | Dependencias sin uso, Makefile y docs | 2 | flutter-implementer | RF-20 (código aprobado; G6 pendiente: la persona decidió seguir, 2026-10-08) | — | bloqueado: G6 de la persona (código aprobado y con commit) |
