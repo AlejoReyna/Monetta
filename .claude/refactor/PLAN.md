@@ -83,9 +83,10 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-41 | ViewModels del piloto | 4 | test-engineer → flutter-implementer | RF-40 | D-14 | cerrado (G6 verde el 2026-10-09: Android e iOS compilan sobre `da31075`, ejecutado por la persona). Código en `refactor/rf-41-viewmodels`: PERF-01 (`ba3faa4`), A `SearchScreen` + `Command` (`1b4fa1c`), B `CollectionScreen` (`1a7710c`), C `CatalogBrowseScreen` con CHAR-17 (`c7542fb`), D `ProductScreen` (`653f4b3`, integrada en `9fa75f6`), techos PERF-01 (`1580c62`) y cierre de fachadas (`da31075`). PERF-01 final: 411/0, 435/0, 3/0 y 99/0. Evidencia para RF-43 registrada; RF-43 puede apoyarse en este código como RF-32 en el de RF-30/31 |
 | RF-42 | Upsert de destacados vía coordinador | 4 | flutter-implementer | RF-40 | E3, E10 | cerrado (`b2f3816` en `refactor/rf-42-destacados`, rebasado sobre `da31075`; pruebas en `31e4bb8`). Hecho por GPT Sol 6.1 y auditado por el orquestador con contraste en worktree temporal. El invariante 5 queda sin excepciones; no requiere G6 |
 | RF-43 | Gate de decisión de DI | 4 | orquestador | RF-41 | — | cerrado (D-16, 2026-10-09: conservar los scopes; evidencia medida en bitácora, sin WP nuevo) |
-| RF-50 | Separar `CatalogStore` tras una fachada | 5 | test-engineer → flutter-implementer | RF-43 | E4, E10 | pendiente |
+| RF-50 | Separar `CatalogStore` tras una fachada | 5 | test-engineer → flutter-implementer | RF-43, RF-42 (cerrados); RF-53 si se acepta | E4, E10 | pendiente |
 | RF-51 | `CompleteCheckout` y cierre de la DB | 5 | flutter-implementer | RF-50 | — | pendiente |
-| RF-52 | ViewModel del checkout | 5 | flutter-implementer | RF-51 | — | pendiente |
+| RF-52 | ViewModel del checkout | 5 | flutter-implementer | RF-51; integración D-06 antes de empezar | — | pendiente |
+| RF-53 | E4 en la bolsa antes de extraer (desdoblamiento propuesto) | 5 | test-engineer → flutter-implementer | RF-42 | E4 (decidida; el desdoblamiento es propuesta) | pendiente: propuesta pendiente de la persona |
 | RF-60 | `Money` y esquema v8 | 6 | test-engineer → flutter + backend | RF-50 | Inventario de instalaciones reales y su versión (D-02) | pendiente |
 | RF-61 | Modelo de dominio de pedidos y `OrderId` | 6 | flutter-implementer | RF-12 | — | pendiente |
 | RF-62 a RF-67 | Cuenta y pedidos, Rewards, notificaciones, admin, funciones de nicho, atribución | 6 | según el WP | RF-52 | E5, E8, E9; inventario de cuentas propias para RF-62 (D-02) | pendiente |
@@ -595,3 +596,59 @@ Origen: R05.
   - Riverpod.
 
 **Salida:** la decisión, registrada en la tabla. Si la inyección cambia, se crea un WP nuevo antes de la fase 5.
+
+## Detalle de los WPs de la fase 5 (mostrado a la persona el 2026-10-09; pendiente su visto bueno)
+
+Insumo verificado: `scratch/plan/fase5_detalle_propuesto.md` (107 anclas re-verificadas; correcciones aplicadas abajo). **Base de las citas: `b2f3816`** (fase 4 cerrada). IDs nuevos reservados, todos libres en la matriz: CHAR-18 a CHAR-23, CONTRACT-07 a CONTRACT-10, ARCH-06 a ARCH-08, PERF-02 y PERF-03. Orden: **RF-53 → RF-50 → RF-51 → RF-52** (RF-53 sólo si la persona acepta el desdoblamiento). RF-52 empieza después de la integración D-06 (el envío gratis; `checkout_screen.dart:1918` aún trae `_shippingFor`).
+
+### RF-53 · E4 en la bolsa antes de extraer (propuesta pendiente de la persona)
+
+Origen: R16; E4 ya decidida. Sólo cambia comportamiento sobre los colaboradores actuales, para que RF-50 sea extracción con paridad.
+
+**Hechos:**
+- La fusión lee al invitado fuera de la transacción y sobrescribe (`bag_store.dart:120-123`, `:131-136`); la llaman ambas sesiones (`customer_session_repository.dart:132`, `system_account_session_repository.dart:110`).
+- `bagLines` oculta lo ausente pero `bagQuantity` suma crudo (`catalog_store.dart:148`, `:160`); el alta suma sin tope (`:513`) y el update topa en 10 (`:555`).
+
+**Cambios:** fusión en una transacción (suma con tope 10, idempotente); el contador cuenta unidades visibles; ausentes expuestos por ID con aviso y retirada, fuera del subtotal y de Shopify; sin sustituir variantes.
+
+**Pruebas primero:** CHAR-04 y CHAR-05 pasan de CAR a OBJ según E4; CONTRACT-07 (OBJ, fusión en ambas sesiones, repetición y fallo que revierte en Drift real).
+
+**Aceptación:** CHAR-04/05 objetivo y CONTRACT-07 verdes; INV-01, INV-02, INV-05, INV-06, INV-07 e INV-08 verdes; G0–G5 más G6/G8 de la persona.
+
+**Preguntas E4 para la persona (al empezar RF-53):** igual variante con distinto producto; si un agotado presente lleva otro aviso; texto del aviso.
+
+### RF-50 · Separar `CatalogStore` tras una fachada, con paridad
+
+Origen: H01, R17, R18, R20. Depende de RF-42, RF-43 (D-16) y RF-53 si se acepta; recibe E4 y E10 implementadas.
+
+**Hechos:** el store reúne catálogo, bolsa/favoritos y perfil (`catalog_store.dart:129`, `:497`, `:633`); se construye en el constructor y la composición (`:89`, `:174`, `:358`); el perfil reconstruye y notifica (`:633`, `:641`); el full sync verificado reemplaza incluso vacío (`catalog_repository.dart:259` y cuerpo).
+
+**Cambios:** Bag/Wishlist/Interaction/RecommendationRepository sobre los stores; el `CatalogStore` delega con paridad; la fachada se borra sólo sin consumidores; sin tocar E4, E10 ni el cierre (RF-51).
+
+**Pruebas primero:** CHAR-18 (CAR, paridad), ARCH-06 (TRQ, consumidores que sólo decrecen), PERF-02 (TRQ, inicio/bolsa antes y después).
+
+**Aceptación:** las tres verdes; INV-01, INV-02, INV-04, INV-05, INV-06, INV-07, INV-12, INV-14 y CHAR-16 verdes; G0–G5 más G6/G8 de la persona.
+
+### RF-51 · `CompleteCheckout` y cierre de la DB
+
+Origen: R17, R18. Depende de RF-50.
+
+**Hechos:** la compra llama a pedidos (`checkout_screen.dart:268-269`; `account_controller.dart:353`); recibo transaccional con `operationId` (`bag_store.dart:87-114`, `tables.dart:252`); la DB la crea la composición (`app_dependencies.dart:82-94`) y el store la cierra sin esperar (`catalog_store.dart:706`); la hidratación sólo compara cuenta (`catalog_store.dart:259`).
+
+**Cambios:** `CompleteCheckout` con alcance capturado; recarga de pedidos sólo a la cuenta compradora activa; generación anti A→B→A; cierre único idempotente en composición; el carrito se construye en composición.
+
+**Pruebas primero:** CHAR-20 (CAR, flujo vigente), CHAR-19 y CHAR-21 (OBJ, generaciones y cierre), CONTRACT-08 y CONTRACT-09 (OBJ, atomicidad y compra tardía), ARCH-07 (OBJ, sólo composición cierra).
+
+**Aceptación:** las OBJ verdes; INV-01, INV-02, INV-03, INV-05, INV-06, INV-07, INV-08, INV-09 e INV-12 verdes; esquema v7 intacto; G0–G5 más G6/G8 de la persona.
+
+### RF-52 · ViewModels de bolsa y checkout
+
+Origen: H01, R18, R20, patrón RF-41. Depende de RF-51 y de D-06.
+
+**Hechos:** la bolsa arma alcance e intención en pantalla (`checkout_screen.dart:141-154`, `:187-202`, `:245-266`); `_pay` clasifica y navega (`:493-571`); recomendaciones en build (`:1138-1151`); `Command` sin concurrencia (`command.dart:57-74`); atribución obligatoria (`cart_attribution.dart:69-75`).
+
+**Cambios:** `BagViewModel` y `CheckoutViewModel` con estados inmutables y `Command`; efectos de un solo consumo; la compra durable sigue en RF-51; sólo `CheckoutCompleted` confirma.
+
+**Pruebas primero:** CHAR-22 (CAR, flujo visual), CHAR-23 (OBJ, tardíos y generaciones), CONTRACT-10 (OBJ, doble pago y errores), ARCH-08 (OBJ, fronteras) y PERF-03 (TRQ).
+
+**Aceptación:** las OBJ verdes; INV-01, INV-02, INV-05, INV-06, INV-07, INV-09, INV-10, INV-12, INV-14 verdes; G0–G5 más G6/G8 de la persona.

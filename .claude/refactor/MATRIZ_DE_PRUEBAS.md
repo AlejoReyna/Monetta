@@ -93,6 +93,21 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | ARCH-03 | OBJ | Ningún archivo de `lib/` ni `test/` referencia el catálogo externo, salvo el guard de `RuntimeConfig` | RF-20 | R02 |
 | ARCH-04 | TRQ | `lib/app/composition/` es el único lugar que construye implementaciones concretas de `data/` | RF-30, RF-33 | R18 |
 | ARCH-05 | TRQ | Sólo el repositorio del catálogo y el coordinador escriben en la caché: ninguna llamada nueva a `cache.upsertProducts` fuera de ellos | RF-42 | `catalog_store.dart:328` (R08) |
+| CHAR-18 | CAR | Paridad de la fachada y los repositorios de RF-50 sobre la base tras RF-53/RF-42 | RF-50 | fase5 |
+| CHAR-19 | OBJ | Generaciones A→B y A→B→A sin publicar ni revertir de otra generación | RF-51 | fase5 |
+| CHAR-20 | CAR | Flujo y orden vigentes de compra, cancelación/fallo y reintento | RF-51 | fase5 |
+| CHAR-21 | OBJ | Cierre único de DB: repetido, arranque parcial y sin escrituras tras cerrar | RF-51 | fase5 |
+| CHAR-22 | CAR | Flujo visual de bolsa y checkout (contacto→revisión, precarga, cancelación, confirmación) | RF-52 | fase5 |
+| CHAR-23 | OBJ | Sin efectos tardíos ni alcance mezclado ante desmontaje y cambios de cuenta | RF-52 | fase5 |
+| CONTRACT-07 | OBJ | Fusión invitado→cuenta en ambas sesiones, idempotente y atómica | RF-53 | E4 |
+| CONTRACT-08 | OBJ | Resta/recibo atómicos y repetición sin doble resta | RF-51 | fase5 |
+| CONTRACT-09 | OBJ | Compra tardía de A sin tocar la precarga nueva de B; fallo de pedidos sin segundo pago | RF-51 | fase5 |
+| CONTRACT-10 | OBJ | Doble pago presenta una vez; errores sin URL/token | RF-52 | fase5 |
+| ARCH-06 | TRQ | Consumidores de `CatalogStore` que sólo decrecen; repositorios sin depender de la fachada | RF-50 | fase5 |
+| ARCH-07 | TRQ | Sólo composición cierra la DB | RF-51 | fase5 |
+| ARCH-08 | TRQ | UI sin construir datos ni SDK; modelos sin contexto ni navegación | RF-52 | fase5 |
+| PERF-02 | TRQ | Inicio/bolsa antes y después de RF-50, conteos ≤ base | RF-50 | fase5 |
+| PERF-03 | TRQ | Bolsa/checkout antes y después de RF-52, cero reconciliaciones espurias | RF-52 | fase5 |
 | PERF-01 | TRQ | Reconstrucciones de las 4 pantallas del piloto ante 3 notificaciones del store que no les afectan (`store.record` de otra pieza, R20): elementos totales y de la propia pantalla, iguales o menores que la línea base del 2026-10-09 | RF-41 (evidencia para RF-43) | R05 · R20 · `catalog_store.dart` `record` |
 | UI-01 | OBJ | Cada helper de tipografía y los temas claro y oscuro resuelven a una familia empaquetada (Inter o Playfair Display), con el peso por defecto del helper declarado; los archivos existen y `MonettaApp` registra su licencia OFL | RF-17 | `boutique_tokens.dart:53-175` · `theme.dart:269-362` |
 | UI-02 | OBJ | La raíz aplica la política E-T1 por tamaño (D-12): ningún texto pasa de 1.5×, el de 20 px o más no pasa de 1.2× y el menor no pasa de 24 px; la escala es monótona y a 1.0 no cambia | RF-17 | `main.dart:908` (sin tope) |
@@ -127,7 +142,10 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-32 | CHAR-16 | INV-02, INV-08 | — |
 | RF-33 | ARCH-02, ARCH-04 | INV-12 | — |
 | RF-40 a RF-43 | CHAR-12 y CHAR-13 (RF-40), PERF-01 y CHAR-17 (RF-41), CHAR-14 y ARCH-05 (RF-42); CHAR-07 cambia sólo según D-13 | INV-04, INV-05, INV-12, INV-14 | G6 en RF-41 |
-| RF-50 a RF-52 | Según E4 y E10 | INV-01, INV-02, INV-05, INV-06, INV-07 | G6, G8 (DEV-01, DEV-02) |
+| RF-53 | CHAR-04, CHAR-05 (pasan a OBJ según E4), CONTRACT-07 | INV-01, INV-02, INV-05, INV-06, INV-07, INV-08 | G6, G8 (DEV-01, DEV-02) |
+| RF-50 | CHAR-18, ARCH-06, PERF-02 | INV-01, INV-02, INV-04, INV-05, INV-06, INV-07, INV-12, INV-14 | G6, G8 (DEV-01, DEV-02) |
+| RF-51 | CHAR-19, CHAR-20, CHAR-21, CONTRACT-08, CONTRACT-09, ARCH-07 | INV-01, INV-02, INV-03, INV-05, INV-06, INV-07, INV-08, INV-09, INV-12 | G6, G8 (DEV-01, DEV-02) |
+| RF-52 | CHAR-22, CHAR-23, CONTRACT-10, ARCH-08, PERF-03 | INV-01, INV-02, INV-05, INV-06, INV-07, INV-09, INV-10, INV-12, INV-14 | G6, G8 (DEV-01, DEV-02) |
 | RF-60 | Fixtures de dinero (R14) | INV-03, INV-06 | G6 |
 
 Las filas de las fases 6 a 8 se añaden al planear cada WP, antes de empezarlo.
