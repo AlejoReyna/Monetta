@@ -140,8 +140,9 @@ void main() {
     screenType: SearchScreen,
     anchor: () => _productCards(),
     // RF-41 baseline 2026-10-09; lower it when the count drops.
-    baselineTotal: 939,
-    baselineOwn: 3,
+    // 939 / 3 before the SearchViewModel; the cards still read the store.
+    baselineTotal: 411,
+    baselineOwn: 0,
   );
 
   _measure(

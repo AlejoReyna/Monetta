@@ -11,17 +11,15 @@ import '../../app/motion.dart';
 import '../../app/product_telemetry.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/text_scale_policy.dart';
-import '../../data/normalize/facets.dart' show FacetValue;
 import '../../domain/product.dart';
 import '../../app/composition/app_scopes.dart';
-import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
 import '../product/quick_view.dart';
 import 'catalog_controls.dart';
-import 'catalog_query.dart';
 import 'collection_screen.dart';
 import 'product_card.dart';
 import 'search_history.dart';
+import 'search_view_model.dart';
 
 /// A warmer invitation makes an empty search field feel like discovery rather
 /// than a dead end. The sequence advances whenever the search is opened (and
@@ -82,7 +80,7 @@ class _SearchScreenState extends State<SearchScreen> {
   late final FocusNode _focus;
   late final String _prompt;
   late final SearchHistory _history;
-  late bool _showResults;
+  late final SearchViewModel _viewModel;
 
   @override
   void initState() {
@@ -91,8 +89,15 @@ class _SearchScreenState extends State<SearchScreen> {
     _focus = FocusNode();
     _prompt = widget.prompt ?? nextSearchPrompt();
     _history = widget.history ?? SearchHistory.instance;
-    _history.addListener(_onHistoryChanged);
-    _showResults = widget.initialQuery.trim().isNotEmpty;
+    // The store is read without subscribing: the view model decides when a
+    // store notification is worth a rebuild.
+    final store = context.getInheritedWidgetOfExactType<StoreScope>()?.notifier;
+    assert(store != null, 'StoreScope is missing from the tree');
+    _viewModel = SearchViewModel(
+      store: store!,
+      history: _history,
+      initialQuery: widget.initialQuery,
+    );
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted && widget.initialQuery.isEmpty) _focus.requestFocus();
     });
@@ -107,132 +112,28 @@ class _SearchScreenState extends State<SearchScreen> {
     unawaited(_history.setScope(account?.localAccountId));
   }
 
-  void _onHistoryChanged() {
-    if (mounted) setState(() {});
-  }
-
   @override
   void dispose() {
-    _history.removeListener(_onHistoryChanged);
+    _viewModel.dispose();
     _controller.dispose();
     _focus.dispose();
     super.dispose();
   }
 
-  List<Product> _matches(String raw) =>
-      searchProducts(StoreScope.of(context), raw);
+  void _onChanged(String text) => _viewModel.queryChanged(text);
 
-  List<_SearchSuggestion> _suggestions(String raw) {
-    final query = normalizeSearchText(raw);
-    if (query.isEmpty) return const [];
-
-    final byLabel = <String, _SearchSuggestion>{};
-
-    void add(String? label, int priority) {
-      final cleanLabel = label?.trim() ?? '';
-      final normalizedLabel = normalizeSearchText(cleanLabel);
-      if (cleanLabel.isEmpty || !normalizedLabel.contains(query)) return;
-
-      final existing = byLabel[normalizedLabel];
-      if (existing == null || priority < existing.priority) {
-        byLabel[normalizedLabel] = _SearchSuggestion(
-          label: cleanLabel,
-          priority: priority,
-        );
-      }
-    }
-
-    for (final product in StoreScope.of(context).products) {
-      final facets = StoreScope.of(context).facetsFor(product.id);
-      add(facets?.brand == null ? null : brandLabel(facets!.brand!.value), 0);
-      add(
-        facets?.category == null
-            ? null
-            : categoryLabel(facets!.category!.value),
-        1,
-      );
-      add(
-        facets?.silhouette == null
-            ? null
-            : silhouetteLabel(facets!.silhouette!.value),
-        2,
-      );
-      for (final color in facets?.colors ?? const <FacetValue>[]) {
-        add(colorLabel(color.value), 3);
-      }
-      for (final pattern in facets?.patterns ?? const <FacetValue>[]) {
-        add(patternLabel(pattern.value), 3);
-      }
-      add(product.title, 4);
-    }
-
-    final suggestions = byLabel.values.toList()
-      ..sort((a, b) {
-        final aStarts = normalizeSearchText(a.label).startsWith(query);
-        final bStarts = normalizeSearchText(b.label).startsWith(query);
-        if (aStarts != bStarts) return aStarts ? -1 : 1;
-
-        final priority = a.priority.compareTo(b.priority);
-        if (priority != 0) return priority;
-
-        final length = a.label.length.compareTo(b.label.length);
-        if (length != 0) return length;
-        return a.label.compareTo(b.label);
-      });
-    return suggestions.take(6).toList();
-  }
-
-  /// Categories that actually have products behind them, in the catalog's own
-  /// display order.
-  List<String> _availableCategories() {
-    final store = StoreScope.of(context);
-    final slugs = <String>{
-      for (final product in store.products)
-        if (store.facetsFor(product.id)?.category?.value case final value?)
-          value,
-    }.toList()
-      ..sort(
-        (a, b) => categoryPlural(a).toLowerCase().compareTo(
-              categoryPlural(b).toLowerCase(),
-            ),
-      );
-    return slugs;
-  }
-
-  /// A short selection drawn from what the app already has: what the shopper
-  /// looked at last, otherwise the ranked feed, otherwise the catalog head.
-  List<Product> _discoveryProducts({int limit = 8}) {
-    final store = StoreScope.of(context);
-    final recent = store.recentlyViewed(limit: limit);
-    if (recent.isNotEmpty) return recent;
-    final ranked = store.feed(limit: limit);
-    if (ranked.isNotEmpty) {
-      return [for (final item in ranked.take(limit)) item.product];
-    }
-    return store.products.take(limit).toList();
-  }
-
-  void _onChanged(String _) {
-    setState(() => _showResults = false);
-  }
-
-  void _submit({bool remember = true}) {
+  void _submit() {
     final query = _controller.text.trim();
-    if (query.isEmpty) {
-      setState(() => _showResults = false);
-      return;
-    }
+    unawaited(_viewModel.submit.execute(_controller.text));
+    if (query.isEmpty) return;
 
-    final resultCount = _matches(query).length;
-    setState(() => _showResults = true);
     _focus.unfocus();
-    if (remember) unawaited(_history.remember(query));
     logProductEvent(
       context,
       ProductEvent.searchSubmitted,
       parameters: {
         'query_length': query.length,
-        'result_count': resultCount,
+        'result_count': _viewModel.state.results.length,
       },
     );
   }
@@ -245,17 +146,17 @@ class _SearchScreenState extends State<SearchScreen> {
     _submit();
   }
 
-  void _selectSuggestion(_SearchSuggestion suggestion) =>
+  void _selectSuggestion(SearchSuggestion suggestion) =>
       _runQuery(suggestion.label);
 
   void _clear() {
     _controller.clear();
-    setState(() => _showResults = false);
+    _viewModel.clear();
     _focus.requestFocus();
   }
 
   void _edit() {
-    setState(() => _showResults = false);
+    _viewModel.edit();
     _focus.requestFocus();
   }
 
@@ -284,60 +185,66 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final query = _controller.text;
-    final emptyQuery = query.trim().isEmpty;
-    final matches = _matches(query);
-    final suggestions = _suggestions(query);
 
     return Scaffold(
       backgroundColor: palette.canvas,
       body: SafeArea(
-        child: Column(
-          children: [
-            _SearchField(
-              controller: _controller,
-              focusNode: _focus,
-              prompt: _prompt,
-              showClear: !emptyQuery,
-              onChanged: _onChanged,
-              onSubmitted: (_) => _submit(),
-              onClear: _clear,
-              onBack: () => Navigator.of(context).pop(),
-            ),
-            Divider(height: 0.5, color: palette.hairline),
-            Expanded(
-              child: emptyQuery
-                  ? _DiscoveryState(
-                      key: const ValueKey('search-empty-state'),
-                      history: _history.queries,
-                      categories: _availableCategories(),
-                      products: _discoveryProducts(),
-                      onQuery: _runQuery,
-                      onForget: (value) => unawaited(_history.forget(value)),
-                      onClearHistory: () => unawaited(_history.clear()),
-                      onCategory: _openCategory,
-                    )
-                  : _showResults
-                      ? matches.isEmpty
-                          ? _NoResults(
-                              query: query.trim(),
-                              categories: _availableCategories(),
-                              onEdit: _edit,
-                              onClear: _clear,
-                              onCategory: _openCategory,
-                            )
-                          : _Results(
-                              query: query.trim(),
-                              products: matches,
-                              onSeeAll: () => _openAllResults(query.trim()),
-                            )
-                      : _SearchSuggestions(
-                          query: query,
-                          suggestions: suggestions,
-                          onSelected: _selectSuggestion,
-                        ),
-            ),
-          ],
+        child: ListenableBuilder(
+          listenable: _viewModel,
+          builder: (context, _) {
+            final state = _viewModel.state;
+            final query = state.query;
+            final emptyQuery = state.isEmptyQuery;
+            return Column(
+              children: [
+                _SearchField(
+                  controller: _controller,
+                  focusNode: _focus,
+                  prompt: _prompt,
+                  showClear: !emptyQuery,
+                  onChanged: _onChanged,
+                  onSubmitted: (_) => _submit(),
+                  onClear: _clear,
+                  onBack: () => Navigator.of(context).pop(),
+                ),
+                Divider(height: 0.5, color: palette.hairline),
+                Expanded(
+                  child: emptyQuery
+                      ? _DiscoveryState(
+                          key: const ValueKey('search-empty-state'),
+                          history: state.history,
+                          categories: state.categories,
+                          products: state.discovery,
+                          onQuery: _runQuery,
+                          onForget: (value) =>
+                              unawaited(_viewModel.forget.execute(value)),
+                          onClearHistory: () =>
+                              unawaited(_viewModel.clearHistory.execute()),
+                          onCategory: _openCategory,
+                        )
+                      : state.showResults
+                          ? state.results.isEmpty
+                              ? _NoResults(
+                                  query: query.trim(),
+                                  categories: state.categories,
+                                  onEdit: _edit,
+                                  onClear: _clear,
+                                  onCategory: _openCategory,
+                                )
+                              : _Results(
+                                  query: query.trim(),
+                                  products: state.results,
+                                  onSeeAll: () => _openAllResults(query.trim()),
+                                )
+                          : _SearchSuggestions(
+                              query: query,
+                              suggestions: state.suggestions,
+                              onSelected: _selectSuggestion,
+                            ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );
@@ -766,13 +673,6 @@ class _ProductRail extends StatelessWidget {
 // Typing
 // ---------------------------------------------------------------------------
 
-class _SearchSuggestion {
-  const _SearchSuggestion({required this.label, required this.priority});
-
-  final String label;
-  final int priority;
-}
-
 class _SearchSuggestions extends StatelessWidget {
   const _SearchSuggestions({
     required this.query,
@@ -781,8 +681,8 @@ class _SearchSuggestions extends StatelessWidget {
   });
 
   final String query;
-  final List<_SearchSuggestion> suggestions;
-  final ValueChanged<_SearchSuggestion> onSelected;
+  final List<SearchSuggestion> suggestions;
+  final ValueChanged<SearchSuggestion> onSelected;
 
   @override
   Widget build(BuildContext context) {
