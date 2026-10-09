@@ -1340,3 +1340,24 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - La prueba detecta la regresión del invariante 9.
 - **Observación del agente** (sin corregir; es el comportamiento vigente): `setAccountScope` notifica aunque el guard haya descartado su hidratación. Durante un instante el listener puede ver el estado anterior, nunca el de A.
 - **Siguiente paso:** la implementación (`ShopperScope` y `ChangeAccountScope`).
+
+### 2026-10-09 · RF-32 · iteración 1 · CERRADO
+
+- **Agente:** `flutter-implementer`. El orquestador auditó.
+- **Base:** `1b44983`, rama `refactor/rf-32-shopper-scope`, worktree de la fase 3. Commit `732f9e8`.
+- **Diff:**
+  - `lib/domain/shopper_scope.dart` (nuevo, Dart puro): `ShopperScope`, con la tienda y la cuenta, `isGuest` y `bagAccountKey` (`''` para el invitado). No normaliza nada.
+  - `lib/app/change_account_scope.dart` (nuevo): el caso de uso. Llama a `store.setAccountScope`, luego a `searchHistory.setScope` y luego invalida el checkout, en el mismo orden que antes. Las dependencias son inyectables.
+  - `app_dependencies.dart`: el callback de `AccountController` delega en el caso de uso. La invalidación lee `shopifyCart` en el momento de la llamada, como antes.
+  - Pruebas CHAR-16b: 5 de `ShopperScope` y 6 de `ChangeAccountScope`, que cubren el orden y la invalidación en login, logout y cambio A→B.
+  - `docs/ARCHITECTURE.md` describe el caso de uso.
+- **Gates (ejecutados por el auditor en el worktree):**
+  - G0 → alcance esperado; `git diff --check` limpio.
+  - G1 → `Formatted 358 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → CHAR-16, CHAR-16b, INV-02, INV-08 e INV-12: `+120: All tests passed!`.
+  - G4 → `+1250 ~5: All tests passed!` (1233 + 6 + 11).
+  - G5 → catálogo válido; secretos OK.
+  - G6 a G8 → no aplican, según la matriz.
+- **Hallazgos:** [Baja] `ChangeAccountScope` importa `features/catalog/search_history.dart`, el mismo acoplamiento que ya tenía la composición. Se revisa con ARCH-02 en RF-33.
+- **Siguiente paso:** RF-33, sobre esta rama.

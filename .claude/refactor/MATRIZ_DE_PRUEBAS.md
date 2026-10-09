@@ -184,6 +184,7 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | CHAR-15 | verde (OBJ): todos los scopes de la app están por encima del Navigator | RF-30 | 2026-10-09 · RF-30 · iteración 1 |
 | UI-04 | verde, **pendiente de la aprobación de la persona**. 10 goldens (inicio, colección, ficha, bolsa y cuenta, a 375×812 y 440×956) con Inter, Playfair e iconos reales, en `test/goldens/ui04/`. Llevan la etiqueta `golden`, sólo corren en macOS (D-15) y toleran un 0.5 % de diferencia | RF-17 | 2026-10-09 · RF-17 · paso 4 |
 | CHAR-02 | verde (OBJ). 23 casos: búsqueda del producto que no está en caché con una sincronización, «ya no disponible», «No se pudo comprobar» con reintento y «Enlace no disponible» | RF-31 | 2026-10-09 · RF-31 · iteración 1 |
+| CHAR-16 | verde (CAR, 6 casos con lecturas retenidas; la mutación del guard la hace fallar), más CHAR-16b (11 casos: `ShopperScope` y el orden de `ChangeAccountScope`) | RF-32 | 2026-10-09 · RF-32 · iteración 1 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)
