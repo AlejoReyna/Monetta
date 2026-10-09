@@ -49,11 +49,15 @@ control plane.
 └──────────────────────────────────────────────────────────────────┘
 ```
 
-**Composition.** `lib/main.dart` builds every dependency at startup
-(`_MonettaAppState._load`) and exposes it through `InheritedNotifier` scopes:
-`StoreScope`, `AccountScope`, `CartScope`, `AdminScope`, `NotificationScope`,
-`HomeContentScope` and others. Moving composition out of `main.dart` and above
-the Navigator is refactor WP RF-30.
+**Composition.** `lib/main.dart` only calls `bootstrap()` (`lib/app/bootstrap.dart`),
+which validates the configuration, starts Firebase when needed and runs
+`MonettaApp` (`lib/app/monetta_app.dart`). `lib/app/composition/` builds every
+dependency (`AppDependencies`, including `load()`), owns its disposal and
+declares the `InheritedNotifier` scopes (`app_scopes.dart`): `StoreScope`,
+`AccountScope`, `CartScope`, `AdminScope`, `NotificationScope`,
+`HomeContentScope` and others. `AppRouteScopes` mounts all of them above the
+Navigator, so every route sees the same scopes as the home (RF-30, CHAR-15).
+`main.dart` re-exports the scopes and `MonettaApp` for tests and tooling.
 
 **State and navigation.** State is plain `ChangeNotifier` plus
 `InheritedNotifier`; there is no Riverpod. Navigation is the imperative
@@ -97,10 +101,13 @@ reference to it in `lib/` or `test/`. The only exceptions are the guard that
 rejects `ENABLE_EXTERNAL_CATALOG` and the label for historical
 `external_source` audit entries.
 
-**3. Direction of dependencies (goal, not yet true).** Features should depend
+**3. Direction of dependencies (partly enforced).** Features should depend
 on `app/` and `domain/`, not on `main.dart` or on concrete `data/`
-implementations. Today several feature files do both. Refactor WPs RF-30 and
-RF-33 ratchet these down with architecture tests (ARCH-01, ARCH-02, ARCH-04).
+implementations. No feature imports `main.dart` since RF-30 (ARCH-01). Only
+`lib/app/composition/` builds concrete `data/` implementations outside `data/`
+itself, except the entries ARCH-04 still lists for RF-33 and RF-50 (the
+catalog store's internal stores, the cart composition, the reviews screen and
+the Rewards client). ARCH-02 joins in RF-33.
 
 **4. Type comes from two bundled families, and text scale is bounded once,
 at the root.** Every typography helper resolves to Inter (sans) or Playfair
