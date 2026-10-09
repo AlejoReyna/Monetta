@@ -14,12 +14,12 @@ import '../data/notifications/firebase_notification_gateway.dart';
 import '../data/notifications/notification_config.dart';
 import '../data/notifications/notification_models.dart';
 import '../data/firestore/catalog_realtime_source.dart';
-import '../features/catalog/collection_screen.dart';
 import '../features/home/home_screen.dart';
-import '../features/product/product_screen.dart';
 import '../features/welcome/welcome_gate.dart';
 import 'composition/app_dependencies.dart';
 import 'composition/app_scopes.dart';
+import 'destinations/app_destination.dart';
+import 'destinations/destination_navigator.dart';
 import 'font_licenses.dart';
 import 'product_telemetry.dart';
 import 'startup_reveal.dart';
@@ -93,40 +93,12 @@ class _MonettaAppState extends State<MonettaApp> {
     NavigatorState navigator,
     NotificationRouteData route,
   ) {
-    if (route.type == 'product' && route.productKey != null) {
-      final key = route.productKey!;
-      // external:* notification routes are ignored — monitor catalog retired.
-      if (key.startsWith('external:')) {
-        navigator.popUntil((candidate) => candidate.isFirst);
-        return;
-      }
-      final rawId =
-          key.startsWith('shopify:') ? key.substring('shopify:'.length) : key;
-      final exists = _deps.store.products.any((product) => product.id == rawId);
-      if (exists) {
-        navigator.push(
-          MaterialPageRoute<void>(
-            builder: (_) => ProductScreen(productId: rawId),
-          ),
-        );
-        return;
-      }
-    }
-    if (route.type == 'collection' && route.collectionHandle != null) {
-      final handle = route.collectionHandle!;
-      // Collection identity is the Shopify handle, not a facet category slug.
-      // Using category here opened the wrong (or empty) result set (F28).
-      navigator.push(
-        MaterialPageRoute<void>(
-          builder: (_) => CollectionScreen(
-            title: handle,
-            filter: CollectionFilter(collectionHandle: handle),
-          ),
-        ),
-      );
-      return;
-    }
-    navigator.popUntil((candidate) => candidate.isFirst);
+    unawaited(
+      DestinationNavigator(store: _deps.store).open(
+        navigator,
+        AppDestination.fromNotification(route),
+      ),
+    );
   }
 
   @override

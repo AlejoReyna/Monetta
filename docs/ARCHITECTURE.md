@@ -59,6 +59,15 @@ declares the `InheritedNotifier` scopes (`app_scopes.dart`): `StoreScope`,
 Navigator, so every route sees the same scopes as the home (RF-30, CHAR-15).
 `main.dart` re-exports the scopes and `MonettaApp` for tests and tooling.
 
+**Navigation destinations.** Places in the app are values: `AppDestination`
+(`lib/app/destinations/`) is a sealed type with product, collection, home and
+unavailable-link cases, each carrying its `NavigationOrigin`.
+`DestinationNavigator` is the one place that opens them. Notifications and
+product cards go through it. A product missing from the cache is looked up
+with one catalog sync (through the write coordinator) instead of silently
+landing on the home: found, gone (`ProductUnavailable`) or "could not check"
+with a retry (RF-31, CHAR-02).
+
 **State and navigation.** State is plain `ChangeNotifier` plus
 `InheritedNotifier`; there is no Riverpod. Navigation is the imperative
 Navigator (`MaterialPageRoute`, `monettaFadeRoute`); there is no router package

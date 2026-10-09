@@ -19,13 +19,15 @@
 /// shipped before the redesign, so existing call sites need no edit.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
-import '../../app/motion.dart';
+import '../../app/destinations/app_destination.dart';
+import '../../app/destinations/destination_navigator.dart';
 import '../../domain/product.dart';
 import '../../app/composition/app_scopes.dart';
 import '../../reco/events.dart';
-import '../product/product_screen.dart';
 import 'product_tile.dart';
 import 'quick_add_button.dart';
 
@@ -116,17 +118,17 @@ void openProduct(
   BuildContext context,
   Product product, {
   int initialVariantIndex = 0,
+  NavigationOrigin origin = NavigationOrigin.product,
 }) {
   final store = StoreScope.of(context);
   store.record(EventType.productView, productId: product.id);
-  Navigator.of(context).push(
-    monettaFadeRoute(
-      StoreScope(
-        notifier: store,
-        child: ProductScreen(
-          productId: product.id,
-          initialVariantIndex: initialVariantIndex,
-        ),
+  unawaited(
+    DestinationNavigator(store: store).open(
+      Navigator.of(context),
+      ProductDestination(
+        product.id,
+        initialVariantIndex: initialVariantIndex,
+        origin: origin,
       ),
     ),
   );
