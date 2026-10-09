@@ -1361,3 +1361,43 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - G6 a G8 → no aplican, según la matriz.
 - **Hallazgos:** [Baja] `ChangeAccountScope` importa `features/catalog/search_history.dart`, el mismo acoplamiento que ya tenía la composición. Se revisa con ARCH-02 en RF-33.
 - **Siguiente paso:** RF-33, sobre esta rama.
+
+### 2026-10-09 · RF-33 · iteración 1 · CERRADO
+
+- **Agente:** `test-engineer`. El orquestador auditó.
+- **Base:** `732f9e8`, rama `refactor/rf-33-arquitectura`, worktree de la fase 3. Commit `e719391`.
+- **Diff:**
+  - **`test/architecture/features_data_imports_test.dart`** (ARCH-02, TRQ), con 4 pruebas: la autoprueba del detector, la de la lista de permitidos, la guarda contra el vacío y el trinquete.
+    - **Permitidos:** `media_url.dart`, `normalize/`, `notification_models.dart`, `customer_auth_error.dart`, el puerto `checkout_launcher.dart`, `accounts_orders_config.dart` y `cart_attribution.dart` (puro, sin imports).
+    - **Lista conocida:** 14 pares en 9 archivos, cada uno con su WP.
+      - `catalog_cache_store` → RF-50.
+      - `cart_session_store` → RF-51 y `cart_repository` → RF-52.
+      - `database.dart` (`show OrderSummary`) y `order_history_repository` → RF-61. Es una reasignación del agente, aceptada: el modelo de pedidos es de RF-61.
+      - `timeout_http_client` → RF-63.
+      - `admin_notification_client` → RF-64.
+      - `loox_reviews_repository` → RF-66.
+  - **`test/architecture_test.dart`** (INV-12): suma 3 reglas y no quita ninguna.
+    - `app/destinations/app_destination.dart` no importa Flutter.
+    - Las features no importan `app_dependencies.dart` ni `platform_services.dart`.
+    - Se confirma que `shopper_scope.dart` está dentro de la pureza de `lib/domain`.
+  - **`test/architecture/composition_root_test.dart`** (ARCH-04): sólo cambian el comentario y el nombre de la prueba, que ahora dicen que RF-50, RF-51, RF-63 y RF-66 vacían el mapa. El mapa no cambia.
+  - **`docs/ARCHITECTURE.md`:** la regla 3 describe ARCH-02 y la frontera de la composición.
+- **Mutaciones del agente** (copias temporales, ya borradas): ARCH-02 falla ante un par nuevo (`order_status.dart -> database.dart`) y ante un par que ya no existe.
+- **Gates (ejecutados por el auditor en el worktree):**
+  - G0 → alcance esperado; `architecture_test.dart` sólo suma líneas.
+  - G1 → `Formatted 359 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → `+23: All tests passed!`.
+  - G4 → `+1257 ~5: All tests passed!` (1250 + 7).
+  - G5 → catálogo válido; secretos OK.
+- **Hallazgos:**
+  - [Baja] `customer_auth_error.dart` importa `flutter_appauth` para mapear errores, y está entre los permitidos. Separar ese mapeo cuando RF-62 mueva el error a dominio.
+  - [Nota] `admin_notification_client` podría ser de RF-65 (admin) en vez de RF-64. Se decide al detallar la fase 6.
+- **Fase 3:**
+  - RF-30 y RF-31 tienen el código aprobado y esperan G6, más G8 en el caso de RF-31.
+  - RF-32 y RF-33 están cerrados.
+  - La cadena de ramas es `refactor/rf-30-composicion` → `rf-31-destinos` → `rf-32-shopper-scope` → `rf-33-arquitectura` (`e719391`), sobre `38d97cb`.
+- **Siguiente paso:** la fase 4 necesita tres cosas de la persona:
+  - extender D-14, porque la fase 4 también es posterior al lanzamiento;
+  - revisar el borrador de la fase 4;
+  - tomar la decisión D-13, que bloquea RF-40.

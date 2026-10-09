@@ -185,6 +185,7 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | UI-04 | verde, **pendiente de la aprobación de la persona**. 10 goldens (inicio, colección, ficha, bolsa y cuenta, a 375×812 y 440×956) con Inter, Playfair e iconos reales, en `test/goldens/ui04/`. Llevan la etiqueta `golden`, sólo corren en macOS (D-15) y toleran un 0.5 % de diferencia | RF-17 | 2026-10-09 · RF-17 · paso 4 |
 | CHAR-02 | verde (OBJ). 23 casos: búsqueda del producto que no está en caché con una sincronización, «ya no disponible», «No se pudo comprobar» con reintento y «Enlace no disponible» | RF-31 | 2026-10-09 · RF-31 · iteración 1 |
 | CHAR-16 | verde (CAR, 6 casos con lecturas retenidas; la mutación del guard la hace fallar), más CHAR-16b (11 casos: `ShopperScope` y el orden de `ChangeAccountScope`) | RF-32 | 2026-10-09 · RF-32 · iteración 1 |
+| ARCH-02 | verde (TRQ). 7 módulos permitidos (ayudantes puros, modelos, errores, configuración y el puerto `CheckoutLauncher`) y 14 pares conocidos en 9 archivos, cada uno con el WP que lo retira (RF-50 a RF-66). INV-12 suma 3 reglas | RF-33 | 2026-10-09 · RF-33 · iteración 1 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)
