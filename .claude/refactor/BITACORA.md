@@ -1270,3 +1270,19 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Riesgo:** los goldens se generaron en el macOS local. El job `macos-15` del CI puede superar el 0.5 % si CoreText dibuja distinto. Hay que mirarlo en el primer push; la tolerancia es un número dentro de `ui04_typography_goldens_test.dart`.
 - **Commit:** autorizado (RF-17).
 - **Siguiente paso:** la persona aprueba las 10 imágenes de `test/goldens/ui04/`. Con eso, el G6 y DEV-03, RF-17 se cierra.
+
+### 2026-10-09 · RF-31 · paso 1 (CHAR-02) · APROBADO
+
+- **Agente:** `test-engineer`. El orquestador auditó.
+- **Base:** worktree de la fase 3 (`.claude/worktrees/rf-30`), rama `refactor/rf-31-destinos`, desde `80753e3`.
+- **Prueba nueva** (sin commit): `test/app/destinations/destination_navigator_test.dart` (CHAR-02, OBJ), con 23 casos contra la API acordada:
+  - 8 casos de `AppDestination.fromNotification`;
+  - 15 de `DestinationNavigator.open`: en caché, búsqueda que encuentra, `upToDate` o `updated` sin el producto, `failed`, `skippedNotConfigured`, `skippedRealtimeAuthoritative`, excepción, tres variantes de «Reintentar», colección con y sin título, enlace no disponible e inicio.
+- **Fase roja verificada por el auditor** (precedente de RF-15):
+  - Sin la API, la prueba no compila (`uri_does_not_exist`, 46 issues de analyze, todos en ese archivo).
+  - Con un stub temporal que reproduce la navegación de hoy, ya borrado, compila y da `+8 -15`, sin errores de compilación.
+    - Pasan los 7 casos de `fromNotification` que hoy ya se cumplen y el de «inicio».
+    - Fallan los que piden algo nuevo: `external:*` como enlace no disponible, la búsqueda fuera de caché, el reintento y la pantalla de enlace.
+    - También fallan producto en caché y colección, por la razón esperada: la navegación de hoy empuja la ruta sin `StoreScope` («StoreScope is missing from the tree»), y el objetivo exige envolverla como hacen los helpers.
+- **Suite sin la prueba nueva:** `+1210 ~5`, la base, según el agente.
+- **Siguiente paso:** implementación (`flutter-implementer`).
