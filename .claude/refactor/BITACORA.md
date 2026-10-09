@@ -1776,3 +1776,9 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - `provider` NO está en el pub-cache (sí Riverpod 3.1.0, del chequeo de R05): adoptarlo exige red al resolver.
 - **Costos:** (a) conservar: 0 archivos, 0 pruebas, sin dependencias ni G6. (b) `provider`: retocar ~60 archivos de prueba (la mayoría uno por uno; ~10 centralizables en ayudantes) + 67 lecturas y 13 scopes en `lib/` + re-añadir la dependencia que RF-22 retiró (cambio de `pubspec` → G6) en un WP nuevo antes de la fase 5. (c) Riverpod: todo lo de (b) más convertir 11 controladores en `Notifier` y cada consumidor en `ConsumerWidget`; reescribe la presentación, justo lo que R05 quería evitar sin triggers.
 - Pregunta a la persona con recomendación (a).
+
+### 2026-10-09 · RF-43 · DECISIÓN D-16 · CERRADO
+
+- **Decisión de la persona:** conservar los scopes actuales (opción recomendada).
+- Sin WP nuevo de DI; la fase 5 empieza sobre los scopes vigentes. El encargo de evidencia a GPT Sol 6.1 (`scratch/plan/rf43_evidencia.md`) queda cancelado por innecesario: la evidencia la midió el orquestador y la decisión ya se tomó.
+- **Siguiente paso:** fase 5 (RF-50): su detalle se escribe en `PLAN.md` a partir del borrador encargado al otro modelo y se muestra a la persona antes de empezar, con D-16 ya tomada.
