@@ -34,7 +34,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/onboarding_controller.dart';
 import '../../app/product_telemetry.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../onboarding/onboarding_sheet.dart';
 import 'welcome_screen.dart';
 

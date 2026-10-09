@@ -7,7 +7,7 @@ import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../boutique/boutique_tokens.dart';
 import 'checkout_screen.dart';
 

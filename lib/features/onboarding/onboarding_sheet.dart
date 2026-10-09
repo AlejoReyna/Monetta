@@ -24,7 +24,7 @@ import 'package:flutter/material.dart';
 import '../../app/catalog_store.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
 

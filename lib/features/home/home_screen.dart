@@ -21,7 +21,7 @@ import '../../domain/admin_control.dart';
 import '../../domain/editorial_content.dart';
 import '../../domain/home_content.dart';
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../account/account_screen.dart';
 import '../about/about_monetta_screen.dart';
 import '../admin/admin_screen.dart';

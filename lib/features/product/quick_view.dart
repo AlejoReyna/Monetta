@@ -26,7 +26,7 @@ import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../../reco/events.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';

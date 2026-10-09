@@ -13,7 +13,7 @@ import '../../app/shopper_copy.dart';
 import '../../app/text_scale_policy.dart';
 import '../../data/normalize/facets.dart' show FacetValue;
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
 import '../product/quick_view.dart';

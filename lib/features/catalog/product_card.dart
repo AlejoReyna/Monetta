@@ -23,7 +23,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../../reco/events.dart';
 import '../product/product_screen.dart';
 import 'product_tile.dart';

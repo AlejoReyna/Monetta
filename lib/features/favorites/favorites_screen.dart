@@ -9,7 +9,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/catalog_store.dart';
 import '../../domain/product.dart';
-import '../../main.dart' show StoreScope;
+import '../../app/composition/app_scopes.dart' show StoreScope;
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';

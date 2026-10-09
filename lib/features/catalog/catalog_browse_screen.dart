@@ -14,7 +14,7 @@ import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/normalize/facets.dart';
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';

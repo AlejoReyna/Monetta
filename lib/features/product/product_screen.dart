@@ -25,7 +25,7 @@ import '../../data/media/media_url.dart';
 import '../../data/normalize/facets.dart';
 import '../../data/shopify/cart_attribution.dart';
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../../reco/events.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';

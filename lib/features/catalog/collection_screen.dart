@@ -15,7 +15,7 @@ import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../../reco/explainer.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';

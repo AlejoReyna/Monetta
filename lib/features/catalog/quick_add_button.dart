@@ -9,7 +9,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../boutique/boutique_tokens.dart';
 import '../checkout/mini_cart.dart';
 import '../product/product_selection.dart';

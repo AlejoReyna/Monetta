@@ -14,7 +14,7 @@ import 'package:share_plus/share_plus.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/theme.dart';
 import '../../domain/product.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import 'catalog_creator_document.dart';
 
 typedef CatalogSharer = Future<void> Function(String text, Rect? origin);

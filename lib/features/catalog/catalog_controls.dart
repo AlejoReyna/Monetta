@@ -8,7 +8,7 @@ import 'package:flutter/material.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/text_scale_policy.dart';
-import '../../main.dart';
+import '../../app/composition/app_scopes.dart';
 import '../boutique/boutique_tokens.dart';
 
 /// Capsule control from the reference's component strip.
