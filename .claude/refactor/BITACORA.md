@@ -1164,3 +1164,12 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - suite → `+1224 ~5: All tests passed!`, es decir 1204 + 21 SHIP − 1 prueba unitaria retirada.
 - **Parche de la resolución:** `scratch/sync-envio-gratis/resolucion_sobre_168656b.patch` (ignorado por git; 338 líneas, diff contra `168656b`).
 - **Siguiente paso:** cuando el PR esté en `main`, integrar `main` en la línea del refactor (D-06) con esta resolución y registrar los gates.
+
+### 2026-10-09 · RF-17 · documentación · APROBADO
+
+- **Hallazgo del checklist** (Docs), que faltó en la auditoría del paso 3: RF-17 cambia la arquitectura (fuentes empaquetadas y política de escala en la raíz), y `docs/ARCHITECTURE.md` no lo decía.
+- **Corrección del orquestador en `docs/ARCHITECTURE.md`:**
+  - en el mapa de módulos, `app/` incluye ahora la tipografía;
+  - la regla 4 fija las dos familias empaquetadas, `BoundedTextScaler` en la raíz y el uso de `textScaleFactorFor` para las alturas que contienen texto;
+  - el registro de decisiones suma dos filas: tipografía (E-T2) y escala de texto (E-T1 y D-12).
+- `docs/SYSTEM_IMPLEMENTATION.md` no trata la tipografía, así que no cambia.

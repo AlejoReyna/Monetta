@@ -65,7 +65,7 @@ dependencies were removed in RF-22.
 
 | Module | Responsibility | Flutter-free | Doc |
 |---|---|---|---|
-| `app/` | Controllers, stores, runtime config, theme, shopper copy, money formatting | no | — |
+| `app/` | Controllers, stores, runtime config, theme and typography (bundled fonts, text scale policy), shopper copy, money formatting | no | — |
 | `data/shopify/` | Storefront API client, queries, delta sync, cart, attribution | **yes, enforced** | [README](../lib/data/shopify/README.md) |
 | `data/normalize/` | Raw Shopify product → canonical facets | **yes, enforced** | [README](../lib/data/normalize/README.md) |
 | `data/local/` | Drift database `monetta.sqlite`, schema 7: catalog cache, bag, wishlist, events, accounts, sessions, orders, checkout receipts | no (Drift + plugins) | [README](../lib/data/local/README.md) |
@@ -101,6 +101,17 @@ rejects `ENABLE_EXTERNAL_CATALOG` and the label for historical
 on `app/` and `domain/`, not on `main.dart` or on concrete `data/`
 implementations. Today several feature files do both. Refactor WPs RF-30 and
 RF-33 ratchet these down with architecture tests (ARCH-01, ARCH-02, ARCH-04).
+
+**4. Type comes from two bundled families, and text scale is bounded once,
+at the root.** Every typography helper resolves to Inter (sans) or Playfair
+Display (serif), declared in `pubspec.yaml` with their SIL OFL texts, which
+`registerFontLicenses()` adds to the license page. `MonettaApp` installs
+`BoundedTextScaler` (`lib/app/text_scale_policy.dart`) in `MaterialApp.builder`:
+text of 20 px or more grows at most 1.2x, smaller text up to 1.5x without
+passing 24 px (decisions E-T1 and D-12). A box that reserves room for text
+scales with `textScaleFactorFor(scaler, fontSize)` of the text it holds, never
+with `scaler.scale(boxHeight)`: a height is not a font size, and under the
+size-based cap it would grow less than its text. UI-01 to UI-03 enforce it.
 
 ## Data flow: opening the app
 
@@ -183,3 +194,5 @@ core therefore compiles and tests before `build_runner` has ever run.
 | Where the account backend lives | Its own service, `services/accounts_orders/` | Compliance-bearing (redact webhooks) and unrelated to the app's catalog cache |
 | State management and routing | `ChangeNotifier` + `InheritedNotifier`; imperative Navigator | What the app actually uses; decision E6 keeps routers out for now |
 | External (US) catalog | Retired | Decision E2 |
+| Typography | Bundled Inter and Playfair Display (SIL OFL) for every role | The same face on iOS and Android; decision E-T2 |
+| Text scale | Bounded at the root: 1.5x overall, 1.2x from 20 px | Body text can grow for whoever needs it without headlines overflowing; decisions E-T1 and D-12 |
