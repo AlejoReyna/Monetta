@@ -1654,3 +1654,30 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - los reportes quedan en `scratch/plan/rf41d_reporte.md` y `scratch/plan/rf42_reporte.md`;
   - si una de esas ramas tiene commits nuevos, su modelo terminó o avanzó: audítala con G0 a G5 antes de integrarla;
   - no toques esos worktrees mientras su modelo trabaja.
+
+### 2026-10-09 · RF-41 · parte C: CHAR-17 verificada; implementación encargada · EN CURSO
+
+- **Paso 1: CHAR-17 de `test-engineer`, verificado por el auditor.**
+  - Archivo único, sin commit: `test/features/catalog/catalog_browse_bag_count_test.dart`.
+  - Comprobaciones del auditor:
+    - `git status --porcelain` sólo muestra ese archivo;
+    - G1 → `Formatted 377 files (0 changed)`;
+    - G2 → «No issues found!»;
+    - la ejecución por ruta da `+2 -2`.
+  - Los dos casos objetivo fallan por la razón descrita. En los dos, la precondición `store.bagQuantity == 1` pasa, y después `Found 0 widgets with text "1" descending from widgets with key [<'bottom-nav-bag-badge'>]` (razones: «one unit added» y «badge after quick add»).
+  - Los dos casos de caracterización pasan:
+    - sin store, el contador muestra el `bagCount` recibido;
+    - al abrir con 2 unidades en la bolsa, el contador muestra 2.
+  - El caso 3 vuelve a montar la pantalla con otro `bagCount`, así que el ViewModel debe seguir ese parámetro en `didUpdateWidget`.
+  - El agente corrió la suite completa antes de un ajuste de formato: `+1391 ~5 -2`, con sólo los dos casos objetivo en rojo.
+- **Paso 2:** encargado a `flutter-implementer`, en el worktree `rf-30`.
+  - **Alcance:**
+    - la pantalla;
+    - el ViewModel nuevo;
+    - `==` y `hashCode` de `CatalogBrowseFilters`;
+    - dos archivos de prueba nuevos.
+  - **Fuera de alcance:** `catalog_store.dart` y `lib/data/` (RF-42, en paralelo) y `lib/features/product/` (parte D, en paralelo).
+- **Receta para retomar si se corta:**
+  - si el worktree `rf-30` tiene cambios sin commit en esos archivos, son de este encargo;
+  - audítalos con G0 a G5 y PERF-01;
+  - comprueba que CHAR-17 pasa 4/4 sin cambios en su archivo.
