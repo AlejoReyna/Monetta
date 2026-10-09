@@ -86,9 +86,9 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | ARCH-02 | TRQ | `lib/features/` no importa implementaciones de `lib/data/`, salvo la lista explícita de helpers puros | RF-33 | 21 archivos hoy (H03) |
 | ARCH-03 | OBJ | Ningún archivo de `lib/` ni `test/` referencia el catálogo externo, salvo el guard de `RuntimeConfig` | RF-20 | R02 |
 | ARCH-04 | TRQ | `lib/app/composition/` es el único lugar que construye implementaciones concretas de `data/` | RF-30, RF-33 | R18 |
-| UI-01 | OBJ | Cada helper de tipografía resuelve a una familia empaquetada; los archivos de fuente existen y su licencia OFL está registrada | RF-17 | `boutique_tokens.dart:47-64` · `theme.dart:279-372` |
-| UI-02 | OBJ | La raíz aplica la política de escala E-T1 (tope global) y los titulares respetan su tope | RF-17 | `main.dart:857` (sin tope) |
-| UI-03 | OBJ | Sin overflow a escala 1.0, 1.3 y la máxima de E-T1 en inicio, colección, búsqueda, ficha, bolsa, checkout, cuenta y pedidos (teléfono de 375×812 y de 440×956) | RF-17 | R13/RF-17 |
+| UI-01 | OBJ | Cada helper de tipografía y los temas claro y oscuro resuelven a una familia empaquetada (Inter o Playfair Display), con el peso por defecto del helper declarado; los archivos existen y `MonettaApp` registra su licencia OFL | RF-17 | `boutique_tokens.dart:53-175` · `theme.dart:269-362` |
+| UI-02 | OBJ | La raíz aplica la política E-T1 por tamaño (D-12): ningún texto pasa de 1.5×, el de 20 px o más no pasa de 1.2× y el menor no pasa de 24 px; la escala es monótona y a 1.0 no cambia | RF-17 | `main.dart:908` (sin tope) |
+| UI-03 | OBJ | Sin overflow a escala 1.0, 1.3 y 1.5, con la política E-T1 (D-12) y las fuentes reales cargadas, en inicio, colección, búsqueda, ficha, bolsa, checkout, cuenta y pedidos (teléfono de 375×812 y de 440×956) | RF-17 | R13/RF-17 |
 | UI-04 | OBJ | Goldens de referencia a escala 1.0 con las fuentes nuevas, aprobados por la persona | RF-17 | — |
 | DEV-01 | Manual | iOS: login con Shopify, checkout sheet, push en frío y en caliente, cierre de sesión | RF-14, RF-31, RF-51, RF-52, RF-62 | — |
 | DEV-02 | Manual | Android: lo mismo que DEV-01 | Igual que DEV-01 | — |

@@ -43,6 +43,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | D-08 | Defectos latentes del reset por tienda que confirmó CHAR-03 (casos 7 y 8): la semilla del asset y cada snapshot de Firestore guardan la metadata sin `shopDomain`, y el siguiente arranque o sync con `monetta.mx` lo toma por otra tienda | WP nuevo RF-24 en la fase 1, antes del lanzamiento (E1): conservar la procedencia de tienda en la semilla y en Firestore, cambiando CHAR-03 de forma explícita | **tomada, 2026-10-07:** como se recomienda; RF-24 va después de RF-18. El orquestador lo pone antes que RF-17, porque no necesita a la persona (D-07). La persona no sabe si `FIRESTORE_CATALOG_ENABLED` está en `true` en sus archivos reales; se trata como latente | RF-24; lanzamiento (E1) |
 | D-09 | Diseño de RF-24: qué tienda registra la metadata del catálogo incluido y la de Firestore | Procedencia explícita: la semilla registra la tienda de su `_source` (monetta.mx), Firestore la configurada y una instalación nueva guarda su tienda en el cursor desde el primer arranque; la comparación exacta no cambia | **tomada, 2026-10-07:** como se recomienda. La persona confirmó que todo es del catálogo de monetta.mx; el catálogo externo de EE. UU. no participa | RF-24 |
 | D-10 | Aspecto de las tarjetas del catálogo completo cuando el navegador pase de `CatalogItem` a `Product` (RF-20) | Conservar el aspecto actual («$1,749 MXN», sin etiquetas): RF-20 es limpieza sin cambios visuales, y la alineación con las demás rejillas puede ir en RF-17 o en un PR de diseño | **tomada, 2026-10-08:** conservar el aspecto actual en RF-20 | RF-20 |
+| D-12 | Cómo se aplica «titulares 1.2» de E-T1: un `TextScaler` sólo recibe el tamaño, y un rol no se distingue por tamaño (`boutiqueTitle` va de 15 a 24 px; `boutiqueText`, de 9 a 20) | Por tamaño, en la raíz: un solo `TextScaler` en `MaterialApp.builder`, sin tocar llamadas. El texto de 20 px o más crece como máximo 1.2×, y el menor hasta 1.5× sin pasar de 24 px, para que ningún texto pequeño supere a un titular. La alternativa por rol exigía un barrido de unas 106 llamadas y, a escala máxima, dejaba un título de 15 px (18 px) por debajo del cuerpo de 14 px (21 px) | **tomada, 2026-10-08:** por tamaño, en la raíz | RF-17 (UI-02, UI-03) |
 | D-11 | Orden del paso 1 de RF-17 frente a las capturas DEV-03 | Adelantar UI-01 a UI-03 (rojas, sin commit) mientras la persona corre G6 y las capturas: no tocan `lib/`, así que las capturas siguen siendo el «antes». UI-03 se escribe con las fuentes reales cargadas | **tomada, 2026-10-08:** adelantar | RF-17 |
 
 **Opciones de E-T1:**
@@ -275,6 +276,17 @@ Lo pidió la persona.
 - UI-01 a UI-04 en verde;
 - DEV-03 aprobado;
 - el aumento de tamaño del bundle documentado en la bitácora.
+
+**Detalle del paso 1 (2026-10-08, D-11 y D-12):**
+- **UI-01** (`test/app/bundled_fonts_test.dart`):
+  - el `FontManifest.json` declara `Inter` y `Playfair Display` con archivos que existen;
+  - los 13 helpers y los temas claro y oscuro resuelven a una de las dos familias, y el peso por defecto de cada helper está declarado;
+  - `MonettaApp` registra al montarse la licencia OFL de cada familia.
+- **UI-02** (`test/app/text_scale_policy_test.dart`): con `MonettaApp` montada, la escala bajo `HomeScreen` es `min(k·s, s ≥ 20 ? 1.2·s : min(1.5·s, 24))` para k en {0.85, 1.0, 1.3, 2.0, 3.1}, también después de un cambio en caliente.
+- **UI-03** (`test/features/text_scale/`): ninguna excepción de overflow en inicio, colección, búsqueda, ficha, bolsa, checkout, cuenta y pedidos, a 375×812 y 440×956.
+  - Inter y Playfair se registran con `FontLoader`.
+  - Un oráculo aplica esa misma escala para k en {1.0, 1.3, 1.5}.
+- Las tres compilan hoy, sin API nueva, y quedan sin commit hasta el paso 3.
 
 ### RF-18 · Extracciones D02 y D03
 
