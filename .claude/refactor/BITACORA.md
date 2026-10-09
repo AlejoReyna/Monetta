@@ -1006,3 +1006,28 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - D-11: el paso 1 se adelanta. UI-01 a UI-03 se escriben ya, rojas y sin commit, mientras la persona corre G6 y las capturas. Como no tocan `lib/`, las capturas siguen siendo el «antes».
 - **Commit:** autorizado. La corrección y este registro van juntos en `refactor/rf-17-tipografia`, sin push.
 - **Siguiente paso:** descargar las fuentes (paso 2) y encargar UI-01 a UI-03 a `test-engineer` (paso 1).
+
+### 2026-10-08 · RF-17 · paso 2 (fuentes) · APROBADO
+
+- **Agente:** orquestador, con la autorización de la persona (E-T2).
+- **Base:** `e466f11`, rama `refactor/rf-17-tipografia`.
+- **Procedencia:**
+  - **Inter 4.001**, release v4.1 de `rsms/inter` (repositorio del autor). El zip pesa 33 707 794 B, igual que el tamaño que da la API de GitHub; sha256 `9883fdd4…6b11e`. Se toman los TTF estáticos de `extras/ttf/` y `LICENSE.txt`, que es la OFL 1.1 sin nombre reservado.
+  - **Playfair Display 1.203**, descarga oficial de Google Fonts (v40). Los TTF estáticos de `static/` vienen de `fonts.gstatic.com` y `OFL.txt` del manifiesto de descarga, con CRLF pasado a LF y sin los espacios finales de una línea, que `git diff --check` rechaza; el texto no cambia. Su licencia reserva el nombre «Playfair Display»: se usan los archivos sin modificar, porque generar instancias propias sería una versión modificada.
+- **Verificación propia** de las tablas `name` y `OS/2` de cada TTF: familias `Inter` y `Playfair Display`; pesos 300, 400, 500, 600 y 700, y 400 y 700; ninguno tiene `fvar` (son estáticos) ni es itálico.
+- **Pesos elegidos** (conteo en `lib/`):
+  - Inter: w300 (`display` por defecto, 23 llamadas, y una explícita), w400, w500, w600 y w700 (`bold` incluido).
+  - Playfair Display: sólo se pide a 400 (`boutiqueDisplay`, 12 llamadas; `editorial`, 22, cuando pase a la serif). Se añade el Bold porque `Text` pide w700 cuando el sistema activa el texto en negrita (`MediaQuery.boldTextOf`).
+  - Queda fuera w800: sólo lo usan dos marcas de pago itálicas (`_PayPalMark` y `_VisaMark`, en `home_account_invitation.dart`). El paso 3 decide si añade Inter ExtraBold Italic (428 KB) o acepta el peso más cercano.
+- **Archivos nuevos** en `assets/fonts/`, sin declarar en `pubspec.yaml` (que sólo empaqueta `assets/rules/`, `assets/images/`, `assets/images/brands/` y `assets/catalog/`): la app no cambia.
+  - `inter/`: `Inter-Light.ttf`, `Inter-Regular.ttf`, `Inter-Medium.ttf`, `Inter-SemiBold.ttf`, `Inter-Bold.ttf` y `OFL.txt`.
+  - `playfair_display/`: `PlayfairDisplay-Regular.ttf`, `PlayfairDisplay-Bold.ttf` y `OFL.txt`.
+  - Total: 2 469 056 B sin comprimir (2 081 956 B de Inter y 387 100 B de Playfair). El aumento real del bundle se mide en el paso 3.
+- **Resto de la descarga oficial:** en `scratch/fonts-official/` (ignorado por git), con `SOURCES.md` y el sha256 de cada archivo. Sirve si el paso 3 necesita otro peso, porque los subagentes no descargan.
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo `assets/fonts/` (9 archivos) y `.claude/refactor/BITACORA.md`.
+  - G5 secretos → «OK: no private secret patterns found in tracked or commit-candidate files».
+  - G1, G2 y G3 → no aplican: no hay Dart.
+  - G6 → no aplica todavía: nada se empaqueta hasta que el paso 3 declare las fuentes.
+- **Commit:** autorizado, en `refactor/rf-17-tipografia`, sin push.
+- **Siguiente paso:** encargar UI-01 a UI-03 a `test-engineer` (paso 1, D-11).
