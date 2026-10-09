@@ -1741,3 +1741,11 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Gates del auditor:** G0 alcance exacto (25 paths), `diff --check` limpio; G1 `Formatted 382 files (0 changed)`; G2 «No issues found!»; CHAR-12 intacta (35 menciones, 28 `test(`, igual que antes; `expect` sólo re-escritos por la llamada más larga); G3 `+48: All tests passed!`; G4 `+1425 ~5: All tests passed!` (conteo inamovible); G5 catálogo válido y secretos OK. Commit `da31075`.
 - **Estado de RF-41:** código aprobado, **G6 pendiente de la persona** (compilaciones Android e iOS). RF-43 puede apoyarse en este código (precedente RF-32 sobre RF-30/31).
 - **Siguiente paso:** auditar RF-42 (`6cfb02c` + `29f6ca6`, reporte en `scratch/plan/rf42_reporte.md`), rebasarlo sobre la punta e integrar; después RF-43.
+
+### 2026-10-09 · RF-41 · G6 (persona) · CERRADO
+
+- **Ejecutado por la persona** en su sesión (Mac), sobre el worktree `rf-30` en `da31075`, con el código de salida 0 en ambos. Salida literal final:
+  - Android: `Running Gradle task 'assembleStagingDebug'...  101.3s` → `✓ Built build/app/outputs/flutter-apk/app-staging-debug.apk`.
+  - iOS: `Xcode build done.  719.6s` → `✓ Built build/ios/iphonesimulator/Runner.app`.
+- **Revisión del auditor:** `git rev-parse --short HEAD` → `da31075`; `git status --porcelain` limpio; `git diff --check` limpio; ambos artefactos presentes en `build/` (salidas ignoradas, nada versionado).
+- **Estado:** RF-41 pasa a `cerrado`. Queda pendiente de la persona sólo lo ya listado (G6 de RF-14/17/18/20/22/30/31, G8, DEV-03, E8/E9/E12 y el push de `fix/sin-envio-gratis-main`).
