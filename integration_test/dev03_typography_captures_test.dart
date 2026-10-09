@@ -19,8 +19,11 @@
 //       --dart-define-from-file=config/dart_defines.ci.json \
 //       --dart-define=DEV03_DEVICE=iphone17e
 //
-//   Android (emulator Medium_Phone_API_37.0):
-//     flutter drive --no-pub \
+//   Android (emulator Medium_Phone_API_37.0). Android defines the staging and
+//   production flavors, so name one, as G6 does: without --flavor the tool
+//   looks for app-debug.apk and stops with "Gradle build failed to produce an
+//   .apk file". The app installs as Monetta Staging.
+//     flutter drive --no-pub --flavor staging \
 //       --driver=test_driver/integration_test.dart \
 //       --target=integration_test/dev03_typography_captures_test.dart \
 //       -d "<emulator id>" \

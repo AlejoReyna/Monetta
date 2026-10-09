@@ -979,3 +979,30 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Comandos para la persona:** están en la cabecera del test. Son `flutter devices` y luego `flutter drive --no-pub --driver=test_driver/integration_test.dart --target=integration_test/dev03_typography_captures_test.dart -d "<id>" --dart-define-from-file=config/dart_defines.ci.json --dart-define=DEV03_DEVICE=<iphone17e|iphone18promax|pixel_api37>`.
 - **Commit:** sólo el test y su driver, con `lib/` intacto. RF-17 sigue en curso.
 - **Siguiente paso:** cuando la persona entregue las capturas, `test-engineer` escribe UI-01 a UI-03 (paso 1) y se obtienen las fuentes (E-T2).
+
+### 2026-10-08 · RF-17 · re-auditoría del paso 0 y decisiones · APROBADO CON CORRECCIÓN
+
+- **Agente:** orquestador.
+- **Base:** `1fa60d8`, rama `refactor/rf-17-tipografia`. `origin/main` sigue en `6b91639` (`git ls-remote`), ya integrado, y no hay PRs nuevos.
+- **Selección (`/refactor siguiente`):** ningún WP `pendiente` cumple.
+  - Las fases 1 y 2 esperan a la persona: G6 de RF-14, RF-18, RF-20 y RF-22; G8 de RF-14; la verificación de RF-23; las capturas de RF-17.
+  - Las fases 3 y siguientes esperan el lanzamiento (E1), y RF-30 depende además de RF-22. RF-80 y RF-81 esperan E12.
+- **Hallazgo:** [Alta] `integration_test/dev03_typography_captures_test.dart:22-28` — el comando Android no pasaba `--flavor`.
+  - `android/app/build.gradle.kts` define los sabores `staging` y `production`, y `pubspec.yaml` no tiene `default-flavor`.
+  - Sin `--flavor`, Flutter 3.44.8 busca `app-debug.apk` (`_apkFilesFor`, `flutter_tools/lib/src/android/gradle.dart:140`) y termina con «Gradle build failed to produce an .apk file» (`:1246`).
+  - La auditoría del paso 0 no lo detectó.
+  - Corrección del orquestador: `--flavor staging`, como G6 y `make run`, con la nota de que la app se instala como Monetta Staging. iOS sigue sin sabor, igual que G6 iOS (esquema `Runner`, configuración `Debug`).
+- **Re-verificación del test:**
+  - Las claves y los tipos que usa existen en `lib/`: `home-collection-card-`, `quick-add-`, `product-card-`, `purchase-dock-primary`, `bottom-nav-{home,bag,account}` (por interpolación), `bag-heading-row`, `welcome-start-button`, `onboarding-skip`, `BagScreen` y `MiniCartSheet`.
+  - `integration_test` está en `dev_dependencies` y en `ios/Podfile.lock`.
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo `integration_test/dev03_typography_captures_test.dart`, con 5 inserciones y 2 borrados, todo comentario; `git diff --check` limpio.
+  - G1 → `Formatted 331 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → no aplica: el cambio es un comentario, y el test sólo corre en simuladores (lo corre la persona).
+- **Decisiones de la persona en esta iteración:**
+  - Commit autorizado para RF-17 en esta sesión.
+  - Fuentes (E-T2): las descarga el orquestador con curl desde los repositorios oficiales, con su `OFL.txt`. Se usan TTF estáticos de los pesos usados, que quedan en `assets/fonts/` sin declararse en `pubspec.yaml` hasta el paso 3.
+  - D-11: el paso 1 se adelanta. UI-01 a UI-03 se escriben ya, rojas y sin commit, mientras la persona corre G6 y las capturas. Como no tocan `lib/`, las capturas siguen siendo el «antes».
+- **Commit:** autorizado. La corrección y este registro van juntos en `refactor/rf-17-tipografia`, sin push.
+- **Siguiente paso:** descargar las fuentes (paso 2) y encargar UI-01 a UI-03 a `test-engineer` (paso 1).
