@@ -17,6 +17,7 @@ import '../normalize/rules.dart';
 import '../shopify/catalog_sync.dart' as shopify;
 import '../shopify/shopify_gid.dart';
 import '../../domain/product.dart';
+import 'catalog_write_coordinator.dart';
 
 class CatalogSnapshot {
   const CatalogSnapshot({required this.products, required this.facetsById});
@@ -63,11 +64,15 @@ class CatalogRepository {
     this.shopDomain,
     BagStore? bagStore,
     WishlistStore? wishlistStore,
+    CatalogWriteCoordinator? writeCoordinator,
   })  : _catalogSync = catalogSync,
         _bagStore = bagStore,
-        _wishlistStore = wishlistStore;
+        _wishlistStore = wishlistStore,
+        _writeCoordinator = writeCoordinator ??
+            CatalogWriteCoordinator(expectsFirestore: false);
 
   final CatalogCacheStore cache;
+  final CatalogWriteCoordinator _writeCoordinator;
   final SyncCursorStore cursorStore;
   final NormalizationRules rules;
   final shopify.CatalogSync? _catalogSync;
@@ -86,8 +91,11 @@ class CatalogRepository {
   /// Shopify sync has ever succeeded), parse the bundled snapshot asset and
   /// write it in, so [loadCached] never returns nothing. A cache that
   /// already has rows is left untouched — this is a seed, not a reset.
-  Future<void> seedFromAssetIfEmpty(Map<String, dynamic> catalogJson) async {
-    await prepareConfiguredShop();
+  Future<void> seedFromAssetIfEmpty(Map<String, dynamic> catalogJson) =>
+      _writeCoordinator.runCacheWrite(() => _seedFromAssetIfEmpty(catalogJson));
+
+  Future<void> _seedFromAssetIfEmpty(Map<String, dynamic> catalogJson) async {
+    await _cursorForConfiguredShop();
     if (!await cache.isEmpty()) return;
     final metadata = await cache.metadata();
     final cursor = await cursorStore.load();
@@ -125,7 +133,10 @@ class CatalogRepository {
   /// updated by a real Shopify sync. This matters for installs that were
   /// seeded with an earlier snapshot: the cache is persistent, so the old
   /// "seed only when empty" rule otherwise hides every product added later.
-  Future<void> addMissingFromAsset(Map<String, dynamic> catalogJson) async {
+  Future<void> addMissingFromAsset(Map<String, dynamic> catalogJson) =>
+      _writeCoordinator.runCacheWrite(() => _addMissingFromAsset(catalogJson));
+
+  Future<void> _addMissingFromAsset(Map<String, dynamic> catalogJson) async {
     final metadata = await cache.metadata();
     if (metadata != null &&
         metadata.source != CatalogCacheSource.asset &&
@@ -173,6 +184,11 @@ class CatalogRepository {
 
   Future<CatalogCacheMetadata?> loadOrCreateMetadata(
     List<Product> products,
+  ) =>
+      _writeCoordinator.runCacheWrite(() => _loadOrCreateMetadata(products));
+
+  Future<CatalogCacheMetadata?> _loadOrCreateMetadata(
+    List<Product> products,
   ) async {
     final existing = await cache.metadata();
     if (existing != null) return existing;
@@ -206,6 +222,32 @@ class CatalogRepository {
     );
   }
 
+  /// Focused reads use the delta authority policy, checked when dequeued.
+  /// Empty featured membership must never clear or otherwise mutate the cache.
+  Future<bool> upsertFocusedProducts(List<Product> products) {
+    if (products.isEmpty) return Future<bool>.value(false);
+    return _writeCoordinator.runDeltaWrite(
+      write: () async {
+        await cache.upsertProducts(products);
+        return true;
+      },
+      blocked: () => false,
+    );
+  }
+
+  /// Status changes retain the latest persisted provenance and sync fields.
+  Future<CatalogCacheMetadata?> recordCatalogStatus(
+    CatalogCacheStatus status,
+    String detail,
+  ) =>
+      _writeCoordinator.runCacheWrite(() async {
+        final current = await cache.metadata();
+        if (current == null) return null;
+        final updated = current.copyWith(status: status, detail: detail);
+        await cache.saveMetadata(updated);
+        return updated;
+      });
+
   /// Runs a real delta sync against Shopify and writes whatever changed into
   /// the cache. A no-op returning [CatalogSyncOutcome.skippedNotConfigured]
   /// when no token is configured — never throws for that case, since an
@@ -215,7 +257,14 @@ class CatalogRepository {
   /// any other failure leave the last-known-good cache and cursor untouched
   /// aside from marking metadata unavailable. A verified full sync replaces
   /// the catalog atomically — including a legitimate empty result.
-  Future<CatalogSyncResult> sync() async {
+  Future<CatalogSyncResult> sync() => _writeCoordinator.runDeltaWrite(
+        write: _sync,
+        blocked: () => const CatalogSyncResult(
+          outcome: CatalogSyncOutcome.skippedRealtimeAuthoritative,
+        ),
+      );
+
+  Future<CatalogSyncResult> _sync() async {
     final catalogSync = _catalogSync;
     if (catalogSync == null) {
       return const CatalogSyncResult(
@@ -288,9 +337,10 @@ class CatalogRepository {
     }
   }
 
-  Future<void> prepareConfiguredShop() async {
-    await _cursorForConfiguredShop();
-  }
+  Future<void> prepareConfiguredShop() =>
+      _writeCoordinator.runCacheWrite(() async {
+        await _cursorForConfiguredShop();
+      });
 
   /// Rejects a cursor/catalog belonging to another shop before syncing.
   Future<shopify.SyncCursor> _cursorForConfiguredShop() async {

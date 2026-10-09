@@ -11,10 +11,7 @@ const _writers = {
   'lib/data/local/catalog_cache_store.dart',
 };
 
-const _knownViolations = {
-  'lib/app/catalog_store.dart -> upsertProducts',
-  'lib/app/catalog_store.dart -> saveMetadata',
-};
+const _knownViolations = <String>{};
 
 final _mutation = RegExp(
   r'(?:\.|\?\.)\s*(resetShopState|upsertProducts|seedProducts|replaceProducts|clearCatalog|saveMetadata|upsertCollections)\s*(?:<[^>]+>)?\s*\(',

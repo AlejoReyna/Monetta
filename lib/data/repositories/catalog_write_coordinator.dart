@@ -49,6 +49,10 @@ class CatalogWriteCoordinator {
     return _exclusive(() => allowsDelta ? write() : Future<T>.value(blocked()));
   }
 
+  /// Serializes local bootstrap and status writes without changing authority.
+  /// These mutations do not introduce a competing remote catalog snapshot.
+  Future<T> runCacheWrite<T>(Future<T> Function() write) => _exclusive(write);
+
   Future<T> _exclusive<T>(Future<T> Function() action) async {
     final previous = _tail;
     final release = Completer<void>();

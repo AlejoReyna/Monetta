@@ -179,6 +179,7 @@ class CatalogStore extends ChangeNotifier {
       shopDomain: _shopDomain,
       bagStore: _bagStore,
       wishlistStore: _wishlistStore,
+      writeCoordinator: _writeCoordinator,
     );
 
     // `AssetBundle.loadString` moves files over 50 KB to a helper isolate.
@@ -304,12 +305,8 @@ class CatalogStore extends ChangeNotifier {
     final active = _deltaSyncInFlight;
     if (active != null) return active;
 
-    final future = _writeCoordinator.runDeltaWrite(
-      write: _syncWithShopifyFallback,
-      blocked: () => const CatalogSyncResult(
-        outcome: CatalogSyncOutcome.skippedRealtimeAuthoritative,
-      ),
-    );
+    // The repository owns serialization, including callers outside this store.
+    final future = _syncWithShopifyFallback();
     _deltaSyncInFlight = future;
     unawaited(
       future.then<void>(
@@ -325,7 +322,8 @@ class CatalogStore extends ChangeNotifier {
   /// this only keeps the existing product cache current for detail screens.
   Future<void> upsertShopifyProducts(List<Product> incoming) async {
     if (incoming.isEmpty || !ready) return;
-    await _catalogRepository.cache.upsertProducts(incoming);
+    final wrote = await _catalogRepository.upsertFocusedProducts(incoming);
+    if (!wrote) return;
     final snapshot = await _catalogRepository.loadCached();
     products = snapshot.products;
     facetsById = snapshot.facetsById;
@@ -344,8 +342,10 @@ class CatalogStore extends ChangeNotifier {
       products = snapshot.products;
       facetsById = snapshot.facetsById;
     }
-    catalogMetadata = await _cacheStore.metadata();
-    notifyListeners();
+    if (result.outcome != CatalogSyncOutcome.skippedRealtimeAuthoritative) {
+      catalogMetadata = await _cacheStore.metadata();
+      notifyListeners();
+    }
     return result;
   }
 
@@ -406,10 +406,9 @@ class CatalogStore extends ChangeNotifier {
     CatalogCacheStatus status,
     String detail,
   ) async {
-    final current = catalogMetadata ?? await _cacheStore.metadata();
-    if (current == null) return;
-    final updated = current.copyWith(status: status, detail: detail);
-    await _cacheStore.saveMetadata(updated);
+    final updated =
+        await _catalogRepository.recordCatalogStatus(status, detail);
+    if (updated == null) return;
     catalogMetadata = updated;
     notifyListeners();
   }

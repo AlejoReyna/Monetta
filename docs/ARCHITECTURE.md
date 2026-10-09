@@ -154,7 +154,10 @@ size-based cap it would grow less than its text. UI-01 to UI-03 enforce it.
 3. In the background, `data/shopify` runs a **delta sync** from the stored
    cursor, and every write goes through `CatalogWriteCoordinator`. A verified
    full sync replaces the catalog atomically; an incomplete sync never replaces
-   the cache.
+   the cache. Focused featured-product upserts use the same authority policy as
+   delta, checked inside the queue; empty focused reads do not write. Bootstrap,
+   shop preparation and status metadata also use the coordinator. Status writes
+   read current persisted metadata inside the queue to preserve sync provenance.
 4. `reco/` ranks the catalog from the on-device profile and explains each pick.
 
 This is why the owner never needs a new build to add a product. Details:

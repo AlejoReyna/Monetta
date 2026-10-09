@@ -392,7 +392,13 @@ La política de escritores es explícita:
 - mientras Firestore conecta o está live, delta se omite;
 - si Firestore falla, delta queda habilitado como fallback;
 - sólo hay un delta en curso;
-- Firestore y delta pasan por una cola exclusiva;
+- todas las escrituras de catálogo pasan por `CatalogWriteCoordinator`, incluida
+  la semilla, la reparación local, la procedencia de tienda y la metadata;
+- Firestore, delta y el upsert de destacados comparten esa cola exclusiva;
+- destacados usa la política del delta, evaluada al ejecutar: sólo escribe con
+  autoridad `localOnly` o `firestoreUnavailable`; un resultado vacío no escribe;
+- los cambios de estado releen la metadata persistida dentro de la cola y
+  conservan los campos que haya actualizado una sincronización anterior;
 - si Firestore vuelve durante un delta, espera y después recupera autoridad.
 
 Código:
