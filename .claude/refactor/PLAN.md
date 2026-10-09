@@ -44,6 +44,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | D-09 | Diseño de RF-24: qué tienda registra la metadata del catálogo incluido y la de Firestore | Procedencia explícita: la semilla registra la tienda de su `_source` (monetta.mx), Firestore la configurada y una instalación nueva guarda su tienda en el cursor desde el primer arranque; la comparación exacta no cambia | **tomada, 2026-10-07:** como se recomienda. La persona confirmó que todo es del catálogo de monetta.mx; el catálogo externo de EE. UU. no participa | RF-24 |
 | D-10 | Aspecto de las tarjetas del catálogo completo cuando el navegador pase de `CatalogItem` a `Product` (RF-20) | Conservar el aspecto actual («$1,749 MXN», sin etiquetas): RF-20 es limpieza sin cambios visuales, y la alineación con las demás rejillas puede ir en RF-17 o en un PR de diseño | **tomada, 2026-10-08:** conservar el aspecto actual en RF-20 | RF-20 |
 | D-12 | Cómo se aplica «titulares 1.2» de E-T1: un `TextScaler` sólo recibe el tamaño, y un rol no se distingue por tamaño (`boutiqueTitle` va de 15 a 24 px; `boutiqueText`, de 9 a 20) | Por tamaño, en la raíz: un solo `TextScaler` en `MaterialApp.builder`, sin tocar llamadas. El texto de 20 px o más crece como máximo 1.2×, y el menor hasta 1.5× sin pasar de 24 px, para que ningún texto pequeño supere a un titular. La alternativa por rol exigía un barrido de unas 106 llamadas y, a escala máxima, dejaba un título de 15 px (18 px) por debajo del cuerpo de 14 px (21 px) | **tomada, 2026-10-08:** por tamaño, en la raíz | RF-17 (UI-02, UI-03) |
+| D-13 | Regla de colección de CHAR-07: ¿un producto sin `collectionHandles` debe seguir apareciendo en cualquier colección? Hoy sí (`collection_screen.dart:218-219`), y los productos del catálogo incluido nunca traen esos handles | Conservar la regla mientras el catálogo incluido no traiga la pertenencia a colecciones. Una regla estricta exige primero que el script de refresco la incluya | pendiente | RF-40 |
 | D-11 | Orden del paso 1 de RF-17 frente a las capturas DEV-03 | Adelantar UI-01 a UI-03 (rojas, sin commit) mientras la persona corre G6 y las capturas: no tocan `lib/`, así que las capturas siguen siendo el «antes». UI-03 se escribe con las fuentes reales cargadas | **tomada, 2026-10-08:** adelantar | RF-17 |
 
 **Opciones de E-T1:**
@@ -484,3 +485,91 @@ Origen: R17.
 ### RF-33 · Pruebas de arquitectura en trinquete
 
 **Cambios:** ARCH-02 y ARCH-04, con su lista de excepciones explícita, y ampliar INV-12 a los directorios nuevos.
+
+## Detalle de los WPs de la fase 4 (borrador)
+
+Borrador del orquestador del 2026-10-09, escrito sobre el código de `471167a`.
+- La persona lo revisa antes de empezar la fase, que espera el lanzamiento (E1).
+- Las líneas citadas se vuelven a verificar al encargar cada WP.
+
+### RF-40 · Consultas puras del catálogo
+
+Origen: H04 y R05 (el piloto).
+
+**Hechos:**
+- `lib/features/catalog/catalog_query.dart:17-60` ya concentra el emparejador de búsqueda: `productSearchTerms`, `searchProducts` y `productMatchesAnyTerm`. Pero recibe `CatalogStore` e importa `app/`.
+- El filtro de colección vive dentro de la pantalla (`collection_screen.dart:205-224`). Combina tres cosas: la categoría por facetas, la regla de `collectionHandles` (CHAR-07) y los términos.
+- El navegador del catálogo filtra y ordena en `catalog_browse_screen.dart:1153-1193`.
+- Las facetas son `CanonicalFacets` (`lib/data/normalize/facets.dart:70`) y viven en `CatalogStore.facetsById` (`catalog_store.dart:130`).
+
+**Cambios:**
+- Un módulo de consultas puras: búsqueda, filtro de colección, y filtro y orden del navegador.
+  - Recibe productos y facetas (`Iterable<Product>` y `Map<String, CanonicalFacets>`), sin `CatalogStore` ni Flutter.
+  - Su ubicación (`lib/domain/` o junto a `lib/data/normalize/`) depende de los tipos que use. Entra en la prueba de pureza (INV-12).
+- `catalog_query.dart` y las tres pantallas delegan en él (patrón estrangulador). Las firmas públicas se conservan hasta RF-41.
+
+**Pruebas primero:**
+- CHAR-12 (CAR): la búsqueda vigente sobre el catálogo del asset. Cubre la normalización, los términos de facetas y que una consulta vacía no devuelve nada.
+- CHAR-13 (CAR): el filtro y el orden vigentes del navegador.
+- CHAR-07 ya fija la regla de colección. Cambia sólo si D-13 lo decide.
+
+**Aceptación:**
+- CHAR-07, CHAR-12 y CHAR-13 en verde sobre el módulo puro;
+- INV-04, INV-05, INV-12 e INV-14 verdes.
+
+### RF-41 · ViewModels del piloto
+
+Origen: R05 (ADR-02 modificado).
+
+**Hechos:**
+- El estado vive en 11 `ChangeNotifier` de `lib/app/`, expuestos con scopes `InheritedNotifier`:
+  - `CatalogStore`, `AccountController`, `CartController` y `FeaturedCatalogController`;
+  - `NotificationController` y `AdminNotificationController`;
+  - `OnboardingController`, `EditorialContentController` y `HomeContentController`;
+  - `AdminController` y `ThemeController`.
+- Las pantallas del piloto llevan la lógica dentro: `catalog_browse_screen.dart` (1 260 líneas), `collection_screen.dart` (1 123), `search_screen.dart` (1 019) y `product_screen.dart` (1 207).
+
+**Cambios:**
+- Un ViewModel por pantalla del piloto, en `<feature>_view_model.dart`: `ChangeNotifier`, estado inmutable y `Command` para las acciones, con las consultas de RF-40.
+- La inyección sigue con los scopes actuales: no hay dependencias nuevas durante el piloto.
+- Se miden las reconstrucciones de las cuatro pantallas antes y después.
+- Para RF-43 se registran dos cosas:
+  - los ciclos de vida por parámetro que no se resuelvan con dependencias por ruta;
+  - los errores por un `dispose` olvidado.
+
+**Aceptación:**
+- Las pruebas existentes de las cuatro pantallas pasan adaptadas, no reescritas. Se cuentan unas y otras.
+- INV-02, INV-04 e INV-14 verdes.
+- G6.
+
+### RF-42 · Upsert de destacados a través del coordinador
+
+Origen: R08 (ADR-06 modificado). Decisiones E3 y E10.
+
+**Hechos:**
+- `CatalogStore.upsertShopifyProducts` (`catalog_store.dart:326-333`) escribe en la caché con `cache.upsertProducts` sin pasar por `CatalogWriteCoordinator` (`lib/data/repositories/catalog_write_coordinator.dart:13`). Es la excepción conocida del invariante 5.
+- La cablea `main.dart:515` como `cacheProducts` de `FeaturedCatalogController` (`featured_catalog_controller.dart:16-22`).
+- Las demás escrituras pasan por el repositorio (`catalog_repository.dart:171` y `:251`).
+
+**Cambios:**
+- El upsert de destacados pasa por el coordinador, con la autoridad de E3 (sólo `storefrontDirect`) y la política de vacío de E10.
+- Una prueba de fuente (ARCH-05, TRQ) impide escrituras directas nuevas a la caché fuera del repositorio.
+
+**Aceptación:**
+- en verde, la caracterización previa del upsert (CHAR-14) y su versión a través del coordinador;
+- ARCH-05;
+- INV-04 e INV-05 verdes;
+- el invariante 5 de `CLAUDE.md` queda sin excepción.
+
+### RF-43 · Gate de decisión de inyección de dependencias
+
+Origen: R05.
+
+**Trabajo del orquestador:**
+- Evaluar los criterios de R05 con la evidencia de RF-41: los ciclos de vida por parámetro (family o autoDispose) y los errores por un `dispose` olvidado.
+- Presentar las opciones a la persona, con el costo de cada una medido sobre las 24 pruebas que montan scopes:
+  - conservar los scopes actuales;
+  - `provider` 6.1.5+1;
+  - Riverpod.
+
+**Salida:** la decisión, registrada en la tabla. Si la inyección cambia, se crea un WP nuevo antes de la fase 5.

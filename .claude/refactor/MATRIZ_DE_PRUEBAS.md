@@ -76,6 +76,9 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | CHAR-09 | OBJ | Una notificación tocada en arranque en frío abre su destino una vez que el Navigator existe | RF-14, RF-31 | `notification_controller.dart:101-106` |
 | CHAR-10 | OBJ | Mientras `restore()` no termina, pedir el permiso del sistema espera el estado guardado: con el permiso ya concedido no vuelve a pedirlo ni pisa las preferencias | RF-14 | `home_screen.dart:115-123` · `notification_controller.dart:158-170` |
 | CHAR-11 | CAR | El catálogo completo (navegador abierto desde la UI) muestra los productos de la tienda con tarjetas «$N MXN», sin descuento, sin precio tachado y sin «NUEVO» (D-10), y su filtro de categoría deja sólo esa categoría | RF-20 | `catalog_browse_screen.dart` · `product_tile.dart:238` · `theme.dart` `formatCatalogMoney` |
+| CHAR-12 | CAR | Búsqueda vigente sobre el catálogo incluido: normalización, términos de facetas y consulta vacía sin resultados | RF-40 | `catalog_query.dart:17-60` |
+| CHAR-13 | CAR | Filtro y orden vigentes del navegador del catálogo | RF-40 | `catalog_browse_screen.dart:1153-1193` |
+| CHAR-14 | CAR | Upsert vigente de los destacados en la caché, antes de pasarlo por el coordinador | RF-42 | `catalog_store.dart:326-333` (R08) |
 | CONTRACT-01 | OBJ | ID de pedido de Rewards: el mismo fixture en el cliente y el servidor; el cliente envía un segmento válido y el servidor acepta GID o numérico | RF-12 | `rewards_api.dart:78-80` · `rewards/routes.ts:69` (R12) |
 | CONTRACT-02 | OBJ | Rewards apagado: el servidor responde JSON (`feature_disabled`); la ruta desconocida da `not_found` con `requestId`; el cliente muestra «no disponible» y nunca «revisa tu conexión» | RF-13 | `server.ts:538-543,777-787` (R11) |
 | CONTRACT-03 | OBJ | Los parsers de Rewards rechazan fechas inválidas, IDs ausentes y cantidades ausentes con un error de contrato tipado | RF-15 | `rewards_models.dart:47-162` (R15) |
@@ -86,6 +89,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | ARCH-02 | TRQ | `lib/features/` no importa implementaciones de `lib/data/`, salvo la lista explícita de helpers puros | RF-33 | 21 archivos hoy (H03) |
 | ARCH-03 | OBJ | Ningún archivo de `lib/` ni `test/` referencia el catálogo externo, salvo el guard de `RuntimeConfig` | RF-20 | R02 |
 | ARCH-04 | TRQ | `lib/app/composition/` es el único lugar que construye implementaciones concretas de `data/` | RF-30, RF-33 | R18 |
+| ARCH-05 | TRQ | Sólo el repositorio del catálogo y el coordinador escriben en la caché: ninguna llamada nueva a `cache.upsertProducts` fuera de ellos | RF-42 | `catalog_store.dart:328` (R08) |
 | UI-01 | OBJ | Cada helper de tipografía y los temas claro y oscuro resuelven a una familia empaquetada (Inter o Playfair Display), con el peso por defecto del helper declarado; los archivos existen y `MonettaApp` registra su licencia OFL | RF-17 | `boutique_tokens.dart:53-175` · `theme.dart:269-362` |
 | UI-02 | OBJ | La raíz aplica la política E-T1 por tamaño (D-12): ningún texto pasa de 1.5×, el de 20 px o más no pasa de 1.2× y el menor no pasa de 24 px; la escala es monótona y a 1.0 no cambia | RF-17 | `main.dart:908` (sin tope) |
 | UI-03 | OBJ | Sin overflow a escala 1.0, 1.3 y 1.5, con la política E-T1 (D-12) y las fuentes reales cargadas, en inicio, colección, búsqueda, ficha, bolsa, checkout, cuenta y pedidos (teléfono de 375×812 y de 440×956) | RF-17 | R13/RF-17 |
@@ -118,7 +122,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-31 | CHAR-02, CHAR-09 | INV-10, INV-13 | G8 (DEV-01, DEV-02) |
 | RF-32 | — | INV-02, INV-08 | — |
 | RF-33 | ARCH-02, ARCH-04 | INV-12 | — |
-| RF-40 a RF-43 | Caracterización de consultas (CHAR-07 y nuevas de búsqueda) | INV-04, INV-05, INV-14 | — |
+| RF-40 a RF-43 | CHAR-12 y CHAR-13 (RF-40), CHAR-14 y ARCH-05 (RF-42); CHAR-07 cambia sólo según D-13 | INV-04, INV-05, INV-12, INV-14 | G6 en RF-41 |
 | RF-50 a RF-52 | Según E4 y E10 | INV-01, INV-02, INV-05, INV-06, INV-07 | G6, G8 (DEV-01, DEV-02) |
 | RF-60 | Fixtures de dinero (R14) | INV-03, INV-06 | G6 |
 
