@@ -1788,3 +1788,8 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Insumo:** `scratch/plan/fase5_detalle_propuesto.md` (168 líneas, 107 anclas, renumerado sin colisiones), verificado por el auditor: las citas en archivos que RF-42 movió se recorrigieron a `b2f3816` (`catalog_store.dart:160` bolsa, `:513` alta, `:555` tope, `:259` hidratación, `:706` cierre, `:633` perfil; `catalog_repository.dart:259` vacío legítimo); el resto coincide.
 - **Adoptado en `PLAN.md** (detalle RF-53/50/51/52) y filas nuevas en la matriz (CHAR-18–23, CONTRACT-07–10, ARCH-06–08, PERF-02/03, todas pendiente). Orden: RF-53 → RF-50 → RF-51 → RF-52.
 - **Preguntas a la persona antes de empezar:** (1) aceptar el desdoblamiento RF-53 (recomendado: sí, separa comportamiento de extracción); (2) línea de integración de la fase 5: extender D-14 a `refactor/rf-5X-*` con commits (recomendado) o trabajar sobre la línea de lanzamiento.
+
+### 2026-10-09 · Fase 5 · decisiones de arranque · RF-53 EN CURSO
+
+- **Persona:** acepta el desdoblamiento RF-53; D-14 se extiende a la fase 5 (ramas `refactor/rf-5X-*` sobre la fase 4, commits locales, nunca push).
+- Falta E4-producto (misma variante con distinto producto, aviso de agotado, texto del aviso): se pregunta al empezar RF-53, porque sus pruebas lo fijan.
