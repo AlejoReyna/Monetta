@@ -1477,3 +1477,25 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Baja] El orden por `updatedAt` y por precio sigue usando `List.sort`, que no es estable; es lo vigente.
   - [Nota] Las fachadas de `catalog_query.dart` y el `export` de `search_history.dart` se quitan en RF-41, cuando migren las pantallas.
 - **Siguiente paso:** RF-41, los ViewModels del piloto.
+
+### 2026-10-09 · RF-41 · paso 1 (PERF-01, línea base) · APROBADO
+
+- **Agente:** `test-engineer`. El orquestador auditó.
+- **Base:** `4c4a063`, rama `refactor/rf-41-viewmodels`. Commit `ba3faa4`.
+- **Prueba nueva:** `test/features/catalog/pilot_rebuilds_test.dart` (PERF-01, TRQ), con el ayudante `test/support/rebuild_counter.dart`, que usa el gancho `debugOnRebuildDirtyWidget`.
+  - Cada pantalla se monta sobre el catálogo del asset, a 375×812, y recibe 3 veces `store.record(galleryInteraction)` sobre otra pieza.
+  - Se cuentan los elementos reconstruidos en total y los del propio `Element` de la pantalla.
+- **Línea base** (3 corridas idénticas, y 0 en un frame de control sin notificación):
+
+  | Pantalla | Elementos reconstruidos (3 notificaciones) | Reconstrucciones propias |
+  |---|---|---|
+  | `SearchScreen` | 939 | 3 |
+  | `CollectionScreen` | 1044 | 3 |
+  | `CatalogBrowseScreen` | 3 | 0 |
+  | `ProductScreen` | 1413 | 3 |
+
+- **Verificación del auditor:** la corrida da los mismos números. El agente comprobó que el trinquete falla al poner las constantes en 0.
+- **Hallazgos para las partes siguientes:**
+  - [Media] El navegador lee el store con `getInheritedWidgetOfExactType`, sin suscribirse (`catalog_browse_screen.dart:1020`), y `openCatalogBrowse` (`:344`) fija `bagCount` al abrir. Es posible que el contador de bolsa del navegador no siga a la bolsa. Se revisa en la parte C.
+  - [Nota] R20: `record` llama a `_rebuildProfile`, que a su vez llama a `notifyListeners` (`catalog_store.dart:425-451`).
+- **Siguiente paso:** la parte A (`SearchScreen`, el patrón y `Command`).
