@@ -1749,3 +1749,16 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - iOS: `Xcode build done.  719.6s` → `✓ Built build/ios/iphonesimulator/Runner.app`.
 - **Revisión del auditor:** `git rev-parse --short HEAD` → `da31075`; `git status --porcelain` limpio; `git diff --check` limpio; ambos artefactos presentes en `build/` (salidas ignoradas, nada versionado).
 - **Estado:** RF-41 pasa a `cerrado`. Queda pendiente de la persona sólo lo ya listado (G6 de RF-14/17/18/20/22/30/31, G8, DEV-03, E8/E9/E12 y el push de `fix/sin-envio-gratis-main`).
+
+### 2026-10-09 · RF-42 · iteración 1 · CERRADO
+
+- **Agente:** GPT Sol 6.1 (otro modelo, en `.claude/worktrees/rf-42`, rama `refactor/rf-42-destacados`), con CHAR-14/ARCH-05 primero (commit `29f6ca6`) e implementación después (`6cfb02c`). El orquestador re-ejecutó todo.
+- **Cambios** (8 archivos, +591 −23):
+  - `catalog_write_coordinator.dart` (+4): `runCacheWrite` (serializa semilla, procedencia y estado sin cambiar autoridad).
+  - `catalog_repository.dart` (+66 −9): coordinador opcional (por defecto `localOnly`); semilla, reparación, metadata, procedencia y `sync` pasan por él; nuevos `upsertFocusedProducts` (delta al desencolar, vacío no escribe) y `recordCatalogStatus` (relee la metadata persistida en cola).
+  - `catalog_store.dart` (+25 −9): inyecta su coordinador al repositorio y al realtime (cola compartida); `upsertShopifyProducts` delega y no recarga ni notifica si la autoridad bloquea o si SQLite falla (propaga); `_recordCatalogStatus` publica la copia fresca (cierra la segunda escritura directa de `catalog_store.dart:412`); la exclusión de `sync()` se mueve al repositorio sin re-encolamientos (verificado: los cuerpos encolados sólo llaman a la privada `_cursorForConfiguredShop`).
+  - Pruebas: `featured_upsert_characterization_test` (3 CHAR-14 + 5 CHAR-14b), `cache_writers_test` (ARCH-05 con autochequeos) y 3 CHAR-14b en `catalog_write_coordinator_test`; docs actualizados en el WP.
+- **Gates del auditor en la rama:** G0 alcance exacto; G1 `Formatted 378 files (0 changed)`; G2 «No issues found!»; G3 `+15: All tests passed!`; contraste en worktree temporal sobre `1a7710c` (eliminado después): `+3 -5`, con razones confirmadas (upsert que escribía pese a Firestore; metadata de copia vieja `asset` vs `shopify`; ARCH-05); G4 `+1402 ~5` (= 1389 + 13); G5 catálogo válido y secretos OK; sin `skip:` ni `// ignore`.
+- **Rebase e integración:** a `da31075` sin conflictos (`31e4bb8`, `b2f3816`); el diff toca los mismos 8 archivos. Re-verificado: G1 `384 files (0 changed)`, G2 limpio, G3 `+36` (nuevas + INV-04/05), G4 `+1438 ~5: All tests passed!` (= 1425 + 13, exacto), G5 OK.
+- **Hallazgos:** [Nota] 1 test de coordinador pasa también en viejo (fija semántica preexistente con nombre OBJ); inofensivo. Sin Blockers ni Altas. El invariante 5 de `CLAUDE.md` queda sin excepciones. No requiere G6.
+- **Siguiente paso:** RF-43, gate de DI (evidencia encargada a GPT Sol 6.1 en `scratch/plan/rf43_evidencia.md`; decide la persona).
