@@ -1533,3 +1533,47 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Baja] `Command` guarda el error y la pantalla no lo lee. Hoy `remember` no lanza de forma síncrona.
   - [Nota] La parte B (`CollectionScreen`) usa el mismo patrón.
 - **Siguiente paso:** la parte B.
+
+### 2026-10-09 · RF-41 · parte B (`CollectionScreen`) · APROBADO
+
+- **Agente:** `flutter-implementer`. El orquestador auditó.
+- **Base:** `1b4fa1c`, rama `refactor/rf-41-viewmodels`. Commit `1a7710c`.
+- **Diff** (5 archivos, +989 −160):
+  - **`lib/features/catalog/collection_view_model.dart`** (nuevo, 268 líneas):
+    - `CollectionSort`, `CollectionFilters` (con `==` y `hashCode`) y `CollectionViewState`. El estado es inmutable, con igualdad por valor: filtros aplicados, línea base, alcance, piezas visibles, marcas, siluetas y contador de bolsa.
+    - Se calcula con el filtro puro de colección de RF-40. **Sólo notifica si el estado cambia.**
+    - Acciones síncronas: `applyFilters`, `clearFilters`, `updateDestination` y `countFor`. No usan `Command` porque no hay trabajo asíncrono; `SearchViewModel` hace lo mismo con sus acciones síncronas.
+  - **`collection_screen.dart`** (1 091 → 987 líneas):
+    - lee el store sin suscribirse;
+    - conserva el scroll, la navegación y la hoja de filtros;
+    - `didUpdateWidget` llama a `updateDestination`.
+  - **Pruebas nuevas** (22): 16 del ViewModel y 6 de la pantalla.
+  - **Pruebas existentes:** ninguna adaptada. En PERF-01 sólo cambian las constantes de `CollectionScreen`.
+- **Contraste (ejecutado por el auditor):** con el `collection_screen.dart` de `1b4fa1c`, las 6 pruebas de pantalla dan `+4 -2`. Fallan sólo las dos que miden la mejora (listeners liberados y cero reconstrucciones propias), así que el comportamiento se conserva. El archivo se restauró con `git checkout HEAD --` y el worktree quedó limpio.
+- **Evidencia para RF-43** (criterios de R05):
+  - **Ciclo de vida por parámetro:**
+    - la `State` anterior no tenía `didUpdateWidget` y leía `widget.filter` en cada `build`;
+    - con otro destino, las elecciones de la hoja se conservaban, y el alcance y la línea base seguían al filtro nuevo;
+    - se conserva con `didUpdateWidget` → `updateDestination`, y un destino equivalente no notifica;
+    - lo fijan pruebas que pasan con el código viejo y con el nuevo. En producción cada `openCollection` crea una `State` nueva, así que el caso sólo aparece con reconstrucciones en el sitio.
+  - **`dispose`:** quedan cubiertos tres riesgos:
+    - el listener del store se quita (lo mide un contador de listeners en el ViewModel y en la pantalla);
+    - `_refresh` tiene un guard `_disposed` contra notificaciones tardías y contra la hoja que devuelve su resultado después de cerrar la pantalla;
+    - el ViewModel se desecha antes que el `ScrollController`.
+  - **Reconstrucciones:** las propias bajan de 3 a 0 y el total de 1044 a 435. Lo que queda son las tarjetas, que se suscriben con `StoreScope.of`, igual que en la parte A.
+- **Gates (ejecutados por el auditor en el worktree, sobre `1a7710c`):**
+  - G0 → 5 archivos, +989 −160; `git diff --check` limpio.
+  - G1 → `Formatted 376 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → catálogo, ficha, navegación, boutique, escala de texto y arquitectura: `+521: All tests passed!`.
+  - PERF-01 → `CollectionScreen` pasa de 1044/3 a 435/0. Las otras tres no cambian: 411/0, 3/0 y 1413/3.
+  - G4 → `+1389 ~5: All tests passed!` (1367 + 22).
+  - G5 → catálogo válido (103 productos, 340 imágenes); secretos OK.
+- **Hallazgos:**
+  - [Baja] La `State` captura el store en `initState` y no sigue un cambio de `StoreScope.notifier`. Es igual que en la parte A, y ningún caso de la app lo produce.
+  - [Baja] Los productos no tienen igualdad por valor. Si el store reemplaza un producto por otro objeto con los mismos datos, el ViewModel notifica una vez. Es conservador.
+  - [Nota] Que las elecciones de una colección sobrevivan a otro destino es raro, pero es lo vigente. Lo puede normalizar RF-43 o la fase 5.
+- **Siguiente paso:** la parte C (`CatalogBrowseScreen`).
+  - El hallazgo [Media] del paso 1 se confirma leyendo el código. `openCatalogBrowse` fija `bagCount` al abrir (`catalog_browse_screen.dart:344`) y la barra inferior lo pinta (`:308`). Después de agregar con «+», o de cambiar la bolsa en la ficha o en la bolsa, el contador del navegador queda viejo.
+  - La colección (parte B) y el inicio sí siguen la bolsa. El defecto también existe en la línea de lanzamiento.
+  - Decisión del orquestador: se corrige en la parte C, con una prueba objetivo primero (CHAR-17).
