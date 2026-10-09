@@ -1431,3 +1431,11 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - el color del navegador sale del título y la categoría, no de `facets.colors`;
   - el tipo de bolsa sale de subcadenas.
 - **Siguiente paso:** la implementación (`flutter-implementer`).
+
+### 2026-10-09 · RF-40 · implementación interrumpida · EN CURSO
+
+- La sesión llegó a su límite de uso, y el orquestador detuvo a `flutter-implementer` antes de que terminara. No hubo auditoría ni commit.
+- **Para retomar:**
+  1. En `.claude/worktrees/rf-30` (rama `refactor/rf-40-consultas`), descartar las ediciones parciales de `lib/` con `git checkout -- lib` y borrar `lib/features/catalog/query/` si existe.
+  2. Conservar las pruebas sin commit de RF-40: CHAR-12, CHAR-13 y la regla nueva de INV-12 en `test/architecture_test.dart`.
+  3. Relanzar el encargo de implementación de RF-40. Su diseño está en `PLAN.md`; la rama de consulta muerta de `_filterCatalog` se elimina.
