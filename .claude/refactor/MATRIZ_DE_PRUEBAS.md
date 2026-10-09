@@ -181,6 +181,7 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | ARCH-01 | verde (TRQ, lista vacía): ninguna feature importa `main.dart` | RF-30 | 2026-10-09 · RF-30 · iteración 1 |
 | ARCH-04 | verde (TRQ). Sin `lib/main.dart`; quedan las entradas de RF-33 (`shopify_cart_composition.dart`, `customer_experiences_screen.dart` y `rewards_api.dart`) y de RF-50 (`catalog_store.dart`) | RF-30 | 2026-10-09 · RF-30 · iteración 1 |
 | CHAR-15 | verde (OBJ): todos los scopes de la app están por encima del Navigator | RF-30 | 2026-10-09 · RF-30 · iteración 1 |
+| UI-04 | verde, **pendiente de la aprobación de la persona**. 10 goldens (inicio, colección, ficha, bolsa y cuenta, a 375×812 y 440×956) con Inter, Playfair e iconos reales, en `test/goldens/ui04/`. Llevan la etiqueta `golden`, sólo corren en macOS (D-15) y toleran un 0.5 % de diferencia | RF-17 | 2026-10-09 · RF-17 · paso 4 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)

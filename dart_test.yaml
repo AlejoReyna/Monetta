@@ -1,0 +1,7 @@
+# Configuration read by `flutter test` (package:test).
+tags:
+  # UI-04 (RF-17, decision D-15): golden images drawn with the bundled Inter
+  # and Playfair Display. Font rasterization differs between macOS and Linux,
+  # so they are compared on macOS only: the Ubuntu CI job excludes them and the
+  # macOS job runs them.
+  golden:

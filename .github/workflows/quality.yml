@@ -30,7 +30,8 @@ jobs:
       - name: Static analysis
         run: flutter analyze
       - name: Flutter tests
-        run: flutter test
+        # Golden images are compared on macOS only (D-15); see the ios-compile job.
+        run: flutter test --exclude-tags golden
       - name: Catalog and secret gates
         run: |
           dart run bin/verify_catalog_snapshot.dart
@@ -49,6 +50,8 @@ jobs:
           flutter-version: 3.44.8
           cache: true
       - run: flutter pub get
+      - name: Golden tests (UI-04, macOS only)
+        run: flutter test --tags golden
       - name: iOS staging simulator compile
         run: flutter build ios --simulator --debug --dart-define-from-file=config/dart_defines.ci.json
 

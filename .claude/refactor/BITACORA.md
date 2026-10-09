@@ -1241,3 +1241,32 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Baja] `AppDependencies` importa `features/catalog/search_history`, igual que antes `main.dart`. Se retoma en RF-32 o RF-33.
   - [Nota] `MonettaApp` vive en `lib/app/`, fuera de `composition/`, y no construye clases de `data/` (ARCH-04 verde).
 - **Siguiente paso:** RF-31, sobre esta rama y con el criterio de D-14 (RF-14 tiene el código aprobado; su G6 y G8 siguen pendientes).
+
+### 2026-10-09 · RF-17 · paso 4 (UI-04), iteración 1 · APROBADO (PENDIENTE DE LA APROBACIÓN DE LA PERSONA)
+
+- **Decisión de la persona:** D-15, goldens con etiqueta, sólo en macOS y con tolerancia.
+- **Agentes:** `test-engineer`, que hizo los goldens. El orquestador cambió el CI y auditó. El agente entregó un informe parcial, y el auditor ejecutó todo por su cuenta.
+- **Base:** `820de0d`, rama `refactor/rf-17-tipografia`.
+- **Diff:**
+  - **`test/goldens/ui04_typography_goldens_test.dart`:** 10 casos `UI-04 <pantalla> <ancho>x<alto> golden` con `tags: ['golden']`.
+    - Pantallas: inicio, colección, ficha, bolsa y cuenta, a 375×812 y 440×956 con DPR 3.
+    - Escala 1.0 y tema claro.
+    - En `setUpAll` se registran Inter, Playfair Display y `MaterialIcons` (desde `rootBundle`). El comparador tolerante se instala ahí y se restaura en `tearDownAll`.
+  - **`test/goldens/ui04/*.png`:** 10 imágenes, unos 3.3 MB; la mayor es la del inicio a 440×956, con 1.08 MB.
+  - **`test/support/tolerant_golden_comparator.dart`:** un `LocalFileComparator` que acepta un `diffPercent` de hasta 0.005. Si lo supera, falla con el informe estándar.
+  - **`dart_test.yaml`** (orquestador): declara la etiqueta `golden`.
+  - **`.github/workflows/quality.yml`** (orquestador): el job `flutter` (Ubuntu) corre `flutter test --exclude-tags golden`, y el job `ios-compile` (macos-15) añade `flutter test --tags golden`.
+- **Revisión visual del auditor** (ficha y cuenta, 375×812):
+  - se ven Inter en la sans, Playfair Display en la serif e iconos reales;
+  - las fotos de producto quedan en su estado vacío, siempre igual.
+  - Para la persona: en la ficha, el título del encabezado ocupa dos líneas en negrita y el nombre del producto (24 px), tres. Es el tamaño nominal que se juzga en DEV-03.
+- **Gates (ejecutados por el auditor):**
+  - G0 → archivos dentro del alcance.
+  - G1 → `Formatted 344 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → `flutter test --tags golden test/goldens/` dos veces seguidas: `+10: All tests passed!` y `+10: All tests passed!`, deterministas.
+  - G4 → `--exclude-tags golden`, el equivalente del CI en Ubuntu: `+1204 ~5: All tests passed!`. Suite completa en macOS: `+1214 ~5: All tests passed!`.
+  - G5 → catálogo válido; secretos OK.
+- **Riesgo:** los goldens se generaron en el macOS local. El job `macos-15` del CI puede superar el 0.5 % si CoreText dibuja distinto. Hay que mirarlo en el primer push; la tolerancia es un número dentro de `ui04_typography_goldens_test.dart`.
+- **Commit:** autorizado (RF-17).
+- **Siguiente paso:** la persona aprueba las 10 imágenes de `test/goldens/ui04/`. Con eso, el G6 y DEV-03, RF-17 se cierra.
