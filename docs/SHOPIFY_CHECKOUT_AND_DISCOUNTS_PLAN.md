@@ -74,9 +74,10 @@ wallet antes de que Shopify la presente.
 - `checkout_sheet_kit_flutter: ^0.0.2` está declarado, pero no hay uso desde
   `lib/`. Es un wrapper Flutter de terceros alrededor de los SDK nativos de
   Shopify y debe auditarse antes de convertirlo en una dependencia de ingresos.
-- `lib/app/motion.dart` calcula localmente envío gratis desde `$1,499` y una
-  tarifa de `$149`. Puede seguir siendo una estimación claramente rotulada,
-  nunca el total final ni la autoridad comercial.
+- `lib/app/motion.dart` calculaba localmente envío gratis desde `$1,499` y una
+  tarifa de `$149`. **Retirado el 2026-10-08:** la tienda nunca ofreció ese
+  envío gratis. La app ya no estima el envío: la bolsa y el checkout local
+  dicen «Se calcula en Shopify» y el total local no suma envío.
 - `ios/Runner/Runner.entitlements` solo declara notificaciones; no tiene
   Associated Domains.
 - `android/app/src/main/AndroidManifest.xml` no tiene App Links de checkout.

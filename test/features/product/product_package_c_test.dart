@@ -78,7 +78,11 @@ void main() {
     expect(find.text('Pago seguro'), findsOneWidget);
 
     // Shipping facts, never lamina copy.
-    expect(find.textContaining('Envío gratis desde'), findsWidgets);
+    expect(find.text('Envío a todo México'), findsWidgets);
+    expect(
+      find.textContaining(RegExp('gratis', caseSensitive: false)),
+      findsNothing,
+    );
     expect(find.textContaining('Entrega estimada'), findsWidgets);
 
     // Purchase bar: same labels the catalog flow already honours.

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
-import 'package:monetta_app/app/motion.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/catalog_store.dart';
@@ -24,19 +23,8 @@ Widget _app(CatalogStore store, Widget child) {
 }
 
 void main() {
-  test('free-shipping incentive covers empty, partial and complete', () {
-    expect(remainingForFreeShipping(0), kFreeShippingThreshold);
-    expect(
-      remainingForFreeShipping(kFreeShippingThreshold - 1),
-      1,
-    );
-    expect(remainingForFreeShipping(kFreeShippingThreshold), 0);
-    expect(remainingForFreeShipping(kFreeShippingThreshold + 500), 0);
-    expect(shippingFor(0), kStandardShippingFee);
-    expect(shippingFor(kFreeShippingThreshold), 0);
-  });
-
-  testWidgets('bag shows incentive, save-for-later and recommendations',
+  testWidgets(
+      'bag shows no shipping promise, save-for-later and recommendations',
       (tester) async {
     final store = await _loadedStore();
     final product = store.products.firstWhere((item) => item.isInStock);
@@ -46,16 +34,14 @@ void main() {
     await tester.pump();
 
     expect(find.text('Mi bolsa'), findsOneWidget);
+    // No shipping promise by amount: neither the bar nor any "gratis" copy.
     expect(
       find.byKey(const ValueKey('free-shipping-incentive')),
-      findsOneWidget,
+      findsNothing,
     );
-    // Incentivo real: o faltante o gratis, nunca cifra inventada.
     expect(
-      find.textContaining(
-        RegExp(r'(Te faltan|Tienes envío gratis)'),
-      ),
-      findsWidgets,
+      find.textContaining(RegExp('gratis', caseSensitive: false)),
+      findsNothing,
     );
     // Guardar para después = favorito.
     expect(find.text('Guardar para después'), findsOneWidget);

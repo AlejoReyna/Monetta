@@ -429,7 +429,6 @@ class _ProductScreenState extends State<ProductScreen> {
                       }),
                       child: Text(
                         'Envío a todo México en 3 a 5 días hábiles, por DHL, FedEx o Estafeta. '
-                        'Gratis desde ${kMoney.format(kFreeShippingThreshold)}. '
                         'Si la pieza no es lo que esperabas, escríbenos por WhatsApp y lo resolvemos.',
                         style: boutiqueText(
                           size: 14,
@@ -812,7 +811,7 @@ class _AvailabilityLine extends StatelessWidget {
         Expanded(
           child: Text(
             inStock
-                ? 'Disponible · envío 3 a 5 días · gratis desde ${kMoney.format(kFreeShippingThreshold)}'
+                ? 'Disponible · envío 3 a 5 días'
                 : 'Agotado · te avisamos cuando vuelva',
             style: boutiqueText(size: 12, color: palette.inkMuted, height: 1.4),
           ),
@@ -841,7 +840,7 @@ class _ShippingCard extends StatelessWidget {
               const SizedBox(width: BoutiqueSpace.md),
               Expanded(
                 child: Text(
-                  'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)}',
+                  'Envío a todo México',
                   style: boutiqueText(
                     size: 13,
                     weight: FontWeight.w600,

@@ -15,17 +15,6 @@ const Duration kKenBurns = Duration(seconds: 18);
 /// Ease-out expo. No overshoot — overshoot is a template tell.
 const Cubic kMotionCurve = Cubic(0.16, 1, 0.3, 1);
 
-const double kFreeShippingThreshold = 1499;
-const double kStandardShippingFee = 149;
-
-double shippingFor(double subtotal) =>
-    subtotal >= kFreeShippingThreshold ? 0 : kStandardShippingFee;
-
-double remainingForFreeShipping(double subtotal) {
-  final left = kFreeShippingThreshold - subtotal;
-  return left > 0 ? left : 0;
-}
-
 bool get inWidgetTest =>
     WidgetsBinding.instance.runtimeType.toString().contains('Test');
 

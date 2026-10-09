@@ -4,7 +4,6 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
-import '../../app/motion.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../main.dart';
@@ -34,7 +33,6 @@ class MiniCartSheet extends StatelessWidget {
     final store = StoreScope.of(context);
     final lines = store.bagLines;
     final subtotal = store.bagSubtotal;
-    final remaining = remainingForFreeShipping(store.bagSubtotal);
     final last = lines.isEmpty ? null : lines.last;
     final count = store.bagQuantity;
 
@@ -95,30 +93,6 @@ class MiniCartSheet extends StatelessWidget {
                       ),
                     ),
                   ],
-                ),
-                const SizedBox(height: 10),
-                Semantics(
-                  liveRegion: true,
-                  child: Text(
-                    remaining == 0
-                        ? 'Envío gratis en este pedido.'
-                        : 'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)} · te faltan ${kMoney.format(remaining)}',
-                    style: boutiqueText(size: 12, color: palette.inkMuted),
-                  ),
-                ),
-                const SizedBox(height: 10),
-                ClipRRect(
-                  borderRadius: BoutiqueRadius.capsule,
-                  child: LinearProgressIndicator(
-                    value: (subtotal / kFreeShippingThreshold)
-                        .clamp(0.0, 1.0)
-                        .toDouble(),
-                    minHeight: 5,
-                    backgroundColor: palette.surfaceDeep,
-                    valueColor: AlwaysStoppedAnimation<Color>(
-                      remaining == 0 ? palette.gold : palette.ink,
-                    ),
-                  ),
                 ),
                 if (last != null) ...[
                   const SizedBox(height: 18),

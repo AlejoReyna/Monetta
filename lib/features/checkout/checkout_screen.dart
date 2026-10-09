@@ -231,7 +231,6 @@ class _BagContents extends StatelessWidget {
     final store = StoreScope.of(context);
     final count = store.bagQuantity;
     final subtotal = store.bagSubtotal;
-    final shipping = _shippingFor(subtotal);
 
     void continueToCheckout() {
       final controller = cartController;
@@ -337,11 +336,6 @@ class _BagContents extends StatelessWidget {
           ],
         );
 
-        final incentive = Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-          child: _FreeShippingBar(subtotal: subtotal),
-        );
-
         final controller = cartController;
         final scope = cartScope;
         final hasRemoteCart = controller?.scopedSnapshot?.scope == scope &&
@@ -355,7 +349,6 @@ class _BagContents extends StatelessWidget {
               )
             : _OrderSummary(
                 subtotal: subtotal,
-                shipping: shipping,
                 ctaLabel: 'Continuar al checkout',
                 onContinue: continueToCheckout,
               );
@@ -391,8 +384,6 @@ class _BagContents extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 64),
                             child: Column(
                               children: [
-                                _FreeShippingBar(subtotal: subtotal),
-                                const SizedBox(height: 16),
                                 summary,
                               ],
                             ),
@@ -415,7 +406,6 @@ class _BagContents extends StatelessWidget {
             const _CheckoutProgress(activeIndex: 0),
             heading,
             lineTiles,
-            incentive,
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: summary,
@@ -620,7 +610,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                       ? _ReviewPanel(
                           email: _email.text,
                           phone: _phone.text,
-                          shipping: _shippingFor(store.bagSubtotal),
                           launching: _launching,
                           paymentMethods: widget.availablePaymentMethods,
                           selectedPayment: _selectedPayment,
@@ -633,7 +622,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                           formKey: _formKey,
                           email: _email,
                           phone: _phone,
-                          shipping: _shippingFor(store.bagSubtotal),
                           onContinue: _review,
                         );
 
@@ -833,81 +821,6 @@ class _ProgressStep extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-class _FreeShippingBar extends StatelessWidget {
-  const _FreeShippingBar({required this.subtotal});
-
-  final double subtotal;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final remaining = remainingForFreeShipping(subtotal);
-    final progress =
-        (subtotal / kFreeShippingThreshold).clamp(0.0, 1.0).toDouble();
-    final done = remaining == 0;
-    return Semantics(
-      liveRegion: true,
-      label: done
-          ? 'Tienes envío gratis en este pedido'
-          : 'Te faltan ${kMoney.format(remaining)} para el envío gratis',
-      child: Container(
-        key: const ValueKey('free-shipping-incentive'),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BoutiqueRadius.card,
-          border: Border.all(color: palette.hairline, width: .5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  done ? Icons.check_circle : Icons.local_shipping_outlined,
-                  size: 18,
-                  color: done ? palette.goldText : palette.ink,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    done
-                        ? 'Tienes envío gratis en este pedido.'
-                        : 'Te faltan ${kMoney.format(remaining)} para el envío gratis',
-                    style: boutiqueText(
-                      size: 13,
-                      weight: FontWeight.w500,
-                      color: palette.ink,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BoutiqueRadius.capsule,
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: palette.surfaceDeep,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  done ? palette.gold : palette.ink,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)}',
-              style: boutiqueText(size: 11, color: palette.inkMuted),
-            ),
-          ],
-        ),
       ),
     );
   }
@@ -1193,13 +1106,11 @@ class _BagRecommendations extends StatelessWidget {
 class _OrderSummary extends StatelessWidget {
   const _OrderSummary({
     required this.subtotal,
-    required this.shipping,
     required this.ctaLabel,
     required this.onContinue,
   });
 
   final double subtotal;
-  final double shipping;
   final String ctaLabel;
   final VoidCallback onContinue;
 
@@ -1223,15 +1134,15 @@ class _OrderSummary extends StatelessWidget {
           const SizedBox(height: 10),
           _SummaryRow(
             label: 'Envío',
-            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
+            value: 'Se calcula en Shopify',
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Container(height: .5, color: palette.hairline),
           ),
           _SummaryRow(
-            label: 'Total',
-            value: kMoney.format(subtotal + shipping),
+            label: 'Total estimado',
+            value: kMoney.format(subtotal),
             prominent: true,
           ),
           const SizedBox(height: 6),
@@ -1276,27 +1187,35 @@ class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: boutiqueText(
-              size: prominent ? 15 : 13,
-              weight: prominent ? FontWeight.w600 : FontWeight.w400,
-              color: palette.ink,
+    // The value may be a sentence ("Se calcula en Shopify"), so it is capped
+    // and allowed to wrap instead of overflowing at large text scales.
+    return LayoutBuilder(
+      builder: (context, constraints) => Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: boutiqueText(
+                size: prominent ? 15 : 13,
+                weight: prominent ? FontWeight.w600 : FontWeight.w400,
+                color: palette.ink,
+              ),
             ),
           ),
-        ),
-        Text(
-          value,
-          style: boutiqueText(
-            size: prominent ? 16 : 13,
-            weight: prominent ? FontWeight.w700 : FontWeight.w500,
-            color: palette.ink,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth * .65),
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: boutiqueText(
+                size: prominent ? 16 : 13,
+                weight: prominent ? FontWeight.w700 : FontWeight.w500,
+                color: palette.ink,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1306,14 +1225,12 @@ class _ContactForm extends StatelessWidget {
     required this.formKey,
     required this.email,
     required this.phone,
-    required this.shipping,
     required this.onContinue,
   });
 
   final GlobalKey<FormState> formKey;
   final TextEditingController email;
   final TextEditingController phone;
-  final double shipping;
   final VoidCallback onContinue;
 
   String? _required(String? value) =>
@@ -1361,7 +1278,7 @@ class _ContactForm extends StatelessWidget {
             validator: _required,
           ),
           const SizedBox(height: 24),
-          _DeliveryOption(shipping: shipping),
+          const _DeliveryOption(),
           const SizedBox(height: 24),
           BoutiqueButton(label: 'REVISAR PEDIDO', onPressed: onContinue),
         ],
@@ -1425,9 +1342,7 @@ class _CheckoutField extends StatelessWidget {
 }
 
 class _DeliveryOption extends StatelessWidget {
-  const _DeliveryOption({required this.shipping});
-
-  final double shipping;
+  const _DeliveryOption();
 
   @override
   Widget build(BuildContext context) {
@@ -1477,9 +1392,7 @@ class _DeliveryOption extends StatelessWidget {
             ),
           ),
           Text(
-            shipping == 0
-                ? 'ESTIMADO: GRATIS'
-                : 'ESTIMADO: ${kMoney.format(shipping)}',
+            'SE CALCULA EN SHOPIFY',
             style: boutiqueEyebrow(size: 9, color: palette.ink),
           ),
         ],
@@ -1492,7 +1405,6 @@ class _ReviewPanel extends StatelessWidget {
   const _ReviewPanel({
     required this.email,
     required this.phone,
-    required this.shipping,
     required this.launching,
     required this.paymentMethods,
     required this.selectedPayment,
@@ -1503,7 +1415,6 @@ class _ReviewPanel extends StatelessWidget {
 
   final String email;
   final String phone;
-  final double shipping;
   final bool launching;
   final List<String> paymentMethods;
   final String? selectedPayment;
@@ -1539,7 +1450,7 @@ class _ReviewPanel extends StatelessWidget {
         _ReviewBlock(
           title: 'Método de envío',
           value: 'Envío estándar · 3 a 5 días hábiles\n'
-              'Estimado previo: ${shipping == 0 ? 'gratis' : kMoney.format(shipping)} (no final)',
+              'Se calcula en Shopify',
         ),
         _PaymentBlock(
           methods: paymentMethods,
@@ -1796,7 +1707,6 @@ class _CheckoutSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final shipping = _shippingFor(subtotal);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1871,12 +1781,12 @@ class _CheckoutSummary extends StatelessWidget {
           const SizedBox(height: 8),
           _SummaryRow(
             label: 'Envío estimado',
-            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
+            value: 'Se calcula en Shopify',
           ),
           const SizedBox(height: 14),
           _SummaryRow(
             label: 'Total estimado',
-            value: kMoney.format(subtotal + shipping),
+            value: kMoney.format(subtotal),
             prominent: true,
           ),
         ],
@@ -1952,5 +1862,3 @@ class _EmptyBag extends StatelessWidget {
     );
   }
 }
-
-double _shippingFor(double subtotal) => shippingFor(subtotal);

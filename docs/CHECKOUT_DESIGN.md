@@ -23,8 +23,8 @@ promotional noise that gets in the shopper's way.
 
 The resulting flow uses three visible stages:
 
-1. **Bolsa** — large product image, variant, editable quantity, transparent
-   shipping and estimated total.
+1. **Bolsa** — large product image, variant, editable quantity and an
+   estimated total that leaves shipping to Shopify.
 2. **Entrega** — guest-first contact and Mexican delivery fields, one clear
    shipping method, and a persistent order summary.
 3. **Pago** — a compact review with inline edit links, followed by a secure
@@ -34,7 +34,10 @@ Design rules applied:
 
 - One primary action per screen.
 - Guest checkout is the default; no account wall or marketing opt-in.
-- Costs are visible before commitment, including the free-shipping threshold.
+- Costs the app knows are visible before commitment. Shipping is never
+  invented: the app says "Se calcula en Shopify" and Shopify charges the real
+  rate at payment. There is no free-shipping threshold; the $1,499 one was
+  never offered by the store and was removed on 2026-10-08.
 - Reassurance is contextual: originality, delivery, returns and secure payment
   appear beside the decision they support.
 - A numbered progress indicator always answers “where am I?” and “what is
