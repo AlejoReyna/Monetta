@@ -20,6 +20,7 @@ import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../product/product_screen.dart';
+import 'catalog_browse_view_model.dart';
 import 'catalog_controls.dart';
 import 'product_tile.dart';
 import 'query/browse_filters.dart';
@@ -129,20 +130,43 @@ class CatalogBrowseScreen extends StatefulWidget {
 }
 
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
-  CatalogBrowseFilters _filters = const CatalogBrowseFilters();
+  late final CatalogBrowseViewModel _viewModel;
 
-  List<Product> _visibleProducts([CatalogBrowseFilters? filters]) =>
-      filterAndSortCatalog(
-        widget.products,
-        widget.facetsById,
-        filters ?? _filters,
-      );
+  @override
+  void initState() {
+    super.initState();
+    // The store is read without subscribing: the view model decides when a
+    // store notification is worth a rebuild. Without a store above, the
+    // screen shows the bag count it was given.
+    final store = context.getInheritedWidgetOfExactType<StoreScope>()?.notifier;
+    _viewModel = CatalogBrowseViewModel(
+      products: widget.products,
+      facetsById: widget.facetsById,
+      bagCount: widget.bagCount,
+      store: store,
+    );
+  }
+
+  @override
+  void didUpdateWidget(CatalogBrowseScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // New inputs keep the shopper's applied filters.
+    _viewModel.updateInputs(
+      products: widget.products,
+      facetsById: widget.facetsById,
+      bagCount: widget.bagCount,
+    );
+  }
+
+  @override
+  void dispose() {
+    _viewModel.dispose();
+    super.dispose();
+  }
 
   void _resetAll() {
     FocusManager.instance.primaryFocus?.unfocus();
-    setState(() {
-      _filters = const CatalogBrowseFilters();
-    });
+    _viewModel.resetFilters();
   }
 
   Future<void> _openFilters() async {
@@ -155,17 +179,25 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       builder: (sheetContext) => _CatalogFilterSheet(
         products: widget.products,
         facetsById: widget.facetsById,
-        initial: _filters,
-        visibleCount: (draft) => _visibleProducts(draft).length,
+        initial: _viewModel.state.filters,
+        visibleCount: _viewModel.countFor,
       ),
     );
     // Dismissing the sheet keeps the filters that were already applied.
-    if (result != null && mounted) setState(() => _filters = result);
+    if (result != null && mounted) _viewModel.applyFilters(result);
   }
 
   @override
   Widget build(BuildContext context) {
-    final visibleProducts = _visibleProducts();
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, _) => _buildScaffold(context, _viewModel.state),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, CatalogBrowseViewState state) {
+    final visibleProducts = state.visible;
+    final filters = state.filters;
 
     return Scaffold(
       // Never `extendBody`: the last row of products must not sit under the
@@ -224,7 +256,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             dimension: BoutiqueSpace.tapTarget,
             child: Center(
               child: _FilterIconButton(
-                activeCount: _filters.activeCount,
+                activeCount: state.activeCount,
                 onPressed: _openFilters,
               ),
             ),
@@ -255,7 +287,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             ),
           ),
           child: CustomScrollView(
-            key: ValueKey('catalog-section-${_sectionKeySuffix(_filters)}'),
+            key: ValueKey('catalog-section-${_sectionKeySuffix(filters)}'),
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
@@ -263,7 +295,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: _EmptyCatalogState(
-                    hasActiveFilter: _filters.activeCount > 0,
+                    hasActiveFilter: state.activeCount > 0,
                     onReset: _resetAll,
                   ),
                 )
@@ -305,7 +337,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       ),
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.catalog,
-        bagCount: widget.bagCount,
+        bagCount: state.bagCount,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:

@@ -40,7 +40,32 @@ class CatalogBrowseFilters {
       priceBands.length +
       colors.length +
       (inStockOnly ? 1 : 0);
+
+  @override
+  bool operator ==(Object other) =>
+      other is CatalogBrowseFilters &&
+      other.sort == sort &&
+      other.inStockOnly == inStockOnly &&
+      _sameMembers(other.categories, categories) &&
+      _sameMembers(other.types, types) &&
+      _sameMembers(other.brands, brands) &&
+      _sameMembers(other.priceBands, priceBands) &&
+      _sameMembers(other.colors, colors);
+
+  @override
+  int get hashCode => Object.hash(
+        sort,
+        inStockOnly,
+        Object.hashAllUnordered(categories),
+        Object.hashAllUnordered(types),
+        Object.hashAllUnordered(brands),
+        Object.hashAllUnordered(priceBands),
+        Object.hashAllUnordered(colors),
+      );
 }
+
+bool _sameMembers(Set<String> a, Set<String> b) =>
+    a.length == b.length && a.containsAll(b);
 
 const Map<String, List<String>> kBrowseBagTypeTerms = {
   'Crossbody': ['crossbody', 'bandolera', 'messenger'],
