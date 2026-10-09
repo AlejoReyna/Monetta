@@ -1146,3 +1146,21 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - correr el G8 de RF-14;
   - decidir la estrategia de UI-04;
   - hacer la verificación de RF-23.
+
+### 2026-10-09 · Ensayo de integración del envío gratis (D-06) · APROBADO COMO ENSAYO
+
+- **Motivo:** dejar lista la integración de `fix/sin-envio-gratis-main` (`0703176`) para cuando la persona fusione su PR en `main`, y comprobar que la línea del refactor con RF-17 sigue verde con los textos nuevos.
+- **Procedimiento:**
+  - Worktree desechable en `168656b` y `git merge --no-commit 0703176`.
+  - El ensayo no hizo ningún commit: el merge se abortó y el worktree se borró.
+- **Conflictos:** dos trozos en `lib/features/checkout/checkout_screen.dart`, los dos por el renombre de RF-18.
+  - La fila de total de `_OrderSummary` queda como `CheckoutSummaryRow(label: 'Total estimado', value: kMoney.format(subtotal), prominent: true)`.
+  - La clase `_SummaryRow`, que la línea del refactor borró y la rama modificó, se borra.
+  - Su ajuste (valor acotado al 65 % del ancho y partido en líneas) pasa a `CheckoutSummaryRow`, en `lib/features/checkout/checkout_summary_row.dart`. Ese widget también lo usa el resumen remoto.
+  - Lo demás se fusionó solo.
+- **Resultado sobre el árbol fusionado:**
+  - formato → `Formatted 344 files (0 changed)`;
+  - análisis → «No issues found!»;
+  - suite → `+1224 ~5: All tests passed!`, es decir 1204 + 21 SHIP − 1 prueba unitaria retirada.
+- **Parche de la resolución:** `scratch/sync-envio-gratis/resolucion_sobre_168656b.patch` (ignorado por git; 338 líneas, diff contra `168656b`).
+- **Siguiente paso:** cuando el PR esté en `main`, integrar `main` en la línea del refactor (D-06) con esta resolución y registrar los gates.
