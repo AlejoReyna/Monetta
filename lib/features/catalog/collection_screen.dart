@@ -24,19 +24,18 @@ import '../navigation/monetta_bottom_navigation.dart';
 import 'brand_screen.dart';
 import 'catalog_browse_screen.dart';
 import 'catalog_controls.dart';
+import 'collection_view_model.dart';
 import 'query/collection_filter.dart';
 import 'product_card.dart';
 import '../product/quick_view.dart';
 
 export 'query/collection_filter.dart' show CollectionFilter;
 
-enum _Sort { newest, priceAsc, priceDesc }
-
-extension on _Sort {
+extension on CollectionSort {
   String get label => switch (this) {
-        _Sort.newest => 'Más nuevas',
-        _Sort.priceAsc => 'Menor precio',
-        _Sort.priceDesc => 'Mayor precio',
+        CollectionSort.newest => 'Más nuevas',
+        CollectionSort.priceAsc => 'Menor precio',
+        CollectionSort.priceDesc => 'Mayor precio',
       };
 }
 
@@ -52,52 +51,6 @@ extension on _CollectionFilterSection {
         _CollectionFilterSection.availability => 'Disponibilidad',
       };
 }
-
-/// The choices a shopper can make without changing the collection route.
-///
-/// A [CollectionFilter] describes the destination that was opened (for
-/// example, Bolsas or a specific brand). This value describes only the
-/// temporary controls in the filter sheet, so cancelling the sheet never
-/// changes the product grid, and "Limpiar" returns to the destination rather
-/// than to the whole catalog.
-class _CollectionFilters {
-  const _CollectionFilters({
-    this.sort = _Sort.newest,
-    this.inStockOnly = false,
-    this.brand,
-    this.silhouette,
-  });
-
-  final _Sort sort;
-  final bool inStockOnly;
-  final String? brand;
-  final String? silhouette;
-
-  _CollectionFilters copyWith({
-    _Sort? sort,
-    bool? inStockOnly,
-    Object? brand = _unchanged,
-    Object? silhouette = _unchanged,
-  }) {
-    return _CollectionFilters(
-      sort: sort ?? this.sort,
-      inStockOnly: inStockOnly ?? this.inStockOnly,
-      brand: identical(brand, _unchanged) ? this.brand : brand as String?,
-      silhouette: identical(silhouette, _unchanged)
-          ? this.silhouette
-          : silhouette as String?,
-    );
-  }
-
-  /// Mirrors the catalog's badge convention: ordering is not a filter, while
-  /// availability, brand, and bag type are.
-  int activeCountComparedTo(_CollectionFilters baseline) =>
-      (inStockOnly ? 1 : 0) +
-      (brand != baseline.brand ? 1 : 0) +
-      (silhouette != baseline.silhouette ? 1 : 0);
-}
-
-const Object _unchanged = Object();
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({
@@ -130,27 +83,37 @@ class CollectionScreen extends StatefulWidget {
 }
 
 class _CollectionScreenState extends State<CollectionScreen> {
-  late _CollectionFilters _filters;
+  late final CatalogStore _store;
+  late final CollectionViewModel _viewModel;
   final ScrollController _scroll = ScrollController();
   bool _titleInBar = false;
 
   bool get _hasHero =>
       widget.heroImageUrl != null || widget.heroImageAsset != null;
 
-  _CollectionFilters get _initialFilters => _CollectionFilters(
-        brand: widget.filter.brand,
-        silhouette: widget.filter.silhouette,
-      );
-
   @override
   void initState() {
     super.initState();
-    _filters = _initialFilters;
+    // The store is read without subscribing: the view model decides when a
+    // store notification is worth a rebuild.
+    final store = context.getInheritedWidgetOfExactType<StoreScope>()?.notifier;
+    assert(store != null, 'StoreScope is missing from the tree');
+    _store = store!;
+    _viewModel = CollectionViewModel(store: _store, filter: widget.filter);
     _scroll.addListener(_onScroll);
   }
 
   @override
+  void didUpdateWidget(CollectionScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A new destination keeps the shopper's applied choices; only the scope
+    // and the "Limpiar" baseline follow it. The title is read from the widget.
+    _viewModel.updateDestination(widget.filter);
+  }
+
+  @override
   void dispose() {
+    _viewModel.dispose();
     _scroll
       ..removeListener(_onScroll)
       ..dispose();
@@ -183,50 +146,11 @@ class _CollectionScreenState extends State<CollectionScreen> {
     );
   }
 
-  /// Everything the destination contains, before the sheet's own choices.
-  List<Product> _scopedItems() {
-    final store = StoreScope.of(context);
-    return filterCollectionProducts(
-      store.products,
-      store.facetsFor,
-      widget.filter,
-    );
-  }
-
-  List<Product> _items([_CollectionFilters? filters]) {
-    final selection = filters ?? _filters;
-    final store = StoreScope.of(context);
-    final items = _scopedItems().where((product) {
-      final facets = store.facetsFor(product.id);
-      if (selection.brand != null && facets?.brand?.value != selection.brand) {
-        return false;
-      }
-      if (selection.silhouette != null &&
-          facets?.silhouette?.value != selection.silhouette) {
-        return false;
-      }
-      return !selection.inStockOnly || product.isInStock;
-    }).toList();
-
-    items.sort((a, b) {
-      switch (selection.sort) {
-        case _Sort.priceAsc:
-          return a.price.compareTo(b.price);
-        case _Sort.priceDesc:
-          return b.price.compareTo(a.price);
-        case _Sort.newest:
-          return b.createdAt.compareTo(a.createdAt);
-      }
-    });
-    return items;
-  }
-
   void _openFullCatalog() {
-    final store = StoreScope.of(context);
     openCatalogBrowse(
       context,
-      products: store.products,
-      facetsById: store.facetsById,
+      products: _store.products,
+      facetsById: _store.facetsById,
     );
   }
 
@@ -248,69 +172,41 @@ class _CollectionScreenState extends State<CollectionScreen> {
     }
   }
 
-  void _clearFilters() {
-    setState(() => _filters = _initialFilters);
-  }
-
-  List<String> _brandsFor(Iterable<Product> products, CatalogStore store) {
-    final brands = <String>{
-      for (final product in products)
-        if (store.facetsFor(product.id)?.brand?.value case final value?) value,
-    }.toList();
-    brands.sort(
-      (a, b) => brandLabel(a).toLowerCase().compareTo(
-            brandLabel(b).toLowerCase(),
-          ),
-    );
-    return brands;
-  }
-
-  List<String> _silhouettesFor(
-    Iterable<Product> products,
-    CatalogStore store,
-  ) {
-    final silhouettes = <String>{
-      for (final product in products)
-        if (store.facetsFor(product.id)?.silhouette?.value case final value?)
-          value,
-    }.toList();
-    silhouettes.sort(
-      (a, b) => silhouetteLabel(a).toLowerCase().compareTo(
-            silhouetteLabel(b).toLowerCase(),
-          ),
-    );
-    return silhouettes;
-  }
-
   Future<void> _openFilterSheet() async {
-    final store = StoreScope.of(context);
-    final scopedItems = _scopedItems();
-    final result = await showModalBottomSheet<_CollectionFilters>(
+    final state = _viewModel.state;
+    final result = await showModalBottomSheet<CollectionFilters>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: context.monettaColors.scrim,
       builder: (_) => StoreScope(
-        notifier: store,
+        notifier: _store,
         child: _CollectionFilterSheet(
-          initial: _filters,
-          reset: _initialFilters,
-          brands: _brandsFor(scopedItems, store),
-          silhouettes: _silhouettesFor(scopedItems, store),
-          resultCount: (selection) => _items(selection).length,
+          initial: state.filters,
+          reset: state.baseline,
+          brands: state.brands,
+          silhouettes: state.silhouettes,
+          resultCount: _viewModel.countFor,
         ),
       ),
     );
     // A dismissed sheet returns null and the applied filters stand.
-    if (result != null && mounted) setState(() => _filters = result);
+    if (result != null && mounted) _viewModel.applyFilters(result);
   }
 
   @override
   Widget build(BuildContext context) {
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, _) => _buildScaffold(context, _viewModel.state),
+    );
+  }
+
+  Widget _buildScaffold(BuildContext context, CollectionViewState state) {
     final palette = context.boutique;
-    final store = StoreScope.of(context);
-    final items = _items();
-    final activeCount = _filters.activeCountComparedTo(_initialFilters);
+    final items = state.items;
+    final activeCount = state.activeCount;
+    final filters = state.filters;
 
     return Scaffold(
       backgroundColor: palette.canvas,
@@ -340,14 +236,14 @@ class _CollectionScreenState extends State<CollectionScreen> {
             child: _CollectionToolbar(
               count: items.length,
               activeCount: activeCount,
-              onClear: activeCount == 0 ? null : _clearFilters,
+              onClear: activeCount == 0 ? null : _viewModel.clearFilters,
               // Only when the destination really is one brand; a mixed
               // collection has no single marca to open.
-              brandSlug: _filters.brand,
-              onOpenBrand: _filters.brand == null
+              brandSlug: filters.brand,
+              onOpenBrand: filters.brand == null
                   ? null
                   : () => unawaited(
-                        openBrand(context, brandSlug: _filters.brand!),
+                        openBrand(context, brandSlug: filters.brand!),
                       ),
             ),
           ),
@@ -355,7 +251,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
             SliverFillRemaining(
               hasScrollBody: false,
               child: _EmptyFilter(
-                onClear: _clearFilters,
+                onClear: _viewModel.clearFilters,
                 onBrowseAll: _openFullCatalog,
                 hasActiveFilter: activeCount > 0,
               ),
@@ -374,7 +270,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
       ),
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.catalog,
-        bagCount: store.bagQuantity,
+        bagCount: state.bagCount,
         onSelected: _handleBottomNavigation,
       ),
     );
@@ -667,21 +563,21 @@ class _CollectionFilterSheet extends StatefulWidget {
     required this.resultCount,
   });
 
-  final _CollectionFilters initial;
+  final CollectionFilters initial;
 
   /// The destination's own filters. "Limpiar" returns here, never to the
   /// whole catalog.
-  final _CollectionFilters reset;
+  final CollectionFilters reset;
   final List<String> brands;
   final List<String> silhouettes;
-  final int Function(_CollectionFilters filters) resultCount;
+  final int Function(CollectionFilters filters) resultCount;
 
   @override
   State<_CollectionFilterSheet> createState() => _CollectionFilterSheetState();
 }
 
 class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
-  late _CollectionFilters _selection = widget.initial;
+  late CollectionFilters _selection = widget.initial;
   final Set<_CollectionFilterSection> _expanded = {
     _CollectionFilterSection.sort,
   };
@@ -770,7 +666,7 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                             _toggleExpanded(_CollectionFilterSection.sort),
                         child: Column(
                           children: [
-                            for (final option in _Sort.values)
+                            for (final option in CollectionSort.values)
                               _CollectionFilterChoiceRow(
                                 key: Key(
                                   'collection-filter-sort-${option.name}',

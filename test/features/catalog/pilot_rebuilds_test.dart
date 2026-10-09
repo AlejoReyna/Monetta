@@ -154,8 +154,9 @@ void main() {
     screenType: CollectionScreen,
     anchor: () => _productCards(),
     // RF-41 baseline 2026-10-09; lower it when the count drops.
-    baselineTotal: 1044,
-    baselineOwn: 3,
+    // 1044 / 3 before the CollectionViewModel; the cards still read the store.
+    baselineTotal: 435,
+    baselineOwn: 0,
   );
 
   _measure(
