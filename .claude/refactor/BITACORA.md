@@ -1499,3 +1499,37 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Media] El navegador lee el store con `getInheritedWidgetOfExactType`, sin suscribirse (`catalog_browse_screen.dart:1020`), y `openCatalogBrowse` (`:344`) fija `bagCount` al abrir. Es posible que el contador de bolsa del navegador no siga a la bolsa. Se revisa en la parte C.
   - [Nota] R20: `record` llama a `_rebuildProfile`, que a su vez llama a `notifyListeners` (`catalog_store.dart:425-451`).
 - **Siguiente paso:** la parte A (`SearchScreen`, el patrón y `Command`).
+
+### 2026-10-09 · RF-41 · parte A (`SearchScreen` y `Command`) · APROBADO
+
+- **Agente:** `flutter-implementer`. El orquestador auditó.
+- **Base:** `ba3faa4`, rama `refactor/rf-41-viewmodels`. Commit de la parte A en esa rama.
+- **Diff:**
+  - **`lib/app/command.dart`** (nuevo, 109 líneas): `Command0` y `Command1`, con `running`, `completed`, `error` y `clearResult`. No admite ejecuciones concurrentes, y una ejecución que termina después de `dispose` no notifica.
+  - **`lib/features/catalog/search_view_model.dart`** (nuevo, 309 líneas):
+    - `SearchViewState` es inmutable, con igualdad por valor, y se calcula con las consultas puras de RF-40.
+    - **Sólo notifica si el estado cambia** (`next == _state`).
+    - Acciones: `submit`, `forget` y `clearHistory` como `Command`; `queryChanged`, `clear` y `edit` como métodos.
+  - **`search_screen.dart`** (1 019 → 919 líneas):
+    - el ViewModel se crea en `initState`, leyendo el store sin suscribirse, y se desecha en `dispose`;
+    - la pantalla se reconstruye con `ListenableBuilder`;
+    - la API pública no cambia.
+  - **Pruebas nuevas** (33): 8 de `Command`, 23 del ViewModel y 2 de la pantalla (listeners liberados y reconstrucción con otros parámetros).
+  - **Pruebas existentes:** ninguna adaptada. En PERF-01 sólo cambian las constantes de `SearchScreen`.
+- **Evidencia para RF-43** (criterios de R05):
+  - **Ciclo de vida por parámetro:** se conserva el comportamiento vigente. Los parámetros se capturan una vez y una reconstrucción con otros los ignora (fijado por prueba).
+    - Matiz: el store también se captura una vez. Hoy da igual, porque `openSearch` reenvía la misma instancia.
+  - **`dispose`:** el riesgo real era un listener colgado del historial, que es un singleton. Se evita quitando ambos listeners en `dispose`, y una prueba lo demuestra.
+  - **Reconstrucciones:** el ViewModel lleva a 0 las reconstrucciones propias. El costo que queda (411) está en `ProductCard`, que se suscribe con `StoreScope.of`: el arreglo dominante está en los widgets hijos, no en la técnica de inyección.
+- **Desviación aceptada:** los comandos no esperan el guardado del historial en disco (`unawaited`), igual que antes. Si lo esperaran, el «no concurrente» descartaría un segundo envío rápido. Lo fija una prueba.
+- **Gates (ejecutados por el auditor en el worktree):**
+  - G1 → `Formatted 373 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → `+566: All tests passed!`.
+  - PERF-01 → `SearchScreen` pasa de 939/3 a 411/0.
+  - G4 → `+1367 ~5: All tests passed!`.
+  - G5 → catálogo válido; secretos OK.
+- **Hallazgos:**
+  - [Baja] `Command` guarda el error y la pantalla no lo lee. Hoy `remember` no lanza de forma síncrona.
+  - [Nota] La parte B (`CollectionScreen`) usa el mismo patrón.
+- **Siguiente paso:** la parte B.
