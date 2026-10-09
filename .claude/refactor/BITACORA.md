@@ -1320,3 +1320,23 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - [Baja] Notificaciones y tarjetas comparten ahora la transición de desvanecido (antes la notificación usaba `MaterialPageRoute`).
   - [Nota] Si una tarjeta abre un producto que no está en caché, ahora sale la búsqueda en vez de una ficha vacía.
 - **Siguiente paso:** RF-32, sobre esta rama.
+
+### 2026-10-09 · RF-32 · paso 1 (CHAR-16) · APROBADO
+
+- **Agente:** `test-engineer`. El orquestador auditó.
+- **Base:** worktree de la fase 3, rama `refactor/rf-32-shopper-scope`, desde `1b44983`.
+- **Prueba nueva** (sin commit): `test/app/account_scope_switch_test.dart` (CHAR-16, CAR), con 6 casos.
+  - **Bolsa y favoritos:** 4 casos.
+    - Primero, invitado → A → B lanzados uno tras otro, y luego B → invitado.
+    - Después, las variantes con A o con B **retenidas**. Un `QueryInterceptor` de Drift sobre `AppDatabase(NativeDatabase.memory(...).interceptWith(...))` detiene los `SELECT` de esa cuenta hasta que la prueba los suelta, así que la respuesta tardía queda garantizada sin depender de tiempos.
+  - **Historial de búsqueda:** 2 casos, con instancias aisladas y una persistencia controlada con `Completer`s.
+- **Gates (ejecutados por el auditor):**
+  - CHAR-16 → `+6: All tests passed!`.
+  - Formato y análisis limpios, según el agente.
+  - Suite → `+1239 ~5` (1233 + 6), según el agente.
+- **Mutación del auditor:** se quitó a mano el guard de `catalog_store.dart:259` y se restauró con `git checkout`.
+  - Fallan los 4 casos de bolsa y favoritos (`+2 -4`).
+  - Los 2 de historial siguen verdes, porque los protege otro guard.
+  - La prueba detecta la regresión del invariante 9.
+- **Observación del agente** (sin corregir; es el comportamiento vigente): `setAccountScope` notifica aunque el guard haya descartado su hidratación. Durante un instante el listener puede ver el estado anterior, nunca el de A.
+- **Siguiente paso:** la implementación (`ShopperScope` y `ChangeAccountScope`).
