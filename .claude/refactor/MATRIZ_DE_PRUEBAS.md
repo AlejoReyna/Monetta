@@ -80,6 +80,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | CHAR-13 | CAR | Filtro y orden vigentes del navegador del catálogo | RF-40 | `catalog_browse_screen.dart:1153-1193` |
 | CHAR-14 | CAR | Upsert vigente de los destacados en la caché, antes de pasarlo por el coordinador | RF-42 | `catalog_store.dart:326-333` (R08) |
 | CHAR-15 | OBJ | Todas las dependencias de la app están por encima del Navigator: una ruta empujada sobre el Navigator raíz encuentra cada scope de la app | RF-30 | `main.dart:906-990`: varios scopes sólo envuelven `home:` (R18) |
+| CHAR-16 | CAR | Cambio de cuenta A→B con la hidratación de A en curso: sólo quedan visibles la bolsa, los favoritos y el historial de búsqueda de B (invariante 9) | RF-32 | `catalog_store.dart:255-289` · `search_history.dart:120` · `app_dependencies.dart:302-308` |
 | CONTRACT-01 | OBJ | ID de pedido de Rewards: el mismo fixture en el cliente y el servidor; el cliente envía un segmento válido y el servidor acepta GID o numérico | RF-12 | `rewards_api.dart:78-80` · `rewards/routes.ts:69` (R12) |
 | CONTRACT-02 | OBJ | Rewards apagado: el servidor responde JSON (`feature_disabled`); la ruta desconocida da `not_found` con `requestId`; el cliente muestra «no disponible» y nunca «revisa tu conexión» | RF-13 | `server.ts:538-543,777-787` (R11) |
 | CONTRACT-03 | OBJ | Los parsers de Rewards rechazan fechas inválidas, IDs ausentes y cantidades ausentes con un error de contrato tipado | RF-15 | `rewards_models.dart:47-162` (R15) |
@@ -121,7 +122,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-23 | — | INV-16 | — |
 | RF-30 | ARCH-01, ARCH-04, CHAR-15 | INV-02, INV-07, INV-11, INV-13 | G6 |
 | RF-31 | CHAR-02, CHAR-09 | INV-10, INV-13 | G8 (DEV-01, DEV-02) |
-| RF-32 | — | INV-02, INV-08 | — |
+| RF-32 | CHAR-16 | INV-02, INV-08 | — |
 | RF-33 | ARCH-02, ARCH-04 | INV-12 | — |
 | RF-40 a RF-43 | CHAR-12 y CHAR-13 (RF-40), CHAR-14 y ARCH-05 (RF-42); CHAR-07 cambia sólo según D-13 | INV-04, INV-05, INV-12, INV-14 | G6 en RF-41 |
 | RF-50 a RF-52 | Según E4 y E10 | INV-01, INV-02, INV-05, INV-06, INV-07 | G6, G8 (DEV-01, DEV-02) |
