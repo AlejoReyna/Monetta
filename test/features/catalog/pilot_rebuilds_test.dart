@@ -178,9 +178,9 @@ void main() {
     (store) => ProductScreen(productId: _longestInStock(store.products).id),
     screenType: ProductScreen,
     anchor: () => find.byKey(const Key('purchase-dock-primary')),
-    // RF-41 baseline 2026-10-09; lower it when the count drops.
-    baselineTotal: 1413,
-    baselineOwn: 3,
+    // RF-41 part D 2026-10-09; lower it when the count drops.
+    baselineTotal: 99,
+    baselineOwn: 0,
     other: (store) {
       final shown = _longestInStock(store.products).id;
       return store.products.lastWhere((p) => p.id != shown);
