@@ -1286,3 +1286,37 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
     - También fallan producto en caché y colección, por la razón esperada: la navegación de hoy empuja la ruta sin `StoreScope` («StoreScope is missing from the tree»), y el objetivo exige envolverla como hacen los helpers.
 - **Suite sin la prueba nueva:** `+1210 ~5`, la base, según el agente.
 - **Siguiente paso:** implementación (`flutter-implementer`).
+
+### 2026-10-09 · RF-31 · iteración 1 · APROBADO (PENDIENTE DE G6 Y G8)
+
+- **Agente:** `flutter-implementer`. El orquestador auditó.
+- **Base:** `80753e3`, rama `refactor/rf-31-destinos`, worktree de la fase 3. Commit `1b44983`.
+- **Diff:**
+  - **Nuevo, `lib/app/destinations/`:**
+    - `app_destination.dart`: el `AppDestination` sellado, con `NavigationOrigin` y `fromNotification`. Un id o un handle vacíos van al inicio.
+    - `destination_navigator.dart`: `DestinationNavigator.open`. Todo `push` usa `monettaFadeRoute(StoreScope(...))`.
+    - `destination_screens.dart`, con dos pantallas:
+      - `ProductLookupScreen`: busca, queda «ya no disponible» con `ProductUnavailable` o «no se pudo comprobar» con «Reintentar». Un contador de intentos descarta las respuestas tardías.
+      - `UnavailableLinkScreen`.
+  - **`lib/app/monetta_app.dart`:** `_navigateToNotificationRoute` delega en el resolver. La ruta pendiente de arranque en frío no cambia.
+  - **`lib/features/catalog/product_card.dart`:** `openProduct` sigue registrando `productView`, delega en el resolver y suma un `origin` opcional.
+  - **`openCollection`:** no cambia, porque recibe una pantalla ya armada. Ajustarlo exigiría cambiar su firma.
+  - **`docs/ARCHITECTURE.md`:** añade la sección «Navigation destinations».
+- **Checklist:**
+  - Invariante 5: la búsqueda sólo usa `syncWithShopify`, que pasa por el coordinador.
+  - Invariante 9: la búsqueda no depende de la cuenta y no toca la bolsa ni los favoritos.
+  - Textos en español; ausencia y fallo de comprobación son estados distintos.
+- **Gates (ejecutados por el auditor en el worktree):**
+  - G0 → alcance esperado; `git diff --check` limpio.
+  - G1 → `Formatted 353 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → CHAR-02, CHAR-08, CHAR-09 y las pruebas de notificaciones: `+41: All tests passed!`.
+  - G4 → `+1233 ~5: All tests passed!` (1210 + 23).
+  - G5 → catálogo válido; secretos OK.
+  - G6 → **no ejecutado**: le toca a la persona.
+  - G8 → **no ejecutado**: los pasos de push de DEV-01 y DEV-02 en simuladores le tocan a la persona.
+- **Hallazgos:**
+  - [Baja] «No se pudo comprobar» dice «Revisa tu conexión» también cuando la causa es `skippedNotConfigured` o `skippedRealtimeAuthoritative`. Es el texto acordado en CHAR-02, y en producción esos casos casi no ocurren.
+  - [Baja] Notificaciones y tarjetas comparten ahora la transición de desvanecido (antes la notificación usaba `MaterialPageRoute`).
+  - [Nota] Si una tarjeta abre un producto que no está en caché, ahora sale la búsqueda en vez de una ficha vacía.
+- **Siguiente paso:** RF-32, sobre esta rama.
