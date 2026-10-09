@@ -1588,3 +1588,41 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - si ese archivo existe sin commit en el worktree, es de este encargo;
   - ejecútalo con `flutter test --no-pub <archivo>` y comprueba que los casos objetivo fallan porque el contador conserva el valor de la apertura, no por otra causa;
   - después, encarga el ViewModel según `PLAN.md` (fila RF-41).
+
+### 2026-10-09 · Validación del trabajo de otros modelos · VALIDADO CON HALLAZGOS
+
+- **Pausa del bucle:** la persona lo detuvo para pedir esta validación. El encargo de CHAR-17 (RF-41 parte C) no se lanzó; la entrada «EN CURSO» anterior queda como plan.
+- **Haiku 5.5: descripción del PR de `fix/sin-envio-gratis-main`** (`scratch/pr/sin-envio-gratis.md`):
+  - lo que afirma es correcto;
+  - le faltaban dos puntos, que el orquestador añadió y verificó: el ajuste de `_SummaryRow` y la evidencia del ensayo de integración (`+1224 ~5`);
+  - `_SummaryRow` deja el valor al 65 % del ancho, con `TextAlign.end`; sin ese ajuste desbordaba 81 px a 1.3× y 360 px.
+- **Muse Spark 3.1: inventario para RF-43** (`scratch/plan/rf43_inventario_scopes.md`, sobre `1a7710c`):
+  - **Verificado por el auditor con un escaneo propio del commit:**
+    - 13 scopes: 11 `InheritedNotifier` y 2 `InheritedWidget`;
+    - 56 archivos montan u observan scopes: 42 a mano (lista idéntica, con 247 declaraciones), 7 por ayudante, 4 por la app real y 3 por la matriz;
+    - hay 176 archivos de prueba;
+    - las citas revisadas del §6 son exactas, salvo dos que el propio documento marca como aproximadas (`search_screen.dart:112` y `welcome_gate.dart:69`).
+  - La cifra de 24 de la revisión cuenta archivos (`docs/REVISION_PROPUESTA_RECONSTRUCCION_MVVM.md:73`); hoy son 56.
+  - **Hallazgos:**
+    - [Media] Falta el antes y después en código que pedía el encargo; sólo trae un esquema. Se escribe al preparar RF-43, con las firmas verificadas.
+    - [Baja] El resumen contradice al cuerpo en tres puntos:
+      - dice que hay que editar 4 archivos de app real; el §5 dice 2;
+      - cuenta 3 lecturas con `getInheritedWidgetOfExactType` fuera de build, pero una ocurre dentro de `build`;
+      - habla de 3 ayudantes, y el §5, de 2 funciones.
+    - [Baja] Los «casos» mezclan declaraciones con casos generados: la matriz cuenta ×6, pero `pilot_rebuilds_test` cuenta 1 aunque registra 4. Para RF-43 vale la cuenta de archivos.
+- **GPT Sol 6.1: borrador de la fase 5** (`scratch/plan/fase5_borrador.md`, sobre `1b4fa1c`; los archivos que cita no cambian en `1a7710c`):
+  - **Verificadas unas 30 citas: todas exactas.** El código confirma estos hechos nuevos:
+    - `mergeDeviceItemsIntoAccount` lee las filas del invitado fuera de la transacción (`bag_store.dart:120-123`);
+    - `addToBag` suma sin el tope de 10 que sí aplica `updateBagQuantity` (`catalog_store.dart:519,556`);
+    - la hidratación sólo compara la cuenta (`catalog_store.dart:259`), así que en A→B→A puede aceptar una lectura vieja de A;
+    - el callback de compra llama a `loadOrders`, que lee la cuenta activa al momento de invocarse (`checkout_screen.dart:268-269`, `account_controller.dart:353`);
+    - la base la crea la composición (`app_dependencies.dart:82`), pero la cierra `CatalogStore.dispose`, sin `await` (`catalog_store.dart:707`).
+  - **Hallazgos:**
+    - [Media] Choque de IDs: propone CHAR-17, que ya es la fila de la parte C de RF-41. Al adoptarlo se renumeran todas sus filas.
+    - [Media] No contempla la integración de la rama del envío gratis (D-06). En `1b4fa1c`, `checkout_screen.dart:1918` todavía tiene `_shippingFor`. RF-52 empieza después de esa integración, y sus citas van a cambiar.
+    - [Media] RF-50 mezcla cambios de comportamiento con la extracción estructural: E4 con un aviso visible, y E10 si RF-42 no lo cubre. Propuesta del auditor: separar E4 en su propio WP antes de extraer, para que la extracción sea un refactor puro con paridad.
+    - [Baja] Formato: trae unas 70 líneas densas por WP, con jerga en inglés. Hay que condensarlo al formato de `PLAN.md`.
+    - [Nota] Se adoptan dos propuestas suyas:
+      - RF-50 depende también de RF-42;
+      - la fase 5 necesita que la persona decida la línea de integración, porque D-14 sólo cubre las fases 3 y 4.
+- **Conclusión:** los dos documentos sirven como insumo, no como plan aprobado. El detalle de la fase 5 se escribe en `PLAN.md` a partir del borrador, con estos hallazgos aplicados, y se muestra a la persona antes de empezar.
