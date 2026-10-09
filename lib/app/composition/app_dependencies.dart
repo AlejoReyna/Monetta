@@ -45,6 +45,7 @@ import '../../data/shopify/home_content_repository.dart';
 import '../../data/shopify/http_storefront_transport.dart';
 import '../../data/shopify/storefront_client.dart';
 import '../../data/shopify/storefront_config.dart';
+import '../../domain/shopper_scope.dart';
 import '../../features/catalog/search_history.dart';
 import '../../features/catalog/search_history_persistence.dart';
 import '../account_controller.dart';
@@ -53,6 +54,7 @@ import '../admin_controller.dart';
 import '../admin_notification_controller.dart';
 import '../app_build_metadata.dart';
 import '../catalog_store.dart';
+import '../change_account_scope.dart';
 import '../editorial_content_controller.dart';
 import '../featured_catalog_controller.dart';
 import '../home_content_controller.dart';
@@ -274,6 +276,14 @@ class AppDependencies {
       );
     }
 
+    final changeAccountScope = ChangeAccountScope(
+      store: store,
+      // Read lazily: the checkout exists only when the Storefront is usable.
+      invalidateCheckout: () async {
+        await shopifyCart?.checkout.invalidate();
+      },
+    );
+
     final accountsConfig = AccountsOrdersConfig.fromEnvironment();
     final accountsBaseUrl = accountsConfig.baseUrl;
     account = AccountController(
@@ -299,13 +309,9 @@ class AppDependencies {
         customerOrders: _customerOrdersService,
       ),
       deviceId: deviceId,
-      onAccountScopeChanged: (accountId) async {
-        await store.setAccountScope(accountId);
-        await SearchHistory.instance.setScope(accountId);
-        // Login/logout/account switch must never reuse a preloaded checkout
-        // document that belonged to a previous buyer identity (F06/F18).
-        await shopifyCart?.checkout.invalidate();
-      },
+      onAccountScopeChanged: (accountId) => changeAccountScope(
+        ShopperScope(shopDomain: shopDomain, accountId: accountId),
+      ),
     );
 
     final adminConfig = AdminConfig.fromEnvironment();

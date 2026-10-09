@@ -58,6 +58,11 @@ declares the `InheritedNotifier` scopes (`app_scopes.dart`): `StoreScope`,
 `HomeContentScope` and others. `AppRouteScopes` mounts all of them above the
 Navigator, so every route sees the same scopes as the home (RF-30, CHAR-15).
 `main.dart` re-exports the scopes and `MonettaApp` for tests and tooling.
+Login, logout and account switch go through the `ChangeAccountScope` use case
+(`lib/app/change_account_scope.dart`). In this order, it rebinds the bag and
+the wishlist, then the search history, then invalidates the preloaded
+checkout (invariant 9). Its argument is a `ShopperScope` (`lib/domain/`), which
+carries the store and the account together (RF-32).
 
 **Navigation destinations.** Places in the app are values: `AppDestination`
 (`lib/app/destinations/`) is a sealed type with product, collection, home and
