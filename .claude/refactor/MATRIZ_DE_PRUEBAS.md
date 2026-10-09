@@ -190,6 +190,7 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | ARCH-02 | verde (TRQ). 7 módulos permitidos (ayudantes puros, modelos, errores, configuración y el puerto `CheckoutLauncher`) y 14 pares conocidos en 9 archivos, cada uno con el WP que lo retira (RF-50 a RF-66). INV-12 suma 3 reglas | RF-33 | 2026-10-09 · RF-33 · iteración 1 |
 | CHAR-12 | verde (CAR, 38 casos) sobre el módulo puro `lib/features/catalog/query/`, más CHAR-12b (6 casos directos) | RF-40 | 2026-10-09 · RF-40 · iteración 1 |
 | CHAR-13 | verde (CAR, 25 casos por la UI), más CHAR-13b (3 casos directos). La rama de consulta muerta del navegador se eliminó | RF-40 | 2026-10-09 · RF-40 · iteración 1 |
+| CHAR-17 | verde (OBJ, 4 casos: sigue la bolsa con store, «+» del navegador, `bagCount` sin store, bolsa precargada) | RF-41 (parte C) | 2026-10-09 · RF-41 · parte C |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)

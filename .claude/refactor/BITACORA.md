@@ -1681,3 +1681,36 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - si el worktree `rf-30` tiene cambios sin commit en esos archivos, son de este encargo;
   - audítalos con G0 a G5 y PERF-01;
   - comprueba que CHAR-17 pasa 4/4 sin cambios en su archivo.
+
+### 2026-10-09 · RF-41 · parte C (`CatalogBrowseScreen`) · APROBADO
+
+- **Agente:** `flutter-implementer` (sobre CHAR-17 de `test-engineer`, ya verificado en rojo). El orquestador auditó.
+- **Base:** `1a7710c`, rama `refactor/rf-41-viewmodels`, worktree de las fases 3–4. Commit `c7542fb`.
+- **Diff** (2 modificados, 4 nuevos; fuera de alcance intacto: `catalog_store.dart`, `lib/data/` y `lib/features/product/` sin tocar):
+  - **`lib/features/catalog/catalog_browse_view_model.dart`** (nuevo, 142 líneas):
+    - `CatalogBrowseViewState` inmutable, con igualdad por valor (`filters`, `bagCount` y `visible` por `listEquals`).
+    - Con store, gana la cantidad viva (`_store?.bagQuantity`); sin store, el `bagCount` recibido.
+    - `_onStoreChanged` sólo toca el contador y no re-corre el filtro (los productos y facetas son del widget); `_commit` **sólo notifica si el estado cambia**.
+    - `updateInputs` (productos, facetas y `bagCount`) conserva los filtros; `countFor` no cambia el estado; guard `_disposed` y listener liberado en `dispose`.
+  - **`catalog_browse_screen.dart`**: la `State` crea el ViewModel en `initState` (store leído sin suscribirse), lo sigue en `didUpdateWidget`, lo desecha en `dispose` y pinta con `ListenableBuilder`; la barra inferior usa `state.bagCount`. La API pública (`openCatalogBrowse`, que envuelve con `StoreScope` y pasa `bagCount: store.bagQuantity`) no cambia.
+  - **`query/browse_filters.dart`**: `==` y `hashCode` por valor de `CatalogBrowseFilters` (conjuntos orden-insensibles).
+  - **Pruebas nuevas** (16): 12 del ViewModel y 4 de la pantalla (listeners liberados, 0 reconstrucciones propias, filtros que sobreviven a otros productos, reset desde el vacío).
+  - CHAR-17 (`catalog_browse_bag_count_test.dart`, del paso 1) quedó sin cambios de intención: 2 objetivo + 2 caracterización, como pedía la receta; pasa 4/4 por la corrección, no por edición.
+- **Gates (ejecutados por el auditor en el worktree):**
+  - G0 → 2 modificados + 4 nuevos, todos del alcance; `git diff --check` limpio; sin `skip:` ni `// ignore` (`grep` sin hallazgos); ninguna prueba existente tocada.
+  - G1 → `Formatted 380 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → `+20: All tests passed!` (los 3 archivos: 4 CHAR-17 + 12 + 4).
+  - PERF-01 → `SearchScreen` 411/0, `CollectionScreen` 435/0, `CatalogBrowseScreen` 3/0 (no pasa de 3/0), `ProductScreen` 1413/3. Sin cambios salvo lo ya medido en A y B.
+  - Área (catálogo, arquitectura, alcance de bolsa, ficha) → `+477 ~4: All tests passed!`.
+  - G4 → tres corridas: `+1408 ~5`, `+1409 ~5`, `+1409 ~5: All tests passed!`. Esperado 1389 + 20 = 1409; la primera corrida sub-reportó 1 con todo en verde (flake del runner, sin fallos).
+  - G5 → `Catálogo válido: 103 productos, 340 imágenes`; `OK: no private secret patterns found`.
+  - G6 → pendiente: lo ejecuta la persona al cerrar RF-41 (partes A y B tampoco lo corrieron por parte).
+- **Hallazgos:**
+  - [Baja] `Product` no tiene igualdad por valor: si el store reemplazara una pieza por otro objeto con los mismos datos, el ViewModel notifica una vez de más. Conservador; igual que en la parte B.
+  - [Baja] La `State` captura el store en `initState` y no sigue un cambio de `StoreScope.notifier`. Igual que en A y B; ningún caso de la app lo produce.
+- **Evidencia para RF-43** (criterios de R05):
+  - **Ciclo de vida por parámetro:** capturados una vez; `didUpdateWidget` → `updateInputs` conserva filtros y sigue productos/facetas/`bagCount`; entradas equivalentes no notifican (probado). El store también se captura una vez.
+  - **`dispose`:** listener del store liberado (contador en ViewModel y pantalla), guard `_disposed` contra notificaciones tardías, ViewModel desechado en `dispose` de la `State`.
+  - **Reconstrucciones:** propias 0 (ya eran 0: el navegador nunca se suscribía); total 3, igual que la base. El defecto del contador fijo queda corregido con el mismo presupuesto.
+- **Siguiente paso:** auditar la parte D (`refactor/rf-41-ficha`, `653f4b3`, reporte en `scratch/plan/rf41d_reporte.md`), luego el cierre de RF-41 y RF-42 (`6cfb02c`, reporte en `scratch/plan/rf42_reporte.md`).
