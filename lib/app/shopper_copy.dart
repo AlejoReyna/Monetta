@@ -377,7 +377,7 @@ const String kApartadoSentence =
 
 const List<String> kTrustRows = [
   'Piezas originales importadas de Estados Unidos',
-  'Envío a todo México · gratis desde \$1,499',
+  'Envío a todo México',
   'Cambios por WhatsApp',
   'Apartado manual por WhatsApp · \$400 · 20 días',
 ];

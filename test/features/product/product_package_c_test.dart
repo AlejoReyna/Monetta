@@ -83,7 +83,11 @@ void main() {
     expect(find.text('Compra con confianza'), findsOneWidget);
 
     // Shipping facts already in the app, never an invented threshold.
-    expect(find.textContaining('gratis desde'), findsWidgets);
+    expect(
+      find.textContaining(RegExp('gratis', caseSensitive: false)),
+      findsNothing,
+    );
+    expect(find.text('Entrega estimada'), findsWidgets);
 
     expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
     await scrollTo(tester, find.text('COMPRAR AHORA'));

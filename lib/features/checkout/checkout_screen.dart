@@ -289,7 +289,6 @@ class _BagContents extends StatelessWidget {
     final store = StoreScope.of(context);
     final count = store.bagQuantity;
     final subtotal = store.bagSubtotal;
-    final shipping = _shippingFor(subtotal);
 
     Future<void> continueToCheckout() async {
       final guard = ReviewingCheckoutScope.maybeOf(context);
@@ -436,7 +435,7 @@ class _BagContents extends StatelessWidget {
         final incentive = Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
           child: const PurchasePolicyNotice(
-            key: ValueKey('free-shipping-incentive'),
+            key: ValueKey('purchase-policy-notice'),
           ),
         );
 
@@ -453,7 +452,6 @@ class _BagContents extends StatelessWidget {
               )
             : _OrderSummary(
                 subtotal: subtotal,
-                shipping: shipping,
                 ctaLabel: 'Continuar al checkout',
                 onContinue: () => unawaited(continueToCheckout()),
               );
@@ -490,7 +488,7 @@ class _BagContents extends StatelessWidget {
                             child: Column(
                               children: [
                                 const PurchasePolicyNotice(
-                                  key: ValueKey('free-shipping-incentive'),
+                                  key: ValueKey('purchase-policy-notice'),
                                 ),
                                 const SizedBox(height: 16),
                                 summary,
@@ -919,7 +917,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                       ? _ReviewPanel(
                           email: _email.text,
                           phone: _phone.text,
-                          shipping: _shippingFor(store.bagSubtotal),
                           openingSheet: _openingSheet,
                           returnPhase: _returnPhase,
                           returnDetail: _returnDetail,
@@ -938,7 +935,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                           formKey: _formKey,
                           email: _email,
                           phone: _phone,
-                          shipping: _shippingFor(store.bagSubtotal),
                           onContinue: _review,
                         );
 
@@ -1461,13 +1457,11 @@ class _BagRecommendations extends StatelessWidget {
 class _OrderSummary extends StatelessWidget {
   const _OrderSummary({
     required this.subtotal,
-    required this.shipping,
     required this.ctaLabel,
     required this.onContinue,
   });
 
   final double subtotal;
-  final double shipping;
   final String ctaLabel;
   final VoidCallback onContinue;
 
@@ -1493,8 +1487,8 @@ class _OrderSummary extends StatelessWidget {
           _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
           const SizedBox(height: 10),
           _SummaryRow(
-            label: 'Envío estimado',
-            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
+            label: 'Envío',
+            value: 'Se calcula en Shopify',
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
@@ -1502,7 +1496,7 @@ class _OrderSummary extends StatelessWidget {
           ),
           _SummaryRow(
             label: 'Total estimado',
-            value: kMoney.format(subtotal + shipping),
+            value: kMoney.format(subtotal),
             prominent: true,
           ),
           const SizedBox(height: 6),
@@ -1547,27 +1541,35 @@ class _SummaryRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Row(
-      children: [
-        Expanded(
-          child: Text(
-            label,
-            style: boutiqueText(
-              size: prominent ? 15 : 13,
-              weight: prominent ? FontWeight.w600 : FontWeight.w400,
-              color: palette.ink,
+    // The value may be a sentence ("Se calcula en Shopify"), so it is capped
+    // and allowed to wrap instead of overflowing at large text scales.
+    return LayoutBuilder(
+      builder: (context, constraints) => Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: boutiqueText(
+                size: prominent ? 15 : 13,
+                weight: prominent ? FontWeight.w600 : FontWeight.w400,
+                color: palette.ink,
+              ),
             ),
           ),
-        ),
-        Text(
-          value,
-          style: boutiqueText(
-            size: prominent ? 16 : 13,
-            weight: prominent ? FontWeight.w700 : FontWeight.w500,
-            color: palette.ink,
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth * .65),
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: boutiqueText(
+                size: prominent ? 16 : 13,
+                weight: prominent ? FontWeight.w700 : FontWeight.w500,
+                color: palette.ink,
+              ),
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
@@ -1577,14 +1579,12 @@ class _ContactForm extends StatelessWidget {
     required this.formKey,
     required this.email,
     required this.phone,
-    required this.shipping,
     required this.onContinue,
   });
 
   final GlobalKey<FormState> formKey;
   final TextEditingController email;
   final TextEditingController phone;
-  final double shipping;
   final VoidCallback onContinue;
 
   String? _required(String? value) =>
@@ -1632,7 +1632,7 @@ class _ContactForm extends StatelessWidget {
             validator: _required,
           ),
           const SizedBox(height: 24),
-          _DeliveryOption(shipping: shipping),
+          const _DeliveryOption(),
           const SizedBox(height: 24),
           BoutiqueButton(label: 'REVISAR PEDIDO', onPressed: onContinue),
         ],
@@ -1696,9 +1696,7 @@ class _CheckoutField extends StatelessWidget {
 }
 
 class _DeliveryOption extends StatelessWidget {
-  const _DeliveryOption({required this.shipping});
-
-  final double shipping;
+  const _DeliveryOption();
 
   @override
   Widget build(BuildContext context) {
@@ -1748,9 +1746,7 @@ class _DeliveryOption extends StatelessWidget {
             ),
           ),
           Text(
-            shipping == 0
-                ? 'ESTIMADO: GRATIS'
-                : 'ESTIMADO: ${kMoney.format(shipping)}',
+            'SE CALCULA EN SHOPIFY',
             style: boutiqueEyebrow(size: 9, color: palette.ink),
           ),
         ],
@@ -1769,7 +1765,6 @@ class _ReviewPanel extends StatelessWidget {
   const _ReviewPanel({
     required this.email,
     required this.phone,
-    required this.shipping,
     required this.openingSheet,
     required this.returnPhase,
     this.returnDetail,
@@ -1786,7 +1781,6 @@ class _ReviewPanel extends StatelessWidget {
 
   final String email;
   final String phone;
-  final double shipping;
   final bool openingSheet;
   final CheckoutReturnPhase? returnPhase;
   final String? returnDetail;
@@ -1828,7 +1822,7 @@ class _ReviewPanel extends StatelessWidget {
         _ReviewBlock(
           title: 'Método de envío',
           value: 'Envíos: contenido pendiente de aprobación.\n'
-              'Estimado previo: ${shipping == 0 ? 'gratis' : kMoney.format(shipping)} (no final)',
+              'Se calcula en Shopify',
         ),
         _PaymentBlock(
           methods: paymentMethods,
@@ -2097,7 +2091,6 @@ class _CheckoutSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final shipping = _shippingFor(subtotal);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -2174,12 +2167,12 @@ class _CheckoutSummary extends StatelessWidget {
           const SizedBox(height: 8),
           _SummaryRow(
             label: 'Envío estimado',
-            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
+            value: 'Se calcula en Shopify',
           ),
           const SizedBox(height: 14),
           _SummaryRow(
             label: 'Total estimado',
-            value: kMoney.format(subtotal + shipping),
+            value: kMoney.format(subtotal),
             prominent: true,
           ),
         ],
@@ -2255,5 +2248,3 @@ class _EmptyBag extends StatelessWidget {
     );
   }
 }
-
-double _shippingFor(double subtotal) => shippingFor(subtotal);
