@@ -454,7 +454,7 @@ Origen: R18.
 
 **Cambios:**
 - Crear `lib/app/composition/` (construcción, alcance y cierre de las dependencias).
-- Mover los scopes ahí, con los mismos nombres y la misma API, reexportados para no romper las 24 pruebas que los montan.
+- Mover los scopes ahí, con los mismos nombres y la misma API, reexportados para no romper las pruebas que los montan: eran 24 en la revisión y son 39 archivos el 2026-10-09.
 - Montar todas las dependencias de la app por encima del Navigator.
 - `main.dart` queda sólo con `bootstrap()`.
 - Sin dependencias nuevas.

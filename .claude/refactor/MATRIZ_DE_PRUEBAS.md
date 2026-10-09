@@ -79,13 +79,14 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | CHAR-12 | CAR | Búsqueda vigente sobre el catálogo incluido: normalización, términos de facetas y consulta vacía sin resultados | RF-40 | `catalog_query.dart:17-60` |
 | CHAR-13 | CAR | Filtro y orden vigentes del navegador del catálogo | RF-40 | `catalog_browse_screen.dart:1153-1193` |
 | CHAR-14 | CAR | Upsert vigente de los destacados en la caché, antes de pasarlo por el coordinador | RF-42 | `catalog_store.dart:326-333` (R08) |
+| CHAR-15 | OBJ | Todas las dependencias de la app están por encima del Navigator: una ruta empujada sobre el Navigator raíz encuentra cada scope de la app | RF-30 | `main.dart:906-990`: varios scopes sólo envuelven `home:` (R18) |
 | CONTRACT-01 | OBJ | ID de pedido de Rewards: el mismo fixture en el cliente y el servidor; el cliente envía un segmento válido y el servidor acepta GID o numérico | RF-12 | `rewards_api.dart:78-80` · `rewards/routes.ts:69` (R12) |
 | CONTRACT-02 | OBJ | Rewards apagado: el servidor responde JSON (`feature_disabled`); la ruta desconocida da `not_found` con `requestId`; el cliente muestra «no disponible» y nunca «revisa tu conexión» | RF-13 | `server.ts:538-543,777-787` (R11) |
 | CONTRACT-03 | OBJ | Los parsers de Rewards rechazan fechas inválidas, IDs ausentes y cantidades ausentes con un error de contrato tipado | RF-15 | `rewards_models.dart:47-162` (R15) |
 | CONTRACT-04 | OBJ | Los atributos del carrito por escenario de origen siguen la decisión E8 | RF-67 | `cart_attribution.dart:46` (R03) |
 | CONTRACT-05 | OBJ | Cada cliente HTTP propio agota su tiempo máximo y lo traduce a un error tipado | RF-14 | 7 clientes sin timeout (R13) |
 | CONTRACT-06 | OBJ | Admin sin catálogo externo: `GET/PUT /admin/external-policy/:id` dan el 404 JSON `not_found` con `requestId`; `POST /admin/sync` con `external-status` da 422 `INVALID_SYNC_CHANNEL`; el control-plane no trae `sources` ni `health.sources`; `/admin/me` no trae `manageExternalSources`; `CATALOG_MONITOR_*` ya no se lee | RF-21 | `admin/routes.ts:270,502-544,787,888` · `config.ts:99-108` |
-| ARCH-01 | TRQ | Ningún archivo de `lib/features/` importa `main.dart` | RF-30 | 15 archivos hoy (R18) |
+| ARCH-01 | TRQ | Ningún archivo de `lib/features/` importa `main.dart`. La lista conocida sólo puede bajar, y RF-30 la deja vacía | RF-30 | 17 archivos el 2026-10-09 (R18 contaba 15) |
 | ARCH-02 | TRQ | `lib/features/` no importa implementaciones de `lib/data/`, salvo la lista explícita de helpers puros | RF-33 | 21 archivos hoy (H03) |
 | ARCH-03 | OBJ | Ningún archivo de `lib/` ni `test/` referencia el catálogo externo, salvo el guard de `RuntimeConfig` | RF-20 | R02 |
 | ARCH-04 | TRQ | `lib/app/composition/` es el único lugar que construye implementaciones concretas de `data/` | RF-30, RF-33 | R18 |
@@ -118,7 +119,7 @@ En cada iteración del subagente bastan G0–G3. Para cerrar el WP se exigen G0�
 | RF-21 | CONTRACT-06 y ampliación de ARCH-03 (fuentes externas del admin de la app) | INV-15, INV-11 | G7 |
 | RF-22 | — | Todos | G6 |
 | RF-23 | — | INV-16 | — |
-| RF-30 | ARCH-01, ARCH-04 | INV-02, INV-07, INV-11, INV-13 | G6 |
+| RF-30 | ARCH-01, ARCH-04, CHAR-15 | INV-02, INV-07, INV-11, INV-13 | G6 |
 | RF-31 | CHAR-02, CHAR-09 | INV-10, INV-13 | G8 (DEV-01, DEV-02) |
 | RF-32 | — | INV-02, INV-08 | — |
 | RF-33 | ARCH-02, ARCH-04 | INV-12 | — |
