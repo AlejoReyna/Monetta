@@ -79,7 +79,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-32 | `ShopperScope` y `ChangeAccountScope` | 3 | test-engineer → flutter-implementer | RF-30 (código aprobado; G6 pendiente, D-14) | E11, D-14 | cerrado (`732f9e8` en `refactor/rf-32-shopper-scope`). No requiere G6; se apoya en el código de RF-30 y RF-31, cuyo G6 sigue pendiente, igual que RF-24 sobre RF-18 |
 | RF-33 | Pruebas de arquitectura en trinquete | 3 | test-engineer | RF-30 (código aprobado; G6 pendiente, D-14) | D-14 | cerrado (`e719391` en `refactor/rf-33-arquitectura`). Sólo pruebas; no requiere G6 |
 | RF-40 | Consultas puras del catálogo | 4 | test-engineer → flutter-implementer | RF-33 | D-13, D-14 | cerrado (`4c4a063` en `refactor/rf-40-consultas`). No requiere G6 |
-| RF-41 | ViewModels del piloto | 4 | flutter-implementer | RF-40 | — | pendiente |
+| RF-41 | ViewModels del piloto | 4 | test-engineer → flutter-implementer | RF-40 | D-14 | en curso: rama `refactor/rf-41-viewmodels`, desde `4c4a063`. Partes en serie: medición base PERF-01, luego A `SearchScreen` (fija el patrón y crea `Command`), B `CollectionScreen`, C `CatalogBrowseScreen` y D `ProductScreen` |
 | RF-42 | Upsert de destacados vía coordinador | 4 | flutter-implementer | RF-40 | E3, E10 | pendiente |
 | RF-43 | Gate de decisión de DI | 4 | orquestador | RF-41 | — | pendiente |
 | RF-50 | Separar `CatalogStore` tras una fachada | 5 | test-engineer → flutter-implementer | RF-43 | E4, E10 | pendiente |
