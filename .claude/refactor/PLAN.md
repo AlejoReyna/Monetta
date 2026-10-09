@@ -529,6 +529,15 @@ Origen: H04 y R05 (el piloto).
 - CHAR-07, CHAR-12 y CHAR-13 en verde sobre el módulo puro;
 - INV-04, INV-05, INV-12 e INV-14 verdes.
 
+**Diseño al empezar (2026-10-09):**
+- El módulo puro va en `lib/features/catalog/query/`:
+  - no importa Flutter, `CatalogStore` ni `composition/`; lo vigila una regla nueva de INV-12;
+  - recibe `Iterable<Product>` y `Map<String, CanonicalFacets>` (o una función de búsqueda de facetas);
+  - usa las etiquetas de `app/shopper_copy.dart` y `reco/explainer.dart`, que no importan Flutter.
+- `normalizeSearchText` y `CollectionFilter` se mudan ahí. `search_history.dart` y `collection_screen.dart` los reexportan, así que su API pública no cambia.
+- `_filterCatalog` del navegador y sus tipos privados (`_CatalogFilters` y `_CatalogSort`) pasan a ser públicos en el módulo.
+- Patrón estrangulador: las funciones de `catalog_query.dart` que reciben `CatalogStore` quedan como envoltorios que delegan en las puras, hasta RF-41.
+
 ### RF-41 · ViewModels del piloto
 
 Origen: R05 (ADR-02 modificado).
