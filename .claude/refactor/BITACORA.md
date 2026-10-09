@@ -1626,3 +1626,31 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
       - RF-50 depende también de RF-42;
       - la fase 5 necesita que la persona decida la línea de integración, porque D-14 sólo cubre las fases 3 y 4.
 - **Conclusión:** los dos documentos sirven como insumo, no como plan aprobado. El detalle de la fase 5 se escribe en `PLAN.md` a partir del borrador, con estos hallazgos aplicados, y se muestra a la persona antes de empezar.
+
+### 2026-10-09 · Trabajo en paralelo con otros modelos (RF-41 parte D y RF-42) · EN CURSO
+
+- **Pedido de la persona:** dos tareas pesadas para otros modelos, para terminar antes. El bucle del orquestador sigue con la parte C.
+- **Condiciones de la regla 4 de CLAUDE.md:**
+  - archivos disjuntos: C toca el navegador, D la ficha, y RF-42 el store, el repositorio y el coordinador;
+  - un worktree por tarea;
+  - commits autorizados por la persona.
+- **Worktrees** (receta segura, desde `1a7710c`, con `flutter pub get --offline` OK):
+  - `.claude/worktrees/rf-41d`, rama `refactor/rf-41-ficha`: Muse Spark 3.1 hace RF-41 parte D (`ProductScreen`);
+  - `.claude/worktrees/rf-42`, rama `refactor/rf-42-destacados`: GPT Sol 6.1 hace RF-42 completo.
+- **Hallazgo nuevo para RF-42:** además de R08 (`catalog_store.dart:328`), `_recordCatalogStatus` escribe la metadata directo en la caché (`catalog_store.dart:412`), sin coordinador, desde la ruta de Firestore. Su copia de la metadata puede ser vieja.
+  - ARCH-05 cubrirá todas las escrituras de `CatalogCacheStore`.
+  - Permitidos: `catalog_repository.dart`, `realtime_catalog_repository.dart` (vía `runFirestoreWrite`, `:133-134`), el coordinador y el propio `catalog_cache_store.dart`.
+- **Independencia entre prueba e implementación:**
+  - cada modelo hace ambos papeles, en pasadas separadas;
+  - en RF-42, CHAR-14 y ARCH-05 van en un commit propio, antes de la implementación;
+  - el auditor vuelve a ejecutar las pruebas nuevas contra el código base antes de aprobar.
+- **Integración, en este orden:**
+  1. C, del orquestador;
+  2. D;
+  3. el cierre de RF-41;
+  4. RF-42, rebasado sobre la punta.
+  - D no edita PERF-01; el auditor baja sus constantes al integrar.
+- **Receta para retomar:**
+  - los reportes quedan en `scratch/plan/rf41d_reporte.md` y `scratch/plan/rf42_reporte.md`;
+  - si una de esas ramas tiene commits nuevos, su modelo terminó o avanzó: audítala con G0 a G5 antes de integrarla;
+  - no toques esos worktrees mientras su modelo trabaja.
