@@ -178,6 +178,9 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | UI-01 | verde (OBJ). Las 13 funciones de estilo y los temas, en Android e iOS, usan Inter o Playfair Display, que están empaquetadas; `MonettaApp` registra su OFL | RF-17 | 2026-10-08 · RF-17 · paso 1 · 2026-10-09 · RF-17 · paso 3 |
 | UI-02 | verde (OBJ, D-12). `BoundedTextScaler` en la raíz | RF-17 | 2026-10-08 · RF-17 · paso 1 · 2026-10-09 · RF-17 · paso 3 |
 | UI-03 | verde (OBJ). 60 casos: 10 pantallas, 2 teléfonos y 3 escalas | RF-17 | 2026-10-08 · RF-17 · paso 1 · 2026-10-09 · RF-17 · paso 3 |
+| ARCH-01 | verde (TRQ, lista vacía): ninguna feature importa `main.dart` | RF-30 | 2026-10-09 · RF-30 · iteración 1 |
+| ARCH-04 | verde (TRQ). Sin `lib/main.dart`; quedan las entradas de RF-33 (`shopify_cart_composition.dart`, `customer_experiences_screen.dart` y `rewards_api.dart`) y de RF-50 (`catalog_store.dart`) | RF-30 | 2026-10-09 · RF-30 · iteración 1 |
+| CHAR-15 | verde (OBJ): todos los scopes de la app están por encima del Navigator | RF-30 | 2026-10-09 · RF-30 · iteración 1 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)

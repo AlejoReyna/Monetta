@@ -1202,3 +1202,42 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - `lib/app/shopify_cart_composition.dart` no se mueve en RF-30: `test/architecture_test.dart:83-120` (INV-12) exige esa ruta, y sus entradas de ARCH-04 quedan para RF-33.
   - `AppRouteScopes` conserva su constructor, porque lo montan `checkout_screen_test.dart` y `account_package_e_test.dart`.
 - **Siguiente paso:** la implementación (`flutter-implementer`). Se espera `+1210 ~5`: ARCH-01 vacío, ARCH-04 sin `main.dart` y CHAR-15 en verde.
+
+### 2026-10-09 · RF-30 · iteración 1 · APROBADO (PENDIENTE DE G6)
+
+- **Agente:** `flutter-implementer`. El orquestador auditó.
+- **Base:** `38d97cb`, rama `refactor/rf-30-composicion`, worktree `.claude/worktrees/rf-30`. Commits `ca474b4` (código y pruebas) y `80753e3` (documentación).
+- **Diff:**
+  - **`lib/main.dart`:** pasa de 1 028 a 12 líneas, con `main() => bootstrap()` y los `export` de los scopes y de `MonettaApp`.
+  - **Nuevos:**
+    - `lib/app/bootstrap.dart`: lo que hacía `main()`, más `_installTelemetryErrorHandlers` y `_ConfigurationErrorApp`.
+    - `lib/app/monetta_app.dart`: `MonettaApp`, con el mismo constructor, más las rutas de notificación y `_ErrorScreen`.
+    - `lib/app/composition/app_dependencies.dart`: la construcción, `load()`, el listener de capacidades y `dispose`.
+    - `lib/app/composition/app_scopes.dart`: los 9 scopes y `AppRouteScopes`, que suma 6 controladores opcionales.
+    - `lib/app/composition/platform_services.dart`: Firestore y el gateway de notificaciones.
+  - **Las 17 features:** sólo cambia el import, de `main.dart` a `app/composition/app_scopes.dart` (+17 −17 líneas).
+  - **`home:`** queda en `WelcomeGate(child: HomeScreen())`, y todos los scopes envuelven el Navigator.
+- **Paridad verificada por el auditor** (diff normalizado de `_x` a `x` y de `widget.x` a `x`, contra `HEAD:lib/main.dart`):
+  - `_load()` frente a `AppDependencies.load()`: 155 líneas contra 155, con 0 diferencias. Incluye el cambio de cuenta del invariante 9 (`setAccountScope`, `SearchHistory.setScope` e `invalidate()` del checkout).
+  - `_openNotificationRoute`, `_openPendingNotificationRoute` y `_navigateToNotificationRoute`: 0 diferencias.
+  - `main()` frente a `bootstrap()`: sólo cambian las dos construcciones, que pasan a `platform_services.dart`.
+  - `dispose()`: igual, salvo `super.dispose()`, que ahora llama el `State`.
+- **Pruebas:**
+  - ARCH-01 se queda con la lista vacía.
+  - ARCH-04 pierde la entrada de `lib/main.dart`, y su comentario reparte el resto entre RF-33 y RF-50.
+  - CHAR-15 pasa sin cambios.
+  - Ninguna otra prueba se tocó.
+- **Gates (ejecutados por el auditor en el worktree):**
+  - G0 → alcance esperado; `git diff --check` limpio.
+  - G1 → `Formatted 349 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → los trinquetes, CHAR-15, CHAR-08 y CHAR-09, más INV-02, INV-07, INV-11, INV-12 e INV-13: `+86: All tests passed!`.
+  - G4 → `+1210 ~5: All tests passed!` (1204 + 5 de los trinquetes + CHAR-15).
+  - G5 → catálogo válido; secretos OK.
+  - G6 → **no ejecutado**: cambia la composición del arranque; le toca a la persona, sobre esta rama.
+- **Documentación:** `docs/ARCHITECTURE.md` describe la raíz de composición. La regla 3 pasa de «goal, not yet true» a «partly enforced».
+- **Hallazgos:**
+  - [Baja] `AppDatabase` sigue sin cerrarse en `dispose`, como antes; corresponde a RF-51.
+  - [Baja] `AppDependencies` importa `features/catalog/search_history`, igual que antes `main.dart`. Se retoma en RF-32 o RF-33.
+  - [Nota] `MonettaApp` vive en `lib/app/`, fuera de `composition/`, y no construye clases de `data/` (ARCH-04 verde).
+- **Siguiente paso:** RF-31, sobre esta rama y con el criterio de D-14 (RF-14 tiene el código aprobado; su G6 y G8 siguen pendientes).
