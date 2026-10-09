@@ -1401,3 +1401,33 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - extender D-14, porque la fase 4 también es posterior al lanzamiento;
   - revisar el borrador de la fase 4;
   - tomar la decisión D-13, que bloquea RF-40.
+
+### 2026-10-09 · RF-40 · paso 1 (CHAR-12, CHAR-13 e INV-12) · APROBADO
+
+- **Decisiones de la persona:**
+  - D-13: se conserva la regla de colección.
+  - D-14 se amplía a la fase 4, con el borrador del plan.
+- **Agente:** `test-engineer`. El orquestador auditó.
+- **Base:** worktree de las fases 3–4, rama `refactor/rf-40-consultas`, desde `e719391`.
+- **Pruebas nuevas** (sin commit):
+  - `test/features/catalog/search_characterization_test.dart` (CHAR-12, CAR, 38 casos). Fija:
+    - la normalización (mayúsculas, á é í ó ú ü ñ y espacios; no pliega `ç` ni `à`);
+    - cada fuente de término;
+    - que el `vendor` crudo no sirve para encontrar;
+    - que una consulta vacía devuelve `[]`;
+    - el orden de catálogo y la semántica de `productMatchesAnyTerm`.
+  - `test/features/catalog/catalog_browse_filters_characterization_test.dart` (CHAR-13, CAR, 25 casos, por la UI). Fija:
+    - los cuatro órdenes;
+    - cada filtro, con unión dentro de una dimensión e intersección entre dimensiones, incluidas las aristas de las bandas de precio;
+    - el color y el tipo de bolsa deducidos del título y la categoría;
+    - que el navegador no tiene campo de texto.
+  - Regla nueva de INV-12 en `test/architecture_test.dart` (OBJ): `lib/features/catalog/query/` existe, tiene archivos `.dart` y ninguno importa Flutter, `app/catalog_store.dart` ni `app/composition/`.
+- **Verificación del auditor:**
+  - CHAR-12 y CHAR-13 → `+63: All tests passed!`.
+  - `architecture_test.dart` → `+10 -1`, con el fallo esperado: «lib/features/catalog/query does not exist yet».
+  - Suite → `+1320 ~5 -1`, según el agente; sólo falla esa regla.
+- **Hallazgo y decisión del orquestador:** `_filterCatalog` sólo se llama con `query: ''` (`catalog_browse_screen.dart:223-227`). Su rama de consulta es código muerto, con otra semántica (no quita acentos). La implementación la elimina al pasar el filtro al módulo puro.
+- **Hallazgos vigentes que no se corrigen** (son comportamiento, y CHAR-13 los vigila):
+  - el color del navegador sale del título y la categoría, no de `facets.colors`;
+  - el tipo de bolsa sale de subcadenas.
+- **Siguiente paso:** la implementación (`flutter-implementer`).
