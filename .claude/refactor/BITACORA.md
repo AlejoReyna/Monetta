@@ -1762,3 +1762,17 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 - **Rebase e integración:** a `da31075` sin conflictos (`31e4bb8`, `b2f3816`); el diff toca los mismos 8 archivos. Re-verificado: G1 `384 files (0 changed)`, G2 limpio, G3 `+36` (nuevas + INV-04/05), G4 `+1438 ~5: All tests passed!` (= 1425 + 13, exacto), G5 OK.
 - **Hallazgos:** [Nota] 1 test de coordinador pasa también en viejo (fija semántica preexistente con nombre OBJ); inofensivo. Sin Blockers ni Altas. El invariante 5 de `CLAUDE.md` queda sin excepciones. No requiere G6.
 - **Siguiente paso:** RF-43, gate de DI (evidencia encargada a GPT Sol 6.1 en `scratch/plan/rf43_evidencia.md`; decide la persona).
+
+### 2026-10-09 · RF-43 · evidencia medida (auditor) · DECIDE LA PERSONA
+
+- **Criterios R05** (reconsiderar Riverpod sólo si): (1) ciclos de vida por parámetro que exijan family/autoDispose sin resolverse por ruta; (2) bugs por `dispose` olvidados.
+- **Veredicto del auditor: ninguno se cumple.**
+  - (1) Las 4 pantallas capturan parámetros una vez; `didUpdateWidget` → `update*` conserva lo vigente y lo equivalente no notifica (probado en A–D). En producción cada `open*` crea `State` nueva; el caso sólo aparece con reconstrucciones en el sitio. Nada exige family/autoDispose.
+  - (2) Cero bugs de `dispose`: listeners liberados (contados en pantalla y ViewModel), guards `_disposed`, orden de desecho, y el riesgo real (historial singleton en A) eliminado por diseño.
+- **Medido sobre `b2f3816` por el auditor** (el «24 pruebas» de la revisión está viejo: era conteo de archivos de entonces):
+  - 13 scopes (11 `InheritedNotifier` + 2 `InheritedWidget`), verificado clase por clase.
+  - ~60 archivos de prueba montan scopes: 57 con `Scope(` literal fuera de `test/support/` (43 sólo `StoreScope`), más ayudantes, app real y matriz.
+  - En `lib/`: 13 definiciones + 67 lecturas `.of/.maybeOf` + la raíz de composición.
+  - `provider` NO está en el pub-cache (sí Riverpod 3.1.0, del chequeo de R05): adoptarlo exige red al resolver.
+- **Costos:** (a) conservar: 0 archivos, 0 pruebas, sin dependencias ni G6. (b) `provider`: retocar ~60 archivos de prueba (la mayoría uno por uno; ~10 centralizables en ayudantes) + 67 lecturas y 13 scopes en `lib/` + re-añadir la dependencia que RF-22 retiró (cambio de `pubspec` → G6) en un WP nuevo antes de la fase 5. (c) Riverpod: todo lo de (b) más convertir 11 controladores en `Notifier` y cada consumidor en `ConsumerWidget`; reescribe la presentación, justo lo que R05 quería evitar sin triggers.
+- Pregunta a la persona con recomendación (a).
