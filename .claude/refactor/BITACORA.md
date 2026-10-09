@@ -1793,3 +1793,13 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
 
 - **Persona:** acepta el desdoblamiento RF-53; D-14 se extiende a la fase 5 (ramas `refactor/rf-5X-*` sobre la fase 4, commits locales, nunca push).
 - Falta E4-producto (misma variante con distinto producto, aviso de agotado, texto del aviso): se pregunta al empezar RF-53, porque sus pruebas lo fijan.
+
+### 2026-10-09 · RF-53 · paso 1 (pruebas OBJ primero, E4 detallada) · EN CURSO
+
+- **E4-producto decidida por la persona:** manda la variante por clave (se conserva el productId del invitado en conflicto); agotado presente con aviso distinto; aviso «Algunos artículos ya no están disponibles y no se incluyeron en tu bolsa» + marca «Agotado» (botón «Retirar no disponibles»).
+- **Pasada 1 del orquestador (sólo `test/`, `lib/` intacto, sin commit por estar en rojo):**
+  - `test/data/local/bag_merge_characterization_test.dart` (CHAR-04, 4 casos OBJ: 2+1=3, 3+15=10, aislamiento, vista de app 5+1).
+  - `test/app/bag_counter_characterization_test.dart` (CHAR-05, 5 casos OBJ: contador visible, tooltip/insignia, salida de catálogo, aviso+retirada en `BagScreen`, agotado que cuenta y se marca).
+  - `test/data/local/bag_merge_contract_test.dart` (CONTRACT-07, nuevo, 6 casos: suma en cuenta propia y de sistema, repetición, concurrencia, reversión ante fallo con trigger en Drift real, y productId del invitado).
+- **Verificación del auditor:** G1 `385 files (0 changed)`; G2 «No issues found!»; las 3 rutas dan `+2 -13`. Verdes sólo los 2 guardias (reversión y productId, que ya valen y deben sobrevivir). Rojos por la razón descrita: suma/reemplazo (p. ej. `Expected: {'v1': 5}, Actual: {'v1': 2}` en concurrencia), tope, contador (`Expected: <2>, Actual: <11>`), insignia y aviso (`Found 0 widgets with text "Algunos artículos…"`).
+- **Receta:** el paso 2 (producción) implementa suma con tope 10 con lectura dentro de la transacción, contador sobre líneas visibles, exposición de ausentes + aviso/retirada en bolsa y marca de agotado; luego auditoría G0–G5 y suite completa.
