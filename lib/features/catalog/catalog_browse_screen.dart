@@ -22,17 +22,16 @@ import '../navigation/monetta_bottom_navigation.dart';
 import '../product/product_screen.dart';
 import 'catalog_controls.dart';
 import 'product_tile.dart';
+import 'query/browse_filters.dart';
 import 'quick_add_button.dart';
 import 'search_screen.dart';
 
-enum _CatalogSort { featured, newest, priceAsc, priceDesc }
-
-extension on _CatalogSort {
+extension on CatalogSort {
   String get label => switch (this) {
-        _CatalogSort.featured => 'Destacados',
-        _CatalogSort.newest => 'Más recientes',
-        _CatalogSort.priceAsc => 'Precio: de menor a mayor',
-        _CatalogSort.priceDesc => 'Precio: de mayor a menor',
+        CatalogSort.featured => 'Destacados',
+        CatalogSort.newest => 'Más recientes',
+        CatalogSort.priceAsc => 'Precio: de menor a mayor',
+        CatalogSort.priceDesc => 'Precio: de mayor a menor',
       };
 }
 
@@ -50,36 +49,6 @@ extension on _FilterSection {
       };
 }
 
-class _CatalogFilters {
-  const _CatalogFilters({
-    this.sort = _CatalogSort.featured,
-    this.categories = const <String>{},
-    this.types = const <String>{},
-    this.brands = const <String>{},
-    this.priceBands = const <String>{},
-    this.colors = const <String>{},
-    this.inStockOnly = false,
-  });
-
-  final _CatalogSort sort;
-
-  /// Canonical category keys as produced by [_categoryFor].
-  final Set<String> categories;
-  final Set<String> types;
-  final Set<String> brands;
-  final Set<String> priceBands;
-  final Set<String> colors;
-  final bool inStockOnly;
-
-  int get activeCount =>
-      categories.length +
-      types.length +
-      brands.length +
-      priceBands.length +
-      colors.length +
-      (inStockOnly ? 1 : 0);
-}
-
 /// Gap at each end of the header, outside the 48pt button slots.
 const double _kHeaderEdgeInset = 4;
 
@@ -87,38 +56,6 @@ const double _kHeaderEdgeInset = 4;
 /// the edge gap. The leading side reserves the same, empty or not.
 const double _kHeaderSlotWidth =
     _kHeaderEdgeInset + BoutiqueSpace.tapTarget * 2;
-
-const Map<String, List<String>> _bagTypeTerms = {
-  'Crossbody': ['crossbody', 'bandolera', 'messenger'],
-  'Tote': ['tote'],
-  'Bolsa de hombro': ['shoulder', 'hombro'],
-  'Satchel': ['satchel'],
-  'Bolsa de mano': ['handbag', 'top handle', 'bolsa de mano'],
-  'Mochila': ['backpack', 'mochila'],
-  'Clutch': ['clutch'],
-  'Cangurera': ['belt bag', 'waist bag', 'cangurera'],
-  'Bolsa cubeta': ['bucket', 'cubeta'],
-  'Cartera': ['wallet', 'cartera'],
-  'Tarjetero': ['card holder', 'cardholder', 'tarjetero'],
-};
-
-const Map<String, List<String>> _colorTerms = {
-  'Negro': ['negro', 'negra', 'black'],
-  'Café': ['cafe', 'café', 'brown', 'cognac'],
-  'Beige': ['beige', 'arena', 'sand', 'camel', 'nude'],
-  'Blanco': ['blanco', 'blanca', 'white', 'ivory', 'hueso'],
-  'Gris': ['gris', 'gray', 'grey'],
-  'Azul': ['azul', 'blue', 'navy', 'marino', 'mezclilla'],
-  'Rosa': ['rosa', 'pink', 'blush'],
-  'Rojo': ['rojo', 'roja', 'red'],
-  'Vino': ['vino', 'burgundy', 'bordo'],
-  'Verde': ['verde', 'green', 'olive', 'oliva'],
-  'Morado': ['morado', 'morada', 'purple', 'lila'],
-  'Amarillo': ['amarillo', 'amarilla', 'yellow'],
-  'Naranja': ['naranja', 'orange'],
-  'Dorado': ['dorado', 'gold'],
-  'Plateado': ['plateado', 'silver'],
-};
 
 const Map<String, String> _catalogCategoryLabels = {
   'bolsa': 'Bolsas',
@@ -149,32 +86,6 @@ const List<String> _catalogCategoryOrder = [
 String _categoryLabel(String category) =>
     _catalogCategoryLabels[category] ?? categoryPlural(category);
 
-String _categoryFor(CanonicalFacets? facets) {
-  final rawCategory = facets?.category?.value.trim().toLowerCase();
-
-  // A piece without a category facet has no bag/wallet/perfume vertical to
-  // fall back on (the vertical was itself derived from the category), so it
-  // is simply "otros".
-  return switch (rawCategory) {
-    'bolsas' || 'handbag' || 'handbags' => 'bolsa',
-    'carteras' || 'wallet' || 'wallets' => 'cartera',
-    'monederos' => 'monedero',
-    'tarjeteros' || 'card case' || 'card cases' => 'tarjetero',
-    'relojes' || 'watch' || 'watches' => 'reloj',
-    'cosmetiqueras' || 'cosmetic case' || 'cosmetic cases' => 'cosmetiquera',
-    'sets' => 'set',
-    'accesorios' || 'accessory' || 'accessories' => 'accesorio',
-    'perfumes' ||
-    'fragancia' ||
-    'fragancias' ||
-    'fragrance' ||
-    'fragrances' =>
-      'perfume',
-    final value? when value.isNotEmpty => value,
-    _ => 'otros',
-  };
-}
-
 /// Categories present in [products], in the canonical order and then
 /// alphabetically by label.
 List<String> _availableCategories(
@@ -182,7 +93,7 @@ List<String> _availableCategories(
   Map<String, CanonicalFacets> facetsById,
 ) {
   final categories = {
-    for (final product in products) _categoryFor(facetsById[product.id]),
+    for (final product in products) browseCategoryFor(facetsById[product.id]),
   };
   return [
     for (final category in _catalogCategoryOrder)
@@ -193,7 +104,7 @@ List<String> _availableCategories(
 }
 
 /// Identity of the product grid: it changes whenever the applied categories do.
-String _sectionKeySuffix(_CatalogFilters filters) {
+String _sectionKeySuffix(CatalogBrowseFilters filters) {
   if (filters.categories.isEmpty) return 'collection';
   return (filters.categories.toList()..sort()).join('+');
 }
@@ -218,25 +129,25 @@ class CatalogBrowseScreen extends StatefulWidget {
 }
 
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
-  _CatalogFilters _filters = const _CatalogFilters();
+  CatalogBrowseFilters _filters = const CatalogBrowseFilters();
 
-  List<Product> _visibleProducts([_CatalogFilters? filters]) => _filterCatalog(
+  List<Product> _visibleProducts([CatalogBrowseFilters? filters]) =>
+      filterAndSortCatalog(
         widget.products,
         widget.facetsById,
-        query: '',
-        filters: filters ?? _filters,
+        filters ?? _filters,
       );
 
   void _resetAll() {
     FocusManager.instance.primaryFocus?.unfocus();
     setState(() {
-      _filters = const _CatalogFilters();
+      _filters = const CatalogBrowseFilters();
     });
   }
 
   Future<void> _openFilters() async {
     FocusManager.instance.primaryFocus?.unfocus();
-    final result = await showModalBottomSheet<_CatalogFilters>(
+    final result = await showModalBottomSheet<CatalogBrowseFilters>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
@@ -516,16 +427,16 @@ class _CatalogFilterSheet extends StatefulWidget {
 
   final List<Product> products;
   final Map<String, CanonicalFacets> facetsById;
-  final _CatalogFilters initial;
+  final CatalogBrowseFilters initial;
 
-  final int Function(_CatalogFilters filters) visibleCount;
+  final int Function(CatalogBrowseFilters filters) visibleCount;
 
   @override
   State<_CatalogFilterSheet> createState() => _CatalogFilterSheetState();
 }
 
 class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
-  late _CatalogSort _sort;
+  late CatalogSort _sort;
   late Set<String> _categories;
   late Set<String> _types;
   late Set<String> _brands;
@@ -541,7 +452,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
     _load(widget.initial);
   }
 
-  void _load(_CatalogFilters filters) {
+  void _load(CatalogBrowseFilters filters) {
     _sort = filters.sort;
     _categories = {...filters.categories};
     _types = {...filters.types};
@@ -551,7 +462,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
     _inStockOnly = filters.inStockOnly;
   }
 
-  _CatalogFilters get _selection => _CatalogFilters(
+  CatalogBrowseFilters get _selection => CatalogBrowseFilters(
         sort: _sort,
         categories: _categories,
         types: _types,
@@ -562,33 +473,29 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
       );
 
   List<String> get _typeOptions => _optionsWithMatches(
-        _bagTypeTerms.keys,
-        (product, facets, value) => _bagTypeFor(product, facets) == value,
+        kBrowseBagTypeTerms.keys,
+        (product, facets, value) => browseBagTypeFor(product, facets) == value,
       );
 
   List<String> get _brandOptions {
     final values = {
       for (final product in widget.products)
-        if (_brandFor(product, widget.facetsById[product.id]).isNotEmpty)
-          _brandFor(product, widget.facetsById[product.id]),
+        if (browseBrandFor(product, widget.facetsById[product.id]).isNotEmpty)
+          browseBrandFor(product, widget.facetsById[product.id]),
     }.toList();
     values.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return values;
   }
 
   List<String> get _priceOptions => _optionsWithMatches(
-        const [
-          'mxn-under-1000',
-          'mxn-1000-2499',
-          'mxn-2500-4999',
-          'mxn-5000-plus',
-        ],
-        (product, facets, value) => _priceBandFor(product) == value,
+        kBrowsePriceBands,
+        (product, facets, value) => browsePriceBandFor(product) == value,
       );
 
   List<String> get _colorOptions => _optionsWithMatches(
-        _colorTerms.keys,
-        (product, facets, value) => _colorsFor(product, facets).contains(value),
+        kBrowseColorTerms.keys,
+        (product, facets, value) =>
+            browseColorsFor(product, facets).contains(value),
       );
 
   List<String> _optionsWithMatches(
@@ -620,7 +527,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   }
 
   void _clear() {
-    setState(() => _load(const _CatalogFilters()));
+    setState(() => _load(const CatalogBrowseFilters()));
   }
 
   @override
@@ -679,7 +586,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                         onTap: () => _toggleExpanded(_FilterSection.sort),
                         child: Column(
                           children: [
-                            for (final option in _CatalogSort.values)
+                            for (final option in CatalogSort.values)
                               _FilterChoiceRow(
                                 label: option.label,
                                 selected: _sort == option,
@@ -1141,95 +1048,6 @@ class _BrowseTile extends StatelessWidget {
       // store.
     );
   }
-}
-
-List<Product> _filterCatalog(
-  List<Product> products,
-  Map<String, CanonicalFacets> facetsById, {
-  required String query,
-  required _CatalogFilters filters,
-}) {
-  final normalizedQuery = query.trim().toLowerCase();
-  final result = products.where((product) {
-    final facets = facetsById[product.id];
-    if (normalizedQuery.isNotEmpty) {
-      final searchable = [
-        product.title,
-        facets?.brand?.value ?? product.vendor,
-        'Monetta',
-        facets?.category?.value ?? '',
-      ].join(' ').toLowerCase();
-      if (!searchable.contains(normalizedQuery)) return false;
-    }
-
-    if (filters.categories.isNotEmpty &&
-        !filters.categories.contains(_categoryFor(facets))) {
-      return false;
-    }
-    if (filters.types.isNotEmpty &&
-        !filters.types.contains(_bagTypeFor(product, facets))) {
-      return false;
-    }
-    if (filters.brands.isNotEmpty &&
-        !filters.brands.contains(_brandFor(product, facets))) {
-      return false;
-    }
-    if (filters.priceBands.isNotEmpty &&
-        !filters.priceBands.contains(_priceBandFor(product))) {
-      return false;
-    }
-    if (filters.colors.isNotEmpty &&
-        filters.colors.intersection(_colorsFor(product, facets)).isEmpty) {
-      return false;
-    }
-    if (filters.inStockOnly && !product.isInStock) return false;
-    return true;
-  }).toList(growable: false);
-
-  switch (filters.sort) {
-    case _CatalogSort.featured:
-      break;
-    case _CatalogSort.newest:
-      result.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
-    case _CatalogSort.priceAsc:
-      result.sort(_comparePriceAsc);
-    case _CatalogSort.priceDesc:
-      result.sort((a, b) => _comparePriceAsc(b, a));
-  }
-  return result;
-}
-
-int _comparePriceAsc(Product a, Product b) => a.price.compareTo(b.price);
-
-String _brandFor(Product product, CanonicalFacets? facets) =>
-    catalogBrowseBrand(product, facets);
-
-String? _bagTypeFor(Product product, CanonicalFacets? facets) {
-  final terms =
-      '${facets?.category?.value ?? ''} ${product.title}'.toLowerCase();
-  for (final entry in _bagTypeTerms.entries) {
-    if (entry.value.any(terms.contains)) return entry.key;
-  }
-  return null;
-}
-
-Set<String> _colorsFor(Product product, CanonicalFacets? facets) {
-  final terms = [
-    product.title,
-    facets?.category?.value ?? '',
-  ].join(' ').toLowerCase();
-  return {
-    for (final entry in _colorTerms.entries)
-      if (entry.value.any(terms.contains)) entry.key,
-  };
-}
-
-String _priceBandFor(Product product) {
-  final amount = product.price;
-  if (amount < 1000) return 'mxn-under-1000';
-  if (amount < 2500) return 'mxn-1000-2499';
-  if (amount < 5000) return 'mxn-2500-4999';
-  return 'mxn-5000-plus';
 }
 
 String _priceBandLabel(String value) => switch (value) {

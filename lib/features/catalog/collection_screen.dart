@@ -24,9 +24,11 @@ import '../navigation/monetta_bottom_navigation.dart';
 import 'brand_screen.dart';
 import 'catalog_browse_screen.dart';
 import 'catalog_controls.dart';
-import 'catalog_query.dart';
+import 'query/collection_filter.dart';
 import 'product_card.dart';
 import '../product/quick_view.dart';
+
+export 'query/collection_filter.dart' show CollectionFilter;
 
 enum _Sort { newest, priceAsc, priceDesc }
 
@@ -96,24 +98,6 @@ class _CollectionFilters {
 }
 
 const Object _unchanged = Object();
-
-class CollectionFilter {
-  const CollectionFilter({
-    this.category,
-    this.brand,
-    this.silhouette,
-    this.query,
-    this.queryTerms = const [],
-    this.collectionHandle,
-  });
-
-  final String? category;
-  final String? brand;
-  final String? silhouette;
-  final String? query;
-  final List<String> queryTerms;
-  final String? collectionHandle;
-}
 
 class CollectionScreen extends StatefulWidget {
   const CollectionScreen({
@@ -202,27 +186,11 @@ class _CollectionScreenState extends State<CollectionScreen> {
   /// Everything the destination contains, before the sheet's own choices.
   List<Product> _scopedItems() {
     final store = StoreScope.of(context);
-    final queryTerms = <String>{
-      if (widget.filter.query?.trim() case final query? when query.isNotEmpty)
-        query,
-      for (final term in widget.filter.queryTerms)
-        if (term.trim().isNotEmpty) term.trim(),
-    };
-    return store.products.where((product) {
-      final facets = store.facetsFor(product.id);
-      if (widget.filter.category != null &&
-          facets?.category?.value != widget.filter.category) {
-        return false;
-      }
-      if (widget.filter.collectionHandle != null &&
-          product.collectionHandles.isNotEmpty &&
-          !product.collectionHandles.contains(widget.filter.collectionHandle)) {
-        return false;
-      }
-      // Same matcher the search screen counts with, so "Ver todo" lands on
-      // the same number of pieces the shopper was just looking at.
-      return productMatchesAnyTerm(store, product, queryTerms);
-    }).toList(growable: false);
+    return filterCollectionProducts(
+      store.products,
+      store.facetsFor,
+      widget.filter,
+    );
   }
 
   List<Product> _items([_CollectionFilters? filters]) {

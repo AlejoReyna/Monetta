@@ -122,6 +122,57 @@ void main() {
       expect(File('lib/domain/shopper_scope.dart').existsSync(), isTrue);
     });
 
+    test('INV-12 the catalog query module is pure and store-free', () {
+      // RF-40 moves the catalog's pure queries (search, filter, sort) into
+      // `lib/features/catalog/query/`. They take plain data, so the module
+      // must not import Flutter, `CatalogStore` or the composition root: that
+      // is what lets it run in a plain `test()` with no widget pump.
+      const path = 'lib/features/catalog/query';
+      final dir = Directory(path);
+      expect(
+        dir.existsSync(),
+        isTrue,
+        reason: '$path does not exist yet: RF-40 must create the pure '
+            'catalog query module there (this rule is red until it does).',
+      );
+
+      final files = dir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .where((file) => file.path.endsWith('.dart'))
+          .toList();
+      expect(
+        files,
+        isNotEmpty,
+        reason: '$path exists but holds no Dart file: the module is empty.',
+      );
+
+      final offenders = <String>[];
+      for (final file in files) {
+        final lines = file.readAsLinesSync();
+        for (var i = 0; i < lines.length; i++) {
+          final line = lines[i].trim();
+          if (!line.startsWith('import ') && !line.startsWith('export ')) {
+            continue;
+          }
+          if (line.contains('package:flutter/') ||
+              line.contains('package:flutter_') ||
+              line.contains('app/catalog_store.dart') ||
+              line.contains('app/composition/')) {
+            offenders.add('${file.path}:${i + 1}  $line');
+          }
+        }
+      }
+
+      expect(
+        offenders,
+        isEmpty,
+        reason: 'The catalog query module must not import Flutter, '
+            'app/catalog_store.dart or app/composition/:\n'
+            '${offenders.join('\n')}',
+      );
+    });
+
     test('checkout UI does not import a Checkout Kit SDK', () {
       final offenders = <String>[];
       final dir = Directory('lib/features/checkout');

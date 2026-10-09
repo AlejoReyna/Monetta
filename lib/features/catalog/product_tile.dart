@@ -28,6 +28,7 @@ import '../../data/normalize/facets.dart';
 import '../../domain/money.dart';
 import '../../domain/product.dart';
 import '../../reco/explainer.dart';
+import 'query/browse_filters.dart' show browseBrandFor;
 import '../boutique/boutique_tokens.dart';
 
 /// How much room a tile has. Only the image proportion and the type scale
@@ -257,10 +258,8 @@ class ProductTileData {
 
 /// The humanized brand the full-catalog browser shows and filters by: the
 /// canonical brand facet, else the raw vendor, else the store name.
-String catalogBrowseBrand(Product product, CanonicalFacets? facets) {
-  final brand = (facets?.brand?.value ?? product.vendor).trim();
-  return humanizeCatalogValue(brand.isEmpty ? 'Monetta' : brand);
-}
+String catalogBrowseBrand(Product product, CanonicalFacets? facets) =>
+    browseBrandFor(product, facets);
 
 /// The shared card.
 ///

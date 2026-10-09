@@ -108,6 +108,11 @@ UI reasons; their tests run in milliseconds with no widget pump.
 `data/shopify/` qualifies because its HTTP call is *injected* as a transport,
 which is also what lets the sync contract run against a fake. Enforced by
 `test/architecture_test.dart`.
+The catalog queries follow the same rule: `lib/features/catalog/query/` holds
+search, the collection filter and the browser's filter and sort as pure
+functions over products and facets, with no Flutter, `CatalogStore` or
+composition import (INV-12, RF-40). The screens and `catalog_query.dart`
+delegate to them.
 
 **2. The retired external catalog stays retired.**
 `test/architecture/external_catalog_retired_test.dart` (ARCH-03) fails on any
