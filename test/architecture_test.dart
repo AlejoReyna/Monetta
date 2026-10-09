@@ -55,6 +55,73 @@ void main() {
       });
     }
 
+    test('INV-12 the destination vocabulary stays Flutter-free', () {
+      // `AppDestination` is the typed vocabulary of the app's routes. It is
+      // read by non-widget code (deep links, notification routing), so it must
+      // not drag Flutter in. The navigator and the screens map live next to it
+      // and are allowed to import Flutter.
+      const path = 'lib/app/destinations/app_destination.dart';
+      final file = File(path);
+      expect(file.existsSync(), isTrue, reason: '$path is missing');
+
+      final offenders = <String>[];
+      final lines = file.readAsLinesSync();
+      for (var i = 0; i < lines.length; i++) {
+        final line = lines[i].trim();
+        if (!line.startsWith('import ') && !line.startsWith('export ')) {
+          continue;
+        }
+        if (line.contains('package:flutter/') ||
+            line.contains('package:flutter_')) {
+          offenders.add('$path:${i + 1}  $line');
+        }
+      }
+
+      expect(offenders, isEmpty, reason: offenders.join('\n'));
+    });
+
+    test('INV-12 features read the composition only through app_scopes', () {
+      // `app_dependencies.dart` and `platform_services.dart` are the internals
+      // of the composition root. A screen that imports them can construct or
+      // reach concrete dependencies; screens go through `app_scopes.dart`.
+      const internals = <String>[
+        'app/composition/app_dependencies.dart',
+        'app/composition/platform_services.dart',
+      ];
+      final offenders = <String>[];
+
+      for (final entity
+          in Directory('lib/features').listSync(recursive: true)) {
+        if (entity is! File || !entity.path.endsWith('.dart')) continue;
+        final lines = entity.readAsLinesSync();
+        for (var i = 0; i < lines.length; i++) {
+          final line = lines[i].trim();
+          if (!line.startsWith('import ') && !line.startsWith('export ')) {
+            continue;
+          }
+          if (internals.any(line.contains)) {
+            offenders.add('${entity.path}:${i + 1}  $line');
+          }
+        }
+      }
+
+      expect(
+        offenders,
+        isEmpty,
+        reason: 'Features may import only app/composition/app_scopes.dart '
+            'from the composition root:\n${offenders.join('\n')}',
+      );
+    });
+
+    test('INV-12 the shopper scope is covered by the pure domain rule', () {
+      // `lib/domain/shopper_scope.dart` has no test of its own on purpose: it
+      // lives under `lib/domain`, which the loop over [_pureDartDirectories]
+      // already checks for Flutter imports. This guards that the file stays
+      // inside that directory and that the directory stays on the list.
+      expect(_pureDartDirectories, contains('lib/domain'));
+      expect(File('lib/domain/shopper_scope.dart').existsSync(), isTrue);
+    });
+
     test('checkout UI does not import a Checkout Kit SDK', () {
       final offenders = <String>[];
       final dir = Directory('lib/features/checkout');

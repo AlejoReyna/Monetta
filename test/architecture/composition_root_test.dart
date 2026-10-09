@@ -3,10 +3,17 @@
 ///
 /// RF-30 moved every construction of `lib/main.dart` into
 /// `lib/app/composition/`. [_knownConstructions] records what remains outside
-/// it, as a map from file to the concrete classes it builds. `catalog_store.dart`
-/// belongs to RF-50; `shopify_cart_composition.dart`,
-/// `customer_experiences_screen.dart` and `rewards_api.dart` belong to RF-33.
-/// Each of those RFs must leave the map EMPTY.
+/// it, as a map from file to the concrete classes it builds. Each entry is
+/// emptied by the WP that owns it:
+///
+/// * `lib/app/catalog_store.dart`: RF-50 (the `CatalogStore` facade);
+/// * `lib/app/shopify_cart_composition.dart`: RF-51 (`CompleteCheckout` and
+///   the cart wiring move to the composition root);
+/// * `lib/features/home/customer_experiences_screen.dart`: RF-66 (niche
+///   features, the Loox reviews);
+/// * `lib/features/rewards/rewards_api.dart`: RF-63 (Rewards).
+///
+/// Together they must leave the map EMPTY.
 ///
 /// The map is alive in both directions:
 /// * a (file, class) pair that is not listed fails the test (no new
@@ -291,7 +298,8 @@ final g = 'HttpFooClient(';
 
   test(
       'ARCH-04 concrete data/ classes are built outside lib/data only in '
-      'the known places (RF-33 and RF-50 must empty the map)', () {
+      'the known places (RF-50, RF-51, RF-63 and RF-66 must empty the map)',
+      () {
     final current = _pairs(_currentConstructions());
     final known = _pairs(_knownConstructions);
 

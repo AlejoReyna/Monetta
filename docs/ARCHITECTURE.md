@@ -121,7 +121,11 @@ implementations. No feature imports `main.dart` since RF-30 (ARCH-01). Only
 `lib/app/composition/` builds concrete `data/` implementations outside `data/`
 itself, except the entries ARCH-04 still lists for RF-33 and RF-50 (the
 catalog store's internal stores, the cart composition, the reviews screen and
-the Rewards client). ARCH-02 joins in RF-33.
+the Rewards client). From `lib/data/`, features import only pure helpers,
+models, errors, configuration values and the `CheckoutLauncher` port
+(ARCH-02, RF-33). Its known list names the WP that removes each remaining
+import of an implementation. Features reach the composition only through
+`app_scopes.dart` (INV-12).
 
 **4. Type comes from two bundled families, and text scale is bounded once,
 at the root.** Every typography helper resolves to Inter (sans) or Playfair
