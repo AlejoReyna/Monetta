@@ -25,6 +25,7 @@ import '../../data/media/media_url.dart';
 import '../../data/normalize/facets.dart';
 import '../../data/shopify/cart_attribution.dart';
 import '../../domain/product.dart';
+import '../../app/catalog_store.dart';
 import '../../app/composition/app_scopes.dart';
 import '../../reco/events.dart';
 import '../../reco/explainer.dart';
@@ -35,6 +36,7 @@ import '../checkout/mini_cart.dart' show showMiniCart;
 import 'product_header.dart';
 import 'product_selection.dart';
 import 'product_unavailable.dart';
+import 'product_view_model.dart';
 import 'purchase_dock.dart';
 import 'quick_view.dart';
 
@@ -58,8 +60,9 @@ class ProductScreen extends StatefulWidget {
 class _ProductScreenState extends State<ProductScreen> {
   final Stopwatch _dwell = Stopwatch()..start();
   final PageController _gallery = PageController();
+  late final CatalogStore _store;
+  late final ProductViewModel _viewModel;
   int _page = 0;
-  late int _variantIndex = widget.initialVariantIndex;
   final Set<String> _open = <String>{};
 
   /// True while an add is in flight; blocks a second tap on any purchase
@@ -67,15 +70,38 @@ class _ProductScreenState extends State<ProductScreen> {
   bool _adding = false;
 
   @override
+  void initState() {
+    super.initState();
+    // The store is read without subscribing: the view model decides when a
+    // store notification is worth a rebuild.
+    final store = context.getInheritedWidgetOfExactType<StoreScope>()?.notifier;
+    assert(store != null, 'StoreScope is missing from the tree');
+    _store = store!;
+    _viewModel = ProductViewModel(
+      store: _store,
+      productId: widget.productId,
+      initialVariantIndex: widget.initialVariantIndex,
+    );
+  }
+
+  @override
+  void didUpdateWidget(ProductScreen oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    // A rebuild with another id follows the new piece; the chosen variant
+    // stays, exactly as the former `late` field did.
+    _viewModel.updateProductId(widget.productId);
+  }
+
+  @override
   void dispose() {
+    _viewModel.dispose();
     _dwell.stop();
     _gallery.dispose();
     super.dispose();
   }
 
   void _recordDwellAndPop() {
-    final store = StoreScope.of(context);
-    store.record(
+    _store.record(
       EventType.productView,
       productId: widget.productId,
       dwellMs: _dwell.elapsedMilliseconds,
@@ -85,12 +111,12 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Future<void> _openApartado(Product product) async {
-    final store = StoreScope.of(context);
-    store.record(EventType.whatsappApartado, productId: product.id);
+    _store.record(EventType.whatsappApartado, productId: product.id);
     final request = ApartadoRequest(
       productTitle: product.title,
       productHandle: product.handle,
-      price: selectedVariant(product, _variantIndex)?.price ?? product.price,
+      price: selectedVariant(product, _viewModel.state.variantIndex)?.price ??
+          product.price,
       attributionCode: const AttributionCodeGenerator()
           .generate(DateTime.now().microsecondsSinceEpoch),
     );
@@ -118,8 +144,7 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   Future<void> _share(Product product, double price) async {
-    final store = StoreScope.of(context);
-    store.record(EventType.galleryInteraction, productId: product.id);
+    _store.record(EventType.galleryInteraction, productId: product.id);
     try {
       await Share.share(
         '${shopperProductName(product.title)} · ${kMoney.format(price)} en Monetta',
@@ -167,7 +192,11 @@ class _ProductScreenState extends State<ProductScreen> {
   Future<void> _purchase(Product product, {required bool buyNow}) async {
     if (_adding) return;
     setState(() => _adding = true);
-    final result = await tryAddSelectionToBag(context, product, _variantIndex);
+    final result = await tryAddSelectionToBag(
+      context,
+      product,
+      _viewModel.state.variantIndex,
+    );
     if (!mounted) return;
     // Released before any feedback so the action is usable again as soon as
     // the sheet or the snack bar appears.
@@ -210,28 +239,28 @@ class _ProductScreenState extends State<ProductScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final store = StoreScope.of(context);
-    Product? found;
-    for (final candidate in store.products) {
-      if (candidate.id == widget.productId) {
-        found = candidate;
-        break;
-      }
-    }
+    return ListenableBuilder(
+      listenable: _viewModel,
+      builder: (context, _) => _buildPage(context, _viewModel.state),
+    );
+  }
+
+  Widget _buildPage(BuildContext context, ProductViewState state) {
+    final product = state.product;
     // The product can leave the catalog while the page is open (live sync) or
     // never have been in it (stale link): show the unavailable state instead
     // of throwing. If it returns, the next rebuild shows the page again.
-    if (found == null) return const ProductUnavailable();
-    final product = found;
-    final facets = store.facetsFor(product.id);
-    final wishlisted = store.wishlist.contains(product.id);
+    if (product == null) return const ProductUnavailable();
+    final facets = state.facets;
+    final wishlisted = state.wishlisted;
+    final variantIndex = state.variantIndex;
     final selectable = selectableVariants(product);
-    final selected = selectedVariant(product, _variantIndex);
+    final selected = selectedVariant(product, variantIndex);
     final price = selected?.price ?? product.price;
     final compare = selected?.compareAtPrice ?? product.compareAtPrice;
-    final onSale = selectionOnSale(product, _variantIndex);
-    final discount = selectionDiscountPercent(product, _variantIndex);
-    final inStock = selectionInStock(product, _variantIndex);
+    final onSale = selectionOnSale(product, variantIndex);
+    final discount = selectionDiscountPercent(product, variantIndex);
+    final inStock = selectionInStock(product, variantIndex);
     final images = product.images.isEmpty ? <String?>[null] : product.images;
     final shopifyDescription = shopifyDescriptionText(product.descriptionHtml);
     // Shopify remains the primary source of truth. When it is genuinely empty,
@@ -247,13 +276,8 @@ class _ProductScreenState extends State<ProductScreen> {
                 ? null
                 : facets.colors.first.value,
           );
-    final recent = store.recentlyViewed(excluding: product.id);
-    final related = facets?.brand?.value == null
-        ? const <Product>[]
-        : store.moreFromBrand(
-            facets!.brand!.value,
-            excluding: product.id,
-          );
+    final recent = state.recent;
+    final related = state.related;
     final notifications = NotificationScope.maybeOf(context);
     final palette = context.boutique;
 
@@ -278,7 +302,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 size: 20,
                 color: wishlisted ? palette.goldText : palette.ink,
               ),
-              onPressed: () => store.toggleWishlist(product.id),
+              onPressed: () => _store.toggleWishlist(product.id),
             ),
             const BagAction(),
           ],
@@ -297,7 +321,7 @@ class _ProductScreenState extends State<ProductScreen> {
                 wishlisted: wishlisted,
                 inStock: inStock,
                 onPageChanged: (i) => setState(() => _page = i),
-                onToggleWishlist: () => store.toggleWishlist(product.id),
+                onToggleWishlist: () => _store.toggleWishlist(product.id),
                 onShare: () => _share(product, price),
               ),
               if (images.length > 1)
@@ -394,8 +418,8 @@ class _ProductScreenState extends State<ProductScreen> {
                       const SizedBox(height: BoutiqueSpace.xl),
                       ProductOptionSelector(
                         product: product,
-                        selectedIndex: _variantIndex,
-                        onSelect: (i) => setState(() => _variantIndex = i),
+                        selectedIndex: variantIndex,
+                        onSelect: _viewModel.selectVariant,
                       ),
                     ],
                     const SizedBox(height: BoutiqueSpace.xl),
