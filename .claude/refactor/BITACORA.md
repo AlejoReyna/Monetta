@@ -1577,3 +1577,14 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - El hallazgo [Media] del paso 1 se confirma leyendo el código. `openCatalogBrowse` fija `bagCount` al abrir (`catalog_browse_screen.dart:344`) y la barra inferior lo pinta (`:308`). Después de agregar con «+», o de cambiar la bolsa en la ficha o en la bolsa, el contador del navegador queda viejo.
   - La colección (parte B) y el inicio sí siguen la bolsa. El defecto también existe en la línea de lanzamiento.
   - Decisión del orquestador: se corrige en la parte C, con una prueba objetivo primero (CHAR-17).
+
+### 2026-10-09 · RF-41 · parte C, paso 1 (CHAR-17 primero) · EN CURSO
+
+- **Encargo:** `test-engineer` escribe CHAR-17 en `test/features/catalog/catalog_browse_bag_count_test.dart`, en el worktree `.claude/worktrees/rf-30` (rama `refactor/rf-41-viewmodels`, base `1a7710c`). No toca `lib/`.
+- **Qué se espera:**
+  - dos casos objetivo, rojos hoy: el navegador abierto con `openCatalogBrowse` sigue la bolsa, y el contador sube después de un «+»;
+  - dos casos de caracterización, verdes hoy: sin store, el contador muestra el `bagCount` recibido; y al abrir con piezas en la bolsa, las muestra.
+- **Receta para retomar si se corta:**
+  - si ese archivo existe sin commit en el worktree, es de este encargo;
+  - ejecútalo con `flutter test --no-pub <archivo>` y comprueba que los casos objetivo fallan porque el contador conserva el valor de la apertura, no por otra causa;
+  - después, encarga el ViewModel según `PLAN.md` (fila RF-41).
