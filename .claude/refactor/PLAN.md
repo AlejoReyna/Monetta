@@ -77,7 +77,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-30 | Composición fuera de `main.dart` y sobre el Navigator | 3 | test-engineer → flutter-implementer | RF-22 (código aprobado; G6 pendiente, D-14) | E1, E11, D-14 | bloqueado: G6 de la persona. El código está aprobado y con commit (`80753e3` en `refactor/rf-30-composicion`, worktree `.claude/worktrees/rf-30`) |
 | RF-31 | `AppDestination` y resolver de notificaciones | 3 | test-engineer → flutter-implementer | RF-30, RF-14 (los dos con el código aprobado y G6 pendiente; D-14) | E6, D-14 | bloqueado: G6 y G8 (los pasos de push de DEV-01 y DEV-02) de la persona. El código está aprobado y con commit (`1b44983` en `refactor/rf-31-destinos`) |
 | RF-32 | `ShopperScope` y `ChangeAccountScope` | 3 | test-engineer → flutter-implementer | RF-30 (código aprobado; G6 pendiente, D-14) | E11, D-14 | cerrado (`732f9e8` en `refactor/rf-32-shopper-scope`). No requiere G6; se apoya en el código de RF-30 y RF-31, cuyo G6 sigue pendiente, igual que RF-24 sobre RF-18 |
-| RF-33 | Pruebas de arquitectura en trinquete | 3 | test-engineer | RF-30 | — | pendiente |
+| RF-33 | Pruebas de arquitectura en trinquete | 3 | test-engineer | RF-30 (código aprobado; G6 pendiente, D-14) | D-14 | en curso: rama `refactor/rf-33-arquitectura`, desde `732f9e8`, en el worktree de la fase 3 |
 | RF-40 | Consultas puras del catálogo | 4 | test-engineer → flutter-implementer | RF-33 | — | pendiente |
 | RF-41 | ViewModels del piloto | 4 | flutter-implementer | RF-40 | — | pendiente |
 | RF-42 | Upsert de destacados vía coordinador | 4 | flutter-implementer | RF-40 | E3, E10 | pendiente |
