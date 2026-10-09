@@ -186,6 +186,8 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | CHAR-02 | verde (OBJ). 23 casos: búsqueda del producto que no está en caché con una sincronización, «ya no disponible», «No se pudo comprobar» con reintento y «Enlace no disponible» | RF-31 | 2026-10-09 · RF-31 · iteración 1 |
 | CHAR-16 | verde (CAR, 6 casos con lecturas retenidas; la mutación del guard la hace fallar), más CHAR-16b (11 casos: `ShopperScope` y el orden de `ChangeAccountScope`) | RF-32 | 2026-10-09 · RF-32 · iteración 1 |
 | ARCH-02 | verde (TRQ). 7 módulos permitidos (ayudantes puros, modelos, errores, configuración y el puerto `CheckoutLauncher`) y 14 pares conocidos en 9 archivos, cada uno con el WP que lo retira (RF-50 a RF-66). INV-12 suma 3 reglas | RF-33 | 2026-10-09 · RF-33 · iteración 1 |
+| CHAR-12 | verde (CAR, 38 casos) sobre el módulo puro `lib/features/catalog/query/`, más CHAR-12b (6 casos directos) | RF-40 | 2026-10-09 · RF-40 · iteración 1 |
+| CHAR-13 | verde (CAR, 25 casos por la UI), más CHAR-13b (3 casos directos). La rama de consulta muerta del navegador se eliminó | RF-40 | 2026-10-09 · RF-40 · iteración 1 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)

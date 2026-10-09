@@ -1439,3 +1439,41 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   1. En `.claude/worktrees/rf-30` (rama `refactor/rf-40-consultas`), descartar las ediciones parciales de `lib/` con `git checkout -- lib` y borrar `lib/features/catalog/query/` si existe.
   2. Conservar las pruebas sin commit de RF-40: CHAR-12, CHAR-13 y la regla nueva de INV-12 en `test/architecture_test.dart`.
   3. Relanzar el encargo de implementación de RF-40. Su diseño está en `PLAN.md`; la rama de consulta muerta de `_filterCatalog` se elimina.
+
+### 2026-10-09 · RF-40 · iteración 1 · CERRADO
+
+- **Agente:** `flutter-implementer`, relanzado tras el corte de uso. El orquestador auditó.
+- **Base:** `e719391`, rama `refactor/rf-40-consultas`, worktree de las fases 3–4. Commit `4c4a063`.
+- **Diff:**
+  - **Nuevo, `lib/features/catalog/query/`:**
+    - `search_text.dart`: `normalizeSearchText`.
+    - `product_search.dart`: `searchTermsFor`, `matchesNormalizedQuery`, `searchProductList`, `matchesAnyTerm` y `FacetsLookup`.
+    - `collection_filter.dart`: `CollectionFilter` y `filterCollectionProducts`, con la regla de D-13.
+    - `browse_filters.dart`: `CatalogSort`, `CatalogBrowseFilters`, los ayudantes `browse*For`, las constantes y `filterAndSortCatalog`, ya sin consulta.
+    - Sus imports son sólo `domain/`, `data/normalize/`, `app/shopper_copy.dart` y `reco/`.
+  - **Envoltorios y reexportaciones:**
+    - Las 4 funciones de `catalog_query.dart` conservan su firma y delegan en las puras.
+    - `search_history.dart` reexporta `normalizeSearchText`.
+    - `collection_screen.dart` reexporta `CollectionFilter` y filtra con la función pura.
+    - `catalog_browse_screen.dart` pierde sus tipos y ayudantes privados (−242 líneas). Ahí se eliminó la rama de consulta muerta.
+  - **Extra declarado:** `product_tile.dart`. `catalogBrowseBrand` delega en `browseBrandFor`, con el mismo cuerpo; así no se duplica la regla de marca.
+  - **Pruebas nuevas:** CHAR-12b y CHAR-13b, 9 casos sobre el módulo, sin widgets ni store.
+  - **`docs/ARCHITECTURE.md`:** describe el módulo puro.
+- **Paridad verificada por el auditor** contra `HEAD`, con un diff normalizado:
+  - `browseCategoryFor`, `browsePriceBandFor`, `browseColorsFor` y `browseBagTypeFor` son iguales a sus originales privados;
+  - los mapas de términos son idénticos;
+  - las bandas de precio conservan los cortes 1000, 2500 y 5000;
+  - `browseBrandFor` tiene el cuerpo de `catalogBrowseBrand`.
+  - La búsqueda y el filtro de colección los cubren CHAR-12 y CHAR-07.
+- **Gates (ejecutados por el auditor en el worktree):**
+  - G0 → alcance esperado más el extra declarado; `git diff --check` limpio.
+  - G1 → `Formatted 366 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → catálogo y arquitectura, con la regla nueva de INV-12 en verde: `+298: All tests passed!`.
+  - G4 → `+1330 ~5: All tests passed!` (1320 + la regla de INV-12 + 9).
+  - G5 → catálogo válido; secretos OK.
+  - G6 → no aplica: la matriz lo pide desde RF-41.
+- **Hallazgos:**
+  - [Baja] El orden por `updatedAt` y por precio sigue usando `List.sort`, que no es estable; es lo vigente.
+  - [Nota] Las fachadas de `catalog_query.dart` y el `export` de `search_history.dart` se quitan en RF-41, cuando migren las pantallas.
+- **Siguiente paso:** RF-41, los ViewModels del piloto.
