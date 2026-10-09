@@ -22,6 +22,7 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
+import 'package:monetta_app/features/catalog/query/collection_filter.dart';
 import 'package:monetta_app/features/catalog/search_history.dart';
 import 'package:monetta_app/features/catalog/search_screen.dart';
 import 'package:monetta_app/features/product/product_screen.dart';

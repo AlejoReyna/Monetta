@@ -18,6 +18,7 @@ import '../product/quick_view.dart';
 import 'catalog_controls.dart';
 import 'collection_screen.dart';
 import 'product_card.dart';
+import 'query/collection_filter.dart';
 import 'search_history.dart';
 import 'search_view_model.dart';
 

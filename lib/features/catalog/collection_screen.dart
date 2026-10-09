@@ -29,8 +29,6 @@ import 'query/collection_filter.dart';
 import 'product_card.dart';
 import '../product/quick_view.dart';
 
-export 'query/collection_filter.dart' show CollectionFilter;
-
 extension on CollectionSort {
   String get label => switch (this) {
         CollectionSort.newest => 'Más nuevas',

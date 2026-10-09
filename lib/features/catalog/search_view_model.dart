@@ -18,6 +18,7 @@ import '../../data/normalize/facets.dart' show FacetValue;
 import '../../domain/product.dart';
 import '../../reco/explainer.dart';
 import 'query/product_search.dart';
+import 'query/search_text.dart';
 import 'search_history.dart';
 
 /// One type-ahead line: a label that contains the query, ranked by how

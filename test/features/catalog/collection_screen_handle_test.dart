@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
+import 'package:monetta_app/features/catalog/query/collection_filter.dart';
 import 'package:monetta_app/main.dart';
 
 void main() {

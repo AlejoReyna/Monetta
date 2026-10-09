@@ -18,8 +18,6 @@ import 'package:flutter/foundation.dart';
 
 import 'query/search_text.dart';
 
-export 'query/search_text.dart' show normalizeSearchText;
-
 /// Durable storage for the history. Implement and inject to survive a restart.
 abstract class SearchHistoryPersistence {
   /// [scopeKey] is `''` for a guest and the account id once signed in —

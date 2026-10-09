@@ -12,6 +12,7 @@ import 'package:flutter/material.dart';
 
 import '../../data/repositories/catalog_repository.dart';
 import '../../features/catalog/collection_screen.dart';
+import '../../features/catalog/query/collection_filter.dart';
 import '../../features/product/product_screen.dart';
 import '../catalog_store.dart';
 import '../composition/app_scopes.dart';

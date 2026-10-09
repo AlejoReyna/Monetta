@@ -7,6 +7,7 @@ import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
+import 'package:monetta_app/features/catalog/query/collection_filter.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 

@@ -28,6 +28,7 @@ import '../admin/admin_screen.dart';
 import '../catalog/catalog_browse_screen.dart';
 import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
+import '../catalog/query/collection_filter.dart';
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../product/quick_view.dart';

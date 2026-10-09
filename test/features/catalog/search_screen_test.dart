@@ -12,8 +12,8 @@ import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
-import 'package:monetta_app/features/catalog/catalog_query.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
+import 'package:monetta_app/features/catalog/query/product_search.dart';
 import 'package:monetta_app/features/catalog/search_history.dart';
 import 'package:monetta_app/features/catalog/search_screen.dart';
 import 'package:monetta_app/main.dart';
@@ -301,7 +301,8 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.search);
     await tester.pumpAndSettle();
 
-    final expected = searchProducts(store, 'coach').length;
+    final expected =
+        searchProductList(store.products, store.facetsFor, 'coach').length;
     expect(expected, greaterThan(0));
     expect(
       find.text(expected == 1 ? '1 pieza' : '$expected piezas'),
@@ -323,7 +324,8 @@ void main() {
     await tester.testTextInput.receiveAction(TextInputAction.search);
     await tester.pumpAndSettle();
 
-    final expected = searchProducts(store, 'coach').length;
+    final expected =
+        searchProductList(store.products, store.facetsFor, 'coach').length;
     expect(find.byKey(const ValueKey('search-result-grid')), findsOneWidget);
     expect(
       find.text(expected == 1 ? '1 pieza' : '$expected piezas'),

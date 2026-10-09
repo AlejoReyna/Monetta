@@ -26,6 +26,7 @@ import '../product/quick_view.dart';
 import 'catalog_controls.dart';
 import 'collection_screen.dart';
 import 'product_card.dart';
+import 'query/collection_filter.dart';
 
 /// Bundled wordmark for a canonical brand slug, e.g. `michael_kors`.
 ///

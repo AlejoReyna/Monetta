@@ -1,5 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
-import 'package:monetta_app/features/catalog/collection_screen.dart';
+import 'package:monetta_app/features/catalog/query/collection_filter.dart';
 
 void main() {
   test('notification collection routes use collectionHandle identity', () {

@@ -1,10 +1,11 @@
 /// CHAR-12: what product search matches today.
 ///
-/// Characterization of `lib/features/catalog/catalog_query.dart`
-/// (`productSearchTerms`, `productMatchesNormalizedQuery`, `searchProducts`,
-/// `productMatchesAnyTerm`) and of the normalization they share
-/// (`normalizeSearchText`). RF-40 moves these queries into a pure module; it
-/// must keep every assertion here, changing only the imports below.
+/// Characterization of `lib/features/catalog/query/product_search.dart`
+/// (`searchTermsFor`, `matchesNormalizedQuery`, `searchProductList`,
+/// `matchesAnyTerm`) and of the normalization they share
+/// (`normalizeSearchText`). RF-41 retargets these queries to the pure module;
+/// it must keep every assertion here, changing only the imports and the call
+/// sites below.
 ///
 /// Synthetic products pin each term source exactly; the bundled catalog asset
 /// covers the real data (order, raw `vendor`, empty query).
@@ -15,8 +16,8 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/normalize/facets.dart';
 import 'package:monetta_app/domain/product.dart';
-import 'package:monetta_app/features/catalog/catalog_query.dart';
-import 'package:monetta_app/features/catalog/search_history.dart';
+import 'package:monetta_app/features/catalog/query/product_search.dart';
+import 'package:monetta_app/features/catalog/query/search_text.dart';
 
 import '../../support/product_screen_harness.dart';
 
@@ -117,21 +118,33 @@ void main() {
           'NANDU',
         ]) {
           expect(
-            _ids(searchProducts(store, query)),
+            _ids(searchProductList(store.products, store.facetsFor, query)),
             [_gid(1)],
             reason: 'query "$query"',
           );
         }
         // Accent folding works in both directions.
-        expect(_ids(searchProducts(store, 'clasico')), [_gid(2)]);
-        expect(_ids(searchProducts(store, 'CLÁSICO')), [_gid(2)]);
+        expect(
+          _ids(searchProductList(store.products, store.facetsFor, 'clasico')),
+          [_gid(2)],
+        );
+        expect(
+          _ids(searchProductList(store.products, store.facetsFor, 'CLÁSICO')),
+          [_gid(2)],
+        );
       },
     );
 
     test('CHAR-12 the query matches as a substring, not by whole word', () {
       final store = _store([_product(1, title: 'Mochila Urbana')]);
-      expect(_ids(searchProducts(store, 'chila urb')), [_gid(1)]);
-      expect(searchProducts(store, 'urbana mochila'), isEmpty);
+      expect(
+        _ids(searchProductList(store.products, store.facetsFor, 'chila urb')),
+        [_gid(1)],
+      );
+      expect(
+        searchProductList(store.products, store.facetsFor, 'urbana mochila'),
+        isEmpty,
+      );
     });
   });
 
@@ -183,7 +196,7 @@ void main() {
     for (final entry in sources.entries) {
       test('CHAR-12 a piece is found by its ${entry.key}', () {
         expect(
-          _ids(searchProducts(store, entry.value)),
+          _ids(searchProductList(store.products, store.facetsFor, entry.value)),
           [_gid(1)],
           reason: 'query "${entry.value}"',
         );
@@ -191,17 +204,36 @@ void main() {
     }
 
     test('CHAR-12 labels are matched with accents and case folded', () {
-      expect(_ids(searchProducts(store, 'CAFÉ')), [_gid(1)]);
-      expect(_ids(searchProducts(store, 'Animal Print')), [_gid(1)]);
-      expect(_ids(searchProducts(store, 'MICHAEL   KORS')), [_gid(1)]);
+      expect(
+        _ids(searchProductList(store.products, store.facetsFor, 'CAFÉ')),
+        [_gid(1)],
+      );
+      expect(
+        _ids(
+          searchProductList(store.products, store.facetsFor, 'Animal Print'),
+        ),
+        [_gid(1)],
+      );
+      expect(
+        _ids(
+          searchProductList(store.products, store.facetsFor, 'MICHAEL   KORS'),
+        ),
+        [_gid(1)],
+      );
     });
 
     test('CHAR-12 the raw facet slugs are not searchable, only their labels',
         () {
       // `michael_kors` and `animal_print` are identifiers; only the humanized
       // label ("Michael Kors") is a search term.
-      expect(searchProducts(store, 'michael_kors'), isEmpty);
-      expect(searchProducts(store, 'animal_print'), isEmpty);
+      expect(
+        searchProductList(store.products, store.facetsFor, 'michael_kors'),
+        isEmpty,
+      );
+      expect(
+        searchProductList(store.products, store.facetsFor, 'animal_print'),
+        isEmpty,
+      );
     });
 
     test('CHAR-12 the singular category label does not satisfy the plural', () {
@@ -211,15 +243,27 @@ void main() {
         [_product(1, title: 'Zafiro')],
         [_facets(1, category: 'reloj')],
       );
-      expect(_ids(searchProducts(single, 'reloj')), [_gid(1)]);
-      expect(_ids(searchProducts(single, 'relojes')), [_gid(1)]);
+      expect(
+        _ids(searchProductList(single.products, single.facetsFor, 'reloj')),
+        [_gid(1)],
+      );
+      expect(
+        _ids(searchProductList(single.products, single.facetsFor, 'relojes')),
+        [_gid(1)],
+      );
       // A different category matches neither.
-      expect(searchProducts(single, 'bolsas'), isEmpty);
+      expect(
+        searchProductList(single.products, single.facetsFor, 'bolsas'),
+        isEmpty,
+      );
     });
 
     test('CHAR-12 productSearchTerms lists the own text then the facet labels',
         () {
-      final terms = productSearchTerms(store, store.products.first);
+      final terms = searchTermsFor(
+        store.products.first,
+        store.facetsFor(store.products.first.id),
+      );
       expect(
         terms,
         [
@@ -242,19 +286,37 @@ void main() {
       final blank = _store([
         _product(1, title: 'Solo', productType: '  ', tags: const ['', ' ']),
       ]);
-      expect(productSearchTerms(blank, blank.products.first), ['Solo']);
+      expect(
+        searchTermsFor(
+          blank.products.first,
+          blank.facetsFor(blank.products.first.id),
+        ),
+        ['Solo'],
+      );
     });
 
     test('CHAR-12 a piece without facets is found only by its own text', () {
       final bare = _store([
         _product(1, title: 'Zafiro', tags: const ['viaje']),
       ]);
-      expect(_ids(searchProducts(bare, 'viaje')), [_gid(1)]);
-      expect(searchProducts(bare, 'bolsa'), isEmpty);
-      expect(productSearchTerms(bare, bare.products.first), [
-        'Zafiro',
-        'viaje',
-      ]);
+      expect(
+        _ids(searchProductList(bare.products, bare.facetsFor, 'viaje')),
+        [_gid(1)],
+      );
+      expect(
+        searchProductList(bare.products, bare.facetsFor, 'bolsa'),
+        isEmpty,
+      );
+      expect(
+        searchTermsFor(
+          bare.products.first,
+          bare.facetsFor(bare.products.first.id),
+        ),
+        [
+          'Zafiro',
+          'viaje',
+        ],
+      );
     });
   });
 
@@ -263,11 +325,19 @@ void main() {
       final store = _store([
         _product(1, title: 'Zafiro', vendor: 'Zorbatex'),
       ]);
-      expect(searchProducts(store, 'zorbatex'), isEmpty);
-      expect(searchProducts(store, 'ZORBATEX'), isEmpty);
       expect(
-        productSearchTerms(store, store.products.first)
-            .map(normalizeSearchText),
+        searchProductList(store.products, store.facetsFor, 'zorbatex'),
+        isEmpty,
+      );
+      expect(
+        searchProductList(store.products, store.facetsFor, 'ZORBATEX'),
+        isEmpty,
+      );
+      expect(
+        searchTermsFor(
+          store.products.first,
+          store.facetsFor(store.products.first.id),
+        ).map(normalizeSearchText),
         isNot(contains('zorbatex')),
       );
     });
@@ -279,18 +349,27 @@ void main() {
         [_product(1, title: 'Zafiro', vendor: 'Guess')],
         [_facets(1, brand: 'guess')],
       );
-      expect(_ids(searchProducts(store, 'guess')), [_gid(1)]);
+      expect(
+        _ids(searchProductList(store.products, store.facetsFor, 'guess')),
+        [_gid(1)],
+      );
       final unresolved = _store([
         _product(1, title: 'Zafiro', vendor: 'Guess'),
       ]);
-      expect(searchProducts(unresolved, 'guess'), isEmpty);
+      expect(
+        searchProductList(unresolved.products, unresolved.facetsFor, 'guess'),
+        isEmpty,
+      );
     });
 
     test('CHAR-12 the raw vendor of the asset catalog is not a term', () async {
       final store = await loadedStore();
-      bool vendorIsATerm(Product p) => productSearchTerms(store, p)
-          .map(normalizeSearchText)
-          .any((t) => t.contains(normalizeSearchText(p.vendor)));
+      bool vendorIsATerm(Product p) => searchTermsFor(
+            p,
+            store.facetsFor(p.id),
+          )
+              .map(normalizeSearchText)
+              .any((t) => t.contains(normalizeSearchText(p.vendor)));
 
       final unreachable = store.products
           .where((p) => p.vendor.trim().isNotEmpty && !vendorIsATerm(p))
@@ -299,7 +378,7 @@ void main() {
       expect(unreachable, isNotEmpty);
       for (final product in unreachable.take(10)) {
         expect(
-          searchProducts(store, product.vendor),
+          searchProductList(store.products, store.facetsFor, product.vendor),
           isNot(contains(product)),
           reason: '${product.title} found through vendor "${product.vendor}"',
         );
@@ -312,7 +391,7 @@ void main() {
       final store = _store([_product(1, title: 'Zafiro')]);
       for (final query in const ['', ' ', '    ', '\t', '\n', ' \t \n ']) {
         expect(
-          searchProducts(store, query),
+          searchProductList(store.products, store.facetsFor, query),
           isEmpty,
           reason: 'query ${query.codeUnits}',
         );
@@ -323,8 +402,11 @@ void main() {
         () async {
       final store = await loadedStore();
       expect(store.products, isNotEmpty);
-      expect(searchProducts(store, ''), isEmpty);
-      expect(searchProducts(store, '   '), isEmpty);
+      expect(searchProductList(store.products, store.facetsFor, ''), isEmpty);
+      expect(
+        searchProductList(store.products, store.facetsFor, '   '),
+        isEmpty,
+      );
     });
 
     test(
@@ -332,22 +414,37 @@ void main() {
         () {
       final store = _store([_product(1, title: 'Zafiro')]);
       expect(
-        productMatchesNormalizedQuery(store, store.products.first, ''),
+        matchesNormalizedQuery(
+          store.products.first,
+          store.facetsFor(store.products.first.id),
+          '',
+        ),
         isTrue,
       );
       expect(
-        productMatchesNormalizedQuery(store, store.products.first, 'zafiro'),
+        matchesNormalizedQuery(
+          store.products.first,
+          store.facetsFor(store.products.first.id),
+          'zafiro',
+        ),
         isTrue,
       );
       expect(
-        productMatchesNormalizedQuery(store, store.products.first, 'otro'),
+        matchesNormalizedQuery(
+          store.products.first,
+          store.facetsFor(store.products.first.id),
+          'otro',
+        ),
         isFalse,
       );
     });
 
     test('CHAR-12 a query matching nothing returns an empty list', () {
       final store = _store([_product(1, title: 'Zafiro')]);
-      expect(searchProducts(store, 'xyzzy'), isEmpty);
+      expect(
+        searchProductList(store.products, store.facetsFor, 'xyzzy'),
+        isEmpty,
+      );
     });
   });
 
@@ -360,14 +457,14 @@ void main() {
         _product(5, title: 'Bolsa Mini'),
       ]);
       expect(
-        _ids(searchProducts(store, 'bolsa')),
+        _ids(searchProductList(store.products, store.facetsFor, 'bolsa')),
         [_gid(30), _gid(10), _gid(5)],
       );
 
       // Reordering the catalog reorders the result: nothing re-ranks it.
       store.products = store.products.reversed.toList();
       expect(
-        _ids(searchProducts(store, 'bolsa')),
+        _ids(searchProductList(store.products, store.facetsFor, 'bolsa')),
         [_gid(5), _gid(10), _gid(30)],
       );
     });
@@ -384,7 +481,10 @@ void main() {
         ],
         [_facets(1, category: 'bolsa')],
       );
-      expect(_ids(searchProducts(store, 'bolsa')), [_gid(1)]);
+      expect(
+        _ids(searchProductList(store.products, store.facetsFor, 'bolsa')),
+        [_gid(1)],
+      );
     });
 
     test('CHAR-12 asset results keep the catalog order', () async {
@@ -393,7 +493,8 @@ void main() {
         for (var i = 0; i < store.products.length; i++) store.products[i].id: i,
       };
       for (final query in const ['bolsa', 'guess', 'negro', 'a']) {
-        final result = searchProducts(store, query);
+        final result =
+            searchProductList(store.products, store.facetsFor, query);
         expect(result, isNotEmpty, reason: query);
         final positions = result.map((p) => order[p.id]!).toList();
         expect(positions, orderedEquals([...positions]..sort()), reason: query);
@@ -405,13 +506,14 @@ void main() {
       final store = await loadedStore();
       for (final product in store.products.take(25)) {
         if (normalizeSearchText(product.title).isEmpty) continue;
-        final result = searchProducts(store, product.title);
+        final result =
+            searchProductList(store.products, store.facetsFor, product.title);
         expect(result, contains(product), reason: product.title);
         expect(
           result.every(
-            (p) => productMatchesNormalizedQuery(
-              store,
+            (p) => matchesNormalizedQuery(
               p,
+              store.facetsFor(p.id),
               normalizeSearchText(product.title),
             ),
           ),
@@ -437,31 +539,45 @@ void main() {
     });
 
     test('CHAR-12 no terms at all matches every piece', () {
-      expect(productMatchesAnyTerm(store, piece, const []), isTrue);
+      expect(
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const []),
+        isTrue,
+      );
     });
 
     test('CHAR-12 only blank terms match every piece', () {
-      expect(productMatchesAnyTerm(store, piece, const ['', '   ']), isTrue);
+      expect(
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const ['', '   ']),
+        isTrue,
+      );
     });
 
     test('CHAR-12 one matching term among several is enough', () {
       expect(
-        productMatchesAnyTerm(
-          store,
+        matchesAnyTerm(
           piece,
+          store.facetsFor(piece.id),
           const ['reloj', 'viaje', 'perfume'],
         ),
         isTrue,
       );
       expect(
-        productMatchesAnyTerm(store, piece, const ['reloj', 'bolsa']),
+        matchesAnyTerm(
+          piece,
+          store.facetsFor(piece.id),
+          const ['reloj', 'bolsa'],
+        ),
         isTrue,
       );
     });
 
     test('CHAR-12 no matching term means no match', () {
       expect(
-        productMatchesAnyTerm(store, piece, const ['reloj', 'perfume']),
+        matchesAnyTerm(
+          piece,
+          store.facetsFor(piece.id),
+          const ['reloj', 'perfume'],
+        ),
         isFalse,
       );
     });
@@ -469,26 +585,45 @@ void main() {
     test('CHAR-12 blank terms are ignored when a real term is present', () {
       // A blank term does not turn "reloj" into "everything".
       expect(
-        productMatchesAnyTerm(store, piece, const ['', 'reloj']),
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const ['', 'reloj']),
         isFalse,
       );
       expect(
-        productMatchesAnyTerm(store, piece, const ['', 'viaje']),
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const ['', 'viaje']),
         isTrue,
       );
     });
 
     test('CHAR-12 terms are normalized and matched against facet labels', () {
-      expect(productMatchesAnyTerm(store, piece, const ['PEQUEÑA']), isTrue);
-      expect(productMatchesAnyTerm(store, piece, const ['pequena']), isTrue);
-      expect(productMatchesAnyTerm(store, piece, const ['Guess']), isTrue);
-      expect(productMatchesAnyTerm(store, piece, const ['bolsas']), isTrue);
+      expect(
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const ['PEQUEÑA']),
+        isTrue,
+      );
+      expect(
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const ['pequena']),
+        isTrue,
+      );
+      expect(
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const ['Guess']),
+        isTrue,
+      );
+      expect(
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const ['bolsas']),
+        isTrue,
+      );
     });
 
     test('CHAR-12 a term is a substring match, like a typed query', () {
-      expect(productMatchesAnyTerm(store, piece, const ['pequ']), isTrue);
       expect(
-        productMatchesAnyTerm(store, piece, const ['pequeña bolsa']),
+        matchesAnyTerm(piece, store.facetsFor(piece.id), const ['pequ']),
+        isTrue,
+      );
+      expect(
+        matchesAnyTerm(
+          piece,
+          store.facetsFor(piece.id),
+          const ['pequeña bolsa'],
+        ),
         isFalse,
       );
     });
