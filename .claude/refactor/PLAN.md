@@ -75,7 +75,7 @@ Ningún WP que dependa de una decisión `pendiente` puede empezar.
 | RF-22 | Dependencias sin uso, Makefile y docs | 2 | flutter-implementer | RF-20 (código aprobado; G6 pendiente: la persona decidió seguir, 2026-10-08) | — | bloqueado: G6 de la persona (código aprobado y con commit) |
 | RF-23 | Retirar `functions/` | 2 | backend-implementer | RF-10 | Inventario de webhooks de ambas tiendas (D-02). El repo, verificado el 2026-10-08, no apunta a Functions; faltan las suscripciones vivas, creadas por API | bloqueado: verificación en las tiendas |
 | RF-30 | Composición fuera de `main.dart` y sobre el Navigator | 3 | test-engineer → flutter-implementer | RF-22 (código aprobado; G6 pendiente, D-14) | E1, E11, D-14 | bloqueado: G6 de la persona. El código está aprobado y con commit (`80753e3` en `refactor/rf-30-composicion`, worktree `.claude/worktrees/rf-30`) |
-| RF-31 | `AppDestination` y resolver de notificaciones | 3 | test-engineer → flutter-implementer | RF-30, RF-14 | E6 | pendiente |
+| RF-31 | `AppDestination` y resolver de notificaciones | 3 | test-engineer → flutter-implementer | RF-30, RF-14 (los dos con el código aprobado y G6 pendiente; D-14) | E6, D-14 | en curso: rama `refactor/rf-31-destinos`, desde `80753e3`, en el worktree de la fase 3 (`.claude/worktrees/rf-30`) |
 | RF-32 | `ShopperScope` y `ChangeAccountScope` | 3 | flutter-implementer | RF-30 | E11 | pendiente |
 | RF-33 | Pruebas de arquitectura en trinquete | 3 | test-engineer | RF-30 | — | pendiente |
 | RF-40 | Consultas puras del catálogo | 4 | test-engineer → flutter-implementer | RF-33 | — | pendiente |
@@ -472,6 +472,16 @@ Origen: R06; alcance según E6.
 - El origen de la navegación (push, búsqueda, colección…) llega disponible para RF-67.
 
 **Aceptación:** CHAR-02 y CHAR-09 en verde; DEV-01 y DEV-02, sólo los pasos de push.
+
+**Detalle (2026-10-09, al empezar el WP):**
+- **Hoy:** una notificación de un producto que no está en caché, o de un `external:*`, vuelve al inicio en silencio (`lib/app/monetta_app.dart:93-128`).
+- **Mecanismo de resolución:** `CatalogStore.syncWithShopify()`, que ya pasa por el coordinador. No hay consulta nueva ni escritor nuevo (invariante 5).
+  - Si después de sincronizar el producto aparece, se abre la ficha.
+  - Si el resultado es `updated` o `upToDate` y no aparece, se muestra «Este artículo ya no está disponible» (RF-11).
+  - Si es `failed`, `skippedNotConfigured`, `skippedRealtimeAuthoritative` o una excepción, se muestra «No se pudo comprobar este artículo» con «Reintentar».
+  - Un `external:*` muestra «Enlace no disponible».
+- **API:** `AppDestination` (sellada, con `NavigationOrigin` para RF-67) y `DestinationNavigator.open`, en `lib/app/destinations/`. Los helpers `openProduct` y `openCollection` delegan en ella y conservan `monettaFadeRoute` y el envoltorio de `StoreScope`.
+- **Pruebas:** CHAR-02 se escribe contra la API nueva y no compila hasta la implementación (precedente de RF-15). El orquestador verifica con stubs temporales que falla por comportamiento.
 
 ### RF-32 · `ShopperScope` y `ChangeAccountScope`
 
