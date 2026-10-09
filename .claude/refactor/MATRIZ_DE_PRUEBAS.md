@@ -174,6 +174,9 @@ El orquestador actualiza esta sección al cerrar cada WP.
 | ARCH-03 | verde (OBJ). Ampliada en RF-21 con la gestión de fuentes externas del admin. Excepciones vivas: la guarda de `ENABLE_EXTERNAL_CATALOG` y `AdminChannel.externalCatalog`, que etiqueta la auditoría histórica `external_source` | RF-20, RF-21 | 2026-10-08 · RF-20 · iteración 1 · 2026-10-08 · RF-21 · iteración 1 |
 | CONTRACT-06 | verde | RF-21 | 2026-10-08 · RF-21 · iteración 1 |
 | CHAR-11 | verde (CAR, D-10) | RF-20 | 2026-10-08 · RF-20 · iteración 1 |
+| UI-01 | verde (OBJ). Las 13 funciones de estilo y los temas, en Android e iOS, usan Inter o Playfair Display, que están empaquetadas; `MonettaApp` registra su OFL | RF-17 | 2026-10-08 · RF-17 · paso 1 · 2026-10-09 · RF-17 · paso 3 |
+| UI-02 | verde (OBJ, D-12). `BoundedTextScaler` en la raíz | RF-17 | 2026-10-08 · RF-17 · paso 1 · 2026-10-09 · RF-17 · paso 3 |
+| UI-03 | verde (OBJ). 60 casos: 10 pantallas, 2 teléfonos y 3 escalas | RF-17 | 2026-10-08 · RF-17 · paso 1 · 2026-10-09 · RF-17 · paso 3 |
 | Las demás | pendiente | — | — |
 
 ## 7. Conteos base (RF-00)

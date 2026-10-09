@@ -21,6 +21,7 @@ import 'package:flutter/material.dart';
 import '../../app/card_lift.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/shopper_copy.dart';
+import '../../app/text_scale_policy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../data/normalize/facets.dart';
@@ -123,7 +124,13 @@ extension ProductTileVariantMetrics on ProductTileVariant {
   /// font size is scaled on its own, so a non-linear scaler (Android 14+)
   /// grows the reserve exactly as it grows the text.
   double captionExtent(ProductTileDensity density, TextScaler textScaler) {
-    if (!_edge) return textScaler.scale(density.captionHeight);
+    // The caption is sized for its text, not for its own height: the factor
+    // is read at the name size so a root cap by font size cannot shrink the
+    // reserve below what the text needs.
+    if (!_edge) {
+      return density.captionHeight *
+          textScaleFactorFor(textScaler, density.nameSize);
+    }
     return captionGap +
         textScaler.scale(density.brandSize) * _brandLineHeight +
         _brandGap +

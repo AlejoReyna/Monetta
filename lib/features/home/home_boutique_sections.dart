@@ -8,6 +8,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/card_lift.dart';
+import '../../app/text_scale_policy.dart';
 import '../../app/media/monetta_video.dart';
 import '../../domain/campaign.dart';
 import '../../domain/home_content.dart';
@@ -253,8 +254,10 @@ class HomeNewArrivalsRail extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     // Just under three cards across, so the rail reads as scrollable.
     final cardWidth = (width * .36).clamp(132.0, 190.0);
+    final textScaler = MediaQuery.textScalerOf(context);
     final railHeight = cardWidth * _density.imageHeightFactor +
-        MediaQuery.textScalerOf(context).scale(_density.captionHeight);
+        _density.captionHeight *
+            textScaleFactorFor(textScaler, _density.nameSize);
 
     return Column(
       key: const ValueKey('home-section-new-products'),
@@ -321,8 +324,10 @@ class HomeShopByStyle extends StatelessWidget {
     // Four tiles across a phone, with the fourth cut so the rail reads as
     // scrollable — the proportion figure 03 uses.
     final tileWidth = (width * .27).clamp(96.0, 150.0);
+    // The 38pt label band holds one line of 13pt text.
     final tileHeight =
-        MediaQuery.textScalerOf(context).scale(38) + tileWidth * 0.86;
+        38 * textScaleFactorFor(MediaQuery.textScalerOf(context), 13) +
+            tileWidth * 0.86;
 
     return Column(
       key: const ValueKey('home-section-bag-types'),

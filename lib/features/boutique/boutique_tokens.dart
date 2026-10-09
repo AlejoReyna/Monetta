@@ -50,26 +50,13 @@ import '../../app/theme.dart';
 // Type
 // ---------------------------------------------------------------------------
 
-/// Editorial serif. Playfair Display when registered; platform serif until then.
-const String kBoutiqueSerifFamily = 'Playfair Display';
-const List<String> kBoutiqueSerifFallback = <String>[
-  'New York',
-  'Iowan Old Style',
-  'Baskerville',
-  'Georgia',
-  'Times New Roman',
-  'serif',
-];
+/// Editorial serif: the bundled Playfair Display (see `kSerifFontFamily`).
+const String kBoutiqueSerifFamily = kSerifFontFamily;
+const List<String> kBoutiqueSerifFallback = kSerifFontFallback;
 
-/// Controls, prices, navigation. Inter when registered; platform sans until then.
-const String kBoutiqueSansFamily = 'Inter';
-const List<String> kBoutiqueSansFallback = <String>[
-  'SF Pro Text',
-  'Helvetica Neue',
-  'Helvetica',
-  'Arial',
-  'sans-serif',
-];
+/// Controls, prices, navigation: the bundled Inter (see `kSansFontFamily`).
+const String kBoutiqueSansFamily = kSansFontFamily;
+const List<String> kBoutiqueSansFallback = kSansFontFallback;
 
 /// Editorial headline. 24–32 depending on the space it is given — never the
 /// 8–11px the mockup's pixel density implies.

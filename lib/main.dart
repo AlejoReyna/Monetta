@@ -24,6 +24,7 @@ import 'app/catalog_store.dart';
 import 'app/cart_controller.dart';
 import 'app/editorial_content_controller.dart';
 import 'app/featured_catalog_controller.dart';
+import 'app/font_licenses.dart';
 import 'app/home_content_controller.dart';
 import 'app/notification_controller.dart';
 import 'app/onboarding_controller.dart';
@@ -33,6 +34,7 @@ import 'app/shopify_cart_composition.dart';
 import 'app/shopify_checkout_coordinator.dart';
 import 'app/theme.dart';
 import 'app/startup_reveal.dart';
+import 'app/text_scale_policy.dart';
 import 'app/theme_controller.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
 import 'data/accounts_orders/system_account_client.dart';
@@ -867,6 +869,12 @@ class _MonettaAppState extends State<MonettaApp> {
   }
 
   @override
+  void initState() {
+    super.initState();
+    registerFontLicenses();
+  }
+
+  @override
   void dispose() {
     if (_adminCapListenerAttached) {
       _account.removeListener(_refreshAdminCapabilities);
@@ -909,7 +917,7 @@ class _MonettaAppState extends State<MonettaApp> {
               final overlay =
                   Theme.of(context).appBarTheme.systemOverlayStyle ??
                       SystemUiOverlayStyle.light;
-              return AnnotatedRegion<SystemUiOverlayStyle>(
+              final region = AnnotatedRegion<SystemUiOverlayStyle>(
                 value: overlay,
                 child: FutureBuilder<void>(
                   future: _loading,
@@ -936,6 +944,15 @@ class _MonettaAppState extends State<MonettaApp> {
                     );
                   },
                 ),
+              );
+              // RF-17 (E-T1 / D-12): one bounded scaler at the root, so no
+              // call site has to clamp the system text scale on its own.
+              final media = MediaQuery.of(context);
+              return MediaQuery(
+                data: media.copyWith(
+                  textScaler: BoundedTextScaler(media.textScaler),
+                ),
+                child: region,
               );
             },
             home: StoreScope(

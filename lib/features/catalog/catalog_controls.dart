@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/text_scale_policy.dart';
 import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
 
@@ -134,9 +135,9 @@ class MonettaChipRail extends StatelessWidget {
   Widget build(BuildContext context) {
     if (children.isEmpty) return const SizedBox.shrink();
     // Grows with the shopper's text size instead of clipping the chips.
-    final height = MediaQuery.textScalerOf(context).scale(
-      BoutiqueSpace.tapTarget,
-    );
+    // The tap target holds 14pt chip labels, so it follows their scale.
+    final height = BoutiqueSpace.tapTarget *
+        textScaleFactorFor(MediaQuery.textScalerOf(context), 14);
     return SizedBox(
       height: height + BoutiqueSpace.sm,
       child: ListView.separated(

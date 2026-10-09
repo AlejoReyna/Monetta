@@ -1090,3 +1090,59 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - Pruebas SHIP-01 a SHIP-07 primero, con las dos pruebas viejas convertidas de forma explícita y la unitaria de las funciones retiradas quitada; después, la implementación.
   - Gates del auditor en el worktree: G0 en alcance; G1 `Formatted 331 files (0 changed)`; G2 «No issues found!»; G4 `+1097 ~5: All tests passed!` (base 1077, +21, −1); G5 catálogo válido y secretos OK.
   - **Integración futura (D-06):** la simulación `git merge-tree e14d2e6 0703176` da un solo conflicto, en `lib/features/checkout/checkout_screen.dart`. RF-18 reemplazó `_SummaryRow` por `CheckoutSummaryRow`, y el cambio del envío hace que esa fila parta un valor largo. Al integrar `main`, ese comportamiento pasa a `CheckoutSummaryRow`.
+
+### 2026-10-09 · RF-17 · paso 3, iteración 1 · APROBADO (PENDIENTE DE G6, G8 Y UI-04)
+
+- **Agente:** `flutter-implementer`. El orquestador auditó.
+- **Base:** `4310b07`, rama `refactor/rf-17-tipografia`.
+- **Diff:**
+  - **`pubspec.yaml`:** sección `fonts:` con Inter (300, 400, 500, 600 y 700) y Playfair Display (400 y 700), más los dos `OFL.txt` en `assets:`, declarados uno por uno. `pubspec.lock` no cambia.
+  - **`lib/app/theme.dart`:**
+    - las familias tienen una sola fuente: `kSansFontFamily` (Inter) y `kSerifFontFamily` (Playfair Display), con sus listas de respaldo;
+    - `display`, `wordmark`, `eyebrow` y `sans` pasan a Inter, y `editorial` a Playfair; firmas, pesos y métricas intactos;
+    - `kEditorialFontFamily` apunta a la serif;
+    - `buildTheme` fija `fontFamily` y `fontFamilyFallback`.
+  - **`boutique_tokens.dart`:** sus cuatro constantes públicas pasan a ser alias, con los mismos valores.
+  - **`lib/app/text_scale_policy.dart`** (nuevo):
+    - `BoundedTextScaler` aplica `min(sistema, s ≥ 20 ? 1.2·s : min(1.5·s, 24))`;
+    - el getter obsoleto `textScaleFactor` se estima con `scale()` a 14 px, para no leer un miembro obsoleto ni usar `// ignore`;
+    - `textScaleFactorFor` da el factor que se aplica a un tamaño de texto.
+  - **`lib/app/font_licenses.dart`** (nuevo): `registerFontLicenses()`, idempotente, lee los `OFL.txt` con `rootBundle`.
+  - **`lib/main.dart`:**
+    - `initState` registra las licencias;
+    - el `builder` del `MaterialApp` envuelve todo en `MediaQuery(textScaler: BoundedTextScaler(...))`.
+  - **Alturas reservadas:** los 7 sitios usan `alto × textScaleFactorFor(escala, tamaño del texto que contienen)`. El encargo decía 8, pero `grep` confirma que son 7. Con un escalador lineal el resultado es idéntico.
+    - Ficha de producto, rail de novedades del inicio y rail de búsqueda: el `nameSize` del producto (13 o 14).
+    - Etiquetas de «Compra por estilo» del inicio: 13.
+    - Chips y pestañas de marca: 14.
+    - Rail de la ficha: 14.
+  - **Extra declarado: `home_screen.dart`.**
+    - El rail de ofertas tenía alto fijo de 430 y su texto desbordaba a 1.3 y a 1.5 (`Column@home_screen.dart:808`, 17 y 25 px).
+    - Ahora crece con lo que crece su texto (eyebrow 11, título 22 de dos líneas y descripción 13 de dos líneas), repartido en las 21 partes de la tarjeta. Las constantes coinciden con `_OfferCard`; lo verificó el auditor.
+- **Verificación del auditor:**
+  - las 9 pruebas rojas no se modificaron: su fecha es anterior a `e14d2e6`;
+  - el diff completo se leyó.
+- **Gates (ejecutados por el auditor):**
+  - G0 → 11 archivos modificados y 2 nuevos en `lib/`, más `pubspec.yaml`; `git diff --check` limpio.
+  - G1 → `Formatted 342 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → UI-01, UI-02 y UI-03: `+86: All tests passed!`.
+  - G4 → `+1204 ~5: All tests passed!` (base 1118 + 86).
+  - G5 → catálogo válido (103 productos, 340 imágenes); secretos OK.
+  - G6 → **no ejecutado**: cambia `pubspec.yaml` y empaqueta fuentes; le toca a la persona.
+  - G8 → **no ejecutado**: DEV-03; le toca a la persona.
+  - UI-04 → **no empezado**. Con fuentes reales, un golden hecho en macOS no coincide con el del CI de Ubuntu, y la regla prohíbe `skip:`. La estrategia (por ejemplo, una etiqueta sólo para macOS con tolerancia) la decide la persona.
+- **Tamaño:** las fuentes suman 2 477 885 B sin comprimir (2.36 MiB) y 1 178 579 B con deflate (≈ 1.12 MiB, el crecimiento estimado de la descarga). El número real sale del G6 de la persona.
+- **Filas de la matriz:** UI-01, UI-02 y UI-03 → verdes.
+- **Hallazgos:**
+  - [Baja] `home_screen.dart` (`_HomeOffersSection`): la altura del rail repite a mano los tamaños de `_OfferCard`; si cambia la tarjeta, puede desincronizarse.
+  - [Baja] `_ConfigurationErrorApp` no aplica la política de escala. Es una pantalla de error de configuración y queda fuera del alcance.
+  - [Baja] Las listas de respaldo conservan nombres de plataforma (`SF Pro Text`, `New York`). Sólo se usan si fallan las fuentes empaquetadas.
+- **Cambio visible:** toda la app pasa a Inter y Playfair Display. La persona lo verifica con DEV-03: «antes» en `.claude/worktrees/rf-17-antes`, «después» en el checkout principal.
+- **Commit:** autorizado. Van juntos el código, las pruebas UI-01 a UI-03 (ya verdes) y este registro.
+- **Siguiente paso:** las fases 1 y 2 ya sólo dependen de la persona. Ella tiene que:
+  - correr G6 sobre esta rama, que cubre RF-14, RF-18, RF-20, RF-22 y RF-17;
+  - hacer las capturas DEV-03;
+  - correr el G8 de RF-14;
+  - decidir la estrategia de UI-04;
+  - hacer la verificación de RF-23.

@@ -19,6 +19,7 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
+import '../../app/text_scale_policy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../data/normalize/facets.dart';
@@ -1177,7 +1178,11 @@ class _Rail extends StatelessWidget {
     // 12pt photo gap plus ~120pt for brand, two-line name and price, matching
     // the grid caption contract. The caption is text, so it grows with the
     // text scale; the gap does not.
-    final caption = MediaQuery.textScalerOf(context).scale(120);
+    final caption = 120 *
+        textScaleFactorFor(
+          MediaQuery.textScalerOf(context),
+          ProductTileDensity.grid.nameSize,
+        );
     return SizedBox(
       height: tileWidth * 1.25 + 12 + caption,
       child: ListView.separated(

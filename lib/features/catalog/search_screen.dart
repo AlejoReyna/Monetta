@@ -10,6 +10,7 @@ import 'package:flutter/material.dart';
 import '../../app/motion.dart';
 import '../../app/product_telemetry.dart';
 import '../../app/shopper_copy.dart';
+import '../../app/text_scale_policy.dart';
 import '../../data/normalize/facets.dart' show FacetValue;
 import '../../domain/product.dart';
 import '../../main.dart';
@@ -728,9 +729,11 @@ class _ProductRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final cardWidth = (width * .40).clamp(140.0, 200.0);
-    final caption = MediaQuery.textScalerOf(context).scale(
-      ProductTileDensity.compact.captionHeight,
-    );
+    final caption = ProductTileDensity.compact.captionHeight *
+        textScaleFactorFor(
+          MediaQuery.textScalerOf(context),
+          ProductTileDensity.compact.nameSize,
+        );
 
     return SizedBox(
       key: const ValueKey('search-product-rail'),

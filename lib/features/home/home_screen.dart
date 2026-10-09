@@ -2,6 +2,7 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter/material.dart';
@@ -695,10 +696,29 @@ class _HomeOffersSection extends StatelessWidget {
   final VoidCallback onOpenCatalog;
   final VoidCallback onOpenPartner;
 
+  /// The card gives its text 10 of 21 flex parts of its height.
+  static const double _offerCardHeightPerTextHeight = 21 / 10;
+
+  /// Height of the offer card's text stack for a given size scaling: an 11pt
+  /// eyebrow line, a 22pt title (two lines) and a 13pt description (two
+  /// lines). Line heights match the styles in [_OfferCard].
+  static double _offerTextHeight(double Function(double size) scale) =>
+      scale(11) * 1.3 + scale(22) * 1.12 * 2 + scale(13) * 1.35 * 2;
+
   @override
   Widget build(BuildContext context) {
     final viewportWidth = MediaQuery.sizeOf(context).width;
     final cardWidth = (viewportWidth * .84).clamp(304.0, 420.0);
+    // The card holds a fixed stack of text (eyebrow, two-line title, two-line
+    // description) in the lower 10/21 of its height. Each size is scaled on its
+    // own, so the rail grows by exactly what that text grows by, spread over
+    // the whole card, and the text never overflows.
+    final scaler = MediaQuery.textScalerOf(context);
+    final growth = math.max<double>(
+          0,
+          _offerTextHeight(scaler.scale) - _offerTextHeight((size) => size),
+        ) *
+        _offerCardHeightPerTextHeight;
     return Column(
       key: const ValueKey('home-section-offers'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -709,7 +729,7 @@ class _HomeOffersSection extends StatelessWidget {
         ),
         SizedBox(
           key: const ValueKey('home-offers-rail'),
-          height: 430,
+          height: 430 + growth,
           child: ListView.separated(
             key: const PageStorageKey<String>('home-offers-scroll'),
             scrollDirection: Axis.horizontal,

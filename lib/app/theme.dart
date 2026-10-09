@@ -266,25 +266,33 @@ const double kAppBarWordmarkHeight = 24;
 // Typography
 // ---------------------------------------------------------------------------
 
-const String _displayFamily = 'Helvetica Neue';
-const List<String> _displayFallback = <String>[
+/// Sans family bundled with the app (Inter, SIL OFL; see `assets/fonts/`).
+///
+/// Single source of the app's sans face: every sans helper and the Material
+/// theme read it. The fallbacks only matter if the bundled files fail to load.
+const String kSansFontFamily = 'Inter';
+const List<String> kSansFontFallback = <String>[
+  'SF Pro Text',
+  'Helvetica Neue',
   'Helvetica',
   'Arial',
   'sans-serif',
 ];
 
-/// Serif used by Monetta's storefront navigation and editorial section titles.
-///
-/// The live storefront uses New York as its menu face. The fallbacks preserve
-/// that high-contrast editorial character on platforms that do not ship it.
-const String kEditorialFontFamily = 'New York';
-const List<String> _editorialFallback = <String>[
+/// Serif family bundled with the app (Playfair Display, SIL OFL; see
+/// `assets/fonts/`), used by storefront navigation and editorial titles.
+const String kSerifFontFamily = 'Playfair Display';
+const List<String> kSerifFontFallback = <String>[
+  'New York',
   'Iowan Old Style',
   'Baskerville',
   'Georgia',
   'Times New Roman',
   'serif',
 ];
+
+/// Serif used by Monetta's storefront navigation and editorial section titles.
+const String kEditorialFontFamily = kSerifFontFamily;
 
 /// Editorial headline. Clean geometric sans with restrained tracking.
 TextStyle display(
@@ -294,8 +302,8 @@ TextStyle display(
   double height = 1.3,
 }) =>
     TextStyle(
-      fontFamily: _displayFamily,
-      fontFamilyFallback: _displayFallback,
+      fontFamily: kSansFontFamily,
+      fontFamilyFallback: kSansFontFallback,
       fontSize: size,
       fontWeight: weight,
       letterSpacing: size * -0.025,
@@ -310,8 +318,8 @@ TextStyle editorial(
   double height = 1.2,
 }) =>
     TextStyle(
-      fontFamily: kEditorialFontFamily,
-      fontFamilyFallback: _editorialFallback,
+      fontFamily: kSerifFontFamily,
+      fontFamilyFallback: kSerifFontFallback,
       fontSize: size,
       fontWeight: weight,
       letterSpacing: size * -0.012,
@@ -321,8 +329,8 @@ TextStyle editorial(
 
 /// Text fallback for the bitmap wordmark.
 TextStyle wordmark({double size = 19, Color? color}) => TextStyle(
-      fontFamily: _displayFamily,
-      fontFamilyFallback: _displayFallback,
+      fontFamily: kSansFontFamily,
+      fontFamilyFallback: kSansFontFallback,
       fontSize: size,
       fontWeight: FontWeight.w700,
       letterSpacing: size * 0.18,
@@ -338,6 +346,8 @@ TextStyle eyebrow({
   FontWeight weight = FontWeight.w500,
 }) =>
     TextStyle(
+      fontFamily: kSansFontFamily,
+      fontFamilyFallback: kSansFontFallback,
       fontSize: size,
       fontWeight: weight,
       letterSpacing: 1.8,
@@ -354,6 +364,8 @@ TextStyle sans({
   TextDecoration? decoration,
 }) =>
     TextStyle(
+      fontFamily: kSansFontFamily,
+      fontFamilyFallback: kSansFontFallback,
       fontSize: size,
       fontWeight: weight,
       height: height,
@@ -693,6 +705,8 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
 
   return ThemeData(
     useMaterial3: true,
+    fontFamily: kSansFontFamily,
+    fontFamilyFallback: kSansFontFallback,
     brightness: brightness,
     colorScheme: scheme,
     extensions: <ThemeExtension<dynamic>>[colors],

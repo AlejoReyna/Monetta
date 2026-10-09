@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import '../../app/catalog_store.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
+import '../../app/text_scale_policy.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
@@ -383,7 +384,8 @@ class _BrandTabs extends StatelessWidget {
     ];
 
     return SizedBox(
-      height: MediaQuery.textScalerOf(context).scale(52),
+      // The tab band holds 14pt labels, so it follows their scale.
+      height: 52 * textScaleFactorFor(MediaQuery.textScalerOf(context), 14),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
