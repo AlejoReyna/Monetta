@@ -1714,3 +1714,30 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - **`dispose`:** listener del store liberado (contador en ViewModel y pantalla), guard `_disposed` contra notificaciones tardías, ViewModel desechado en `dispose` de la `State`.
   - **Reconstrucciones:** propias 0 (ya eran 0: el navegador nunca se suscribía); total 3, igual que la base. El defecto del contador fijo queda corregido con el mismo presupuesto.
 - **Siguiente paso:** auditar la parte D (`refactor/rf-41-ficha`, `653f4b3`, reporte en `scratch/plan/rf41d_reporte.md`), luego el cierre de RF-41 y RF-42 (`6cfb02c`, reporte en `scratch/plan/rf42_reporte.md`).
+
+### 2026-10-09 · RF-41 · parte D (`ProductScreen`) · APROBADA E INTEGRADA
+
+- **Agente:** Muse Spark 3.1 (otro modelo, en `.claude/worktrees/rf-41d`, rama `refactor/rf-41-ficha` desde `1a7710c`), reporte en `scratch/plan/rf41d_reporte.md`. El orquestador re-ejecutó todo: el reporte no cuenta como evidencia.
+- **Base y commit:** `1a7710c` → `653f4b3`. Diff: 4 archivos, +689 −36 (ViewModel nuevo de 142 líneas, pantalla +60 −36, 2 archivos de prueba).
+- **Cambio:** `ProductViewModel` (`ChangeNotifier`, `ProductViewState` inmutable con `==` por valor e `identical` para producto/facetas) escucha al store y sólo notifica si el estado cambia; la pantalla lo crea en `initState` (lectura sin suscripción), lo sigue con `didUpdateWidget` → `updateProductId` (la variante elegida se conserva, como el `late` anterior) y lo desecha en `dispose`; pinta con `ListenableBuilder`. Sin `Command` (nada asíncrono, como la parte B); la compra sigue por `tryAddSelectionToBag`.
+- **Gates del auditor en la rama:**
+  - G0 → árbol limpio, 4 archivos del alcance; `git diff --check` limpio; sin `skip:` ni `// ignore`.
+  - G1 → `Formatted 379 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → `+16: All tests passed!` (11 unitarias + 5 de pantalla, todas `RF-41`).
+  - PERF-01 → ficha 1413/3 → `total=99 own=0`; las otras tres intactas (411/0, 435/0, 3/0). El archivo no fue editado por el agente.
+  - Contraste re-ejecutado por el auditor (pantalla de `1a7710c` restaurada, devuelta después desde `/tmp`, diff intacto): `+3 -2`; sólo fallan las dos que miden la mejora (listeners y 0 reconstrucciones propias); disponibilidad, otros parámetros y selección pasan con el código viejo.
+  - G4 → `+1405 ~5: All tests passed!` (= 1389 + 16). Nota honesta: el primer intento en primer plano superó el timeout de 120 s sin salida; la corrida en segundo plano completó con ese resultado.
+  - G5 → `Catálogo válido: 103 productos, 340 imágenes`; `OK: no private secret patterns found`.
+- **Verificación propia del auditor:** el `assert(store != null)` del `initState` no endurece nada: el código viejo llamaba a `StoreScope.of(context)`, que ya trae ese mismo `assert` más `!` (`app_scopes.dart:33-37`). Las suscripciones residuales (`tryAddSelectionToBag` en la primera compra, `NotificationScope` en el `build`) son preexistentes y quedaron declaradas en el reporte §7.
+- **Hallazgos:** [Baja] `identical` para producto/facetas: si el store reemplaza instancias con los mismos datos, notifica una vez de más (conservador; mismo patrón aceptado en B y C). Sin Blockers ni Altas.
+- **Evidencia para RF-43** (verificada): otro `productId` sigue la pieza y conserva la variante (sólo pasa con reconstrucciones en el sitio); `dispose` quita el listener con guard `_disposed`, antes que `PageController` y `Stopwatch`; reconstrucciones 1413/3 → 99/0, y lo que queda son `ProductCard` de rieles y `BagAction` suscritos con `StoreScope.of` (arreglo en hijos, no en inyección).
+- **Integración:** merge a `refactor/rf-41-viewmodels` (`9fa75f6`, sin conflictos: D toca `product/`, C el navegador) y techos PERF-01 de la ficha a 99/0 (`1580c62`, verificado `total=99 own=0`). Gates del tip integrado: G1 `Formatted 383 files (0 changed)`; G2 «No issues found!»; G4 `+1425 ~5: All tests passed!` (= 1409 + 16, exacto).
+
+### 2026-10-09 · RF-41 · cierre (fachadas de RF-40) · APROBADO
+
+- **Agente:** subagente general con encargo autocontenido (mecánico, sin cambios de comportamiento); no commitea. El orquestador auditó.
+- **Cambio:** borrado `catalog_query.dart` (44 líneas, 4 wrappers) y los re-exports de `search_history.dart:21` y `collection_screen.dart:32`; cada uso retargeteado al módulo puro `query/`. Diff: 8 `lib/` (7 líneas de import/export + 1 borrado) y 17 `test/` (casi todo, +1 import). Desviaciones aceptadas: quitar el import ya sin uso en `collection_deep_link_test.dart` (lo exigía `analyze`) y trailing commas en CHAR-12 al re-explotar llamadas (sólo formato).
+- **Gates del auditor:** G0 alcance exacto (25 paths), `diff --check` limpio; G1 `Formatted 382 files (0 changed)`; G2 «No issues found!»; CHAR-12 intacta (35 menciones, 28 `test(`, igual que antes; `expect` sólo re-escritos por la llamada más larga); G3 `+48: All tests passed!`; G4 `+1425 ~5: All tests passed!` (conteo inamovible); G5 catálogo válido y secretos OK. Commit `da31075`.
+- **Estado de RF-41:** código aprobado, **G6 pendiente de la persona** (compilaciones Android e iOS). RF-43 puede apoyarse en este código (precedente RF-32 sobre RF-30/31).
+- **Siguiente paso:** auditar RF-42 (`6cfb02c` + `29f6ca6`, reporte en `scratch/plan/rf42_reporte.md`), rebasarlo sobre la punta e integrar; después RF-43.
