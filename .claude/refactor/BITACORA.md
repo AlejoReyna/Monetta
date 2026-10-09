@@ -1031,3 +1031,35 @@ Ningún gate se ejecutó. En la sesión de revisión, el sandbox impidió correr
   - G6 → no aplica todavía: nada se empaqueta hasta que el paso 3 declare las fuentes.
 - **Commit:** autorizado, en `refactor/rf-17-tipografia`, sin push.
 - **Siguiente paso:** encargar UI-01 a UI-03 a `test-engineer` (paso 1, D-11).
+
+### 2026-10-08 · RF-17 · paso 1 (UI-01 a UI-03), iteraciones 1 y 2 · APROBADO
+
+- **Agente:** `test-engineer`. El orquestador auditó.
+- **Base:** `ffb2914`, rama `refactor/rf-17-tipografia`.
+- **Archivos nuevos (sin commit, porque son pruebas rojas):**
+  - `test/app/bundled_fonts_test.dart` (UI-01, 20 pruebas) y `test/app/text_scale_policy_test.dart` (UI-02, 6).
+  - `test/features/text_scale/` (UI-03, 60): `text_scale_catalog_screens_test.dart`, `text_scale_purchase_screens_test.dart` y `text_scale_account_screens_test.dart`.
+  - Soportes en `test/support/`: `bundled_fonts.dart` (registra los TTF de `assets/fonts/`), `monetta_app_harness.dart` (monta `MonettaApp` con sus bordes de plataforma falsos), `e_t1_text_scaler.dart` (el oráculo `expected(s, k)`) y `text_scale_matrix.dart` (2 teléfonos × 3 escalas, recorrido acotado y registro de cada `FlutterError`).
+  - `lib/` no cambia.
+- **Iteración 2:** hallazgos Media corregidos en las anclas de UI-03.
+  - Ficha: el ancla era `find.byType(ProductScreen)`, que siempre se cumple. Ahora es «Agregar al carrito» bajo `purchase-dock-primary`, porque esa clave también existe en la rama sin stock.
+  - Colección y Búsqueda: exigen al menos una tarjeta `product-card-*`.
+- **Gates (ejecutados por el auditor):**
+  - G0 → sólo 9 archivos nuevos en `test/`; `lib/` intacto.
+  - G1 → `Formatted 340 files (0 changed)`.
+  - G2 → «No issues found!».
+  - G3 → `+56 -30`. Cada rojo falla por la razón descrita:
+    - **UI-01, 20 rojos:** `FontManifest.json must declare "Inter"; it declares [MaterialIcons]`. Los 5 helpers de `theme.dart` usan Helvetica Neue, New York o `null`. Los 8 helpers boutique piden un peso que el manifiesto no declara. Los temas, en Android y en iOS, usan Roboto, `CupertinoSystemText` o Helvetica Neue. No hay licencia registrada.
+    - **UI-02, 4 rojos:** a k = 1.3, 2.0 y 3.1 y en el cambio en caliente hay 92, 220, 229 y 229 violaciones, porque la escala es lineal (`MediaQuery scale(14.0) = 43.4, expected 21.0 at k=3.1`). A 0.85 y 1.0 ya pasa, como se esperaba.
+    - **UI-03, 6 rojos, todos overflows reales:**
+      - 4 en `Column@lib/features/catalog/product_tile.dart:316`: Inicio @1.5 en los dos teléfonos, y Colección y Búsqueda 440×956 @1.5. El texto es Inter, registrada.
+      - 2 en Inicio @1.3: `customer_experiences_section.dart:704` (31 px) y `home_account_invitation.dart:146` (5 px). Ese texto usa `sans()`, sin familia, y hoy se dibuja con la fuente de pruebas.
+  - Suite completa → `+1174 ~5 -30`. Los 30 fallos son exactamente los rojos nuevos; las 1118 previas siguen verdes.
+- **Hallazgos:**
+  - [Media, corregido en la iteración 2] anclas débiles en UI-03.
+  - [Alta para el paso 3] Las alturas reservadas con `textScaler.scale(<alto>)` chocan con D-12: una altura grande cuenta como titular y queda topada en 1.2× mientras su texto crece 1.5×. Pasó a requisito del paso 3 en `PLAN.md`.
+  - [Media para el paso 3] Los `OFL.txt` no son assets, y `rootBundle` no puede leerlos. También pasó a requisito.
+  - [Baja] UI-02 observa pocos párrafos, porque el arnés monta un catálogo vacío. UI-03 cubre los párrafos con datos reales.
+- **Decisión del orquestador:** las pruebas de tema cubren también iOS (`CupertinoSystemText`), más allá del encargo. Se aceptan, porque la app corre en iOS.
+- **Commit:** sólo este registro y el plan. Las pruebas rojas siguen sin commit hasta el paso 3.
+- **Siguiente paso:** el paso 3 espera las capturas DEV-03 de la persona («antes de cualquier cambio de tipografía»).

@@ -288,6 +288,19 @@ Lo pidió la persona.
   - Un oráculo aplica esa misma escala para k en {1.0, 1.3, 1.5}.
 - Las tres compilan hoy, sin API nueva, y quedan sin commit hasta el paso 3.
 
+**Requisitos que el paso 1 dejó para el paso 3 (2026-10-08):**
+- Declarar los `OFL.txt` como assets, o llevar su texto en código, porque hoy `rootBundle` no los encuentra. `MonettaApp` registra la licencia al montarse.
+- Corregir las alturas reservadas con `textScaler.scale(<alto en px>)`:
+  - `product_tile.dart:126` y `:748`;
+  - `search_screen.dart:731`;
+  - `catalog_controls.dart:137`;
+  - `brand_screen.dart:386`;
+  - `home_boutique_sections.dart:257` y `:325`;
+  - `product_screen.dart:1180`.
+
+  Con D-12 una altura grande cuenta como titular y queda topada en 1.2×, mientras el texto que contiene crece hasta 1.5×. Ésa es la causa de los 4 overflows de UI-03 en `product_tile.dart:316`. La altura debe salir del tamaño escalado de cada texto, como ya hace la variante de borde a borde (`product_tile.dart:128-134`).
+- `sans()` y `eyebrow()` deben fijar familia. Los 2 overflows de Inicio a 1.3 están en texto que hoy se dibuja con la fuente de pruebas (`customer_experiences_section.dart:704` y `home_account_invitation.dart:146`); si siguen al pasar a Inter, se corrige el contenedor.
+
 ### RF-18 · Extracciones D02 y D03
 
 **Cambios:**
