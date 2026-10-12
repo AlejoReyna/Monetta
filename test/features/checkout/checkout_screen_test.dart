@@ -53,10 +53,16 @@ void main() {
     await tester.pumpWidget(_app(store, const BagScreen()));
     await tester.pump();
 
-    expect(find.text('Mi bolsa'), findsOneWidget);
     expect(find.text(product.title), findsOneWidget);
     expect(find.text('Continuar al checkout'), findsOneWidget);
 
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text('Mi bolsa'),
+      ),
+      findsOneWidget,
+    );
     final headingRow = find.byKey(const ValueKey('bag-heading-row'));
     expect(
       find.descendant(of: headingRow, matching: find.text('Mi bolsa')),

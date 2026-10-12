@@ -36,7 +36,7 @@ void main() {
     expect(shippingFor(kFreeShippingThreshold), 0);
   });
 
-  testWidgets('bag shows incentive, save-for-later and recommendations',
+  testWidgets('bag shows incentive, remove action and recommendations',
       (tester) async {
     final store = await _loadedStore();
     final product = store.products.firstWhere((item) => item.isInStock);
@@ -45,7 +45,14 @@ void main() {
     await tester.pumpWidget(_app(store, const BagScreen()));
     await tester.pump();
 
-    expect(find.text('Mi bolsa'), findsOneWidget);
+    // Header title plus the in-body heading share the label.
+    expect(
+      find.descendant(
+        of: find.byType(AppBar),
+        matching: find.text('Mi bolsa'),
+      ),
+      findsOneWidget,
+    );
     expect(
       find.byKey(const ValueKey('free-shipping-incentive')),
       findsOneWidget,
@@ -57,12 +64,9 @@ void main() {
       ),
       findsWidgets,
     );
-    // Guardar para después = favorito.
-    expect(find.text('Guardar para después'), findsOneWidget);
-    await tester.tap(find.text('Guardar para después'));
-    await tester.pump();
-    expect(store.wishlist.contains(product.id), isTrue);
-    expect(find.text('Guardado ✓'), findsOneWidget);
+    // Solo Eliminar: sin Guardar para después.
+    expect(find.text('Guardar para después'), findsNothing);
+    expect(find.text('Eliminar'), findsOneWidget);
     // Recomendaciones con ProductCard de lectura.
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('bag-recommendations')),
@@ -72,6 +76,20 @@ void main() {
       find.byKey(const ValueKey('bag-recommendations')),
       findsOneWidget,
     );
+  });
+
+  testWidgets('bag remove action empties the line', (tester) async {
+    final store = await _loadedStore();
+    final product = store.products.firstWhere((item) => item.isInStock);
+    await store.addToBag(product);
+
+    await tester.pumpWidget(_app(store, const BagScreen()));
+    await tester.pump();
+
+    await tester.tap(find.text('Eliminar'));
+    await tester.pump();
+    expect(store.bagLines, isEmpty);
+    expect(find.text('Tu bolsa está vacía'), findsOneWidget);
   });
 
   testWidgets('quantity zero removes the line; large values clamp to 10',
@@ -209,7 +227,8 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('Mi bolsa'), findsOneWidget);
+      // Header title plus the in-body heading share the label.
+      expect(find.text('Mi bolsa'), findsNWidgets(2));
       expect(tester.takeException(), isNull);
     }
     await tester.binding.setSurfaceSize(null);

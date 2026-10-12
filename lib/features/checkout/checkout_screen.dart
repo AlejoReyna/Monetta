@@ -167,6 +167,7 @@ class _BagScreenState extends State<BagScreen> {
           onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back, size: 20),
         ),
+        title: 'Mi bolsa',
       ),
       body: SafeArea(
         bottom: true,
@@ -930,9 +931,8 @@ class _BagLineTile extends StatelessWidget {
     final palette = context.boutique;
     final store = StoreScope.of(context);
     final brand = store.facetsFor(line.product.id)?.brand?.value;
-    final wishlisted = store.wishlist.contains(line.product.id);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: palette.hairline, width: 0.5),
@@ -944,8 +944,8 @@ class _BagLineTile extends StatelessWidget {
           ClipRRect(
             borderRadius: BoutiqueRadius.tile,
             child: SizedBox(
-              width: 76,
-              height: 92,
+              width: 96,
+              height: 116,
               child: _ProductImage(url: line.product.primaryImage),
             ),
           ),
@@ -957,17 +957,17 @@ class _BagLineTile extends StatelessWidget {
                 if (brand != null) ...[
                   Text(
                     brand.toUpperCase(),
-                    style: boutiqueEyebrow(size: 9, color: palette.inkMuted),
+                    style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
                   ),
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 5),
                 ],
                 Text(
                   line.product.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                   style: boutiqueText(
-                    size: 14,
-                    weight: FontWeight.w500,
+                    size: 15,
+                    weight: FontWeight.w600,
                     height: 1.35,
                   ),
                 ),
@@ -978,32 +978,20 @@ class _BagLineTile extends StatelessWidget {
                     style: boutiqueText(size: 12, color: palette.inkMuted),
                   ),
                 ],
-                const SizedBox(height: 6),
+                const SizedBox(height: 7),
                 Text(
                   kMoney.format(line.lineTotal),
-                  style: boutiqueText(size: 14, weight: FontWeight.w700),
+                  style: boutiqueText(size: 16, weight: FontWeight.w700),
                 ),
-                const SizedBox(height: 10),
+                const SizedBox(height: 12),
                 _QuantityStepper(
                   quantity: line.quantity,
                   onChanged: onChanged,
                 ),
-                const SizedBox(height: 4),
-                Wrap(
-                  spacing: 16,
-                  runSpacing: 4,
-                  crossAxisAlignment: WrapCrossAlignment.center,
-                  children: [
-                    _BagTextAction(
-                      label: 'Eliminar',
-                      onTap: onRemove,
-                    ),
-                    _BagTextAction(
-                      label: wishlisted ? 'Guardado ✓' : 'Guardar para después',
-                      onTap: () =>
-                          unawaited(store.toggleWishlist(line.product.id)),
-                    ),
-                  ],
+                const SizedBox(height: 2),
+                _BagTextAction(
+                  label: 'Eliminar',
+                  onTap: onRemove,
                 ),
               ],
             ),
@@ -1069,11 +1057,11 @@ class _QuantityStepper extends StatelessWidget {
     return Semantics(
       label: 'Cantidad $quantity',
       child: Container(
-        height: 40,
+        height: 48,
+        padding: const EdgeInsets.symmetric(horizontal: 8),
         decoration: BoxDecoration(
           border: Border.all(color: palette.hairline),
-          borderRadius: BoutiqueRadius.tile,
-          color: palette.surface,
+          borderRadius: BoutiqueRadius.control,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -1084,11 +1072,11 @@ class _QuantityStepper extends StatelessWidget {
               onPressed: () => onChanged(quantity - 1),
             ),
             ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 36),
+              constraints: const BoxConstraints(minWidth: 48),
               child: Text(
                 '$quantity',
                 textAlign: TextAlign.center,
-                style: boutiqueText(size: 13, weight: FontWeight.w600),
+                style: boutiqueText(size: 14, weight: FontWeight.w600),
               ),
             ),
             _StepperButton(
@@ -1119,8 +1107,8 @@ class _StepperButton extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      icon: Icon(icon, size: 15),
-      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+      icon: Icon(icon, size: 16),
+      constraints: const BoxConstraints.tightFor(width: 56, height: 48),
       padding: EdgeInsets.zero,
     );
   }
