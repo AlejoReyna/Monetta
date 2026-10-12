@@ -15,7 +15,6 @@ import '../../app/home_content_controller.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
-import '../../app/theme_controller.dart';
 import '../../data/media/media_url.dart';
 import '../../domain/admin_control.dart';
 import '../../domain/editorial_content.dart';
@@ -35,6 +34,7 @@ import '../boutique/boutique_tokens.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
 import '../partner/partner_hub_screen.dart';
+import '../settings/settings_sheet.dart';
 import '../welcome/welcome_gate.dart';
 import 'customer_experiences_section.dart';
 import 'customer_experiences_screen.dart';
@@ -593,6 +593,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildSideMenu(CatalogStore store) {
+    final accountState = AccountScope.maybeOf(context);
+    final localAccount = accountState?.account;
     return MonettaSideMenu(
       onSearch: _openSearch,
       onCatalog: _openFullCatalog,
@@ -608,18 +610,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         title: 'Maquillaje y skincare',
         queryTerms: const ['maquillaje', 'skincare'],
       ),
-      onToggleTheme: _toggleTheme,
+      isSignedIn: accountState?.isSignedIn ?? false,
+      accountName: localAccount?.displayName,
+      accountEmail: localAccount?.email,
+      onAccount: _openAccount,
+      onSettings: () => unawaited(openAppSettings(context)),
       onAbout: _openAbout,
       onPartner: _openPartner,
       onSupport: () => _openWhatsApp(conciergeWhatsAppUri()),
     );
-  }
-
-  void _toggleTheme() {
-    final nextMode = Theme.of(context).brightness == Brightness.dark
-        ? ThemeMode.light
-        : ThemeMode.dark;
-    unawaited(ThemeScope.of(context).setMode(nextMode));
   }
 
   /// Floating header over the full-bleed hero (restored pre-redesign

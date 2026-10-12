@@ -107,8 +107,27 @@ void main() {
     expect(menuText('TIENDA'), findsNothing);
     expect(menuText('MÁS DE MONETTA'), findsNothing);
     expect(menuText('Mis notificaciones'), findsNothing);
-    expect(menuText('Apariencia'), findsNothing);
-    expect(find.byKey(const Key('side-menu-appearance')), findsOneWidget);
+    // Links are plain icon rows with no separators; settings live behind
+    // the "Ajustes" gear row.
+    expect(menuText('Ajustes'), findsOneWidget);
+    expect(find.byKey(const Key('side-menu-settings')), findsOneWidget);
+    expect(
+      find.descendant(of: menu, matching: find.byIcon(Icons.settings_outlined)),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(
+        of: menu,
+        matching: find.byIcon(Icons.shopping_bag_outlined),
+      ),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: menu, matching: find.byType(Divider)),
+      findsNothing,
+    );
+    // Signed out: the drawer offers a sign-in entry instead of user data.
+    expect(menuText('Inicia sesión'), findsOneWidget);
     expect(find.text('Todo lo que buscas,\nen un solo lugar.'), findsNothing);
     expect(find.text('Explorar catálogo'), findsNothing);
     expect(find.text('Mi bolsa'), findsNothing);
@@ -116,12 +135,11 @@ void main() {
     expect(menuText('Nuestra historia'), findsOneWidget);
     expect(
       tester.widget<Text>(menuText('Bolsas')).style?.fontFamily,
-      kEditorialFontFamily,
+      kSansFontFamily,
     );
   });
 
-  testWidgets('side-menu theme icon switches modes without opening a picker',
-      (tester) async {
+  testWidgets('side-menu ajustes open the appearance options', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -141,15 +159,18 @@ void main() {
     await tester.tap(find.byKey(const Key('home-menu-button')));
     await tester.pumpAndSettle();
 
-    expect(find.byTooltip('Activar modo oscuro'), findsOneWidget);
-    await tester.tap(find.byKey(const Key('side-menu-appearance')));
+    await tester.tap(find.byKey(const Key('side-menu-settings')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Preferencias de la app'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('settings-appearance')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Elige cómo se ve Monetta'), findsOneWidget);
+    await tester.tap(find.byKey(const ValueKey('appearance-dark')));
     await tester.pumpAndSettle();
 
     expect(themeController.mode, ThemeMode.dark);
-    expect(find.byKey(const Key('monetta-side-menu')), findsOneWidget);
-    expect(find.byTooltip('Activar modo claro'), findsOneWidget);
-    expect(find.byIcon(Icons.dark_mode_outlined), findsOneWidget);
-    expect(find.text('Elige cómo se ve Monetta'), findsNothing);
   });
 
   testWidgets('storefront menu opens its matching internal collection',
