@@ -68,7 +68,7 @@ void main() {
     expect(find.text('ORDENAR'), findsNothing);
   });
 
-  testWidgets('search sits above a banner that leaves room to shop', (
+  testWidgets('search floats over the bottom of a full-bleed hero', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -81,20 +81,25 @@ void main() {
     await tester.pumpWidget(_app(store));
     await tester.pump();
 
+    final hero = tester.getRect(
+      find.byKey(const ValueKey('home-compact-hero')),
+    );
     final search = tester.getRect(
       find.byKey(const ValueKey('home-search-bar')),
     );
-    final banner = tester.getRect(
-      find.byKey(const ValueKey('home-compact-hero')),
-    );
 
-    expect(search.bottom, lessThanOrEqualTo(banner.top));
-    // The brief's 25–32% of the viewport, never the whole first fold.
-    expect(banner.height / 844, greaterThanOrEqualTo(0.25));
-    expect(banner.height / 844, lessThanOrEqualTo(0.32));
-    // Full bleed, as on figure 03 — the photograph runs rail to rail.
-    expect(banner.left, 0);
-    expect(banner.right, 390);
+    // Full bleed: the photograph opens at the very top of the
+    // screen — behind the status bar and the floating app bar — rail to rail.
+    expect(hero.top, 0);
+    expect(hero.left, 0);
+    expect(hero.right, 390);
+    // Tall enough to hold the headline, the action and the overlaid search.
+    expect(hero.height, greaterThan(400));
+    // The search pill floats over the hero's bottom, not above the banner.
+    expect(search.top, greaterThan(hero.top));
+    expect(search.bottom, lessThanOrEqualTo(hero.bottom));
+    expect(search.left, greaterThanOrEqualTo(hero.left));
+    expect(search.right, lessThanOrEqualTo(hero.right));
     expect(find.text('Ver novedades'), findsOneWidget);
   });
 
@@ -151,7 +156,7 @@ void main() {
     );
   });
 
-  testWidgets('the header is compact and opaque from the first frame', (
+  testWidgets('the header floats transparent over the full-bleed hero', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -165,10 +170,12 @@ void main() {
 
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     expect(appBar.toolbarHeight, 60);
-    expect(appBar.backgroundColor, isNot(Colors.transparent));
+    // Transparent over the photograph, not opaque grey: the hero
+    // opens behind the status bar and the bar.
+    expect(appBar.backgroundColor, Colors.transparent);
     expect(
       tester.widget<Scaffold>(find.byType(Scaffold)).extendBodyBehindAppBar,
-      isFalse,
+      isTrue,
     );
 
     final wordmark = find.descendant(
@@ -179,9 +186,20 @@ void main() {
       tester.widget<MonettaWordmark>(wordmark).height,
       kAppBarWordmarkHeight,
     );
+
+    // Once the hero scrolls away the bar takes its grey surface.
+    await tester.drag(
+      find.byKey(const ValueKey('home-discovery-header')),
+      const Offset(0, -600),
+    );
+    await tester.pump();
+    expect(
+      tester.widget<AppBar>(find.byType(AppBar)).backgroundColor,
+      isNot(Colors.transparent),
+    );
   });
 
-  testWidgets('the in-page search field hands over to the app-bar icon', (
+  testWidgets('the hero search field hands over to the app-bar icon', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());

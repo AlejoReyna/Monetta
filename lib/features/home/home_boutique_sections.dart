@@ -28,13 +28,34 @@ final CampaignMedia kHomeBannerCampaign = CampaignMedia(
   posterAsset: 'assets/images/campaign_olive.jpg',
 );
 
+/// Height of the transparent app bar that floats over the hero. Kept in one
+/// place so the bleed behind the system chrome always matches the bar.
+const double _kHeroAppBarHeight = 60;
+
+/// Space the hero keeps clear at the top so its image slides behind the
+/// status bar and the transparent app bar: the bar floats over the
+/// photograph until the shopper scrolls.
+double homeHeroTopBleed(BuildContext context) =>
+    MediaQuery.paddingOf(context).top + _kHeroAppBarHeight;
+
 /// Banner height as a share of the viewport.
 ///
-/// The brief's 25–32% starting point, landed at 29% and clamped so a small
-/// phone still gets a banner worth looking at and a tall one does not hand the
-/// whole first fold to a single image.
+/// Tall enough to hold the headline, the action and the search
+/// field stacked inside the photograph: copy (3-line 26pt headline) + action
+/// (48pt) + search block (52pt field plus its insets) + breathing room. This
+/// is the image area *below* the top bleed; the hero's full height adds
+/// [homeHeroTopBleed].
 double homeBannerHeight(BuildContext context) =>
-    (MediaQuery.sizeOf(context).height * 0.29).clamp(200.0, 320.0);
+    (MediaQuery.sizeOf(context).height * 0.52).clamp(300.0, 380.0);
+
+/// Full hero height: banner image plus the top bleed behind the system chrome.
+double homeHeroHeight(BuildContext context) =>
+    homeBannerHeight(context) + homeHeroTopBleed(context);
+
+/// Vertical room the search field occupies inside the hero: its own insets
+/// plus the 52pt capsule. The banner copy keeps clear of this strip.
+const double _kHeroSearchClearance =
+    BoutiqueSpace.control + BoutiqueSpace.md + BoutiqueSpace.lg;
 
 // ---------------------------------------------------------------------------
 // Search
@@ -113,15 +134,37 @@ class HomeEditorialBanner extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    // Full bleed, square to the edges — figure 03 runs the photograph from
-    // rail to rail under the header, not as an inset card.
+    final topBleed = homeHeroTopBleed(context);
+    // Full bleed, edge to edge and behind the status bar plus the app bar —
+    // the photograph runs from the very top of the screen, with the
+    // wordmark floating over it until scroll gives the bar a surface. This is
+    // the pre-redesign full-bleed hero, keeping the redesign's copy.
     return SizedBox(
       key: const ValueKey('home-compact-hero'),
-      height: homeBannerHeight(context),
+      height: homeHeroHeight(context),
       child: Stack(
         fit: StackFit.expand,
         children: [
           MonettaVideo(campaign: kHomeBannerCampaign, playing: playing),
+          // Top scrim: keeps the status icons and the wordmark readable
+          // while the bar is still transparent (restored from the
+          // pre-redesign full-bleed hero).
+          const IgnorePointer(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  colors: <Color>[
+                    Color(0x40000000),
+                    Color(0x08000000),
+                    Color(0xA3000000),
+                  ],
+                  stops: <double>[0, .35, 1],
+                ),
+              ),
+            ),
+          ),
           // Left-weighted scrim: the asset keeps its subject right of centre,
           // so the copy column stays readable without dimming the piece.
           const IgnorePointer(
@@ -140,15 +183,14 @@ class HomeEditorialBanner extends StatelessWidget {
               ),
             ),
           ),
-          // Vertical padding is lg, not xl: copy (3-line 26pt headline) +
-          // action (48pt) + 2×24pt padding peaks near 205pt and overflowed
-          // the 200pt minimum banner on short viewports by 5pt.
+          // The copy sits above the overlaid search field: top starts below
+          // the floating bar, bottom clears the search strip.
           Padding(
-            padding: const EdgeInsets.fromLTRB(
+            padding: EdgeInsets.fromLTRB(
               BoutiqueSpace.gutter,
-              BoutiqueSpace.lg,
+              topBleed + BoutiqueSpace.lg,
               BoutiqueSpace.gutter,
-              BoutiqueSpace.lg,
+              _kHeroSearchClearance + BoutiqueSpace.lg,
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,

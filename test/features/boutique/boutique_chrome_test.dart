@@ -274,8 +274,21 @@ Future<void> _mountContact(WidgetTester tester, ThemeData theme) async {
   await _settle(tester);
 }
 
+/// Scrolls the home past its full-bleed hero so the floating bar takes its
+/// solid surface — the home equivalent of scrolling a collection banner away.
+Future<void> _scrollHomePastHero(WidgetTester tester) async {
+  await tester.drag(
+    find.byKey(const ValueKey('home-discovery-header')),
+    const Offset(0, -700),
+  );
+  await _settle(tester);
+}
+
 final _screens = <_Screen>[
-  const _Screen('Home', _mountHome),
+  // Home is not in this opaque-bar loop on purpose: its hero is full-bleed,
+  // so the bar floats transparent over the photograph at rest
+  // and only turns solid once the hero scrolls away. Dedicated Home cases
+  // below pin both states.
   const _Screen('Catálogo', _mountCatalog),
   const _Screen('Colección (sólido)', _mountCollection),
   const _Screen('Marca', _mountBrand),
@@ -394,11 +407,47 @@ void main() {
         expect(_topBarColor(tester), Colors.transparent);
       },
     );
+
+    testWidgets(
+      'UI-THEME-04 (caracterización) Home: the bar stays transparent over '
+      'the full-bleed hero',
+      (tester) async {
+        await _mountHome(tester, light);
+
+        final problems = <String>[
+          if (_topBarColor(tester) != Colors.transparent)
+            'top bar painted ${_hex(_topBarColor(tester))}, '
+                'expected transparent over the hero',
+          if (_scaffoldColor(tester) != _white)
+            'scaffold painted ${_hex(_scaffoldColor(tester))}, '
+                'expected ${_hex(_white)}',
+        ];
+        expect(problems, isEmpty);
+      },
+    );
+
+    testWidgets(
+      'UI-THEME-04 (objetivo) Home: the bar turns solid '
+      '${_hex(_barGrey)} once the hero has scrolled away',
+      (tester) async {
+        await _mountHome(tester, light);
+        await _scrollHomePastHero(tester);
+
+        final problems = <String>[
+          if (_topBarColor(tester) != _barGrey)
+            'solid bar painted ${_hex(_topBarColor(tester))}, '
+                'expected ${_hex(_barGrey)}',
+        ];
+        expect(problems, isEmpty);
+      },
+    );
   });
 
   group('UI-THEME-05 light: bottom bar matches the top bar', () {
     final withBottomBar = <_Screen>[
-      const _Screen('Home', _mountHome),
+      // Home is covered by its own case below: over the full-bleed hero the
+      // top bar is transparent at rest, so it only matches the bottom bar
+      // once the hero has scrolled away.
       const _Screen('Catálogo', _mountCatalog),
       const _Screen('Colección', _mountCollection),
     ];
@@ -422,11 +471,36 @@ void main() {
         },
       );
     }
+
+    testWidgets(
+      'UI-THEME-05 (objetivo) Home: bottom bar ${_hex(_barGrey)}, equal to '
+      'the top bar once the hero has scrolled away',
+      (tester) async {
+        await _mountHome(tester, light);
+
+        expect(_bottomBarColor(tester), _barGrey);
+        expect(_topBarColor(tester), Colors.transparent);
+
+        await _scrollHomePastHero(tester);
+
+        final bottom = _bottomBarColor(tester);
+        final top = _topBarColor(tester);
+        final problems = <String>[
+          if (bottom != _barGrey)
+            'bottom bar painted ${_hex(bottom)}, expected ${_hex(_barGrey)}',
+          if (bottom != top)
+            'bottom bar ${_hex(bottom)} differs from the top bar '
+                '${_hex(top)}',
+        ];
+        expect(problems, isEmpty);
+      },
+    );
   });
 
   group('UI-THEME-06 dark: unchanged', () {
     final subset = <_Screen>[
-      const _Screen('Home', _mountHome),
+      // Home is covered by its own case below: over the full-bleed hero the
+      // bar floats transparent at rest and takes the dark canvas on scroll.
       const _Screen('Catálogo', _mountCatalog),
       const _Screen('Producto', _mountProduct),
       const _Screen('Cuenta', _mountAccount),
@@ -443,6 +517,21 @@ void main() {
         },
       );
     }
+
+    testWidgets(
+      'UI-THEME-06 (caracterización) Home: transparent over the hero, dark '
+      'canvas once it scrolls away',
+      (tester) async {
+        await _mountHome(tester, dark);
+
+        expect(_topBarColor(tester), Colors.transparent);
+        expect(_scaffoldColor(tester), MonettaColors.dark.canvas);
+
+        await _scrollHomePastHero(tester);
+
+        expect(_topBarColor(tester), MonettaColors.dark.canvas);
+      },
+    );
 
     for (final screen in <_Screen>[
       const _Screen('Home', _mountHome),

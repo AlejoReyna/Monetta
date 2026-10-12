@@ -43,11 +43,6 @@ import 'home_boutique_sections.dart';
 
 const int _kNewestCount = 8;
 
-/// Search field height plus the padding around it — used only to decide when
-/// the banner film has scrolled out of view.
-const double _kSearchFieldBlockHeight =
-    BoutiqueSpace.control + BoutiqueSpace.md + BoutiqueSpace.lg;
-
 /// The redesign's opening rhythm: what is new, then how to shop it, then the
 /// editorial tail. Applied only when the storefront still carries the bundled
 /// default order — see `_resolveSectionOrder`.
@@ -170,6 +165,36 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         if (!mounted) return;
         setState(() => _searchPrompt = nextSearchPrompt());
       }),
+    );
+  }
+
+  /// The search field with its scroll-driven handover to the app-bar icon.
+  /// Shared by the hero overlay and the in-page fallback used when
+  /// the owner hides the hero.
+  Widget _buildSearchFieldTransition() {
+    return ValueListenableBuilder<double>(
+      valueListenable: _collapse,
+      builder: (context, value, child) {
+        final visibility = 1 -
+            Curves.easeInCubic.transform(
+              ((value - .08) / .78).clamp(0.0, 1.0),
+            );
+        return IgnorePointer(
+          ignoring: visibility < .25,
+          child: ExcludeSemantics(
+            excluding: visibility < .25,
+            child: Opacity(
+              key: const ValueKey('home-search-bar-transition'),
+              opacity: visibility,
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: HomeSearchField(
+        onTap: _openSearch,
+        prompt: _searchPrompt,
+      ),
     );
   }
 
@@ -354,7 +379,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final sections = _resolveSectionOrder(homeContent, storefront);
     final body = LayoutBuilder(
       builder: (context, constraints) {
-        _heroHeight = homeBannerHeight(context) + _kSearchFieldBlockHeight;
+        _heroHeight = homeHeroHeight(context);
         return ListView(
           controller: _scroll,
           padding: EdgeInsets.zero,
@@ -363,38 +388,30 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               key: const ValueKey('home-discovery-header'),
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ValueListenableBuilder<double>(
-                  valueListenable: _collapse,
-                  builder: (context, value, child) {
-                    final visibility = 1 -
-                        Curves.easeInCubic.transform(
-                          ((value - .08) / .78).clamp(0.0, 1.0),
-                        );
-                    return IgnorePointer(
-                      ignoring: visibility < .25,
-                      child: ExcludeSemantics(
-                        excluding: visibility < .25,
-                        child: Opacity(
-                          key: const ValueKey('home-search-bar-transition'),
-                          opacity: visibility,
-                          child: child,
+                if (showHero)
+                  // Full-bleed hero, restored from the pre-redesign header:
+                  // the photograph opens at the very top of the screen,
+                  // behind the status bar and the floating app bar, with the
+                  // search field overlaid at its bottom.
+                  Stack(
+                    children: [
+                      ValueListenableBuilder<bool>(
+                        valueListenable: _heroPlaying,
+                        builder: (context, playing, _) => HomeEditorialBanner(
+                          playing: playing,
+                          onOpenNew: _openFullCatalog,
                         ),
                       ),
-                    );
-                  },
-                  child: HomeSearchField(
-                    onTap: _openSearch,
-                    prompt: _searchPrompt,
-                  ),
-                ),
-                if (showHero)
-                  ValueListenableBuilder<bool>(
-                    valueListenable: _heroPlaying,
-                    builder: (context, playing, _) => HomeEditorialBanner(
-                      playing: playing,
-                      onOpenNew: _openFullCatalog,
-                    ),
-                  ),
+                      Positioned(
+                        left: 0,
+                        right: 0,
+                        bottom: 0,
+                        child: _buildSearchFieldTransition(),
+                      ),
+                    ],
+                  )
+                else
+                  _buildSearchFieldTransition(),
               ],
             ),
             for (var index = 0; index < sections.length; index++)
@@ -458,10 +475,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       builder: (context, collapse, child) {
         return Scaffold(
           extendBody: true,
+          // Restored full-bleed hero: the photograph opens behind the status
+          // bar and the app bar, until scroll gives the bar a surface.
+          extendBodyBehindAppBar: showHero,
           backgroundColor: context.boutique.canvas,
           drawer: drawer,
           drawerScrimColor: context.monettaColors.scrim,
-          appBar: _buildAppBar(searchCollapse: showHero ? collapse : 1),
+          appBar: _buildAppBar(
+            searchCollapse: showHero ? collapse : 1,
+            surfaceCollapse: showHero ? collapse : 1,
+          ),
           body: child,
           bottomNavigationBar: bottomNavigation,
         );
@@ -599,36 +622,69 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     unawaited(ThemeScope.of(context).setMode(nextMode));
   }
 
-  /// Compact header: menu, wordmark, and the search action that takes over
-  /// once the in-page field has scrolled away. Opaque from the first frame —
-  /// the banner is now an inset card, not a full-bleed hero to float over.
-  PreferredSizeWidget _buildAppBar({double searchCollapse = 1}) {
+  /// Floating header over the full-bleed hero (restored pre-redesign
+  /// behavior): transparent with white actions over the photograph, taking the
+  /// bar's grey surface and ink actions once the hero has scrolled away.
+  PreferredSizeWidget _buildAppBar({
+    double searchCollapse = 1,
+    double surfaceCollapse = 1,
+  }) {
     final palette = context.boutique;
     final searchProgress = Curves.easeOutCubic.transform(
       ((searchCollapse - .34) / .66).clamp(0.0, 1.0),
     );
+    final surfaceProgress = Curves.easeOutCubic.transform(
+      ((surfaceCollapse - .08) / .72).clamp(0.0, 1.0),
+    );
+    final foreground =
+        Color.lerp(Colors.white, palette.ink, surfaceProgress)!;
     final dark = Theme.of(context).brightness == Brightness.dark;
+    final collapsedBrightness = dark ? Brightness.light : Brightness.dark;
     return AppBar(
       automaticallyImplyLeading: false,
       toolbarHeight: 60,
-      backgroundColor: palette.bar,
+      backgroundColor: Color.lerp(
+        Colors.transparent,
+        palette.bar,
+        surfaceProgress,
+      ),
       surfaceTintColor: Colors.transparent,
-      foregroundColor: palette.ink,
-      iconTheme: IconThemeData(color: palette.ink, size: 22),
+      foregroundColor: foreground,
+      iconTheme: IconThemeData(color: foreground, size: 22),
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: dark ? Brightness.light : Brightness.dark,
-        statusBarBrightness: dark ? Brightness.dark : Brightness.light,
+        statusBarIconBrightness:
+            surfaceProgress < .55 ? Brightness.light : collapsedBrightness,
+        statusBarBrightness:
+            surfaceProgress < .55 ? Brightness.dark : Theme.of(context).brightness,
       ),
       centerTitle: true,
       titleSpacing: 0,
       leadingWidth: 56,
       leading: Builder(
-        builder: (scaffoldContext) => IconButton(
-          key: const Key('home-menu-button'),
-          tooltip: 'Abrir menú',
-          onPressed: () => Scaffold.of(scaffoldContext).openDrawer(),
-          icon: const Icon(Icons.menu_rounded, size: 22),
+        builder: (scaffoldContext) => Padding(
+          padding: const EdgeInsets.all(9),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: Colors.black.withValues(
+                alpha: .42 * (1 - surfaceProgress),
+              ),
+              border: Border.all(
+                color: Colors.white.withValues(
+                  alpha: .48 * (1 - surfaceProgress),
+                ),
+                width: .5,
+              ),
+            ),
+            child: IconButton(
+              key: const Key('home-menu-button'),
+              tooltip: 'Abrir menú',
+              padding: EdgeInsets.zero,
+              onPressed: () => Scaffold.of(scaffoldContext).openDrawer(),
+              icon: const Icon(Icons.menu_rounded, size: 22),
+            ),
+          ),
         ),
       ),
       title: const MonettaWordmark.appBar(),
@@ -653,7 +709,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ],
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(0.5),
-        child: Divider(height: 0.5, color: palette.hairline),
+        child: Divider(
+          height: 0.5,
+          color: palette.hairline.withValues(
+            alpha: palette.hairline.a * surfaceProgress,
+          ),
+        ),
       ),
     );
   }
