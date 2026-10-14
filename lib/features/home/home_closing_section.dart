@@ -89,6 +89,7 @@ class HomeClosingSection extends StatelessWidget {
     this.onOpenUrl,
     this.platform,
     this.expressPayLogosEnabled = kExpressPayLogosEnabled,
+    this.paymentLogoRowEnabled = kPaymentLogoRowEnabled,
     super.key,
   });
 
@@ -103,6 +104,9 @@ class HomeClosingSection extends StatelessWidget {
 
   /// Test seam. Production uses [kExpressPayLogosEnabled].
   final bool expressPayLogosEnabled;
+
+  /// Test seam. Production uses [kPaymentLogoRowEnabled].
+  final bool paymentLogoRowEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -127,6 +131,7 @@ class HomeClosingSection extends StatelessWidget {
                 onRegister: onRegister,
                 platform: platform,
                 expressPayLogosEnabled: expressPayLogosEnabled,
+                paymentLogoRowEnabled: paymentLogoRowEnabled,
                 onOpenWhatsApp: onOpenWhatsApp,
                 onOpenUrl: onOpenUrl,
                 links: _links(),
@@ -161,6 +166,7 @@ class _ClosingColumn extends StatelessWidget {
     required this.onRegister,
     required this.links,
     required this.expressPayLogosEnabled,
+    required this.paymentLogoRowEnabled,
     this.platform,
     this.onOpenWhatsApp,
     this.onOpenUrl,
@@ -171,6 +177,7 @@ class _ClosingColumn extends StatelessWidget {
   final VoidCallback onRegister;
   final TargetPlatform? platform;
   final bool expressPayLogosEnabled;
+  final bool paymentLogoRowEnabled;
   final VoidCallback? onOpenWhatsApp;
   final ValueChanged<Uri>? onOpenUrl;
   final List<HomeSocialLink> links;
@@ -226,10 +233,12 @@ class _ClosingColumn extends StatelessWidget {
           const SizedBox(height: 36),
           _Promises(wide: wide),
           const SizedBox(height: 28),
-          HomePaymentMethodRow(
-            platform: platform,
-            expressPayLogosEnabled: expressPayLogosEnabled,
-          ),
+          paymentLogoRowEnabled
+              ? HomePaymentMethodRow(
+                  platform: platform,
+                  expressPayLogosEnabled: expressPayLogosEnabled,
+                )
+              : const HomePaymentMethodsLine(),
           const SizedBox(height: 8),
           TextButton(
             key: const ValueKey<String>('home-whatsapp-link'),

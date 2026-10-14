@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/theme.dart';
+import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/home/home_closing_section.dart';
 import 'package:monetta_app/features/home/home_payment_methods.dart';
 
@@ -11,6 +12,7 @@ void main() {
     bool isSignedIn = false,
     TargetPlatform? platform,
     bool expressPayLogosEnabled = kExpressPayLogosEnabled,
+    bool paymentLogoRowEnabled = kPaymentLogoRowEnabled,
     VoidCallback? onOpenWhatsApp,
     ValueChanged<Uri>? onOpenUrl,
   }) {
@@ -26,6 +28,7 @@ void main() {
               isSignedIn: isSignedIn,
               platform: platform ?? TargetPlatform.android,
               expressPayLogosEnabled: expressPayLogosEnabled,
+              paymentLogoRowEnabled: paymentLogoRowEnabled,
               onOpenWhatsApp: onOpenWhatsApp,
               onOpenUrl: onOpenUrl,
             ),
@@ -78,6 +81,12 @@ void main() {
     expect(kHomeOriginalsPromise, 'Originales garantizados');
     expect(kHomePaymentLogoHeight, 24);
     expect(kExpressPayLogosEnabled, isFalse);
+    expect(kPaymentLogoRowEnabled, isFalse);
+    expect(
+      '$kHomePaymentMethodsLineLead'
+      ' tarjeta de crédito o débito, PayPal, Mercado Pago y transferencia.',
+      kHomePaymentMethodsLine,
+    );
     expect(
       {
         for (final method in kHomePaymentMethods)
@@ -156,7 +165,12 @@ void main() {
     phone(tester, size: const Size(800, 2000));
     final semantics = tester.ensureSemantics();
     await tester.pumpWidget(
-      app(onRegister: () {}, width: 320, platform: TargetPlatform.android),
+      app(
+        onRegister: () {},
+        width: 320,
+        platform: TargetPlatform.android,
+        paymentLogoRowEnabled: true,
+      ),
     );
 
     expect(tester.takeException(), isNull);
@@ -255,6 +269,49 @@ void main() {
     semantics.dispose();
   });
 
+  testWidgets('logo row off shows the payment sentence', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(app(onRegister: () {}));
+
+    expect(find.byKey(const ValueKey('home-payment-strip')), findsNothing);
+    expect(find.byKey(const ValueKey('home-payment-logo-visa')), findsNothing);
+    final line = tester.widget<Text>(
+      find.byKey(const ValueKey('home-payment-methods-line')),
+    );
+    final span = line.textSpan! as TextSpan;
+    expect(line.textAlign, TextAlign.center);
+    expect(line.maxLines, 2);
+    expect(span.toPlainText(), kHomePaymentMethodsLine);
+    expect(span.style!.fontFamily, kBoutiqueSansFamily);
+    expect(span.style!.fontSize, 13);
+    expect(span.style!.color, const Color(0xFF6B6660));
+    final lead = span.children!.first as TextSpan;
+    expect(lead.text, kHomePaymentMethodsLineLead);
+    expect(lead.style!.fontWeight, FontWeight.w500);
+  });
+
+  testWidgets('logo row on hides the payment sentence', (tester) async {
+    phone(tester);
+    await tester.pumpWidget(
+      app(onRegister: () {}, paymentLogoRowEnabled: true),
+    );
+
+    expect(
+      find.byKey(const ValueKey('home-payment-methods-line')),
+      findsNothing,
+    );
+    expect(find.text(kHomePaymentMethodsLine), findsNothing);
+    expect(find.byKey(const ValueKey('home-payment-strip')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('home-payment-logo-apple_pay')),
+      findsNothing,
+    );
+    expect(
+      find.byKey(const ValueKey('home-payment-logo-google_pay')),
+      findsNothing,
+    );
+  });
+
   testWidgets('flag off hides Apple Pay and Google Pay on iOS and Android', (
     tester,
   ) async {
@@ -264,7 +321,11 @@ void main() {
       TargetPlatform.iOS,
     ]) {
       await tester.pumpWidget(
-        app(onRegister: () {}, platform: platform),
+        app(
+          onRegister: () {},
+          platform: platform,
+          paymentLogoRowEnabled: true,
+        ),
       );
       expect(
         find.byKey(const ValueKey('home-payment-logo-apple_pay')),
@@ -284,6 +345,7 @@ void main() {
         onRegister: () {},
         platform: TargetPlatform.android,
         expressPayLogosEnabled: true,
+        paymentLogoRowEnabled: true,
       ),
     );
     expect(
@@ -300,6 +362,7 @@ void main() {
         onRegister: () {},
         platform: TargetPlatform.iOS,
         expressPayLogosEnabled: true,
+        paymentLogoRowEnabled: true,
       ),
     );
     expect(
@@ -341,6 +404,7 @@ void main() {
         onRegister: () {},
         platform: TargetPlatform.android,
         expressPayLogosEnabled: true,
+        paymentLogoRowEnabled: true,
       ),
     );
     expect(find.text('Pay'), findsOneWidget);

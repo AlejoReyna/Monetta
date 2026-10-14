@@ -13,6 +13,8 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../boutique/boutique_tokens.dart';
+
 /// Every mark in the row is this tall. Clear space is a multiple of it.
 const double kHomePaymentLogoHeight = 24;
 
@@ -22,6 +24,16 @@ const double kHomePaymentLogoHeight = 24;
 /// entry. When it is true, [kHomePaymentMethods] still decides the row:
 /// Apple Pay on iOS, Google Pay on Android.
 const bool kExpressPayLogosEnabled = false;
+
+/// Drawn payment marks. Off shows one sentence; on shows the logo row.
+const bool kPaymentLogoRowEnabled = false;
+
+/// Lead of [kHomePaymentMethodsLine], set in medium weight.
+const String kHomePaymentMethodsLineLead = 'Pagos seguros con';
+
+/// Shown in place of the logo row while [kPaymentLogoRowEnabled] is false.
+const String kHomePaymentMethodsLine =
+    'Pagos seguros con tarjeta de crédito o débito, PayPal, Mercado Pago y transferencia.';
 
 const Color kPaymentMonochrome = Color(0xFF8A8A8A);
 
@@ -178,6 +190,34 @@ String homePaymentMethodsLabel(List<HomePaymentMethod> methods) {
   final labels = methods.map((method) => method.label).toList(growable: false);
   final head = labels.sublist(0, labels.length - 1).join(', ');
   return 'Métodos de pago: $head y ${labels.last}';
+}
+
+class HomePaymentMethodsLine extends StatelessWidget {
+  const HomePaymentMethodsLine({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = context.boutique.inkMuted;
+    return Text.rich(
+      TextSpan(
+        style: boutiqueText(size: 13, color: color),
+        children: const <InlineSpan>[
+          TextSpan(
+            text: kHomePaymentMethodsLineLead,
+            style: TextStyle(fontWeight: FontWeight.w500),
+          ),
+          TextSpan(
+            text:
+                ' tarjeta de crédito o débito, PayPal, Mercado Pago y transferencia.',
+          ),
+        ],
+      ),
+      key: const ValueKey<String>('home-payment-methods-line'),
+      textAlign: TextAlign.center,
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
+    );
+  }
 }
 
 class HomePaymentMethodRow extends StatelessWidget {
