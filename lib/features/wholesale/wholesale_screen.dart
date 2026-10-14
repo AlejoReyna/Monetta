@@ -7,6 +7,8 @@
 library;
 
 import 'package:flutter/material.dart';
+
+import '../navigation/monetta_page_header.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shopper_copy.dart';
@@ -35,7 +37,10 @@ class WholesaleScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
     return Scaffold(
-      appBar: AppBar(title: const MonettaWordmark.appBar()),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Mayoreo',
+      ),
       body: ListView(
         key: const ValueKey('wholesale-scroll'),
         padding: EdgeInsets.zero,

@@ -26,7 +26,7 @@ import 'package:monetta_app/main.dart';
 
 const Key kHeaderTitleKey = Key('product-header-title');
 const Key kHeaderBackKey = Key('product-header-back');
-const Key kHeaderFavoriteKey = Key('product-header-favorite');
+const Key kHeaderFavoriteKey = Key('product-gallery-favorite');
 const Key kDockKey = Key('purchase-dock');
 const Key kDockPrimaryKey = Key('purchase-dock-primary');
 const Key kRestockKey = ValueKey<String>('create-restock-alert');

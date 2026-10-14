@@ -22,6 +22,8 @@ import 'app/admin_notification_controller.dart';
 import 'app/app_build_metadata.dart';
 import 'app/catalog_store.dart';
 import 'app/cart_controller.dart';
+import 'app/checkout_buyer_identity.dart';
+import 'app/checkout_return_router.dart';
 import 'app/editorial_content_controller.dart';
 import 'app/featured_catalog_controller.dart';
 import 'app/font_licenses.dart';
@@ -69,6 +71,9 @@ import 'data/repositories/order_history_repository.dart';
 import 'data/reviews/loox_reviews_repository.dart';
 import 'data/shopify/catalog_sync.dart' as shopify;
 import 'data/shopify/cart_attribution.dart';
+import 'data/shopify/cart/cart_repository.dart';
+import 'data/shopify/cart/cart_session_store.dart';
+import 'data/shopify/cart/checkout_launcher.dart';
 import 'data/shopify/editorial_content_repository.dart';
 import 'data/shopify/featured_catalog_repository.dart';
 import 'data/shopify/home_content_repository.dart';
@@ -76,11 +81,14 @@ import 'data/shopify/http_storefront_transport.dart';
 import 'data/shopify/storefront_client.dart';
 import 'data/shopify/storefront_config.dart';
 import 'features/catalog/collection_screen.dart';
+import 'features/checkout/checkout_screen.dart';
 import 'features/catalog/search_history.dart';
 import 'features/catalog/search_history_persistence.dart';
 import 'features/home/home_screen.dart';
 import 'features/product/product_screen.dart';
 import 'features/welcome/welcome_gate.dart';
+import 'platform/checkout_return_link_receiver.dart';
+import 'platform/external_checkout_opener.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -783,11 +791,99 @@ class _MonettaAppState extends State<MonettaApp> {
     // `_openNotificationRoute`.
     unawaited(_notifications!.restore());
     await _store.waitForInitialCatalog();
+    _attachReturnLinkReceiver();
   }
 
   /// Latest notification route that arrived before the Navigator existed.
   NotificationRouteData? _pendingNotificationRoute;
   bool _pendingNotificationRouteScheduled = false;
+
+  /// Offsite-payment return links (Fase 5). Attached once the cart stack,
+  /// account state and Navigator key exist; detached in [dispose].
+  CheckoutReturnLinkReceiver? _returnLinkReceiver;
+
+  void _attachReturnLinkReceiver() {
+    final composition = _shopifyCart;
+    if (composition == null || _returnLinkReceiver != null) return;
+    final router = CheckoutReturnRouter(
+      policy: composition.returnPolicy,
+      onResumeCheckout: _resumeCheckoutAfterReturn,
+      onOpenBag: _openBagAfterReturn,
+      externalOpener: const UrlLauncherExternalCheckoutOpener(),
+    );
+    final receiver = CheckoutReturnLinkReceiver(router: router);
+    _returnLinkReceiver = receiver;
+    unawaited(receiver.attach());
+  }
+
+  /// Re-presents the same-scope checkout after an offsite return.
+  ///
+  /// The incoming URL only triggers this call: presentation reconciles the
+  /// live bag, refreshes the checkout URL and waits for Shopify's real
+  /// terminal event. Coming back from a provider never counts as paid;
+  /// `cancelled`/`failed` keep the bag, `completed` cleans it once through
+  /// the coordinator.
+  Future<CheckoutResult> _resumeCheckoutAfterReturn(
+    ValidatedCheckoutUrl _,
+  ) async {
+    final composition = _shopifyCart;
+    if (composition == null) {
+      return const CheckoutFailed(
+        code: CheckoutFailureCode.unavailable,
+        userMessage: 'El checkout seguro no está disponible en esta '
+            'configuración. Tu bolsa se conserva.',
+      );
+    }
+    final shopDomain = StorefrontConfig.fromEnvironment().shopDomain.trim();
+    final account = _account.account;
+    final scope = account == null
+        ? CartSessionScope.guest(shopDomain: shopDomain)
+        : CartSessionScope.authenticated(
+            shopDomain: shopDomain,
+            localAccountId: account.localAccountId,
+          );
+    final intent = [
+      for (final line in _store.bagLines)
+        LocalCartIntent(variantId: line.variant.id, quantity: line.quantity),
+    ];
+    final buyerIdentity = await resolveCheckoutBuyerIdentity(
+      account: account,
+      shopifyAccessToken: _account.accessTokenForShopifyCheckout,
+    );
+    final result = await composition.checkout.present(
+      controller: composition.controller,
+      scope: scope,
+      localIntent: intent,
+      buyerIdentity: buyerIdentity,
+      onCompleted: (purchase) async {
+        await _store.applyCheckoutPurchase(purchase);
+        await _account.loadOrders();
+      },
+    );
+    switch (result) {
+      case CheckoutCancelled():
+        _showReturnLinkNotice('Checkout cancelado. Tu bolsa se conserva.');
+      case CheckoutFailed(:final userMessage):
+        _showReturnLinkNotice(userMessage);
+      case CheckoutCompleted():
+        break;
+    }
+    return result;
+  }
+
+  Future<void> _openBagAfterReturn() async {
+    final context = _navigatorKey.currentContext;
+    if (context == null || !mounted) return;
+    await openBag(context);
+  }
+
+  void _showReturnLinkNotice(String message) {
+    final context = _navigatorKey.currentContext;
+    if (context == null || !mounted) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
 
   void _openNotificationRoute(NotificationRouteData route) {
     final navigator = _navigatorKey.currentState;
@@ -885,6 +981,8 @@ class _MonettaAppState extends State<MonettaApp> {
     _customerOrdersService?.close();
     _customerApiDiscovery?.close();
     _adminClient?.close();
+    _returnLinkReceiver?.detach();
+    _returnLinkReceiver = null;
     _admin?.dispose();
     _notifications?.dispose();
     _adminNotifications?.dispose();

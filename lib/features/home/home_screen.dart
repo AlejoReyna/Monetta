@@ -31,7 +31,7 @@ import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../product/quick_view.dart';
 import '../boutique/boutique_tokens.dart';
-import '../navigation/monetta_bottom_navigation.dart';
+import '../navigation/monetta_floating_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
 import '../partner/partner_hub_screen.dart';
 import '../settings/settings_sheet.dart';
@@ -69,12 +69,10 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _scroll = ScrollController();
-  // Keep scroll-driven state out of the (image-heavy) home body. The app bar
-  // and hero playback each listen to only the value they need.
+  // Keep scroll-driven state out of the (image-heavy) home body: only the
+  // app bar and the search handover listen to it.
   final ValueNotifier<double> _collapse = ValueNotifier<double>(0);
-  final ValueNotifier<bool> _heroPlaying = ValueNotifier<bool>(true);
   Timer? _featuredRefreshTimer;
-  double _heroHeight = double.infinity;
   bool _foreground = true;
   bool _firstRunPrepared = false;
   late String _searchPrompt;
@@ -121,7 +119,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _collapse.dispose();
-    _heroPlaying.dispose();
     _featuredRefreshTimer?.cancel();
     _scroll.dispose();
     super.dispose();
@@ -135,7 +132,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       _foreground = active;
       if (active) _searchPrompt = nextSearchPrompt();
     });
-    _syncHeroPlayback();
     if (active) {
       unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
       // General catalog (single-flight inside CatalogStore.syncWithShopify).
@@ -148,14 +144,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     if ((next - _collapse.value).abs() >= 0.01) {
       _collapse.value = next;
     }
-    _syncHeroPlayback();
-  }
-
-  void _syncHeroPlayback() {
-    final shouldPlay =
-        _foreground && (!_scroll.hasClients || _scroll.offset < _heroHeight);
-    if (_heroPlaying.value == shouldPlay) return;
-    _heroPlaying.value = shouldPlay;
   }
 
   void _openSearch() {
@@ -171,7 +159,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   /// The search field with its scroll-driven handover to the app-bar icon.
   /// Shared by the hero overlay and the in-page fallback used when
   /// the owner hides the hero.
-  Widget _buildSearchFieldTransition() {
+  Widget _buildSearchFieldTransition({bool inHero = false}) {
     return ValueListenableBuilder<double>(
       valueListenable: _collapse,
       builder: (context, value, child) {
@@ -194,6 +182,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       child: HomeSearchField(
         onTap: _openSearch,
         prompt: _searchPrompt,
+        padding: inHero
+            ? EdgeInsets.zero
+            : const EdgeInsets.fromLTRB(
+                BoutiqueSpace.gutter,
+                BoutiqueSpace.md,
+                BoutiqueSpace.gutter,
+                BoutiqueSpace.lg,
+              ),
       ),
     );
   }
@@ -359,7 +355,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         drawerScrimColor: context.monettaColors.scrim,
         appBar: _buildAppBar(),
         body: Center(child: Text('Sin resultados', style: eyebrow())),
-        bottomNavigationBar: MonettaBottomNavigation(
+        bottomNavigationBar: MonettaFloatingBottomNavigation(
           current: MonettaBottomDestination.home,
           bagCount: store.bagQuantity,
           onSelected: _handleBottomNavigation,
@@ -371,7 +367,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ..sort((a, b) => b.createdAt.compareTo(a.createdAt));
     final fresh = newest.take(_kNewestCount).toList();
     final drawer = _buildSideMenu(store);
-    final bottomNavigation = MonettaBottomNavigation(
+    final bottomNavigation = MonettaFloatingBottomNavigation(
       current: MonettaBottomDestination.home,
       bagCount: store.bagQuantity,
       onSelected: _handleBottomNavigation,
@@ -379,7 +375,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final sections = _resolveSectionOrder(homeContent, storefront);
     final body = LayoutBuilder(
       builder: (context, constraints) {
-        _heroHeight = homeHeroHeight(context);
         return ListView(
           controller: _scroll,
           padding: EdgeInsets.zero,
@@ -389,26 +384,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 if (showHero)
-                  // Full-bleed hero, restored from the pre-redesign header:
-                  // the photograph opens at the very top of the screen,
-                  // behind the status bar and the floating app bar, with the
-                  // search field overlaid at its bottom.
-                  Stack(
-                    children: [
-                      ValueListenableBuilder<bool>(
-                        valueListenable: _heroPlaying,
-                        builder: (context, playing, _) => HomeEditorialBanner(
-                          playing: playing,
-                          onOpenNew: _openFullCatalog,
-                        ),
-                      ),
-                      Positioned(
-                        left: 0,
-                        right: 0,
-                        bottom: 0,
-                        child: _buildSearchFieldTransition(),
-                      ),
-                    ],
+                  HomeEditorialBanner(
+                    searchField: _buildSearchFieldTransition(inHero: true),
                   )
                 else
                   _buildSearchFieldTransition(),
@@ -439,16 +416,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
             Padding(
               padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
-              child: RevealOnScroll(
+              child: HomeAccountInvitation(
                 key: const ValueKey('home-reveal-account-invitation'),
                 scrollController: _scroll,
-                delay: const Duration(milliseconds: 280),
-                offset: 0,
-                child: HomeAccountInvitation(
-                  isSignedIn:
-                      AccountScope.maybeOf(context)?.isSignedIn ?? false,
-                  onRegister: _openAccount,
-                ),
+                isSignedIn: AccountScope.maybeOf(context)?.isSignedIn ?? false,
+                onRegister: _openAccount,
               ),
             ),
             // The home body extends beneath the persistent navigation. Keep
@@ -459,7 +431,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             // as its bottom padding.
             ColoredBox(
               key: const ValueKey('home-account-invitation-bottom-bleed'),
-              color: context.monettaColors.surfaceMuted,
+              color: homeAccountInvitationBackground(context),
               child: SizedBox(height: MediaQuery.paddingOf(context).bottom),
             ),
           ],
@@ -475,15 +447,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       builder: (context, collapse, child) {
         return Scaffold(
           extendBody: true,
-          // Restored full-bleed hero: the photograph opens behind the status
-          // bar and the app bar, until scroll gives the bar a surface.
-          extendBodyBehindAppBar: showHero,
           backgroundColor: context.boutique.canvas,
           drawer: drawer,
           drawerScrimColor: context.monettaColors.scrim,
           appBar: _buildAppBar(
             searchCollapse: showHero ? collapse : 1,
-            surfaceCollapse: showHero ? collapse : 1,
+            dividerCollapse: showHero ? collapse : 1,
           ),
           body: child,
           bottomNavigationBar: bottomNavigation,
@@ -621,41 +590,33 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  /// Floating header over the full-bleed hero (restored pre-redesign
-  /// behavior): transparent with white actions over the photograph, taking the
-  /// bar's grey surface and ink actions once the hero has scrolled away.
+  /// Solid canvas header (white in light mode) so it runs straight into the
+  /// light hero photograph; its hairline only appears once the hero scrolls.
   PreferredSizeWidget _buildAppBar({
     double searchCollapse = 1,
-    double surfaceCollapse = 1,
+    double dividerCollapse = 1,
   }) {
     final palette = context.boutique;
     final searchProgress = Curves.easeOutCubic.transform(
       ((searchCollapse - .34) / .66).clamp(0.0, 1.0),
     );
-    final surfaceProgress = Curves.easeOutCubic.transform(
-      ((surfaceCollapse - .08) / .72).clamp(0.0, 1.0),
+    final dividerProgress = Curves.easeOutCubic.transform(
+      ((dividerCollapse - .08) / .72).clamp(0.0, 1.0),
     );
-    final foreground =
-        Color.lerp(Colors.white, palette.ink, surfaceProgress)!;
-    final dark = Theme.of(context).brightness == Brightness.dark;
-    final collapsedBrightness = dark ? Brightness.light : Brightness.dark;
+    final brightness = Theme.of(context).brightness;
     return AppBar(
       automaticallyImplyLeading: false,
       toolbarHeight: 60,
-      backgroundColor: Color.lerp(
-        Colors.transparent,
-        palette.bar,
-        surfaceProgress,
-      ),
+      backgroundColor: palette.canvas,
       surfaceTintColor: Colors.transparent,
-      foregroundColor: foreground,
-      iconTheme: IconThemeData(color: foreground, size: 22),
+      scrolledUnderElevation: 0,
+      foregroundColor: palette.ink,
+      iconTheme: IconThemeData(color: palette.ink, size: 22),
       systemOverlayStyle: SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness:
-            surfaceProgress < .55 ? Brightness.light : collapsedBrightness,
-        statusBarBrightness:
-            surfaceProgress < .55 ? Brightness.dark : Theme.of(context).brightness,
+            brightness == Brightness.dark ? Brightness.light : Brightness.dark,
+        statusBarBrightness: brightness,
       ),
       centerTitle: true,
       titleSpacing: 0,
@@ -663,26 +624,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       leading: Builder(
         builder: (scaffoldContext) => Padding(
           padding: const EdgeInsets.all(9),
-          child: DecoratedBox(
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: Colors.black.withValues(
-                alpha: .42 * (1 - surfaceProgress),
-              ),
-              border: Border.all(
-                color: Colors.white.withValues(
-                  alpha: .48 * (1 - surfaceProgress),
-                ),
-                width: .5,
-              ),
-            ),
-            child: IconButton(
-              key: const Key('home-menu-button'),
-              tooltip: 'Abrir menú',
-              padding: EdgeInsets.zero,
-              onPressed: () => Scaffold.of(scaffoldContext).openDrawer(),
-              icon: const Icon(Icons.menu_rounded, size: 22),
-            ),
+          child: IconButton(
+            key: const Key('home-menu-button'),
+            tooltip: 'Abrir menú',
+            padding: EdgeInsets.zero,
+            onPressed: () => Scaffold.of(scaffoldContext).openDrawer(),
+            icon: const Icon(Icons.menu_rounded, size: 22),
           ),
         ),
       ),
@@ -711,7 +658,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         child: Divider(
           height: 0.5,
           color: palette.hairline.withValues(
-            alpha: palette.hairline.a * surfaceProgress,
+            alpha: palette.hairline.a * dividerProgress,
           ),
         ),
       ),
@@ -1218,41 +1165,23 @@ class _BrandsSectionState extends State<_BrandsSection>
               child: Semantics(
                 button: true,
                 label: 'Ver ${brand.title}',
-                child: MonettaCardLift(
-                  borderRadius: BoutiqueRadius.card,
-                  child: Material(
-                    key: ValueKey('home-brand-${brand.handle}'),
-                    color: context.boutique.surface,
-                    // A logo is artwork, not photography: contain it inside a
-                    // hairline card instead of cropping it to fill, and drop
-                    // the drop shadow the brief rules out.
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BoutiqueRadius.card,
-                      side: BorderSide(
-                        color: context.boutique.hairline,
-                        width: 1,
+                child: Material(
+                  key: ValueKey('home-brand-${brand.handle}'),
+                  color: Colors.transparent,
+                  child: InkWell(
+                    onTap: () => openCollection(
+                      context,
+                      CollectionScreen(
+                        title: brand.title,
+                        filter: CollectionFilter(brand: brand.brand),
                       ),
                     ),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => openCollection(
-                        context,
-                        CollectionScreen(
-                          title: brand.title,
-                          filter: CollectionFilter(brand: brand.brand),
-                        ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BoutiqueSpace.md,
+                        vertical: BoutiqueSpace.md,
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: BoutiqueSpace.lg,
-                          vertical: BoutiqueSpace.md,
-                        ),
-                        child: _HomeImage(
-                          imageUrl: brand.imageUrl,
-                          fallbackAsset: brand.fallbackAsset,
-                          fit: BoxFit.contain,
-                        ),
-                      ),
+                      child: _HomeBrandLogo(brand: brand),
                     ),
                   ),
                 ),
@@ -1261,6 +1190,87 @@ class _BrandsSectionState extends State<_BrandsSection>
           },
         ),
       ],
+    );
+  }
+}
+
+/// Bounds of the artwork inside the original 600px square logo assets.
+/// Cropping at render time keeps the originals intact and gives each logo
+/// the same usable width, rather than fitting its surrounding white space.
+const _brandLogoBounds = <String, Rect>{
+  'anne_klein': Rect.fromLTRB(68, 269, 546, 320),
+  'coach': Rect.fromLTRB(127, 262, 480, 318),
+  'dior': Rect.fromLTRB(153, 247, 460, 334),
+  'guess': Rect.fromLTRB(127, 254, 486, 330),
+  'laneige': Rect.fromLTRB(87, 260, 514, 331),
+  'michael_kors': Rect.fromLTRB(75, 272, 532, 322),
+  'olaplex': Rect.fromLTRB(88, 262, 525, 338),
+  'rhode': Rect.fromLTRB(120, 233, 491, 336),
+  'steve_madden': Rect.fromLTRB(84, 259, 533, 334),
+  'summer_fridays': Rect.fromLTRB(97, 230, 508, 358),
+  'the_ordinary': Rect.fromLTRB(144, 227, 484, 364),
+  'tommy_hilfiger': Rect.fromLTRB(118, 232, 494, 352),
+};
+
+class _HomeBrandLogo extends StatelessWidget {
+  const _HomeBrandLogo({required this.brand});
+
+  final HomeBrandCard brand;
+
+  @override
+  Widget build(BuildContext context) {
+    final asset = brand.fallbackAsset;
+    final assetName = asset.split('/').last.split('.').first;
+    final bounds = _brandLogoBounds[assetName];
+    Widget fullBleed(double size) => Image.asset(
+          asset,
+          width: size,
+          height: size,
+          filterQuality: FilterQuality.high,
+        );
+    Widget cropped(Widget artwork600) {
+      // La imagen es un cuadrado de 600px con el logo al centro: se recorta
+      // el whitespace para que el trazo llene la celda sin cambiar su tamaño.
+      if (bounds == null) {
+        return FittedBox(fit: BoxFit.contain, child: artwork600);
+      }
+      return FittedBox(
+        fit: BoxFit.contain,
+        child: SizedBox(
+          width: bounds.width,
+          height: bounds.height,
+          child: ClipRect(
+            child: Stack(
+              children: [
+                Positioned(
+                  left: -bounds.left,
+                  top: -bounds.top,
+                  width: 600,
+                  height: 600,
+                  child: artwork600,
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
+    final fallback = cropped(fullBleed(600));
+    final url = brand.imageUrl;
+    if (url == null || url.isEmpty) return fallback;
+    // La imagen de Shopify es el mismo cuadrado con whitespace: se recorta
+    // igual que el asset para que el logo se vea del mismo tamaño.
+    return cropped(
+      Image.network(
+        MediaUrl.sized(url, width: MediaUrl.cardWidth),
+        width: 600,
+        height: 600,
+        fit: BoxFit.fill,
+        filterQuality: FilterQuality.high,
+        cacheWidth: MediaUrl.cardWidth,
+        errorBuilder: (_, __, ___) => fullBleed(600),
+      ),
     );
   }
 }
@@ -1280,87 +1290,147 @@ class _AboutMonettaSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         const BoutiqueSectionHeader(title: 'Más sobre Monetta'),
-        MonettaCardLift(
-          mouseCursor: MouseCursor.defer,
-          child: Container(
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+          child: SizedBox(
             key: const ValueKey('home-about-card'),
             width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BoutiqueRadius.card,
-              border: Border.all(color: context.boutique.hairline),
-            ),
-            clipBehavior: Clip.antiAlias,
             child: LayoutBuilder(
               builder: (context, constraints) {
                 final wide = constraints.maxWidth >= 720;
+                final portraitWidth = wide
+                    ? constraints.maxWidth * .4
+                    : constraints.maxWidth * .38;
                 final image = SizedBox(
                   key: const ValueKey('home-about-image'),
-                  height: 360,
-                  width: double.infinity,
+                  width: portraitWidth,
+                  height: portraitWidth * 1.3,
                   child: _HomeImage(
                     imageUrl: imageUrl,
                     fallbackAsset: 'assets/images/home_about.webp',
                     fit: BoxFit.cover,
                   ),
                 );
-                final copy = Padding(
+                final heading = Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'NUESTRA HISTORIA',
+                      style: boutiqueEyebrow(size: 10, color: palette.goldText),
+                    ),
+                    const SizedBox(height: BoutiqueSpace.md),
+                    Text(
+                      content.headline,
+                      style:
+                          boutiqueDisplay(wide ? 32 : 24, color: palette.ink),
+                    ),
+                  ],
+                );
+                final details = Column(
                   key: const ValueKey('home-about-monetta'),
-                  padding: EdgeInsets.all(wide ? 36 : 24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'BIENVENID@',
-                        style: display(
-                          wide ? 31 : 27,
-                          color: context.monettaColors.accent,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Text(
+                      content.body,
+                      style: boutiqueText(
+                        size: 14,
+                        color: palette.inkMuted,
+                        height: 1.55,
+                      ),
+                    ),
+                    const SizedBox(height: BoutiqueSpace.xl),
+                    FilledButton(
+                      onPressed: onOpen,
+                      style: FilledButton.styleFrom(
+                        backgroundColor: palette.ink,
+                        foregroundColor: palette.canvas,
+                        minimumSize:
+                            const Size.fromHeight(BoutiqueSpace.control),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: BoutiqueSpace.lg,
+                          vertical: BoutiqueSpace.md,
+                        ),
+                        shape: const RoundedRectangleBorder(
+                          borderRadius: BoutiqueRadius.control,
                         ),
                       ),
-                      const SizedBox(height: 14),
-                      Text(content.headline, style: display(wide ? 27 : 23)),
-                      const SizedBox(height: 14),
-                      Text(
-                        content.body,
-                        style: sans(
-                          size: 13,
-                          color: context.monettaColors.contentMuted,
-                          height: 1.55,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Wrap(
-                        spacing: 26,
-                        runSpacing: 18,
+                      child: Row(
                         children: [
-                          UnderlineLink(
-                            label: 'Conoce nuestra historia',
-                            onTap: onOpen,
+                          Expanded(
+                            child: Text(
+                              'Conoce nuestra historia',
+                              style: boutiqueText(
+                                size: 14,
+                                weight: FontWeight.w600,
+                                color: palette.canvas,
+                              ),
+                            ),
                           ),
-                          UnderlineLink(
-                            key: const ValueKey('home-open-partner'),
-                            label: 'Vende con Monetta',
-                            onTap: onOpenPartner,
-                          ),
+                          const SizedBox(width: BoutiqueSpace.md),
+                          const Icon(Icons.arrow_forward, size: 20),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    TextButton(
+                      key: const ValueKey('home-open-partner'),
+                      onPressed: onOpenPartner,
+                      style: TextButton.styleFrom(
+                        foregroundColor: palette.ink,
+                        minimumSize:
+                            const Size.fromHeight(BoutiqueSpace.tapTarget),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Vende con Monetta',
+                            style: boutiqueText(size: 13, color: palette.ink),
+                          ),
+                          const SizedBox(width: BoutiqueSpace.sm),
+                          const Icon(Icons.north_east, size: 16),
+                        ],
+                      ),
+                    ),
+                  ],
                 );
-                if (!wide) return Column(children: [image, copy]);
-                return SizedBox(
-                  height: 360,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                if (!wide) {
+                  return Column(
                     children: [
-                      Expanded(child: image),
-                      Expanded(child: copy),
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          image,
+                          const SizedBox(width: BoutiqueSpace.lg),
+                          Expanded(child: heading),
+                        ],
+                      ),
+                      const SizedBox(height: BoutiqueSpace.xl),
+                      details,
                     ],
-                  ),
+                  );
+                }
+                return Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    image,
+                    const SizedBox(width: BoutiqueSpace.xxl),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          heading,
+                          const SizedBox(height: BoutiqueSpace.xl),
+                          details,
+                        ],
+                      ),
+                    ),
+                  ],
                 );
               },
             ),
@@ -1389,15 +1459,22 @@ class _SocialSection extends StatelessWidget {
           padding: const EdgeInsets.symmetric(
             horizontal: BoutiqueSpace.gutter,
           ),
-          child: Row(
-            children: [
-              for (var index = 0; index < links.length; index++) ...[
-                if (index > 0) const SizedBox(width: BoutiqueSpace.md),
-                Expanded(
-                  child: _SocialTile(link: links[index], onOpen: onOpen),
-                ),
-              ],
-            ],
+          child: Align(
+            alignment: Alignment.center,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 960),
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var index = 0; index < links.length; index++) ...[
+                    if (index > 0) const SizedBox(width: BoutiqueSpace.md),
+                    Expanded(
+                      child: _SocialTile(link: links[index], onOpen: onOpen),
+                    ),
+                  ],
+                ],
+              ),
+            ),
           ),
         ),
       ],
@@ -1415,48 +1492,75 @@ class _SocialTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final uri = link.uri;
     return Semantics(
-      button: uri != null,
+      link: uri != null,
       label: 'Abrir ${link.label}',
-      child: GestureDetector(
+      excludeSemantics: true,
+      onTap: uri == null ? null : () => onOpen(uri),
+      child: InkWell(
+        key: ValueKey('home-social-${link.id}'),
         onTap: uri == null ? null : () => onOpen(uri),
         child: MonettaCardLift(
           enabled: uri != null,
-          child: AspectRatio(
-            aspectRatio: .82,
-            child: Container(
-              decoration: BoxDecoration(
-                border: Border.all(color: context.monettaColors.divider),
-              ),
-              padding: const EdgeInsets.symmetric(horizontal: 6),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(
-                    _socialIcon(link.id),
-                    color: context.monettaColors.accent,
-                    size: 28,
-                  ),
-                  const SizedBox(height: 18),
-                  Text(
-                    link.label.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: eyebrow(size: 8),
-                  ),
-                ],
-              ),
-            ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final wide = constraints.maxWidth >= 180;
+              final imageSize = math.min(constraints.maxWidth, 240.0);
+              final asset = _socialAsset(link.id);
+              return Padding(
+                padding: EdgeInsets.symmetric(
+                  vertical: wide ? BoutiqueSpace.xl : BoutiqueSpace.sm,
+                ),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      width: imageSize,
+                      height: imageSize * 420 / 440,
+                      child: asset == null
+                          ? Icon(
+                              Icons.open_in_new,
+                              color: context.monettaColors.accent,
+                              size: 28,
+                            )
+                          : Image.asset(
+                              asset,
+                              fit: BoxFit.contain,
+                              filterQuality: FilterQuality.high,
+                              excludeFromSemantics: true,
+                            ),
+                    ),
+                    SizedBox(
+                      height: wide ? BoutiqueSpace.lg : BoutiqueSpace.sm,
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 4),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          link.label.toUpperCase(),
+                          maxLines: 1,
+                          style: boutiqueEyebrow(
+                            size: wide ? 12 : 10,
+                            color: context.boutique.ink,
+                            weight: FontWeight.w400,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
           ),
         ),
       ),
     );
   }
 
-  IconData _socialIcon(String id) => switch (id) {
-        'instagram' => Icons.camera_alt_outlined,
-        'facebook' => Icons.facebook,
-        'tiktok' => Icons.music_note,
-        _ => Icons.open_in_new,
+  String? _socialAsset(String id) => switch (id) {
+        'instagram' => 'assets/images/home_social_instagram.webp',
+        'tiktok' => 'assets/images/home_social_tiktok.webp',
+        'facebook' => 'assets/images/home_social_facebook.webp',
+        _ => null,
       };
 }
 
@@ -1513,45 +1617,16 @@ void _openHomeCollection(BuildContext context, HomeCollectionCard card) {
 
 class _CatalogGrid extends StatelessWidget {
   const _CatalogGrid({required this.products});
-
   final List<Product> products;
-
   @override
-  Widget build(BuildContext context) {
-    if (products.isEmpty) return const SizedBox.shrink();
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 1060
-            ? 4
-            : constraints.maxWidth >= 720
-                ? 3
-                : 2;
-        return GridView.builder(
-          clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+  Widget build(BuildContext context) => products.isEmpty
+      ? const SizedBox.shrink()
+      : ProductCardGrid(
+          products: products,
+          variant: ProductTileVariant.edgeToEdge,
+          showWishlist: false,
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          // 0.50 reserves ~115pt for the caption under a 4:5 photo plus the
-          // 12pt gap, matching the grid delegate's 112pt contract. 0.52
-          // overflowed by 5-8pt on two-line names.
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            childAspectRatio: 0.50,
-            crossAxisSpacing: BoutiqueSpace.md,
-            mainAxisSpacing: BoutiqueSpace.xxl,
-          ),
-          itemCount: products.length,
-          itemBuilder: (context, index) {
-            final product = products[index];
-            return ProductCard(
-              product: product,
-              onQuickView: () => showProductQuickView(context, product),
-            );
-          },
+          onQuickView: (product) => showProductQuickView(context, product),
         );
-      },
-    );
-  }
 }

@@ -35,6 +35,18 @@ class CustomerIdentity {
   final String? displayName;
 }
 
+/// Shopify's displayName may be an email or phone number, rather than a name.
+String? customerProfileName(Object? value) {
+  if (value is! String) return null;
+  final name = value.trim().replaceAll(RegExp(r'\s+'), ' ');
+  if (name.isEmpty ||
+      name.contains('@') ||
+      RegExp(r'^\+?[\d\s().-]+$').hasMatch(name)) {
+    return null;
+  }
+  return name;
+}
+
 /// Injected into [CustomerSessionRepository] the same way
 /// `CustomerAuthGateway` is, so login stays testable without a socket.
 abstract class CustomerIdentityService {
@@ -66,14 +78,15 @@ class HttpCustomerIdentityService implements CustomerIdentityService {
   final Duration timeout;
   late final CustomerApiDiscoveryService _discovery;
 
-  /// Only what identity needs. Profile, addresses and orders are Phase 5
-  /// (`docs/SHOPIFY_PRODUCTION_IMPLEMENTATION_PLAN.md`) and deliberately not
-  /// requested here: this call sits on the login path, so every extra field
-  /// is latency between the browser closing and the account appearing.
+  /// Only identity and name fields. Shopify's displayName can contain an
+  /// email, so firstName and lastName distinguish a name from its fallback.
+  /// Addresses and orders are loaded separately.
   static const String identityQuery = '''
 query MonettaCustomerIdentity {
   customer {
     id
+    firstName
+    lastName
     displayName
     emailAddress {
       emailAddress
@@ -193,15 +206,17 @@ query MonettaCustomerIdentity {
     }
 
     final emailAddress = customer['emailAddress'];
-    final displayName = customer['displayName'];
+    final fullName = [
+      customerProfileName(customer['firstName']),
+      customerProfileName(customer['lastName']),
+    ].whereType<String>().join(' ');
     return CustomerIdentity(
       shopifyCustomerId: id,
       email: emailAddress is Map<String, dynamic>
           ? emailAddress['emailAddress'] as String?
           : null,
-      displayName: displayName is String && displayName.trim().isNotEmpty
-          ? displayName.trim()
-          : null,
+      displayName: customerProfileName(fullName) ??
+          customerProfileName(customer['displayName']),
     );
   }
 

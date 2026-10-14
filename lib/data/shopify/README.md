@@ -45,7 +45,7 @@ optional; missing or malformed values retain the bundled mobile-home fallback.
 |---|---|---|
 | `app.home_sections` | JSON | `["collections","new_products","bag_types","brands","about","social","testimonials"]` |
 | `app.home_collections` | JSON | `["guess","carteras-1","relojes"]` |
-| `app.home_bag_types` | JSON | `["totes","crossbodys","hombro"]` |
+| `app.home_bag_types` | JSON | `["totes","crossbodys","hombro","satchel","hobo"]` |
 | `app.social_links` | JSON | `{"instagram":"https://…","tiktok":"https://…","facebook":"https://…"}` |
 | `app.about_image_url` | Single line text / URL | `https://cdn.shopify.com/…` |
 

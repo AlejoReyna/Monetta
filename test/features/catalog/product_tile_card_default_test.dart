@@ -1,9 +1,7 @@
 // Characterization of the default product card.
 //
-// The edge-to-edge catalog redesign must not change the card that Home,
-// favourites, search and collections draw. These tests pin today's geometry
-// using only API that exists before the redesign, so they must pass both
-// before and after it.
+// Product cards share a white rounded surface and a small inset photograph.
+// The grid reserve includes air beneath the unchanged caption typography.
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
@@ -87,22 +85,22 @@ void main() {
 
       expect(find.byType(MonettaCardLift), findsOneWidget);
 
-      // Caption: flush with the photo's left edge, 12 pt below its bottom.
+      // Caption: inset 12 pt, with the existing 12 pt gap beneath the photo.
       final brand = tester.getRect(find.text('Guess'));
-      expect(brand.left, closeTo(photo.left, 0.01));
+      expect(brand.left, closeTo(photo.left + 12, 0.01));
       expect(brand.top, closeTo(photo.bottom + 12, 0.01));
     },
   );
 
   testWidgets(
     'UI-CAT-02 productGridDelegate without extras keeps 12/24 spacing and '
-    'the 112 pt caption reserve',
+    'the 124 pt caption reserve',
     (tester) async {
       final delegate = await _delegateFor(tester, availableWidth: 350);
       expect(delegate.crossAxisCount, 2);
       expect(delegate.crossAxisSpacing, 12);
       expect(delegate.mainAxisSpacing, 24);
-      expect(delegate.mainAxisExtent, closeTo(169 * 1.25 + 112, 0.01));
+      expect(delegate.mainAxisExtent, closeTo(169 * 1.25 + 124, 0.01));
     },
   );
 
@@ -115,7 +113,7 @@ void main() {
         textScaler: const TextScaler.linear(2),
       );
       expect(delegate.crossAxisCount, 2);
-      expect(delegate.mainAxisExtent, closeTo(169 * 1.25 + 224, 0.01));
+      expect(delegate.mainAxisExtent, closeTo(169 * 1.25 + 248, 0.01));
     },
   );
 

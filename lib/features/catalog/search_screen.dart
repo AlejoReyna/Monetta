@@ -16,6 +16,7 @@ import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
+import '../navigation/monetta_page_header.dart';
 import '../product/quick_view.dart';
 import 'catalog_controls.dart';
 import 'catalog_query.dart';
@@ -50,7 +51,7 @@ Future<void> openSearch(
 }) async {
   final store = StoreScope.of(context);
   await Navigator.of(context).push<void>(
-    monettaFadeRoute(
+    monettaPageRoute(
       StoreScope(
         notifier: store,
         child: SearchScreen(initialQuery: initialQuery, prompt: prompt),
@@ -291,6 +292,11 @@ class _SearchScreenState extends State<SearchScreen> {
 
     return Scaffold(
       backgroundColor: palette.canvas,
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Buscar',
+        backKey: const ValueKey('search-back-button'),
+      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -302,7 +308,6 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: _onChanged,
               onSubmitted: (_) => _submit(),
               onClear: _clear,
-              onBack: () => Navigator.of(context).pop(),
             ),
             Divider(height: 0.5, color: palette.hairline),
             Expanded(
@@ -357,7 +362,6 @@ class _SearchField extends StatelessWidget {
     required this.onChanged,
     required this.onSubmitted,
     required this.onClear,
-    required this.onBack,
   });
 
   final TextEditingController controller;
@@ -367,7 +371,6 @@ class _SearchField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
   final VoidCallback onClear;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -379,28 +382,13 @@ class _SearchField extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        BoutiqueSpace.sm,
+        BoutiqueSpace.gutter,
         BoutiqueSpace.md,
-        BoutiqueSpace.lg,
+        BoutiqueSpace.gutter,
         BoutiqueSpace.md,
       ),
       child: Row(
         children: [
-          SizedBox(
-            width: BoutiqueSpace.tapTarget,
-            height: BoutiqueSpace.tapTarget,
-            child: IconButton(
-              key: const ValueKey('search-back-button'),
-              tooltip: 'Volver',
-              onPressed: onBack,
-              icon: Icon(
-                Icons.arrow_back_rounded,
-                size: 24,
-                color: palette.ink,
-              ),
-            ),
-          ),
-          const SizedBox(width: BoutiqueSpace.sm),
           Expanded(
             child: TextField(
               key: const ValueKey('search-query-field'),
@@ -922,12 +910,9 @@ class _Results extends StatelessWidget {
           child: ProductCardGrid(
             key: const ValueKey('search-result-grid'),
             products: products,
-            padding: const EdgeInsets.fromLTRB(
-              BoutiqueSpace.gutter,
-              BoutiqueSpace.xs,
-              BoutiqueSpace.gutter,
-              BoutiqueSpace.xxl,
-            ),
+            variant: ProductTileVariant.edgeToEdge,
+            showWishlist: false,
+            padding: const EdgeInsets.only(top: BoutiqueSpace.md),
             onQuickView: (product) => showProductQuickView(context, product),
           ),
         ),

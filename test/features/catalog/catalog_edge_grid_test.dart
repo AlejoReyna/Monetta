@@ -1,6 +1,5 @@
-// Target-state tests for the edge-to-edge catalog screen (UI-CAT-01, 03, 04,
-// 05). They use only API that exists today, so they compile now and fail on
-// assertions until the redesign lands.
+// Catalog cards retain the catalog data, typography and interactions, with
+// white rounded surfaces and slightly inset photographs.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -201,9 +200,9 @@ List<Rect> _firstRowPhotos(WidgetTester tester) {
 }
 
 void main() {
-  group('UI-CAT-01 the grid runs edge to edge', () {
+  group('UI-CAT-01 the grid uses spaced product cards', () {
     testWidgets(
-      'UI-CAT-01 at 390 pt: two 193 pt columns, 4 pt apart, no row gap',
+      'UI-CAT-01 at 390 pt: two 189 pt cards, 12 pt apart',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -216,23 +215,23 @@ void main() {
 
         // Row 1.
         expect(photo[0].left, closeTo(0, 0.01));
-        expect(photo[0].width, closeTo(193, 0.01));
-        expect(photo[0].height, closeTo(241.25, 0.01));
-        expect(photo[1].left, closeTo(197, 0.01));
+        expect(photo[0].width, closeTo(189, 0.01));
+        expect(photo[0].height, closeTo(236.25, 0.01));
+        expect(photo[1].left, closeTo(201, 0.01));
         expect(photo[1].right, closeTo(390, 0.01));
-        expect(photo[1].width, closeTo(193, 0.01));
+        expect(photo[1].width, closeTo(189, 0.01));
         expect(photo[1].top, closeTo(photo[0].top, 0.01));
 
         // Row 2 is aligned with itself and one full tile further down:
-        // 241.25 photo + 115.85 caption, with no extra space between rows.
+        // 236.25 photo + 115.85 caption + 12 pt between card rows.
         expect(photo[3].top, closeTo(photo[2].top, 0.01));
         expect(photo[2].left, closeTo(0, 0.01));
-        expect(photo[2].top - photo[0].top, closeTo(357.1, 0.01));
+        expect(photo[2].top - photo[0].top, closeTo(364.1, 0.01));
       },
     );
 
     testWidgets(
-      'UI-CAT-01 tiles carry no card: no lift, no clip, no photo inset',
+      'UI-CAT-01 tiles use rounded cards and inset photos without a lift',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -245,20 +244,24 @@ void main() {
           final tile = tiles.at(i);
           expect(
             find.descendant(of: tile, matching: find.byType(ClipRRect)),
-            findsNothing,
-            reason: 'tile $i must not clip its photo into a rounded card',
+            findsNWidgets(2),
+            reason: 'tile $i clips the card and the inset photograph',
           );
           final image = _rect(
             tester,
             find.descendant(of: tile, matching: find.byType(MonettaImage)),
           );
-          expect(image, _rect(tester, _photoOf(tile)), reason: 'tile $i');
+          expect(
+            image,
+            _rect(tester, _photoOf(tile)).deflate(8),
+            reason: 'tile $i',
+          );
         }
       },
     );
 
     testWidgets(
-      'UI-CAT-01 caption sits 8 pt in from the photo and 10 pt below it',
+      'UI-CAT-01 caption sits 12 pt in from the photo and 10 pt below it',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -268,8 +271,8 @@ void main() {
         final brand = _rect(tester, _brandOf(tile));
         final name = _rect(tester, _nameOf(tile));
 
-        expect(brand.left, closeTo(photo.left + 8, 0.01));
-        expect(name.left, closeTo(photo.left + 8, 0.01));
+        expect(brand.left, closeTo(photo.left + 12, 0.01));
+        expect(name.left, closeTo(photo.left + 12, 0.01));
         expect(brand.top, closeTo(photo.bottom + 10, 0.01));
       },
     );
@@ -288,7 +291,7 @@ void main() {
           await _pump(tester, _items(8));
 
           final row = _firstRowPhotos(tester);
-          final tileWidth = (width - 4.0 * (columns - 1)) / columns;
+          final tileWidth = (width - 12.0 * (columns - 1)) / columns;
           expect(row.length, columns);
           expect(row.first.left, closeTo(0, 0.01));
           expect(row.last.right, closeTo(width, 0.01));
@@ -367,7 +370,7 @@ void main() {
     }
   });
 
-  group('UI-CAT-04 the header is centred', () {
+  group('UI-CAT-04 the header sits beside back', () {
     // Measured as an owner sees it: shoppers get the title alone, owners also
     // get the piece count under it.
     for (final pushed in [true, false]) {
@@ -378,7 +381,7 @@ void main() {
         final route = pushed ? 'with BackButton' : 'as root route';
 
         testWidgets(
-          'UI-CAT-04 title and count are centred on the screen '
+          'UI-CAT-04 title and count align beside the back arrow '
           '($route, $label)',
           (tester) async {
             _setView(tester, const Size(390, 844));
@@ -393,16 +396,20 @@ void main() {
 
             expect(errors.takeUnexpected(), isEmpty);
             expect(
-              find.byType(BackButton),
-              pushed ? findsOneWidget : findsNothing,
+              find.byKey(const ValueKey('monetta-page-back')),
+              findsOneWidget,
             );
             expect(
-              _rect(tester, find.text('Productos')).center.dx,
-              closeTo(195, 0.5),
+              _rect(tester, find.text('Productos')).left,
+              closeTo(
+                _rect(tester, find.byKey(const ValueKey('monetta-page-back')))
+                    .right,
+                0.5,
+              ),
             );
             expect(
-              _rect(tester, find.text('6 piezas')).center.dx,
-              closeTo(195, 0.5),
+              _rect(tester, find.text('6 piezas')).left,
+              closeTo(_rect(tester, find.text('Productos')).left, 0.5),
             );
           },
         );
@@ -432,7 +439,10 @@ void main() {
             );
             final buttons = [search, filter];
             if (pushed) {
-              final back = _rect(tester, find.byType(BackButton));
+              final back = _rect(
+                tester,
+                find.byKey(const ValueKey('monetta-page-back')),
+              );
               expect(back.left, lessThan(60));
               buttons.add(back);
             }

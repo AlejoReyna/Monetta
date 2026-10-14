@@ -7,6 +7,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/catalog_store.dart';
 import '../../domain/product.dart';
 import '../../main.dart' show StoreScope;
@@ -28,19 +30,9 @@ class FavoritesScreen extends StatelessWidget {
     final palette = context.boutique;
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: AppBar(
-        backgroundColor: palette.bar,
-        foregroundColor: palette.ink,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          'Favoritos',
-          style: boutiqueTitle(size: 15, color: palette.ink),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(.5),
-          child: Container(height: .5, color: palette.hairline),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Favoritos',
       ),
       body: SafeArea(
         child: ListenableBuilder(
@@ -116,20 +108,11 @@ class _FavoritesBody extends StatelessWidget {
             ),
           ),
         SliverPadding(
-          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
-          sliver: SliverGrid(
-            gridDelegate: productGridDelegate(
-              context,
-              availableWidth:
-                  MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) => ProductCard(
-                key: ValueKey('favorite-card-${saved[index].id}'),
-                product: saved[index],
-              ),
-              childCount: saved.length,
-            ),
+          padding: const EdgeInsets.only(top: BoutiqueSpace.md),
+          sliver: ProductCardSliverGrid(
+            products: saved,
+            showWishlist: true,
+            cardKeyPrefix: 'favorite-card',
           ),
         ),
       ],

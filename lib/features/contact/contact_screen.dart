@@ -14,6 +14,8 @@
 library;
 
 import 'package:flutter/material.dart';
+
+import '../navigation/monetta_page_header.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shopper_copy.dart';
@@ -133,19 +135,9 @@ class ContactScreen extends StatelessWidget {
     final channels = monettaContactChannels(socialLinks: socialLinks);
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: AppBar(
-        backgroundColor: palette.bar,
-        foregroundColor: palette.ink,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          'Contacto',
-          style: boutiqueTitle(size: 15, color: palette.ink),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(.5),
-          child: Container(height: .5, color: palette.hairline),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Contacto',
       ),
       body: SafeArea(
         child: ListView(

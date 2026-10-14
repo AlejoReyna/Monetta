@@ -9,76 +9,45 @@ import 'package:flutter/material.dart';
 
 import '../../app/card_lift.dart';
 import '../../app/text_scale_policy.dart';
-import '../../app/media/monetta_video.dart';
-import '../../domain/campaign.dart';
 import '../../domain/home_content.dart';
 import '../../domain/product.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../product/quick_view.dart';
 
-/// The home banner's film, with a real editorial poster frame.
-///
-/// `CampaignMedia.monettaHome` points its poster at `hero_poster.jpg`, which is
-/// a blown-out white frame — acceptable behind a full-bleed hero that fills the
-/// screen in under a second, wrong for a banner that is the first thing under
-/// the search field. The film is unchanged; only the still it rests on is.
-final CampaignMedia kHomeBannerCampaign = CampaignMedia(
-  videoUrl: CampaignMedia.monettaHome.videoUrl,
-  posterAsset: 'assets/images/campaign_olive.jpg',
-);
+const String kHomeBannerAsset = 'assets/images/home_banner.jpg';
 
-/// Height of the transparent app bar that floats over the hero. Kept in one
-/// place so the bleed behind the system chrome always matches the bar.
-const double _kHeroAppBarHeight = 60;
-
-/// Space the hero keeps clear at the top so its image slides behind the
-/// status bar and the transparent app bar: the bar floats over the
-/// photograph until the shopper scrolls.
-double homeHeroTopBleed(BuildContext context) =>
-    MediaQuery.paddingOf(context).top + _kHeroAppBarHeight;
-
-/// Banner height as a share of the viewport.
-///
-/// Tall enough to hold the headline, the action and the search
-/// field stacked inside the photograph: copy (3-line 26pt headline) + action
-/// (48pt) + search block (52pt field plus its insets) + breathing room. This
-/// is the image area *below* the top bleed; the hero's full height adds
-/// [homeHeroTopBleed].
-double homeBannerHeight(BuildContext context) =>
-    (MediaQuery.sizeOf(context).height * 0.52).clamp(300.0, 380.0);
-
-/// Full hero height: banner image plus the top bleed behind the system chrome.
+/// Compact hero under the app bar: about a third of the viewport.
 double homeHeroHeight(BuildContext context) =>
-    homeBannerHeight(context) + homeHeroTopBleed(context);
-
-/// Vertical room the search field occupies inside the hero: its own insets
-/// plus the 52pt capsule. The banner copy keeps clear of this strip.
-const double _kHeroSearchClearance =
-    BoutiqueSpace.control + BoutiqueSpace.md + BoutiqueSpace.lg;
+    (MediaQuery.sizeOf(context).height * 0.3).clamp(220.0, 280.0);
 
 // ---------------------------------------------------------------------------
 // Search
 // ---------------------------------------------------------------------------
 
-/// The search field, in the page rather than floating over the hero: on the
-/// reference it is a standing part of the header, visible before any scroll.
+/// Search entry, embedded in the hero or shown on its own when it is hidden.
 class HomeSearchField extends StatelessWidget {
-  const HomeSearchField({required this.onTap, required this.prompt, super.key});
+  const HomeSearchField({
+    required this.onTap,
+    required this.prompt,
+    this.padding = const EdgeInsets.fromLTRB(
+      BoutiqueSpace.gutter,
+      BoutiqueSpace.md,
+      BoutiqueSpace.gutter,
+      BoutiqueSpace.lg,
+    ),
+    super.key,
+  });
 
   final VoidCallback onTap;
   final String prompt;
+  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
     return Padding(
-      padding: const EdgeInsets.fromLTRB(
-        BoutiqueSpace.gutter,
-        BoutiqueSpace.md,
-        BoutiqueSpace.gutter,
-        BoutiqueSpace.lg,
-      ),
+      padding: padding,
       child: Semantics(
         button: true,
         label: 'Buscar productos',
@@ -121,147 +90,45 @@ class HomeSearchField extends StatelessWidget {
 // Editorial banner
 // ---------------------------------------------------------------------------
 
+/// The home photograph under the white app bar, with the search field
+/// resting on its lower edge. No copy and no scrims: the photograph is light,
+/// so the bar and the search pill read directly over it.
 class HomeEditorialBanner extends StatelessWidget {
   const HomeEditorialBanner({
-    required this.playing,
-    required this.onOpenNew,
+    required this.searchField,
     super.key,
   });
 
-  final bool playing;
-  final VoidCallback onOpenNew;
+  final Widget searchField;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final topBleed = homeHeroTopBleed(context);
-    // Full bleed, edge to edge and behind the status bar plus the app bar —
-    // the photograph runs from the very top of the screen, with the
-    // wordmark floating over it until scroll gives the bar a surface. This is
-    // the pre-redesign full-bleed hero, keeping the redesign's copy.
     return SizedBox(
       key: const ValueKey('home-compact-hero'),
       height: homeHeroHeight(context),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          MonettaVideo(campaign: kHomeBannerCampaign, playing: playing),
-          // Top scrim: keeps the status icons and the wordmark readable
-          // while the bar is still transparent (restored from the
-          // pre-redesign full-bleed hero).
-          const IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: <Color>[
-                    Color(0x40000000),
-                    Color(0x08000000),
-                    Color(0xA3000000),
-                  ],
-                  stops: <double>[0, .35, 1],
-                ),
-              ),
-            ),
+          Image.asset(
+            kHomeBannerAsset,
+            fit: BoxFit.cover,
+            // Keeps the hand and the bag's hardware in frame on wide crops.
+            alignment: const Alignment(0, .45),
+            excludeFromSemantics: true,
           ),
-          // Left-weighted scrim: the asset keeps its subject right of centre,
-          // so the copy column stays readable without dimming the piece.
-          const IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: <Color>[
-                    Color(0xC2000000),
-                    Color(0x70000000),
-                    Color(0x1A000000),
-                  ],
-                  stops: <double>[0, .52, 1],
-                ),
-              ),
-            ),
-          ),
-          // The copy sits above the overlaid search field: top starts below
-          // the floating bar, bottom clears the search strip.
           Padding(
-            padding: EdgeInsets.fromLTRB(
+            padding: const EdgeInsets.fromLTRB(
               BoutiqueSpace.gutter,
-              topBleed + BoutiqueSpace.lg,
+              BoutiqueSpace.sm,
               BoutiqueSpace.gutter,
-              _kHeroSearchClearance + BoutiqueSpace.lg,
+              BoutiqueSpace.md,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.sizeOf(context).width * .62,
-                  ),
-                  child: Text(
-                    'Estilo que te acompaña en cada momento',
-                    maxLines: 3,
-                    overflow: TextOverflow.ellipsis,
-                    style: boutiqueDisplay(
-                      26,
-                      color: palette.onDark,
-                      height: 1.18,
-                    ),
-                  ),
-                ),
-                const SizedBox(height: BoutiqueSpace.lg),
-                _BannerAction(
-                  key: const ValueKey('home-banner-action'),
-                  label: 'Ver novedades',
-                  onTap: onOpenNew,
-                ),
-              ],
+            child: Align(
+              alignment: Alignment.bottomCenter,
+              child: searchField,
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// A capsule — the brief's geometry for short editorial actions.
-class _BannerAction extends StatelessWidget {
-  const _BannerAction({required this.label, required this.onTap, super.key});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Semantics(
-      button: true,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: Material(
-        color: palette.onDark,
-        borderRadius: BoutiqueRadius.capsule,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BoutiqueRadius.capsule,
-          child: Container(
-            height: BoutiqueSpace.tapTarget,
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.xl),
-            child: Text(
-              label,
-              style: boutiqueText(
-                size: 14,
-                weight: FontWeight.w600,
-                color: const Color(0xFF111111),
-                height: 1.1,
-              ),
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -329,6 +196,7 @@ class HomeNewArrivalsRail extends StatelessWidget {
                 child: ProductCard(
                   product: product,
                   density: _density,
+                  showSaleBadge: false,
                   onQuickView: () => showProductQuickView(context, product),
                 ),
               );
@@ -363,13 +231,13 @@ class HomeShopByStyle extends StatelessWidget {
   Widget build(BuildContext context) {
     if (cards.isEmpty) return const SizedBox.shrink();
     final width = MediaQuery.sizeOf(context).width;
-    // Four tiles across a phone, with the fourth cut so the rail reads as
-    // scrollable — the proportion figure 03 uses.
-    final tileWidth = (width * .27).clamp(96.0, 150.0);
-    // The 38pt label band holds one line of 13pt text.
-    final tileHeight =
-        38 * textScaleFactorFor(MediaQuery.textScalerOf(context), 13) +
-            tileWidth * 0.86;
+    // Iconos más grandes: cada tile muestra un tercio del ancho para que
+    // cinco estilos siempre desborden y el rail se lea como scrolleable.
+    final tileWidth = (width * .32).clamp(112.0, 172.0);
+    // Imagen cuadrada + banda de etiqueta centrada de una línea.
+    final labelBand =
+        34 * textScaleFactorFor(MediaQuery.textScalerOf(context), 13);
+    final tileHeight = tileWidth + 8 + labelBand;
 
     return Column(
       key: const ValueKey('home-section-bag-types'),
@@ -385,6 +253,7 @@ class HomeShopByStyle extends StatelessWidget {
           child: ListView.separated(
             key: const ValueKey('home-style-rail'),
             scrollDirection: Axis.horizontal,
+            physics: const AlwaysScrollableScrollPhysics(),
             clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(
               horizontal: BoutiqueSpace.gutter,
@@ -425,26 +294,17 @@ class _StyleTile extends StatelessWidget {
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
         child: MonettaCardLift(
-          borderRadius: BoutiqueRadius.card,
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: palette.surfaceDeep,
-              borderRadius: BoutiqueRadius.card,
-            ),
+          borderRadius: BorderRadius.zero,
+          child: ColoredBox(
+            color: Colors.transparent,
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // The bundled silhouettes are one consistent set, shot at one
-                // scale on white — contained, never cropped.
+                // Icono sin borde ni fondo: la silueta va directa sobre el
+                // lienzo, contenida y centrada, nunca recortada.
                 Expanded(
-                  child: Padding(
-                    padding: const EdgeInsets.fromLTRB(
-                      BoutiqueSpace.sm,
-                      BoutiqueSpace.sm,
-                      BoutiqueSpace.sm,
-                      0,
-                    ),
+                  child: Center(
                     child: HomeAssetImage(
                       imageUrl: card.imageUrl,
                       fallbackAsset: card.fallbackAsset,
@@ -452,22 +312,16 @@ class _StyleTile extends StatelessWidget {
                     ),
                   ),
                 ),
-                Padding(
-                  padding: const EdgeInsets.fromLTRB(
-                    BoutiqueSpace.md,
-                    BoutiqueSpace.xs,
-                    BoutiqueSpace.sm,
-                    BoutiqueSpace.md,
-                  ),
-                  child: Text(
-                    card.title,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: boutiqueText(
-                      size: 13,
-                      height: 1.2,
-                      color: palette.ink,
-                    ),
+                const SizedBox(height: 8),
+                Text(
+                  card.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                  style: boutiqueText(
+                    size: 13,
+                    height: 1.2,
+                    color: palette.ink,
                   ),
                 ),
               ],

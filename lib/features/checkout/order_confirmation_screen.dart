@@ -13,6 +13,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/motion.dart';
 import '../boutique/boutique_tokens.dart';
 
@@ -30,7 +32,7 @@ Future<void> showOrderConfirmation(
   VoidCallback? onViewOrder,
 }) {
   return Navigator.of(context).push(
-    monettaFadeRoute(
+    monettaPageRoute(
       OrderConfirmationScreen(
         orderLabel: orderLabel,
         email: email,
@@ -60,26 +62,10 @@ class OrderConfirmationScreen extends StatelessWidget {
 
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: AppBar(
-        backgroundColor: palette.bar,
-        foregroundColor: palette.ink,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        automaticallyImplyLeading: false,
-        leading: IconButton(
-          tooltip: 'Cerrar',
-          onPressed: () => Navigator.of(context).popUntil((r) => r.isFirst),
-          icon: const Icon(Icons.close, size: 20),
-        ),
-        centerTitle: true,
-        title: Text(
-          'Confirmación',
-          style: boutiqueTitle(size: 15, color: palette.ink),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(.5),
-          child: Container(height: .5, color: palette.hairline),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Confirmación',
+        onBack: () => Navigator.of(context).popUntil((route) => route.isFirst),
       ),
       body: SafeArea(
         child: SingleChildScrollView(

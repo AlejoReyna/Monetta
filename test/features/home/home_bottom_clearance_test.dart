@@ -4,6 +4,7 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
+import 'package:monetta_app/features/navigation/monetta_floating_bottom_navigation.dart';
 import 'package:monetta_app/main.dart';
 
 // NAV-10: Home extends its body behind the persistent navigation, so the
@@ -64,8 +65,14 @@ void main() {
     await _scrollToBleed(tester, bleed);
 
     expect(surface, findsOneWidget);
-    final bar = tester.getSize(surface).height;
+    final bar =
+        tester.getSize(find.byType(MonettaFloatingBottomNavigation)).height;
     expect(tester.getSize(bleed).height, bar);
-    expect(bar, 90, reason: '56 + 34 of safe area');
+    expect(
+      bar,
+      greaterThan(tester.getSize(surface).height),
+      reason: 'clearance includes the floating gap',
+    );
+    expect(tester.getRect(surface).bottom, lessThan(844));
   });
 }

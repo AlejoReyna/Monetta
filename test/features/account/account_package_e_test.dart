@@ -89,8 +89,13 @@ void main() {
       await tester.pumpWidget(_host(controller));
       await tester.pumpAndSettle();
 
-      expect(find.text('Sesión iniciada'), findsOneWidget);
+      expect(find.text('Qué gusto verte,'), findsOneWidget);
       expect(find.text('Ana García'), findsOneWidget);
+      final information =
+          find.byKey(const ValueKey('account-open-information'));
+      await tester.ensureVisible(information);
+      await tester.tap(information);
+      await tester.pumpAndSettle();
       expect(find.text('ana@example.com'), findsOneWidget);
       expect(find.text('Cuenta Shopify verificada'), findsOneWidget);
       expect(find.textContaining('puntos'), findsNothing);

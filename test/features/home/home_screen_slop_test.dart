@@ -68,7 +68,7 @@ void main() {
     expect(find.text('ORDENAR'), findsNothing);
   });
 
-  testWidgets('search floats over the bottom of a full-bleed hero', (
+  testWidgets('search replaces the action in the half-height hero', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -88,19 +88,20 @@ void main() {
       find.byKey(const ValueKey('home-search-bar')),
     );
 
-    // Full bleed: the photograph opens at the very top of the
-    // screen — behind the status bar and the floating app bar — rail to rail.
-    expect(hero.top, 0);
+    // The photograph starts right under the white app bar, rail to rail.
+    final topBarBottom = tester.getRect(find.byType(AppBar)).bottom;
+    expect(hero.top, topBarBottom);
     expect(hero.left, 0);
     expect(hero.right, 390);
-    // Tall enough to hold the headline, the action and the overlaid search.
-    expect(hero.height, greaterThan(400));
+    expect(hero.height, 844 * .3);
+    expect(find.text('Estilo que te acompaña en cada momento'), findsNothing);
     // The search pill floats over the hero's bottom, not above the banner.
     expect(search.top, greaterThan(hero.top));
     expect(search.bottom, lessThanOrEqualTo(hero.bottom));
     expect(search.left, greaterThanOrEqualTo(hero.left));
     expect(search.right, lessThanOrEqualTo(hero.right));
-    expect(find.text('Ver novedades'), findsOneWidget);
+    expect(find.text('Ver novedades'), findsNothing);
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('modules sit on a 24–32px rhythm, not a 64–72px one', (
@@ -156,7 +157,7 @@ void main() {
     );
   });
 
-  testWidgets('the header floats transparent over the full-bleed hero', (
+  testWidgets('the header is a solid white bar above the hero', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -170,12 +171,10 @@ void main() {
 
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     expect(appBar.toolbarHeight, 60);
-    // Transparent over the photograph, not opaque grey: the hero
-    // opens behind the status bar and the bar.
-    expect(appBar.backgroundColor, Colors.transparent);
+    expect(appBar.backgroundColor, Colors.white);
     expect(
       tester.widget<Scaffold>(find.byType(Scaffold)).extendBodyBehindAppBar,
-      isTrue,
+      isFalse,
     );
 
     final wordmark = find.descendant(
@@ -187,7 +186,7 @@ void main() {
       kAppBarWordmarkHeight,
     );
 
-    // Once the hero scrolls away the bar takes its grey surface.
+    // It stays white once the hero scrolls away.
     await tester.drag(
       find.byKey(const ValueKey('home-discovery-header')),
       const Offset(0, -600),
@@ -195,7 +194,7 @@ void main() {
     await tester.pump();
     expect(
       tester.widget<AppBar>(find.byType(AppBar)).backgroundColor,
-      isNot(Colors.transparent),
+      Colors.white,
     );
   });
 

@@ -120,6 +120,42 @@ final class CartMutationIssue {
   final String message;
   final String? code;
   final List<String> field;
+
+  /// True when Shopify rejected the customer credential behind an
+  /// authenticated buyer identity (expired, revoked or unknown token).
+  ///
+  /// Callers use this to offer login/recovery while keeping the local bag:
+  /// the cart snapshot itself is still authoritative for lines and totals,
+  /// only the sign-in association failed. Guest-first checkout stays
+  /// available; this flag only decides whether to also surface login.
+  bool get isAuthenticationIssue =>
+      isAuthenticationSignal(code: code, field: field);
+
+  /// Conservative predicate shared by the Storefront mapper and callers.
+  ///
+  /// Matches credential/account/session-shaped error codes plus the
+  /// `customerAccessToken` input field. Line, discount and inventory codes
+  /// never match; an unknown future code fails closed to false and keeps
+  /// the generic message.
+  static bool isAuthenticationSignal({
+    String? code,
+    List<String> field = const [],
+  }) {
+    final normalizedCode = (code ?? '').toUpperCase();
+    if (normalizedCode.contains('CUSTOMER') ||
+        normalizedCode.contains('TOKEN') ||
+        normalizedCode.contains('AUTH') ||
+        normalizedCode.contains('SESSION') ||
+        normalizedCode.contains('LOGIN') ||
+        normalizedCode.contains('EXPIRED') ||
+        normalizedCode.contains('UNAUTHENTICATED') ||
+        normalizedCode.contains('UNAUTHORIZED')) {
+      return true;
+    }
+    return field.any(
+      (part) => part.toLowerCase().contains('customeraccesstoken'),
+    );
+  }
 }
 
 final class CartMutationResult {

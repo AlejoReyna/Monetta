@@ -171,7 +171,7 @@ void main() {
         _inMainList(find.text(kMoney.format(selectionPrice(product, 0)))),
         findsWidgets,
       );
-      expect(_inMainList(find.textContaining('Disponible')), findsOneWidget);
+      expect(_inMainList(find.textContaining('Disponible')), findsNothing);
       expect(_inMainList(find.byType(ProductOptionSelector)), findsOneWidget);
     });
 
@@ -418,7 +418,7 @@ void main() {
       );
       expect(_inPrimary(find.text(_restockLabel)), findsOneWidget);
       expect(find.text(_addLabel, skipOffstage: false), findsNothing);
-      expect(_inMainList(find.textContaining('Agotado')), findsWidgets);
+      expect(_inMainList(find.text('AGOTADO')), findsWidgets);
       expect(
         find.descendant(of: _dock(), matching: find.textContaining('Agotado')),
         findsNothing,

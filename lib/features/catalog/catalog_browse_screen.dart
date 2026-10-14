@@ -9,6 +9,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
@@ -18,7 +20,7 @@ import '../../main.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
-import '../navigation/monetta_bottom_navigation.dart';
+import '../navigation/monetta_floating_bottom_navigation.dart';
 import '../product/product_screen.dart';
 import 'catalog_controls.dart';
 import 'product_tile.dart';
@@ -82,11 +84,6 @@ class _CatalogFilters {
 
 /// Gap at each end of the header, outside the 48pt button slots.
 const double _kHeaderEdgeInset = 4;
-
-/// Width reserved on both sides of the title: the two end buttons' slots plus
-/// the edge gap. The leading side reserves the same, empty or not.
-const double _kHeaderSlotWidth =
-    _kHeaderEdgeInset + BoutiqueSpace.tapTarget * 2;
 
 const Map<String, List<String>> _bagTypeTerms = {
   'Crossbody': ['crossbody', 'bandolera', 'messenger'],
@@ -255,47 +252,19 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   @override
   Widget build(BuildContext context) {
     final visibleProducts = _visibleProducts();
+    final bagCount =
+        StoreScope.maybeOf(context)?.bagQuantity ?? widget.bagCount;
 
     return Scaffold(
-      // Never `extendBody`: the last row of products must not sit under the
-      // navigation bar, and this screen has no floating bar competing with it.
-      extendBody: false,
+      extendBody: true,
       backgroundColor: context.boutique.canvas,
-      appBar: AppBar(
-        toolbarHeight: 76,
-        backgroundColor: context.boutique.bar,
-        foregroundColor: context.boutique.ink,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        // One button at the start and two at the end: a centred title meets
-        // the end buttons first and is pushed off centre. Both sides reserve
-        // the same slot, so "Productos" stays on the screen's centre.
-        centerTitle: true,
-        titleSpacing: BoutiqueSpace.sm,
-        leadingWidth: _kHeaderSlotWidth,
-        leading: const _HeaderBackSlot(),
-        // The FittedBox only shrinks the block when it does not fit between
-        // the slots; it never truncates it or runs it under a button.
-        title: FittedBox(
-          fit: BoxFit.scaleDown,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Text(
-                'Productos',
-                textAlign: TextAlign.center,
-                style: boutiqueScreenTitle(color: context.boutique.ink),
-              ),
-              const SizedBox(height: 2),
-              // Counted from the very list the grid renders below.
-              CatalogResultCount(
-                count: visibleProducts.length,
-                noun: 'pieza',
-                pluralNoun: 'piezas',
-              ),
-            ],
-          ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Productos',
+        subtitle: CatalogResultCount(
+          count: visibleProducts.length,
+          noun: 'pieza',
+          pluralNoun: 'piezas',
         ),
         actions: [
           SizedBox.square(
@@ -320,6 +289,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
           ),
           const SizedBox(width: _kHeaderEdgeInset),
         ],
+        actionsWidth: 100,
       ),
       body: ClipRect(
         child: AnimatedSwitcher(
@@ -388,13 +358,16 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                     ),
                   ),
                 ),
+              const SliverToBoxAdapter(
+                child: MonettaFloatingNavigationClearance(),
+              ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: MonettaBottomNavigation(
+      bottomNavigationBar: MonettaFloatingBottomNavigation(
         current: MonettaBottomDestination.catalog,
-        bagCount: widget.bagCount,
+        bagCount: bagCount,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
@@ -424,7 +397,7 @@ void openCatalogBrowse(
 }) {
   final store = StoreScope.of(context);
   Navigator.of(context).push(
-    monettaFadeRoute(
+    monettaPageRoute(
       StoreScope(
         notifier: store,
         child: CatalogBrowseScreen(
@@ -435,24 +408,6 @@ void openCatalogBrowse(
       ),
     ),
   );
-}
-
-class _HeaderBackSlot extends StatelessWidget {
-  const _HeaderBackSlot();
-
-  @override
-  Widget build(BuildContext context) {
-    final canLeave = ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
-    return Align(
-      alignment: AlignmentDirectional.centerStart,
-      child: canLeave
-          ? const Padding(
-              padding: EdgeInsetsDirectional.only(start: _kHeaderEdgeInset),
-              child: BackButton(),
-            )
-          : null,
-    );
-  }
 }
 
 class _FilterIconButton extends StatelessWidget {

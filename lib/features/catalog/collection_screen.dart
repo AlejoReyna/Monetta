@@ -10,6 +10,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/catalog_store.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
@@ -20,7 +22,7 @@ import '../../reco/explainer.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
-import '../navigation/monetta_bottom_navigation.dart';
+import '../navigation/monetta_floating_bottom_navigation.dart';
 import 'brand_screen.dart';
 import 'catalog_browse_screen.dart';
 import 'catalog_controls.dart';
@@ -148,7 +150,6 @@ class CollectionScreen extends StatefulWidget {
 class _CollectionScreenState extends State<CollectionScreen> {
   late _CollectionFilters _filters;
   final ScrollController _scroll = ScrollController();
-  bool _titleInBar = false;
 
   bool get _hasHero =>
       widget.heroImageUrl != null || widget.heroImageAsset != null;
@@ -162,23 +163,12 @@ class _CollectionScreenState extends State<CollectionScreen> {
   void initState() {
     super.initState();
     _filters = _initialFilters;
-    _scroll.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _scroll
-      ..removeListener(_onScroll)
-      ..dispose();
+    _scroll.dispose();
     super.dispose();
-  }
-
-  /// The destination's name belongs to the header. It only moves into the bar
-  /// once the header has scrolled away, so the title is never printed twice.
-  void _onScroll() {
-    if (!_scroll.hasClients) return;
-    final collapsed = _scroll.offset > 120;
-    if (collapsed != _titleInBar) setState(() => _titleInBar = collapsed);
   }
 
   void _scrollToGrid() {
@@ -345,27 +335,45 @@ class _CollectionScreenState extends State<CollectionScreen> {
     final activeCount = _filters.activeCountComparedTo(_initialFilters);
 
     return Scaffold(
+      extendBody: true,
       backgroundColor: palette.canvas,
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: widget.title,
+        actions: [
+          _CollectionFilterIconButton(
+            activeCount: activeCount,
+            onPressed: _openFilterSheet,
+            color: palette.ink,
+          ),
+        ],
+        actionsWidth: 48,
+      ),
       body: CustomScrollView(
         controller: _scroll,
         slivers: [
-          _CollectionAppBar(
-            title: widget.title,
-            showTitle: _titleInBar,
-            onPhoto: _hasHero,
-            activeCount: activeCount,
-            onFilters: _openFilterSheet,
-            heroImageUrl: widget.heroImageUrl,
-            heroImageAsset: widget.heroImageAsset,
-            description: widget.description,
-            ctaLabel: widget.ctaLabel ?? 'Ver la colección',
-            onCta: _scrollToGrid,
-          ),
-          if (!_hasHero)
+          if (_hasHero)
             SliverToBoxAdapter(
               child: CatalogEditorialBanner(
                 title: widget.title,
                 description: widget.description,
+                imageUrl: widget.heroImageUrl,
+                imageAsset: widget.heroImageAsset,
+                actionLabel: widget.ctaLabel ?? 'Ver la colección',
+                onAction: _scrollToGrid,
+              ),
+            )
+          else if (widget.description?.trim().isNotEmpty ?? false)
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BoutiqueSpace.gutter,
+                  vertical: BoutiqueSpace.md,
+                ),
+                child: Text(
+                  widget.description!,
+                  style: boutiqueText(size: 14, color: palette.inkMuted),
+                ),
               ),
             ),
           SliverToBoxAdapter(
@@ -394,17 +402,19 @@ class _CollectionScreenState extends State<CollectionScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                BoutiqueSpace.gutter,
-                BoutiqueSpace.lg,
-                BoutiqueSpace.gutter,
-                BoutiqueSpace.xxl,
+              padding: const EdgeInsets.only(top: BoutiqueSpace.md),
+              sliver: ProductCardSliverGrid(
+                products: items,
+                onQuickView: (product) =>
+                    showProductQuickView(context, product),
               ),
-              sliver: _ProductSliverGrid(products: items),
             ),
+          const SliverToBoxAdapter(
+            child: MonettaFloatingNavigationClearance(),
+          ),
         ],
       ),
-      bottomNavigationBar: MonettaBottomNavigation(
+      bottomNavigationBar: MonettaFloatingBottomNavigation(
         current: MonettaBottomDestination.catalog,
         bagCount: store.bagQuantity,
         onSelected: _handleBottomNavigation,
@@ -415,103 +425,6 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
 /// The shared grid as a sliver, so a collection scrolls as one page — banner,
 /// chips and products together — instead of a header above a nested list.
-class _ProductSliverGrid extends StatelessWidget {
-  const _ProductSliverGrid({required this.products});
-
-  final List<Product> products;
-
-  @override
-  Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2;
-    return SliverGrid(
-      gridDelegate: productGridDelegate(context, availableWidth: width),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final product = products[index];
-          return ProductCard(
-            key: ValueKey('product-card-${product.id}'),
-            product: product,
-            onQuickView: () => showProductQuickView(context, product),
-          );
-        },
-        childCount: products.length,
-      ),
-    );
-  }
-}
-
-class _CollectionAppBar extends StatelessWidget {
-  const _CollectionAppBar({
-    required this.title,
-    required this.showTitle,
-    required this.onPhoto,
-    required this.activeCount,
-    required this.onFilters,
-    required this.heroImageUrl,
-    required this.heroImageAsset,
-    required this.description,
-    required this.ctaLabel,
-    required this.onCta,
-  });
-
-  final String title;
-  final bool showTitle;
-  final bool onPhoto;
-  final int activeCount;
-  final VoidCallback onFilters;
-  final String? heroImageUrl;
-  final String? heroImageAsset;
-  final String? description;
-  final String ctaLabel;
-  final VoidCallback onCta;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final foreground = onPhoto && !showTitle ? palette.onDark : palette.ink;
-    // The banner and the bar are sized from one number so the photograph can
-    // never be cropped by a taller bar than it was laid out for.
-    final bannerHeight = onPhoto ? catalogBannerHeight(context) : null;
-
-    return SliverAppBar(
-      pinned: true,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      backgroundColor: onPhoto && !showTitle ? Colors.transparent : palette.bar,
-      surfaceTintColor: Colors.transparent,
-      foregroundColor: foreground,
-      expandedHeight: bannerHeight,
-      flexibleSpace: bannerHeight == null
-          ? null
-          : FlexibleSpaceBar(
-              collapseMode: CollapseMode.pin,
-              background: CatalogEditorialBanner(
-                title: title,
-                description: description,
-                imageUrl: heroImageUrl,
-                imageAsset: heroImageAsset,
-                actionLabel: ctaLabel,
-                onAction: onCta,
-                height: bannerHeight,
-              ),
-            ),
-      title: showTitle
-          ? Text(
-              title,
-              style: boutiqueHeaderName(color: palette.ink),
-            )
-          : null,
-      actions: [
-        _CollectionFilterIconButton(
-          activeCount: activeCount,
-          onPressed: onFilters,
-          color: foreground,
-        ),
-        const SizedBox(width: BoutiqueSpace.xs),
-      ],
-    );
-  }
-}
 
 /// Count, brand link and the way back to the unfiltered destination. It takes
 /// no space at all when there is nothing to show: the filter button in the
@@ -1116,7 +1029,7 @@ class _CollectionSelectionMark extends StatelessWidget {
 void openCollection(BuildContext context, CollectionScreen screen) {
   final store = StoreScope.of(context);
   Navigator.of(context).push(
-    monettaFadeRoute(
+    monettaPageRoute(
       StoreScope(notifier: store, child: screen),
     ),
   );

@@ -4,6 +4,8 @@
 library;
 
 import 'package:flutter/material.dart';
+
+import '../navigation/monetta_page_header.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -148,12 +150,9 @@ class PartnerHubScreen extends StatelessWidget {
         .toList(growable: false);
 
     return Scaffold(
-      appBar: AppBar(
-        title: const MonettaWordmark.appBar(),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0.5),
-          child: Divider(height: 0.5),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Mayoreo',
       ),
       body: ListView(
         key: const ValueKey('partner-hub-scroll'),

@@ -253,14 +253,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     final store = StoreScope.of(context);
     final facets = store.facetsFor(product.id);
     final chosen = _variantIndex;
-    // Until an option is chosen the sheet shows the piece's own price and no
-    // sale or availability claim: those belong to one variant.
+    // Prices and stock follow the actual selected variant.
     final price =
         chosen == null ? product.price : selectionPrice(product, chosen);
-    final compare = chosen == null ? null : selectionCompareAt(product, chosen);
-    final onSale = chosen != null && selectionOnSale(product, chosen);
-    final discount =
-        chosen == null ? 0 : selectionDiscountPercent(product, chosen);
     final inStock = chosen == null || selectionInStock(product, chosen);
     final images = product.images.isEmpty ? <String?>[null] : product.images;
 
@@ -487,37 +482,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                               color: inStock ? palette.ink : palette.inkMuted,
                             ),
                           ),
-                          // Same rule as the ficha: previous price and
-                          // -% only off real compare_at data.
-                          if (onSale && compare != null) ...[
-                            Text(
-                              kMoney.format(compare),
-                              style: boutiqueText(
-                                size: 13,
-                                color: palette.inkMuted,
-                                decoration: TextDecoration.lineThrough,
-                              ),
-                            ),
-                            if (discount > 0)
-                              Container(
-                                key: const ValueKey('discount-badge'),
-                                padding: const EdgeInsets.symmetric(
-                                  horizontal: 10,
-                                  vertical: 5,
-                                ),
-                                decoration: BoxDecoration(
-                                  color: palette.sale,
-                                  borderRadius: BoutiqueRadius.capsule,
-                                ),
-                                child: Text(
-                                  '-$discount%',
-                                  style: boutiqueEyebrow(
-                                    size: 11,
-                                    color: const Color(0xFFFFFFFF),
-                                  ),
-                                ),
-                              ),
-                          ],
                         ],
                       ),
                       const SizedBox(height: BoutiqueSpace.sm),
@@ -525,14 +489,14 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       // Low-stock urgency ("Últimas piezas") needs a
                       // quantity the catalog does not carry, so it is
                       // deliberately never rendered here.
-                      Text(
-                        chosen == null
-                            ? 'Elige una opción para ver la disponibilidad'
-                            : inStock
-                                ? 'Disponible · envío 3 a 5 días'
-                                : 'Agotado · te avisamos cuando vuelva',
-                        style: boutiqueText(size: 12, color: palette.inkMuted),
-                      ),
+                      if (chosen == null || !inStock)
+                        Text(
+                          chosen == null
+                              ? 'Elige una opción para ver la disponibilidad'
+                              : 'Agotado · te avisamos cuando vuelva',
+                          style:
+                              boutiqueText(size: 12, color: palette.inkMuted),
+                        ),
                       if (selectableVariants(product).isNotEmpty) ...[
                         const SizedBox(height: BoutiqueSpace.lg),
                         if (chosen == null) ...[

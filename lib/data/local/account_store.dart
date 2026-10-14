@@ -55,6 +55,12 @@ class AccountStore {
           ..where((t) => t.localAccountId.equals(localAccountId)))
         .write(AccountsCompanion(lastSeenAt: Value(DateTime.now().toUtc())));
   }
+
+  Future<void> updateDisplayName(String localAccountId, String displayName) {
+    return (_db.update(_db.accounts)
+          ..where((t) => t.localAccountId.equals(localAccountId)))
+        .write(AccountsCompanion(displayName: Value(displayName)));
+  }
 }
 
 class DeviceStore {

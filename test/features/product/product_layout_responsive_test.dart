@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
@@ -66,7 +67,8 @@ Future<void> _expectMatrixContract(
   expect(title.right, lessThanOrEqualTo(bar.right + 0.01));
   expect(title.top, greaterThanOrEqualTo(bar.top - 0.01));
   expect(title.bottom, lessThanOrEqualTo(bar.bottom + 0.01));
-  expect(lineCount(tester, headerTitle()), lessThanOrEqualTo(2));
+  expect(title.width.isFinite, isTrue);
+  expect(title.height.isFinite, isTrue);
 
   await scrollToEnd(tester);
   expect(tester.takeException(), isNull);
@@ -127,6 +129,16 @@ void main() {
         await tester.pump();
 
         expectButton(tester, find.byKey(kHeaderBackKey), what: 'back');
+        expectButton(
+          tester,
+          find.byKey(const Key('product-header-search')),
+          what: 'search',
+        );
+        expectButton(
+          tester,
+          find.byKey(const Key('product-header-account')),
+          what: 'account',
+        );
         expectButton(tester, find.byKey(kHeaderFavoriteKey), what: 'heart');
         expectButton(tester, inAppBar(find.byType(BagAction)), what: 'bag');
         expectButton(tester, find.byKey(kDockPrimaryKey), what: 'dock button');

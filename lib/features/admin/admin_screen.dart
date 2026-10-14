@@ -3,6 +3,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/admin_controller.dart';
 import '../../app/admin_notification_controller.dart';
 import '../../app/catalog_store.dart';
@@ -75,13 +77,9 @@ class _AdminScreenState extends State<AdminScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const MonettaWordmark.appBar(),
-        centerTitle: true,
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(.5),
-          child: Divider(height: .5),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Administración',
       ),
       body: SafeArea(
         child: ListenableBuilder(

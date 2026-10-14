@@ -6,6 +6,7 @@ import 'package:monetta_app/app/media/monetta_image.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/domain/product.dart';
+import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
 import 'package:monetta_app/features/product/quick_view.dart';
@@ -47,7 +48,7 @@ void main() {
     );
   });
 
-  testWidgets('ficha Fig.07: galería contenida, precio y confianza',
+  testWidgets('ficha: galería, precio actual y acciones de compra',
       (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
@@ -73,13 +74,15 @@ void main() {
     expect(find.byTooltip('Compartir'), findsOneWidget);
 
     // Trust row from the reference strip.
-    expect(find.text('Original'), findsOneWidget);
-    expect(find.text('Importado de EE. UU.'), findsOneWidget);
-    expect(find.text('Pago seguro'), findsOneWidget);
+    expect(find.text('Original'), findsNothing);
+    expect(find.text('Importado de EE. UU.'), findsNothing);
+    expect(find.text('Pago seguro'), findsNothing);
 
     // Shipping facts, never lamina copy.
-    expect(find.textContaining('Envío gratis desde'), findsWidgets);
-    expect(find.textContaining('Entrega estimada'), findsWidgets);
+    expect(find.textContaining('Envío gratis desde'), findsNothing);
+    expect(find.textContaining('Entrega estimada'), findsNothing);
+    expect(find.textContaining('3 a 5 días'), findsNothing);
+    expect(find.textContaining('Disponible'), findsNothing);
 
     // Purchase bar: same labels the catalog flow already honours.
     expect(find.text('Agregar al carrito'), findsOneWidget);
@@ -90,7 +93,8 @@ void main() {
     expect(find.text('Apartar'), findsOneWidget);
   });
 
-  testWidgets('descuento solo con compare_at real', (tester) async {
+  testWidgets('solo se muestra el precio actual, incluso con compare_at',
+      (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -101,7 +105,21 @@ void main() {
     );
     await _pumpFicha(tester, store, onSale.id);
     // The badge carries a key so related cards cannot fake the assertion.
-    expect(find.byKey(const ValueKey('discount-badge')), findsWidgets);
+    expect(find.byKey(const ValueKey('discount-badge')), findsNothing);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const ValueKey('product-current-price')))
+          .data,
+      kMoney.format(selectionPrice(onSale, 0)),
+    );
+    expect(
+      find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            widget.style?.decoration == TextDecoration.lineThrough,
+      ),
+      findsNothing,
+    );
 
     final plain = store.products.firstWhere(
       (item) =>
@@ -113,6 +131,38 @@ void main() {
     await _pumpFicha(tester, store, plain.id);
     // Price block, purchase bar and sheet share the key — none may render.
     expect(find.byKey(const ValueKey('discount-badge')), findsNothing);
+  });
+
+  testWidgets('recomendados muestran el precio actual y la foto sin marco gris',
+      (tester) async {
+    setPhoneView(tester);
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+    final pair = productWithBrandRail(store);
+    await _pumpFicha(tester, store, pair.product.id);
+    final rail = find.byKey(const ValueKey('product-recommendations'));
+    await scrollTo(tester, rail);
+    final card =
+        find.descendant(of: rail, matching: find.byType(ProductCard)).first;
+    final photo = tester.getRect(
+      find.descendant(of: card, matching: find.byType(AspectRatio)).first,
+    );
+    final image =
+        find.descendant(of: card, matching: find.byType(MonettaImage)).first;
+    expect(tester.getRect(image), photo);
+    expect(tester.widget<MonettaImage>(image).backgroundColor, kPackshotGround);
+    expect(
+      find.descendant(
+        of: rail,
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Text &&
+              widget.style?.decoration == TextDecoration.lineThrough,
+        ),
+      ),
+      findsNothing,
+    );
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('swatches con mapeo fiable, chips en caso contrario',
@@ -138,7 +188,8 @@ void main() {
     expect(find.text('COLOR'), findsNothing);
   });
 
-  testWidgets('acordeones Descripción, Detalles y Envíos', (tester) async {
+  testWidgets('acordeones abiertos por defecto se pueden cerrar y reabrir',
+      (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1.0;
@@ -149,13 +200,26 @@ void main() {
 
     for (final label in ['Descripción', 'Detalles', 'Envíos y cambios']) {
       expect(find.text(label), findsOneWidget);
+      final header = find.byWidgetPredicate(
+        (widget) => widget is Semantics && widget.properties.label == label,
+      );
+      expect(tester.widget<Semantics>(header).properties.expanded, isTrue);
       await tester.ensureVisible(find.text(label));
       await tester.pump();
       await tester.tap(find.text(label));
       await tester.pump();
+      expect(tester.widget<Semantics>(header).properties.expanded, isFalse);
+      await tester.tap(find.text(label));
+      await tester.pump();
+      expect(tester.widget<Semantics>(header).properties.expanded, isTrue);
     }
     // Shipping terms open; internal slugs never leak.
-    expect(find.textContaining('DHL'), findsOneWidget);
+    expect(
+      find.textContaining('Consulta las condiciones de envío'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('3 a 5 días'), findsNothing);
+    expect(find.textContaining('Gratis desde'), findsNothing);
     expect(find.text('Gama'), findsNothing);
   });
 

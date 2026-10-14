@@ -5,14 +5,18 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
+import '../navigation/monetta_page_header.dart';
 
 Future<void> openAppearanceSettings(BuildContext context) {
   final controller = ThemeScope.of(context);
   return showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
+    isScrollControlled: true,
     showDragHandle: false,
-    builder: (context) => _AppearanceSheet(controller: controller),
+    builder: (context) => SingleChildScrollView(
+      child: _AppearanceSheet(controller: controller),
+    ),
   );
 }
 
@@ -45,14 +49,11 @@ class _AppearanceSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              'APARIENCIA',
-              style: eyebrow(color: colors.contentMuted),
-            ),
+            const MonettaSheetHeading(title: 'Apariencia'),
             const SizedBox(height: 8),
             Text(
               'Elige cómo se ve Monetta',
-              style: editorial(24, color: colors.contentPrimary),
+              style: sans(size: 14, color: colors.contentMuted),
             ),
             const SizedBox(height: 18),
             _AppearanceOption(

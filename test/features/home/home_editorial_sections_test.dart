@@ -155,14 +155,15 @@ void main() {
 
     final aboutCard = find.byKey(const ValueKey('home-about-card'));
     final aboutImage = find.byKey(const ValueKey('home-about-image'));
-    expect(tester.getSize(aboutCard).width, 390);
-    expect(tester.getSize(aboutImage), const Size(388, 360));
+    expect(tester.getSize(aboutCard).width, 350);
+    expect(tester.getSize(aboutImage).width, closeTo(133, .01));
+    expect(tester.getSize(aboutImage).height, closeTo(172.9, .01));
 
     await tester.tap(find.text('Conoce nuestra historia'));
     await tester.pumpAndSettle();
     expect(find.byType(AboutMonettaScreen), findsOneWidget);
 
-    await tester.pageBack();
+    await tester.tap(find.byTooltip('Volver').first);
     await tester.pumpAndSettle();
     final partnerButton = find.byKey(const ValueKey('home-open-partner'));
     await tester.scrollUntilVisible(

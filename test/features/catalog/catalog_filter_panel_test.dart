@@ -476,7 +476,7 @@ void main() {
 
       expect(find.byKey(const Key('collection-open-brand')), findsNothing);
       expect(find.byKey(const Key('collection-clear-inline')), findsNothing);
-      final banner = tester.getRect(find.byType(CatalogEditorialBanner));
+      final banner = tester.getRect(find.byType(AppBar));
       final firstCard = tester.getRect(find.byType(ProductCard).first);
       expect(firstCard.top - banner.bottom, inInclusiveRange(8, 16));
     });

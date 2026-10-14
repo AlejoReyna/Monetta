@@ -8,6 +8,9 @@
 library;
 
 import 'package:flutter/foundation.dart';
+import 'package:drift/drift.dart' show Value;
+
+import '../data/customer_auth/customer_identity.dart';
 
 import '../data/accounts_orders/system_account_session_repository.dart';
 import '../data/customer_auth/customer_account_config.dart';
@@ -93,6 +96,39 @@ class AccountController extends ChangeNotifier {
   int _ordersGeneration = 0;
 
   bool get isSignedIn => account != null;
+
+  /// Fetches a missing name for a restored account, without blocking its UI.
+  Future<void> refreshProfile() async {
+    final current = account;
+    final repository = _sessionRepository;
+    if (current == null ||
+        repository == null ||
+        current.authProvider != 'shopify' ||
+        customerProfileName(current.displayName) != null) {
+      return;
+    }
+    try {
+      final updated = await repository.refreshProfile(current.localAccountId);
+      if (updated != null &&
+          account?.localAccountId == current.localAccountId) {
+        account = updated;
+        notifyListeners();
+      }
+    } catch (_) {
+      // A missing name or offline lookup must not interrupt the session.
+    }
+  }
+
+  /// A personal display name, scoped to the account on this device.
+  Future<void> saveProfileName(String value) async {
+    final current = account;
+    final name = customerProfileName(value);
+    if (current == null || name == null) return;
+    await _accountStore.updateDisplayName(current.localAccountId, name);
+    if (account?.localAccountId != current.localAccountId) return;
+    account = current.copyWith(displayName: Value(name));
+    notifyListeners();
+  }
 
   /// True once a Partner-dashboard registration exists — see
   /// `CustomerAccountConfig.isUsable`. The login entry point should hide or

@@ -20,7 +20,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
-import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
+import 'package:monetta_app/features/navigation/monetta_floating_bottom_navigation.dart';
 
 import '../support/e_t1_text_scaler.dart';
 import '../support/monetta_app_harness.dart';
@@ -45,7 +45,7 @@ bool _isIconGlyph(String text) =>
 List<RenderParagraph> _homeParagraphs(WidgetTester tester) {
   final inNav = find
       .descendant(
-        of: find.byType(MonettaBottomNavigation),
+        of: find.byType(MonettaFloatingBottomNavigation),
         matching: find.byType(RichText),
       )
       .evaluate()

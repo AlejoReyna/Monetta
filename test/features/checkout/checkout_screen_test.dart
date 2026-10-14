@@ -64,6 +64,11 @@ void main() {
       findsOneWidget,
     );
     final headingRow = find.byKey(const ValueKey('bag-heading-row'));
+    expect(find.text('Mi bolsa'), findsOneWidget);
+    expect(
+      tester.getRect(find.text('Mi bolsa')).left,
+      greaterThan(tester.getRect(find.byIcon(Icons.arrow_back)).right),
+    );
     expect(
       find.descendant(of: headingRow, matching: find.text('Mi bolsa')),
       findsOneWidget,
@@ -103,7 +108,10 @@ void main() {
     await tester.pump();
 
     expect(find.text('SEGURO'), findsOneWidget);
-    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(find.text('ENTREGA'), findsNothing);
+    expect(find.text('CONFIRMACIÓN'), findsNothing);
+    expect(find.text('Inicia sesión con Shop'), findsOneWidget);
     expect(
       find.textContaining('dirección y el envío se capturan en el checkout'),
       findsOneWidget,
@@ -132,6 +140,38 @@ void main() {
     );
     expect(find.text('Pago protegido'), findsNothing);
     expect(store.bagQuantity, 1);
+  });
+
+  testWidgets('Shop login updates checkout without leaving the flow',
+      (tester) async {
+    final store = await _loadedStore();
+    await store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    final database = openTestDatabase();
+    final controller = _CheckoutLoginController(database);
+    addTearDown(controller.dispose);
+    addTearDown(database.close);
+    await tester.pumpWidget(
+      _app(
+        store,
+        AccountScope(
+          notifier: controller,
+          child: const CheckoutFlowScreen(),
+        ),
+      ),
+    );
+
+    await tester.tap(find.byKey(const ValueKey('checkout-shop-login')));
+    await tester.pumpAndSettle();
+
+    expect(controller.loginCalls, 1);
+    expect(find.text('Inicia sesión con Shop'), findsNothing);
+    expect(find.text('Checkout'), findsOneWidget);
+    expect(find.text('ana@example.com'), findsOneWidget);
+    expect(store.bagQuantity, 1);
+
+    await controller.logout();
+    await tester.pumpAndSettle();
+    expect(find.text('Inicia sesión con Shop'), findsOneWidget);
   });
 
   testWidgets('BagAction route inherits authenticated cart composition',
@@ -305,3 +345,40 @@ String _opaque(String suffix) => String.fromCharCodes([
       101,
       ...suffix.codeUnits,
     ]);
+
+class _CheckoutLoginController extends AccountController {
+  _CheckoutLoginController(AppDatabase database)
+      : super(
+          accountStore: AccountStore(database),
+          deviceStore: DeviceStore(database),
+          orderHistoryRepository: OrderHistoryRepository(
+            store: OrderSummaryStore(database),
+            config: AccountsOrdersConfig.disabled,
+          ),
+          deviceId: 'checkout-login-device',
+        );
+
+  int loginCalls = 0;
+
+  @override
+  bool get canLogin => true;
+
+  @override
+  Future<void> login() async {
+    loginCalls++;
+    account = Account(
+      localAccountId: 'checkout-account',
+      authProvider: 'shopify',
+      email: 'ana@example.com',
+      createdAt: DateTime.utc(2026, 10, 12),
+      lastSeenAt: DateTime.utc(2026, 10, 12),
+    );
+    notifyListeners();
+  }
+
+  @override
+  Future<void> logout() async {
+    account = null;
+    notifyListeners();
+  }
+}

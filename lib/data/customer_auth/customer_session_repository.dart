@@ -116,7 +116,8 @@ class CustomerSessionRepository {
       localAccountId: localAccountId,
       shopifyCustomerId: identity.shopifyCustomerId,
       email: identity.email,
-      displayName: identity.displayName,
+      displayName: customerProfileName(existing?.displayName) ??
+          customerProfileName(identity.displayName),
       authProvider: 'shopify',
       createdAt: existing?.createdAt ?? DateTime.now().toUtc(),
     );
@@ -163,7 +164,13 @@ class CustomerSessionRepository {
       );
     }
     final claims = decodeIdTokenClaims(idToken);
-    final sub = claims['sub'] as String?;
+    // Shopify may send its customer id as a JSON integer. Keep the same
+    // representation as a string subject without accepting floats or booleans.
+    final sub = switch (claims['sub']) {
+      final String value => value,
+      final int value when value > 0 => value.toString(),
+      _ => null,
+    };
     if (sub == null || sub.isEmpty) {
       throw const CustomerAuthException(
         CustomerAuthErrorKind.server,
@@ -191,6 +198,32 @@ class CustomerSessionRepository {
       return Future.value(cached);
     }
     return refreshAccessToken(localAccountId);
+  }
+
+  /// Refreshes an existing profile without requiring another hosted login.
+  Future<Account?> refreshProfile(String localAccountId) async {
+    final service = _identityService;
+    final existing = await _accountStore.byLocalId(localAccountId);
+    if (service == null || existing == null) return existing;
+    final token = await accessTokenFor(localAccountId);
+    final identity = await service.fetch(token);
+    if (identity.shopifyCustomerId != existing.shopifyCustomerId) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'profile identity does not match the active account',
+      );
+    }
+    final latest = await _accountStore.byLocalId(localAccountId);
+    await _accountStore.upsert(
+      localAccountId: localAccountId,
+      shopifyCustomerId: existing.shopifyCustomerId,
+      email: identity.email ?? existing.email,
+      displayName: customerProfileName(latest?.displayName) ??
+          customerProfileName(identity.displayName),
+      authProvider: existing.authProvider,
+      createdAt: existing.createdAt,
+    );
+    return _accountStore.byLocalId(localAccountId);
   }
 
   /// Silently exchanges the stored refresh token for a fresh access token —

@@ -154,8 +154,9 @@ void main() {
       gateway.succeed();
       await tester.pumpAndSettle();
 
-      expect(find.text('Sesión iniciada'), findsOneWidget);
-      expect(find.text('ana@example.com'), findsOneWidget);
+      expect(find.text('Qué gusto verte,'), findsOneWidget);
+      expect(find.text('ana@example.com'), findsNothing);
+      expect(find.text('Tu cuenta'), findsWidgets);
       expect(find.byType(TextFormField), findsNothing);
 
       final adminEntry = find.byKey(const ValueKey('open-owner-admin'));

@@ -4,6 +4,7 @@ library;
 
 import 'dart:async';
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 
 const Duration kEnter = Duration(milliseconds: 720);
@@ -36,28 +37,58 @@ bool reduceMotion(BuildContext context) {
   return media.disableAnimations || media.accessibleNavigation;
 }
 
-/// Fade plus a 8 px rise. Used for shopper routes. Checkout should call this
-/// too so money screens do not slide like a list tile.
-Route<T> monettaFadeRoute<T extends Object?>(Widget page) {
-  return PageRouteBuilder<T>(
-    pageBuilder: (context, animation, secondaryAnimation) => page,
-    transitionDuration: kEnter,
-    reverseTransitionDuration: kSettle,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      if (reduceMotion(context)) return child;
-      final curved = CurvedAnimation(parent: animation, curve: kMotionCurve);
-      return FadeTransition(
-        opacity: curved,
-        child: SlideTransition(
-          position: Tween<Offset>(
-            begin: const Offset(0, 0.012),
-            end: Offset.zero,
-          ).animate(curved),
-          child: child,
-        ),
-      );
-    },
-  );
+/// Shopper navigation uses the theme's interactive slide-back transition.
+/// Material routes keep the previous page mounted, including its scroll state.
+Route<T> monettaPageRoute<T extends Object?>(Widget page) {
+  return MaterialPageRoute<T>(builder: (_) => page);
+}
+
+/// Native edge-swipe recognition, drag progress, cancellation and settling.
+/// Restricting the gesture to the leading edge leaves carousels and galleries
+/// free to handle horizontal swipes within the page.
+class MonettaPageTransitionsBuilder extends CupertinoPageTransitionsBuilder {
+  const MonettaPageTransitionsBuilder();
+
+  static bool _motionDisabled(BuildContext context) =>
+      MediaQuery.disableAnimationsOf(context) ||
+      MediaQuery.accessibleNavigationOf(context);
+
+  @override
+  DelegatedTransitionBuilder? get delegatedTransition => (
+        context,
+        animation,
+        secondaryAnimation,
+        allowSnapshotting,
+        child,
+      ) {
+        if (_motionDisabled(context)) return child;
+        return CupertinoPageTransition.delegatedTransition(
+          context,
+          animation,
+          secondaryAnimation,
+          allowSnapshotting,
+          child,
+        );
+      };
+
+  @override
+  Widget buildTransitions<T>(
+    PageRoute<T> route,
+    BuildContext context,
+    Animation<double> animation,
+    Animation<double> secondaryAnimation,
+    Widget child,
+  ) {
+    final disabled = _motionDisabled(context);
+    // Keep the native gesture detector mounted even with motion disabled.
+    return super.buildTransitions(
+      route,
+      context,
+      disabled ? const AlwaysStoppedAnimation<double>(1) : animation,
+      disabled ? const AlwaysStoppedAnimation<double>(0) : secondaryAnimation,
+      child,
+    );
+  }
 }
 
 /// One-shot enter for a headline or a hero. Not for product grids.

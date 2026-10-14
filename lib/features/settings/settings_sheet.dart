@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
+import '../navigation/monetta_page_header.dart';
 import 'appearance_sheet.dart';
 
 Future<void> openAppSettings(BuildContext context) {
@@ -12,10 +13,13 @@ Future<void> openAppSettings(BuildContext context) {
   return showModalBottomSheet<void>(
     context: context,
     useSafeArea: true,
+    isScrollControlled: true,
     showDragHandle: false,
-    builder: (sheetContext) => _AppSettingsSheet(
-      controller: controller,
-      parentContext: context,
+    builder: (sheetContext) => SingleChildScrollView(
+      child: _AppSettingsSheet(
+        controller: controller,
+        parentContext: context,
+      ),
     ),
   );
 }
@@ -63,14 +67,11 @@ class _AppSettingsSheet extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Text(
-              'AJUSTES',
-              style: eyebrow(color: colors.contentMuted),
-            ),
+            const MonettaSheetHeading(title: 'Ajustes'),
             const SizedBox(height: 8),
             Text(
               'Preferencias de la app',
-              style: editorial(24, color: colors.contentPrimary),
+              style: sans(size: 14, color: colors.contentMuted),
             ),
             const SizedBox(height: 10),
             InkWell(

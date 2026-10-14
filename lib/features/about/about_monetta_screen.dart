@@ -4,6 +4,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/theme.dart';
 import '../../domain/editorial_content.dart';
 
@@ -22,12 +24,9 @@ class AboutMonettaScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const MonettaWordmark.appBar(),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0.5),
-          child: Divider(height: 0.5),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Nuestra historia',
       ),
       body: ListView(
         key: const ValueKey('about-monetta-scroll'),

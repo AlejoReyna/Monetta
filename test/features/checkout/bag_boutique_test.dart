@@ -36,7 +36,7 @@ void main() {
     expect(shippingFor(kFreeShippingThreshold), 0);
   });
 
-  testWidgets('bag shows incentive, remove action and recommendations',
+  testWidgets('bag shows lines, remove action and recommendations',
       (tester) async {
     final store = await _loadedStore();
     final product = store.products.firstWhere((item) => item.isInStock);
@@ -45,7 +45,7 @@ void main() {
     await tester.pumpWidget(_app(store, const BagScreen()));
     await tester.pump();
 
-    // Header title plus the in-body heading share the label.
+    // The editorial heading lives beside the back arrow in the top bar.
     expect(
       find.descendant(
         of: find.byType(AppBar),
@@ -53,16 +53,16 @@ void main() {
       ),
       findsOneWidget,
     );
+    // Sin incentivo de envío gratis ni stepper de progreso en la bolsa.
     expect(
       find.byKey(const ValueKey('free-shipping-incentive')),
-      findsOneWidget,
+      findsNothing,
     );
-    // Incentivo real: o faltante o gratis, nunca cifra inventada.
     expect(
       find.textContaining(
         RegExp(r'(Te faltan|Tienes envío gratis)'),
       ),
-      findsWidgets,
+      findsNothing,
     );
     // Solo Eliminar: sin Guardar para después.
     expect(find.text('Guardar para después'), findsNothing);
@@ -227,8 +227,7 @@ void main() {
         ),
       );
       await tester.pump();
-      // Header title plus the in-body heading share the label.
-      expect(find.text('Mi bolsa'), findsNWidgets(2));
+      expect(find.text('Mi bolsa'), findsOneWidget);
       expect(tester.takeException(), isNull);
     }
     await tester.binding.setSurfaceSize(null);

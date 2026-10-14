@@ -55,11 +55,17 @@ android {
             applicationIdSuffix = ".staging"
             versionNameSuffix = "-staging"
             manifestPlaceholders["appAuthRedirectScheme"] = "shop.90228850722.oauth"
+            // Fase 5 return host. Replace with the staging custom domain once
+            // connected; verified App Links are unavailable on *.myshopify.com.
+            manifestPlaceholders["checkoutReturnHost"] = "monetta-staging.myshopify.com"
             resValue("string", "app_name", "Monetta Staging")
         }
         create("production") {
             dimension = "environment"
             manifestPlaceholders["appAuthRedirectScheme"] = "shop.72391655575.oauth"
+            // Fase 5 return host. Replace with the production custom return
+            // domain when chosen; keep staging and production separate.
+            manifestPlaceholders["checkoutReturnHost"] = "monetta.mx"
             resValue("string", "app_name", "Monetta")
         }
     }

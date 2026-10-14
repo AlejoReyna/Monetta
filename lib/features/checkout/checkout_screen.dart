@@ -12,6 +12,8 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+
+import '../navigation/monetta_page_header.dart';
 import 'package:flutter/services.dart';
 
 import '../../app/cart_controller.dart';
@@ -62,7 +64,7 @@ Future<void> openBag(
 }) {
   final store = StoreScope.of(context);
   return Navigator.of(context).push(
-    monettaFadeRoute(
+    monettaPageRoute(
       StoreScope(
         notifier: store,
         child: BagScreen(launchSecureCheckout: launchSecureCheckout),
@@ -161,13 +163,13 @@ class _BagScreenState extends State<BagScreen> {
 
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: _BoutiqueBar(
-        leading: IconButton(
-          tooltip: 'Volver',
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back, size: 20),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
         title: 'Mi bolsa',
+        titleRowKey: const ValueKey('bag-heading-row'),
+        trailingLabel:
+            '${store.bagQuantity} ${store.bagQuantity == 1 ? 'artículo' : 'artículos'}',
+        onBack: () => Navigator.of(context).pop(),
       ),
       body: SafeArea(
         bottom: true,
@@ -231,7 +233,6 @@ class _BagContents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
-    final count = store.bagQuantity;
     final subtotal = store.bagSubtotal;
     final shipping = _shippingFor(subtotal);
 
@@ -260,9 +261,16 @@ class _BagContents extends StatelessWidget {
                     email: draft.email,
                     phone: draft.phone,
                   );
+                  final currentAccount = accountController?.account;
+                  final currentScope = currentAccount == null
+                      ? CartSessionScope.guest(shopDomain: scope.shopDomain)
+                      : CartSessionScope.authenticated(
+                          shopDomain: scope.shopDomain,
+                          localAccountId: currentAccount.localAccountId,
+                        );
                   return checkout.present(
                     controller: controller,
-                    scope: scope,
+                    scope: currentScope,
                     localIntent: currentIntent,
                     buyerIdentity: buyerIdentity,
                     onCompleted: (purchase) async {
@@ -285,7 +293,7 @@ class _BagContents extends StatelessWidget {
         return;
       }
       Navigator.of(context).push(
-        monettaFadeRoute(
+        monettaPageRoute(
           StoreScope(
             notifier: store,
             child: CheckoutFlowScreen(
@@ -302,31 +310,6 @@ class _BagContents extends StatelessWidget {
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide = constraints.maxWidth >= 860;
-        final heading = Padding(
-          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-          child: Row(
-            key: const ValueKey('bag-heading-row'),
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Expanded(
-                child: Text(
-                  'Mi bolsa',
-                  style: boutiqueDisplay(wide ? 32 : 28),
-                ),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                '$count ${count == 1 ? 'artículo' : 'artículos'}',
-                style: boutiqueText(
-                  size: 12,
-                  color: context.boutique.inkMuted,
-                ),
-              ),
-            ],
-          ),
-        );
-
         final lineTiles = Column(
           children: [
             for (final line in lines)
@@ -337,11 +320,6 @@ class _BagContents extends StatelessWidget {
                 onRemove: () => store.removeFromBag(line.variant.id),
               ),
           ],
-        );
-
-        final incentive = Padding(
-          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-          child: _FreeShippingBar(subtotal: subtotal),
         );
 
         final controller = cartController;
@@ -374,8 +352,6 @@ class _BagContents extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _CheckoutProgress(activeIndex: 0),
-                    const SizedBox(height: 8),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -383,21 +359,15 @@ class _BagContents extends StatelessWidget {
                           flex: 7,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [heading, lineTiles],
+                            children: [lineTiles],
                           ),
                         ),
                         const SizedBox(width: 48),
                         Expanded(
                           flex: 4,
                           child: Padding(
-                            padding: const EdgeInsets.only(top: 64),
-                            child: Column(
-                              children: [
-                                _FreeShippingBar(subtotal: subtotal),
-                                const SizedBox(height: 16),
-                                summary,
-                              ],
-                            ),
+                            padding: const EdgeInsets.only(top: 16),
+                            child: summary,
                           ),
                         ),
                       ],
@@ -414,10 +384,7 @@ class _BagContents extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.only(bottom: 32),
           children: [
-            const _CheckoutProgress(activeIndex: 0),
-            heading,
             lineTiles,
-            incentive,
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: summary,
@@ -457,16 +424,18 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   final _phone = TextEditingController();
   bool _reviewing = false;
   bool _launching = false;
-  bool _didPrefillContact = false;
+  String? _prefilledAccountId;
   String? _selectedPayment;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_didPrefillContact) return;
-    _didPrefillContact = true;
     final account = AccountScope.maybeOf(context)?.account;
-    final email = account?.email?.trim();
+    if (account == null || _prefilledAccountId == account.localAccountId) {
+      return;
+    }
+    _prefilledAccountId = account.localAccountId;
+    final email = account.email?.trim();
     if (email != null && email.isNotEmpty && _email.text.isEmpty) {
       _email.text = email;
     }
@@ -478,6 +447,23 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     _email.dispose();
     _phone.dispose();
     super.dispose();
+  }
+
+  Future<void> _signIn() async {
+    final controller = AccountScope.maybeOf(context);
+    if (controller == null || !controller.canLogin || controller.isLoading) {
+      return;
+    }
+    await controller.login();
+    if (!mounted || controller.isSignedIn) return;
+    final error = controller.lastError;
+    if (error != null && !error.isSilent) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('No pudimos iniciar sesión. Inténtalo de nuevo.'),
+        ),
+      );
+    }
   }
 
   void _review() {
@@ -590,22 +576,35 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     if (store.bagLines.isEmpty) {
       return Scaffold(
         backgroundColor: palette.canvas,
-        appBar: const _BoutiqueBar(),
+        appBar: buildMonettaPageAppBar(context, title: 'Mi bolsa'),
         body: const SafeArea(child: _EmptyBag()),
       );
     }
 
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: _BoutiqueBar(
-        leading: IconButton(
-          tooltip: 'Volver',
-          onPressed: _reviewing
-              ? () => setState(() => _reviewing = false)
-              : () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back, size: 20),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
         title: 'Checkout',
+        onBack: _reviewing
+            ? () => setState(() => _reviewing = false)
+            : () => Navigator.of(context).pop(),
+        actionsWidth: 96,
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 18),
+            child: Row(
+              children: [
+                const Icon(Icons.lock_outline, size: 15),
+                const SizedBox(width: 6),
+                Text(
+                  'SEGURO',
+                  style: boutiqueEyebrow(size: 9, color: palette.ink),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
       body: SafeArea(
         bottom: true,
@@ -614,7 +613,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
           padding: const EdgeInsets.only(bottom: 40),
           child: Column(
             children: [
-              _CheckoutProgress(activeIndex: _reviewing ? 2 : 1),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final wide = constraints.maxWidth >= 900;
@@ -637,6 +635,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                           phone: _phone,
                           shipping: _shippingFor(store.bagSubtotal),
                           onContinue: _review,
+                          onSignIn: () => unawaited(_signIn()),
                         );
 
                   final summary = _CheckoutSummary(
@@ -678,237 +677,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _BoutiqueBar extends StatelessWidget implements PreferredSizeWidget {
-  const _BoutiqueBar({this.leading, this.title});
-
-  final Widget? leading;
-  final String? title;
-
-  @override
-  Size get preferredSize => const Size.fromHeight(60.5);
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return AppBar(
-      toolbarHeight: 60,
-      leading: leading,
-      automaticallyImplyLeading: false,
-      backgroundColor: palette.bar,
-      foregroundColor: palette.ink,
-      elevation: 0,
-      scrolledUnderElevation: 0,
-      centerTitle: true,
-      title: title == null
-          ? const MonettaWordmark.appBar()
-          : Text(title!, style: boutiqueTitle(size: 16, color: palette.ink)),
-      actions: title == 'Checkout'
-          ? [
-              Padding(
-                padding: const EdgeInsets.only(right: 18),
-                child: Row(
-                  children: [
-                    const Icon(Icons.lock_outline, size: 15),
-                    const SizedBox(width: 6),
-                    Text(
-                      'SEGURO',
-                      style: boutiqueEyebrow(size: 9, color: palette.ink),
-                    ),
-                  ],
-                ),
-              ),
-            ]
-          : null,
-      bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(.5),
-        child: Container(height: .5, color: palette.hairline),
-      ),
-    );
-  }
-}
-
-class _CheckoutProgress extends StatelessWidget {
-  const _CheckoutProgress({required this.activeIndex});
-
-  final int activeIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    const labels = ['Bolsa', 'Entrega', 'Pago', 'Confirmación'];
-    return Container(
-      color: palette.surfaceDeep,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Row(
-            children: [
-              for (var index = 0; index < labels.length; index++) ...[
-                if (index > 0)
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color:
-                          index <= activeIndex ? palette.ink : palette.hairline,
-                    ),
-                  ),
-                _ProgressStep(
-                  label: labels[index],
-                  number: index + 1,
-                  active: index == activeIndex,
-                  complete: index < activeIndex,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProgressStep extends StatelessWidget {
-  const _ProgressStep({
-    required this.label,
-    required this.number,
-    required this.active,
-    required this.complete,
-  });
-
-  final String label;
-  final int number;
-  final bool active;
-  final bool complete;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Semantics(
-      label:
-          '$label, ${active ? 'paso actual' : complete ? 'completado' : 'pendiente'}',
-      child: Column(
-        children: [
-          Container(
-            width: 26,
-            height: 26,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: active || complete ? palette.ink : palette.surface,
-              border: Border.all(
-                color: active || complete ? palette.ink : palette.hairline,
-              ),
-            ),
-            child: complete
-                ? Icon(Icons.check, size: 13, color: palette.canvas)
-                : Text(
-                    '$number',
-                    style: boutiqueText(
-                      size: 11,
-                      color: active ? palette.canvas : palette.inkMuted,
-                      weight: FontWeight.w600,
-                      height: 1,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 5),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 88),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label.toUpperCase(),
-                maxLines: 1,
-                softWrap: false,
-                style: boutiqueEyebrow(
-                  size: 8,
-                  color: active || complete ? palette.ink : palette.inkMuted,
-                ).copyWith(letterSpacing: 1.0),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _FreeShippingBar extends StatelessWidget {
-  const _FreeShippingBar({required this.subtotal});
-
-  final double subtotal;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final remaining = remainingForFreeShipping(subtotal);
-    final progress =
-        (subtotal / kFreeShippingThreshold).clamp(0.0, 1.0).toDouble();
-    final done = remaining == 0;
-    return Semantics(
-      liveRegion: true,
-      label: done
-          ? 'Tienes envío gratis en este pedido'
-          : 'Te faltan ${kMoney.format(remaining)} para el envío gratis',
-      child: Container(
-        key: const ValueKey('free-shipping-incentive'),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BoutiqueRadius.card,
-          border: Border.all(color: palette.hairline, width: .5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  done ? Icons.check_circle : Icons.local_shipping_outlined,
-                  size: 18,
-                  color: done ? palette.goldText : palette.ink,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    done
-                        ? 'Tienes envío gratis en este pedido.'
-                        : 'Te faltan ${kMoney.format(remaining)} para el envío gratis',
-                    style: boutiqueText(
-                      size: 13,
-                      weight: FontWeight.w500,
-                      color: palette.ink,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BoutiqueRadius.capsule,
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: palette.surfaceDeep,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  done ? palette.gold : palette.ink,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)}',
-              style: boutiqueText(size: 11, color: palette.inkMuted),
-            ),
-          ],
         ),
       ),
     );
@@ -1258,6 +1026,7 @@ class _ContactForm extends StatelessWidget {
     required this.phone,
     required this.shipping,
     required this.onContinue,
+    required this.onSignIn,
   });
 
   final GlobalKey<FormState> formKey;
@@ -1265,6 +1034,7 @@ class _ContactForm extends StatelessWidget {
   final TextEditingController phone;
   final double shipping;
   final VoidCallback onContinue;
+  final VoidCallback onSignIn;
 
   String? _required(String? value) =>
       value == null || value.trim().isEmpty ? 'Completa este campo' : null;
@@ -1272,13 +1042,30 @@ class _ContactForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    final accountController = AccountScope.maybeOf(context);
     return Form(
       key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('¿Cómo te contactamos?', style: boutiqueDisplay(28)),
-          const SizedBox(height: 8),
+          if (accountController?.isSignedIn != true) ...[
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                key: const ValueKey('checkout-shop-login'),
+                onPressed: accountController?.canLogin == true &&
+                        accountController?.isLoading == false
+                    ? onSignIn
+                    : null,
+                child: Text(
+                  accountController?.isLoading == true
+                      ? 'Iniciando sesión…'
+                      : 'Inicia sesión con Shop',
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+          ],
           Text(
             'La dirección y el envío se capturan en el checkout seguro de '
             'Shopify para no pedirlos dos veces. Totales finales también '

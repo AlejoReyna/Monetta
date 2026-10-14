@@ -8,6 +8,8 @@
 library;
 
 import 'package:flutter/material.dart';
+
+import '../navigation/monetta_page_header.dart';
 import 'package:flutter/services.dart';
 import 'package:share_plus/share_plus.dart';
 
@@ -133,12 +135,9 @@ class _CatalogCreatorScreenState extends State<CatalogCreatorScreen> {
   Widget build(BuildContext context) {
     final lines = _lines;
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('CREAR CATÁLOGO'),
-        bottom: const PreferredSize(
-          preferredSize: Size.fromHeight(0.5),
-          child: Divider(height: 0.5),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Crear catálogo',
       ),
       body: LayoutBuilder(
         builder: (context, constraints) {

@@ -8,6 +8,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/account_controller.dart';
 import '../../app/theme.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
@@ -59,19 +61,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
     final palette = context.boutique;
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: AppBar(
-        backgroundColor: palette.bar,
-        foregroundColor: palette.ink,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          'Mis pedidos',
-          style: boutiqueTitle(size: 15, color: palette.ink),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(.5),
-          child: Container(height: .5, color: palette.hairline),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Mis pedidos',
       ),
       body: SafeArea(
         child: ListenableBuilder(

@@ -79,8 +79,9 @@ Future<void> _openCatalogPanel(WidgetTester tester) async {
 }
 
 void main() {
-  group('TYPE-01 catalog titles use the sans of the product cards', () {
-    testWidgets('TYPE-01 "Productos" is sans w600, 22-24, like the card names',
+  group('TYPE-01 page titles use the editorial face of the bag', () {
+    testWidgets(
+        'TYPE-01 Productos uses the bag title face beside the back arrow',
         (tester) async {
       _view(tester);
       final items = [_item(1), _item(2), _item(3)];
@@ -88,9 +89,9 @@ void main() {
       await tester.pump();
 
       final title = _styleOf(tester, find.text('Productos'));
-      _expectSans(title, reason: 'Productos');
-      expect(title.fontSize, inInclusiveRange(22, 24));
-      _expectSameFace(title, _cardNameStyle(tester, items.first), 'vs card');
+      expect(title.fontFamily, kBoutiqueSerifFamily);
+      expect(title.fontWeight, FontWeight.w400);
+      expect(title.fontSize, 28);
     });
 
     testWidgets('TYPE-01b "Sin resultados" of the empty catalog is sans w600',
@@ -163,134 +164,41 @@ void main() {
     });
   });
 
-  group('TYPE-01c collection titles use the sans of the product cards', () {
-    Future<CatalogStore> pump(
-      WidgetTester tester, {
-      String? heroImageAsset,
-    }) async {
-      _view(tester, height: 844);
-      final store = await _loadedStore();
-      addTearDown(store.dispose);
-      await tester.pumpWidget(
-        _app(
-          StoreScope(
-            notifier: store,
-            child: CollectionScreen(
-              title: 'Bolsas',
-              filter: const CollectionFilter(category: 'bolsa'),
-              heroImageAsset: heroImageAsset,
+  group('TYPE-01c collections share the bag heading', () {
+    for (final image in <String?>[null, 'assets/images/campaign_olive.jpg']) {
+      testWidgets('collection heading remains beside back with artwork $image',
+          (tester) async {
+        _view(tester, height: 844);
+        final store = await _loadedStore();
+        addTearDown(store.dispose);
+        await tester.pumpWidget(
+          _app(
+            StoreScope(
+              notifier: store,
+              child: CollectionScreen(
+                title: 'Bolsas',
+                filter: const CollectionFilter(category: 'bolsa'),
+                heroImageAsset: image,
+              ),
             ),
           ),
-        ),
-      );
-      await tester.pump();
-      return store;
+        );
+        await tester.pump();
+        final title = find.byKey(const ValueKey('monetta-page-title'));
+        final back = find.byKey(const ValueKey('monetta-page-back'));
+        final style = _styleOf(tester, title);
+        expect(style.fontFamily, kBoutiqueSerifFamily);
+        expect(style.fontSize, 28);
+        expect(
+          tester.getRect(title).left,
+          closeTo(tester.getRect(back).right, .01),
+        );
+        final before = tester.getRect(title);
+        await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
+        await tester.pumpAndSettle();
+        expect(tester.getRect(title), before);
+      });
     }
-
-    Iterable<TextStyle> stylesOfTitle(WidgetTester tester) => tester
-        .widgetList<Text>(find.text('Bolsas'))
-        .map((text) => text.style!)
-        .toList();
-
-    testWidgets('TYPE-01c typographic banner title is sans w600, 22-24',
-        (tester) async {
-      await pump(tester);
-
-      final title = _styleOf(
-        tester,
-        find.descendant(
-          of: find.byType(CatalogEditorialBanner),
-          matching: find.text('Bolsas'),
-        ),
-      );
-      _expectSans(title, reason: 'banner title');
-      expect(title.fontSize, inInclusiveRange(22, 24));
-    });
-
-    testWidgets('TYPE-01c photo banner title is sans w600, 22-24',
-        (tester) async {
-      await pump(tester, heroImageAsset: 'assets/images/campaign_olive.jpg');
-
-      final title = _styleOf(
-        tester,
-        find.descendant(
-          of: find.byType(CatalogEditorialBanner),
-          matching: find.text('Bolsas'),
-        ),
-      );
-      _expectSans(title, reason: 'photo banner title');
-      expect(title.fontSize, inInclusiveRange(22, 24));
-    });
-
-    testWidgets('TYPE-01c the collapsed bar title is sans w600',
-        (tester) async {
-      await pump(tester);
-      expect(
-        find.descendant(
-          of: find.byType(SliverAppBar),
-          matching: find.text('Bolsas'),
-        ),
-        findsNothing,
-        reason: 'the bar shows no title until the header scrolls away',
-      );
-
-      await tester.drag(
-        find.byType(CustomScrollView),
-        const Offset(0, -400),
-      );
-      await tester.pumpAndSettle();
-
-      final barTitle = _styleOf(
-        tester,
-        find.descendant(
-          of: find.byType(SliverAppBar),
-          matching: find.text('Bolsas'),
-        ),
-      );
-      _expectSans(barTitle, reason: 'collapsed bar title');
-      expect(barTitle.fontSize, inInclusiveRange(18, 20), reason: 'bar title');
-      for (final style in stylesOfTitle(tester)) {
-        _expectSans(style, reason: 'every copy of the title');
-      }
-    });
-
-    testWidgets('TYPE-01c the collapsed bar title over a photo is sans w600',
-        (tester) async {
-      await pump(tester, heroImageAsset: 'assets/images/campaign_olive.jpg');
-
-      await tester.drag(
-        find.byType(CustomScrollView),
-        const Offset(0, -400),
-      );
-      await tester.pumpAndSettle();
-
-      // The banner (kept by the flexible space) and the bar title.
-      final titles = stylesOfTitle(tester).toList();
-      expect(titles.length, greaterThanOrEqualTo(2));
-      for (final style in titles) {
-        _expectSans(style, reason: 'every copy of the title over a photo');
-      }
-
-      // The bar title is the copy that is not inside the banner.
-      final inBanner = tester
-          .widgetList<Text>(
-            find.descendant(
-              of: find.byType(CatalogEditorialBanner),
-              matching: find.text('Bolsas'),
-            ),
-          )
-          .toList();
-      final barTitles = tester
-          .widgetList<Text>(find.text('Bolsas'))
-          .where((text) => !inBanner.any((other) => identical(other, text)))
-          .toList();
-      expect(barTitles, hasLength(1), reason: 'one bar title over a photo');
-      expect(
-        barTitles.single.style!.fontSize,
-        inInclusiveRange(18, 20),
-        reason: 'bar title over a photo',
-      );
-    });
   });
 
   group('TYPE-02 editorial surfaces stay serif (vigente)', () {
@@ -319,7 +227,7 @@ void main() {
       );
       await tester.pump();
 
-      final style = _styleOf(tester, find.text('REGÍSTRATE'));
+      final style = _styleOf(tester, find.text('OBTEN TU PRIMER ENVÍO GRATIS'));
       expect(style.fontFamily, kBoutiqueSerifFamily);
       expect(style.fontFamilyFallback, kBoutiqueSerifFallback);
     });

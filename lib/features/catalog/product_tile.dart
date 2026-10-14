@@ -4,9 +4,8 @@
 /// draw the same anatomy: a complete photograph on a neutral ground, an
 /// optional data-backed badge, an optional favourite, then brand, name and
 /// price. The screens differ in *what they scope*, never in how a piece looks.
-/// The one deliberate exception is the full catalog, which uses the
-/// [ProductTileVariant.edgeToEdge] variant: the same data in a continuous
-/// photographic grid.
+/// The full catalog keeps its plain-price data and compact caption reserve,
+/// with the same white card and inset photograph as the other surfaces.
 ///
 /// ## Why a presentation widget and not one model
 ///
@@ -64,20 +63,20 @@ extension ProductTileMetrics on ProductTileDensity {
   /// caption peaks near 100pt with a wrapped compare-at price (was 98pt and
   /// overflowed by 9pt); a compact caption peaks near 82pt when the price
   /// wraps under a narrow card (was 74pt and overflowed by up to 25pt).
-  double get captionHeight => this == ProductTileDensity.compact ? 88 : 112;
+  double get captionHeight => this == ProductTileDensity.compact ? 100 : 124;
 }
 
 /// Which presentation a [MonettaProductTile] takes. The data and the anatomy
 /// (photo, brand, name, price) are the same; only the framing differs.
 enum ProductTileVariant {
-  /// A standalone card: the photo is inset on a tinted, rounded ground and the
-  /// whole tile lifts when pressed. Used by Home, search, collections and
+  /// A standalone white card with an inset photograph. The whole tile lifts
+  /// when pressed. Used by Home, search, collections and
   /// favourites, and the default.
   card,
 
-  /// The full catalog's continuous photographic grid. Photos run to the edges
-  /// and meet 4pt apart, with no frame, radius, inset or lift; only the
-  /// caption is inset.
+  /// The full catalog's plain-price card, with a tighter caption reserve and
+  /// no lift. The legacy name is retained for existing callers; its photograph
+  /// now has the same inset and rounded frame as every product card.
   edgeToEdge,
 }
 
@@ -93,33 +92,32 @@ extension ProductTileVariantMetrics on ProductTileVariant {
   bool get _edge => this == ProductTileVariant.edgeToEdge;
 
   /// Horizontal gap between grid columns.
-  double get columnSpacing => _edge ? 4 : BoutiqueSpace.md;
+  double get columnSpacing => BoutiqueSpace.md;
 
-  /// Vertical gap between grid rows. The edge-to-edge tile carries its own
-  /// trailing air instead.
-  double get rowSpacing => _edge ? 0 : BoutiqueSpace.xl;
+  /// Vertical gap between standalone cards.
+  double get rowSpacing => _edge ? BoutiqueSpace.md : BoutiqueSpace.xl;
 
   /// Space between the tile edge and the photograph.
-  double get photoInset => _edge ? 0 : BoutiqueSpace.sm;
+  double get photoInset => BoutiqueSpace.sm;
 
-  BorderRadius get photoRadius =>
-      _edge ? BorderRadius.zero : BoutiqueRadius.tile;
+  BorderRadius get photoRadius => BoutiqueRadius.tile;
 
   /// Horizontal inset of the caption text.
-  double get captionInset => _edge ? BoutiqueSpace.sm : 0;
+  double get captionInset => BoutiqueSpace.md;
 
   /// Gap between the photograph and the caption.
   double get captionGap => _edge ? 10 : BoutiqueSpace.md;
 
-  /// Air inside the tile, under the caption (there is no row spacing).
-  double get captionTrailing => _edge ? BoutiqueSpace.xl + BoutiqueSpace.xs : 0;
+  /// Air inside the card under its caption.
+  double get captionTrailing =>
+      _edge ? BoutiqueSpace.xl + BoutiqueSpace.xs : BoutiqueSpace.sm;
 
   /// Whether the tile rises when pressed.
   bool get lifts => !_edge;
 
   /// Height the grid reserves under the photograph.
   ///
-  /// [ProductTileVariant.card] keeps the measured allowance. The edge-to-edge
+  /// [ProductTileVariant.card] keeps the measured allowance. The catalog
   /// tile reserves exactly brand, a two-line name and one price line. Each
   /// font size is scaled on its own, so a non-linear scaler (Android 14+)
   /// grows the reserve exactly as it grows the text.
@@ -205,10 +203,11 @@ class ProductTileData {
     Product product, {
     CanonicalFacets? facets,
     bool allowNewBadge = true,
+    bool allowDiscounts = true,
   }) {
     final brand = facets?.brand?.value;
     final discount = (product.discountFraction * 100).round();
-    final badge = product.isOnSale && discount > 0
+    final badge = allowDiscounts && product.isOnSale && discount > 0
         ? ProductTileBadge(label: '-$discount%', tone: ProductBadgeTone.sale)
         : allowNewBadge && (facets?.newArrival ?? false)
             ? const ProductTileBadge(
@@ -226,8 +225,9 @@ class ProductTileData {
             : facets.colors.first.value,
       ),
       priceLabel: kMoney.format(product.price),
-      compareAtLabel:
-          product.isOnSale ? kMoney.format(product.compareAtPrice) : null,
+      compareAtLabel: allowDiscounts && product.isOnSale
+          ? kMoney.format(product.compareAtPrice)
+          : null,
       badge: badge,
       imageUrls: product.images,
       inStock: product.isInStock,
@@ -273,6 +273,8 @@ class MonettaProductTile extends StatelessWidget {
     required this.onTap,
     this.density = ProductTileDensity.grid,
     this.variant = ProductTileVariant.card,
+    this.showSaleBadge = true,
+    this.photoInset,
     this.wishlisted = false,
     this.onToggleWishlist,
     this.onQuickView,
@@ -288,6 +290,9 @@ class MonettaProductTile extends StatelessWidget {
 
   /// See [ProductTileVariant]; the card by default.
   final ProductTileVariant variant;
+
+  final bool showSaleBadge;
+  final double? photoInset;
 
   /// Favourite state. The heart is only drawn when [onToggleWishlist] is
   /// given, so a surface without wishlist support never shows a dead control.
@@ -316,7 +321,7 @@ class MonettaProductTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
 
-    final tile = GestureDetector(
+    final content = GestureDetector(
       onTap: onTap,
       onLongPress: onQuickView,
       behavior: HitTestBehavior.opaque,
@@ -329,6 +334,8 @@ class MonettaProductTile extends StatelessWidget {
             child: _TileImage(
               data: data,
               variant: variant,
+              showSaleBadge: showSaleBadge,
+              photoInset: photoInset ?? variant.photoInset,
               wishlisted: wishlisted,
               onToggleWishlist: onToggleWishlist,
               onQuickView: onQuickView,
@@ -338,7 +345,12 @@ class MonettaProductTile extends StatelessWidget {
           ),
           SizedBox(height: variant.captionGap),
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: variant.captionInset),
+            padding: EdgeInsets.fromLTRB(
+              variant.captionInset,
+              0,
+              variant.captionInset,
+              variant.captionTrailing,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -385,11 +397,28 @@ class MonettaProductTile extends StatelessWidget {
       ),
     );
 
+    final tile = DecoratedBox(
+      key: const ValueKey('product-tile-card-surface'),
+      decoration: BoxDecoration(
+        color: palette.canvas,
+        borderRadius: BoutiqueRadius.card,
+        border: Border.all(color: palette.hairline, width: .5),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: .035),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: ClipRRect(borderRadius: BoutiqueRadius.card, child: content),
+    );
+
     return Semantics(
       button: true,
       label: data.semanticLabel,
       child: variant.lifts
-          ? MonettaCardLift(borderRadius: BoutiqueRadius.tile, child: tile)
+          ? MonettaCardLift(borderRadius: BoutiqueRadius.card, child: tile)
           : tile,
     );
   }
@@ -467,6 +496,8 @@ class _TileImage extends StatefulWidget {
   const _TileImage({
     required this.data,
     required this.variant,
+    required this.showSaleBadge,
+    required this.photoInset,
     required this.wishlisted,
     required this.onToggleWishlist,
     required this.overlay,
@@ -476,6 +507,8 @@ class _TileImage extends StatefulWidget {
 
   final ProductTileData data;
   final ProductTileVariant variant;
+  final bool showSaleBadge;
+  final double photoInset;
   final bool wishlisted;
   final VoidCallback? onToggleWishlist;
   final VoidCallback? onQuickView;
@@ -512,16 +545,13 @@ class _TileImageState extends State<_TileImage> {
     final url = candidates.isEmpty ? null : candidates[_activeIndex];
     final badge = widget.data.badge;
 
-    final edge = widget.variant == ProductTileVariant.edgeToEdge;
-
     final photo = MonettaImage(
       key: ValueKey(url ?? 'fallback'),
       url: url,
       fit: BoxFit.contain,
-      // Edge to edge: the widget inset is gone, but the white margin the file
-      // already carries stays. `cover` is chosen only when it crops less than
-      // that margin; otherwise the photo is contained whole.
-      maxCoverTrim: edge ? kPackshotMaxCoverTrim : null,
+      backgroundColor:
+          widget.photoInset == 0 ? kPackshotGround : palette.surface,
+      maxCoverTrim: widget.photoInset == 0 ? kPackshotMaxCoverTrim : null,
       cacheWidth: widget.data.imageCacheWidth,
       fallbackLabel: widget.data.fallbackLabel,
       onFailed: _advance,
@@ -532,13 +562,13 @@ class _TileImageState extends State<_TileImage> {
       children: [
         // Card: `contain` with a small inset. A handbag's handle and straps
         // are the part a shopper recognises, and `cover` crops exactly those.
-        if (edge)
-          photo
-        else
-          Padding(
-            padding: EdgeInsets.all(widget.variant.photoInset),
+        Padding(
+          padding: EdgeInsets.all(widget.photoInset),
+          child: ClipRRect(
+            borderRadius: widget.variant.photoRadius,
             child: photo,
           ),
+        ),
         if (!widget.data.inStock)
           IgnorePointer(
             child: ColoredBox(
@@ -564,7 +594,8 @@ class _TileImageState extends State<_TileImage> {
               ),
             ),
           ),
-        if (badge != null)
+        if (badge != null &&
+            (widget.showSaleBadge || badge.tone != ProductBadgeTone.sale))
           Positioned(
             top: BoutiqueSpace.sm,
             left: BoutiqueSpace.sm,
@@ -600,11 +631,7 @@ class _TileImageState extends State<_TileImage> {
       ],
     );
 
-    if (edge) return stack;
-    return ClipRRect(
-      borderRadius: widget.variant.photoRadius,
-      child: ColoredBox(color: palette.surfaceDeep, child: stack),
-    );
+    return stack;
   }
 }
 

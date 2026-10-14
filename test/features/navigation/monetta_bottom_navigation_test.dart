@@ -143,7 +143,7 @@ void main() {
     }
 
     testWidgets(
-        'NAV-03 label typography: 12-13 px, 1.25 line height, w600/w400',
+        'NAV-03 label typography: Inter like product brands, 12-13 px, 1.25 height, w600/w400',
         (tester) async {
       _phone(tester);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.bag));
@@ -151,6 +151,11 @@ void main() {
 
       for (final d in _destinations) {
         final style = _labelStyle(tester, d);
+        expect(
+          style.fontFamily,
+          kSansFontFamily,
+          reason: '${d.name} family',
+        );
         expect(
           style.fontWeight,
           d == MonettaBottomDestination.bag ? FontWeight.w600 : FontWeight.w400,
@@ -326,7 +331,7 @@ void main() {
       expect(surface.height, 56);
     });
 
-    testWidgets('NAV-06 safe area is honored in full: 34 -> 90 px',
+    testWidgets('NAV-06 the bar ignores the bottom inset: stays 56 px compact',
         (tester) async {
       _phone(tester, bottomInset: 34);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
@@ -336,13 +341,13 @@ void main() {
       expect(surface.left, 0);
       expect(surface.right, 390);
       expect(surface.bottom, 844);
-      expect(surface.height, 90);
+      expect(surface.height, 56);
       for (final d in _destinations) {
         final rect = tester.getRect(_dest(d));
         expect(
           rect.bottom,
-          lessThanOrEqualTo(844 - 34 + 0.01),
-          reason: '${d.name} sits above the home indicator',
+          lessThanOrEqualTo(844 + 0.01),
+          reason: '${d.name} stays inside the compact bar',
         );
         expect(rect.top, greaterThanOrEqualTo(surface.top - 0.01));
       }
@@ -638,7 +643,7 @@ void main() {
           expect(tester.takeException(), isNull);
 
           final surface = tester.getRect(_surface);
-          expect(surface.height, greaterThanOrEqualTo(56 + 34));
+          expect(surface.height, greaterThanOrEqualTo(56));
 
           final heights = <double>[];
           for (final d in _destinations) {
@@ -679,8 +684,8 @@ void main() {
             );
             expect(
               dest.bottom,
-              lessThanOrEqualTo(surface.bottom - 34 + 0.01),
-              reason: '${d.name} ends inside the safe area',
+              lessThanOrEqualTo(surface.bottom + 0.01),
+              reason: '${d.name} ends inside the bar',
             );
             heights.add(label.height);
           }

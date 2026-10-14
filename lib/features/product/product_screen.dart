@@ -1,10 +1,10 @@
 /// Ficha de producto Fig.07 — boutique cálida.
 ///
 /// Galería contenida (nunca recorta asas) con miniaturas, fav y compartir;
-/// marca + nombre + precio con `-X%` solo cuando `compare_at` lo respalda;
+/// marca + nombre + precio actual de la variante seleccionada;
 /// swatches solo con mapeo fiable ([ProductOptionSelector]); envío y entrega
-/// estimadas; muelle inferior con «Agregar al carrito» y, al final de la
-/// información, «Otras formas de comprar» (comprar ahora y apartar); confianza;
+/// en el checkout; muelle inferior con «Agregar al carrito» y, al final de la
+/// información, «Otras formas de comprar» (comprar ahora y apartar);
 /// acordeones Descripción–Detalles–Envíos; relacionados con la [ProductCard]
 /// compartida.
 ///
@@ -29,6 +29,8 @@ import '../../main.dart';
 import '../../reco/events.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
+import '../account/account_screen.dart';
+import '../catalog/search_screen.dart';
 import '../catalog/product_card.dart';
 import '../checkout/checkout_screen.dart';
 import '../checkout/mini_cart.dart' show showMiniCart;
@@ -60,7 +62,7 @@ class _ProductScreenState extends State<ProductScreen> {
   final PageController _gallery = PageController();
   int _page = 0;
   late int _variantIndex = widget.initialVariantIndex;
-  final Set<String> _open = <String>{};
+  final Set<String> _open = <String>{'descripcion', 'detalles', 'envio'};
 
   /// True while an add is in flight; blocks a second tap on any purchase
   /// action so one tap never turns into two units.
@@ -73,7 +75,8 @@ class _ProductScreenState extends State<ProductScreen> {
     super.dispose();
   }
 
-  void _recordDwellAndPop() {
+  void _recordDwell() {
+    _dwell.stop();
     final store = StoreScope.of(context);
     store.record(
       EventType.productView,
@@ -81,7 +84,6 @@ class _ProductScreenState extends State<ProductScreen> {
       dwellMs: _dwell.elapsedMilliseconds,
     );
     NotificationScope.maybeOf(context)?.recordPushOutcome('product_viewed');
-    Navigator.of(context).pop();
   }
 
   Future<void> _openApartado(Product product) async {
@@ -228,9 +230,6 @@ class _ProductScreenState extends State<ProductScreen> {
     final selectable = selectableVariants(product);
     final selected = selectedVariant(product, _variantIndex);
     final price = selected?.price ?? product.price;
-    final compare = selected?.compareAtPrice ?? product.compareAtPrice;
-    final onSale = selectionOnSale(product, _variantIndex);
-    final discount = selectionDiscountPercent(product, _variantIndex);
     final inStock = selectionInStock(product, _variantIndex);
     final images = product.images.isEmpty ? <String?>[null] : product.images;
     final shopifyDescription = shopifyDescriptionText(product.descriptionHtml);
@@ -258,27 +257,24 @@ class _ProductScreenState extends State<ProductScreen> {
     final palette = context.boutique;
 
     return PopScope(
-      canPop: false,
       onPopInvokedWithResult: (didPop, _) {
-        if (!didPop) _recordDwellAndPop();
+        if (didPop) _recordDwell();
       },
       child: Scaffold(
         backgroundColor: palette.canvas,
         appBar: buildProductDetailAppBar(
           context,
-          title: shopperProductName(product.title),
-          onBack: _recordDwellAndPop,
-          actionSlots: 2,
+          onBack: () => Navigator.of(context).maybePop(),
+          onSearch: () => openSearch(context),
           actions: [
             IconButton(
-              key: const Key('product-header-favorite'),
-              tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
-              icon: Icon(
-                wishlisted ? Icons.favorite : Icons.favorite_border,
-                size: 20,
-                color: wishlisted ? palette.goldText : palette.ink,
+              key: const Key('product-header-account'),
+              tooltip: 'Mi cuenta',
+              icon: const Icon(Icons.person_outline, size: 23),
+              onPressed: () => openAccount(
+                context,
+                controller: AccountScope.of(context),
               ),
-              onPressed: () => store.toggleWishlist(product.id),
             ),
             const BagAction(),
           ],
@@ -337,6 +333,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       children: [
                         Text(
                           kMoney.format(price),
+                          key: const ValueKey('product-current-price'),
                           style: boutiqueText(
                             size: 20,
                             weight: FontWeight.w700,
@@ -344,52 +341,8 @@ class _ProductScreenState extends State<ProductScreen> {
                             height: 1.2,
                           ),
                         ),
-                        // Previous price + -% render only off real
-                        // `compare_at` data — never otherwise.
-                        if (onSale && compare != null) ...[
-                          Text(
-                            kMoney.format(compare),
-                            style: boutiqueText(
-                              size: 14,
-                              color: palette.inkMuted,
-                              height: 1.2,
-                              decoration: TextDecoration.lineThrough,
-                            ),
-                          ),
-                          if (discount > 0)
-                            Container(
-                              key: const ValueKey('discount-badge'),
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 10,
-                                vertical: 5,
-                              ),
-                              decoration: BoxDecoration(
-                                color: palette.sale,
-                                borderRadius: BoutiqueRadius.capsule,
-                              ),
-                              child: Text(
-                                '-$discount%',
-                                style: boutiqueEyebrow(
-                                  size: 11,
-                                  color: const Color(0xFFFFFFFF),
-                                ),
-                              ),
-                            ),
-                        ],
                       ],
                     ),
-                    const SizedBox(height: BoutiqueSpace.md),
-                    if (inStock)
-                      Text(
-                        kApartadoSentence,
-                        style: boutiqueText(
-                          size: 13,
-                          color: palette.ink,
-                          height: 1.45,
-                        ),
-                      ),
-                    const SizedBox(height: BoutiqueSpace.sm),
-                    _AvailabilityLine(inStock: inStock),
                     if (selectable.isNotEmpty) ...[
                       const SizedBox(height: BoutiqueSpace.xl),
                       ProductOptionSelector(
@@ -399,10 +352,6 @@ class _ProductScreenState extends State<ProductScreen> {
                       ),
                     ],
                     const SizedBox(height: BoutiqueSpace.xl),
-                    _ShippingCard(),
-                    const SizedBox(height: BoutiqueSpace.xl),
-                    const _TrustRow(),
-                    const SizedBox(height: BoutiqueSpace.sm),
                     _BoutiqueAccordion(
                       label: 'Descripción',
                       open: _open.contains('descripcion'),
@@ -413,7 +362,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       }),
                       child: Text(
                         (description == null || description.isEmpty)
-                            ? 'Pieza original importada de Estados Unidos.'
+                            ? 'Consulta los detalles de esta pieza.'
                             : description,
                         style: boutiqueText(
                           size: 14,
@@ -441,9 +390,7 @@ class _ProductScreenState extends State<ProductScreen> {
                             : _open.add('envio');
                       }),
                       child: Text(
-                        'Envío a todo México en 3 a 5 días hábiles, por DHL, FedEx o Estafeta. '
-                        'Gratis desde ${kMoney.format(kFreeShippingThreshold)}. '
-                        'Si la pieza no es lo que esperabas, escríbenos por WhatsApp y lo resolvemos.',
+                        'Consulta las condiciones de envío y cambios con nuestro equipo por WhatsApp.',
                         style: boutiqueText(
                           size: 14,
                           color: palette.ink,
@@ -479,7 +426,10 @@ class _ProductScreenState extends State<ProductScreen> {
                     style: boutiqueSectionHeading(color: palette.ink),
                   ),
                 ),
-                _Rail(products: related),
+                _Rail(
+                  key: const ValueKey('product-recommendations'),
+                  products: related,
+                ),
               ],
               if (recent.isNotEmpty) ...[
                 const SizedBox(height: BoutiqueSpace.xxl),
@@ -495,7 +445,10 @@ class _ProductScreenState extends State<ProductScreen> {
                     style: boutiqueSectionHeading(color: palette.ink),
                   ),
                 ),
-                _Rail(products: recent),
+                _Rail(
+                  key: const ValueKey('product-recently-viewed'),
+                  products: recent,
+                ),
               ],
               const SizedBox(height: 40),
             ],
@@ -560,7 +513,7 @@ class _Gallery extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     return ColoredBox(
-      color: palette.surfaceDeep,
+      color: kPackshotGround,
       child: AspectRatio(
         aspectRatio: 4 / 5,
         child: Stack(
@@ -574,20 +527,17 @@ class _Gallery extends StatelessWidget {
                 tag: i == 0
                     ? 'product-image-${product.id}'
                     : 'p-${product.id}-$i',
-                // `contain` + inset: handles and straps are the
-                // recognisable part — `cover` crops exactly those.
-                child: Padding(
-                  padding: const EdgeInsets.all(BoutiqueSpace.sm),
-                  child: InteractiveViewer(
-                    minScale: 1,
-                    maxScale: 2.2,
-                    child: MonettaImage(
-                      url: images[i],
-                      fit: BoxFit.contain,
-                      cacheWidth: MediaUrl.heroWidth,
-                      fallbackLabel:
-                          '${shopperProductName(product.title)} · Monetta',
-                    ),
+                child: InteractiveViewer(
+                  minScale: 1,
+                  maxScale: 2.2,
+                  child: MonettaImage(
+                    url: images[i],
+                    fit: BoxFit.contain,
+                    backgroundColor: kPackshotGround,
+                    maxCoverTrim: kPackshotMaxCoverTrim,
+                    cacheWidth: MediaUrl.heroWidth,
+                    fallbackLabel:
+                        '${shopperProductName(product.title)} · Monetta',
                   ),
                 ),
               ),
@@ -620,6 +570,7 @@ class _Gallery extends StatelessWidget {
               child: Column(
                 children: [
                   _RoundPhotoButton(
+                    key: const Key('product-gallery-favorite'),
                     tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
                     icon: wishlisted ? Icons.favorite : Icons.favorite_border,
                     filled: wishlisted,
@@ -654,6 +605,7 @@ class _RoundPhotoButton extends StatelessWidget {
     required this.icon,
     required this.onPressed,
     this.filled = false,
+    super.key,
   });
 
   final String tooltip;
@@ -673,7 +625,7 @@ class _RoundPhotoButton extends StatelessWidget {
         height: BoutiqueSpace.tapTarget,
         child: Center(
           child: Material(
-            color: palette.surface,
+            color: kPackshotGround,
             shape: const CircleBorder(),
             elevation: 0,
             child: InkWell(
@@ -687,7 +639,7 @@ class _RoundPhotoButton extends StatelessWidget {
                   child: Icon(
                     icon,
                     size: 19,
-                    color: filled ? palette.goldText : palette.ink,
+                    color: filled ? palette.goldText : const Color(0xFF111111),
                   ),
                 ),
               ),
@@ -716,7 +668,7 @@ class _Thumbnails extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     return Container(
-      color: palette.surfaceDeep,
+      color: kPackshotGround,
       padding: const EdgeInsets.fromLTRB(
         BoutiqueSpace.gutter,
         BoutiqueSpace.sm,
@@ -744,7 +696,7 @@ class _Thumbnails extends StatelessWidget {
                       width: 56,
                       height: 68,
                       decoration: BoxDecoration(
-                        color: palette.surface,
+                        color: kPackshotGround,
                         borderRadius: BoutiqueRadius.tile,
                         border: Border.all(
                           color: i == active ? palette.ink : palette.hairline,
@@ -756,6 +708,7 @@ class _Thumbnails extends StatelessWidget {
                         child: MonettaImage(
                           url: images[i],
                           fit: BoxFit.contain,
+                          backgroundColor: kPackshotGround,
                           cacheWidth: MediaUrl.thumbWidth,
                           fallbackLabel: title,
                         ),
@@ -802,140 +755,6 @@ class _RuleIndicator extends StatelessWidget {
 // ---------------------------------------------------------------------------
 // Info blocks
 // ---------------------------------------------------------------------------
-
-class _AvailabilityLine extends StatelessWidget {
-  const _AvailabilityLine({required this.inStock});
-
-  final bool inStock;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Row(
-      children: [
-        Container(
-          width: 6,
-          height: 6,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: inStock ? const Color(0xFF3B7B4A) : palette.sale,
-          ),
-        ),
-        const SizedBox(width: BoutiqueSpace.sm),
-        Expanded(
-          child: Text(
-            inStock
-                ? 'Disponible · envío 3 a 5 días · gratis desde ${kMoney.format(kFreeShippingThreshold)}'
-                : 'Agotado · te avisamos cuando vuelva',
-            style: boutiqueText(size: 12, color: palette.inkMuted, height: 1.4),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _ShippingCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Container(
-      padding: const EdgeInsets.all(BoutiqueSpace.lg),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BoutiqueRadius.card,
-        border: Border.all(color: palette.hairline, width: 1),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(Icons.local_shipping_outlined, size: 20, color: palette.ink),
-              const SizedBox(width: BoutiqueSpace.md),
-              Expanded(
-                child: Text(
-                  'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)}',
-                  style: boutiqueText(
-                    size: 13,
-                    weight: FontWeight.w600,
-                    color: palette.ink,
-                    height: 1.3,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: BoutiqueSpace.sm),
-          Row(
-            children: [
-              const SizedBox(width: 32),
-              Expanded(
-                child: Text(
-                  'Entrega estimada: 3 a 5 días hábiles a todo México.',
-                  style: boutiqueText(
-                    size: 12,
-                    color: palette.inkMuted,
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _TrustRow extends StatelessWidget {
-  const _TrustRow();
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    const items = <(IconData, String)>[
-      (Icons.verified_outlined, 'Original'),
-      (Icons.flight_outlined, 'Importado de EE. UU.'),
-      (Icons.lock_outline, 'Pago seguro'),
-    ];
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: BoutiqueSpace.lg,
-        horizontal: BoutiqueSpace.sm,
-      ),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: palette.hairline, width: 1),
-          bottom: BorderSide(color: palette.hairline, width: 1),
-        ),
-      ),
-      child: Row(
-        children: [
-          for (var i = 0; i < items.length; i++)
-            Expanded(
-              child: Column(
-                children: [
-                  Icon(items[i].$1, size: 20, color: palette.ink),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  Text(
-                    items[i].$2,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: boutiqueText(
-                      size: 11,
-                      color: palette.inkMuted,
-                      height: 1.3,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-}
 
 class _BoutiqueAccordion extends StatelessWidget {
   const _BoutiqueAccordion({
@@ -1134,7 +953,7 @@ class _Details extends StatelessWidget {
     ];
     if (rows.isEmpty) {
       return Text(
-        'Pieza original importada de Estados Unidos.',
+        'No hay detalles adicionales de esta pieza.',
         style: boutiqueText(size: 14, color: palette.ink, height: 1.6),
       );
     }
@@ -1168,7 +987,7 @@ class _Details extends StatelessWidget {
 }
 
 class _Rail extends StatelessWidget {
-  const _Rail({required this.products});
+  const _Rail({required this.products, super.key});
 
   final List<Product> products;
 
@@ -1197,6 +1016,8 @@ class _Rail extends StatelessWidget {
             width: tileWidth,
             child: ProductCard(
               product: product,
+              photoInset: 0,
+              showSaleBadge: false,
               onQuickView: () => showProductQuickView(context, product),
             ),
           );

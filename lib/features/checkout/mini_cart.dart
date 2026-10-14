@@ -38,10 +38,11 @@ class MiniCartSheet extends StatelessWidget {
     final last = lines.isEmpty ? null : lines.last;
     final count = store.bagQuantity;
 
-    return SafeArea(
-      child: Material(
-        type: MaterialType.transparency,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+    return Material(
+      color: palette.surface,
+      borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+      child: SafeArea(
+        top: false,
         child: Container(
           decoration: BoxDecoration(
             color: palette.surface,

@@ -91,8 +91,7 @@ Color? _scaffoldColor(WidgetTester tester) {
 Color? _bottomBarColor(WidgetTester tester) {
   final surface = find.byKey(const Key('bottom-nav-surface'));
   expect(surface, findsOneWidget);
-  final decoration = tester.widget<DecoratedBox>(surface).decoration;
-  return (decoration as BoxDecoration).color;
+  return tester.widget<Material>(surface).color;
 }
 
 BrowseEntry _monettaItem(int i, String category) =>
@@ -274,8 +273,8 @@ Future<void> _mountContact(WidgetTester tester, ThemeData theme) async {
   await _settle(tester);
 }
 
-/// Scrolls the home past its full-bleed hero so the floating bar takes its
-/// solid surface — the home equivalent of scrolling a collection banner away.
+/// Scrolls the home past its hero — the home equivalent of scrolling a
+/// collection banner away.
 Future<void> _scrollHomePastHero(WidgetTester tester) async {
   await tester.drag(
     find.byKey(const ValueKey('home-discovery-header')),
@@ -285,10 +284,8 @@ Future<void> _scrollHomePastHero(WidgetTester tester) async {
 }
 
 final _screens = <_Screen>[
-  // Home is not in this opaque-bar loop on purpose: its hero is full-bleed,
-  // so the bar floats transparent over the photograph at rest
-  // and only turns solid once the hero scrolls away. Dedicated Home cases
-  // below pin both states.
+  // Home is not in this loop: it has no page title header. Dedicated Home
+  // cases below pin its bar at rest and after the hero scrolls away.
   const _Screen('Catálogo', _mountCatalog),
   const _Screen('Colección (sólido)', _mountCollection),
   const _Screen('Marca', _mountBrand),
@@ -317,30 +314,44 @@ void main() {
   final light = buildTheme();
   final dark = buildDarkTheme();
 
-  group('UI-THEME-04 light: white page, grey top bar', () {
+  group('UI-THEME-04 light: white page and screen header', () {
     for (final screen in _screens) {
+      final topBarColor = _white;
       testWidgets(
-        'UI-THEME-04 (objetivo) ${screen.name}: top bar ${_hex(_barGrey)}, '
+        'UI-THEME-04 (objetivo) ${screen.name}: top bar ${_hex(topBarColor)}, '
         'scaffold ${_hex(_white)}',
         (tester) async {
           await screen.mount(tester, light);
 
           final problems = <String>[
-            if (_topBarColor(tester) != _barGrey)
+            if (_topBarColor(tester) != topBarColor)
               'top bar painted ${_hex(_topBarColor(tester))}, '
-                  'expected ${_hex(_barGrey)}',
+                  'expected ${_hex(topBarColor)}',
             if (_scaffoldColor(tester) != _white)
               'scaffold painted ${_hex(_scaffoldColor(tester))}, '
                   'expected ${_hex(_white)}',
           ];
           expect(problems, isEmpty);
+          if (screen.name != 'Producto') {
+            final title = find.byKey(const ValueKey('monetta-page-title'));
+            final back = find.byKey(const ValueKey('monetta-page-back'));
+            expect(
+              tester.widget<Text>(title).style!.fontFamily,
+              kBoutiqueSerifFamily,
+            );
+            expect(tester.widget<Text>(title).textAlign, TextAlign.start);
+            expect(
+              tester.getRect(title).left,
+              closeTo(tester.getRect(back).right, .01),
+            );
+          }
         },
       );
     }
 
     testWidgets(
-      'UI-THEME-04 (objetivo) Colección con foto: the bar turns solid '
-      '${_hex(_barGrey)} once the banner has scrolled away',
+      'UI-THEME-04 (objetivo) Colección con foto: the white bar stays fixed '
+      '${_hex(_white)} once the banner has scrolled away',
       (tester) async {
         _phone(tester);
         final store = await _loadedStore();
@@ -377,17 +388,17 @@ void main() {
           reason: 'precondition: the banner has scrolled away',
         );
         final problems = <String>[
-          if (_topBarColor(tester) != _barGrey)
+          if (_topBarColor(tester) != _white)
             'solid bar painted ${_hex(_topBarColor(tester))}, '
-                'expected ${_hex(_barGrey)}',
+                'expected ${_hex(_white)}',
         ];
         expect(problems, isEmpty);
       },
     );
 
     testWidgets(
-      'UI-THEME-04 (caracterización) Colección con foto: the bar stays '
-      'transparent over the photograph',
+      'UI-THEME-04 (caracterización) Colección con foto: the bar stays white '
+      'above the photograph',
       (tester) async {
         _phone(tester);
         final store = await _loadedStore();
@@ -404,20 +415,20 @@ void main() {
         );
         await _settle(tester);
 
-        expect(_topBarColor(tester), Colors.transparent);
+        expect(_topBarColor(tester), _white);
       },
     );
 
     testWidgets(
-      'UI-THEME-04 (caracterización) Home: the bar stays transparent over '
-      'the full-bleed hero',
+      'UI-THEME-04 (caracterización) Home: the bar is ${_hex(_white)} above '
+      'the hero',
       (tester) async {
         await _mountHome(tester, light);
 
         final problems = <String>[
-          if (_topBarColor(tester) != Colors.transparent)
+          if (_topBarColor(tester) != _white)
             'top bar painted ${_hex(_topBarColor(tester))}, '
-                'expected transparent over the hero',
+                'expected ${_hex(_white)} above the hero',
           if (_scaffoldColor(tester) != _white)
             'scaffold painted ${_hex(_scaffoldColor(tester))}, '
                 'expected ${_hex(_white)}',
@@ -427,80 +438,48 @@ void main() {
     );
 
     testWidgets(
-      'UI-THEME-04 (objetivo) Home: the bar turns solid '
-      '${_hex(_barGrey)} once the hero has scrolled away',
+      'UI-THEME-04 (objetivo) Home: the bar stays ${_hex(_white)} once the '
+      'hero has scrolled away',
       (tester) async {
         await _mountHome(tester, light);
         await _scrollHomePastHero(tester);
 
         final problems = <String>[
-          if (_topBarColor(tester) != _barGrey)
+          if (_topBarColor(tester) != _white)
             'solid bar painted ${_hex(_topBarColor(tester))}, '
-                'expected ${_hex(_barGrey)}',
+                'expected ${_hex(_white)}',
         ];
         expect(problems, isEmpty);
       },
     );
   });
 
-  group('UI-THEME-05 light: bottom bar matches the top bar', () {
-    final withBottomBar = <_Screen>[
-      // Home is covered by its own case below: over the full-bleed hero the
-      // top bar is transparent at rest, so it only matches the bottom bar
-      // once the hero has scrolled away.
+  group('UI-THEME-05 light: floating navigation', () {
+    for (final screen in <_Screen>[
       const _Screen('Catálogo', _mountCatalog),
       const _Screen('Colección', _mountCollection),
-    ];
-    for (final screen in withBottomBar) {
-      testWidgets(
-        'UI-THEME-05 (objetivo) ${screen.name}: bottom bar ${_hex(_barGrey)}, '
-        'equal to the top bar',
-        (tester) async {
-          await screen.mount(tester, light);
-
-          final bottom = _bottomBarColor(tester);
-          final top = _topBarColor(tester);
-          final problems = <String>[
-            if (bottom != _barGrey)
-              'bottom bar painted ${_hex(bottom)}, expected ${_hex(_barGrey)}',
-            if (bottom != top)
-              'bottom bar ${_hex(bottom)} differs from the top bar '
-                  '${_hex(top)}',
-          ];
-          expect(problems, isEmpty);
-        },
-      );
+    ]) {
+      testWidgets('${screen.name}: light floating bar with a white page header',
+          (tester) async {
+        await screen.mount(tester, light);
+        expect(_bottomBarColor(tester), _white);
+        expect(_topBarColor(tester), _white);
+      });
     }
-
-    testWidgets(
-      'UI-THEME-05 (objetivo) Home: bottom bar ${_hex(_barGrey)}, equal to '
-      'the top bar once the hero has scrolled away',
-      (tester) async {
-        await _mountHome(tester, light);
-
-        expect(_bottomBarColor(tester), _barGrey);
-        expect(_topBarColor(tester), Colors.transparent);
-
-        await _scrollHomePastHero(tester);
-
-        final bottom = _bottomBarColor(tester);
-        final top = _topBarColor(tester);
-        final problems = <String>[
-          if (bottom != _barGrey)
-            'bottom bar painted ${_hex(bottom)}, expected ${_hex(_barGrey)}',
-          if (bottom != top)
-            'bottom bar ${_hex(bottom)} differs from the top bar '
-                '${_hex(top)}',
-        ];
-        expect(problems, isEmpty);
-      },
-    );
+    testWidgets('Home: floating bar stays light while the hero scrolls away',
+        (tester) async {
+      await _mountHome(tester, light);
+      expect(_bottomBarColor(tester), _white);
+      expect(_topBarColor(tester), _white);
+      await _scrollHomePastHero(tester);
+      expect(_bottomBarColor(tester), _white);
+      expect(_topBarColor(tester), _white);
+    });
   });
 
   group('UI-THEME-06 dark: unchanged', () {
     final subset = <_Screen>[
-      // Home is covered by its own case below: over the full-bleed hero the
-      // bar floats transparent at rest and takes the dark canvas on scroll.
+      // Home is covered by its own case below, at rest and after scroll.
       const _Screen('Catálogo', _mountCatalog),
       const _Screen('Producto', _mountProduct),
       const _Screen('Cuenta', _mountAccount),
@@ -519,12 +498,12 @@ void main() {
     }
 
     testWidgets(
-      'UI-THEME-06 (caracterización) Home: transparent over the hero, dark '
-      'canvas once it scrolls away',
+      'UI-THEME-06 (caracterización) Home: the bar is the dark canvas above '
+      'the hero and once it scrolls away',
       (tester) async {
         await _mountHome(tester, dark);
 
-        expect(_topBarColor(tester), Colors.transparent);
+        expect(_topBarColor(tester), MonettaColors.dark.canvas);
         expect(_scaffoldColor(tester), MonettaColors.dark.canvas);
 
         await _scrollHomePastHero(tester);
@@ -546,7 +525,7 @@ void main() {
 
           expect(
             _bottomBarColor(tester),
-            MonettaColors.dark.navigationSurface,
+            const Color(0xFF191A18),
           );
         },
       );

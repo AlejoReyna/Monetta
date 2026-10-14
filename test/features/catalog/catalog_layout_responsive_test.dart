@@ -5,14 +5,15 @@ import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
+import 'package:monetta_app/features/navigation/monetta_floating_bottom_navigation.dart';
 import 'package:monetta_app/main.dart';
 
 import '../../support/catalog_browse_fixtures.dart';
 
 // RESP-01: the catalog, the collections and the bare bar mount without a
 // layout error at every phone width and text scale of the matrix, with a
-// bottom inset of 34, and nothing is laid out below the bottom edge of the
-// view.
+// bottom inset of 34 present in the view, and
+// nothing is laid out below the bottom edge of the view.
 
 const _widths = [320.0, 390.0, 430.0, 768.0];
 const _scales = [1.0, 2.0];
@@ -40,20 +41,24 @@ Widget _app(Widget home, double scale) => MaterialApp(
       home: home,
     );
 
-/// No overflow was reported and nothing sits below the view's bottom edge:
-/// the bar is docked to the edge and its destinations end above the inset.
-void _expectContained(WidgetTester tester) {
+/// Both navigation variants stay within the view; the new one has a gap.
+void _expectContained(WidgetTester tester, {bool floating = true}) {
   expect(tester.takeException(), isNull);
 
   final surface = tester.getRect(find.byKey(const Key('bottom-nav-surface')));
   expect(surface.bottom, lessThanOrEqualTo(_height + 0.01));
-  expect(surface.bottom, closeTo(_height, 0.01), reason: 'docked');
+  if (floating) {
+    expect(surface.bottom, lessThan(_height), reason: 'floating gap');
+    expect(surface.left, greaterThan(0), reason: 'floating side margin');
+  } else {
+    expect(surface.bottom, closeTo(_height, 0.01), reason: 'legacy docked bar');
+  }
   for (final d in MonettaBottomDestination.values) {
     final rect = tester.getRect(find.byKey(Key('bottom-nav-${d.name}')));
     expect(
       rect.bottom,
-      lessThanOrEqualTo(_height - _inset + 0.01),
-      reason: '${d.name} ends above the inset',
+      lessThanOrEqualTo(_height + 0.01),
+      reason: '${d.name} ends inside the compact bar',
     );
     expect(rect.top, greaterThanOrEqualTo(surface.top - 0.01));
   }
@@ -104,7 +109,7 @@ void main() {
         );
       });
 
-      testWidgets('RESP-01 bottom bar alone, $label', (tester) async {
+      testWidgets('RESP-01 legacy bottom bar alone, $label', (tester) async {
         _view(tester, width);
         await tester.pumpWidget(
           _app(
@@ -121,6 +126,24 @@ void main() {
         );
         await tester.pump();
 
+        _expectContained(tester, floating: false);
+      });
+      testWidgets('RESP-01 floating bottom bar alone, $label', (tester) async {
+        _view(tester, width);
+        await tester.pumpWidget(
+          _app(
+            Scaffold(
+              body: const SizedBox.expand(),
+              bottomNavigationBar: MonettaFloatingBottomNavigation(
+                current: MonettaBottomDestination.catalog,
+                bagCount: 12,
+                onSelected: (_) {},
+              ),
+            ),
+            scale,
+          ),
+        );
+        await tester.pump();
         _expectContained(tester);
       });
     }

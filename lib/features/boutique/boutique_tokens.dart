@@ -415,8 +415,7 @@ class BoutiqueButton extends StatelessWidget {
   }
 }
 
-/// Section opener: a sans title with an optional trailing text action, sized
-/// for the 24–32px module rhythm. Sans, not serif — see [boutiqueTitle].
+/// Home section opener, using the same editorial face as the bag heading.
 class BoutiqueSectionHeader extends StatelessWidget {
   const BoutiqueSectionHeader({
     required this.title,
@@ -455,7 +454,7 @@ class BoutiqueSectionHeader extends StatelessWidget {
                   ),
                   const SizedBox(height: BoutiqueSpace.xs),
                 ],
-                Text(title, style: boutiqueTitle(color: palette.ink)),
+                Text(title, style: boutiqueDisplay(24, color: palette.ink)),
               ],
             ),
           ),

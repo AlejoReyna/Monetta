@@ -12,9 +12,9 @@ import 'package:monetta_app/main.dart';
 import '../../support/catalog_browse_fixtures.dart';
 
 // Contract of the compact bottom bar (FICHA-T1, BRIEF 2.1): 56 px of
-// interactive content plus the real bottom inset, applied once, with the
-// surface painted under the inset. Destinations stay >= 48x48 and the bar
-// grows (never clips) with large text.
+// interactive content, always, with no bottom safe-area inset — the surface
+// stays docked to the edge and the OS home indicator floats over it.
+// Destinations stay >= 48x48 and the bar grows (never clips) with large text.
 //
 // Text note: FlutterTest renders every glyph one em wide, so the bar's
 // fit-to-column logic is active even at scale 1.0 on phone-width columns.
@@ -135,18 +135,13 @@ void main() {
     }
   });
 
-  group('NAV-02 the safe area is added once and painted under', () {
-    for (final (inset, expectedHeight) in [
-      (0.0, 56.0),
-      (20.0, 76.0),
-      (34.0, 90.0),
-    ]) {
-      testWidgets('NAV-02 inset ${inset.toInt()} -> ${expectedHeight.toInt()}',
-          (tester) async {
+  group('NAV-02 the bar stays 56 px compact with any bottom inset', () {
+    for (final inset in [0.0, 20.0, 34.0]) {
+      testWidgets('NAV-02 inset ${inset.toInt()} -> 56', (tester) async {
         await _pumpBar(tester, inset: inset);
 
         final surface = tester.getRect(_surface);
-        expect(surface.height, expectedHeight, reason: '56 + inset, once');
+        expect(surface.height, 56, reason: 'always 56, no inset added');
         expect(surface.bottom, _viewHeight, reason: 'docked to the bottom');
         expect(surface.left, 0);
         expect(surface.right, 390);
@@ -155,14 +150,14 @@ void main() {
           final rect = tester.getRect(_dest(d));
           expect(
             rect.bottom,
-            closeTo(_viewHeight - inset, 0.01),
-            reason: '${d.name} stops above the inset',
+            closeTo(_viewHeight, 0.01),
+            reason: '${d.name} fills the compact bar',
           );
           expect(rect.height, 56, reason: '${d.name} keeps 56 of content');
         }
 
-        // The surface color is painted by the surface itself, so it also
-        // fills the area under the inset.
+        // The surface color is painted by the surface itself, docked to the
+        // bottom edge with no inset.
         final decorated = tester.widget<DecoratedBox>(_surface);
         final colors =
             tester.element(find.byType(MonettaBottomNavigation)).monettaColors;
@@ -330,9 +325,9 @@ void main() {
           'contenido (ancho ${width.toInt()})', (tester) async {
         const inset = 34.0;
 
-        // Control: at scale 1.0 the bar is exactly 56 + inset.
+        // Control: at scale 1.0 the bar is exactly 56.
         await _pumpBar(tester, width: width, inset: inset);
-        expect(tester.getSize(_surface).height, 56 + inset, reason: 'x1.0');
+        expect(tester.getSize(_surface).height, 56, reason: 'x1.0');
 
         await _pumpBar(tester, width: width, inset: inset, scale: 2.0);
         expect(tester.takeException(), isNull);
@@ -340,8 +335,8 @@ void main() {
         final surface = tester.getRect(_surface);
         expect(
           surface.height,
-          greaterThanOrEqualTo(56 + inset),
-          reason: 'never below the 56 px floor plus the inset',
+          greaterThanOrEqualTo(56),
+          reason: 'never below the 56 px floor',
         );
         expect(surface.bottom, _viewHeight);
 
@@ -356,7 +351,7 @@ void main() {
         }
         expect(
           surface.height,
-          greaterThanOrEqualTo(inset + tallestStack),
+          greaterThanOrEqualTo(tallestStack),
           reason: 'the content ($tallestStack) must fit in the bar',
         );
 
@@ -384,7 +379,7 @@ void main() {
             lessThanOrEqualTo(dest.bottom + 0.5),
             reason: '${d.name} label bottom',
           );
-          expect(dest.bottom, lessThanOrEqualTo(_viewHeight - inset + 0.01));
+          expect(dest.bottom, lessThanOrEqualTo(_viewHeight + 0.01));
 
           final rich = find.descendant(
             of: _label(d),
@@ -457,7 +452,7 @@ void main() {
       );
     });
 
-    testWidgets('NAV-04b the catalog bar measures 90 with an inset of 34',
+    testWidgets('NAV-04b the catalog bar floats above the bottom inset of 34',
         (tester) async {
       _view(tester, inset: 34);
       await tester.pumpWidget(
@@ -469,11 +464,13 @@ void main() {
       await tester.pump();
 
       final surface = tester.getRect(_surface);
-      expect(surface.height, 90);
-      expect(surface.bottom, _viewHeight);
+      expect(surface.height, greaterThanOrEqualTo(68));
+      expect(surface.bottom, lessThan(_viewHeight));
+      expect(surface.left, greaterThan(0));
     });
 
-    testWidgets('NAV-04b the collection bar measures 90 with an inset of 34',
+    testWidgets(
+        'NAV-04b the collection bar floats above the bottom inset of 34',
         (tester) async {
       _view(tester, inset: 34);
       final store = await _loadedStore();
@@ -493,8 +490,9 @@ void main() {
       await tester.pump();
 
       final surface = tester.getRect(_surface);
-      expect(surface.height, 90);
-      expect(surface.bottom, _viewHeight);
+      expect(surface.height, greaterThanOrEqualTo(68));
+      expect(surface.bottom, lessThan(_viewHeight));
+      expect(surface.left, greaterThan(0));
     });
   });
 }

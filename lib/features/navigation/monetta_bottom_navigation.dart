@@ -65,44 +65,40 @@ class MonettaBottomNavigation extends StatelessWidget {
         color: colors.navigationSurface,
         border: Border(top: BorderSide(color: colors.divider, width: 0.5)),
       ),
-      // Ink and focus paint on the bar's surface.
+      // Ink and focus paint on the bar's surface. Compact by decision: no
+      // bottom safe-area inset, so the bar is always 56 px of content docked
+      // to the edge; the OS home indicator floats over the surface.
       child: Material(
         type: MaterialType.transparency,
-        child: SafeArea(
-          top: false,
-          maintainBottomViewPadding: true,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: _kBarSidePadding),
-            child: Center(
-              heightFactor: 1,
-              child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: _kBarMaxContentWidth),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final labelScaler = _fittedLabelScaler(
-                      context,
-                      constraints.maxWidth /
-                          MonettaBottomDestination.values.length,
-                    );
-                    return Row(
-                      children: [
-                        for (final destination
-                            in MonettaBottomDestination.values)
-                          Expanded(
-                            child: _NavItem(
-                              destination: destination,
-                              selected: destination == current,
-                              bagCount: bagCount,
-                              labelScaler: labelScaler,
-                              animationsDisabled: animationsDisabled,
-                              onSelected: onSelected,
-                            ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: _kBarSidePadding),
+          child: Center(
+            heightFactor: 1,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: _kBarMaxContentWidth),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final labelScaler = _fittedLabelScaler(
+                    context,
+                    constraints.maxWidth /
+                        MonettaBottomDestination.values.length,
+                  );
+                  return Row(
+                    children: [
+                      for (final destination in MonettaBottomDestination.values)
+                        Expanded(
+                          child: _NavItem(
+                            destination: destination,
+                            selected: destination == current,
+                            bagCount: bagCount,
+                            labelScaler: labelScaler,
+                            animationsDisabled: animationsDisabled,
+                            onSelected: onSelected,
                           ),
-                      ],
-                    );
-                  },
-                ),
+                        ),
+                    ],
+                  );
+                },
               ),
             ),
           ),

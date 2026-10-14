@@ -39,6 +39,43 @@ HttpCustomerIdentityService _serviceReturning(
 }
 
 void main() {
+  group('Profile name', () {
+    CustomerIdentity parse(Map<String, Object?> fields) =>
+        HttpCustomerIdentityService.parseIdentity(
+          utf8.encode(
+            jsonEncode({
+              'data': {
+                'customer': {'id': 'gid://shopify/Customer/7', ...fields},
+              },
+            }),
+          ),
+        );
+
+    test('first and last name win over the displayName email fallback', () {
+      expect(
+        parse({
+          'firstName': ' Alexis ',
+          'lastName': ' Reyna ',
+          'displayName': 'alexis@example.com',
+        }).displayName,
+        'Alexis Reyna',
+      );
+      expect(HttpCustomerIdentityService.identityQuery, contains('firstName'));
+      expect(HttpCustomerIdentityService.identityQuery, contains('lastName'));
+    });
+
+    test('missing names do not turn emails or phones into a profile name', () {
+      for (final value in ['ana@example.com', '+52 811 234 5678', '', null]) {
+        expect(parse({'displayName': value}).displayName, isNull);
+      }
+    });
+
+    test('a single name and a genuine display name remain usable', () {
+      expect(parse({'firstName': 'Ana'}).displayName, 'Ana');
+      expect(parse({'displayName': '  Ana   Ruiz  '}).displayName, 'Ana Ruiz');
+    });
+  });
+
   group('HttpCustomerIdentityService', () {
     test('sends the access token raw, with no Bearer prefix', () async {
       String? authorization;

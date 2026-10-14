@@ -705,6 +705,13 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
 
   return ThemeData(
     useMaterial3: true,
+    pageTransitionsTheme: const PageTransitionsTheme(
+      builders: {
+        TargetPlatform.android: MonettaPageTransitionsBuilder(),
+        TargetPlatform.iOS: MonettaPageTransitionsBuilder(),
+        TargetPlatform.macOS: MonettaPageTransitionsBuilder(),
+      },
+    ),
     fontFamily: kSansFontFamily,
     fontFamilyFallback: kSansFontFallback,
     brightness: brightness,

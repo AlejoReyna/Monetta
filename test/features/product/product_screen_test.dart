@@ -41,6 +41,13 @@ void main() {
     // Package C (Fig.07): the photo is contained so handles and straps are
     // never cropped — `cover` is the bug this asserts against.
     expect(tester.widget<MonettaImage>(heroImage).fit, BoxFit.contain);
+    expect(
+      tester.widget<MonettaImage>(heroImage).backgroundColor,
+      kPackshotGround,
+    );
+    final photo = tester.getRect(heroImage);
+    expect(photo.left, 0);
+    expect(photo.width, tester.getSize(find.byType(Scaffold)).width);
   });
 
   testWidgets('product page sells with facts, not internal facets',
@@ -72,7 +79,7 @@ void main() {
       find.text(
         'Escríbenos por WhatsApp para solicitar apartado (\$400 MXN · 20 días). Abrir el chat no reserva stock ni confirma el anticipo.',
       ),
-      findsOneWidget,
+      findsNothing,
     );
     expect(find.text('Escribir por WhatsApp'), findsOneWidget);
     expect(find.text('Gama'), findsNothing);

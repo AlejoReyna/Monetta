@@ -14,6 +14,8 @@ library;
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/catalog_store.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
@@ -45,7 +47,7 @@ Future<void> openBrand(
 }) async {
   final store = StoreScope.of(context);
   await Navigator.of(context).push<void>(
-    monettaFadeRoute(
+    monettaPageRoute(
       StoreScope(
         notifier: store,
         child: BrandScreen(
@@ -164,24 +166,12 @@ class _BrandScreenState extends State<BrandScreen> {
     final categories = _categories(store, products);
     final visible = _visible(store, products);
     final story = widget.story?.trim() ?? '';
-    final width = MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2;
 
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: AppBar(
-        backgroundColor: palette.bar,
-        foregroundColor: palette.ink,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          _title,
-          style: boutiqueText(
-            size: 15,
-            weight: FontWeight.w600,
-            color: palette.ink,
-          ),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: _title,
       ),
       body: CustomScrollView(
         slivers: [
@@ -231,29 +221,12 @@ class _BrandScreenState extends State<BrandScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.fromLTRB(
-                BoutiqueSpace.gutter,
-                BoutiqueSpace.lg,
-                BoutiqueSpace.gutter,
-                BoutiqueSpace.lg,
-              ),
-              sliver: SliverGrid(
-                key: const ValueKey('brand-product-grid'),
-                gridDelegate: productGridDelegate(
-                  context,
-                  availableWidth: width,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final product = visible[index];
-                    return ProductCard(
-                      key: ValueKey('product-card-${product.id}'),
-                      product: product,
-                      onQuickView: () => showProductQuickView(context, product),
-                    );
-                  },
-                  childCount: visible.length,
-                ),
+              padding: const EdgeInsets.only(top: BoutiqueSpace.md),
+              sliver: ProductCardSliverGrid(
+                products: visible,
+                gridKey: const ValueKey('brand-product-grid'),
+                onQuickView: (product) =>
+                    showProductQuickView(context, product),
               ),
             ),
           if (story.isNotEmpty)

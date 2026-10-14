@@ -7,7 +7,8 @@ library;
 
 import 'package:flutter/material.dart';
 
-import '../../app/theme.dart';
+import '../navigation/monetta_page_header.dart';
+
 import '../boutique/boutique_tokens.dart';
 
 class ProductUnavailable extends StatelessWidget {
@@ -20,19 +21,9 @@ class ProductUnavailable extends StatelessWidget {
     // view for, so no interception is needed here.
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: AppBar(
-        backgroundColor: palette.canvas,
-        foregroundColor: palette.ink,
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, size: 20),
-          tooltip: 'Volver',
-          onPressed: () => Navigator.of(context).pop(),
-        ),
-        title: const MonettaWordmark.appBar(),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(0.5),
-          child: Divider(height: 0.5, color: palette.hairline),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Producto',
       ),
       body: SafeArea(
         child: Center(
