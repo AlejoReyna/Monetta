@@ -125,10 +125,8 @@ String orderFinancialBucket(String? raw) {
   }
 }
 
-String _normalizeFinancial(String? raw) => (raw ?? '')
-    .toLowerCase()
-    .trim()
-    .replaceAll(RegExp(r'[\s-]+'), '_');
+String _normalizeFinancial(String? raw) =>
+    (raw ?? '').toLowerCase().trim().replaceAll(RegExp(r'[\s-]+'), '_');
 
 OrderDisplayStatus _statusFromFinancial(String? raw) {
   switch (orderFinancialBucket(raw)) {
