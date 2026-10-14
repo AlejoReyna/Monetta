@@ -406,6 +406,44 @@ void main() {
       );
       expect(view.orders.single.paymentMethod, isNull);
       expect(orderDisplayStatus(view.orders.single).label, 'Pago en proceso');
+      expect(orderDisplayStatus(view.orders.single).actionLabel, isNull);
+    });
+
+    test('paypal, mercadopago, and unknown gateway stay Pago en proceso',
+        () async {
+      const methods = ['paypal', 'mercadopago', 'other:kueski_pay'];
+      for (var index = 0; index < methods.length; index++) {
+        final method = methods[index];
+        final repo = OrderHistoryRepository(
+          store: OrderSummaryStore(db),
+          config: AccountsOrdersConfig.disabled,
+          mirrorClient: _FakeMirror([
+            MirroredOrder(
+              id: 20 + index,
+              shopifyOrderId: '${900 + index}',
+              source: 'shopify_checkout',
+              attributionCode: null,
+              financialStatus: 'pending',
+              fulfillmentStatus: null,
+              totalAmount: 100,
+              currencyCode: 'MXN',
+              placedAt: null,
+              paymentMethod: method,
+            ),
+          ]),
+        );
+        final view = await repo.refresh(
+          accountId: 'acct-1',
+          backendAccessToken: 'access',
+        );
+        final order = view.orders.singleWhere(
+          (candidate) => candidate.paymentMethod == method,
+        );
+        expect(order.paymentMethod, method);
+        final status = orderDisplayStatus(order);
+        expect(status.label, 'Pago en proceso');
+        expect(status.actionLabel, isNull);
+      }
     });
   });
 }

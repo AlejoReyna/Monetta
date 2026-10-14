@@ -375,7 +375,48 @@ describe('webhook handlers', () => {
         Buffer.from('raw-keep-update'),
       );
 
-      expect(orders.rows[0]!.paymentMethod).toBe('transferencia_bancaria');
+      expect(orders.rows[0]!.paymentMethod).toBe('other:transferencia_bancaria');
+    });
+
+    it('stores paypal, mercadopago, and an unrecognized gateway as non-null methods', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-paypal',
+        'orders/create',
+        orderPayload({
+          id: 701,
+          financial_status: 'pending',
+          payment_gateway_names: ['PayPal Express Checkout'],
+        }),
+        Buffer.from('raw-paypal'),
+      );
+      await handleOrdersWebhook(
+        deps,
+        'wh-mp',
+        'orders/create',
+        orderPayload({
+          id: 702,
+          financial_status: 'pending',
+          payment_gateway_names: ['Mercado Pago'],
+        }),
+        Buffer.from('raw-mp'),
+      );
+      await handleOrdersWebhook(
+        deps,
+        'wh-kueski',
+        'orders/create',
+        orderPayload({
+          id: 703,
+          financial_status: 'pending',
+          payment_gateway_names: ['Kueski Pay'],
+        }),
+        Buffer.from('raw-kueski'),
+      );
+
+      const byId = new Map(orders.rows.map((row) => [row.shopifyOrderId, row.paymentMethod]));
+      expect(byId.get('701')).toBe('paypal');
+      expect(byId.get('702')).toBe('mercadopago');
+      expect(byId.get('703')).toBe('other:kueski_pay');
     });
 
     it('drops a digits-only gateway so a card number is not stored as the method', async () => {

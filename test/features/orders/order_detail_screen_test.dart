@@ -94,27 +94,73 @@ void main() {
       expect(find.text('Pago confirmado'), findsNothing);
     });
 
-    testWidgets('pending card payment is Pago en proceso', (tester) async {
-      await tester.pumpWidget(
-        _host(
-          _order(
-            fulfillmentStatus: null,
-            status: 'pending',
-            paymentMethod: 'card',
+    testWidgets(
+        'known non-transfer pending payments offer a payment question link',
+        (tester) async {
+      for (final method in [
+        'card',
+        'paypal',
+        'mercadopago',
+        'other:kueski_pay',
+      ]) {
+        Uri? opened;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: buildTheme(),
+            home: OrderDetailScreen(
+              order: _order(
+                fulfillmentStatus: null,
+                status: 'pending',
+                displayNumber: '#1044',
+                paymentMethod: method,
+              ),
+              openUri: (uri) async {
+                opened = uri;
+                return true;
+              },
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Pago en proceso'), findsWidgets);
-      expect(find.text('Lo verás aquí cuando se confirme.'), findsWidgets);
-      expect(find.text('Esperando tu transferencia'), findsNothing);
-      expect(find.text('Ver datos de pago'), findsNothing);
-      expect(
-        find.byKey(const ValueKey('missing-payment-whatsapp')),
-        findsNothing,
-      );
-      expect(find.text('Confirmado'), findsNothing);
+        expect(find.text('Pago en proceso'), findsWidgets);
+        expect(find.text('Lo verás aquí cuando se confirme.'), findsWidgets);
+        expect(find.text('Esperando tu transferencia'), findsNothing);
+        expect(find.text('Ver datos de pago'), findsNothing);
+        expect(find.text('Confirmado'), findsNothing);
+        expect(
+          find.text(
+            '¿Elegiste transferencia? Escríbenos por WhatsApp y te compartimos los datos de pago.',
+          ),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey('missing-payment-whatsapp')),
+          findsNothing,
+        );
+        expect(find.byType(TextButton), findsNothing);
+        expect(find.byType(ElevatedButton), findsNothing);
+        expect(find.byType(FilledButton), findsNothing);
+
+        final link = find.byKey(const ValueKey('payment-question-whatsapp'));
+        expect(link, findsOneWidget);
+        expect(
+          find.text('¿Dudas con tu pago? Escríbenos por WhatsApp.'),
+          findsOneWidget,
+        );
+        await tester.ensureVisible(link);
+        await tester.tap(link);
+        await tester.pumpAndSettle();
+
+        expect(opened, isNotNull);
+        expect(opened!.scheme, 'https');
+        expect(opened!.host, 'wa.me');
+        expect(opened!.path, '/528261066868');
+        expect(
+          opened!.queryParameters['text'],
+          'Hola, tengo una duda con el pago de mi pedido #1044',
+        );
+      }
     });
 
     testWidgets(

@@ -186,6 +186,79 @@ describe('payment method backfill', () => {
     expect(JSON.stringify([...lookups.values()])).not.toContain(token);
   });
 
+  it('normalizes PayPal, Mercado Pago, and unknown Admin gateways the same way as webhooks', async () => {
+    const fetchFn = (async () => new Response(JSON.stringify({
+      data: {
+        nodes: [
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/801',
+            name: '#1801',
+            paymentGatewayNames: ['PayPal Express Checkout'],
+            transactions: [{ kind: 'SALE', gateway: 'paypal', formattedGateway: 'PayPal Express Checkout' }],
+          },
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/802',
+            name: '#1802',
+            paymentGatewayNames: ['Mercado Pago'],
+            transactions: [{ kind: 'SALE', gateway: 'MercadoPago', formattedGateway: 'Mercado Pago' }],
+          },
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/803',
+            name: '#1803',
+            paymentGatewayNames: ['Kueski Pay'],
+            transactions: [],
+          },
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/804',
+            name: '#1804',
+            paymentGatewayNames: [],
+            transactions: [{ kind: 'SALE' }],
+          },
+        ],
+      },
+    }), { status: 200 })) as typeof fetch;
+
+    const lookups = await readShopifyOrderPayments({
+      shopDomain: 'monetta-staging.myshopify.com',
+      apiVersion: '2026-07',
+      accessToken: 'shpat_secretvalue',
+      shopifyOrderIds: ['801', '802', '803', '804'],
+      fetchFn,
+    });
+
+    expect(lookups.get('801')).toMatchObject({ ok: true, paymentMethod: 'paypal' });
+    expect(lookups.get('802')).toMatchObject({ ok: true, paymentMethod: 'mercadopago' });
+    expect(lookups.get('803')).toMatchObject({ ok: true, paymentMethod: 'other:kueski_pay' });
+    expect(lookups.get('804')).toMatchObject({ ok: true, paymentMethod: null });
+  });
+
+  it('apply writes an other: method and leaves a missing method null', async () => {
+    const store = new MemoryStore([
+      { shopifyOrderId: '803', financialStatus: 'pending', paymentMethod: null },
+      { shopifyOrderId: '804', financialStatus: 'pending', paymentMethod: null },
+    ]);
+    const reader: OrderPaymentReader = {
+      async read() {
+        return new Map([
+          ['803', { ok: true, name: '#1803', paymentMethod: 'other:kueski_pay' }],
+          ['804', { ok: true, name: '#1804', paymentMethod: null }],
+        ]);
+      },
+    };
+
+    const report = await runPaymentMethodBackfill(store, reader, { apply: true });
+
+    expect(report.entries.map((entry) => entry.action)).toEqual(['written', 'skip_no_method']);
+    expect(store.writes).toEqual([
+      { shopifyOrderId: '803', paymentMethod: 'other:kueski_pay' },
+    ]);
+    expect(store.rows.find((row) => row.shopifyOrderId === '804')?.paymentMethod).toBeNull();
+  });
+
   it('reports an HTTP failure without the response body or token', async () => {
     const token = 'shpat_secretvalue';
     const fetchFn = (async () => new Response(JSON.stringify({

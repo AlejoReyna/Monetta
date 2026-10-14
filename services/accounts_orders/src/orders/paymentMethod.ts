@@ -6,8 +6,17 @@
  * Tokens are lowercase, with spaces and hyphens folded to underscores,
  * de-duplicated, and comma-joined. Processing kinds (`sale`,
  * `authorization`, …), financial statuses, digits-only values, and
- * anything that is not a method name are dropped. Card numbers and
- * other payment details are never read.
+ * emails are dropped. Card numbers and other payment details are never read.
+ *
+ * A known method stays as that token (`paypal`, `mercadopago`, `card`,
+ * `bank_deposit`, …). Any other gateway is `other:<sanitized name>` so a
+ * present method is never stored as null.
+ *
+ * PayPal and Mercado Pago gateway names, before the `other:` rule:
+ * `paypal` / `PayPal` → `paypal`; `PayPal Express Checkout` →
+ * `paypal_express_checkout`; `Mercado Pago` / `mercado_pago` →
+ * `mercado_pago`; `MercadoPago` → `mercadopago`. Those PayPal and
+ * Mercado Pago spellings now collapse to `paypal` and `mercadopago`.
  */
 
 const NON_METHOD_TOKENS = new Set([
@@ -36,10 +45,39 @@ const NON_METHOD_TOKENS = new Set([
   'unknown',
 ]);
 
-/** Reserved Shopify manual-method labels that the Customer Account enum spells differently. */
+/** Display labels that already have a Customer Account or gateway token. */
 const METHOD_ALIASES: Readonly<Record<string, string>> = {
   cash_on_delivery_cod: 'cash_on_delivery',
+  paypal_express: 'paypal',
+  paypal_express_checkout: 'paypal',
+  paypal_commerce: 'paypal',
+  mercado_pago: 'mercadopago',
+  mercado_pago_tarjetas: 'mercadopago',
+  mercado_pago_checkout_pro: 'mercadopago',
 };
+
+/**
+ * Tokens stored as themselves. Anything else that survives sanitizing is
+ * prefixed with `other:` instead of being dropped.
+ */
+const KNOWN_METHOD_TOKENS = new Set([
+  'bank_deposit',
+  'manual',
+  'card',
+  'shopify_payments',
+  'paypal',
+  'mercadopago',
+  'cash_on_delivery',
+  'money_order',
+  'gift_card',
+  'store_credit',
+  'custom',
+  'shop_pay',
+  'apple_pay',
+  'google_pay',
+  'bogus',
+  'shopify_installments',
+]);
 
 export interface ShopifyPaymentTransactionSource {
   readonly gateway?: string | null;
@@ -72,9 +110,17 @@ export function normalizePaymentMethodToken(raw: string): string | null {
   return METHOD_ALIASES[snake] ?? snake;
 }
 
+/** Known token, or `other:<sanitized>` when the gateway name is not a known method. */
+export function classifyPaymentMethodToken(raw: string): string | null {
+  const snake = normalizePaymentMethodToken(raw);
+  if (snake === null) return null;
+  if (KNOWN_METHOD_TOKENS.has(snake)) return snake;
+  return `other:${snake}`;
+}
+
 function pushToken(tokens: string[], raw: unknown): void {
   if (typeof raw !== 'string') return;
-  const token = normalizePaymentMethodToken(raw);
+  const token = classifyPaymentMethodToken(raw);
   if (token === null || tokens.includes(token)) return;
   tokens.push(token);
 }
@@ -98,7 +144,7 @@ export function normalizePaymentMethod(source: ShopifyPaymentMethodSource): stri
     pushToken(tokens, transaction.type);
     const gateway = typeof transaction.gateway === 'string' ? transaction.gateway : null;
     pushToken(tokens, gateway);
-    if (normalizePaymentMethodToken(gateway ?? '') === null) {
+    if (classifyPaymentMethodToken(gateway ?? '') === null) {
       pushToken(tokens, formattedGateway(transaction));
     }
     pushToken(tokens, transaction.kind);
@@ -118,5 +164,6 @@ export function normalizePaymentMethod(source: ShopifyPaymentMethodSource): stri
 
 /** True when [value] is already a normalized method list safe to persist. */
 export function isNormalizedPaymentMethod(value: string): boolean {
-  return /^[a-z0-9_]+(,[a-z0-9_]+)*$/.test(value) && value.length <= 200;
+  return /^(?:other:)?[a-z0-9_]+(?:,(?:other:)?[a-z0-9_]+)*$/.test(value) &&
+    value.length <= 200;
 }

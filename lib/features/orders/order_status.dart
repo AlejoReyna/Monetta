@@ -14,11 +14,11 @@
 /// "Entregado". Un `fulfilled` sin entrega es "En camino". Un `paid` sin
 /// preparación es "Confirmado".
 ///
-/// `pending` es "Esperando tu transferencia" solo si
-/// [OrderSummary.paymentMethod] identifica depósito bancario o pago manual.
+/// `pending` es "Esperando tu transferencia" solo si cada token de
+/// [OrderSummary.paymentMethod] es exactamente `bank_deposit` o `manual`.
 /// Ese estado lleva la acción "Ver datos de pago" en la lista y en el
-/// detalle. Cualquier otro pendiente, vacío o desconocido es
-/// "Pago en proceso".
+/// detalle. PayPal, Mercado Pago, tarjeta, `other:…` y un método ausente
+/// quedan en "Pago en proceso".
 ///
 /// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
 /// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
@@ -198,42 +198,16 @@ const OrderDisplayStatus _paymentInProgress = OrderDisplayStatus(
   detail: 'Lo verás aquí cuando se confirme.',
 );
 
-/// True solo con evidencia de depósito bancario o pago manual.
+/// True solo cuando cada token es `bank_deposit` o `manual`.
 ///
-/// El valor es [OrderSummary.paymentMethod]: los `type` de
-/// `Order.transactions` en la Customer Account API (`bank_deposit`,
-/// `manual`, …). Vacío o ausente no es transferencia.
+/// Un nombre parecido (`transferencia`, `deposito`, `other:bank_deposit`)
+/// no entra. Vacío o ausente tampoco.
 bool orderPaymentMethodIsBankTransfer(String? raw) {
   final tokens = _paymentTokens(raw);
   if (tokens.isEmpty) return false;
-  if (tokens.any(_isElectronicPayment)) return false;
-  return tokens.any(_isTransferToken);
-}
-
-bool _isElectronicPayment(String token) {
-  const electronic = {
-    'card',
-    'shopify_payments',
-    'paypal',
-    'cash_on_delivery',
-    'money_order',
-    'gift_card',
-    'store_credit',
-    'custom',
-    'shop_pay',
-    'apple_pay',
-    'google_pay',
-    'bogus',
-  };
-  return electronic.contains(token);
-}
-
-bool _isTransferToken(String token) {
-  if (token == 'bank_deposit' || token == 'manual') return true;
-  return token.contains('transferencia') ||
-      token.contains('deposito') ||
-      token.contains('bank_deposit') ||
-      token.contains('bank_transfer');
+  return tokens.every(
+    (token) => token == 'bank_deposit' || token == 'manual',
+  );
 }
 
 List<String> _paymentTokens(String? raw) {

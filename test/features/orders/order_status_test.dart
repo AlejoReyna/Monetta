@@ -151,12 +151,8 @@ void main() {
       expect(status.detail, isNot(contains('Te avisaremos')));
     });
 
-    test('pending bank transfer uses the transaction type', () {
-      for (final method in [
-        'bank_deposit',
-        'MANUAL',
-        'Transferencia bancaria',
-      ]) {
+    test('pending bank transfer is only bank_deposit or manual', () {
+      for (final method in ['bank_deposit', 'MANUAL', 'bank_deposit,manual']) {
         final status = orderDisplayStatus(
           _order(
             fulfillmentStatus: null,
@@ -172,7 +168,18 @@ void main() {
     });
 
     test('pending card or unknown method is Pago en proceso', () {
-      for (final method in [null, '', 'card', 'shopify_payments', 'custom']) {
+      for (final method in [
+        null,
+        '',
+        'card',
+        'paypal',
+        'mercadopago',
+        'other:kueski_pay',
+        'Transferencia bancaria',
+        'other:transferencia_bancaria',
+        'shopify_payments',
+        'custom',
+      ]) {
         final status = orderDisplayStatus(
           _order(
             fulfillmentStatus: null,
@@ -184,6 +191,7 @@ void main() {
         expect(status.detail, 'Lo verás aquí cuando se confirme.');
         expect(status.actionLabel, isNull);
         expect(status.label, isNot('Esperando tu transferencia'));
+        expect(orderPaymentMethodIsBankTransfer(method), isFalse);
       }
     });
 

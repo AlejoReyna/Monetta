@@ -24,6 +24,9 @@ import 'order_status.dart';
 const missingPaymentWhatsAppLabel =
     '¿Elegiste transferencia? Escríbenos por WhatsApp y te compartimos los datos de pago.';
 
+const paymentQuestionWhatsAppLabel =
+    '¿Dudas con tu pago? Escríbenos por WhatsApp.';
+
 /// Detail-only help for "Pago en proceso" when no payment method was stored.
 /// Hidden once [OrderSummary.paymentMethod] is known, and never shown on the list.
 bool showMissingPaymentWhatsApp(OrderSummary order) {
@@ -32,9 +35,24 @@ bool showMissingPaymentWhatsApp(OrderSummary order) {
   return method == null || method.isEmpty;
 }
 
+/// Detail-only help when a non-transfer method is known and payment is still
+/// pending. Not used for bank_deposit/manual, and never shown on the list.
+bool showPaymentQuestionWhatsApp(OrderSummary order) {
+  if (orderDisplayStatus(order).label != 'Pago en proceso') return false;
+  final method = order.paymentMethod?.trim();
+  if (method == null || method.isEmpty) return false;
+  return !orderPaymentMethodIsBankTransfer(method);
+}
+
 Uri missingPaymentWhatsAppUri(String orderLabel) {
   return Uri.https('wa.me', '/$kWhatsAppE164', {
     'text': 'Hola, quiero los datos de pago de mi pedido $orderLabel',
+  });
+}
+
+Uri paymentQuestionWhatsAppUri(String orderLabel) {
+  return Uri.https('wa.me', '/$kWhatsAppE164', {
+    'text': 'Hola, tengo una duda con el pago de mi pedido $orderLabel',
   });
 }
 
@@ -166,8 +184,19 @@ class OrderDetailScreen extends StatelessWidget {
                   ],
                   if (showMissingPaymentWhatsApp(order)) ...[
                     const SizedBox(height: BoutiqueSpace.sm),
-                    _MissingPaymentWhatsAppLink(
-                      orderLabel: label,
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('missing-payment-whatsapp'),
+                      label: missingPaymentWhatsAppLabel,
+                      uri: missingPaymentWhatsAppUri(label),
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                  ],
+                  if (showPaymentQuestionWhatsApp(order)) ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('payment-question-whatsapp'),
+                      label: paymentQuestionWhatsAppLabel,
+                      uri: paymentQuestionWhatsAppUri(label),
                       onOpen: (uri) => _open(context, uri),
                     ),
                   ],
@@ -461,13 +490,17 @@ class PaidCancelledRefundHelp extends StatelessWidget {
   }
 }
 
-class _MissingPaymentWhatsAppLink extends StatelessWidget {
-  const _MissingPaymentWhatsAppLink({
-    required this.orderLabel,
+class _PaymentHelpLink extends StatelessWidget {
+  const _PaymentHelpLink({
+    required this.linkKey,
+    required this.label,
+    required this.uri,
     required this.onOpen,
   });
 
-  final String orderLabel;
+  final Key linkKey;
+  final String label;
+  final Uri uri;
   final void Function(Uri uri) onOpen;
 
   @override
@@ -476,10 +509,10 @@ class _MissingPaymentWhatsAppLink extends StatelessWidget {
     return Semantics(
       link: true,
       child: GestureDetector(
-        key: const ValueKey('missing-payment-whatsapp'),
-        onTap: () => onOpen(missingPaymentWhatsAppUri(orderLabel)),
+        key: linkKey,
+        onTap: () => onOpen(uri),
         child: Text(
-          missingPaymentWhatsAppLabel,
+          label,
           style: boutiqueText(
             size: 13,
             color: palette.inkMuted,
