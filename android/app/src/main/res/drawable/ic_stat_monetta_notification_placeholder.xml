@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PLACEHOLDER status-bar icon. Android requires a single white silhouette
+     on a transparent background. Product Designer: replace the paths in
+     place. Do not add color, gradients, or a solid background, and do not
+     rename this file — Firebase messaging and local notifications both
+     reference it. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M3,20V4h3.4L12,12.2L17.6,4H21v16h-3V9.4L13.2,16h-2.4L6,9.4V20z" />
+</vector>

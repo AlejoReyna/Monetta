@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- PLACEHOLDER themed-icon silhouette (API 33+). Android tints this layer.
+     Product Designer: replace the paths in place. Single color only. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#000000"
+        android:pathData="M34,74V36h8.2l11.8,18.6L65.8,36H74v38h-7.2V50.2L56.2,66h-4.4L42.2,50.2V74z" />
+</vector>

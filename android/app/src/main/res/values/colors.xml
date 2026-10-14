@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- PLACEHOLDER accent for the FCM small icon. Brand gold until the
+         Product Designer picks the final notification color. -->
+    <color name="monetta_notification_accent_placeholder">#AA7D44</color>
+</resources>

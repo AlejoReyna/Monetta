@@ -56,7 +56,9 @@ class PluginLocalNotificationScheduler implements LocalNotificationScheduler {
       tz.setLocalLocation(tz.UTC);
     }
     const settings = InitializationSettings(
-      android: AndroidInitializationSettings('@mipmap/ic_launcher'),
+      android: AndroidInitializationSettings(
+        '@drawable/ic_stat_monetta_notification_placeholder',
+      ),
       iOS: DarwinInitializationSettings(
         requestAlertPermission: false,
         requestBadgePermission: false,
