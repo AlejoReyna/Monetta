@@ -49,7 +49,7 @@ decisions taken *and rejected*, gotchas, and how to extend it.
 
 - [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md) — how the modules fit together
 - [`docs/ANDROID_PLAY_STORE_RELEASE.md`](docs/ANDROID_PLAY_STORE_RELEASE.md) —
-  Play App Signing upload key, release AAB, and icon placeholders
+  Play App Signing upload key, release AAB, and launcher icons
 - [`docs/US_SOURCING_DURABILITY.md`](docs/US_SOURCING_DURABILITY.md) — why the US
   catalog stays research, not dropshipping
 - [`docs/EDITORIAL_CONTENT_METAOBJECTS.md`](docs/EDITORIAL_CONTENT_METAOBJECTS.md) —

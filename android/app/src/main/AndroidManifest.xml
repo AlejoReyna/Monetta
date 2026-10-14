@@ -15,15 +15,15 @@
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="monetta_remote" />
-        <!-- Single-color status icon. Not the launcher mipmap: Android
-             renders a full-color launcher as a white square. PLACEHOLDER
-             resource; see drawable/ic_stat_monetta_notification_placeholder.xml. -->
+        <!-- Single-color status icon from the Product Designer SVG.
+             Not the launcher mipmap: Android renders a full-color launcher
+             as a white square. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@drawable/ic_stat_monetta_notification_placeholder" />
+            android:resource="@drawable/ic_stat_monetta" />
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_color"
-            android:resource="@color/monetta_notification_accent_placeholder" />
+            android:resource="@color/monetta_notification_accent" />
         <!-- Production Customer Account login redirect is not an intent-filter
              in this file. The production flavor sets manifest placeholder
              appAuthRedirectScheme to shop.72391655575.oauth, and

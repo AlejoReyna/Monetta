@@ -133,23 +133,30 @@ The redirect activity comes from `flutter_appauth`; it is not duplicated in
 `AndroidManifest.xml` (a second filter breaks the browser hand-off).
 `android:taskAffinity=""` stays unset for the same reason.
 
-## 5. Icons still waiting on final art
+## 5. Launcher and notification icons
+
+The Product Designer's art is already in the Android resources.
 
 | Resource | Role |
 |---|---|
 | `res/mipmap-anydpi-v26/ic_launcher.xml` | Adaptive icon (API 26+) |
-| `res/drawable/ic_launcher_background_placeholder.xml` | Background layer |
-| `res/drawable/ic_launcher_foreground_placeholder.xml` | Foreground layer |
-| `res/drawable/ic_launcher_monochrome_placeholder.xml` | Themed icon (API 33+) |
-| `res/drawable/ic_stat_monetta_notification_placeholder.xml` | White notification silhouette |
-| `res/values/colors.xml` (`monetta_notification_accent_placeholder`) | FCM icon accent |
-| `res/mipmap-{m,h,xh,xxh,xxxh}dpi/ic_launcher.png` | Pre-API 26 fallback; still the Flutter default |
+| `res/mipmap-*/ic_launcher_foreground.png` | 108–432px transparent gold M |
+| `res/mipmap-*/ic_launcher_background.png` | Solid `#1C1A17` at the same sizes |
+| `res/mipmap-*/ic_launcher.png` | Pre-API 26 composite, 48–192px |
+| `res/drawable/ic_launcher_monochrome.xml` | Themed icon: notification silhouette, inset to the safe zone |
+| `res/drawable/ic_stat_monetta.xml` | White FCM / local-notification glyph, from the SVG |
+| `res/values/colors.xml` (`monetta_notification_accent`) | `#A17133`, the M's flat gold |
 
-Replace the placeholder drawables and the density PNGs in place. Keep the
-file names. The notification icon must stay a single white glyph on a
-transparent background. It is wired to
-`com.google.firebase.messaging.default_notification_icon` and to
-`AndroidInitializationSettings` for local reminders.
+The notification drawable is one white path on a transparent background. It
+is wired to `com.google.firebase.messaging.default_notification_icon` and to
+`AndroidInitializationSettings`. A 96px raster of that SVG matches the
+designer's reference PNG exactly.
+
+The iOS 1024 icon (`Icon-App-1024x1024@1x.png`) uses the same gold M and a
+different background. Measured flat fills are Android `#A17133` and iOS
+`#A27234` (one level per channel). The median gold pixel on both is
+`#A97B3D`. The iOS background is `#FFFFFF`; the Android background is
+`#1C1A17`.
 
 ## 6. Manifest audit
 

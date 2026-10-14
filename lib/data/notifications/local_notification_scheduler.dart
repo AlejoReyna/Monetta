@@ -57,7 +57,7 @@ class PluginLocalNotificationScheduler implements LocalNotificationScheduler {
     }
     const settings = InitializationSettings(
       android: AndroidInitializationSettings(
-        '@drawable/ic_stat_monetta_notification_placeholder',
+        '@drawable/ic_stat_monetta',
       ),
       iOS: DarwinInitializationSettings(
         requestAlertPermission: false,

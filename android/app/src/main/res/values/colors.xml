@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- PLACEHOLDER accent for the FCM small icon. Brand gold until the
-         Product Designer picks the final notification color. -->
-    <color name="monetta_notification_accent_placeholder">#AA7D44</color>
+    <!-- Dominant flat gold of the launcher M (#A17133). FCM tints the white
+         notification silhouette with this color. -->
+    <color name="monetta_notification_accent">#A17133</color>
 </resources>
