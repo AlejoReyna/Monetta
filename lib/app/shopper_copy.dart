@@ -279,6 +279,15 @@ String? factualDescription({
   return buffer.toString();
 }
 
+/// Support chat for account deletion. Uses the shop's existing WhatsApp
+/// number; callers pass a placeholder only when that number is absent.
+Uri accountDeletionSupportUri({String phoneE164 = kWhatsAppE164}) {
+  final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
+  return Uri.https('wa.me', '/$phone', <String, String>{
+    'text': '¡Hola Monetta! Necesito ayuda para eliminar mi cuenta.',
+  });
+}
+
 Uri conciergeWhatsAppUri({String? productTitle}) {
   final text = productTitle == null
       ? '¡Hola Monetta! Quiero ayuda para elegir una pieza.'

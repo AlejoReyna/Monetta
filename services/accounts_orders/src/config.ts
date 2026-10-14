@@ -50,6 +50,12 @@ export interface AccountsOrdersConfig {
   readonly rewardsRedemptionEnabled: boolean;
   readonly rewardsReservationTtlMinutes: number;
   readonly rewardsQuoteTtlMinutes: number;
+  /** Static Admin API token. Optional when client-credentials can mint one. */
+  readonly shopifyAdminAccessToken: string;
+  /** Public Customer Account mobile client id, used to check id-token `aud`. */
+  readonly customerAccountClientId: string;
+  /** Interactive Shopify login must be at least this recent to delete an account. */
+  readonly accountDeletionReauthMaxAgeSeconds: number;
 }
 
 function int(value: string | undefined, fallback: number): number {
@@ -153,5 +159,11 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     rewardsRedemptionEnabled: bool(env.REWARDS_REDEMPTION_ENABLED, false),
     rewardsReservationTtlMinutes: int(env.REWARDS_RESERVATION_TTL_MINUTES, 30),
     rewardsQuoteTtlMinutes: int(env.REWARDS_QUOTE_TTL_MINUTES, 10),
+    shopifyAdminAccessToken: (env.SHOPIFY_ADMIN_ACCESS_TOKEN ?? '').trim(),
+    customerAccountClientId: (env.CUSTOMER_ACCOUNT_CLIENT_ID ?? '').trim(),
+    accountDeletionReauthMaxAgeSeconds: Math.max(
+      60,
+      int(env.ACCOUNT_DELETION_REAUTH_MAX_AGE_SECONDS, 600),
+    ),
   };
 }

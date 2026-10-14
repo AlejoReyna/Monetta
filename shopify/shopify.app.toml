@@ -16,7 +16,7 @@ embedded = false
 handle = "monetta-staging"
 
 [access_scopes]
-scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects"
+scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects,write_customer_data_erasure"
 
 # Keep the production-app schema version-controlled. It is not deployed by
 # staging commands; production deployment and scope approval remain separate.

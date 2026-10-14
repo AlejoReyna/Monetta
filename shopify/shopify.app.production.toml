@@ -15,7 +15,7 @@ handle = "monetta"
 # write_* are required for product title/price/publication and storefront
 # metaobject updates implemented under services/accounts_orders admin routes.
 [access_scopes]
-scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects"
+scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects,write_customer_data_erasure"
 
 # App-owned singleton for the native admin control plane. Must match the
 # Storefront consumer handle `$app:storefront_config` / `monetta` used by

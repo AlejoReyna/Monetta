@@ -13,8 +13,10 @@ import '../data/accounts_orders/system_account_session_repository.dart';
 import '../data/customer_auth/customer_account_config.dart';
 import '../data/customer_auth/customer_auth_error.dart';
 import '../data/customer_auth/customer_session_repository.dart';
+import '../data/accounts_orders/account_deletion_client.dart';
 import '../data/local/account_store.dart';
 import '../data/local/database.dart' as local show Account, OrderSummary;
+import '../data/local/wishlist_store.dart';
 import '../data/repositories/order_history_repository.dart';
 
 /// Which of the two entry points a failure came from. They fail for different
@@ -57,6 +59,7 @@ class AccountController extends ChangeNotifier {
     required OrderHistoryRepository orderHistoryRepository,
     CustomerAccountConfig? config,
     required String deviceId,
+    WishlistStore? wishlistStore,
     Future<void> Function(String? accountId)? onAccountScopeChanged,
   })  : _sessionRepository = sessionRepository,
         _systemSessionRepository = systemSessionRepository,
@@ -65,6 +68,7 @@ class AccountController extends ChangeNotifier {
         _orderHistoryRepository = orderHistoryRepository,
         _config = config,
         _deviceId = deviceId,
+        _wishlistStore = wishlistStore,
         _onAccountScopeChanged = onAccountScopeChanged;
 
   final CustomerSessionRepository? _sessionRepository;
@@ -74,6 +78,7 @@ class AccountController extends ChangeNotifier {
   final OrderHistoryRepository _orderHistoryRepository;
   final CustomerAccountConfig? _config;
   final String _deviceId;
+  final WishlistStore? _wishlistStore;
   final Future<void> Function(String? accountId)? _onAccountScopeChanged;
 
   local.Account? account;
@@ -318,6 +323,41 @@ class AccountController extends ChangeNotifier {
         kind: CustomerAuthErrorKind.unknown,
         debugDetail: '$error',
       );
+
+  /// Opens Shopify's hosted login again and returns the fresh tokens the
+  /// deletion endpoint requires. Does not accept a silently refreshed token.
+  Future<FreshCustomerLogin> reauthenticateForDeletion() {
+    final repository = _sessionRepository;
+    if (repository == null) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'customer session repository unavailable',
+      );
+    }
+    return repository.reauthenticate().then(
+          (login) => FreshCustomerLogin(
+            accessToken: login.accessToken,
+            idToken: login.idToken,
+          ),
+        );
+  }
+
+  /// Local sign-out after the server has accepted deletion. Guest wishlist
+  /// rows stay on the device; this account's profile and saved items do not.
+  Future<void> completeAccountDeletion() async {
+    final localId = account?.localAccountId;
+    try {
+      await logout();
+    } catch (_) {
+      account = null;
+      orders = const [];
+      ordersStatus = OrderHistoryStatus.unavailable;
+      notifyListeners();
+    }
+    if (localId == null) return;
+    await _wishlistStore?.deleteForAccount(localId);
+    await _accountStore.deleteLocal(localId);
+  }
 
   Future<void> logout() async {
     final current = account;

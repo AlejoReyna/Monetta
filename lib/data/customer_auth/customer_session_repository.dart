@@ -104,6 +104,23 @@ class CustomerSessionRepository {
   /// if that one call fails the shopper still gets signed in (they just
   /// finished a browser flow; refusing them over a network blip would be the
   /// worse failure) with the weaker claims-derived identity.
+  /// Interactive Shopify login used immediately before account deletion.
+  /// Returns the access token and id token from that login, not a silently
+  /// refreshed session.
+  Future<({String accessToken, String idToken})> reauthenticate() async {
+    final session = await login();
+    final idToken =
+        (await _secureStore.read(_idTokenKey(session.account.localAccountId)))
+            ?.trim();
+    if (idToken == null || idToken.isEmpty) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'reauthentication returned no id token',
+      );
+    }
+    return (accessToken: session.accessToken, idToken: idToken);
+  }
+
   Future<CustomerAuthSession> login() async {
     final result = await _authGateway.login();
     final identity = await _resolveIdentity(result);

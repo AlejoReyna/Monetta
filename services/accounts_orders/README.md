@@ -214,7 +214,36 @@ npm_config_cache=../.npm-cache npx shopify app deploy --config staging --no-rele
 Review the diff, release, then install the app on `monetta-staging.myshopify.com` only —
 never on the production store (`monetta.mx` / `fakcei-n9` / admin handle `monetta-2`).
 
-## 12. Engagement y notificaciones
+## 12. In-app account deletion
+
+`POST /customers/me/account-deletion/precheck` and
+`POST /customers/me/account-deletion` are the only deletion entry points. The
+app sends the shopper's Customer Account access token. The delete call also
+sends the id token from a login that just happened (`X-Monetta-Id-Token`).
+Tokens older than `ACCOUNT_DELETION_REAUTH_MAX_AGE_SECONDS` (default 10
+minutes) are rejected and nothing is deleted.
+
+If any mirrored order is unpaid/pending, unfulfilled, or has a refund in
+progress, the response is `blocked_open_order` and no data is removed.
+Otherwise the service deletes the Firebase Auth user and the Firestore
+profile, wishlist, and saved recommendations, anonymizes the customer's rows
+in this database, then calls Shopify Admin `customerRequestDataErasure`.
+That Admin token is `SHOPIFY_ADMIN_ACCESS_TOKEN` or a client-credentials
+token minted here. It is never sent to the app. Shopify erasure is
+asynchronous (`shopifyDataErasure: "requested"`): the shopper can cancel for
+10 days, and a recent purchase can hold erasure for up to 6 months.
+
+The installed app needs the `write_customer_data_erasure` scope. Firebase
+uses the existing `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, and
+`FIREBASE_PRIVATE_KEY`. Each attempt is appended to `account_deletion_audit`
+with the customer id, step codes, and a timestamp only.
+
+A public page at `https://monetta.mx/eliminar-cuenta` is still required for
+App Store and Play listings. It is a Shopify storefront page, not this
+service: explain the in-app path (Cuenta → Privacidad y datos → Eliminar mi
+cuenta) and the WhatsApp fallback. Do not collect a password on that page.
+
+## 13. Engagement y notificaciones
 
 La implementación completa vive en `src/engagement`: instalaciones anónimas
 atestadas con App Check, registros FCM cifrados, preferencias por finalidad,
