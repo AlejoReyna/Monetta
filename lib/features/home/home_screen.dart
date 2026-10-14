@@ -565,7 +565,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final accountState = AccountScope.maybeOf(context);
     final localAccount = accountState?.account;
     return MonettaSideMenu(
-      onSearch: _openSearch,
       onCatalog: _openFullCatalog,
       onBags: () => _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
       onWallets: () =>

@@ -3,16 +3,27 @@
 /// X-style account header: when the shopper is signed in the drawer opens
 /// with their avatar, name and email; otherwise it offers an
 /// "Inicia sesión" entry. Links are plain icon rows with no separators, and
-/// the app settings live behind the "Ajustes" gear row.
+/// the app settings live behind the "Ajustes" gear row. Type is the home
+/// hero's serif at its regular weight, with light-stroke icons.
 library;
 
 import 'package:flutter/material.dart';
+import 'package:material_symbols_icons/symbols.dart';
 
 import '../../app/theme.dart';
+import '../boutique/boutique_tokens.dart';
+
+/// Stroke weight of the drawer's Material Symbols (100–700; 400 is regular).
+const double _kIconWeight = 300;
+
+TextStyle _menuSerif(double size, Color color) => boutiqueDisplay(
+      size,
+      color: color,
+      height: 1.2,
+    );
 
 class MonettaSideMenu extends StatelessWidget {
   const MonettaSideMenu({
-    required this.onSearch,
     required this.onCatalog,
     required this.onBags,
     required this.onWallets,
@@ -30,7 +41,6 @@ class MonettaSideMenu extends StatelessWidget {
     super.key,
   });
 
-  final VoidCallback onSearch;
   final VoidCallback onCatalog;
   final VoidCallback onBags;
   final VoidCallback onWallets;
@@ -89,7 +99,11 @@ class MonettaSideMenu extends StatelessWidget {
                     key: const Key('close-side-menu'),
                     tooltip: 'Cerrar menú',
                     onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded, size: 22),
+                    icon: const Icon(
+                      Symbols.close,
+                      size: 22,
+                      weight: _kIconWeight,
+                    ),
                   ),
                 ],
               ),
@@ -104,89 +118,62 @@ class MonettaSideMenu extends StatelessWidget {
                   if (callback != null) _select(context, callback);
                 },
               ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-              child: Material(
-                color: context.monettaColors.inputFill,
-                borderRadius: BorderRadius.circular(16),
-                child: InkWell(
-                  key: const Key('side-menu-search'),
-                  onTap: () => _select(context, onSearch),
-                  borderRadius: BorderRadius.circular(16),
-                  child: Padding(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 16,
-                      vertical: 15,
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.search_rounded, size: 20),
-                        const SizedBox(width: 13),
-                        Text('Buscar una pieza', style: sans(size: 13)),
-                        const Spacer(),
-                        const Icon(Icons.arrow_forward_rounded, size: 17),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 14),
             Expanded(
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 22),
                 children: [
                   _MenuLink(
                     key: const Key('side-menu-bags'),
-                    icon: Icons.shopping_bag_outlined,
+                    icon: Symbols.shopping_bag,
                     label: 'Bolsas',
                     onTap: () => _select(context, onBags),
                   ),
                   _MenuLink(
-                    icon: Icons.account_balance_wallet_outlined,
+                    icon: Symbols.account_balance_wallet,
                     label: 'Carteras',
                     onTap: () => _select(context, onWallets),
                   ),
                   _MenuLink(
-                    icon: Icons.watch_outlined,
+                    icon: Symbols.watch,
                     label: 'Relojes',
                     onTap: () => _select(context, onWatches),
                   ),
                   _MenuLink(
-                    icon: Icons.spa_outlined,
+                    icon: Symbols.spa,
                     label: 'Perfumes',
                     onTap: () => _select(context, onPerfumes),
                   ),
                   _MenuLink(
-                    icon: Icons.face_outlined,
+                    icon: Symbols.face,
                     label: 'Maquillaje y skincare',
                     onTap: () => _select(context, onBeauty),
                   ),
                   _MenuLink(
-                    icon: Icons.storefront_outlined,
+                    icon: Symbols.storefront,
                     label: 'Todas las marcas',
                     onTap: () => _select(context, onCatalog),
                   ),
                   const SizedBox(height: 12),
                   _MenuLink(
-                    icon: Icons.handshake_outlined,
+                    icon: Symbols.handshake,
                     label: 'Mayoreo',
                     onTap: () => _select(context, onPartner),
                   ),
                   _MenuLink(
-                    icon: Icons.chat_bubble_outline_rounded,
+                    icon: Symbols.chat_bubble,
                     label: 'Contacto',
                     onTap: () => _select(context, onSupport),
                   ),
                   _MenuLink(
-                    icon: Icons.auto_stories_outlined,
+                    icon: Symbols.auto_stories,
                     label: 'Nuestra historia',
                     onTap: () => _select(context, onAbout),
                   ),
                   if (onSettings != null)
                     _MenuLink(
                       key: const Key('side-menu-settings'),
-                      icon: Icons.settings_outlined,
+                      icon: Symbols.settings,
                       label: 'Ajustes',
                       onTap: () {
                         final callback = onSettings;
@@ -227,11 +214,11 @@ class _AccountHeader extends StatelessWidget {
         child: FilledButton.tonalIcon(
           key: const Key('side-menu-sign-in'),
           onPressed: onTap,
-          icon: const Icon(Icons.login_rounded, size: 19),
+          icon: const Icon(Symbols.login, size: 20, weight: _kIconWeight),
           label: const Text('Inicia sesión'),
           style: FilledButton.styleFrom(
             minimumSize: const Size(double.infinity, 48),
-            textStyle: sans(size: 14, weight: FontWeight.w600),
+            textStyle: boutiqueDisplay(16, height: 1.2),
           ),
         ),
       );
@@ -264,7 +251,7 @@ class _AccountHeader extends StatelessWidget {
                   foregroundColor: colors.surfaceRaised,
                   child: Text(
                     initial,
-                    style: sans(size: 17, weight: FontWeight.w700),
+                    style: boutiqueDisplay(18, height: 1.2),
                   ),
                 ),
                 const SizedBox(width: 13),
@@ -276,11 +263,7 @@ class _AccountHeader extends StatelessWidget {
                         displayName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                        style: sans(
-                          size: 15,
-                          weight: FontWeight.w600,
-                          color: colors.contentPrimary,
-                        ),
+                        style: _menuSerif(17, colors.contentPrimary),
                       ),
                       if (email != null && email.isNotEmpty) ...[
                         const SizedBox(height: 2),
@@ -328,16 +311,17 @@ class _MenuLink extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 13),
           child: Row(
             children: [
-              Icon(icon, size: 22, color: colors.contentPrimary),
+              Icon(
+                icon,
+                size: 22,
+                weight: _kIconWeight,
+                color: colors.contentPrimary,
+              ),
               const SizedBox(width: 14),
               Expanded(
                 child: Text(
                   label,
-                  style: sans(
-                    size: 15,
-                    weight: FontWeight.w600,
-                    color: colors.contentPrimary,
-                  ),
+                  style: _menuSerif(17, colors.contentPrimary),
                 ),
               ),
             ],

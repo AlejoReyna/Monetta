@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
+import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/navigation/monetta_side_menu.dart';
 
 Widget _menu({
@@ -13,7 +15,6 @@ Widget _menu({
   return MaterialApp(
     home: Scaffold(
       body: MonettaSideMenu(
-        onSearch: doNothing,
         onCatalog: doNothing,
         onBags: doNothing,
         onWallets: doNothing,
@@ -61,23 +62,36 @@ void main() {
       );
     }
     for (final icon in [
-      Icons.shopping_bag_outlined,
-      Icons.account_balance_wallet_outlined,
-      Icons.watch_outlined,
-      Icons.spa_outlined,
-      Icons.face_outlined,
-      Icons.storefront_outlined,
-      Icons.handshake_outlined,
-      Icons.chat_bubble_outline_rounded,
-      Icons.auto_stories_outlined,
-      Icons.settings_outlined,
+      Symbols.shopping_bag,
+      Symbols.account_balance_wallet,
+      Symbols.watch,
+      Symbols.spa,
+      Symbols.face,
+      Symbols.storefront,
+      Symbols.handshake,
+      Symbols.chat_bubble,
+      Symbols.auto_stories,
+      Symbols.settings,
     ]) {
       expect(
         find.descendant(of: menu, matching: find.byIcon(icon)),
         findsOneWidget,
         reason: 'missing icon $icon',
       );
+      final glyph = tester.widget<Icon>(
+        find.descendant(of: menu, matching: find.byIcon(icon)),
+      );
+      expect(glyph.weight, 300, reason: 'light stroke for $icon');
     }
+    for (final label in ['Bolsas', 'Ajustes']) {
+      final style = tester
+          .widget<Text>(find.descendant(of: menu, matching: find.text(label)))
+          .style!;
+      expect(style.fontFamily, kBoutiqueSerifFamily);
+      expect(style.fontWeight, FontWeight.w400);
+    }
+    expect(find.text('Buscar una pieza'), findsNothing);
+    expect(find.byKey(const Key('side-menu-search')), findsNothing);
     expect(
       find.descendant(of: menu, matching: find.byType(Divider)),
       findsNothing,

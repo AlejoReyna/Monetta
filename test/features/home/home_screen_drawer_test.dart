@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:material_symbols_icons/symbols.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/app/theme_controller.dart';
@@ -95,7 +96,7 @@ void main() {
     final menu = find.byKey(const Key('monetta-side-menu'));
     Finder menuText(String text) =>
         find.descendant(of: menu, matching: find.text(text));
-    expect(menuText('Buscar una pieza'), findsOneWidget);
+    expect(menuText('Buscar una pieza'), findsNothing);
     expect(menuText('Bolsas'), findsOneWidget);
     expect(menuText('Carteras'), findsOneWidget);
     expect(menuText('Relojes'), findsOneWidget);
@@ -112,14 +113,11 @@ void main() {
     expect(menuText('Ajustes'), findsOneWidget);
     expect(find.byKey(const Key('side-menu-settings')), findsOneWidget);
     expect(
-      find.descendant(of: menu, matching: find.byIcon(Icons.settings_outlined)),
+      find.descendant(of: menu, matching: find.byIcon(Symbols.settings)),
       findsOneWidget,
     );
     expect(
-      find.descendant(
-        of: menu,
-        matching: find.byIcon(Icons.shopping_bag_outlined),
-      ),
+      find.descendant(of: menu, matching: find.byIcon(Symbols.shopping_bag)),
       findsOneWidget,
     );
     expect(
@@ -135,7 +133,7 @@ void main() {
     expect(menuText('Nuestra historia'), findsOneWidget);
     expect(
       tester.widget<Text>(menuText('Bolsas')).style?.fontFamily,
-      kSansFontFamily,
+      kSerifFontFamily,
     );
   });
 
@@ -190,24 +188,6 @@ void main() {
 
     expect(find.byType(CollectionScreen), findsOneWidget);
     expect(find.text('Bolsas'), findsOneWidget);
-  });
-
-  testWidgets('side-menu search shortcut opens the search experience',
-      (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    await tester.pumpWidget(_app(store));
-    await tester.pump();
-
-    await tester.tap(find.byKey(const Key('home-menu-button')));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('side-menu-search')));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(SearchScreen), findsOneWidget);
   });
 
   testWidgets('owner storefront settings are reflected in the app home', (
