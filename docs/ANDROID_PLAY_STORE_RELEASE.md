@@ -157,3 +157,9 @@ transparent background. It is wired to
 Checkout only presents `https` URLs. Debug and profile manifests do not add
 permissions or cleartext. `INTERNET` in `src/main` is required in production;
 it is not a debug-only permission.
+
+A production merge also pulls permissions this app does not declare itself:
+`ACCESS_NETWORK_STATE`, `WAKE_LOCK`, `VIBRATE`, `AD_ID`, the Play install
+referrer, and C2DM receive. They come from Firebase and Play services. The
+Play data-safety form still has to account for the advertising ID. The
+release manifest does not set `usesCleartextTraffic="true"`.
