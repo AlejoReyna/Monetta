@@ -9,7 +9,7 @@ import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
-import 'package:monetta_app/features/home/home_account_invitation.dart';
+import 'package:monetta_app/features/home/home_closing_section.dart';
 import 'package:monetta_app/main.dart';
 
 // Product-related titles share the family and fallback chain of the card
@@ -327,16 +327,19 @@ void main() {
         _app(
           Scaffold(
             body: SingleChildScrollView(
-              child: HomeAccountInvitation(onRegister: () {}),
+              child: HomeClosingSection(onRegister: () {}),
             ),
           ),
         ),
       );
       await tester.pump();
 
-      final style = _styleOf(tester, find.text('REGÍSTRATE'));
-      expect(style.fontFamily, kBoutiqueSerifFamily);
-      expect(style.fontFamilyFallback, kBoutiqueSerifFallback);
+      final style = _styleOf(
+        tester,
+        find.text('OBTÉN TU PRIMER ENVÍO GRATIS'),
+      );
+      expect(style.fontFamily, kEditorialFontFamily);
+      expect(style.fontFamily, isNot(kBoutiqueSansFamily));
     });
   });
 }

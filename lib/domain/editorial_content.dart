@@ -5,6 +5,8 @@
 /// must never leave either screen empty.
 library;
 
+import 'seasonal_campaign.dart';
+
 enum PartnerCatalogMode {
   wholesale,
   suggestedPrices,
@@ -174,18 +176,29 @@ class PartnerProgramContent {
 }
 
 class MonettaEditorialContent {
-  const MonettaEditorialContent({required this.about, required this.partner});
+  const MonettaEditorialContent({
+    required this.about,
+    required this.partner,
+    this.seasonalBanners = const <SeasonalCampaign>[],
+  });
 
   final AboutMonettaContent about;
   final PartnerProgramContent partner;
 
+  /// Every scheduled home banner. The home controller picks the one in window.
+  /// Empty is not the shipped placeholder: that state is "no Storefront
+  /// source", which this list cannot express on its own.
+  final List<SeasonalCampaign> seasonalBanners;
+
   MonettaEditorialContent copyWith({
     AboutMonettaContent? about,
     PartnerProgramContent? partner,
+    List<SeasonalCampaign>? seasonalBanners,
   }) {
     return MonettaEditorialContent(
       about: about ?? this.about,
       partner: partner ?? this.partner,
+      seasonalBanners: seasonalBanners ?? this.seasonalBanners,
     );
   }
 

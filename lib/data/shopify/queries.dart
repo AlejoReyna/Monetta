@@ -186,6 +186,9 @@ query PredictiveSearch($query: String!, $limit: Int!) {
 /// - `app_about` / handle `monetta`
 /// - `app_partner_program` / handle `vende-con-monetta`
 /// - any number of `reseller_catalog` entries
+///
+/// Seasonal home banners are a separate document ([kSeasonalBannerQuery]) so a
+/// missing `app_seasonal_banner` definition cannot fail this one.
 const String kEditorialContentQuery = r'''
 query AppEditorialContent {
   about: metaobject(handle: {type: "app_about", handle: "monetta"}) {
@@ -201,6 +204,42 @@ query AppEditorialContent {
       node {
         handle
         fields { key value }
+      }
+    }
+  }
+}
+''';
+
+/// Scheduled home banners. One entry per campaign; the app picks the window.
+///
+/// Kept apart from [kEditorialContentQuery]: a store that has not created
+/// `app_seasonal_banner` yet must still load About and the partner program.
+/// Field names follow `docs/EDITORIAL_CONTENT_METAOBJECTS.md`. The parser also
+/// accepts the snake_case aliases.
+const String kSeasonalBannerQuery = r'''
+query AppSeasonalBanners {
+  seasonalBanners: metaobjects(type: "app_seasonal_banner", first: 20) {
+    edges {
+      node {
+        handle
+        fields {
+          key
+          value
+          reference {
+            __typename
+            ... on MediaImage {
+              image { url }
+            }
+            ... on GenericFile {
+              url
+            }
+            ... on Collection {
+              id
+              handle
+              title
+            }
+          }
+        }
       }
     }
   }

@@ -4,6 +4,7 @@ library;
 import 'dart:convert';
 
 import '../../domain/editorial_content.dart';
+import '../../domain/seasonal_campaign.dart';
 import 'queries.dart';
 import 'storefront_client.dart';
 
@@ -18,7 +19,19 @@ class EditorialContentRepository {
     return MonettaEditorialContent(
       about: _about(data['about'], fallback.about),
       partner: _partner(data, fallback.partner),
+      seasonalBanners: await _seasonalBanners(),
     );
+  }
+
+  /// A missing definition or a bad payload hides the banner. It must not
+  /// fail the About / partner read that already succeeded.
+  Future<List<SeasonalCampaign>> _seasonalBanners() async {
+    try {
+      final data = await client.query(kSeasonalBannerQuery);
+      return _parseSeasonalBanners(data['seasonalBanners']);
+    } on Object {
+      return const <SeasonalCampaign>[];
+    }
   }
 
   AboutMonettaContent _about(
@@ -206,6 +219,123 @@ class EditorialContentRepository {
         _ => fallback,
       };
 
+  List<SeasonalCampaign> _parseSeasonalBanners(Object? raw) {
+    if (raw is! Map || raw['edges'] is! List) return const <SeasonalCampaign>[];
+    final result = <SeasonalCampaign>[];
+    for (final edge in raw['edges'] as List) {
+      if (edge is! Map || edge['node'] is! Map) continue;
+      final node = Map<dynamic, dynamic>.from(edge['node'] as Map);
+      final campaign = _campaign(node, _richFields(node));
+      if (campaign != null) result.add(campaign);
+    }
+    return List<SeasonalCampaign>.unmodifiable(result);
+  }
+
+  List<_RichField> _richFields(Map<dynamic, dynamic> node) {
+    final list = node['fields'];
+    if (list is! List) return const <_RichField>[];
+    final result = <_RichField>[];
+    for (final item in list) {
+      if (item is! Map) continue;
+      final key = '${item['key'] ?? ''}'.trim();
+      if (key.isEmpty) continue;
+      final reference = item['reference'];
+      result.add(
+        _RichField(
+          key: key,
+          value: '${item['value'] ?? ''}'.trim(),
+          reference:
+              reference is Map ? Map<dynamic, dynamic>.from(reference) : null,
+        ),
+      );
+    }
+    return result;
+  }
+
+  SeasonalCampaign? _campaign(
+    Map<dynamic, dynamic> node,
+    List<_RichField> fields,
+  ) {
+    final link = _collectionLink(fields);
+    final campaign = SeasonalCampaign(
+      id: _nonEmpty('${node['handle'] ?? ''}'),
+      title: _nonEmpty(_field(fields, const ['title'])?.value) ?? '',
+      imageUrl: _imageUrl(_field(fields, const ['image'])),
+      ipadImageUrl: _imageUrl(
+        _field(fields, const ['ipadImage', 'ipad_image']),
+      ),
+      tag: _nonEmpty(_field(fields, const ['tag'])?.value),
+      subtitle: _nonEmpty(_field(fields, const ['subtitle'])?.value),
+      ctaText: _nonEmpty(
+        _field(fields, const ['ctaText', 'cta_text'])?.value,
+      ),
+      collectionId: link.id,
+      collectionHandle: link.handle,
+      startsAt: _date(_field(fields, const ['startsAt', 'starts_at'])?.value),
+      endsAt: _date(_field(fields, const ['endsAt', 'ends_at'])?.value),
+    );
+    if (!campaign.hasVisibleContent) return null;
+    return campaign;
+  }
+
+  _RichField? _field(List<_RichField> fields, List<String> keys) {
+    for (final field in fields) {
+      if (keys.contains(field.key)) return field;
+    }
+    return null;
+  }
+
+  String? _imageUrl(_RichField? field) {
+    if (field == null) return null;
+    final reference = field.reference;
+    if (reference != null) {
+      final image = reference['image'];
+      if (image is Map) {
+        final url = _https('${image['url'] ?? ''}');
+        if (url != null) return url;
+      }
+      final direct = _https('${reference['url'] ?? ''}');
+      if (direct != null) return direct;
+    }
+    return _https(field.value);
+  }
+
+  _CollectionLink _collectionLink(List<_RichField> fields) {
+    final field = _field(fields, const ['collectionId', 'collection_id']);
+    if (field == null) return const _CollectionLink();
+    final reference = field.reference;
+    if (reference != null) {
+      final handle = _nonEmpty('${reference['handle'] ?? ''}');
+      final id = _nonEmpty('${reference['id'] ?? ''}');
+      if (handle != null || id != null) {
+        return _CollectionLink(
+          id: id ?? _nonEmpty(field.value),
+          handle: handle,
+        );
+      }
+    }
+    final value = _nonEmpty(field.value);
+    if (value == null) return const _CollectionLink();
+    if (value.startsWith('gid://')) {
+      return _CollectionLink(id: value);
+    }
+    return _CollectionLink(id: value, handle: value);
+  }
+
+  DateTime? _date(String? raw) {
+    final value = _nonEmpty(raw);
+    if (value == null) return null;
+    return DateTime.tryParse(value);
+  }
+
+  String? _https(String raw) {
+    final trimmed = raw.trim();
+    if (trimmed.isEmpty) return null;
+    final uri = Uri.tryParse(trimmed);
+    if (uri == null || uri.scheme != 'https' || uri.host.isEmpty) return null;
+    return trimmed;
+  }
+
   String _defaultCatalogDescription(PartnerCatalogMode mode) => switch (mode) {
         PartnerCatalogMode.wholesale =>
           'Precios para preparar y cotizar tu pedido.',
@@ -214,4 +344,19 @@ class EditorialContentRepository {
         PartnerCatalogMode.noPrices =>
           'Comparte los modelos y decide tu precio final.',
       };
+}
+
+class _RichField {
+  const _RichField({required this.key, required this.value, this.reference});
+
+  final String key;
+  final String value;
+  final Map<dynamic, dynamic>? reference;
+}
+
+class _CollectionLink {
+  const _CollectionLink({this.id, this.handle});
+
+  final String? id;
+  final String? handle;
 }

@@ -6,9 +6,9 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import 'package:monetta_app/main.dart';
 
-// NAV-10: Home extends its body behind the persistent navigation, so the
-// trailing clearance has to be exactly as tall as the bar or the last content
-// ends up hidden under it (or leaves a gap above it).
+// The home body extends behind the navigation. The closing band keeps the
+// copyright a full bar-height plus 24 above the bottom edge, so the line is
+// not hidden under the bar.
 
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
@@ -48,24 +48,23 @@ Future<void> _scrollToBleed(WidgetTester tester, Finder bleed) async {
 }
 
 void main() {
-  final bleed =
-      find.byKey(const ValueKey('home-account-invitation-bottom-bleed'));
+  final clearance = find.byKey(const ValueKey('home-closing-nav-clearance'));
   final surface = find.byKey(const Key('bottom-nav-surface'));
 
-  testWidgets(
-      'NAV-10 the home bottom clearance is as tall as the navigation bar',
-      (tester) async {
+  testWidgets('home footer clearance is the navigation bar plus 24', (
+    tester,
+  ) async {
     _phone(tester);
     final store = await _loadedStore();
     addTearDown(store.dispose);
     await tester.pumpWidget(_app(store));
     await tester.pump();
 
-    await _scrollToBleed(tester, bleed);
+    await _scrollToBleed(tester, clearance);
 
     expect(surface, findsOneWidget);
     final bar = tester.getSize(surface).height;
-    expect(tester.getSize(bleed).height, bar);
+    expect(tester.getSize(clearance).height, bar + 24);
     expect(bar, 90, reason: '56 + 34 of safe area');
   });
 }

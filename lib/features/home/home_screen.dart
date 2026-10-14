@@ -21,6 +21,7 @@ import '../../domain/admin_control.dart';
 import '../../domain/editorial_content.dart';
 import '../../domain/home_content.dart';
 import '../../domain/product.dart';
+import '../../domain/seasonal_campaign.dart';
 import '../../main.dart';
 import '../account/account_screen.dart';
 import '../about/about_monetta_screen.dart';
@@ -38,8 +39,9 @@ import '../partner/partner_hub_screen.dart';
 import '../welcome/welcome_gate.dart';
 import 'customer_experiences_section.dart';
 import 'customer_experiences_screen.dart';
-import 'home_account_invitation.dart';
 import 'home_boutique_sections.dart';
+import 'home_closing_section.dart';
+import 'seasonal_banner.dart';
 
 const int _kNewestCount = 8;
 
@@ -399,17 +401,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
               ],
             ),
-            for (var index = 0; index < sections.length; index++)
-              _buildHomeSection(
-                sections[index],
-                index: index,
-                store: store,
-                content: homeContent,
-                editorial: editorial,
-                fresh: fresh,
-                featuredProducts: featured?.products ?? const [],
-                reviewsStatus: reviewsStatus,
-              ),
+            ..._orderedHomeSections(
+              sections: sections,
+              store: store,
+              content: homeContent,
+              editorial: editorial,
+              fresh: fresh,
+              featuredProducts: featured?.products ?? const [],
+              reviewsStatus: reviewsStatus,
+            ),
             Padding(
               padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
               child: RevealOnScroll(
@@ -422,6 +422,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 ),
               ),
             ),
+            // The body extends under the navigation (`extendBody`). The
+            // closing band adds that bar height plus 24 inside its own cream
+            // so the copyright sits clear of the bar.
             Padding(
               padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
               child: RevealOnScroll(
@@ -429,23 +432,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 scrollController: _scroll,
                 delay: const Duration(milliseconds: 280),
                 offset: 0,
-                child: HomeAccountInvitation(
+                child: HomeClosingSection(
                   isSignedIn:
                       AccountScope.maybeOf(context)?.isSignedIn ?? false,
                   onRegister: _openAccount,
+                  socialLinks: homeContent.socialLinks,
+                  onOpenWhatsApp: () => _openWhatsApp(conciergeWhatsAppUri()),
+                  onOpenUrl: _openExternal,
                 ),
               ),
-            ),
-            // The home body extends beneath the persistent navigation. Keep
-            // that trailing scroll clearance in the invitation's surface so
-            // its background reaches the navigation divider instead of
-            // revealing the scaffold's canvas. With `extendBody` the scaffold
-            // reports the bar's full height, safe area included, to this body
-            // as its bottom padding.
-            ColoredBox(
-              key: const ValueKey('home-account-invitation-bottom-bleed'),
-              color: context.monettaColors.surfaceMuted,
-              child: SizedBox(height: MediaQuery.paddingOf(context).bottom),
             ),
           ],
         );
@@ -503,6 +498,73 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       HomeSectionId.todaysPicks => storefront.showTodaysPicks,
       _ => true,
     };
+  }
+
+  List<Widget> _orderedHomeSections({
+    required List<HomeSectionId> sections,
+    required CatalogStore store,
+    required HomeContent content,
+    required MonettaEditorialContent editorial,
+    required List<Product> fresh,
+    required List<Product> featuredProducts,
+    required HomeReviewsStatus reviewsStatus,
+  }) {
+    final widgets = <Widget>[];
+    var placedBanner = false;
+    for (var index = 0; index < sections.length; index++) {
+      final section = sections[index];
+      widgets.add(
+        _buildHomeSection(
+          section,
+          index: index,
+          store: store,
+          content: content,
+          editorial: editorial,
+          fresh: fresh,
+          featuredProducts: featuredProducts,
+          reviewsStatus: reviewsStatus,
+        ),
+      );
+      if (section == HomeSectionId.collections) {
+        final banner = _seasonalBanner();
+        if (banner != null) widgets.add(banner);
+        placedBanner = true;
+      }
+    }
+    if (!placedBanner) {
+      final banner = _seasonalBanner();
+      if (banner != null) widgets.add(banner);
+    }
+    return widgets;
+  }
+
+  /// Null when the source is configured and nothing is in window, so the
+  /// list does not keep a gap.
+  Widget? _seasonalBanner() {
+    final scope = EditorialContentScope.maybeOf(context);
+    final phase = scope?.seasonalBannerPhase ?? SeasonalBannerPhase.placeholder;
+    if (phase == SeasonalBannerPhase.hidden) return null;
+    return Padding(
+      padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
+      child: SeasonalBanner(
+        phase: phase,
+        campaign: scope?.activeSeasonalCampaign,
+        onOpenCollection: _openSeasonalCollection,
+      ),
+    );
+  }
+
+  void _openSeasonalCollection(SeasonalCampaign campaign) {
+    final handle = campaign.collectionHandle;
+    if (handle == null || handle.isEmpty) return;
+    final title = campaign.title.trim();
+    openCollection(
+      context,
+      CollectionScreen(
+        title: title.isEmpty ? 'Colección' : title,
+        filter: CollectionFilter(collectionHandle: handle),
+      ),
+    );
   }
 
   Widget _buildHomeSection(
