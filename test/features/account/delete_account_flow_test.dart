@@ -48,6 +48,7 @@ Future<void> _open(
 }) async {
   await tester.pumpWidget(
     MaterialApp(
+      key: UniqueKey(),
       home: Builder(
         builder: (context) => Scaffold(
           body: TextButton(
@@ -109,52 +110,55 @@ void main() {
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
-    addTearDown(semantics.dispose);
-    final client = _Client(const AccountDeletionClear());
-    var signedOut = false;
-    await _open(
-      tester,
-      client: client,
-      reauthenticate: () async => const FreshCustomerLogin(
-        accessToken: 'fresh-access',
-        idToken: 'fresh-id',
-      ),
-      signOut: () async => signedOut = true,
-    );
+    try {
+      final client = _Client(const AccountDeletionClear());
+      var signedOut = false;
+      await _open(
+        tester,
+        client: client,
+        reauthenticate: () async => const FreshCustomerLogin(
+          accessToken: 'fresh-access',
+          idToken: 'fresh-id',
+        ),
+        signOut: () async => signedOut = true,
+      );
 
-    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
-    await tester.pump();
-    await tester.pump(const Duration(milliseconds: 400));
+      await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+      await tester.pump();
+      await tester.pump(const Duration(milliseconds: 400));
 
-    expect(find.text('Esta acción no se puede deshacer.'), findsOneWidget);
-    final disabled = tester.widget<BoutiqueButton>(
-      find.byKey(const ValueKey('delete-account-confirm')),
-    );
-    expect(disabled.onPressed, isNull);
-    expect(
-      find.bySemanticsLabel(
-        'Eliminar cuenta. Se habilita en unos segundos.',
-      ),
-      findsOneWidget,
-    );
-    expect(client.deleteCalls, 0);
+      expect(find.text('Esta acción no se puede deshacer.'), findsOneWidget);
+      final disabled = tester.widget<BoutiqueButton>(
+        find.byKey(const ValueKey('delete-account-confirm')),
+      );
+      expect(disabled.onPressed, isNull);
+      expect(
+        find.bySemanticsLabel(
+          'Eliminar cuenta. Se habilita en unos segundos.',
+        ),
+        findsOneWidget,
+      );
+      expect(client.deleteCalls, 0);
 
-    await tester.pump(const Duration(seconds: 2));
-    final enabled = tester.widget<BoutiqueButton>(
-      find.byKey(const ValueKey('delete-account-confirm')),
-    );
-    expect(enabled.onPressed, isNotNull);
+      await tester.pump(const Duration(seconds: 2));
+      final enabled = tester.widget<BoutiqueButton>(
+        find.byKey(const ValueKey('delete-account-confirm')),
+      );
+      expect(enabled.onPressed, isNotNull);
 
-    await tester.tap(find.byKey(const ValueKey('delete-account-confirm')));
-    await tester.pumpAndSettle();
-    expect(find.text(kDeleteAccountSuccess), findsOneWidget);
-    expect(client.deleteCalls, 1);
+      await tester.tap(find.byKey(const ValueKey('delete-account-confirm')));
+      await tester.pumpAndSettle();
+      expect(find.text(kDeleteAccountSuccess), findsOneWidget);
+      expect(client.deleteCalls, 1);
 
-    await tester.tap(find.byKey(const ValueKey('delete-account-done')));
-    await tester.pumpAndSettle();
-    expect(signedOut, isTrue);
-    expect(find.text('Inicio'), findsOneWidget);
-    expect(find.text(kDeleteAccountSuccess), findsNothing);
+      await tester.tap(find.byKey(const ValueKey('delete-account-done')));
+      await tester.pumpAndSettle();
+      expect(signedOut, isTrue);
+      expect(find.text('Inicio'), findsOneWidget);
+      expect(find.text(kDeleteAccountSuccess), findsNothing);
+    } finally {
+      semantics.dispose();
+    }
   });
 
   testWidgets('shows the slow loading copy after 10 seconds', (tester) async {
