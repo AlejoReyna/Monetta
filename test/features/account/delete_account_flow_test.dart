@@ -148,7 +148,14 @@ void main() {
 
       await tester.tap(find.byKey(const ValueKey('delete-account-confirm')));
       await tester.pumpAndSettle();
+      expect(
+        kDeleteAccountSuccess,
+        'Tu cuenta fue eliminada. Tus datos de compra se borrarán en un '
+        'proceso que puede tardar hasta 6 meses.',
+      );
       expect(find.text(kDeleteAccountSuccess), findsOneWidget);
+      expect(find.textContaining('correo'), findsNothing);
+      expect(find.textContaining('email'), findsNothing);
       expect(client.deleteCalls, 1);
 
       await tester.tap(find.byKey(const ValueKey('delete-account-done')));

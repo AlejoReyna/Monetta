@@ -18,9 +18,8 @@ import '../boutique/boutique_tokens.dart';
 import 'account_boutique.dart';
 
 const String kDeleteAccountSuccess =
-    'Tu cuenta fue eliminada. Estamos procesando la eliminación de tus '
-    'datos de compra. Puede tardar desde 10 días hasta 6 meses si hiciste '
-    'una compra reciente.';
+    'Tu cuenta fue eliminada. Tus datos de compra se borrarán en un proceso '
+    'que puede tardar hasta 6 meses.';
 
 const String kDeleteAccountBlocked =
     'Tienes un pedido en curso. Podrás eliminar tu cuenta cuando se complete.';
