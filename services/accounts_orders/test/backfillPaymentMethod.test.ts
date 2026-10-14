@@ -103,7 +103,7 @@ describe('payment method backfill', () => {
       async read() {
         return new Map([
           ['555', { ok: true, name: '#1002', paymentMethod: 'bank_deposit' }],
-          ['559', { ok: true, name: '#1004', paymentMethod: 'shopify_payments' }],
+          ['559', { ok: true, name: '#1004', paymentMethod: 'card' }],
         ]);
       },
     };
@@ -113,7 +113,7 @@ describe('payment method backfill', () => {
     expect(first.entries.map((entry) => entry.action)).toEqual(['written', 'written']);
     expect(store.writes).toEqual([
       { shopifyOrderId: '555', paymentMethod: 'bank_deposit' },
-      { shopifyOrderId: '559', paymentMethod: 'shopify_payments' },
+      { shopifyOrderId: '559', paymentMethod: 'card' },
     ]);
 
     const second = await runPaymentMethodBackfill(store, reader, { apply: true });
@@ -218,6 +218,24 @@ describe('payment method backfill', () => {
             paymentGatewayNames: [],
             transactions: [{ kind: 'SALE' }],
           },
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/805',
+            name: '#1805',
+            paymentGatewayNames: ['Shopify Payments'],
+            transactions: [{
+              kind: 'AUTHORIZATION',
+              gateway: 'shopify_payments',
+              formattedGateway: 'Shopify Payments',
+            }],
+          },
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/806',
+            name: '#1806',
+            paymentGatewayNames: ['4242424242424242'],
+            transactions: [],
+          },
         ],
       },
     }), { status: 200 })) as typeof fetch;
@@ -226,7 +244,7 @@ describe('payment method backfill', () => {
       shopDomain: 'monetta-staging.myshopify.com',
       apiVersion: '2026-07',
       accessToken: 'shpat_secretvalue',
-      shopifyOrderIds: ['801', '802', '803', '804'],
+      shopifyOrderIds: ['801', '802', '803', '804', '805', '806'],
       fetchFn,
     });
 
@@ -234,6 +252,8 @@ describe('payment method backfill', () => {
     expect(lookups.get('802')).toMatchObject({ ok: true, paymentMethod: 'mercadopago' });
     expect(lookups.get('803')).toMatchObject({ ok: true, paymentMethod: 'other:kueski_pay' });
     expect(lookups.get('804')).toMatchObject({ ok: true, paymentMethod: null });
+    expect(lookups.get('805')).toMatchObject({ ok: true, paymentMethod: 'card' });
+    expect(lookups.get('806')).toMatchObject({ ok: true, paymentMethod: null });
   });
 
   it('apply writes an other: method and leaves a missing method null', async () => {

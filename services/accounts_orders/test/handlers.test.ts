@@ -334,7 +334,7 @@ describe('webhook handlers', () => {
       );
 
       const stored = JSON.stringify(orders.rows[0]);
-      expect(orders.rows[0]!.paymentMethod).toBe('shopify_payments');
+      expect(orders.rows[0]!.paymentMethod).toBe('card');
       expect(stored).not.toContain(pan);
       expect(stored).not.toContain('credit_card');
       expect(stored).not.toContain('Visa');

@@ -9,8 +9,10 @@
  * emails are dropped. Card numbers and other payment details are never read.
  *
  * A known method stays as that token (`paypal`, `mercadopago`, `card`,
- * `bank_deposit`, …). Any other gateway is `other:<sanitized name>` so a
- * present method is never stored as null.
+ * `bank_deposit`, …). `shopify_payments` and `card`, including case and
+ * spacing variants (`Shopify Payments`, `CARD`), are stored as `card`,
+ * never as `shopify_payments` or `other:`. Any other gateway is
+ * `other:<sanitized name>` so a present method is never stored as null.
  *
  * PayPal and Mercado Pago gateway names, before the `other:` rule:
  * `paypal` / `PayPal` → `paypal`; `PayPal Express Checkout` →
@@ -48,6 +50,7 @@ const NON_METHOD_TOKENS = new Set([
 /** Display labels that already have a Customer Account or gateway token. */
 const METHOD_ALIASES: Readonly<Record<string, string>> = {
   cash_on_delivery_cod: 'cash_on_delivery',
+  shopify_payments: 'card',
   paypal_express: 'paypal',
   paypal_express_checkout: 'paypal',
   paypal_commerce: 'paypal',
@@ -64,7 +67,6 @@ const KNOWN_METHOD_TOKENS = new Set([
   'bank_deposit',
   'manual',
   'card',
-  'shopify_payments',
   'paypal',
   'mercadopago',
   'cash_on_delivery',

@@ -53,14 +53,33 @@ describe('normalizePaymentMethod', () => {
     expect(isNormalizedPaymentMethod('Kueski Pay')).toBe(false);
   });
 
-  it('keeps a card gateway and drops processing kinds', () => {
+  it('maps shopify_payments and card variants to card', () => {
+    for (const name of [
+      'shopify_payments',
+      'Shopify Payments',
+      'SHOPIFY_PAYMENTS',
+      'shopify-payments',
+      'card',
+      'Card',
+      'CARD',
+      ' card ',
+    ]) {
+      expect(normalizePaymentMethod({ payment_gateway_names: [name] })).toBe('card');
+    }
     expect(normalizePaymentMethod({
       payment_gateway_names: ['shopify_payments'],
-      transactions: [{ kind: 'authorization', gateway: 'shopify_payments' }],
-    })).toBe('shopify_payments');
+      transactions: [{
+        kind: 'authorization',
+        gateway: 'shopify_payments',
+        formattedGateway: 'Shopify Payments',
+      }],
+    })).toBe('card');
     expect(normalizePaymentMethod({
       transactions: [{ type: 'CARD', kind: 'SALE' }],
     })).toBe('card');
+    expect(normalizePaymentMethod({
+      payment_gateway_names: ['shopify_payments'],
+    })).not.toMatch(/^other:/);
   });
 
   it('returns null when no method name is present', () => {
