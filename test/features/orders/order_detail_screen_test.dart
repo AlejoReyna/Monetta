@@ -56,6 +56,41 @@ void main() {
       expect(find.textContaining('Estafeta'), findsNothing);
     });
 
+    testWidgets('pending transfer is not shown as paid', (tester) async {
+      await tester.pumpWidget(
+        _host(_order(fulfillmentStatus: null, status: 'pending')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Esperando tu transferencia'), findsWidgets);
+      expect(find.text('Confirmado'), findsNothing);
+      expect(find.text('Pago confirmado'), findsNothing);
+    });
+
+    testWidgets('unknown financial status is payment in progress', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(_order(fulfillmentStatus: null, status: 'unknown')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pago en proceso'), findsWidgets);
+      expect(find.text('Confirmado'), findsNothing);
+      expect(find.text('Pago confirmado'), findsNothing);
+    });
+
+    testWidgets('partially paid is not a confirmed payment', (tester) async {
+      await tester.pumpWidget(
+        _host(_order(fulfillmentStatus: null, status: 'partially_paid')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pago en proceso'), findsWidgets);
+      expect(find.text('Pago confirmado'), findsNothing);
+      expect(find.text('Confirmado'), findsNothing);
+    });
+
     testWidgets('enviado is never presented as entregado', (tester) async {
       await tester.pumpWidget(_host(_order()));
       await tester.pumpAndSettle();

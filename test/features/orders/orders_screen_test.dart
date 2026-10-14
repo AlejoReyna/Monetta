@@ -187,6 +187,46 @@ void main() {
       );
     });
 
+    testWidgets('cards label payment from financial_status, never a catch-all',
+        (tester) async {
+      final db = openTestDatabase();
+      addTearDown(db.close);
+      final controller = _controller(db)
+        ..account = _account()
+        ..orders = [
+          _order(
+            id: 'gid://shopify/Order/paid',
+            displayNumber: '#1001',
+            shopifyOrderId: 'gid://shopify/Order/paid',
+            status: 'paid',
+          ),
+          _order(
+            id: 'gid://shopify/Order/pending',
+            displayNumber: '#1002',
+            shopifyOrderId: 'gid://shopify/Order/pending',
+            status: 'pending',
+          ),
+          _order(
+            id: 'gid://shopify/Order/unknown',
+            displayNumber: '#1003',
+            shopifyOrderId: 'gid://shopify/Order/unknown',
+            status: 'unknown',
+          ),
+        ]
+        ..ordersStatus = OrderHistoryStatus.populated;
+
+      await tester.pumpWidget(_host(controller));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Confirmado'), findsOneWidget);
+      expect(find.text('Esperando tu transferencia'), findsOneWidget);
+      expect(find.text('Pago en proceso'), findsOneWidget);
+      expect(
+        find.byKey(const ValueKey('order-card-gid://shopify/Order/pending')),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('empty history does not read as an error', (tester) async {
       final db = openTestDatabase();
       addTearDown(db.close);

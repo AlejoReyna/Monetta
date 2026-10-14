@@ -9,6 +9,12 @@
 /// evidencia de entrega (`delivered`) se rotula "Entregado". Un `fulfilled`
 /// sin entrega es "En camino" (enviado), y un pedido pagado sin preparación
 /// es "Confirmado", no "En camino".
+///
+/// El pago se lee solo de `financial_status` (campo [OrderSummary.status]).
+/// Únicamente `paid` es "Confirmado". `pending` (transferencia o depósito
+/// en espera) es "Esperando tu transferencia". Reembolsos y anulaciones
+/// conservan "Con ajuste". Cualquier otro valor, vacío o desconocido, es
+/// "Pago en proceso" — nunca "Confirmado".
 library;
 
 import '../../data/local/database.dart' show OrderSummary;
@@ -93,35 +99,69 @@ OrderDisplayStatus orderDisplayStatus(OrderSummary order) {
             'preparación.',
       );
   }
-  final financial = order.status.toLowerCase().trim();
-  if (financial.contains('refund') ||
-      financial.contains('void') ||
-      financial.contains('cancel')) {
-    return const OrderDisplayStatus(
-      key: 'adjusted',
-      label: 'Con ajuste',
-      detail: 'Este pedido tiene una cancelación o devolución registrada. '
-          'El importe final está en tu confirmación de Shopify.',
-    );
+  return _statusFromFinancial(order.status);
+}
+
+/// Clasificación estricta de `financial_status` de Shopify.
+///
+/// `paid`, `pending`, `adjusted` o `in_progress`. No usa subcadenas: así
+/// `partially_paid` no cuenta como pagado ni un valor desconocido como
+/// confirmado. Vacío, `null` y `unknown` (el valor que persiste el
+/// repositorio cuando Shopify no manda estado) son `in_progress`.
+String orderFinancialBucket(String? raw) {
+  switch (_normalizeFinancial(raw)) {
+    case 'paid':
+      return 'paid';
+    case 'partially_refunded':
+    case 'refunded':
+    case 'voided':
+    case 'cancelled':
+    case 'canceled':
+      return 'adjusted';
+    case 'pending':
+      return 'pending';
+    default:
+      return 'in_progress';
   }
-  if (financial.contains('paid') ||
-      financial.contains('pending') ||
-      financial.contains('authorized') ||
-      financial.contains('unfulfilled') ||
-      financial.isNotEmpty) {
-    return const OrderDisplayStatus(
-      key: 'confirmed',
-      label: 'Confirmado',
-      detail: 'Tu pedido está confirmado y en preparación. Te avisaremos '
-          'cuando se envíe.',
-    );
+}
+
+String _normalizeFinancial(String? raw) => (raw ?? '')
+    .toLowerCase()
+    .trim()
+    .replaceAll(RegExp(r'[\s-]+'), '_');
+
+OrderDisplayStatus _statusFromFinancial(String? raw) {
+  switch (orderFinancialBucket(raw)) {
+    case 'paid':
+      return const OrderDisplayStatus(
+        key: 'confirmed',
+        label: 'Confirmado',
+        detail: 'Tu pedido está confirmado y en preparación. Te avisaremos '
+            'cuando se envíe.',
+      );
+    case 'adjusted':
+      return const OrderDisplayStatus(
+        key: 'adjusted',
+        label: 'Con ajuste',
+        detail: 'Este pedido tiene una cancelación o devolución registrada. '
+            'El importe final está en tu confirmación de Shopify.',
+      );
+    case 'pending':
+      return const OrderDisplayStatus(
+        key: 'awaiting_transfer',
+        label: 'Esperando tu transferencia',
+        detail: 'El pago por transferencia o depósito sigue pendiente. '
+            'El pedido no queda confirmado hasta que Shopify registre el pago.',
+      );
+    default:
+      // authorized, partially_paid, expired, unknown, vacío y cualquier
+      // valor que Shopify no liste: el pago no está confirmado.
+      return const OrderDisplayStatus(
+        key: 'payment_in_progress',
+        label: 'Pago en proceso',
+        detail: 'Shopify todavía no reporta el pago de este pedido.',
+      );
   }
-  return const OrderDisplayStatus(
-    key: 'confirmed',
-    label: 'Confirmado',
-    detail: 'Tu pedido está confirmado y en preparación. Te avisaremos '
-        'cuando se envíe.',
-  );
 }
 
 bool _isDelivered(OrderSummary order) =>

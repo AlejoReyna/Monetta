@@ -69,6 +69,7 @@ void main() {
         _order(fulfillmentStatus: null, status: 'paid'),
       );
       expect(status.label, 'Confirmado');
+      expect(status.key, 'confirmed');
     });
 
     test('apartado keeps its own identity', () {
@@ -82,6 +83,83 @@ void main() {
         ),
       );
       expect(status.label, 'Apartado');
+    });
+  });
+
+  group('orderDisplayStatus: financial_status estricto', () {
+    // Cada financial_status de Shopify (Customer Account API) más el
+    // centinela que persiste un estado nulo. Solo `paid` es Confirmado.
+    final labels = <String, String>{
+      'paid': 'Confirmado',
+      'PAID': 'Confirmado',
+      'partially_refunded': 'Con ajuste',
+      'PARTIALLY_REFUNDED': 'Con ajuste',
+      'partially refunded': 'Con ajuste',
+      'refunded': 'Con ajuste',
+      'voided': 'Con ajuste',
+      'cancelled': 'Con ajuste',
+      'canceled': 'Con ajuste',
+      'pending': 'Esperando tu transferencia',
+      'PENDING': 'Esperando tu transferencia',
+      ' pending ': 'Esperando tu transferencia',
+      'authorized': 'Pago en proceso',
+      'partially_paid': 'Pago en proceso',
+      'expired': 'Pago en proceso',
+      'unknown': 'Pago en proceso',
+      'UNKNOWN': 'Pago en proceso',
+      '': 'Pago en proceso',
+      'null': 'Pago en proceso',
+      'unfulfilled': 'Pago en proceso',
+      'not_a_real_status': 'Pago en proceso',
+    };
+
+    for (final entry in labels.entries) {
+      final raw = entry.key.isEmpty ? '(vacío)' : entry.key;
+      test('$raw → ${entry.value}', () {
+        final status = orderDisplayStatus(
+          _order(fulfillmentStatus: null, status: entry.key),
+        );
+        expect(status.label, entry.value);
+        if (entry.value != 'Confirmado') {
+          expect(status.label, isNot('Confirmado'));
+          expect(status.key, isNot('confirmed'));
+        } else {
+          expect(status.key, 'confirmed');
+        }
+      });
+    }
+
+    test('null financial_status is Pago en proceso, never Confirmado', () {
+      expect(orderFinancialBucket(null), 'in_progress');
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: null, status: 'unknown'),
+      );
+      expect(status.label, 'Pago en proceso');
+      expect(status.key, 'payment_in_progress');
+      expect(status.detail.toLowerCase(), isNot(contains('confirmado')));
+    });
+
+    test('pending detail does not claim the order is confirmed', () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: null, status: 'pending'),
+      );
+      expect(status.key, 'awaiting_transfer');
+      expect(status.label, 'Esperando tu transferencia');
+      expect(status.detail.toLowerCase(), isNot(contains('está confirmado')));
+    });
+
+    test('shipment evidence still wins over a non-paid financial status', () {
+      final inTransit = orderDisplayStatus(
+        _order(fulfillmentStatus: 'fulfilled', status: 'pending'),
+      );
+      expect(inTransit.label, 'En camino');
+      expect(inTransit.label, isNot('Confirmado'));
+
+      final delivered = orderDisplayStatus(
+        _order(fulfillmentStatus: 'delivered', status: 'unknown'),
+      );
+      expect(delivered.label, 'Entregado');
+      expect(delivered.key, 'delivered');
     });
   });
 
