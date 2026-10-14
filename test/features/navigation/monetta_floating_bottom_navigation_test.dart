@@ -103,7 +103,7 @@ void main() {
     expect(find.byKey(const Key('bottom-nav-bag-badge')), findsOneWidget);
   });
 
-  Widget _dock(ThemeData theme) {
+  Widget dock(ThemeData theme) {
     return MaterialApp(
       theme: theme,
       home: Scaffold(
@@ -119,7 +119,7 @@ void main() {
   testWidgets('light mode paints the dock in the page color and keeps gold', (
     tester,
   ) async {
-    await tester.pumpWidget(_dock(buildLightTheme()));
+    await tester.pumpWidget(dock(buildLightTheme()));
 
     expect(
       tester
@@ -152,7 +152,7 @@ void main() {
   testWidgets('dark mode keeps the dark dock and the gold selection', (
     tester,
   ) async {
-    await tester.pumpWidget(_dock(buildDarkTheme()));
+    await tester.pumpWidget(dock(buildDarkTheme()));
 
     expect(
       tester
@@ -212,7 +212,8 @@ void main() {
     unawaited(
       navigator.currentState!.push<void>(
         monettaPageRoute<void>(
-            page('catalog', MonettaBottomDestination.catalog)),
+          page('catalog', MonettaBottomDestination.catalog),
+        ),
       ),
     );
     await tester.pump();

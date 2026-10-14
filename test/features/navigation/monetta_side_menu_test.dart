@@ -50,7 +50,7 @@ void main() {
       'Perfumes',
       'Maquillaje y skincare',
       'Todas las marcas',
-      'Mayoreo',
+      'Vende con Monetta',
       'Contacto',
       'Nuestra historia',
       'Ajustes',
@@ -90,6 +90,24 @@ void main() {
       expect(style.fontFamily, kBoutiqueSerifFamily);
       expect(style.fontWeight, FontWeight.w400);
     }
+    expect(find.text('Mayoreo'), findsNothing);
+    // "Vende con Monetta" follows "Todas las marcas".
+    expect(
+      tester.getTopLeft(find.text('Vende con Monetta')).dy,
+      greaterThan(tester.getTopLeft(find.text('Todas las marcas')).dy),
+    );
+    // Contacto, Nuestra historia and Ajustes form the block at the foot.
+    final footer = find.byKey(const Key('side-menu-footer'));
+    for (final label in ['Contacto', 'Nuestra historia', 'Ajustes']) {
+      expect(
+        find.descendant(of: footer, matching: find.text(label)),
+        findsOneWidget,
+      );
+    }
+    expect(
+      tester.getBottomLeft(footer).dy,
+      greaterThan(tester.getBottomLeft(menu).dy - 60),
+    );
     expect(find.text('Buscar una pieza'), findsNothing);
     expect(find.byKey(const Key('side-menu-search')), findsNothing);
     expect(

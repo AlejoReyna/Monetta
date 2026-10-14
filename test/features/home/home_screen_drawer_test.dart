@@ -103,7 +103,7 @@ void main() {
     expect(menuText('Perfumes'), findsOneWidget);
     expect(menuText('Maquillaje y skincare'), findsOneWidget);
     expect(menuText('Todas las marcas'), findsOneWidget);
-    expect(menuText('Mayoreo'), findsOneWidget);
+    expect(menuText('Vende con Monetta'), findsOneWidget);
     expect(menuText('Contacto'), findsOneWidget);
     expect(menuText('TIENDA'), findsNothing);
     expect(menuText('MÁS DE MONETTA'), findsNothing);

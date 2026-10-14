@@ -121,7 +121,7 @@ class MonettaSideMenu extends StatelessWidget {
             const SizedBox(height: 14),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(18, 0, 18, 22),
+                padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
                 children: [
                   _MenuLink(
                     key: const Key('side-menu-bags'),
@@ -154,12 +154,22 @@ class MonettaSideMenu extends StatelessWidget {
                     label: 'Todas las marcas',
                     onTap: () => _select(context, onCatalog),
                   ),
-                  const SizedBox(height: 12),
                   _MenuLink(
+                    key: const Key('side-menu-partner'),
                     icon: Symbols.handshake,
-                    label: 'Mayoreo',
+                    label: 'Vende con Monetta',
                     onTap: () => _select(context, onPartner),
                   ),
+                ],
+              ),
+            ),
+            // Service links sit as one block at the foot of the drawer.
+            Padding(
+              key: const Key('side-menu-footer'),
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   _MenuLink(
                     icon: Symbols.chat_bubble,
                     label: 'Contacto',
