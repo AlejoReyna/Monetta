@@ -166,6 +166,7 @@ void main() {
         );
         expect(status.label, 'Esperando tu transferencia');
         expect(status.detail, contains('Lo verás aquí cuando se confirme.'));
+        expect(status.actionLabel, 'Ver datos de pago');
         expect(orderPaymentMethodIsBankTransfer(method), isTrue);
       }
     });
@@ -181,6 +182,7 @@ void main() {
         );
         expect(status.label, 'Pago en proceso');
         expect(status.detail, 'Lo verás aquí cuando se confirme.');
+        expect(status.actionLabel, isNull);
         expect(status.label, isNot('Esperando tu transferencia'));
       }
     });

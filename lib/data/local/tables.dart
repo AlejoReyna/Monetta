@@ -236,9 +236,10 @@ class OrderSummaries extends Table {
 
   TextColumn get status => text()();
 
-  /// Shopify Customer Account `Order.transactions.type` values, joined
-  /// with commas (`bank_deposit`, `manual`, `card`, …). Null when the
-  /// order history query did not return a transaction type — never guessed.
+  /// Payment method tokens joined with commas (`bank_deposit`, `manual`,
+  /// `card`, …). Customer Account `Order.transactions.type`, or the same
+  /// normalized gateway names from the order mirror. Null when neither
+  /// source returned a method — never guessed.
   TextColumn get paymentMethod => text().nullable()();
 
   /// Shopify `cancelledAt`. Null when the order was not canceled.

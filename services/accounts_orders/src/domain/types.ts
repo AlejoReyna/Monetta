@@ -18,6 +18,11 @@ export interface OrderRecord {
   readonly attributionCode: string | null;
   readonly tags: readonly string[];
   readonly financialStatus: string | null;
+  /**
+   * Normalized gateway/method names (`bank_deposit`, `manual`, `card`, …).
+   * Null when the webhook did not carry a method. Never card data.
+   */
+  readonly paymentMethod?: string | null;
   readonly fulfillmentStatus: string | null;
   readonly totalAmount: number | null;
   readonly currencyCode: string | null;

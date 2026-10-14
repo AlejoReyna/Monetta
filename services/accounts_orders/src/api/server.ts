@@ -763,6 +763,7 @@ export function createApp(deps: ServerDeps): Express {
           source: o.source,
           attributionCode: o.attributionCode,
           financialStatus: o.financialStatus,
+          paymentMethod: o.paymentMethod ?? null,
           fulfillmentStatus: o.fulfillmentStatus,
           totalAmount: o.totalAmount,
           currencyCode: o.currencyCode,

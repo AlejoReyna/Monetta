@@ -21,6 +21,23 @@ import '../boutique/boutique_tokens.dart';
 import '../rewards/rewards_section.dart';
 import 'order_status.dart';
 
+const missingPaymentWhatsAppLabel =
+    '¿Elegiste transferencia? Escríbenos por WhatsApp y te compartimos los datos de pago.';
+
+/// Detail-only help for "Pago en proceso" when no payment method was stored.
+/// Hidden once [OrderSummary.paymentMethod] is known, and never shown on the list.
+bool showMissingPaymentWhatsApp(OrderSummary order) {
+  if (orderDisplayStatus(order).label != 'Pago en proceso') return false;
+  final method = order.paymentMethod?.trim();
+  return method == null || method.isEmpty;
+}
+
+Uri missingPaymentWhatsAppUri(String orderLabel) {
+  return Uri.https('wa.me', '/$kWhatsAppE164', {
+    'text': 'Hola, quiero los datos de pago de mi pedido $orderLabel',
+  });
+}
+
 Future<void> openOrderDetail(
   BuildContext context, {
   required OrderSummary order,
@@ -135,6 +152,25 @@ class OrderDetailScreen extends StatelessWidget {
                     order: order,
                     onOpen: (uri) => _open(context, uri),
                   ),
+                  if (status.key == 'awaiting_transfer') ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    Text(
+                      'Ver datos de pago',
+                      key: const ValueKey('order-payment-details'),
+                      style: boutiqueText(
+                        size: 13,
+                        weight: FontWeight.w600,
+                        color: palette.ink,
+                      ),
+                    ),
+                  ],
+                  if (showMissingPaymentWhatsApp(order)) ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _MissingPaymentWhatsAppLink(
+                      orderLabel: label,
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                  ],
                   if (status.key == 'in_transit') ...[
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(
@@ -418,6 +454,36 @@ class PaidCancelledRefundHelp extends StatelessWidget {
               color: palette.ink,
               decoration: TextDecoration.underline,
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _MissingPaymentWhatsAppLink extends StatelessWidget {
+  const _MissingPaymentWhatsAppLink({
+    required this.orderLabel,
+    required this.onOpen,
+  });
+
+  final String orderLabel;
+  final void Function(Uri uri) onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Semantics(
+      link: true,
+      child: GestureDetector(
+        key: const ValueKey('missing-payment-whatsapp'),
+        onTap: () => onOpen(missingPaymentWhatsAppUri(orderLabel)),
+        child: Text(
+          missingPaymentWhatsAppLabel,
+          style: boutiqueText(
+            size: 13,
+            color: palette.inkMuted,
+            decoration: TextDecoration.underline,
           ),
         ),
       ),

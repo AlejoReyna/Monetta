@@ -6,6 +6,7 @@ import 'package:monetta_app/data/customer_auth/customer_orders.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
+import 'package:monetta_app/features/orders/order_status.dart';
 
 class _FakeMirror implements OrderHistoryClient {
   _FakeMirror(this.orders);
@@ -49,16 +50,19 @@ CustomerAccountOrder _caa({
   String id = 'gid://shopify/Order/1',
   int number = 100,
   double amount = 1749,
+  String? financialStatus = 'PAID',
+  String? paymentMethod,
 }) =>
     CustomerAccountOrder(
       id: id,
       name: '#$number',
       number: number,
       processedAt: DateTime.utc(2026, 8, 1),
-      financialStatus: 'PAID',
+      financialStatus: financialStatus,
       fulfillmentStatus: null,
       totalAmount: amount,
       currencyCode: 'MXN',
+      paymentMethod: paymentMethod,
     );
 
 void main() {
@@ -294,6 +298,114 @@ void main() {
       expect(mirror.receivedAccessToken, 'access');
       expect(view.status, OrderHistoryStatus.populated);
       expect(view.orders, hasLength(1));
+    });
+
+    test('webhook-only pending transfer keeps the mirror payment method',
+        () async {
+      final repo = OrderHistoryRepository(
+        store: OrderSummaryStore(db),
+        config: AccountsOrdersConfig.disabled,
+        mirrorClient: _FakeMirror([
+          const MirroredOrder(
+            id: 7,
+            shopifyOrderId: '700',
+            source: 'shopify_checkout',
+            attributionCode: null,
+            financialStatus: 'pending',
+            fulfillmentStatus: null,
+            totalAmount: 890,
+            currencyCode: 'MXN',
+            placedAt: null,
+            paymentMethod: 'bank_deposit',
+          ),
+        ]),
+      );
+
+      final view = await repo.refresh(
+        accountId: 'acct-1',
+        backendAccessToken: 'access',
+      );
+      final order = view.orders.single;
+      expect(order.paymentMethod, 'bank_deposit');
+      expect(order.status, 'pending');
+      final status = orderDisplayStatus(order);
+      expect(status.label, 'Esperando tu transferencia');
+      expect(status.actionLabel, 'Ver datos de pago');
+    });
+
+    test('app-loaded pending transfer keeps the Customer Account method',
+        () async {
+      final repo = OrderHistoryRepository(
+        store: OrderSummaryStore(db),
+        config: AccountsOrdersConfig.disabled,
+        customerOrders: _FakeCaa([
+          _caa(
+            number: 1008,
+            financialStatus: 'PENDING',
+            paymentMethod: 'manual',
+          ),
+        ]),
+      );
+
+      final view = await repo.refresh(
+        accountId: 'acct-1',
+        customerAccountAccessToken: 'caa',
+      );
+      final order = view.orders.single;
+      expect(order.paymentMethod, 'manual');
+      expect(order.displayNumber, '#1008');
+      final status = orderDisplayStatus(order);
+      expect(status.label, 'Esperando tu transferencia');
+      expect(status.actionLabel, 'Ver datos de pago');
+    });
+
+    test('card pending stays Pago en proceso', () async {
+      final repo = OrderHistoryRepository(
+        store: OrderSummaryStore(db),
+        config: AccountsOrdersConfig.disabled,
+        customerOrders: _FakeCaa([
+          _caa(
+            financialStatus: 'PENDING',
+            paymentMethod: 'card',
+          ),
+        ]),
+      );
+
+      final view = await repo.refresh(
+        accountId: 'acct-1',
+        customerAccountAccessToken: 'caa',
+      );
+      final status = orderDisplayStatus(view.orders.single);
+      expect(view.orders.single.paymentMethod, 'card');
+      expect(status.label, 'Pago en proceso');
+      expect(status.actionLabel, isNot('Ver datos de pago'));
+    });
+
+    test('missing payment method stays Pago en proceso', () async {
+      final repo = OrderHistoryRepository(
+        store: OrderSummaryStore(db),
+        config: AccountsOrdersConfig.disabled,
+        mirrorClient: _FakeMirror([
+          const MirroredOrder(
+            id: 8,
+            shopifyOrderId: '800',
+            source: 'shopify_checkout',
+            attributionCode: null,
+            financialStatus: 'pending',
+            fulfillmentStatus: null,
+            totalAmount: 100,
+            currencyCode: 'MXN',
+            placedAt: null,
+          ),
+        ]),
+      );
+
+      final view = await repo.refresh(
+        accountId: 'acct-1',
+        backendAccessToken: 'access',
+      );
+      expect(view.orders.single.paymentMethod, isNull);
+      expect(orderDisplayStatus(view.orders.single).label, 'Pago en proceso');
     });
   });
 }

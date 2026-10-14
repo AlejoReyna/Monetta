@@ -271,6 +271,7 @@ class OrderHistoryRepository {
           source: order.source,
           attributionCode: Value(order.attributionCode),
           status: order.financialStatus ?? 'unknown',
+          paymentMethod: Value(order.paymentMethod),
           totalAmount: order.totalAmount ?? 0,
           currencyCode: order.currencyCode ?? 'MXN',
           placedAt: order.placedAt ?? DateTime.now().toUtc(),

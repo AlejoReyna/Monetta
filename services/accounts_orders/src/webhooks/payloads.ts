@@ -13,6 +13,20 @@ export interface ShopifyOrderWebhookPayload {
   readonly tags?: string;
   readonly financial_status?: string | null;
   readonly fulfillment_status?: string | null;
+  /**
+   * Gateway names only. Card numbers and `payment_details` are intentionally
+   * untyped so this service never reads them.
+   */
+  readonly payment_gateway_names?: readonly string[] | string | null;
+  /** Deprecated Shopify order field; same role as one gateway name. */
+  readonly gateway?: string | null;
+  readonly transactions?: ReadonlyArray<{
+    readonly kind?: string | null;
+    readonly gateway?: string | null;
+    readonly type?: string | null;
+    readonly formatted_gateway?: string | null;
+    readonly formattedGateway?: string | null;
+  }> | null;
   readonly current_total_price?: string | null;
   readonly currency?: string | null;
   readonly created_at?: string | null;

@@ -27,6 +27,24 @@ void main() {
     );
     expect(captured.headers['Authorization'], 'Bearer customer-access-token');
     expect(orders.single.shopifyOrderId, '100');
+    expect(orders.single.paymentMethod, isNull);
+  });
+
+  test('reads a normalized payment method and ignores a blank one', () async {
+    final client = HttpOrderHistoryClient(
+      baseUrl: 'https://accounts.example.com',
+      httpClient: MockClient((_) async {
+        return http.Response(
+          '''{"orders":[{"id":2,"shopifyOrderId":"200","source":"shopify_checkout","attributionCode":null,"financialStatus":"pending","paymentMethod":"bank_deposit","fulfillmentStatus":null,"totalAmount":500,"currencyCode":"MXN","placedAt":"2026-08-25T00:00:00Z"},{"id":3,"shopifyOrderId":"201","source":"shopify_checkout","attributionCode":null,"financialStatus":"pending","paymentMethod":"  ","fulfillmentStatus":null,"totalAmount":10,"currencyCode":"MXN","placedAt":null}]}''',
+          200,
+          headers: {'Content-Type': 'application/json'},
+        );
+      }),
+    );
+
+    final orders = await client.fetchOrders('token');
+    expect(orders.first.paymentMethod, 'bank_deposit');
+    expect(orders.last.paymentMethod, isNull);
   });
 
   test('does not include the bearer value in an HTTP error', () async {

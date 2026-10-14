@@ -238,9 +238,16 @@ void main() {
 
       expect(find.text('Confirmado'), findsOneWidget);
       expect(find.text('Esperando tu transferencia'), findsOneWidget);
+      expect(find.text('Ver datos de pago'), findsOneWidget);
       expect(find.text('Pago en proceso'), findsOneWidget);
       expect(find.text('Reembolsado'), findsOneWidget);
       expect(find.text('Ver pedido'), findsOneWidget);
+      expect(
+        find.text(
+          '¿Elegiste transferencia? Escríbenos por WhatsApp y te compartimos los datos de pago.',
+        ),
+        findsNothing,
+      );
       expect(find.text('En camino'), findsNothing);
       expect(find.text('Con ajuste'), findsNothing);
       expect(

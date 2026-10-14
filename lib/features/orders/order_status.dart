@@ -16,7 +16,9 @@
 ///
 /// `pending` es "Esperando tu transferencia" solo si
 /// [OrderSummary.paymentMethod] identifica depósito bancario o pago manual.
-/// Cualquier otro pendiente, vacío o desconocido es "Pago en proceso".
+/// Ese estado lleva la acción "Ver datos de pago" en la lista y en el
+/// detalle. Cualquier otro pendiente, vacío o desconocido es
+/// "Pago en proceso".
 ///
 /// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
 /// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
@@ -169,6 +171,7 @@ OrderDisplayStatus orderPaymentStatus(OrderSummary order) {
           label: 'Esperando tu transferencia',
           detail: 'Estamos esperando tu transferencia. '
               'Lo verás aquí cuando se confirme.',
+          actionLabel: 'Ver datos de pago',
         );
       }
       return _paymentInProgress;
