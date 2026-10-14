@@ -4374,6 +4374,12 @@ class $OrderSummariesTable extends OrderSummaries
   late final GeneratedColumn<String> status = GeneratedColumn<String>(
       'status', aliasedName, false,
       type: DriftSqlType.string, requiredDuringInsert: true);
+  static const VerificationMeta _paymentMethodMeta =
+      const VerificationMeta('paymentMethod');
+  @override
+  late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
+      'payment_method', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
   static const VerificationMeta _totalAmountMeta =
       const VerificationMeta('totalAmount');
   @override
@@ -4402,6 +4408,7 @@ class $OrderSummariesTable extends OrderSummaries
         source,
         attributionCode,
         status,
+        paymentMethod,
         totalAmount,
         currencyCode,
         placedAt
@@ -4463,6 +4470,12 @@ class $OrderSummariesTable extends OrderSummaries
     } else if (isInserting) {
       context.missing(_statusMeta);
     }
+    if (data.containsKey('payment_method')) {
+      context.handle(
+          _paymentMethodMeta,
+          paymentMethod.isAcceptableOrUnknown(
+              data['payment_method']!, _paymentMethodMeta));
+    }
     if (data.containsKey('total_amount')) {
       context.handle(
           _totalAmountMeta,
@@ -4510,6 +4523,8 @@ class $OrderSummariesTable extends OrderSummaries
           DriftSqlType.string, data['${effectivePrefix}attribution_code']),
       status: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
+      paymentMethod: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}payment_method']),
       totalAmount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}total_amount'])!,
       currencyCode: attachedDatabase.typeMapping
@@ -4542,6 +4557,11 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
   /// apartado orders.
   final String? attributionCode;
   final String status;
+
+  /// Shopify Customer Account `Order.transactions.type` values, joined
+  /// with commas (`bank_deposit`, `manual`, `card`, …). Null when the
+  /// order history query did not return a transaction type — never guessed.
+  final String? paymentMethod;
   final double totalAmount;
   final String currencyCode;
   final DateTime placedAt;
@@ -4554,6 +4574,7 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       required this.source,
       this.attributionCode,
       required this.status,
+      this.paymentMethod,
       required this.totalAmount,
       required this.currencyCode,
       required this.placedAt});
@@ -4576,6 +4597,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       map['attribution_code'] = Variable<String>(attributionCode);
     }
     map['status'] = Variable<String>(status);
+    if (!nullToAbsent || paymentMethod != null) {
+      map['payment_method'] = Variable<String>(paymentMethod);
+    }
     map['total_amount'] = Variable<double>(totalAmount);
     map['currency_code'] = Variable<String>(currencyCode);
     map['placed_at'] = Variable<DateTime>(placedAt);
@@ -4600,6 +4624,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
           ? const Value.absent()
           : Value(attributionCode),
       status: Value(status),
+      paymentMethod: paymentMethod == null && nullToAbsent
+          ? const Value.absent()
+          : Value(paymentMethod),
       totalAmount: Value(totalAmount),
       currencyCode: Value(currencyCode),
       placedAt: Value(placedAt),
@@ -4619,6 +4646,7 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       source: serializer.fromJson<String>(json['source']),
       attributionCode: serializer.fromJson<String?>(json['attributionCode']),
       status: serializer.fromJson<String>(json['status']),
+      paymentMethod: serializer.fromJson<String?>(json['paymentMethod']),
       totalAmount: serializer.fromJson<double>(json['totalAmount']),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
       placedAt: serializer.fromJson<DateTime>(json['placedAt']),
@@ -4636,6 +4664,7 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       'source': serializer.toJson<String>(source),
       'attributionCode': serializer.toJson<String?>(attributionCode),
       'status': serializer.toJson<String>(status),
+      'paymentMethod': serializer.toJson<String?>(paymentMethod),
       'totalAmount': serializer.toJson<double>(totalAmount),
       'currencyCode': serializer.toJson<String>(currencyCode),
       'placedAt': serializer.toJson<DateTime>(placedAt),
@@ -4651,6 +4680,7 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
           String? source,
           Value<String?> attributionCode = const Value.absent(),
           String? status,
+          Value<String?> paymentMethod = const Value.absent(),
           double? totalAmount,
           String? currencyCode,
           DateTime? placedAt}) =>
@@ -4669,6 +4699,8 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
             ? attributionCode.value
             : this.attributionCode,
         status: status ?? this.status,
+        paymentMethod:
+            paymentMethod.present ? paymentMethod.value : this.paymentMethod,
         totalAmount: totalAmount ?? this.totalAmount,
         currencyCode: currencyCode ?? this.currencyCode,
         placedAt: placedAt ?? this.placedAt,
@@ -4691,6 +4723,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
           ? data.attributionCode.value
           : this.attributionCode,
       status: data.status.present ? data.status.value : this.status,
+      paymentMethod: data.paymentMethod.present
+          ? data.paymentMethod.value
+          : this.paymentMethod,
       totalAmount:
           data.totalAmount.present ? data.totalAmount.value : this.totalAmount,
       currencyCode: data.currencyCode.present
@@ -4711,6 +4746,7 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
           ..write('source: $source, ')
           ..write('attributionCode: $attributionCode, ')
           ..write('status: $status, ')
+          ..write('paymentMethod: $paymentMethod, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('placedAt: $placedAt')
@@ -4728,6 +4764,7 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       source,
       attributionCode,
       status,
+      paymentMethod,
       totalAmount,
       currencyCode,
       placedAt);
@@ -4743,6 +4780,7 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
           other.source == this.source &&
           other.attributionCode == this.attributionCode &&
           other.status == this.status &&
+          other.paymentMethod == this.paymentMethod &&
           other.totalAmount == this.totalAmount &&
           other.currencyCode == this.currencyCode &&
           other.placedAt == this.placedAt);
@@ -4757,6 +4795,7 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
   final Value<String> source;
   final Value<String?> attributionCode;
   final Value<String> status;
+  final Value<String?> paymentMethod;
   final Value<double> totalAmount;
   final Value<String> currencyCode;
   final Value<DateTime> placedAt;
@@ -4770,6 +4809,7 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     this.source = const Value.absent(),
     this.attributionCode = const Value.absent(),
     this.status = const Value.absent(),
+    this.paymentMethod = const Value.absent(),
     this.totalAmount = const Value.absent(),
     this.currencyCode = const Value.absent(),
     this.placedAt = const Value.absent(),
@@ -4784,6 +4824,7 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     required String source,
     this.attributionCode = const Value.absent(),
     required String status,
+    this.paymentMethod = const Value.absent(),
     required double totalAmount,
     required String currencyCode,
     required DateTime placedAt,
@@ -4804,6 +4845,7 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     Expression<String>? source,
     Expression<String>? attributionCode,
     Expression<String>? status,
+    Expression<String>? paymentMethod,
     Expression<double>? totalAmount,
     Expression<String>? currencyCode,
     Expression<DateTime>? placedAt,
@@ -4818,6 +4860,7 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
       if (source != null) 'source': source,
       if (attributionCode != null) 'attribution_code': attributionCode,
       if (status != null) 'status': status,
+      if (paymentMethod != null) 'payment_method': paymentMethod,
       if (totalAmount != null) 'total_amount': totalAmount,
       if (currencyCode != null) 'currency_code': currencyCode,
       if (placedAt != null) 'placed_at': placedAt,
@@ -4834,6 +4877,7 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
       Value<String>? source,
       Value<String?>? attributionCode,
       Value<String>? status,
+      Value<String?>? paymentMethod,
       Value<double>? totalAmount,
       Value<String>? currencyCode,
       Value<DateTime>? placedAt,
@@ -4847,6 +4891,7 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
       source: source ?? this.source,
       attributionCode: attributionCode ?? this.attributionCode,
       status: status ?? this.status,
+      paymentMethod: paymentMethod ?? this.paymentMethod,
       totalAmount: totalAmount ?? this.totalAmount,
       currencyCode: currencyCode ?? this.currencyCode,
       placedAt: placedAt ?? this.placedAt,
@@ -4881,6 +4926,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     if (status.present) {
       map['status'] = Variable<String>(status.value);
     }
+    if (paymentMethod.present) {
+      map['payment_method'] = Variable<String>(paymentMethod.value);
+    }
     if (totalAmount.present) {
       map['total_amount'] = Variable<double>(totalAmount.value);
     }
@@ -4907,6 +4955,7 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
           ..write('source: $source, ')
           ..write('attributionCode: $attributionCode, ')
           ..write('status: $status, ')
+          ..write('paymentMethod: $paymentMethod, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('placedAt: $placedAt, ')
@@ -7925,6 +7974,7 @@ typedef $$OrderSummariesTableCreateCompanionBuilder = OrderSummariesCompanion
   required String source,
   Value<String?> attributionCode,
   required String status,
+  Value<String?> paymentMethod,
   required double totalAmount,
   required String currencyCode,
   required DateTime placedAt,
@@ -7940,6 +7990,7 @@ typedef $$OrderSummariesTableUpdateCompanionBuilder = OrderSummariesCompanion
   Value<String> source,
   Value<String?> attributionCode,
   Value<String> status,
+  Value<String?> paymentMethod,
   Value<double> totalAmount,
   Value<String> currencyCode,
   Value<DateTime> placedAt,
@@ -7999,6 +8050,9 @@ class $$OrderSummariesTableFilterComposer
 
   ColumnFilters<String> get status => $composableBuilder(
       column: $table.status, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get paymentMethod => $composableBuilder(
+      column: $table.paymentMethod, builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get totalAmount => $composableBuilder(
       column: $table.totalAmount, builder: (column) => ColumnFilters(column));
@@ -8064,6 +8118,10 @@ class $$OrderSummariesTableOrderingComposer
   ColumnOrderings<String> get status => $composableBuilder(
       column: $table.status, builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<String> get paymentMethod => $composableBuilder(
+      column: $table.paymentMethod,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<double> get totalAmount => $composableBuilder(
       column: $table.totalAmount, builder: (column) => ColumnOrderings(column));
 
@@ -8124,6 +8182,9 @@ class $$OrderSummariesTableAnnotationComposer
 
   GeneratedColumn<String> get status =>
       $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get paymentMethod => $composableBuilder(
+      column: $table.paymentMethod, builder: (column) => column);
 
   GeneratedColumn<double> get totalAmount => $composableBuilder(
       column: $table.totalAmount, builder: (column) => column);
@@ -8187,6 +8248,7 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
             Value<String> source = const Value.absent(),
             Value<String?> attributionCode = const Value.absent(),
             Value<String> status = const Value.absent(),
+            Value<String?> paymentMethod = const Value.absent(),
             Value<double> totalAmount = const Value.absent(),
             Value<String> currencyCode = const Value.absent(),
             Value<DateTime> placedAt = const Value.absent(),
@@ -8201,6 +8263,7 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
             source: source,
             attributionCode: attributionCode,
             status: status,
+            paymentMethod: paymentMethod,
             totalAmount: totalAmount,
             currencyCode: currencyCode,
             placedAt: placedAt,
@@ -8215,6 +8278,7 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
             required String source,
             Value<String?> attributionCode = const Value.absent(),
             required String status,
+            Value<String?> paymentMethod = const Value.absent(),
             required double totalAmount,
             required String currencyCode,
             required DateTime placedAt,
@@ -8229,6 +8293,7 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
             source: source,
             attributionCode: attributionCode,
             status: status,
+            paymentMethod: paymentMethod,
             totalAmount: totalAmount,
             currencyCode: currencyCode,
             placedAt: placedAt,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/features/account/account_boutique.dart';
 import 'package:monetta_app/features/orders/order_detail_screen.dart';
 import 'package:monetta_app/features/rewards/rewards_models.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
@@ -14,6 +15,7 @@ OrderSummary _order({
   String source = 'shopify_checkout',
   String? attributionCode,
   String status = 'paid',
+  String? paymentMethod,
   double total = 11480,
 }) =>
     OrderSummary(
@@ -25,6 +27,7 @@ OrderSummary _order({
       source: source,
       attributionCode: attributionCode,
       status: status,
+      paymentMethod: paymentMethod,
       totalAmount: total,
       currencyCode: 'MXN',
       placedAt: DateTime.utc(2026, 5, 12),
@@ -58,13 +61,41 @@ void main() {
 
     testWidgets('pending transfer is not shown as paid', (tester) async {
       await tester.pumpWidget(
-        _host(_order(fulfillmentStatus: null, status: 'pending')),
+        _host(
+          _order(
+            fulfillmentStatus: null,
+            status: 'pending',
+            paymentMethod: 'bank_deposit',
+          ),
+        ),
       );
       await tester.pumpAndSettle();
 
       expect(find.text('Esperando tu transferencia'), findsWidgets);
+      expect(
+        find.textContaining('Lo verás aquí cuando se confirme.'),
+        findsWidgets,
+      );
       expect(find.text('Confirmado'), findsNothing);
       expect(find.text('Pago confirmado'), findsNothing);
+    });
+
+    testWidgets('pending card payment is Pago en proceso', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: null,
+            status: 'pending',
+            paymentMethod: 'card',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pago en proceso'), findsWidgets);
+      expect(find.text('Lo verás aquí cuando se confirme.'), findsWidgets);
+      expect(find.text('Esperando tu transferencia'), findsNothing);
+      expect(find.text('Confirmado'), findsNothing);
     });
 
     testWidgets('unknown financial status is payment in progress', (
@@ -89,6 +120,47 @@ void main() {
       expect(find.text('Pago en proceso'), findsWidgets);
       expect(find.text('Pago confirmado'), findsNothing);
       expect(find.text('Confirmado'), findsNothing);
+    });
+
+    testWidgets('shipped refund is not shown as on the way', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: 'shipped',
+            status: 'refunded',
+            total: 11480,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reembolsado'), findsWidgets);
+      expect(find.textContaining('Te devolvimos'), findsWidgets);
+      expect(find.textContaining('a tu método de pago.'), findsWidgets);
+      expect(find.text('En camino'), findsNothing);
+      expect(find.text('Pedido enviado'), findsNothing);
+      expect(find.text('Confirmado'), findsNothing);
+
+      final capsule = find.byType(EStatusCapsule);
+      final box = tester.widget<Container>(
+        find.descendant(of: capsule, matching: find.byType(Container)).first,
+      );
+      final decoration = box.decoration! as BoxDecoration;
+      expect(decoration.color, isNot(MonettaColors.light.success));
+      expect(decoration.color, isNot(MonettaColors.light.successSurface));
+    });
+
+    testWidgets('shipped cancellation is not shown as on the way', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(_order(fulfillmentStatus: 'shipped', status: 'cancelled')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancelado'), findsWidgets);
+      expect(find.text('En camino'), findsNothing);
+      expect(find.text('Pedido enviado'), findsNothing);
     });
 
     testWidgets('enviado is never presented as entregado', (tester) async {

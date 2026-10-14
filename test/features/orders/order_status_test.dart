@@ -10,6 +10,7 @@ OrderSummary _order({
   String source = 'shopify_checkout',
   String? attributionCode,
   String status = 'paid',
+  String? paymentMethod,
   double total = 11480,
   String currency = 'MXN',
 }) =>
@@ -22,6 +23,7 @@ OrderSummary _order({
       source: source,
       attributionCode: attributionCode,
       status: status,
+      paymentMethod: paymentMethod,
       totalAmount: total,
       currencyCode: currency,
       placedAt: DateTime.utc(2026, 5, 12),
@@ -87,21 +89,20 @@ void main() {
   });
 
   group('orderDisplayStatus: financial_status estricto', () {
-    // Cada financial_status de Shopify (Customer Account API) más el
-    // centinela que persiste un estado nulo. Solo `paid` es Confirmado.
     final labels = <String, String>{
       'paid': 'Confirmado',
       'PAID': 'Confirmado',
-      'partially_refunded': 'Con ajuste',
-      'PARTIALLY_REFUNDED': 'Con ajuste',
-      'partially refunded': 'Con ajuste',
-      'refunded': 'Con ajuste',
-      'voided': 'Con ajuste',
-      'cancelled': 'Con ajuste',
-      'canceled': 'Con ajuste',
-      'pending': 'Esperando tu transferencia',
-      'PENDING': 'Esperando tu transferencia',
-      ' pending ': 'Esperando tu transferencia',
+      'partially_refunded': 'Reembolso en proceso',
+      'PARTIALLY_REFUNDED': 'Reembolso en proceso',
+      'partially refunded': 'Reembolso en proceso',
+      'pending_refund': 'Reembolso en proceso',
+      'refund_pending': 'Reembolso en proceso',
+      'refunded': 'Reembolsado',
+      'voided': 'Cancelado',
+      'cancelled': 'Cancelado',
+      'canceled': 'Cancelado',
+      'pending': 'Pago en proceso',
+      'PENDING': 'Pago en proceso',
       'authorized': 'Pago en proceso',
       'partially_paid': 'Pago en proceso',
       'expired': 'Pago en proceso',
@@ -120,46 +121,175 @@ void main() {
           _order(fulfillmentStatus: null, status: entry.key),
         );
         expect(status.label, entry.value);
+        expect(status.label, isNot('Con ajuste'));
+        expect(status.detail, isNot(contains('Te avisaremos')));
         if (entry.value != 'Confirmado') {
           expect(status.label, isNot('Confirmado'));
           expect(status.key, isNot('confirmed'));
+          expect(status.success, isFalse);
         } else {
           expect(status.key, 'confirmed');
+          expect(status.detail, 'Aquí verás cuando tu pedido salga.');
         }
       });
     }
 
     test('null financial_status is Pago en proceso, never Confirmado', () {
-      expect(orderFinancialBucket(null), 'in_progress');
-      final status = orderDisplayStatus(
+      final status = orderPaymentStatus(
         _order(fulfillmentStatus: null, status: 'unknown'),
       );
       expect(status.label, 'Pago en proceso');
       expect(status.key, 'payment_in_progress');
-      expect(status.detail.toLowerCase(), isNot(contains('confirmado')));
+      expect(status.detail, 'Lo verás aquí cuando se confirme.');
+      expect(status.detail, isNot(contains('Te avisaremos')));
     });
 
-    test('pending detail does not claim the order is confirmed', () {
+    test('pending bank transfer uses the transaction type', () {
+      for (final method in [
+        'bank_deposit',
+        'MANUAL',
+        'Transferencia bancaria'
+      ]) {
+        final status = orderDisplayStatus(
+          _order(
+            fulfillmentStatus: null,
+            status: 'pending',
+            paymentMethod: method,
+          ),
+        );
+        expect(status.label, 'Esperando tu transferencia');
+        expect(status.detail, contains('Lo verás aquí cuando se confirme.'));
+        expect(orderPaymentMethodIsBankTransfer(method), isTrue);
+      }
+    });
+
+    test('pending card or unknown method is Pago en proceso', () {
+      for (final method in [null, '', 'card', 'shopify_payments', 'custom']) {
+        final status = orderDisplayStatus(
+          _order(
+            fulfillmentStatus: null,
+            status: 'pending',
+            paymentMethod: method,
+          ),
+        );
+        expect(status.label, 'Pago en proceso');
+        expect(status.detail, 'Lo verás aquí cuando se confirme.');
+        expect(status.label, isNot('Esperando tu transferencia'));
+      }
+    });
+
+    test('refund in progress explains itself without a notification', () {
       final status = orderDisplayStatus(
-        _order(fulfillmentStatus: null, status: 'pending'),
+        _order(fulfillmentStatus: null, status: 'partially_refunded'),
       );
-      expect(status.key, 'awaiting_transfer');
-      expect(status.label, 'Esperando tu transferencia');
-      expect(status.detail.toLowerCase(), isNot(contains('está confirmado')));
+      expect(status.label, 'Reembolso en proceso');
+      expect(status.detail, 'Lo verás aquí cuando se complete.');
+      expect(status.success, isFalse);
     });
 
-    test('shipment evidence still wins over a non-paid financial status', () {
-      final inTransit = orderDisplayStatus(
-        _order(fulfillmentStatus: 'fulfilled', status: 'pending'),
+    test('refunded names the amount, action and neutral tone', () {
+      final status = orderDisplayStatus(
+        _order(
+          fulfillmentStatus: 'shipped',
+          status: 'refunded',
+          total: 11480,
+          currency: 'MXN',
+        ),
       );
-      expect(inTransit.label, 'En camino');
-      expect(inTransit.label, isNot('Confirmado'));
+      expect(status.label, 'Reembolsado');
+      expect(status.detail, contains('Te devolvimos'));
+      expect(status.detail, contains('a tu método de pago.'));
+      expect(status.detail, contains('11,480'));
+      expect(status.detail, contains('MXN'));
+      expect(status.actionLabel, 'Ver pedido');
+      expect(status.success, isFalse);
+      expect(status.label, isNot('En camino'));
+    });
 
-      final delivered = orderDisplayStatus(
-        _order(fulfillmentStatus: 'delivered', status: 'unknown'),
+    test('refunded without an amount uses the fallback body', () {
+      final status = orderDisplayStatus(
+        _order(status: 'refunded', total: 0),
       );
-      expect(delivered.label, 'Entregado');
-      expect(delivered.key, 'delivered');
+      expect(status.detail, 'Te devolvimos tu pago.');
+      expect(status.actionLabel, 'Ver pedido');
+    });
+  });
+
+  group('orderDisplayStatus: el pago gana al envío', () {
+    test('shipped and refunded is never En camino', () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: 'shipped', status: 'refunded'),
+      );
+      expect(status.label, 'Reembolsado');
+      expect(status.key, isNot('in_transit'));
+      expect(status.key, isNot('delivered'));
+    });
+
+    test('shipped and cancelled is never En camino', () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: 'shipped', status: 'cancelled'),
+      );
+      expect(status.label, 'Cancelado');
+      expect(status.label, isNot('En camino'));
+    });
+
+    test('fulfilled and voided is never En camino', () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: 'fulfilled', status: 'voided'),
+      );
+      expect(status.label, 'Cancelado');
+    });
+
+    test('delivered and partially refunded is not Entregado', () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: 'delivered', status: 'partially_refunded'),
+      );
+      expect(status.label, 'Reembolso en proceso');
+      expect(status.key, isNot('delivered'));
+    });
+
+    test('shipped and unpaid is not En camino', () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: 'shipped', status: 'pending'),
+      );
+      expect(status.label, 'Pago en proceso');
+      expect(status.label, isNot('En camino'));
+    });
+
+    test('paid and shipped is still En camino', () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: 'shipped', status: 'paid'),
+      );
+      expect(status.label, 'En camino');
+    });
+
+    test('paid and delivered is still Entregado', () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: 'delivered', status: 'paid'),
+      );
+      expect(status.label, 'Entregado');
+      expect(status.key, 'delivered');
+    });
+
+    test('En camino filter ignores unpaid shipments', () {
+      final orders = [
+        _order(id: 'paid-shipped', fulfillmentStatus: 'shipped'),
+        _order(
+          id: 'refunded-shipped',
+          fulfillmentStatus: 'shipped',
+          status: 'refunded',
+        ),
+        _order(
+          id: 'cancelled-shipped',
+          fulfillmentStatus: 'fulfilled',
+          status: 'cancelled',
+        ),
+      ];
+      expect(
+        filterOrders(orders, OrderFilter.inTransit).map((o) => o.id),
+        ['paid-shipped'],
+      );
+      expect(filterOrders(orders, OrderFilter.delivered), isEmpty);
     });
   });
 

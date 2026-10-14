@@ -226,6 +226,7 @@ class OrderHistoryRepository {
           status:
               (order.financialStatus ?? order.fulfillmentStatus ?? 'unknown')
                   .toLowerCase(),
+          paymentMethod: Value(order.paymentMethod),
           totalAmount: order.totalAmount,
           currencyCode: order.currencyCode,
           placedAt: order.processedAt,

@@ -27,6 +27,7 @@ class CustomerAccountOrder {
     required this.fulfillmentStatus,
     required this.totalAmount,
     required this.currencyCode,
+    this.paymentMethod,
   });
 
   /// Globally unique `gid://shopify/Order/...`.
@@ -43,6 +44,10 @@ class CustomerAccountOrder {
   final String? fulfillmentStatus;
   final double totalAmount;
   final String currencyCode;
+
+  /// Comma-separated `Order.transactions.type` values (`bank_deposit`,
+  /// `manual`, `card`, …). Null when Shopify did not return any.
+  final String? paymentMethod;
 }
 
 abstract class CustomerOrdersService {
@@ -81,6 +86,7 @@ query MonettaCustomerOrders($first: Int!, $after: String) {
         processedAt
         financialStatus
         fulfillmentStatus
+        transactions { type }
         totalPrice {
           amount
           currencyCode
@@ -351,6 +357,7 @@ query MonettaCustomerOrders($first: Int!, $after: String) {
           fulfillmentStatus: fulfillment is String ? fulfillment : null,
           totalAmount: amount,
           currencyCode: currency,
+          paymentMethod: _paymentMethodOf(raw['transactions']),
         ),
       );
     }
@@ -366,4 +373,21 @@ query MonettaCustomerOrders($first: Int!, $after: String) {
   void close() {
     if (_ownsClient) _client.close();
   }
+}
+
+/// `Order.transactions.type` joined in source order. Missing or empty
+/// lists stay null so a pending order is not guessed to be a transfer.
+String? _paymentMethodOf(Object? raw) {
+  if (raw is! List) return null;
+  final types = <String>[];
+  for (final item in raw) {
+    if (item is! Map) continue;
+    final type = item['type'];
+    if (type is! String) continue;
+    final normalized = type.toLowerCase().trim().replaceAll('-', '_');
+    if (normalized.isEmpty || types.contains(normalized)) continue;
+    types.add(normalized);
+  }
+  if (types.isEmpty) return null;
+  return types.join(',');
 }

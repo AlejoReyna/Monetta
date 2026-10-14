@@ -21,6 +21,7 @@ OrderSummary _order({
   String source = 'shopify_checkout',
   String? attributionCode,
   String status = 'paid',
+  String? paymentMethod,
   double total = 11480,
 }) =>
     OrderSummary(
@@ -32,6 +33,7 @@ OrderSummary _order({
       source: source,
       attributionCode: attributionCode,
       status: status,
+      paymentMethod: paymentMethod,
       totalAmount: total,
       currencyCode: 'MXN',
       placedAt: DateTime.utc(2026, 5, 12),
@@ -205,12 +207,20 @@ void main() {
             displayNumber: '#1002',
             shopifyOrderId: 'gid://shopify/Order/pending',
             status: 'pending',
+            paymentMethod: 'manual',
           ),
           _order(
             id: 'gid://shopify/Order/unknown',
             displayNumber: '#1003',
             shopifyOrderId: 'gid://shopify/Order/unknown',
             status: 'unknown',
+          ),
+          _order(
+            id: 'gid://shopify/Order/refunded',
+            displayNumber: '#1004',
+            shopifyOrderId: 'gid://shopify/Order/refunded',
+            fulfillmentStatus: 'shipped',
+            status: 'refunded',
           ),
         ]
         ..ordersStatus = OrderHistoryStatus.populated;
@@ -221,6 +231,10 @@ void main() {
       expect(find.text('Confirmado'), findsOneWidget);
       expect(find.text('Esperando tu transferencia'), findsOneWidget);
       expect(find.text('Pago en proceso'), findsOneWidget);
+      expect(find.text('Reembolsado'), findsOneWidget);
+      expect(find.text('Ver pedido'), findsOneWidget);
+      expect(find.text('En camino'), findsNothing);
+      expect(find.text('Con ajuste'), findsNothing);
       expect(
         find.byKey(const ValueKey('order-card-gid://shopify/Order/pending')),
         findsOneWidget,

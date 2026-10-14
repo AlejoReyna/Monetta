@@ -402,9 +402,10 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final status = orderDisplayStatus(order);
+    final action = status.actionLabel ?? 'Ver detalles';
     return Semantics(
       button: true,
-      label: 'Ver detalles del pedido ${orderLabelOf(order)}, '
+      label: '$action del pedido ${orderLabelOf(order)}, '
           '${status.label}, ${kMoney.format(order.totalAmount)}',
       child: InkWell(
         key: ValueKey('order-card-${order.id}'),
@@ -478,7 +479,7 @@ class _OrderCard extends StatelessWidget {
                     spacing: 4,
                     children: [
                       Text(
-                        'Ver detalles',
+                        action,
                         style: boutiqueText(
                           size: 13,
                           weight: FontWeight.w600,

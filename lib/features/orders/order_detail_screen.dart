@@ -286,35 +286,20 @@ class OrderDetailScreen extends StatelessWidget {
         'Registrado el ${orderDateLabel(order.placedAt)}.',
       ),
     ];
-    // Misma lectura estricta que [orderDisplayStatus]: solo `paid` es un
-    // pago confirmado. Un apartado conserva su propio evento más abajo.
+    // El pago se lee aparte del envío. Un reembolso o un impago no
+    // agrega "enviado" ni "entregado" aunque haya fulfillment.
+    final paid = order.source != 'whatsapp_apartado' &&
+        orderPaymentStatus(order).key == 'confirmed';
     if (order.source != 'whatsapp_apartado') {
-      switch (orderFinancialBucket(order.status)) {
-        case 'paid':
-          events.add(('Pago confirmado', 'Shopify registró el pago.'));
-        case 'pending':
-          events.add(
-            (
-              'Esperando tu transferencia',
-              'Shopify aún no confirma el pago de este pedido.',
-            ),
-          );
-        case 'adjusted':
-          events.add(
-            (
-              'Con ajuste',
-              'Este pedido tiene una cancelación o devolución registrada. '
-                  'El importe final está en tu confirmación de Shopify.',
-            ),
-          );
-        default:
-          events.add(
-            (
-              'Pago en proceso',
-              'Shopify todavía no confirma el pago de este pedido.',
-            ),
-          );
+      if (paid) {
+        events.add(('Pago confirmado', 'Shopify registró el pago.'));
+      } else {
+        final payment = orderPaymentStatus(order);
+        events.add((payment.label, payment.detail));
       }
+    }
+    if (!paid && order.source != 'whatsapp_apartado') {
+      return events;
     }
     final fulfillment = order.fulfillmentStatus?.toLowerCase().trim();
     switch (fulfillment) {

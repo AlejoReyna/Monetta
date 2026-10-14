@@ -235,6 +235,11 @@ class OrderSummaries extends Table {
   TextColumn get attributionCode => text().nullable()();
 
   TextColumn get status => text()();
+
+  /// Shopify Customer Account `Order.transactions.type` values, joined
+  /// with commas (`bank_deposit`, `manual`, `card`, …). Null when the
+  /// order history query did not return a transaction type — never guessed.
+  TextColumn get paymentMethod => text().nullable()();
   RealColumn get totalAmount => real()();
   TextColumn get currencyCode => text()();
   DateTimeColumn get placedAt => dateTime()();
