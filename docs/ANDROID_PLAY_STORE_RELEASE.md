@@ -141,7 +141,7 @@ The Product Designer's art is already in the Android resources.
 |---|---|
 | `res/mipmap-anydpi-v26/ic_launcher.xml` | Adaptive icon (API 26+) |
 | `res/mipmap-*/ic_launcher_foreground.png` | 108–432px transparent gold M |
-| `res/mipmap-*/ic_launcher_background.png` | Solid `#1C1A17` at the same sizes |
+| `res/mipmap-*/ic_launcher_background.png` | Solid `#FFFFFF`, matching the iOS icon |
 | `res/mipmap-*/ic_launcher.png` | Pre-API 26 composite, 48–192px |
 | `res/drawable/ic_launcher_monochrome.xml` | Themed icon: notification silhouette, inset to the safe zone |
 | `res/drawable/ic_stat_monetta.xml` | White FCM / local-notification glyph, from the SVG |
@@ -152,11 +152,11 @@ is wired to `com.google.firebase.messaging.default_notification_icon` and to
 `AndroidInitializationSettings`. A 96px raster of that SVG matches the
 designer's reference PNG exactly.
 
-The iOS 1024 icon (`Icon-App-1024x1024@1x.png`) uses the same gold M and a
-different background. Measured flat fills are Android `#A17133` and iOS
-`#A27234` (one level per channel). The median gold pixel on both is
-`#A97B3D`. The iOS background is `#FFFFFF`; the Android background is
-`#1C1A17`.
+The iOS 1024 icon (`Icon-App-1024x1024@1x.png`) and the Android launcher
+now share a white background (`#FFFFFF`). Measured flat gold fills are
+Android `#A17133` and iOS `#A27234` (one level per channel). The median gold
+pixel on both is `#A97B3D`. The notification glyph stays white on
+transparent; it is not the launcher background.
 
 ## 6. Manifest audit
 
