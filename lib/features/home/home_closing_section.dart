@@ -88,6 +88,7 @@ class HomeClosingSection extends StatelessWidget {
     this.onOpenWhatsApp,
     this.onOpenUrl,
     this.platform,
+    this.expressPayLogosEnabled = kExpressPayLogosEnabled,
     super.key,
   });
 
@@ -99,6 +100,9 @@ class HomeClosingSection extends StatelessWidget {
 
   /// Test seam. Production follows the app platform.
   final TargetPlatform? platform;
+
+  /// Test seam. Production uses [kExpressPayLogosEnabled].
+  final bool expressPayLogosEnabled;
 
   @override
   Widget build(BuildContext context) {
@@ -122,6 +126,7 @@ class HomeClosingSection extends StatelessWidget {
                 isSignedIn: isSignedIn,
                 onRegister: onRegister,
                 platform: platform,
+                expressPayLogosEnabled: expressPayLogosEnabled,
                 onOpenWhatsApp: onOpenWhatsApp,
                 onOpenUrl: onOpenUrl,
                 links: _links(),
@@ -155,6 +160,7 @@ class _ClosingColumn extends StatelessWidget {
     required this.isSignedIn,
     required this.onRegister,
     required this.links,
+    required this.expressPayLogosEnabled,
     this.platform,
     this.onOpenWhatsApp,
     this.onOpenUrl,
@@ -164,6 +170,7 @@ class _ClosingColumn extends StatelessWidget {
   final bool isSignedIn;
   final VoidCallback onRegister;
   final TargetPlatform? platform;
+  final bool expressPayLogosEnabled;
   final VoidCallback? onOpenWhatsApp;
   final ValueChanged<Uri>? onOpenUrl;
   final List<HomeSocialLink> links;
@@ -219,7 +226,10 @@ class _ClosingColumn extends StatelessWidget {
           const SizedBox(height: 36),
           _Promises(wide: wide),
           const SizedBox(height: 28),
-          HomePaymentMethodRow(platform: platform),
+          HomePaymentMethodRow(
+            platform: platform,
+            expressPayLogosEnabled: expressPayLogosEnabled,
+          ),
           const SizedBox(height: 8),
           TextButton(
             key: const ValueKey<String>('home-whatsapp-link'),

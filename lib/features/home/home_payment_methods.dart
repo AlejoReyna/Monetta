@@ -13,16 +13,32 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
-/// Shared cap height so a color mark and a gray mark sit on one line.
-const double kHomePaymentLogoHeight = 22;
+/// Every mark in the row is this tall. Clear space is a multiple of it.
+const double kHomePaymentLogoHeight = 24;
+
+/// Enable only after MON-PAY-04 passes on device.
+///
+/// While this is false the home hides every [HomePaymentMethod.expressPay]
+/// entry. When it is true, [kHomePaymentMethods] still decides the row:
+/// Apple Pay on iOS, Google Pay on Android.
+const bool kExpressPayLogosEnabled = false;
 
 const Color kPaymentMonochrome = Color(0xFF8A8A8A);
+
+/// Visa Blue. Visa has no gray variant on this row.
+const Color kVisaBlue = Color(0xFF1434CB);
+
+/// White Apple Pay mark. The apple is an outline, never a black fill.
+const Color kApplePayMarkWhite = Color(0xFFFFFFFF);
+
+/// Strip behind the payment row, inside the cream closing band.
+const Color kHomePaymentStripColor = Color(0xFFFFFFFF);
 
 enum PaymentLogoVariant {
   /// Gray reproduction. Only for marks whose guidelines allow it.
   monochrome,
 
-  /// Official brand colors. Apple Pay's light-background mark is black.
+  /// Official brand colors. Visa uses [kVisaBlue]. Apple Pay uses white.
   officialColor,
 }
 
@@ -32,6 +48,8 @@ class HomePaymentMethod {
     required this.label,
     required this.variant,
     this.platforms = const <TargetPlatform>{},
+    this.expressPay = false,
+    required this.clearSpaceFactor,
   });
 
   final String id;
@@ -41,56 +59,86 @@ class HomePaymentMethod {
   /// Empty means every platform.
   final Set<TargetPlatform> platforms;
 
-  bool showsOn(TargetPlatform platform) =>
-      platforms.isEmpty || platforms.contains(platform);
+  /// Apple Pay or Google Pay. Off until [kExpressPayLogosEnabled].
+  final bool expressPay;
+
+  /// Clear space on each side, as a multiple of [kHomePaymentLogoHeight].
+  ///
+  /// The list comment names the brand rule (V, the Apple mark, the G, the P,
+  /// the d, or the Mastercard circle). Those references are drawn at the
+  /// mark height, and a Mastercard circle's width equals that height.
+  final double clearSpaceFactor;
+
+  bool showsOn(
+    TargetPlatform platform, {
+    bool expressPayLogosEnabled = kExpressPayLogosEnabled,
+  }) {
+    if (expressPay && !expressPayLogosEnabled) return false;
+    return platforms.isEmpty || platforms.contains(platform);
+  }
 }
 
 /// Visa, Mastercard, PayPal, Mercado Pago, transferencia, then the wallet
 /// for the platform in hand. Maestro and Shop Pay are not offered.
 const List<HomePaymentMethod> kHomePaymentMethods = <HomePaymentMethod>[
-  // Visa Blue wordmark. A gray recolor is not an approved reproduction.
+  // Visa Blue wordmark. A gray recolor is not a Visa variant.
+  // Clear space: 0.5 × the height of the V.
   HomePaymentMethod(
     id: 'visa',
     label: 'Visa',
     variant: PaymentLogoVariant.officialColor,
+    clearSpaceFactor: 0.5,
   ),
   // Interlocking circles stay red and yellow. Recoloring is not allowed.
+  // Clear space: 1/4 of the circle width. The circle's width is the mark height.
   HomePaymentMethod(
     id: 'mastercard',
     label: 'Mastercard',
     variant: PaymentLogoVariant.officialColor,
+    clearSpaceFactor: 0.25,
   ),
   // PayPal Blue wordmark. Approved inks are blue, black, and white — not gray.
+  // Clear space: the height of the P.
   HomePaymentMethod(
     id: 'paypal',
     label: 'PayPal',
     variant: PaymentLogoVariant.officialColor,
+    clearSpaceFactor: 1,
   ),
   // Mercado Pago blue. No approved gray lockup is published for this use.
+  // Clear space: the height of the d.
   HomePaymentMethod(
     id: 'mercado_pago',
     label: 'Mercado Pago',
     variant: PaymentLogoVariant.officialColor,
+    clearSpaceFactor: 1,
   ),
-  // Generic bank icon, not a network logo.
+  // Generic bank icon, not a network logo. House gap: a quarter of the icon.
   HomePaymentMethod(
     id: 'bank_transfer',
     label: 'Transferencia',
     variant: PaymentLogoVariant.monochrome,
+    clearSpaceFactor: 0.25,
   ),
-  // Apple forbids any color other than black or white, including gray.
+  // White mark, Apple drawn as an outline. Black is not this variant.
+  // Clear space: 1/4 of the mark height. "Pay" stays in English.
   HomePaymentMethod(
     id: 'apple_pay',
     label: 'Apple Pay',
     variant: PaymentLogoVariant.officialColor,
     platforms: <TargetPlatform>{TargetPlatform.iOS},
+    expressPay: true,
+    clearSpaceFactor: 0.25,
   ),
   // Google Pay's mark is the official color lockup. Gray is not allowed.
+  // Clear space: 1/2 of the G. The G is the mark height. "Pay" stays in English.
   HomePaymentMethod(
     id: 'google_pay',
     label: 'Google Pay',
     variant: PaymentLogoVariant.officialColor,
     platforms: <TargetPlatform>{TargetPlatform.android},
+    expressPay: true,
+    clearSpaceFactor: 0.5,
   ),
 ];
 
@@ -104,11 +152,22 @@ const Set<String> kHomePaymentMethodsNeedingGuidelineCheck = <String>{
   'google_pay',
 };
 
-List<HomePaymentMethod> homePaymentMethodsFor(TargetPlatform platform) {
+List<HomePaymentMethod> homePaymentMethodsFor(
+  TargetPlatform platform, {
+  bool expressPayLogosEnabled = kExpressPayLogosEnabled,
+}) {
   return <HomePaymentMethod>[
     for (final method in kHomePaymentMethods)
-      if (method.showsOn(platform)) method,
+      if (method.showsOn(
+        platform,
+        expressPayLogosEnabled: expressPayLogosEnabled,
+      ))
+        method,
   ];
+}
+
+double homePaymentClearSpace(HomePaymentMethod method) {
+  return kHomePaymentLogoHeight * method.clearSpaceFactor;
 }
 
 String homePaymentMethodsLabel(List<HomePaymentMethod> methods) {
@@ -122,38 +181,50 @@ String homePaymentMethodsLabel(List<HomePaymentMethod> methods) {
 }
 
 class HomePaymentMethodRow extends StatelessWidget {
-  const HomePaymentMethodRow({this.platform, super.key});
+  const HomePaymentMethodRow({
+    this.platform,
+    this.expressPayLogosEnabled = kExpressPayLogosEnabled,
+    super.key,
+  });
 
   final TargetPlatform? platform;
+
+  /// Defaults to [kExpressPayLogosEnabled]. Tests pass the other value.
+  final bool expressPayLogosEnabled;
 
   @override
   Widget build(BuildContext context) {
     final resolved = platform ?? Theme.of(context).platform;
-    final methods = homePaymentMethodsFor(resolved);
-    return Semantics(
-      key: const ValueKey<String>('home-payment-methods'),
-      label: homePaymentMethodsLabel(methods),
-      child: ExcludeSemantics(
-        child: SizedBox(
-          height: kHomePaymentLogoHeight,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              return SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minWidth: constraints.maxWidth),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      for (var index = 0; index < methods.length; index++) ...[
-                        if (index > 0) const SizedBox(width: 22),
-                        HomePaymentLogo(method: methods[index]),
+    final methods = homePaymentMethodsFor(
+      resolved,
+      expressPayLogosEnabled: expressPayLogosEnabled,
+    );
+    return ColoredBox(
+      key: const ValueKey<String>('home-payment-strip'),
+      color: kHomePaymentStripColor,
+      child: Semantics(
+        key: const ValueKey<String>('home-payment-methods'),
+        label: homePaymentMethodsLabel(methods),
+        child: ExcludeSemantics(
+          child: SizedBox(
+            height: kHomePaymentLogoHeight,
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                return SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minWidth: constraints.maxWidth),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        for (final method in methods)
+                          HomePaymentLogo(method: method),
                       ],
-                    ],
+                    ),
                   ),
-                ),
-              );
-            },
+                );
+              },
+            ),
           ),
         ),
       ),
@@ -170,35 +241,38 @@ class HomePaymentLogo extends StatelessWidget {
   Widget build(BuildContext context) {
     final mono = method.variant == PaymentLogoVariant.monochrome;
     final mark = switch (method.id) {
-      'visa' => _VisaWordmark(monochrome: mono),
+      'visa' => const _VisaWordmark(),
       'mastercard' => _MastercardMark(monochrome: mono),
       'paypal' => _PayPalWordmark(monochrome: mono),
       'mercado_pago' => _MercadoPagoWordmark(monochrome: mono),
       'bank_transfer' => _BankTransferMark(monochrome: mono),
-      'apple_pay' => _ApplePayMark(monochrome: mono),
+      'apple_pay' => const _ApplePayMark(),
       'google_pay' => _GooglePayMark(monochrome: mono),
       _ => const SizedBox.shrink(),
     };
-    return SizedBox(
+    return Padding(
       key: ValueKey<String>('home-payment-logo-${method.id}'),
-      height: kHomePaymentLogoHeight,
-      child: mark,
+      padding: EdgeInsets.symmetric(
+        horizontal: homePaymentClearSpace(method),
+      ),
+      child: SizedBox(
+        height: kHomePaymentLogoHeight,
+        child: mark,
+      ),
     );
   }
 }
 
 class _VisaWordmark extends StatelessWidget {
-  const _VisaWordmark({required this.monochrome});
-
-  final bool monochrome;
+  const _VisaWordmark();
 
   @override
   Widget build(BuildContext context) {
-    return Text(
+    return const Text(
       'VISA',
       style: TextStyle(
-        color: monochrome ? kPaymentMonochrome : const Color(0xFF1434CB),
-        fontSize: 16,
+        color: kVisaBlue,
+        fontSize: kHomePaymentLogoHeight,
         fontWeight: FontWeight.w800,
         fontStyle: FontStyle.italic,
         letterSpacing: 0.4,
@@ -216,7 +290,7 @@ class _MastercardMark extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      width: 34,
+      width: kHomePaymentLogoHeight * 1.55,
       height: kHomePaymentLogoHeight,
       child: CustomPaint(
         painter: _MastercardPainter(monochrome: monochrome),
@@ -276,7 +350,7 @@ class _PayPalWordmark extends StatelessWidget {
 
   TextStyle _paypal(Color color) => TextStyle(
         color: color,
-        fontSize: 16,
+        fontSize: kHomePaymentLogoHeight,
         fontWeight: FontWeight.w700,
         fontStyle: FontStyle.italic,
         height: 1,
@@ -294,7 +368,7 @@ class _MercadoPagoWordmark extends StatelessWidget {
       'Mercado Pago',
       style: TextStyle(
         color: monochrome ? kPaymentMonochrome : const Color(0xFF009EE3),
-        fontSize: 14,
+        fontSize: kHomePaymentLogoHeight,
         fontWeight: FontWeight.w700,
         height: 1,
         letterSpacing: -0.2,
@@ -319,31 +393,70 @@ class _BankTransferMark extends StatelessWidget {
 }
 
 class _ApplePayMark extends StatelessWidget {
-  const _ApplePayMark({required this.monochrome});
-
-  final bool monochrome;
+  const _ApplePayMark();
 
   @override
   Widget build(BuildContext context) {
-    // Official light-background Apple Pay mark is black. Gray is not allowed,
-    // so the monochrome variant is only a fallback if the config asks for it.
-    final color = monochrome ? kPaymentMonochrome : const Color(0xFF000000);
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(Icons.apple, size: 16, color: color),
-        Text(
+        SizedBox(
+          width: kHomePaymentLogoHeight,
+          height: kHomePaymentLogoHeight,
+          child: CustomPaint(
+            painter: const _AppleOutlinePainter(color: kApplePayMarkWhite),
+          ),
+        ),
+        const Text(
           'Pay',
           style: TextStyle(
-            color: color,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
+            color: kApplePayMarkWhite,
+            fontSize: kHomePaymentLogoHeight,
+            fontWeight: FontWeight.w500,
             height: 1,
           ),
         ),
       ],
     );
   }
+}
+
+class _AppleOutlinePainter extends CustomPainter {
+  const _AppleOutlinePainter({required this.color});
+
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final stroke = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = size.width * 0.08
+      ..strokeJoin = StrokeJoin.round
+      ..strokeCap = StrokeCap.round;
+    canvas.drawOval(
+      Rect.fromLTWH(
+        size.width * 0.18,
+        size.height * 0.30,
+        size.width * 0.64,
+        size.height * 0.58,
+      ),
+      stroke,
+    );
+    final leaf = Path()
+      ..moveTo(size.width * 0.52, size.height * 0.32)
+      ..quadraticBezierTo(
+        size.width * 0.70,
+        size.height * 0.06,
+        size.width * 0.80,
+        size.height * 0.22,
+      );
+    canvas.drawPath(leaf, stroke);
+  }
+
+  @override
+  bool shouldRepaint(covariant _AppleOutlinePainter oldDelegate) =>
+      oldDelegate.color != color;
 }
 
 class _GooglePayMark extends StatelessWidget {
@@ -358,18 +471,17 @@ class _GooglePayMark extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         SizedBox(
-          width: 18,
-          height: 18,
+          width: kHomePaymentLogoHeight,
+          height: kHomePaymentLogoHeight,
           child: CustomPaint(
             painter: _GoogleGPainter(monochrome: monochrome),
           ),
         ),
-        const SizedBox(width: 2),
         Text(
           'Pay',
           style: TextStyle(
             color: pay,
-            fontSize: 15,
+            fontSize: kHomePaymentLogoHeight,
             fontWeight: FontWeight.w500,
             height: 1,
           ),

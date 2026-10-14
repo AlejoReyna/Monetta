@@ -10,6 +10,7 @@ void main() {
     double width = 390,
     bool isSignedIn = false,
     TargetPlatform? platform,
+    bool expressPayLogosEnabled = kExpressPayLogosEnabled,
     VoidCallback? onOpenWhatsApp,
     ValueChanged<Uri>? onOpenUrl,
   }) {
@@ -24,6 +25,7 @@ void main() {
               onRegister: onRegister,
               isSignedIn: isSignedIn,
               platform: platform ?? TargetPlatform.android,
+              expressPayLogosEnabled: expressPayLogosEnabled,
               onOpenWhatsApp: onOpenWhatsApp,
               onOpenUrl: onOpenUrl,
             ),
@@ -74,6 +76,34 @@ void main() {
       kHomePaymentMethodsNeedingGuidelineCheck,
     );
     expect(kHomeOriginalsPromise, 'Originales garantizados');
+    expect(kHomePaymentLogoHeight, 24);
+    expect(kExpressPayLogosEnabled, isFalse);
+    expect(
+      {
+        for (final method in kHomePaymentMethods)
+          method.id: method.clearSpaceFactor,
+      },
+      <String, double>{
+        'visa': 0.5,
+        'mastercard': 0.25,
+        'paypal': 1,
+        'mercado_pago': 1,
+        'bank_transfer': 0.25,
+        'apple_pay': 0.25,
+        'google_pay': 0.5,
+      },
+    );
+    expect(
+      kHomePaymentMethods.singleWhere((method) => method.id == 'visa').variant,
+      PaymentLogoVariant.officialColor,
+    );
+    expect(
+      kHomePaymentMethods
+          .where((method) => method.expressPay)
+          .map((method) => method.id)
+          .toSet(),
+      <String>{'apple_pay', 'google_pay'},
+    );
   });
 
   testWidgets('presents the first-order benefit and account action', (
@@ -120,7 +150,7 @@ void main() {
     expect(find.text('Aplica en tu primera compra.'), findsNothing);
   });
 
-  testWidgets('scrolls payment marks without boxes, one wallet per platform', (
+  testWidgets('scrolls payment marks without boxes while wallets stay off', (
     tester,
   ) async {
     phone(tester, size: const Size(800, 2000));
@@ -132,14 +162,25 @@ void main() {
     expect(tester.takeException(), isNull);
     expect(
       tester
+          .widget<ColoredBox>(
+            find.byKey(const ValueKey('home-payment-strip')),
+          )
+          .color,
+      kHomePaymentStripColor,
+    );
+    expect(
+      tester.getSize(find.byKey(const ValueKey('home-payment-methods'))).height,
+      kHomePaymentLogoHeight,
+    );
+    expect(
+      tester
           .getSemantics(find.byKey(const ValueKey('home-payment-methods')))
           .label,
-      'Métodos de pago: Visa, Mastercard, PayPal, Mercado Pago, '
-      'Transferencia y Google Pay',
+      'Métodos de pago: Visa, Mastercard, PayPal, Mercado Pago y Transferencia',
     );
     expect(
       find.byKey(const ValueKey('home-payment-logo-google_pay')),
-      findsOneWidget,
+      findsNothing,
     );
     expect(
       find.byKey(const ValueKey('home-payment-logo-apple_pay')),
@@ -161,7 +202,39 @@ void main() {
     );
     expect(
       tester.widget<Text>(find.text('VISA')).style!.color,
-      const Color(0xFF1434CB),
+      kVisaBlue,
+    );
+    expect(
+      tester
+          .widget<Padding>(
+            find.byKey(const ValueKey('home-payment-logo-visa')),
+          )
+          .padding,
+      const EdgeInsets.symmetric(horizontal: 12),
+    );
+    expect(
+      tester
+          .widget<Padding>(
+            find.byKey(const ValueKey('home-payment-logo-mastercard')),
+          )
+          .padding,
+      const EdgeInsets.symmetric(horizontal: 6),
+    );
+    expect(
+      tester
+          .widget<Padding>(
+            find.byKey(const ValueKey('home-payment-logo-paypal')),
+          )
+          .padding,
+      const EdgeInsets.symmetric(horizontal: 24),
+    );
+    expect(
+      tester
+          .widget<Padding>(
+            find.byKey(const ValueKey('home-payment-logo-mercado_pago')),
+          )
+          .padding,
+      const EdgeInsets.symmetric(horizontal: 24),
     );
     expect(
       tester.widget<Icon>(find.byIcon(Icons.account_balance_outlined)).color,
@@ -182,14 +255,53 @@ void main() {
     semantics.dispose();
   });
 
-  testWidgets('iOS shows Apple Pay in black and hides Google Pay', (
+  testWidgets('flag off hides Apple Pay and Google Pay on iOS and Android', (
     tester,
   ) async {
     phone(tester);
+    for (final platform in <TargetPlatform>[
+      TargetPlatform.android,
+      TargetPlatform.iOS,
+    ]) {
+      await tester.pumpWidget(
+        app(onRegister: () {}, platform: platform),
+      );
+      expect(
+        find.byKey(const ValueKey('home-payment-logo-apple_pay')),
+        findsNothing,
+      );
+      expect(
+        find.byKey(const ValueKey('home-payment-logo-google_pay')),
+        findsNothing,
+      );
+    }
+  });
+
+  testWidgets('flag on shows only the platform wallet', (tester) async {
+    phone(tester);
     await tester.pumpWidget(
-      app(onRegister: () {}, platform: TargetPlatform.iOS),
+      app(
+        onRegister: () {},
+        platform: TargetPlatform.android,
+        expressPayLogosEnabled: true,
+      ),
+    );
+    expect(
+      find.byKey(const ValueKey('home-payment-logo-google_pay')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('home-payment-logo-apple_pay')),
+      findsNothing,
     );
 
+    await tester.pumpWidget(
+      app(
+        onRegister: () {},
+        platform: TargetPlatform.iOS,
+        expressPayLogosEnabled: true,
+      ),
+    );
     expect(
       find.byKey(const ValueKey('home-payment-logo-apple_pay')),
       findsOneWidget,
@@ -198,9 +310,48 @@ void main() {
       find.byKey(const ValueKey('home-payment-logo-google_pay')),
       findsNothing,
     );
+    expect(find.text('Pay'), findsOneWidget);
+    expect(find.text('Pagar'), findsNothing);
+    expect(find.byIcon(Icons.apple), findsNothing);
     expect(
-      tester.widget<Icon>(find.byIcon(Icons.apple)).color,
-      const Color(0xFF000000),
+      tester.widget<Text>(find.text('Pay')).style!.color,
+      kApplePayMarkWhite,
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('home-payment-logo-apple_pay')),
+        matching: find.byWidgetPredicate(
+          (widget) =>
+              widget is Text && widget.style?.color == const Color(0xFF000000),
+        ),
+      ),
+      findsNothing,
+    );
+    expect(
+      tester
+          .widget<Padding>(
+            find.byKey(const ValueKey('home-payment-logo-apple_pay')),
+          )
+          .padding,
+      const EdgeInsets.symmetric(horizontal: 6),
+    );
+
+    await tester.pumpWidget(
+      app(
+        onRegister: () {},
+        platform: TargetPlatform.android,
+        expressPayLogosEnabled: true,
+      ),
+    );
+    expect(find.text('Pay'), findsOneWidget);
+    expect(find.text('Pagar'), findsNothing);
+    expect(
+      tester
+          .widget<Padding>(
+            find.byKey(const ValueKey('home-payment-logo-google_pay')),
+          )
+          .padding,
+      const EdgeInsets.symmetric(horizontal: 12),
     );
   });
 

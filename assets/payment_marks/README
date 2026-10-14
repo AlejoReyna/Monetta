@@ -1,0 +1,45 @@
+Marcas de pago — archivos oficiales
+
+Los dibujos del home son placeholders. No descargar ni empaquetar SVG de
+marca desde la web. El Designer entrega estos archivos y se sustituye el
+dibujo. "Pay" no se traduce en ningún archivo.
+
+Cada marca mide 24 px de alto. El espacio libre de cada una está en
+`clearSpaceFactor` de `kHomePaymentMethods`.
+
+Visa
+  Archivo oficial: Visa_Brandmark_Blue_RGB.svg
+  Variante: Visa Blue. Sin versión gris, blanca o negra.
+  Espacio libre: 0.5 × la altura de la V.
+
+Mastercard
+  Archivo oficial: mc_symbol.svg
+  Variante: símbolo de círculos (rojo y amarillo), sin wordmark.
+  Espacio libre: 1/4 del ancho del círculo.
+
+PayPal
+  Archivo oficial: PayPal_Logo_Horizontal_Full_Color_RGB.svg
+  Variante: wordmark horizontal a color. "Pay" queda en inglés.
+  Espacio libre: la altura de la P.
+
+Mercado Pago
+  Archivo oficial: MP_RGB_HANDSHAKE_color_horizontal.svg
+  Variante: logotipo horizontal a color.
+  Espacio libre: la altura de la d.
+
+Apple Pay
+  Archivo oficial: Apple_Pay_Mark_White.svg
+  Variante: marca blanca con la manzana en contorno. Sin marca negra.
+  Solo iOS, y solo con kExpressPayLogosEnabled después de MON-PAY-04.
+  "Pay" queda en inglés.
+  Espacio libre: 1/4 de la altura de la marca.
+
+Google Pay
+  Archivo oficial: GPay_Acceptance_Mark.svg
+  Variante: marca de aceptación a color. Sin versión gris.
+  Solo Android, y solo con kExpressPayLogosEnabled después de MON-PAY-04.
+  "Pay" queda en inglés.
+  Espacio libre: 1/2 de la G.
+
+Transferencia
+  Sin archivo de red. Sigue el icono genérico en gris.
