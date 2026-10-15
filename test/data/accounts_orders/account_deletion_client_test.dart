@@ -69,4 +69,24 @@ void main() {
       isA<AccountDeletionStale>(),
     );
   });
+
+  test(
+      'an unfinished Shopify order check is a failure, not permission to delete',
+      () async {
+    final client = HttpAccountDeletionClient(
+      baseUrl: 'https://accounts.example',
+      httpClient: MockClient((request) async {
+        return http.Response(
+          jsonEncode({'error': 'order_check_unavailable'}),
+          503,
+        );
+      }),
+    );
+    addTearDown(client.close);
+
+    final outcome = await client.precheck('shopper-token');
+    expect(outcome, isA<AccountDeletionFailed>());
+    expect(outcome, isNot(isA<AccountDeletionClear>()));
+    expect(outcome, isNot(isA<AccountDeletionDeleted>()));
+  });
 }

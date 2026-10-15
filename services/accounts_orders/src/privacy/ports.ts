@@ -68,6 +68,20 @@ export interface AccountDeletionAuditRepository {
   list(shopifyCustomerId: string): Promise<readonly AccountDeletionAuditEntry[]>;
 }
 
+export interface ShopifyListedOrder {
+  readonly id: string;
+  readonly financialStatus: string | null;
+  readonly fulfillmentStatus: string | null;
+  readonly tags: readonly string[];
+  readonly cancelledAt: string | null;
+  readonly cancelReason: string | null;
+}
+
+/** Live Shopify orders for the deletion block check. Throws when it cannot finish. */
+export interface ShopifyCustomerOrderLookup {
+  listOrders(accessToken: string): Promise<readonly ShopifyListedOrder[]>;
+}
+
 export interface BlockingOrderRef {
   readonly id: string;
   readonly shopifyOrderId: string | null;
@@ -77,7 +91,8 @@ export interface BlockingOrderRef {
 export type AccountDeletionPrecheck =
   | { readonly result: 'clear' }
   | { readonly result: 'blocked_open_order'; readonly order: BlockingOrderRef }
-  | { readonly result: 'deleted'; readonly shopifyDataErasure: 'requested' };
+  | { readonly result: 'deleted'; readonly shopifyDataErasure: 'requested' }
+  | { readonly result: 'order_check_unavailable' };
 
 export type AccountDeletionExecute =
   | { readonly result: 'deleted'; readonly shopifyDataErasure: 'requested' }
@@ -85,4 +100,5 @@ export type AccountDeletionExecute =
   | { readonly result: 'stale_reauthentication' }
   | { readonly result: 'unauthorized' }
   | { readonly result: 'unavailable' }
-  | { readonly result: 'failed' };
+  | { readonly result: 'failed' }
+  | { readonly result: 'order_check_unavailable' };

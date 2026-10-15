@@ -1,6 +1,6 @@
 import type { OrdersRepository } from '../domain/ports.js';
 import { logger } from '../logger.js';
-import { openOrderBlockReason } from './openOrderBlock.js';
+import { openOrderBlockReason, shopifyOrderNumber } from './openOrderBlock.js';
 import type {
   AccountDeletionAuditRepository,
   AccountDeletionExecute,
@@ -12,7 +12,10 @@ import type {
   CustomerDataEraser,
   FreshLoginVerifier,
   ShopifyCustomerErasureClient,
+  ShopifyCustomerOrderLookup,
+  ShopifyListedOrder,
 } from './ports.js';
+import { OrderCheckUnavailableError } from './shopifyOrderCheck.js';
 import { redactLogFields, redactText, sanitizeAuditSteps, sanitizeInternalId } from './redact.js';
 
 const locks = new Map<string, Promise<unknown>>();
@@ -24,6 +27,8 @@ export interface AccountDeletionServiceDeps {
   readonly appData: AppDataEraser;
   readonly customerData: CustomerDataEraser;
   readonly shopifyErasure: ShopifyCustomerErasureClient;
+  /** Customer Account `customer.orders`. Required before a deletion can proceed. */
+  readonly shopifyOrders: ShopifyCustomerOrderLookup;
   readonly freshLogin: FreshLoginVerifier;
   /** False when Firebase or the Shopify Admin erasure credential is missing. */
   readonly ready: boolean;
@@ -38,13 +43,17 @@ export interface AccountDeletionServiceDeps {
 export class AccountDeletionService {
   constructor(private readonly deps: AccountDeletionServiceDeps) {}
 
-  async precheck(shopifyCustomerId: string): Promise<AccountDeletionPrecheck> {
+  async precheck(shopifyCustomerId: string, accessToken: string): Promise<AccountDeletionPrecheck> {
     const customerId = requireCustomerId(shopifyCustomerId);
     const existing = await this.deps.state.get(customerId);
     if (existing?.status === 'completed') {
       return { result: 'deleted', shopifyDataErasure: 'requested' };
     }
-    const blocking = await this.findBlockingOrder(customerId);
+    const blocking = await this.findBlockingOrder(customerId, accessToken);
+    if (blocking === 'unavailable') {
+      await this.recordUnavailable(customerId);
+      return { result: 'order_check_unavailable' };
+    }
     if (blocking !== null) {
       await this.record(customerId, 'blocked_open_order', {
         blockCheck: 'blocked',
@@ -78,10 +87,10 @@ export class AccountDeletionService {
     }
 
     const customerId = requireCustomerId(decision.customerId);
-    return this.withLock(customerId, () => this.executeFresh(customerId));
+    return this.withLock(customerId, () => this.executeFresh(customerId, accessToken));
   }
 
-  private async executeFresh(customerId: string): Promise<AccountDeletionExecute> {
+  private async executeFresh(customerId: string, accessToken: string): Promise<AccountDeletionExecute> {
     const existing = await this.deps.state.get(customerId);
     if (existing?.status === 'completed') {
       await this.record(customerId, 'deleted', completedSteps(existing), existing.appAccountId, existing.firebaseUid);
@@ -103,7 +112,11 @@ export class AccountDeletionService {
 
     let progress = existing;
     if (progress === null) {
-      const blocking = await this.findBlockingOrder(customerId);
+      const blocking = await this.findBlockingOrder(customerId, accessToken);
+      if (blocking === 'unavailable') {
+        await this.recordUnavailable(customerId);
+        return { result: 'order_check_unavailable' };
+      }
       if (blocking !== null) {
         await this.record(customerId, 'blocked_open_order', {
           blockCheck: 'blocked',
@@ -202,9 +215,38 @@ export class AccountDeletionService {
     return { result: 'deleted', shopifyDataErasure: 'requested' };
   }
 
-  private async findBlockingOrder(customerId: string): Promise<BlockingOrderRef | null> {
-    const orders = await this.deps.orders.listForCustomer(customerId);
-    for (const order of orders) {
+  private async findBlockingOrder(
+    customerId: string,
+    accessToken: string,
+  ): Promise<BlockingOrderRef | null | 'unavailable'> {
+    let live: readonly ShopifyListedOrder[];
+    try {
+      live = await this.deps.shopifyOrders.listOrders(accessToken);
+    } catch (error) {
+      this.writeLog('error', 'account deletion order check failed', {
+        shopifyCustomerId: customerId,
+        step: 'order_check',
+        detail: error instanceof OrderCheckUnavailableError ? error.name : 'order_check_unavailable',
+      });
+      return 'unavailable';
+    }
+
+    const seen = new Set<string>();
+    for (const order of live) {
+      const number = shopifyOrderNumber(order.id);
+      if (number !== null) seen.add(number);
+      const reason = openOrderBlockReason(order);
+      if (reason === null) continue;
+      return {
+        id: number ?? order.id,
+        shopifyOrderId: number,
+        reason,
+      };
+    }
+
+    const mirrored = await this.deps.orders.listForCustomer(customerId);
+    for (const order of mirrored) {
+      if (order.shopifyOrderId !== null && seen.has(order.shopifyOrderId)) continue;
       const reason = openOrderBlockReason(order);
       if (reason === null) continue;
       return {
@@ -214,6 +256,18 @@ export class AccountDeletionService {
       };
     }
     return null;
+  }
+
+  private async recordUnavailable(customerId: string): Promise<void> {
+    await this.record(customerId, 'order_check_unavailable', {
+      blockCheck: 'unavailable',
+      firebaseAuth: 'not_attempted',
+      firestoreProfile: 'not_attempted',
+      firestoreWishlist: 'not_attempted',
+      firestoreSavedRecommendations: 'not_attempted',
+      postgres: 'not_attempted',
+      shopifyErasure: 'not_attempted',
+    }, null, null);
   }
 
   private async fail(

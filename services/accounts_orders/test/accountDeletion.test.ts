@@ -19,7 +19,10 @@ import type {
   CustomerDataEraser,
   FreshLoginVerifier,
   ShopifyCustomerErasureClient,
+  ShopifyCustomerOrderLookup,
+  ShopifyListedOrder,
 } from '../src/privacy/ports.js';
+import { CustomerAccountOrderLookup, OrderCheckUnavailableError } from '../src/privacy/shopifyOrderCheck.js';
 import { redactLogFields, redactText, sanitizeAuditSteps } from '../src/privacy/redact.js';
 import { ShopifyCustomerDataErasureClient } from '../src/privacy/shopifyErasure.js';
 import {
@@ -130,6 +133,20 @@ class FakeCustomerData implements CustomerDataEraser {
   }
 }
 
+class FakeOrderLookup implements ShopifyCustomerOrderLookup {
+  orders: ShopifyListedOrder[] = [];
+  fail = false;
+  calls = 0;
+  token: string | null = null;
+
+  async listOrders(accessToken: string): Promise<readonly ShopifyListedOrder[]> {
+    this.calls += 1;
+    this.token = accessToken;
+    if (this.fail || accessToken.trim() === '') throw new OrderCheckUnavailableError();
+    return this.orders;
+  }
+}
+
 class FakeShopify implements ShopifyCustomerErasureClient {
   calls = 0;
   fail = false;
@@ -165,6 +182,7 @@ function harness(options?: { readonly ready?: boolean }) {
   const appData = new FakeAppData();
   const customerData = new FakeCustomerData();
   const shopify = new FakeShopify();
+  const shopifyOrders = new FakeOrderLookup();
   const logs: Array<{ level: string; message: string; fields?: Record<string, unknown> }> = [];
   const service = new AccountDeletionService({
     orders,
@@ -173,12 +191,13 @@ function harness(options?: { readonly ready?: boolean }) {
     appData,
     customerData,
     shopifyErasure: shopify,
+    shopifyOrders,
     freshLogin: fresh,
     ready: options?.ready ?? true,
     log: (level, message, fields) => logs.push({ level, message, fields }),
     now: () => new Date('2026-10-14T08:00:00.000Z'),
   });
-  return { orders, state, audit, fresh, appData, customerData, shopify, logs, service };
+  return { orders, state, audit, fresh, appData, customerData, shopify, shopifyOrders, logs, service };
 }
 
 describe('open order block check', () => {
@@ -237,6 +256,34 @@ describe('open order block check', () => {
       tags: ['cancelled'],
     })).toBeNull();
     expect(openOrderBlockReason({
+      financialStatus: 'paid',
+      fulfillmentStatus: 'unfulfilled',
+      tags: [],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBeNull();
+    expect(openOrderBlockReason({
+      financialStatus: 'pending',
+      fulfillmentStatus: null,
+      tags: [],
+      cancelReason: 'customer',
+    })).toBeNull();
+    expect(openOrderBlockReason({
+      financialStatus: 'cancelled',
+      fulfillmentStatus: 'unfulfilled',
+      tags: [],
+    })).toBeNull();
+    expect(openOrderBlockReason({
+      financialStatus: 'canceled',
+      fulfillmentStatus: 'unfulfilled',
+      tags: [],
+    })).toBeNull();
+    expect(openOrderBlockReason({
+      financialStatus: 'paid',
+      fulfillmentStatus: 'unfulfilled',
+      tags: ['refund-in-progress'],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBeNull();
+    expect(openOrderBlockReason({
       financialStatus: 'partially_refunded',
       fulfillmentStatus: 'fulfilled',
       tags: [],
@@ -253,7 +300,7 @@ describe('account deletion', () => {
       shopifyOrderId: '555',
     }));
 
-    const precheck = await service.precheck('77');
+    const precheck = await service.precheck('77', 'access');
     expect(precheck).toEqual({
       result: 'blocked_open_order',
       order: { id: '1', shopifyOrderId: '555', reason: 'unpaid_or_pending' },
@@ -368,6 +415,74 @@ describe('account deletion', () => {
     expect(audit.entries[0]?.createdAt).toBe('2026-10-14T08:00:00.000Z');
     expect(audit.entries[0]?.steps.firebaseAuth).toBe('failed');
   });
+
+  it('does not block a cancelled unfulfilled order that the mirror only stored as open', async () => {
+    const { orders, service, shopifyOrders, appData, customerData, shopify } = harness();
+    await orders.upsertByShopifyOrderId(order({
+      financialStatus: 'paid',
+      fulfillmentStatus: 'unfulfilled',
+      shopifyOrderId: '900',
+      tags: [],
+    }));
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/900',
+      financialStatus: 'PAID',
+      fulfillmentStatus: 'UNFULFILLED',
+      cancelledAt: '2026-03-01T12:00:00Z',
+      cancelReason: 'customer',
+      tags: [],
+    }];
+
+    const precheck = await service.precheck('77', 'shopify-token-77');
+    expect(precheck).toEqual({ result: 'clear' });
+    const executed = await service.execute('access', 'id-token');
+    expect(executed).toEqual({ result: 'deleted', shopifyDataErasure: 'requested' });
+    expect(appData.calls).toBe(1);
+    expect(customerData.calls).toBe(1);
+    expect(shopify.calls).toBe(1);
+  });
+
+  it('blocks an open order that never reached the mirror', async () => {
+    const { service, shopifyOrders, appData, customerData, shopify, state } = harness();
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/42',
+      financialStatus: 'PENDING',
+      fulfillmentStatus: 'UNFULFILLED',
+      cancelledAt: null,
+      cancelReason: null,
+      tags: [],
+    }];
+
+    const precheck = await service.precheck('77', 'shopify-token-77');
+    expect(precheck).toEqual({
+      result: 'blocked_open_order',
+      order: { id: '42', shopifyOrderId: '42', reason: 'unpaid_or_pending' },
+    });
+    const executed = await service.execute('access', 'id-token');
+    expect(executed.result).toBe('blocked_open_order');
+    expect(appData.calls).toBe(0);
+    expect(customerData.calls).toBe(0);
+    expect(shopify.calls).toBe(0);
+    expect(state.rows.size).toBe(0);
+  });
+
+  it('fails closed when the Shopify order check cannot complete', async () => {
+    const { service, shopifyOrders, appData, customerData, shopify, audit, state } = harness();
+    shopifyOrders.fail = true;
+
+    const precheck = await service.precheck('77', 'shopify-token-77');
+    expect(precheck).toEqual({ result: 'order_check_unavailable' });
+    const executed = await service.execute('access', 'id-token');
+    expect(executed).toEqual({ result: 'order_check_unavailable' });
+    expect(appData.calls).toBe(0);
+    expect(customerData.calls).toBe(0);
+    expect(shopify.calls).toBe(0);
+    expect(state.rows.size).toBe(0);
+    const serialized = JSON.stringify(audit.entries);
+    expect(serialized).toContain('order_check_unavailable');
+    expect(serialized).not.toContain('@');
+    expect(serialized).not.toContain('shopify-token');
+  });
 });
 
 describe('account deletion HTTP', () => {
@@ -432,6 +547,30 @@ describe('account deletion HTTP', () => {
     expect(JSON.stringify(body)).not.toContain('@');
     expect(JSON.stringify(body)).not.toContain('1999');
     expect(JSON.stringify(body)).not.toContain('MXN');
+  });
+
+  it('returns order_check_unavailable and deletes nothing when Shopify cannot be read', async () => {
+    const { service, shopifyOrders, shopify } = harness();
+    shopifyOrders.fail = true;
+    await start(new InMemoryOrdersRepository(), service);
+
+    const response = await fetch(`${baseUrl}/customers/me/account-deletion/precheck`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer shopify-token-77' },
+    });
+    expect(response.status).toBe(503);
+    expect(await response.json()).toEqual({ error: 'order_check_unavailable' });
+
+    const deleted = await fetch(`${baseUrl}/customers/me/account-deletion`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer shopify-token-77',
+        'X-Monetta-Id-Token': 'fresh-id-token',
+      },
+    });
+    expect(deleted.status).toBe(503);
+    expect(await deleted.json()).toEqual({ error: 'order_check_unavailable' });
+    expect(shopify.calls).toBe(0);
   });
 
   it('requires a fresh login and reports Shopify erasure as requested', async () => {
@@ -547,6 +686,108 @@ describe('fresh Shopify login token', () => {
     }));
     expect(stale).toEqual({ status: 'stale', customerId: '77' });
     expect(JSON.stringify(stale)).not.toContain('@');
+  });
+});
+
+describe('Customer Account order check', () => {
+  const endpoint = 'https://shopify.example/account/customer/api/2026-07/graphql';
+
+  function lookup(fetchFn: typeof fetch): CustomerAccountOrderLookup {
+    return new CustomerAccountOrderLookup({
+      shopDomain: 'monetta-staging.myshopify.com',
+      graphQlEndpoint: endpoint,
+      fetchFn,
+    });
+  }
+
+  it('reads cancellation fields and follows pagination', async () => {
+    const pages = [
+      {
+        data: {
+          customer: {
+            orders: {
+              pageInfo: { hasNextPage: true, endCursor: 'cursor-2' },
+              nodes: [{
+                id: 'gid://shopify/Order/1',
+                financialStatus: 'PAID',
+                fulfillmentStatus: 'UNFULFILLED',
+                cancelledAt: '2026-04-01T00:00:00Z',
+                cancelReason: 'CUSTOMER',
+              }],
+            },
+          },
+        },
+      },
+      {
+        data: {
+          customer: {
+            orders: {
+              pageInfo: { hasNextPage: false, endCursor: null },
+              nodes: [{
+                id: 'gid://shopify/Order/2',
+                financialStatus: 'PENDING',
+                fulfillmentStatus: 'UNFULFILLED',
+                cancelledAt: null,
+                cancelReason: null,
+              }],
+            },
+          },
+        },
+      },
+    ];
+    let call = 0;
+    const fetchFn: typeof fetch = async (_input, init) => {
+      const body = JSON.parse(String(init?.body ?? '{}')) as { variables?: { after?: string | null } };
+      expect(init?.headers).toMatchObject({ Authorization: 'shopper-token' });
+      expect(JSON.stringify(init?.headers)).not.toContain('shpat_');
+      if (call === 0) expect(body.variables?.after).toBeNull();
+      if (call === 1) expect(body.variables?.after).toBe('cursor-2');
+      const page = pages[call];
+      call += 1;
+      return new Response(JSON.stringify(page), { status: 200 });
+    };
+
+    const orders = await lookup(fetchFn).listOrders('shopper-token');
+    expect(orders).toEqual([
+      {
+        id: 'gid://shopify/Order/1',
+        financialStatus: 'PAID',
+        fulfillmentStatus: 'UNFULFILLED',
+        cancelledAt: '2026-04-01T00:00:00Z',
+        cancelReason: 'CUSTOMER',
+        tags: [],
+      },
+      {
+        id: 'gid://shopify/Order/2',
+        financialStatus: 'PENDING',
+        fulfillmentStatus: 'UNFULFILLED',
+        cancelledAt: null,
+        cancelReason: null,
+        tags: [],
+      },
+    ]);
+  });
+
+  it('fails closed on HTTP errors, GraphQL errors, and a broken next page', async () => {
+    const httpFail = lookup(async () => new Response('no', { status: 503 }));
+    await expect(httpFail.listOrders('shopper-token')).rejects.toBeInstanceOf(OrderCheckUnavailableError);
+
+    const graphqlFail = lookup(async () => new Response(JSON.stringify({
+      errors: [{ message: 'customer ana@example.com unavailable' }],
+    }), { status: 200 }));
+    await expect(graphqlFail.listOrders('shopper-token')).rejects.toBeInstanceOf(OrderCheckUnavailableError);
+
+    const truncated = lookup(async () => new Response(JSON.stringify({
+      data: {
+        customer: {
+          orders: {
+            pageInfo: { hasNextPage: true, endCursor: null },
+            nodes: [],
+          },
+        },
+      },
+    }), { status: 200 }));
+    await expect(truncated.listOrders('shopper-token')).rejects.toBeInstanceOf(OrderCheckUnavailableError);
   });
 });
 

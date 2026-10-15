@@ -223,8 +223,17 @@ sends the id token from a login that just happened (`X-Monetta-Id-Token`).
 Tokens older than `ACCOUNT_DELETION_REAUTH_MAX_AGE_SECONDS` (default 10
 minutes) are rejected and nothing is deleted.
 
-If any mirrored order is unpaid/pending, unfulfilled, or has a refund in
-progress, the response is `blocked_open_order` and no data is removed.
+Before anything is removed, the service reads the shopper's orders from the
+Customer Account API (`customer.orders`, the same source as Mis pedidos) and
+from the local mirror. The mirror alone is not enough: an order whose webhook
+never arrived still blocks deletion. If that Shopify read cannot be completed,
+the response is 503 `order_check_unavailable` and nothing is deleted.
+
+A cancelled order does not block. Cancellation is Shopify `cancelledAt`, a
+present `cancelReason`, financial status `cancelled` / `canceled` / `voided`,
+or a cancelled tag — the same signals as the order-status labels. An unpaid,
+unfulfilled, or in-progress refund still returns `blocked_open_order` and no
+data is removed.
 Otherwise the service deletes the Firebase Auth user and the Firestore
 profile, wishlist, and saved recommendations, anonymizes the customer's rows
 in this database, then calls Shopify Admin `customerRequestDataErasure`.

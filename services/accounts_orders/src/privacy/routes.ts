@@ -14,7 +14,16 @@ export function registerAccountDeletionRoutes(
       try {
         const customerId = await options.authenticate(req, res);
         if (customerId === null) return;
-        const outcome = await options.deletion.precheck(customerId);
+        const accessToken = bearer(req);
+        if (accessToken === null) {
+          res.status(401).json({ error: 'unauthorized' });
+          return;
+        }
+        const outcome = await options.deletion.precheck(customerId, accessToken);
+        if (outcome.result === 'order_check_unavailable') {
+          res.status(503).json({ error: 'order_check_unavailable' });
+          return;
+        }
         res.status(200).json(publicBody(outcome));
       } catch (error) {
         next(error);
@@ -58,6 +67,9 @@ export function registerAccountDeletionRoutes(
           case 'unavailable':
             res.status(503).json({ error: 'deletion_unavailable' });
             return;
+          case 'order_check_unavailable':
+            res.status(503).json({ error: 'order_check_unavailable' });
+            return;
           case 'failed':
             res.status(503).json({ error: 'deletion_incomplete' });
             return;
@@ -83,6 +95,9 @@ function publicBody(outcome: Awaited<ReturnType<AccountDeletionService['precheck
   }
   if (outcome.result === 'deleted') {
     return { result: 'deleted', shopifyDataErasure: 'requested' };
+  }
+  if (outcome.result === 'order_check_unavailable') {
+    throw new Error('order_check_unavailable');
   }
   return { result: 'clear' };
 }

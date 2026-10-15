@@ -13,6 +13,10 @@ export interface OpenOrderSnapshot {
   readonly financialStatus: string | null;
   readonly fulfillmentStatus: string | null;
   readonly tags: readonly string[];
+  /** Shopify `cancelledAt`. A present value closes the order. */
+  readonly cancelledAt?: string | null;
+  /** Shopify `cancelReason` / `cancel_reason`. A present value closes the order. */
+  readonly cancelReason?: string | null;
 }
 
 const unpaidStatuses = new Set([
@@ -24,6 +28,8 @@ const unpaidStatuses = new Set([
 ]);
 
 const closedFinancialStatuses = new Set(['voided', 'refunded', 'expired']);
+
+const cancelledFinancialStatuses = new Set(['cancelled', 'canceled', 'voided']);
 
 const closedFulfillmentStatuses = new Set([
   'fulfilled',
@@ -55,12 +61,36 @@ function norm(value: string | null | undefined): string {
   return (value ?? '').trim().toLowerCase();
 }
 
+function present(value: string | null | undefined): boolean {
+  return norm(value) !== '';
+}
+
+/** Numeric Shopify order id from a raw id or `gid://shopify/Order/{id}`. */
+export function shopifyOrderNumber(id: string | null | undefined): string | null {
+  if (id == null) return null;
+  const trimmed = id.trim();
+  const gid = /^gid:\/\/shopify\/Order\/([0-9]+)$/.exec(trimmed);
+  if (gid?.[1] !== undefined) return gid[1];
+  return /^[0-9]+$/.test(trimmed) ? trimmed : null;
+}
+
 export function openOrderBlockReason(
   order: OpenOrderSnapshot,
 ): OpenOrderBlockReason | null {
   const financial = norm(order.financialStatus);
   const fulfillment = norm(order.fulfillmentStatus);
   const tags = order.tags.map((tag) => norm(tag));
+
+  // Cancellation wins over an unfulfilled or unpaid snapshot. A missing
+  // cancel tag must not keep a Shopify-cancelled order open forever.
+  if (
+    cancelledFinancialStatuses.has(financial) ||
+    present(order.cancelledAt) ||
+    present(order.cancelReason) ||
+    tags.some((tag) => cancelledTags.has(tag))
+  ) {
+    return null;
+  }
 
   if (
     refundInProgressStatuses.has(financial) ||
@@ -69,10 +99,7 @@ export function openOrderBlockReason(
     return 'refund_in_progress';
   }
 
-  if (
-    closedFinancialStatuses.has(financial) ||
-    tags.some((tag) => cancelledTags.has(tag))
-  ) {
+  if (closedFinancialStatuses.has(financial)) {
     return null;
   }
 

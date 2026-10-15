@@ -81,6 +81,7 @@ import {
 } from '../privacy/pgAccountDeletionRepository.js';
 import { PgCustomerDataEraser } from '../privacy/pgCustomerErasure.js';
 import { registerAccountDeletionRoutes } from '../privacy/routes.js';
+import { CustomerAccountOrderLookup } from '../privacy/shopifyOrderCheck.js';
 import { ShopifyCustomerDataErasureClient } from '../privacy/shopifyErasure.js';
 
 export interface ServerDeps extends HandlerDeps {
@@ -917,6 +918,7 @@ if (isMain) {
       clientId: config.shopifyAppClientId,
       clientSecret: config.webhookSecret,
     }),
+    shopifyOrders: new CustomerAccountOrderLookup({ shopDomain: config.shopDomain }),
     freshLogin: new ShopifyFreshLoginVerifier({
       shopDomain: config.shopDomain,
       customerTokens: customerTokenVerifier,
