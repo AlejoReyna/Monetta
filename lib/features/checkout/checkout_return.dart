@@ -13,9 +13,9 @@ const Duration kCheckoutOrderLookupInterval = Duration(seconds: 3);
 /// Proposed upper bound for MON-UX-03-DUP. Not a measured SLA.
 const Duration kCheckoutOrderLookupTimeout = Duration(seconds: 30);
 
-/// False until an order source actually returns `checkout_token` or
-/// `cart_token`. A timeout is not proof that no charge happened, so banner 1
-/// stays gated on this flag.
+/// Stays false even though `GET /customers/me/orders` can return
+/// `checkoutToken` and `cartToken`. A 30s miss can still be a slow webhook,
+/// so timeout keeps banner 3 until PM/Designer decide otherwise.
 const bool kCheckoutTokenCorrelationAvailable = false;
 
 /// Shown with a loading indicator while the lookup window is open.

@@ -13,7 +13,7 @@ void main() {
       expect(kCheckoutOrderLookupTimeout, const Duration(seconds: 30));
     });
 
-    test('token correlation stays off until sources return tokens', () {
+    test('token correlation stays off so a timeout remains banner 3', () {
       expect(kCheckoutTokenCorrelationAvailable, isFalse);
     });
   });
@@ -217,34 +217,31 @@ void main() {
   });
 
   group('existing order sources', () {
-    test('do not carry a checkout or cart token, so they cannot match', () {
-      final snapshot = OrderCorrelationSnapshot(
-        customerOrders: [
-          CustomerAccountOrder(
-            id: 'gid://shopify/Order/1',
-            name: '#1001',
-            number: 1001,
-            processedAt: DateTime.utc(2026, 10, 15),
-            financialStatus: 'PAID',
-            fulfillmentStatus: null,
-            totalAmount: 10,
-            currencyCode: 'MXN',
-          ),
-        ],
-        mirroredOrders: [
-          MirroredOrder(
-            id: 2,
-            shopifyOrderId: 'gid://shopify/Order/2',
-            source: 'shopify_checkout',
-            attributionCode: null,
-            financialStatus: 'pending',
-            fulfillmentStatus: null,
-            totalAmount: 10,
-            currencyCode: 'MXN',
-            placedAt: null,
-          ),
-        ],
+    test('a mirror row matches on cartToken or checkoutToken', () {
+      const attempt = CheckoutAttemptIdentity(
+        cartToken: 'cart-token',
+        checkoutToken: 'checkout-token',
       );
+
+      final byCart = checkoutSourcedOrdersFrom(
+        _snapshot(
+          mirrored: _mirror(cartToken: 'cart-token'),
+        ),
+      );
+      final cartMatch = matchCheckoutOrder(attempt, byCart);
+      expect(cartMatch?.orderId, 'gid://shopify/Order/2');
+
+      final byCheckout = checkoutSourcedOrdersFrom(
+        _snapshot(
+          mirrored: _mirror(checkoutToken: 'checkout-token'),
+        ),
+      );
+      final checkoutMatch = matchCheckoutOrder(attempt, byCheckout);
+      expect(checkoutMatch?.orderId, 'gid://shopify/Order/2');
+    });
+
+    test('null mirror tokens do not match, and customer orders have none', () {
+      final snapshot = _snapshot(mirrored: _mirror());
 
       final sourced = checkoutSourcedOrdersFrom(snapshot);
       expect(sourced, hasLength(2));
@@ -262,6 +259,40 @@ void main() {
       );
     });
   });
+}
+
+OrderCorrelationSnapshot _snapshot({MirroredOrder? mirrored}) {
+  return OrderCorrelationSnapshot(
+    customerOrders: [
+      CustomerAccountOrder(
+        id: 'gid://shopify/Order/1',
+        name: '#1001',
+        number: 1001,
+        processedAt: DateTime.utc(2026, 10, 15),
+        financialStatus: 'PAID',
+        fulfillmentStatus: null,
+        totalAmount: 10,
+        currencyCode: 'MXN',
+      ),
+    ],
+    mirroredOrders: [mirrored ?? _mirror()],
+  );
+}
+
+MirroredOrder _mirror({String? checkoutToken, String? cartToken}) {
+  return MirroredOrder(
+    id: 2,
+    shopifyOrderId: 'gid://shopify/Order/2',
+    source: 'shopify_checkout',
+    attributionCode: null,
+    financialStatus: 'pending',
+    fulfillmentStatus: null,
+    totalAmount: 10,
+    currencyCode: 'MXN',
+    placedAt: null,
+    checkoutToken: checkoutToken,
+    cartToken: cartToken,
+  );
 }
 
 final class _Clock {
