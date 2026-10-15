@@ -22,7 +22,7 @@
  *
  * A confirmed manual-method display name becomes `bank_deposit` by adding
  * one snake_case key to [TRANSFER_METHOD_ALIASES]. The webhook and the
- * backfill both read that list. No live store name is listed yet.
+ * backfill both read that list.
  */
 
 const NON_METHOD_TOKENS = new Set([
@@ -56,9 +56,11 @@ const NON_METHOD_TOKENS = new Set([
  *
  * Add one key when a store display name is confirmed (for example from the
  * Shopify Payments screenshot). The app treats that stored value as a
- * transfer. No other code change is required. This list is empty until then.
+ * transfer. "Transferencia bancaria" is confirmed on Monetta staging.
  */
-export const TRANSFER_METHOD_ALIASES: Readonly<Record<string, 'bank_deposit'>> = {};
+export const TRANSFER_METHOD_ALIASES: Readonly<Record<string, 'bank_deposit'>> = {
+  transferencia_bancaria: 'bank_deposit',
+};
 
 /** Display labels that already have a Customer Account or gateway token. */
 const METHOD_ALIASES: Readonly<Record<string, string>> = {

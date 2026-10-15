@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   handleCustomersDataRequest,
   handleCustomersRedact,
@@ -64,6 +65,31 @@ describe('webhook handlers', () => {
   });
 
   describe('handleOrdersWebhook', () => {
+    it.each(['orders/create', 'orders/updated'] as const)(
+      'mirrors the exact staging transfer gateway on %s for the Flutter contract',
+      async (topic) => {
+        const fixture = JSON.parse(readFileSync(new URL(
+          '../../../test/fixtures/contracts/staging_transfer_payment.json', import.meta.url,
+        ), 'utf8')) as { gateway: string; paymentMethod: string };
+        expect(fixture.gateway).toBe('Transferencia bancaria');
+
+        await handleOrdersWebhook(
+          deps,
+          `wh-staging-transfer-${topic}`,
+          topic,
+          orderPayload({
+            financial_status: 'pending',
+            payment_gateway_names: [fixture.gateway],
+          }),
+          Buffer.from('raw-staging-transfer'),
+        );
+
+        expect(orders.rows).toHaveLength(1);
+        expect(orders.rows[0]!.financialStatus).toBe('pending');
+        expect(orders.rows[0]!.paymentMethod).toBe(fixture.paymentMethod);
+      },
+    );
+
     it('mirrors a real checkout order and its customer', async () => {
       await handleOrdersWebhook(
         deps,
@@ -375,7 +401,7 @@ describe('webhook handlers', () => {
         Buffer.from('raw-keep-update'),
       );
 
-      expect(orders.rows[0]!.paymentMethod).toBe('other:transferencia_bancaria');
+      expect(orders.rows[0]!.paymentMethod).toBe('bank_deposit');
     });
 
     it('stores paypal, mercadopago, and an unrecognized gateway as non-null methods', async () => {

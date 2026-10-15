@@ -188,7 +188,7 @@ describe('payment method backfill', () => {
   });
 
   it('leaves an unlisted transfer-like name as other: via the shared alias list', async () => {
-    expect(Object.keys(TRANSFER_METHOD_ALIASES)).toEqual([]);
+    expect(TRANSFER_METHOD_ALIASES.transferencia_bancaria).toBe('bank_deposit');
     const fetchFn = (async () => new Response(JSON.stringify({
       data: {
         nodes: [

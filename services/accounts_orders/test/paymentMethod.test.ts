@@ -21,7 +21,7 @@ describe('normalizePaymentMethod', () => {
   });
 
   it('maps one transfer alias entry to bank_deposit and ignores it until listed', () => {
-    expect(Object.keys(TRANSFER_METHOD_ALIASES)).toEqual([]);
+    expect(TRANSFER_METHOD_ALIASES.transferencia_bancaria).toBe('bank_deposit');
     expect(normalizePaymentMethod(
       { payment_gateway_names: ['ZZ Fake Transfer Rail'] },
       FAKE_TRANSFER_ALIAS_FIXTURE,
@@ -39,10 +39,10 @@ describe('normalizePaymentMethod', () => {
     )).toBe('other:constructor');
   });
 
-  it('keeps a similar transfer label distinguishable from bank_deposit', () => {
+  it('recognizes the confirmed staging transfer name but leaves unlisted names distinct', () => {
     expect(normalizePaymentMethod({
       payment_gateway_names: ['Transferencia bancaria'],
-    })).toBe('other:transferencia_bancaria');
+    })).toBe('bank_deposit');
     expect(normalizePaymentMethod({
       gateway: 'Depósito bancario',
     })).toBe('other:deposito_bancario');
