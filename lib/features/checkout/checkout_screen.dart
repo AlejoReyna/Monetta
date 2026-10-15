@@ -261,10 +261,12 @@ class _BagContents extends StatelessWidget {
 
     Future<void> continueToCheckout() async {
       final guard = ReviewingCheckoutScope.maybeOf(context);
-      final token = cartTokenFromShopifyCartId(
-        cartController?.snapshot?.cart?.id,
-      );
-      if (guard != null && guard.isActiveFor(token)) {
+      if (guard != null) {
+        await guard.ensureLoaded();
+        if (!context.mounted) return;
+      }
+      if (guard != null &&
+          guard.blocksCheckout(bagEmpty: store.bagLines.isEmpty)) {
         final choice = await showCheckoutDoubleChargeSheet(context);
         if (!context.mounted) return;
         if (choice == CheckoutDoubleChargeChoice.viewOrders) {
@@ -640,8 +642,8 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
 
   void _viewOrders() => openCheckoutOrders(context);
 
-  void _activateReviewing(CheckoutAttemptIdentity attempt) {
-    ReviewingCheckoutScope.maybeOf(context)?.markActive(attempt.cartToken);
+  void _activateReviewing() {
+    ReviewingCheckoutScope.maybeOf(context)?.markActive();
   }
 
   void _deactivateReviewing() {
@@ -753,7 +755,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             final attempt = _attemptIdentity();
             if (lookup == null) {
               // Nothing to correlate against. That is not proof of no charge.
-              _activateReviewing(attempt);
+              _activateReviewing();
               setState(() => _returnPhase = CheckoutReturnPhase.reviewing);
               return;
             }
@@ -781,10 +783,8 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
               await _openMatchedOrder(decision.match);
               return;
             }
-            if (decision is CheckoutOrderNotFound) {
-              _deactivateReviewing();
-            } else {
-              _activateReviewing(attempt);
+            if (decision is! CheckoutOrderNotFound) {
+              _activateReviewing();
             }
             setState(() {
               _checkingOrder = false;

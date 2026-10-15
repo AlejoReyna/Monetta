@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/app/cart_controller.dart';
 import 'package:monetta_app/app/catalog_store.dart';
@@ -24,37 +25,67 @@ const _cartToken = 'cart-token-1';
 
 void main() {
   group('ReviewingCheckoutCart', () {
-    test('tracks banner 3 for the recorded cart token only', () {
-      final guard = ReviewingCheckoutCart();
-      expect(guard.isActiveFor(_cartToken), isFalse);
-
-      guard.markActive('  ');
+    test('stores a flag and timestamp and clears when the bag is empty',
+        () async {
+      final memory = _MemoryWarningStore();
+      final now = DateTime.utc(2026, 10, 15, 15);
+      final guard = ReviewingCheckoutCart(
+        store: memory,
+        clock: () => now,
+      );
       expect(guard.isActive, isFalse);
 
-      guard.markActive(_cartToken);
-      expect(guard.isActiveFor(_cartToken), isTrue);
-      expect(guard.isActiveFor('other-cart'), isFalse);
+      guard.markActive();
+      await guard.flush();
+      expect(guard.isActive, isTrue);
       expect(guard.toString(), 'ReviewingCheckoutCart(active: true)');
+      expect(memory.record?.markedAt, now);
 
-      guard.clear();
+      guard.noteBag(emptied: false);
+      expect(guard.isActive, isTrue);
+
+      guard.noteBag(emptied: true);
+      await guard.flush();
       expect(guard.isActive, isFalse);
+      expect(memory.record, isNull);
     });
 
-    test('a new cart token or an empty cart clears banner 3', () {
-      final guard = ReviewingCheckoutCart()..markActive(_cartToken);
+    test('a restarted reader restores the flag without a cart token', () async {
+      final memory = _MemoryWarningStore();
+      final now = DateTime.utc(2026, 10, 15, 15);
+      final first = ReviewingCheckoutCart(store: memory, clock: () => now)
+        ..markActive();
+      await first.flush();
+      first.dispose();
 
-      guard.noteCart(cartId: null);
-      expect(guard.isActiveFor(_cartToken), isTrue);
+      final second = ReviewingCheckoutCart(store: memory, clock: () => now);
+      await second.ensureLoaded();
+      expect(second.isActive, isTrue);
+      expect(second.blocksCheckout(bagEmpty: false), isTrue);
+      expect(second.blocksCheckout(bagEmpty: true), isFalse);
+    });
 
-      guard.noteCart(cartId: _cartId);
-      expect(guard.isActiveFor(_cartToken), isTrue);
+    test('the warning expires 24 hours after the uncertain return', () async {
+      final memory = _MemoryWarningStore();
+      var now = DateTime.utc(2026, 10, 15, 15);
+      final guard = ReviewingCheckoutCart(store: memory, clock: () => now)
+        ..markActive();
+      await guard.flush();
 
-      guard.noteCart(cartId: 'gid://shopify/Cart/other-cart');
+      now = now.add(const Duration(hours: 23, minutes: 59));
+      expect(guard.isActive, isTrue);
+
+      now = DateTime.utc(2026, 10, 15, 15).add(
+        kCheckoutReviewingWarningLifetime,
+      );
+      guard.expireIfDue();
+      await guard.flush();
       expect(guard.isActive, isFalse);
+      expect(memory.record, isNull);
 
-      guard.markActive(_cartToken);
-      guard.noteCart(cartId: _cartId, emptied: true);
-      expect(guard.isActive, isFalse);
+      final restored = ReviewingCheckoutCart(store: memory, clock: () => now);
+      await restored.ensureLoaded();
+      expect(restored.isActive, isFalse);
     });
   });
 
@@ -90,20 +121,131 @@ void main() {
     expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
   });
 
-  testWidgets('cart checkout opens directly for a different cart token', (
+  testWidgets('a new cart token keeps the warning and still shows the sheet', (
     tester,
   ) async {
-    final harness = await _BagHarness.create();
-    harness.guard.markActive('other-cart');
+    final harness = await _BagHarness.create(reviewing: true);
     addTearDown(harness.dispose);
 
     await tester.pumpWidget(harness.app());
     await tester.pumpAndSettle();
+    harness.reconciler.cartId = 'gid://shopify/Cart/other-cart?key=next';
+    await harness.cart.reconcileLocalBag(
+      scope: const CartSessionScope.guest(shopDomain: 'staging.invalid'),
+      localIntent: [
+        for (final line in harness.store.bagLines)
+          LocalCartIntent(variantId: line.variant.id, quantity: line.quantity),
+      ],
+    );
+    await tester.pumpAndSettle();
+    await _tapCartCheckout(tester);
+
+    expect(find.text(kCheckoutDoubleChargeTitle), findsOneWidget);
+    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+    expect(harness.guard.isActive, isTrue);
+  });
+
+  testWidgets('changing the bag quantity keeps the warning', (tester) async {
+    final harness = await _BagHarness.create(reviewing: true);
+    addTearDown(harness.dispose);
+
+    await tester.pumpWidget(harness.app());
+    await tester.pumpAndSettle();
+    final variantId = harness.store.bagLines.single.variant.id;
+    await harness.store.updateBagQuantity(variantId, 3);
+    await tester.pumpAndSettle();
+
+    expect(harness.store.bagQuantity, 3);
+    expect(harness.guard.isActive, isTrue);
+    await _tapCartCheckout(tester);
+    expect(find.text(kCheckoutDoubleChargeTitle), findsOneWidget);
+  });
+
+  testWidgets('an empty bag clears the warning', (tester) async {
+    final memory = _MemoryWarningStore();
+    final guard = ReviewingCheckoutCart(store: memory)..markActive();
+    await guard.flush();
+    final harness = await _BagHarness.create(guard: guard);
+    addTearDown(harness.dispose);
+
+    await tester.pumpWidget(harness.app());
+    await tester.pumpAndSettle();
+    final product = harness.store.bagLines.single.product;
+    await harness.store.removeFromBag(harness.store.bagLines.single.variant.id);
+    await tester.pumpAndSettle();
+    await guard.flush();
+
+    expect(harness.store.bagQuantity, 0);
+    expect(guard.isActive, isFalse);
+    expect(memory.record, isNull);
+
+    await harness.store.addToBag(product);
+    await tester.pumpAndSettle();
+    await _tapCartCheckout(tester);
+    expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
+    expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
+  });
+
+  testWidgets('a restarted app shows the sheet while the bag is not empty', (
+    tester,
+  ) async {
+    SharedPreferences.setMockInitialValues({});
+    final now = DateTime.utc(2026, 10, 15, 15);
+    final preferences = await SharedPreferences.getInstance();
+    final stored = SharedPreferencesReviewingWarningStore(preferences);
+    final writer = ReviewingCheckoutCart(store: stored, clock: () => now)
+      ..markActive();
+    await writer.flush();
+    writer.dispose();
+
+    expect(
+      preferences.getKeys(),
+      unorderedEquals({
+        kCheckoutReviewingWarningFlagKey,
+        kCheckoutReviewingWarningAtKey,
+      }),
+    );
+    expect(preferences.getBool(kCheckoutReviewingWarningFlagKey), isTrue);
+    expect(
+      preferences.getInt(kCheckoutReviewingWarningAtKey),
+      now.millisecondsSinceEpoch,
+    );
+    for (final key in preferences.getKeys()) {
+      expect(preferences.get(key), isNot(isA<String>()));
+    }
+
+    final harness = await _BagHarness.create();
+    addTearDown(harness.dispose);
+    await tester.pumpWidget(
+      harness.app(
+        warningStore: stored,
+        clock: () => now,
+        restore: true,
+      ),
+    );
+    await tester.pumpAndSettle();
+    await _tapCartCheckout(tester);
+
+    expect(find.text(kCheckoutDoubleChargeTitle), findsOneWidget);
+    expect(find.text('¿Cómo te contactamos?'), findsNothing);
+  });
+
+  testWidgets('a warning older than 24 hours opens checkout directly', (
+    tester,
+  ) async {
+    var now = DateTime.utc(2026, 10, 15, 15);
+    final guard = ReviewingCheckoutCart(clock: () => now)..markActive();
+    final harness = await _BagHarness.create(guard: guard);
+    addTearDown(harness.dispose);
+
+    await tester.pumpWidget(harness.app());
+    await tester.pumpAndSettle();
+    now = now.add(kCheckoutReviewingWarningLifetime);
     await _tapCartCheckout(tester);
 
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
     expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
-    expect(harness.guard.isActive, isFalse);
+    expect(guard.isActive, isFalse);
   });
 
   testWidgets('view orders opens history and does not start checkout', (
@@ -122,7 +264,7 @@ void main() {
     expect(find.text('Mis pedidos'), findsWidgets);
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
     expect(find.text('¿Cómo te contactamos?'), findsNothing);
-    expect(harness.guard.isActiveFor(_cartToken), isTrue);
+    expect(harness.guard.isActive, isTrue);
   });
 
   testWidgets('pay anyway continues into checkout and keeps the warning', (
@@ -139,10 +281,10 @@ void main() {
 
     expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
     expect(find.text(kCheckoutDoubleChargeTitle), findsNothing);
-    expect(harness.guard.isActiveFor(_cartToken), isTrue);
+    expect(harness.guard.isActive, isTrue);
   });
 
-  testWidgets('an uncertain return marks banner 3 for that cart token', (
+  testWidgets('an uncertain return stores the banner 3 warning', (
     tester,
   ) async {
     final harness = await _FlowHarness.create();
@@ -163,12 +305,12 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('Estamos revisando tu pago'), findsOneWidget);
-    expect(harness.guard.isActiveFor(_cartToken), isTrue);
+    expect(harness.guard.isActive, isTrue);
   });
 
   testWidgets('a matching order clears banner 3 for the cart', (tester) async {
     final harness = await _FlowHarness.create();
-    harness.guard.markActive(_cartToken);
+    harness.guard.markActive();
     addTearDown(harness.dispose);
 
     await tester.pumpWidget(
@@ -195,7 +337,7 @@ void main() {
     tester,
   ) async {
     final harness = await _FlowHarness.create();
-    harness.guard.markActive(_cartToken);
+    harness.guard.markActive();
     addTearDown(harness.dispose);
 
     await tester.pumpWidget(
@@ -214,11 +356,11 @@ void main() {
     expect(find.text('Pago protegido'), findsNothing);
   });
 
-  testWidgets('a capable miss clears the double-charge warning', (
+  testWidgets('a capable miss does not clear the double-charge warning', (
     tester,
   ) async {
     final harness = await _FlowHarness.create();
-    harness.guard.markActive(_cartToken);
+    harness.guard.markActive();
     addTearDown(harness.dispose);
 
     await tester.pumpWidget(
@@ -237,7 +379,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('No se completó tu pago'), findsOneWidget);
-    expect(harness.guard.isActive, isFalse);
+    expect(harness.guard.isActive, isTrue);
   });
 }
 
@@ -264,6 +406,7 @@ final class _BagHarness {
   _BagHarness({
     required this.store,
     required this.guard,
+    required this.reconciler,
     required this.cart,
     required this.account,
     required this.database,
@@ -271,6 +414,7 @@ final class _BagHarness {
 
   final CatalogStore store;
   final ReviewingCheckoutCart guard;
+  final _FixedCartReconciler reconciler;
   final CartController cart;
   final AccountController account;
   final AppDatabase database;
@@ -279,6 +423,7 @@ final class _BagHarness {
   static Future<_BagHarness> create({
     bool reviewing = false,
     bool signedIn = false,
+    ReviewingCheckoutCart? guard,
   }) async {
     final database = openTestDatabase();
     final store = CatalogStore(database: database);
@@ -301,24 +446,33 @@ final class _BagHarness {
         lastSeenAt: DateTime.utc(2026, 8, 27),
       );
     }
-    final guard = ReviewingCheckoutCart();
-    if (reviewing) guard.markActive(_cartToken);
+    final resolvedGuard = guard ?? ReviewingCheckoutCart();
+    if (reviewing) resolvedGuard.markActive();
+    final reconciler = _FixedCartReconciler(_cartId);
     return _BagHarness(
       store: store,
-      guard: guard,
-      cart: CartController(reconciler: _FixedCartReconciler(_cartId)),
+      guard: resolvedGuard,
+      reconciler: reconciler,
+      cart: CartController(reconciler: reconciler),
       account: account,
       database: database,
     );
   }
 
-  Widget app() {
+  Widget app({
+    ReviewingWarningStore? warningStore,
+    DateTime Function()? clock,
+    bool restore = false,
+  }) {
     return MaterialApp(
       theme: buildTheme(),
       builder: (context, navigator) => AppRouteScopes(
         accountController: account,
         cartController: cart,
-        reviewingCheckout: guard,
+        catalogStore: store,
+        reviewingCheckout: restore ? null : guard,
+        reviewingWarningStore: warningStore,
+        reviewingClock: clock,
         shopDomain: 'staging.invalid',
         child: navigator!,
       ),
@@ -382,10 +536,22 @@ final class _FlowHarness {
   }
 }
 
+final class _MemoryWarningStore implements ReviewingWarningStore {
+  ReviewingWarningRecord? record;
+
+  @override
+  Future<ReviewingWarningRecord?> read() async => record;
+
+  @override
+  Future<void> write(ReviewingWarningRecord? record) async {
+    this.record = record;
+  }
+}
+
 final class _FixedCartReconciler implements CartReconciler {
   _FixedCartReconciler(this.cartId);
 
-  final String cartId;
+  String cartId;
 
   @override
   Future<CartReconciliation> reconcile({

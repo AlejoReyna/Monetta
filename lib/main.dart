@@ -363,6 +363,8 @@ class AppRouteScopes extends StatelessWidget {
     this.catalogStore,
     this.notificationController,
     this.reviewingCheckout,
+    this.reviewingWarningStore,
+    this.reviewingClock,
     required this.shopDomain,
     required this.child,
     super.key,
@@ -374,9 +376,11 @@ class AppRouteScopes extends StatelessWidget {
   final CatalogStore? catalogStore;
   final NotificationController? notificationController;
 
-  /// Banner-3 cart warning. Null lets [ReviewingCheckoutHost] keep one in
-  /// memory for this element; it is not restored after an app restart.
+  /// Banner-3 warning. Null lets [ReviewingCheckoutHost] restore the on-device
+  /// flag. The stored record is a flag and a timestamp, never a cart token.
   final ReviewingCheckoutCart? reviewingCheckout;
+  final ReviewingWarningStore? reviewingWarningStore;
+  final DateTime Function()? reviewingClock;
   final String shopDomain;
   final Widget child;
 
@@ -384,8 +388,10 @@ class AppRouteScopes extends StatelessWidget {
   Widget build(BuildContext context) {
     final cart = cartController;
     Widget routedApp = ReviewingCheckoutHost(
-      cart: cart,
+      bag: catalogStore,
       reviewing: reviewingCheckout,
+      store: reviewingWarningStore,
+      clock: reviewingClock,
       child: cart == null
           ? child
           : CartScope(
