@@ -39,6 +39,25 @@ class OrderHistoryView {
   final OrderHistoryStatus status;
 }
 
+/// Both order sources, unmerged, for checkout correlation.
+///
+/// [customerOrders] is the Customer Account API page. [mirroredOrders] is
+/// `GET /customers/me/orders`, including checkout orders the shopper-list
+/// merge would drop when CAA is the primary source.
+class OrderCorrelationSnapshot {
+  const OrderCorrelationSnapshot({
+    required this.customerOrders,
+    required this.mirroredOrders,
+  });
+
+  const OrderCorrelationSnapshot.empty()
+      : customerOrders = const [],
+        mirroredOrders = const [];
+
+  final List<CustomerAccountOrder> customerOrders;
+  final List<MirroredOrder> mirroredOrders;
+}
+
 class OrderHistoryRepository {
   OrderHistoryRepository({
     required this.store,
@@ -189,6 +208,49 @@ class OrderHistoryRepository {
     return const OrderHistoryView(
       orders: [],
       status: OrderHistoryStatus.failed,
+    );
+  }
+
+  /// Reads Customer Account orders and the accounts_orders mirror without
+  /// replacing the shopper cache.
+  ///
+  /// Used to look for an order from the checkout that just returned. A
+  /// failure of one source leaves that list empty and does not erase the
+  /// other. Neither payload includes a checkout or cart token.
+  Future<OrderCorrelationSnapshot> loadForCheckoutCorrelation({
+    String? customerAccountAccessToken,
+    String? backendAccessToken,
+  }) async {
+    final tryCaa = _customerOrders != null &&
+        customerAccountAccessToken != null &&
+        customerAccountAccessToken.isNotEmpty;
+    final tryMirror = _mirrorClient != null &&
+        backendAccessToken != null &&
+        backendAccessToken.isNotEmpty;
+
+    List<CustomerAccountOrder> customerOrders = const [];
+    if (tryCaa) {
+      try {
+        customerOrders = await _customerOrders.fetchOrders(
+          customerAccountAccessToken,
+        );
+      } catch (_) {
+        customerOrders = const [];
+      }
+    }
+
+    List<MirroredOrder> mirroredOrders = const [];
+    if (tryMirror) {
+      try {
+        mirroredOrders = await _mirrorClient.fetchOrders(backendAccessToken);
+      } catch (_) {
+        mirroredOrders = const [];
+      }
+    }
+
+    return OrderCorrelationSnapshot(
+      customerOrders: customerOrders,
+      mirroredOrders: mirroredOrders,
     );
   }
 
