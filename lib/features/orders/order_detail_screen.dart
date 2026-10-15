@@ -131,6 +131,10 @@ class OrderDetailScreen extends StatelessWidget {
                       ),
                     ),
                   ],
+                  PaidCancelledRefundHelp(
+                    order: order,
+                    onOpen: (uri) => _open(context, uri),
+                  ),
                   if (status.key == 'in_transit') ...[
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(
@@ -359,6 +363,65 @@ class OrderDetailScreen extends StatelessWidget {
       );
     }
     return events;
+  }
+}
+
+/// Línea de WhatsApp bajo un "Cancelado" pagado. No ocupa espacio
+/// en ningún otro estado.
+class PaidCancelledRefundHelp extends StatelessWidget {
+  const PaidCancelledRefundHelp({
+    required this.order,
+    this.onOpen,
+    super.key,
+  });
+
+  final OrderSummary order;
+
+  /// Nulo abre WhatsApp directo. El detalle inyecta su propio aviso
+  /// cuando el enlace no se puede abrir.
+  final Future<void> Function(Uri uri)? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final uri = paidCancelledRefundWhatsAppUri(order);
+    if (uri == null) return const SizedBox.shrink();
+    final palette = context.boutique;
+    return Padding(
+      padding: const EdgeInsets.only(top: BoutiqueSpace.sm),
+      child: Semantics(
+        button: true,
+        link: true,
+        label: paidCancelledRefundHelp,
+        child: GestureDetector(
+          key: const ValueKey('paid-cancelled-refund-help'),
+          behavior: HitTestBehavior.opaque,
+          onTap: () async {
+            final open = onOpen;
+            if (open != null) {
+              await open(uri);
+              return;
+            }
+            final ok = await launchUrl(
+              uri,
+              mode: LaunchMode.externalApplication,
+            );
+            if (!ok && context.mounted) {
+              ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                const SnackBar(content: Text('No se pudo abrir el enlace.')),
+              );
+            }
+          },
+          child: Text(
+            paidCancelledRefundHelp,
+            style: boutiqueText(
+              size: 13,
+              color: palette.ink,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

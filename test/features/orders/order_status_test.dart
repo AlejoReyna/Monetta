@@ -337,6 +337,57 @@ void main() {
       expect(status.label, isNot('En camino'));
     });
 
+    test('paid cancellation links WhatsApp with the order number', () {
+      final order = _order(
+        displayNumber: '#1001',
+        status: 'paid',
+        fulfillmentStatus: 'shipped',
+        cancelledAt: DateTime.utc(2026, 6, 1),
+      );
+      final uri = paidCancelledRefundWhatsAppUri(order);
+      expect(orderDisplayStatus(order).label, 'Cancelado');
+      expect(uri, isNotNull);
+      expect(uri!.host, 'wa.me');
+      expect(uri.path, contains('528261066868'));
+      expect(uri.queryParameters['text'], contains('#1001'));
+    });
+
+    test('pending cancellation has no WhatsApp line', () {
+      final order = _order(
+        status: 'pending',
+        paymentMethod: 'bank_deposit',
+        cancelReason: 'customer',
+      );
+      expect(orderDisplayStatus(order).label, 'Cancelado');
+      expect(paidCancelledRefundWhatsAppUri(order), isNull);
+    });
+
+    test('other cancellations and refunded have no WhatsApp line', () {
+      expect(
+        paidCancelledRefundWhatsAppUri(
+          _order(status: 'cancelled', fulfillmentStatus: 'delivered'),
+        ),
+        isNull,
+      );
+      expect(
+        paidCancelledRefundWhatsAppUri(
+          _order(status: 'voided', fulfillmentStatus: 'shipped'),
+        ),
+        isNull,
+      );
+      final refunded = _order(
+        status: 'refunded',
+        cancelledAt: DateTime.utc(2026, 6, 1),
+        total: 500,
+      );
+      expect(orderDisplayStatus(refunded).label, 'Reembolsado');
+      expect(paidCancelledRefundWhatsAppUri(refunded), isNull);
+      expect(
+        paidCancelledRefundWhatsAppUri(_order(status: 'paid')),
+        isNull,
+      );
+    });
+
     test('a cancelled paid shipment is not in En camino', () {
       final orders = [
         _order(id: 'open', fulfillmentStatus: 'shipped', status: 'paid'),

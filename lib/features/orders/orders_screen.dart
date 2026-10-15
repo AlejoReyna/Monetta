@@ -404,11 +404,13 @@ class _OrderCard extends StatelessWidget {
     final status = orderDisplayStatus(order);
     final action = status.actionLabel ?? 'Ver detalles';
     final secondary = status.secondaryLabel;
+    final refundHelp = paidCancelledRefundWhatsAppUri(order) != null;
     return Semantics(
       button: true,
       label: '$action del pedido ${orderLabelOf(order)}, '
           '${status.label}'
-          '${secondary == null ? '' : ', $secondary'}, '
+          '${secondary == null ? '' : ', $secondary'}'
+          '${refundHelp ? ', $paidCancelledRefundHelp' : ''}, '
           '${kMoney.format(order.totalAmount)}',
       child: InkWell(
         key: ValueKey('order-card-${order.id}'),
@@ -465,6 +467,7 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ),
               ],
+              PaidCancelledRefundHelp(order: order),
               const SizedBox(height: BoutiqueSpace.md),
               Container(height: .5, color: palette.hairline),
               const SizedBox(height: BoutiqueSpace.md),

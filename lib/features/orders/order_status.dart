@@ -20,9 +20,11 @@
 ///
 /// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
 /// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
-/// `pending`. `refunded` y `voided` conservan su regla.
+/// `pending`. `refunded` y `voided` conservan su regla. Solo un cancelado
+/// con `financial_status` `paid` ofrece la línea de WhatsApp.
 library;
 
+import '../../app/shopper_copy.dart' show conciergeWhatsAppUri;
 import '../../app/theme.dart' show kMoney;
 import '../../data/local/database.dart' show OrderSummary;
 
@@ -41,6 +43,21 @@ String orderFilterLabel(OrderFilter filter) => switch (filter) {
       OrderFilter.delivered => 'Entregados',
       OrderFilter.apartado => 'Apartados',
     };
+
+/// Línea bajo "Cancelado" cuando el pedido ya estaba pagado.
+/// Una sola copia: la lista y el detalle la leen de aquí.
+const String paidCancelledRefundHelp =
+    'Si ya pagaste y tienes dudas sobre tu reembolso, escríbenos por WhatsApp.';
+
+/// WhatsApp de un cancelado pagado, con el número de pedido en el mensaje.
+/// Nulo si no es "Cancelado" con `financial_status` `paid`.
+Uri? paidCancelledRefundWhatsAppUri(OrderSummary order) {
+  if (_normalizeFinancial(order.status) != 'paid') return null;
+  if (!_isShopifyCancelled(order)) return null;
+  return conciergeWhatsAppUri(
+    productTitle: 'mi pedido ${orderLabelOf(order)}',
+  );
+}
 
 /// Etiqueta de pedido real: `displayNumber` (`#1001`) cuando existe;
 /// código de apartado (`MN-XXXX`) para WhatsApp; nunca un `#MON12345`

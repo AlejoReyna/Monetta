@@ -4,6 +4,7 @@ import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/account/account_boutique.dart';
 import 'package:monetta_app/features/orders/order_detail_screen.dart';
+import 'package:monetta_app/features/orders/order_status.dart';
 import 'package:monetta_app/features/rewards/rewards_models.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
 
@@ -167,6 +168,66 @@ void main() {
       expect(find.text('Cancelado'), findsWidgets);
       expect(find.text('En camino'), findsNothing);
       expect(find.text('Pedido enviado'), findsNothing);
+    });
+
+    testWidgets('paid cancellation shows the WhatsApp refund line', (
+      tester,
+    ) async {
+      Uri? opened;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(),
+          home: OrderDetailScreen(
+            order: _order(
+              displayNumber: '#1001',
+              fulfillmentStatus: 'shipped',
+              status: 'paid',
+              cancelledAt: DateTime.utc(2026, 6, 1),
+            ),
+            openUri: (uri) async {
+              opened = uri;
+              return true;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancelado'), findsWidgets);
+      expect(find.text('Reembolsado'), findsNothing);
+      expect(find.text(paidCancelledRefundHelp), findsOneWidget);
+      final line = tester.widget<Text>(find.text(paidCancelledRefundHelp));
+      expect(line.style?.color, isNot(MonettaColors.light.success));
+      expect(line.style?.color, isNot(const Color(0xFF8F6838)));
+
+      await tester.tap(find.text(paidCancelledRefundHelp));
+      await tester.pumpAndSettle();
+
+      expect(opened, isNotNull);
+      expect(opened!.host, 'wa.me');
+      expect(opened!.path, contains('528261066868'));
+      expect(opened!.queryParameters['text'], contains('#1001'));
+    });
+
+    testWidgets('pending cancellation has no WhatsApp refund line', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: null,
+            status: 'pending',
+            paymentMethod: 'bank_deposit',
+            cancelReason: 'customer',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancelado'), findsWidgets);
+      expect(find.text(paidCancelledRefundHelp), findsNothing);
+      expect(find.byKey(const ValueKey('paid-cancelled-refund-help')),
+          findsNothing);
     });
 
     testWidgets('cancelled paid shipment is Cancelado', (tester) async {
