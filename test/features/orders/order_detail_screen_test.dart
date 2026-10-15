@@ -226,8 +226,10 @@ void main() {
 
       expect(find.text('Cancelado'), findsWidgets);
       expect(find.text(paidCancelledRefundHelp), findsNothing);
-      expect(find.byKey(const ValueKey('paid-cancelled-refund-help')),
-          findsNothing);
+      expect(
+        find.byKey(const ValueKey('paid-cancelled-refund-help')),
+        findsNothing,
+      );
     });
 
     testWidgets('cancelled paid shipment is Cancelado', (tester) async {
@@ -249,6 +251,70 @@ void main() {
       expect(find.text('Confirmado'), findsNothing);
       expect(find.text('Pago confirmado'), findsNothing);
     });
+
+    testWidgets(
+      'OST-13d detail shows partial refund, Cancelado, and the WhatsApp line',
+      (tester) async {
+        Uri? opened;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: buildTheme(),
+            home: OrderDetailScreen(
+              order: _order(
+                displayNumber: '#1001',
+                fulfillmentStatus: 'delivered',
+                status: 'partially_refunded',
+                refundedAmount: 200,
+                total: 1000,
+                cancelledAt: DateTime.utc(2026, 6, 1),
+              ),
+              openUri: (uri) async {
+                opened = uri;
+                return true;
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final capsule = tester.widget<EStatusCapsule>(
+          find.byType(EStatusCapsule),
+        );
+        expect(capsule.label, 'Reembolso parcial');
+        expect(capsule.dark, isFalse);
+        expect(
+          find.descendant(
+            of: find.byType(EStatusCapsule),
+            matching: find.text('Cancelado'),
+          ),
+          findsNothing,
+        );
+        expect(find.text('En camino'), findsNothing);
+        expect(find.text('Entregado'), findsNothing);
+        expect(find.text('Pedido entregado'), findsNothing);
+        expect(
+          find.textContaining('Te devolvimos'),
+          findsWidgets,
+        );
+
+        final secondary = tester.widget<Text>(find.text('Cancelado'));
+        expect(secondary.style?.color, isNot(const Color(0xFF8F6838)));
+        expect(secondary.style?.color, isNot(MonettaColors.light.success));
+        expect(
+          secondary.style?.color,
+          isNot(MonettaColors.light.successSurface),
+        );
+
+        expect(find.text(paidCancelledRefundHelp), findsOneWidget);
+        await tester.ensureVisible(find.text(paidCancelledRefundHelp));
+        await tester.tap(find.text(paidCancelledRefundHelp));
+        await tester.pumpAndSettle();
+        expect(opened, isNotNull);
+        expect(opened!.host, 'wa.me');
+        expect(opened!.path, contains('528261066868'));
+        expect(opened!.queryParameters['text'], contains('#1001'));
+      },
+    );
 
     testWidgets('partial refund fallback and secondary shipment stay neutral', (
       tester,

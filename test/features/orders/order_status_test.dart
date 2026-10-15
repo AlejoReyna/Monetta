@@ -155,7 +155,7 @@ void main() {
       for (final method in [
         'bank_deposit',
         'MANUAL',
-        'Transferencia bancaria'
+        'Transferencia bancaria',
       ]) {
         final status = orderDisplayStatus(
           _order(
@@ -402,6 +402,112 @@ void main() {
         filterOrders(orders, OrderFilter.inTransit).map((o) => o.id),
         ['open'],
       );
+    });
+  });
+
+  group('OST-13d cancelled partial refund', () {
+    test('OST-13d primary is Reembolso parcial and secondary is Cancelado', () {
+      final order = _order(
+        displayNumber: '#1001',
+        status: 'partially_refunded',
+        refundedAmount: 200,
+        total: 1000,
+        currency: 'MXN',
+        cancelledAt: DateTime.utc(2026, 6, 1),
+        cancelReason: 'customer',
+      );
+      final status = orderDisplayStatus(order);
+      final uri = paidCancelledRefundWhatsAppUri(order);
+
+      expect(status.label, 'Reembolso parcial');
+      expect(status.key, 'partial_refund');
+      expect(status.success, isFalse);
+      expect(status.secondaryLabel, 'Cancelado');
+      expect(
+        status.detail,
+        'Te devolvimos ${kMoney.format(200)} MXN de '
+        '${kMoney.format(1000)} MXN a tu método de pago.',
+      );
+      expect(uri, isNotNull);
+      expect(uri!.host, 'wa.me');
+      expect(uri.path, contains('528261066868'));
+      expect(uri.queryParameters['text'], contains('#1001'));
+    });
+
+    test('OST-13d missing amount uses the Designer fallback', () {
+      final status = orderDisplayStatus(
+        _order(
+          status: 'partially_refunded',
+          refundedAmount: null,
+          total: 1000,
+          cancelReason: 'customer',
+        ),
+      );
+      expect(status.label, 'Reembolso parcial');
+      expect(status.secondaryLabel, 'Cancelado');
+      expect(
+        status.detail,
+        'Te devolvimos una parte de tu pago a tu método de pago.',
+      );
+    });
+
+    test('OST-13d Cancelado wins over a shipment secondary', () {
+      final order = _order(
+        fulfillmentStatus: 'shipped',
+        status: 'partially_refunded',
+        cancelledAt: DateTime.utc(2026, 6, 1),
+      );
+      final status = orderDisplayStatus(order);
+      expect(status.label, 'Reembolso parcial');
+      expect(status.secondaryLabel, 'Cancelado');
+      expect(status.secondaryLabel, isNot('En camino'));
+      expect(
+        filterOrders([order], OrderFilter.inTransit),
+        isEmpty,
+      );
+    });
+
+    test('OST-13d leaves the other cancel rules unchanged', () {
+      final refunded = orderDisplayStatus(
+        _order(
+          status: 'refunded',
+          cancelledAt: DateTime.utc(2026, 6, 1),
+          total: 500,
+        ),
+      );
+      expect(refunded.label, 'Reembolsado');
+      expect(refunded.secondaryLabel, isNull);
+      expect(
+        paidCancelledRefundWhatsAppUri(
+          _order(
+            status: 'refunded',
+            cancelledAt: DateTime.utc(2026, 6, 1),
+            total: 500,
+          ),
+        ),
+        isNull,
+      );
+
+      final paid = _order(
+        displayNumber: '#1008',
+        status: 'paid',
+        cancelledAt: DateTime.utc(2026, 6, 1),
+      );
+      expect(orderDisplayStatus(paid).label, 'Cancelado');
+      expect(orderDisplayStatus(paid).secondaryLabel, isNull);
+      expect(
+        paidCancelledRefundWhatsAppUri(paid)!.queryParameters['text'],
+        contains('#1008'),
+      );
+
+      final pending = _order(
+        status: 'pending',
+        paymentMethod: 'bank_deposit',
+        cancelReason: 'customer',
+      );
+      expect(orderDisplayStatus(pending).label, 'Cancelado');
+      expect(orderDisplayStatus(pending).secondaryLabel, isNull);
+      expect(paidCancelledRefundWhatsAppUri(pending), isNull);
     });
   });
 

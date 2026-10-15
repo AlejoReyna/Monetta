@@ -20,8 +20,10 @@
 ///
 /// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
 /// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
-/// `pending`. `refunded` y `voided` conservan su regla. Solo un cancelado
-/// con `financial_status` `paid` ofrece la línea de WhatsApp.
+/// `pending`. `refunded` y `voided` conservan su regla. Un cancelado con
+/// `partially_refunded` (OST-13d) es "Reembolso parcial" y deja "Cancelado"
+/// como línea secundaria, sin el envío. La línea de WhatsApp aparece en un
+/// cancelado `paid` y en ese reembolso parcial cancelado.
 library;
 
 import '../../app/shopper_copy.dart' show conciergeWhatsAppUri;
@@ -44,16 +46,18 @@ String orderFilterLabel(OrderFilter filter) => switch (filter) {
       OrderFilter.apartado => 'Apartados',
     };
 
-/// Línea bajo "Cancelado" cuando el pedido ya estaba pagado.
-/// Una sola copia: la lista y el detalle la leen de aquí.
+/// Línea de WhatsApp bajo un cancelado pagado y bajo un reembolso parcial
+/// cancelado. Una sola copia: la lista y el detalle la leen de aquí.
 const String paidCancelledRefundHelp =
     'Si ya pagaste y tienes dudas sobre tu reembolso, escríbenos por WhatsApp.';
 
-/// WhatsApp de un cancelado pagado, con el número de pedido en el mensaje.
-/// Nulo si no es "Cancelado" con `financial_status` `paid`.
+/// WhatsApp con el número de pedido. Aplica a un cancelado `paid` y a
+/// OST-13d (`partially_refunded` cancelado). Nulo en pending, voided,
+/// `refunded` y el resto de cancelaciones.
 Uri? paidCancelledRefundWhatsAppUri(OrderSummary order) {
-  if (_normalizeFinancial(order.status) != 'paid') return null;
   if (!_isShopifyCancelled(order)) return null;
+  final financial = _normalizeFinancial(order.status);
+  if (financial != 'paid' && financial != 'partially_refunded') return null;
   return conciergeWhatsAppUri(
     productTitle: 'mi pedido ${orderLabelOf(order)}',
   );
@@ -91,7 +95,8 @@ class OrderDisplayStatus {
   final String detail;
   final String? actionLabel;
 
-  /// Estado de envío bajo un reembolso parcial. Texto neutro, sin acento.
+  /// Texto neutro bajo la etiqueta, sin acento. Envío de un reembolso
+  /// parcial, o "Cancelado" cuando ese reembolso también está cancelado.
   final String? secondaryLabel;
   final bool success;
 }
@@ -107,6 +112,9 @@ OrderDisplayStatus orderDisplayStatus(OrderSummary order) {
   }
   final payment = orderPaymentStatus(order);
   if (payment.key == 'partial_refund') {
+    if (_isShopifyCancelled(order)) {
+      return _withSecondary(payment, 'Cancelado');
+    }
     return _withSecondaryFulfillment(order, payment);
   }
   if (payment.key != 'confirmed') return payment;
@@ -125,6 +133,13 @@ OrderDisplayStatus orderPaymentStatus(OrderSummary order) {
       actionLabel: 'Ver pedido',
     );
   }
+  if (financial == 'partially_refunded') {
+    return OrderDisplayStatus(
+      key: 'partial_refund',
+      label: 'Reembolso parcial',
+      detail: _partialRefundBody(order),
+    );
+  }
   if (financial == 'voided' || _isShopifyCancelled(order)) {
     return const OrderDisplayStatus(
       key: 'cancelled',
@@ -138,12 +153,6 @@ OrderDisplayStatus orderPaymentStatus(OrderSummary order) {
         key: 'confirmed',
         label: 'Confirmado',
         detail: 'Aquí verás cuando tu pedido salga.',
-      );
-    case 'partially_refunded':
-      return OrderDisplayStatus(
-        key: 'partial_refund',
-        label: 'Reembolso parcial',
-        detail: _partialRefundBody(order),
       );
     case 'pending_refund':
     case 'refund_pending':
@@ -271,7 +280,13 @@ OrderDisplayStatus _withSecondaryFulfillment(
   OrderSummary order,
   OrderDisplayStatus payment,
 ) {
-  final secondary = _secondaryFulfillmentLabel(order);
+  return _withSecondary(payment, _secondaryFulfillmentLabel(order));
+}
+
+OrderDisplayStatus _withSecondary(
+  OrderDisplayStatus payment,
+  String? secondary,
+) {
   if (secondary == null) return payment;
   return OrderDisplayStatus(
     key: payment.key,
