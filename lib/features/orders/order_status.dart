@@ -16,10 +16,10 @@
 ///
 /// `pending` es "Esperando tu transferencia" solo si cada token de
 /// [OrderSummary.paymentMethod] es exactamente `bank_deposit` o `manual`.
-/// Ese estado lleva la acción "Ver datos de pago" en la lista, que abre el
-/// pedido. El detalle pide los datos por WhatsApp con su propio rótulo.
-/// PayPal, Mercado Pago, tarjeta, `other:…` y un método ausente quedan en
-/// "Pago en proceso".
+/// Ese estado lleva [transferPaymentDetailsLabel] en la lista y en el
+/// detalle. La lista abre el pedido; el detalle abre WhatsApp. No hay
+/// ficha de datos bancarios. PayPal, Mercado Pago, tarjeta, `other:…` y
+/// un método ausente quedan en "Pago en proceso".
 ///
 /// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
 /// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
@@ -32,6 +32,12 @@ library;
 import '../../app/shopper_copy.dart' show conciergeWhatsAppUri;
 import '../../app/theme.dart' show kMoney;
 import '../../data/local/database.dart' show OrderSummary;
+
+/// Transfer prompt on the list and the order detail. One label so a later
+/// in-app bank-details sheet can replace this handoff. There is no sheet
+/// and no account data here. The list opens the order; the detail opens
+/// WhatsApp with the payment-details message.
+const transferPaymentDetailsLabel = 'Pedir datos de pago por WhatsApp';
 
 /// Filtros pertinentes con datos reales. Sin "Más vendidos" ni rangos
 /// inventados: cada filtro corresponde a un subconjunto verificable.
@@ -172,7 +178,7 @@ OrderDisplayStatus orderPaymentStatus(OrderSummary order) {
           label: 'Esperando tu transferencia',
           detail: 'Estamos esperando tu transferencia. '
               'Lo verás aquí cuando se confirme.',
-          actionLabel: 'Ver datos de pago',
+          actionLabel: transferPaymentDetailsLabel,
         );
       }
       return _paymentInProgress;

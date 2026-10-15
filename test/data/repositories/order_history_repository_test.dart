@@ -330,7 +330,7 @@ void main() {
       expect(order.status, 'pending');
       final status = orderDisplayStatus(order);
       expect(status.label, 'Esperando tu transferencia');
-      expect(status.actionLabel, 'Ver datos de pago');
+      expect(status.actionLabel, transferPaymentDetailsLabel);
     });
 
     test('app-loaded pending transfer keeps the Customer Account method',
@@ -356,7 +356,7 @@ void main() {
       expect(order.displayNumber, '#1008');
       final status = orderDisplayStatus(order);
       expect(status.label, 'Esperando tu transferencia');
-      expect(status.actionLabel, 'Ver datos de pago');
+      expect(status.actionLabel, transferPaymentDetailsLabel);
     });
 
     test('card pending stays Pago en proceso', () async {
@@ -378,7 +378,7 @@ void main() {
       final status = orderDisplayStatus(view.orders.single);
       expect(view.orders.single.paymentMethod, 'card');
       expect(status.label, 'Pago en proceso');
-      expect(status.actionLabel, isNot('Ver datos de pago'));
+      expect(status.actionLabel, isNot(transferPaymentDetailsLabel));
     });
 
     test('missing payment method stays Pago en proceso', () async {

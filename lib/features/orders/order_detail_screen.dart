@@ -27,11 +27,6 @@ const missingPaymentWhatsAppLabel =
 const paymentQuestionWhatsAppLabel =
     '¿Dudas con tu pago? Escríbenos por WhatsApp.';
 
-/// Known-transfer prompt on the order detail. One label so a later in-app
-/// bank-details sheet can replace this WhatsApp handoff without hunting
-/// for the copy. There is no bank-details sheet and no account data here.
-const transferPaymentDetailsLabel = 'Pedir datos de pago por WhatsApp';
-
 /// Detail-only help for "Pago en proceso" when no payment method was stored.
 /// Hidden once [OrderSummary.paymentMethod] is known, and never shown on the list.
 bool showMissingPaymentWhatsApp(OrderSummary order) {
