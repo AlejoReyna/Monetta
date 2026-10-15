@@ -908,6 +908,7 @@ if (isMain) {
   const deletionTokens = firebaseDeletionReady
     ? new GoogleAccessTokenProvider(config.firebaseClientEmail, config.firebasePrivateKey)
     : null;
+  const customerAccount = new CustomerAccountOrderLookup({ shopDomain: config.shopDomain });
   const accountDeletion = new AccountDeletionService({
     orders: new PgOrdersRepository(pool),
     state: new PgAccountDeletionStateRepository(pool),
@@ -927,7 +928,10 @@ if (isMain) {
       clientId: config.shopifyAppClientId,
       clientSecret: config.webhookSecret,
     }),
-    shopifyOrders: new CustomerAccountOrderLookup({ shopDomain: config.shopDomain }),
+    shopifyOrders: customerAccount,
+    customerEmail: customerAccount,
+    appAccounts,
+    hashSessionToken: hashToken,
     freshLogin: new ShopifyFreshLoginVerifier({
       shopDomain: config.shopDomain,
       customerTokens: customerTokenVerifier,

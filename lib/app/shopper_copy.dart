@@ -291,6 +291,20 @@ Uri accountDeletionSupportUri({String phoneE164 = kWhatsAppE164}) {
   });
 }
 
+const String kDeleteAccountRefundReviewWhatsAppLead =
+    'Hola, quiero eliminar mi cuenta de Monetta. Necesito que revisen el reembolso del pedido';
+
+/// WhatsApp handoff for a cancelled partial refund that still needs review.
+Uri accountDeletionRefundReviewUri({
+  required String orderNumber,
+  String phoneE164 = kWhatsAppE164,
+}) {
+  final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
+  return Uri.https('wa.me', '/$phone', <String, String>{
+    'text': '$kDeleteAccountRefundReviewWhatsAppLead $orderNumber.',
+  });
+}
+
 /// WhatsApp handoff when the app cannot delete the account itself.
 Uri accountDeletionManualRequestUri({String phoneE164 = kWhatsAppE164}) {
   final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();

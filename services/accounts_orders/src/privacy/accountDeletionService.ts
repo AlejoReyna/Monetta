@@ -1,5 +1,6 @@
-import type { OrdersRepository } from '../domain/ports.js';
+import type { AppAccountsRepository, OrdersRepository } from '../domain/ports.js';
 import { logger } from '../logger.js';
+import { maskAccountEmail, normalizeAccountEmail } from './emailMatch.js';
 import { openOrderBlockReason, shopifyOrderNumber } from './openOrderBlock.js';
 import type {
   AccountDeletionAuditRepository,
@@ -9,9 +10,11 @@ import type {
   AccountDeletionStateRepository,
   AppDataEraser,
   BlockingOrderRef,
+  CustomerAccountEmailLookup,
   CustomerDataEraser,
   DeletionCredential,
   FreshLoginVerifier,
+  LegacyEmailMatch,
   ShopifyCustomerErasureClient,
   ShopifyCustomerOrderLookup,
   ShopifyListedOrder,
@@ -31,6 +34,10 @@ export interface AccountDeletionServiceDeps {
   /** Customer Account `customer.orders`. Required before a deletion can proceed. */
   readonly shopifyOrders: ShopifyCustomerOrderLookup;
   readonly freshLogin: FreshLoginVerifier;
+  /** Legacy session lookup for the post-login email comparison. */
+  readonly appAccounts?: AppAccountsRepository;
+  readonly customerEmail?: CustomerAccountEmailLookup;
+  readonly hashSessionToken?: (token: string) => string;
   /** False when Firebase or the Shopify Admin erasure credential is missing. */
   readonly ready: boolean;
   readonly log?: (
@@ -82,7 +89,45 @@ export class AccountDeletionService {
     return { result: 'clear' };
   }
 
-  async execute(accessToken: string, idToken: string): Promise<AccountDeletionExecute> {
+  async matchLegacyEmail(
+    shopifyAccessToken: string,
+    legacySessionToken: string,
+  ): Promise<LegacyEmailMatch> {
+    const legacy = legacySessionToken.trim();
+    if (legacy === '' || legacy.length > 8192 || /\s/.test(legacy)) {
+      return { result: 'unauthorized' };
+    }
+    const accounts = this.deps.appAccounts;
+    const emails = this.deps.customerEmail;
+    const hash = this.deps.hashSessionToken;
+    if (accounts === undefined || emails === undefined || hash === undefined) {
+      return { result: 'unavailable' };
+    }
+    const account = await accounts.findByTokenHash(hash(legacy));
+    if (account === null) return { result: 'unauthorized' };
+    let shopifyEmail: string | null;
+    try {
+      shopifyEmail = await emails.customerEmail(shopifyAccessToken);
+    } catch {
+      return { result: 'unavailable' };
+    }
+    if (shopifyEmail === null) return { result: 'unauthorized' };
+    const shopifyNormalized = normalizeAccountEmail(shopifyEmail);
+    const legacyNormalized = normalizeAccountEmail(account.email);
+    if (shopifyNormalized === null || legacyNormalized === null) {
+      return { result: 'unavailable' };
+    }
+    if (shopifyNormalized !== legacyNormalized) {
+      return { result: 'email_mismatch', maskedEmail: maskAccountEmail(legacyNormalized) };
+    }
+    return { result: 'email_match' };
+  }
+
+  async execute(
+    accessToken: string,
+    idToken: string,
+    legacySessionToken?: string | null,
+  ): Promise<AccountDeletionExecute> {
     const decision = await this.deps.freshLogin.verify(accessToken, idToken);
     if (decision.status === 'unavailable') return { result: 'unavailable' };
     if (decision.status === 'invalid') return { result: 'unauthorized' };
@@ -100,6 +145,19 @@ export class AccountDeletionService {
     }
 
     const customerId = requireCustomerId(decision.customerId);
+    const legacy = legacySessionToken?.trim() ?? '';
+    if (legacy !== '') {
+      const match = await this.matchLegacyEmail(accessToken, legacy);
+      if (match.result === 'email_mismatch') {
+        await this.recordCheck(customerId, 'email_mismatch', 'email_mismatch');
+        return match;
+      }
+      if (match.result === 'unauthorized') return { result: 'unauthorized' };
+      if (match.result === 'unavailable') {
+        await this.recordCheck(customerId, 'failed', 'unavailable');
+        return { result: 'unavailable' };
+      }
+    }
     return this.withLock(customerId, () => this.executeFresh(customerId, accessToken));
   }
 
@@ -253,29 +311,30 @@ export class AccountDeletionService {
       return tooMany ? 'too_many_orders' : 'unavailable';
     }
 
+    const mirrored = await this.deps.orders.listForCustomer(customerId);
+    const tagsByNumber = new Map<string, readonly string[]>();
+    for (const order of mirrored) {
+      if (order.shopifyOrderId !== null) tagsByNumber.set(order.shopifyOrderId, order.tags);
+    }
+
     const seen = new Set<string>();
     for (const order of live) {
       const number = shopifyOrderNumber(order.id);
       if (number !== null) seen.add(number);
-      const reason = openOrderBlockReason(order);
+      const mirrorTags = number === null ? [] : tagsByNumber.get(number) ?? [];
+      const reason = openOrderBlockReason({
+        ...order,
+        tags: [...order.tags, ...mirrorTags],
+      });
       if (reason === null) continue;
-      return {
-        id: number ?? order.id,
-        shopifyOrderId: number,
-        reason,
-      };
+      return blockingRef(number ?? order.id, number, reason, order.name);
     }
 
-    const mirrored = await this.deps.orders.listForCustomer(customerId);
     for (const order of mirrored) {
       if (order.shopifyOrderId !== null && seen.has(order.shopifyOrderId)) continue;
       const reason = openOrderBlockReason(order);
       if (reason === null) continue;
-      return {
-        id: String(order.id),
-        shopifyOrderId: order.shopifyOrderId,
-        reason,
-      };
+      return blockingRef(String(order.id), order.shopifyOrderId, reason, null);
     }
     return null;
   }
@@ -361,6 +420,27 @@ export class AccountDeletionService {
       if (locks.get(customerId) === tail) locks.delete(customerId);
     }
   }
+}
+
+function blockingRef(
+  id: string,
+  shopifyOrderId: string | null,
+  reason: BlockingOrderRef['reason'],
+  name: string | null | undefined,
+): BlockingOrderRef {
+  const orderName = shopperOrderName(name);
+  return {
+    id,
+    shopifyOrderId,
+    reason,
+    ...(orderName === null ? {} : { orderName }),
+  };
+}
+
+function shopperOrderName(name: string | null | undefined): string | null {
+  const trimmed = name?.trim() ?? '';
+  if (trimmed === '' || trimmed.includes('@') || trimmed.length > 40) return null;
+  return trimmed;
 }
 
 function requireCustomerId(value: string): string {

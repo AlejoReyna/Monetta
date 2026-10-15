@@ -80,6 +80,7 @@ class AccountController extends ChangeNotifier {
   final String _deviceId;
   final WishlistStore? _wishlistStore;
   final Future<void> Function(String? accountId)? _onAccountScopeChanged;
+  HeldShopifyLogin? _heldDeletionLogin;
 
   local.Account? account;
   bool isLoading = false;
@@ -324,12 +325,102 @@ class AccountController extends ChangeNotifier {
         debugDetail: '$error',
       );
 
+  /// Shopify login for a legacy Monetta session. The device account stays on
+  /// the legacy row until the server says the emails match.
+  Future<LegacyDeletionSignIn> signInForAccountDeletion(
+    AccountDeletionClient? client,
+  ) async {
+    if (client == null) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'account deletion client is unavailable',
+      );
+    }
+    final repository = _sessionRepository;
+    final current = account;
+    if (repository == null ||
+        current == null ||
+        current.authProvider != 'monetta') {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'legacy deletion login is unavailable',
+      );
+    }
+    final legacyToken = await _systemSessionRepository?.accessTokenFor(
+      current.localAccountId,
+    );
+    if (legacyToken == null || legacyToken.trim().isEmpty) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'legacy session token is missing',
+      );
+    }
+    final held = await repository.holdLogin();
+    _heldDeletionLogin = held;
+    final idToken = held.idToken;
+    if (idToken == null) {
+      await abandonUnmatchedDeletionLogin();
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'reauthentication returned no id token',
+      );
+    }
+    final AccountDeletionOutcome outcome;
+    try {
+      outcome = await client.matchLegacyEmail(
+        shopifyAccessToken: held.accessToken,
+        legacySessionToken: legacyToken,
+      );
+    } catch (error) {
+      await abandonUnmatchedDeletionLogin();
+      if (error is CustomerAuthException) rethrow;
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'email match failed',
+      );
+    }
+    switch (outcome) {
+      case AccountDeletionEmailMatch():
+        final session = await repository.commitHeldLogin(held);
+        _heldDeletionLogin = null;
+        account = session.account;
+        notifyListeners();
+        await _publishAccountScope();
+        await loadOrders();
+        return LegacyDeletionMatched(
+          FreshCustomerLogin(
+            accessToken: session.accessToken,
+            idToken: idToken,
+          ),
+          legacySessionToken: legacyToken,
+        );
+      case AccountDeletionEmailMismatch(:final maskedEmail):
+        return LegacyDeletionMismatch(maskedEmail);
+      case AccountDeletionOffline():
+        await abandonUnmatchedDeletionLogin();
+        throw const CustomerAuthException(CustomerAuthErrorKind.offline);
+      default:
+        await abandonUnmatchedDeletionLogin();
+        throw const CustomerAuthException(
+          CustomerAuthErrorKind.server,
+          debugDetail: 'email match failed',
+        );
+    }
+  }
+
+  /// Ends a Shopify login that did not match the legacy account.
+  Future<void> abandonUnmatchedDeletionLogin() async {
+    final held = _heldDeletionLogin;
+    _heldDeletionLogin = null;
+    if (held == null) return;
+    await _sessionRepository?.abandonHeldLogin(held);
+  }
+
   /// Opens Shopify's hosted login again and returns the fresh tokens the
   /// deletion endpoint requires. Does not accept a silently refreshed token.
   ///
-  /// The hosted login also becomes the device's current account, so the next
-  /// request from this screen presents the Customer Account token instead of
-  /// the legacy Monetta session that could not read orders.
+  /// This adopts the Shopify account immediately. The legacy deletion path
+  /// uses [signInForAccountDeletion], which waits for the email match.
   Future<FreshCustomerLogin> reauthenticateForDeletion() async {
     final repository = _sessionRepository;
     if (repository == null) {

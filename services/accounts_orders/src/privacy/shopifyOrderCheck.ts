@@ -1,6 +1,10 @@
 import { Buffer } from 'node:buffer';
 import { isIP } from 'node:net';
-import type { ShopifyCustomerOrderLookup, ShopifyListedOrder } from './ports.js';
+import type {
+  CustomerAccountEmailLookup,
+  ShopifyCustomerOrderLookup,
+  ShopifyListedOrder,
+} from './ports.js';
 
 /**
  * The live order check could not be completed. Callers must not treat that
@@ -27,6 +31,7 @@ const ordersQuery = `query MonettaDeletionOrderCheck($first: Int!, $after: Strin
       pageInfo { hasNextPage endCursor }
       nodes {
         id
+        name
         financialStatus
         fulfillmentStatus
         cancelledAt
@@ -34,6 +39,10 @@ const ordersQuery = `query MonettaDeletionOrderCheck($first: Int!, $after: Strin
       }
     }
   }
+}`;
+
+const emailQuery = `query MonettaDeletionCustomerEmail {
+  customer { emailAddress { emailAddress } }
 }`;
 
 const pageSize = 50;
@@ -46,7 +55,7 @@ const maxResponseBytes = 512 * 1024;
  * not involved. Any transport, auth, or pagination failure throws
  * {@link OrderCheckUnavailableError} so deletion fails closed.
  */
-export class CustomerAccountOrderLookup implements ShopifyCustomerOrderLookup {
+export class CustomerAccountOrderLookup implements ShopifyCustomerOrderLookup, CustomerAccountEmailLookup {
   constructor(private readonly options: {
     readonly shopDomain: string;
     readonly fetchFn?: typeof fetch;
@@ -75,6 +84,40 @@ export class CustomerAccountOrderLookup implements ShopifyCustomerOrderLookup {
       after = cursor;
     }
     throw new TooManyOrdersError();
+  }
+
+  async customerEmail(accessToken: string): Promise<string | null> {
+    if (accessToken.trim() === '' || accessToken.length > 8192 || /\s/.test(accessToken)) {
+      return null;
+    }
+    const endpoint = await this.endpoint();
+    let response: Response;
+    try {
+      response = await (this.options.fetchFn ?? fetch)(endpoint, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+          Authorization: accessToken,
+          'User-Agent': 'MonettaAccountsOrders/0.1 (+https://monetta.mx)',
+        },
+        body: JSON.stringify({ query: emailQuery }),
+        signal: AbortSignal.timeout(this.options.timeoutMs ?? 10_000),
+      });
+    } catch {
+      throw new OrderCheckUnavailableError();
+    }
+    if (response.status === 401 || response.status === 403) return null;
+    if (!response.ok) throw new OrderCheckUnavailableError();
+    const text = await response.text();
+    if (Buffer.byteLength(text, 'utf8') > maxResponseBytes) throw new OrderCheckUnavailableError();
+    let payload: unknown;
+    try {
+      payload = JSON.parse(text) as unknown;
+    } catch {
+      throw new OrderCheckUnavailableError();
+    }
+    return readCustomerEmail(payload);
   }
 
   private async endpoint(): Promise<URL> {
@@ -150,12 +193,38 @@ function readOrder(node: unknown): ShopifyListedOrder {
   }
   return {
     id: node.id,
+    name: optionalString(node.name),
     financialStatus: optionalString(node.financialStatus),
     fulfillmentStatus: optionalString(node.fulfillmentStatus),
     cancelledAt: optionalString(node.cancelledAt),
     cancelReason: optionalString(node.cancelReason),
     tags: [],
   };
+}
+
+function readCustomerEmail(payload: unknown): string | null {
+  if (!isRecord(payload)) throw new OrderCheckUnavailableError();
+  const errors = payload.errors;
+  if (Array.isArray(errors) && errors.length > 0) {
+    const text = JSON.stringify(errors).toUpperCase();
+    if (
+      text.includes('UNAUTHENTICATED') ||
+      text.includes('UNAUTHORIZED') ||
+      text.includes('ACCESS_DENIED') ||
+      text.includes('INVALID_TOKEN')
+    ) {
+      return null;
+    }
+    throw new OrderCheckUnavailableError();
+  }
+  const data = isRecord(payload.data) ? payload.data : null;
+  const customer = data?.customer;
+  if (customer === null) return null;
+  if (!isRecord(customer)) throw new OrderCheckUnavailableError();
+  const emailAddress = customer.emailAddress;
+  if (emailAddress === null) return null;
+  if (!isRecord(emailAddress)) throw new OrderCheckUnavailableError();
+  return optionalString(emailAddress.emailAddress);
 }
 
 function optionalString(value: unknown): string | null {

@@ -50,7 +50,11 @@ export function registerAccountDeletionRoutes(
           res.status(401).json({ error: 'unauthorized' });
           return;
         }
-        const outcome = await options.deletion.execute(accessToken, idToken);
+        const outcome = await options.deletion.execute(
+          accessToken,
+          idToken,
+          headerToken(req, 'x-monetta-legacy-session'),
+        );
         switch (outcome.result) {
           case 'deleted':
             res.status(200).json({
@@ -63,6 +67,12 @@ export function registerAccountDeletionRoutes(
             return;
           case 'too_many_orders':
             res.status(200).json({ result: 'too_many_orders' });
+            return;
+          case 'email_mismatch':
+            res.status(200).json({
+              result: 'email_mismatch',
+              maskedEmail: outcome.maskedEmail,
+            });
             return;
           case 'stale_reauthentication':
             res.status(401).json({ error: 'stale_reauthentication' });
@@ -87,6 +97,39 @@ export function registerAccountDeletionRoutes(
       }
     },
   );
+
+  app.post(
+    '/customers/me/account-deletion/email-match',
+    async (req: Request, res: Response, next: NextFunction) => {
+      try {
+        const accessToken = bearer(req);
+        const legacySession = headerToken(req, 'x-monetta-legacy-session');
+        if (accessToken === null || legacySession === null) {
+          res.status(401).json({ error: 'unauthorized' });
+          return;
+        }
+        const outcome = await options.deletion.matchLegacyEmail(accessToken, legacySession);
+        if (outcome.result === 'email_match') {
+          res.status(200).json({ result: 'email_match' });
+          return;
+        }
+        if (outcome.result === 'email_mismatch') {
+          res.status(200).json({
+            result: 'email_mismatch',
+            maskedEmail: outcome.maskedEmail,
+          });
+          return;
+        }
+        if (outcome.result === 'unauthorized') {
+          res.status(401).json({ error: 'unauthorized' });
+          return;
+        }
+        res.status(503).json({ error: 'deletion_unavailable' });
+      } catch (error) {
+        next(error);
+      }
+    },
+  );
 }
 
 function publicBody(outcome: Awaited<ReturnType<AccountDeletionService['precheck']>>): unknown {
@@ -100,13 +143,19 @@ function publicBody(outcome: Awaited<ReturnType<AccountDeletionService['precheck
   return { result: 'clear' };
 }
 
-function blockedBody(order: { readonly id: string; readonly shopifyOrderId: string | null; readonly reason: string }): unknown {
+function blockedBody(order: {
+  readonly id: string;
+  readonly shopifyOrderId: string | null;
+  readonly reason: string;
+  readonly orderName?: string;
+}): unknown {
   return {
     result: 'blocked_open_order',
     order: {
       id: order.id,
       shopifyOrderId: order.shopifyOrderId,
       reason: publicReason(order.reason),
+      ...(order.orderName ? { orderName: order.orderName } : {}),
     },
   };
 }
@@ -114,6 +163,7 @@ function blockedBody(order: { readonly id: string; readonly shopifyOrderId: stri
 function publicReason(reason: string): string {
   if (
     reason === 'refund_in_progress' ||
+    reason === 'refund_review' ||
     reason === 'unpaid_or_pending' ||
     reason === 'unfulfilled'
   ) {

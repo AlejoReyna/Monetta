@@ -369,6 +369,9 @@ class _SignedIn extends StatelessWidget {
               client: deletionClient,
               accessToken: controller.accessTokenForBackend,
               reauthenticate: controller.reauthenticateForDeletion,
+              signInForDeletion: () =>
+                  controller.signInForAccountDeletion(deletionClient),
+              abandonUnmatchedLogin: controller.abandonUnmatchedDeletionLogin,
               signOutToHome: controller.completeAccountDeletion,
               supportUri: accountDeletionSupportUri(),
               openUri: openExternalUri,

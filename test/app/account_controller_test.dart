@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
+import 'package:monetta_app/data/accounts_orders/account_deletion_client.dart';
 import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
 import 'package:monetta_app/data/accounts_orders/system_account_client.dart';
 import 'package:monetta_app/data/accounts_orders/system_account_session_repository.dart';
@@ -139,6 +140,33 @@ class _FakeSystemClient implements SystemAccountClient {
   Future<void> logout(String sessionToken) async {}
 }
 
+class _MatchClient implements AccountDeletionClient {
+  _MatchClient(this.outcome);
+
+  final AccountDeletionOutcome outcome;
+
+  @override
+  Future<AccountDeletionOutcome> precheck(String accessToken) async => outcome;
+
+  @override
+  Future<AccountDeletionOutcome> matchLegacyEmail({
+    required String shopifyAccessToken,
+    required String legacySessionToken,
+  }) async =>
+      outcome;
+
+  @override
+  Future<AccountDeletionOutcome> delete({
+    required String accessToken,
+    required String idToken,
+    String? legacySessionToken,
+  }) async =>
+      outcome;
+
+  @override
+  void close() {}
+}
+
 void main() {
   late AppDatabase db;
   late DeviceStore deviceStore;
@@ -255,6 +283,47 @@ void main() {
     expect(controller.isSignedIn, isTrue);
     expect(controller.account?.email, 'a@b.com');
     expect(controller.lastError, isNull);
+  });
+
+  test('a mismatched deletion login keeps the legacy account', () async {
+    final controller = buildController(systemClient: _FakeSystemClient());
+    await controller.loginWithSystemAccount(
+      email: 'legacy@example.com',
+      password: 'secret',
+    );
+    final localId = controller.account?.localAccountId;
+    expect(controller.account?.authProvider, 'monetta');
+
+    final result = await controller.signInForAccountDeletion(
+      _MatchClient(const AccountDeletionEmailMismatch('a•••@gmail.com')),
+    );
+
+    expect(result, isA<LegacyDeletionMismatch>());
+    expect((result as LegacyDeletionMismatch).maskedEmail, 'a•••@gmail.com');
+    expect(controller.account?.authProvider, 'monetta');
+    expect(controller.account?.localAccountId, localId);
+    expect(await controller.accessTokenForBackend(), 'session-token');
+    final device = await deviceStore.byId('dev-1');
+    expect(device?.accountId, localId);
+  });
+
+  test('a matching deletion login adopts Shopify only after the server agrees',
+      () async {
+    final controller = buildController(systemClient: _FakeSystemClient());
+    await controller.loginWithSystemAccount(
+      email: 'legacy@example.com',
+      password: 'secret',
+    );
+
+    final result = await controller.signInForAccountDeletion(
+      _MatchClient(const AccountDeletionEmailMatch()),
+    );
+
+    expect(result, isA<LegacyDeletionMatched>());
+    expect(controller.account?.authProvider, 'shopify');
+    expect(
+        (result as LegacyDeletionMatched).legacySessionToken, 'session-token');
+    expect(await controller.accessTokenForBackend(), 'access');
   });
 
   test('reauthenticateForDeletion switches a legacy session to Shopify',

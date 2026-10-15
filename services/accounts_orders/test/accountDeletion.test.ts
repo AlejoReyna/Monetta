@@ -9,6 +9,7 @@ import type { OrderRecord } from '../src/domain/types.js';
 import { AccountDeletionService } from '../src/privacy/accountDeletionService.js';
 import { ShopifyFreshLoginVerifier } from '../src/privacy/freshLogin.js';
 import { FirebaseAppDataEraser } from '../src/privacy/firebaseAppData.js';
+import { maskAccountEmail, normalizeAccountEmail } from '../src/privacy/emailMatch.js';
 import { openOrderBlockReason } from '../src/privacy/openOrderBlock.js';
 import type {
   AccountDeletionAuditEntry,
@@ -17,6 +18,7 @@ import type {
   AccountDeletionStateRepository,
   AppDataEraser,
   AppDataErasureResult,
+  CustomerAccountEmailLookup,
   CustomerDataEraser,
   FreshLoginVerifier,
   ShopifyCustomerErasureClient,
@@ -134,6 +136,16 @@ class FakeCustomerData implements CustomerDataEraser {
   }
 }
 
+class FakeCustomerEmail implements CustomerAccountEmailLookup {
+  email: string | null = null;
+  fail = false;
+
+  async customerEmail(): Promise<string | null> {
+    if (this.fail) throw new OrderCheckUnavailableError();
+    return this.email;
+  }
+}
+
 class FakeOrderLookup implements ShopifyCustomerOrderLookup {
   orders: ShopifyListedOrder[] = [];
   fail = false;
@@ -177,7 +189,11 @@ function order(partial: Partial<OrderRecord> & Pick<OrderRecord, 'financialStatu
   };
 }
 
-function harness(options?: { readonly ready?: boolean }) {
+function harness(options?: {
+  readonly ready?: boolean;
+  readonly appAccounts?: InMemoryAppAccountsRepository;
+  readonly customerEmail?: CustomerAccountEmailLookup;
+}) {
   const orders = new InMemoryOrdersRepository();
   const state = new MemoryState();
   const audit = new MemoryAudit();
@@ -196,6 +212,9 @@ function harness(options?: { readonly ready?: boolean }) {
     shopifyErasure: shopify,
     shopifyOrders,
     freshLogin: fresh,
+    appAccounts: options?.appAccounts,
+    customerEmail: options?.customerEmail,
+    hashSessionToken: hashAdminBearerToken,
     ready: options?.ready ?? true,
     log: (level, message, fields) => logs.push({ level, message, fields }),
     now: () => new Date('2026-10-14T08:00:00.000Z'),
@@ -289,6 +308,36 @@ describe('open order block check', () => {
       financialStatus: 'partially_refunded',
       fulfillmentStatus: 'unfulfilled',
       tags: [],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBe('refund_review');
+    expect(openOrderBlockReason({
+      financialStatus: 'partially_refunded',
+      fulfillmentStatus: 'unfulfilled',
+      tags: ['Monetta-Reembolso-Revisado'],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBeNull();
+    expect(openOrderBlockReason({
+      financialStatus: 'partially_refunded',
+      fulfillmentStatus: 'unfulfilled',
+      tags: [' monetta-reembolso-revisado '],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBeNull();
+    expect(openOrderBlockReason({
+      financialStatus: 'partially_refunded',
+      fulfillmentStatus: 'unfulfilled',
+      tags: ['monetta-reembolso-revisado-extra'],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBe('refund_review');
+    expect(openOrderBlockReason({
+      financialStatus: 'paid',
+      fulfillmentStatus: 'unfulfilled',
+      tags: ['monetta-reembolso-revisado'],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBe('refund_in_progress');
+    expect(openOrderBlockReason({
+      financialStatus: 'refund_in_progress',
+      fulfillmentStatus: 'fulfilled',
+      tags: ['monetta-reembolso-revisado'],
       cancelledAt: '2026-02-01T00:00:00Z',
     })).toBe('refund_in_progress');
     expect(openOrderBlockReason({
@@ -502,6 +551,98 @@ describe('account deletion', () => {
     expect(state.rows.size).toBe(0);
   });
 
+  it('asks for a refund review on a cancelled partial refund until the tag is set', async () => {
+    const { orders, service, shopifyOrders, appData, customerData, shopify, state } = harness();
+    await orders.upsertByShopifyOrderId(order({
+      financialStatus: 'partially_refunded',
+      fulfillmentStatus: 'unfulfilled',
+      shopifyOrderId: '900',
+      tags: [],
+    }));
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/900',
+      name: '#1042',
+      financialStatus: 'PARTIALLY_REFUNDED',
+      fulfillmentStatus: 'UNFULFILLED',
+      cancelledAt: '2026-03-01T12:00:00Z',
+      cancelReason: 'customer',
+      tags: [],
+    }];
+
+    const precheck = await service.precheck('77', 'shopify-token-77');
+    expect(precheck).toEqual({
+      result: 'blocked_open_order',
+      order: {
+        id: '900',
+        shopifyOrderId: '900',
+        reason: 'refund_review',
+        orderName: '#1042',
+      },
+    });
+    expect((await service.execute('access', 'id-token')).result).toBe('blocked_open_order');
+    expect(appData.calls).toBe(0);
+    expect(customerData.calls).toBe(0);
+    expect(shopify.calls).toBe(0);
+    expect(state.rows.size).toBe(0);
+  });
+
+  it('releases a cancelled partial refund when the mirror has the review tag', async () => {
+    const { orders, service, shopifyOrders, appData } = harness();
+    await orders.upsertByShopifyOrderId(order({
+      financialStatus: 'paid',
+      fulfillmentStatus: 'unfulfilled',
+      shopifyOrderId: '900',
+      tags: ['Monetta-Reembolso-Revisado'],
+    }));
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/900',
+      name: '#1042',
+      financialStatus: 'PARTIALLY_REFUNDED',
+      fulfillmentStatus: 'UNFULFILLED',
+      cancelledAt: '2026-03-01T12:00:00Z',
+      cancelReason: null,
+      tags: [],
+    }];
+
+    expect(await service.precheck('77', 'shopify-token-77')).toEqual({ result: 'clear' });
+    expect(await service.execute('access', 'id-token')).toEqual({
+      result: 'deleted',
+      shopifyDataErasure: 'requested',
+    });
+    expect(appData.calls).toBe(1);
+  });
+
+  it('keeps a real refund in progress blocked when the review tag is present', async () => {
+    const { orders, service, shopifyOrders, appData } = harness();
+    await orders.upsertByShopifyOrderId(order({
+      financialStatus: 'partially_refunded',
+      fulfillmentStatus: 'fulfilled',
+      shopifyOrderId: '900',
+      tags: ['monetta-reembolso-revisado', 'refund-in-progress'],
+    }));
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/900',
+      name: '#1042',
+      financialStatus: 'PARTIALLY_REFUNDED',
+      fulfillmentStatus: 'FULFILLED',
+      cancelledAt: '2026-03-01T12:00:00Z',
+      cancelReason: null,
+      tags: [],
+    }];
+
+    const precheck = await service.precheck('77', 'shopify-token-77');
+    expect(precheck).toEqual({
+      result: 'blocked_open_order',
+      order: {
+        id: '900',
+        shopifyOrderId: '900',
+        reason: 'refund_in_progress',
+        orderName: '#1042',
+      },
+    });
+    expect(appData.calls).toBe(0);
+  });
+
   it('asks a legacy Monetta session to sign in again and deletes nothing', async () => {
     const { service, shopifyOrders, appData, audit } = harness();
     shopifyOrders.orders = [{
@@ -573,6 +714,78 @@ describe('account deletion', () => {
     expect(serialized).toContain('order_check_unavailable');
     expect(serialized).not.toContain('@');
     expect(serialized).not.toContain('shopify-token');
+  });
+});
+
+describe('legacy email match', () => {
+  it('masks the legacy address as the first character plus the domain', () => {
+    expect(normalizeAccountEmail('  Alexis@Gmail.com ')).toBe('alexis@gmail.com');
+    expect(maskAccountEmail('  Alexis@Gmail.com ')).toBe('a•••@gmail.com');
+    expect(maskAccountEmail('a@gmail.com')).toBe('a•••@gmail.com');
+  });
+
+  async function legacyAccounts(email: string, token = 'legacy-session-token') {
+    const accounts = new InMemoryAppAccountsRepository();
+    await accounts.register({
+      accountId: '11111111-1111-4111-8111-111111111111',
+      email,
+      displayName: null,
+      passwordHash: 'scrypt$salt$hash',
+      deviceId: 'device-1',
+      tokenHash: hashAdminBearerToken(token),
+      expiresAt: new Date('2027-01-01T00:00:00Z'),
+    });
+    const account = accounts.byId.get('11111111-1111-4111-8111-111111111111');
+    if (account === undefined) throw new Error('missing account');
+    accounts.byId.set(account.id, { ...account, shopifyCustomerId: '77' });
+    return accounts;
+  }
+
+  it('deletes nothing when the Shopify email does not match', async () => {
+    const token = 'legacy-session-token';
+    const accounts = await legacyAccounts('Alexis@Gmail.com', token);
+    const customerEmail = new FakeCustomerEmail();
+    customerEmail.email = 'other@gmail.com';
+    const { service, appData, customerData, shopify, audit, state } = harness({
+      appAccounts: accounts,
+      customerEmail,
+    });
+
+    expect(await service.matchLegacyEmail('shopify-token-77', token)).toEqual({
+      result: 'email_mismatch',
+      maskedEmail: 'a•••@gmail.com',
+    });
+    expect(await service.execute('access', 'id-token', token)).toEqual({
+      result: 'email_mismatch',
+      maskedEmail: 'a•••@gmail.com',
+    });
+    expect(appData.calls).toBe(0);
+    expect(customerData.calls).toBe(0);
+    expect(shopify.calls).toBe(0);
+    expect(state.rows.size).toBe(0);
+    const serialized = JSON.stringify(audit.entries);
+    expect(serialized).toContain('email_mismatch');
+    expect(serialized).not.toContain('@');
+    expect(serialized).not.toContain('Alexis');
+    expect(serialized).not.toContain('gmail');
+  });
+
+  it('deletes when the emails match after trim and lowercase', async () => {
+    const token = 'legacy-session-token';
+    const accounts = await legacyAccounts('  Alexis@Gmail.com ', token);
+    const customerEmail = new FakeCustomerEmail();
+    customerEmail.email = 'alexis@gmail.com';
+    const { service, appData, shopify } = harness({ appAccounts: accounts, customerEmail });
+
+    expect(await service.matchLegacyEmail('shopify-token-77', token)).toEqual({
+      result: 'email_match',
+    });
+    expect(await service.execute('access', 'id-token', token)).toEqual({
+      result: 'deleted',
+      shopifyDataErasure: 'requested',
+    });
+    expect(appData.calls).toBe(1);
+    expect(shopify.calls).toBe(1);
   });
 });
 
@@ -695,6 +908,59 @@ describe('account deletion HTTP', () => {
     expect(body).toEqual({ result: 'reauth_required' });
     expect(shopifyOrders.calls).toBe(0);
     expect(JSON.stringify(body)).not.toContain('@');
+  });
+
+  it('returns email_mismatch and deletes nothing', async () => {
+    const token = 'legacy-session-token';
+    const accounts = new InMemoryAppAccountsRepository();
+    await accounts.register({
+      accountId: '11111111-1111-4111-8111-111111111111',
+      email: 'Alexis@Gmail.com',
+      displayName: null,
+      passwordHash: 'scrypt$salt$hash',
+      deviceId: 'device-1',
+      tokenHash: hashAdminBearerToken(token),
+      expiresAt: new Date('2027-01-01T00:00:00Z'),
+    });
+    const stored = accounts.byId.get('11111111-1111-4111-8111-111111111111');
+    if (stored === undefined) throw new Error('missing account');
+    accounts.byId.set(stored.id, { ...stored, shopifyCustomerId: '77' });
+    const customerEmail = new FakeCustomerEmail();
+    customerEmail.email = 'other@gmail.com';
+    const { service, shopify, appData } = harness({ appAccounts: accounts, customerEmail });
+    await start(new InMemoryOrdersRepository(), service, accounts);
+
+    const matched = await fetch(`${baseUrl}/customers/me/account-deletion/email-match`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer shopify-token-77',
+        'X-Monetta-Legacy-Session': token,
+      },
+    });
+    expect(matched.status).toBe(200);
+    expect(await matched.json()).toEqual({
+      result: 'email_mismatch',
+      maskedEmail: 'a•••@gmail.com',
+    });
+
+    const deleted = await fetch(`${baseUrl}/customers/me/account-deletion`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer shopify-token-77',
+        'X-Monetta-Id-Token': 'fresh-id-token',
+        'X-Monetta-Legacy-Session': token,
+      },
+    });
+    expect(deleted.status).toBe(200);
+    const body = await deleted.json();
+    expect(body).toEqual({
+      result: 'email_mismatch',
+      maskedEmail: 'a•••@gmail.com',
+    });
+    expect(JSON.stringify(body)).not.toContain('Alexis');
+    expect(JSON.stringify(body)).not.toContain('alexis@gmail.com');
+    expect(shopify.calls).toBe(0);
+    expect(appData.calls).toBe(0);
   });
 
   it('returns too_many_orders without deleting', async () => {
@@ -847,6 +1113,7 @@ describe('Customer Account order check', () => {
               pageInfo: { hasNextPage: true, endCursor: 'cursor-2' },
               nodes: [{
                 id: 'gid://shopify/Order/1',
+                name: '#1001',
                 financialStatus: 'PAID',
                 fulfillmentStatus: 'UNFULFILLED',
                 cancelledAt: '2026-04-01T00:00:00Z',
@@ -863,6 +1130,7 @@ describe('Customer Account order check', () => {
               pageInfo: { hasNextPage: false, endCursor: null },
               nodes: [{
                 id: 'gid://shopify/Order/2',
+                name: null,
                 financialStatus: 'PENDING',
                 fulfillmentStatus: 'UNFULFILLED',
                 cancelledAt: null,
@@ -889,6 +1157,7 @@ describe('Customer Account order check', () => {
     expect(orders).toEqual([
       {
         id: 'gid://shopify/Order/1',
+        name: '#1001',
         financialStatus: 'PAID',
         fulfillmentStatus: 'UNFULFILLED',
         cancelledAt: '2026-04-01T00:00:00Z',
@@ -897,6 +1166,7 @@ describe('Customer Account order check', () => {
       },
       {
         id: 'gid://shopify/Order/2',
+        name: null,
         financialStatus: 'PENDING',
         fulfillmentStatus: 'UNFULFILLED',
         cancelledAt: null,

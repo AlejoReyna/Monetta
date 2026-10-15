@@ -3,16 +3,21 @@
  * unpaid/pending, not yet fulfilled, or a refund that has not finished.
  *
  * A refund in progress blocks even when the order is cancelled. That is a
- * refund status, a refund-in-progress tag, or a cancellation of an order
- * that was charged (`paid`, `partially_paid`, `partially_refunded`) and is
- * not yet `refunded`. `refunded`, `voided`, and a cancellation that was
- * never charged do not block.
+ * refund status or a refund-in-progress tag, and it still blocks when the
+ * review tag below is present. A cancelled `paid` or `partially_paid` order
+ * uses that same in-progress block. A cancelled `partially_refunded` order
+ * is a separate review block until Shopify carries
+ * {@link kRefundReviewReleaseTag}. `refunded`, `voided`, and a cancellation
+ * that was never charged do not block.
  */
+
+export const kRefundReviewReleaseTag = 'monetta-reembolso-revisado';
 
 export type OpenOrderBlockReason =
   | 'unpaid_or_pending'
   | 'unfulfilled'
-  | 'refund_in_progress';
+  | 'refund_in_progress'
+  | 'refund_review';
 
 export interface OpenOrderSnapshot {
   readonly financialStatus: string | null;
@@ -33,8 +38,6 @@ const unpaidStatuses = new Set([
 ]);
 
 const closedFinancialStatuses = new Set(['expired']);
-
-const chargedStatuses = new Set(['paid', 'partially_paid', 'partially_refunded']);
 
 const closedFulfillmentStatuses = new Set([
   'fulfilled',
@@ -108,8 +111,14 @@ export function openOrderBlockReason(
   }
 
   if (cancelled) {
-    // Charged and not yet refunded: the refund may still be owed.
-    if (chargedStatuses.has(financial)) return 'refund_in_progress';
+    if (financial === 'partially_refunded') {
+      // Exact tag, compared after trim and lowercase. A longer tag does not release.
+      if (tags.some((tag) => tag === kRefundReviewReleaseTag)) return null;
+      return 'refund_review';
+    }
+    if (financial === 'paid' || financial === 'partially_paid') {
+      return 'refund_in_progress';
+    }
     return null;
   }
 

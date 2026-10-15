@@ -127,6 +127,66 @@ void main() {
         (blocked as AccountDeletionBlocked).order.reason, 'refund_in_progress');
   });
 
+  test(
+      'email mismatch returns the masked address and refund review keeps the order name',
+      () async {
+    var call = 0;
+    String? matchPath;
+    String? legacyHeader;
+    final client = HttpAccountDeletionClient(
+      baseUrl: 'https://accounts.example',
+      httpClient: MockClient((request) async {
+        call += 1;
+        if (call == 1) {
+          matchPath = request.url.path;
+          for (final entry in request.headers.entries) {
+            if (entry.key.toLowerCase() == 'x-monetta-legacy-session') {
+              legacyHeader = entry.value;
+            }
+          }
+          return http.Response(
+            jsonEncode({
+              'result': 'email_mismatch',
+              'maskedEmail': 'a•••@gmail.com',
+            }),
+            200,
+            headers: {'content-type': 'application/json'},
+          );
+        }
+        return http.Response(
+          jsonEncode({
+            'result': 'blocked_open_order',
+            'order': {
+              'id': '900',
+              'shopifyOrderId': '900',
+              'reason': 'refund_review',
+              'orderName': '#1042',
+            },
+          }),
+          200,
+        );
+      }),
+    );
+    addTearDown(client.close);
+
+    final mismatch = await client.matchLegacyEmail(
+      shopifyAccessToken: 'shopify',
+      legacySessionToken: 'legacy-token',
+    );
+    expect(matchPath, '/customers/me/account-deletion/email-match');
+    expect(legacyHeader, 'legacy-token');
+    expect(mismatch, isA<AccountDeletionEmailMismatch>());
+    expect(
+      (mismatch as AccountDeletionEmailMismatch).maskedEmail,
+      'a•••@gmail.com',
+    );
+
+    final blocked = await client.precheck('shopper-token');
+    final order = (blocked as AccountDeletionBlocked).order;
+    expect(order.reason, 'refund_review');
+    expect(order.orderName, '#1042');
+  });
+
   test('too many orders is its own result', () async {
     final client = HttpAccountDeletionClient(
       baseUrl: 'https://accounts.example',

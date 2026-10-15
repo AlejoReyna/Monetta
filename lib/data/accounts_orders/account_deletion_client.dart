@@ -24,13 +24,37 @@ class AccountDeletionOrderRef {
     required this.id,
     this.shopifyOrderId,
     this.reason,
+    this.orderName,
   });
 
   final String id;
   final String? shopifyOrderId;
 
-  /// `unpaid_or_pending`, `unfulfilled`, or `refund_in_progress`.
+  /// `unpaid_or_pending`, `unfulfilled`, `refund_in_progress`, or `refund_review`.
   final String? reason;
+
+  /// Shopper-facing order name, such as `#1042`.
+  final String? orderName;
+}
+
+sealed class LegacyDeletionSignIn {
+  const LegacyDeletionSignIn();
+}
+
+class LegacyDeletionMatched extends LegacyDeletionSignIn {
+  const LegacyDeletionMatched(
+    this.login, {
+    required this.legacySessionToken,
+  });
+
+  final FreshCustomerLogin login;
+  final String legacySessionToken;
+}
+
+class LegacyDeletionMismatch extends LegacyDeletionSignIn {
+  const LegacyDeletionMismatch(this.maskedEmail);
+
+  final String maskedEmail;
 }
 
 sealed class AccountDeletionOutcome {
@@ -75,12 +99,28 @@ class AccountDeletionTooManyOrders extends AccountDeletionOutcome {
   const AccountDeletionTooManyOrders();
 }
 
+class AccountDeletionEmailMatch extends AccountDeletionOutcome {
+  const AccountDeletionEmailMatch();
+}
+
+class AccountDeletionEmailMismatch extends AccountDeletionOutcome {
+  const AccountDeletionEmailMismatch(this.maskedEmail);
+
+  final String maskedEmail;
+}
+
 abstract class AccountDeletionClient {
   Future<AccountDeletionOutcome> precheck(String accessToken);
+
+  Future<AccountDeletionOutcome> matchLegacyEmail({
+    required String shopifyAccessToken,
+    required String legacySessionToken,
+  });
 
   Future<AccountDeletionOutcome> delete({
     required String accessToken,
     required String idToken,
+    String? legacySessionToken,
   });
 
   void close() {}
@@ -103,14 +143,32 @@ class HttpAccountDeletionClient implements AccountDeletionClient {
   }
 
   @override
+  Future<AccountDeletionOutcome> matchLegacyEmail({
+    required String shopifyAccessToken,
+    required String legacySessionToken,
+  }) {
+    return _post(
+      '/customers/me/account-deletion/email-match',
+      shopifyAccessToken,
+      extraHeaders: {'X-Monetta-Legacy-Session': legacySessionToken},
+    );
+  }
+
+  @override
   Future<AccountDeletionOutcome> delete({
     required String accessToken,
     required String idToken,
+    String? legacySessionToken,
   }) {
+    final legacy = legacySessionToken?.trim();
     return _post(
       '/customers/me/account-deletion',
       accessToken,
-      extraHeaders: {'X-Monetta-Id-Token': idToken},
+      extraHeaders: {
+        'X-Monetta-Id-Token': idToken,
+        if (legacy != null && legacy.isNotEmpty)
+          'X-Monetta-Legacy-Session': legacy,
+      },
     );
   }
 
@@ -181,17 +239,27 @@ class HttpAccountDeletionClient implements AccountDeletionClient {
         if (id is! String && id is! num) return const AccountDeletionFailed();
         final shopifyOrderId = order['shopifyOrderId'];
         final reason = order['reason'];
+        final orderName = order['orderName'];
         return AccountDeletionBlocked(
           AccountDeletionOrderRef(
             id: '$id',
             shopifyOrderId: shopifyOrderId is String ? shopifyOrderId : null,
             reason: reason is String ? reason : null,
+            orderName: orderName is String ? orderName : null,
           ),
         );
       case 'reauth_required':
         return const AccountDeletionReauthRequired();
       case 'too_many_orders':
         return const AccountDeletionTooManyOrders();
+      case 'email_match':
+        return const AccountDeletionEmailMatch();
+      case 'email_mismatch':
+        final maskedEmail = json['maskedEmail'];
+        if (maskedEmail is! String || maskedEmail.trim().isEmpty) {
+          return const AccountDeletionFailed();
+        }
+        return AccountDeletionEmailMismatch(maskedEmail);
       default:
         return const AccountDeletionFailed();
     }

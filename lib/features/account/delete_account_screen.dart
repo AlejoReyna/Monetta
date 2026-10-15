@@ -27,6 +27,14 @@ const String kDeleteAccountBlocked =
 const String kDeleteAccountRefundBlocked =
     'Tienes un reembolso en proceso. Podrás eliminar tu cuenta cuando se complete.';
 
+String deleteAccountRefundReviewMessage(String orderNumber) =>
+    'Necesitamos revisar un reembolso de tu pedido $orderNumber antes de eliminar tu cuenta.';
+
+const String kDeleteAccountEmailMismatchTitle = 'Entraste con otra cuenta';
+
+String deleteAccountEmailMismatchBody(String maskedEmail) =>
+    'Para eliminar tu cuenta, inicia sesión con $maskedEmail. No se eliminó nada.';
+
 const String kDeleteAccountReauthTitle =
     'Vuelve a iniciar sesión para continuar';
 
@@ -60,6 +68,8 @@ Future<void> openDeleteAccount(
   required Future<FreshCustomerLogin> Function() reauthenticate,
   required Future<void> Function() signOutToHome,
   required void Function(AccountDeletionOrderRef order) onViewOrder,
+  Future<LegacyDeletionSignIn> Function()? signInForDeletion,
+  Future<void> Function()? abandonUnmatchedLogin,
   AccountDeletionClient? client,
   Uri? supportUri,
   Duration confirmDelay = const Duration(seconds: 2),
@@ -73,6 +83,8 @@ Future<void> openDeleteAccount(
         reauthenticate: reauthenticate,
         signOutToHome: signOutToHome,
         onViewOrder: onViewOrder,
+        signInForDeletion: signInForDeletion,
+        abandonUnmatchedLogin: abandonUnmatchedLogin,
         client: client,
         supportUri: supportUri ?? accountDeletionSupportUri(),
         confirmDelay: confirmDelay,
@@ -89,6 +101,8 @@ class DeleteAccountScreen extends StatefulWidget {
     required this.reauthenticate,
     required this.signOutToHome,
     required this.onViewOrder,
+    this.signInForDeletion,
+    this.abandonUnmatchedLogin,
     this.client,
     this.supportUri,
     this.confirmDelay = const Duration(seconds: 2),
@@ -101,6 +115,8 @@ class DeleteAccountScreen extends StatefulWidget {
   final Future<FreshCustomerLogin> Function() reauthenticate;
   final Future<void> Function() signOutToHome;
   final void Function(AccountDeletionOrderRef order) onViewOrder;
+  final Future<LegacyDeletionSignIn> Function()? signInForDeletion;
+  final Future<void> Function()? abandonUnmatchedLogin;
   final AccountDeletionClient? client;
   final Uri? supportUri;
   final Duration confirmDelay;
@@ -121,6 +137,7 @@ enum _Phase {
   reauth,
   orderCheck,
   tooManyOrders,
+  emailMismatch,
 }
 
 class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
@@ -130,6 +147,8 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   AccountDeletionOrderRef? _blockedOrder;
   Timer? _slowTimer;
   FreshCustomerLogin? _freshLogin;
+  String? _legacySessionToken;
+  String? _maskedEmail;
 
   AccountDeletionClient get _deletionClient {
     final injected = widget.client;
@@ -143,6 +162,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   void dispose() {
     _slowTimer?.cancel();
     if (widget.client == null) _ownedClient?.close();
+    if (_phase == _Phase.emailMismatch) {
+      final abandon = widget.abandonUnmatchedLogin;
+      if (abandon != null) unawaited(abandon());
+    }
     super.dispose();
   }
 
@@ -172,7 +195,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     final outcome = await _deletionClient.precheck(token);
     if (!mounted) return;
     _setLoading(false);
-    _showOutcome(outcome, onClear: _reauthenticate);
+    _showOutcome(
+      outcome,
+      onClear: _freshLogin == null ? _reauthenticate : _showConfirmSheet,
+    );
   }
 
   void _showOutcome(
@@ -197,6 +223,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         setState(() => _phase = _Phase.reauth);
       case AccountDeletionTooManyOrders():
         setState(() => _phase = _Phase.tooManyOrders);
+      case AccountDeletionEmailMismatch(:final maskedEmail):
+        _maskedEmail = maskedEmail;
+        setState(() => _phase = _Phase.emailMismatch);
+      case AccountDeletionEmailMatch():
       case AccountDeletionFailed():
       case AccountDeletionStale():
         setState(() => _phase = _Phase.error);
@@ -204,11 +234,39 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   }
 
   Future<void> _loginAndReturnToDelete() async {
+    final signIn = widget.signInForDeletion;
+    if (signIn == null) {
+      try {
+        final fresh = await widget.reauthenticate();
+        if (!mounted) return;
+        _freshLogin = fresh;
+        setState(() => _phase = _Phase.info);
+      } on CustomerAuthException catch (error) {
+        if (!mounted) return;
+        if (error.kind == CustomerAuthErrorKind.cancelled) return;
+        setState(() {
+          _phase = error.kind == CustomerAuthErrorKind.offline
+              ? _Phase.offline
+              : _Phase.error;
+        });
+      } catch (_) {
+        if (!mounted) return;
+        setState(() => _phase = _Phase.error);
+      }
+      return;
+    }
     try {
-      final fresh = await widget.reauthenticate();
+      final result = await signIn();
       if (!mounted) return;
-      _freshLogin = fresh;
-      setState(() => _phase = _Phase.info);
+      switch (result) {
+        case LegacyDeletionMatched(:final login, :final legacySessionToken):
+          _freshLogin = login;
+          _legacySessionToken = legacySessionToken;
+          setState(() => _phase = _Phase.info);
+        case LegacyDeletionMismatch(:final maskedEmail):
+          _maskedEmail = maskedEmail;
+          setState(() => _phase = _Phase.emailMismatch);
+      }
     } on CustomerAuthException catch (error) {
       if (!mounted) return;
       if (error.kind == CustomerAuthErrorKind.cancelled) return;
@@ -221,6 +279,35 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       if (!mounted) return;
       setState(() => _phase = _Phase.error);
     }
+  }
+
+  Future<void> _signInWithAnotherAccount() async {
+    await widget.abandonUnmatchedLogin?.call();
+    await _loginAndReturnToDelete();
+  }
+
+  Future<void> _cancelMismatch() async {
+    await widget.abandonUnmatchedLogin?.call();
+    if (!mounted) return;
+    Navigator.of(context).maybePop();
+  }
+
+  String _orderLabel(AccountDeletionOrderRef? order) {
+    final name = order?.orderName?.trim();
+    if (name != null && name.isNotEmpty) return name;
+    final shopifyId = order?.shopifyOrderId?.trim();
+    if (shopifyId != null && shopifyId.isNotEmpty) return shopifyId;
+    return order?.id ?? '';
+  }
+
+  String _blockedMessage() {
+    final order = _blockedOrder;
+    if (order?.reason == 'refund_review') {
+      return deleteAccountRefundReviewMessage(_orderLabel(order));
+    }
+    if (order?.reason == 'refund_in_progress')
+      return kDeleteAccountRefundBlocked;
+    return kDeleteAccountBlocked;
   }
 
   Future<void> _reauthenticate() async {
@@ -269,6 +356,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     final outcome = await _deletionClient.delete(
       accessToken: fresh.accessToken,
       idToken: fresh.idToken,
+      legacySessionToken: _legacySessionToken,
     );
     if (!mounted) return;
     _setLoading(false);
@@ -321,9 +409,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         child: switch (_phase) {
           _Phase.loading => _Loading(slow: _slow),
           _Phase.blocked => _MessageState(
-              message: _blockedOrder?.reason == 'refund_in_progress'
-                  ? kDeleteAccountRefundBlocked
-                  : kDeleteAccountBlocked,
+              message: _blockedMessage(),
               primaryLabel: 'Ver pedido',
               primaryKey: const ValueKey('delete-account-view-order'),
               onPrimary: () {
@@ -332,7 +418,15 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               },
               secondaryLabel: 'Escríbenos por WhatsApp',
               secondaryKey: const ValueKey('delete-account-whatsapp'),
-              onSecondary: _openSupport,
+              onSecondary: () => unawaited(
+                _openUri(
+                  _blockedOrder?.reason == 'refund_review'
+                      ? accountDeletionRefundReviewUri(
+                          orderNumber: _orderLabel(_blockedOrder),
+                        )
+                      : (widget.supportUri ?? accountDeletionSupportUri()),
+                ),
+              ),
             ),
           _Phase.error => _MessageState(
               message: kDeleteAccountError,
@@ -374,6 +468,16 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               primaryLabel: 'Reintentar',
               primaryKey: const ValueKey('delete-account-order-check-retry'),
               onPrimary: _continue,
+            ),
+          _Phase.emailMismatch => _PromptState(
+              title: kDeleteAccountEmailMismatchTitle,
+              body: deleteAccountEmailMismatchBody(_maskedEmail ?? ''),
+              primaryLabel: 'Iniciar sesión con otra cuenta',
+              primaryKey: const ValueKey('delete-account-other-account'),
+              onPrimary: () => unawaited(_signInWithAnotherAccount()),
+              secondaryLabel: 'Cancelar',
+              secondaryKey: const ValueKey('delete-account-email-cancel'),
+              onSecondary: () => unawaited(_cancelMismatch()),
             ),
           _Phase.tooManyOrders => _PromptState(
               title: kDeleteAccountTooManyTitle,

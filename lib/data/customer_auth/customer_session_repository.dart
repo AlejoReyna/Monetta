@@ -16,6 +16,24 @@ import 'customer_identity.dart';
 import 'jwt.dart';
 import 'secure_token_store.dart';
 
+class HeldShopifyLogin {
+  const HeldShopifyLogin({
+    required this.result,
+    required this.identity,
+  });
+
+  final CustomerAuthResult result;
+  final CustomerIdentity identity;
+
+  String get accessToken => result.accessToken;
+
+  String? get idToken {
+    final value = result.idToken?.trim();
+    if (value == null || value.isEmpty) return null;
+    return value;
+  }
+}
+
 class CustomerAuthSession {
   const CustomerAuthSession({required this.account, required this.accessToken});
 
@@ -121,10 +139,46 @@ class CustomerSessionRepository {
     return (accessToken: session.accessToken, idToken: idToken);
   }
 
-  Future<CustomerAuthSession> login() async {
+  /// Shopify login that does not replace the device's current account.
+  /// [commitHeldLogin] is what attaches it, after the deletion email check.
+  Future<HeldShopifyLogin> holdLogin() async {
     final result = await _authGateway.login();
     final identity = await _resolveIdentity(result);
+    final idToken = result.idToken?.trim();
+    if (idToken == null || idToken.isEmpty) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'reauthentication returned no id token',
+      );
+    }
+    return HeldShopifyLogin(result: result, identity: identity);
+  }
 
+  /// Ends the hosted Shopify session for a login that was never attached.
+  /// The device's current account stays where it is.
+  Future<void> abandonHeldLogin(HeldShopifyLogin held) async {
+    final idToken = held.idToken;
+    if (idToken == null || idToken.isEmpty) return;
+    try {
+      await _authGateway.endSession(idTokenHint: idToken);
+    } on Object {
+      // The legacy account is still the device account either way.
+    }
+  }
+
+  Future<CustomerAuthSession> commitHeldLogin(HeldShopifyLogin held) {
+    return _persistLogin(held.result, held.identity);
+  }
+
+  Future<CustomerAuthSession> login() async {
+    final held = await holdLogin();
+    return commitHeldLogin(held);
+  }
+
+  Future<CustomerAuthSession> _persistLogin(
+    CustomerAuthResult result,
+    CustomerIdentity identity,
+  ) async {
     final existing =
         await _accountStore.byShopifyCustomerId(identity.shopifyCustomerId);
     final localAccountId = existing?.localAccountId ?? _uuid.v4();

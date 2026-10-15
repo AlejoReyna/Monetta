@@ -26,9 +26,18 @@ class _Client implements AccountDeletionClient {
   }
 
   @override
+  Future<AccountDeletionOutcome> matchLegacyEmail({
+    required String shopifyAccessToken,
+    required String legacySessionToken,
+  }) async {
+    return const AccountDeletionFailed();
+  }
+
+  @override
   Future<AccountDeletionOutcome> delete({
     required String accessToken,
     required String idToken,
+    String? legacySessionToken,
   }) async {
     deleteCalls += 1;
     return deleteResult;
@@ -47,6 +56,8 @@ Future<void> _open(
   Duration confirmDelay = const Duration(seconds: 2),
   Duration slowAfter = const Duration(seconds: 10),
   Future<bool> Function(Uri uri)? openUri,
+  Future<LegacyDeletionSignIn> Function()? signInForDeletion,
+  Future<void> Function()? abandonUnmatchedLogin,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -64,6 +75,8 @@ Future<void> _open(
               confirmDelay: confirmDelay,
               slowAfter: slowAfter,
               openUri: openUri ?? (_) async => true,
+              signInForDeletion: signInForDeletion,
+              abandonUnmatchedLogin: abandonUnmatchedLogin,
             ),
             child: const Text('Inicio'),
           ),
@@ -334,6 +347,127 @@ void main() {
         .tap(find.byKey(const ValueKey('delete-account-order-check-retry')));
     await tester.pumpAndSettle();
     expect(client.precheckCalls, 2);
+  });
+
+  testWidgets('a cancelled partial refund names the order and opens WhatsApp', (
+    tester,
+  ) async {
+    final client = _Client(
+      const AccountDeletionBlocked(
+        AccountDeletionOrderRef(
+          id: '9',
+          shopifyOrderId: '9',
+          reason: 'refund_review',
+          orderName: '#1042',
+        ),
+      ),
+    );
+    Uri? opened;
+    await _open(
+      tester,
+      client: client,
+      reauthenticate: () async => throw StateError('should not reauth'),
+      signOut: () async {},
+      openUri: (uri) async {
+        opened = uri;
+        return true;
+      },
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(deleteAccountRefundReviewMessage('#1042')),
+      findsOneWidget,
+    );
+    expect(find.text(kDeleteAccountRefundBlocked), findsNothing);
+
+    await tester.tap(find.byKey(const ValueKey('delete-account-whatsapp')));
+    await tester.pumpAndSettle();
+    expect(opened, accountDeletionRefundReviewUri(orderNumber: '#1042'));
+    expect(opened?.queryParameters['text'], contains('#1042'));
+    expect(client.deleteCalls, 0);
+  });
+
+  testWidgets('a mismatched Shopify login stays on the delete flow', (
+    tester,
+  ) async {
+    final client = _Client(const AccountDeletionReauthRequired());
+    var signIns = 0;
+    var abandoned = 0;
+    await _open(
+      tester,
+      client: client,
+      reauthenticate: () async => throw StateError('should not reauth'),
+      signOut: () async {},
+      abandonUnmatchedLogin: () async {
+        abandoned += 1;
+      },
+      signInForDeletion: () async {
+        signIns += 1;
+        if (signIns == 1) {
+          return const LegacyDeletionMismatch('a•••@gmail.com');
+        }
+        return const LegacyDeletionMatched(
+          FreshCustomerLogin(accessToken: 'fresh', idToken: 'id'),
+          legacySessionToken: 'legacy-token',
+        );
+      },
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('delete-account-reauth')));
+    await tester.pumpAndSettle();
+
+    expect(find.text(kDeleteAccountEmailMismatchTitle), findsOneWidget);
+    expect(
+      find.text(deleteAccountEmailMismatchBody('a•••@gmail.com')),
+      findsOneWidget,
+    );
+    expect(find.text('Iniciar sesión con otra cuenta'), findsOneWidget);
+    expect(client.deleteCalls, 0);
+    expect(find.text('Inicio'), findsNothing);
+
+    await tester
+        .tap(find.byKey(const ValueKey('delete-account-other-account')));
+    await tester.pumpAndSettle();
+    expect(abandoned, 1);
+    expect(signIns, 2);
+    expect(find.text('¿Eliminar tu cuenta?'), findsOneWidget);
+    expect(find.text(kDeleteAccountEmailMismatchTitle), findsNothing);
+
+    client.precheckResult = const AccountDeletionClear();
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    expect(find.text('Esta acción no se puede deshacer.'), findsOneWidget);
+    expect(signIns, 2);
+    expect(client.deleteCalls, 0);
+  });
+
+  testWidgets('Cancelar on a mismatched login closes without deleting', (
+    tester,
+  ) async {
+    final client = _Client(const AccountDeletionReauthRequired());
+    var abandoned = 0;
+    await _open(
+      tester,
+      client: client,
+      reauthenticate: () async => throw StateError('should not reauth'),
+      signOut: () async {},
+      abandonUnmatchedLogin: () async {
+        abandoned += 1;
+      },
+      signInForDeletion: () async =>
+          const LegacyDeletionMismatch('a•••@gmail.com'),
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('delete-account-reauth')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('delete-account-email-cancel')));
+    await tester.pumpAndSettle();
+    expect(find.text('Inicio'), findsOneWidget);
+    expect(abandoned, greaterThan(0));
+    expect(client.deleteCalls, 0);
   });
 
   testWidgets('too many orders opens WhatsApp and does not delete', (

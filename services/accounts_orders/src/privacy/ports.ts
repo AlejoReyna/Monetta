@@ -70,11 +70,18 @@ export interface AccountDeletionAuditRepository {
 
 export interface ShopifyListedOrder {
   readonly id: string;
+  /** Shopper-facing name such as `#1001`. Customer Account API does not return tags. */
+  readonly name?: string | null;
   readonly financialStatus: string | null;
   readonly fulfillmentStatus: string | null;
   readonly tags: readonly string[];
   readonly cancelledAt: string | null;
   readonly cancelReason: string | null;
+}
+
+/** Customer Account `customer.emailAddress`. Null means the token is not a customer. */
+export interface CustomerAccountEmailLookup {
+  customerEmail(accessToken: string): Promise<string | null>;
 }
 
 /** Live Shopify orders for the deletion block check. Throws when it cannot finish. */
@@ -86,6 +93,8 @@ export interface BlockingOrderRef {
   readonly id: string;
   readonly shopifyOrderId: string | null;
   readonly reason: OpenOrderBlockReason;
+  /** Shopper-facing order name, when Shopify sent one. */
+  readonly orderName?: string;
 }
 
 export type DeletionCredential = 'customer_account' | 'monetta_session';
@@ -98,6 +107,12 @@ export type AccountDeletionPrecheck =
   | { readonly result: 'reauth_required' }
   | { readonly result: 'too_many_orders' };
 
+export type LegacyEmailMatch =
+  | { readonly result: 'email_match' }
+  | { readonly result: 'email_mismatch'; readonly maskedEmail: string }
+  | { readonly result: 'unauthorized' }
+  | { readonly result: 'unavailable' };
+
 export type AccountDeletionExecute =
   | { readonly result: 'deleted'; readonly shopifyDataErasure: 'requested' }
   | { readonly result: 'blocked_open_order'; readonly order: BlockingOrderRef }
@@ -106,4 +121,5 @@ export type AccountDeletionExecute =
   | { readonly result: 'unavailable' }
   | { readonly result: 'failed' }
   | { readonly result: 'order_check_unavailable' }
-  | { readonly result: 'too_many_orders' };
+  | { readonly result: 'too_many_orders' }
+  | { readonly result: 'email_mismatch'; readonly maskedEmail: string };
