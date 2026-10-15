@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vitest';
+import { TRANSFER_METHOD_ALIASES } from '../src/orders/paymentMethod.js';
 import {
   ORDER_PAYMENT_QUERY,
   backfillLine,
@@ -184,6 +185,36 @@ describe('payment method backfill', () => {
       paymentMethod: 'bank_deposit',
     });
     expect(JSON.stringify([...lookups.values()])).not.toContain(token);
+  });
+
+  it('leaves an unlisted transfer-like name as other: via the shared alias list', async () => {
+    expect(Object.keys(TRANSFER_METHOD_ALIASES)).toEqual([]);
+    const fetchFn = (async () => new Response(JSON.stringify({
+      data: {
+        nodes: [
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/901',
+            name: '#1901',
+            paymentGatewayNames: ['ZZ Fake Transfer Rail'],
+            transactions: [],
+          },
+        ],
+      },
+    }), { status: 200 })) as typeof fetch;
+
+    const lookups = await readShopifyOrderPayments({
+      shopDomain: 'monetta-staging.myshopify.com',
+      apiVersion: '2026-07',
+      accessToken: 'shpat_secretvalue',
+      shopifyOrderIds: ['901'],
+      fetchFn,
+    });
+
+    expect(lookups.get('901')).toMatchObject({
+      ok: true,
+      paymentMethod: 'other:zz_fake_transfer_rail',
+    });
   });
 
   it('normalizes PayPal, Mercado Pago, and unknown Admin gateways the same way as webhooks', async () => {

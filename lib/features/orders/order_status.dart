@@ -201,8 +201,10 @@ const OrderDisplayStatus _paymentInProgress = OrderDisplayStatus(
 
 /// True solo cuando cada token es `bank_deposit` o `manual`.
 ///
-/// Un nombre parecido (`transferencia`, `deposito`, `other:bank_deposit`)
-/// no entra. Vacío o ausente tampoco.
+/// Un alias de transferencia se guarda como `bank_deposit` en el
+/// normalizador compartido. Un nombre parecido que no se haya aliasado
+/// (`other:transferencia_bancaria`, `other:zz_fake_transfer_rail`) no entra.
+/// Vacío o ausente tampoco.
 bool orderPaymentMethodIsBankTransfer(String? raw) {
   final tokens = _paymentTokens(raw);
   if (tokens.isEmpty) return false;

@@ -151,6 +151,22 @@ void main() {
       expect(status.detail, isNot(contains('Te avisaremos')));
     });
 
+    test('stored bank_deposit from a transfer alias is a transfer', () {
+      final status = orderDisplayStatus(
+        _order(
+          fulfillmentStatus: null,
+          status: 'pending',
+          paymentMethod: 'bank_deposit',
+        ),
+      );
+      expect(status.label, 'Esperando tu transferencia');
+      expect(status.actionLabel, 'Ver datos de pago');
+      expect(
+        orderPaymentMethodIsBankTransfer('other:zz_fake_transfer_rail'),
+        isFalse,
+      );
+    });
+
     test('pending bank transfer is only bank_deposit or manual', () {
       for (final method in ['bank_deposit', 'MANUAL', 'bank_deposit,manual']) {
         final status = orderDisplayStatus(

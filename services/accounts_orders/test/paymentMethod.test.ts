@@ -1,8 +1,14 @@
 import { describe, expect, it } from 'vitest';
 import {
+  TRANSFER_METHOD_ALIASES,
   isNormalizedPaymentMethod,
   normalizePaymentMethod,
 } from '../src/orders/paymentMethod.js';
+
+/** Not a store name. Proves one alias entry stores `bank_deposit`. */
+const FAKE_TRANSFER_ALIAS_FIXTURE = {
+  zz_fake_transfer_rail: 'bank_deposit',
+} as const;
 
 describe('normalizePaymentMethod', () => {
   it('maps Bank Deposit and manual gateways to the Customer Account tokens', () => {
@@ -12,6 +18,25 @@ describe('normalizePaymentMethod', () => {
     expect(normalizePaymentMethod({
       transactions: [{ kind: 'sale', gateway: 'manual', type: 'MANUAL' }],
     })).toBe('manual');
+  });
+
+  it('maps one transfer alias entry to bank_deposit and ignores it until listed', () => {
+    expect(Object.keys(TRANSFER_METHOD_ALIASES)).toEqual([]);
+    expect(normalizePaymentMethod(
+      { payment_gateway_names: ['ZZ Fake Transfer Rail'] },
+      FAKE_TRANSFER_ALIAS_FIXTURE,
+    )).toBe('bank_deposit');
+    expect(normalizePaymentMethod(
+      { gateway: 'zz-fake-transfer-rail' },
+      FAKE_TRANSFER_ALIAS_FIXTURE,
+    )).toBe('bank_deposit');
+    expect(normalizePaymentMethod({
+      payment_gateway_names: ['ZZ Fake Transfer Rail'],
+    })).toBe('other:zz_fake_transfer_rail');
+    expect(normalizePaymentMethod(
+      { payment_gateway_names: ['constructor'] },
+      FAKE_TRANSFER_ALIAS_FIXTURE,
+    )).toBe('other:constructor');
   });
 
   it('keeps a similar transfer label distinguishable from bank_deposit', () => {

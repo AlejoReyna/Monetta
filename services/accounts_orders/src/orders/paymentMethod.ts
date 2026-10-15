@@ -19,6 +19,10 @@
  * `paypal_express_checkout`; `Mercado Pago` / `mercado_pago` →
  * `mercado_pago`; `MercadoPago` → `mercadopago`. Those PayPal and
  * Mercado Pago spellings now collapse to `paypal` and `mercadopago`.
+ *
+ * A confirmed manual-method display name becomes `bank_deposit` by adding
+ * one snake_case key to [TRANSFER_METHOD_ALIASES]. The webhook and the
+ * backfill both read that list. No live store name is listed yet.
  */
 
 const NON_METHOD_TOKENS = new Set([
@@ -46,6 +50,15 @@ const NON_METHOD_TOKENS = new Set([
   'error',
   'unknown',
 ]);
+
+/**
+ * Sanitized gateway names that store as `bank_deposit`.
+ *
+ * Add one key when a store display name is confirmed (for example from the
+ * Shopify Payments screenshot). The app treats that stored value as a
+ * transfer. No other code change is required. This list is empty until then.
+ */
+export const TRANSFER_METHOD_ALIASES: Readonly<Record<string, 'bank_deposit'>> = {};
 
 /** Display labels that already have a Customer Account or gateway token. */
 const METHOD_ALIASES: Readonly<Record<string, string>> = {
@@ -95,7 +108,17 @@ export interface ShopifyPaymentMethodSource {
   readonly transactions?: readonly ShopifyPaymentTransactionSource[] | null;
 }
 
-export function normalizePaymentMethodToken(raw: string): string | null {
+/** Own properties only. Inherited names such as `constructor` are not aliases. */
+function ownAlias(table: Readonly<Record<string, string>>, snake: string): string | null {
+  if (!Object.hasOwn(table, snake)) return null;
+  const alias = table[snake];
+  return typeof alias === 'string' && alias.length > 0 ? alias : null;
+}
+
+export function normalizePaymentMethodToken(
+  raw: string,
+  transferAliases: Readonly<Record<string, 'bank_deposit'>> = TRANSFER_METHOD_ALIASES,
+): string | null {
   const folded = raw
     .trim()
     .toLowerCase()
@@ -109,22 +132,27 @@ export function normalizePaymentMethodToken(raw: string): string | null {
   if (snake.length === 0 || snake.length > 64) return null;
   if (/^\d+$/.test(snake)) return null;
   if (NON_METHOD_TOKENS.has(snake)) return null;
-  // Own properties only. `constructor` and other inherited names are not aliases.
-  if (!Object.hasOwn(METHOD_ALIASES, snake)) return snake;
-  return METHOD_ALIASES[snake] ?? snake;
+  return ownAlias(transferAliases, snake) ?? ownAlias(METHOD_ALIASES, snake) ?? snake;
 }
 
 /** Known token, or `other:<sanitized>` when the gateway name is not a known method. */
-export function classifyPaymentMethodToken(raw: string): string | null {
-  const snake = normalizePaymentMethodToken(raw);
+export function classifyPaymentMethodToken(
+  raw: string,
+  transferAliases: Readonly<Record<string, 'bank_deposit'>> = TRANSFER_METHOD_ALIASES,
+): string | null {
+  const snake = normalizePaymentMethodToken(raw, transferAliases);
   if (snake === null) return null;
   if (KNOWN_METHOD_TOKENS.has(snake)) return snake;
   return `other:${snake}`;
 }
 
-function pushToken(tokens: string[], raw: unknown): void {
+function pushToken(
+  tokens: string[],
+  raw: unknown,
+  transferAliases: Readonly<Record<string, 'bank_deposit'>>,
+): void {
   if (typeof raw !== 'string') return;
-  const token = classifyPaymentMethodToken(raw);
+  const token = classifyPaymentMethodToken(raw, transferAliases);
   if (token === null || tokens.includes(token)) return;
   tokens.push(token);
 }
@@ -140,27 +168,30 @@ function formattedGateway(transaction: ShopifyPaymentTransactionSource): string 
  * non-processing kind, then `payment_gateway_names`, then the order gateway.
  * Empty input is null so a pending order is not guessed to be a transfer.
  */
-export function normalizePaymentMethod(source: ShopifyPaymentMethodSource): string | null {
+export function normalizePaymentMethod(
+  source: ShopifyPaymentMethodSource,
+  transferAliases: Readonly<Record<string, 'bank_deposit'>> = TRANSFER_METHOD_ALIASES,
+): string | null {
   const tokens: string[] = [];
   const transactions = Array.isArray(source.transactions) ? source.transactions : [];
   for (const transaction of transactions) {
     if (transaction === null || typeof transaction !== 'object') continue;
-    pushToken(tokens, transaction.type);
+    pushToken(tokens, transaction.type, transferAliases);
     const gateway = typeof transaction.gateway === 'string' ? transaction.gateway : null;
-    pushToken(tokens, gateway);
-    if (classifyPaymentMethodToken(gateway ?? '') === null) {
-      pushToken(tokens, formattedGateway(transaction));
+    pushToken(tokens, gateway, transferAliases);
+    if (classifyPaymentMethodToken(gateway ?? '', transferAliases) === null) {
+      pushToken(tokens, formattedGateway(transaction), transferAliases);
     }
-    pushToken(tokens, transaction.kind);
+    pushToken(tokens, transaction.kind, transferAliases);
   }
 
   const names = source.payment_gateway_names;
   if (Array.isArray(names)) {
-    for (const name of names) pushToken(tokens, name);
+    for (const name of names) pushToken(tokens, name, transferAliases);
   } else {
-    pushToken(tokens, names);
+    pushToken(tokens, names, transferAliases);
   }
-  pushToken(tokens, source.gateway);
+  pushToken(tokens, source.gateway, transferAliases);
 
   if (tokens.length === 0) return null;
   return tokens.join(',');
