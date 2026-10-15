@@ -27,6 +27,11 @@ const missingPaymentWhatsAppLabel =
 const paymentQuestionWhatsAppLabel =
     '¿Dudas con tu pago? Escríbenos por WhatsApp.';
 
+/// Known-transfer prompt on the order detail. One label so a later in-app
+/// bank-details sheet can replace this WhatsApp handoff without hunting
+/// for the copy. There is no bank-details sheet and no account data here.
+const transferPaymentDetailsLabel = 'Pedir datos de pago por WhatsApp';
+
 /// Detail-only help for "Pago en proceso" when no payment method was stored.
 /// Hidden once [OrderSummary.paymentMethod] is known, and never shown on the list.
 bool showMissingPaymentWhatsApp(OrderSummary order) {
@@ -172,14 +177,12 @@ class OrderDetailScreen extends StatelessWidget {
                   ),
                   if (status.key == 'awaiting_transfer') ...[
                     const SizedBox(height: BoutiqueSpace.sm),
-                    Text(
-                      'Ver datos de pago',
-                      key: const ValueKey('order-payment-details'),
-                      style: boutiqueText(
-                        size: 13,
-                        weight: FontWeight.w600,
-                        color: palette.ink,
-                      ),
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('order-payment-details'),
+                      label: transferPaymentDetailsLabel,
+                      uri: missingPaymentWhatsAppUri(label),
+                      icon: Icons.chat_outlined,
+                      onOpen: (uri) => _open(context, uri),
                     ),
                   ],
                   if (showMissingPaymentWhatsApp(order)) ...[
@@ -496,29 +499,42 @@ class _PaymentHelpLink extends StatelessWidget {
     required this.label,
     required this.uri,
     required this.onOpen,
+    this.icon,
   });
 
   final Key linkKey;
   final String label;
   final Uri uri;
   final void Function(Uri uri) onOpen;
+  final IconData? icon;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    final text = Text(
+      label,
+      style: boutiqueText(
+        size: 13,
+        color: palette.inkMuted,
+        decoration: TextDecoration.underline,
+      ),
+    );
     return Semantics(
       link: true,
       child: GestureDetector(
         key: linkKey,
         onTap: () => onOpen(uri),
-        child: Text(
-          label,
-          style: boutiqueText(
-            size: 13,
-            color: palette.inkMuted,
-            decoration: TextDecoration.underline,
-          ),
-        ),
+        child: icon == null
+            ? text
+            : Row(
+                children: [
+                  ExcludeSemantics(
+                    child: Icon(icon, size: 16, color: palette.inkMuted),
+                  ),
+                  const SizedBox(width: BoutiqueSpace.sm),
+                  Flexible(child: text),
+                ],
+              ),
       ),
     );
   }

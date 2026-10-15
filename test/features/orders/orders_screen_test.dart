@@ -252,6 +252,7 @@ void main() {
         find.text('¿Dudas con tu pago? Escríbenos por WhatsApp.'),
         findsNothing,
       );
+      expect(find.text('Pedir datos de pago por WhatsApp'), findsNothing);
       expect(find.text('En camino'), findsNothing);
       expect(find.text('Con ajuste'), findsNothing);
       expect(

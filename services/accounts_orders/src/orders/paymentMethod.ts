@@ -109,6 +109,8 @@ export function normalizePaymentMethodToken(raw: string): string | null {
   if (snake.length === 0 || snake.length > 64) return null;
   if (/^\d+$/.test(snake)) return null;
   if (NON_METHOD_TOKENS.has(snake)) return null;
+  // Own properties only. `constructor` and other inherited names are not aliases.
+  if (!Object.hasOwn(METHOD_ALIASES, snake)) return snake;
   return METHOD_ALIASES[snake] ?? snake;
 }
 
@@ -164,8 +166,13 @@ export function normalizePaymentMethod(source: ShopifyPaymentMethodSource): stri
   return tokens.join(',');
 }
 
-/** True when [value] is already a normalized method list safe to persist. */
+/**
+ * True when [value] is a method list [normalizePaymentMethod] can emit.
+ *
+ * `orders_mirror.payment_method` is unbounded `TEXT`. The webhook stores the
+ * normalizer output directly, so this check must accept that same output,
+ * including lists longer than a few tokens. It does not impose a shorter cap.
+ */
 export function isNormalizedPaymentMethod(value: string): boolean {
-  return /^(?:other:)?[a-z0-9_]+(?:,(?:other:)?[a-z0-9_]+)*$/.test(value) &&
-    value.length <= 200;
+  return /^(?:other:)?[a-z0-9_]+(?:,(?:other:)?[a-z0-9_]+)*$/.test(value);
 }

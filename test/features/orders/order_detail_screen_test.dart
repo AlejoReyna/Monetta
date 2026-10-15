@@ -66,20 +66,33 @@ void main() {
       expect(find.textContaining('Estafeta'), findsNothing);
     });
 
-    testWidgets('pending transfer is not shown as paid', (tester) async {
+    testWidgets('pending transfer asks for payment details on WhatsApp', (
+      tester,
+    ) async {
+      Uri? opened;
       await tester.pumpWidget(
-        _host(
-          _order(
-            fulfillmentStatus: null,
-            status: 'pending',
-            paymentMethod: 'bank_deposit',
+        MaterialApp(
+          theme: buildTheme(),
+          home: OrderDetailScreen(
+            order: _order(
+              fulfillmentStatus: null,
+              status: 'pending',
+              displayNumber: '#1044',
+              paymentMethod: 'bank_deposit',
+            ),
+            openUri: (uri) async {
+              opened = uri;
+              return true;
+            },
           ),
         ),
       );
       await tester.pumpAndSettle();
 
       expect(find.text('Esperando tu transferencia'), findsWidgets);
-      expect(find.text('Ver datos de pago'), findsOneWidget);
+      expect(transferPaymentDetailsLabel, 'Pedir datos de pago por WhatsApp');
+      expect(find.text('Ver datos de pago'), findsNothing);
+      expect(find.text(transferPaymentDetailsLabel), findsOneWidget);
       expect(
         find.textContaining('Lo verás aquí cuando se confirme.'),
         findsWidgets,
@@ -92,6 +105,38 @@ void main() {
       );
       expect(find.text('Confirmado'), findsNothing);
       expect(find.text('Pago confirmado'), findsNothing);
+      expect(find.textContaining('CLABE'), findsNothing);
+      expect(find.byType(TextButton), findsNothing);
+      expect(find.byType(ElevatedButton), findsNothing);
+      expect(find.byType(FilledButton), findsNothing);
+
+      final link = find.byKey(const ValueKey('order-payment-details'));
+      expect(link, findsOneWidget);
+      expect(
+        find.descendant(of: link, matching: find.byIcon(Icons.chat_outlined)),
+        findsOneWidget,
+      );
+      expect(
+        find.ancestor(
+          of: link,
+          matching: find.byWidgetPredicate(
+            (widget) => widget is Semantics && widget.properties.link == true,
+          ),
+        ),
+        findsWidgets,
+      );
+      await tester.ensureVisible(link);
+      await tester.tap(link);
+      await tester.pumpAndSettle();
+
+      expect(opened, isNotNull);
+      expect(opened!.scheme, 'https');
+      expect(opened!.host, 'wa.me');
+      expect(opened!.path, '/528261066868');
+      expect(
+        opened!.queryParameters['text'],
+        'Hola, quiero los datos de pago de mi pedido #1044',
+      );
     });
 
     testWidgets(
@@ -127,6 +172,7 @@ void main() {
         expect(find.text('Lo verás aquí cuando se confirme.'), findsWidgets);
         expect(find.text('Esperando tu transferencia'), findsNothing);
         expect(find.text('Ver datos de pago'), findsNothing);
+        expect(find.text(transferPaymentDetailsLabel), findsNothing);
         expect(find.text('Confirmado'), findsNothing);
         expect(
           find.text(
@@ -188,6 +234,7 @@ void main() {
       expect(find.text('Pago en proceso'), findsWidgets);
       expect(find.text('Lo verás aquí cuando se confirme.'), findsWidgets);
       expect(find.text('Ver datos de pago'), findsNothing);
+      expect(find.text(transferPaymentDetailsLabel), findsNothing);
       expect(find.byType(TextButton), findsNothing);
       expect(find.byType(ElevatedButton), findsNothing);
       expect(find.byType(FilledButton), findsNothing);

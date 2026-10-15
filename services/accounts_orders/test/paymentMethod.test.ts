@@ -43,6 +43,21 @@ describe('normalizePaymentMethod', () => {
     })).toBe('mercadopago');
   });
 
+  it('stores an inherited object key as other:<name>, not the prototype value', () => {
+    expect(normalizePaymentMethod({
+      payment_gateway_names: ['constructor'],
+    })).toBe('other:constructor');
+    expect(isNormalizedPaymentMethod('other:constructor')).toBe(true);
+  });
+
+  it('accepts every list the normalizer emits, including ones longer than 200 characters', () => {
+    const names = ['a', 'b', 'c'].map((suffix) => `${'g'.repeat(63)}${suffix}`);
+    const stored = normalizePaymentMethod({ payment_gateway_names: names });
+    expect(stored).toBe(names.map((name) => `other:${name}`).join(','));
+    expect(stored!.length).toBeGreaterThan(200);
+    expect(isNormalizedPaymentMethod(stored!)).toBe(true);
+  });
+
   it('stores an unrecognized gateway as other:<sanitized name>', () => {
     expect(normalizePaymentMethod({
       payment_gateway_names: ['Kueski Pay'],

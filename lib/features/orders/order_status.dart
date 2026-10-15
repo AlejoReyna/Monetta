@@ -16,9 +16,10 @@
 ///
 /// `pending` es "Esperando tu transferencia" solo si cada token de
 /// [OrderSummary.paymentMethod] es exactamente `bank_deposit` o `manual`.
-/// Ese estado lleva la acción "Ver datos de pago" en la lista y en el
-/// detalle. PayPal, Mercado Pago, tarjeta, `other:…` y un método ausente
-/// quedan en "Pago en proceso".
+/// Ese estado lleva la acción "Ver datos de pago" en la lista, que abre el
+/// pedido. El detalle pide los datos por WhatsApp con su propio rótulo.
+/// PayPal, Mercado Pago, tarjeta, `other:…` y un método ausente quedan en
+/// "Pago en proceso".
 ///
 /// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
 /// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
