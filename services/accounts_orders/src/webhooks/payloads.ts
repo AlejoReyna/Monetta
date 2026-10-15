@@ -9,6 +9,8 @@
 
 export interface ShopifyOrderWebhookPayload {
   readonly id: number;
+  /** Shop-facing name such as `#1001`. Not a correlation token. */
+  readonly name?: string | null;
   /** Comma-separated in Shopify's REST payload — not an array. */
   readonly tags?: string;
   readonly financial_status?: string | null;
@@ -110,6 +112,16 @@ export function orderCorrelationToken(value: unknown): string | null {
   if (token.length === 0 || token.length > MAX_ORDER_CORRELATION_TOKEN_LENGTH) return null;
   if (!ORDER_CORRELATION_TOKEN.test(token)) return null;
   return token;
+}
+
+/** Shop-facing order name safe to log. Anything else, including a token, becomes null. */
+const ORDER_LOG_NAME = /^#[A-Za-z0-9][A-Za-z0-9-]{0,30}$/;
+
+export function orderLogName(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const name = value.trim();
+  if (!ORDER_LOG_NAME.test(name)) return null;
+  return name;
 }
 
 export function parseTags(tags: string | undefined): string[] {
