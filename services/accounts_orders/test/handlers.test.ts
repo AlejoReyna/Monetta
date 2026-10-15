@@ -460,6 +460,121 @@ describe('webhook handlers', () => {
       expect(orders.rows[0]!.paymentMethod).toBeNull();
       expect(JSON.stringify(orders.rows[0])).not.toContain('4242424242424242');
     });
+
+    it('stores checkout_token and cart_token and does not log them', async () => {
+      const checkoutToken = 'chk_a1b2c3d4e5';
+      const cartToken = 'crt_f6e5d4c3b2';
+      const lines: string[] = [];
+      const original = {
+        log: console.log,
+        warn: console.warn,
+        error: console.error,
+      };
+      console.log = (line?: unknown) => {
+        lines.push(String(line));
+      };
+      console.warn = (line?: unknown) => {
+        lines.push(String(line));
+      };
+      console.error = (line?: unknown) => {
+        lines.push(String(line));
+      };
+      try {
+        await handleOrdersWebhook(
+          deps,
+          'wh-tokens',
+          'orders/create',
+          orderPayload({
+            checkout_token: `  ${checkoutToken}?key=not-a-stored-key`,
+            cart_token: cartToken,
+          }),
+          Buffer.from('raw-tokens'),
+        );
+      } finally {
+        console.log = original.log;
+        console.warn = original.warn;
+        console.error = original.error;
+      }
+
+      expect(orders.rows[0]!.checkoutToken).toBe(checkoutToken);
+      expect(orders.rows[0]!.cartToken).toBe(cartToken);
+      const logged = lines.join('\n');
+      expect(logged).not.toContain(checkoutToken);
+      expect(logged).not.toContain(cartToken);
+      expect(logged).not.toContain('not-a-stored-key');
+    });
+
+    it('leaves both tokens null when the webhook omits them or sends a non-string', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-no-tokens',
+        'orders/create',
+        orderPayload({
+          checkout_token: null,
+          cart_token: 4242 as never,
+        }),
+        Buffer.from('raw-no-tokens'),
+      );
+
+      expect(orders.rows[0]!.checkoutToken).toBeNull();
+      expect(orders.rows[0]!.cartToken).toBeNull();
+      expect(JSON.stringify(orders.rows[0])).not.toContain('4242');
+    });
+
+    it('does not clear stored tokens when a later webhook omits them', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-token-create',
+        'orders/create',
+        orderPayload({
+          updated_at: '2026-08-01T10:00:00-06:00',
+          checkout_token: 'chk_a1b2c3d4e5',
+          cart_token: 'crt_f6e5d4c3b2',
+        }),
+        Buffer.from('raw-token-create'),
+      );
+      await handleOrdersWebhook(
+        deps,
+        'wh-token-update',
+        'orders/updated',
+        orderPayload({
+          updated_at: '2026-08-01T12:00:00-06:00',
+          financial_status: 'paid',
+        }),
+        Buffer.from('raw-token-update'),
+      );
+
+      expect(orders.rows).toHaveLength(1);
+      expect(orders.rows[0]!.checkoutToken).toBe('chk_a1b2c3d4e5');
+      expect(orders.rows[0]!.cartToken).toBe('crt_f6e5d4c3b2');
+      expect(orders.rows[0]!.financialStatus).toBe('paid');
+    });
+
+    it('fills tokens that were missing when a later webhook carries them', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-token-fill-create',
+        'orders/create',
+        orderPayload({ updated_at: '2026-08-01T10:00:00-06:00' }),
+        Buffer.from('raw-token-fill-create'),
+      );
+      expect(orders.rows[0]!.checkoutToken).toBeNull();
+
+      await handleOrdersWebhook(
+        deps,
+        'wh-token-fill-update',
+        'orders/updated',
+        orderPayload({
+          updated_at: '2026-08-01T12:00:00-06:00',
+          checkout_token: 'chk_filledlater',
+          cart_token: 'crt_filledlater',
+        }),
+        Buffer.from('raw-token-fill-update'),
+      );
+
+      expect(orders.rows[0]!.checkoutToken).toBe('chk_filledlater');
+      expect(orders.rows[0]!.cartToken).toBe('crt_filledlater');
+    });
   });
 
   describe('handleCustomersRedact', () => {

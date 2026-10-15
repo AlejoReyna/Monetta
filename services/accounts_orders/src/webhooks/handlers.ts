@@ -10,6 +10,7 @@ import { logger } from '../logger.js';
 import { normalizePaymentMethod } from '../orders/paymentMethod.js';
 import {
   noteAttribute,
+  orderCorrelationToken,
   parseTags,
   type ShopifyCustomerDataRequestWebhookPayload,
   type ShopifyCustomerRedactWebhookPayload,
@@ -175,6 +176,8 @@ export async function handleOrdersWebhook(
         currencyCode: payload.currency ?? null,
         attributionDeviceId: noteAttribute(payload, '_device_id'),
         attributionRecoSource: noteAttribute(payload, '_rec_source'),
+        checkoutToken: orderCorrelationToken(payload.checkout_token),
+        cartToken: orderCorrelationToken(payload.cart_token),
         placedAt: payload.created_at ? new Date(payload.created_at) : null,
         shopifyUpdatedAt: payload.updated_at ? new Date(payload.updated_at) : null,
       });

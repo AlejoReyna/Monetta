@@ -29,6 +29,15 @@ export interface ShopifyOrderWebhookPayload {
   }> | null;
   readonly current_total_price?: string | null;
   readonly currency?: string | null;
+  /**
+   * REST order fields that tie this order to the checkout attempt that
+   * created it. Bearer-like: parse them, persist them, never log them.
+   * `checkout_id` left order webhooks in API 2026-04; Shopify points
+   * handlers at `checkout_token` instead. Older REST docs still mark both
+   * tokens deprecated, and a payload may omit them.
+   */
+  readonly checkout_token?: string | null;
+  readonly cart_token?: string | null;
   readonly created_at?: string | null;
   /** Shopify's order updated_at — used for out-of-order protection (F15). */
   readonly updated_at?: string | null;
@@ -80,6 +89,27 @@ export function noteAttribute(
   name: string,
 ): string | null {
   return payload.note_attributes?.find((a) => a.name === name)?.value ?? null;
+}
+
+/**
+ * Shopify correlation tokens are a single opaque string. Anything longer is
+ * rejected rather than truncated, so a partial token cannot collide.
+ */
+const MAX_ORDER_CORRELATION_TOKEN_LENGTH = 255;
+const ORDER_CORRELATION_TOKEN = /^[A-Za-z0-9_-]+$/;
+
+/**
+ * Reads `checkout_token` or `cart_token` from an order webhook value.
+ * Non-strings, blanks, and values that are not one token become null.
+ * A trailing query (`?key=…`) is dropped so the cart key is not stored and
+ * the remainder matches the token the app compares. Never log the result.
+ */
+export function orderCorrelationToken(value: unknown): string | null {
+  if (typeof value !== 'string') return null;
+  const token = value.trim().split('?', 1)[0]?.trim() ?? '';
+  if (token.length === 0 || token.length > MAX_ORDER_CORRELATION_TOKEN_LENGTH) return null;
+  if (!ORDER_CORRELATION_TOKEN.test(token)) return null;
+  return token;
 }
 
 export function parseTags(tags: string | undefined): string[] {

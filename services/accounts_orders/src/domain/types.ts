@@ -28,6 +28,14 @@ export interface OrderRecord {
   readonly currencyCode: string | null;
   readonly attributionDeviceId: string | null;
   readonly attributionRecoSource: string | null;
+  /**
+   * Shopify `checkout_token` for this order. Null when the webhook omitted
+   * it or the row was mirrored before the column existed. Bearer-like:
+   * returned only on the owning customer's order list, never logged.
+   */
+  readonly checkoutToken?: string | null;
+  /** Shopify `cart_token`. Same null and logging rules as `checkoutToken`. */
+  readonly cartToken?: string | null;
   readonly placedAt: Date | null;
   /** Shopify order updated_at; used to ignore stale out-of-order webhooks (F15). */
   readonly shopifyUpdatedAt?: Date | null;
