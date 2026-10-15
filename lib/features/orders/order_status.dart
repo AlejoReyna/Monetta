@@ -16,10 +16,10 @@
 ///
 /// `pending` es "Esperando tu transferencia" solo si cada token de
 /// [OrderSummary.paymentMethod] es exactamente `bank_deposit` o `manual`.
-/// Ese estado lleva [transferPaymentDetailsLabel] en la lista y en el
-/// detalle. La lista abre el pedido; el detalle abre WhatsApp. No hay
-/// ficha de datos bancarios. PayPal, Mercado Pago, tarjeta, `other:…` y
-/// un método ausente quedan en "Pago en proceso".
+/// La lista muestra solo ese estado, sin texto de acción. El detalle
+/// abre WhatsApp con [transferPaymentDetailsLabel]. No hay ficha de
+/// datos bancarios. PayPal, Mercado Pago, tarjeta, `other:…` y un
+/// método ausente quedan en "Pago en proceso".
 ///
 /// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
 /// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
@@ -33,10 +33,10 @@ import '../../app/shopper_copy.dart' show conciergeWhatsAppUri;
 import '../../app/theme.dart' show kMoney;
 import '../../data/local/database.dart' show OrderSummary;
 
-/// Transfer prompt on the list and the order detail. One label so a later
-/// in-app bank-details sheet can replace this handoff. There is no sheet
-/// and no account data here. The list opens the order; the detail opens
-/// WhatsApp with the payment-details message.
+/// Transfer prompt on the order detail. The list shows the status without
+/// this text. One label so a later in-app bank-details sheet can replace
+/// this handoff. There is no sheet and no account data here. The detail
+/// opens WhatsApp with the payment-details message.
 const transferPaymentDetailsLabel = 'Pedir datos de pago por WhatsApp';
 
 /// Filtros pertinentes con datos reales. Sin "Más vendidos" ni rangos
@@ -178,7 +178,6 @@ OrderDisplayStatus orderPaymentStatus(OrderSummary order) {
           label: 'Esperando tu transferencia',
           detail: 'Estamos esperando tu transferencia. '
               'Lo verás aquí cuando se confirme.',
-          actionLabel: transferPaymentDetailsLabel,
         );
       }
       return _paymentInProgress;

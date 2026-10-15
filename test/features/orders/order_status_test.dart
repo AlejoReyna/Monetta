@@ -160,7 +160,7 @@ void main() {
         ),
       );
       expect(status.label, 'Esperando tu transferencia');
-      expect(status.actionLabel, transferPaymentDetailsLabel);
+      expect(status.actionLabel, isNull);
       expect(
         orderPaymentMethodIsBankTransfer('other:zz_fake_transfer_rail'),
         isFalse,
@@ -178,7 +178,7 @@ void main() {
         );
         expect(status.label, 'Esperando tu transferencia');
         expect(status.detail, contains('Lo verás aquí cuando se confirme.'));
-        expect(status.actionLabel, transferPaymentDetailsLabel);
+        expect(status.actionLabel, isNull);
         expect(orderPaymentMethodIsBankTransfer(method), isTrue);
       }
     });
