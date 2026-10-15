@@ -13,27 +13,34 @@ const Duration kCheckoutOrderLookupInterval = Duration(seconds: 3);
 /// Proposed upper bound for MON-UX-03-DUP. Not a measured SLA.
 const Duration kCheckoutOrderLookupTimeout = Duration(seconds: 30);
 
-/// PM-approved titles. Use verbatim.
+/// False until an order source actually returns `checkout_token` or
+/// `cart_token`. A timeout is not proof that no charge happened, so banner 1
+/// stays gated on this flag.
+const bool kCheckoutTokenCorrelationAvailable = false;
+
+/// Shown with a loading indicator while the lookup window is open.
+const String kCheckoutReturnConfirmingText = 'Confirmando tu pago…';
+
 const String kCheckoutReturnPaymentNotCompletedTitle = 'No se completó tu pago';
+
+const String kCheckoutReturnPaymentNotCompletedBody =
+    'No se hizo ningún cargo. Tus productos siguen en el carrito.';
 
 const String kCheckoutReturnSheetDidNotOpenTitle = 'No pudimos abrir el pago';
 
+const String kCheckoutReturnSheetDidNotOpenBody =
+    'Revisa tu conexión e inténtalo otra vez. Tus productos siguen en el carrito.';
+
 const String kCheckoutReturnReviewingTitle = 'Estamos revisando tu pago';
 
-/// Body copy is not defined in repo docs or specs.
-const String kCheckoutReturnPaymentNotCompletedBodyTodo =
-    'TODO(designer): texto secundario de «No se completó tu pago».';
+const String kCheckoutReturnReviewingBody =
+    'Si se hizo el cargo, tu pedido aparecerá en Mis pedidos. Para evitar un cobro doble, no vuelvas a pagar todavía.';
 
-const String kCheckoutReturnSheetDidNotOpenBodyTodo =
-    'TODO(designer): texto secundario de «No pudimos abrir el pago».';
+const String kCheckoutReturnRetryLabel = 'Intentar de nuevo';
 
-const String kCheckoutReturnReviewingBodyTodo =
-    'TODO(designer): texto secundario de «Estamos revisando tu pago».';
+const String kCheckoutReturnViewOrdersLabel = 'Ver mis pedidos';
 
-/// A distinct retry label is not defined. The existing pay action stays the
-/// control; this placeholder is for the designer.
-const String kCheckoutReturnRetryCtaTodo =
-    'TODO(designer): etiqueta del CTA para reintentar el pago.';
+const String kCheckoutReturnWhatsAppLabel = 'Escríbenos por WhatsApp';
 
 enum CheckoutReturnKind {
   completed,
@@ -42,9 +49,17 @@ enum CheckoutReturnKind {
 }
 
 enum CheckoutReturnPhase {
-  reviewing,
+  /// Lookup in progress. Not a settled banner.
+  confirming,
+
+  /// Banner 1. Only after a capable lookup finds no order.
   paymentNotCompleted,
+
+  /// Banner 2. The sheet never opened.
   sheetDidNotOpen,
+
+  /// Banner 3. The outcome is still uncertain.
+  reviewing,
 }
 
 /// Cart and checkout tokens for the attempt that just returned.
@@ -120,8 +135,14 @@ final class CheckoutOrderFound extends CheckoutReturnDecision {
   final CheckoutOrderMatch match;
 }
 
+/// Capable lookup finished with no matching order. Banner 1.
 final class CheckoutOrderNotFound extends CheckoutReturnDecision {
   const CheckoutOrderNotFound();
+}
+
+/// Timeout or a failed read that cannot prove there was no charge. Banner 3.
+final class CheckoutReturnUncertain extends CheckoutReturnDecision {
+  const CheckoutReturnUncertain();
 }
 
 typedef CheckoutOrderClock = DateTime Function();
@@ -224,6 +245,7 @@ Future<CheckoutReturnDecision> decideCheckoutReturn({
   required CheckoutAttemptIdentity attempt,
   Duration interval = kCheckoutOrderLookupInterval,
   Duration timeout = kCheckoutOrderLookupTimeout,
+  bool correlationAvailable = kCheckoutTokenCorrelationAvailable,
   CheckoutOrderClock clock = DateTime.now,
   CheckoutOrderDelay delay = _defaultDelay,
   bool Function()? isCancelled,
@@ -236,6 +258,7 @@ Future<CheckoutReturnDecision> decideCheckoutReturn({
         attempt: attempt,
         interval: interval,
         timeout: timeout,
+        correlationAvailable: correlationAvailable,
         clock: clock,
         delay: delay,
         isCancelled: isCancelled,
@@ -245,37 +268,49 @@ Future<CheckoutReturnDecision> decideCheckoutReturn({
 
 /// Polls immediately, then every [interval], through [timeout] inclusive.
 ///
-/// A lookup error is not evidence that no order exists; polling continues
-/// until the window ends. [isCancelled] stops the loop without a decision
-/// the UI should treat as "not found".
+/// A matching order wins even after an earlier failed read. If the window
+/// ends without a match, [CheckoutOrderNotFound] is returned only when
+/// [correlationAvailable] is true and every read succeeded. A lookup error,
+/// or a timeout while correlation is unavailable, is [CheckoutReturnUncertain]:
+/// absence of a match is not proof that no charge happened.
 Future<CheckoutReturnDecision> resolvePaymentReturn({
   required CheckoutOrderLookup lookup,
   required CheckoutAttemptIdentity attempt,
   Duration interval = kCheckoutOrderLookupInterval,
   Duration timeout = kCheckoutOrderLookupTimeout,
+  bool correlationAvailable = kCheckoutTokenCorrelationAvailable,
   CheckoutOrderClock clock = DateTime.now,
   CheckoutOrderDelay delay = _defaultDelay,
   bool Function()? isCancelled,
 }) async {
   final started = clock();
+  var lookupFailed = false;
   while (true) {
     if (isCancelled?.call() == true) {
-      return const CheckoutOrderNotFound();
+      return const CheckoutReturnUncertain();
     }
-    CheckoutOrderMatch? match;
     try {
-      match = await lookup.findOrder(attempt);
+      final match = await lookup.findOrder(attempt);
+      if (match != null) return CheckoutOrderFound(match);
     } on Object {
-      match = null;
+      lookupFailed = true;
     }
-    if (match != null) return CheckoutOrderFound(match);
     final elapsed = clock().difference(started);
-    if (elapsed >= timeout) return const CheckoutOrderNotFound();
+    if (elapsed >= timeout) return _settle(correlationAvailable, lookupFailed);
     final remaining = timeout - elapsed;
     final wait = remaining < interval ? remaining : interval;
-    if (wait <= Duration.zero) return const CheckoutOrderNotFound();
+    if (wait <= Duration.zero) {
+      return _settle(correlationAvailable, lookupFailed);
+    }
     await delay(wait);
   }
+}
+
+CheckoutReturnDecision _settle(bool correlationAvailable, bool lookupFailed) {
+  if (lookupFailed || !correlationAvailable) {
+    return const CheckoutReturnUncertain();
+  }
+  return const CheckoutOrderNotFound();
 }
 
 bool _tokensOverlap(

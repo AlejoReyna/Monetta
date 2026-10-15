@@ -13,12 +13,14 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/cart_controller.dart';
 import '../../app/checkout_buyer_identity.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/shopify_checkout_coordinator.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/local/database.dart' show OrderSummary;
 import '../../data/media/media_url.dart';
@@ -31,6 +33,7 @@ import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../orders/order_detail_screen.dart';
+import '../orders/orders_screen.dart';
 import '../product/quick_view.dart';
 import 'checkout_order_lookup.dart';
 import 'checkout_return.dart';
@@ -444,6 +447,8 @@ class CheckoutFlowScreen extends StatefulWidget {
     this.orderLookupTimeout = kCheckoutOrderLookupTimeout,
     this.orderLookupDelay,
     this.onOrderFound,
+    this.correlationAvailable = kCheckoutTokenCorrelationAvailable,
+    this.openUri,
     super.key,
   });
 
@@ -471,6 +476,13 @@ class CheckoutFlowScreen extends StatefulWidget {
     BuildContext context,
     CheckoutOrderMatch match,
   )? onOrderFound;
+
+  /// Banner 1 is allowed only when this is true. Production stays false
+  /// until order sources return a checkout or cart token.
+  final bool correlationAvailable;
+
+  /// Opens the concierge WhatsApp link. Tests pass a fake.
+  final Future<bool> Function(Uri uri)? openUri;
 
   @override
   State<CheckoutFlowScreen> createState() => _CheckoutFlowScreenState();
@@ -582,6 +594,34 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     );
   }
 
+  Future<void> _openConciergeWhatsApp() async {
+    final uri = conciergeWhatsAppUri();
+    final open = widget.openUri ??
+        ((target) => launchUrl(target, mode: LaunchMode.externalApplication));
+    final ok = await open(uri);
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el enlace.')),
+      );
+    }
+  }
+
+  void _viewOrders() {
+    final account = AccountScope.maybeOf(context);
+    if (account == null || !account.isSignedIn) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'Inicia sesión para ver Mis pedidos. Te enviamos la '
+            'confirmación a tu correo.',
+          ),
+        ),
+      );
+      return;
+    }
+    unawaited(openOrders(context, controller: account));
+  }
+
   Future<void> _openMatchedOrder(CheckoutOrderMatch match) async {
     final handler = widget.onOrderFound;
     if (handler != null) {
@@ -685,20 +725,20 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             final lookup = _lookup();
             final attempt = _attemptIdentity();
             if (lookup == null) {
-              setState(
-                () => _returnPhase = CheckoutReturnPhase.paymentNotCompleted,
-              );
+              // Nothing to correlate against. That is not proof of no charge.
+              setState(() => _returnPhase = CheckoutReturnPhase.reviewing);
               return;
             }
             setState(() {
               _checkingOrder = true;
-              _returnPhase = CheckoutReturnPhase.reviewing;
+              _returnPhase = CheckoutReturnPhase.confirming;
             });
             final decision = await resolvePaymentReturn(
               lookup: lookup,
               attempt: attempt,
               interval: widget.orderLookupInterval,
               timeout: widget.orderLookupTimeout,
+              correlationAvailable: widget.correlationAvailable,
               delay: _delayPoll,
               isCancelled: () => !mounted || generation != _returnGeneration,
             );
@@ -714,7 +754,9 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             }
             setState(() {
               _checkingOrder = false;
-              _returnPhase = CheckoutReturnPhase.paymentNotCompleted;
+              _returnPhase = decision is CheckoutOrderNotFound
+                  ? CheckoutReturnPhase.paymentNotCompleted
+                  : CheckoutReturnPhase.reviewing;
             });
         }
       } finally {
@@ -788,6 +830,8 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                               setState(() => _selectedPayment = value),
                           onEdit: () => setState(() => _reviewing = false),
                           onPay: () => unawaited(_pay()),
+                          onViewOrders: _viewOrders,
+                          onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
                         )
                       : _ContactForm(
                           formKey: _formKey,
@@ -1648,6 +1692,12 @@ class _DeliveryOption extends StatelessWidget {
   }
 }
 
+/// The first pay control stays up, disabled, while we confirm. Settled
+/// banners own their own actions, and banner 3 has no retry.
+bool _showsCheckoutPayButton(CheckoutReturnPhase? phase) {
+  return phase == null || phase == CheckoutReturnPhase.confirming;
+}
+
 class _ReviewPanel extends StatelessWidget {
   const _ReviewPanel({
     required this.email,
@@ -1662,6 +1712,8 @@ class _ReviewPanel extends StatelessWidget {
     required this.onSelectPayment,
     required this.onEdit,
     required this.onPay,
+    required this.onViewOrders,
+    required this.onWhatsApp,
   });
 
   final String email;
@@ -1676,6 +1728,8 @@ class _ReviewPanel extends StatelessWidget {
   final ValueChanged<String> onSelectPayment;
   final VoidCallback onEdit;
   final VoidCallback onPay;
+  final VoidCallback onViewOrders;
+  final VoidCallback onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -1713,7 +1767,13 @@ class _ReviewPanel extends StatelessWidget {
           onSelect: onSelectPayment,
         ),
         const SizedBox(height: 24),
-        if (returnPhase != null) CheckoutReturnBanner(phase: returnPhase!),
+        if (returnPhase != null)
+          CheckoutReturnBanner(
+            phase: returnPhase!,
+            onRetry: payEnabled ? onPay : null,
+            onViewOrders: onViewOrders,
+            onWhatsApp: onWhatsApp,
+          ),
         if (openingSheet)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
@@ -1739,7 +1799,7 @@ class _ReviewPanel extends StatelessWidget {
               ),
             ),
           ),
-        if (showPayButton)
+        if (showPayButton && _showsCheckoutPayButton(returnPhase))
           BoutiqueButton(
             key: const ValueKey('checkout-pay-button'),
             label: 'CONTINUAR AL PAGO SEGURO',

@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
@@ -13,53 +14,90 @@ import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/main.dart';
 
 void main() {
-  testWidgets('reviewing banner uses the approved title', (tester) async {
-    await tester.pumpWidget(
-      _bannerHost(CheckoutReturnPhase.reviewing),
-    );
+  testWidgets('confirming state shows the loading line and no retry', (
+    tester,
+  ) async {
+    await tester.pumpWidget(_bannerHost(CheckoutReturnPhase.confirming));
 
-    expect(find.text(kCheckoutReturnReviewingTitle), findsOneWidget);
-    expect(find.text(kCheckoutReturnReviewingBodyTodo), findsOneWidget);
-    expect(find.text(kCheckoutReturnRetryCtaTodo), findsOneWidget);
-    expect(find.text('Estamos revisando tu pago'), findsOneWidget);
+    expect(find.text('Confirmando tu pago…'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    expect(find.text('Intentar de nuevo'), findsNothing);
+    expect(find.text(kCheckoutReturnViewOrdersLabel), findsNothing);
     _expectNoDeclineCopy();
   });
 
-  testWidgets('payment not completed banner uses the approved title', (
+  testWidgets('banner 3 explains the uncertain payment and has no retry', (
     tester,
   ) async {
+    var orders = 0;
+    Uri? whatsApp;
     await tester.pumpWidget(
-      _bannerHost(CheckoutReturnPhase.paymentNotCompleted),
+      _bannerHost(
+        CheckoutReturnPhase.reviewing,
+        onViewOrders: () => orders += 1,
+        onWhatsApp: () => whatsApp = conciergeWhatsAppUri(),
+      ),
+    );
+
+    expect(find.text('Estamos revisando tu pago'), findsOneWidget);
+    expect(find.text(kCheckoutReturnReviewingBody), findsOneWidget);
+    expect(find.text('Intentar de nuevo'), findsNothing);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    _expectNoDeclineCopy();
+
+    await tester.tap(find.text('Ver mis pedidos'));
+    await tester.tap(find.text('Escríbenos por WhatsApp'));
+    expect(orders, 1);
+    expect(whatsApp?.host, 'wa.me');
+    expect(whatsApp?.path, '/528261066868');
+    expect(whatsApp.toString(), startsWith('https://wa.me/528261066868'));
+  });
+
+  testWidgets('banner 1 offers retry only after a capable miss', (
+    tester,
+  ) async {
+    var retries = 0;
+    await tester.pumpWidget(
+      _bannerHost(
+        CheckoutReturnPhase.paymentNotCompleted,
+        onRetry: () => retries += 1,
+      ),
     );
 
     expect(find.text('No se completó tu pago'), findsOneWidget);
-    expect(
-      find.text(kCheckoutReturnPaymentNotCompletedBodyTodo),
-      findsOneWidget,
-    );
-    expect(find.text(kCheckoutReturnRetryCtaTodo), findsOneWidget);
+    expect(find.text(kCheckoutReturnPaymentNotCompletedBody), findsOneWidget);
+    expect(find.text('Intentar de nuevo'), findsOneWidget);
+    expect(find.text(kCheckoutReturnViewOrdersLabel), findsNothing);
     _expectNoDeclineCopy();
+
+    await tester.tap(find.text('Intentar de nuevo'));
+    expect(retries, 1);
   });
 
-  testWidgets('sheet failed to open banner uses the approved title', (
+  testWidgets('banner 2 offers retry when the sheet never opened', (
     tester,
   ) async {
     await tester.pumpWidget(
-      _bannerHost(CheckoutReturnPhase.sheetDidNotOpen),
+      _bannerHost(
+        CheckoutReturnPhase.sheetDidNotOpen,
+        onRetry: () {},
+      ),
     );
 
     expect(find.text('No pudimos abrir el pago'), findsOneWidget);
-    expect(find.text(kCheckoutReturnSheetDidNotOpenBodyTodo), findsOneWidget);
-    expect(find.text(kCheckoutReturnRetryCtaTodo), findsOneWidget);
+    expect(find.text(kCheckoutReturnSheetDidNotOpenBody), findsOneWidget);
+    expect(find.text('Intentar de nuevo'), findsOneWidget);
+    expect(find.text('Estamos revisando tu pago'), findsNothing);
     _expectNoDeclineCopy();
   });
 
-  testWidgets('reviewing banner disables retry until the lookup settles', (
+  testWidgets('timeout without correlation shows banner 3 and no retry', (
     tester,
   ) async {
     final store = await _loadedStore();
     await store.addToBag(store.products.firstWhere((item) => item.isInStock));
     final gate = Completer<CheckoutOrderMatch?>();
+    Uri? openedWhatsApp;
     addTearDown(() {
       if (!gate.isCompleted) gate.complete(null);
     });
@@ -72,6 +110,10 @@ void main() {
           orderLookup: _ScriptedLookup((_) => gate.future),
           orderLookupTimeout: Duration.zero,
           attemptIdentity: const CheckoutAttemptIdentity(cartToken: 'cart-1'),
+          openUri: (uri) async {
+            openedWhatsApp = uri;
+            return true;
+          },
         ),
       ),
     );
@@ -79,7 +121,9 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pump();
 
-    expect(find.text('Estamos revisando tu pago'), findsOneWidget);
+    expect(find.text('Confirmando tu pago…'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsWidgets);
+    expect(find.text('Intentar de nuevo'), findsNothing);
     expect(
       tester
           .widget<BoutiqueButton>(
@@ -91,19 +135,24 @@ void main() {
 
     gate.complete(null);
     await tester.pumpAndSettle();
-    expect(find.text('No se completó tu pago'), findsOneWidget);
-    expect(
-      tester
-          .widget<BoutiqueButton>(
-            find.byKey(const ValueKey('checkout-pay-button')),
-          )
-          .onPressed,
-      isNotNull,
-    );
+    expect(find.text('Estamos revisando tu pago'), findsOneWidget);
+    expect(find.text('Intentar de nuevo'), findsNothing);
+    expect(find.text('Ver mis pedidos'), findsOneWidget);
+    expect(find.text('Escríbenos por WhatsApp'), findsOneWidget);
+    expect(find.byKey(const ValueKey('checkout-pay-button')), findsNothing);
     expect(store.bagQuantity, 1);
+
+    await tester.ensureVisible(find.text('Escríbenos por WhatsApp'));
+    await tester.tap(find.text('Escríbenos por WhatsApp'));
+    await tester.pump();
+    expect(openedWhatsApp, conciergeWhatsAppUri());
+    expect(
+      openedWhatsApp.toString(),
+      startsWith('https://wa.me/528261066868'),
+    );
   });
 
-  testWidgets('no order after the check shows the payment banner and retry', (
+  testWidgets('capable lookup with no match shows banner 1 and retry', (
     tester,
   ) async {
     final store = await _loadedStore();
@@ -124,6 +173,7 @@ void main() {
             return null;
           }),
           orderLookupTimeout: Duration.zero,
+          correlationAvailable: true,
           attemptIdentity:
               const CheckoutAttemptIdentity(checkoutToken: 'chk-1'),
         ),
@@ -135,12 +185,17 @@ void main() {
 
     expect(calls, 1);
     expect(find.text('No se completó tu pago'), findsOneWidget);
+    expect(
+      find.text('No se hizo ningún cargo. Tus productos siguen en el carrito.'),
+      findsOneWidget,
+    );
     expect(find.text('Estamos revisando tu pago'), findsNothing);
     expect(find.text('No pudimos abrir el pago'), findsNothing);
+    expect(find.text('Intentar de nuevo'), findsOneWidget);
     expect(
       tester
           .widget<BoutiqueButton>(
-            find.byKey(const ValueKey('checkout-pay-button')),
+            find.byKey(const ValueKey('checkout-retry-button')),
           )
           .onPressed,
       isNotNull,
@@ -176,16 +231,16 @@ void main() {
 
     expect(calls, 0);
     expect(find.text('No pudimos abrir el pago'), findsOneWidget);
+    expect(
+      find.text(
+        'Revisa tu conexión e inténtalo otra vez. Tus productos siguen en el carrito.',
+      ),
+      findsOneWidget,
+    );
     expect(find.text('No se completó tu pago'), findsNothing);
     expect(find.text('Estamos revisando tu pago'), findsNothing);
-    expect(
-      tester
-          .widget<BoutiqueButton>(
-            find.byKey(const ValueKey('checkout-pay-button')),
-          )
-          .onPressed,
-      isNotNull,
-    );
+    expect(find.text('Intentar de nuevo'), findsOneWidget);
+    expect(find.byKey(const ValueKey('checkout-pay-button')), findsNothing);
     expect(store.bagQuantity, 1);
   });
 
@@ -220,6 +275,7 @@ void main() {
 
     expect(found?.orderId, 'gid://shopify/Order/5');
     expect(find.byKey(const ValueKey('checkout-pay-button')), findsNothing);
+    expect(find.text('Intentar de nuevo'), findsNothing);
     expect(find.text('No se completó tu pago'), findsNothing);
     expect(find.text('Estamos revisando tu pago'), findsNothing);
     expect(find.text('No pudimos abrir el pago'), findsNothing);
@@ -233,10 +289,22 @@ void _expectNoDeclineCopy() {
   expect(find.textContaining('declin'), findsNothing);
 }
 
-Widget _bannerHost(CheckoutReturnPhase phase) {
+Widget _bannerHost(
+  CheckoutReturnPhase phase, {
+  VoidCallback? onRetry,
+  VoidCallback? onViewOrders,
+  VoidCallback? onWhatsApp,
+}) {
   return MaterialApp(
     theme: buildTheme(),
-    home: Scaffold(body: CheckoutReturnBanner(phase: phase)),
+    home: Scaffold(
+      body: CheckoutReturnBanner(
+        phase: phase,
+        onRetry: onRetry,
+        onViewOrders: onViewOrders,
+        onWhatsApp: onWhatsApp,
+      ),
+    ),
   );
 }
 

@@ -1,8 +1,7 @@
 /// Banners for a checkout that returned without completion (MON-UX-03).
 ///
-/// Titles are the PM-approved sentences. Body and retry CTA are designer
-/// placeholders until copy exists in the repo. Nothing here names a card,
-/// a provider, or a decline reason.
+/// Copy is the designer text, kept in [checkout_return.dart]. Nothing here
+/// names a card, a provider, or a decline reason.
 library;
 
 import 'package:flutter/material.dart';
@@ -13,17 +12,55 @@ import 'checkout_return.dart';
 class CheckoutReturnBanner extends StatelessWidget {
   const CheckoutReturnBanner({
     required this.phase,
+    this.onRetry,
+    this.onViewOrders,
+    this.onWhatsApp,
     super.key,
   });
 
   final CheckoutReturnPhase phase;
+  final VoidCallback? onRetry;
+  final VoidCallback? onViewOrders;
+  final VoidCallback? onWhatsApp;
 
   static const bannerKey = ValueKey<String>('checkout-return-banner');
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    if (phase == CheckoutReturnPhase.confirming) {
+      return Semantics(
+        key: bannerKey,
+        container: true,
+        liveRegion: true,
+        label: kCheckoutReturnConfirmingText,
+        child: Padding(
+          padding: const EdgeInsets.only(bottom: 16),
+          child: Row(
+            children: [
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2,
+                  color: palette.ink,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  kCheckoutReturnConfirmingText,
+                  style: boutiqueText(size: 13, color: palette.ink),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
     final title = switch (phase) {
+      CheckoutReturnPhase.confirming => kCheckoutReturnConfirmingText,
       CheckoutReturnPhase.paymentNotCompleted =>
         kCheckoutReturnPaymentNotCompletedTitle,
       CheckoutReturnPhase.sheetDidNotOpen =>
@@ -31,11 +68,11 @@ class CheckoutReturnBanner extends StatelessWidget {
       CheckoutReturnPhase.reviewing => kCheckoutReturnReviewingTitle,
     };
     final body = switch (phase) {
+      CheckoutReturnPhase.confirming => '',
       CheckoutReturnPhase.paymentNotCompleted =>
-        kCheckoutReturnPaymentNotCompletedBodyTodo,
-      CheckoutReturnPhase.sheetDidNotOpen =>
-        kCheckoutReturnSheetDidNotOpenBodyTodo,
-      CheckoutReturnPhase.reviewing => kCheckoutReturnReviewingBodyTodo,
+        kCheckoutReturnPaymentNotCompletedBody,
+      CheckoutReturnPhase.sheetDidNotOpen => kCheckoutReturnSheetDidNotOpenBody,
+      CheckoutReturnPhase.reviewing => kCheckoutReturnReviewingBody,
     };
     return Semantics(
       key: bannerKey,
@@ -54,45 +91,43 @@ class CheckoutReturnBanner extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                if (phase == CheckoutReturnPhase.reviewing) ...[
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: SizedBox(
-                      width: 16,
-                      height: 16,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: palette.ink,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 10),
-                ],
-                Expanded(
-                  child: Text(
-                    title,
-                    style: boutiqueText(
-                      size: 16,
-                      weight: FontWeight.w600,
-                      color: palette.ink,
-                    ),
-                  ),
-                ),
-              ],
+            Text(
+              title,
+              style: boutiqueText(
+                size: 16,
+                weight: FontWeight.w600,
+                color: palette.ink,
+              ),
             ),
             const SizedBox(height: 6),
             Text(
               body,
               style: boutiqueText(size: 12, color: palette.inkMuted),
             ),
-            const SizedBox(height: 8),
-            Text(
-              kCheckoutReturnRetryCtaTodo,
-              style: boutiqueText(size: 12, color: palette.inkMuted),
-            ),
+            if (phase == CheckoutReturnPhase.paymentNotCompleted ||
+                phase == CheckoutReturnPhase.sheetDidNotOpen) ...[
+              const SizedBox(height: 16),
+              BoutiqueButton(
+                key: const ValueKey('checkout-retry-button'),
+                label: kCheckoutReturnRetryLabel,
+                onPressed: onRetry,
+              ),
+            ],
+            if (phase == CheckoutReturnPhase.reviewing) ...[
+              const SizedBox(height: 16),
+              BoutiqueButton(
+                key: const ValueKey('checkout-view-orders-button'),
+                label: kCheckoutReturnViewOrdersLabel,
+                onPressed: onViewOrders,
+              ),
+              const SizedBox(height: 10),
+              BoutiqueButton(
+                key: const ValueKey('checkout-whatsapp-button'),
+                label: kCheckoutReturnWhatsAppLabel,
+                filled: false,
+                onPressed: onWhatsApp,
+              ),
+            ],
           ],
         ),
       ),

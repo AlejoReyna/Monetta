@@ -12,6 +12,10 @@ void main() {
       expect(kCheckoutOrderLookupInterval, const Duration(seconds: 3));
       expect(kCheckoutOrderLookupTimeout, const Duration(seconds: 30));
     });
+
+    test('token correlation stays off until sources return tokens', () {
+      expect(kCheckoutTokenCorrelationAvailable, isFalse);
+    });
   });
 
   group('decideCheckoutReturn', () {
@@ -41,7 +45,8 @@ void main() {
       expect(clock.elapsed, kCheckoutOrderLookupInterval);
     });
 
-    test('not found after timeout polls through the whole window', () async {
+    test('timeout without correlation is uncertain, not a missed charge',
+        () async {
       final clock = _Clock(DateTime.utc(2026, 10, 15));
       final seenAt = <Duration>[];
       final decision = await decideCheckoutReturn(
@@ -58,7 +63,9 @@ void main() {
         delay: (duration) async => clock.advance(duration),
       );
 
-      expect(decision, isA<CheckoutOrderNotFound>());
+      expect(kCheckoutTokenCorrelationAvailable, isFalse);
+      expect(decision, isA<CheckoutReturnUncertain>());
+      expect(decision, isNot(isA<CheckoutOrderNotFound>()));
       expect(clock.elapsed, kCheckoutOrderLookupTimeout);
       expect(
         seenAt,
@@ -67,6 +74,37 @@ void main() {
             Duration(seconds: seconds),
         ],
       );
+    });
+
+    test('capable lookup with no match is banner 1', () async {
+      final clock = _Clock(DateTime.utc(2026, 10, 15));
+      final decision = await decideCheckoutReturn(
+        result: const CheckoutCancelled(),
+        attempt: const CheckoutAttemptIdentity(cartToken: 'cart-token'),
+        correlationAvailable: true,
+        lookup: _ScriptedLookup((_) async => null),
+        timeout: Duration.zero,
+        clock: clock.now,
+        delay: (duration) async => clock.advance(duration),
+      );
+
+      expect(decision, isA<CheckoutOrderNotFound>());
+    });
+
+    test('a lookup error stays uncertain even when correlation is on',
+        () async {
+      final clock = _Clock(DateTime.utc(2026, 10, 15));
+      final decision = await resolvePaymentReturn(
+        attempt: const CheckoutAttemptIdentity(cartToken: 'cart-token'),
+        correlationAvailable: true,
+        lookup: _ScriptedLookup((_) async => throw StateError('source down')),
+        timeout: Duration.zero,
+        clock: clock.now,
+        delay: (duration) async => clock.advance(duration),
+      );
+
+      expect(decision, isA<CheckoutReturnUncertain>());
+      expect(decision, isNot(isA<CheckoutOrderNotFound>()));
     });
 
     test('a lookup error is not treated as not-found before timeout', () async {
