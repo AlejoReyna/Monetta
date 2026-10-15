@@ -164,6 +164,7 @@ function publicReason(reason: string): string {
   if (
     reason === 'refund_in_progress' ||
     reason === 'refund_review' ||
+    reason === 'payment_review' ||
     reason === 'unpaid_or_pending' ||
     reason === 'unfulfilled'
   ) {

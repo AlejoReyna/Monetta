@@ -232,14 +232,15 @@ the response is 503 `order_check_unavailable` and nothing is deleted.
 A cancellation that was never charged does not block. Cancellation is Shopify
 `cancelledAt`, a present `cancelReason`, financial status `cancelled` /
 `canceled`, or a cancelled tag. `refunded` and `voided` do not block. A refund
-in progress does, including a cancelled `paid` or `partially_paid` order. A
-cancelled `partially_refunded` order returns `refund_review` until the order
-carries the tag `monetta-reembolso-revisado` (exact, case-insensitive). The
-Customer Account API does not expose order tags, so that tag is read from the
-order mirror after the Shopify webhook. A real refund-in-progress status or
-tag still blocks when the review tag is present. An unpaid or unfulfilled
-order that is not cancelled still returns `blocked_open_order` and no data is
-removed. A legacy Monetta session returns `reauth_required`. After the fresh
+in progress does. A cancelled `paid` or `partially_paid` order with no refund
+in progress returns `payment_review`. A cancelled `partially_refunded` order
+returns `refund_review` until the order carries the tag
+`monetta-reembolso-revisado` (exact, case-insensitive). That tag does not
+release a cancelled paid or partially paid order, and it does not release a
+pending refund. The Customer Account API does not expose order tags, so that
+tag is read from the order mirror after the Shopify webhook. An unpaid or
+unfulfilled order that is not cancelled still returns `blocked_open_order` and
+no data is removed. A legacy Monetta session returns `reauth_required`. After the fresh
 Shopify login, `POST /customers/me/account-deletion/email-match` compares the
 Customer Account email with the legacy account email (trim + lowercase). A
 mismatch returns `email_mismatch` and the delete call deletes nothing. More

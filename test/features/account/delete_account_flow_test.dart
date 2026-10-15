@@ -388,6 +388,47 @@ void main() {
     expect(client.deleteCalls, 0);
   });
 
+  testWidgets('a cancelled charge with no refund asks to review the payment', (
+    tester,
+  ) async {
+    final client = _Client(
+      const AccountDeletionBlocked(
+        AccountDeletionOrderRef(
+          id: '9',
+          shopifyOrderId: '9',
+          reason: 'payment_review',
+          orderName: '#1042',
+        ),
+      ),
+    );
+    Uri? opened;
+    await _open(
+      tester,
+      client: client,
+      reauthenticate: () async => throw StateError('should not reauth'),
+      signOut: () async {},
+      openUri: (uri) async {
+        opened = uri;
+        return true;
+      },
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    expect(
+      find.text(deleteAccountPaymentReviewMessage('#1042')),
+      findsOneWidget,
+    );
+    expect(find.text(kDeleteAccountRefundBlocked), findsNothing);
+    expect(find.text('Escríbenos por WhatsApp'), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('delete-account-whatsapp')));
+    await tester.pumpAndSettle();
+    expect(opened, accountDeletionPaymentReviewUri(orderNumber: '#1042'));
+    expect(opened.toString(), contains('wa.me/528261066868'));
+    expect(opened?.queryParameters['text'], contains('#1042'));
+    expect(client.deleteCalls, 0);
+  });
+
   testWidgets('a mismatched Shopify login stays on the delete flow', (
     tester,
   ) async {

@@ -5,10 +5,11 @@
  * A refund in progress blocks even when the order is cancelled. That is a
  * refund status or a refund-in-progress tag, and it still blocks when the
  * review tag below is present. A cancelled `paid` or `partially_paid` order
- * uses that same in-progress block. A cancelled `partially_refunded` order
- * is a separate review block until Shopify carries
- * {@link kRefundReviewReleaseTag}. `refunded`, `voided`, and a cancellation
- * that was never charged do not block.
+ * with no refund in progress is a payment review. A cancelled
+ * `partially_refunded` order is a separate review block until Shopify carries
+ * {@link kRefundReviewReleaseTag}. That tag releases only the partial-refund
+ * review. `refunded`, `voided`, and a cancellation that was never charged do
+ * not block.
  */
 
 export const kRefundReviewReleaseTag = 'monetta-reembolso-revisado';
@@ -17,7 +18,8 @@ export type OpenOrderBlockReason =
   | 'unpaid_or_pending'
   | 'unfulfilled'
   | 'refund_in_progress'
-  | 'refund_review';
+  | 'refund_review'
+  | 'payment_review';
 
 export interface OpenOrderSnapshot {
   readonly financialStatus: string | null;
@@ -117,7 +119,8 @@ export function openOrderBlockReason(
       return 'refund_review';
     }
     if (financial === 'paid' || financial === 'partially_paid') {
-      return 'refund_in_progress';
+      // The review tag releases only a cancelled partial refund.
+      return 'payment_review';
     }
     return null;
   }

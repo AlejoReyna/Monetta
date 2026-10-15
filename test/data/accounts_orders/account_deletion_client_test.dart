@@ -187,6 +187,32 @@ void main() {
     expect(order.orderName, '#1042');
   });
 
+  test('payment review keeps its reason and order name', () async {
+    final client = HttpAccountDeletionClient(
+      baseUrl: 'https://accounts.example',
+      httpClient: MockClient((request) async {
+        return http.Response(
+          jsonEncode({
+            'result': 'blocked_open_order',
+            'order': {
+              'id': '900',
+              'shopifyOrderId': '900',
+              'reason': 'payment_review',
+              'orderName': '#1042',
+            },
+          }),
+          200,
+        );
+      }),
+    );
+    addTearDown(client.close);
+
+    final blocked = await client.precheck('shopper-token');
+    final order = (blocked as AccountDeletionBlocked).order;
+    expect(order.reason, 'payment_review');
+    expect(order.orderName, '#1042');
+  });
+
   test('too many orders is its own result', () async {
     final client = HttpAccountDeletionClient(
       baseUrl: 'https://accounts.example',

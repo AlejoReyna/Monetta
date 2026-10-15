@@ -291,19 +291,19 @@ describe('open order block check', () => {
       financialStatus: 'paid',
       fulfillmentStatus: 'unfulfilled',
       tags: ['cancelled'],
-    })).toBe('refund_in_progress');
+    })).toBe('payment_review');
     expect(openOrderBlockReason({
       financialStatus: 'paid',
       fulfillmentStatus: 'unfulfilled',
       tags: [],
       cancelledAt: '2026-02-01T00:00:00Z',
-    })).toBe('refund_in_progress');
+    })).toBe('payment_review');
     expect(openOrderBlockReason({
       financialStatus: 'partially_paid',
       fulfillmentStatus: 'fulfilled',
       tags: [],
       cancelReason: 'customer',
-    })).toBe('refund_in_progress');
+    })).toBe('payment_review');
     expect(openOrderBlockReason({
       financialStatus: 'partially_refunded',
       fulfillmentStatus: 'unfulfilled',
@@ -333,7 +333,13 @@ describe('open order block check', () => {
       fulfillmentStatus: 'unfulfilled',
       tags: ['monetta-reembolso-revisado'],
       cancelledAt: '2026-02-01T00:00:00Z',
-    })).toBe('refund_in_progress');
+    })).toBe('payment_review');
+    expect(openOrderBlockReason({
+      financialStatus: 'partially_paid',
+      fulfillmentStatus: 'unfulfilled',
+      tags: [' Monetta-Reembolso-Revisado '],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBe('payment_review');
     expect(openOrderBlockReason({
       financialStatus: 'refund_in_progress',
       fulfillmentStatus: 'fulfilled',
@@ -527,10 +533,11 @@ describe('account deletion', () => {
     expect(shopify.calls).toBe(1);
   });
 
-  it('blocks a cancelled order that was charged until the refund finishes', async () => {
+  it('asks for a payment review on a cancelled charge with no refund', async () => {
     const { service, shopifyOrders, appData, customerData, shopify, state } = harness();
     shopifyOrders.orders = [{
       id: 'gid://shopify/Order/900',
+      name: '#1042',
       financialStatus: 'PAID',
       fulfillmentStatus: 'UNFULFILLED',
       cancelledAt: '2026-03-01T12:00:00Z',
@@ -541,7 +548,12 @@ describe('account deletion', () => {
     const precheck = await service.precheck('77', 'shopify-token-77');
     expect(precheck).toEqual({
       result: 'blocked_open_order',
-      order: { id: '900', shopifyOrderId: '900', reason: 'refund_in_progress' },
+      order: {
+        id: '900',
+        shopifyOrderId: '900',
+        reason: 'payment_review',
+        orderName: '#1042',
+      },
     });
     const executed = await service.execute('access', 'id-token');
     expect(executed.result).toBe('blocked_open_order');
@@ -610,6 +622,40 @@ describe('account deletion', () => {
       shopifyDataErasure: 'requested',
     });
     expect(appData.calls).toBe(1);
+  });
+
+  it('keeps a cancelled paid order in payment review when the refund tag is present', async () => {
+    const { orders, service, shopifyOrders, appData, customerData, shopify } = harness();
+    await orders.upsertByShopifyOrderId(order({
+      financialStatus: 'paid',
+      fulfillmentStatus: 'unfulfilled',
+      shopifyOrderId: '900',
+      tags: ['monetta-reembolso-revisado'],
+    }));
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/900',
+      name: '#1042',
+      financialStatus: 'PAID',
+      fulfillmentStatus: 'UNFULFILLED',
+      cancelledAt: '2026-03-01T12:00:00Z',
+      cancelReason: null,
+      tags: [],
+    }];
+
+    const precheck = await service.precheck('77', 'shopify-token-77');
+    expect(precheck).toEqual({
+      result: 'blocked_open_order',
+      order: {
+        id: '900',
+        shopifyOrderId: '900',
+        reason: 'payment_review',
+        orderName: '#1042',
+      },
+    });
+    expect((await service.execute('access', 'id-token')).result).toBe('blocked_open_order');
+    expect(appData.calls).toBe(0);
+    expect(customerData.calls).toBe(0);
+    expect(shopify.calls).toBe(0);
   });
 
   it('keeps a real refund in progress blocked when the review tag is present', async () => {
@@ -975,6 +1021,61 @@ describe('account deletion HTTP', () => {
     expect(response.status).toBe(200);
     expect(await response.json()).toEqual({ result: 'too_many_orders' });
     expect(shopify.calls).toBe(0);
+  });
+
+  it('returns payment_review for a cancelled charge and deletes nothing', async () => {
+    const { orders, service, shopifyOrders, shopify, appData } = harness();
+    await orders.upsertByShopifyOrderId(order({
+      financialStatus: 'paid',
+      fulfillmentStatus: 'unfulfilled',
+      shopifyOrderId: '900',
+      tags: ['monetta-reembolso-revisado'],
+    }));
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/900',
+      name: '#1042',
+      financialStatus: 'PARTIALLY_PAID',
+      fulfillmentStatus: 'UNFULFILLED',
+      cancelledAt: '2026-03-01T12:00:00Z',
+      cancelReason: 'customer',
+      tags: [],
+    }];
+    await start(orders, service);
+
+    const blocked = await fetch(`${baseUrl}/customers/me/account-deletion/precheck`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer shopify-token-77' },
+    });
+    expect(blocked.status).toBe(200);
+    expect(await blocked.json()).toEqual({
+      result: 'blocked_open_order',
+      order: {
+        id: '900',
+        shopifyOrderId: '900',
+        reason: 'payment_review',
+        orderName: '#1042',
+      },
+    });
+
+    const deleted = await fetch(`${baseUrl}/customers/me/account-deletion`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer shopify-token-77',
+        'X-Monetta-Id-Token': 'fresh-id-token',
+      },
+    });
+    expect(deleted.status).toBe(200);
+    expect(await deleted.json()).toEqual({
+      result: 'blocked_open_order',
+      order: {
+        id: '900',
+        shopifyOrderId: '900',
+        reason: 'payment_review',
+        orderName: '#1042',
+      },
+    });
+    expect(shopify.calls).toBe(0);
+    expect(appData.calls).toBe(0);
   });
 
   it('requires a fresh login and reports Shopify erasure as requested', async () => {

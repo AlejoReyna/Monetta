@@ -30,6 +30,10 @@ const String kDeleteAccountRefundBlocked =
 String deleteAccountRefundReviewMessage(String orderNumber) =>
     'Necesitamos revisar un reembolso de tu pedido $orderNumber antes de eliminar tu cuenta.';
 
+String deleteAccountPaymentReviewMessage(String orderNumber) =>
+    'Necesitamos revisar el pago de tu pedido $orderNumber antes de eliminar tu cuenta. '
+    'Escríbenos y lo resolvemos.';
+
 const String kDeleteAccountEmailMismatchTitle = 'Entraste con otra cuenta';
 
 String deleteAccountEmailMismatchBody(String maskedEmail) =>
@@ -305,6 +309,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     if (order?.reason == 'refund_review') {
       return deleteAccountRefundReviewMessage(_orderLabel(order));
     }
+    if (order?.reason == 'payment_review') {
+      return deleteAccountPaymentReviewMessage(_orderLabel(order));
+    }
     if (order?.reason == 'refund_in_progress')
       return kDeleteAccountRefundBlocked;
     return kDeleteAccountBlocked;
@@ -375,6 +382,18 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   Future<void> _openSupport() =>
       _openUri(widget.supportUri ?? accountDeletionSupportUri());
 
+  Uri _blockedSupportUri() {
+    final order = _blockedOrder;
+    final label = _orderLabel(order);
+    if (order?.reason == 'refund_review') {
+      return accountDeletionRefundReviewUri(orderNumber: label);
+    }
+    if (order?.reason == 'payment_review') {
+      return accountDeletionPaymentReviewUri(orderNumber: label);
+    }
+    return widget.supportUri ?? accountDeletionSupportUri();
+  }
+
   Future<void> _openUri(Uri uri) async {
     final open = widget.openUri ??
         ((target) => launchUrl(target, mode: LaunchMode.externalApplication));
@@ -418,15 +437,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               },
               secondaryLabel: 'Escríbenos por WhatsApp',
               secondaryKey: const ValueKey('delete-account-whatsapp'),
-              onSecondary: () => unawaited(
-                _openUri(
-                  _blockedOrder?.reason == 'refund_review'
-                      ? accountDeletionRefundReviewUri(
-                          orderNumber: _orderLabel(_blockedOrder),
-                        )
-                      : (widget.supportUri ?? accountDeletionSupportUri()),
-                ),
-              ),
+              onSecondary: () => unawaited(_openUri(_blockedSupportUri())),
             ),
           _Phase.error => _MessageState(
               message: kDeleteAccountError,

@@ -294,6 +294,9 @@ Uri accountDeletionSupportUri({String phoneE164 = kWhatsAppE164}) {
 const String kDeleteAccountRefundReviewWhatsAppLead =
     'Hola, quiero eliminar mi cuenta de Monetta. Necesito que revisen el reembolso del pedido';
 
+const String kDeleteAccountPaymentReviewWhatsAppLead =
+    'Hola, quiero eliminar mi cuenta de Monetta. Necesito que revisen el pago del pedido';
+
 /// WhatsApp handoff for a cancelled partial refund that still needs review.
 Uri accountDeletionRefundReviewUri({
   required String orderNumber,
@@ -302,6 +305,17 @@ Uri accountDeletionRefundReviewUri({
   final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
   return Uri.https('wa.me', '/$phone', <String, String>{
     'text': '$kDeleteAccountRefundReviewWhatsAppLead $orderNumber.',
+  });
+}
+
+/// WhatsApp handoff for a cancelled charge that still needs a payment review.
+Uri accountDeletionPaymentReviewUri({
+  required String orderNumber,
+  String phoneE164 = kWhatsAppE164,
+}) {
+  final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
+  return Uri.https('wa.me', '/$phone', <String, String>{
+    'text': '$kDeleteAccountPaymentReviewWhatsAppLead $orderNumber.',
   });
 }
 

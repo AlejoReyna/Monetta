@@ -30,7 +30,8 @@ class AccountDeletionOrderRef {
   final String id;
   final String? shopifyOrderId;
 
-  /// `unpaid_or_pending`, `unfulfilled`, `refund_in_progress`, or `refund_review`.
+  /// `unpaid_or_pending`, `unfulfilled`, `refund_in_progress`,
+  /// `refund_review`, or `payment_review`.
   final String? reason;
 
   /// Shopper-facing order name, such as `#1042`.
