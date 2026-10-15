@@ -1,27 +1,36 @@
 import type { Express, NextFunction, Request, Response } from 'express';
 import { AccountDeletionService } from './accountDeletionService.js';
+import type { DeletionCredential } from './ports.js';
 
 export function registerAccountDeletionRoutes(
   app: Express,
   options: {
     readonly deletion: AccountDeletionService;
-    readonly authenticate: (req: Request, res: Response) => Promise<string | null>;
+    readonly authenticate: (
+      req: Request,
+      res: Response,
+    ) => Promise<{ readonly customerId: string; readonly credential: DeletionCredential } | null>;
   },
 ): void {
   app.post(
     '/customers/me/account-deletion/precheck',
     async (req: Request, res: Response, next: NextFunction) => {
       try {
-        const customerId = await options.authenticate(req, res);
-        if (customerId === null) return;
+        const shopper = await options.authenticate(req, res);
+        if (shopper === null) return;
         const accessToken = bearer(req);
         if (accessToken === null) {
           res.status(401).json({ error: 'unauthorized' });
           return;
         }
-        const outcome = await options.deletion.precheck(customerId, accessToken);
-        if (outcome.result === 'order_check_unavailable') {
-          res.status(503).json({ error: 'order_check_unavailable' });
+        const outcome = await options.deletion.precheck(
+          shopper.customerId,
+          accessToken,
+          shopper.credential,
+        );
+        const special = specialBody(outcome.result);
+        if (special !== null) {
+          res.status(special.status).json(special.body);
           return;
         }
         res.status(200).json(publicBody(outcome));
@@ -50,13 +59,10 @@ export function registerAccountDeletionRoutes(
             });
             return;
           case 'blocked_open_order':
-            res.status(200).json({
-              result: 'blocked_open_order',
-              order: {
-                id: outcome.order.id,
-                shopifyOrderId: outcome.order.shopifyOrderId,
-              },
-            });
+            res.status(200).json(blockedBody(outcome.order));
+            return;
+          case 'too_many_orders':
+            res.status(200).json({ result: 'too_many_orders' });
             return;
           case 'stale_reauthentication':
             res.status(401).json({ error: 'stale_reauthentication' });
@@ -84,22 +90,45 @@ export function registerAccountDeletionRoutes(
 }
 
 function publicBody(outcome: Awaited<ReturnType<AccountDeletionService['precheck']>>): unknown {
-  if (outcome.result === 'blocked_open_order') {
-    return {
-      result: 'blocked_open_order',
-      order: {
-        id: outcome.order.id,
-        shopifyOrderId: outcome.order.shopifyOrderId,
-      },
-    };
-  }
+  if (outcome.result === 'blocked_open_order') return blockedBody(outcome.order);
   if (outcome.result === 'deleted') {
     return { result: 'deleted', shopifyDataErasure: 'requested' };
   }
-  if (outcome.result === 'order_check_unavailable') {
-    throw new Error('order_check_unavailable');
+  if (outcome.result !== 'clear') {
+    throw new Error(outcome.result);
   }
   return { result: 'clear' };
+}
+
+function blockedBody(order: { readonly id: string; readonly shopifyOrderId: string | null; readonly reason: string }): unknown {
+  return {
+    result: 'blocked_open_order',
+    order: {
+      id: order.id,
+      shopifyOrderId: order.shopifyOrderId,
+      reason: publicReason(order.reason),
+    },
+  };
+}
+
+function publicReason(reason: string): string {
+  if (
+    reason === 'refund_in_progress' ||
+    reason === 'unpaid_or_pending' ||
+    reason === 'unfulfilled'
+  ) {
+    return reason;
+  }
+  return 'unpaid_or_pending';
+}
+
+function specialBody(result: string): { readonly status: number; readonly body: unknown } | null {
+  if (result === 'order_check_unavailable') {
+    return { status: 503, body: { error: 'order_check_unavailable' } };
+  }
+  if (result === 'reauth_required') return { status: 200, body: { result: 'reauth_required' } };
+  if (result === 'too_many_orders') return { status: 200, body: { result: 'too_many_orders' } };
+  return null;
 }
 
 function bearer(req: Request): string | null {

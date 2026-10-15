@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/data/accounts_orders/account_deletion_client.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_error.dart';
 import 'package:monetta_app/features/account/delete_account_screen.dart';
@@ -45,6 +46,7 @@ Future<void> _open(
   void Function(AccountDeletionOrderRef order)? onViewOrder,
   Duration confirmDelay = const Duration(seconds: 2),
   Duration slowAfter = const Duration(seconds: 10),
+  Future<bool> Function(Uri uri)? openUri,
 }) async {
   await tester.pumpWidget(
     MaterialApp(
@@ -61,7 +63,7 @@ Future<void> _open(
               onViewOrder: onViewOrder ?? (_) {},
               confirmDelay: confirmDelay,
               slowAfter: slowAfter,
-              openUri: (_) async => true,
+              openUri: openUri ?? (_) async => true,
             ),
             child: const Text('Inicio'),
           ),
@@ -245,5 +247,120 @@ void main() {
     expect(find.text('¿Eliminar tu cuenta?'), findsOneWidget);
     expect(find.text(kDeleteAccountError), findsNothing);
     expect(clear.deleteCalls, 0);
+  });
+
+  testWidgets('a charged cancellation uses the refund block screen', (
+    tester,
+  ) async {
+    final client = _Client(
+      const AccountDeletionBlocked(
+        AccountDeletionOrderRef(
+          id: '9',
+          shopifyOrderId: '9',
+          reason: 'refund_in_progress',
+        ),
+      ),
+    );
+    await _open(
+      tester,
+      client: client,
+      reauthenticate: () async => throw StateError('should not reauth'),
+      signOut: () async {},
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    expect(find.text(kDeleteAccountRefundBlocked), findsOneWidget);
+    expect(find.text('Ver pedido'), findsOneWidget);
+    expect(find.text(kDeleteAccountBlocked), findsNothing);
+  });
+
+  testWidgets('legacy reauth returns to the delete screen and Ahora no closes',
+      (
+    tester,
+  ) async {
+    final client = _Client(const AccountDeletionReauthRequired());
+    var logins = 0;
+    await _open(
+      tester,
+      client: client,
+      reauthenticate: () async {
+        logins += 1;
+        return const FreshCustomerLogin(accessToken: 'fresh', idToken: 'id');
+      },
+      signOut: () async {},
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    expect(find.text(kDeleteAccountReauthTitle), findsOneWidget);
+    expect(find.text(kDeleteAccountReauthBody), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('delete-account-reauth')));
+    await tester.pumpAndSettle();
+    expect(logins, 1);
+    expect(find.text('¿Eliminar tu cuenta?'), findsOneWidget);
+    expect(find.text('Eliminar cuenta'), findsOneWidget);
+    expect(find.text(kDeleteAccountReauthTitle), findsNothing);
+    expect(find.text('Inicio'), findsNothing);
+    expect(client.deleteCalls, 0);
+
+    client.precheckResult = const AccountDeletionReauthRequired();
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    await tester
+        .tap(find.byKey(const ValueKey('delete-account-reauth-dismiss')));
+    await tester.pumpAndSettle();
+    expect(find.text('Inicio'), findsOneWidget);
+    expect(find.text(kDeleteAccountReauthTitle), findsNothing);
+  });
+
+  testWidgets('a failed order check explains that nothing was deleted', (
+    tester,
+  ) async {
+    final client = _Client(const AccountDeletionOrderCheckUnavailable());
+    await _open(
+      tester,
+      client: client,
+      reauthenticate: () async => throw StateError('should not reauth'),
+      signOut: () async {},
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    expect(find.text(kDeleteAccountOrderCheckTitle), findsOneWidget);
+    expect(find.text(kDeleteAccountOrderCheckBody), findsOneWidget);
+    expect(find.text('Reintentar'), findsOneWidget);
+
+    client.precheckResult = const AccountDeletionClear();
+    await tester
+        .tap(find.byKey(const ValueKey('delete-account-order-check-retry')));
+    await tester.pumpAndSettle();
+    expect(client.precheckCalls, 2);
+  });
+
+  testWidgets('too many orders opens WhatsApp and does not delete', (
+    tester,
+  ) async {
+    final client = _Client(const AccountDeletionTooManyOrders());
+    Uri? opened;
+    await _open(
+      tester,
+      client: client,
+      reauthenticate: () async => throw StateError('should not reauth'),
+      signOut: () async {},
+      openUri: (uri) async {
+        opened = uri;
+        return true;
+      },
+    );
+    await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+    await tester.pumpAndSettle();
+    expect(find.text(kDeleteAccountTooManyTitle), findsOneWidget);
+    expect(find.text(kDeleteAccountTooManyBody), findsOneWidget);
+
+    await tester
+        .tap(find.byKey(const ValueKey('delete-account-too-many-whatsapp')));
+    await tester.pumpAndSettle();
+    expect(opened, accountDeletionManualRequestUri());
+    expect(opened?.queryParameters['text'], kDeleteAccountManualWhatsAppText);
+    expect(client.deleteCalls, 0);
   });
 }

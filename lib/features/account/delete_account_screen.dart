@@ -24,6 +24,28 @@ const String kDeleteAccountSuccess =
 const String kDeleteAccountBlocked =
     'Tienes un pedido en curso. Podrás eliminar tu cuenta cuando se complete.';
 
+const String kDeleteAccountRefundBlocked =
+    'Tienes un reembolso en proceso. Podrás eliminar tu cuenta cuando se complete.';
+
+const String kDeleteAccountReauthTitle =
+    'Vuelve a iniciar sesión para continuar';
+
+const String kDeleteAccountReauthBody =
+    'Por seguridad, antes de eliminar tu cuenta necesitamos que entres de nuevo '
+    'con tu cuenta de Monetta.';
+
+const String kDeleteAccountOrderCheckTitle = 'No pudimos revisar tus pedidos';
+
+const String kDeleteAccountOrderCheckBody =
+    'No se eliminó nada. Inténtalo más tarde.';
+
+const String kDeleteAccountTooManyTitle =
+    'Necesitamos ayudarte con esta solicitud';
+
+const String kDeleteAccountTooManyBody =
+    'Tu cuenta tiene muchos pedidos y no podemos eliminarla desde la app. '
+    'Escríbenos y lo hacemos por ti.';
+
 const String kDeleteAccountError =
     'No pudimos eliminar tu cuenta. Intenta de nuevo o escríbenos.';
 
@@ -89,7 +111,17 @@ class DeleteAccountScreen extends StatefulWidget {
   State<DeleteAccountScreen> createState() => _DeleteAccountScreenState();
 }
 
-enum _Phase { info, loading, blocked, error, offline, success }
+enum _Phase {
+  info,
+  loading,
+  blocked,
+  error,
+  offline,
+  success,
+  reauth,
+  orderCheck,
+  tooManyOrders,
+}
 
 class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   AccountDeletionClient? _ownedClient;
@@ -127,7 +159,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   Future<void> _continue() async {
     setState(() => _phase = _Phase.loading);
     _setLoading(true);
-    final token = await widget.accessToken();
+    final freshToken = _freshLogin?.accessToken.trim();
+    final token = freshToken != null && freshToken.isNotEmpty
+        ? freshToken
+        : await widget.accessToken();
     if (!mounted) return;
     if (token == null || token.isEmpty) {
       _setLoading(false);
@@ -137,9 +172,16 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     final outcome = await _deletionClient.precheck(token);
     if (!mounted) return;
     _setLoading(false);
+    _showOutcome(outcome, onClear: _reauthenticate);
+  }
+
+  void _showOutcome(
+    AccountDeletionOutcome outcome, {
+    required Future<void> Function() onClear,
+  }) {
     switch (outcome) {
       case AccountDeletionClear():
-        await _reauthenticate();
+        unawaited(onClear());
       case AccountDeletionBlocked(:final order):
         setState(() {
           _blockedOrder = order;
@@ -149,9 +191,35 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         setState(() => _phase = _Phase.success);
       case AccountDeletionOffline():
         setState(() => _phase = _Phase.offline);
+      case AccountDeletionOrderCheckUnavailable():
+        setState(() => _phase = _Phase.orderCheck);
+      case AccountDeletionReauthRequired():
+        setState(() => _phase = _Phase.reauth);
+      case AccountDeletionTooManyOrders():
+        setState(() => _phase = _Phase.tooManyOrders);
       case AccountDeletionFailed():
       case AccountDeletionStale():
         setState(() => _phase = _Phase.error);
+    }
+  }
+
+  Future<void> _loginAndReturnToDelete() async {
+    try {
+      final fresh = await widget.reauthenticate();
+      if (!mounted) return;
+      _freshLogin = fresh;
+      setState(() => _phase = _Phase.info);
+    } on CustomerAuthException catch (error) {
+      if (!mounted) return;
+      if (error.kind == CustomerAuthErrorKind.cancelled) return;
+      setState(() {
+        _phase = error.kind == CustomerAuthErrorKind.offline
+            ? _Phase.offline
+            : _Phase.error;
+      });
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _phase = _Phase.error);
     }
   }
 
@@ -204,21 +272,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     );
     if (!mounted) return;
     _setLoading(false);
-    switch (outcome) {
-      case AccountDeletionDeleted():
-        setState(() => _phase = _Phase.success);
-      case AccountDeletionBlocked(:final order):
-        setState(() {
-          _blockedOrder = order;
-          _phase = _Phase.blocked;
-        });
-      case AccountDeletionOffline():
-        setState(() => _phase = _Phase.offline);
-      case AccountDeletionClear():
-      case AccountDeletionFailed():
-      case AccountDeletionStale():
-        setState(() => _phase = _Phase.error);
-    }
+    _showOutcome(outcome, onClear: () async {
+      if (!mounted) return;
+      setState(() => _phase = _Phase.error);
+    });
   }
 
   Future<void> _finish() async {
@@ -227,8 +284,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     Navigator.of(context).popUntil((route) => route.isFirst);
   }
 
-  Future<void> _openSupport() async {
-    final uri = widget.supportUri ?? accountDeletionSupportUri();
+  Future<void> _openSupport() =>
+      _openUri(widget.supportUri ?? accountDeletionSupportUri());
+
+  Future<void> _openUri(Uri uri) async {
     final open = widget.openUri ??
         ((target) => launchUrl(target, mode: LaunchMode.externalApplication));
     final ok = await open(uri);
@@ -262,7 +321,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         child: switch (_phase) {
           _Phase.loading => _Loading(slow: _slow),
           _Phase.blocked => _MessageState(
-              message: kDeleteAccountBlocked,
+              message: _blockedOrder?.reason == 'refund_in_progress'
+                  ? kDeleteAccountRefundBlocked
+                  : kDeleteAccountBlocked,
               primaryLabel: 'Ver pedido',
               primaryKey: const ValueKey('delete-account-view-order'),
               onPrimary: () {
@@ -296,6 +357,32 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               primaryLabel: 'Ir al inicio',
               primaryKey: const ValueKey('delete-account-done'),
               onPrimary: _finish,
+            ),
+          _Phase.reauth => _PromptState(
+              title: kDeleteAccountReauthTitle,
+              body: kDeleteAccountReauthBody,
+              primaryLabel: 'Iniciar sesión',
+              primaryKey: const ValueKey('delete-account-reauth'),
+              onPrimary: () => unawaited(_loginAndReturnToDelete()),
+              secondaryLabel: 'Ahora no',
+              secondaryKey: const ValueKey('delete-account-reauth-dismiss'),
+              onSecondary: () => Navigator.of(context).maybePop(),
+            ),
+          _Phase.orderCheck => _PromptState(
+              title: kDeleteAccountOrderCheckTitle,
+              body: kDeleteAccountOrderCheckBody,
+              primaryLabel: 'Reintentar',
+              primaryKey: const ValueKey('delete-account-order-check-retry'),
+              onPrimary: _continue,
+            ),
+          _Phase.tooManyOrders => _PromptState(
+              title: kDeleteAccountTooManyTitle,
+              body: kDeleteAccountTooManyBody,
+              primaryLabel: 'Escríbenos por WhatsApp',
+              primaryKey: const ValueKey('delete-account-too-many-whatsapp'),
+              onPrimary: () => unawaited(
+                _openUri(accountDeletionManualRequestUri()),
+              ),
             ),
           _Phase.info => _Info(
               onContinue: _continue,
@@ -385,6 +472,58 @@ class _Loading extends StatelessWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _PromptState extends StatelessWidget {
+  const _PromptState({
+    required this.title,
+    required this.body,
+    required this.primaryLabel,
+    required this.primaryKey,
+    required this.onPrimary,
+    this.secondaryLabel,
+    this.secondaryKey,
+    this.onSecondary,
+  });
+
+  final String title;
+  final String body;
+  final String primaryLabel;
+  final Key primaryKey;
+  final VoidCallback onPrimary;
+  final String? secondaryLabel;
+  final Key? secondaryKey;
+  final VoidCallback? onSecondary;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return ListView(
+      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      children: [
+        AccountPageHeader(kicker: 'Privacidad', title: title, subtitle: body),
+        const SizedBox(height: BoutiqueSpace.xl),
+        BoutiqueButton(
+          key: primaryKey,
+          label: primaryLabel,
+          onPressed: onPrimary,
+        ),
+        if (secondaryLabel != null && onSecondary != null) ...[
+          const SizedBox(height: BoutiqueSpace.sm),
+          Center(
+            child: TextButton(
+              key: secondaryKey,
+              onPressed: onSecondary,
+              child: Text(
+                secondaryLabel!,
+                style: boutiqueText(size: 14, color: palette.ink),
+              ),
+            ),
+          ),
+        ],
+      ],
     );
   }
 }

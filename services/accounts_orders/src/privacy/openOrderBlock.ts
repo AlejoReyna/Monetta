@@ -1,7 +1,12 @@
 /**
  * An order blocks account deletion while it is still commercially open:
  * unpaid/pending, not yet fulfilled, or a refund that has not finished.
- * Voided, cancelled, and fully refunded orders are closed and do not block.
+ *
+ * A refund in progress blocks even when the order is cancelled. That is a
+ * refund status, a refund-in-progress tag, or a cancellation of an order
+ * that was charged (`paid`, `partially_paid`, `partially_refunded`) and is
+ * not yet `refunded`. `refunded`, `voided`, and a cancellation that was
+ * never charged do not block.
  */
 
 export type OpenOrderBlockReason =
@@ -27,9 +32,9 @@ const unpaidStatuses = new Set([
   'partially_authorized',
 ]);
 
-const closedFinancialStatuses = new Set(['voided', 'refunded', 'expired']);
+const closedFinancialStatuses = new Set(['expired']);
 
-const cancelledFinancialStatuses = new Set(['cancelled', 'canceled', 'voided']);
+const chargedStatuses = new Set(['paid', 'partially_paid', 'partially_refunded']);
 
 const closedFulfillmentStatuses = new Set([
   'fulfilled',
@@ -42,8 +47,9 @@ const closedFulfillmentStatuses = new Set([
 ]);
 
 const refundInProgressStatuses = new Set([
-  'refund_pending',
   'pending_refund',
+  'refund_pending',
+  'refund_in_progress',
   'refunding',
 ]);
 
@@ -65,6 +71,16 @@ function present(value: string | null | undefined): boolean {
   return norm(value) !== '';
 }
 
+function isCancelled(
+  order: OpenOrderSnapshot,
+  financial: string,
+  tags: readonly string[],
+): boolean {
+  if (financial === 'cancelled' || financial === 'canceled') return true;
+  if (present(order.cancelledAt) || present(order.cancelReason)) return true;
+  return tags.some((tag) => cancelledTags.has(tag));
+}
+
 /** Numeric Shopify order id from a raw id or `gid://shopify/Order/{id}`. */
 export function shopifyOrderNumber(id: string | null | undefined): string | null {
   if (id == null) return null;
@@ -80,23 +96,21 @@ export function openOrderBlockReason(
   const financial = norm(order.financialStatus);
   const fulfillment = norm(order.fulfillmentStatus);
   const tags = order.tags.map((tag) => norm(tag));
+  const cancelled = isCancelled(order, financial, tags);
 
-  // Cancellation wins over an unfulfilled or unpaid snapshot. A missing
-  // cancel tag must not keep a Shopify-cancelled order open forever.
-  if (
-    cancelledFinancialStatuses.has(financial) ||
-    present(order.cancelledAt) ||
-    present(order.cancelReason) ||
-    tags.some((tag) => cancelledTags.has(tag))
-  ) {
-    return null;
-  }
+  if (financial === 'voided' || financial === 'refunded') return null;
 
   if (
     refundInProgressStatuses.has(financial) ||
     tags.some((tag) => refundInProgressTags.has(tag))
   ) {
     return 'refund_in_progress';
+  }
+
+  if (cancelled) {
+    // Charged and not yet refunded: the refund may still be owed.
+    if (chargedStatuses.has(financial)) return 'refund_in_progress';
+    return null;
   }
 
   if (closedFinancialStatuses.has(financial)) {

@@ -326,7 +326,11 @@ class AccountController extends ChangeNotifier {
 
   /// Opens Shopify's hosted login again and returns the fresh tokens the
   /// deletion endpoint requires. Does not accept a silently refreshed token.
-  Future<FreshCustomerLogin> reauthenticateForDeletion() {
+  ///
+  /// The hosted login also becomes the device's current account, so the next
+  /// request from this screen presents the Customer Account token instead of
+  /// the legacy Monetta session that could not read orders.
+  Future<FreshCustomerLogin> reauthenticateForDeletion() async {
     final repository = _sessionRepository;
     if (repository == null) {
       throw const CustomerAuthException(
@@ -334,12 +338,21 @@ class AccountController extends ChangeNotifier {
         debugDetail: 'customer session repository unavailable',
       );
     }
-    return repository.reauthenticate().then(
-          (login) => FreshCustomerLogin(
-            accessToken: login.accessToken,
-            idToken: login.idToken,
-          ),
-        );
+    final login = await repository.reauthenticate();
+    final device = await _deviceStore.byId(_deviceId);
+    final accountId = device?.accountId;
+    final restored =
+        accountId == null ? null : await _accountStore.byLocalId(accountId);
+    if (restored != null) {
+      account = restored;
+      notifyListeners();
+      await _publishAccountScope();
+      await loadOrders();
+    }
+    return FreshCustomerLogin(
+      accessToken: login.accessToken,
+      idToken: login.idToken,
+    );
   }
 
   /// Local sign-out after the server has accepted deletion. Guest wishlist

@@ -229,11 +229,14 @@ from the local mirror. The mirror alone is not enough: an order whose webhook
 never arrived still blocks deletion. If that Shopify read cannot be completed,
 the response is 503 `order_check_unavailable` and nothing is deleted.
 
-A cancelled order does not block. Cancellation is Shopify `cancelledAt`, a
-present `cancelReason`, financial status `cancelled` / `canceled` / `voided`,
-or a cancelled tag — the same signals as the order-status labels. An unpaid,
-unfulfilled, or in-progress refund still returns `blocked_open_order` and no
-data is removed.
+A cancellation that was never charged does not block. Cancellation is Shopify
+`cancelledAt`, a present `cancelReason`, financial status `cancelled` /
+`canceled`, or a cancelled tag. `refunded` and `voided` do not block. A refund
+in progress does, including a cancelled order that was charged (`paid`,
+`partially_paid`, or `partially_refunded`) and is not yet refunded. An unpaid
+or unfulfilled order that is not cancelled still returns `blocked_open_order`
+and no data is removed. A legacy Monetta session returns `reauth_required`.
+More than 2,000 orders returns `too_many_orders`.
 Otherwise the service deletes the Firebase Auth user and the Firestore
 profile, wishlist, and saved recommendations, anonymizes the customer's rows
 in this database, then calls Shopify Admin `customerRequestDataErasure`.

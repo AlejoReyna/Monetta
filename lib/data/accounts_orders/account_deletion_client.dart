@@ -23,10 +23,14 @@ class AccountDeletionOrderRef {
   const AccountDeletionOrderRef({
     required this.id,
     this.shopifyOrderId,
+    this.reason,
   });
 
   final String id;
   final String? shopifyOrderId;
+
+  /// `unpaid_or_pending`, `unfulfilled`, or `refund_in_progress`.
+  final String? reason;
 }
 
 sealed class AccountDeletionOutcome {
@@ -57,6 +61,18 @@ class AccountDeletionOffline extends AccountDeletionOutcome {
 
 class AccountDeletionFailed extends AccountDeletionOutcome {
   const AccountDeletionFailed();
+}
+
+class AccountDeletionOrderCheckUnavailable extends AccountDeletionOutcome {
+  const AccountDeletionOrderCheckUnavailable();
+}
+
+class AccountDeletionReauthRequired extends AccountDeletionOutcome {
+  const AccountDeletionReauthRequired();
+}
+
+class AccountDeletionTooManyOrders extends AccountDeletionOutcome {
+  const AccountDeletionTooManyOrders();
 }
 
 abstract class AccountDeletionClient {
@@ -138,6 +154,9 @@ class HttpAccountDeletionClient implements AccountDeletionClient {
       json = const {};
     }
     final error = json['error'];
+    if (error == 'order_check_unavailable') {
+      return const AccountDeletionOrderCheckUnavailable();
+    }
     if (response.statusCode == 401 && error == 'stale_reauthentication') {
       return const AccountDeletionStale();
     }
@@ -161,12 +180,18 @@ class HttpAccountDeletionClient implements AccountDeletionClient {
         final id = order['id'];
         if (id is! String && id is! num) return const AccountDeletionFailed();
         final shopifyOrderId = order['shopifyOrderId'];
+        final reason = order['reason'];
         return AccountDeletionBlocked(
           AccountDeletionOrderRef(
             id: '$id',
             shopifyOrderId: shopifyOrderId is String ? shopifyOrderId : null,
+            reason: reason is String ? reason : null,
           ),
         );
+      case 'reauth_required':
+        return const AccountDeletionReauthRequired();
+      case 'too_many_orders':
+        return const AccountDeletionTooManyOrders();
       default:
         return const AccountDeletionFailed();
     }

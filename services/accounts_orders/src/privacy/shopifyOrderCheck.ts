@@ -13,6 +13,14 @@ export class OrderCheckUnavailableError extends Error {
   }
 }
 
+/** The shopper has more orders than this check will page through. */
+export class TooManyOrdersError extends Error {
+  constructor() {
+    super('too_many_orders');
+    this.name = 'TooManyOrdersError';
+  }
+}
+
 const ordersQuery = `query MonettaDeletionOrderCheck($first: Int!, $after: String) {
   customer {
     orders(first: $first, after: $after, sortKey: PROCESSED_AT, reverse: true) {
@@ -66,7 +74,7 @@ export class CustomerAccountOrderLookup implements ShopifyCustomerOrderLookup {
       seenCursors.add(cursor);
       after = cursor;
     }
-    throw new OrderCheckUnavailableError();
+    throw new TooManyOrdersError();
   }
 
   private async endpoint(): Promise<URL> {

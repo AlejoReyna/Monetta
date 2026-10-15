@@ -85,8 +85,63 @@ void main() {
     addTearDown(client.close);
 
     final outcome = await client.precheck('shopper-token');
-    expect(outcome, isA<AccountDeletionFailed>());
+    expect(outcome, isA<AccountDeletionOrderCheckUnavailable>());
     expect(outcome, isNot(isA<AccountDeletionClear>()));
     expect(outcome, isNot(isA<AccountDeletionDeleted>()));
+  });
+
+  test('reauth and too many orders are distinct from a failed check', () async {
+    var call = 0;
+    final client = HttpAccountDeletionClient(
+      baseUrl: 'https://accounts.example',
+      httpClient: MockClient((request) async {
+        call += 1;
+        if (call == 1) {
+          return http.Response(
+            jsonEncode({'result': 'reauth_required'}),
+            200,
+          );
+        }
+        return http.Response(
+          jsonEncode({
+            'result': 'blocked_open_order',
+            'order': {
+              'id': '9',
+              'shopifyOrderId': '9',
+              'reason': 'refund_in_progress',
+            },
+          }),
+          200,
+        );
+      }),
+    );
+    addTearDown(client.close);
+
+    expect(
+      await client.precheck('shopper-token'),
+      isA<AccountDeletionReauthRequired>(),
+    );
+    final blocked = await client.precheck('shopper-token');
+    expect(blocked, isA<AccountDeletionBlocked>());
+    expect(
+        (blocked as AccountDeletionBlocked).order.reason, 'refund_in_progress');
+  });
+
+  test('too many orders is its own result', () async {
+    final client = HttpAccountDeletionClient(
+      baseUrl: 'https://accounts.example',
+      httpClient: MockClient((request) async {
+        return http.Response(
+          jsonEncode({'result': 'too_many_orders'}),
+          200,
+        );
+      }),
+    );
+    addTearDown(client.close);
+
+    expect(
+      await client.precheck('shopper-token'),
+      isA<AccountDeletionTooManyOrders>(),
+    );
   });
 }

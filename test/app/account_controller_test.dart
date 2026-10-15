@@ -257,6 +257,24 @@ void main() {
     expect(controller.lastError, isNull);
   });
 
+  test('reauthenticateForDeletion switches a legacy session to Shopify',
+      () async {
+    final controller = buildController(systemClient: _FakeSystemClient());
+    await controller.loginWithSystemAccount(
+      email: 'legacy@example.com',
+      password: 'secret',
+    );
+    expect(controller.account?.authProvider, 'monetta');
+    expect(await controller.accessTokenForBackend(), 'session-token');
+
+    final fresh = await controller.reauthenticateForDeletion();
+
+    expect(fresh.accessToken, 'access');
+    expect(fresh.idToken, isNotEmpty);
+    expect(controller.account?.authProvider, 'shopify');
+    expect(await controller.accessTokenForBackend(), 'access');
+  });
+
   test('login() surfaces a failure without throwing, and does not sign in',
       () async {
     final controller = buildController(loginThrows: true);

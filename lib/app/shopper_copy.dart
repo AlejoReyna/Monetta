@@ -279,12 +279,23 @@ String? factualDescription({
   return buffer.toString();
 }
 
+const String kDeleteAccountManualWhatsAppText =
+    'Hola, quiero eliminar mi cuenta de Monetta.';
+
 /// Support chat for account deletion. Uses the shop's existing WhatsApp
 /// number; callers pass a placeholder only when that number is absent.
 Uri accountDeletionSupportUri({String phoneE164 = kWhatsAppE164}) {
   final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
   return Uri.https('wa.me', '/$phone', <String, String>{
     'text': '¡Hola Monetta! Necesito ayuda para eliminar mi cuenta.',
+  });
+}
+
+/// WhatsApp handoff when the app cannot delete the account itself.
+Uri accountDeletionManualRequestUri({String phoneE164 = kWhatsAppE164}) {
+  final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
+  return Uri.https('wa.me', '/$phone', <String, String>{
+    'text': kDeleteAccountManualWhatsAppText,
   });
 }
 

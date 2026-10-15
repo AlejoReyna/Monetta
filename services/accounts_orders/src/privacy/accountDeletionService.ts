@@ -10,12 +10,13 @@ import type {
   AppDataEraser,
   BlockingOrderRef,
   CustomerDataEraser,
+  DeletionCredential,
   FreshLoginVerifier,
   ShopifyCustomerErasureClient,
   ShopifyCustomerOrderLookup,
   ShopifyListedOrder,
 } from './ports.js';
-import { OrderCheckUnavailableError } from './shopifyOrderCheck.js';
+import { OrderCheckUnavailableError, TooManyOrdersError } from './shopifyOrderCheck.js';
 import { redactLogFields, redactText, sanitizeAuditSteps, sanitizeInternalId } from './redact.js';
 
 const locks = new Map<string, Promise<unknown>>();
@@ -43,16 +44,28 @@ export interface AccountDeletionServiceDeps {
 export class AccountDeletionService {
   constructor(private readonly deps: AccountDeletionServiceDeps) {}
 
-  async precheck(shopifyCustomerId: string, accessToken: string): Promise<AccountDeletionPrecheck> {
+  async precheck(
+    shopifyCustomerId: string,
+    accessToken: string,
+    credential: DeletionCredential = 'customer_account',
+  ): Promise<AccountDeletionPrecheck> {
     const customerId = requireCustomerId(shopifyCustomerId);
     const existing = await this.deps.state.get(customerId);
     if (existing?.status === 'completed') {
       return { result: 'deleted', shopifyDataErasure: 'requested' };
     }
+    if (credential === 'monetta_session') {
+      await this.recordCheck(customerId, 'reauth_required', 'reauth_required');
+      return { result: 'reauth_required' };
+    }
     const blocking = await this.findBlockingOrder(customerId, accessToken);
     if (blocking === 'unavailable') {
-      await this.recordUnavailable(customerId);
+      await this.recordCheck(customerId, 'order_check_unavailable', 'unavailable');
       return { result: 'order_check_unavailable' };
+    }
+    if (blocking === 'too_many_orders') {
+      await this.recordCheck(customerId, 'too_many_orders', 'too_many_orders');
+      return { result: 'too_many_orders' };
     }
     if (blocking !== null) {
       await this.record(customerId, 'blocked_open_order', {
@@ -114,8 +127,12 @@ export class AccountDeletionService {
     if (progress === null) {
       const blocking = await this.findBlockingOrder(customerId, accessToken);
       if (blocking === 'unavailable') {
-        await this.recordUnavailable(customerId);
+        await this.recordCheck(customerId, 'order_check_unavailable', 'unavailable');
         return { result: 'order_check_unavailable' };
+      }
+      if (blocking === 'too_many_orders') {
+        await this.recordCheck(customerId, 'too_many_orders', 'too_many_orders');
+        return { result: 'too_many_orders' };
       }
       if (blocking !== null) {
         await this.record(customerId, 'blocked_open_order', {
@@ -218,17 +235,22 @@ export class AccountDeletionService {
   private async findBlockingOrder(
     customerId: string,
     accessToken: string,
-  ): Promise<BlockingOrderRef | null | 'unavailable'> {
+  ): Promise<BlockingOrderRef | null | 'unavailable' | 'too_many_orders'> {
     let live: readonly ShopifyListedOrder[];
     try {
       live = await this.deps.shopifyOrders.listOrders(accessToken);
     } catch (error) {
+      const tooMany = error instanceof TooManyOrdersError;
       this.writeLog('error', 'account deletion order check failed', {
         shopifyCustomerId: customerId,
         step: 'order_check',
-        detail: error instanceof OrderCheckUnavailableError ? error.name : 'order_check_unavailable',
+        detail: tooMany
+          ? 'too_many_orders'
+          : error instanceof OrderCheckUnavailableError
+            ? error.name
+            : 'order_check_unavailable',
       });
-      return 'unavailable';
+      return tooMany ? 'too_many_orders' : 'unavailable';
     }
 
     const seen = new Set<string>();
@@ -258,9 +280,9 @@ export class AccountDeletionService {
     return null;
   }
 
-  private async recordUnavailable(customerId: string): Promise<void> {
-    await this.record(customerId, 'order_check_unavailable', {
-      blockCheck: 'unavailable',
+  private async recordCheck(customerId: string, result: string, blockCheck: string): Promise<void> {
+    await this.record(customerId, result, {
+      blockCheck,
       firebaseAuth: 'not_attempted',
       firestoreProfile: 'not_attempted',
       firestoreWishlist: 'not_attempted',

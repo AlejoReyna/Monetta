@@ -1,6 +1,7 @@
 import { createSign, generateKeyPairSync, type JsonWebKey } from 'node:crypto';
 import type { Server } from 'node:http';
 import { afterEach, describe, expect, it } from 'vitest';
+import { hashAdminBearerToken } from '../src/admin/authorizer.js';
 import { createApp, type ServerDeps } from '../src/api/server.js';
 import type { CustomerTokenVerifier } from '../src/auth/customerTokenVerifier.js';
 import type { OrdersRepository } from '../src/domain/ports.js';
@@ -22,7 +23,7 @@ import type {
   ShopifyCustomerOrderLookup,
   ShopifyListedOrder,
 } from '../src/privacy/ports.js';
-import { CustomerAccountOrderLookup, OrderCheckUnavailableError } from '../src/privacy/shopifyOrderCheck.js';
+import { CustomerAccountOrderLookup, OrderCheckUnavailableError, TooManyOrdersError } from '../src/privacy/shopifyOrderCheck.js';
 import { redactLogFields, redactText, sanitizeAuditSteps } from '../src/privacy/redact.js';
 import { ShopifyCustomerDataErasureClient } from '../src/privacy/shopifyErasure.js';
 import {
@@ -136,12 +137,14 @@ class FakeCustomerData implements CustomerDataEraser {
 class FakeOrderLookup implements ShopifyCustomerOrderLookup {
   orders: ShopifyListedOrder[] = [];
   fail = false;
+  tooMany = false;
   calls = 0;
   token: string | null = null;
 
   async listOrders(accessToken: string): Promise<readonly ShopifyListedOrder[]> {
     this.calls += 1;
     this.token = accessToken;
+    if (this.tooMany) throw new TooManyOrdersError();
     if (this.fail || accessToken.trim() === '') throw new OrderCheckUnavailableError();
     return this.orders;
   }
@@ -227,6 +230,21 @@ describe('open order block check', () => {
       fulfillmentStatus: 'fulfilled',
       tags: [],
     })).toBe('refund_in_progress');
+    expect(openOrderBlockReason({
+      financialStatus: 'pending_refund',
+      fulfillmentStatus: 'fulfilled',
+      tags: [],
+    })).toBe('refund_in_progress');
+    expect(openOrderBlockReason({
+      financialStatus: 'refund_pending',
+      fulfillmentStatus: 'fulfilled',
+      tags: [],
+    })).toBe('refund_in_progress');
+    expect(openOrderBlockReason({
+      financialStatus: 'refund_in_progress',
+      fulfillmentStatus: 'fulfilled',
+      tags: [],
+    })).toBe('refund_in_progress');
   });
 
   it('allows paid fulfilled orders and closed voids or refunds', () => {
@@ -243,7 +261,7 @@ describe('open order block check', () => {
     expect(openOrderBlockReason({
       financialStatus: 'voided',
       fulfillmentStatus: null,
-      tags: [],
+      tags: ['refund-in-progress'],
     })).toBeNull();
     expect(openOrderBlockReason({
       financialStatus: 'refunded',
@@ -254,13 +272,25 @@ describe('open order block check', () => {
       financialStatus: 'paid',
       fulfillmentStatus: 'unfulfilled',
       tags: ['cancelled'],
-    })).toBeNull();
+    })).toBe('refund_in_progress');
     expect(openOrderBlockReason({
       financialStatus: 'paid',
       fulfillmentStatus: 'unfulfilled',
       tags: [],
       cancelledAt: '2026-02-01T00:00:00Z',
-    })).toBeNull();
+    })).toBe('refund_in_progress');
+    expect(openOrderBlockReason({
+      financialStatus: 'partially_paid',
+      fulfillmentStatus: 'fulfilled',
+      tags: [],
+      cancelReason: 'customer',
+    })).toBe('refund_in_progress');
+    expect(openOrderBlockReason({
+      financialStatus: 'partially_refunded',
+      fulfillmentStatus: 'unfulfilled',
+      tags: [],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBe('refund_in_progress');
     expect(openOrderBlockReason({
       financialStatus: 'pending',
       fulfillmentStatus: null,
@@ -281,6 +311,12 @@ describe('open order block check', () => {
       financialStatus: 'paid',
       fulfillmentStatus: 'unfulfilled',
       tags: ['refund-in-progress'],
+      cancelledAt: '2026-02-01T00:00:00Z',
+    })).toBe('refund_in_progress');
+    expect(openOrderBlockReason({
+      financialStatus: 'refunded',
+      fulfillmentStatus: 'unfulfilled',
+      tags: [],
       cancelledAt: '2026-02-01T00:00:00Z',
     })).toBeNull();
     expect(openOrderBlockReason({
@@ -416,7 +452,7 @@ describe('account deletion', () => {
     expect(audit.entries[0]?.steps.firebaseAuth).toBe('failed');
   });
 
-  it('does not block a cancelled unfulfilled order that the mirror only stored as open', async () => {
+  it('does not block a cancelled unfulfilled order that was never charged', async () => {
     const { orders, service, shopifyOrders, appData, customerData, shopify } = harness();
     await orders.upsertByShopifyOrderId(order({
       financialStatus: 'paid',
@@ -426,7 +462,7 @@ describe('account deletion', () => {
     }));
     shopifyOrders.orders = [{
       id: 'gid://shopify/Order/900',
-      financialStatus: 'PAID',
+      financialStatus: 'PENDING',
       fulfillmentStatus: 'UNFULFILLED',
       cancelledAt: '2026-03-01T12:00:00Z',
       cancelReason: 'customer',
@@ -440,6 +476,61 @@ describe('account deletion', () => {
     expect(appData.calls).toBe(1);
     expect(customerData.calls).toBe(1);
     expect(shopify.calls).toBe(1);
+  });
+
+  it('blocks a cancelled order that was charged until the refund finishes', async () => {
+    const { service, shopifyOrders, appData, customerData, shopify, state } = harness();
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/900',
+      financialStatus: 'PAID',
+      fulfillmentStatus: 'UNFULFILLED',
+      cancelledAt: '2026-03-01T12:00:00Z',
+      cancelReason: 'customer',
+      tags: [],
+    }];
+
+    const precheck = await service.precheck('77', 'shopify-token-77');
+    expect(precheck).toEqual({
+      result: 'blocked_open_order',
+      order: { id: '900', shopifyOrderId: '900', reason: 'refund_in_progress' },
+    });
+    const executed = await service.execute('access', 'id-token');
+    expect(executed.result).toBe('blocked_open_order');
+    expect(appData.calls).toBe(0);
+    expect(customerData.calls).toBe(0);
+    expect(shopify.calls).toBe(0);
+    expect(state.rows.size).toBe(0);
+  });
+
+  it('asks a legacy Monetta session to sign in again and deletes nothing', async () => {
+    const { service, shopifyOrders, appData, audit } = harness();
+    shopifyOrders.orders = [{
+      id: 'gid://shopify/Order/1',
+      financialStatus: 'PENDING',
+      fulfillmentStatus: 'UNFULFILLED',
+      cancelledAt: null,
+      cancelReason: null,
+      tags: [],
+    }];
+
+    const precheck = await service.precheck('77', 'legacy-session', 'monetta_session');
+    expect(precheck).toEqual({ result: 'reauth_required' });
+    expect(shopifyOrders.calls).toBe(0);
+    expect(appData.calls).toBe(0);
+    expect(JSON.stringify(audit.entries)).not.toContain('legacy-session');
+    expect(JSON.stringify(audit.entries)).not.toContain('@');
+  });
+
+  it('returns too_many_orders and deletes nothing', async () => {
+    const { service, shopifyOrders, appData, customerData, shopify, state } = harness();
+    shopifyOrders.tooMany = true;
+
+    expect(await service.precheck('77', 'shopify-token-77')).toEqual({ result: 'too_many_orders' });
+    expect(await service.execute('access', 'id-token')).toEqual({ result: 'too_many_orders' });
+    expect(appData.calls).toBe(0);
+    expect(customerData.calls).toBe(0);
+    expect(shopify.calls).toBe(0);
+    expect(state.rows.size).toBe(0);
   });
 
   it('blocks an open order that never reached the mirror', async () => {
@@ -496,14 +587,18 @@ describe('account deletion HTTP', () => {
     });
   });
 
-  async function start(orders: OrdersRepository, service: AccountDeletionService): Promise<void> {
+  async function start(
+    orders: OrdersRepository,
+    service: AccountDeletionService,
+    appAccounts = new InMemoryAppAccountsRepository(),
+  ): Promise<void> {
     const customerTokenVerifier: CustomerTokenVerifier = {
       async resolveCustomerId(accessToken: string) {
         return accessToken === 'shopify-token-77' ? 'gid://shopify/Customer/77' : null;
       },
     };
     const deps: ServerDeps = {
-      appAccounts: new InMemoryAppAccountsRepository(),
+      appAccounts,
       customers: new InMemoryCustomersRepository(),
       orders,
       webhookEvents: new InMemoryWebhookEventsRepository(),
@@ -542,7 +637,7 @@ describe('account deletion HTTP', () => {
     const body = await blocked.json() as { result: string; order: { id: string; shopifyOrderId: string } };
     expect(body).toEqual({
       result: 'blocked_open_order',
-      order: { id: '1', shopifyOrderId: '900' },
+      order: { id: '1', shopifyOrderId: '900', reason: 'unpaid_or_pending' },
     });
     expect(JSON.stringify(body)).not.toContain('@');
     expect(JSON.stringify(body)).not.toContain('1999');
@@ -570,6 +665,49 @@ describe('account deletion HTTP', () => {
     });
     expect(deleted.status).toBe(503);
     expect(await deleted.json()).toEqual({ error: 'order_check_unavailable' });
+    expect(shopify.calls).toBe(0);
+  });
+
+  it('returns reauth_required for a legacy Monetta session', async () => {
+    const { service, shopifyOrders } = harness();
+    const accounts = new InMemoryAppAccountsRepository();
+    const token = 'legacy-session-token';
+    await accounts.register({
+      accountId: '11111111-1111-4111-8111-111111111111',
+      email: 'legacy@example.com',
+      displayName: null,
+      passwordHash: 'scrypt$salt$hash',
+      deviceId: 'device-1',
+      tokenHash: hashAdminBearerToken(token),
+      expiresAt: new Date('2027-01-01T00:00:00Z'),
+    });
+    const account = accounts.byId.get('11111111-1111-4111-8111-111111111111');
+    if (account === undefined) throw new Error('missing account');
+    accounts.byId.set(account.id, { ...account, shopifyCustomerId: '77' });
+    await start(new InMemoryOrdersRepository(), service, accounts);
+
+    const response = await fetch(`${baseUrl}/customers/me/account-deletion/precheck`, {
+      method: 'POST',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    expect(response.status).toBe(200);
+    const body = await response.json();
+    expect(body).toEqual({ result: 'reauth_required' });
+    expect(shopifyOrders.calls).toBe(0);
+    expect(JSON.stringify(body)).not.toContain('@');
+  });
+
+  it('returns too_many_orders without deleting', async () => {
+    const { service, shopifyOrders, shopify } = harness();
+    shopifyOrders.tooMany = true;
+    await start(new InMemoryOrdersRepository(), service);
+
+    const response = await fetch(`${baseUrl}/customers/me/account-deletion/precheck`, {
+      method: 'POST',
+      headers: { Authorization: 'Bearer shopify-token-77' },
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ result: 'too_many_orders' });
     expect(shopify.calls).toBe(0);
   });
 
@@ -788,6 +926,31 @@ describe('Customer Account order check', () => {
       },
     }), { status: 200 }));
     await expect(truncated.listOrders('shopper-token')).rejects.toBeInstanceOf(OrderCheckUnavailableError);
+  });
+
+  it('fails closed with too_many_orders after 2000 orders', async () => {
+    let pages = 0;
+    const fetchFn: typeof fetch = async () => {
+      pages += 1;
+      return new Response(JSON.stringify({
+        data: {
+          customer: {
+            orders: {
+              pageInfo: { hasNextPage: true, endCursor: `cursor-${pages}` },
+              nodes: [{
+                id: `gid://shopify/Order/${pages}`,
+                financialStatus: 'PAID',
+                fulfillmentStatus: 'FULFILLED',
+                cancelledAt: null,
+                cancelReason: null,
+              }],
+            },
+          },
+        },
+      }), { status: 200 });
+    };
+    await expect(lookup(fetchFn).listOrders('shopper-token')).rejects.toBeInstanceOf(TooManyOrdersError);
+    expect(pages).toBe(40);
   });
 });
 

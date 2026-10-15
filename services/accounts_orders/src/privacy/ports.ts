@@ -88,11 +88,15 @@ export interface BlockingOrderRef {
   readonly reason: OpenOrderBlockReason;
 }
 
+export type DeletionCredential = 'customer_account' | 'monetta_session';
+
 export type AccountDeletionPrecheck =
   | { readonly result: 'clear' }
   | { readonly result: 'blocked_open_order'; readonly order: BlockingOrderRef }
   | { readonly result: 'deleted'; readonly shopifyDataErasure: 'requested' }
-  | { readonly result: 'order_check_unavailable' };
+  | { readonly result: 'order_check_unavailable' }
+  | { readonly result: 'reauth_required' }
+  | { readonly result: 'too_many_orders' };
 
 export type AccountDeletionExecute =
   | { readonly result: 'deleted'; readonly shopifyDataErasure: 'requested' }
@@ -101,4 +105,5 @@ export type AccountDeletionExecute =
   | { readonly result: 'unauthorized' }
   | { readonly result: 'unavailable' }
   | { readonly result: 'failed' }
-  | { readonly result: 'order_check_unavailable' };
+  | { readonly result: 'order_check_unavailable' }
+  | { readonly result: 'too_many_orders' };

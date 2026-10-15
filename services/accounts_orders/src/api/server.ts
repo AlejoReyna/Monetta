@@ -163,6 +163,15 @@ async function authenticatedCustomerId(
   req: Request,
   res: Response,
 ): Promise<string | null> {
+  const shopper = await authenticateShopper(deps, req, res);
+  return shopper?.customerId ?? null;
+}
+
+async function authenticateShopper(
+  deps: ServerDeps,
+  req: Request,
+  res: Response,
+): Promise<{ readonly customerId: string; readonly credential: 'customer_account' | 'monetta_session' } | null> {
   const token = bearerToken(req);
   if (token === null) {
     res.status(401).json({ error: 'unauthorized' });
@@ -176,7 +185,7 @@ async function authenticatedCustomerId(
       res.status(403).json({ error: 'shopify_customer_not_linked' });
       return null;
     }
-    return customerId;
+    return { customerId, credential: 'monetta_session' };
   }
 
   try {
@@ -190,7 +199,7 @@ async function authenticatedCustomerId(
       res.status(503).json({ error: 'authentication_unavailable' });
       return null;
     }
-    return customerId;
+    return { customerId, credential: 'customer_account' };
   } catch (error) {
     // The verifier deliberately never places a token in its errors. Log only
     // the error class anyway, keeping that invariant even for injected code.
@@ -790,7 +799,7 @@ export function createApp(deps: ServerDeps): Express {
   if (deps.accountDeletion !== undefined) {
     registerAccountDeletionRoutes(app, {
       deletion: deps.accountDeletion,
-      authenticate: (req, res) => authenticatedCustomerId(deps, req, res),
+      authenticate: (req, res) => authenticateShopper(deps, req, res),
     });
   }
 
