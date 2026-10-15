@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
@@ -15,9 +16,18 @@ void main() {
     bool paymentLogoRowEnabled = kPaymentLogoRowEnabled,
     VoidCallback? onOpenWhatsApp,
     ValueChanged<Uri>? onOpenUrl,
+    TextScaler? textScaler,
   }) {
     return MaterialApp(
       theme: buildTheme(),
+      builder: textScaler == null
+          ? null
+          : (context, child) {
+              return MediaQuery(
+                data: MediaQuery.of(context).copyWith(textScaler: textScaler),
+                child: child!,
+              );
+            },
       home: Scaffold(
         body: Align(
           alignment: Alignment.topCenter,
@@ -82,11 +92,10 @@ void main() {
     expect(kHomePaymentLogoHeight, 24);
     expect(kExpressPayLogosEnabled, isFalse);
     expect(kPaymentLogoRowEnabled, isFalse);
-    expect(
-      '$kHomePaymentMethodsLineLead'
-      ' tarjeta de crédito o débito, PayPal, Mercado Pago y transferencia.',
-      kHomePaymentMethodsLine,
-    );
+    final (lead, rest) = homePaymentMethodsLineParts();
+    expect(lead, kHomePaymentMethodsLineLead);
+    expect('$lead$rest', kHomePaymentMethodsLine);
+    expect(rest, isNotEmpty);
     expect(
       {
         for (final method in kHomePaymentMethods)
@@ -280,15 +289,73 @@ void main() {
     );
     final span = line.textSpan! as TextSpan;
     expect(line.textAlign, TextAlign.center);
-    expect(line.maxLines, 2);
+    expect(line.maxLines, isNull);
+    expect(line.overflow, isNull);
     expect(span.toPlainText(), kHomePaymentMethodsLine);
     expect(span.style!.fontFamily, kBoutiqueSansFamily);
     expect(span.style!.fontSize, 13);
     expect(span.style!.color, const Color(0xFF6B6660));
     final lead = span.children!.first as TextSpan;
+    final rest = span.children![1] as TextSpan;
     expect(lead.text, kHomePaymentMethodsLineLead);
     expect(lead.style!.fontWeight, FontWeight.w500);
+    expect(
+      rest.text,
+      kHomePaymentMethodsLine.substring(kHomePaymentMethodsLineLead.length),
+    );
   });
+
+  testWidgets(
+    'payment sentence at textScaler 2.0 shows the full line',
+    (tester) async {
+      phone(tester);
+      await tester.pumpWidget(
+        app(
+          onRegister: () {},
+          textScaler: const TextScaler.linear(2),
+        ),
+      );
+
+      expect(tester.takeException(), isNull);
+      final finder = find.byKey(
+        const ValueKey<String>('home-payment-methods-line'),
+      );
+      expect(
+        MediaQuery.textScalerOf(tester.element(finder)),
+        const TextScaler.linear(2),
+      );
+      final line = tester.widget<Text>(finder);
+      expect(line.maxLines, isNull);
+      expect(line.overflow, isNot(TextOverflow.ellipsis));
+      final paragraph = tester.renderObject<RenderParagraph>(finder);
+      expect(paragraph.didExceedMaxLines, isFalse);
+      expect(paragraph.text.toPlainText(), kHomePaymentMethodsLine);
+      final boxes = paragraph.getBoxesForSelection(
+        TextSelection(
+          baseOffset: 0,
+          extentOffset: kHomePaymentMethodsLine.length,
+        ),
+      );
+      expect(boxes, isNotEmpty);
+      final tops = boxes.map((box) => box.top.round()).toSet();
+      expect(tops.length, greaterThanOrEqualTo(3));
+      var bottom = 0.0;
+      for (final TextBox box in boxes) {
+        if (box.bottom > bottom) bottom = box.bottom;
+      }
+      expect(bottom, lessThanOrEqualTo(paragraph.size.height + 0.01));
+      for (var index = 0; index < kHomePaymentMethodsLine.length; index++) {
+        final glyph = paragraph.getBoxesForSelection(
+          TextSelection(baseOffset: index, extentOffset: index + 1),
+        );
+        expect(
+          glyph,
+          isNotEmpty,
+          reason: 'hidden glyph at $index',
+        );
+      }
+    },
+  );
 
   testWidgets('logo row on hides the payment sentence', (tester) async {
     phone(tester);

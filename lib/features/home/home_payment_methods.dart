@@ -192,30 +192,38 @@ String homePaymentMethodsLabel(List<HomePaymentMethod> methods) {
   return 'Métodos de pago: $head y ${labels.last}';
 }
 
+/// Lead and remainder of [kHomePaymentMethodsLine].
+///
+/// The remainder is that constant with the lead removed, so the sentence
+/// has one source. An empty lead means the constant no longer starts with
+/// [kHomePaymentMethodsLineLead]; the full line is still shown.
+(String lead, String rest) homePaymentMethodsLineParts() {
+  const line = kHomePaymentMethodsLine;
+  const lead = kHomePaymentMethodsLineLead;
+  if (!line.startsWith(lead)) return ('', line);
+  return (lead, line.substring(lead.length));
+}
+
 class HomePaymentMethodsLine extends StatelessWidget {
   const HomePaymentMethodsLine({super.key});
 
   @override
   Widget build(BuildContext context) {
     final color = context.boutique.inkMuted;
+    final (lead, rest) = homePaymentMethodsLineParts();
     return Text.rich(
       TextSpan(
         style: boutiqueText(size: 13, color: color),
-        children: const <InlineSpan>[
+        children: <InlineSpan>[
           TextSpan(
-            text: kHomePaymentMethodsLineLead,
-            style: TextStyle(fontWeight: FontWeight.w500),
+            text: lead,
+            style: const TextStyle(fontWeight: FontWeight.w500),
           ),
-          TextSpan(
-            text:
-                ' tarjeta de crédito o débito, PayPal, Mercado Pago y transferencia.',
-          ),
+          TextSpan(text: rest),
         ],
       ),
       key: const ValueKey<String>('home-payment-methods-line'),
       textAlign: TextAlign.center,
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
     );
   }
 }
