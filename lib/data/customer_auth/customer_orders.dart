@@ -28,6 +28,9 @@ class CustomerAccountOrder {
     required this.totalAmount,
     required this.currencyCode,
     this.paymentMethod,
+    this.cancelledAt,
+    this.cancelReason,
+    this.refundedAmount,
   });
 
   /// Globally unique `gid://shopify/Order/...`.
@@ -48,6 +51,15 @@ class CustomerAccountOrder {
   /// Comma-separated `Order.transactions.type` values (`bank_deposit`,
   /// `manual`, `card`, …). Null when Shopify did not return any.
   final String? paymentMethod;
+
+  /// `Order.cancelledAt`. Null when the order was not canceled.
+  final DateTime? cancelledAt;
+
+  /// `Order.cancelReason`. Null when Shopify did not send one.
+  final String? cancelReason;
+
+  /// `Order.totalRefunded`. Null when the amount was absent.
+  final double? refundedAmount;
 }
 
 abstract class CustomerOrdersService {
@@ -86,7 +98,10 @@ query MonettaCustomerOrders($first: Int!, $after: String) {
         processedAt
         financialStatus
         fulfillmentStatus
+        cancelledAt
+        cancelReason
         transactions { type }
+        totalRefunded { amount currencyCode }
         totalPrice {
           amount
           currencyCode
@@ -358,6 +373,9 @@ query MonettaCustomerOrders($first: Int!, $after: String) {
           totalAmount: amount,
           currencyCode: currency,
           paymentMethod: _paymentMethodOf(raw['transactions']),
+          cancelledAt: _cancelledAtOf(raw['cancelledAt']),
+          cancelReason: _cancelReasonOf(raw['cancelReason']),
+          refundedAmount: _moneyAmount(raw['totalRefunded']),
         ),
       );
     }
@@ -390,4 +408,24 @@ String? _paymentMethodOf(Object? raw) {
   }
   if (types.isEmpty) return null;
   return types.join(',');
+}
+
+DateTime? _cancelledAtOf(Object? raw) {
+  if (raw is! String || raw.trim().isEmpty) return null;
+  return DateTime.tryParse(raw)?.toUtc();
+}
+
+String? _cancelReasonOf(Object? raw) {
+  if (raw is! String) return null;
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+  return trimmed;
+}
+
+double? _moneyAmount(Object? raw) {
+  if (raw is! Map) return null;
+  final amount = raw['amount'];
+  if (amount is num) return amount.toDouble();
+  if (amount is String) return double.tryParse(amount);
+  return null;
 }

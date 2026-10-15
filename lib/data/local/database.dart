@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -95,6 +95,23 @@ class AppDatabase extends _$AppDatabase {
               orderSummaries.actualTableName,
               'payment_method',
               'TEXT',
+            );
+          }
+          if (from < 9) {
+            await _addColumnIfMissing(
+              orderSummaries.actualTableName,
+              'cancelled_at',
+              'INTEGER',
+            );
+            await _addColumnIfMissing(
+              orderSummaries.actualTableName,
+              'cancel_reason',
+              'TEXT',
+            );
+            await _addColumnIfMissing(
+              orderSummaries.actualTableName,
+              'refunded_amount',
+              'REAL',
             );
           }
         },

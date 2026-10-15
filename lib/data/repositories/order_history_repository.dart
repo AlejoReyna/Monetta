@@ -227,6 +227,9 @@ class OrderHistoryRepository {
               (order.financialStatus ?? order.fulfillmentStatus ?? 'unknown')
                   .toLowerCase(),
           paymentMethod: Value(order.paymentMethod),
+          cancelledAt: Value(order.cancelledAt),
+          cancelReason: Value(order.cancelReason),
+          refundedAmount: Value(order.refundedAmount),
           totalAmount: order.totalAmount,
           currencyCode: order.currencyCode,
           placedAt: order.processedAt,

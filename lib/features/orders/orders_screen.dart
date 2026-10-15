@@ -403,10 +403,13 @@ class _OrderCard extends StatelessWidget {
     final palette = context.boutique;
     final status = orderDisplayStatus(order);
     final action = status.actionLabel ?? 'Ver detalles';
+    final secondary = status.secondaryLabel;
     return Semantics(
       button: true,
       label: '$action del pedido ${orderLabelOf(order)}, '
-          '${status.label}, ${kMoney.format(order.totalAmount)}',
+          '${status.label}'
+          '${secondary == null ? '' : ', $secondary'}, '
+          '${kMoney.format(order.totalAmount)}',
       child: InkWell(
         key: ValueKey('order-card-${order.id}'),
         onTap: onTap,
@@ -452,6 +455,16 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (secondary != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  secondary,
+                  style: boutiqueText(
+                    size: 12,
+                    color: palette.inkMuted,
+                  ),
+                ),
+              ],
               const SizedBox(height: BoutiqueSpace.md),
               Container(height: .5, color: palette.hairline),
               const SizedBox(height: BoutiqueSpace.md),

@@ -121,6 +121,16 @@ class OrderDetailScreen extends StatelessWidget {
                       color: palette.inkMuted,
                     ),
                   ),
+                  if (status.secondaryLabel != null) ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    Text(
+                      status.secondaryLabel!,
+                      style: boutiqueText(
+                        size: 13,
+                        color: palette.inkMuted,
+                      ),
+                    ),
+                  ],
                   if (status.key == 'in_transit') ...[
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(

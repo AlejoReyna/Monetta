@@ -4380,6 +4380,24 @@ class $OrderSummariesTable extends OrderSummaries
   late final GeneratedColumn<String> paymentMethod = GeneratedColumn<String>(
       'payment_method', aliasedName, true,
       type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _cancelledAtMeta =
+      const VerificationMeta('cancelledAt');
+  @override
+  late final GeneratedColumn<DateTime> cancelledAt = GeneratedColumn<DateTime>(
+      'cancelled_at', aliasedName, true,
+      type: DriftSqlType.dateTime, requiredDuringInsert: false);
+  static const VerificationMeta _cancelReasonMeta =
+      const VerificationMeta('cancelReason');
+  @override
+  late final GeneratedColumn<String> cancelReason = GeneratedColumn<String>(
+      'cancel_reason', aliasedName, true,
+      type: DriftSqlType.string, requiredDuringInsert: false);
+  static const VerificationMeta _refundedAmountMeta =
+      const VerificationMeta('refundedAmount');
+  @override
+  late final GeneratedColumn<double> refundedAmount = GeneratedColumn<double>(
+      'refunded_amount', aliasedName, true,
+      type: DriftSqlType.double, requiredDuringInsert: false);
   static const VerificationMeta _totalAmountMeta =
       const VerificationMeta('totalAmount');
   @override
@@ -4409,6 +4427,9 @@ class $OrderSummariesTable extends OrderSummaries
         attributionCode,
         status,
         paymentMethod,
+        cancelledAt,
+        cancelReason,
+        refundedAmount,
         totalAmount,
         currencyCode,
         placedAt
@@ -4476,6 +4497,24 @@ class $OrderSummariesTable extends OrderSummaries
           paymentMethod.isAcceptableOrUnknown(
               data['payment_method']!, _paymentMethodMeta));
     }
+    if (data.containsKey('cancelled_at')) {
+      context.handle(
+          _cancelledAtMeta,
+          cancelledAt.isAcceptableOrUnknown(
+              data['cancelled_at']!, _cancelledAtMeta));
+    }
+    if (data.containsKey('cancel_reason')) {
+      context.handle(
+          _cancelReasonMeta,
+          cancelReason.isAcceptableOrUnknown(
+              data['cancel_reason']!, _cancelReasonMeta));
+    }
+    if (data.containsKey('refunded_amount')) {
+      context.handle(
+          _refundedAmountMeta,
+          refundedAmount.isAcceptableOrUnknown(
+              data['refunded_amount']!, _refundedAmountMeta));
+    }
     if (data.containsKey('total_amount')) {
       context.handle(
           _totalAmountMeta,
@@ -4525,6 +4564,12 @@ class $OrderSummariesTable extends OrderSummaries
           .read(DriftSqlType.string, data['${effectivePrefix}status'])!,
       paymentMethod: attachedDatabase.typeMapping
           .read(DriftSqlType.string, data['${effectivePrefix}payment_method']),
+      cancelledAt: attachedDatabase.typeMapping
+          .read(DriftSqlType.dateTime, data['${effectivePrefix}cancelled_at']),
+      cancelReason: attachedDatabase.typeMapping
+          .read(DriftSqlType.string, data['${effectivePrefix}cancel_reason']),
+      refundedAmount: attachedDatabase.typeMapping
+          .read(DriftSqlType.double, data['${effectivePrefix}refunded_amount']),
       totalAmount: attachedDatabase.typeMapping
           .read(DriftSqlType.double, data['${effectivePrefix}total_amount'])!,
       currencyCode: attachedDatabase.typeMapping
@@ -4562,6 +4607,15 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
   /// with commas (`bank_deposit`, `manual`, `card`, …). Null when the
   /// order history query did not return a transaction type — never guessed.
   final String? paymentMethod;
+
+  /// Shopify `cancelledAt`. Null when the order was not canceled.
+  final DateTime? cancelledAt;
+
+  /// Shopify `cancelReason`. Null when absent; never inferred.
+  final String? cancelReason;
+
+  /// Shopify `totalRefunded`. Null when the query did not return an amount.
+  final double? refundedAmount;
   final double totalAmount;
   final String currencyCode;
   final DateTime placedAt;
@@ -4575,6 +4629,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       this.attributionCode,
       required this.status,
       this.paymentMethod,
+      this.cancelledAt,
+      this.cancelReason,
+      this.refundedAmount,
       required this.totalAmount,
       required this.currencyCode,
       required this.placedAt});
@@ -4599,6 +4656,15 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
     map['status'] = Variable<String>(status);
     if (!nullToAbsent || paymentMethod != null) {
       map['payment_method'] = Variable<String>(paymentMethod);
+    }
+    if (!nullToAbsent || cancelledAt != null) {
+      map['cancelled_at'] = Variable<DateTime>(cancelledAt);
+    }
+    if (!nullToAbsent || cancelReason != null) {
+      map['cancel_reason'] = Variable<String>(cancelReason);
+    }
+    if (!nullToAbsent || refundedAmount != null) {
+      map['refunded_amount'] = Variable<double>(refundedAmount);
     }
     map['total_amount'] = Variable<double>(totalAmount);
     map['currency_code'] = Variable<String>(currencyCode);
@@ -4627,6 +4693,15 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       paymentMethod: paymentMethod == null && nullToAbsent
           ? const Value.absent()
           : Value(paymentMethod),
+      cancelledAt: cancelledAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelledAt),
+      cancelReason: cancelReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cancelReason),
+      refundedAmount: refundedAmount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(refundedAmount),
       totalAmount: Value(totalAmount),
       currencyCode: Value(currencyCode),
       placedAt: Value(placedAt),
@@ -4647,6 +4722,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       attributionCode: serializer.fromJson<String?>(json['attributionCode']),
       status: serializer.fromJson<String>(json['status']),
       paymentMethod: serializer.fromJson<String?>(json['paymentMethod']),
+      cancelledAt: serializer.fromJson<DateTime?>(json['cancelledAt']),
+      cancelReason: serializer.fromJson<String?>(json['cancelReason']),
+      refundedAmount: serializer.fromJson<double?>(json['refundedAmount']),
       totalAmount: serializer.fromJson<double>(json['totalAmount']),
       currencyCode: serializer.fromJson<String>(json['currencyCode']),
       placedAt: serializer.fromJson<DateTime>(json['placedAt']),
@@ -4665,6 +4743,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       'attributionCode': serializer.toJson<String?>(attributionCode),
       'status': serializer.toJson<String>(status),
       'paymentMethod': serializer.toJson<String?>(paymentMethod),
+      'cancelledAt': serializer.toJson<DateTime?>(cancelledAt),
+      'cancelReason': serializer.toJson<String?>(cancelReason),
+      'refundedAmount': serializer.toJson<double?>(refundedAmount),
       'totalAmount': serializer.toJson<double>(totalAmount),
       'currencyCode': serializer.toJson<String>(currencyCode),
       'placedAt': serializer.toJson<DateTime>(placedAt),
@@ -4681,6 +4762,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
           Value<String?> attributionCode = const Value.absent(),
           String? status,
           Value<String?> paymentMethod = const Value.absent(),
+          Value<DateTime?> cancelledAt = const Value.absent(),
+          Value<String?> cancelReason = const Value.absent(),
+          Value<double?> refundedAmount = const Value.absent(),
           double? totalAmount,
           String? currencyCode,
           DateTime? placedAt}) =>
@@ -4701,6 +4785,11 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
         status: status ?? this.status,
         paymentMethod:
             paymentMethod.present ? paymentMethod.value : this.paymentMethod,
+        cancelledAt: cancelledAt.present ? cancelledAt.value : this.cancelledAt,
+        cancelReason:
+            cancelReason.present ? cancelReason.value : this.cancelReason,
+        refundedAmount:
+            refundedAmount.present ? refundedAmount.value : this.refundedAmount,
         totalAmount: totalAmount ?? this.totalAmount,
         currencyCode: currencyCode ?? this.currencyCode,
         placedAt: placedAt ?? this.placedAt,
@@ -4726,6 +4815,14 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       paymentMethod: data.paymentMethod.present
           ? data.paymentMethod.value
           : this.paymentMethod,
+      cancelledAt:
+          data.cancelledAt.present ? data.cancelledAt.value : this.cancelledAt,
+      cancelReason: data.cancelReason.present
+          ? data.cancelReason.value
+          : this.cancelReason,
+      refundedAmount: data.refundedAmount.present
+          ? data.refundedAmount.value
+          : this.refundedAmount,
       totalAmount:
           data.totalAmount.present ? data.totalAmount.value : this.totalAmount,
       currencyCode: data.currencyCode.present
@@ -4747,6 +4844,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
           ..write('attributionCode: $attributionCode, ')
           ..write('status: $status, ')
           ..write('paymentMethod: $paymentMethod, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('cancelReason: $cancelReason, ')
+          ..write('refundedAmount: $refundedAmount, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('placedAt: $placedAt')
@@ -4765,6 +4865,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
       attributionCode,
       status,
       paymentMethod,
+      cancelledAt,
+      cancelReason,
+      refundedAmount,
       totalAmount,
       currencyCode,
       placedAt);
@@ -4781,6 +4884,9 @@ class OrderSummary extends DataClass implements Insertable<OrderSummary> {
           other.attributionCode == this.attributionCode &&
           other.status == this.status &&
           other.paymentMethod == this.paymentMethod &&
+          other.cancelledAt == this.cancelledAt &&
+          other.cancelReason == this.cancelReason &&
+          other.refundedAmount == this.refundedAmount &&
           other.totalAmount == this.totalAmount &&
           other.currencyCode == this.currencyCode &&
           other.placedAt == this.placedAt);
@@ -4796,6 +4902,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
   final Value<String?> attributionCode;
   final Value<String> status;
   final Value<String?> paymentMethod;
+  final Value<DateTime?> cancelledAt;
+  final Value<String?> cancelReason;
+  final Value<double?> refundedAmount;
   final Value<double> totalAmount;
   final Value<String> currencyCode;
   final Value<DateTime> placedAt;
@@ -4810,6 +4919,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     this.attributionCode = const Value.absent(),
     this.status = const Value.absent(),
     this.paymentMethod = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
+    this.cancelReason = const Value.absent(),
+    this.refundedAmount = const Value.absent(),
     this.totalAmount = const Value.absent(),
     this.currencyCode = const Value.absent(),
     this.placedAt = const Value.absent(),
@@ -4825,6 +4937,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     this.attributionCode = const Value.absent(),
     required String status,
     this.paymentMethod = const Value.absent(),
+    this.cancelledAt = const Value.absent(),
+    this.cancelReason = const Value.absent(),
+    this.refundedAmount = const Value.absent(),
     required double totalAmount,
     required String currencyCode,
     required DateTime placedAt,
@@ -4846,6 +4961,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     Expression<String>? attributionCode,
     Expression<String>? status,
     Expression<String>? paymentMethod,
+    Expression<DateTime>? cancelledAt,
+    Expression<String>? cancelReason,
+    Expression<double>? refundedAmount,
     Expression<double>? totalAmount,
     Expression<String>? currencyCode,
     Expression<DateTime>? placedAt,
@@ -4861,6 +4979,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
       if (attributionCode != null) 'attribution_code': attributionCode,
       if (status != null) 'status': status,
       if (paymentMethod != null) 'payment_method': paymentMethod,
+      if (cancelledAt != null) 'cancelled_at': cancelledAt,
+      if (cancelReason != null) 'cancel_reason': cancelReason,
+      if (refundedAmount != null) 'refunded_amount': refundedAmount,
       if (totalAmount != null) 'total_amount': totalAmount,
       if (currencyCode != null) 'currency_code': currencyCode,
       if (placedAt != null) 'placed_at': placedAt,
@@ -4878,6 +4999,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
       Value<String?>? attributionCode,
       Value<String>? status,
       Value<String?>? paymentMethod,
+      Value<DateTime?>? cancelledAt,
+      Value<String?>? cancelReason,
+      Value<double?>? refundedAmount,
       Value<double>? totalAmount,
       Value<String>? currencyCode,
       Value<DateTime>? placedAt,
@@ -4892,6 +5016,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
       attributionCode: attributionCode ?? this.attributionCode,
       status: status ?? this.status,
       paymentMethod: paymentMethod ?? this.paymentMethod,
+      cancelledAt: cancelledAt ?? this.cancelledAt,
+      cancelReason: cancelReason ?? this.cancelReason,
+      refundedAmount: refundedAmount ?? this.refundedAmount,
       totalAmount: totalAmount ?? this.totalAmount,
       currencyCode: currencyCode ?? this.currencyCode,
       placedAt: placedAt ?? this.placedAt,
@@ -4929,6 +5056,15 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
     if (paymentMethod.present) {
       map['payment_method'] = Variable<String>(paymentMethod.value);
     }
+    if (cancelledAt.present) {
+      map['cancelled_at'] = Variable<DateTime>(cancelledAt.value);
+    }
+    if (cancelReason.present) {
+      map['cancel_reason'] = Variable<String>(cancelReason.value);
+    }
+    if (refundedAmount.present) {
+      map['refunded_amount'] = Variable<double>(refundedAmount.value);
+    }
     if (totalAmount.present) {
       map['total_amount'] = Variable<double>(totalAmount.value);
     }
@@ -4956,6 +5092,9 @@ class OrderSummariesCompanion extends UpdateCompanion<OrderSummary> {
           ..write('attributionCode: $attributionCode, ')
           ..write('status: $status, ')
           ..write('paymentMethod: $paymentMethod, ')
+          ..write('cancelledAt: $cancelledAt, ')
+          ..write('cancelReason: $cancelReason, ')
+          ..write('refundedAmount: $refundedAmount, ')
           ..write('totalAmount: $totalAmount, ')
           ..write('currencyCode: $currencyCode, ')
           ..write('placedAt: $placedAt, ')
@@ -7975,6 +8114,9 @@ typedef $$OrderSummariesTableCreateCompanionBuilder = OrderSummariesCompanion
   Value<String?> attributionCode,
   required String status,
   Value<String?> paymentMethod,
+  Value<DateTime?> cancelledAt,
+  Value<String?> cancelReason,
+  Value<double?> refundedAmount,
   required double totalAmount,
   required String currencyCode,
   required DateTime placedAt,
@@ -7991,6 +8133,9 @@ typedef $$OrderSummariesTableUpdateCompanionBuilder = OrderSummariesCompanion
   Value<String?> attributionCode,
   Value<String> status,
   Value<String?> paymentMethod,
+  Value<DateTime?> cancelledAt,
+  Value<String?> cancelReason,
+  Value<double?> refundedAmount,
   Value<double> totalAmount,
   Value<String> currencyCode,
   Value<DateTime> placedAt,
@@ -8053,6 +8198,16 @@ class $$OrderSummariesTableFilterComposer
 
   ColumnFilters<String> get paymentMethod => $composableBuilder(
       column: $table.paymentMethod, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<DateTime> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<String> get cancelReason => $composableBuilder(
+      column: $table.cancelReason, builder: (column) => ColumnFilters(column));
+
+  ColumnFilters<double> get refundedAmount => $composableBuilder(
+      column: $table.refundedAmount,
+      builder: (column) => ColumnFilters(column));
 
   ColumnFilters<double> get totalAmount => $composableBuilder(
       column: $table.totalAmount, builder: (column) => ColumnFilters(column));
@@ -8122,6 +8277,17 @@ class $$OrderSummariesTableOrderingComposer
       column: $table.paymentMethod,
       builder: (column) => ColumnOrderings(column));
 
+  ColumnOrderings<DateTime> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<String> get cancelReason => $composableBuilder(
+      column: $table.cancelReason,
+      builder: (column) => ColumnOrderings(column));
+
+  ColumnOrderings<double> get refundedAmount => $composableBuilder(
+      column: $table.refundedAmount,
+      builder: (column) => ColumnOrderings(column));
+
   ColumnOrderings<double> get totalAmount => $composableBuilder(
       column: $table.totalAmount, builder: (column) => ColumnOrderings(column));
 
@@ -8186,6 +8352,15 @@ class $$OrderSummariesTableAnnotationComposer
   GeneratedColumn<String> get paymentMethod => $composableBuilder(
       column: $table.paymentMethod, builder: (column) => column);
 
+  GeneratedColumn<DateTime> get cancelledAt => $composableBuilder(
+      column: $table.cancelledAt, builder: (column) => column);
+
+  GeneratedColumn<String> get cancelReason => $composableBuilder(
+      column: $table.cancelReason, builder: (column) => column);
+
+  GeneratedColumn<double> get refundedAmount => $composableBuilder(
+      column: $table.refundedAmount, builder: (column) => column);
+
   GeneratedColumn<double> get totalAmount => $composableBuilder(
       column: $table.totalAmount, builder: (column) => column);
 
@@ -8249,6 +8424,9 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
             Value<String?> attributionCode = const Value.absent(),
             Value<String> status = const Value.absent(),
             Value<String?> paymentMethod = const Value.absent(),
+            Value<DateTime?> cancelledAt = const Value.absent(),
+            Value<String?> cancelReason = const Value.absent(),
+            Value<double?> refundedAmount = const Value.absent(),
             Value<double> totalAmount = const Value.absent(),
             Value<String> currencyCode = const Value.absent(),
             Value<DateTime> placedAt = const Value.absent(),
@@ -8264,6 +8442,9 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
             attributionCode: attributionCode,
             status: status,
             paymentMethod: paymentMethod,
+            cancelledAt: cancelledAt,
+            cancelReason: cancelReason,
+            refundedAmount: refundedAmount,
             totalAmount: totalAmount,
             currencyCode: currencyCode,
             placedAt: placedAt,
@@ -8279,6 +8460,9 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
             Value<String?> attributionCode = const Value.absent(),
             required String status,
             Value<String?> paymentMethod = const Value.absent(),
+            Value<DateTime?> cancelledAt = const Value.absent(),
+            Value<String?> cancelReason = const Value.absent(),
+            Value<double?> refundedAmount = const Value.absent(),
             required double totalAmount,
             required String currencyCode,
             required DateTime placedAt,
@@ -8294,6 +8478,9 @@ class $$OrderSummariesTableTableManager extends RootTableManager<
             attributionCode: attributionCode,
             status: status,
             paymentMethod: paymentMethod,
+            cancelledAt: cancelledAt,
+            cancelReason: cancelReason,
+            refundedAmount: refundedAmount,
             totalAmount: totalAmount,
             currencyCode: currencyCode,
             placedAt: placedAt,

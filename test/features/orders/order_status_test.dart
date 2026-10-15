@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/orders/order_status.dart';
 
@@ -11,6 +12,9 @@ OrderSummary _order({
   String? attributionCode,
   String status = 'paid',
   String? paymentMethod,
+  DateTime? cancelledAt,
+  String? cancelReason,
+  double? refundedAmount,
   double total = 11480,
   String currency = 'MXN',
 }) =>
@@ -24,6 +28,9 @@ OrderSummary _order({
       attributionCode: attributionCode,
       status: status,
       paymentMethod: paymentMethod,
+      cancelledAt: cancelledAt,
+      cancelReason: cancelReason,
+      refundedAmount: refundedAmount,
       totalAmount: total,
       currencyCode: currency,
       placedAt: DateTime.utc(2026, 5, 12),
@@ -92,9 +99,9 @@ void main() {
     final labels = <String, String>{
       'paid': 'Confirmado',
       'PAID': 'Confirmado',
-      'partially_refunded': 'Reembolso en proceso',
-      'PARTIALLY_REFUNDED': 'Reembolso en proceso',
-      'partially refunded': 'Reembolso en proceso',
+      'partially_refunded': 'Reembolso parcial',
+      'PARTIALLY_REFUNDED': 'Reembolso parcial',
+      'partially refunded': 'Reembolso parcial',
       'pending_refund': 'Reembolso en proceso',
       'refund_pending': 'Reembolso en proceso',
       'refunded': 'Reembolsado',
@@ -180,7 +187,7 @@ void main() {
 
     test('refund in progress explains itself without a notification', () {
       final status = orderDisplayStatus(
-        _order(fulfillmentStatus: null, status: 'partially_refunded'),
+        _order(fulfillmentStatus: null, status: 'pending_refund'),
       );
       expect(status.label, 'Reembolso en proceso');
       expect(status.detail, 'Lo verás aquí cuando se complete.');
@@ -240,12 +247,14 @@ void main() {
       expect(status.label, 'Cancelado');
     });
 
-    test('delivered and partially refunded is not Entregado', () {
+    test('delivered and partially refunded keeps the refund as the label', () {
       final status = orderDisplayStatus(
         _order(fulfillmentStatus: 'delivered', status: 'partially_refunded'),
       );
-      expect(status.label, 'Reembolso en proceso');
+      expect(status.label, 'Reembolso parcial');
+      expect(status.secondaryLabel, 'Entregado');
       expect(status.key, isNot('delivered'));
+      expect(status.success, isFalse);
     });
 
     test('shipped and unpaid is not En camino', () {
@@ -270,7 +279,142 @@ void main() {
       expect(status.label, 'Entregado');
       expect(status.key, 'delivered');
     });
+  });
 
+  group('F9 cancelación de Shopify', () {
+    test('paid with cancelledAt is Cancelado, not Confirmado', () {
+      final status = orderDisplayStatus(
+        _order(
+          fulfillmentStatus: 'shipped',
+          status: 'paid',
+          cancelledAt: DateTime.utc(2026, 6, 1),
+        ),
+      );
+      expect(status.label, 'Cancelado');
+      expect(status.key, 'cancelled');
+      expect(status.label, isNot('En camino'));
+      expect(status.label, isNot('Confirmado'));
+    });
+
+    test('pending with cancelReason is Cancelado', () {
+      final status = orderDisplayStatus(
+        _order(
+          status: 'pending',
+          paymentMethod: 'bank_deposit',
+          cancelReason: 'customer',
+        ),
+      );
+      expect(status.label, 'Cancelado');
+      expect(status.label, isNot('Esperando tu transferencia'));
+    });
+
+    test('cancelled status is Cancelado even when fulfillment is delivered',
+        () {
+      final status = orderDisplayStatus(
+        _order(fulfillmentStatus: 'delivered', status: 'cancelled'),
+      );
+      expect(status.label, 'Cancelado');
+      expect(status.key, isNot('delivered'));
+    });
+
+    test('refunded stays Reembolsado when cancelledAt is also set', () {
+      final status = orderDisplayStatus(
+        _order(
+          status: 'refunded',
+          cancelledAt: DateTime.utc(2026, 6, 1),
+          cancelReason: 'customer',
+          total: 500,
+        ),
+      );
+      expect(status.label, 'Reembolsado');
+    });
+
+    test('voided stays Cancelado', () {
+      final status = orderDisplayStatus(
+        _order(status: 'voided', fulfillmentStatus: 'shipped'),
+      );
+      expect(status.label, 'Cancelado');
+      expect(status.label, isNot('En camino'));
+    });
+
+    test('a cancelled paid shipment is not in En camino', () {
+      final orders = [
+        _order(id: 'open', fulfillmentStatus: 'shipped', status: 'paid'),
+        _order(
+          id: 'cancelled',
+          fulfillmentStatus: 'shipped',
+          status: 'paid',
+          cancelledAt: DateTime.utc(2026, 6, 2),
+        ),
+      ];
+      expect(
+        filterOrders(orders, OrderFilter.inTransit).map((o) => o.id),
+        ['open'],
+      );
+    });
+  });
+
+  group('F8 reembolso parcial', () {
+    test('uses the refunded amount and the order total', () {
+      final status = orderDisplayStatus(
+        _order(
+          status: 'partially_refunded',
+          refundedAmount: 200,
+          total: 1000,
+          currency: 'MXN',
+        ),
+      );
+      expect(status.label, 'Reembolso parcial');
+      expect(status.success, isFalse);
+      expect(status.actionLabel, isNull);
+      expect(
+        status.detail,
+        'Te devolvimos ${kMoney.format(200)} MXN de '
+        '${kMoney.format(1000)} MXN a tu método de pago.',
+      );
+    });
+
+    test('missing refunded amount uses the Designer fallback', () {
+      for (final amount in <double?>[null, 0]) {
+        final status = orderDisplayStatus(
+          _order(
+            status: 'partially_refunded',
+            refundedAmount: amount,
+            total: 1000,
+          ),
+        );
+        expect(
+          status.detail,
+          'Te devolvimos una parte de tu pago a tu método de pago.',
+        );
+        expect(status.label, 'Reembolso parcial');
+      }
+    });
+
+    test('shipped partial refund keeps fulfillment as secondary', () {
+      final status = orderDisplayStatus(
+        _order(
+          fulfillmentStatus: 'shipped',
+          status: 'partially_refunded',
+        ),
+      );
+      expect(status.label, 'Reembolso parcial');
+      expect(status.secondaryLabel, 'En camino');
+      expect(status.key, 'partial_refund');
+      expect(status.success, isFalse);
+    });
+
+    test('in-progress refund is not a partial refund', () {
+      final status = orderDisplayStatus(
+        _order(status: 'refund_pending', fulfillmentStatus: 'shipped'),
+      );
+      expect(status.label, 'Reembolso en proceso');
+      expect(status.secondaryLabel, isNull);
+      expect(status.label, isNot('En camino'));
+    });
+  });
+
+  group('orderDisplayStatus: el pago gana al envío', () {
     test('En camino filter ignores unpaid shipments', () {
       final orders = [
         _order(id: 'paid-shipped', fulfillmentStatus: 'shipped'),

@@ -16,6 +16,9 @@ OrderSummary _order({
   String? attributionCode,
   String status = 'paid',
   String? paymentMethod,
+  DateTime? cancelledAt,
+  String? cancelReason,
+  double? refundedAmount,
   double total = 11480,
 }) =>
     OrderSummary(
@@ -28,6 +31,9 @@ OrderSummary _order({
       attributionCode: attributionCode,
       status: status,
       paymentMethod: paymentMethod,
+      cancelledAt: cancelledAt,
+      cancelReason: cancelReason,
+      refundedAmount: refundedAmount,
       totalAmount: total,
       currencyCode: 'MXN',
       placedAt: DateTime.utc(2026, 5, 12),
@@ -161,6 +167,61 @@ void main() {
       expect(find.text('Cancelado'), findsWidgets);
       expect(find.text('En camino'), findsNothing);
       expect(find.text('Pedido enviado'), findsNothing);
+    });
+
+    testWidgets('cancelled paid shipment is Cancelado', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: 'shipped',
+            status: 'paid',
+            cancelledAt: DateTime.utc(2026, 6, 1),
+            cancelReason: 'customer',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancelado'), findsWidgets);
+      expect(find.text('En camino'), findsNothing);
+      expect(find.text('Pedido enviado'), findsNothing);
+      expect(find.text('Confirmado'), findsNothing);
+      expect(find.text('Pago confirmado'), findsNothing);
+    });
+
+    testWidgets('partial refund fallback and secondary shipment stay neutral', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: 'shipped',
+            status: 'partially_refunded',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reembolso parcial'), findsWidgets);
+      expect(
+        find.text('Te devolvimos una parte de tu pago a tu método de pago.'),
+        findsWidgets,
+      );
+      expect(find.text('Reembolso en proceso'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(EStatusCapsule),
+          matching: find.text('En camino'),
+        ),
+        findsNothing,
+      );
+      final secondary = tester.widget<Text>(find.text('En camino'));
+      expect(secondary.style?.color, isNot(const Color(0xFF8F6838)));
+      expect(secondary.style?.color, isNot(MonettaColors.light.success));
+      expect(
+        secondary.style?.color,
+        isNot(MonettaColors.light.successSurface),
+      );
     });
 
     testWidgets('enviado is never presented as entregado', (tester) async {
