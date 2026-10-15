@@ -75,6 +75,7 @@ import 'data/shopify/storefront_config.dart';
 import 'features/catalog/collection_screen.dart';
 import 'features/catalog/search_history.dart';
 import 'features/catalog/search_history_persistence.dart';
+import 'features/checkout/reviewing_checkout.dart';
 import 'features/home/home_screen.dart';
 import 'features/product/product_screen.dart';
 import 'features/welcome/welcome_gate.dart';
@@ -361,6 +362,7 @@ class AppRouteScopes extends StatelessWidget {
     this.checkoutCoordinator,
     this.catalogStore,
     this.notificationController,
+    this.reviewingCheckout,
     required this.shopDomain,
     required this.child,
     super.key,
@@ -371,20 +373,28 @@ class AppRouteScopes extends StatelessWidget {
   final ShopifyCheckoutCoordinator? checkoutCoordinator;
   final CatalogStore? catalogStore;
   final NotificationController? notificationController;
+
+  /// Banner-3 cart warning. Null lets [ReviewingCheckoutHost] keep one in
+  /// memory for this element; it is not restored after an app restart.
+  final ReviewingCheckoutCart? reviewingCheckout;
   final String shopDomain;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final cart = cartController;
-    Widget routedApp = cart == null
-        ? child
-        : CartScope(
-            shopDomain: shopDomain,
-            notifier: cart,
-            checkoutCoordinator: checkoutCoordinator,
-            child: child,
-          );
+    Widget routedApp = ReviewingCheckoutHost(
+      cart: cart,
+      reviewing: reviewingCheckout,
+      child: cart == null
+          ? child
+          : CartScope(
+              shopDomain: shopDomain,
+              notifier: cart,
+              checkoutCoordinator: checkoutCoordinator,
+              child: child,
+            ),
+    );
     final notifications = notificationController;
     if (notifications != null) {
       routedApp = NotificationScope(

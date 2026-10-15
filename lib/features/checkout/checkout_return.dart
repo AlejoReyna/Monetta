@@ -42,6 +42,14 @@ const String kCheckoutReturnViewOrdersLabel = 'Ver mis pedidos';
 
 const String kCheckoutReturnWhatsAppLabel = 'Escríbenos por WhatsApp';
 
+/// DUP-02. Shown before a second checkout while banner 3 is active.
+const String kCheckoutDoubleChargeTitle = 'Es posible que ya hayas pagado';
+
+const String kCheckoutDoubleChargeBody =
+    'Revisa Mis pedidos antes de pagar otra vez para evitar un cobro doble.';
+
+const String kCheckoutDoubleChargePayAnywayLabel = 'Pagar de todos modos';
+
 enum CheckoutReturnKind {
   completed,
   sheetDidNotOpen,

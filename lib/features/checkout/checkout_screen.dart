@@ -35,9 +35,11 @@ import '../catalog/product_card.dart';
 import '../orders/order_detail_screen.dart';
 import '../orders/orders_screen.dart';
 import '../product/quick_view.dart';
+import 'checkout_double_charge_sheet.dart';
 import 'checkout_order_lookup.dart';
 import 'checkout_return.dart';
 import 'checkout_return_banner.dart';
+import 'reviewing_checkout.dart';
 import 'order_confirmation_screen.dart';
 import 'shopify_cart_summary.dart';
 
@@ -62,6 +64,22 @@ typedef SecureCheckoutLauncher = Future<CheckoutResult> Function(
   CheckoutDraft draft,
 );
 typedef ExternalCheckoutFallback = Future<bool> Function();
+
+void openCheckoutOrders(BuildContext context) {
+  final account = AccountScope.maybeOf(context);
+  if (account == null || !account.isSignedIn) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Inicia sesión para ver Mis pedidos. Te enviamos la '
+          'confirmación a tu correo.',
+        ),
+      ),
+    );
+    return;
+  }
+  unawaited(openOrders(context, controller: account));
+}
 
 Future<void> openBag(
   BuildContext context, {
@@ -241,7 +259,21 @@ class _BagContents extends StatelessWidget {
     final subtotal = store.bagSubtotal;
     final shipping = _shippingFor(subtotal);
 
-    void continueToCheckout() {
+    Future<void> continueToCheckout() async {
+      final guard = ReviewingCheckoutScope.maybeOf(context);
+      final token = cartTokenFromShopifyCartId(
+        cartController?.snapshot?.cart?.id,
+      );
+      if (guard != null && guard.isActiveFor(token)) {
+        final choice = await showCheckoutDoubleChargeSheet(context);
+        if (!context.mounted) return;
+        if (choice == CheckoutDoubleChargeChoice.viewOrders) {
+          openCheckoutOrders(context);
+          return;
+        }
+        if (choice != CheckoutDoubleChargeChoice.payAnyway) return;
+      }
+      if (!context.mounted) return;
       final controller = cartController;
       final scope = cartScope;
       final checkout = checkoutCoordinator;
@@ -359,13 +391,13 @@ class _BagContents extends StatelessWidget {
                 controller: controller,
                 scope: scope,
                 localIntent: localIntent,
-                onContinue: continueToCheckout,
+                onContinue: () => unawaited(continueToCheckout()),
               )
             : _OrderSummary(
                 subtotal: subtotal,
                 shipping: shipping,
                 ctaLabel: 'Continuar al checkout',
-                onContinue: continueToCheckout,
+                onContinue: () => unawaited(continueToCheckout()),
               );
 
         final bagIds = {for (final line in lines) line.product.id};
@@ -606,20 +638,14 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     }
   }
 
-  void _viewOrders() {
-    final account = AccountScope.maybeOf(context);
-    if (account == null || !account.isSignedIn) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Inicia sesión para ver Mis pedidos. Te enviamos la '
-            'confirmación a tu correo.',
-          ),
-        ),
-      );
-      return;
-    }
-    unawaited(openOrders(context, controller: account));
+  void _viewOrders() => openCheckoutOrders(context);
+
+  void _activateReviewing(CheckoutAttemptIdentity attempt) {
+    ReviewingCheckoutScope.maybeOf(context)?.markActive(attempt.cartToken);
+  }
+
+  void _deactivateReviewing() {
+    ReviewingCheckoutScope.maybeOf(context)?.clear();
   }
 
   Future<void> _openMatchedOrder(CheckoutOrderMatch match) async {
@@ -677,6 +703,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
         setState(() => _openingSheet = false);
         switch (result) {
           case CheckoutCompleted():
+            _deactivateReviewing();
             setState(() => _returnPhase = null);
             // Confirmación solo con evidencia del result. CheckoutCompleted no
             // porta identidad de pedido y la sincronización de Mis pedidos
@@ -726,6 +753,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             final attempt = _attemptIdentity();
             if (lookup == null) {
               // Nothing to correlate against. That is not proof of no charge.
+              _activateReviewing(attempt);
               setState(() => _returnPhase = CheckoutReturnPhase.reviewing);
               return;
             }
@@ -744,6 +772,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             );
             if (!mounted || generation != _returnGeneration) return;
             if (decision is CheckoutOrderFound) {
+              _deactivateReviewing();
               setState(() {
                 _checkingOrder = false;
                 _orderFound = true;
@@ -751,6 +780,11 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
               });
               await _openMatchedOrder(decision.match);
               return;
+            }
+            if (decision is CheckoutOrderNotFound) {
+              _deactivateReviewing();
+            } else {
+              _activateReviewing(attempt);
             }
             setState(() {
               _checkingOrder = false;
