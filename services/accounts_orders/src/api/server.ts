@@ -768,6 +768,8 @@ export function createApp(deps: ServerDeps): Express {
           totalAmount: o.totalAmount,
           currencyCode: o.currencyCode,
           placedAt: o.placedAt?.toISOString() ?? null,
+          checkoutToken: o.checkoutToken ?? null,
+          cartToken: o.cartToken ?? null,
         })),
       });
     } catch (error) {

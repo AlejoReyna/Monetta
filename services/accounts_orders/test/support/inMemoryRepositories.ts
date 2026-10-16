@@ -147,6 +147,8 @@ export class InMemoryOrdersRepository implements OrdersRepository {
           attributionCode: order.attributionCode ?? existing.attributionCode,
           shopifyUpdatedAt: order.shopifyUpdatedAt ?? existing.shopifyUpdatedAt,
           paymentMethod: order.paymentMethod ?? existing.paymentMethod ?? null,
+          checkoutToken: order.checkoutToken ?? existing.checkoutToken ?? null,
+          cartToken: order.cartToken ?? existing.cartToken ?? null,
         });
         return;
       }
@@ -154,6 +156,8 @@ export class InMemoryOrdersRepository implements OrdersRepository {
     this.rows.push({
       ...order,
       paymentMethod: order.paymentMethod ?? null,
+      checkoutToken: order.checkoutToken ?? null,
+      cartToken: order.cartToken ?? null,
       id: this.nextId++,
     });
   }

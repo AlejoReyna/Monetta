@@ -10,6 +10,8 @@ import { logger } from '../logger.js';
 import { normalizePaymentMethod } from '../orders/paymentMethod.js';
 import {
   noteAttribute,
+  orderCorrelationToken,
+  orderLogName,
   parseTags,
   type ShopifyCustomerDataRequestWebhookPayload,
   type ShopifyCustomerRedactWebhookPayload,
@@ -35,6 +37,54 @@ export interface HandlerDeps {
     deleteForShopifyCustomer(shopifyCustomerId: string): Promise<void>;
     deleteAll(): Promise<void>;
   };
+  /**
+   * `orders/updated` warns about missing checkout tokens only when the
+   * order's Shopify `created_at` is at or after this instant. Defaults to
+   * process start, which is this running deploy. `orders/create` is not
+   * gated: a create handled by this process is a new order.
+   */
+  readonly checkoutTokensDeployedAt?: Date;
+}
+
+/** Process start. Orders created earlier are pre-deploy for this process. */
+const runningDeployAt = new Date();
+
+function shopifyTimestamp(value: string | null | undefined): Date | null {
+  if (value === undefined || value === null || value.trim() === '') return null;
+  const parsed = new Date(value);
+  if (Number.isNaN(parsed.getTime())) return null;
+  return parsed;
+}
+
+/**
+ * Both correlation tokens parsed to null. Field names only — never values.
+ * `orders/updated` stays quiet for orders created before this deploy so a
+ * historical update does not warn once per order.
+ */
+function warnIfOrderMissingCheckoutTokens(
+  deps: HandlerDeps,
+  topic: 'orders/create' | 'orders/updated',
+  payload: ShopifyOrderWebhookPayload,
+  shopifyOrderId: string,
+  checkoutToken: string | null,
+  cartToken: string | null,
+): void {
+  const missingFields = [
+    ...(checkoutToken === null ? ['checkout_token' as const] : []),
+    ...(cartToken === null ? ['cart_token' as const] : []),
+  ];
+  if (missingFields.length !== 2) return;
+  if (topic === 'orders/updated') {
+    const deployedAt = deps.checkoutTokensDeployedAt ?? runningDeployAt;
+    const createdAt = shopifyTimestamp(payload.created_at);
+    if (createdAt === null || createdAt.getTime() < deployedAt.getTime()) return;
+  }
+  logger.warn('order_webhook_missing_checkout_tokens', {
+    shopifyOrderId,
+    orderName: orderLogName(payload.name),
+    missingFields,
+    topic,
+  });
 }
 
 /**
@@ -138,6 +188,16 @@ export async function handleOrdersWebhook(
       const tags = parseTags(payload.tags);
       const attributionCode = tags.find((t) => APARTADO_CODE.test(t)) ?? null;
       const customerId = payload.customer ? String(payload.customer.id) : null;
+      const checkoutToken = orderCorrelationToken(payload.checkout_token);
+      const cartToken = orderCorrelationToken(payload.cart_token);
+      warnIfOrderMissingCheckoutTokens(
+        deps,
+        topic,
+        payload,
+        shopifyOrderId,
+        checkoutToken,
+        cartToken,
+      );
 
       if (payload.customer) {
         await deps.customers.upsert({
@@ -175,6 +235,8 @@ export async function handleOrdersWebhook(
         currencyCode: payload.currency ?? null,
         attributionDeviceId: noteAttribute(payload, '_device_id'),
         attributionRecoSource: noteAttribute(payload, '_rec_source'),
+        checkoutToken,
+        cartToken,
         placedAt: payload.created_at ? new Date(payload.created_at) : null,
         shopifyUpdatedAt: payload.updated_at ? new Date(payload.updated_at) : null,
       });

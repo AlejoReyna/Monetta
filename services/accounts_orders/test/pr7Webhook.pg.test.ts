@@ -118,4 +118,79 @@ describe.skipIf(!available)('R4 PostgreSQL recovery', () => {
     await handleOrdersWebhook(deps, id, 'orders/updated', payload, body);
     expect((await pool.query("SELECT count(*)::int AS n FROM orders_mirror WHERE shopify_order_id='702'")).rows[0].n).toBe(1);
   });
+
+  it('persists checkout and cart tokens for the owning customer and keeps them across a later webhook', async () => {
+    const indexes = await pool.query<{ indexname: string }>(
+      `SELECT indexname FROM pg_indexes
+       WHERE tablename = 'orders_mirror'
+         AND indexname IN ('idx_orders_mirror_checkout_token', 'idx_orders_mirror_cart_token')`,
+    );
+    expect(indexes.rows.map((row) => row.indexname).sort()).toEqual([
+      'idx_orders_mirror_cart_token',
+      'idx_orders_mirror_checkout_token',
+    ]);
+
+    const orders = new PgOrdersRepository(pool);
+    const customers = new PgCustomersRepository(pool);
+    const deps = {
+      webhookEvents: new PgWebhookEventsRepository(pool),
+      orders,
+      customers,
+      pushTokens: new InMemoryPushTokensRepository(),
+    };
+    const checkoutToken = 'chk_pgowner77';
+    const cartToken = 'crt_pgowner77';
+    const otherCheckout = 'chk_pgother88';
+    await handleOrdersWebhook(
+      deps,
+      randomUUID(),
+      'orders/create',
+      {
+        id: 910,
+        created_at: '2026-08-03T00:00:00Z',
+        updated_at: '2026-08-03T00:00:00Z',
+        checkout_token: `${checkoutToken}?key=not-a-stored-key`,
+        cart_token: cartToken,
+        customer: { id: 77, email: 'c@example.com' },
+      },
+      Buffer.from('pg-token-create'),
+    );
+    await handleOrdersWebhook(
+      deps,
+      randomUUID(),
+      'orders/create',
+      {
+        id: 911,
+        created_at: '2026-08-04T00:00:00Z',
+        updated_at: '2026-08-04T00:00:00Z',
+        checkout_token: otherCheckout,
+        cart_token: 'crt_pgother88',
+        customer: { id: 88, email: 'other@example.com' },
+      },
+      Buffer.from('pg-token-other'),
+    );
+    await handleOrdersWebhook(
+      deps,
+      randomUUID(),
+      'orders/updated',
+      {
+        id: 910,
+        financial_status: 'paid',
+        updated_at: '2026-08-03T01:00:00Z',
+        customer: { id: 77, email: 'c@example.com' },
+      },
+      Buffer.from('pg-token-update'),
+    );
+
+    const stored = await pool.query<{ checkout_token: string | null; cart_token: string | null }>(
+      `SELECT checkout_token, cart_token FROM orders_mirror WHERE shopify_order_id = '910'`,
+    );
+    expect(stored.rows[0]).toEqual({ checkout_token: checkoutToken, cart_token: cartToken });
+    const owned = await orders.listForCustomer('77');
+    expect(owned.map((order) => order.shopifyOrderId)).toEqual(['910']);
+    expect(owned[0]?.checkoutToken).toBe(checkoutToken);
+    expect(owned[0]?.cartToken).toBe(cartToken);
+    expect(JSON.stringify(owned)).not.toContain(otherCheckout);
+    expect(JSON.stringify(stored.rows)).not.toContain('not-a-stored-key');
+  });
 });

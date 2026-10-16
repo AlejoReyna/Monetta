@@ -19,6 +19,11 @@
  *
  * Runbook: dry-run, review the id/name list, apply on staging, then
  * production only after Alexis approves that dry-run list.
+ *
+ * Does not backfill checkout_token or cart_token. Those columns are filled
+ * by orders/create and orders/updated. This script's candidate set is only
+ * pending rows still missing a payment method, and its stdout prints every
+ * looked-up field — printing the tokens would log them.
  */
 import { fileURLToPath } from 'node:url';
 import type pg from 'pg';
