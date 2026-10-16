@@ -35,15 +35,25 @@ primary_region = "dfw"
 
 [processes]
   app = "node dist/api/server.js"
+  # Rewards maintenance (lot expiry, abandoned reservations, inbox retry) polls
+  # every 60 s and holds an advisory lock, so a single Machine is enough. It
+  # serves no HTTP.
+  worker = "node dist/rewards/worker.js"
 
 # Engagement is disabled in staging. Keeping its worker out of this release
 # avoids paying for a second idle Machine before notification configuration is
-# explicitly enabled and tested.
+# explicitly enabled and tested. The Rewards worker above is the only extra
+# Machine.
 
 [[vm]]
   size = "shared-cpu-1x"
   memory = "256mb"
   processes = ["app"]
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "256mb"
+  processes = ["worker"]
 
 [http_service]
   processes = ["app"]
