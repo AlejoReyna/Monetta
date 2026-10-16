@@ -13,13 +13,16 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/cart_controller.dart';
 import '../../app/checkout_buyer_identity.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../app/shopify_checkout_coordinator.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../data/local/database.dart' show OrderSummary;
 import '../../data/media/media_url.dart';
 import '../../data/shopify/cart/cart_repository.dart';
 import '../../data/shopify/cart/cart_session_store.dart';
@@ -29,7 +32,14 @@ import '../../main.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
+import '../orders/order_detail_screen.dart';
+import '../orders/orders_screen.dart';
 import '../product/quick_view.dart';
+import 'checkout_double_charge_sheet.dart';
+import 'checkout_order_lookup.dart';
+import 'checkout_return.dart';
+import 'checkout_return_banner.dart';
+import 'reviewing_checkout.dart';
 import 'order_confirmation_screen.dart';
 import 'shopify_cart_summary.dart';
 
@@ -54,6 +64,22 @@ typedef SecureCheckoutLauncher = Future<CheckoutResult> Function(
   CheckoutDraft draft,
 );
 typedef ExternalCheckoutFallback = Future<bool> Function();
+
+void openCheckoutOrders(BuildContext context) {
+  final account = AccountScope.maybeOf(context);
+  if (account == null || !account.isSignedIn) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Inicia sesión para ver Mis pedidos. Te enviamos la '
+          'confirmación a tu correo.',
+        ),
+      ),
+    );
+    return;
+  }
+  unawaited(openOrders(context, controller: account));
+}
 
 Future<void> openBag(
   BuildContext context, {
@@ -233,7 +259,23 @@ class _BagContents extends StatelessWidget {
     final subtotal = store.bagSubtotal;
     final shipping = _shippingFor(subtotal);
 
-    void continueToCheckout() {
+    Future<void> continueToCheckout() async {
+      final guard = ReviewingCheckoutScope.maybeOf(context);
+      if (guard != null) {
+        await guard.ensureLoaded();
+        if (!context.mounted) return;
+      }
+      if (guard != null &&
+          guard.blocksCheckout(bagEmpty: store.bagLines.isEmpty)) {
+        final choice = await showCheckoutDoubleChargeSheet(context);
+        if (!context.mounted) return;
+        if (choice == CheckoutDoubleChargeChoice.viewOrders) {
+          openCheckoutOrders(context);
+          return;
+        }
+        if (choice != CheckoutDoubleChargeChoice.payAnyway) return;
+      }
+      if (!context.mounted) return;
       final controller = cartController;
       final scope = cartScope;
       final checkout = checkoutCoordinator;
@@ -282,15 +324,17 @@ class _BagContents extends StatelessWidget {
         );
         return;
       }
-      Navigator.of(context).push(
-        monettaFadeRoute(
-          StoreScope(
-            notifier: store,
-            child: CheckoutFlowScreen(
-              launchSecureCheckout: launcher,
-              // El coordinador decide al invocar si hay URL fresca; no se
-              // congela estado antes de la reconciliación final.
-              openExternalCheckout: checkout?.openExternalFallback,
+      unawaited(
+        Navigator.of(context).push(
+          monettaFadeRoute(
+            StoreScope(
+              notifier: store,
+              child: CheckoutFlowScreen(
+                launchSecureCheckout: launcher,
+                // El coordinador decide al invocar si hay URL fresca; no se
+                // congela estado antes de la reconciliación final.
+                openExternalCheckout: checkout?.openExternalFallback,
+              ),
             ),
           ),
         ),
@@ -351,13 +395,13 @@ class _BagContents extends StatelessWidget {
                 controller: controller,
                 scope: scope,
                 localIntent: localIntent,
-                onContinue: continueToCheckout,
+                onContinue: () => unawaited(continueToCheckout()),
               )
             : _OrderSummary(
                 subtotal: subtotal,
                 shipping: shipping,
                 ctaLabel: 'Continuar al checkout',
-                onContinue: continueToCheckout,
+                onContinue: () => unawaited(continueToCheckout()),
               );
 
         final bagIds = {for (final line in lines) line.product.id};
@@ -433,6 +477,14 @@ class CheckoutFlowScreen extends StatefulWidget {
     this.launchSecureCheckout,
     this.openExternalCheckout,
     this.availablePaymentMethods = const [],
+    this.orderLookup,
+    this.attemptIdentity,
+    this.orderLookupInterval = kCheckoutOrderLookupInterval,
+    this.orderLookupTimeout = kCheckoutOrderLookupTimeout,
+    this.orderLookupDelay,
+    this.onOrderFound,
+    this.correlationAvailable = kCheckoutTokenCorrelationAvailable,
+    this.openUri,
     super.key,
   });
 
@@ -444,6 +496,30 @@ class CheckoutFlowScreen extends StatefulWidget {
   /// se muestra el aviso alojado. El orquestador los conecta cuando existan.
   final List<String> availablePaymentMethods;
 
+  /// When null, the signed-in account's existing order sources are used.
+  /// Tests pass a fake. With no account and no fake, there is nothing to poll.
+  final CheckoutOrderLookup? orderLookup;
+
+  /// Overrides the cart/checkout token read from the reconciled cart.
+  final CheckoutAttemptIdentity? attemptIdentity;
+
+  final Duration orderLookupInterval;
+  final Duration orderLookupTimeout;
+  final CheckoutOrderDelay? orderLookupDelay;
+
+  /// Replaces the default route to order detail. Used by tests.
+  final Future<void> Function(
+    BuildContext context,
+    CheckoutOrderMatch match,
+  )? onOrderFound;
+
+  /// Banner 1 is allowed only when this is true. Production stays false
+  /// until order sources return a checkout or cart token.
+  final bool correlationAvailable;
+
+  /// Opens the concierge WhatsApp link. Tests pass a fake.
+  final Future<bool> Function(Uri uri)? openUri;
+
   @override
   State<CheckoutFlowScreen> createState() => _CheckoutFlowScreenState();
 }
@@ -454,9 +530,17 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   final _email = TextEditingController();
   final _phone = TextEditingController();
   bool _reviewing = false;
-  bool _launching = false;
+  bool _openingSheet = false;
+  bool _checkingOrder = false;
+  bool _orderFound = false;
   bool _didPrefillContact = false;
+  int _returnGeneration = 0;
+  CheckoutReturnPhase? _returnPhase;
   String? _selectedPayment;
+  Timer? _pollTimer;
+  Completer<void>? _pollDelay;
+
+  bool get _retryBlocked => _openingSheet || _checkingOrder || _orderFound;
 
   @override
   void didChangeDependencies() {
@@ -472,10 +556,32 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
 
   @override
   void dispose() {
+    _returnGeneration += 1;
+    _finishPollDelay();
     _scrollController.dispose();
     _email.dispose();
     _phone.dispose();
     super.dispose();
+  }
+
+  Future<void> _delayPoll(Duration duration) {
+    final injected = widget.orderLookupDelay;
+    if (injected != null) return injected(duration);
+    final completer = Completer<void>();
+    _pollDelay = completer;
+    _pollTimer?.cancel();
+    _pollTimer = Timer(duration, () {
+      if (!completer.isCompleted) completer.complete();
+    });
+    return completer.future;
+  }
+
+  void _finishPollDelay() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+    final completer = _pollDelay;
+    _pollDelay = null;
+    if (completer != null && !completer.isCompleted) completer.complete();
   }
 
   void _review() {
@@ -489,12 +595,105 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     );
   }
 
+  CheckoutOrderLookup? _lookup() {
+    final injected = widget.orderLookup;
+    if (injected != null) return injected;
+    final account = AccountScope.maybeOf(context);
+    if (account == null) return null;
+    return AccountCheckoutOrderLookup(account);
+  }
+
+  CheckoutAttemptIdentity _attemptIdentity() {
+    final override = widget.attemptIdentity;
+    if (override != null) return override;
+    final cart = CartScope.maybeOf(context)?.notifier?.snapshot?.cart;
+    return checkoutAttemptFromCart(
+      cartId: cart?.id,
+      checkoutUrl: cart?.checkoutUrl,
+    );
+  }
+
+  void _showBrowserFallback(CheckoutFailed failure) {
+    final fallback = widget.openExternalCheckout;
+    if (fallback == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${failure.userMessage} Abrir el navegador no confirma el pago; '
+          'revisa Mis pedidos si terminaste ahí.',
+        ),
+        action: SnackBarAction(
+          label: 'ABRIR NAVEGADOR',
+          onPressed: () => unawaited(fallback()),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openConciergeWhatsApp() async {
+    final uri = conciergeWhatsAppUri();
+    final open = widget.openUri ??
+        ((target) => launchUrl(target, mode: LaunchMode.externalApplication));
+    final ok = await open(uri);
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el enlace.')),
+      );
+    }
+  }
+
+  void _viewOrders() => openCheckoutOrders(context);
+
+  void _activateReviewing() {
+    ReviewingCheckoutScope.maybeOf(context)?.markActive();
+  }
+
+  void _deactivateReviewing() {
+    ReviewingCheckoutScope.maybeOf(context)?.clear();
+  }
+
+  Future<void> _openMatchedOrder(CheckoutOrderMatch match) async {
+    final handler = widget.onOrderFound;
+    if (handler != null) {
+      await handler(context, match);
+      return;
+    }
+    if (!mounted) return;
+    final account = AccountScope.maybeOf(context);
+    if (account != null) await account.loadOrders();
+    if (!mounted) return;
+    OrderSummary? summary;
+    for (final order in account?.orders ?? const <OrderSummary>[]) {
+      if (order.id == match.orderId ||
+          (order.shopifyOrderId != null &&
+              order.shopifyOrderId == match.orderId)) {
+        summary = order;
+        break;
+      }
+    }
+    if (summary == null || !mounted) return;
+    final matched = summary;
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => OrderDetailScreen(
+          order: matched,
+          rewardsController: account,
+        ),
+      ),
+    );
+  }
+
   Future<void> _pay() async {
+    if (_retryBlocked) return;
     final store = StoreScope.of(context);
     final lines = store.bagLines;
     if (widget.launchSecureCheckout case final launcher?) {
       NotificationScope.maybeOf(context)?.recordPushOutcome('checkout_started');
-      setState(() => _launching = true);
+      final generation = ++_returnGeneration;
+      setState(() {
+        _openingSheet = true;
+        _returnPhase = null;
+      });
       try {
         final email = _email.text.trim();
         final result = await launcher(
@@ -504,9 +703,12 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             phone: _phone.text.trim(),
           ),
         );
-        if (!mounted) return;
+        if (!mounted || generation != _returnGeneration) return;
+        setState(() => _openingSheet = false);
         switch (result) {
           case CheckoutCompleted():
+            _deactivateReviewing();
+            setState(() => _returnPhase = null);
             // Confirmación solo con evidencia del result. CheckoutCompleted no
             // porta identidad de pedido y la sincronización de Mis pedidos
             // puede aún no incluir el pedido nuevo: tomar el primer
@@ -542,36 +744,69 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
               },
             );
           case CheckoutCancelled():
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Checkout cancelado. Tu bolsa se conserva.'),
-              ),
+          case CheckoutFailed():
+            if (result is CheckoutFailed) _showBrowserFallback(result);
+            final kind = classifyCheckoutResult(result);
+            if (kind == CheckoutReturnKind.sheetDidNotOpen) {
+              setState(
+                () => _returnPhase = CheckoutReturnPhase.sheetDidNotOpen,
+              );
+              return;
+            }
+            final lookup = _lookup();
+            final attempt = _attemptIdentity();
+            if (lookup == null) {
+              // Nothing to correlate against. That is not proof of no charge.
+              _activateReviewing();
+              setState(() => _returnPhase = CheckoutReturnPhase.reviewing);
+              return;
+            }
+            setState(() {
+              _checkingOrder = true;
+              _returnPhase = CheckoutReturnPhase.confirming;
+            });
+            final decision = await resolvePaymentReturn(
+              lookup: lookup,
+              attempt: attempt,
+              interval: widget.orderLookupInterval,
+              timeout: widget.orderLookupTimeout,
+              correlationAvailable: widget.correlationAvailable,
+              delay: _delayPoll,
+              isCancelled: () => !mounted || generation != _returnGeneration,
             );
-          case CheckoutFailed(:final userMessage):
-            final fallback = widget.openExternalCheckout;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  fallback == null
-                      ? userMessage
-                      : '$userMessage Abrir el navegador no confirma el pago; '
-                          'revisa Mis pedidos si terminaste ahí.',
-                ),
-                action: fallback == null
-                    ? null
-                    : SnackBarAction(
-                        label: 'ABRIR NAVEGADOR',
-                        onPressed: () => unawaited(fallback()),
-                      ),
-              ),
-            );
+            if (!mounted || generation != _returnGeneration) return;
+            if (decision is CheckoutOrderFound) {
+              _deactivateReviewing();
+              setState(() {
+                _checkingOrder = false;
+                _orderFound = true;
+                _returnPhase = null;
+              });
+              await _openMatchedOrder(decision.match);
+              return;
+            }
+            if (decision is! CheckoutOrderNotFound) {
+              _activateReviewing();
+            }
+            setState(() {
+              _checkingOrder = false;
+              _returnPhase = decision is CheckoutOrderNotFound
+                  ? CheckoutReturnPhase.paymentNotCompleted
+                  : CheckoutReturnPhase.reviewing;
+            });
         }
       } finally {
-        if (mounted) setState(() => _launching = false);
+        if (mounted && generation == _returnGeneration) {
+          setState(() {
+            _openingSheet = false;
+            _checkingOrder = false;
+          });
+        }
       }
       return;
     }
     if (!mounted) return;
+    setState(() => _returnPhase = CheckoutReturnPhase.sheetDidNotOpen);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
@@ -621,13 +856,18 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                           email: _email.text,
                           phone: _phone.text,
                           shipping: _shippingFor(store.bagSubtotal),
-                          launching: _launching,
+                          openingSheet: _openingSheet,
+                          returnPhase: _returnPhase,
+                          payEnabled: !_retryBlocked,
+                          showPayButton: !_orderFound,
                           paymentMethods: widget.availablePaymentMethods,
                           selectedPayment: _selectedPayment,
                           onSelectPayment: (value) =>
                               setState(() => _selectedPayment = value),
                           onEdit: () => setState(() => _reviewing = false),
                           onPay: () => unawaited(_pay()),
+                          onViewOrders: _viewOrders,
+                          onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
                         )
                       : _ContactForm(
                           formKey: _formKey,
@@ -1488,28 +1728,44 @@ class _DeliveryOption extends StatelessWidget {
   }
 }
 
+/// The first pay control stays up, disabled, while we confirm. Settled
+/// banners own their own actions, and banner 3 has no retry.
+bool _showsCheckoutPayButton(CheckoutReturnPhase? phase) {
+  return phase == null || phase == CheckoutReturnPhase.confirming;
+}
+
 class _ReviewPanel extends StatelessWidget {
   const _ReviewPanel({
     required this.email,
     required this.phone,
     required this.shipping,
-    required this.launching,
+    required this.openingSheet,
+    required this.returnPhase,
+    required this.payEnabled,
+    required this.showPayButton,
     required this.paymentMethods,
     required this.selectedPayment,
     required this.onSelectPayment,
     required this.onEdit,
     required this.onPay,
+    required this.onViewOrders,
+    required this.onWhatsApp,
   });
 
   final String email;
   final String phone;
   final double shipping;
-  final bool launching;
+  final bool openingSheet;
+  final CheckoutReturnPhase? returnPhase;
+  final bool payEnabled;
+  final bool showPayButton;
   final List<String> paymentMethods;
   final String? selectedPayment;
   final ValueChanged<String> onSelectPayment;
   final VoidCallback onEdit;
   final VoidCallback onPay;
+  final VoidCallback onViewOrders;
+  final VoidCallback onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -1547,7 +1803,14 @@ class _ReviewPanel extends StatelessWidget {
           onSelect: onSelectPayment,
         ),
         const SizedBox(height: 24),
-        if (launching)
+        if (returnPhase != null)
+          CheckoutReturnBanner(
+            phase: returnPhase!,
+            onRetry: payEnabled ? onPay : null,
+            onViewOrders: onViewOrders,
+            onWhatsApp: onWhatsApp,
+          ),
+        if (openingSheet)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Semantics(
@@ -1572,10 +1835,12 @@ class _ReviewPanel extends StatelessWidget {
               ),
             ),
           ),
-        BoutiqueButton(
-          label: 'CONTINUAR AL PAGO SEGURO',
-          onPressed: launching ? null : onPay,
-        ),
+        if (showPayButton && _showsCheckoutPayButton(returnPhase))
+          BoutiqueButton(
+            key: const ValueKey('checkout-pay-button'),
+            label: 'CONTINUAR AL PAGO SEGURO',
+            onPressed: payEnabled ? onPay : null,
+          ),
         const SizedBox(height: 14),
         Text(
           'Shopify procesa el pago. Monetta nunca ve los datos de tu tarjeta.',

@@ -31,6 +31,8 @@ class MirroredOrder {
     required this.currencyCode,
     required this.placedAt,
     this.paymentMethod,
+    this.checkoutToken,
+    this.cartToken,
   });
 
   final int id;
@@ -53,6 +55,15 @@ class MirroredOrder {
   /// not stored a method.
   final String? paymentMethod;
 
+  /// Shopify checkout token from `GET /customers/me/orders`, when the mirror
+  /// has one. Null for apartado rows and for orders the webhook has not
+  /// filled in yet. Bearer-like; never log it.
+  final String? checkoutToken;
+
+  /// Shopify cart token from the same payload. Same null and logging rules
+  /// as [checkoutToken].
+  final String? cartToken;
+
   bool get isApartado => source == 'whatsapp_apartado';
 
   factory MirroredOrder.fromJson(Map<String, dynamic> json) => MirroredOrder(
@@ -71,6 +82,8 @@ class MirroredOrder {
                 (json['paymentMethod'] as String).trim().isNotEmpty
             ? json['paymentMethod'] as String
             : null,
+        checkoutToken: json['checkoutToken'] as String?,
+        cartToken: json['cartToken'] as String?,
       );
 }
 

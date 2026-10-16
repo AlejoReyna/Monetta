@@ -238,8 +238,10 @@ void main() {
 
     expect(launches, 1);
     expect(store.bagQuantity, 1);
-    expect(find.text('Checkout cancelado. Tu bolsa se conserva.'), findsOne);
+    expect(find.text('Estamos revisando tu pago'), findsOneWidget);
+    expect(find.text('Intentar de nuevo'), findsNothing);
     expect(find.text('Pago protegido'), findsNothing);
+    expect(find.textContaining('rechaz'), findsNothing);
   });
 }
 

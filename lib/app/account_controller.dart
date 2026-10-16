@@ -392,6 +392,37 @@ class AccountController extends ChangeNotifier {
     }
   }
 
+  /// Customer Account orders and the accounts_orders mirror, without
+  /// replacing the shopper cache. Empty when signed out or the session
+  /// changed mid-read. Neither source currently carries a checkout token.
+  Future<OrderCorrelationSnapshot> loadCheckoutCorrelation() async {
+    final current = account;
+    if (current == null) return const OrderCorrelationSnapshot.empty();
+    final generation = _ordersGeneration;
+    final accountId = current.localAccountId;
+
+    final customerAccountToken = current.authProvider == 'shopify'
+        ? await accessTokenForShopifyCheckout()
+        : null;
+    if (!_ordersStillCurrent(generation, accountId)) {
+      return const OrderCorrelationSnapshot.empty();
+    }
+
+    final backendToken = await accessTokenForBackend();
+    if (!_ordersStillCurrent(generation, accountId)) {
+      return const OrderCorrelationSnapshot.empty();
+    }
+
+    final snapshot = await _orderHistoryRepository.loadForCheckoutCorrelation(
+      customerAccountAccessToken: customerAccountToken,
+      backendAccessToken: backendToken,
+    );
+    if (!_ordersStillCurrent(generation, accountId)) {
+      return const OrderCorrelationSnapshot.empty();
+    }
+    return snapshot;
+  }
+
   bool _ordersStillCurrent(int generation, String accountId) =>
       generation == _ordersGeneration && account?.localAccountId == accountId;
 

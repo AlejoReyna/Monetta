@@ -445,5 +445,44 @@ void main() {
         expect(status.actionLabel, isNull);
       }
     });
+
+    test('checkout correlation reads both sources and does not touch the cache',
+        () async {
+      final mirror = _FakeMirror([
+        const MirroredOrder(
+          id: 4,
+          shopifyOrderId: 'gid://shopify/Order/4',
+          source: 'shopify_checkout',
+          attributionCode: null,
+          financialStatus: 'pending',
+          fulfillmentStatus: null,
+          totalAmount: 10,
+          currencyCode: 'MXN',
+          placedAt: null,
+        ),
+      ]);
+      final caa = _FakeCaa.throwing();
+      final repo = OrderHistoryRepository(
+        store: OrderSummaryStore(db),
+        config: AccountsOrdersConfig.disabled,
+        customerOrders: caa,
+        mirrorClient: mirror,
+      );
+
+      final snapshot = await repo.loadForCheckoutCorrelation(
+        customerAccountAccessToken: 'caa-token',
+        backendAccessToken: 'mirror-token',
+      );
+
+      expect(caa.receivedToken, 'caa-token');
+      expect(mirror.receivedAccessToken, 'mirror-token');
+      expect(snapshot.customerOrders, isEmpty);
+      expect(
+        snapshot.mirroredOrders.single.shopifyOrderId,
+        'gid://shopify/Order/4',
+      );
+      expect(snapshot.mirroredOrders.single.source, 'shopify_checkout');
+      expect(await repo.loadCached('acct-1'), isEmpty);
+    });
   });
 }
