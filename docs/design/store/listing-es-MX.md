@@ -39,7 +39,7 @@ Monetta es la tienda de bolsas, carteras y relojes importados, ahora en tu celul
 EXPLORA EL CATÁLOGO
 • Bolsas, carteras y relojes de marcas internacionales.
 • Catálogo siempre al día: productos, precios en MXN y disponibilidad vienen directo de nuestra tienda en Shopify.
-• Busca y filtra por categoría y marca.
+• Busca y explora por categoría y marca.
 
 RECOMENDACIONES PARA TI
 • Te sugerimos productos según lo que exploras.
@@ -81,7 +81,7 @@ Monetta es la tienda de bolsas, carteras y relojes importados, ahora en tu celul
 EXPLORA EL CATÁLOGO
 • Bolsas, carteras y relojes de marcas internacionales.
 • Catálogo siempre al día: productos, precios en MXN y disponibilidad vienen directo de nuestra tienda en Shopify.
-• Busca y filtra por categoría y marca.
+• Busca y explora por categoría y marca.
 
 RECOMENDACIONES PARA TI
 • Te sugerimos productos según lo que exploras.
@@ -101,6 +101,6 @@ Descarga Monetta y encuentra tu próxima bolsa, cartera o reloj.
 ```
 
 ## Pendiente de verificar
-- Búsqueda/filtros por marca y categoría: confirmar en la build antes de publicar.
+- Búsqueda y exploración por categoría y marca: confirmado por el Engineer en main (search_screen, brand_screen, catalog_controls).
 - Que el seguimiento de pedido muestre estado en la app (pantalla de pedidos) para todos los casos.
 - Disponibilidad del nombre «Monetta» en ambas tiendas.
