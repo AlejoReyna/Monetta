@@ -279,3 +279,12 @@ Read-only review of PR diffs #13–#16 (current heads on 2026-10-15) against thi
 - Merge order (PM): #14 -> #16 -> #18 -> #17; #13/#15 anytime; all stay draft until Payments Pass on staging.
 - TOK-02 (new): token match must be to the current attempt only; an older order sharing the same cart_token (reused cart) must not open/clear the warning. Empty tokens never match. Blocked (staging + 015).
 - DEL-10b confirmed: tag `monetta-reembolso-revisado` releases cancelled+partially_refunded only. DEL-10c (new): cancelled + paid/partially_paid without refund stays blocked even with tag; text "Necesitamos revisar el pago de tu pedido [número] antes de eliminar tu cuenta. Escríbenos y lo resolvemos." + WhatsApp; released once refunded/voided. Refund pending keeps DEL-10 text. Blocked (staging).
+
+## Web theme (MON-WEB-02) - WEB-PAY (new 2026-10-16)
+Env: unpublished duplicate theme on monetta-staging (preview link only, never production). Checkout = Shopify. No real charges. All Blocked until preview link exists.
+- WEB-PAY-01 (S1): cart -> Shopify checkout keeps items, qty, variant and total in MXN; subtotal on theme = checkout subtotal.
+- WEB-PAY-02 (S2): no payment logos shown; line "Pagos seguros con…" names only methods active in staging Settings > Payments. Any inactive method named = Fail.
+- WEB-PAY-03 (S1): test-mode card order from web lands in orders_mirror like app orders (same total, MXN, payment method normalized per #16) within 60 s.
+- WEB-PAY-04 (S2): if classic customer accounts, order list/detail on theme follows app copy rules ("Esperando tu transferencia" only for bank_deposit/manual, else "Pago en proceso"; WhatsApp only in detail). If new customer accounts, test on Shopify pages instead and note as N/A for theme.
+- WEB-PAY-05 (S2): agotado variant cannot be added to cart or reach checkout.
+- WEB-PAY-06 (S3): theme preview cart and app cart do not mix or clear each other for same customer (record behavior).
