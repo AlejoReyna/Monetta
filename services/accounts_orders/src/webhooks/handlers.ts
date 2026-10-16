@@ -7,6 +7,7 @@ import type {
   WebhookEventsRepository,
 } from '../domain/ports.js';
 import { logger } from '../logger.js';
+import { normalizePaymentMethod } from '../orders/paymentMethod.js';
 import {
   noteAttribute,
   parseTags,
@@ -162,6 +163,11 @@ export async function handleOrdersWebhook(
         attributionCode,
         tags,
         financialStatus: payload.financial_status ?? null,
+        paymentMethod: normalizePaymentMethod({
+          payment_gateway_names: payload.payment_gateway_names,
+          gateway: payload.gateway,
+          transactions: payload.transactions,
+        }),
         fulfillmentStatus: payload.fulfillment_status ?? null,
         totalAmount: payload.current_total_price
           ? Number.parseFloat(payload.current_total_price)

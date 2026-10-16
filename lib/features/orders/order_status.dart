@@ -14,9 +14,12 @@
 /// "Entregado". Un `fulfilled` sin entrega es "En camino". Un `paid` sin
 /// preparación es "Confirmado".
 ///
-/// `pending` es "Esperando tu transferencia" solo si
-/// [OrderSummary.paymentMethod] identifica depósito bancario o pago manual.
-/// Cualquier otro pendiente, vacío o desconocido es "Pago en proceso".
+/// `pending` es "Esperando tu transferencia" solo si cada token de
+/// [OrderSummary.paymentMethod] es exactamente `bank_deposit` o `manual`.
+/// La lista muestra solo ese estado, sin texto de acción. El detalle
+/// abre WhatsApp con [transferPaymentDetailsLabel]. No hay ficha de
+/// datos bancarios. PayPal, Mercado Pago, tarjeta, `other:…` y un
+/// método ausente quedan en "Pago en proceso".
 ///
 /// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
 /// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
@@ -29,6 +32,12 @@ library;
 import '../../app/shopper_copy.dart' show conciergeWhatsAppUri;
 import '../../app/theme.dart' show kMoney;
 import '../../data/local/database.dart' show OrderSummary;
+
+/// Transfer prompt on the order detail. The list shows the status without
+/// this text. One label so a later in-app bank-details sheet can replace
+/// this handoff. There is no sheet and no account data here. The detail
+/// opens WhatsApp with the payment-details message.
+const transferPaymentDetailsLabel = 'Pedir datos de pago por WhatsApp';
 
 /// Filtros pertinentes con datos reales. Sin "Más vendidos" ni rangos
 /// inventados: cada filtro corresponde a un subconjunto verificable.
@@ -195,42 +204,18 @@ const OrderDisplayStatus _paymentInProgress = OrderDisplayStatus(
   detail: 'Lo verás aquí cuando se confirme.',
 );
 
-/// True solo con evidencia de depósito bancario o pago manual.
+/// True solo cuando cada token es `bank_deposit` o `manual`.
 ///
-/// El valor es [OrderSummary.paymentMethod]: los `type` de
-/// `Order.transactions` en la Customer Account API (`bank_deposit`,
-/// `manual`, …). Vacío o ausente no es transferencia.
+/// Un alias de transferencia se guarda como `bank_deposit` en el
+/// normalizador compartido. Un nombre parecido que no se haya aliasado
+/// (`other:transferencia_bancaria`, `other:zz_fake_transfer_rail`) no entra.
+/// Vacío o ausente tampoco.
 bool orderPaymentMethodIsBankTransfer(String? raw) {
   final tokens = _paymentTokens(raw);
   if (tokens.isEmpty) return false;
-  if (tokens.any(_isElectronicPayment)) return false;
-  return tokens.any(_isTransferToken);
-}
-
-bool _isElectronicPayment(String token) {
-  const electronic = {
-    'card',
-    'shopify_payments',
-    'paypal',
-    'cash_on_delivery',
-    'money_order',
-    'gift_card',
-    'store_credit',
-    'custom',
-    'shop_pay',
-    'apple_pay',
-    'google_pay',
-    'bogus',
-  };
-  return electronic.contains(token);
-}
-
-bool _isTransferToken(String token) {
-  if (token == 'bank_deposit' || token == 'manual') return true;
-  return token.contains('transferencia') ||
-      token.contains('deposito') ||
-      token.contains('bank_deposit') ||
-      token.contains('bank_transfer');
+  return tokens.every(
+    (token) => token == 'bank_deposit' || token == 'manual',
+  );
 }
 
 List<String> _paymentTokens(String? raw) {

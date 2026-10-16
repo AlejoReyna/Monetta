@@ -1,4 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest';
+import { readFileSync } from 'node:fs';
 import {
   handleCustomersDataRequest,
   handleCustomersRedact,
@@ -64,6 +65,31 @@ describe('webhook handlers', () => {
   });
 
   describe('handleOrdersWebhook', () => {
+    it.each(['orders/create', 'orders/updated'] as const)(
+      'mirrors the exact staging transfer gateway on %s for the Flutter contract',
+      async (topic) => {
+        const fixture = JSON.parse(readFileSync(new URL(
+          '../../../test/fixtures/contracts/staging_transfer_payment.json', import.meta.url,
+        ), 'utf8')) as { gateway: string; paymentMethod: string };
+        expect(fixture.gateway).toBe('Transferencia bancaria');
+
+        await handleOrdersWebhook(
+          deps,
+          `wh-staging-transfer-${topic}`,
+          topic,
+          orderPayload({
+            financial_status: 'pending',
+            payment_gateway_names: [fixture.gateway],
+          }),
+          Buffer.from('raw-staging-transfer'),
+        );
+
+        expect(orders.rows).toHaveLength(1);
+        expect(orders.rows[0]!.financialStatus).toBe('pending');
+        expect(orders.rows[0]!.paymentMethod).toBe(fixture.paymentMethod);
+      },
+    );
+
     it('mirrors a real checkout order and its customer', async () => {
       await handleOrdersWebhook(
         deps,
@@ -266,6 +292,173 @@ describe('webhook handlers', () => {
         'shopify_checkout',
         'whatsapp_apartado',
       ]);
+    });
+
+    it('stores a pending bank deposit from payment_gateway_names as bank_deposit', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-transfer',
+        'orders/create',
+        orderPayload({
+          financial_status: 'pending',
+          payment_gateway_names: ['Bank Deposit'],
+        }),
+        Buffer.from('raw-transfer'),
+      );
+
+      expect(orders.rows[0]!.paymentMethod).toBe('bank_deposit');
+      expect(orders.rows[0]!.financialStatus).toBe('pending');
+    });
+
+    it('stores a manual transaction gateway on orders/updated and drops the sale kind', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-manual-create',
+        'orders/create',
+        orderPayload({ financial_status: 'pending', updated_at: '2026-08-01T10:00:00-06:00' }),
+        Buffer.from('raw-manual-create'),
+      );
+      expect(orders.rows[0]!.paymentMethod).toBeNull();
+
+      await handleOrdersWebhook(
+        deps,
+        'wh-manual-update',
+        'orders/updated',
+        orderPayload({
+          financial_status: 'pending',
+          updated_at: '2026-08-01T11:00:00-06:00',
+          transactions: [{ kind: 'sale', gateway: 'manual', type: 'MANUAL' }],
+        }),
+        Buffer.from('raw-manual-update'),
+      );
+
+      expect(orders.rows).toHaveLength(1);
+      expect(orders.rows[0]!.paymentMethod).toBe('manual');
+    });
+
+    it('stores a card gateway without card numbers or payment_details', async () => {
+      const pan = '4242424242424242';
+      await handleOrdersWebhook(
+        deps,
+        'wh-card',
+        'orders/create',
+        orderPayload({
+          financial_status: 'pending',
+          payment_gateway_names: ['shopify_payments'],
+          transactions: [
+            {
+              kind: 'authorization',
+              gateway: 'shopify_payments',
+              payment_details: {
+                credit_card_number: pan,
+                credit_card_company: 'Visa',
+              },
+            } as never,
+          ],
+        }),
+        Buffer.from('raw-card'),
+      );
+
+      const stored = JSON.stringify(orders.rows[0]);
+      expect(orders.rows[0]!.paymentMethod).toBe('card');
+      expect(stored).not.toContain(pan);
+      expect(stored).not.toContain('credit_card');
+      expect(stored).not.toContain('Visa');
+    });
+
+    it('leaves payment_method null when the webhook has no method', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-missing',
+        'orders/create',
+        orderPayload({ financial_status: 'pending', payment_gateway_names: [] }),
+        Buffer.from('raw-missing'),
+      );
+
+      expect(orders.rows[0]!.paymentMethod).toBeNull();
+    });
+
+    it('does not clear a known method when a later webhook omits gateways', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-keep-create',
+        'orders/create',
+        orderPayload({
+          financial_status: 'pending',
+          updated_at: '2026-08-01T10:00:00-06:00',
+          payment_gateway_names: ['Transferencia bancaria'],
+        }),
+        Buffer.from('raw-keep-create'),
+      );
+      await handleOrdersWebhook(
+        deps,
+        'wh-keep-update',
+        'orders/updated',
+        orderPayload({
+          financial_status: 'pending',
+          updated_at: '2026-08-01T12:00:00-06:00',
+        }),
+        Buffer.from('raw-keep-update'),
+      );
+
+      expect(orders.rows[0]!.paymentMethod).toBe('bank_deposit');
+    });
+
+    it('stores paypal, mercadopago, and an unrecognized gateway as non-null methods', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-paypal',
+        'orders/create',
+        orderPayload({
+          id: 701,
+          financial_status: 'pending',
+          payment_gateway_names: ['PayPal Express Checkout'],
+        }),
+        Buffer.from('raw-paypal'),
+      );
+      await handleOrdersWebhook(
+        deps,
+        'wh-mp',
+        'orders/create',
+        orderPayload({
+          id: 702,
+          financial_status: 'pending',
+          payment_gateway_names: ['Mercado Pago'],
+        }),
+        Buffer.from('raw-mp'),
+      );
+      await handleOrdersWebhook(
+        deps,
+        'wh-kueski',
+        'orders/create',
+        orderPayload({
+          id: 703,
+          financial_status: 'pending',
+          payment_gateway_names: ['Kueski Pay'],
+        }),
+        Buffer.from('raw-kueski'),
+      );
+
+      const byId = new Map(orders.rows.map((row) => [row.shopifyOrderId, row.paymentMethod]));
+      expect(byId.get('701')).toBe('paypal');
+      expect(byId.get('702')).toBe('mercadopago');
+      expect(byId.get('703')).toBe('other:kueski_pay');
+    });
+
+    it('drops a digits-only gateway so a card number is not stored as the method', async () => {
+      await handleOrdersWebhook(
+        deps,
+        'wh-pan-name',
+        'orders/create',
+        orderPayload({
+          financial_status: 'pending',
+          payment_gateway_names: ['4242424242424242'],
+        }),
+        Buffer.from('raw-pan-name'),
+      );
+
+      expect(orders.rows[0]!.paymentMethod).toBeNull();
+      expect(JSON.stringify(orders.rows[0])).not.toContain('4242424242424242');
     });
   });
 

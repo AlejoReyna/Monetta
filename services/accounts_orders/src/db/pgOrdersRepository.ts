@@ -10,6 +10,7 @@ interface OrderRow {
   attribution_code: string | null;
   tags: string[];
   financial_status: string | null;
+  payment_method: string | null;
   fulfillment_status: string | null;
   total_amount: string | null;
   currency_code: string | null;
@@ -29,6 +30,7 @@ function fromRow(row: OrderRow): MirroredOrder {
     attributionCode: row.attribution_code,
     tags: row.tags,
     financialStatus: row.financial_status,
+    paymentMethod: row.payment_method,
     fulfillmentStatus: row.fulfillment_status,
     // NUMERIC comes back from `pg` as a string, to avoid silently losing
     // precision on a value JS numbers can't represent exactly.
@@ -56,16 +58,17 @@ export class PgOrdersRepository implements OrdersRepository {
     await this.pool.query(
       `INSERT INTO orders_mirror
          (shopify_order_id, customer_id, source, attribution_code, tags,
-          financial_status, fulfillment_status, total_amount, currency_code,
+          financial_status, payment_method, fulfillment_status, total_amount, currency_code,
           attribution_device_id, attribution_reco_source, placed_at,
           shopify_updated_at, updated_at)
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, now())
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, now())
        ON CONFLICT (shopify_order_id) DO UPDATE SET
          customer_id = EXCLUDED.customer_id,
          source = EXCLUDED.source,
          attribution_code = COALESCE(EXCLUDED.attribution_code, orders_mirror.attribution_code),
          tags = EXCLUDED.tags,
          financial_status = EXCLUDED.financial_status,
+         payment_method = COALESCE(EXCLUDED.payment_method, orders_mirror.payment_method),
          fulfillment_status = EXCLUDED.fulfillment_status,
          total_amount = EXCLUDED.total_amount,
          currency_code = EXCLUDED.currency_code,
@@ -81,6 +84,7 @@ export class PgOrdersRepository implements OrdersRepository {
         order.attributionCode,
         order.tags,
         order.financialStatus,
+        order.paymentMethod ?? null,
         order.fulfillmentStatus,
         order.totalAmount,
         order.currencyCode,

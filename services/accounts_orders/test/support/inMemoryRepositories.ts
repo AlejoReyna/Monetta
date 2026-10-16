@@ -146,11 +146,16 @@ export class InMemoryOrdersRepository implements OrdersRepository {
         Object.assign(existing, order, {
           attributionCode: order.attributionCode ?? existing.attributionCode,
           shopifyUpdatedAt: order.shopifyUpdatedAt ?? existing.shopifyUpdatedAt,
+          paymentMethod: order.paymentMethod ?? existing.paymentMethod ?? null,
         });
         return;
       }
     }
-    this.rows.push({ ...order, id: this.nextId++ });
+    this.rows.push({
+      ...order,
+      paymentMethod: order.paymentMethod ?? null,
+      id: this.nextId++,
+    });
   }
 
   async linkApartadoByAttributionCode(

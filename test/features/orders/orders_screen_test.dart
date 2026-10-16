@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
@@ -91,6 +94,55 @@ Widget _host(AccountController controller, {FakeRewardsReader? rewards}) =>
 
 void main() {
   group('OrdersScreen', () {
+    testWidgets(
+      'staging Transferencia bancaria shows the WhatsApp action only in detail',
+      (tester) async {
+        // Shared with the backend webhook test: the exact Shopify gateway
+        // must produce the paymentMethod consumed by the app.
+        final fixture = jsonDecode(
+          File('test/fixtures/contracts/staging_transfer_payment.json')
+              .readAsStringSync(),
+        ) as Map<String, dynamic>;
+        expect(fixture['gateway'], 'Transferencia bancaria');
+        final db = openTestDatabase();
+        addTearDown(db.close);
+        final controller = _controller(db)
+          ..account = _account()
+          ..orders = [
+            _order(
+              status: 'pending',
+              paymentMethod: fixture['paymentMethod'] as String,
+            ),
+          ]
+          ..ordersStatus = OrderHistoryStatus.populated;
+
+        await tester.pumpWidget(_host(controller));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Esperando tu transferencia'), findsOneWidget);
+        expect(find.text('Pedir datos de pago por WhatsApp'), findsNothing);
+        expect(
+          find.byKey(const ValueKey('order-payment-details')),
+          findsNothing,
+        );
+
+        final card = find.byKey(
+          const ValueKey('order-card-gid://shopify/Order/1'),
+        );
+        await tester.ensureVisible(card);
+        await tester.tap(card);
+        await tester.pumpAndSettle();
+
+        expect(find.byType(OrderDetailScreen), findsOneWidget);
+        expect(find.text('Esperando tu transferencia'), findsWidgets);
+        expect(find.text('Pedir datos de pago por WhatsApp'), findsOneWidget);
+        expect(
+          find.byKey(const ValueKey('order-payment-details')),
+          findsOneWidget,
+        );
+      },
+    );
+
     testWidgets('lists real orders with summary, status and detail entry',
         (tester) async {
       final db = openTestDatabase();
@@ -238,9 +290,22 @@ void main() {
 
       expect(find.text('Confirmado'), findsOneWidget);
       expect(find.text('Esperando tu transferencia'), findsOneWidget);
+      expect(find.text('Ver datos de pago'), findsNothing);
+      expect(find.text(transferPaymentDetailsLabel), findsNothing);
       expect(find.text('Pago en proceso'), findsOneWidget);
       expect(find.text('Reembolsado'), findsOneWidget);
       expect(find.text('Ver pedido'), findsOneWidget);
+      expect(find.text('Ver detalles'), findsNWidgets(2));
+      expect(
+        find.text(
+          '¿Elegiste transferencia? Escríbenos por WhatsApp y te compartimos los datos de pago.',
+        ),
+        findsNothing,
+      );
+      expect(
+        find.text('¿Dudas con tu pago? Escríbenos por WhatsApp.'),
+        findsNothing,
+      );
       expect(find.text('En camino'), findsNothing);
       expect(find.text('Con ajuste'), findsNothing);
       expect(

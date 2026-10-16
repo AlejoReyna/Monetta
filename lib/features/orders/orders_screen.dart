@@ -402,12 +402,14 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final status = orderDisplayStatus(order);
+    final showAction = status.key != 'awaiting_transfer';
     final action = status.actionLabel ?? 'Ver detalles';
     final secondary = status.secondaryLabel;
     final refundHelp = paidCancelledRefundWhatsAppUri(order) != null;
+    final actionPrefix = showAction ? '$action del pedido' : 'Pedido';
     return Semantics(
       button: true,
-      label: '$action del pedido ${orderLabelOf(order)}, '
+      label: '$actionPrefix ${orderLabelOf(order)}, '
           '${status.label}'
           '${secondary == null ? '' : ', $secondary'}'
           '${refundHelp ? ', $paidCancelledRefundHelp' : ''}, '
@@ -490,26 +492,27 @@ class _OrderCard extends StatelessWidget {
                       color: palette.ink,
                     ),
                   ),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        action,
-                        style: boutiqueText(
-                          size: 13,
-                          weight: FontWeight.w600,
-                          color: palette.ink,
-                          decoration: TextDecoration.underline,
+                  if (showAction)
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          action,
+                          style: boutiqueText(
+                            size: 13,
+                            weight: FontWeight.w600,
+                            color: palette.ink,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 18,
-                        color: palette.inkMuted,
-                      ),
-                    ],
-                  ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          size: 18,
+                          color: palette.inkMuted,
+                        ),
+                      ],
+                    ),
                 ],
               ),
               AutoOrderRewardsLine(

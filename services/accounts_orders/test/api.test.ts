@@ -411,8 +411,11 @@ describe('accounts_orders API', () => {
       headers: { Authorization: 'Bearer shopify-token-77' },
     });
     expect(response.status).toBe(200);
-    const json = (await response.json()) as { orders: Array<{ shopifyOrderId: string }> };
+    const json = (await response.json()) as {
+      orders: Array<{ shopifyOrderId: string; paymentMethod: string | null }>;
+    };
     expect(json.orders.map((o) => o.shopifyOrderId)).toEqual(['11', '10']);
+    expect(json.orders.every((order) => order.paymentMethod === null)).toBe(true);
 
     expect((await fetch(`${baseUrl}/customers/77/orders`, {
       headers: { Authorization: 'Bearer shopify-token-77' },
@@ -467,6 +470,47 @@ describe('accounts_orders API', () => {
     expect(response.status).toBe(200);
     const json = (await response.json()) as { orders: Array<{ shopifyOrderId: string }> };
     expect(json.orders.map((order) => order.shopifyOrderId)).toEqual(['21']);
+  });
+
+  it('returns the normalized payment method and no card data', async () => {
+    const pan = '4242424242424242';
+    const body = JSON.stringify({
+      id: 31,
+      financial_status: 'pending',
+      created_at: '2026-08-02T00:00:00Z',
+      payment_gateway_names: ['Bank Deposit'],
+      customer: { id: 77, email: 'c@example.com' },
+      transactions: [
+        {
+          kind: 'sale',
+          gateway: 'Bank Deposit',
+          payment_details: { credit_card_number: pan },
+        },
+      ],
+    });
+    const created = await fetch(`${baseUrl}/webhooks/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Hmac-Sha256': sign(body),
+        'X-Shopify-Webhook-Id': randomUUID(),
+      },
+      body,
+    });
+    expect(created.status).toBe(200);
+
+    const response = await fetch(`${baseUrl}/customers/me/orders`, {
+      headers: { Authorization: 'Bearer shopify-token-77' },
+    });
+    expect(response.status).toBe(200);
+    const raw = await response.text();
+    const json = JSON.parse(raw) as {
+      orders: Array<{ shopifyOrderId: string; paymentMethod: string | null }>;
+    };
+    expect(json.orders.map((order) => order.shopifyOrderId)).toEqual(['31']);
+    expect(json.orders[0]?.paymentMethod).toBe('bank_deposit');
+    expect(raw).not.toContain(pan);
+    expect(raw).not.toContain('credit_card');
   });
 
   it('rejects an invalid customer bearer', async () => {

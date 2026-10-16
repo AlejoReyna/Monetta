@@ -21,6 +21,41 @@ import '../boutique/boutique_tokens.dart';
 import '../rewards/rewards_section.dart';
 import 'order_status.dart';
 
+const missingPaymentWhatsAppLabel =
+    '¿Elegiste transferencia? Escríbenos por WhatsApp y te compartimos los datos de pago.';
+
+const paymentQuestionWhatsAppLabel =
+    '¿Dudas con tu pago? Escríbenos por WhatsApp.';
+
+/// Detail-only help for "Pago en proceso" when no payment method was stored.
+/// Hidden once [OrderSummary.paymentMethod] is known, and never shown on the list.
+bool showMissingPaymentWhatsApp(OrderSummary order) {
+  if (orderDisplayStatus(order).label != 'Pago en proceso') return false;
+  final method = order.paymentMethod?.trim();
+  return method == null || method.isEmpty;
+}
+
+/// Detail-only help when a non-transfer method is known and payment is still
+/// pending. Not used for bank_deposit/manual, and never shown on the list.
+bool showPaymentQuestionWhatsApp(OrderSummary order) {
+  if (orderDisplayStatus(order).label != 'Pago en proceso') return false;
+  final method = order.paymentMethod?.trim();
+  if (method == null || method.isEmpty) return false;
+  return !orderPaymentMethodIsBankTransfer(method);
+}
+
+Uri missingPaymentWhatsAppUri(String orderLabel) {
+  return Uri.https('wa.me', '/$kWhatsAppE164', {
+    'text': 'Hola, quiero los datos de pago de mi pedido $orderLabel',
+  });
+}
+
+Uri paymentQuestionWhatsAppUri(String orderLabel) {
+  return Uri.https('wa.me', '/$kWhatsAppE164', {
+    'text': 'Hola, tengo una duda con el pago de mi pedido $orderLabel',
+  });
+}
+
 Future<void> openOrderDetail(
   BuildContext context, {
   required OrderSummary order,
@@ -135,6 +170,34 @@ class OrderDetailScreen extends StatelessWidget {
                     order: order,
                     onOpen: (uri) => _open(context, uri),
                   ),
+                  if (status.key == 'awaiting_transfer') ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('order-payment-details'),
+                      label: transferPaymentDetailsLabel,
+                      uri: missingPaymentWhatsAppUri(label),
+                      icon: Icons.chat_outlined,
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                  ],
+                  if (showMissingPaymentWhatsApp(order)) ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('missing-payment-whatsapp'),
+                      label: missingPaymentWhatsAppLabel,
+                      uri: missingPaymentWhatsAppUri(label),
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                  ],
+                  if (showPaymentQuestionWhatsApp(order)) ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('payment-question-whatsapp'),
+                      label: paymentQuestionWhatsAppLabel,
+                      uri: paymentQuestionWhatsAppUri(label),
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                  ],
                   if (status.key == 'in_transit') ...[
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(
@@ -420,6 +483,53 @@ class PaidCancelledRefundHelp extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+class _PaymentHelpLink extends StatelessWidget {
+  const _PaymentHelpLink({
+    required this.linkKey,
+    required this.label,
+    required this.uri,
+    required this.onOpen,
+    this.icon,
+  });
+
+  final Key linkKey;
+  final String label;
+  final Uri uri;
+  final void Function(Uri uri) onOpen;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final text = Text(
+      label,
+      style: boutiqueText(
+        size: 13,
+        color: palette.inkMuted,
+        decoration: TextDecoration.underline,
+      ),
+    );
+    return Semantics(
+      link: true,
+      child: GestureDetector(
+        key: linkKey,
+        onTap: () => onOpen(uri),
+        child: icon == null
+            ? text
+            : Row(
+                children: [
+                  ExcludeSemantics(
+                    child: Icon(icon, size: 16, color: palette.inkMuted),
+                  ),
+                  const SizedBox(width: BoutiqueSpace.sm),
+                  Flexible(child: text),
+                ],
+              ),
       ),
     );
   }

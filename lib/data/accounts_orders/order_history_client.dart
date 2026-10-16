@@ -30,6 +30,7 @@ class MirroredOrder {
     required this.totalAmount,
     required this.currencyCode,
     required this.placedAt,
+    this.paymentMethod,
   });
 
   final int id;
@@ -47,6 +48,11 @@ class MirroredOrder {
   final String? currencyCode;
   final DateTime? placedAt;
 
+  /// Same tokens as Customer Account `Order.transactions.type`
+  /// (`bank_deposit`, `manual`, `card`, …). Null when the mirror has
+  /// not stored a method.
+  final String? paymentMethod;
+
   bool get isApartado => source == 'whatsapp_apartado';
 
   factory MirroredOrder.fromJson(Map<String, dynamic> json) => MirroredOrder(
@@ -61,6 +67,10 @@ class MirroredOrder {
         placedAt: json['placedAt'] == null
             ? null
             : DateTime.parse(json['placedAt'] as String),
+        paymentMethod: json['paymentMethod'] is String &&
+                (json['paymentMethod'] as String).trim().isNotEmpty
+            ? json['paymentMethod'] as String
+            : null,
       );
 }
 
