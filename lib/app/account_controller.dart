@@ -13,8 +13,10 @@ import '../data/accounts_orders/system_account_session_repository.dart';
 import '../data/customer_auth/customer_account_config.dart';
 import '../data/customer_auth/customer_auth_error.dart';
 import '../data/customer_auth/customer_session_repository.dart';
+import '../data/accounts_orders/account_deletion_client.dart';
 import '../data/local/account_store.dart';
 import '../data/local/database.dart' as local show Account, OrderSummary;
+import '../data/local/wishlist_store.dart';
 import '../data/repositories/order_history_repository.dart';
 
 /// Which of the two entry points a failure came from. They fail for different
@@ -57,6 +59,7 @@ class AccountController extends ChangeNotifier {
     required OrderHistoryRepository orderHistoryRepository,
     CustomerAccountConfig? config,
     required String deviceId,
+    WishlistStore? wishlistStore,
     Future<void> Function(String? accountId)? onAccountScopeChanged,
   })  : _sessionRepository = sessionRepository,
         _systemSessionRepository = systemSessionRepository,
@@ -65,6 +68,7 @@ class AccountController extends ChangeNotifier {
         _orderHistoryRepository = orderHistoryRepository,
         _config = config,
         _deviceId = deviceId,
+        _wishlistStore = wishlistStore,
         _onAccountScopeChanged = onAccountScopeChanged;
 
   final CustomerSessionRepository? _sessionRepository;
@@ -74,7 +78,9 @@ class AccountController extends ChangeNotifier {
   final OrderHistoryRepository _orderHistoryRepository;
   final CustomerAccountConfig? _config;
   final String _deviceId;
+  final WishlistStore? _wishlistStore;
   final Future<void> Function(String? accountId)? _onAccountScopeChanged;
+  HeldShopifyLogin? _heldDeletionLogin;
 
   local.Account? account;
   bool isLoading = false;
@@ -318,6 +324,149 @@ class AccountController extends ChangeNotifier {
         kind: CustomerAuthErrorKind.unknown,
         debugDetail: '$error',
       );
+
+  /// Shopify login for a legacy Monetta session. The device account stays on
+  /// the legacy row until the server says the emails match.
+  Future<LegacyDeletionSignIn> signInForAccountDeletion(
+    AccountDeletionClient? client,
+  ) async {
+    if (client == null) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'account deletion client is unavailable',
+      );
+    }
+    final repository = _sessionRepository;
+    final current = account;
+    if (repository == null ||
+        current == null ||
+        current.authProvider != 'monetta') {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'legacy deletion login is unavailable',
+      );
+    }
+    final legacyToken = await _systemSessionRepository?.accessTokenFor(
+      current.localAccountId,
+    );
+    if (legacyToken == null || legacyToken.trim().isEmpty) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'legacy session token is missing',
+      );
+    }
+    final held = await repository.holdLogin();
+    _heldDeletionLogin = held;
+    final idToken = held.idToken;
+    if (idToken == null) {
+      await abandonUnmatchedDeletionLogin();
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'reauthentication returned no id token',
+      );
+    }
+    final AccountDeletionOutcome outcome;
+    try {
+      outcome = await client.matchLegacyEmail(
+        shopifyAccessToken: held.accessToken,
+        legacySessionToken: legacyToken,
+      );
+    } catch (error) {
+      await abandonUnmatchedDeletionLogin();
+      if (error is CustomerAuthException) rethrow;
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'email match failed',
+      );
+    }
+    switch (outcome) {
+      case AccountDeletionEmailMatch():
+        final session = await repository.commitHeldLogin(held);
+        _heldDeletionLogin = null;
+        account = session.account;
+        notifyListeners();
+        await _publishAccountScope();
+        await loadOrders();
+        return LegacyDeletionMatched(
+          FreshCustomerLogin(
+            accessToken: session.accessToken,
+            idToken: idToken,
+          ),
+          legacySessionToken: legacyToken,
+        );
+      case AccountDeletionEmailMismatch(:final maskedEmail):
+        return LegacyDeletionMismatch(maskedEmail);
+      case AccountDeletionOffline():
+        await abandonUnmatchedDeletionLogin();
+        throw const CustomerAuthException(CustomerAuthErrorKind.offline);
+      default:
+        await abandonUnmatchedDeletionLogin();
+        throw const CustomerAuthException(
+          CustomerAuthErrorKind.server,
+          debugDetail: 'email match failed',
+        );
+    }
+  }
+
+  /// Ends a Shopify login that did not match the legacy account.
+  Future<void> abandonUnmatchedDeletionLogin() async {
+    final held = _heldDeletionLogin;
+    _heldDeletionLogin = null;
+    if (held == null) return;
+    await _sessionRepository?.abandonHeldLogin(held);
+  }
+
+  /// Opens Shopify's hosted login again without adopting another customer.
+  /// Legacy accounts use [signInForAccountDeletion] for the server email check.
+  Future<FreshCustomerLogin> reauthenticateForDeletion() async {
+    final repository = _sessionRepository;
+    // Account is immutable: retain both the customer ID and email before
+    // opening the browser, even if the controller changes during login.
+    final target = account;
+    if (repository == null ||
+        target == null ||
+        target.authProvider != 'shopify' ||
+        target.shopifyCustomerId == null ||
+        target.shopifyCustomerId!.isEmpty) {
+      throw const CustomerAuthException(
+        CustomerAuthErrorKind.configuration,
+        debugDetail: 'Shopify account for deletion is unavailable',
+      );
+    }
+    final login = await repository.reauthenticate();
+    // The stable customer ID decides identity; an email change on the same
+    // Shopify customer must not turn it into another account.
+    if (login.identity.shopifyCustomerId != target.shopifyCustomerId) {
+      await repository.abandonHeldLogin(login);
+      throw const AccountDeletionIdentityMismatch();
+    }
+    final session = await repository.commitHeldLogin(login);
+    account = session.account;
+    notifyListeners();
+    await _publishAccountScope();
+    await loadOrders();
+    return FreshCustomerLogin(
+      accessToken: login.accessToken,
+      idToken: login.idToken!,
+    );
+  }
+
+  /// Local sign-out after the server has accepted deletion. Guest wishlist
+  /// rows stay on the device; this account's profile and saved items do not.
+  Future<void> completeAccountDeletion() async {
+    final localId = account?.localAccountId;
+    try {
+      await logout();
+    } catch (_) {
+      account = null;
+      orders = const [];
+      ordersStatus = OrderHistoryStatus.unavailable;
+      notifyListeners();
+    }
+    if (localId == null) return;
+    await _wishlistStore?.deleteForAccount(localId);
+    await _accountStore.deleteLocal(localId);
+  }
 
   Future<void> logout() async {
     final current = account;

@@ -72,6 +72,17 @@ import type {
 } from '../webhooks/payloads.js';
 import type { Platform } from '../domain/types.js';
 import { AccountRegistrationConflictError } from '../domain/accountErrors.js';
+import { AccountDeletionService } from '../privacy/accountDeletionService.js';
+import { FirebaseAppDataEraser } from '../privacy/firebaseAppData.js';
+import { ShopifyFreshLoginVerifier } from '../privacy/freshLogin.js';
+import {
+  PgAccountDeletionAuditRepository,
+  PgAccountDeletionStateRepository,
+} from '../privacy/pgAccountDeletionRepository.js';
+import { PgCustomerDataEraser } from '../privacy/pgCustomerErasure.js';
+import { registerAccountDeletionRoutes } from '../privacy/routes.js';
+import { CustomerAccountOrderLookup } from '../privacy/shopifyOrderCheck.js';
+import { ShopifyCustomerDataErasureClient } from '../privacy/shopifyErasure.js';
 
 export interface ServerDeps extends HandlerDeps {
   readonly webhookSecret: string;
@@ -101,6 +112,8 @@ export interface ServerDeps extends HandlerDeps {
   readonly engagement?: EngagementRouteDeps & { readonly internalCatalogEventSecret: string };
   /** Paquete F: Rewards. Ausente = programa no montado (rutas 404). */
   readonly rewards?: { readonly service: RewardsService };
+  /** In-app account deletion. Absent in tests that do not exercise the route. */
+  readonly accountDeletion?: AccountDeletionService;
 }
 
 const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
@@ -150,6 +163,15 @@ async function authenticatedCustomerId(
   req: Request,
   res: Response,
 ): Promise<string | null> {
+  const shopper = await authenticateShopper(deps, req, res);
+  return shopper?.customerId ?? null;
+}
+
+async function authenticateShopper(
+  deps: ServerDeps,
+  req: Request,
+  res: Response,
+): Promise<{ readonly customerId: string; readonly credential: 'customer_account' | 'monetta_session' } | null> {
   const token = bearerToken(req);
   if (token === null) {
     res.status(401).json({ error: 'unauthorized' });
@@ -163,7 +185,7 @@ async function authenticatedCustomerId(
       res.status(403).json({ error: 'shopify_customer_not_linked' });
       return null;
     }
-    return customerId;
+    return { customerId, credential: 'monetta_session' };
   }
 
   try {
@@ -177,7 +199,7 @@ async function authenticatedCustomerId(
       res.status(503).json({ error: 'authentication_unavailable' });
       return null;
     }
-    return customerId;
+    return { customerId, credential: 'customer_account' };
   } catch (error) {
     // The verifier deliberately never places a token in its errors. Log only
     // the error class anyway, keeping that invariant even for injected code.
@@ -777,6 +799,13 @@ export function createApp(deps: ServerDeps): Express {
     }
   });
 
+  if (deps.accountDeletion !== undefined) {
+    registerAccountDeletionRoutes(app, {
+      deletion: deps.accountDeletion,
+      authenticate: (req, res) => authenticateShopper(deps, req, res),
+    });
+  }
+
   app.use((error: unknown, _req: Request, res: Response, _next: NextFunction) => {
     if (error instanceof WebhookBusyError) {
       res.setHeader('Retry-After', '5');
@@ -872,6 +901,48 @@ if (isMain) {
     };
     catalogEvents = new PgShopifyCatalogEventProcessor(pool, engagementService);
   }
+  const firebaseDeletionReady = config.firebaseProjectId !== ''
+    && config.firebaseClientEmail !== ''
+    && config.firebasePrivateKey !== '';
+  const shopifyErasureReady = config.shopDomain !== '' && (
+    config.shopifyAdminAccessToken.length >= 16
+    || (config.shopifyAppClientId !== '' && config.webhookSecret.length >= 16)
+  );
+  const deletionTokens = firebaseDeletionReady
+    ? new GoogleAccessTokenProvider(config.firebaseClientEmail, config.firebasePrivateKey)
+    : null;
+  const customerAccount = new CustomerAccountOrderLookup({ shopDomain: config.shopDomain });
+  const accountDeletion = new AccountDeletionService({
+    orders: new PgOrdersRepository(pool),
+    state: new PgAccountDeletionStateRepository(pool),
+    audit: new PgAccountDeletionAuditRepository(pool),
+    appData: new FirebaseAppDataEraser({
+      projectId: config.firebaseProjectId,
+      accessToken: async () => {
+        if (deletionTokens === null) throw new Error('firebase_not_configured');
+        return deletionTokens.accessToken();
+      },
+    }),
+    customerData: new PgCustomerDataEraser(pool),
+    shopifyErasure: new ShopifyCustomerDataErasureClient({
+      shopDomain: config.shopDomain,
+      apiVersion: config.shopifyAdminApiVersion,
+      adminAccessToken: config.shopifyAdminAccessToken,
+      clientId: config.shopifyAppClientId,
+      clientSecret: config.webhookSecret,
+    }),
+    shopifyOrders: customerAccount,
+    customerEmail: customerAccount,
+    appAccounts,
+    hashSessionToken: hashToken,
+    freshLogin: new ShopifyFreshLoginVerifier({
+      shopDomain: config.shopDomain,
+      customerTokens: customerTokenVerifier,
+      customerAccountClientId: config.customerAccountClientId,
+      maxAgeMs: config.accountDeletionReauthMaxAgeSeconds * 1000,
+    }),
+    ready: firebaseDeletionReady && shopifyErasureReady,
+  });
   const rewardsEnv = loadRewardsEnv();
   const rewardsService = new RewardsService({
     rewards: new PgRewardsRepository(pool),
@@ -916,6 +987,7 @@ if (isMain) {
     engagementPrivacy: config.notificationsEnabled
       ? new PgEngagementPrivacyRepository(pool)
       : undefined,
+    accountDeletion,
   });
   const server = app.listen(config.port, () => {
     logger.info('accounts & orders API listening', { port: config.port });

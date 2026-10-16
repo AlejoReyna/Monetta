@@ -704,6 +704,7 @@ class _MonettaAppState extends State<MonettaApp> {
       ),
       accountStore: AccountStore(_database),
       deviceStore: deviceStore,
+      wishlistStore: WishlistStore(_database),
       orderHistoryRepository: OrderHistoryRepository(
         store: OrderSummaryStore(_database),
         config: accountsConfig,

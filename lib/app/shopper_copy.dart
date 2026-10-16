@@ -279,6 +279,54 @@ String? factualDescription({
   return buffer.toString();
 }
 
+const String kDeleteAccountManualWhatsAppText =
+    'Hola, quiero eliminar mi cuenta de Monetta.';
+
+/// Support chat for account deletion. Uses the shop's existing WhatsApp
+/// number; callers pass a placeholder only when that number is absent.
+Uri accountDeletionSupportUri({String phoneE164 = kWhatsAppE164}) {
+  final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
+  return Uri.https('wa.me', '/$phone', <String, String>{
+    'text': '¡Hola Monetta! Necesito ayuda para eliminar mi cuenta.',
+  });
+}
+
+const String kDeleteAccountRefundReviewWhatsAppLead =
+    'Hola, quiero eliminar mi cuenta de Monetta. Necesito que revisen el reembolso del pedido';
+
+const String kDeleteAccountPaymentReviewWhatsAppLead =
+    'Hola, quiero eliminar mi cuenta de Monetta. Necesito que revisen el pago del pedido';
+
+/// WhatsApp handoff for a cancelled partial refund that still needs review.
+Uri accountDeletionRefundReviewUri({
+  required String orderNumber,
+  String phoneE164 = kWhatsAppE164,
+}) {
+  final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
+  return Uri.https('wa.me', '/$phone', <String, String>{
+    'text': '$kDeleteAccountRefundReviewWhatsAppLead $orderNumber.',
+  });
+}
+
+/// WhatsApp handoff for a cancelled charge that still needs a payment review.
+Uri accountDeletionPaymentReviewUri({
+  required String orderNumber,
+  String phoneE164 = kWhatsAppE164,
+}) {
+  final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
+  return Uri.https('wa.me', '/$phone', <String, String>{
+    'text': '$kDeleteAccountPaymentReviewWhatsAppLead $orderNumber.',
+  });
+}
+
+/// WhatsApp handoff when the app cannot delete the account itself.
+Uri accountDeletionManualRequestUri({String phoneE164 = kWhatsAppE164}) {
+  final phone = phoneE164.trim().isEmpty ? '0000000000' : phoneE164.trim();
+  return Uri.https('wa.me', '/$phone', <String, String>{
+    'text': kDeleteAccountManualWhatsAppText,
+  });
+}
+
 Uri conciergeWhatsAppUri({String? productTitle}) {
   final text = productTitle == null
       ? '¡Hola Monetta! Quiero ayuda para elegir una pieza.'

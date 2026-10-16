@@ -166,6 +166,16 @@ void main() {
       await tester.tap(adminEntry);
       expect(openedAdmin, isTrue);
 
+      final deleteLink = find.text('Eliminar mi cuenta');
+      await tester.scrollUntilVisible(deleteLink, 400);
+      await tester.pumpAndSettle();
+      expect(find.text('Privacidad y datos'), findsOneWidget);
+      expect(find.text('Política de privacidad'), findsOneWidget);
+      expect(
+        tester.widget<Text>(deleteLink).style?.color,
+        const Color(0xFFA3342B),
+      );
+
       final logout = find.text('CERRAR SESIÓN');
       await tester.scrollUntilVisible(logout, 400);
       await tester.pumpAndSettle();

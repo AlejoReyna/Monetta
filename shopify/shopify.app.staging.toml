@@ -16,7 +16,7 @@ embedded = false
 handle = "monetta-staging"
 
 [access_scopes]
-scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects"
+scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects,write_customer_data_erasure"
 
 # App-owned singleton for the native admin control plane. The $app type keeps
 # the schema under this app's ownership while allowing the merchant to update

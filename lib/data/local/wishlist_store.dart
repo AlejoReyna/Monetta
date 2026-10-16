@@ -43,6 +43,13 @@ class WishlistStore {
 
   Future<void> clearAllScopes() => _db.delete(_db.wishlistItems).go();
 
+  Future<void> deleteForAccount(String accountId) {
+    if (accountId.isEmpty) return Future.value();
+    return (_db.delete(_db.wishlistItems)
+          ..where((t) => t.accountId.equals(accountId)))
+        .go();
+  }
+
   /// On login, every wishlist row still scoped to the guest (`''`) becomes
   /// this account's. Rows already belonging to a *different* account are left
   /// untouched — that would mean two people signed into the same device, and
