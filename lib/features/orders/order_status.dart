@@ -5,12 +5,29 @@
 /// de WhatsApp como enriquecimiento. No inventa líneas, importes ni
 /// seguimiento: lo que no está en el resumen no se presenta.
 ///
-/// Regla central: **enviado no es entregado**. Solo `fulfillmentStatus` con
-/// evidencia de entrega (`delivered`) se rotula "Entregado". Un `fulfilled`
-/// sin entrega es "En camino" (enviado), y un pedido pagado sin preparación
-/// es "Confirmado", no "En camino".
+/// Regla central: **el pago gana al envío**. "En camino" y "Entregado" solo
+/// aplican cuando `financial_status` es `paid`. Un pedido reembolsado,
+/// cancelado o sin pagar no se muestra como enviado ni entregado, aunque
+/// Shopify ya tenga `fulfillmentStatus`.
+///
+/// Enviado no es entregado: con el pago cubierto, solo `delivered` es
+/// "Entregado". Un `fulfilled` sin entrega es "En camino". Un `paid` sin
+/// preparación es "Confirmado".
+///
+/// `pending` es "Esperando tu transferencia" solo si
+/// [OrderSummary.paymentMethod] identifica depósito bancario o pago manual.
+/// Cualquier otro pendiente, vacío o desconocido es "Pago en proceso".
+///
+/// Un pedido cancelado en Shopify (`cancelledAt`, `cancelReason` o estado
+/// `cancelled`) es "Cancelado" aunque el pago figure como `paid` o
+/// `pending`. `refunded` y `voided` conservan su regla. Un cancelado con
+/// `partially_refunded` (OST-13d) es "Reembolso parcial" y deja "Cancelado"
+/// como línea secundaria, sin el envío. La línea de WhatsApp aparece en un
+/// cancelado `paid` y en ese reembolso parcial cancelado.
 library;
 
+import '../../app/shopper_copy.dart' show conciergeWhatsAppUri;
+import '../../app/theme.dart' show kMoney;
 import '../../data/local/database.dart' show OrderSummary;
 
 /// Filtros pertinentes con datos reales. Sin "Más vendidos" ni rangos
@@ -29,6 +46,23 @@ String orderFilterLabel(OrderFilter filter) => switch (filter) {
       OrderFilter.apartado => 'Apartados',
     };
 
+/// Línea de WhatsApp bajo un cancelado pagado y bajo un reembolso parcial
+/// cancelado. Una sola copia: la lista y el detalle la leen de aquí.
+const String paidCancelledRefundHelp =
+    'Si ya pagaste y tienes dudas sobre tu reembolso, escríbenos por WhatsApp.';
+
+/// WhatsApp con el número de pedido. Aplica a un cancelado `paid` y a
+/// OST-13d (`partially_refunded` cancelado). Nulo en pending, voided,
+/// `refunded` y el resto de cancelaciones.
+Uri? paidCancelledRefundWhatsAppUri(OrderSummary order) {
+  if (!_isShopifyCancelled(order)) return null;
+  final financial = _normalizeFinancial(order.status);
+  if (financial != 'paid' && financial != 'partially_refunded') return null;
+  return conciergeWhatsAppUri(
+    productTitle: 'mi pedido ${orderLabelOf(order)}',
+  );
+}
+
 /// Etiqueta de pedido real: `displayNumber` (`#1001`) cuando existe;
 /// código de apartado (`MN-XXXX`) para WhatsApp; nunca un `#MON12345`
 /// inventado ni el primer pedido del historial.
@@ -43,17 +77,28 @@ String orderLabelOf(OrderSummary order) {
 }
 
 /// Cápsula de estado verificable. `label` es lo que se muestra; `detail`
-/// explica la evidencia sin prometer seguimiento inexistente.
+/// es el cuerpo, sin prometer una notificación. [actionLabel] es el
+/// enlace de la tarjeta cuando el estado pide uno. [success] queda en
+/// falso para reembolsos y cancelaciones: no usan color de éxito.
 class OrderDisplayStatus {
   const OrderDisplayStatus({
     required this.key,
     required this.label,
     required this.detail,
+    this.actionLabel,
+    this.secondaryLabel,
+    this.success = false,
   });
 
   final String key;
   final String label;
   final String detail;
+  final String? actionLabel;
+
+  /// Texto neutro bajo la etiqueta, sin acento. Envío de un reembolso
+  /// parcial, o "Cancelado" cuando ese reembolso también está cancelado.
+  final String? secondaryLabel;
+  final bool success;
 }
 
 OrderDisplayStatus orderDisplayStatus(OrderSummary order) {
@@ -65,8 +110,214 @@ OrderDisplayStatus orderDisplayStatus(OrderSummary order) {
           'disponibilidad y registra tu anticipo.',
     );
   }
-  final fulfillment = order.fulfillmentStatus?.toLowerCase().trim();
-  switch (fulfillment) {
+  final payment = orderPaymentStatus(order);
+  if (payment.key == 'partial_refund') {
+    if (_isShopifyCancelled(order)) {
+      return _withSecondary(payment, 'Cancelado');
+    }
+    return _withSecondaryFulfillment(order, payment);
+  }
+  if (payment.key != 'confirmed') return payment;
+  return _fulfillmentStatus(order) ?? payment;
+}
+
+/// Estado de pago, sin mirar el envío. Un reembolso o un impago no
+/// cambia porque el pedido figure como enviado.
+OrderDisplayStatus orderPaymentStatus(OrderSummary order) {
+  final financial = _normalizeFinancial(order.status);
+  if (financial == 'refunded') {
+    return OrderDisplayStatus(
+      key: 'refunded',
+      label: 'Reembolsado',
+      detail: _refundedBody(order),
+      actionLabel: 'Ver pedido',
+    );
+  }
+  if (financial == 'partially_refunded') {
+    return OrderDisplayStatus(
+      key: 'partial_refund',
+      label: 'Reembolso parcial',
+      detail: _partialRefundBody(order),
+    );
+  }
+  if (financial == 'voided' || _isShopifyCancelled(order)) {
+    return const OrderDisplayStatus(
+      key: 'cancelled',
+      label: 'Cancelado',
+      detail: 'Este pedido fue cancelado.',
+    );
+  }
+  switch (financial) {
+    case 'paid':
+      return const OrderDisplayStatus(
+        key: 'confirmed',
+        label: 'Confirmado',
+        detail: 'Aquí verás cuando tu pedido salga.',
+      );
+    case 'pending_refund':
+    case 'refund_pending':
+    case 'refund_in_progress':
+      return const OrderDisplayStatus(
+        key: 'refund_in_progress',
+        label: 'Reembolso en proceso',
+        detail: 'Lo verás aquí cuando se complete.',
+      );
+    case 'pending':
+      if (orderPaymentMethodIsBankTransfer(order.paymentMethod)) {
+        return const OrderDisplayStatus(
+          key: 'awaiting_transfer',
+          label: 'Esperando tu transferencia',
+          detail: 'Estamos esperando tu transferencia. '
+              'Lo verás aquí cuando se confirme.',
+        );
+      }
+      return _paymentInProgress;
+    default:
+      return _paymentInProgress;
+  }
+}
+
+/// Cancelación de Shopify distinta de `refunded` y `voided`.
+///
+/// `cancelledAt`, un `cancelReason` presente, o el estado `cancelled` /
+/// `canceled`. No se infiere por el envío ni por un pago pendiente.
+bool _isShopifyCancelled(OrderSummary order) {
+  if (order.cancelledAt != null) return true;
+  final reason = order.cancelReason?.trim();
+  if (reason != null && reason.isNotEmpty) return true;
+  final financial = _normalizeFinancial(order.status);
+  return financial == 'cancelled' || financial == 'canceled';
+}
+
+const OrderDisplayStatus _paymentInProgress = OrderDisplayStatus(
+  key: 'payment_in_progress',
+  label: 'Pago en proceso',
+  detail: 'Lo verás aquí cuando se confirme.',
+);
+
+/// True solo con evidencia de depósito bancario o pago manual.
+///
+/// El valor es [OrderSummary.paymentMethod]: los `type` de
+/// `Order.transactions` en la Customer Account API (`bank_deposit`,
+/// `manual`, …). Vacío o ausente no es transferencia.
+bool orderPaymentMethodIsBankTransfer(String? raw) {
+  final tokens = _paymentTokens(raw);
+  if (tokens.isEmpty) return false;
+  if (tokens.any(_isElectronicPayment)) return false;
+  return tokens.any(_isTransferToken);
+}
+
+bool _isElectronicPayment(String token) {
+  const electronic = {
+    'card',
+    'shopify_payments',
+    'paypal',
+    'cash_on_delivery',
+    'money_order',
+    'gift_card',
+    'store_credit',
+    'custom',
+    'shop_pay',
+    'apple_pay',
+    'google_pay',
+    'bogus',
+  };
+  return electronic.contains(token);
+}
+
+bool _isTransferToken(String token) {
+  if (token == 'bank_deposit' || token == 'manual') return true;
+  return token.contains('transferencia') ||
+      token.contains('deposito') ||
+      token.contains('bank_deposit') ||
+      token.contains('bank_transfer');
+}
+
+List<String> _paymentTokens(String? raw) {
+  final folded = (raw ?? '')
+      .toLowerCase()
+      .trim()
+      .replaceAll('á', 'a')
+      .replaceAll('é', 'e')
+      .replaceAll('í', 'i')
+      .replaceAll('ó', 'o')
+      .replaceAll('ú', 'u');
+  if (folded.isEmpty) return const [];
+  return folded
+      .split(RegExp(r'[\s,;/|]+'))
+      .map((token) => token.replaceAll('-', '_'))
+      .where((token) => token.isNotEmpty)
+      .toList(growable: false);
+}
+
+String _refundedBody(OrderSummary order) {
+  if (order.totalAmount <= 0) return 'Te devolvimos tu pago.';
+  return 'Te devolvimos ${_money(order.totalAmount, order.currencyCode)} '
+      'a tu método de pago.';
+}
+
+/// Copia del Designer. El monto reembolsado es `totalRefunded`. Si no
+/// está, o no hay total contra el cual leerlo, se usa el fallback
+/// aprobado en lugar de armar una cifra.
+String _partialRefundBody(OrderSummary order) {
+  final refunded = order.refundedAmount;
+  final total = order.totalAmount;
+  if (refunded == null || refunded <= 0 || total <= 0 || refunded > total) {
+    return 'Te devolvimos una parte de tu pago a tu método de pago.';
+  }
+  final currency = order.currencyCode;
+  return 'Te devolvimos ${_money(refunded, currency)} de '
+      '${_money(total, currency)} a tu método de pago.';
+}
+
+String _money(double amount, String currency) {
+  final formatted = kMoney.format(amount);
+  final code = currency.trim();
+  return code.isEmpty ? formatted : '$formatted $code';
+}
+
+OrderDisplayStatus _withSecondaryFulfillment(
+  OrderSummary order,
+  OrderDisplayStatus payment,
+) {
+  return _withSecondary(payment, _secondaryFulfillmentLabel(order));
+}
+
+OrderDisplayStatus _withSecondary(
+  OrderDisplayStatus payment,
+  String? secondary,
+) {
+  if (secondary == null) return payment;
+  return OrderDisplayStatus(
+    key: payment.key,
+    label: payment.label,
+    detail: payment.detail,
+    actionLabel: payment.actionLabel,
+    secondaryLabel: secondary,
+  );
+}
+
+/// Envío o entrega bajo el reembolso parcial. No sustituye la etiqueta.
+String? _secondaryFulfillmentLabel(OrderSummary order) {
+  switch (order.fulfillmentStatus?.toLowerCase().trim()) {
+    case 'delivered':
+      return 'Entregado';
+    case 'fulfilled':
+    case 'shipped':
+    case 'in_transit':
+    case 'in transit':
+    case 'out_for_delivery':
+      return 'En camino';
+    default:
+      return null;
+  }
+}
+
+String _normalizeFinancial(String? raw) =>
+    (raw ?? '').toLowerCase().trim().replaceAll(RegExp(r'[\s-]+'), '_');
+
+OrderDisplayStatus? _fulfillmentStatus(OrderSummary order) {
+  switch (order.fulfillmentStatus?.toLowerCase().trim()) {
     case 'delivered':
       return const OrderDisplayStatus(
         key: 'delivered',
@@ -92,44 +343,21 @@ OrderDisplayStatus orderDisplayStatus(OrderSummary order) {
         detail: 'Parte de tu pedido fue enviada. Lo restante sigue en '
             'preparación.',
       );
+    default:
+      return null;
   }
-  final financial = order.status.toLowerCase().trim();
-  if (financial.contains('refund') ||
-      financial.contains('void') ||
-      financial.contains('cancel')) {
-    return const OrderDisplayStatus(
-      key: 'adjusted',
-      label: 'Con ajuste',
-      detail: 'Este pedido tiene una cancelación o devolución registrada. '
-          'El importe final está en tu confirmación de Shopify.',
-    );
-  }
-  if (financial.contains('paid') ||
-      financial.contains('pending') ||
-      financial.contains('authorized') ||
-      financial.contains('unfulfilled') ||
-      financial.isNotEmpty) {
-    return const OrderDisplayStatus(
-      key: 'confirmed',
-      label: 'Confirmado',
-      detail: 'Tu pedido está confirmado y en preparación. Te avisaremos '
-          'cuando se envíe.',
-    );
-  }
-  return const OrderDisplayStatus(
-    key: 'confirmed',
-    label: 'Confirmado',
-    detail: 'Tu pedido está confirmado y en preparación. Te avisaremos '
-        'cuando se envíe.',
-  );
 }
+
+bool _isPaid(OrderSummary order) =>
+    _normalizeFinancial(order.status) == 'paid' && !_isShopifyCancelled(order);
 
 bool _isDelivered(OrderSummary order) =>
     order.source != 'whatsapp_apartado' &&
+    _isPaid(order) &&
     order.fulfillmentStatus?.toLowerCase().trim() == 'delivered';
 
 bool _isInTransit(OrderSummary order) {
-  if (order.source == 'whatsapp_apartado') return false;
+  if (order.source == 'whatsapp_apartado' || !_isPaid(order)) return false;
   return switch (order.fulfillmentStatus?.toLowerCase().trim()) {
     'fulfilled' ||
     'shipped' ||

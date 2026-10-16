@@ -156,6 +156,81 @@ void main() {
       expect(orders.single.totalAmount, 1749);
       expect(orders.single.currencyCode, 'MXN');
       expect(orders.single.financialStatus, 'PAID');
+      expect(orders.single.paymentMethod, isNull);
+    });
+
+    test('reads transaction types used to detect a bank transfer', () {
+      final body = utf8.encode(
+        jsonEncode({
+          'data': {
+            'customer': {
+              'orders': {
+                'pageInfo': {'hasNextPage': false, 'endCursor': null},
+                'nodes': [
+                  {
+                    'id': 'gid://shopify/Order/12',
+                    'name': '#1002',
+                    'number': 1002,
+                    'processedAt': '2026-08-01T12:00:00Z',
+                    'financialStatus': 'PENDING',
+                    'fulfillmentStatus': null,
+                    'transactions': [
+                      {'type': 'BANK_DEPOSIT'},
+                      {'type': 'bank_deposit'},
+                    ],
+                    'totalPrice': {
+                      'amount': '500.0',
+                      'currencyCode': 'MXN',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      );
+
+      final orders = HttpCustomerOrdersService.parseOrders(body);
+      expect(orders.single.paymentMethod, 'bank_deposit');
+    });
+
+    test('reads cancellation and the refunded amount', () {
+      final body = utf8.encode(
+        jsonEncode({
+          'data': {
+            'customer': {
+              'orders': {
+                'pageInfo': {'hasNextPage': false, 'endCursor': null},
+                'nodes': [
+                  {
+                    'id': 'gid://shopify/Order/13',
+                    'name': '#1003',
+                    'number': 1003,
+                    'processedAt': '2026-08-01T12:00:00Z',
+                    'financialStatus': 'PARTIALLY_REFUNDED',
+                    'fulfillmentStatus': 'FULFILLED',
+                    'cancelledAt': '2026-08-02T00:00:00Z',
+                    'cancelReason': 'CUSTOMER',
+                    'totalRefunded': {
+                      'amount': '200.00',
+                      'currencyCode': 'MXN',
+                    },
+                    'totalPrice': {
+                      'amount': '1000.0',
+                      'currencyCode': 'MXN',
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        }),
+      );
+
+      final orders = HttpCustomerOrdersService.parseOrders(body);
+      expect(orders.single.cancelledAt, DateTime.utc(2026, 8, 2));
+      expect(orders.single.cancelReason, 'CUSTOMER');
+      expect(orders.single.refundedAmount, 200);
     });
 
     test('GraphQL UNAUTHENTICATED becomes sessionExpired', () {

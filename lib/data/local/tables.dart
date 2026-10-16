@@ -235,6 +235,20 @@ class OrderSummaries extends Table {
   TextColumn get attributionCode => text().nullable()();
 
   TextColumn get status => text()();
+
+  /// Shopify Customer Account `Order.transactions.type` values, joined
+  /// with commas (`bank_deposit`, `manual`, `card`, …). Null when the
+  /// order history query did not return a transaction type — never guessed.
+  TextColumn get paymentMethod => text().nullable()();
+
+  /// Shopify `cancelledAt`. Null when the order was not canceled.
+  DateTimeColumn get cancelledAt => dateTime().nullable()();
+
+  /// Shopify `cancelReason`. Null when absent; never inferred.
+  TextColumn get cancelReason => text().nullable()();
+
+  /// Shopify `totalRefunded`. Null when the query did not return an amount.
+  RealColumn get refundedAmount => real().nullable()();
   RealColumn get totalAmount => real()();
   TextColumn get currencyCode => text()();
   DateTimeColumn get placedAt => dateTime()();

@@ -8,7 +8,9 @@ import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
+import 'package:monetta_app/features/account/account_boutique.dart';
 import 'package:monetta_app/features/orders/order_detail_screen.dart';
+import 'package:monetta_app/features/orders/order_status.dart';
 import 'package:monetta_app/features/orders/orders_screen.dart';
 import 'package:monetta_app/features/rewards/rewards_models.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
@@ -21,6 +23,10 @@ OrderSummary _order({
   String source = 'shopify_checkout',
   String? attributionCode,
   String status = 'paid',
+  String? paymentMethod,
+  DateTime? cancelledAt,
+  String? cancelReason,
+  double? refundedAmount,
   double total = 11480,
 }) =>
     OrderSummary(
@@ -32,6 +38,10 @@ OrderSummary _order({
       source: source,
       attributionCode: attributionCode,
       status: status,
+      paymentMethod: paymentMethod,
+      cancelledAt: cancelledAt,
+      cancelReason: cancelReason,
+      refundedAmount: refundedAmount,
       totalAmount: total,
       currencyCode: 'MXN',
       placedAt: DateTime.utc(2026, 5, 12),
@@ -186,6 +196,105 @@ void main() {
         findsOneWidget,
       );
     });
+
+    testWidgets('cards label payment from financial_status, never a catch-all',
+        (tester) async {
+      final db = openTestDatabase();
+      addTearDown(db.close);
+      final controller = _controller(db)
+        ..account = _account()
+        ..orders = [
+          _order(
+            id: 'gid://shopify/Order/paid',
+            displayNumber: '#1001',
+            shopifyOrderId: 'gid://shopify/Order/paid',
+            status: 'paid',
+          ),
+          _order(
+            id: 'gid://shopify/Order/pending',
+            displayNumber: '#1002',
+            shopifyOrderId: 'gid://shopify/Order/pending',
+            status: 'pending',
+            paymentMethod: 'manual',
+          ),
+          _order(
+            id: 'gid://shopify/Order/unknown',
+            displayNumber: '#1003',
+            shopifyOrderId: 'gid://shopify/Order/unknown',
+            status: 'unknown',
+          ),
+          _order(
+            id: 'gid://shopify/Order/refunded',
+            displayNumber: '#1004',
+            shopifyOrderId: 'gid://shopify/Order/refunded',
+            fulfillmentStatus: 'shipped',
+            status: 'refunded',
+          ),
+        ]
+        ..ordersStatus = OrderHistoryStatus.populated;
+
+      await tester.pumpWidget(_host(controller));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Confirmado'), findsOneWidget);
+      expect(find.text('Esperando tu transferencia'), findsOneWidget);
+      expect(find.text('Pago en proceso'), findsOneWidget);
+      expect(find.text('Reembolsado'), findsOneWidget);
+      expect(find.text('Ver pedido'), findsOneWidget);
+      expect(find.text('En camino'), findsNothing);
+      expect(find.text('Con ajuste'), findsNothing);
+      expect(
+        find.byKey(const ValueKey('order-card-gid://shopify/Order/pending')),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets(
+      'OST-13d list shows partial refund, Cancelado, and the WhatsApp line',
+      (tester) async {
+        final db = openTestDatabase();
+        addTearDown(db.close);
+        final controller = _controller(db)
+          ..account = _account()
+          ..orders = [
+            _order(
+              id: 'gid://shopify/Order/partial',
+              displayNumber: '#1013',
+              shopifyOrderId: 'gid://shopify/Order/partial',
+              fulfillmentStatus: 'shipped',
+              status: 'partially_refunded',
+              cancelledAt: DateTime.utc(2026, 6, 1),
+            ),
+          ]
+          ..ordersStatus = OrderHistoryStatus.populated;
+
+        await tester.pumpWidget(_host(controller));
+        await tester.pumpAndSettle();
+
+        final capsule = tester.widget<EStatusCapsule>(
+          find.byType(EStatusCapsule),
+        );
+        expect(capsule.label, 'Reembolso parcial');
+        expect(capsule.dark, isFalse);
+        expect(
+          find.descendant(
+            of: find.byType(EStatusCapsule),
+            matching: find.text('Cancelado'),
+          ),
+          findsNothing,
+        );
+        expect(find.text('En camino'), findsNothing);
+        expect(find.text('Cancelado'), findsOneWidget);
+        expect(find.text(paidCancelledRefundHelp), findsOneWidget);
+        final secondary = tester.widget<Text>(find.text('Cancelado'));
+        expect(secondary.style?.color, isNot(const Color(0xFF8F6838)));
+        expect(secondary.style?.color, isNot(MonettaColors.light.success));
+        expect(
+          secondary.style?.color,
+          isNot(MonettaColors.light.successSurface),
+        );
+      },
+    );
 
     testWidgets('empty history does not read as an error', (tester) async {
       final db = openTestDatabase();

@@ -48,7 +48,7 @@ class AppDatabase extends _$AppDatabase {
   factory AppDatabase.connect() => AppDatabase(_openConnection());
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -89,6 +89,30 @@ class AppDatabase extends _$AppDatabase {
               'INSERT INTO order_summaries (id, account_id, shopify_order_id, display_number, source, attribution_code, status, total_amount, currency_code, placed_at) SELECT id, account_id, CASE WHEN id LIKE \'gid://shopify/Order/%\' THEN id ELSE shopify_order_id END, CASE WHEN id LIKE \'gid://shopify/Order/%\' THEN shopify_order_id ELSE NULL END, source, attribution_code, status, total_amount, currency_code, placed_at FROM order_summaries_v6',
             );
             await customStatement('DROP TABLE order_summaries_v6');
+          }
+          if (from < 8) {
+            await _addColumnIfMissing(
+              orderSummaries.actualTableName,
+              'payment_method',
+              'TEXT',
+            );
+          }
+          if (from < 9) {
+            await _addColumnIfMissing(
+              orderSummaries.actualTableName,
+              'cancelled_at',
+              'INTEGER',
+            );
+            await _addColumnIfMissing(
+              orderSummaries.actualTableName,
+              'cancel_reason',
+              'TEXT',
+            );
+            await _addColumnIfMissing(
+              orderSummaries.actualTableName,
+              'refunded_amount',
+              'REAL',
+            );
           }
         },
         beforeOpen: (_) => customStatement('PRAGMA foreign_keys = ON;'),

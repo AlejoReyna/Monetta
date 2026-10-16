@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/features/account/account_boutique.dart';
 import 'package:monetta_app/features/orders/order_detail_screen.dart';
+import 'package:monetta_app/features/orders/order_status.dart';
 import 'package:monetta_app/features/rewards/rewards_models.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
 
@@ -14,6 +16,10 @@ OrderSummary _order({
   String source = 'shopify_checkout',
   String? attributionCode,
   String status = 'paid',
+  String? paymentMethod,
+  DateTime? cancelledAt,
+  String? cancelReason,
+  double? refundedAmount,
   double total = 11480,
 }) =>
     OrderSummary(
@@ -25,6 +31,10 @@ OrderSummary _order({
       source: source,
       attributionCode: attributionCode,
       status: status,
+      paymentMethod: paymentMethod,
+      cancelledAt: cancelledAt,
+      cancelReason: cancelReason,
+      refundedAmount: refundedAmount,
       totalAmount: total,
       currencyCode: 'MXN',
       placedAt: DateTime.utc(2026, 5, 12),
@@ -54,6 +64,291 @@ void main() {
       expect(find.textContaining('MON12345'), findsNothing);
       expect(find.textContaining('DHL'), findsNothing);
       expect(find.textContaining('Estafeta'), findsNothing);
+    });
+
+    testWidgets('pending transfer is not shown as paid', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: null,
+            status: 'pending',
+            paymentMethod: 'bank_deposit',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Esperando tu transferencia'), findsWidgets);
+      expect(
+        find.textContaining('Lo verás aquí cuando se confirme.'),
+        findsWidgets,
+      );
+      expect(find.text('Confirmado'), findsNothing);
+      expect(find.text('Pago confirmado'), findsNothing);
+    });
+
+    testWidgets('pending card payment is Pago en proceso', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: null,
+            status: 'pending',
+            paymentMethod: 'card',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pago en proceso'), findsWidgets);
+      expect(find.text('Lo verás aquí cuando se confirme.'), findsWidgets);
+      expect(find.text('Esperando tu transferencia'), findsNothing);
+      expect(find.text('Confirmado'), findsNothing);
+    });
+
+    testWidgets('unknown financial status is payment in progress', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(_order(fulfillmentStatus: null, status: 'unknown')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pago en proceso'), findsWidgets);
+      expect(find.text('Confirmado'), findsNothing);
+      expect(find.text('Pago confirmado'), findsNothing);
+    });
+
+    testWidgets('partially paid is not a confirmed payment', (tester) async {
+      await tester.pumpWidget(
+        _host(_order(fulfillmentStatus: null, status: 'partially_paid')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Pago en proceso'), findsWidgets);
+      expect(find.text('Pago confirmado'), findsNothing);
+      expect(find.text('Confirmado'), findsNothing);
+    });
+
+    testWidgets('shipped refund is not shown as on the way', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: 'shipped',
+            status: 'refunded',
+            total: 11480,
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reembolsado'), findsWidgets);
+      expect(find.textContaining('Te devolvimos'), findsWidgets);
+      expect(find.textContaining('a tu método de pago.'), findsWidgets);
+      expect(find.text('En camino'), findsNothing);
+      expect(find.text('Pedido enviado'), findsNothing);
+      expect(find.text('Confirmado'), findsNothing);
+
+      final capsule = find.byType(EStatusCapsule);
+      final box = tester.widget<Container>(
+        find.descendant(of: capsule, matching: find.byType(Container)).first,
+      );
+      final decoration = box.decoration! as BoxDecoration;
+      expect(decoration.color, isNot(MonettaColors.light.success));
+      expect(decoration.color, isNot(MonettaColors.light.successSurface));
+    });
+
+    testWidgets('shipped cancellation is not shown as on the way', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(_order(fulfillmentStatus: 'shipped', status: 'cancelled')),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancelado'), findsWidgets);
+      expect(find.text('En camino'), findsNothing);
+      expect(find.text('Pedido enviado'), findsNothing);
+    });
+
+    testWidgets('paid cancellation shows the WhatsApp refund line', (
+      tester,
+    ) async {
+      Uri? opened;
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildTheme(),
+          home: OrderDetailScreen(
+            order: _order(
+              displayNumber: '#1001',
+              fulfillmentStatus: 'shipped',
+              status: 'paid',
+              cancelledAt: DateTime.utc(2026, 6, 1),
+            ),
+            openUri: (uri) async {
+              opened = uri;
+              return true;
+            },
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancelado'), findsWidgets);
+      expect(find.text('Reembolsado'), findsNothing);
+      expect(find.text(paidCancelledRefundHelp), findsOneWidget);
+      final line = tester.widget<Text>(find.text(paidCancelledRefundHelp));
+      expect(line.style?.color, isNot(MonettaColors.light.success));
+      expect(line.style?.color, isNot(const Color(0xFF8F6838)));
+
+      await tester.tap(find.text(paidCancelledRefundHelp));
+      await tester.pumpAndSettle();
+
+      expect(opened, isNotNull);
+      expect(opened!.host, 'wa.me');
+      expect(opened!.path, contains('528261066868'));
+      expect(opened!.queryParameters['text'], contains('#1001'));
+    });
+
+    testWidgets('pending cancellation has no WhatsApp refund line', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: null,
+            status: 'pending',
+            paymentMethod: 'bank_deposit',
+            cancelReason: 'customer',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancelado'), findsWidgets);
+      expect(find.text(paidCancelledRefundHelp), findsNothing);
+      expect(
+        find.byKey(const ValueKey('paid-cancelled-refund-help')),
+        findsNothing,
+      );
+    });
+
+    testWidgets('cancelled paid shipment is Cancelado', (tester) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: 'shipped',
+            status: 'paid',
+            cancelledAt: DateTime.utc(2026, 6, 1),
+            cancelReason: 'customer',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Cancelado'), findsWidgets);
+      expect(find.text('En camino'), findsNothing);
+      expect(find.text('Pedido enviado'), findsNothing);
+      expect(find.text('Confirmado'), findsNothing);
+      expect(find.text('Pago confirmado'), findsNothing);
+    });
+
+    testWidgets(
+      'OST-13d detail shows partial refund, Cancelado, and the WhatsApp line',
+      (tester) async {
+        Uri? opened;
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: buildTheme(),
+            home: OrderDetailScreen(
+              order: _order(
+                displayNumber: '#1001',
+                fulfillmentStatus: 'delivered',
+                status: 'partially_refunded',
+                refundedAmount: 200,
+                total: 1000,
+                cancelledAt: DateTime.utc(2026, 6, 1),
+              ),
+              openUri: (uri) async {
+                opened = uri;
+                return true;
+              },
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        final capsule = tester.widget<EStatusCapsule>(
+          find.byType(EStatusCapsule),
+        );
+        expect(capsule.label, 'Reembolso parcial');
+        expect(capsule.dark, isFalse);
+        expect(
+          find.descendant(
+            of: find.byType(EStatusCapsule),
+            matching: find.text('Cancelado'),
+          ),
+          findsNothing,
+        );
+        expect(find.text('En camino'), findsNothing);
+        expect(find.text('Entregado'), findsNothing);
+        expect(find.text('Pedido entregado'), findsNothing);
+        expect(
+          find.textContaining('Te devolvimos'),
+          findsWidgets,
+        );
+
+        final secondary = tester.widget<Text>(find.text('Cancelado'));
+        expect(secondary.style?.color, isNot(const Color(0xFF8F6838)));
+        expect(secondary.style?.color, isNot(MonettaColors.light.success));
+        expect(
+          secondary.style?.color,
+          isNot(MonettaColors.light.successSurface),
+        );
+
+        expect(find.text(paidCancelledRefundHelp), findsOneWidget);
+        await tester.ensureVisible(find.text(paidCancelledRefundHelp));
+        await tester.tap(find.text(paidCancelledRefundHelp));
+        await tester.pumpAndSettle();
+        expect(opened, isNotNull);
+        expect(opened!.host, 'wa.me');
+        expect(opened!.path, contains('528261066868'));
+        expect(opened!.queryParameters['text'], contains('#1001'));
+      },
+    );
+
+    testWidgets('partial refund fallback and secondary shipment stay neutral', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _host(
+          _order(
+            fulfillmentStatus: 'shipped',
+            status: 'partially_refunded',
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Reembolso parcial'), findsWidgets);
+      expect(
+        find.text('Te devolvimos una parte de tu pago a tu método de pago.'),
+        findsWidgets,
+      );
+      expect(find.text('Reembolso en proceso'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(EStatusCapsule),
+          matching: find.text('En camino'),
+        ),
+        findsNothing,
+      );
+      final secondary = tester.widget<Text>(find.text('En camino'));
+      expect(secondary.style?.color, isNot(const Color(0xFF8F6838)));
+      expect(secondary.style?.color, isNot(MonettaColors.light.success));
+      expect(
+        secondary.style?.color,
+        isNot(MonettaColors.light.successSurface),
+      );
     });
 
     testWidgets('enviado is never presented as entregado', (tester) async {

@@ -27,6 +27,10 @@ class CustomerAccountOrder {
     required this.fulfillmentStatus,
     required this.totalAmount,
     required this.currencyCode,
+    this.paymentMethod,
+    this.cancelledAt,
+    this.cancelReason,
+    this.refundedAmount,
   });
 
   /// Globally unique `gid://shopify/Order/...`.
@@ -43,6 +47,19 @@ class CustomerAccountOrder {
   final String? fulfillmentStatus;
   final double totalAmount;
   final String currencyCode;
+
+  /// Comma-separated `Order.transactions.type` values (`bank_deposit`,
+  /// `manual`, `card`, …). Null when Shopify did not return any.
+  final String? paymentMethod;
+
+  /// `Order.cancelledAt`. Null when the order was not canceled.
+  final DateTime? cancelledAt;
+
+  /// `Order.cancelReason`. Null when Shopify did not send one.
+  final String? cancelReason;
+
+  /// `Order.totalRefunded`. Null when the amount was absent.
+  final double? refundedAmount;
 }
 
 abstract class CustomerOrdersService {
@@ -81,6 +98,10 @@ query MonettaCustomerOrders($first: Int!, $after: String) {
         processedAt
         financialStatus
         fulfillmentStatus
+        cancelledAt
+        cancelReason
+        transactions { type }
+        totalRefunded { amount currencyCode }
         totalPrice {
           amount
           currencyCode
@@ -351,6 +372,10 @@ query MonettaCustomerOrders($first: Int!, $after: String) {
           fulfillmentStatus: fulfillment is String ? fulfillment : null,
           totalAmount: amount,
           currencyCode: currency,
+          paymentMethod: _paymentMethodOf(raw['transactions']),
+          cancelledAt: _cancelledAtOf(raw['cancelledAt']),
+          cancelReason: _cancelReasonOf(raw['cancelReason']),
+          refundedAmount: _moneyAmount(raw['totalRefunded']),
         ),
       );
     }
@@ -366,4 +391,41 @@ query MonettaCustomerOrders($first: Int!, $after: String) {
   void close() {
     if (_ownsClient) _client.close();
   }
+}
+
+/// `Order.transactions.type` joined in source order. Missing or empty
+/// lists stay null so a pending order is not guessed to be a transfer.
+String? _paymentMethodOf(Object? raw) {
+  if (raw is! List) return null;
+  final types = <String>[];
+  for (final item in raw) {
+    if (item is! Map) continue;
+    final type = item['type'];
+    if (type is! String) continue;
+    final normalized = type.toLowerCase().trim().replaceAll('-', '_');
+    if (normalized.isEmpty || types.contains(normalized)) continue;
+    types.add(normalized);
+  }
+  if (types.isEmpty) return null;
+  return types.join(',');
+}
+
+DateTime? _cancelledAtOf(Object? raw) {
+  if (raw is! String || raw.trim().isEmpty) return null;
+  return DateTime.tryParse(raw)?.toUtc();
+}
+
+String? _cancelReasonOf(Object? raw) {
+  if (raw is! String) return null;
+  final trimmed = raw.trim();
+  if (trimmed.isEmpty) return null;
+  return trimmed;
+}
+
+double? _moneyAmount(Object? raw) {
+  if (raw is! Map) return null;
+  final amount = raw['amount'];
+  if (amount is num) return amount.toDouble();
+  if (amount is String) return double.tryParse(amount);
+  return null;
 }
