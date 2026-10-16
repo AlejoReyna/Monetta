@@ -324,15 +324,17 @@ class _BagContents extends StatelessWidget {
         );
         return;
       }
-      Navigator.of(context).push(
-        monettaFadeRoute(
-          StoreScope(
-            notifier: store,
-            child: CheckoutFlowScreen(
-              launchSecureCheckout: launcher,
-              // El coordinador decide al invocar si hay URL fresca; no se
-              // congela estado antes de la reconciliación final.
-              openExternalCheckout: checkout?.openExternalFallback,
+      unawaited(
+        Navigator.of(context).push(
+          monettaFadeRoute(
+            StoreScope(
+              notifier: store,
+              child: CheckoutFlowScreen(
+                launchSecureCheckout: launcher,
+                // El coordinador decide al invocar si hay URL fresca; no se
+                // congela estado antes de la reconciliación final.
+                openExternalCheckout: checkout?.openExternalFallback,
+              ),
             ),
           ),
         ),
