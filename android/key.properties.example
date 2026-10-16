@@ -1,6 +1,8 @@
-# Copy to android/key.properties (gitignored) and inject these values from the
-# release secret store. Never commit the keystore or real passwords.
-storeFile=app/monetta-release.jks
+# Copy to android/key.properties (gitignored). These are the Play App Signing
+# *upload* key values, not the app signing key Google holds. Paths are
+# relative to the android/ directory. Never commit the keystore or passwords.
+# Generate the keystore with docs/ANDROID_PLAY_STORE_RELEASE.md.
+storeFile=app/monetta-upload.jks
 storePassword=replace_in_secret_store
-keyAlias=monetta
+keyAlias=monetta-upload
 keyPassword=replace_in_secret_store

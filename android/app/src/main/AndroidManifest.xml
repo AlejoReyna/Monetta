@@ -1,18 +1,36 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Release permissions. None of these are debug-only.
+         INTERNET: Shopify, Firebase, and the accounts backend.
+         POST_NOTIFICATIONS: FCM and local cart reminders on API 33+.
+         RECEIVE_BOOT_COMPLETED: reschedule local cart reminders after reboot
+         (ScheduledNotificationBootReceiver). -->
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <application
         android:label="@string/app_name"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/ic_launcher"
+        android:usesCleartextTraffic="false">
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_channel_id"
             android:value="monetta_remote" />
+        <!-- Single-color status icon from the Product Designer SVG.
+             Not the launcher mipmap: Android renders a full-color launcher
+             as a white square. -->
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"
-            android:resource="@mipmap/ic_launcher" />
-        <!-- android:taskAffinity="" was removed here: flutter_appauth's own
+            android:resource="@drawable/ic_stat_monetta" />
+        <meta-data
+            android:name="com.google.firebase.messaging.default_notification_color"
+            android:resource="@color/monetta_notification_accent" />
+        <!-- Production Customer Account login redirect is not an intent-filter
+             in this file. The production flavor sets manifest placeholder
+             appAuthRedirectScheme to shop.72391655575.oauth, and
+             flutter_appauth's RedirectUriReceiverActivity consumes it. Do not
+             declare that activity again here: a second filter makes Android
+             show a disambiguation dialog and the browser never returns.
+             android:taskAffinity="" was removed here: flutter_appauth's own
              troubleshooting docs identify it as a known cause of the OAuth
              browser never returning to the app after Customer Account API
              login (data/customer_auth) on some Android versions. Nothing
