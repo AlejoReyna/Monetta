@@ -1,87 +1,76 @@
-# Deploy de pagos y webhooks en staging
+# Deploy de staging: backend, migración 015, webhooks y APK
 
-Este procedimiento es solo para `monetta-staging.myshopify.com` y la app Fly
-`monetta-accounts-staging` (`https://monetta-accounts-staging.fly.dev`). No hace
-merge de los PR #16/#18, no cambia pagos en Shopify y no habilita
-`kCheckoutTokenCorrelationAvailable`: debe seguir en `false`. Los comandos de
-deploy de este documento son pasos para ejecutar posteriormente; escribir este
-runbook no significa que se hayan ejecutado.
+Este runbook aplica solo a staging:
 
-## 1. Requisitos y límites
+- tienda Shopify `monetta-staging.myshopify.com`;
+- app Fly `monetta-accounts-staging` (`https://monetta-accounts-staging.fly.dev`);
+- app Shopify **monetta-staging** (`shopify/shopify.app.staging.toml`).
 
-- Usar un checkout limpio de la rama del PR #18, basado en el #16 actualizado.
-  Revisar `git rev-parse HEAD` y `git status --short` antes del deploy.
-- Tener acceso ya autenticado a Fly y al Dev Dashboard de la app Shopify
-  **monetta-staging**. Si aparece un login, verificación, permiso o dato faltante,
-  detenerse y pedir a Alexis que lo resuelva; no improvisar credenciales.
-- Confirmar en Dev Dashboard que esa app está instalada **solo en la tienda de
-  staging**. Una versión de app afecta sus instalaciones; si hay otra tienda,
-  detenerse. No usar la configuración predeterminada ni la de producción.
-- Alexis debe confirmar que el `DATABASE_URL` de Fly corresponde al PostgreSQL
-  aislado de staging y disponer de un snapshot recuperable de Neon antes de
-  migrar. No mostrar ni copiar esa URL, secretos o contenidos de tokens.
-- El host debe tener ya `SHOPIFY_STORE_DOMAIN=monetta-staging.myshopify.com` y
-  `SHOPIFY_APP_CLIENT_SECRET` de **esa misma app**. El receptor valida HMAC y el
-  dominio de la tienda. No usar la firma de webhooks manuales de Notificaciones.
-- Node 22 o superior, Flutter del repo, Shopify CLI del lockfile y Fly CLI
-  instalados. No usar `--verbose`, trazas de shell ni volcar el entorno.
+Parte de `main` con los PR #14, #16 y #18 ya integrados. Escribir o revisar
+este documento no ejecuta nada: los comandos de deploy, migración y registro
+son pasos para Alexis (ver el checklist del apartado 6).
 
-## 2. Declaración y registro de webhooks
+Límites que no cambian:
 
-La fuente es `shopify/shopify.app.staging.toml`, no un registro automático por
-API al arrancar el backend. No hay una llamada `webhookSubscriptionCreate` en
-`services/accounts_orders/src`. La configuración declara:
+- Nunca apuntar a producción (`monetta.mx`, `fakcei-n9`, admin `monetta-2`),
+  ni usar `shopify.app.toml` o `shopify.app.production.toml`.
+- `kCheckoutTokenCorrelationAvailable` sigue en `false`.
+- Ningún secreto, token, `DATABASE_URL`, CLABE ni `dart_defines` reales en
+  archivos, commits, PR, issues o capturas. En este documento aparecen como
+  placeholders (`<SHOPIFY_ADMIN_TOKEN>`).
+- Si un paso pide un login, una verificación o un dato que no tienes,
+  detente y anótalo para Alexis.
+- No usar `--verbose`, `set -x` ni volcar el entorno (`env`, `printenv`).
 
-| Topic | Destino HTTPS | Versión del payload |
+## 1. Backend en Fly (`monetta-accounts-staging`)
+
+### 1.1 Secretos que deben existir en Fly (solo nombres)
+
+`fly.toml` no contiene secretos. Fija `NODE_ENV=production` y `PORT=8082`
+en `[env]`; el resto se lee de `fly secrets` (`services/accounts_orders/src/config.ts`).
+
+| Secreto | ¿Requerido? | Para qué |
 | --- | --- | --- |
-| `orders/create` | `https://monetta-accounts-staging.fly.dev/webhooks/orders/create` | `2026-07` |
-| `orders/updated` | `https://monetta-accounts-staging.fly.dev/webhooks/orders/updated` | `2026-07` |
+| `DATABASE_URL` | Sí | PostgreSQL de staging en Neon (`?sslmode=require`). Sin él, el servicio intenta `localhost` y `/readyz` falla. |
+| `SHOPIFY_STORE_DOMAIN` | Sí | Debe ser `monetta-staging.myshopify.com`. Valida el dominio de los webhooks y de los tokens de Customer Account. |
+| `SHOPIFY_APP_CLIENT_SECRET` | Sí | Secreto de la app **monetta-staging**. Verifica el HMAC de los webhooks; vacío = todas las rutas de webhook responden `401`. |
+| `SHOPIFY_APP_CLIENT_ID` | Sí, para Admin | `client_id` de la misma app; junto con el secreto y `SHOPIFY_HEADLESS_PUBLICATION_ID` habilita las lecturas Admin. |
+| `SHOPIFY_HEADLESS_PUBLICATION_ID` | Sí, para Admin | Publicación headless usada por el panel del dueño. |
+| `SHOPIFY_FEATURED_COLLECTION_ID` | Opcional | Colección destacada del panel. |
+| `SHOPIFY_ADMIN_API_VERSION` | Opcional | Versión de lecturas Admin; por defecto `2026-07`. No definirla salvo que se cambie a propósito. |
+| `OWNER_ADMIN_EMAILS`, `OWNER_SHOPIFY_CUSTOMER_IDS` | Opcional | Candidatos y IDs del dueño para el panel admin. |
+| `ADMIN_ENVIRONMENT`, `ADMIN_MUTATIONS_ENABLED`, `ADMIN_SHOPIFY_WRITES_ENABLED`, `ADMIN_EXTERNAL_WRITES_ENABLED` | Opcional | Banderas del panel admin (apagadas por defecto). |
+| `REWARDS_ENABLED`, `REWARDS_REDEMPTION_ENABLED`, `REWARDS_RESERVATION_TTL_MINUTES`, `REWARDS_QUOTE_TTL_MINUTES` | Opcional | Rewards (canje apagado por defecto). |
+| `LEGACY_ACCOUNT_REGISTRATION_ENABLED` | Opcional | Registro de cuentas propias (encendido por defecto). |
+| `INTERNAL_CATALOG_EVENT_SECRET` | Opcional | Eventos internos de catálogo. |
+| `NOTIFICATIONS_ENABLED`, `FIREBASE_PROJECT_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`, `PUSH_TOKEN_ENCRYPTION_SECRET` | Solo si se encienden notificaciones | Con `NODE_ENV=production` y notificaciones encendidas, el arranque falla si falta alguno. En staging siguen apagadas. |
 
-La versión procede de `[webhooks].api_version`. `SHOPIFY_ADMIN_API_VERSION`
-controla las lecturas Admin por separado (su valor predeterminado también es
-`2026-07`). `src/api/server.ts` monta ambas rutas; `src/webhooks/handlers.ts`
-actualiza el mirror. La app requiere `read_orders`; conservar los demás scopes
-y suscripciones existentes, sin agregar permisos en este procedimiento.
-
-Primero desplegar el backend del apartado 3. Después, desde la raíz del repo:
-
-```bash
-cd shopify
-npm ci
-npx shopify app config validate --config staging
-npx shopify app info --config staging
-shopify_stage_version="staging-orders-$(git rev-parse --short HEAD)"
-npx shopify app deploy --config staging --no-release --version "$shopify_stage_version"
-npx shopify app versions list --config staging
-```
-
-Revisar en Dev Dashboard la versión recién creada: app **monetta-staging**,
-versión `2026-07`, los dos topics/destinos de la tabla y ausencia de cambios
-inesperados en scopes, metaobjetos o las demás suscripciones. `--no-release`
-solo prepara la versión; todavía no cambia la versión activa. Si falta la
-instalación o `read_orders`, Alexis debe resolverlo únicamente en staging y
-después repetir la revisión.
-
-Liberar **esa** versión para registrar/aplicar las suscripciones de la app:
+Comprobar que existen sin ver sus valores (`fly secrets list` muestra nombre
+y digest, nunca el valor):
 
 ```bash
-npx shopify app release --config staging --version "$shopify_stage_version"
-npx shopify app versions list --config staging
+fly secrets list --app monetta-accounts-staging
 ```
 
-Confirmar en Dev Dashboard que esa versión es la activa. Estos son webhooks
-administrados por la app: una lista vacía en Configuración > Notificaciones >
-Webhooks no demuestra que falten. No crear duplicados desde esa pantalla ni
-mediante una mutación Admin API. Tampoco `app deploy` despliega el servidor Fly.
+Si falta uno requerido, Alexis lo define desde su terminal, escribiendo él
+mismo el valor (nunca pegarlo en un chat ni en un archivo):
 
-## 3. Backend y migración 015
+```bash
+fly secrets set --app monetta-accounts-staging --stage SHOPIFY_APP_CLIENT_SECRET='<SHOPIFY_APP_CLIENT_SECRET>'
+```
 
-Desde la raíz del checkout del PR #18, ejecutar los checks locales:
+`--stage` deja el secreto listo para el próximo `fly deploy` sin reiniciar
+máquinas.
+
+### 1.2 Checks locales antes del deploy
+
+Desde un checkout limpio de `main` (comprobar `git rev-parse HEAD` y
+`git status --short`):
 
 ```bash
 flutter pub get
 flutter analyze
-flutter test test/features/orders test/data/accounts_orders/order_history_client_test.dart test/data/repositories/order_history_repository_test.dart test/data/local/order_summary_store_test.dart
+flutter test
 cd services/accounts_orders
 npm ci
 npm test
@@ -89,70 +78,63 @@ npm run typecheck
 npm run build
 ```
 
-Antes del deploy, guardar privadamente la referencia de imagen de la última
-release sana y compatible anterior a 015 que muestre el siguiente comando.
-No confundir una release fallida con la imagen que está sirviendo tráfico.
+### 1.3 Deploy
+
+Antes de desplegar, anotar en privado la imagen de la última release sana,
+anterior a 015, para poder volver a ella (apartado 2.3). Una referencia de
+imagen no es una credencial.
 
 ```bash
+cd services/accounts_orders
 fly releases --app monetta-accounts-staging --image
-# Introducir solo la referencia de imagen, que no es una credencial.
-read -r staging_previous_image
+read -r staging_previous_image   # pegar la referencia de imagen anotada
 fly deploy --app monetta-accounts-staging --config fly.toml
 fly status --app monetta-accounts-staging
 curl --fail --silent --show-error https://monetta-accounts-staging.fly.dev/livez
 curl --fail --silent --show-error https://monetta-accounts-staging.fly.dev/readyz
 ```
 
-`fly.toml` ejecuta `node dist/db/migrate.js` como `release_command` antes de
-cambiar el tráfico. El Dockerfile copia los SQL a `dist/db/migrations`.
-No ejecutar `npm run migrate` en la imagen final: no incluye `tsx`.
-El runner aplica todos los SQL pendientes en orden y registra cada archivo en
-`schema_migrations`, dentro de la misma transacción que su SQL. No omitir 014
-ni marcar manualmente 015 como aplicada. No ejecutar migradores concurrentes.
+`/readyz` debe reportar `database: up`. `fly deploy` construye el
+`Dockerfile` del servicio y ejecuta el `release_command` (`node
+dist/db/migrate.js`) antes de que una máquina nueva reciba tráfico; si la
+migración falla, la release no se activa.
 
-`015_order_checkout_tokens.sql` añade dos columnas `TEXT` anulables
-(`checkout_token`, `cart_token`) e índices parciales
-`idx_orders_mirror_checkout_token` / `idx_orders_mirror_cart_token` para valores
-no nulos. No rellena pedidos antiguos. Los webhooks posteriores pueden aportar
-esos campos; si los omiten, no borran valores ya almacenados.
+## 2. Migración 015 (`015_order_checkout_tokens.sql`)
 
-Verificar la release, los logs y `/readyz` (`database: up`). El log esperado
-cuando 015 es nueva contiene `migration applied` y su nombre; si ya estaba
-registrada, el runner la omite. Usar la comprobación SQL siguiente como prueba
-de aplicación, además de los logs.
+Añade a `orders_mirror` dos columnas `TEXT` anulables, `checkout_token` y
+`cart_token`, y dos índices parciales para valores no nulos:
+`idx_orders_mirror_checkout_token` e `idx_orders_mirror_cart_token`. No
+rellena pedidos antiguos. Los tokens se tratan como credenciales: nunca se
+registran ni se muestran.
 
-## 4. Verificar migración y entregas sin exponer datos sensibles
+### 2.1 Aplicarla
 
-Ver logs solo en la terminal privada de staging:
+No hay un paso manual: el `release_command` del apartado 1.3 aplica todos
+los SQL pendientes en orden de nombre y registra cada archivo en
+`schema_migrations` dentro de la misma transacción que su SQL. Por eso:
 
-```bash
-fly logs --app monetta-accounts-staging
-```
+- no ejecutar `npm run migrate` dentro de la imagen (no incluye `tsx`);
+- no marcar 015 como aplicada a mano ni omitir 014;
+- no lanzar migradores en paralelo.
 
-Buscar `migration applied`, `order mirrored` con el ID de pedido, y
-`http request completed` con `POST`, la ruta correspondiente y `status: 200`.
-No adjuntar logs crudos, cuerpos de webhooks, cabeceras HMAC ni tokens a PRs.
-Un `401` requiere revisar HMAC/dominio con Alexis; un `5xx` requiere revisar
-DB/esquema y el reintento. Un `200` de una entrega repetida ya completada no
-implica una nueva escritura.
+Antes de migrar, Alexis confirma que el `DATABASE_URL` de Fly es la base
+aislada de staging y que existe un snapshot recuperable en Neon.
 
-Para probar el registro de extremo a extremo, Alexis debe generar o autorizar
-un pedido **de prueba** de staging y una actualización posterior del mismo,
-sin cobrar ni marcarlo pagado. Esperar ambos topics en las entregas/logs de la
-app y un único `shopify_order_id` en el mirror. No crear pedidos como parte de
-la ejecución documental de este runbook. El comando `shopify app webhook
-trigger` solo manda una muestra y no prueba que las suscripciones estén
-registradas; tampoco usarlo para introducir pedidos de muestra en el mirror.
+En `fly logs` la primera vez debe aparecer `migration applied` con
+`015_order_checkout_tokens.sql`. Si ya estaba registrada, el runner la omite
+sin log.
 
-Abrir una consola solo en la máquina del backend de staging:
+### 2.2 Verificarla
+
+Abrir una consola en la máquina de staging:
 
 ```bash
 fly ssh console --app monetta-accounts-staging
 cd /app
 ```
 
-En esa consola, ejecutar esta consulta de solo lectura. Muestra identificadores,
-estados y presencia de campos; nunca sus valores sensibles:
+Ejecutar esta consulta de solo lectura. Muestra identificadores, estados y
+si los tokens existen, nunca sus valores:
 
 ```bash
 node --input-type=module <<'JS'
@@ -173,16 +155,6 @@ try {
     `SELECT indexname, indexdef FROM pg_indexes
      WHERE schemaname = 'public' AND tablename = 'orders_mirror'
        AND indexname IN ('idx_orders_mirror_checkout_token', 'idx_orders_mirror_cart_token')`,
-    `SELECT webhook_id, topic, shopify_resource_id, status, attempt_count,
-            received_at, processed_at FROM webhook_events
-     WHERE shop_domain = 'monetta-staging.myshopify.com'
-       AND topic IN ('orders/create', 'orders/updated')
-     ORDER BY received_at DESC LIMIT 10`,
-    `SELECT shopify_order_id, financial_status, payment_method, shopify_updated_at,
-            checkout_token IS NOT NULL AS has_checkout_token,
-            cart_token IS NOT NULL AS has_cart_token
-     FROM orders_mirror WHERE source = 'shopify_checkout'
-     ORDER BY updated_at DESC LIMIT 10`,
   ]) console.table((await db.query(sql)).rows);
   await db.query('COMMIT');
 } catch {
@@ -194,36 +166,32 @@ try {
 JS
 ```
 
-Esperar una fila de migración, dos columnas `text`/`YES`, dos índices con
-predicado `IS NOT NULL`, y entregas `completed`/`processed_at` para el ID del
-pedido probado. Comparar ese ID en `webhook_events` y `orders_mirror`; una
-actualización más reciente debe avanzar `shopify_updated_at` sin duplicar la
-fila. Un pago pendiente con gateway **Transferencia bancaria** debe almacenar
-`payment_method=bank_deposit`. No es obligatorio que los campos de correlación
-estén presentes en pedidos antiguos. `order_webhook_missing_checkout_tokens`
-advierte de ausencia: no imprime sus valores y no impide por sí solo el mirror.
-El backfill de métodos de pago no rellena los campos de 015.
+Resultado esperado:
 
-## 5. Revertir 015
+- una fila en `schema_migrations` para `015_order_checkout_tokens.sql`;
+- dos columnas, `checkout_token` y `cart_token`, con `data_type = text` e
+  `is_nullable = YES`;
+- dos índices cuyo `indexdef` termina en `WHERE (… IS NOT NULL)`.
 
-Primera opción: revertir solo la aplicación y conservar las columnas/índices
-aditivos. Desde `services/accounts_orders`, con la referencia sana registrada
-en el apartado 3 (sin sustituirla por una imagen del PR #18):
+### 2.3 Revertirla
+
+**Primera opción: revertir solo el código** y conservar las columnas, que son
+aditivas. Con la imagen anotada en el apartado 1.3:
 
 ```bash
+cd services/accounts_orders
 fly deploy --app monetta-accounts-staging --config fly.toml --image "$staging_previous_image" --skip-release-command
 fly status --app monetta-accounts-staging
 curl --fail --silent --show-error https://monetta-accounts-staging.fly.dev/readyz
 ```
 
-Confirmar que todas las máquinas sirven código anterior a 015, que no lee ni
-escribe esas columnas. El rollback de imagen no revierte SQL y una migración
-confirmada permanece aunque falle el arranque posterior. No quitar columnas
-mientras exista una máquina con código del PR #18.
+El código anterior a 015 no lee ni escribe esas columnas. El rollback de
+imagen no revierte SQL.
 
-Solo si se requiere revertir también el esquema, y después de confirmar el
-snapshot recuperable y el código anterior en todas las máquinas, abrir la
-misma consola de staging del apartado 4 y ejecutar:
+**Segunda opción, solo si hace falta revertir el esquema.** Requisitos: el
+snapshot de Neon confirmado y todas las máquinas ya con código anterior a 015
+(nunca quitar columnas mientras una máquina use el código nuevo). En la misma
+consola del apartado 2.2:
 
 ```bash
 node --input-type=module <<'JS'
@@ -256,20 +224,242 @@ try {
 JS
 ```
 
-Esta operación elimina los datos de esas dos columnas; no elimina pedidos.
-Verificar que ya no hay fila de 015, columnas ni índices (las primeras tres
-consultas del apartado 4; no ejecutar la consulta de pedidos que usa las
-columnas eliminadas). La siguiente release que incluya 015 la aplicará otra
-vez y empezará con valores nulos: recuperar datos previos requiere el snapshot
-privado. No se proporciona un comando de restauración global que sobrescriba
-pedidos o cambios posteriores.
+Borra los valores de esas dos columnas, no los pedidos. Repetir la consulta
+del apartado 2.2: las tres consultas deben volver vacías. La siguiente release
+que incluya 015 la aplicará de nuevo, con valores nulos; recuperar los
+anteriores requiere el snapshot.
 
-## Referencias verificadas
+## 3. Webhooks `orders/create` y `orders/updated` en Shopify staging
 
-- [Shopify: suscripciones de app](https://shopify.dev/docs/apps/build/webhooks/get-started).
+### 3.1 Qué espera el backend
+
+| Topic | Destino | Versión del payload |
+| --- | --- | --- |
+| `orders/create` | `https://monetta-accounts-staging.fly.dev/webhooks/orders/create` | `2026-07` |
+| `orders/updated` | `https://monetta-accounts-staging.fly.dev/webhooks/orders/updated` | `2026-07` |
+
+- Formato JSON (payload REST del pedido). El backend lee, entre otros,
+  `financial_status`, `payment_gateway_names`, `gateway`, `transactions`,
+  `current_total_price`, `note_attributes`, `checkout_token` y `cart_token`.
+- La versión del payload sale de `[webhooks].api_version` en
+  `shopify/shopify.app.staging.toml`. `SHOPIFY_ADMIN_API_VERSION` (por defecto
+  también `2026-07`) controla solo las lecturas Admin.
+- Cada entrega se valida con HMAC usando `SHOPIFY_APP_CLIENT_SECRET` y con el
+  dominio `SHOPIFY_STORE_DOMAIN`. Por eso la suscripción tiene que pertenecer a
+  la app **monetta-staging**: una suscripción creada por otra app firma con
+  otro secreto y recibe `401`.
+- La app necesita el scope `read_orders` (ya declarado).
+
+### 3.2 Opción A, recomendada: configuración de la app
+
+Es la fuente de verdad del repo: `shopify/shopify.app.staging.toml` ya
+declara ambos topics. El backend no registra webhooks al arrancar. Primero el
+deploy del backend (apartado 1); después, desde la raíz del repo:
+
+```bash
+cd shopify
+npm ci
+npx shopify app config validate --config staging
+npx shopify app info --config staging
+shopify_stage_version="staging-orders-$(git rev-parse --short HEAD)"
+npx shopify app deploy --config staging --no-release --version "$shopify_stage_version"
+npx shopify app versions list --config staging
+```
+
+Revisar en Dev Dashboard la versión creada: app **monetta-staging**,
+`api_version` `2026-07`, los dos destinos de la tabla y sin cambios
+inesperados en scopes, metaobjetos u otras suscripciones. Confirmar que la
+app está instalada **solo** en `monetta-staging.myshopify.com`. Después,
+liberar esa versión:
+
+```bash
+npx shopify app release --config staging --version "$shopify_stage_version"
+npx shopify app versions list --config staging
+```
+
+Estas suscripciones las administra la app: no aparecen en Configuración >
+Notificaciones > Webhooks, y la lista vacía ahí no significa que falten. No
+crearlas también desde esa pantalla.
+
+### 3.3 Opción B: Admin API (solo si no se usa la opción A)
+
+No mezclar con la opción A: se duplicarían las entregas. El token tiene que
+ser un token Admin de la app **monetta-staging** instalada en la tienda de
+staging, con `read_orders`; un token de otra app produce `401` en el backend
+(apartado 3.1).
+
+```bash
+SHOP=monetta-staging.myshopify.com
+API_VERSION=2026-07
+for topic in ORDERS_CREATE ORDERS_UPDATED; do
+  path=$(echo "$topic" | tr 'A-Z_' 'a-z/')   # orders/create, orders/updated
+  curl --fail --silent --show-error \
+    "https://$SHOP/admin/api/$API_VERSION/graphql.json" \
+    -H 'Content-Type: application/json' \
+    -H 'X-Shopify-Access-Token: <SHOPIFY_ADMIN_TOKEN>' \
+    -d "{\"query\":\"mutation(\$topic: WebhookSubscriptionTopic!, \$sub: WebhookSubscriptionInput!) { webhookSubscriptionCreate(topic: \$topic, webhookSubscription: \$sub) { webhookSubscription { id topic uri } userErrors { field message } } }\",\"variables\":{\"topic\":\"$topic\",\"sub\":{\"uri\":\"https://monetta-accounts-staging.fly.dev/webhooks/$path\"}}}"
+  echo
+done
+```
+
+`<SHOPIFY_ADMIN_TOKEN>` se escribe en la terminal en el momento; no se
+guarda en el historial ni en archivos. `userErrors` debe venir vacío. Para
+listar las suscripciones creadas así:
+
+```bash
+curl --fail --silent --show-error \
+  "https://$SHOP/admin/api/$API_VERSION/graphql.json" \
+  -H 'Content-Type: application/json' \
+  -H 'X-Shopify-Access-Token: <SHOPIFY_ADMIN_TOKEN>' \
+  -d '{"query":"{ webhookSubscriptions(first: 20) { nodes { id topic uri } } }"}'
+```
+
+Las suscripciones de la opción A se revisan en Dev Dashboard, no con esta
+consulta.
+
+### 3.4 Verificar que llegan
+
+Alexis crea o autoriza un pedido **de prueba** en la tienda de staging y
+después lo actualiza (por ejemplo, una nota o una etiqueta), sin cobrar ni
+marcarlo pagado. `shopify app webhook trigger` no sirve como prueba: solo manda una
+muestra y no demuestra que las suscripciones estén registradas.
+
+Logs, solo en la terminal privada de Alexis:
+
+```bash
+fly logs --app monetta-accounts-staging
+```
+
+Líneas esperadas, en JSON, por cada entrega:
+
+- `"message":"order mirrored"` con `shopifyOrderId` y
+  `source: "shopify_checkout"`;
+- `"message":"http request completed"` con `method: "POST"`,
+  `path: "/webhooks/orders/create"` o `"/webhooks/orders/updated"` y
+  `status: 200`.
+
+Avisos posibles:
+
+- `order_webhook_missing_checkout_tokens`: el payload no traía los tokens;
+  el pedido se refleja igual y el aviso no imprime valores.
+- `completed webhook delivery ignored`: reintento de una entrega ya
+  procesada; responde `200` sin escribir de nuevo.
+- `401`: HMAC o dominio no coinciden; revisar con Alexis el secreto y la app
+  dueña de la suscripción.
+- `5xx`: revisar la base de datos o el esquema; Shopify reintentará.
+
+No pegar logs crudos, cuerpos de webhooks, cabeceras HMAC ni tokens en PR o
+chats.
+
+Fila en `orders_mirror` (misma consola del apartado 2.2, solo lectura):
+
+```bash
+node --input-type=module <<'JS'
+import pg from 'pg';
+if (process.env.SHOPIFY_STORE_DOMAIN !== 'monetta-staging.myshopify.com') {
+  throw new Error('Abortado: no es staging');
+}
+const db = new pg.Client({ connectionString: process.env.DATABASE_URL });
+try {
+  await db.connect();
+  await db.query('BEGIN READ ONLY');
+  for (const sql of [
+    `SELECT webhook_id, topic, shopify_resource_id, status, attempt_count,
+            received_at, processed_at FROM webhook_events
+     WHERE shop_domain = 'monetta-staging.myshopify.com'
+       AND topic IN ('orders/create', 'orders/updated')
+     ORDER BY received_at DESC LIMIT 10`,
+    `SELECT shopify_order_id, financial_status, payment_method, shopify_updated_at,
+            checkout_token IS NOT NULL AS has_checkout_token,
+            cart_token IS NOT NULL AS has_cart_token
+     FROM orders_mirror WHERE source = 'shopify_checkout'
+     ORDER BY updated_at DESC LIMIT 10`,
+  ]) console.table((await db.query(sql)).rows);
+  await db.query('COMMIT');
+} catch {
+  console.error('Verificación fallida; revisar acceso/esquema de staging sin volcar secretos');
+  process.exitCode = 1;
+} finally {
+  await db.end();
+}
+JS
+```
+
+Resultado esperado:
+
+- en `webhook_events`, una entrega por topic para el pedido de prueba, con
+  `status = completed` y `processed_at` no nulo;
+- en `orders_mirror`, **una sola** fila con ese `shopify_order_id`; la
+  actualización avanza `shopify_updated_at` sin duplicarla;
+- un pago pendiente con la pasarela **Transferencia bancaria** guarda
+  `payment_method = bank_deposit` y en la app se ve como
+  «Esperando tu transferencia»;
+- `has_checkout_token` y `has_cart_token` en `true` para pedidos nuevos del
+  checkout; los pedidos anteriores a 015 quedan en `false`.
+
+## 4. APK de staging
+
+El archivo de defines vive en `config/dart_defines.staging.json` y
+**nunca se sube al repo**: `.gitignore` lo excluye en esa ruta. No crearlo en
+la raíz del repo, donde no está ignorado. Se crea a partir del ejemplo y
+Alexis rellena los valores reales:
+
+```bash
+cp config/dart_defines.staging.json.example config/dart_defines.staging.json
+# Editar los valores a mano. ACCOUNTS_ORDERS_BASE_URL apunta a
+# https://monetta-accounts-staging.fly.dev y SHOPIFY_STORE_DOMAIN a la tienda de staging.
+git check-ignore -v config/dart_defines.staging.json   # debe imprimir la regla de .gitignore
+dart run bin/validate_dart_defines.dart config/dart_defines.staging.json staging
+```
+
+Compilar (equivale a `make build-staging-android`):
+
+```bash
+flutter pub get
+flutter build apk --debug --flavor staging --dart-define-from-file=config/dart_defines.staging.json
+```
+
+El APK queda en `build/app/outputs/flutter-apk/app-staging-debug.apk`, con
+`applicationId` terminado en `.staging`. Un `--release` exige
+`android/key.properties` (la firma de debug está prohibida para release);
+si no existe, usar `--debug`. No adjuntar el APK ni el JSON a PR o issues:
+los defines quedan embebidos en el binario.
+
+## 5. Revisión después del deploy
+
+- `/livez` y `/readyz` responden `200`; `/readyz` con `database: up`.
+- La consulta del apartado 2.2 confirma 015.
+- Las consultas del apartado 3.4 muestran el pedido de prueba.
+- La app de staging lista el pedido de prueba con el estado correcto.
+- `kCheckoutTokenCorrelationAvailable` sigue en `false` en `main`.
+
+## 6. Checklist para Alexis
+
+Solo Alexis puede ejecutar estos pasos, porque requieren sus sesiones o
+credenciales. En orden:
+
+1. [ ] Confirmar en Fly que `DATABASE_URL` de `monetta-accounts-staging` apunta a la base aislada de staging, y crear un snapshot recuperable en Neon.
+2. [ ] `fly secrets list --app monetta-accounts-staging`: confirmar que existen `DATABASE_URL`, `SHOPIFY_STORE_DOMAIN`, `SHOPIFY_APP_CLIENT_SECRET`, `SHOPIFY_APP_CLIENT_ID` y `SHOPIFY_HEADLESS_PUBLICATION_ID`; definir con `fly secrets set --stage` los que falten.
+3. [ ] Anotar en privado la imagen de la release sana actual (`fly releases --app monetta-accounts-staging --image`).
+4. [ ] Desde `main` limpio, correr los checks del apartado 1.2.
+5. [ ] `fly deploy --app monetta-accounts-staging --config fly.toml` desde `services/accounts_orders`; comprobar `fly status`, `/livez` y `/readyz`.
+6. [ ] En `fly logs`, confirmar `migration applied` para `015_order_checkout_tokens.sql`; correr la consulta del apartado 2.2.
+7. [ ] Confirmar en Dev Dashboard que la app **monetta-staging** está instalada solo en `monetta-staging.myshopify.com`.
+8. [ ] Registrar los webhooks con la opción A (`shopify app deploy --config staging --no-release`, revisar la versión, `shopify app release`). Usar la opción B solo si se decide no usar la A, con un token Admin de esa misma app.
+9. [ ] Crear un pedido de prueba en staging (sin cobrar) y actualizarlo; confirmar `order mirrored` y `status: 200` en los logs, y la fila única en `orders_mirror` (apartado 3.4).
+10. [ ] Probar un pedido pendiente con «Transferencia bancaria»: `payment_method = bank_deposit` en el mirror y «Esperando tu transferencia» en la app.
+11. [ ] Crear `config/dart_defines.staging.json` desde el ejemplo, validarlo y confirmar con `git check-ignore` que está ignorado.
+12. [ ] Compilar el APK de staging (apartado 4) e instalarlo en un dispositivo de prueba.
+13. [ ] Si algo falla: rollback de imagen (apartado 2.3, primera opción); revertir el esquema solo con el snapshot confirmado.
+
+## Referencias
+
+- [Shopify: suscripciones de webhooks de la app](https://shopify.dev/docs/apps/build/webhooks/get-started).
+- [Shopify: `webhookSubscriptionCreate`](https://shopify.dev/docs/api/admin-graphql/latest/mutations/webhookSubscriptionCreate).
 - [Shopify: preparar versiones](https://shopify.dev/docs/apps/launch/deployment/deploy-app-versions)
   y [liberarlas](https://shopify.dev/docs/api/shopify-cli/app/app-release).
-- [Shopify: limitaciones de webhook trigger](https://shopify.dev/docs/api/shopify-cli/app/app-webhook-trigger).
-- [Fly: deploy y skip-release-command](https://docs.fly.io/flyctl/cmd/fly_deploy),
-  [releases](https://docs.fly.io/flyctl/cmd/fly_releases) y
-  [consola SSH](https://docs.fly.io/flyctl/cmd/fly_ssh_console).
+- [Fly: `fly deploy`](https://docs.fly.io/flyctl/cmd/fly_deploy),
+  [`fly releases`](https://docs.fly.io/flyctl/cmd/fly_releases),
+  [`fly secrets set`](https://docs.fly.io/flyctl/cmd/fly_secrets_set) y
+  [`fly ssh console`](https://docs.fly.io/flyctl/cmd/fly_ssh_console).
+- `services/accounts_orders/README.md` § Deploy y `config/README.md`.
