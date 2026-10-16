@@ -111,36 +111,13 @@ class CustomerSessionRepository {
   /// mid-request after passing the check.
   static const Duration _expiryHeadroom = Duration(minutes: 2);
 
-  /// Opens Shopify's hosted login page, exchanges the code, resolves who just
-  /// signed in, and — on success — merges this device's guest wishlist and
-  /// bag into the account (`docs/ACCOUNTS_AND_SYNC_PLAN.md` § 5: merge, never
-  /// discard or silently keep separate).
-  ///
-  /// Identity comes from an authenticated `customer { id }` call, not from the
-  /// id token this app decoded without verifying its signature — see
-  /// `customer_identity.dart`. The id token is the fallback, not the source:
-  /// if that one call fails the shopper still gets signed in (they just
-  /// finished a browser flow; refusing them over a network blip would be the
-  /// worse failure) with the weaker claims-derived identity.
   /// Interactive Shopify login used immediately before account deletion.
-  /// Returns the access token and id token from that login, not a silently
-  /// refreshed session.
-  Future<({String accessToken, String idToken})> reauthenticate() async {
-    final session = await login();
-    final idToken =
-        (await _secureStore.read(_idTokenKey(session.account.localAccountId)))
-            ?.trim();
-    if (idToken == null || idToken.isEmpty) {
-      throw const CustomerAuthException(
-        CustomerAuthErrorKind.server,
-        debugDetail: 'reauthentication returned no id token',
-      );
-    }
-    return (accessToken: session.accessToken, idToken: idToken);
-  }
+  /// Keeps the new identity detached until the controller has compared it
+  /// with the account selected for deletion.
+  Future<HeldShopifyLogin> reauthenticate() => holdLogin();
 
   /// Shopify login that does not replace the device's current account.
-  /// [commitHeldLogin] is what attaches it, after the deletion email check.
+  /// [commitHeldLogin] attaches it after the deletion identity or email check.
   Future<HeldShopifyLogin> holdLogin() async {
     final result = await _authGateway.login();
     final identity = await _resolveIdentity(result);
@@ -162,7 +139,7 @@ class CustomerSessionRepository {
     try {
       await _authGateway.endSession(idTokenHint: idToken);
     } on Object {
-      // The legacy account is still the device account either way.
+      // The original account is still the device account either way.
     }
   }
 
@@ -170,6 +147,17 @@ class CustomerSessionRepository {
     return _persistLogin(held.result, held.identity);
   }
 
+  /// Opens Shopify's hosted login page, exchanges the code, resolves who just
+  /// signed in, and — on success — merges this device's guest wishlist and
+  /// bag into the account (`docs/ACCOUNTS_AND_SYNC_PLAN.md` § 5: merge, never
+  /// discard or silently keep separate).
+  ///
+  /// Identity comes from an authenticated `customer { id }` call, not from the
+  /// id token this app decoded without verifying its signature — see
+  /// `customer_identity.dart`. The id token is the fallback, not the source:
+  /// if that one call fails the shopper still gets signed in (they just
+  /// finished a browser flow; refusing them over a network blip would be the
+  /// worse failure) with the weaker claims-derived identity.
   Future<CustomerAuthSession> login() async {
     final held = await holdLogin();
     return commitHeldLogin(held);

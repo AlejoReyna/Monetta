@@ -369,8 +369,9 @@ class _SignedIn extends StatelessWidget {
               client: deletionClient,
               accessToken: controller.accessTokenForBackend,
               reauthenticate: controller.reauthenticateForDeletion,
-              signInForDeletion: () =>
-                  controller.signInForAccountDeletion(deletionClient),
+              signInForDeletion: controller.account?.authProvider == 'monetta'
+                  ? () => controller.signInForAccountDeletion(deletionClient)
+                  : null,
               abandonUnmatchedLogin: controller.abandonUnmatchedDeletionLogin,
               signOutToHome: controller.completeAccountDeletion,
               supportUri: accountDeletionSupportUri(),

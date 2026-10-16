@@ -39,6 +39,9 @@ const String kDeleteAccountEmailMismatchTitle = 'Entraste con otra cuenta';
 String deleteAccountEmailMismatchBody(String maskedEmail) =>
     'Para eliminar tu cuenta, inicia sesión con $maskedEmail. No se eliminó nada.';
 
+const String kDeleteAccountIdentityMismatch =
+    'Iniciaste sesión con otra cuenta. Para eliminar la cuenta, entra con la misma.';
+
 const String kDeleteAccountReauthTitle =
     'Vuelve a iniciar sesión para continuar';
 
@@ -142,6 +145,7 @@ enum _Phase {
   orderCheck,
   tooManyOrders,
   emailMismatch,
+  identityMismatch,
 }
 
 class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
@@ -245,6 +249,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
         if (!mounted) return;
         _freshLogin = fresh;
         setState(() => _phase = _Phase.info);
+      } on AccountDeletionIdentityMismatch {
+        if (!mounted) return;
+        _freshLogin = null;
+        setState(() => _phase = _Phase.identityMismatch);
       } on CustomerAuthException catch (error) {
         if (!mounted) return;
         if (error.kind == CustomerAuthErrorKind.cancelled) return;
@@ -293,7 +301,7 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   Future<void> _cancelMismatch() async {
     await widget.abandonUnmatchedLogin?.call();
     if (!mounted) return;
-    Navigator.of(context).maybePop();
+    await Navigator.of(context).maybePop();
   }
 
   String _orderLabel(AccountDeletionOrderRef? order) {
@@ -312,8 +320,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     if (order?.reason == 'payment_review') {
       return deleteAccountPaymentReviewMessage(_orderLabel(order));
     }
-    if (order?.reason == 'refund_in_progress')
+    if (order?.reason == 'refund_in_progress') {
       return kDeleteAccountRefundBlocked;
+    }
     return kDeleteAccountBlocked;
   }
 
@@ -323,6 +332,10 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
       if (!mounted) return;
       _freshLogin = fresh;
       await _showConfirmSheet();
+    } on AccountDeletionIdentityMismatch {
+      if (!mounted) return;
+      _freshLogin = null;
+      setState(() => _phase = _Phase.identityMismatch);
     } on CustomerAuthException catch (error) {
       if (!mounted) return;
       if (error.kind == CustomerAuthErrorKind.cancelled) {
@@ -367,10 +380,13 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
     );
     if (!mounted) return;
     _setLoading(false);
-    _showOutcome(outcome, onClear: () async {
-      if (!mounted) return;
-      setState(() => _phase = _Phase.error);
-    });
+    _showOutcome(
+      outcome,
+      onClear: () async {
+        if (!mounted) return;
+        setState(() => _phase = _Phase.error);
+      },
+    );
   }
 
   Future<void> _finish() async {
@@ -479,6 +495,12 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
               primaryLabel: 'Reintentar',
               primaryKey: const ValueKey('delete-account-order-check-retry'),
               onPrimary: _continue,
+            ),
+          _Phase.identityMismatch => _MessageState(
+              message: kDeleteAccountIdentityMismatch,
+              primaryLabel: 'Cancelar',
+              primaryKey: const ValueKey('delete-account-identity-cancel'),
+              onPrimary: () => Navigator.of(context).maybePop(),
             ),
           _Phase.emailMismatch => _PromptState(
               title: kDeleteAccountEmailMismatchTitle,

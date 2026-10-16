@@ -416,33 +416,38 @@ class AccountController extends ChangeNotifier {
     await _sessionRepository?.abandonHeldLogin(held);
   }
 
-  /// Opens Shopify's hosted login again and returns the fresh tokens the
-  /// deletion endpoint requires. Does not accept a silently refreshed token.
-  ///
-  /// This adopts the Shopify account immediately. The legacy deletion path
-  /// uses [signInForAccountDeletion], which waits for the email match.
+  /// Opens Shopify's hosted login again without adopting another customer.
+  /// Legacy accounts use [signInForAccountDeletion] for the server email check.
   Future<FreshCustomerLogin> reauthenticateForDeletion() async {
     final repository = _sessionRepository;
-    if (repository == null) {
+    // Account is immutable: retain both the customer ID and email before
+    // opening the browser, even if the controller changes during login.
+    final target = account;
+    if (repository == null ||
+        target == null ||
+        target.authProvider != 'shopify' ||
+        target.shopifyCustomerId == null ||
+        target.shopifyCustomerId!.isEmpty) {
       throw const CustomerAuthException(
         CustomerAuthErrorKind.configuration,
-        debugDetail: 'customer session repository unavailable',
+        debugDetail: 'Shopify account for deletion is unavailable',
       );
     }
     final login = await repository.reauthenticate();
-    final device = await _deviceStore.byId(_deviceId);
-    final accountId = device?.accountId;
-    final restored =
-        accountId == null ? null : await _accountStore.byLocalId(accountId);
-    if (restored != null) {
-      account = restored;
-      notifyListeners();
-      await _publishAccountScope();
-      await loadOrders();
+    // The stable customer ID decides identity; an email change on the same
+    // Shopify customer must not turn it into another account.
+    if (login.identity.shopifyCustomerId != target.shopifyCustomerId) {
+      await repository.abandonHeldLogin(login);
+      throw const AccountDeletionIdentityMismatch();
     }
+    final session = await repository.commitHeldLogin(login);
+    account = session.account;
+    notifyListeners();
+    await _publishAccountScope();
+    await loadOrders();
     return FreshCustomerLogin(
       accessToken: login.accessToken,
-      idToken: login.idToken,
+      idToken: login.idToken!,
     );
   }
 

@@ -9,6 +9,11 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 
+/// A fresh Shopify login belongs to a different customer. No deletion is allowed.
+class AccountDeletionIdentityMismatch implements Exception {
+  const AccountDeletionIdentityMismatch();
+}
+
 class FreshCustomerLogin {
   const FreshCustomerLogin({
     required this.accessToken,

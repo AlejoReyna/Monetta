@@ -183,6 +183,57 @@ void main() {
     }
   });
 
+  for (final needsReauthPrompt in [false, true]) {
+    testWidgets(
+      'another Shopify customer cancels deletion (reauth prompt: $needsReauthPrompt)',
+      (tester) async {
+        final client = _Client(
+          needsReauthPrompt
+              ? const AccountDeletionReauthRequired()
+              : const AccountDeletionClear(),
+        );
+        var reauthCalls = 0;
+        await _open(
+          tester,
+          client: client,
+          reauthenticate: () async {
+            reauthCalls += 1;
+            throw const AccountDeletionIdentityMismatch();
+          },
+          signOut: () async => fail('must not complete deletion'),
+        );
+        await tester.tap(find.byKey(const ValueKey('delete-account-continue')));
+        await tester.pumpAndSettle();
+        if (needsReauthPrompt) {
+          await tester.tap(find.byKey(const ValueKey('delete-account-reauth')));
+          await tester.pumpAndSettle();
+        }
+        expect(reauthCalls, 1);
+        expect(client.precheckCalls, 1);
+        expect(client.deleteCalls, 0);
+        expect(
+          find.text(
+            'Iniciaste sesión con otra cuenta. Para eliminar la cuenta, entra con la misma.',
+          ),
+          findsOneWidget,
+        );
+        expect(
+          find.byKey(const ValueKey('delete-account-confirm')),
+          findsNothing,
+        );
+        expect(
+          find.byKey(const ValueKey('delete-account-continue')),
+          findsNothing,
+        );
+        await tester
+            .tap(find.byKey(const ValueKey('delete-account-identity-cancel')));
+        await tester.pumpAndSettle();
+        expect(find.text('Inicio'), findsOneWidget);
+        expect(client.deleteCalls, 0);
+      },
+    );
+  }
+
   testWidgets('shows the slow loading copy after 10 seconds', (tester) async {
     final client = _Client(
       const AccountDeletionBlocked(

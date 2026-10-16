@@ -118,7 +118,10 @@ class FakeAppData implements AppDataEraser {
     firebaseUid: 'uid-77',
   };
 
-  async erase(): Promise<AppDataErasureResult> {
+  readonly customerIds: string[] = [];
+
+  async erase(customerId: string): Promise<AppDataErasureResult> {
+    this.customerIds.push(customerId);
     this.calls += 1;
     if (this.fail) throw new Error('firebase down for ana@example.com card 4242424242424242');
     return this.result;
@@ -129,7 +132,10 @@ class FakeCustomerData implements CustomerDataEraser {
   calls = 0;
   fail = false;
 
-  async erase(): Promise<{ appAccountId: string | null }> {
+  readonly customerIds: string[] = [];
+
+  async erase(customerId: string): Promise<{ appAccountId: string | null }> {
+    this.customerIds.push(customerId);
     this.calls += 1;
     if (this.fail) throw new Error('postgres down ana@example.com');
     return { appAccountId: '11111111-1111-1111-1111-111111111111' };
@@ -166,7 +172,10 @@ class FakeShopify implements ShopifyCustomerErasureClient {
   calls = 0;
   fail = false;
 
-  async request(): Promise<'requested'> {
+  readonly customerIds: string[] = [];
+
+  async request(customerId: string): Promise<'requested'> {
+    this.customerIds.push(customerId);
     this.calls += 1;
     if (this.fail) throw new Error('shopify rejected ana@example.com');
     return 'requested';
@@ -875,6 +884,28 @@ describe('account deletion HTTP', () => {
     baseUrl = `http://127.0.0.1:${address.port}`;
   }
 
+  it('DEL-14: ignores client customer IDs and erases only the token customer', async () => {
+    const { service, appData, customerData, shopify, state, audit } = harness();
+    await start(new InMemoryOrdersRepository(), service);
+
+    const response = await fetch(`${baseUrl}/customers/me/account-deletion?customerId=88`, {
+      method: 'POST',
+      headers: {
+        Authorization: 'Bearer shopify-token-77',
+        'X-Monetta-Id-Token': 'fresh-id-token',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ customerId: '88', shopifyCustomerId: 'gid://shopify/Customer/88' }),
+    });
+    expect(response.status).toBe(200);
+    expect(await response.json()).toEqual({ result: 'deleted', shopifyDataErasure: 'requested' });
+    expect(appData.customerIds).toEqual(['77']);
+    expect(customerData.customerIds).toEqual(['77']);
+    expect(shopify.customerIds).toEqual(['77']);
+    expect(await state.get('88')).toBeNull();
+    expect(await audit.list('88')).toEqual([]);
+  });
+
   it('precheck blocks and the response carries no payment or contact data', async () => {
     const { orders, service } = harness();
     await orders.upsertByShopifyOrderId(order({
@@ -1180,6 +1211,16 @@ describe('fresh Shopify login token', () => {
     }));
     expect(accepted.status).toBe('fresh');
     if (accepted.status === 'fresh') expect(accepted.customerId).toBe('77');
+
+    const otherCustomer = await fresh.verify('live-access', idToken({
+      iss: 'https://shopify.com/authentication/1',
+      sub: 'gid://shopify/Customer/88',
+      aud: 'mobile-client',
+      iat: nowSeconds - 30,
+      auth_time: nowSeconds - 30,
+      exp: nowSeconds + 3600,
+    }));
+    expect(otherCustomer).toEqual({ status: 'invalid' });
 
     const stale = await fresh.verify('live-access', idToken({
       iss: 'https://shopify.com/authentication/1',

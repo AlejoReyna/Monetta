@@ -124,7 +124,9 @@ void main() {
     final blocked = await client.precheck('shopper-token');
     expect(blocked, isA<AccountDeletionBlocked>());
     expect(
-        (blocked as AccountDeletionBlocked).order.reason, 'refund_in_progress');
+      (blocked as AccountDeletionBlocked).order.reason,
+      'refund_in_progress',
+    );
   });
 
   test(
