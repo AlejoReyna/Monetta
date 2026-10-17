@@ -16,6 +16,7 @@ library;
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../navigation/monetta_page_header.dart';
 import '../navigation/monetta_floating_bottom_navigation.dart';
@@ -24,22 +25,27 @@ import '../../app/account_controller.dart';
 import '../../main.dart' show StoreScope;
 import '../catalog/catalog_browse_screen.dart';
 import '../checkout/checkout_screen.dart';
-import '../orders/order_detail_screen.dart';
 import 'profile_components.dart';
 import 'profile_rewards_card.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../data/accounts_orders/account_deletion_client.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/customer_auth/customer_identity.dart';
+import '../../data/local/database.dart' show OrderSummary;
 import '../../data/repositories/order_history_repository.dart';
 import '../contact/contact_screen.dart';
 import '../favorites/favorites_screen.dart';
 import '../notifications/notification_inbox.dart';
 import '../notifications/notifications_screen.dart';
+import '../orders/order_detail_screen.dart';
 import '../orders/order_status.dart';
 import '../orders/orders_screen.dart';
 import '../rewards/rewards_section.dart';
 import 'account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
+import 'delete_account_screen.dart';
+import 'privacy_policy_config.dart';
 
 /// Abre el flujo hospedado de Shopify cuando hace falta y luego presenta la
 /// cuenta. La autenticación siempre ocurre antes del push de la ruta para que
@@ -53,6 +59,9 @@ Future<void> openAccount(
   RewardsReader? rewardsReader,
   NotificationInbox? notificationInbox,
   VoidCallback? onOpenInvite,
+  AccountDeletionClient? deletionClient,
+  PrivacyPolicyConfig? privacyPolicy,
+  Future<bool> Function(Uri uri)? openExternalUri,
 }) async {
   if (controller.isLoading) return;
   if (controller.isSignedIn) unawaited(controller.refreshProfile());
@@ -88,6 +97,9 @@ Future<void> openAccount(
         rewardsReader: rewardsReader,
         notificationInbox: notificationInbox,
         onOpenInvite: onOpenInvite,
+        deletionClient: deletionClient,
+        privacyPolicy: privacyPolicy,
+        openExternalUri: openExternalUri,
       ),
     ),
   );
@@ -108,6 +120,9 @@ class AccountScreen extends StatelessWidget {
     this.rewardsReader,
     this.notificationInbox,
     this.onOpenInvite,
+    this.deletionClient,
+    this.privacyPolicy,
+    this.openExternalUri,
     super.key,
   });
 
@@ -133,6 +148,10 @@ class AccountScreen extends StatelessWidget {
   /// Punto de entrada público de F para invitar/referidos. Nulo = la fila
   /// no se muestra (no se inventa un programa de invitados).
   final VoidCallback? onOpenInvite;
+
+  final AccountDeletionClient? deletionClient;
+  final PrivacyPolicyConfig? privacyPolicy;
+  final Future<bool> Function(Uri uri)? openExternalUri;
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +202,9 @@ class AccountScreen extends StatelessWidget {
                   rewardsReader: rewardsReader,
                   notificationInbox: notificationInbox,
                   onOpenInvite: onOpenInvite,
+                  deletionClient: deletionClient,
+                  privacyPolicy: privacyPolicy,
+                  openExternalUri: openExternalUri,
                 )
               : const SizedBox.shrink(),
         ),
@@ -200,6 +222,9 @@ class _SignedIn extends StatelessWidget {
     required this.rewardsReader,
     required this.notificationInbox,
     required this.onOpenInvite,
+    required this.deletionClient,
+    required this.privacyPolicy,
+    required this.openExternalUri,
   });
 
   final AccountController controller;
@@ -209,6 +234,9 @@ class _SignedIn extends StatelessWidget {
   final RewardsReader? rewardsReader;
   final NotificationInbox? notificationInbox;
   final VoidCallback? onOpenInvite;
+  final AccountDeletionClient? deletionClient;
+  final PrivacyPolicyConfig? privacyPolicy;
+  final Future<bool> Function(Uri uri)? openExternalUri;
 
   Future<void> _logout(BuildContext context) async {
     await controller.logout();
@@ -427,6 +455,25 @@ class _SignedIn extends StatelessWidget {
             _PartnerAccountLink(onTap: onOpenPartner!),
           ],
           const SizedBox(height: BoutiqueSpace.sectionGapTight),
+          const ESectionTitle(title: 'Privacidad y datos'),
+          const SizedBox(height: BoutiqueSpace.sm),
+          _PrivacyLinks(
+            onDelete: () => openDeleteAccount(
+              context,
+              client: deletionClient,
+              accessToken: controller.accessTokenForBackend,
+              reauthenticate: controller.reauthenticateForDeletion,
+              signInForDeletion: controller.account?.authProvider == 'monetta'
+                  ? () => controller.signInForAccountDeletion(deletionClient)
+                  : null,
+              abandonUnmatchedLogin: controller.abandonUnmatchedDeletionLogin,
+              signOutToHome: controller.completeAccountDeletion,
+              supportUri: accountDeletionSupportUri(),
+              openUri: openExternalUri,
+              onViewOrder: (ref) => _openBlockingOrder(context, ref),
+            ),
+            onPrivacyPolicy: () => _openPrivacyPolicy(context),
+          ),
           if (controller.isLoading) ...[
             const SizedBox(height: BoutiqueSpace.md),
             Center(
@@ -461,6 +508,44 @@ class _SignedIn extends StatelessWidget {
     );
   }
 
+  void _openBlockingOrder(BuildContext context, AccountDeletionOrderRef ref) {
+    OrderSummary? match;
+    for (final order in controller.orders) {
+      final shopifyId = order.shopifyOrderId;
+      if (order.id == ref.id ||
+          order.id == ref.shopifyOrderId ||
+          order.id == 'apartado:${ref.id}' ||
+          (shopifyId != null &&
+              (shopifyId == ref.shopifyOrderId ||
+                  shopifyId.endsWith('/${ref.shopifyOrderId}')))) {
+        match = order;
+        break;
+      }
+    }
+    if (match != null) {
+      openOrderDetail(
+        context,
+        order: match,
+        rewardsController: controller,
+        openUri: openExternalUri,
+      );
+      return;
+    }
+    openOrders(context, controller: controller);
+  }
+
+  Future<void> _openPrivacyPolicy(BuildContext context) async {
+    final uri = (privacyPolicy ?? PrivacyPolicyConfig.fromEnvironment()).url;
+    final open = openExternalUri ??
+        ((target) => launchUrl(target, mode: LaunchMode.externalApplication));
+    final ok = await open(uri);
+    if (!ok && context.mounted) {
+      ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el enlace.')),
+      );
+    }
+  }
+
   String _ordersSubtitle() {
     final count = controller.orders.length;
     if (controller.ordersLoading && count == 0) return 'Cargando…';
@@ -470,6 +555,63 @@ class _SignedIn extends StatelessWidget {
           : 'Consulta tu historial';
     }
     return count == 1 ? '1 pedido' : '$count pedidos';
+  }
+}
+
+class _PrivacyLinks extends StatelessWidget {
+  const _PrivacyLinks({
+    required this.onDelete,
+    required this.onPrivacyPolicy,
+  });
+
+  final VoidCallback onDelete;
+  final VoidCallback onPrivacyPolicy;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return ECard(
+      children: [
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            key: const ValueKey('account-privacy-policy'),
+            onPressed: onPrivacyPolicy,
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              foregroundColor: palette.ink,
+            ),
+            child: Text(
+              'Política de privacidad',
+              style: boutiqueText(
+                size: 14,
+                color: palette.ink,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton(
+            key: const ValueKey('account-delete'),
+            onPressed: onDelete,
+            style: TextButton.styleFrom(
+              padding: EdgeInsets.zero,
+              minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              foregroundColor: palette.sale,
+            ),
+            child: Text(
+              'Eliminar mi cuenta',
+              style: boutiqueText(size: 14, color: palette.sale),
+            ),
+          ),
+        ),
+      ],
+    );
   }
 }
 

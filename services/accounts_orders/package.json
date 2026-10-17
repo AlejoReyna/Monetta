@@ -11,6 +11,7 @@
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "migrate": "tsx --env-file-if-exists=.env src/db/migrate.ts",
+    "backfill:payment-method": "tsx --env-file-if-exists=.env src/scripts/backfillPaymentMethod.ts",
     "start": "tsx --env-file-if-exists=.env src/api/server.ts",
     "worker": "tsx --env-file-if-exists=.env src/engagement/worker.ts",
     "worker:rewards": "tsx --env-file-if-exists=.env src/rewards/worker.ts",

@@ -84,6 +84,7 @@ import 'features/catalog/collection_screen.dart';
 import 'features/checkout/checkout_screen.dart';
 import 'features/catalog/search_history.dart';
 import 'features/catalog/search_history_persistence.dart';
+import 'features/checkout/reviewing_checkout.dart';
 import 'features/home/home_screen.dart';
 import 'features/product/product_screen.dart';
 import 'features/welcome/welcome_gate.dart';
@@ -372,6 +373,9 @@ class AppRouteScopes extends StatelessWidget {
     this.checkoutCoordinator,
     this.catalogStore,
     this.notificationController,
+    this.reviewingCheckout,
+    this.reviewingWarningStore,
+    this.reviewingClock,
     required this.shopDomain,
     required this.child,
     super.key,
@@ -382,20 +386,32 @@ class AppRouteScopes extends StatelessWidget {
   final ShopifyCheckoutCoordinator? checkoutCoordinator;
   final CatalogStore? catalogStore;
   final NotificationController? notificationController;
+
+  /// Banner-3 warning. Null lets [ReviewingCheckoutHost] restore the on-device
+  /// flag. The stored record is a flag and a timestamp, never a cart token.
+  final ReviewingCheckoutCart? reviewingCheckout;
+  final ReviewingWarningStore? reviewingWarningStore;
+  final DateTime Function()? reviewingClock;
   final String shopDomain;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final cart = cartController;
-    Widget routedApp = cart == null
-        ? child
-        : CartScope(
-            shopDomain: shopDomain,
-            notifier: cart,
-            checkoutCoordinator: checkoutCoordinator,
-            child: child,
-          );
+    Widget routedApp = ReviewingCheckoutHost(
+      bag: catalogStore,
+      reviewing: reviewingCheckout,
+      store: reviewingWarningStore,
+      clock: reviewingClock,
+      child: cart == null
+          ? child
+          : CartScope(
+              shopDomain: shopDomain,
+              notifier: cart,
+              checkoutCoordinator: checkoutCoordinator,
+              child: child,
+            ),
+    );
     final notifications = notificationController;
     if (notifications != null) {
       routedApp = NotificationScope(
@@ -704,6 +720,7 @@ class _MonettaAppState extends State<MonettaApp> {
       ),
       accountStore: AccountStore(_database),
       deviceStore: deviceStore,
+      wishlistStore: WishlistStore(_database),
       orderHistoryRepository: OrderHistoryRepository(
         store: OrderSummaryStore(_database),
         config: accountsConfig,

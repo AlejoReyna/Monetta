@@ -394,10 +394,18 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final status = orderDisplayStatus(order);
+    final showAction = status.key != 'awaiting_transfer';
+    final action = status.actionLabel ?? 'Ver detalles';
+    final secondary = status.secondaryLabel;
+    final refundHelp = paidCancelledRefundWhatsAppUri(order) != null;
+    final actionPrefix = showAction ? '$action del pedido' : 'Pedido';
     return Semantics(
       button: true,
-      label: 'Ver detalles del pedido ${orderLabelOf(order)}, '
-          '${status.label}, ${kMoney.format(order.totalAmount)}',
+      label: '$actionPrefix ${orderLabelOf(order)}, '
+          '${status.label}'
+          '${secondary == null ? '' : ', $secondary'}'
+          '${refundHelp ? ', $paidCancelledRefundHelp' : ''}, '
+          '${kMoney.format(order.totalAmount)}',
       child: InkWell(
         key: ValueKey('order-card-${order.id}'),
         onTap: onTap,
@@ -443,6 +451,17 @@ class _OrderCard extends StatelessWidget {
                   ),
                 ],
               ),
+              if (secondary != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  secondary,
+                  style: boutiqueText(
+                    size: 12,
+                    color: palette.inkMuted,
+                  ),
+                ),
+              ],
+              PaidCancelledRefundHelp(order: order),
               const SizedBox(height: BoutiqueSpace.md),
               Container(height: .5, color: palette.hairline),
               const SizedBox(height: BoutiqueSpace.md),
@@ -465,26 +484,27 @@ class _OrderCard extends StatelessWidget {
                       color: palette.ink,
                     ),
                   ),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        'Ver detalles',
-                        style: boutiqueText(
-                          size: 13,
-                          weight: FontWeight.w600,
-                          color: palette.ink,
-                          decoration: TextDecoration.underline,
+                  if (showAction)
+                    Wrap(
+                      crossAxisAlignment: WrapCrossAlignment.center,
+                      spacing: 4,
+                      children: [
+                        Text(
+                          action,
+                          style: boutiqueText(
+                            size: 13,
+                            weight: FontWeight.w600,
+                            color: palette.ink,
+                            decoration: TextDecoration.underline,
+                          ),
                         ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 18,
-                        color: palette.inkMuted,
-                      ),
-                    ],
-                  ),
+                        Icon(
+                          Icons.chevron_right_rounded,
+                          size: 18,
+                          color: palette.inkMuted,
+                        ),
+                      ],
+                    ),
                 ],
               ),
               AutoOrderRewardsLine(

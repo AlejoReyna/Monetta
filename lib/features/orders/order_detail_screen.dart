@@ -23,6 +23,41 @@ import '../boutique/boutique_tokens.dart';
 import '../rewards/rewards_section.dart';
 import 'order_status.dart';
 
+const missingPaymentWhatsAppLabel =
+    '¿Elegiste transferencia? Escríbenos por WhatsApp y te compartimos los datos de pago.';
+
+const paymentQuestionWhatsAppLabel =
+    '¿Dudas con tu pago? Escríbenos por WhatsApp.';
+
+/// Detail-only help for "Pago en proceso" when no payment method was stored.
+/// Hidden once [OrderSummary.paymentMethod] is known, and never shown on the list.
+bool showMissingPaymentWhatsApp(OrderSummary order) {
+  if (orderDisplayStatus(order).label != 'Pago en proceso') return false;
+  final method = order.paymentMethod?.trim();
+  return method == null || method.isEmpty;
+}
+
+/// Detail-only help when a non-transfer method is known and payment is still
+/// pending. Not used for bank_deposit/manual, and never shown on the list.
+bool showPaymentQuestionWhatsApp(OrderSummary order) {
+  if (orderDisplayStatus(order).label != 'Pago en proceso') return false;
+  final method = order.paymentMethod?.trim();
+  if (method == null || method.isEmpty) return false;
+  return !orderPaymentMethodIsBankTransfer(method);
+}
+
+Uri missingPaymentWhatsAppUri(String orderLabel) {
+  return Uri.https('wa.me', '/$kWhatsAppE164', {
+    'text': 'Hola, quiero los datos de pago de mi pedido $orderLabel',
+  });
+}
+
+Uri paymentQuestionWhatsAppUri(String orderLabel) {
+  return Uri.https('wa.me', '/$kWhatsAppE164', {
+    'text': 'Hola, tengo una duda con el pago de mi pedido $orderLabel',
+  });
+}
+
 Future<void> openOrderDetail(
   BuildContext context, {
   required OrderSummary order,
@@ -113,6 +148,48 @@ class OrderDetailScreen extends StatelessWidget {
                       color: palette.inkMuted,
                     ),
                   ),
+                  if (status.secondaryLabel != null) ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    Text(
+                      status.secondaryLabel!,
+                      style: boutiqueText(
+                        size: 13,
+                        color: palette.inkMuted,
+                      ),
+                    ),
+                  ],
+                  PaidCancelledRefundHelp(
+                    order: order,
+                    onOpen: (uri) => _open(context, uri),
+                  ),
+                  if (status.key == 'awaiting_transfer') ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('order-payment-details'),
+                      label: transferPaymentDetailsLabel,
+                      uri: missingPaymentWhatsAppUri(label),
+                      icon: Icons.chat_outlined,
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                  ],
+                  if (showMissingPaymentWhatsApp(order)) ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('missing-payment-whatsapp'),
+                      label: missingPaymentWhatsAppLabel,
+                      uri: missingPaymentWhatsAppUri(label),
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                  ],
+                  if (showPaymentQuestionWhatsApp(order)) ...[
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _PaymentHelpLink(
+                      linkKey: const ValueKey('payment-question-whatsapp'),
+                      label: paymentQuestionWhatsAppLabel,
+                      uri: paymentQuestionWhatsAppUri(label),
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                  ],
                   if (status.key == 'in_transit') ...[
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(
@@ -278,16 +355,20 @@ class OrderDetailScreen extends StatelessWidget {
         'Registrado el ${orderDateLabel(order.placedAt)}.',
       ),
     ];
-    final financial = order.status.toLowerCase();
-    if (financial.contains('paid') || financial.contains('partially')) {
-      events.add(('Pago confirmado', 'Shopify registró el pago.'));
-    } else if (financial.contains('pending')) {
-      events.add(
-        (
-          'Pago pendiente',
-          'Shopify aún no confirma el pago de este pedido.',
-        ),
-      );
+    // El pago se lee aparte del envío. Un reembolso o un impago no
+    // agrega "enviado" ni "entregado" aunque haya fulfillment.
+    final paid = order.source != 'whatsapp_apartado' &&
+        orderPaymentStatus(order).key == 'confirmed';
+    if (order.source != 'whatsapp_apartado') {
+      if (paid) {
+        events.add(('Pago confirmado', 'Shopify registró el pago.'));
+      } else {
+        final payment = orderPaymentStatus(order);
+        events.add((payment.label, payment.detail));
+      }
+    }
+    if (!paid && order.source != 'whatsapp_apartado') {
+      return events;
     }
     final fulfillment = order.fulfillmentStatus?.toLowerCase().trim();
     switch (fulfillment) {
@@ -337,6 +418,112 @@ class OrderDetailScreen extends StatelessWidget {
       );
     }
     return events;
+  }
+}
+
+/// Línea de WhatsApp bajo un "Cancelado" pagado. No ocupa espacio
+/// en ningún otro estado.
+class PaidCancelledRefundHelp extends StatelessWidget {
+  const PaidCancelledRefundHelp({
+    required this.order,
+    this.onOpen,
+    super.key,
+  });
+
+  final OrderSummary order;
+
+  /// Nulo abre WhatsApp directo. El detalle inyecta su propio aviso
+  /// cuando el enlace no se puede abrir.
+  final Future<void> Function(Uri uri)? onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final uri = paidCancelledRefundWhatsAppUri(order);
+    if (uri == null) return const SizedBox.shrink();
+    final palette = context.boutique;
+    return Padding(
+      padding: const EdgeInsets.only(top: BoutiqueSpace.sm),
+      child: Semantics(
+        button: true,
+        link: true,
+        label: paidCancelledRefundHelp,
+        child: GestureDetector(
+          key: const ValueKey('paid-cancelled-refund-help'),
+          behavior: HitTestBehavior.opaque,
+          onTap: () async {
+            final open = onOpen;
+            if (open != null) {
+              await open(uri);
+              return;
+            }
+            final ok = await launchUrl(
+              uri,
+              mode: LaunchMode.externalApplication,
+            );
+            if (!ok && context.mounted) {
+              ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+                const SnackBar(content: Text('No se pudo abrir el enlace.')),
+              );
+            }
+          },
+          child: Text(
+            paidCancelledRefundHelp,
+            style: boutiqueText(
+              size: 13,
+              color: palette.ink,
+              decoration: TextDecoration.underline,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PaymentHelpLink extends StatelessWidget {
+  const _PaymentHelpLink({
+    required this.linkKey,
+    required this.label,
+    required this.uri,
+    required this.onOpen,
+    this.icon,
+  });
+
+  final Key linkKey;
+  final String label;
+  final Uri uri;
+  final void Function(Uri uri) onOpen;
+  final IconData? icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final text = Text(
+      label,
+      style: boutiqueText(
+        size: 13,
+        color: palette.inkMuted,
+        decoration: TextDecoration.underline,
+      ),
+    );
+    return Semantics(
+      link: true,
+      child: GestureDetector(
+        key: linkKey,
+        onTap: () => onOpen(uri),
+        child: icon == null
+            ? text
+            : Row(
+                children: [
+                  ExcludeSemantics(
+                    child: Icon(icon, size: 16, color: palette.inkMuted),
+                  ),
+                  const SizedBox(width: BoutiqueSpace.sm),
+                  Flexible(child: text),
+                ],
+              ),
+      ),
+    );
   }
 }
 

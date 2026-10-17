@@ -411,8 +411,11 @@ describe('accounts_orders API', () => {
       headers: { Authorization: 'Bearer shopify-token-77' },
     });
     expect(response.status).toBe(200);
-    const json = (await response.json()) as { orders: Array<{ shopifyOrderId: string }> };
+    const json = (await response.json()) as {
+      orders: Array<{ shopifyOrderId: string; paymentMethod: string | null }>;
+    };
     expect(json.orders.map((o) => o.shopifyOrderId)).toEqual(['11', '10']);
+    expect(json.orders.every((order) => order.paymentMethod === null)).toBe(true);
 
     expect((await fetch(`${baseUrl}/customers/77/orders`, {
       headers: { Authorization: 'Bearer shopify-token-77' },
@@ -467,6 +470,181 @@ describe('accounts_orders API', () => {
     expect(response.status).toBe(200);
     const json = (await response.json()) as { orders: Array<{ shopifyOrderId: string }> };
     expect(json.orders.map((order) => order.shopifyOrderId)).toEqual(['21']);
+  });
+
+  it('returns the normalized payment method and no card data', async () => {
+    const pan = '4242424242424242';
+    const body = JSON.stringify({
+      id: 31,
+      financial_status: 'pending',
+      created_at: '2026-08-02T00:00:00Z',
+      payment_gateway_names: ['Bank Deposit'],
+      customer: { id: 77, email: 'c@example.com' },
+      transactions: [
+        {
+          kind: 'sale',
+          gateway: 'Bank Deposit',
+          payment_details: { credit_card_number: pan },
+        },
+      ],
+    });
+    const created = await fetch(`${baseUrl}/webhooks/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Hmac-Sha256': sign(body),
+        'X-Shopify-Webhook-Id': randomUUID(),
+      },
+      body,
+    });
+    expect(created.status).toBe(200);
+
+    const response = await fetch(`${baseUrl}/customers/me/orders`, {
+      headers: { Authorization: 'Bearer shopify-token-77' },
+    });
+    expect(response.status).toBe(200);
+    const raw = await response.text();
+    const json = JSON.parse(raw) as {
+      orders: Array<{ shopifyOrderId: string; paymentMethod: string | null }>;
+    };
+    expect(json.orders.map((order) => order.shopifyOrderId)).toEqual(['31']);
+    expect(json.orders[0]?.paymentMethod).toBe('bank_deposit');
+    expect(raw).not.toContain(pan);
+    expect(raw).not.toContain('credit_card');
+  });
+
+  it('returns checkout and cart tokens only for the authenticated customer', async () => {
+    const ownCheckout = 'chk_owner77token';
+    const ownCart = 'crt_owner77token';
+    const otherCheckout = 'chk_other88token';
+    const otherCart = 'crt_other88token';
+    const lines: string[] = [];
+    const original = {
+      log: console.log,
+      warn: console.warn,
+      error: console.error,
+    };
+    console.log = (line?: unknown) => {
+      lines.push(String(line));
+    };
+    console.warn = (line?: unknown) => {
+      lines.push(String(line));
+    };
+    console.error = (line?: unknown) => {
+      lines.push(String(line));
+    };
+
+    const postOrder = async (body: string) => {
+      const response = await fetch(`${baseUrl}/webhooks/orders/create`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Shopify-Hmac-Sha256': sign(body),
+          'X-Shopify-Webhook-Id': randomUUID(),
+        },
+        body,
+      });
+      expect(response.status).toBe(200);
+    };
+
+    try {
+      await postOrder(JSON.stringify({
+        id: 41,
+        created_at: '2026-08-03T00:00:00Z',
+        checkout_token: ownCheckout,
+        cart_token: `${ownCart}?key=not-a-stored-key`,
+        customer: { id: 77, email: 'c@example.com' },
+      }));
+      await postOrder(JSON.stringify({
+        id: 42,
+        created_at: '2026-08-04T00:00:00Z',
+        checkout_token: otherCheckout,
+        cart_token: otherCart,
+        customer: { id: 88, email: 'other@example.com' },
+      }));
+
+      const unauthenticated = await fetch(`${baseUrl}/customers/me/orders`);
+      expect(unauthenticated.status).toBe(401);
+
+      const response = await fetch(`${baseUrl}/customers/me/orders`, {
+        headers: { Authorization: 'Bearer shopify-token-77' },
+      });
+      expect(response.status).toBe(200);
+      const raw = await response.text();
+      const json = JSON.parse(raw) as {
+        orders: Array<{
+          shopifyOrderId: string;
+          checkoutToken: string | null;
+          cartToken: string | null;
+        }>;
+      };
+      expect(json.orders).toEqual([
+        {
+          id: expect.any(Number),
+          shopifyOrderId: '41',
+          source: 'shopify_checkout',
+          attributionCode: null,
+          financialStatus: null,
+          paymentMethod: null,
+          fulfillmentStatus: null,
+          totalAmount: null,
+          currencyCode: null,
+          placedAt: '2026-08-03T00:00:00.000Z',
+          checkoutToken: ownCheckout,
+          cartToken: ownCart,
+        },
+      ]);
+      expect(raw).not.toContain(otherCheckout);
+      expect(raw).not.toContain(otherCart);
+      expect(raw).not.toContain('not-a-stored-key');
+
+      const other = await fetch(`${baseUrl}/customers/me/orders`, {
+        headers: { Authorization: 'Bearer shopify-token-88' },
+      });
+      const otherJson = (await other.json()) as {
+        orders: Array<{ shopifyOrderId: string; checkoutToken: string | null; cartToken: string | null }>;
+      };
+      expect(otherJson.orders.map((order) => order.shopifyOrderId)).toEqual(['42']);
+      expect(otherJson.orders[0]?.checkoutToken).toBe(otherCheckout);
+      expect(otherJson.orders[0]?.cartToken).toBe(otherCart);
+    } finally {
+      console.log = original.log;
+      console.warn = original.warn;
+      console.error = original.error;
+    }
+
+    const logged = lines.join('\n');
+    expect(logged).not.toContain(ownCheckout);
+    expect(logged).not.toContain(ownCart);
+    expect(logged).not.toContain(otherCheckout);
+    expect(logged).not.toContain(otherCart);
+    expect(logged).not.toContain('not-a-stored-key');
+  });
+
+  it('returns null tokens when the webhook did not carry them', async () => {
+    const body = JSON.stringify({
+      id: 43,
+      created_at: '2026-08-05T00:00:00Z',
+      customer: { id: 77, email: 'c@example.com' },
+    });
+    expect((await fetch(`${baseUrl}/webhooks/orders/create`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Shopify-Hmac-Sha256': sign(body),
+        'X-Shopify-Webhook-Id': randomUUID(),
+      },
+      body,
+    })).status).toBe(200);
+
+    const response = await fetch(`${baseUrl}/customers/me/orders`, {
+      headers: { Authorization: 'Bearer shopify-token-77' },
+    });
+    const json = (await response.json()) as {
+      orders: Array<{ checkoutToken: string | null; cartToken: string | null }>;
+    };
+    expect(json.orders[0]?.checkoutToken).toBeNull();
+    expect(json.orders[0]?.cartToken).toBeNull();
   });
 
   it('rejects an invalid customer bearer', async () => {

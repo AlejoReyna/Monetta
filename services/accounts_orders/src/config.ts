@@ -14,6 +14,9 @@ export interface AccountsOrdersConfig {
   readonly shopifyFeaturedCollectionId: string;
   readonly adminMutationsEnabled: boolean;
   readonly adminShopifyWritesEnabled: boolean;
+  readonly adminExternalWritesEnabled: boolean;
+  readonly catalogMonitorBaseUrl: string;
+  readonly catalogMonitorServiceSecret: string;
 
   /**
    * The Shopify app's API secret key — NOT the Customer Account API mobile
@@ -42,7 +45,17 @@ export interface AccountsOrdersConfig {
    * still authenticate via /accounts/login.
    */
   readonly legacyAccountRegistrationEnabled: boolean;
-  // Rewards (paquete F) lee sus banderas en src/rewards/rewardsConfig.ts.
+  // Paquete F — Rewards (banderas; canje apagado por defecto).
+  readonly rewardsEnabled: boolean;
+  readonly rewardsRedemptionEnabled: boolean;
+  readonly rewardsReservationTtlMinutes: number;
+  readonly rewardsQuoteTtlMinutes: number;
+  /** Static Admin API token. Optional when client-credentials can mint one. */
+  readonly shopifyAdminAccessToken: string;
+  /** Public Customer Account mobile client id, used to check id-token `aud`. */
+  readonly customerAccountClientId: string;
+  /** Interactive Shopify login must be at least this recent to delete an account. */
+  readonly accountDeletionReauthMaxAgeSeconds: number;
 }
 
 function int(value: string | undefined, fallback: number): number {
@@ -93,6 +106,18 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     );
   }
 
+  const catalogMonitorBaseUrl = (env.CATALOG_MONITOR_BASE_URL ?? '').trim();
+  const catalogMonitorServiceSecret = env.CATALOG_MONITOR_SERVICE_SECRET ?? '';
+  if (catalogMonitorBaseUrl !== '') {
+    const parsed = new URL(catalogMonitorBaseUrl);
+    if (!['http:', 'https:'].includes(parsed.protocol)) {
+      throw new Error('CATALOG_MONITOR_BASE_URL must use HTTP or HTTPS');
+    }
+    if (catalogMonitorServiceSecret.length < 32) {
+      throw new Error('CATALOG_MONITOR_SERVICE_SECRET must be at least 32 characters');
+    }
+  }
+
   // Shopify integration is optional while first-party Monetta accounts are
   // the active identity system. An empty secret keeps every Shopify webhook
   // route closed (401) without preventing the accounts API from starting.
@@ -110,6 +135,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     shopifyFeaturedCollectionId: (env.SHOPIFY_FEATURED_COLLECTION_ID ?? '').trim(),
     adminMutationsEnabled: env.ADMIN_MUTATIONS_ENABLED === 'true',
     adminShopifyWritesEnabled: env.ADMIN_SHOPIFY_WRITES_ENABLED === 'true',
+    adminExternalWritesEnabled: env.ADMIN_EXTERNAL_WRITES_ENABLED === 'true',
+    catalogMonitorBaseUrl,
+    catalogMonitorServiceSecret,
     webhookSecret,
     notificationsEnabled,
     firebaseProjectId,
@@ -126,6 +154,16 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     legacyAccountRegistrationEnabled: bool(
       env.LEGACY_ACCOUNT_REGISTRATION_ENABLED,
       true,
+    ),
+    rewardsEnabled: bool(env.REWARDS_ENABLED, true),
+    rewardsRedemptionEnabled: bool(env.REWARDS_REDEMPTION_ENABLED, false),
+    rewardsReservationTtlMinutes: int(env.REWARDS_RESERVATION_TTL_MINUTES, 30),
+    rewardsQuoteTtlMinutes: int(env.REWARDS_QUOTE_TTL_MINUTES, 10),
+    shopifyAdminAccessToken: (env.SHOPIFY_ADMIN_ACCESS_TOKEN ?? '').trim(),
+    customerAccountClientId: (env.CUSTOMER_ACCOUNT_CLIENT_ID ?? '').trim(),
+    accountDeletionReauthMaxAgeSeconds: Math.max(
+      60,
+      int(env.ACCOUNT_DELETION_REAUTH_MAX_AGE_SECONDS, 600),
     ),
   };
 }

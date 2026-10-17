@@ -50,6 +50,12 @@ class AccountStore {
         );
   }
 
+  Future<void> deleteLocal(String localAccountId) {
+    return (_db.delete(_db.accounts)
+          ..where((t) => t.localAccountId.equals(localAccountId)))
+        .go();
+  }
+
   Future<void> touchLastSeen(String localAccountId) {
     return (_db.update(_db.accounts)
           ..where((t) => t.localAccountId.equals(localAccountId)))
