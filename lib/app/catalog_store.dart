@@ -126,7 +126,16 @@ class CatalogStore extends ChangeNotifier {
   /// variantId -> productId for the current [_accountScope].
   final Map<String, String> _bagProductByVariant = {};
 
-  List<Product> products = const [];
+  List<Product> _products = const [];
+
+  /// Shopper-facing catalog. Shopify sample products (the staging store ships
+  /// snowboards under the "Monetta Staging" vendor) are dropped on assignment,
+  /// so lists, search and Home never show them. The cache keeps the full set.
+  List<Product> get products => _products;
+  set products(List<Product> value) {
+    _products = value.where((p) => !p.isDemoProduct).toList(growable: false);
+  }
+
   Map<String, CanonicalFacets> facetsById = const {};
   late NormalizationRules rules;
 

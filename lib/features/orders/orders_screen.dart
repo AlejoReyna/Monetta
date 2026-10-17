@@ -6,6 +6,8 @@
 /// caché, sesión caducada) tiene presentación propia.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 
 import '../navigation/monetta_page_header.dart';
@@ -16,6 +18,7 @@ import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
 import '../../data/repositories/order_history_repository.dart';
 import '../account/account_boutique.dart';
+import '../account/account_screen.dart' show openAccount;
 import '../boutique/boutique_tokens.dart';
 import '../rewards/rewards_section.dart';
 import 'order_detail_screen.dart';
@@ -191,7 +194,9 @@ class _OrdersScreenState extends State<OrdersScreen> {
           message: 'Tu sesión terminó. Inicia sesión de nuevo para '
               'actualizar tus pedidos.',
           actionLabel: 'Iniciar sesión',
-          onAction: controller.isLoading ? null : () => controller.login(),
+          onAction: controller.isLoading
+              ? null
+              : () => unawaited(openAccount(context, controller: controller)),
           icon: Icons.lock_outline_rounded,
         ),
         const SizedBox(height: BoutiqueSpace.md),

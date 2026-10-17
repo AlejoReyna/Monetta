@@ -30,6 +30,12 @@ class Product {
     this.categoryOverride,
   });
 
+  /// Shopify's sample catalog (staging ships snowboards under the "Monetta
+  /// Staging" vendor). Not a Monetta product, so the shopper catalog skips it.
+  bool get isDemoProduct =>
+      vendor.trim().toLowerCase() == 'monetta staging' ||
+      productType.trim().toLowerCase() == 'snowboard';
+
   /// Canonical Shopify GID (`gid://shopify/Product/<legacy id>`).
   ///
   /// The bundled Ajax snapshot is normalized at its mapper boundary and the

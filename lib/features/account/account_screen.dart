@@ -636,7 +636,12 @@ class _IdentityCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final account = controller.account!;
     final palette = context.boutique;
-    final name = customerProfileName(account.displayName) ?? 'Tu cuenta';
+    // Profile name, else the part of the email before the @ (as the side
+    // menu does), so the header never reads like a placeholder. A name that is
+    // really an email is never shown whole.
+    final emailName = account.email?.trim().split('@').first;
+    final name = customerProfileName(account.displayName) ??
+        ((emailName != null && emailName.isNotEmpty) ? emailName : 'Tu cuenta');
     final words = name.trim().split(RegExp(r'\s+')).where((s) => s.isNotEmpty);
     final initials =
         words.take(2).map((s) => s.characters.first.toUpperCase()).join();
