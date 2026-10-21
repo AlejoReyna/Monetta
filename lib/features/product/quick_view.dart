@@ -470,8 +470,8 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                         style: boutiqueProductName(
+                          context: context,
                           color: palette.ink,
-                          size: 22,
                         ),
                       ),
                       const SizedBox(height: BoutiqueSpace.sm),

@@ -138,28 +138,27 @@ class EAccessRow extends StatelessWidget {
         onTap: onTap,
         borderRadius: BoutiqueRadius.control,
         child: Container(
-          constraints: const BoxConstraints(minHeight: BoutiqueSpace.tapTarget),
+          constraints: const BoxConstraints(minHeight: 64),
           padding: const EdgeInsets.symmetric(
             vertical: BoutiqueSpace.md,
           ),
           decoration: BoxDecoration(
             border: Border(
-              bottom: BorderSide(color: palette.hairline, width: .5),
+              bottom: BorderSide(color: palette.hairline),
             ),
           ),
           child: Row(
             children: [
-              Icon(icon, size: 20, color: palette.ink),
-              const SizedBox(width: 14),
+              Icon(icon, size: 24, color: palette.ink),
+              const SizedBox(width: BoutiqueSpace.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
                       title,
-                      style: boutiqueText(
-                        size: 14,
-                        weight: FontWeight.w500,
+                      style: boutiqueRowLabel(
+                        context: context,
                         color: enabled ? palette.ink : palette.inkMuted,
                       ),
                     ),
@@ -192,7 +191,7 @@ class EAccessRow extends StatelessWidget {
               const SizedBox(width: 8),
               Icon(
                 Icons.chevron_right_rounded,
-                size: 20,
+                size: 22,
                 color: palette.inkMuted,
               ),
             ],

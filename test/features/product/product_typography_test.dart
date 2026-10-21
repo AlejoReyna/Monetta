@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/reco/events.dart';
@@ -7,22 +8,29 @@ import 'package:monetta_app/reco/explainer.dart';
 
 import '../../support/product_screen_harness.dart';
 
-// FICHA-T2, TYPE-01d: the product-related titles of both fichas use the face
-// of the card names (`boutiqueText` family and fallback chain) instead of the
-// editorial serif (BRIEF 2.3). The style handed to each `Text` is read
-// directly, so the Ahem test font is irrelevant.
+// FICHA-T2, TYPE-01d (style guideline): the product name and the section
+// headings of the ficha are the editorial serif (Playfair Display, w400); the
+// earlier brief set them in the sans of the card names. The style handed to
+// each `Text` is read directly, so the Ahem test font is irrelevant.
 
 void _expectSans(TextStyle style, {required String reason}) {
   expect(style.fontFamily, kBoutiqueSansFamily, reason: '$reason: family');
-  expect(
-    style.fontFamilyFallback,
-    kBoutiqueSansFallback,
-    reason: '$reason: fallback chain',
-  );
+  expect(style.fontFamilyFallback, kBoutiqueSansFallback,
+      reason: '$reason: fallback chain');
   expect(style.fontWeight, FontWeight.w600, reason: '$reason: weight');
 }
 
-/// Scrolls to [heading] and checks it is a section heading (sans, w600, 16-18).
+void _expectSerif(TextStyle style, {required String reason}) {
+  expect(style.fontFamily, kBoutiqueSerifFamily, reason: '$reason: family');
+  expect(
+    style.fontFamilyFallback,
+    kBoutiqueSerifFallback,
+    reason: '$reason: fallback chain',
+  );
+  expect(style.fontWeight, FontWeight.w400, reason: '$reason: weight');
+}
+
+/// Scrolls to [heading] and checks it is a section heading (serif, w400, 23).
 Future<void> _expectSectionHeading(
   WidgetTester tester,
   Finder heading, {
@@ -30,8 +38,12 @@ Future<void> _expectSectionHeading(
 }) async {
   await scrollTo(tester, heading);
   final style = styleOf(tester, heading);
-  _expectSans(style, reason: reason);
-  expect(style.fontSize, inInclusiveRange(16, 18), reason: '$reason: size');
+  _expectSerif(style, reason: reason);
+  expect(
+    style.fontSize,
+    MonettaTokens.sectionTitle.compact,
+    reason: '$reason: size',
+  );
 }
 
 void main() {
@@ -54,13 +66,13 @@ void main() {
       );
     }
 
-    testWidgets('TYPE-01d the main name is sans w600, 22-24', (tester) async {
+    testWidgets('TYPE-01d the main name is serif w400, 25', (tester) async {
       final ficha = await mount(tester);
 
       await scrollTo(tester, contentNameText(ficha.name));
       final style = styleOf(tester, contentNameText(ficha.name));
-      _expectSans(style, reason: 'main name');
-      expect(style.fontSize, inInclusiveRange(22, 24));
+      _expectSerif(style, reason: 'main name');
+      expect(style.fontSize, MonettaTokens.productName.compact);
     });
 
     testWidgets('TYPE-01d the three accordion labels are section headings',
@@ -116,13 +128,13 @@ void main() {
       await pumpExternal(tester, item: item);
     }
 
-    testWidgets('TYPE-01d the main name is sans w600, 22-24', (tester) async {
+    testWidgets('TYPE-01d the main name is serif w400, 25', (tester) async {
       await mount(tester);
 
       await scrollTo(tester, contentNameText(name));
       final style = styleOf(tester, contentNameText(name));
-      _expectSans(style, reason: 'main name');
-      expect(style.fontSize, inInclusiveRange(22, 24));
+      _expectSerif(style, reason: 'main name');
+      expect(style.fontSize, MonettaTokens.productName.compact);
     });
 
     testWidgets('TYPE-01d "Descripción del producto" is a section heading',
