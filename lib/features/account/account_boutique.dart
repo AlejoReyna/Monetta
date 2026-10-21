@@ -9,6 +9,8 @@ library;
 import 'package:flutter/material.dart';
 
 import '../boutique/boutique_tokens.dart';
+import '../boutique/client_guide_components.dart';
+import '../../app/monetta_tokens.g.dart';
 
 /// Cabecera de pantalla E: ojo editorial serif + título + subtítulo.
 class AccountPageHeader extends StatelessWidget {
@@ -207,25 +209,71 @@ class EStatusCapsule extends StatelessWidget {
   const EStatusCapsule({
     required this.label,
     required this.dark,
+    this.guideIcon,
     super.key,
   });
 
   final String label;
   final bool dark;
+  final IconData? guideIcon;
 
   factory EStatusCapsule.forOrderKey(
     String key, {
     required String label,
+    IconData? guideIcon,
   }) {
     return EStatusCapsule(
       label: label,
       dark: key == 'delivered',
+      guideIcon: guideIcon,
     );
   }
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    if (guideIcon != null) {
+      final isLight = Theme.of(context).brightness == Brightness.light;
+      final foreground = dark && isLight ? MonettaTokens.success : palette.ink;
+      return Semantics(
+        label: 'Estado: $label',
+        child: Container(
+          padding: EdgeInsets.symmetric(
+            horizontal: MonettaTokens.space[2],
+            vertical: MonettaTokens.space[1],
+          ),
+          decoration: BoxDecoration(
+            color: dark && isLight
+                ? MonettaTokens.successSurface
+                : palette.surfaceDeep,
+            borderRadius: const BorderRadius.all(
+              Radius.circular(MonettaTokens.radiusPill),
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                guideIcon,
+                size: MonettaTokens.logoHeight,
+                color: foreground,
+              ),
+              SizedBox(width: MonettaTokens.space[1]),
+              Flexible(
+                child: Text(
+                  label,
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.cardLabel,
+                    color: foreground,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Semantics(
       label: 'Estado: $label',
       child: Container(
