@@ -1,0 +1,109 @@
+{
+  "auditDate": "2026-10-20",
+  "timezone": "America/Monterrey",
+  "createdAtUtc": "2026-10-20T22:17:18.067825+00:00",
+  "scope": "Planning audit only; no app, prototype source, theme source, remote configuration, deployment or commerce mutations.",
+  "repositoryHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+  "source": {
+    "path": "/Users/alexis_reyna/Desktop/guideline.pdf",
+    "sha256": "7e7414def29c38c65c1ab5ce25dd5f250cc50d65db66a291d67536b45dbb97db",
+    "pages": 19,
+    "pageSizePoints": [
+      600,
+      1500
+    ],
+    "review": "All pages rendered; all four contact sheets and detailed relevant pages visually inspected. Most screen content is raster, so extracted text contains only page headings."
+  },
+  "publicStorefront": {
+    "url": "https://monetta.mx/",
+    "observedAtUtc": "2026-10-20T22:17:18.139120+00:00",
+    "method": "Read-only public HTML request; no production browser or authenticated-admin audit",
+    "theme": {
+      "name": "Atelier",
+      "id": 149125824663,
+      "schema_name": "Atelier",
+      "schema_version": "3.5.0",
+      "theme_store_id": 3621,
+      "role": "main"
+    },
+    "includesMonettaTokensStylesheet": false,
+    "fonts": {
+      "--font-body--family": "\"Source Sans Pro\", sans-serif",
+      "--font-heading--family": "Newsreader, serif",
+      "--font-accent--family": "\"Inknut Antiqua\", serif"
+    }
+  },
+  "checks": [
+    {
+      "name": "Flutter representative baseline",
+      "command": "fvm flutter test --no-pub test/app/theme_test.dart test/app/boutique_palette_test.dart test/features/navigation/monetta_floating_bottom_navigation_test.dart test/features/product/product_layout_responsive_test.dart test/features/account/package_e_responsive_test.dart test/features/onboarding/onboarding_flow_test.dart test/features/rewards/rewards_disabled_contract_test.dart --reporter expanded",
+      "passed": 67,
+      "failed": 0,
+      "evidence": "flutter-baseline.log",
+      "scope": "Selected tests only; not full Flutter suite, native device rendering, or payment verification"
+    },
+    {
+      "name": "Prototype unit baseline",
+      "command": "npm test (cwd design-prototype)",
+      "passed": 52,
+      "failed": 0,
+      "evidence": "prototype-unit-baseline.log"
+    },
+    {
+      "name": "Prototype browser baseline",
+      "command": "npm run verify -- --only=identity,layout --out=/tmp/monetta-style-audit-20261020/browser-baseline (cwd design-prototype)",
+      "passed": 51,
+      "failed": 0,
+      "evidence": "prototype-browser-baseline.json",
+      "browser": {
+        "executablePath": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+        "version": "155.0.8059.40"
+      },
+      "scope": "Identity, five main pages at seven widths, 320px reflow, console/request checks; does not validate the current Shopify draft or new PDF design"
+    }
+  ],
+  "visualEvidence": {
+    "comparison": "current-vs-reference.jpg",
+    "currentImageSource": "Freshly built local prototype; 390x844 CSS viewport, captured at DPR 2",
+    "referenceImageSource": "Supplied PDF page 3; screen area cropped to omit PDF page title and white canvas",
+    "caveat": "Both images are resized for comparison; do not derive final typography, spacing, or production image quality from this composite",
+    "currentCaptures": {
+      "phone": "baseline-phone.jpg",
+      "tablet": "baseline-tablet.jpg",
+      "desktop": "baseline-desktop.jpg"
+    }
+  },
+  "notVerifiedThisRun": [
+    "Authenticated Shopify draft status or data",
+    "Shopify plan entitlements or customer-account configuration",
+    "Real iOS/Android/tablet hardware",
+    "Safari/Firefox or assistive technology runtime behavior",
+    "Payment completion, orders, refunds, Rewards operation or cross-channel cart synchronization"
+  ],
+  "priorEvidence": {
+    "stagingDelivery": "docs/web-redesign/shopify-staging/ENTREGA.md",
+    "stagingRuns": "docs/web-redesign/shopify-staging/RUNS.md",
+    "warning": "Staging observations are dated October 19 and are identified as such in the plan; prior pass totals are not presented as fresh results."
+  },
+  "initialColorContrast": {
+    "method": "WCAG relative luminance ratio for solid sRGB colors",
+    "pairs": [
+      {
+        "foreground": "#FFFFFF",
+        "background": "#745237",
+        "ratio": 6.99
+      },
+      {
+        "foreground": "#73665D",
+        "background": "#F3EADF",
+        "ratio": 4.66
+      },
+      {
+        "foreground": "#805C32",
+        "background": "#F3EADF",
+        "ratio": 5.05
+      }
+    ],
+    "adjustment": "The existing #8F6838 on #F3EADF is 4.20:1; propose darker #805C32 for small accent text on warm surfaces."
+  }
+}

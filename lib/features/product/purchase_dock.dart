@@ -75,8 +75,12 @@ class PurchaseDockButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final enabled = onPressed != null && !pending;
-    final background =
-        enabled ? palette.ink : palette.ink.withValues(alpha: 0.6);
+    final background = enabled
+        ? palette.action
+        : Color.alphaBlend(
+            palette.canvas.withValues(alpha: 0.45),
+            palette.action,
+          );
     return Semantics(
       button: true,
       enabled: enabled,
@@ -85,10 +89,10 @@ class PurchaseDockButton extends StatelessWidget {
       onTap: enabled ? onPressed : null,
       child: Material(
         color: background,
-        borderRadius: BoutiqueRadius.control,
+        shape: const StadiumBorder(),
         child: InkWell(
           onTap: enabled ? onPressed : null,
-          borderRadius: BoutiqueRadius.control,
+          customBorder: const StadiumBorder(),
           child: ConstrainedBox(
             constraints: const BoxConstraints(
               minHeight: kPurchaseDockButtonHeight,
@@ -107,7 +111,7 @@ class PurchaseDockButton extends StatelessWidget {
                       height: 16,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        color: palette.canvas,
+                        color: palette.onAction,
                       ),
                     ),
                     const SizedBox(width: BoutiqueSpace.sm),
@@ -121,7 +125,7 @@ class PurchaseDockButton extends StatelessWidget {
                       style: boutiqueText(
                         size: 14,
                         weight: FontWeight.w600,
-                        color: palette.canvas,
+                        color: palette.onAction,
                         height: 1.2,
                       ),
                     ),

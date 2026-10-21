@@ -8,6 +8,7 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/theme.dart';
+import '../boutique/boutique_tokens.dart';
 import 'rewards_models.dart';
 
 // ---------------------------------------------------------------------------
@@ -35,20 +36,46 @@ class RewardsBalanceCard extends StatelessWidget {
     final colors = context.monettaColors;
     return Container(
       key: const ValueKey('rewards-balance-card'),
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: colors.surface,
+        color: colors.surfaceWarm,
         border: Border.all(color: colors.divider, width: .5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('MONETTA REWARDS', style: eyebrow(color: colors.accentContent)),
-          const SizedBox(height: 10),
-          Text(
-            'Tienes ${summary.availableLabel} disponibles',
-            key: const ValueKey('rewards-balance-available'),
-            style: editorial(26),
+          Row(
+            children: [
+              ExcludeSemantics(
+                child: Icon(
+                  Icons.card_giftcard_outlined,
+                  size: 24,
+                  color: colors.accentContent,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'MONETTA REWARDS',
+                      style: boutiqueRowLabel(color: colors.contentPrimary),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'Tienes ${summary.availableLabel} disponibles',
+                      key: const ValueKey('rewards-balance-available'),
+                      style: boutiqueText(
+                        size: 16,
+                        weight: FontWeight.w600,
+                        color: colors.contentPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: 6),
           Text(

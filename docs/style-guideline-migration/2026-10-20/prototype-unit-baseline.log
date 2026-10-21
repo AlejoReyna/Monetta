@@ -1,0 +1,69 @@
+
+> monetta-web-design-prototype@0.1.0 test
+> node --test tests/unit/*.test.mjs
+
+✔ the page bar is reserved at its real height, not at its minimum (1.316167ms)
+✔ bars that are hidden, static or without an offset cover nothing (0.094167ms)
+✔ fixed bottom controls reserve their offset plus their height (0.122917ms)
+✔ the largest reserve wins when several bars are pinned to the same edge (0.056209ms)
+✔ a card that is already inside the rail leaves it alone (0.092042ms)
+✔ a snapping rail takes the focused card to its own snap position (0.057167ms)
+✔ going back to a card scrolled out on the left aligns it to the start padding (0.060542ms)
+✔ the target never leaves the scrollable range (0.227208ms)
+✔ a chip half outside the row moves the least that clears the padding (0.179166ms)
+✔ a chip hidden on the left comes back to the start padding (0.266375ms)
+✔ a percentage end padding keeps a faded edge clear (0.151458ms)
+✔ an item wider than the visible band aligns by its start (0.120292ms)
+✔ scroll-padding alone cannot take the last link out of the fade: the clamp to the scrollable room wins (0.226208ms)
+✔ with end padding as wide as the fade the last link scrolls out of it (0.132166ms)
+✔ a link that already ends before the fade is left where it is (0.116791ms)
+✔ money parses decimal strings into exact centavos and formats MXN labels (45.895834ms)
+✔ a discount appears only for a genuine compare-at price (0.192125ms)
+✔ adding the same exact variant raises its quantity; another colour is its own line (0.748125ms)
+✔ a sold-out variant is refused and never substituted (0.128375ms)
+✔ an inventory limit caps additions and quantity changes (0.14175ms)
+✔ quantity zero and removal drop the line; totals are summed in centavos (0.2295ms)
+✔ Shopify-style filter URLs parse and serialize back unchanged (2.308875ms)
+✔ search URLs keep q and type, and default sort is omitted (0.258917ms)
+✔ values combine with OR inside a facet and AND across facets (5.351958ms)
+✔ facet counts answer "how many if I add this", excluding the facet itself (14.040334ms)
+✔ price range keeps any product with a variant inside it (0.789166ms)
+✔ sorting by price and newest is stable and correct (1.57975ms)
+✔ changing filters or sort returns to page one; clearing keeps the query and sort (0.327542ms)
+✔ each active chip removes exactly its own value (17.80475ms)
+✔ load more pages through results in steps of PAGE_SIZE (0.324458ms)
+✔ search is accent-, plural- and synonym-tolerant and ranks brand matches first (2.669125ms)
+✔ suggestions only offer terms that lead to results (0.617375ms)
+✔ swatches only for reliable single colours, never for bicolours (0.172333ms)
+✔ every product image exists locally and every image has a recorded source (16.642375ms)
+✔ default variants are buyable whenever any variant is (0.322917ms)
+✔ collections reference catalog products only and keep their live counts (0.126417ms)
+✔ sale flags match genuine compare-at prices (0.195041ms)
+✔ synthetic states are labelled in the data and in the manifest (0.556083ms)
+✔ real merchandising states exist in the snapshot (0.302917ms)
+✔ descriptions split facts from copy and turn "sobre pedido" into a state (1.579208ms)
+✔ a visit that began on this screen has nothing to go back to (1.179917ms)
+✔ opening another screen makes one step back leave it (1.609833ms)
+✔ filter and sort entries stay inside the screen they belong to (0.133333ms)
+✔ the next screen starts its own run after filters (0.064333ms)
+✔ filters applied on the first screen of a visit still have nowhere to go back to (0.06525ms)
+✔ replacing the entry (retry, variant) never moves the counters (0.065958ms)
+✔ Forward right after the arrow is not undone by the arrow's fallback (1.700208ms)
+✔ a link opened after the arrow wins even when it lands on the address the arrow left (0.502083ms)
+✔ a changed address or a restore from the cache after the arrow also retires the fallback (0.453ms)
+✔ when the earlier entries are gone the arrow still reaches its parent (0.428042ms)
+✔ a visit that began on the screen goes to the parent without touching the history (0.275333ms)
+✔ the arrow skips the filter entries of its screen in one step; the fallback stays quiet (0.254584ms)
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 173.239458
+npm notice
+npm notice New major version of npm available! 11.19.0 -> 12.2.0
+npm notice Changelog: https://github.com/npm/cli/releases/tag/v12.2.0
+npm notice To update run: npm install -g npm@12.2.0
+npm notice

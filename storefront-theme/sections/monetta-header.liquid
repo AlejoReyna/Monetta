@@ -1,0 +1,163 @@
+{%- comment -%}
+  Monetta header: phone (menu, centred wordmark, search), product header (back + search, wordmark, account + bag),
+  tablet and desktop (wordmark, search field, account / bag with labels, category row) and the phone menu drawer.
+  Anatomy and measurements: docs/web-redesign/DESIGN_SPEC.md sections 3, 5 and 7; prototype src/components/shell.js.
+  Collections, search and the bag draw their own page bar on phones (snippets/monetta-page-bar.liquid) and hide this
+  header there by CSS (body.has-page-bar).
+{%- endcomment -%}
+{%- liquid
+  assign is_product = false
+  if template.name == 'product'
+    assign is_product = true
+  endif
+  assign no_dock = false
+  if template.name == 'product'
+    assign no_dock = true
+  elsif template.name == 'cart' and cart.item_count > 0
+    assign no_dock = true
+  endif
+  assign nav_menu = linklists[section.settings.menu]
+  assign drawer_menu = linklists[section.settings.secondary_menu]
+  assign back_url = routes.all_products_collection_url
+  if template.name == 'product' and product.collections.size > 0
+    assign back_url = product.collections.first.url
+  endif
+  assign cart_label = 'Carrito, vacío'
+  if cart.item_count > 0
+    assign cart_label = 'Carrito, ' | append: cart.item_count | append: ' artículo'
+    if cart.item_count != 1
+      assign cart_label = cart_label | append: 's'
+    endif
+  endif
+  assign search_hidden = false
+  if template.name == 'index' or template.name == 'search'
+    assign search_hidden = true
+  endif
+-%}
+<header
+  class="site-header{% if is_product %} site-header--product{% endif %}{% if no_dock %} site-header--no-dock{% endif %}"
+  id="site-header"
+>
+  <div class="site-header__bar">
+    <div class="site-header__start">
+      {%- if is_product -%}
+        <a class="icon-button site-header__back" href="{{ back_url }}" data-action="back" data-back-parent="{{ back_url }}" aria-label="Volver">{% render 'monetta-icon', name: 'arrowBack', size: 22 %}</a>
+      {%- endif -%}
+      <button type="button" class="icon-button site-header__menu" data-open-dialog="menu-drawer" aria-label="Abrir menú" aria-haspopup="dialog" aria-controls="menu-drawer">{% render 'monetta-icon', name: 'menu', size: 24 %}</button>
+      <a class="icon-button site-header__search-start" href="{{ routes.search_url }}" aria-label="Buscar productos">{% render 'monetta-icon', name: 'search', size: 22 %}</a>
+    </div>
+    <a class="wordmark" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}, ir al inicio">{% render 'monetta-logo', height: 24, logo: section.settings.logo %}</a>
+    <form class="header-search" role="search" aria-label="Buscar en la tienda" action="{{ routes.search_url }}" method="get">
+      <div class="search-field">
+        {% render 'monetta-icon', name: 'search', size: 20 %}
+        <label class="visually-hidden" for="header-search-input">Buscar productos</label>
+        <input
+          id="header-search-input"
+          type="search"
+          name="q"
+          value="{{ search.terms | escape }}"
+          placeholder="{{ section.settings.search_placeholder | escape }}"
+          autocomplete="off"
+          spellcheck="false"
+          enterkeyhint="search"
+        >
+        <input type="hidden" name="type" value="product">
+        <button type="button" class="icon-button search-field__clear" data-search-clear aria-label="Borrar búsqueda" hidden>{% render 'monetta-icon', name: 'close', size: 20 %}</button>
+      </div>
+    </form>
+    <div class="site-header__end">
+      <a class="icon-button site-header__search-icon" href="{{ routes.search_url }}" aria-label="Buscar productos"{% if search_hidden %} hidden{% endif %}>{% render 'monetta-icon', name: 'search', size: 24 %}</a>
+      <a class="icon-button header-utility header-utility--account" href="{{ routes.account_url }}" aria-label="Cuenta">{% render 'monetta-icon', name: 'person', size: 24 %}<span class="header-utility__label" aria-hidden="true">Cuenta</span></a>
+      <a class="icon-button header-utility header-utility--cart" href="{{ routes.cart_url }}" aria-label="{{ cart_label }}" data-cart-link>{% render 'monetta-icon', name: 'bag', size: 23 %}<span class="header-utility__label" aria-hidden="true">Carrito</span><span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></a>
+    </div>
+  </div>
+
+  <nav class="site-nav" aria-label="Categorías">
+    <ul class="site-nav__list" role="list">
+      {%- for link in nav_menu.links -%}
+        <li><a class="site-nav__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}{% render 'monetta-store-lang' %}>{{ link.title }}</a></li>
+      {%- else -%}
+        <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">Novedades</a></li>
+        <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}">Catálogo</a></li>
+      {%- endfor -%}
+    </ul>
+  </nav>
+
+  <dialog class="overlay overlay--drawer-left" id="menu-drawer" aria-labelledby="menu-title">
+    <div class="overlay__backdrop" data-overlay-close></div>
+    <div class="overlay__panel">
+      <nav class="menu" aria-labelledby="menu-title">
+        <h2 class="visually-hidden" id="menu-title">Menú</h2>
+        <div class="menu__top">
+          {% render 'monetta-logo', height: 21, logo: section.settings.logo %}
+          <button type="button" class="icon-button" data-overlay-close aria-label="Cerrar menú">{% render 'monetta-icon', name: 'close', size: 22 %}</button>
+        </div>
+        <div class="menu__account">
+          {%- if customer -%}
+            <a class="btn btn--quiet" href="{{ routes.account_url }}">{% render 'monetta-icon', name: 'user', size: 20 %} Mi cuenta</a>
+          {%- else -%}
+            <a class="btn btn--quiet" href="{{ routes.account_login_url }}">{% render 'monetta-icon', name: 'login', size: 20 %} Inicia sesión</a>
+          {%- endif -%}
+        </div>
+        <div class="menu__links">
+          {%- for link in nav_menu.links -%}
+            {%- capture icon_name -%}{% render 'monetta-menu-icon', handle: link.handle %}{%- endcapture -%}
+            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span {% render 'monetta-store-lang' %}>{{ link.title }}</span></a>
+          {%- else -%}
+            <a class="menu-link" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">{% render 'monetta-icon', name: 'sparkle', size: 22 %}<span>Novedades</span></a>
+            <a class="menu-link" href="{{ routes.all_products_collection_url }}">{% render 'monetta-icon', name: 'store', size: 22 %}<span>Catálogo</span></a>
+          {%- endfor -%}
+        </div>
+        <div class="menu__footer">
+          {%- for link in drawer_menu.links limit: 4 -%}
+            {%- capture icon_name -%}{% render 'monetta-menu-icon', handle: link.handle %}{%- endcapture -%}
+            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span {% render 'monetta-store-lang' %}>{{ link.title }}</span></a>
+          {%- endfor -%}
+        </div>
+      </nav>
+    </div>
+  </dialog>
+</header>
+
+{% schema %}
+{
+  "name": "Monetta · Cabecera",
+  "enabled_on": { "groups": ["header"] },
+  "settings": [
+    {
+      "type": "header",
+      "content": "Marca"
+    },
+    {
+      "type": "image_picker",
+      "id": "logo",
+      "label": "Logotipo",
+      "info": "Opcional. Sin imagen se usa el logotipo original de Monetta incluido en el tema (24 px de alto en teléfono y tablet, 32 px en escritorio)."
+    },
+    {
+      "type": "header",
+      "content": "Navegación"
+    },
+    {
+      "type": "link_list",
+      "id": "menu",
+      "label": "Menú de categorías",
+      "default": "main-menu",
+      "info": "Fila de categorías (tablet y escritorio) y enlaces principales del menú del teléfono. Se administra en Navegación."
+    },
+    {
+      "type": "link_list",
+      "id": "secondary_menu",
+      "label": "Menú secundario del teléfono",
+      "default": "footer",
+      "info": "Hasta 4 enlaces al pie del menú del teléfono (contacto, historia)."
+    },
+    {
+      "type": "text",
+      "id": "search_placeholder",
+      "label": "Texto del buscador",
+      "default": "Buscar bolsas, carteras y relojes"
+    }
+  ]
+}
+{% endschema %}

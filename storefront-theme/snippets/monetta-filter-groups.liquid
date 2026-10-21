@@ -1,0 +1,65 @@
+{%- doc -%}
+  Storefront filtering controls as plain GET inputs: each facet value is a checkbox named with Shopify's own parameter
+  (filter.v.availability, filter.v.price.gte, filter.p.m.custom.*...), so the form works without JavaScript and the
+  URL is the state. Only the filters Search & Discovery exposes are shown; nothing is invented.
+
+  @param {object} filters - collection.filters or search.filters.
+  @param {string} [open_first] - 'true' to open the first group.
+{%- enddoc -%}
+<div class="filters">
+  {%- for filter in filters -%}
+    {%- liquid
+      assign is_open = false
+      if filter.active_values.size > 0 or filter.min_value.value != blank or filter.max_value.value != blank
+        assign is_open = true
+      endif
+      if forloop.first and open_first == 'true'
+        assign is_open = true
+      endif
+    -%}
+    <details class="filter-group"{% if is_open %} open{% endif %}>
+      <summary>
+        <span>{{ filter.label | escape }}</span>
+        {%- if filter.active_values.size > 0 -%}<span class="filter-group__selected">{{ filter.active_values.size }}</span>{%- endif -%}
+        {% render 'monetta-icon', name: 'expand', size: 20 %}
+      </summary>
+      <div class="filter-group__body">
+        {%- case filter.type -%}
+          {%- when 'price_range' -%}
+            {%- liquid
+              assign max_price = filter.range_max | money_without_currency | replace: ',', ''
+              assign min_shown = filter.min_value.value | money_without_currency | replace: ',', ''
+              assign max_shown = filter.max_value.value | money_without_currency | replace: ',', ''
+            -%}
+            <div class="price-range" data-price-range>
+              <label class="field">
+                <span class="field__label">Desde</span>
+                <input class="input" type="number" inputmode="decimal" min="0" max="{{ max_price }}" name="{{ filter.min_value.param_name }}" value="{{ min_shown }}" placeholder="0">
+              </label>
+              <label class="field">
+                <span class="field__label">Hasta</span>
+                <input class="input" type="number" inputmode="decimal" min="0" max="{{ max_price }}" name="{{ filter.max_value.param_name }}" value="{{ max_shown }}" placeholder="{{ max_price }}">
+              </label>
+              <p class="price-range__hint">Precios en pesos. El máximo actual es {{ filter.range_max | money_without_trailing_zeros }}.</p>
+            </div>
+          {%- when 'boolean' -%}
+            <label class="check">
+              <input type="checkbox" name="{{ filter.true_value.param_name }}" value="{{ filter.true_value.value }}"{% if filter.true_value.active %} checked{% endif %}>
+              <span>{{ filter.true_value.label | escape }}</span>
+              <span class="check__count">{{ filter.true_value.count }}</span>
+            </label>
+          {%- else -%}
+            {%- for value in filter.values -%}
+              {%- assign unavailable = false -%}
+              {%- if value.count == 0 and value.active == false -%}{%- assign unavailable = true -%}{%- endif -%}
+              <label class="check{% if unavailable %} check--disabled{% endif %}">
+                <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}"{% if value.active %} checked{% endif %}{% if unavailable %} disabled{% endif %}>
+                <span>{{ value.label | escape }}</span>
+                <span class="check__count">{{ value.count }}</span>
+              </label>
+            {%- endfor -%}
+        {%- endcase -%}
+      </div>
+    </details>
+  {%- endfor -%}
+</div>

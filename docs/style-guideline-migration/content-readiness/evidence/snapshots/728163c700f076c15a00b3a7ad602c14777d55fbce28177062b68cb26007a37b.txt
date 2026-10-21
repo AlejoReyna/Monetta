@@ -1,0 +1,103 @@
+{%- doc -%}
+  Controls and layout shared by collections and search: toolbar (filters button, sort), removable active filters, the filter
+  sidebar (from 1200 px) and the "Filtrar y ordenar" drawer. Filters and sort are plain GET forms against Shopify's
+  storefront filtering, so each change is a real document with its own URL and the browser's Back/Forward step through them.
+
+  @param {object} filters - collection.filters or search.filters.
+  @param {object} sort_options - collection.sort_options or search.sort_options.
+  @param {string} sort_by - Current sort value.
+  @param {string} default_sort - The default sort value; it is not repeated in the address.
+  @param {string} base_url - collection.url or the search route; the forms submit here.
+  @param {string} clear_url - base_url without filters (keeps the sort).
+  @param {string} results_html - Captured markup of snippets/monetta-results.liquid.
+  @param {number} active_count - Number of active filters.
+  @param {boolean} has_products - false hides the controls (nothing to filter).
+  @param {string} [query] - Search terms (search page only).
+{%- enddoc -%}
+{%- if has_products or active_count > 0 -%}
+  <div class="toolbar">
+    <div class="toolbar__start">
+      <button type="button" class="btn btn--quiet btn--sm filters-button" data-open-dialog="filters-drawer" aria-haspopup="dialog" aria-controls="filters-drawer">
+        {% render 'monetta-icon', name: 'tune', size: 20 %} Filtrar y ordenar
+        {%- if active_count > 0 -%}<span class="filters-button__count"><span class="visually-hidden">, </span>{{ active_count }}<span class="visually-hidden"> activos</span></span>{%- endif -%}
+      </button>
+    </div>
+    <div class="toolbar__end">
+      <form class="toolbar__sort" action="{{ base_url }}" method="get" data-sort-form>
+        {% render 'monetta-hidden-filters', filters: filters, query: query %}
+        <label for="sort-select">Ordenar</label>
+        <select class="select" id="sort-select" name="sort_by" data-sort-select>
+          {%- for option in sort_options -%}
+            <option value="{{ option.value }}"{% if option.value == sort_by %} selected{% endif %}>{{ option.name | escape }}</option>
+          {%- endfor -%}
+        </select>
+        <noscript><button type="submit" class="btn btn--quiet btn--sm">Ordenar</button></noscript>
+      </form>
+    </div>
+  </div>
+
+  {%- if active_count > 0 -%}
+    <div class="active-chips">
+      <h2 class="visually-hidden">Filtros activos</h2>
+      <ul class="chips" role="list">
+        {%- for filter in filters -%}
+          {%- if filter.type == 'price_range' -%}
+            {%- if filter.min_value.value != blank or filter.max_value.value != blank -%}
+              <li><a class="chip chip--removable" href="{{ filter.url_to_remove }}" aria-label="Quitar filtro: precio">Precio: {{ filter.min_value.value | default: 0 | money_without_trailing_zeros }} – {{ filter.max_value.value | default: filter.range_max | money_without_trailing_zeros }}{% render 'monetta-icon', name: 'close', size: 16 %}</a></li>
+            {%- endif -%}
+          {%- else -%}
+            {%- for value in filter.active_values -%}
+              <li><a class="chip chip--removable" href="{{ value.url_to_remove }}" aria-label="Quitar filtro: {{ value.label | escape }}">{{ value.label | escape }}{% render 'monetta-icon', name: 'close', size: 16 %}</a></li>
+            {%- endfor -%}
+          {%- endif -%}
+        {%- endfor -%}
+        <li><a class="chip" href="{{ clear_url }}">Limpiar todo</a></li>
+      </ul>
+    </div>
+  {%- endif -%}
+{%- endif -%}
+
+<div class="collection-layout{% if filters.size > 0 %} collection-layout--filters{% endif %}">
+  {%- if filters.size > 0 -%}
+    <aside class="filter-sidebar" aria-label="Filtros">
+      <form action="{{ base_url }}" method="get" data-filters-form data-autosubmit>
+        {%- if sort_by != blank and sort_by != default_sort -%}<input type="hidden" name="sort_by" value="{{ sort_by }}">{%- endif -%}
+        {%- if query != blank -%}<input type="hidden" name="q" value="{{ query | escape }}"><input type="hidden" name="type" value="product">{%- endif -%}
+        {% render 'monetta-filter-groups', filters: filters, open_first: 'true' %}
+        <noscript><button type="submit" class="btn btn--primary btn--block" style="margin-top:16px">Aplicar filtros</button></noscript>
+      </form>
+    </aside>
+  {%- endif -%}
+  <div class="results" data-results>{{ results_html }}</div>
+</div>
+
+{%- if has_products or active_count > 0 -%}
+  <dialog class="overlay overlay--drawer-right" id="filters-drawer" aria-labelledby="filters-title">
+    <div class="overlay__backdrop" data-overlay-close></div>
+    <div class="overlay__panel">
+      <div class="overlay__header">
+        <h2 class="overlay__title" id="filters-title">Filtrar y ordenar</h2>
+        <button type="button" class="icon-button" data-overlay-close aria-label="Cerrar">{% render 'monetta-icon', name: 'close', size: 22 %}</button>
+      </div>
+      <form action="{{ base_url }}" method="get" data-filters-form data-drawer-form class="filters-drawer__form">
+        <div class="overlay__body">
+          {%- if query != blank -%}<input type="hidden" name="q" value="{{ query | escape }}"><input type="hidden" name="type" value="product">{%- endif -%}
+          <fieldset class="options filters-drawer__sort">
+            <legend><span class="eyebrow eyebrow--muted">Ordenar</span></legend>
+            {%- for option in sort_options -%}
+              <label class="check">
+                <input type="radio" name="sort_by" value="{{ option.value }}"{% if option.value == sort_by %} checked{% endif %}>
+                <span>{{ option.name | escape }}</span>
+              </label>
+            {%- endfor -%}
+          </fieldset>
+          {% render 'monetta-filter-groups', filters: filters, open_first: 'true' %}
+        </div>
+        <div class="overlay__footer">
+          <button type="submit" class="btn btn--primary btn--block" data-apply-filters>Ver resultados</button>
+          {%- if active_count > 0 -%}<a class="btn btn--outline btn--block" href="{{ clear_url }}">Limpiar filtros</a>{%- endif -%}
+        </div>
+      </form>
+    </div>
+  </dialog>
+{%- endif -%}

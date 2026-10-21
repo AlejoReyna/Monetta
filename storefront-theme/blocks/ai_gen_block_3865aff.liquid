@@ -1,0 +1,696 @@
+{% doc %}
+  @prompt
+    Crea un bloque de Shopify OS 2.0 llamado expandable-text como archivo .liquid en /blocks/. Completamente autocontenido (CSS y JS dentro del mismo archivo), compatible con múltiples instancias usando block.id como identificador único.
+    
+    COMPORTAMIENTO:
+    
+    El primer párrafo del rich text es siempre visible
+    El resto del contenido está completamente oculto desde el inicio (max-height: 0, opacity: 0, overflow: hidden) — nunca visible hasta que el usuario interactúe
+    Al hacer clic, medir altura real con element.scrollHeight y asignarla como max-height
+    Al terminar la expansión (transitionend), cambiar max-height a none
+    Al colapsar, reasignar scrollHeight explícitamente antes de poner 0
+    El botón alterna entre dos labels editables
+    La flecha es un SVG chevron minimalista que rota 180° al expandirse
+    aria-expanded para accesibilidad
+    Sin setTimeout — solo transitionend y scrollHeight
+    ANIMACIÓN PREMIUM:
+    
+    Contenido: transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    Flecha: transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    SETTINGS — Texto principal:
+    
+    text — Richtext
+    font_family — Select: Body, Heading, Monospace
+    font_size — Range 12–36px
+    font_weight — Select: 300, 400, 500, 600, 700
+    line_height — Select: tight, normal, relaxed, loose
+    letter_spacing — Range -1–4px
+    text_color — Color picker
+    text_align — Select: left, center, right
+    max_width — Range 30–100%, paso 5
+    horizontal_position — Select: left, center, right
+    paragraph_spacing — Range 0–60px, paso 2, default 16 — espacio entre <p> con p + p { margin-top }
+    paragraph_indent — Range 0–40px, paso 2, default 0 — text-indent en cada párrafo
+    SETTINGS — Espaciado del bloque completo:
+    
+    block_margin_top — Range 0–120px, paso 4, default 0
+    block_margin_bottom — Range 0–120px, paso 4, default 0
+    block_margin_left — Range 0–80px, paso 4, default 0
+    block_margin_right — Range 0–80px, paso 4, default 0
+    block_padding_top — Range 0–80px, paso 4, default 0
+    block_padding_bottom — Range 0–80px, paso 4, default 0
+    block_padding_left — Range 0–80px, paso 4, default 0
+    block_padding_right — Range 0–80px, paso 4, default 0
+    block_min_height — Range 0–600px, paso 8, default 0 — altura mínima del bloque completo para eliminar espacios blancos no deseados
+    SETTINGS — Botón "Ver más":
+    
+    button_label_more — Text, default "Ver más"
+    button_label_less — Text, default "Ver menos"
+    button_mode — Select: link, outline, solid
+    button_font_size — Range 11–24px
+    button_font_weight — Select: 400, 500, 600, 700
+    button_color — Color picker
+    button_bg_color — Color picker
+    button_border_radius — Range 0–50px
+    button_padding_x — Range 0–48px
+    button_padding_y — Range 0–32px
+    button_min_height — Range 0–80px, paso 4, default 0 — altura mínima del botón para controlarlo verticalmente
+    button_align — Select: left, center, right
+    button_margin_top — Range 0–80px, paso 4, default 16
+    button_margin_bottom — Range 0–80px, paso 4, default 0
+    show_arrow — Checkbox, default true
+    arrow_size — Range 12–32px
+    arrow_position — Select: right of text, left of text, below text
+    Todos los valores deben aplicarse como variables CSS internas (--et-*) en el elemento raíz del bloque. JS vanilla puro, sin dependencias.
+    
+    
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .expandable-text-{{ ai_gen_id }} {
+    display: block;
+    margin-top: {{ block.settings.block_margin_top }}px;
+    margin-bottom: {{ block.settings.block_margin_bottom }}px;
+    margin-left: {{ block.settings.block_margin_left }}px;
+    margin-right: {{ block.settings.block_margin_right }}px;
+    padding-top: {{ block.settings.block_padding_top }}px;
+    padding-bottom: {{ block.settings.block_padding_bottom }}px;
+    padding-left: {{ block.settings.block_padding_left }}px;
+    padding-right: {{ block.settings.block_padding_right }}px;
+    min-height: {{ block.settings.block_min_height }}px;
+  }
+
+  .expandable-text__wrapper-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}%;
+    {% if block.settings.horizontal_position == 'center' %}
+      margin-left: auto;
+      margin-right: auto;
+    {% elsif block.settings.horizontal_position == 'right' %}
+      margin-left: auto;
+      margin-right: 0;
+    {% else %}
+      margin-left: 0;
+      margin-right: auto;
+    {% endif %}
+  }
+
+  .expandable-text__content-{{ ai_gen_id }} {
+    font-family: {% if block.settings.font_family == 'heading' %}var(--font-heading-family, sans-serif){% elsif block.settings.font_family == 'monospace' %}monospace{% else %}var(--font-body-family, sans-serif){% endif %};
+    font-size: {{ block.settings.font_size }}px;
+    font-weight: {{ block.settings.font_weight }};
+    line-height: {% if block.settings.line_height == 'tight' %}1.25{% elsif block.settings.line_height == 'relaxed' %}1.75{% elsif block.settings.line_height == 'loose' %}2{% else %}1.5{% endif %};
+    letter-spacing: {{ block.settings.letter_spacing }}px;
+    color: {{ block.settings.text_color }};
+    text-align: {{ block.settings.text_align }};
+  }
+
+  .expandable-text__content-{{ ai_gen_id }} p {
+    margin: 0;
+    text-indent: {{ block.settings.paragraph_indent }}px;
+  }
+
+  .expandable-text__content-{{ ai_gen_id }} p + p {
+    margin-top: {{ block.settings.paragraph_spacing }}px;
+  }
+
+  .expandable-text__hidden-{{ ai_gen_id }} {
+    max-height: 0;
+    opacity: 0;
+    overflow: hidden;
+    transition: max-height 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .expandable-text__hidden-{{ ai_gen_id }}.is-expanded {
+    opacity: 1;
+  }
+
+  .expandable-text__button-container-{{ ai_gen_id }} {
+    margin-top: {{ block.settings.button_margin_top }}px;
+    margin-bottom: {{ block.settings.button_margin_bottom }}px;
+    text-align: {{ block.settings.button_align }};
+  }
+
+  .expandable-text__button-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: {{ block.settings.button_font_weight }};
+    color: {{ block.settings.button_color }};
+    background-color: {% if block.settings.button_mode == 'solid' %}{{ block.settings.button_bg_color }}{% else %}transparent{% endif %};
+    border: {% if block.settings.button_mode == 'outline' %}1px solid {{ block.settings.button_color }}{% else %}none{% endif %};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    padding: {{ block.settings.button_padding_y }}px {{ block.settings.button_padding_x }}px;
+    min-height: {{ block.settings.button_min_height }}px;
+    cursor: pointer;
+    transition: opacity 0.3s ease;
+    {% if block.settings.button_mode == 'link' %}
+      text-decoration: underline;
+    {% endif %}
+    {% if block.settings.arrow_position == 'below' %}
+      flex-direction: column;
+    {% elsif block.settings.arrow_position == 'left' %}
+      flex-direction: row-reverse;
+    {% endif %}
+  }
+
+  .expandable-text__button-{{ ai_gen_id }}:hover {
+    opacity: 0.8;
+  }
+
+  .expandable-text__arrow-{{ ai_gen_id }} {
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    flex-shrink: 0;
+  }
+
+  .expandable-text__arrow-{{ ai_gen_id }}.is-expanded {
+    transform: rotate(180deg);
+  }
+{% endstyle %}
+
+<expandable-text-{{ ai_gen_id }}
+  class="expandable-text-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="expandable-text__wrapper-{{ ai_gen_id }}">
+    <div class="expandable-text__content-{{ ai_gen_id }}">
+      <div class="expandable-text__visible-{{ ai_gen_id }}" data-visible></div>
+      <div class="expandable-text__hidden-{{ ai_gen_id }}" data-hidden></div>
+    </div>
+
+    <div class="expandable-text__button-container-{{ ai_gen_id }}">
+      <button
+        class="expandable-text__button-{{ ai_gen_id }}"
+        data-toggle
+        aria-expanded="false"
+      >
+        <span data-label>{{ block.settings.button_label_more }}</span>
+        {% if block.settings.show_arrow %}
+          <svg
+            class="expandable-text__arrow-{{ ai_gen_id }}"
+            data-arrow
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        {% endif %}
+      </button>
+    </div>
+  </div>
+</expandable-text-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ExpandableText{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.isExpanded = false;
+        this.richText = {{ block.settings.text | json }};
+        this.labelMore = {{ block.settings.button_label_more | json }};
+        this.labelLess = {{ block.settings.button_label_less | json }};
+      }
+
+      connectedCallback() {
+        this.visibleContainer = this.querySelector('[data-visible]');
+        this.hiddenContainer = this.querySelector('[data-hidden]');
+        this.toggleButton = this.querySelector('[data-toggle]');
+        this.labelElement = this.querySelector('[data-label]');
+        this.arrowElement = this.querySelector('[data-arrow]');
+
+        this.splitContent();
+        this.setupEventListeners();
+      }
+
+      splitContent() {
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = this.richText;
+        const paragraphs = Array.from(tempDiv.querySelectorAll('p, h1, h2, h3, h4, h5, h6'));
+
+        if (paragraphs.length === 0) {
+          this.visibleContainer.innerHTML = this.richText;
+          this.toggleButton.style.display = 'none';
+          return;
+        }
+
+        if (paragraphs.length === 1) {
+          this.visibleContainer.innerHTML = this.richText;
+          this.toggleButton.style.display = 'none';
+          return;
+        }
+
+        this.visibleContainer.appendChild(paragraphs[0].cloneNode(true));
+
+        for (let i = 1; i < paragraphs.length; i++) {
+          this.hiddenContainer.appendChild(paragraphs[i].cloneNode(true));
+        }
+      }
+
+      setupEventListeners() {
+        this.toggleButton.addEventListener('click', () => this.toggle());
+        this.hiddenContainer.addEventListener('transitionend', (e) => {
+          if (e.propertyName === 'max-height' && this.isExpanded) {
+            this.hiddenContainer.style.maxHeight = 'none';
+          }
+        });
+      }
+
+      toggle() {
+        if (this.isExpanded) {
+          this.collapse();
+        } else {
+          this.expand();
+        }
+      }
+
+      expand() {
+        this.isExpanded = true;
+        const height = this.hiddenContainer.scrollHeight;
+        this.hiddenContainer.style.maxHeight = height + 'px';
+        this.hiddenContainer.classList.add('is-expanded');
+        this.toggleButton.setAttribute('aria-expanded', 'true');
+        this.labelElement.textContent = this.labelLess;
+        if (this.arrowElement) {
+          this.arrowElement.classList.add('is-expanded');
+        }
+      }
+
+      collapse() {
+        this.isExpanded = false;
+        const height = this.hiddenContainer.scrollHeight;
+        this.hiddenContainer.style.maxHeight = height + 'px';
+        
+        requestAnimationFrame(() => {
+          this.hiddenContainer.style.maxHeight = '0';
+          this.hiddenContainer.classList.remove('is-expanded');
+        });
+
+        this.toggleButton.setAttribute('aria-expanded', 'false');
+        this.labelElement.textContent = this.labelMore;
+        if (this.arrowElement) {
+          this.arrowElement.classList.remove('is-expanded');
+        }
+      }
+    }
+
+    customElements.define('expandable-text-{{ ai_gen_id }}', ExpandableText{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Expandable text",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Texto principal"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Contenido",
+      "default": "<p>Este es el primer párrafo que siempre será visible.</p><p>Este contenido estará oculto hasta que el usuario haga clic en el botón.</p><p>Puedes agregar múltiples párrafos y todos excepto el primero estarán colapsados inicialmente.</p>"
+    },
+    {
+      "type": "select",
+      "id": "font_family",
+      "label": "Familia de fuente",
+      "options": [
+        { "value": "body", "label": "Body" },
+        { "value": "heading", "label": "Heading" },
+        { "value": "monospace", "label": "Monospace" }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Tamaño de fuente",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        { "value": "300", "label": "300" },
+        { "value": "400", "label": "400" },
+        { "value": "500", "label": "500" },
+        { "value": "600", "label": "600" },
+        { "value": "700", "label": "700" }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "Altura de línea",
+      "options": [
+        { "value": "tight", "label": "Tight" },
+        { "value": "normal", "label": "Normal" },
+        { "value": "relaxed", "label": "Relaxed" },
+        { "value": "loose", "label": "Loose" }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Espaciado de letras",
+      "min": -1,
+      "max": 4,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color de texto",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Ancho máximo",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "horizontal_position",
+      "label": "Posición horizontal",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "paragraph_spacing",
+      "label": "Espacio entre párrafos",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "paragraph_indent",
+      "label": "Sangría de párrafo",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Espaciado del bloque"
+    },
+    {
+      "type": "range",
+      "id": "block_margin_top",
+      "label": "Margen superior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "block_margin_bottom",
+      "label": "Margen inferior",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "block_margin_left",
+      "label": "Margen izquierdo",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "block_margin_right",
+      "label": "Margen derecho",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "block_padding_top",
+      "label": "Relleno superior",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "block_padding_bottom",
+      "label": "Relleno inferior",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "block_padding_left",
+      "label": "Relleno izquierdo",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "block_padding_right",
+      "label": "Relleno derecho",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "block_min_height",
+      "label": "Altura mínima del bloque",
+      "min": 0,
+      "max": 600,
+      "step": 8,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "text",
+      "id": "button_label_more",
+      "label": "Etiqueta expandir",
+      "default": "Ver más"
+    },
+    {
+      "type": "text",
+      "id": "button_label_less",
+      "label": "Etiqueta colapsar",
+      "default": "Ver menos"
+    },
+    {
+      "type": "select",
+      "id": "button_mode",
+      "label": "Estilo de botón",
+      "options": [
+        { "value": "link", "label": "Link" },
+        { "value": "outline", "label": "Outline" },
+        { "value": "solid", "label": "Solid" }
+      ],
+      "default": "link"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Tamaño de fuente",
+      "min": 11,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "button_font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        { "value": "400", "label": "400" },
+        { "value": "500", "label": "500" },
+        { "value": "600", "label": "600" },
+        { "value": "700", "label": "700" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Color de fondo",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "button_padding_x",
+      "label": "Relleno horizontal",
+      "min": 0,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_padding_y",
+      "label": "Relleno vertical",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "button_min_height",
+      "label": "Altura mínima del botón",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "select",
+      "id": "button_align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "label": "Margen superior",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_margin_bottom",
+      "label": "Margen inferior",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrow",
+      "label": "Mostrar flecha",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Tamaño de flecha",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "arrow_position",
+      "label": "Posición de flecha",
+      "options": [
+        { "value": "right", "label": "Derecha del texto" },
+        { "value": "left", "label": "Izquierda del texto" },
+        { "value": "below", "label": "Debajo del texto" }
+      ],
+      "default": "right"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Expandable text"
+    }
+  ]
+}
+{% endschema %}

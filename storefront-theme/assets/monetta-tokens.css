@@ -1,0 +1,230 @@
+/* Monetta tokens, ported from design-prototype/src/styles/tokens.css by tools/style-guideline-theme/port-css.mjs.
+   @font-face lives in snippets/monetta-fonts.liquid (asset URLs need Liquid). --strip-h is 0: the theme has no prototype strip. */
+:root {
+  color-scheme: light;
+
+  --section-gap: 32px;
+  --strip-h: 0px;
+  --grid-gap-x: 12px;
+  --grid-gap-y: 24px;
+
+  /* Fixed bottom UI (dock, purchase dock, checkout bar); set by the shell. */
+  --bottom-ui: 0px;
+
+  /* Device cut-outs. Landscape phones put the notch and the rounded corners at the sides. */
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+
+  /* Where content starts at each side: the gutter, or the cut-out when that is wider.
+     Full-bleed rows (rails, chips, the flush grid, bars) undo exactly this much. */
+  --edge-l: max(var(--gutter), var(--safe-left));
+  --edge-r: max(var(--gutter), var(--safe-right));
+
+  /* Space the pinned chrome covers; measured by lib/chrome.js, so the values here only
+     apply until the first measurement. */
+  --pinned-top: calc(var(--strip-h) + var(--header-h));
+  --pinned-bottom: 0px;
+}
+
+/* @generated:tokens:start — design-system/build.mjs from design-system/monetta.tokens.json; edit the manifest, not this block */
+:root {
+  --color-canvas: #fbf8f2;
+  --color-bar: #f7f3ec;
+  --color-surface: #ffffff;
+  --color-surface-warm: #f3eadf;
+  --color-surface-tile: #f4eee5;
+  --color-ink: #211b16;
+  --color-ink-muted: #73665d;
+  --color-action-primary: #745237;
+  --color-on-action-primary: #ffffff;
+  --color-action-dark: #2d1e14;
+  --color-on-action-dark: #fbf8f2;
+  --color-accent-text: #805c32;
+  --color-gold: #c5a052;
+  --color-divider: #e7dcce;
+  --color-border-control: #8a7766;
+  --color-navigation-active: #8c6436;
+  --color-navigation-inactive: #211b16;
+  --color-sale: #a3342b;
+  --color-sale-surface: #f6deda;
+  --color-success: #3b7b4a;
+  --color-success-surface: #eaf4ec;
+  --color-scrim: rgba(33, 27, 22, 0.451);
+  --color-on-photo: #f8f5ee;
+  /* Names the components already use. They point at the semantic roles above; new work uses the roles. */
+  --color-surface-deep: var(--color-surface-tile);
+  --color-gold-text: var(--color-accent-text);
+  --color-hairline: var(--color-divider);
+  --color-hairline-strong: var(--color-border-control);
+  --color-on-dark: var(--color-on-photo);
+  --color-dock-ink: var(--color-ink);
+  --color-ink-on-warm: var(--color-ink);
+
+  /* Type families and roles (compact values; medium and expanded override below) */
+  --font-serif: 'Playfair Display', Georgia, 'Times New Roman', serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+  --type-campaign-font: var(--font-serif);
+  --type-campaign-weight: 400;
+  --type-campaign-lh: 1.08;
+  --type-campaign-track: -0.012em;
+  --type-campaign-size: 32px;
+  --type-screen-title-font: var(--font-serif);
+  --type-screen-title-weight: 400;
+  --type-screen-title-lh: 1.12;
+  --type-screen-title-track: -0.012em;
+  --type-screen-title-size: 26px;
+  --type-section-title-font: var(--font-serif);
+  --type-section-title-weight: 400;
+  --type-section-title-lh: 1.15;
+  --type-section-title-track: -0.01em;
+  --type-section-title-size: 23px;
+  --type-product-name-font: var(--font-serif);
+  --type-product-name-weight: 400;
+  --type-product-name-lh: 1.15;
+  --type-product-name-track: -0.01em;
+  --type-product-name-size: 25px;
+  --type-account-row-font: var(--font-serif);
+  --type-account-row-weight: 400;
+  --type-account-row-lh: 1.25;
+  --type-account-row-track: 0em;
+  --type-account-row-size: 18px;
+  --type-body-font: var(--font-sans);
+  --type-body-weight: 400;
+  --type-body-lh: 1.5;
+  --type-body-track: 0em;
+  --type-body-size: 15px;
+  --type-card-label-font: var(--font-sans);
+  --type-card-label-weight: 500;
+  --type-card-label-lh: 1.35;
+  --type-card-label-track: 0em;
+  --type-card-label-size: 14px;
+  --type-price-font: var(--font-sans);
+  --type-price-weight: 600;
+  --type-price-lh: 1.3;
+  --type-price-track: 0em;
+  --type-price-size: 15px;
+  --type-control-font: var(--font-sans);
+  --type-control-weight: 600;
+  --type-control-lh: 1.1;
+  --type-control-track: 0.02em;
+  --type-control-size: 14px;
+  --type-nav-label-font: var(--font-sans);
+  --type-nav-label-weight: 500;
+  --type-nav-label-lh: 1.2;
+  --type-nav-label-track: 0em;
+  --type-nav-label-size: 12px;
+  --type-eyebrow-font: var(--font-sans);
+  --type-eyebrow-weight: 500;
+  --type-eyebrow-lh: 1.3;
+  --type-eyebrow-track: 0.14em;
+  --type-eyebrow-size: 11px;
+
+  /* Geometry */
+  --radius-card: 12px;
+  --radius-control: 12px;
+  --radius-tile: 10px;
+  --radius-chip: 999px;
+  --radius-pill: 999px;
+  --radius-sheet: 20px;
+  --radius-dock: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --gutter: 20px;
+  --content-max: 1440px;
+  --control: 52px;
+  --tap: 48px;
+  --header-h: 60px;
+  --logo-h: 24px;
+  --cols-product: 2;
+  --cols-category: 3;
+
+  /* Motion */
+  --dur-snap: 180ms;
+  --dur-swap: 280ms;
+  --dur-settle: 480ms;
+  --ease: cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* Elevation */
+  --shadow-card: 0 4px 14px rgba(61, 43, 28, 0.059);
+  --shadow-float: 0 1px 6px rgba(61, 43, 28, 0.122);
+  --shadow-panel: 0 24px 64px rgba(61, 43, 28, 0.18);
+  --shadow-dock: none;
+}
+
+/* Narrow phones */
+@media (max-width: 359.98px) {
+  :root {
+    --gutter: 16px;
+    --cols-product: 1;
+  }
+}
+
+/* Medium: tablets and large phones in landscape */
+@media (min-width: 768px) {
+  :root {
+    --gutter: 32px;
+    --header-h: 64px;
+    --cols-product: 3;
+    --cols-category: 4;
+    --type-campaign-size: 40px;
+    --type-screen-title-size: 30px;
+    --type-section-title-size: 27px;
+    --type-product-name-size: 29px;
+    --type-account-row-size: 19px;
+    --type-body-size: 16px;
+    --type-card-label-size: 15px;
+    --type-price-size: 16px;
+    --type-control-size: 15px;
+    --type-nav-label-size: 13px;
+    --type-eyebrow-size: 11px;
+  }
+}
+
+/* Expanded: desktop */
+@media (min-width: 1024px) {
+  :root {
+    --gutter: 40px;
+    --header-h: 72px;
+    --cols-product: 4;
+    --cols-category: 6;
+    --type-campaign-size: 52px;
+    --type-screen-title-size: 36px;
+    --type-section-title-size: 30px;
+    --type-product-name-size: 32px;
+    --type-account-row-size: 20px;
+    --type-body-size: 17px;
+    --type-card-label-size: 16px;
+    --type-price-size: 17px;
+    --type-control-size: 15px;
+    --type-nav-label-size: 13px;
+    --type-eyebrow-size: 12px;
+  }
+}
+
+/* Wide desktop */
+@media (min-width: 1280px) {
+  :root {
+    --gutter: 48px;
+  }
+}
+/* @generated:tokens:end */
+
+@media (min-width: 768px) {
+  :root {
+    --section-gap: 48px;
+    --grid-gap-x: 16px;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --section-gap: 64px;
+  }
+}

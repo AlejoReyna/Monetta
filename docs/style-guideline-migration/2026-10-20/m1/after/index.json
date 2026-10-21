@@ -1,0 +1,171 @@
+{
+  "browser": "155.0.8059.40",
+  "capturedAt": "2026-10-21T00:12:38.443Z",
+  "shots": [
+    {
+      "screen": "inicio",
+      "viewport": "390",
+      "route": "/",
+      "top": "inicio__390__top.jpg",
+      "full": "inicio__390__full.jpg",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "height": 5418,
+      "problems": []
+    },
+    {
+      "screen": "inicio",
+      "viewport": "834",
+      "route": "/",
+      "top": "inicio__834__top.jpg",
+      "full": "inicio__834__full.jpg",
+      "scrollWidth": 834,
+      "clientWidth": 834,
+      "height": 5742,
+      "problems": []
+    },
+    {
+      "screen": "inicio",
+      "viewport": "1440",
+      "route": "/",
+      "top": "inicio__1440__top.jpg",
+      "full": "inicio__1440__full.jpg",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "height": 5640,
+      "problems": []
+    },
+    {
+      "screen": "coleccion",
+      "viewport": "390",
+      "route": "/collections/coach",
+      "top": "coleccion__390__top.jpg",
+      "full": "coleccion__390__full.jpg",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "height": 4262,
+      "problems": []
+    },
+    {
+      "screen": "coleccion",
+      "viewport": "834",
+      "route": "/collections/coach",
+      "top": "coleccion__834__top.jpg",
+      "full": "coleccion__834__full.jpg",
+      "scrollWidth": 834,
+      "clientWidth": 834,
+      "height": 3753,
+      "problems": []
+    },
+    {
+      "screen": "coleccion",
+      "viewport": "1440",
+      "route": "/collections/coach",
+      "top": "coleccion__1440__top.jpg",
+      "full": "coleccion__1440__full.jpg",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "height": 2738,
+      "problems": []
+    },
+    {
+      "screen": "producto",
+      "viewport": "390",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "top": "producto__390__top.jpg",
+      "full": "producto__390__full.jpg",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "height": 4278,
+      "problems": []
+    },
+    {
+      "screen": "producto",
+      "viewport": "834",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "top": "producto__834__top.jpg",
+      "full": "producto__834__full.jpg",
+      "scrollWidth": 834,
+      "clientWidth": 834,
+      "height": 3297,
+      "problems": []
+    },
+    {
+      "screen": "producto",
+      "viewport": "1440",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "top": "producto__1440__top.jpg",
+      "full": "producto__1440__full.jpg",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "height": 2957,
+      "problems": []
+    },
+    {
+      "screen": "cuenta",
+      "viewport": "390",
+      "route": "/design/cuenta",
+      "top": "cuenta__390__top.jpg",
+      "full": "cuenta__390__full.jpg",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "height": 2438,
+      "problems": []
+    },
+    {
+      "screen": "cuenta",
+      "viewport": "834",
+      "route": "/design/cuenta",
+      "top": "cuenta__834__top.jpg",
+      "full": "cuenta__834__full.jpg",
+      "scrollWidth": 834,
+      "clientWidth": 834,
+      "height": 1630,
+      "problems": []
+    },
+    {
+      "screen": "cuenta",
+      "viewport": "1440",
+      "route": "/design/cuenta",
+      "top": "cuenta__1440__top.jpg",
+      "full": "cuenta__1440__full.jpg",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "height": 1280,
+      "problems": []
+    },
+    {
+      "screen": "board",
+      "viewport": "390",
+      "route": "/design/board",
+      "top": "board__390__top.jpg",
+      "full": "board__390__full.jpg",
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "height": 6199,
+      "problems": []
+    },
+    {
+      "screen": "board",
+      "viewport": "834",
+      "route": "/design/board",
+      "top": "board__834__top.jpg",
+      "full": "board__834__full.jpg",
+      "scrollWidth": 834,
+      "clientWidth": 834,
+      "height": 4104,
+      "problems": []
+    },
+    {
+      "screen": "board",
+      "viewport": "1440",
+      "route": "/design/board",
+      "top": "board__1440__top.jpg",
+      "full": "board__1440__full.jpg",
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "height": 3792,
+      "problems": []
+    }
+  ]
+}

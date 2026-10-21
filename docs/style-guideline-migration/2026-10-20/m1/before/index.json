@@ -1,0 +1,105 @@
+{
+  "browser": "155.0.8059.40",
+  "capturedAt": "2026-10-20T22:49:39.088Z",
+  "shots": [
+    {
+      "screen": "inicio",
+      "viewport": "390",
+      "route": "/",
+      "top": "inicio__390__top.jpg",
+      "full": null,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "height": 5442,
+      "problems": []
+    },
+    {
+      "screen": "inicio",
+      "viewport": "834",
+      "route": "/",
+      "top": "inicio__834__top.jpg",
+      "full": null,
+      "scrollWidth": 834,
+      "clientWidth": 834,
+      "height": 5756,
+      "problems": []
+    },
+    {
+      "screen": "inicio",
+      "viewport": "1440",
+      "route": "/",
+      "top": "inicio__1440__top.jpg",
+      "full": null,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "height": 5609,
+      "problems": []
+    },
+    {
+      "screen": "coleccion",
+      "viewport": "390",
+      "route": "/collections/coach",
+      "top": "coleccion__390__top.jpg",
+      "full": null,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "height": 4280,
+      "problems": []
+    },
+    {
+      "screen": "coleccion",
+      "viewport": "834",
+      "route": "/collections/coach",
+      "top": "coleccion__834__top.jpg",
+      "full": null,
+      "scrollWidth": 834,
+      "clientWidth": 834,
+      "height": 3730,
+      "problems": []
+    },
+    {
+      "screen": "coleccion",
+      "viewport": "1440",
+      "route": "/collections/coach",
+      "top": "coleccion__1440__top.jpg",
+      "full": null,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "height": 2702,
+      "problems": []
+    },
+    {
+      "screen": "producto",
+      "viewport": "390",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "top": "producto__390__top.jpg",
+      "full": null,
+      "scrollWidth": 390,
+      "clientWidth": 390,
+      "height": 4275,
+      "problems": []
+    },
+    {
+      "screen": "producto",
+      "viewport": "834",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "top": "producto__834__top.jpg",
+      "full": null,
+      "scrollWidth": 834,
+      "clientWidth": 834,
+      "height": 3291,
+      "problems": []
+    },
+    {
+      "screen": "producto",
+      "viewport": "1440",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "top": "producto__1440__top.jpg",
+      "full": null,
+      "scrollWidth": 1440,
+      "clientWidth": 1440,
+      "height": 2940,
+      "problems": []
+    }
+  ]
+}

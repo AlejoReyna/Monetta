@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
 import 'package:monetta_app/data/local/account_store.dart';
@@ -28,8 +29,8 @@ import 'package:monetta_app/features/rewards/rewards_section.dart';
 import 'package:monetta_app/main.dart';
 
 /// The grey the owner asked for on both bars, light mode.
-const Color _barGrey = Color(0xFFF5F5F5);
-const Color _white = Color(0xFFFFFFFF);
+const Color _barGrey = MonettaTokens.bar;
+const Color _white = MonettaTokens.canvas;
 
 /// Chrome (top bar, bottom bar) is read from what is painted,
 /// not from palette getters: the colour a shopper sees is the contract.

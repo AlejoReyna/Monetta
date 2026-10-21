@@ -1,0 +1,610 @@
+{% doc %}
+  @prompt
+    Generate HTML and CSS for a Shopify 'Custom Liquid' section consisting ONLY of a horizontal collection carousel with the following specifications:
+    
+    Layout & Interaction:
+    
+    Create a horizontal scroll container with scroll-snap-type: x mandatory.
+    
+    Mobile Visibility (Peek Effect): The active card must be centered, while the subsequent card must be 25% visible on the right side of the viewport to clearly indicate more content is available to swipe.
+    
+    Hide all scrollbars using ::-webkit-scrollbar { display: none; } and scrollbar-width: none.
+    
+    Card Design (Premium & Minimalist):
+    
+    Shape: Apply a border-radius: 32px to each card for a soft, ultra-modern rounded contour.
+    
+    Aspect Ratio: Each card must have a 4:5 vertical ratio (tall and wide) to fill the screen elegantly.
+    
+    Aesthetic: Background color #FFFFFF. Add a very subtle, expansive soft shadow: box-shadow: 0 25px 50px rgba(0,0,0,0.04).
+    
+    Floating Content: Position a transparent PNG image placeholder in the center of the card.
+    
+    Animation & Physics:
+    
+    Smooth Motion: Use transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1) for a high-end, buttery-smooth feel.
+    
+    Focus Effect: The centered card should be scale(1.0) and opacity: 1. Cards not in focus should automatically transition to scale(0.9) and opacity: 0.5 as the user scrolls.
+    
+    Content Structure:
+    
+    Card 1: Title "BOLSAS", Link: "/collections/bolsas", minimalist "EXPLORAR" button.
+    
+    Card 2: Title "CARTERAS", Link: "/collections/carteras", minimalist "EXPLORAR" button.
+    
+    Card 3: Title "RELOJES", Link: "/collections/relojes", minimalist "EXPLORAR" button.
+    
+    Technical Requirements:
+    
+    Pure HTML and CSS only. No JavaScript.
+    
+    Use a unique CSS prefix .lux-card-slider- to avoid theme conflicts.
+    
+    Ensure the design is fully responsive for mobile and desktop.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .lux-card-slider-container-{{ ai_gen_id }} {
+    width: 100%;
+    overflow: hidden;
+    display: block;
+  }
+
+  .lux-card-slider-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 16px;
+    padding: 20px 0;
+  }
+
+  .lux-card-slider-wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lux-card-slider-card-{{ ai_gen_id }} {
+    flex: 0 0 auto;
+    width: calc(100vw - 80px);
+    aspect-ratio: 4 / 5;
+    background-color: {{ block.settings.card_background_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    box-shadow: {{ block.settings.card_shadow_x }}px {{ block.settings.card_shadow_y }}px {{ block.settings.card_shadow_blur }}px {{ block.settings.card_shadow_color }};
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    transition: all 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    opacity: {{ block.settings.unfocused_opacity | divided_by: 100.0 }};
+    transform: scale({{ block.settings.unfocused_scale | divided_by: 100.0 }});
+    text-decoration: none;
+    padding: 40px 20px;
+  }
+
+  .lux-card-slider-card-{{ ai_gen_id }}:first-child {
+    margin-left: calc((100vw - (100vw - 80px)) / 2);
+  }
+
+  .lux-card-slider-card-{{ ai_gen_id }}:last-child {
+    margin-right: calc((100vw - (100vw - 80px)) / 2);
+  }
+
+  .lux-card-slider-card-{{ ai_gen_id }}.lux-card-slider-focused-{{ ai_gen_id }} {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  .lux-card-slider-image-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: 300px;
+    height: auto;
+    margin-bottom: 30px;
+  }
+
+  .lux-card-slider-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: 300px;
+    height: 300px;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 30px;
+  }
+
+  .lux-card-slider-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 200px;
+    max-height: 200px;
+  }
+
+  .lux-card-slider-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_font_size }}px;
+    font-weight: {{ block.settings.title_font_weight }};
+    color: {{ block.settings.title_color }};
+    margin: 0 0 20px 0;
+    text-align: center;
+    letter-spacing: {{ block.settings.title_letter_spacing }}px;
+    text-transform: {{ block.settings.title_text_transform }};
+  }
+
+  .lux-card-slider-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    background-color: {{ block.settings.button_background_color }};
+    color: {{ block.settings.button_text_color }};
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: {{ block.settings.button_font_weight }};
+    text-decoration: none;
+    text-transform: {{ block.settings.button_text_transform }};
+    letter-spacing: {{ block.settings.button_letter_spacing }}px;
+    transition: all 0.3s ease;
+  }
+
+  .lux-card-slider-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background_color }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .lux-card-slider-card-{{ ai_gen_id }} {
+      width: {{ block.settings.desktop_card_width }}px;
+    }
+
+    .lux-card-slider-card-{{ ai_gen_id }}:first-child {
+      margin-left: calc((100vw - {{ block.settings.desktop_card_width }}px) / 2);
+    }
+
+    .lux-card-slider-card-{{ ai_gen_id }}:last-child {
+      margin-right: calc((100vw - {{ block.settings.desktop_card_width }}px) / 2);
+    }
+  }
+{% endstyle %}
+
+<lux-card-slider-{{ ai_gen_id }} class="lux-card-slider-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="lux-card-slider-wrapper-{{ ai_gen_id }}">
+    {% for i in (1..3) %}
+      {% liquid
+        assign card_title_key = 'card_' | append: i | append: '_title'
+        assign card_link_key = 'card_' | append: i | append: '_link'
+        assign card_image_key = 'card_' | append: i | append: '_image'
+        
+        assign card_title = block.settings[card_title_key]
+        assign card_link = block.settings[card_link_key]
+        assign card_image = block.settings[card_image_key]
+      %}
+      
+      <a 
+        href="{{ card_link }}" 
+        class="lux-card-slider-card-{{ ai_gen_id }}"
+        data-card-index="{{ i }}"
+      >
+        {% if card_image %}
+          <img
+            src="{{ card_image | image_url: width: 600 }}"
+            alt="{{ card_image.alt | escape }}"
+            loading="lazy"
+            width="{{ card_image.width }}"
+            height="{{ card_image.height }}"
+            class="lux-card-slider-image-{{ ai_gen_id }}"
+          >
+        {% else %}
+          <div class="lux-card-slider-image-placeholder-{{ ai_gen_id }}">
+            {{ 'image' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+        
+        <h3 class="lux-card-slider-title-{{ ai_gen_id }}">{{ card_title }}</h3>
+        <span class="lux-card-slider-button-{{ ai_gen_id }}">{{ block.settings.button_text }}</span>
+      </a>
+    {% endfor %}
+  </div>
+</lux-card-slider-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class LuxCardSlider{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.wrapper = this.querySelector('.lux-card-slider-wrapper-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.lux-card-slider-card-{{ ai_gen_id }}');
+      }
+
+      connectedCallback() {
+        this.setupScrollObserver();
+        this.updateFocusedCard();
+      }
+
+      setupScrollObserver() {
+        const options = {
+          root: this.wrapper,
+          threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              this.cards.forEach(card => card.classList.remove('lux-card-slider-focused-{{ ai_gen_id }}'));
+              entry.target.classList.add('lux-card-slider-focused-{{ ai_gen_id }}');
+            }
+          });
+        }, options);
+
+        this.cards.forEach(card => observer.observe(card));
+      }
+
+      updateFocusedCard() {
+        if (this.cards.length > 0) {
+          this.cards[0].classList.add('lux-card-slider-focused-{{ ai_gen_id }}');
+        }
+      }
+    }
+
+    customElements.define('lux-card-slider-{{ ai_gen_id }}', LuxCardSlider{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Card 1"
+    },
+    {
+      "type": "text",
+      "id": "card_1_title",
+      "label": "Title",
+      "default": "BOLSAS"
+    },
+    {
+      "type": "url",
+      "id": "card_1_link",
+      "label": "Link"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Card 2"
+    },
+    {
+      "type": "text",
+      "id": "card_2_title",
+      "label": "Title",
+      "default": "CARTERAS"
+    },
+    {
+      "type": "url",
+      "id": "card_2_link",
+      "label": "Link"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Card 3"
+    },
+    {
+      "type": "text",
+      "id": "card_3_title",
+      "label": "Title",
+      "default": "RELOJES"
+    },
+    {
+      "type": "url",
+      "id": "card_3_link",
+      "label": "Link"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "range",
+      "id": "desktop_card_width",
+      "label": "Desktop card width",
+      "min": 300,
+      "max": 800,
+      "step": 50,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_x",
+      "label": "Shadow X offset",
+      "min": -20,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_y",
+      "label": "Shadow Y offset",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_blur",
+      "label": "Shadow blur",
+      "min": 0,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "card_shadow_color",
+      "label": "Shadow color",
+      "default": "rgba(0,0,0,0.04)"
+    },
+    {
+      "type": "header",
+      "content": "Focus effect"
+    },
+    {
+      "type": "range",
+      "id": "unfocused_opacity",
+      "label": "Unfocused opacity",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "unfocused_scale",
+      "label": "Unfocused scale",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 90
+    },
+    {
+      "type": "header",
+      "content": "Title style"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Font size",
+      "min": 16,
+      "max": 72,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "title_font_weight",
+      "label": "Font weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "default": 700
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "title_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "title_text_transform",
+      "label": "Text transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "Lowercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "EXPLORAR"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_font_weight",
+      "label": "Font weight",
+      "min": 100,
+      "max": 900,
+      "step": 100,
+      "default": 600
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Vertical padding",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 5,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "select",
+      "id": "button_text_transform",
+      "label": "Text transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "lowercase",
+          "label": "Lowercase"
+        }
+      ],
+      "default": "uppercase"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background_color",
+      "label": "Hover background color",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Hover border color",
+      "default": "#383838"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

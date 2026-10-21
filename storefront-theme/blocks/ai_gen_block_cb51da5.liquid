@@ -1,0 +1,514 @@
+{% doc %}
+  @prompt
+    Task: Create a "Collection List" Mobile Carousel (Strictly NO Section Titles).
+    
+    1. Rigid Anti-Overflow & Spacing (Crucial):
+    
+    No Titles: Do NOT include any section headings or text outside the cards.
+    
+    Vertical Margins: Add exactly 60px of padding at the top and bottom of the section so the cards float in the center and are never cut off.
+    
+    Containment: Apply strict clipping to the main container. The section must NEVER expand the website width or cause horizontal scrolling on the page body.
+    
+    Mobile Behavior: Disable "Stack on mobile". Strictly maintain the side-by-side horizontal scrolling layout on all mobile devices.
+    
+    2. Individualized Card Layout (The Peek):
+    
+    Card Width: Each card must be exactly 80% of the screen width.
+    
+    Isolation Gap: Add a visible gap between cards so they feel like distinct, individual elements.
+    
+    Asymmetric Depth: Align the active card with a 5% left margin, leaving a clear 15% peek of the next card on the right to invite swiping.
+    
+    3. High-End Aesthetic & 40/60 Proportions:
+    
+    Card Geometry: 36px border-radius, pure white background, and a soft, high-diffusion shadow.
+    
+    Internal Layout: Allocate exactly 40% of the card's height to the image area and 60% to the texts and buttons.
+    
+    Image Frame: Place the transparent product image inside a subtle rounded frame within that top 40% space. This ensures the image scales optimally without breaking the design.
+    
+    Typography: Use an elegant Serif font for the titles ("BOLSAS", "CARTERAS", "RELOJES"). Center the text and the "EXPLORAR" button within the bottom 60% area.
+    
+    4. Premium Pop-Up Motion:
+    
+    Snapping: Use an instant magnetic snap effect when swiping.
+    
+    Exaggerated Depth: The active centered card must scale to 1.0. Inactive side cards must shrink smoothly to 0.85 to create an individual pop-up feel.
+    
+    Polish: Hide all scrollbars for a clean, native app experience.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    padding: 60px 0;
+    position: relative;
+  }
+
+  .ai-collection-carousel-container-{{ ai_gen_id }} {
+    width: 100%;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-collection-carousel-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    padding-left: 5%;
+    padding-right: 15%;
+  }
+
+  .ai-collection-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 80%;
+    scroll-snap-align: start;
+    background-color: {{ block.settings.card_background }};
+    border-radius: 36px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, {{ block.settings.shadow_opacity | divided_by: 100.0 }});
+    overflow: hidden;
+    transition: transform 0.3s ease;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ai-collection-carousel-image-wrapper-{{ ai_gen_id }} {
+    height: 40%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background-color: {{ block.settings.image_frame_background }};
+  }
+
+  .ai-collection-carousel-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-collection-carousel-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-collection-carousel-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-collection-carousel-content-{{ ai_gen_id }} {
+    height: 60%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 20px;
+    text-align: center;
+  }
+
+  .ai-collection-carousel-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-weight: {{ block.settings.title_font.weight }};
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 20px 0;
+    letter-spacing: 1px;
+  }
+
+  .ai-collection-carousel-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 32px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    transition: all 0.3s ease;
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+  }
+
+  .ai-collection-carousel-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-carousel-track-{{ ai_gen_id }} {
+      padding-left: 5%;
+      padding-right: 15%;
+    }
+
+    .ai-collection-carousel-card-{{ ai_gen_id }} {
+      flex: 0 0 80%;
+    }
+
+    .ai-collection-carousel-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-collection-carousel-button-{{ ai_gen_id }} {
+      font-size: {{ block.settings.button_font_size | times: 0.9 }}px;
+      padding: 10px 24px;
+    }
+  }
+{% endstyle %}
+
+<collection-carousel-{{ ai_gen_id }}
+  class="ai-collection-carousel-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-collection-carousel-container-{{ ai_gen_id }}">
+    <div class="ai-collection-carousel-track-{{ ai_gen_id }}">
+      {% for i in (1..6) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+
+        <div class="ai-collection-carousel-card-{{ ai_gen_id }}" data-card-index="{{ forloop.index0 }}">
+          <div class="ai-collection-carousel-image-wrapper-{{ ai_gen_id }}">
+            {% if collection != blank and collection.featured_image %}
+              <img
+                src="{{ collection.featured_image | image_url: width: 600 }}"
+                alt="{{ collection.featured_image.alt | escape }}"
+                loading="lazy"
+                width="600"
+                height="600"
+                class="ai-collection-carousel-image-{{ ai_gen_id }}"
+              >
+            {% else %}
+              <div class="ai-collection-carousel-placeholder-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="ai-collection-carousel-content-{{ ai_gen_id }}">
+            {% if collection != blank %}
+              <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+              <a
+                href="{{ collection.url }}"
+                class="ai-collection-carousel-button-{{ ai_gen_id }}"
+              >
+                {{ block.settings.button_text }}
+              </a>
+            {% else %}
+              <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">Colección {{ i }}</h3>
+              <a
+                href="#"
+                class="ai-collection-carousel-button-{{ ai_gen_id }}"
+              >
+                {{ block.settings.button_text }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</collection-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.container = this.querySelector('.ai-collection-carousel-container-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.ai-collection-carousel-card-{{ ai_gen_id }}');
+        this.isScrolling = false;
+        this.scrollTimeout = null;
+      }
+
+      connectedCallback() {
+        this.setupScrollSnap();
+        this.setupScaleEffect();
+      }
+
+      setupScrollSnap() {
+        this.container.addEventListener('scroll', () => {
+          clearTimeout(this.scrollTimeout);
+          this.isScrolling = true;
+
+          this.scrollTimeout = setTimeout(() => {
+            this.isScrolling = false;
+            this.snapToNearest();
+          }, 150);
+
+          this.updateCardScales();
+        });
+      }
+
+      snapToNearest() {
+        const containerRect = this.container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          closestCard.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'start'
+          });
+        }
+      }
+
+      setupScaleEffect() {
+        this.updateCardScales();
+      }
+
+      updateCardScales() {
+        const containerRect = this.container.getBoundingClientRect();
+        const containerCenter = containerRect.left + containerRect.width / 2;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(containerCenter - cardCenter);
+          const maxDistance = containerRect.width / 2;
+          const normalizedDistance = Math.min(distance / maxDistance, 1);
+
+          const minScale = 0.85;
+          const maxScale = 1.0;
+          const scale = maxScale - (normalizedDistance * (maxScale - minScale));
+
+          card.style.transform = `scale(${scale})`;
+        });
+      }
+    }
+
+    customElements.define('collection-carousel-{{ ai_gen_id }}', CollectionCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 40,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Card background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Shadow opacity",
+      "min": 0,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 15
+    },
+    {
+      "type": "header",
+      "content": "Image frame"
+    },
+    {
+      "type": "color",
+      "id": "image_frame_background",
+      "label": "Frame background",
+      "default": "#f9f9f9"
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Title"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Font",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "EXPLORAR"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Hover border color",
+      "default": "#383838"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

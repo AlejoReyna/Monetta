@@ -1,0 +1,1378 @@
+{% doc %}
+  @prompt
+    Create a premium image card carousel block with exactly 3 cards.
+    Each card must contain, in this exact order from top to bottom:
+    
+    1. A full-width image that fills the card edge-to-edge with no white space
+       or padding around it. The image must have border-radius on the top-left
+       and top-right corners only (50px), matching the card top corners exactly,
+       so it blends seamlessly with no gap or white line.
+       Settings: image picker per card, image height selector (Small 160px /
+       Medium 220px / Large 300px / Extra Large 380px). Default: Medium (220px).
+    
+    2. A heading below the image.
+       Settings: text input, font picker, font size (range 16–48px, default 22px),
+       font weight (Normal / Medium / Bold), text color picker (default #000000),
+       text alignment (Left / Center / Right),
+       padding-top (range 8–40px, default 14px),
+       padding-sides (range 8–40px, default 16px).
+    
+    3. A body text paragraph below the heading.
+       Settings: textarea input, font picker, font size (range 12–24px, default 14px),
+       font weight (Normal / Medium), text color picker (default #666666),
+       text alignment (Left / Center / Right),
+       padding-top (range 4–32px, default 8px),
+       padding-sides (range 8–40px, default 16px),
+       line-height (range 1.2–2.0, step 0.1, default 1.6).
+    
+    4. A pill-shaped CTA button inside the card.
+       Settings: button label text input, external URL input (opens in new tab),
+       font picker (default Andada Pro), font size (range 12–20px, default 14px),
+       background color picker (default #dedede), text color picker (default #000000),
+       hover background color picker (default #dedede),
+       hover text color picker (default #aa7d44),
+       border radius (range 0–50px, default 50px),
+       border width (range 0–4px), border color picker,
+       button width (Auto / Full width),
+       padding-vertical (range 8–24px, default 10px),
+       padding-horizontal (range 16–48px, default 24px),
+       margin-top (range 8–32px, default 14px),
+       margin-sides (range 8–40px, default 16px),
+       margin-bottom (range 8–40px, default 20px).
+    
+    5. A secondary plain text link below the button, still inside the card.
+       Settings: link label text input, URL input (opens in new tab),
+       font size (range 12–16px), text color picker, underline toggle,
+       margin-top (range 4–24px), margin-bottom (range 8–32px),
+       text alignment (Left / Center / Right).
+    
+    Card design settings:
+    - Card background color picker (default #ffffff)
+    - Card border radius (range 0–60px, default 50px)
+    - Card border width (range 0–4px) and border color picker
+    - overflow: hidden on the card so the image clips correctly to rounded
+      corners with NO white line or gap between image and card border
+    - DO NOT add any border, outline, or margin inside the card that could
+      create a white line between the image and the card border
+    - Premium floating shadow on the card WRAPPER (a div OUTSIDE the card),
+      NOT on the card itself, so the shadow is NEVER clipped:
+      box-shadow: 0 20px 60px rgba(0,0,0,0.18), 0 6px 20px rgba(0,0,0,0.10)
+    - Shadow intensity selector (None / Subtle / Medium / Strong / Ultra)
+    - Shadow color picker (default #000000)
+    - Card wrapper must have padding: 12px (to give room for shadow to render)
+      and background: transparent
+    - Card inner padding-bottom (range 0–48px, default 0px)
+    
+    Carousel & layout settings:
+    - Desktop card width: 62% of carousel viewport (so the second card peeks
+      visibly on the right side, showing approximately 20–25% of it)
+    - Mobile card width: 82% (so second card peeks on mobile too)
+    - Gap between cards: 20px (default)
+    - Gap between cards range: 8–64px
+    - Carousel container horizontal padding: 24px left, 24px right, so the
+      peeking card is clearly visible and shadows are not clipped
+    - The carousel track must use display: flex with no wrapping
+    - scroll-snap-type: x mandatory on the container
+    - scroll-snap-align: start on each card
+    - scroll-behavior: smooth
+    - overflow: visible on Y axis, overflow-x: scroll on the container
+      so vertical shadows are NEVER clipped
+    - Navigation arrows toggle (Show / Hide, default Show)
+    - Arrow position (Inside overlay / Outside cards, default Outside)
+    - Arrow background color picker (default #ffffff),
+      arrow icon color picker (default #000000),
+      arrow border radius (range 0–50px, default 50px),
+      arrow size (range 24–64px, default 40px)
+    - Dots/pagination indicator toggle (Show / Hide, default Show)
+    - Active dot color picker (default #aa7d44),
+      inactive dot color picker (default #dedede), dot size (default 8px)
+    - Autoplay toggle (default Off) with interval selector (3s/4s/5s/7s/10s)
+    - Loop toggle (infinite scroll, default On)
+    - Animation easing: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+    - Transition duration selector (300ms / 400ms / 500ms / 700ms, default 500ms)
+    - Mobile swipe-friendly with touch events
+    
+    Section settings:
+    - Section background color picker (default transparent)
+    - Section top padding (range 0–120px, default 63px)
+    - Section bottom padding (range 0–120px, default 96px)
+    - Section left/right padding (range 0–64px, default 0px)
+    -
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-carousel-section-{{ ai_gen_id }} {
+    background-color: {{ block.settings.section_bg_color }};
+    padding-top: {{ block.settings.section_padding_top }}px;
+    padding-bottom: {{ block.settings.section_padding_bottom }}px;
+    padding-left: {{ block.settings.section_padding_sides }}px;
+    padding-right: {{ block.settings.section_padding_sides }}px;
+    width: 100%;
+  }
+
+  .ai-carousel-container-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    max-width: 100%;
+    overflow: visible;
+  }
+
+  .ai-carousel-viewport-{{ ai_gen_id }} {
+    overflow-x: scroll;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 {{ block.settings.carousel_padding_horizontal }}px;
+  }
+
+  .ai-carousel-viewport-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    width: max-content;
+  }
+
+  .ai-carousel-card-wrapper-{{ ai_gen_id }} {
+    scroll-snap-align: start;
+    flex-shrink: 0;
+    width: 62%;
+    padding: 12px;
+    background: transparent;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-carousel-card-wrapper-{{ ai_gen_id }} {
+      width: 82%;
+    }
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }} {
+    background-color: {{ block.settings.card_bg_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    {% if block.settings.card_border_width > 0 %}
+      border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+    {% endif %}
+  }
+
+  {% assign shadow_intensity = block.settings.shadow_intensity %}
+  {% if shadow_intensity == 'subtle' %}
+    .ai-carousel-card-wrapper-{{ ai_gen_id }} {
+      box-shadow: 0 4px 12px rgba({{ block.settings.shadow_color | color_extract: 'red' }}, {{ block.settings.shadow_color | color_extract: 'green' }}, {{ block.settings.shadow_color | color_extract: 'blue' }}, 0.08);
+    }
+  {% elsif shadow_intensity == 'medium' %}
+    .ai-carousel-card-wrapper-{{ ai_gen_id }} {
+      box-shadow: 0 10px 30px rgba({{ block.settings.shadow_color | color_extract: 'red' }}, {{ block.settings.shadow_color | color_extract: 'green' }}, {{ block.settings.shadow_color | color_extract: 'blue' }}, 0.12), 0 3px 10px rgba({{ block.settings.shadow_color | color_extract: 'red' }}, {{ block.settings.shadow_color | color_extract: 'green' }}, {{ block.settings.shadow_color | color_extract: 'blue' }}, 0.08);
+    }
+  {% elsif shadow_intensity == 'strong' %}
+    .ai-carousel-card-wrapper-{{ ai_gen_id }} {
+      box-shadow: 0 20px 60px rgba({{ block.settings.shadow_color | color_extract: 'red' }}, {{ block.settings.shadow_color | color_extract: 'green' }}, {{ block.settings.shadow_color | color_extract: 'blue' }}, 0.18), 0 6px 20px rgba({{ block.settings.shadow_color | color_extract: 'red' }}, {{ block.settings.shadow_color | color_extract: 'green' }}, {{ block.settings.shadow_color | color_extract: 'blue' }}, 0.10);
+    }
+  {% elsif shadow_intensity == 'ultra' %}
+    .ai-carousel-card-wrapper-{{ ai_gen_id }} {
+      box-shadow: 0 30px 90px rgba({{ block.settings.shadow_color | color_extract: 'red' }}, {{ block.settings.shadow_color | color_extract: 'green' }}, {{ block.settings.shadow_color | color_extract: 'blue' }}, 0.25), 0 10px 30px rgba({{ block.settings.shadow_color | color_extract: 'red' }}, {{ block.settings.shadow_color | color_extract: 'green' }}, {{ block.settings.shadow_color | color_extract: 'blue' }}, 0.15);
+    }
+  {% endif %}
+
+  .ai-carousel-image-{{ ai_gen_id }} {
+    width: 100%;
+    {% if block.settings.image_height == 'small' %}
+      height: 160px;
+    {% elsif block.settings.image_height == 'medium' %}
+      height: 220px;
+    {% elsif block.settings.image_height == 'large' %}
+      height: 300px;
+    {% elsif block.settings.image_height == 'extra_large' %}
+      height: 380px;
+    {% endif %}
+    object-fit: cover;
+    display: block;
+    border-radius: {{ block.settings.card_border_radius }}px {{ block.settings.card_border_radius }}px 0 0;
+  }
+
+  .ai-carousel-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    {% if block.settings.image_height == 'small' %}
+      height: 160px;
+    {% elsif block.settings.image_height == 'medium' %}
+      height: 220px;
+    {% elsif block.settings.image_height == 'large' %}
+      height: 300px;
+    {% elsif block.settings.image_height == 'extra_large' %}
+      height: 380px;
+    {% endif %}
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: {{ block.settings.card_border_radius }}px {{ block.settings.card_border_radius }}px 0 0;
+  }
+
+  .ai-carousel-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-carousel-content-{{ ai_gen_id }} {
+    padding-bottom: {{ block.settings.card_inner_padding_bottom }}px;
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ai-carousel-heading-{{ ai_gen_id }} {
+    font-family: {{ block.settings.heading_font.family }}, {{ block.settings.heading_font.fallback_families }};
+    font-weight: {{ block.settings.heading_font.weight }};
+    font-size: {{ block.settings.heading_font_size }}px;
+    color: {{ block.settings.heading_color }};
+    text-align: {{ block.settings.heading_alignment }};
+    padding-top: {{ block.settings.heading_padding_top }}px;
+    padding-left: {{ block.settings.heading_padding_sides }}px;
+    padding-right: {{ block.settings.heading_padding_sides }}px;
+    margin: 0;
+    {% if block.settings.heading_font_weight == 'normal' %}
+      font-weight: 400;
+    {% elsif block.settings.heading_font_weight == 'medium' %}
+      font-weight: 500;
+    {% elsif block.settings.heading_font_weight == 'bold' %}
+      font-weight: 700;
+    {% endif %}
+  }
+
+  .ai-carousel-body-{{ ai_gen_id }} {
+    font-family: {{ block.settings.body_font.family }}, {{ block.settings.body_font.fallback_families }};
+    font-weight: {{ block.settings.body_font.weight }};
+    font-size: {{ block.settings.body_font_size }}px;
+    color: {{ block.settings.body_color }};
+    text-align: {{ block.settings.body_alignment }};
+    line-height: {{ block.settings.body_line_height }};
+    padding-top: {{ block.settings.body_padding_top }}px;
+    padding-left: {{ block.settings.body_padding_sides }}px;
+    padding-right: {{ block.settings.body_padding_sides }}px;
+    margin: 0;
+    {% if block.settings.body_font_weight == 'normal' %}
+      font-weight: 400;
+    {% elsif block.settings.body_font_weight == 'medium' %}
+      font-weight: 500;
+    {% endif %}
+  }
+
+  .ai-carousel-button-{{ ai_gen_id }} {
+    display: inline-block;
+    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-weight: {{ block.settings.button_font.weight }};
+    font-size: {{ block.settings.button_font_size }}px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    border-radius: {{ block.settings.button_border_radius }}px;
+    padding: {{ block.settings.button_padding_vertical }}px {{ block.settings.button_padding_horizontal }}px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    margin-top: {{ block.settings.button_margin_top }}px;
+    margin-left: {{ block.settings.button_margin_sides }}px;
+    margin-right: {{ block.settings.button_margin_sides }}px;
+    margin-bottom: {{ block.settings.button_margin_bottom }}px;
+    {% if block.settings.button_border_width > 0 %}
+      border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border_color }};
+    {% else %}
+      border: none;
+    {% endif %}
+    {% if block.settings.button_width == 'full' %}
+      width: calc(100% - {{ block.settings.button_margin_sides | times: 2 }}px);
+      text-align: center;
+    {% else %}
+      width: auto;
+    {% endif %}
+  }
+
+  .ai-carousel-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg_color }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  .ai-carousel-link-{{ ai_gen_id }} {
+    font-size: {{ block.settings.link_font_size }}px;
+    color: {{ block.settings.link_color }};
+    text-align: {{ block.settings.link_alignment }};
+    margin-top: {{ block.settings.link_margin_top }}px;
+    margin-bottom: {{ block.settings.link_margin_bottom }}px;
+    padding-left: {{ block.settings.button_margin_sides }}px;
+    padding-right: {{ block.settings.button_margin_sides }}px;
+    {% if block.settings.link_underline %}
+      text-decoration: underline;
+    {% else %}
+      text-decoration: none;
+    {% endif %}
+  }
+
+  .ai-carousel-link-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    {% if block.settings.link_underline %}
+      text-decoration: underline;
+    {% else %}
+      text-decoration: none;
+    {% endif %}
+  }
+
+  .ai-carousel-nav-{{ ai_gen_id }} {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background-color: {{ block.settings.arrow_bg_color }};
+    border: none;
+    border-radius: {{ block.settings.arrow_border_radius }}px;
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 10;
+    transition: opacity 0.3s ease;
+  }
+
+  .ai-carousel-nav-{{ ai_gen_id }}:hover {
+    opacity: 0.8;
+  }
+
+  .ai-carousel-nav-{{ ai_gen_id }} svg {
+    width: 50%;
+    height: 50%;
+    stroke: {{ block.settings.arrow_icon_color }};
+    fill: none;
+    stroke-width: 2;
+  }
+
+  {% if block.settings.arrow_position == 'inside' %}
+    .ai-carousel-nav-prev-{{ ai_gen_id }} {
+      left: 20px;
+    }
+    .ai-carousel-nav-next-{{ ai_gen_id }} {
+      right: 20px;
+    }
+  {% else %}
+    .ai-carousel-nav-prev-{{ ai_gen_id }} {
+      left: -{{ block.settings.arrow_size | divided_by: 2 }}px;
+    }
+    .ai-carousel-nav-next-{{ ai_gen_id }} {
+      right: -{{ block.settings.arrow_size | divided_by: 2 }}px;
+    }
+  {% endif %}
+
+  .ai-carousel-dots-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  .ai-carousel-dot-{{ ai_gen_id }} {
+    width: {{ block.settings.dot_size }}px;
+    height: {{ block.settings.dot_size }}px;
+    border-radius: 50%;
+    background-color: {{ block.settings.dot_inactive_color }};
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    padding: 0;
+  }
+
+  .ai-carousel-dot-{{ ai_gen_id }}.active {
+    background-color: {{ block.settings.dot_active_color }};
+  }
+{% endstyle %}
+
+<premium-carousel-{{ ai_gen_id }} class="ai-carousel-section-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-carousel-container-{{ ai_gen_id }}">
+    {% if block.settings.show_arrows %}
+      <button class="ai-carousel-nav-{{ ai_gen_id }} ai-carousel-nav-prev-{{ ai_gen_id }}" aria-label="Previous slide">
+        <svg viewBox="0 0 24 24">
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
+      </button>
+      <button class="ai-carousel-nav-{{ ai_gen_id }} ai-carousel-nav-next-{{ ai_gen_id }}" aria-label="Next slide">
+        <svg viewBox="0 0 24 24">
+          <polyline points="9 18 15 12 9 6"></polyline>
+        </svg>
+      </button>
+    {% endif %}
+
+    <div class="ai-carousel-viewport-{{ ai_gen_id }}">
+      <div class="ai-carousel-track-{{ ai_gen_id }}">
+        {% for i in (1..3) %}
+          {% liquid
+            assign image_key = 'card_' | append: i | append: '_image'
+            assign heading_key = 'card_' | append: i | append: '_heading'
+            assign body_key = 'card_' | append: i | append: '_body'
+            assign button_label_key = 'card_' | append: i | append: '_button_label'
+            assign button_url_key = 'card_' | append: i | append: '_button_url'
+            assign link_label_key = 'card_' | append: i | append: '_link_label'
+            assign link_url_key = 'card_' | append: i | append: '_link_url'
+
+            assign card_image = block.settings[image_key]
+            assign card_heading = block.settings[heading_key]
+            assign card_body = block.settings[body_key]
+            assign card_button_label = block.settings[button_label_key]
+            assign card_button_url = block.settings[button_url_key]
+            assign card_link_label = block.settings[link_label_key]
+            assign card_link_url = block.settings[link_url_key]
+          %}
+
+          <div class="ai-carousel-card-wrapper-{{ ai_gen_id }}">
+            <div class="ai-carousel-card-{{ ai_gen_id }}">
+              {% if card_image %}
+                <img
+                  src="{{ card_image | image_url: width: 800 }}"
+                  alt="{{ card_image.alt | escape }}"
+                  loading="lazy"
+                  width="{{ card_image.width }}"
+                  height="{{ card_image.height }}"
+                  class="ai-carousel-image-{{ ai_gen_id }}"
+                >
+              {% else %}
+                <div class="ai-carousel-image-placeholder-{{ ai_gen_id }}">
+                  {{ 'image' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+
+              <div class="ai-carousel-content-{{ ai_gen_id }}">
+                {% if card_heading != blank %}
+                  <h3 class="ai-carousel-heading-{{ ai_gen_id }}">{{ card_heading }}</h3>
+                {% endif %}
+
+                {% if card_body != blank %}
+                  <p class="ai-carousel-body-{{ ai_gen_id }}">{{ card_body }}</p>
+                {% endif %}
+
+                {% if card_button_label != blank and card_button_url != blank %}
+                  <a
+                    href="{{ card_button_url }}"
+                    class="ai-carousel-button-{{ ai_gen_id }}"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {{ card_button_label }}
+                  </a>
+                {% endif %}
+
+                {% if card_link_label != blank and card_link_url != blank %}
+                  <div class="ai-carousel-link-{{ ai_gen_id }}">
+                    <a href="{{ card_link_url }}" target="_blank" rel="noopener noreferrer">{{ card_link_label }}</a>
+                  </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    {% if block.settings.show_dots %}
+      <div class="ai-carousel-dots-{{ ai_gen_id }}">
+        {% for i in (1..3) %}
+          <button class="ai-carousel-dot-{{ ai_gen_id }} {% if i == 1 %}active{% endif %}" data-index="{{ i | minus: 1 }}" aria-label="Go to slide {{ i }}"></button>
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
+</premium-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PremiumCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.viewport = this.querySelector('.ai-carousel-viewport-{{ ai_gen_id }}');
+        this.track = this.querySelector('.ai-carousel-track-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.ai-carousel-card-wrapper-{{ ai_gen_id }}');
+        this.prevButton = this.querySelector('.ai-carousel-nav-prev-{{ ai_gen_id }}');
+        this.nextButton = this.querySelector('.ai-carousel-nav-next-{{ ai_gen_id }}');
+        this.dots = this.querySelectorAll('.ai-carousel-dot-{{ ai_gen_id }}');
+        this.currentIndex = 0;
+        this.autoplayInterval = null;
+        this.transitionDuration = {{ block.settings.transition_duration }};
+        this.autoplayEnabled = {{ block.settings.autoplay }};
+        this.autoplayDelay = {{ block.settings.autoplay_interval | times: 1000 }};
+        this.loopEnabled = {{ block.settings.loop }};
+      }
+
+      connectedCallback() {
+        this.setupEventListeners();
+        if (this.autoplayEnabled) {
+          this.startAutoplay();
+        }
+      }
+
+      disconnectedCallback() {
+        this.stopAutoplay();
+      }
+
+      setupEventListeners() {
+        if (this.prevButton) {
+          this.prevButton.addEventListener('click', () => this.prev());
+        }
+        if (this.nextButton) {
+          this.nextButton.addEventListener('click', () => this.next());
+        }
+
+        this.dots.forEach((dot, index) => {
+          dot.addEventListener('click', () => this.goToSlide(index));
+        });
+
+        this.viewport.addEventListener('scroll', () => {
+          this.updateActiveSlide();
+        });
+
+        this.viewport.addEventListener('touchstart', () => {
+          this.stopAutoplay();
+        });
+
+        this.viewport.addEventListener('touchend', () => {
+          if (this.autoplayEnabled) {
+            this.startAutoplay();
+          }
+        });
+      }
+
+      prev() {
+        if (this.currentIndex > 0) {
+          this.goToSlide(this.currentIndex - 1);
+        } else if (this.loopEnabled) {
+          this.goToSlide(this.cards.length - 1);
+        }
+      }
+
+      next() {
+        if (this.currentIndex < this.cards.length - 1) {
+          this.goToSlide(this.currentIndex + 1);
+        } else if (this.loopEnabled) {
+          this.goToSlide(0);
+        }
+      }
+
+      goToSlide(index) {
+        this.currentIndex = index;
+        const card = this.cards[index];
+        if (card) {
+          card.scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'start'
+          });
+        }
+        this.updateDots();
+        if (this.autoplayEnabled) {
+          this.stopAutoplay();
+          this.startAutoplay();
+        }
+      }
+
+      updateActiveSlide() {
+        const viewportLeft = this.viewport.scrollLeft;
+        const viewportWidth = this.viewport.offsetWidth;
+        const viewportCenter = viewportLeft + viewportWidth / 2;
+
+        let closestIndex = 0;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card, index) => {
+          const cardLeft = card.offsetLeft;
+          const cardWidth = card.offsetWidth;
+          const cardCenter = cardLeft + cardWidth / 2;
+          const distance = Math.abs(cardCenter - viewportCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestIndex = index;
+          }
+        });
+
+        if (this.currentIndex !== closestIndex) {
+          this.currentIndex = closestIndex;
+          this.updateDots();
+        }
+      }
+
+      updateDots() {
+        this.dots.forEach((dot, index) => {
+          if (index === this.currentIndex) {
+            dot.classList.add('active');
+          } else {
+            dot.classList.remove('active');
+          }
+        });
+      }
+
+      startAutoplay() {
+        this.stopAutoplay();
+        this.autoplayInterval = setInterval(() => {
+          this.next();
+        }, this.autoplayDelay);
+      }
+
+      stopAutoplay() {
+        if (this.autoplayInterval) {
+          clearInterval(this.autoplayInterval);
+          this.autoplayInterval = null;
+        }
+      }
+    }
+
+    customElements.define('premium-carousel-{{ ai_gen_id }}', PremiumCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Premium image carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Background",
+      "default": "rgba(0,0,0,0)"
+    },
+    {
+      "type": "range",
+      "id": "section_padding_top",
+      "label": "Top padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 64
+    },
+    {
+      "type": "range",
+      "id": "section_padding_bottom",
+      "label": "Bottom padding",
+      "min": 0,
+      "max": 120,
+      "step": 4,
+      "unit": "px",
+      "default": 96
+    },
+    {
+      "type": "range",
+      "id": "section_padding_sides",
+      "label": "Left/right padding",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Carousel"
+    },
+    {
+      "type": "range",
+      "id": "carousel_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 0,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 8,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Border color",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "range",
+      "id": "card_inner_padding_bottom",
+      "label": "Inner bottom padding",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Shadow"
+    },
+    {
+      "type": "select",
+      "id": "shadow_intensity",
+      "label": "Intensity",
+      "options": [
+        { "value": "none", "label": "None" },
+        { "value": "subtle", "label": "Subtle" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "strong", "label": "Strong" },
+        { "value": "ultra", "label": "Ultra" }
+      ],
+      "default": "strong"
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "select",
+      "id": "image_height",
+      "label": "Height",
+      "options": [
+        { "value": "small", "label": "Small (160px)" },
+        { "value": "medium", "label": "Medium (220px)" },
+        { "value": "large", "label": "Large (300px)" },
+        { "value": "extra_large", "label": "Extra large (380px)" }
+      ],
+      "default": "medium"
+    },
+    {
+      "type": "header",
+      "content": "Card 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_1_heading",
+      "label": "Heading",
+      "default": "Premium Feature"
+    },
+    {
+      "type": "textarea",
+      "id": "card_1_body",
+      "label": "Body text",
+      "default": "Discover our exclusive collection designed for those who appreciate quality and craftsmanship."
+    },
+    {
+      "type": "text",
+      "id": "card_1_button_label",
+      "label": "Button label",
+      "default": "Explore"
+    },
+    {
+      "type": "url",
+      "id": "card_1_button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "text",
+      "id": "card_1_link_label",
+      "label": "Link label",
+      "default": "Learn more"
+    },
+    {
+      "type": "url",
+      "id": "card_1_link_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Card 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_2_heading",
+      "label": "Heading",
+      "default": "Luxury Design"
+    },
+    {
+      "type": "textarea",
+      "id": "card_2_body",
+      "label": "Body text",
+      "default": "Experience the perfect blend of elegance and functionality in every detail."
+    },
+    {
+      "type": "text",
+      "id": "card_2_button_label",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "card_2_button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "text",
+      "id": "card_2_link_label",
+      "label": "Link label",
+      "default": "View collection"
+    },
+    {
+      "type": "url",
+      "id": "card_2_link_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Card 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_3_heading",
+      "label": "Heading",
+      "default": "Timeless Elegance"
+    },
+    {
+      "type": "textarea",
+      "id": "card_3_body",
+      "label": "Body text",
+      "default": "Curated pieces that transcend trends and celebrate enduring style."
+    },
+    {
+      "type": "text",
+      "id": "card_3_button_label",
+      "label": "Button label",
+      "default": "Discover"
+    },
+    {
+      "type": "url",
+      "id": "card_3_button_url",
+      "label": "Button URL"
+    },
+    {
+      "type": "text",
+      "id": "card_3_link_label",
+      "label": "Link label",
+      "default": "See details"
+    },
+    {
+      "type": "url",
+      "id": "card_3_link_url",
+      "label": "Link URL"
+    },
+    {
+      "type": "header",
+      "content": "Heading style"
+    },
+    {
+      "type": "font_picker",
+      "id": "heading_font",
+      "label": "Font",
+      "default": "newsreader_n7"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 22
+    },
+    {
+      "type": "select",
+      "id": "heading_font_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "medium", "label": "Medium" },
+        { "value": "bold", "label": "Bold" }
+      ],
+      "default": "bold"
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "heading_alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_top",
+      "label": "Top padding",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "heading_padding_sides",
+      "label": "Side padding",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Body text style"
+    },
+    {
+      "type": "font_picker",
+      "id": "body_font",
+      "label": "Font",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "body_font_size",
+      "label": "Size",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "body_font_weight",
+      "label": "Weight",
+      "options": [
+        { "value": "normal", "label": "Normal" },
+        { "value": "medium", "label": "Medium" }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "color",
+      "id": "body_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "select",
+      "id": "body_alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "body_padding_top",
+      "label": "Top padding",
+      "min": 4,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "body_padding_sides",
+      "label": "Side padding",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "body_line_height",
+      "label": "Line height",
+      "min": 1.2,
+      "max": 2,
+      "step": 0.1,
+      "default": 1.6
+    },
+    {
+      "type": "header",
+      "content": "Button style"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Font",
+      "default": "inknut_antiqua_n5"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background",
+      "default": "#dedede"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Hover background",
+      "default": "#dedede"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text",
+      "default": "#aa7d44"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Border width",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "button_width",
+      "label": "Width",
+      "options": [
+        { "value": "auto", "label": "Auto" },
+        { "value": "full", "label": "Full width" }
+      ],
+      "default": "auto"
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "label": "Top margin",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_margin_sides",
+      "label": "Side margin",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_margin_bottom",
+      "label": "Bottom margin",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Link style"
+    },
+    {
+      "type": "range",
+      "id": "link_font_size",
+      "label": "Size",
+      "min": 12,
+      "max": 16,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "checkbox",
+      "id": "link_underline",
+      "label": "Underline",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "link_alignment",
+      "label": "Alignment",
+      "options": [
+        { "value": "left", "label": "Left" },
+        { "value": "center", "label": "Center" },
+        { "value": "right", "label": "Right" }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "link_margin_top",
+      "label": "Top margin",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "link_margin_bottom",
+      "label": "Bottom margin",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Navigation"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show arrows",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "arrow_position",
+      "label": "Arrow position",
+      "options": [
+        { "value": "inside", "label": "Inside overlay" },
+        { "value": "outside", "label": "Outside cards" }
+      ],
+      "default": "outside"
+    },
+    {
+      "type": "color",
+      "id": "arrow_bg_color",
+      "label": "Arrow background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "arrow_icon_color",
+      "label": "Arrow icon",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "arrow_border_radius",
+      "label": "Arrow border radius",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Arrow size",
+      "min": 24,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show dots",
+      "default": true
+    },
+    {
+      "type": "color",
+      "id": "dot_active_color",
+      "label": "Active dot",
+      "default": "#aa7d44"
+    },
+    {
+      "type": "color",
+      "id": "dot_inactive_color",
+      "label": "Inactive dot",
+      "default": "#dedede"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size",
+      "min": 4,
+      "max": 16,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Behavior"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay",
+      "default": false
+    },
+    {
+      "type": "select",
+      "id": "autoplay_interval",
+      "label": "Autoplay interval",
+      "options": [
+        { "value": "3", "label": "3 seconds" },
+        { "value": "4", "label": "4 seconds" },
+        { "value": "5", "label": "5 seconds" },
+        { "value": "7", "label": "7 seconds" },
+        { "value": "10", "label": "10 seconds" }
+      ],
+      "default": "5"
+    },
+    {
+      "type": "checkbox",
+      "id": "loop",
+      "label": "Loop",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "transition_duration",
+      "label": "Transition duration",
+      "options": [
+        { "value": "300", "label": "300ms" },
+        { "value": "400", "label": "400ms" },
+        { "value": "500", "label": "500ms" },
+        { "value": "700", "label": "700ms" }
+      ],
+      "default": "500"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Premium image carousel"
+    }
+  ]
+}
+{% endschema %}

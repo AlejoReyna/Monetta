@@ -1,0 +1,82 @@
+
+┌─────────────────────────────────────────────────────────┐
+│ A new version of Flutter is available!                  │
+│                                                         │
+│ To update to the latest version, run "flutter upgrade". │
+└─────────────────────────────────────────────────────────┘
+00:00 +0: loading /Users/alexis_reyna/MyCode/Monetta/test/app/theme_test.dart
+00:00 +0: /Users/alexis_reyna/MyCode/Monetta/test/app/theme_test.dart: light and dark themes expose complete semantic palettes
+00:00 +1: /Users/alexis_reyna/MyCode/Monetta/test/app/boutique_palette_test.dart: boutique light palette UI-THEME-01 (objetivo) canvas is 0xFFFFFFFF and a neutral grey
+00:00 +2: /Users/alexis_reyna/MyCode/Monetta/test/app/boutique_palette_test.dart: boutique light palette UI-THEME-01 (objetivo) canvas is 0xFFFFFFFF and a neutral grey
+00:00 +3: /Users/alexis_reyna/MyCode/Monetta/test/app/theme_test.dart: section headings use the fluid editorial title reveal
+00:00 +4: /Users/alexis_reyna/MyCode/Monetta/test/app/theme_test.dart: section headings use the fluid editorial title reveal
+00:00 +5: /Users/alexis_reyna/MyCode/Monetta/test/app/theme_test.dart: section headings use the fluid editorial title reveal
+00:00 +6: /Users/alexis_reyna/MyCode/Monetta/test/app/theme_test.dart: section headings use the fluid editorial title reveal
+00:00 +7: /Users/alexis_reyna/MyCode/Monetta/test/app/theme_test.dart: section headings use the fluid editorial title reveal
+00:00 +8: /Users/alexis_reyna/MyCode/Monetta/test/app/boutique_palette_test.dart: boutique light palette UI-THEME-02 (caracterización) brand colours and the dark palette are untouched
+00:00 +9: /Users/alexis_reyna/MyCode/Monetta/test/app/boutique_palette_test.dart: shared theme app bar UI-THEME-03 (objetivo) light appBarTheme paints the navigation grey
+00:00 +10: /Users/alexis_reyna/MyCode/Monetta/test/app/boutique_palette_test.dart: shared theme app bar UI-THEME-03 (caracterización) dark appBarTheme stays on the dark surface
+00:01 +11: /Users/alexis_reyna/MyCode/Monetta/test/features/navigation/monetta_floating_bottom_navigation_test.dart: every tab forwards its destination and updates the selection
+00:01 +12: /Users/alexis_reyna/MyCode/Monetta/test/features/navigation/monetta_floating_bottom_navigation_test.dart: large bag counts stay compact and announce the actual quantity
+00:01 +13: /Users/alexis_reyna/MyCode/Monetta/test/features/navigation/monetta_floating_bottom_navigation_test.dart: catalog badge follows bag changes after the route is opened
+00:02 +14: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:02 +15: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:02 +16: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:02 +17: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:03 +18: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+00:03 +19: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+00:04 +20: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+RESPONSIVE-cuenta: null
+00:04 +21: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+00:04 +22: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+RESPONSIVE-pedidos: null
+00:04 +23: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+RESPONSIVE-detalle: null
+RESPONSIVE-contacto: null
+00:05 +24: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+00:05 +25: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+00:05 +26: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+00:05 +27: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+00:05 +28: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+RESPONSIVE-notificaciones: null
+00:05 +29: /Users/alexis_reyna/MyCode/Monetta/test/features/account/package_e_responsive_test.dart: Paquete E en teléfono estrecho con texto ampliado cuenta, pedidos, detalle, contacto y notificaciones
+RESPONSIVE-favoritos: null
+00:05 +30: /Users/alexis_reyna/MyCode/Monetta/test/features/rewards/rewards_disabled_contract_test.dart: CONTRACT-02 RewardsSection states CONTRACT-02 disabled shows unavailable, never connection
+00:05 +31: /Users/alexis_reyna/MyCode/Monetta/test/features/rewards/rewards_disabled_contract_test.dart: CONTRACT-02 RewardsSection states CONTRACT-02 disabled shows unavailable, never connection
+00:05 +32: /Users/alexis_reyna/MyCode/Monetta/test/features/rewards/rewards_disabled_contract_test.dart: CONTRACT-02 RewardsSection states CONTRACT-02 disabled shows unavailable, never connection
+00:05 +33: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x1.0
+00:05 +34: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x1.0
+00:05 +35: /Users/alexis_reyna/MyCode/Monetta/test/features/rewards/rewards_disabled_contract_test.dart: CONTRACT-02 RewardsSection states CONTRACT-02 offline shows the connection message
+00:05 +36: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:05 +37: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:05 +38: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:05 +39: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:05 +40: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:05 +41: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:05 +42: /Users/alexis_reyna/MyCode/Monetta/test/features/rewards/rewards_disabled_contract_test.dart: CONTRACT-02 RewardsBalanceCard states CONTRACT-02 401 without JSON shows session ended
+00:05 +43: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 390 wide x1.0
+00:06 +44: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x1.0
+00:06 +45: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:06 +46: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x2.0
+00:06 +47: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 390 wide x2.0
+00:06 +48: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x2.0
+00:06 +49: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 430 wide x1.0
+00:07 +50: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x1.0
+00:07 +51: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x1.0
+00:07 +52: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x1.0
+00:07 +53: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 430 wide x2.0
+00:07 +54: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x2.0
+00:07 +55: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x2.0
+00:07 +56: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x2.0
+00:07 +57: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x1.0
+00:07 +58: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x1.0
+00:08 +59: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x1.0
+00:08 +60: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x1.0
+00:08 +61: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x2.0
+00:08 +62: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x2.0
+00:08 +63: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x2.0
+00:08 +64: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x2.0
+00:08 +65: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons
+00:08 +66: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 the reading order is header, content, dock
+00:08 +67: /Users/alexis_reyna/MyCode/Monetta/test/features/product/product_layout_responsive_test.dart: (tearDownAll)
+00:08 +67: All tests passed!

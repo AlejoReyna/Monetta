@@ -561,7 +561,8 @@ class _SectionTitle extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style: boutiqueSectionHeading(color: palette.ink),
+              style:
+                  boutiqueSectionHeading(context: context, color: palette.ink),
             ),
           ),
           if (actionLabel case final label? when onAction != null)

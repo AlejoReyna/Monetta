@@ -1,0 +1,675 @@
+{% doc %}
+  @prompt
+    haz tres secciones diferentes, las cuales te desplazas por ellas deslizando tu dedo. Es importante que las secciones se difuminen cuando se desplazan , Haz que sean unas tarjetas verticales que puedan tener una coleccion para añadir como conexion, quiero que se vean separados cada elemento y que el modelo del centro se vea mas cerca e iluminado , quiero que las tarjetas sean mas estrechas y se vean redondeadas, las otras tarjetas deslizables se deben de ver detrás de la principal para provocar que el usuario deslice
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-swipe-cards-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    position: relative;
+    overflow: visible;
+    touch-action: pan-y;
+    padding: 80px 0;
+  }
+
+  .ai-swipe-cards-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    perspective: 1200px;
+  }
+
+  .ai-swipe-cards-container-{{ ai_gen_id }} {
+    position: relative;
+    width: {{ block.settings.card_width }}px;
+    height: {{ block.settings.card_height }}px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .ai-swipe-card-{{ ai_gen_id }} {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: {{ block.settings.card_bg_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    overflow: hidden;
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+    cursor: grab;
+  }
+
+  .ai-swipe-card-{{ ai_gen_id }}.ai-swipe-card-left-{{ ai_gen_id }} {
+    transform: translateX(-{{ block.settings.stack_offset }}%) translateZ(-100px) scale({{ block.settings.stack_scale | divided_by: 100.0 }});
+    opacity: {{ block.settings.stack_opacity | divided_by: 100.0 }};
+    filter: blur({{ block.settings.stack_blur }}px) brightness({{ block.settings.stack_brightness | divided_by: 100.0 }});
+    z-index: 1;
+  }
+
+  .ai-swipe-card-{{ ai_gen_id }}.ai-swipe-card-right-{{ ai_gen_id }} {
+    transform: translateX({{ block.settings.stack_offset }}%) translateZ(-100px) scale({{ block.settings.stack_scale | divided_by: 100.0 }});
+    opacity: {{ block.settings.stack_opacity | divided_by: 100.0 }};
+    filter: blur({{ block.settings.stack_blur }}px) brightness({{ block.settings.stack_brightness | divided_by: 100.0 }});
+    z-index: 1;
+  }
+
+  .ai-swipe-card-{{ ai_gen_id }}.ai-swipe-card-active-{{ ai_gen_id }} {
+    transform: translateX(0) translateZ(0) scale(1);
+    opacity: 1;
+    filter: brightness({{ block.settings.active_brightness | divided_by: 100.0 }});
+    z-index: 10;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+  }
+
+  .ai-swipe-card-{{ ai_gen_id }}.ai-swipe-card-hidden-{{ ai_gen_id }} {
+    opacity: 0;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .ai-swipe-card-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 70%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-swipe-card-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 70%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-swipe-card-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 150px;
+    max-height: 150px;
+  }
+
+  .ai-swipe-card-content-{{ ai_gen_id }} {
+    padding: {{ block.settings.card_padding }}px;
+    color: {{ block.settings.card_text_color }};
+    height: 30%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .ai-swipe-card-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    margin: 0 0 8px;
+    color: {{ block.settings.card_text_color }};
+    font-weight: 600;
+  }
+
+  .ai-swipe-card-description-{{ ai_gen_id }} {
+    font-size: {{ block.settings.text_size }}px;
+    margin: 0 0 12px;
+    color: {{ block.settings.card_text_color }};
+    opacity: 0.8;
+    line-height: 1.4;
+  }
+
+  .ai-swipe-card-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_text_size }}px;
+    transition: background-color 0.3s ease;
+    text-align: center;
+    width: fit-content;
+  }
+
+  .ai-swipe-card-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg_color }};
+  }
+
+  .ai-swipe-indicators-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    padding: 30px 0 0;
+  }
+
+  .ai-swipe-indicator-{{ ai_gen_id }} {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background-color: {{ block.settings.indicator_color }};
+    opacity: 0.3;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    cursor: pointer;
+    border: none;
+    padding: 0;
+  }
+
+  .ai-swipe-indicator-{{ ai_gen_id }}.ai-swipe-indicator-active-{{ ai_gen_id }} {
+    opacity: 1;
+    transform: scale(1.3);
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-swipe-cards-container-{{ ai_gen_id }} {
+      width: 85%;
+      max-width: 350px;
+      height: auto;
+      aspect-ratio: 3 / 4;
+    }
+
+    .ai-swipe-card-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.8 }}px;
+    }
+
+    .ai-swipe-card-description-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.9 }}px;
+    }
+
+    .ai-swipe-card-{{ ai_gen_id }}.ai-swipe-card-left-{{ ai_gen_id }},
+    .ai-swipe-card-{{ ai_gen_id }}.ai-swipe-card-right-{{ ai_gen_id }} {
+      transform: translateX(0) translateZ(-80px) scale({{ block.settings.stack_scale | times: 0.95 | divided_by: 100.0 }});
+    }
+  }
+{% endstyle %}
+
+<swipe-cards-{{ ai_gen_id }} class="ai-swipe-cards-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-swipe-cards-wrapper-{{ ai_gen_id }}">
+    <div class="ai-swipe-cards-container-{{ ai_gen_id }}" data-container>
+      {% for i in (1..3) %}
+        {% liquid
+          assign collection_key = 'card_' | append: i | append: '_collection'
+          assign title_key = 'card_' | append: i | append: '_title'
+          assign description_key = 'card_' | append: i | append: '_description'
+          assign button_text_key = 'card_' | append: i | append: '_button_text'
+          
+          assign collection = block.settings[collection_key]
+          assign title = block.settings[title_key]
+          assign description = block.settings[description_key]
+          assign button_text = block.settings[button_text_key]
+        %}
+
+        <div class="ai-swipe-card-{{ ai_gen_id }}" data-card="{{ forloop.index0 }}">
+          {% if collection != blank and collection.featured_image %}
+            <img
+              src="{{ collection.featured_image | image_url: width: 600 }}"
+              alt="{{ collection.featured_image.alt | escape }}"
+              class="ai-swipe-card-image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="600"
+              height="600"
+            >
+          {% else %}
+            <div class="ai-swipe-card-image-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+
+          <div class="ai-swipe-card-content-{{ ai_gen_id }}">
+            {% if title != blank %}
+              <h3 class="ai-swipe-card-title-{{ ai_gen_id }}">{{ title }}</h3>
+            {% elsif collection != blank %}
+              <h3 class="ai-swipe-card-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+            {% endif %}
+
+            {% if description != blank %}
+              <div class="ai-swipe-card-description-{{ ai_gen_id }}">{{ description }}</div>
+            {% elsif collection != blank and collection.description != blank %}
+              <div class="ai-swipe-card-description-{{ ai_gen_id }}">{{ collection.description | strip_html | truncate: 80 }}</div>
+            {% endif %}
+
+            {% if collection != blank %}
+              <a href="{{ collection.url }}" class="ai-swipe-card-button-{{ ai_gen_id }}">
+                {% if button_text != blank %}
+                  {{ button_text }}
+                {% else %}
+                  Ver colección
+                {% endif %}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+
+  <div class="ai-swipe-indicators-{{ ai_gen_id }}" data-indicators>
+    <button class="ai-swipe-indicator-{{ ai_gen_id }} ai-swipe-indicator-active-{{ ai_gen_id }}" data-indicator="0" aria-label="Ir a tarjeta 1"></button>
+    <button class="ai-swipe-indicator-{{ ai_gen_id }}" data-indicator="1" aria-label="Ir a tarjeta 2"></button>
+    <button class="ai-swipe-indicator-{{ ai_gen_id }}" data-indicator="2" aria-label="Ir a tarjeta 3"></button>
+  </div>
+</swipe-cards-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class SwipeCards{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.currentIndex = 0;
+        this.totalCards = 3;
+        this.startX = 0;
+        this.currentX = 0;
+        this.isDragging = false;
+        this.threshold = 50;
+      }
+
+      connectedCallback() {
+        this.container = this.querySelector('[data-container]');
+        this.cards = this.querySelectorAll('[data-card]');
+        this.indicators = this.querySelectorAll('[data-indicator]');
+        
+        this.setupEventListeners();
+        this.updateCards();
+      }
+
+      setupEventListeners() {
+        this.container.addEventListener('touchstart', this.handleTouchStart.bind(this), { passive: true });
+        this.container.addEventListener('touchmove', this.handleTouchMove.bind(this), { passive: true });
+        this.container.addEventListener('touchend', this.handleTouchEnd.bind(this));
+
+        this.container.addEventListener('mousedown', this.handleMouseDown.bind(this));
+        this.container.addEventListener('mousemove', this.handleMouseMove.bind(this));
+        this.container.addEventListener('mouseup', this.handleMouseUp.bind(this));
+        this.container.addEventListener('mouseleave', this.handleMouseUp.bind(this));
+
+        this.indicators.forEach((indicator) => {
+          indicator.addEventListener('click', () => {
+            const index = parseInt(indicator.getAttribute('data-indicator'));
+            this.goToCard(index);
+          });
+        });
+      }
+
+      handleTouchStart(e) {
+        this.startX = e.touches[0].clientX;
+        this.isDragging = true;
+      }
+
+      handleTouchMove(e) {
+        if (!this.isDragging) return;
+        this.currentX = e.touches[0].clientX;
+      }
+
+      handleTouchEnd() {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+
+        const diff = this.startX - this.currentX;
+
+        if (Math.abs(diff) > this.threshold) {
+          if (diff > 0 && this.currentIndex < this.totalCards - 1) {
+            this.currentIndex++;
+          } else if (diff < 0 && this.currentIndex > 0) {
+            this.currentIndex--;
+          }
+          this.updateCards();
+        }
+
+        this.startX = 0;
+        this.currentX = 0;
+      }
+
+      handleMouseDown(e) {
+        this.startX = e.clientX;
+        this.isDragging = true;
+        this.container.style.cursor = 'grabbing';
+      }
+
+      handleMouseMove(e) {
+        if (!this.isDragging) return;
+        this.currentX = e.clientX;
+      }
+
+      handleMouseUp() {
+        if (!this.isDragging) return;
+        this.isDragging = false;
+        this.container.style.cursor = 'grab';
+
+        const diff = this.startX - this.currentX;
+
+        if (Math.abs(diff) > this.threshold) {
+          if (diff > 0 && this.currentIndex < this.totalCards - 1) {
+            this.currentIndex++;
+          } else if (diff < 0 && this.currentIndex > 0) {
+            this.currentIndex--;
+          }
+          this.updateCards();
+        }
+
+        this.startX = 0;
+        this.currentX = 0;
+      }
+
+      goToCard(index) {
+        this.currentIndex = index;
+        this.updateCards();
+      }
+
+      updateCards() {
+        this.cards.forEach((card, index) => {
+          card.classList.remove('ai-swipe-card-left-{{ ai_gen_id }}');
+          card.classList.remove('ai-swipe-card-right-{{ ai_gen_id }}');
+          card.classList.remove('ai-swipe-card-active-{{ ai_gen_id }}');
+          card.classList.remove('ai-swipe-card-hidden-{{ ai_gen_id }}');
+          
+          if (index === this.currentIndex) {
+            card.classList.add('ai-swipe-card-active-{{ ai_gen_id }}');
+          } else if (index === this.currentIndex - 1) {
+            card.classList.add('ai-swipe-card-left-{{ ai_gen_id }}');
+          } else if (index === this.currentIndex + 1) {
+            card.classList.add('ai-swipe-card-right-{{ ai_gen_id }}');
+          } else {
+            card.classList.add('ai-swipe-card-hidden-{{ ai_gen_id }}');
+          }
+        });
+
+        this.indicators.forEach((indicator, index) => {
+          if (index === this.currentIndex) {
+            indicator.classList.add('ai-swipe-indicator-active-{{ ai_gen_id }}');
+          } else {
+            indicator.classList.remove('ai-swipe-indicator-active-{{ ai_gen_id }}');
+          }
+        });
+      }
+    }
+
+    customElements.define('swipe-cards-{{ ai_gen_id }}', SwipeCards{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Tarjetas deslizables",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Dimensiones de tarjeta"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Ancho de tarjeta",
+      "min": 250,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 350
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "label": "Altura de tarjeta",
+      "min": 400,
+      "max": 700,
+      "step": 20,
+      "unit": "px",
+      "default": 500
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Espaciado interno",
+      "min": 16,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Tarjeta activa (centro)"
+    },
+    {
+      "type": "range",
+      "id": "active_brightness",
+      "label": "Brillo",
+      "min": 100,
+      "max": 150,
+      "step": 5,
+      "unit": "%",
+      "default": 120
+    },
+    {
+      "type": "header",
+      "content": "Tarjetas apiladas (detrás)"
+    },
+    {
+      "type": "range",
+      "id": "stack_offset",
+      "label": "Desplazamiento lateral",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 25
+    },
+    {
+      "type": "range",
+      "id": "stack_scale",
+      "label": "Escala",
+      "min": 70,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "range",
+      "id": "stack_opacity",
+      "label": "Opacidad",
+      "min": 20,
+      "max": 80,
+      "step": 10,
+      "unit": "%",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "stack_blur",
+      "label": "Desenfoque",
+      "min": 0,
+      "max": 8,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "stack_brightness",
+      "label": "Brillo",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "header",
+      "content": "Colores"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Fondo de tarjeta",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_text_color",
+      "label": "Texto de tarjeta",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "indicator_color",
+      "label": "Indicadores",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Tipografía"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño de título",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 22
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Tamaño de descripción",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "range",
+      "id": "button_text_size",
+      "label": "Tamaño de texto",
+      "min": 12,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 30,
+      "step": 2,
+      "unit": "px",
+      "default": 6
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Fondo",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Fondo al pasar el cursor",
+      "default": "#333333"
+    },
+    {
+      "type": "header",
+      "content": "Tarjeta 1"
+    },
+    {
+      "type": "collection",
+      "id": "card_1_collection",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "card_1_title",
+      "label": "Título personalizado"
+    },
+    {
+      "type": "textarea",
+      "id": "card_1_description",
+      "label": "Descripción personalizada"
+    },
+    {
+      "type": "text",
+      "id": "card_1_button_text",
+      "label": "Texto del botón"
+    },
+    {
+      "type": "header",
+      "content": "Tarjeta 2"
+    },
+    {
+      "type": "collection",
+      "id": "card_2_collection",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "card_2_title",
+      "label": "Título personalizado"
+    },
+    {
+      "type": "textarea",
+      "id": "card_2_description",
+      "label": "Descripción personalizada"
+    },
+    {
+      "type": "text",
+      "id": "card_2_button_text",
+      "label": "Texto del botón"
+    },
+    {
+      "type": "header",
+      "content": "Tarjeta 3"
+    },
+    {
+      "type": "collection",
+      "id": "card_3_collection",
+      "label": "Colección"
+    },
+    {
+      "type": "text",
+      "id": "card_3_title",
+      "label": "Título personalizado"
+    },
+    {
+      "type": "textarea",
+      "id": "card_3_description",
+      "label": "Descripción personalizada"
+    },
+    {
+      "type": "text",
+      "id": "card_3_button_text",
+      "label": "Texto del botón"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Tarjetas deslizables"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,8104 @@
+{
+ "capturedAt": "2026-10-17T20:56:00-06:00",
+ "source": "https://monetta.mx/products.json (snapshot público)",
+ "note": "Datos de demostración. Precios, existencias y descripciones son una foto fechada, no una garantía en vivo.",
+ "totalLiveProducts": 311,
+ "collections": [
+  {
+   "handle": "guess",
+   "title": "Bolsas",
+   "kind": "category",
+   "category": "bolsa",
+   "productIds": [
+    15424222199959,
+    15424222167191,
+    15424222134423,
+    15424201752727,
+    15424198049943,
+    15424197984407,
+    15424196477079,
+    15424196411543,
+    15424196378775,
+    15424196313239,
+    15424196214935,
+    15424196182167,
+    15424194052247,
+    15423991873687,
+    15423940165783,
+    15423940133015,
+    15423940067479,
+    15423936594071,
+    15423936528535,
+    15423936233623,
+    15423912411287,
+    15423884820631,
+    15422234689687,
+    15422234656919,
+    15422234525847,
+    15422234394775,
+    15422234263703,
+    15422227939479,
+    15422227382423,
+    15422221648023,
+    15422216994967,
+    15422205100183,
+    15422183604375,
+    15422183211159,
+    15422179410071,
+    15416868864151,
+    9706533453975,
+    9706494656663,
+    9706258432151,
+    9706255122583,
+    9690439286935,
+    9639916437655,
+    9621931917463,
+    9621767389335,
+    9619735576727,
+    9619622002839,
+    9619142672535,
+    9618484134039,
+    9618437800087,
+    9618432360599,
+    9618409193623,
+    9618362957975,
+    9618298405015,
+    9618276188311,
+    9617982488727,
+    9617961779351,
+    9617960009879,
+    9617543692439
+   ],
+   "liveCount": 207
+  },
+  {
+   "handle": "carteras-1",
+   "title": "Carteras",
+   "kind": "category",
+   "category": "cartera",
+   "productIds": [
+    15424222265495,
+    15424211910807,
+    15424211943575,
+    15424211878039,
+    15424201556119,
+    15424201523351,
+    15424193986711,
+    15424193953943,
+    15424122978455,
+    15423940362391,
+    15422270996631,
+    15422270898327,
+    15422240882839,
+    15422240686231,
+    15422240424087,
+    9623249911959,
+    9623232151703,
+    9623210885271
+   ],
+   "liveCount": 82
+  },
+  {
+   "handle": "carteras",
+   "title": "Carteras",
+   "kind": "category",
+   "category": "cartera",
+   "aliasOf": "carteras-1",
+   "productIds": [
+    15424222265495,
+    15424211910807,
+    15424211943575,
+    15424211878039,
+    15424201556119,
+    15424201523351,
+    15424193986711,
+    15424193953943,
+    15424122978455,
+    15423940362391,
+    15422270996631,
+    15422270898327,
+    15422240882839,
+    15422240686231,
+    15422240424087,
+    9623249911959,
+    9623232151703,
+    9623210885271
+   ],
+   "liveCount": 82
+  },
+  {
+   "handle": "relojes",
+   "title": "Relojes",
+   "kind": "category",
+   "category": "reloj",
+   "productIds": [
+    9617417470103,
+    9617402134679,
+    9617390600343,
+    9617360912535,
+    9617293115543,
+    9617252679831,
+    9616980508823,
+    9616964714647
+   ],
+   "liveCount": 19
+  },
+  {
+   "handle": "relojes-1",
+   "title": "Relojes",
+   "kind": "category",
+   "category": "reloj",
+   "aliasOf": "relojes",
+   "productIds": [
+    9617417470103,
+    9617402134679,
+    9617390600343,
+    9617360912535,
+    9617293115543,
+    9617252679831,
+    9616980508823,
+    9616964714647
+   ],
+   "liveCount": 19
+  },
+  {
+   "handle": "crossbodys",
+   "title": "Crossbodys",
+   "kind": "style",
+   "parent": "guess",
+   "productIds": [
+    9617543692439,
+    9618432360599,
+    15424222167191,
+    15424222134423,
+    15424201752727,
+    15424198049943,
+    15424197984407,
+    15424196477079,
+    15424196378775,
+    15424196411543,
+    15424196313239,
+    15423991873687,
+    15423940165783,
+    15423940133015,
+    15423936594071,
+    15423936528535,
+    15423936233623,
+    15423912411287,
+    15422234689687,
+    15422234656919,
+    15422234525847,
+    15422234394775,
+    15422234263703,
+    15422227939479,
+    15422227382423,
+    15422221648023,
+    15422216994967,
+    15416868864151,
+    9706533453975,
+    9706494656663,
+    9690439286935,
+    9617961779351,
+    9618276188311,
+    9618409193623,
+    9619142672535,
+    9619622002839,
+    9639916437655,
+    9618484134039,
+    9618437800087
+   ],
+   "liveCount": 141
+  },
+  {
+   "handle": "totes",
+   "title": "Totes",
+   "kind": "style",
+   "parent": "guess",
+   "productIds": [
+    9617960009879,
+    15424194052247,
+    15423936594071,
+    15422183604375,
+    15422183211159,
+    15422179410071,
+    9619735576727,
+    9619622002839,
+    9618298405015,
+    9617982488727
+   ],
+   "liveCount": 34
+  },
+  {
+   "handle": "hombro",
+   "title": "Hombro",
+   "kind": "style",
+   "parent": "guess",
+   "productIds": [
+    9618362957975,
+    15423940067479,
+    15422234689687,
+    15422227382423,
+    15422205100183,
+    9639916437655,
+    9621931917463,
+    9621767389335
+   ],
+   "liveCount": 41
+  },
+  {
+   "handle": "coach",
+   "title": "Coach",
+   "kind": "brand",
+   "brand": "coach",
+   "productIds": [
+    9621931917463,
+    9618437800087,
+    9621767389335,
+    9618409193623,
+    9618432360599,
+    9619622002839,
+    9618484134039,
+    9619142672535,
+    9618362957975,
+    9619735576727,
+    9623232151703,
+    9623210885271,
+    9617293115543,
+    9617252679831,
+    9616980508823,
+    9616964714647
+   ],
+   "liveCount": 34
+  },
+  {
+   "handle": "michael-kors",
+   "title": "Michael Kors",
+   "kind": "brand",
+   "brand": "michael_kors",
+   "productIds": [
+    9617960009879,
+    9617543692439,
+    15424211910807,
+    15424211943575,
+    15424211878039,
+    15424201752727,
+    9639916437655,
+    9623249911959,
+    9618298405015,
+    9618276188311,
+    9617982488727,
+    9617961779351,
+    9617417470103,
+    9617402134679,
+    9617390600343,
+    9617360912535
+   ],
+   "liveCount": 30
+  },
+  {
+   "handle": "guess-1",
+   "title": "Guess",
+   "kind": "brand",
+   "brand": "guess",
+   "productIds": [
+    15422270996631,
+    15422270898327,
+    15422240882839,
+    15422240686231,
+    15422240424087,
+    15422234689687,
+    15422234656919,
+    15422234525847,
+    15422234394775,
+    15422234263703,
+    15422227939479,
+    15422227382423,
+    15422221648023,
+    15422216994967,
+    15422205100183,
+    15422183604375,
+    15422183211159,
+    15422179410071,
+    15416868864151,
+    9706494656663,
+    9706258432151,
+    9706255122583
+   ],
+   "liveCount": 116
+  },
+  {
+   "handle": "steve-madden",
+   "title": "Steve Madden",
+   "kind": "brand",
+   "brand": "steve_madden",
+   "productIds": [
+    15424193986711,
+    15424193953943,
+    15424193921175,
+    15424193888407,
+    15424122978455,
+    15423991873687,
+    15423940362391,
+    15423940165783,
+    15423940133015,
+    15423940067479,
+    15423936594071,
+    15423936528535,
+    15423936233623,
+    15423912411287,
+    15423884820631,
+    9690439286935
+   ],
+   "liveCount": 102
+  },
+  {
+   "handle": "tommy-hilfiger",
+   "title": "Tommy Hilfiger",
+   "kind": "brand",
+   "brand": "tommy_hilfiger",
+   "productIds": [
+    15424201556119,
+    15424201523351,
+    15424198049943,
+    15424197984407,
+    15424196477079,
+    15424196411543,
+    15424196378775,
+    15424196313239,
+    15424196214935,
+    15424196182167,
+    15424194052247,
+    9706533453975
+   ],
+   "liveCount": 25
+  }
+ ],
+ "products": [
+  {
+   "id": 15424222265495,
+   "handle": "cartera-calvin-klein-negra-texturizada",
+   "title": "Cartera Calvin Klein Negra Texturizada",
+   "vendor": "Calvin Klein",
+   "productType": "Cartera",
+   "tags": [
+    "Calvin Klein",
+    "Cartera",
+    "Negro",
+    "Texturizada"
+   ],
+   "brand": "calvin_klein",
+   "brandLabel": "Calvin Klein",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T23:09:01-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056353702039,
+     "title": null,
+     "options": [],
+     "price": "1049.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056353702039,
+   "images": [
+    "/media/products/cartera-calvin-klein-negra-texturizada/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Calvin Klein"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 11 cm × Alto 9 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": [
+     "Cartera Calvin Klein en color negro con acabado texturizado y logotipo discreto al frente."
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424222199959,
+   "handle": "bolsa-juicy-couture-hobo-rosa",
+   "title": "Bolsa Juicy Couture Hobo Rosa",
+   "vendor": "Juicy Couture",
+   "productType": "Bolsa",
+   "tags": [
+    "Bolsa",
+    "Hobo",
+    "Juicy Couture",
+    "Rosa"
+   ],
+   "brand": "juicy_couture",
+   "brandLabel": "Juicy Couture",
+   "category": "bolsa",
+   "silhouette": "hobo",
+   "colors": [
+    "rosa"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T23:08:57-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056353636503,
+     "title": null,
+     "options": [],
+     "price": "1299.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056353636503,
+   "images": [
+    "/media/products/bolsa-juicy-couture-hobo-rosa/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Juicy Couture"
+     },
+     {
+      "label": "Color",
+      "value": "Rosa"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 36 cm × Alto 29 cm × Ancho 9 cm"
+     }
+    ],
+    "paragraphs": [
+     "Bolsa Juicy Couture en color rosa con placa frontal, aplicaciones metálicas y asa de hombro."
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424222167191,
+   "handle": "bolsa-juicy-couture-crossbody-satchel-blanca",
+   "title": "Bolsa Juicy Couture Crossbody Satchel Blanca",
+   "vendor": "Juicy Couture",
+   "productType": "Bolsa",
+   "tags": [
+    "Blanco",
+    "Bolsa",
+    "Crossbody",
+    "Juicy Couture"
+   ],
+   "brand": "juicy_couture",
+   "brandLabel": "Juicy Couture",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "blanco"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T23:08:52-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056353603735,
+     "title": null,
+     "options": [],
+     "price": "1299.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056353603735,
+   "images": [
+    "/media/products/bolsa-juicy-couture-crossbody-satchel-blanca/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Juicy Couture"
+     },
+     {
+      "label": "Color",
+      "value": "Blanco"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 33 cm × Alto 18 cm × Ancho 9 cm"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     }
+    ],
+    "paragraphs": [
+     "Bolsa Juicy Couture en color blanco con detalles metálicos, aplicaciones decorativas y correa adicional. Incluye correa crossbody."
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424222134423,
+   "handle": "bolsa-juicy-couture-crossbody-satchel-negra",
+   "title": "Bolsa Juicy Couture Crossbody Satchel Negra",
+   "vendor": "Juicy Couture",
+   "productType": "Bolsa",
+   "tags": [
+    "Bolsa",
+    "Crossbody",
+    "Juicy Couture",
+    "Negro"
+   ],
+   "brand": "juicy_couture",
+   "brandLabel": "Juicy Couture",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T23:08:47-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056353570967,
+     "title": null,
+     "options": [],
+     "price": "1299.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056353570967,
+   "images": [
+    "/media/products/bolsa-juicy-couture-crossbody-satchel-negra/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Juicy Couture"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 28 cm × Alto 21 cm × Ancho 9 cm"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     }
+    ],
+    "paragraphs": [
+     "Bolsa Juicy Couture en color negro con logotipo frontal, detalles metálicos y lazo rosa. Incluye correa crossbody."
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424211943575,
+   "handle": "cartera-michael-kors-slim-billfold-taupe",
+   "title": "Cartera Michael Kors Slim Billfold Taupe",
+   "vendor": "Michael Kors",
+   "productType": "Cartera",
+   "tags": [
+    "Cartera",
+    "Michael Kors",
+    "Slim Billfold"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T22:38:23-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056298127511,
+     "title": null,
+     "options": [],
+     "price": "1099.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056298127511,
+   "images": [
+    "/media/products/cartera-michael-kors-slim-billfold-taupe/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Color",
+      "value": "Taupe"
+     },
+     {
+      "label": "Tipo",
+      "value": "Slim Billfold"
+     },
+     {
+      "label": "Diseño",
+      "value": "Liso"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 9 cm × Largo 11 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424211910807,
+   "handle": "cartera-michael-kors-slim-billfold-azul-monograma-mk",
+   "title": "Cartera Michael Kors Slim Billfold Azul Monograma MK",
+   "vendor": "Michael Kors",
+   "productType": "Cartera",
+   "tags": [
+    "Cartera",
+    "Michael Kors",
+    "Slim Billfold"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "azul"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T22:38:18-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056298094743,
+     "title": null,
+     "options": [],
+     "price": "1099.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056298094743,
+   "images": [
+    "/media/products/cartera-michael-kors-slim-billfold-azul-monograma-mk/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Color",
+      "value": "Azul"
+     },
+     {
+      "label": "Tipo",
+      "value": "Slim Billfold"
+     },
+     {
+      "label": "Diseño",
+      "value": "Monograma MK"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 9 cm × Largo 11 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424211878039,
+   "handle": "cartera-michael-kors-slim-billfold-negra-monograma-mk",
+   "title": "Cartera Michael Kors Slim Billfold Negra Monograma MK",
+   "vendor": "Michael Kors",
+   "productType": "Cartera",
+   "tags": [
+    "Cartera",
+    "Michael Kors",
+    "Slim Billfold"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "negro"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T22:38:13-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056298061975,
+     "title": null,
+     "options": [],
+     "price": "1099.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056298061975,
+   "images": [
+    "/media/products/cartera-michael-kors-slim-billfold-negra-monograma-mk/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Tipo",
+      "value": "Slim Billfold"
+     },
+     {
+      "label": "Diseño",
+      "value": "Monograma MK"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 9 cm × Largo 11 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424201752727,
+   "handle": "bolsa-michael-kors-crossbody-negra",
+   "title": "Bolsa Michael Kors Crossbody Negra",
+   "vendor": "Michael Kors",
+   "productType": "Bolsas",
+   "tags": [
+    "Bolsa",
+    "Crossbody",
+    "Michael Kors",
+    "Negro"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T22:04:12-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056262082711,
+     "title": null,
+     "options": [],
+     "price": "1999.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056262082711,
+   "images": [
+    "/media/products/bolsa-michael-kors-crossbody-negra/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 17 cm × Largo 24 cm × Ancho 6 cm"
+     }
+    ],
+    "paragraphs": [
+     "Incluye correa crossbody."
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424201556119,
+   "handle": "cartera-tommy-hilfiger-zip-vino-monograma",
+   "title": "Cartera Tommy Hilfiger Zip Vino Monograma",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Carteras",
+   "tags": [
+    "Cartera",
+    "Monograma",
+    "Tommy Hilfiger",
+    "Vino",
+    "Zip"
+   ],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T22:04:06-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056261525655,
+     "title": null,
+     "options": [],
+     "price": "769.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056261525655,
+   "images": [
+    "/media/products/cartera-tommy-hilfiger-zip-vino-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Color",
+      "value": "Vino"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 10 cm × Largo 21 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424201523351,
+   "handle": "cartera-tommy-hilfiger-grande-roja-monograma",
+   "title": "Cartera Tommy Hilfiger Grande Roja Monograma",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Carteras",
+   "tags": [
+    "Cartera",
+    "Monograma",
+    "Rojo",
+    "Tommy Hilfiger"
+   ],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T22:04:02-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056261492887,
+     "title": null,
+     "options": [],
+     "price": "769.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056261492887,
+   "images": [
+    "/media/products/cartera-tommy-hilfiger-grande-roja-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Color",
+      "value": "Rojo"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 10 cm × Largo 18 cm × Ancho 3 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424198049943,
+   "handle": "bolsa-tommy-hilfiger-crossbody-flap-beige-monograma",
+   "title": "Bolsa Tommy Hilfiger Crossbody Flap Beige Monograma",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "beige"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:51:43-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056253268119,
+     "title": "Default",
+     "options": [
+      "Default"
+     ],
+     "price": "1419.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056253268119,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-crossbody-flap-beige-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Flap"
+     },
+     {
+      "label": "Color",
+      "value": "Beige Monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 14 cm × Largo 27 cm × Ancho 13 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424197984407,
+   "handle": "bolsa-tommy-hilfiger-crossbody-flap-rojo",
+   "title": "Bolsa Tommy Hilfiger Crossbody Flap Rojo",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:51:38-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056253202583,
+     "title": "Default",
+     "options": [
+      "Default"
+     ],
+     "price": "1419.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056253202583,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-crossbody-flap-rojo/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Flap"
+     },
+     {
+      "label": "Color",
+      "value": "Rojo"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 13 cm × Largo 22 cm × Ancho 7 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424196477079,
+   "handle": "bolsa-tommy-hilfiger-crossbody-clutch-rojo",
+   "title": "Bolsa Tommy Hilfiger Crossbody Clutch Rojo",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "clutch",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:44:24-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056250220695,
+     "title": null,
+     "options": [],
+     "price": "1419.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056250220695,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-crossbody-clutch-rojo/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Clutch"
+     },
+     {
+      "label": "Color",
+      "value": "Rojo"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 15 cm × Largo 26 cm × Ancho 6 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424196411543,
+   "handle": "bolsa-tommy-hilfiger-crossbody-satchel-azul",
+   "title": "Bolsa Tommy Hilfiger Crossbody Satchel Azul",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "azul"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:44:19-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056249958551,
+     "title": null,
+     "options": [],
+     "price": "1449.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056249958551,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-crossbody-satchel-azul/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Satchel"
+     },
+     {
+      "label": "Color",
+      "value": "Azul"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 20 cm × Largo 30 cm × Ancho 11 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424196378775,
+   "handle": "bolsa-tommy-hilfiger-crossbody-clutch-vino",
+   "title": "Bolsa Tommy Hilfiger Crossbody Clutch Vino",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "clutch",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:44:14-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056249925783,
+     "title": null,
+     "options": [],
+     "price": "1419.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056249925783,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-crossbody-clutch-vino/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Clutch"
+     },
+     {
+      "label": "Color",
+      "value": "Vino"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 15 cm × Largo 26 cm × Ancho 6 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424196313239,
+   "handle": "bolsa-tommy-hilfiger-crossbody-satchel-azul-rojo-monograma",
+   "title": "Bolsa Tommy Hilfiger Crossbody Satchel Azul Rojo Monograma",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "azul",
+    "rojo"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:44:05-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056249860247,
+     "title": null,
+     "options": [],
+     "price": "1419.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056249860247,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-crossbody-satchel-azul-rojo-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Satchel"
+     },
+     {
+      "label": "Color",
+      "value": "Azul Rojo Monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 17 cm × Largo 28 cm × Ancho 8 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424196214935,
+   "handle": "bolsa-tommy-hilfiger-hobo-negro-monograma",
+   "title": "Bolsa Tommy Hilfiger Hobo Negro Monograma",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "hobo",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:43:55-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056249761943,
+     "title": null,
+     "options": [],
+     "price": "1439.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056249761943,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-hobo-negro-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Hobo"
+     },
+     {
+      "label": "Color",
+      "value": "Negro Monograma"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 26 cm × Largo 30 cm × Ancho 11 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424196182167,
+   "handle": "bolsa-tommy-hilfiger-hobo-cafe-monograma",
+   "title": "Bolsa Tommy Hilfiger Hobo Café Monograma",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "hobo",
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:43:47-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056249729175,
+     "title": null,
+     "options": [],
+     "price": "1529.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056249729175,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-hobo-cafe-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Hobo"
+     },
+     {
+      "label": "Color",
+      "value": "Café Monograma"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 36 cm × Largo 37 cm × Ancho 9 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424194052247,
+   "handle": "bolsa-tommy-hilfiger-tote-negro-monograma",
+   "title": "Bolsa Tommy Hilfiger Tote Negro Monograma",
+   "vendor": "Tommy Hilfiger",
+   "productType": "Bolsa",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:29:08-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056245731479,
+     "title": null,
+     "options": [],
+     "price": "1589.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056245731479,
+   "images": [
+    "/media/products/bolsa-tommy-hilfiger-tote-negro-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Tommy Hilfiger"
+     },
+     {
+      "label": "Tipo",
+      "value": "Tote"
+     },
+     {
+      "label": "Color",
+      "value": "Negro Monograma"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 28 cm × Largo 40 cm × Ancho 13 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424193986711,
+   "handle": "cartera-steve-madden-verde-acolchada",
+   "title": "Cartera Steve Madden Verde Acolchada",
+   "vendor": "Steve Madden",
+   "productType": "Cartera",
+   "tags": [],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "verde"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:28:57-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056245665943,
+     "title": null,
+     "options": [],
+     "price": "629.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056245665943,
+   "images": [
+    "/media/products/cartera-steve-madden-verde-acolchada/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Cartera"
+     },
+     {
+      "label": "Color",
+      "value": "Verde Acolchado"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 9 cm × Largo 12 cm × Ancho 3 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424193953943,
+   "handle": "cartera-steve-madden-cafe-patchwork",
+   "title": "Cartera Steve Madden Café Patchwork",
+   "vendor": "Steve Madden",
+   "productType": "Cartera",
+   "tags": [],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:28:52-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056245633175,
+     "title": null,
+     "options": [],
+     "price": "769.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056245633175,
+   "images": [
+    "/media/products/cartera-steve-madden-cafe-patchwork/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Cartera"
+     },
+     {
+      "label": "Color",
+      "value": "Café Patchwork"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 12 cm × Largo 21 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424193921175,
+   "handle": "munequera-steve-madden-negro-candado",
+   "title": "Muñequera Steve Madden Negro Candado",
+   "vendor": "Steve Madden",
+   "productType": "Muñequera",
+   "tags": [],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "wristlet",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:28:48-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056245600407,
+     "title": null,
+     "options": [],
+     "price": "699.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056245600407,
+   "images": [
+    "/media/products/munequera-steve-madden-negro-candado/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Muñequera"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 8 cm × Largo 13 cm × Ancho 3 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424193888407,
+   "handle": "munequera-steve-madden-negro-monograma",
+   "title": "Muñequera Steve Madden Negro Monograma",
+   "vendor": "Steve Madden",
+   "productType": "Muñequera",
+   "tags": [],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "wristlet",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:28:44-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68056245567639,
+     "title": null,
+     "options": [],
+     "price": "699.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68056245567639,
+   "images": [
+    "/media/products/munequera-steve-madden-negro-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Muñequera"
+     },
+     {
+      "label": "Color",
+      "value": "Negro Monograma"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 8 cm × Largo 13 cm × Ancho 3 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15424122978455,
+   "handle": "tarjetero-steve-madden-rosa",
+   "title": "Tarjetero Steve Madden Rosa",
+   "vendor": "Steve Madden",
+   "productType": "Tarjetero",
+   "tags": [
+    "Rosa",
+    "Steve Madden",
+    "Tarjetero"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "tarjetero",
+   "silhouette": null,
+   "colors": [
+    "rosa"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T21:06:57-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68055702831255,
+     "title": null,
+     "options": [],
+     "price": "589.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68055702831255,
+   "images": [
+    "/media/products/tarjetero-steve-madden-rosa/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Tarjetero"
+     },
+     {
+      "label": "Color",
+      "value": "Rosa"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 8 cm × Largo 11 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423991873687,
+   "handle": "bolsa-steve-madden-crossbody-mini-satchel-rojo",
+   "title": "Bolsa Steve Madden Crossbody Mini Satchel Rojo",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Mini Satchel",
+   "tags": [
+    "Bolsa",
+    "Crossbody",
+    "Mini Satchel",
+    "Rojo",
+    "Steve Madden"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T15:47:25-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68055199678615,
+     "title": null,
+     "options": [],
+     "price": "949.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68055199678615,
+   "images": [
+    "/media/products/bolsa-steve-madden-crossbody-mini-satchel-rojo/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Mini Satchel"
+     },
+     {
+      "label": "Color",
+      "value": "Rojo"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 8 cm × Largo 13 cm × Ancho 6 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423940362391,
+   "handle": "tarjetero-steve-madden-negro-con-monedero-rojo",
+   "title": "Tarjetero Steve Madden Negro con Monedero Rojo",
+   "vendor": "Steve Madden",
+   "productType": "Tarjetero",
+   "tags": [
+    "Monedero",
+    "Negro",
+    "Rojo",
+    "Steve Madden",
+    "Tarjetero"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "tarjetero",
+   "silhouette": null,
+   "colors": [
+    "negro",
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T13:57:26-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054987309207,
+     "title": null,
+     "options": [],
+     "price": "859.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054987309207,
+   "images": [
+    "/media/products/tarjetero-steve-madden-negro-con-monedero-rojo/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Tarjetero con monedero"
+     },
+     {
+      "label": "Color",
+      "value": "Negro con Rojo"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 8 cm × Largo 12 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423940165783,
+   "handle": "bolsa-steve-madden-crossbody-hobo-vino",
+   "title": "Bolsa Steve Madden Crossbody Hobo Vino",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Hobo",
+   "tags": [
+    "Bolsa",
+    "Crossbody",
+    "Hobo",
+    "Steve Madden",
+    "Vino"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "hobo",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T13:57:13-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054987014295,
+     "title": null,
+     "options": [],
+     "price": "1419.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054987014295,
+   "images": [
+    "/media/products/bolsa-steve-madden-crossbody-hobo-vino/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Hobo"
+     },
+     {
+      "label": "Color",
+      "value": "Vino"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 16 cm × Largo 24 cm × Ancho 9 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423940133015,
+   "handle": "bolsa-steve-madden-crossbody-messenger-cafe-monograma",
+   "title": "Bolsa Steve Madden Crossbody Messenger Café Monograma",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Messenger",
+   "tags": [
+    "Bolsa",
+    "Café",
+    "Crossbody",
+    "Messenger",
+    "Monograma",
+    "Steve Madden"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T13:57:07-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054986981527,
+     "title": null,
+     "options": [],
+     "price": "1419.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054986981527,
+   "images": [
+    "/media/products/bolsa-steve-madden-crossbody-messenger-cafe-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Messenger"
+     },
+     {
+      "label": "Color",
+      "value": "Café Monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 16 cm × Largo 28 cm × Ancho 7 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423940067479,
+   "handle": "bolsa-steve-madden-shoulder-vino-croco",
+   "title": "Bolsa Steve Madden Shoulder Vino Croco",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Shoulder",
+   "tags": [
+    "Bolsa",
+    "Croco",
+    "Shoulder",
+    "Steve Madden",
+    "Vino"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "shoulder",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T13:57:00-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054986915991,
+     "title": null,
+     "options": [],
+     "price": "1419.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054986915991,
+   "images": [
+    "/media/products/bolsa-steve-madden-shoulder-vino-croco/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Shoulder"
+     },
+     {
+      "label": "Color",
+      "value": "Vino Croco"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 14 cm × Largo 28 cm × Ancho 5 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423936594071,
+   "handle": "bolsa-steve-madden-crossbody-tote-vino",
+   "title": "Bolsa Steve Madden Crossbody Tote Vino",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Tote",
+   "tags": [
+    "Bolsa",
+    "Crossbody",
+    "Steve Madden",
+    "Tote",
+    "Vino"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T13:48:03-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054980591767,
+     "title": null,
+     "options": [],
+     "price": "1359.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054980591767,
+   "images": [
+    "/media/products/bolsa-steve-madden-crossbody-tote-vino/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Tote"
+     },
+     {
+      "label": "Color",
+      "value": "Vino"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 18 cm × Largo 24 cm × Ancho 10 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423936528535,
+   "handle": "bolsa-steve-madden-crossbody-satchel-camel-monograma-1",
+   "title": "Bolsa Steve Madden Crossbody Satchel Camel Monograma",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Satchel",
+   "tags": [
+    "Bolsa",
+    "Camel",
+    "Crossbody",
+    "Monograma",
+    "Satchel",
+    "Steve Madden"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T13:47:54-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054980526231,
+     "title": null,
+     "options": [],
+     "price": "1359.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054980526231,
+   "images": [
+    "/media/products/bolsa-steve-madden-crossbody-satchel-camel-monograma-1/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Satchel"
+     },
+     {
+      "label": "Color",
+      "value": "Camel Monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 18 cm × Largo 21 cm × Ancho 9 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423936233623,
+   "handle": "bolsa-steve-madden-crossbody-clutch-azul-claro-monograma",
+   "title": "Bolsa Steve Madden Crossbody Clutch Azul Claro Monograma",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Clutch",
+   "tags": [
+    "Azul Claro",
+    "Bolsa",
+    "Clutch",
+    "Crossbody",
+    "Monograma",
+    "Steve Madden"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "clutch",
+   "colors": [
+    "azul"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T13:47:29-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054980198551,
+     "title": null,
+     "options": [],
+     "price": "949.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054980198551,
+   "images": [
+    "/media/products/bolsa-steve-madden-crossbody-clutch-azul-claro-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Clutch"
+     },
+     {
+      "label": "Color",
+      "value": "Azul Claro Monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 8 cm × Largo 13 cm × Ancho 6 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423912411287,
+   "handle": "bolsa-steve-madden-crossbody-satchel-azul-denim-estampado-cerezas",
+   "title": "Bolsa Steve Madden Crossbody Satchel Azul Denim Estampado Cerezas",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Satchel",
+   "tags": [
+    "Azul Denim",
+    "Bolsa",
+    "Crossbody",
+    "Estampado Cerezas",
+    "Satchel",
+    "Steve Madden"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "azul"
+   ],
+   "patterns": [
+    "cerezas"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T13:03:27-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054815670423,
+     "title": null,
+     "options": [],
+     "price": "1519.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054815670423,
+   "images": [
+    "/media/products/bolsa-steve-madden-crossbody-satchel-azul-denim-estampado-cerezas/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Satchel"
+     },
+     {
+      "label": "Color",
+      "value": "Azul Denim Estampado Cerezas"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 19 cm × Largo 24 cm × Ancho 11 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15423884820631,
+   "handle": "bolsa-steve-madden-hobo-animal-print-piton-cafe",
+   "title": "Bolsa Steve Madden Hobo Animal Print Pitón Café",
+   "vendor": "Steve Madden",
+   "productType": "Bolsa Hobo",
+   "tags": [
+    "Animal Print Pitón Café",
+    "Bolsa",
+    "Hobo",
+    "Steve Madden"
+   ],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "hobo",
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [
+    "animal_print"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-14T12:26:36-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68054556115095,
+     "title": null,
+     "options": [],
+     "price": "1589.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68054556115095,
+   "images": [
+    "/media/products/bolsa-steve-madden-hobo-animal-print-piton-cafe/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Tipo",
+      "value": "Hobo"
+     },
+     {
+      "label": "Color",
+      "value": "Animal Print Pitón Café"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 35 cm × Largo 38 cm × Ancho 10 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422270996631,
+   "handle": "cartera-guess-flap-cafe-monograma",
+   "title": "Cartera Guess Flap Café Monograma",
+   "vendor": "Guess",
+   "productType": "Cartera",
+   "tags": [
+    "Carteras",
+    "Guess"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:48:33-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68047110439063,
+     "title": "Default",
+     "options": [
+      "Default"
+     ],
+     "price": "829.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68047110439063,
+   "images": [
+    "/media/products/cartera-guess-flap-cafe-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Cartera flap"
+     },
+     {
+      "label": "Color",
+      "value": "Café monograma"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 10 cm × Largo 18 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422270898327,
+   "handle": "cartera-guess-flap-azul-marino-monograma-solapa-recta",
+   "title": "Cartera Guess Flap Azul Marino Monograma Solapa Recta",
+   "vendor": "Guess",
+   "productType": "Cartera",
+   "tags": [
+    "Carteras",
+    "Guess"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "azul"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:48:26-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68047110176919,
+     "title": "Default",
+     "options": [
+      "Default"
+     ],
+     "price": "829.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68047110176919,
+   "images": [
+    "/media/products/cartera-guess-flap-azul-marino-monograma-solapa-recta/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Cartera flap"
+     },
+     {
+      "label": "Color",
+      "value": "Azul marino monograma"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 10 cm × Largo 18 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422240882839,
+   "handle": "cartera-guess-compacta-negro",
+   "title": "Cartera Guess Compacta Negro",
+   "vendor": "Guess",
+   "productType": "Cartera",
+   "tags": [
+    "Cartera",
+    "Compacta",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Negro"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:09:54-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046983626903,
+     "title": null,
+     "options": [],
+     "price": "769.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0,
+     "inventoryLimit": 2
+    }
+   ],
+   "defaultVariantId": 68046983626903,
+   "images": [
+    "/media/products/cartera-guess-compacta-negro/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Cartera compacta"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 9 cm × Largo 14 cm × Ancho 3 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": {
+    "inventoryLimit": 2,
+    "note": "Límite de existencia de demostración (2 piezas): la API pública no expone cantidades."
+   }
+  },
+  {
+   "id": 15422240686231,
+   "handle": "set-guess-tarjetero-y-monedero-cafe-monograma",
+   "title": "Set Guess Tarjetero y Monedero Café Monograma",
+   "vendor": "Guess",
+   "productType": "Set de tarjetero y monedero",
+   "tags": [
+    "Café",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Monedero",
+    "Monograma",
+    "Set",
+    "Tarjetero"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "set",
+   "silhouette": null,
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:09:48-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046983331991,
+     "title": null,
+     "options": [],
+     "price": "859.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046983331991,
+   "images": [
+    "/media/products/set-guess-tarjetero-y-monedero-cafe-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Set de tarjetero y monedero"
+     },
+     {
+      "label": "Color",
+      "value": "Café monograma"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 8 cm × Largo 11 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422240424087,
+   "handle": "set-cartera-guess-monograma-cafe-con-monedero-animal-print",
+   "title": "Set Cartera Guess Monograma Café con Monedero Animal Print",
+   "vendor": "Guess",
+   "productType": "Set de cartera",
+   "tags": [
+    "Animal print",
+    "Café",
+    "Cartera",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Monedero",
+    "Monograma",
+    "Set"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "set",
+   "silhouette": null,
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [
+    "animal_print",
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:09:41-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046982709399,
+     "title": null,
+     "options": [],
+     "price": "1049.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046982709399,
+   "images": [
+    "/media/products/set-cartera-guess-monograma-cafe-con-monedero-animal-print/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Set de cartera y monedero"
+     },
+     {
+      "label": "Color",
+      "value": "Café monograma con animal print"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 10 cm × Largo 18 cm × Ancho 2 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422234689687,
+   "handle": "bolsa-guess-crossbody-shoulder-cafe-geometrico",
+   "title": "Bolsa Guess Crossbody Shoulder Café Geométrico",
+   "vendor": "Guess",
+   "productType": "Bolsa Shoulder",
+   "tags": [
+    "Bolsa",
+    "Café",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Geométrico",
+    "Guess",
+    "Shoulder"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "shoulder",
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:03:04-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046967275671,
+     "title": null,
+     "options": [],
+     "price": "1479.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046967275671,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-shoulder-cafe-geometrico/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Shoulder"
+     },
+     {
+      "label": "Color",
+      "value": "Café geométrico"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 22 cm × Alto 14 cm × Ancho 7 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422234656919,
+   "handle": "bolsa-guess-crossbody-camera-cafe-geometrico",
+   "title": "Bolsa Guess Crossbody Camera Café Geométrico",
+   "vendor": "Guess",
+   "productType": "Bolsa Camera",
+   "tags": [
+    "Bolsa",
+    "Café",
+    "Camera",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Geométrico",
+    "Guess"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:02:58-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046967242903,
+     "title": null,
+     "options": [],
+     "price": "1479.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046967242903,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-camera-cafe-geometrico/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Camera"
+     },
+     {
+      "label": "Color",
+      "value": "Café geométrico"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 22 cm × Alto 14 cm × Ancho 7 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422234525847,
+   "handle": "bolsa-guess-crossbody-camera-negro-geometrico",
+   "title": "Bolsa Guess Crossbody Camera Negro Geométrico",
+   "vendor": "Guess",
+   "productType": "Bolsa Camera",
+   "tags": [
+    "Bolsa",
+    "Camera",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Geométrico",
+    "Guess",
+    "Negro"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:02:51-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046966947991,
+     "title": null,
+     "options": [],
+     "price": "1479.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046966947991,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-camera-negro-geometrico/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Camera"
+     },
+     {
+      "label": "Color",
+      "value": "Negro geométrico"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 22 cm × Alto 14 cm × Ancho 7 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422234394775,
+   "handle": "bolsa-guess-crossbody-camera-mini-beige-cafe-monograma",
+   "title": "Bolsa Guess Crossbody Camera Mini Beige Café Monograma",
+   "vendor": "Guess",
+   "productType": "Bolsa Camera",
+   "tags": [
+    "Beige",
+    "Bolsa",
+    "Café",
+    "Camera",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Mini",
+    "Monograma"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "mini",
+   "colors": [
+    "beige",
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:02:39-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046966816919,
+     "title": null,
+     "options": [],
+     "price": "1479.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046966816919,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-camera-mini-beige-cafe-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Camera Mini"
+     },
+     {
+      "label": "Color",
+      "value": "Beige café monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 10 cm × Alto 10 cm × Ancho 10 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422234263703,
+   "handle": "bolsa-guess-crossbody-satchel-mini-gris-oscuro-monograma",
+   "title": "Bolsa Guess Crossbody Satchel Mini Gris Oscuro Monograma",
+   "vendor": "Guess",
+   "productType": "Bolsa Satchel",
+   "tags": [
+    "Bolsa",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Gris oscuro",
+    "Guess",
+    "Mini",
+    "Monograma",
+    "Satchel"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "gris"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T16:02:26-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046966358167,
+     "title": null,
+     "options": [],
+     "price": "1589.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046966358167,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-satchel-mini-gris-oscuro-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Satchel Mini"
+     },
+     {
+      "label": "Color",
+      "value": "Gris oscuro monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 10 cm × Alto 10 cm × Ancho 10 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422227939479,
+   "handle": "bolsa-guess-crossbody-camera-camel",
+   "title": "Bolsa Guess Crossbody Camera Camel",
+   "vendor": "Guess",
+   "productType": "Bolsa Camera",
+   "tags": [
+    "Bolsa",
+    "Camel",
+    "Camera",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Guess"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T15:49:49-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046943846551,
+     "title": null,
+     "options": [],
+     "price": "1509.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046943846551,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-camera-camel/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Camera"
+     },
+     {
+      "label": "Color",
+      "value": "Camel"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 22 cm × Alto 15 cm × Ancho 7 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422227382423,
+   "handle": "bolsa-guess-crossbody-shoulder-negro-monograma",
+   "title": "Bolsa Guess Crossbody Shoulder Negro Monograma",
+   "vendor": "Guess",
+   "productType": "Bolsa Shoulder",
+   "tags": [
+    "Bolsa",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Monograma",
+    "Negro",
+    "Shoulder"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "shoulder",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T15:49:20-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046941323415,
+     "title": null,
+     "options": [],
+     "price": "1759.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046941323415,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-shoulder-negro-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Shoulder"
+     },
+     {
+      "label": "Color",
+      "value": "Negro monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 24 cm × Alto 14 cm × Ancho 5 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422221648023,
+   "handle": "bolsa-guess-crossbody-satchel-blanco-taupe-monograma",
+   "title": "Bolsa Guess Crossbody Satchel Blanco Taupe Monograma",
+   "vendor": "Guess",
+   "productType": "Bolsa Satchel",
+   "tags": [
+    "Blanco",
+    "Bolsa",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Monograma",
+    "Satchel",
+    "Taupe"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "blanco",
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T15:38:57-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046917730455,
+     "title": null,
+     "options": [],
+     "price": "1639.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046917730455,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-satchel-blanco-taupe-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Satchel"
+     },
+     {
+      "label": "Color",
+      "value": "Blanco taupe monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 16 cm × Largo 27 cm × Ancho 8 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422216994967,
+   "handle": "bolsa-guess-crossbody-hobo-negro-monograma",
+   "title": "Bolsa Guess Crossbody Hobo Negro Monograma",
+   "vendor": "Guess",
+   "productType": "Bolsa Hobo",
+   "tags": [
+    "Bolsa",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Hobo",
+    "Monograma",
+    "Negro"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "hobo",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T15:31:14-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046903279767,
+     "title": null,
+     "options": [],
+     "price": "1589.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046903279767,
+   "images": [
+    "/media/products/bolsa-guess-crossbody-hobo-negro-monograma/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Hobo"
+     },
+     {
+      "label": "Color",
+      "value": "Negro monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 20 cm × Largo 25 cm × Ancho 8 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422205100183,
+   "handle": "bolsa-guess-shoulder-vino-brillante",
+   "title": "Bolsa Guess Shoulder Vino Brillante",
+   "vendor": "Guess",
+   "productType": "Bolsa Shoulder",
+   "tags": [
+    "Bolsa",
+    "Brillante",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Shoulder",
+    "Vino"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "shoulder",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T15:20:16-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046877753495,
+     "title": null,
+     "options": [],
+     "price": "1589.00",
+     "compareAtPrice": null,
+     "available": false,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046877753495,
+   "images": [
+    "/media/products/bolsa-guess-shoulder-vino-brillante/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Shoulder"
+     },
+     {
+      "label": "Color",
+      "value": "Vino brillante"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 29 cm × Alto 20 cm × Ancho 9 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": {
+    "soldOut": true,
+    "note": "Agotado de demostración: ningún producto estaba agotado por completo en el snapshot del 17-oct-2026."
+   }
+  },
+  {
+   "id": 15422183604375,
+   "handle": "bolsa-guess-tote-cafe-monograma-dijes",
+   "title": "Bolsa Guess Tote Café Monograma Dijes",
+   "vendor": "Guess",
+   "productType": "Bolsa Tote",
+   "tags": [
+    "Bolsa",
+    "Café",
+    "Dijes",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Monograma",
+    "Tote"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T15:05:19-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046847836311,
+     "title": null,
+     "options": [],
+     "price": "1769.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046847836311,
+   "images": [
+    "/media/products/bolsa-guess-tote-cafe-monograma-dijes/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Tote"
+     },
+     {
+      "label": "Color",
+      "value": "Café monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 30 cm × Alto 21 cm × Ancho 12 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422183211159,
+   "handle": "bolsa-guess-tote-negro-blanco",
+   "title": "Bolsa Guess Tote Negro Blanco",
+   "vendor": "Guess",
+   "productType": "Bolsa Tote",
+   "tags": [
+    "Blanco",
+    "Bolsa",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Negro",
+    "Tote"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "blanco",
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T15:05:08-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046847246487,
+     "title": null,
+     "options": [],
+     "price": "1769.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046847246487,
+   "images": [
+    "/media/products/bolsa-guess-tote-negro-blanco/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Tote"
+     },
+     {
+      "label": "Color",
+      "value": "Negro y blanco"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 33 cm × Alto 24 cm × Ancho 11 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15422179410071,
+   "handle": "bolsa-guess-tote-negra-monograma-barra-logo",
+   "title": "Bolsa Guess Tote Negra Monograma Barra Logo",
+   "vendor": "Guess",
+   "productType": "Bolsa Tote",
+   "tags": [
+    "Bolsa",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Monograma",
+    "Negra",
+    "Tote"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-13T14:53:47-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68046832533655,
+     "title": null,
+     "options": [],
+     "price": "1769.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68046832533655,
+   "images": [
+    "/media/products/bolsa-guess-tote-negra-monograma-barra-logo/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Tote"
+     },
+     {
+      "label": "Color",
+      "value": "Negra monograma"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 29 cm × Ancho 11 cm × Largo 38 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 15416868864151,
+   "handle": "bolso-guess-hobo-vino",
+   "title": "Bolso Guess Crossbody Hobo Vino",
+   "vendor": "Guess",
+   "productType": "Bolsa Hobo",
+   "tags": [
+    "Bolso",
+    "Crossbody",
+    "Disponible",
+    "Envío inmediato",
+    "Guess",
+    "Hobo",
+    "Vino"
+   ],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "hobo",
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": true,
+    "newArrival": true
+   },
+   "createdAt": "2026-10-10T13:31:49-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 68026017218711,
+     "title": null,
+     "options": [],
+     "price": "1645.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 68026017218711,
+   "images": [
+    "/media/products/bolso-guess-hobo-vino/1.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Guess"
+     },
+     {
+      "label": "Tipo",
+      "value": "Hobo"
+     },
+     {
+      "label": "Color",
+      "value": "Vino"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 20 cm × Largo 25 cm × Ancho 8 cm"
+     }
+    ],
+    "paragraphs": [
+     "Disponible para envío inmediato."
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9706533453975,
+   "handle": "bolso-tommy-hilfiger-crossbody-beige-y-rojo",
+   "title": "Bolso Tommy Hilfiger Crossbody Beige y Rojo",
+   "vendor": "Monetta",
+   "productType": "",
+   "tags": [],
+   "brand": "tommy_hilfiger",
+   "brandLabel": "Tommy Hilfiger",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "beige",
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": true,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-09-03T19:09:51-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 48201681207447,
+     "title": null,
+     "options": [],
+     "price": "1299.00",
+     "compareAtPrice": "1549.00",
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 48201681207447,
+   "images": [
+    "/media/products/bolso-tommy-hilfiger-crossbody-beige-y-rojo/1.webp",
+    "/media/products/bolso-tommy-hilfiger-crossbody-beige-y-rojo/2.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Tipo",
+      "value": "Crossbody"
+     },
+     {
+      "label": "Color",
+      "value": "Beige"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9706494656663,
+   "handle": "bolso-guess-crossbody-negro-1",
+   "title": "Bolso Guess Crossbody Negro",
+   "vendor": "Monetta",
+   "productType": "",
+   "tags": [],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": true,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-09-03T17:13:17-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 48201591750807,
+     "title": null,
+     "options": [],
+     "price": "1704.00",
+     "compareAtPrice": "1899.00",
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 48201591750807,
+   "images": [
+    "/media/products/bolso-guess-crossbody-negro-1/1.webp",
+    "/media/products/bolso-guess-crossbody-negro-1/2.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Tipo",
+      "value": "Crossbody"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 19 cm × Ancho 10 cm × Largo 24 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9706258432151,
+   "handle": "bolso-crossbosy-doble-cierre-guess-rojo-copia",
+   "title": "Bolso Crossbosy Doble Cierre Guess Café",
+   "vendor": "Monetta",
+   "productType": "",
+   "tags": [],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": null,
+   "colors": [
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": true,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-09-03T10:30:06-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 48200812757143,
+     "title": null,
+     "options": [],
+     "price": "1528.00",
+     "compareAtPrice": "1749.00",
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 48200812757143,
+   "images": [
+    "/media/products/bolso-crossbosy-doble-cierre-guess-rojo-copia/1.webp",
+    "/media/products/bolso-crossbosy-doble-cierre-guess-rojo-copia/2.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Tipo",
+      "value": "Crossbody"
+     },
+     {
+      "label": "Color",
+      "value": "Café"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 14 cm × Ancho 8 cm × Largo 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9706255122583,
+   "handle": "bolso-crossbosy-doble-cierre-guess-rojo",
+   "title": "Bolso Crossbosy Doble Cierre Guess Rojo",
+   "vendor": "Monetta",
+   "productType": "",
+   "tags": [],
+   "brand": "guess",
+   "brandLabel": "Guess",
+   "category": "bolsa",
+   "silhouette": null,
+   "colors": [
+    "rojo"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": true,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-09-03T10:21:19-06:00",
+   "options": [],
+   "variants": [
+    {
+     "id": 48200806891671,
+     "title": null,
+     "options": [],
+     "price": "1528.00",
+     "compareAtPrice": "1749.00",
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 48200806891671,
+   "images": [
+    "/media/products/bolso-crossbosy-doble-cierre-guess-rojo/1.webp",
+    "/media/products/bolso-crossbosy-doble-cierre-guess-rojo/2.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Tipo",
+      "value": "Crossbody"
+     },
+     {
+      "label": "Color",
+      "value": "Rojo intenso"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 14 cm × Ancho 8 cm × Largo 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9690439286935,
+   "handle": "bolso-steve-madden-crossbody-3",
+   "title": "Bolso Steve Madden Crossbody",
+   "vendor": "Monetta",
+   "productType": "",
+   "tags": [],
+   "brand": "steve_madden",
+   "brandLabel": "Steve Madden",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": false,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-08-11T03:14:49-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Marrón",
+      "Negro"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 48117832548503,
+     "title": "Marrón",
+     "options": [
+      "Marrón"
+     ],
+     "price": "1445.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 48117832581271,
+     "title": "Negro",
+     "options": [
+      "Negro"
+     ],
+     "price": "1445.00",
+     "compareAtPrice": null,
+     "available": false,
+     "image": 1
+    }
+   ],
+   "defaultVariantId": 48117832548503,
+   "images": [
+    "/media/products/bolso-steve-madden-crossbody-3/1.webp",
+    "/media/products/bolso-steve-madden-crossbody-3/2.webp",
+    "/media/products/bolso-steve-madden-crossbody-3/3.webp",
+    "/media/products/bolso-steve-madden-crossbody-3/4.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Steve Madden"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Crossbody"
+     },
+     {
+      "label": "Medidas",
+      "value": "Alto 16 cm × Ancho 10 cm × Largo 23 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9639916437655,
+   "handle": "bolso-michael-kors-sammy-medium-black-copy",
+   "title": "Bolso Michael Kors Sammy Small Hombro Crossbody",
+   "vendor": "Michael Kors",
+   "productType": "Bolso",
+   "tags": [
+    "Black",
+    "Bolso",
+    "Crossbody",
+    "Michael Kors",
+    "Sammy Medium"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "beige",
+    "rosa",
+    "negro",
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-06-12T22:44:31-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Beige/Dorado",
+      "Rosa/Dorado",
+      "Ivory",
+      "Negro/Dorado",
+      "Café/Nude Dorado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47913920659607,
+     "title": "Beige/Dorado",
+     "options": [
+      "Beige/Dorado"
+     ],
+     "price": "3679.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47913920692375,
+     "title": "Rosa/Dorado",
+     "options": [
+      "Rosa/Dorado"
+     ],
+     "price": "3679.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47913920725143,
+     "title": "Ivory",
+     "options": [
+      "Ivory"
+     ],
+     "price": "3679.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47913920757911,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "3679.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47913920790679,
+     "title": "Café/Nude Dorado",
+     "options": [
+      "Café/Nude Dorado"
+     ],
+     "price": "3679.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    }
+   ],
+   "defaultVariantId": 47913920659607,
+   "images": [
+    "/media/products/bolso-michael-kors-sammy-medium-black-copy/1.webp",
+    "/media/products/bolso-michael-kors-sammy-medium-black-copy/2.webp",
+    "/media/products/bolso-michael-kors-sammy-medium-black-copy/3.webp",
+    "/media/products/bolso-michael-kors-sammy-medium-black-copy/4.webp",
+    "/media/products/bolso-michael-kors-sammy-medium-black-copy/5.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Shoulder / Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9623249911959,
+   "handle": "cartera-michael-kors-greenwich-medium-leather-trifold-wallet-negro-1",
+   "title": "Cartera Michael Kors Greenwich Medium Leather Trifold Wallet Negro",
+   "vendor": "Michael Kors",
+   "productType": "Cartera",
+   "tags": [
+    "Cartera",
+    "Greenwich",
+    "Michael Kors",
+    "Negro",
+    "Trifold",
+    "Wallet"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-30T03:51:45-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Negro/Dorado",
+      "Negro/Plateado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47912942698647,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "2555.24",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47912942731415,
+     "title": "Negro/Plateado",
+     "options": [
+      "Negro/Plateado"
+     ],
+     "price": "2555.24",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    }
+   ],
+   "defaultVariantId": 47912942698647,
+   "images": [
+    "/media/products/cartera-michael-kors-greenwich-medium-leather-trifold-wallet-negro-1/1.webp",
+    "/media/products/cartera-michael-kors-greenwich-medium-leather-trifold-wallet-negro-1/2.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Color",
+      "value": "Negro"
+     },
+     {
+      "label": "Tipo",
+      "value": "Greenwich Medium Leather Trifold Wallet"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 14 cm × Alto 9 cm × Ancho 3 cm"
+     }
+    ],
+    "paragraphs": [
+     "Cierre con broche y compartimentos interiores",
+     "Medidas aproximadas:"
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9623232151703,
+   "handle": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa",
+   "title": "Cartera Coach Long Zip Around Wallet",
+   "vendor": "Coach",
+   "productType": "Cartera",
+   "tags": [
+    "Cartera",
+    "Coach",
+    "Long Zip Around",
+    "Signature Canvas",
+    "Wallet"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "cafe",
+    "gris",
+    "beige",
+    "blanco",
+    "negro"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-30T02:25:14-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Café",
+      "Gris",
+      "Beige",
+      "Clara",
+      "Blanco",
+      "Negro",
+      "Negro y Plata",
+      "Blanco y Plata"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47881395142807,
+     "title": "Café",
+     "options": [
+      "Café"
+     ],
+     "price": "2989.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47881531523223,
+     "title": "Gris",
+     "options": [
+      "Gris"
+     ],
+     "price": "2989.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47881533259927,
+     "title": "Beige",
+     "options": [
+      "Beige"
+     ],
+     "price": "2989.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47881536110743,
+     "title": "Clara",
+     "options": [
+      "Clara"
+     ],
+     "price": "2989.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47881538044055,
+     "title": "Blanco",
+     "options": [
+      "Blanco"
+     ],
+     "price": "2989.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47881550823575,
+     "title": "Negro",
+     "options": [
+      "Negro"
+     ],
+     "price": "2989.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    },
+    {
+     "id": 47881627959447,
+     "title": "Negro y Plata",
+     "options": [
+      "Negro y Plata"
+     ],
+     "price": "2989.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 6
+    },
+    {
+     "id": 47881678323863,
+     "title": "Blanco y Plata",
+     "options": [
+      "Blanco y Plata"
+     ],
+     "price": "2989.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 7
+    }
+   ],
+   "defaultVariantId": 47881395142807,
+   "images": [
+    "/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/1.webp",
+    "/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/2.webp",
+    "/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/3.webp",
+    "/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/4.webp",
+    "/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/5.webp",
+    "/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/6.webp",
+    "/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/7.webp",
+    "/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/8.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Long Zip Around Wallet"
+     },
+     {
+      "label": "Medidas",
+      "value": "Largo 20 cm × Alto 10 cm × Ancho 3 cm"
+     }
+    ],
+    "paragraphs": [
+     "Incluye correa de muñeca: Sí",
+     "Medidas aproximadas:"
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9623210885271,
+   "handle": "cartera-coach-snap-wallet-negro-3",
+   "title": "Cartera Coach Snap Wallet",
+   "vendor": "Coach",
+   "productType": "Cartera",
+   "tags": [
+    "Cartera",
+    "Coach",
+    "Negro",
+    "Snap Wallet"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "cartera",
+   "silhouette": null,
+   "colors": [
+    "negro",
+    "cafe",
+    "blanco",
+    "beige"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-30T00:41:34-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Negro/Dorado",
+      "Café/Dorado",
+      "Blanco/Dorado",
+      "Café/Dorado Signature Canvas",
+      "Blanco/Plateado Signature Canvas",
+      "Café Oscuro/Dorado Signature Canvas",
+      "Café Jacquard/Dorado Signature Canvas",
+      "Arena/Dorado Signature Canvas"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47885276774551,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "2289.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47885300203671,
+     "title": "Café/Dorado",
+     "options": [
+      "Café/Dorado"
+     ],
+     "price": "2289.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47885369573527,
+     "title": "Blanco/Dorado",
+     "options": [
+      "Blanco/Dorado"
+     ],
+     "price": "2289.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47885386612887,
+     "title": "Café/Dorado Signature Canvas",
+     "options": [
+      "Café/Dorado Signature Canvas"
+     ],
+     "price": "2289.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47885395624087,
+     "title": "Blanco/Plateado Signature Canvas",
+     "options": [
+      "Blanco/Plateado Signature Canvas"
+     ],
+     "price": "2289.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47885405487255,
+     "title": "Café Oscuro/Dorado Signature Canvas",
+     "options": [
+      "Café Oscuro/Dorado Signature Canvas"
+     ],
+     "price": "2289.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    },
+    {
+     "id": 47885417218199,
+     "title": "Café Jacquard/Dorado Signature Canvas",
+     "options": [
+      "Café Jacquard/Dorado Signature Canvas"
+     ],
+     "price": "2289.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 6
+    },
+    {
+     "id": 47885426065559,
+     "title": "Arena/Dorado Signature Canvas",
+     "options": [
+      "Arena/Dorado Signature Canvas"
+     ],
+     "price": "2289.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 7
+    }
+   ],
+   "defaultVariantId": 47885276774551,
+   "images": [
+    "/media/products/cartera-coach-snap-wallet-negro-3/1.webp",
+    "/media/products/cartera-coach-snap-wallet-negro-3/2.webp",
+    "/media/products/cartera-coach-snap-wallet-negro-3/3.webp",
+    "/media/products/cartera-coach-snap-wallet-negro-3/4.webp",
+    "/media/products/cartera-coach-snap-wallet-negro-3/5.webp",
+    "/media/products/cartera-coach-snap-wallet-negro-3/6.webp",
+    "/media/products/cartera-coach-snap-wallet-negro-3/7.webp",
+    "/media/products/cartera-coach-snap-wallet-negro-3/8.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Snap Wallet"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 3 cm × Largo 14 cm × Alto 9 cm"
+     }
+    ],
+    "paragraphs": [
+     "Incluye cierre a presión: Sí"
+    ]
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9621931917463,
+   "handle": "bolso-coach-jet-shoulder-bag-signature-rosa",
+   "title": "Bolso Coach Jet Shoulder Bag",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Coach",
+    "Jet",
+    "Rosa",
+    "Shoulder"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "shoulder",
+   "colors": [
+    "cafe",
+    "negro",
+    "blanco"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-28T22:38:22-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Arcilla/Arena Signature Arena",
+      "Arcilla Gamuza",
+      "Cafe/Dorado Signature Canvas",
+      "Negro/Dorado Liso",
+      "Blanco/Dorado liso",
+      "Café/Dorado liso"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47902645846167,
+     "title": "Arcilla/Arena Signature Arena",
+     "options": [
+      "Arcilla/Arena Signature Arena"
+     ],
+     "price": "10926.03",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47902645878935,
+     "title": "Arcilla Gamuza",
+     "options": [
+      "Arcilla Gamuza"
+     ],
+     "price": "10926.03",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47902645911703,
+     "title": "Cafe/Dorado Signature Canvas",
+     "options": [
+      "Cafe/Dorado Signature Canvas"
+     ],
+     "price": "10926.03",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47902645944471,
+     "title": "Negro/Dorado Liso",
+     "options": [
+      "Negro/Dorado Liso"
+     ],
+     "price": "10926.03",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47902645977239,
+     "title": "Blanco/Dorado liso",
+     "options": [
+      "Blanco/Dorado liso"
+     ],
+     "price": "10926.03",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    },
+    {
+     "id": 47902646010007,
+     "title": "Café/Dorado liso",
+     "options": [
+      "Café/Dorado liso"
+     ],
+     "price": "10926.03",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 6
+    }
+   ],
+   "defaultVariantId": 47902645846167,
+   "images": [
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/1.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/2.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/3.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/4.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/5.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/6.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/7.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Shoulder"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9621767389335,
+   "handle": "bolso-coach-jet-shoulder-bag-signature-cafe",
+   "title": "Bolso Coach Lana Shoulder",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Cafe",
+    "Coach",
+    "Jet",
+    "Shoulder"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "shoulder",
+   "colors": [
+    "cafe",
+    "negro",
+    "blanco"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-28T22:26:35-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Ivory",
+      "Cafe/Dorado",
+      "Negro/Dorado",
+      "Blanco/Dorado",
+      "Café Gamuza",
+      "Arcilla Gamuza"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47902632804503,
+     "title": "Ivory",
+     "options": [
+      "Ivory"
+     ],
+     "price": "11624.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47902632837271,
+     "title": "Cafe/Dorado",
+     "options": [
+      "Cafe/Dorado"
+     ],
+     "price": "11624.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47902632870039,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "11624.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47902632902807,
+     "title": "Blanco/Dorado",
+     "options": [
+      "Blanco/Dorado"
+     ],
+     "price": "11624.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47902632935575,
+     "title": "Café Gamuza",
+     "options": [
+      "Café Gamuza"
+     ],
+     "price": "11624.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47902632968343,
+     "title": "Arcilla Gamuza",
+     "options": [
+      "Arcilla Gamuza"
+     ],
+     "price": "11624.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    }
+   ],
+   "defaultVariantId": 47902632804503,
+   "images": [
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/1.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/2.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/3.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/4.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/5.webp",
+    "/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/6.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Shoulder"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 50 cm × Largo 33 cm × Alto 20 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9619735576727,
+   "handle": "bolso-coach-station-tote-bag-negro",
+   "title": "Bolso Coach Station Tote Bag",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Coach",
+    "Negro",
+    "Station Tote",
+    "Tote"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "negro",
+    "blanco",
+    "beige",
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T23:31:50-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Negro/Dorado Signature Canvas Gd",
+      "Negro/Plateado",
+      "Blanco/Dorado",
+      "Beige/Dorado",
+      "Negro/Dorado",
+      "Blanco/Dorado Signature Canvas",
+      "Café/Negro Dorado",
+      "Arena/Beige Plateado Signature Canvas",
+      "Cafe/Arena Signature Canvas",
+      "Negro/Dorado Liso",
+      "Beige Liso",
+      "Café/Dorado liso",
+      "Negro/Dorado Signature Canvas ch"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47895025156247,
+     "title": "Negro/Dorado Signature Canvas Gd",
+     "options": [
+      "Negro/Dorado Signature Canvas Gd"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47895025189015,
+     "title": "Negro/Plateado",
+     "options": [
+      "Negro/Plateado"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47895025221783,
+     "title": "Blanco/Dorado",
+     "options": [
+      "Blanco/Dorado"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47895025254551,
+     "title": "Beige/Dorado",
+     "options": [
+      "Beige/Dorado"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47895025287319,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    },
+    {
+     "id": 47895025320087,
+     "title": "Blanco/Dorado Signature Canvas",
+     "options": [
+      "Blanco/Dorado Signature Canvas"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 6
+    },
+    {
+     "id": 47895025352855,
+     "title": "Café/Negro Dorado",
+     "options": [
+      "Café/Negro Dorado"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 7
+    },
+    {
+     "id": 47895025385623,
+     "title": "Arena/Beige Plateado Signature Canvas",
+     "options": [
+      "Arena/Beige Plateado Signature Canvas"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 8
+    },
+    {
+     "id": 47895025418391,
+     "title": "Cafe/Arena Signature Canvas",
+     "options": [
+      "Cafe/Arena Signature Canvas"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 9
+    },
+    {
+     "id": 47895025451159,
+     "title": "Negro/Dorado Liso",
+     "options": [
+      "Negro/Dorado Liso"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 10
+    },
+    {
+     "id": 47895025483927,
+     "title": "Beige Liso",
+     "options": [
+      "Beige Liso"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 11
+    },
+    {
+     "id": 47895025516695,
+     "title": "Café/Dorado liso",
+     "options": [
+      "Café/Dorado liso"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 12
+    },
+    {
+     "id": 47895025549463,
+     "title": "Negro/Dorado Signature Canvas ch",
+     "options": [
+      "Negro/Dorado Signature Canvas ch"
+     ],
+     "price": "4842.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 47895025156247,
+   "images": [
+    "/media/products/bolso-coach-station-tote-bag-negro/1.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/2.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/3.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/4.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/5.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/6.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/7.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/8.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/9.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/10.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/11.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/12.webp",
+    "/media/products/bolso-coach-station-tote-bag-negro/13.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Tote"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9619622002839,
+   "handle": "bolso-coach-mollie-tote-bag-25-signature-blanco",
+   "title": "Bolso Coach Mollie Tote Bag Crossbody 25 Signature Blanco",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Blanco",
+    "Bolso",
+    "Coach",
+    "Mollie Tote",
+    "Tote"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "negro",
+    "blanco"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T23:08:55-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Negro/Plateado",
+      "Blanco/Dorado Signature Canvas",
+      "Full Blanco"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47894594027671,
+     "title": "Negro/Plateado",
+     "options": [
+      "Negro/Plateado"
+     ],
+     "price": "4729.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47894594060439,
+     "title": "Blanco/Dorado Signature Canvas",
+     "options": [
+      "Blanco/Dorado Signature Canvas"
+     ],
+     "price": "4729.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47894594093207,
+     "title": "Full Blanco",
+     "options": [
+      "Full Blanco"
+     ],
+     "price": "4729.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 47894594027671,
+   "images": [
+    "/media/products/bolso-coach-mollie-tote-bag-25-signature-blanco/1.webp",
+    "/media/products/bolso-coach-mollie-tote-bag-25-signature-blanco/2.webp",
+    "/media/products/bolso-coach-mollie-tote-bag-25-signature-blanco/3.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Tote / Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9619142672535,
+   "handle": "bolso-coach-rowan-bucket-bag-blanco",
+   "title": "Bolso Coach Rowan Bucket Bag Crossbody Blanco",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Blanco",
+    "Bolso",
+    "Bucket",
+    "Coach",
+    "Rowan"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "blanco",
+    "cafe",
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T22:36:39-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Blanco/Dorado",
+      "Cafe/Plateado",
+      "Negro/Dorado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47894591307927,
+     "title": "Blanco/Dorado",
+     "options": [
+      "Blanco/Dorado"
+     ],
+     "price": "4589.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47894591340695,
+     "title": "Cafe/Plateado",
+     "options": [
+      "Cafe/Plateado"
+     ],
+     "price": "4589.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47894591373463,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "4589.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    }
+   ],
+   "defaultVariantId": 47894591307927,
+   "images": [
+    "/media/products/bolso-coach-rowan-bucket-bag-blanco/1.webp",
+    "/media/products/bolso-coach-rowan-bucket-bag-blanco/2.webp",
+    "/media/products/bolso-coach-rowan-bucket-bag-blanco/3.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Bucket / Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9618484134039,
+   "handle": "bolso-coach-rainer-crossbody-quilted-blanco",
+   "title": "Bolso Coach Rainer Crossbody Quilted Blanco",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Blanco",
+    "Bolso",
+    "Coach",
+    "Crossbody",
+    "Rainer"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "rosa",
+    "cafe",
+    "beige",
+    "negro",
+    "blanco"
+   ],
+   "patterns": [
+    "acolchado"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T13:29:22-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Rosa/Dorado",
+      "Cafe/Arena Signature Canvas",
+      "Arena/Beige Plateado Signature Canvas",
+      "Negro/Café",
+      "Negro/Dorado",
+      "Blanco/Dorado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47894507716759,
+     "title": "Rosa/Dorado",
+     "options": [
+      "Rosa/Dorado"
+     ],
+     "price": "4629.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47894507749527,
+     "title": "Cafe/Arena Signature Canvas",
+     "options": [
+      "Cafe/Arena Signature Canvas"
+     ],
+     "price": "4629.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47894507782295,
+     "title": "Arena/Beige Plateado Signature Canvas",
+     "options": [
+      "Arena/Beige Plateado Signature Canvas"
+     ],
+     "price": "4629.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47894507815063,
+     "title": "Negro/Café",
+     "options": [
+      "Negro/Café"
+     ],
+     "price": "4629.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47894507847831,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "4629.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47894507880599,
+     "title": "Blanco/Dorado",
+     "options": [
+      "Blanco/Dorado"
+     ],
+     "price": "4629.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    }
+   ],
+   "defaultVariantId": 47894507716759,
+   "images": [
+    "/media/products/bolso-coach-rainer-crossbody-quilted-blanco/1.webp",
+    "/media/products/bolso-coach-rainer-crossbody-quilted-blanco/2.webp",
+    "/media/products/bolso-coach-rainer-crossbody-quilted-blanco/3.webp",
+    "/media/products/bolso-coach-rainer-crossbody-quilted-blanco/4.webp",
+    "/media/products/bolso-coach-rainer-crossbody-quilted-blanco/5.webp",
+    "/media/products/bolso-coach-rainer-crossbody-quilted-blanco/6.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9618437800087,
+   "handle": "bolso-coach-mini-klare-crossbody-signature-beige-blanco",
+   "title": "Bolso Coach Klare Crossbody",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Beige Blanco",
+    "Bolso",
+    "Coach",
+    "Crossbody",
+    "Mini Klare"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "mini",
+   "colors": [
+    "cafe",
+    "negro",
+    "blanco",
+    "beige",
+    "gris"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T12:25:21-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Cafe/Dorado",
+      "Negro/Dorado",
+      "Café/Nude Dorado",
+      "Blanco/Dorado Signature Canvas",
+      "Arena/Beige Dorado Signature Canvas",
+      "Gris/Café Signature Canvas",
+      "Negro/Café",
+      "Negro/Arena",
+      "Arena/Beige Plateado Signature Canvas",
+      "Gris/Negro",
+      "Arena/Blanco Signature Canvas"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47886982414487,
+     "title": "Cafe/Dorado",
+     "options": [
+      "Cafe/Dorado"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47886982447255,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47886982480023,
+     "title": "Café/Nude Dorado",
+     "options": [
+      "Café/Nude Dorado"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47886982512791,
+     "title": "Blanco/Dorado Signature Canvas",
+     "options": [
+      "Blanco/Dorado Signature Canvas"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47886982545559,
+     "title": "Arena/Beige Dorado Signature Canvas",
+     "options": [
+      "Arena/Beige Dorado Signature Canvas"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47886982578327,
+     "title": "Gris/Café Signature Canvas",
+     "options": [
+      "Gris/Café Signature Canvas"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    },
+    {
+     "id": 47886982611095,
+     "title": "Negro/Café",
+     "options": [
+      "Negro/Café"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 6
+    },
+    {
+     "id": 47886982643863,
+     "title": "Negro/Arena",
+     "options": [
+      "Negro/Arena"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 7
+    },
+    {
+     "id": 47886982676631,
+     "title": "Arena/Beige Plateado Signature Canvas",
+     "options": [
+      "Arena/Beige Plateado Signature Canvas"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 8
+    },
+    {
+     "id": 47886982709399,
+     "title": "Gris/Negro",
+     "options": [
+      "Gris/Negro"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47886982742167,
+     "title": "Arena/Blanco Signature Canvas",
+     "options": [
+      "Arena/Blanco Signature Canvas"
+     ],
+     "price": "5192.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 9
+    }
+   ],
+   "defaultVariantId": 47886982414487,
+   "images": [
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/1.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/2.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/3.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/4.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/5.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/6.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/7.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/8.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/9.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/10.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9618432360599,
+   "handle": "bolso-coach-mini-klare-crossbody-cafe",
+   "title": "Bolso Coach Mini Klare Crossbody",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Café",
+    "Coach",
+    "Crossbody",
+    "Mini Klare"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "mini",
+   "colors": [
+    "cafe",
+    "beige"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T12:19:46-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Café",
+      "Arena/Beige Dorado Signature Canvas"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47886921105559,
+     "title": "Café",
+     "options": [
+      "Café"
+     ],
+     "price": "4777.50",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47886921138327,
+     "title": "Arena/Beige Dorado Signature Canvas",
+     "options": [
+      "Arena/Beige Dorado Signature Canvas"
+     ],
+     "price": "4777.50",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    }
+   ],
+   "defaultVariantId": 47886921105559,
+   "images": [
+    "/media/products/bolso-coach-mini-klare-crossbody-cafe/1.webp",
+    "/media/products/bolso-coach-mini-klare-crossbody-cafe/2.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Color",
+      "value": "Café"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9618409193623,
+   "handle": "bolso-coach-lara-mini-satchel-blanco",
+   "title": "Bolso Coach Lara Mini Satchel Crossbody",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Blanco",
+    "Bolso",
+    "Coach",
+    "Lara Mini",
+    "Satchel"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "cafe",
+    "negro",
+    "blanco"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T11:50:24-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Café",
+      "Charol Negro/Plateado Signature Canvas",
+      "Blanco/Dorado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47886910259351,
+     "title": "Café",
+     "options": [
+      "Café"
+     ],
+     "price": "3929.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47886910292119,
+     "title": "Charol Negro/Plateado Signature Canvas",
+     "options": [
+      "Charol Negro/Plateado Signature Canvas"
+     ],
+     "price": "3929.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47886910324887,
+     "title": "Blanco/Dorado",
+     "options": [
+      "Blanco/Dorado"
+     ],
+     "price": "3929.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 47886910259351,
+   "images": [
+    "/media/products/bolso-coach-lara-mini-satchel-blanco/1.webp",
+    "/media/products/bolso-coach-lara-mini-satchel-blanco/2.webp",
+    "/media/products/bolso-coach-lara-mini-satchel-blanco/3.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Satchel / Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9618362957975,
+   "handle": "bolso-coach-shoulder-negro-rectangular",
+   "title": "Bolso Coach Shoulder Rectangular",
+   "vendor": "Coach",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Coach",
+    "Negro",
+    "Shoulder",
+    "Shoulder Bag"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "bolsa",
+   "silhouette": "shoulder",
+   "colors": [
+    "negro",
+    "beige",
+    "cafe",
+    "blanco",
+    "azul"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T10:58:45-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Charol Negro/Plateado Signature Canvas",
+      "Arena/Blanco Signature Canvas",
+      "Café",
+      "Arena/Beige Plateado Signature Canvas",
+      "Blanco/Dorado Signature Canvas",
+      "Arena/Beige Dorado Signature Canvas",
+      "Negro/Dorado",
+      "Mezclilla/Café"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47886074577047,
+     "title": "Charol Negro/Plateado Signature Canvas",
+     "options": [
+      "Charol Negro/Plateado Signature Canvas"
+     ],
+     "price": "3854.00",
+     "compareAtPrice": null,
+     "available": false,
+     "image": 1
+    },
+    {
+     "id": 47886098464919,
+     "title": "Arena/Blanco Signature Canvas",
+     "options": [
+      "Arena/Blanco Signature Canvas"
+     ],
+     "price": "3854.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47886205386903,
+     "title": "Café",
+     "options": [
+      "Café"
+     ],
+     "price": "3854.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47886205419671,
+     "title": "Arena/Beige Plateado Signature Canvas",
+     "options": [
+      "Arena/Beige Plateado Signature Canvas"
+     ],
+     "price": "3854.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47886210859159,
+     "title": "Blanco/Dorado Signature Canvas",
+     "options": [
+      "Blanco/Dorado Signature Canvas"
+     ],
+     "price": "3854.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    },
+    {
+     "id": 47886218985623,
+     "title": "Arena/Beige Dorado Signature Canvas",
+     "options": [
+      "Arena/Beige Dorado Signature Canvas"
+     ],
+     "price": "3854.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 6
+    },
+    {
+     "id": 47886893842583,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "3854.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47886906556567,
+     "title": "Mezclilla/Café",
+     "options": [
+      "Mezclilla/Café"
+     ],
+     "price": "3854.00",
+     "compareAtPrice": null,
+     "available": false,
+     "image": 7
+    }
+   ],
+   "defaultVariantId": 47886098464919,
+   "images": [
+    "/media/products/bolso-coach-shoulder-negro-rectangular/1.webp",
+    "/media/products/bolso-coach-shoulder-negro-rectangular/2.webp",
+    "/media/products/bolso-coach-shoulder-negro-rectangular/3.webp",
+    "/media/products/bolso-coach-shoulder-negro-rectangular/4.webp",
+    "/media/products/bolso-coach-shoulder-negro-rectangular/5.webp",
+    "/media/products/bolso-coach-shoulder-negro-rectangular/6.webp",
+    "/media/products/bolso-coach-shoulder-negro-rectangular/7.webp",
+    "/media/products/bolso-coach-shoulder-negro-rectangular/8.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Shoulder"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 5 cm × Largo 19 cm × Alto 12 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9618298405015,
+   "handle": "bolso-michael-kors-eva-large-saffiano-leather-tote-negro",
+   "title": "Bolso Michael Kors Eva Large Saffiano Leather Tote",
+   "vendor": "Michael Kors",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Eva Large",
+    "Michael Kors",
+    "Negro",
+    "Tote"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "negro",
+    "azul"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T10:09:31-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Negro/Plateado",
+      "Azul Oscuro"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47912970813591,
+     "title": "Negro/Plateado",
+     "options": [
+      "Negro/Plateado"
+     ],
+     "price": "3672.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47912970846359,
+     "title": "Azul Oscuro",
+     "options": [
+      "Azul Oscuro"
+     ],
+     "price": "3672.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    }
+   ],
+   "defaultVariantId": 47912970813591,
+   "images": [
+    "/media/products/bolso-michael-kors-eva-large-saffiano-leather-tote-negro/1.webp",
+    "/media/products/bolso-michael-kors-eva-large-saffiano-leather-tote-negro/2.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Tote"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9618276188311,
+   "handle": "bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro",
+   "title": "Bolso Michael Kors Thompson Medium Pebbled Leather Satchel Crossbody",
+   "vendor": "Michael Kors",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Michael Kors",
+    "Negro",
+    "Satchel",
+    "Thompson Medium"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "rosa",
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T09:59:56-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Rosa",
+      "Ivory",
+      "Negro/Plateado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47912977268887,
+     "title": "Rosa",
+     "options": [
+      "Rosa"
+     ],
+     "price": "3669.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47912977301655,
+     "title": "Ivory",
+     "options": [
+      "Ivory"
+     ],
+     "price": "3669.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47912977334423,
+     "title": "Negro/Plateado",
+     "options": [
+      "Negro/Plateado"
+     ],
+     "price": "3669.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    }
+   ],
+   "defaultVariantId": 47912977268887,
+   "images": [
+    "/media/products/bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro/1.webp",
+    "/media/products/bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro/2.webp",
+    "/media/products/bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro/3.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Satchel / Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617982488727,
+   "handle": "bolso-michael-kors-jet-set-medium-pocket-tote-negro",
+   "title": "Bolso Michael Kors Jet Set Medium Pocket Tote",
+   "vendor": "Michael Kors",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Jet Set Medium",
+    "Michael Kors",
+    "Negro",
+    "Tote"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "bolsa",
+   "silhouette": "tote",
+   "colors": [
+    "cafe",
+    "negro",
+    "rosa"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T02:26:12-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Cafe/Dorado",
+      "Negro/Dorado",
+      "Café/ Dorado Signature Canvas",
+      "Rosa/Dorado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47913924919447,
+     "title": "Cafe/Dorado",
+     "options": [
+      "Cafe/Dorado"
+     ],
+     "price": "2962.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47913924952215,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "2962.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47913924984983,
+     "title": "Café/ Dorado Signature Canvas",
+     "options": [
+      "Café/ Dorado Signature Canvas"
+     ],
+     "price": "2962.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47913925017751,
+     "title": "Rosa/Dorado",
+     "options": [
+      "Rosa/Dorado"
+     ],
+     "price": "2962.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 47913924919447,
+   "images": [
+    "/media/products/bolso-michael-kors-jet-set-medium-pocket-tote-negro/1.webp",
+    "/media/products/bolso-michael-kors-jet-set-medium-pocket-tote-negro/2.webp",
+    "/media/products/bolso-michael-kors-jet-set-medium-pocket-tote-negro/3.webp",
+    "/media/products/bolso-michael-kors-jet-set-medium-pocket-tote-negro/4.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Tote"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617961779351,
+   "handle": "bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+   "title": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+   "vendor": "Michael Kors",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Marilyn Medium",
+    "Michael Kors",
+    "Satchel",
+    "Vanilla Rosa"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "bolsa",
+   "silhouette": "satchel",
+   "colors": [
+    "blanco",
+    "cafe",
+    "negro",
+    "rosa"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T00:50:10-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Blanco/Rosa Signature Canvas",
+      "Café/ Dorado Signature Canvas",
+      "Negro/Dorado",
+      "Negro/Plateado",
+      "Rosa/Dorado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47913922429079,
+     "title": "Blanco/Rosa Signature Canvas",
+     "options": [
+      "Blanco/Rosa Signature Canvas"
+     ],
+     "price": "2872.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47913922461847,
+     "title": "Café/ Dorado Signature Canvas",
+     "options": [
+      "Café/ Dorado Signature Canvas"
+     ],
+     "price": "2872.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47913923215511,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "2872.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47913923248279,
+     "title": "Negro/Plateado",
+     "options": [
+      "Negro/Plateado"
+     ],
+     "price": "2872.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47913923281047,
+     "title": "Rosa/Dorado",
+     "options": [
+      "Rosa/Dorado"
+     ],
+     "price": "2872.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 47913922429079,
+   "images": [
+    "/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/1.webp",
+    "/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/2.webp",
+    "/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/3.webp",
+    "/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/4.webp",
+    "/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/5.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Satchel / Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617960009879,
+   "handle": "bolso-michael-kors-jet-set-large-logo-shoulder-vanilla",
+   "title": "Bolso Michael Kors Jet Set Large Logo Tote",
+   "vendor": "Michael Kors",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Jet Set Large",
+    "Michael Kors",
+    "Shoulder Bag",
+    "Vanilla"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "bolsa",
+   "silhouette": "shoulder",
+   "colors": [
+    "blanco",
+    "negro",
+    "cafe"
+   ],
+   "patterns": [
+    "monograma"
+   ],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-27T00:34:42-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Blanco/Café Signature Canvas",
+      "Negro/Dorado",
+      "Café/ Dorado Signature Canvas",
+      "Cafe/Dorado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47913928229015,
+     "title": "Blanco/Café Signature Canvas",
+     "options": [
+      "Blanco/Café Signature Canvas"
+     ],
+     "price": "3372.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47913928261783,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "3372.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47913928294551,
+     "title": "Café/ Dorado Signature Canvas",
+     "options": [
+      "Café/ Dorado Signature Canvas"
+     ],
+     "price": "3372.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47913928818839,
+     "title": "Cafe/Dorado",
+     "options": [
+      "Cafe/Dorado"
+     ],
+     "price": "3372.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 47913928229015,
+   "images": [
+    "/media/products/bolso-michael-kors-jet-set-large-logo-shoulder-vanilla/1.webp",
+    "/media/products/bolso-michael-kors-jet-set-large-logo-shoulder-vanilla/2.webp",
+    "/media/products/bolso-michael-kors-jet-set-large-logo-shoulder-vanilla/3.webp",
+    "/media/products/bolso-michael-kors-jet-set-large-logo-shoulder-vanilla/4.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Shoulder"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "No"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617543692439,
+   "handle": "bolso-michael-kors-jet-set-travel-vanilla",
+   "title": "Bolso Michael Kors Jet Set Travel Crossbody",
+   "vendor": "Michael Kors",
+   "productType": "Bolso",
+   "tags": [
+    "Bolso",
+    "Crossbody",
+    "Jet Set Travel",
+    "Michael Kors",
+    "Vanilla"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "bolsa",
+   "silhouette": "crossbody",
+   "colors": [
+    "rosa",
+    "negro",
+    "cafe",
+    "blanco"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": true,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T17:09:47-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Rosa/Dorado",
+      "Negro/Dorado",
+      "Café/Dorado liso",
+      "Café/ Dorado Signature Canvas",
+      "Blanco/Dorado Signature Canvas"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47913867247767,
+     "title": "Rosa/Dorado",
+     "options": [
+      "Rosa/Dorado"
+     ],
+     "price": "1949.00",
+     "compareAtPrice": "2625.00",
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47913867280535,
+     "title": "Negro/Dorado",
+     "options": [
+      "Negro/Dorado"
+     ],
+     "price": "1949.00",
+     "compareAtPrice": "2625.00",
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47913867313303,
+     "title": "Café/Dorado liso",
+     "options": [
+      "Café/Dorado liso"
+     ],
+     "price": "1949.00",
+     "compareAtPrice": "2625.00",
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47913867411607,
+     "title": "Café/ Dorado Signature Canvas",
+     "options": [
+      "Café/ Dorado Signature Canvas"
+     ],
+     "price": "1949.00",
+     "compareAtPrice": "2625.00",
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47913867444375,
+     "title": "Blanco/Dorado Signature Canvas",
+     "options": [
+      "Blanco/Dorado Signature Canvas"
+     ],
+     "price": "1949.00",
+     "compareAtPrice": "2625.00",
+     "available": true,
+     "image": 4
+    }
+   ],
+   "defaultVariantId": 47913867247767,
+   "images": [
+    "/media/products/bolso-michael-kors-jet-set-travel-vanilla/1.webp",
+    "/media/products/bolso-michael-kors-jet-set-travel-vanilla/2.webp",
+    "/media/products/bolso-michael-kors-jet-set-travel-vanilla/3.webp",
+    "/media/products/bolso-michael-kors-jet-set-travel-vanilla/4.webp",
+    "/media/products/bolso-michael-kors-jet-set-travel-vanilla/5.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Color",
+      "value": "Vanilla"
+     },
+     {
+      "label": "Tipo",
+      "value": "Bolsa Crossbody"
+     },
+     {
+      "label": "Incluye correa crossbody",
+      "value": "Sí"
+     },
+     {
+      "label": "Medidas",
+      "value": "Ancho 11 cm × Largo 31 cm × Alto 22 cm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617417470103,
+   "handle": "reloj-michael-kors-mini-aspyn-rose-gold",
+   "title": "Reloj Michael Kors Mini Aspyn",
+   "vendor": "Michael Kors",
+   "productType": "Reloj",
+   "tags": [
+    "Michael Kors",
+    "Mini Aspyn",
+    "Mujer",
+    "Reloj",
+    "Rose Gold"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "reloj",
+   "silhouette": null,
+   "colors": [
+    "rosa",
+    "dorado"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T15:51:38-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Rose Gold",
+      "Plateado/Dorado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47912782495895,
+     "title": "Rose Gold",
+     "options": [
+      "Rose Gold"
+     ],
+     "price": "4529.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47912782528663,
+     "title": "Plateado/Dorado",
+     "options": [
+      "Plateado/Dorado"
+     ],
+     "price": "4529.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    }
+   ],
+   "defaultVariantId": 47912782495895,
+   "images": [
+    "/media/products/reloj-michael-kors-mini-aspyn-rose-gold/1.webp",
+    "/media/products/reloj-michael-kors-mini-aspyn-rose-gold/2.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Modelo",
+      "value": "Mini Aspyn Watch"
+     },
+     {
+      "label": "Material",
+      "value": "caja de acero inoxidable, extensible de acero inoxidable y cristal mineral"
+     },
+     {
+      "label": "Medidas",
+      "value": "caja mini"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617402134679,
+   "handle": "reloj-michael-kors-monroe-silver-leather",
+   "title": "Reloj Michael Kors Monroe",
+   "vendor": "Michael Kors",
+   "productType": "Reloj",
+   "tags": [
+    "Hombre",
+    "Michael Kors",
+    "Monroe",
+    "Reloj",
+    "Silver Black"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "reloj",
+   "silhouette": null,
+   "colors": [
+    "negro",
+    "cafe"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T15:39:18-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Negro/Plateado",
+      "Cafe/Plateado",
+      "Café Oscuro/Plateado",
+      "Plateado"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47904910049431,
+     "title": "Negro/Plateado",
+     "options": [
+      "Negro/Plateado"
+     ],
+     "price": "3744.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47904910082199,
+     "title": "Cafe/Plateado",
+     "options": [
+      "Cafe/Plateado"
+     ],
+     "price": "3744.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47904910114967,
+     "title": "Café Oscuro/Plateado",
+     "options": [
+      "Café Oscuro/Plateado"
+     ],
+     "price": "3744.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47908573315223,
+     "title": "Plateado",
+     "options": [
+      "Plateado"
+     ],
+     "price": "3744.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    }
+   ],
+   "defaultVariantId": 47904910049431,
+   "images": [
+    "/media/products/reloj-michael-kors-monroe-silver-leather/1.webp",
+    "/media/products/reloj-michael-kors-monroe-silver-leather/2.webp",
+    "/media/products/reloj-michael-kors-monroe-silver-leather/3.webp",
+    "/media/products/reloj-michael-kors-monroe-silver-leather/4.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Modelo",
+      "value": "Monroe Silver-Tone and Leather Watch"
+     },
+     {
+      "label": "Material",
+      "value": "caja de acero inoxidable, correa de piel y cristal mineral"
+     },
+     {
+      "label": "Medidas",
+      "value": "caja rectangular"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617390600343,
+   "handle": "reloj-michael-kors-oversized-callum-gold",
+   "title": "Reloj Michael Kors Oversized Callum",
+   "vendor": "Michael Kors",
+   "productType": "Reloj",
+   "tags": [
+    "Callum",
+    "Gold",
+    "Hombre",
+    "Michael Kors",
+    "Reloj"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "reloj",
+   "silhouette": null,
+   "colors": [
+    "dorado",
+    "negro"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T15:31:33-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Dorado",
+      "Plateado",
+      "Negro"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47902819549335,
+     "title": "Dorado",
+     "options": [
+      "Dorado"
+     ],
+     "price": "6292.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47902819582103,
+     "title": "Plateado",
+     "options": [
+      "Plateado"
+     ],
+     "price": "6292.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47902819614871,
+     "title": "Negro",
+     "options": [
+      "Negro"
+     ],
+     "price": "6292.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    }
+   ],
+   "defaultVariantId": 47902819549335,
+   "images": [
+    "/media/products/reloj-michael-kors-oversized-callum-gold/1.webp",
+    "/media/products/reloj-michael-kors-oversized-callum-gold/2.webp",
+    "/media/products/reloj-michael-kors-oversized-callum-gold/3.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Modelo",
+      "value": "Oversized Callum Watch"
+     },
+     {
+      "label": "Material",
+      "value": "caja de acero inoxidable, extensible de acero inoxidable y cristal mineral"
+     },
+     {
+      "label": "Medidas",
+      "value": "caja oversized"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617360912535,
+   "handle": "reloj-michael-kors-lennox-pave-gold",
+   "title": "Reloj Michael Kors Lennox Pavé",
+   "vendor": "Michael Kors",
+   "productType": "Reloj",
+   "tags": [
+    "Gold",
+    "Lennox",
+    "Michael Kors",
+    "Mujer",
+    "Reloj"
+   ],
+   "brand": "michael_kors",
+   "brandLabel": "Michael Kors",
+   "category": "reloj",
+   "silhouette": null,
+   "colors": [
+    "dorado",
+    "rosa"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T15:15:53-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Dorado",
+      "Plateado/Dorado",
+      "Rose Gold"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47902800248983,
+     "title": "Dorado",
+     "options": [
+      "Dorado"
+     ],
+     "price": "4879.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47902800281751,
+     "title": "Plateado/Dorado",
+     "options": [
+      "Plateado/Dorado"
+     ],
+     "price": "4879.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47902800314519,
+     "title": "Rose Gold",
+     "options": [
+      "Rose Gold"
+     ],
+     "price": "4879.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    }
+   ],
+   "defaultVariantId": 47902800248983,
+   "images": [
+    "/media/products/reloj-michael-kors-lennox-pave-gold/1.webp",
+    "/media/products/reloj-michael-kors-lennox-pave-gold/2.webp",
+    "/media/products/reloj-michael-kors-lennox-pave-gold/3.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Michael Kors"
+     },
+     {
+      "label": "Modelo",
+      "value": "Lennox Pavé Watch"
+     },
+     {
+      "label": "Material",
+      "value": "caja de acero inoxidable, extensible de acero inoxidable y cristal mineral"
+     },
+     {
+      "label": "Medidas",
+      "value": "caja estándar"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617293115543,
+   "handle": "reloj-coach-iris-rose-gold",
+   "title": "Reloj Coach Iris",
+   "vendor": "Coach",
+   "productType": "Reloj",
+   "tags": [
+    "Coach",
+    "Iris",
+    "Mujer",
+    "Reloj",
+    "Rose Gold"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "reloj",
+   "silhouette": null,
+   "colors": [
+    "dorado",
+    "rosa"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T14:39:12-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Plateado/Blanco",
+      "Dorado/Blanco",
+      "Rose Gold/Blanco"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47886847312023,
+     "title": "Plateado/Blanco",
+     "options": [
+      "Plateado/Blanco"
+     ],
+     "price": "6836.99",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47886847344791,
+     "title": "Dorado/Blanco",
+     "options": [
+      "Dorado/Blanco"
+     ],
+     "price": "6836.99",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47886847377559,
+     "title": "Rose Gold/Blanco",
+     "options": [
+      "Rose Gold/Blanco"
+     ],
+     "price": "6836.99",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    }
+   ],
+   "defaultVariantId": 47886847312023,
+   "images": [
+    "/media/products/reloj-coach-iris-rose-gold/1.webp",
+    "/media/products/reloj-coach-iris-rose-gold/2.webp",
+    "/media/products/reloj-coach-iris-rose-gold/3.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Modelo",
+      "value": "Iris Watch 22 mm"
+     },
+     {
+      "label": "Material",
+      "value": "caja de acero inoxidable, extensible de acero inoxidable y cristal mineral"
+     },
+     {
+      "label": "Medidas",
+      "value": "caja de 22 mm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9617252679831,
+   "handle": "reloj-coach-olivia-gold",
+   "title": "Reloj Coach Olivia",
+   "vendor": "Coach",
+   "productType": "Reloj",
+   "tags": [
+    "Coach",
+    "Gold",
+    "Mujer",
+    "Olivia",
+    "Reloj"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "reloj",
+   "silhouette": null,
+   "colors": [
+    "dorado"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T14:18:07-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Full Plateado",
+      "Full Dorado",
+      "Plateado/Rosa"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47886837874839,
+     "title": "Full Plateado",
+     "options": [
+      "Full Plateado"
+     ],
+     "price": "3789.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47886837907607,
+     "title": "Full Dorado",
+     "options": [
+      "Full Dorado"
+     ],
+     "price": "3789.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47886838366359,
+     "title": "Plateado/Rosa",
+     "options": [
+      "Plateado/Rosa"
+     ],
+     "price": "3789.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    }
+   ],
+   "defaultVariantId": 47886837874839,
+   "images": [
+    "/media/products/reloj-coach-olivia-gold/1.webp",
+    "/media/products/reloj-coach-olivia-gold/2.webp",
+    "/media/products/reloj-coach-olivia-gold/3.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Modelo",
+      "value": "Olivia Watch 34 mm"
+     },
+     {
+      "label": "Material",
+      "value": "caja de acero inoxidable, extensible de acero inoxidable y cristal mineral"
+     },
+     {
+      "label": "Medidas",
+      "value": "caja de 34 mm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9616980508823,
+   "handle": "reloj-coach-sammy-gold-white",
+   "title": "Reloj Coach Sammy Acero",
+   "vendor": "Coach",
+   "productType": "Reloj",
+   "tags": [
+    "Coach",
+    "Gold White",
+    "Mujer",
+    "Reloj",
+    "Sammy"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "reloj",
+   "silhouette": null,
+   "colors": [
+    "dorado",
+    "rosa"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T04:37:53-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Dorado/Blanco",
+      "Rose Gold/Blanco",
+      "Dorado/Negro",
+      "Plateado/Blanco",
+      "Full Rose Gold",
+      "Full Dorado",
+      "Full Plateado",
+      "Plateado/Blanco Chunks",
+      "Rose Gold/Blanco Chunks",
+      "Plateado/Dorado",
+      "Dorado/Blanco Chunks"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47886823293079,
+     "title": "Dorado/Blanco",
+     "options": [
+      "Dorado/Blanco"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47886823325847,
+     "title": "Rose Gold/Blanco",
+     "options": [
+      "Rose Gold/Blanco"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47886823358615,
+     "title": "Dorado/Negro",
+     "options": [
+      "Dorado/Negro"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47886823391383,
+     "title": "Plateado/Blanco",
+     "options": [
+      "Plateado/Blanco"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47886823424151,
+     "title": "Full Rose Gold",
+     "options": [
+      "Full Rose Gold"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47886823456919,
+     "title": "Full Dorado",
+     "options": [
+      "Full Dorado"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    },
+    {
+     "id": 47886823489687,
+     "title": "Full Plateado",
+     "options": [
+      "Full Plateado"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 6
+    },
+    {
+     "id": 47886823522455,
+     "title": "Plateado/Blanco Chunks",
+     "options": [
+      "Plateado/Blanco Chunks"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 7
+    },
+    {
+     "id": 47886823555223,
+     "title": "Rose Gold/Blanco Chunks",
+     "options": [
+      "Rose Gold/Blanco Chunks"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 8
+    },
+    {
+     "id": 47886823587991,
+     "title": "Plateado/Dorado",
+     "options": [
+      "Plateado/Dorado"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 9
+    },
+    {
+     "id": 47886823620759,
+     "title": "Dorado/Blanco Chunks",
+     "options": [
+      "Dorado/Blanco Chunks"
+     ],
+     "price": "5259.15",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 10
+    }
+   ],
+   "defaultVariantId": 47886823293079,
+   "images": [
+    "/media/products/reloj-coach-sammy-gold-white/1.webp",
+    "/media/products/reloj-coach-sammy-gold-white/2.webp",
+    "/media/products/reloj-coach-sammy-gold-white/3.webp",
+    "/media/products/reloj-coach-sammy-gold-white/4.webp",
+    "/media/products/reloj-coach-sammy-gold-white/5.webp",
+    "/media/products/reloj-coach-sammy-gold-white/6.webp",
+    "/media/products/reloj-coach-sammy-gold-white/7.webp",
+    "/media/products/reloj-coach-sammy-gold-white/8.webp",
+    "/media/products/reloj-coach-sammy-gold-white/9.webp",
+    "/media/products/reloj-coach-sammy-gold-white/10.webp",
+    "/media/products/reloj-coach-sammy-gold-white/11.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Modelo",
+      "value": "Sammy Watch 22 mm"
+     },
+     {
+      "label": "Material",
+      "value": "caja de acero inoxidable, extensible de acero inoxidable y cristal mineral"
+     },
+     {
+      "label": "Medidas",
+      "value": "caja de 22 mm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  },
+  {
+   "id": 9616964714647,
+   "handle": "reloj-coach-talia-saddle",
+   "title": "Reloj Coach Talia Saddle",
+   "vendor": "Coach",
+   "productType": "Reloj",
+   "tags": [
+    "Coach",
+    "Mujer",
+    "Reloj",
+    "Saddle",
+    "Talia"
+   ],
+   "brand": "coach",
+   "brandLabel": "Coach",
+   "category": "reloj",
+   "silhouette": null,
+   "colors": [
+    "rosa",
+    "cafe",
+    "negro",
+    "dorado"
+   ],
+   "patterns": [],
+   "flags": {
+    "onSale": false,
+    "sobrePedido": true,
+    "envioInmediato": false,
+    "newArrival": false
+   },
+   "createdAt": "2026-05-26T03:42:14-06:00",
+   "options": [
+    {
+     "name": "Color",
+     "values": [
+      "Rosa Blush",
+      "Café",
+      "Negro/Plateado",
+      "Rosa/Plateado",
+      "Rose Gold",
+      "Dorado",
+      "Plateado/Dorado",
+      "Plateado/Negro"
+     ]
+    }
+   ],
+   "variants": [
+    {
+     "id": 47886798782615,
+     "title": "Rosa Blush",
+     "options": [
+      "Rosa Blush"
+     ],
+     "price": "3647.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 1
+    },
+    {
+     "id": 47886799732887,
+     "title": "Café",
+     "options": [
+      "Café"
+     ],
+     "price": "3647.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 0
+    },
+    {
+     "id": 47886800748695,
+     "title": "Negro/Plateado",
+     "options": [
+      "Negro/Plateado"
+     ],
+     "price": "3647.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 2
+    },
+    {
+     "id": 47886801567895,
+     "title": "Rosa/Plateado",
+     "options": [
+      "Rosa/Plateado"
+     ],
+     "price": "3647.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 3
+    },
+    {
+     "id": 47886802223255,
+     "title": "Rose Gold",
+     "options": [
+      "Rose Gold"
+     ],
+     "price": "3647.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 4
+    },
+    {
+     "id": 47886802714775,
+     "title": "Dorado",
+     "options": [
+      "Dorado"
+     ],
+     "price": "3647.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 5
+    },
+    {
+     "id": 47886803140759,
+     "title": "Plateado/Dorado",
+     "options": [
+      "Plateado/Dorado"
+     ],
+     "price": "3647.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 6
+    },
+    {
+     "id": 47886803435671,
+     "title": "Plateado/Negro",
+     "options": [
+      "Plateado/Negro"
+     ],
+     "price": "3647.00",
+     "compareAtPrice": null,
+     "available": true,
+     "image": 7
+    }
+   ],
+   "defaultVariantId": 47886798782615,
+   "images": [
+    "/media/products/reloj-coach-talia-saddle/1.webp",
+    "/media/products/reloj-coach-talia-saddle/2.webp",
+    "/media/products/reloj-coach-talia-saddle/3.webp",
+    "/media/products/reloj-coach-talia-saddle/4.webp",
+    "/media/products/reloj-coach-talia-saddle/5.webp",
+    "/media/products/reloj-coach-talia-saddle/6.webp",
+    "/media/products/reloj-coach-talia-saddle/7.webp",
+    "/media/products/reloj-coach-talia-saddle/8.webp"
+   ],
+   "description": {
+    "facts": [
+     {
+      "label": "Marca",
+      "value": "Coach"
+     },
+     {
+      "label": "Modelo",
+      "value": "Talia Watch 22 mm"
+     },
+     {
+      "label": "Material",
+      "value": "caja de acero inoxidable, correa de piel y cristal mineral"
+     },
+     {
+      "label": "Medidas",
+      "value": "caja de 22 mm"
+     }
+    ],
+    "paragraphs": []
+   },
+   "synthetic": null
+  }
+ ]
+}

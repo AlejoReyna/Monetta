@@ -1,0 +1,229 @@
+{% doc %}
+  @prompt
+    Un encabezado con un efecto luminoso animado
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-glow-heading-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.padding_top }}px {{ block.settings.padding_horizontal }}px {{ block.settings.padding_bottom }}px;
+    text-align: {{ block.settings.text_alignment }};
+  }
+
+  .ai-glow-heading__text-{{ ai_gen_id }} {
+    margin: 0;
+    font-size: {{ block.settings.font_size }}px;
+    color: {{ block.settings.text_color }};
+    position: relative;
+    display: inline-block;
+    text-shadow: 
+      0 0 {{ block.settings.glow_intensity }}px {{ block.settings.glow_color }},
+      0 0 {{ block.settings.glow_intensity | times: 2 }}px {{ block.settings.glow_color }},
+      0 0 {{ block.settings.glow_intensity | times: 3 }}px {{ block.settings.glow_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-glow-heading__text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.font_size | times: 0.7 }}px;
+    }
+  }
+{% endstyle %}
+
+<glow-heading-{{ ai_gen_id }}
+  class="ai-glow-heading-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  {% if block.settings.heading_text != blank %}
+    <h2 class="ai-glow-heading__text-{{ ai_gen_id }}">
+      {{ block.settings.heading_text }}
+    </h2>
+  {% else %}
+    <h2 class="ai-glow-heading__text-{{ ai_gen_id }}">
+      Encabezado luminoso
+    </h2>
+  {% endif %}
+</glow-heading-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class GlowHeading{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        const heading = this.querySelector('.ai-glow-heading__text-{{ ai_gen_id }}');
+        if (!heading) return;
+
+        let intensity = {{ block.settings.glow_intensity }};
+        let direction = 1;
+        const minIntensity = {{ block.settings.glow_intensity }} * 0.5;
+        const maxIntensity = {{ block.settings.glow_intensity }} * 1.5;
+        const speed = {{ block.settings.animation_speed }};
+
+        const animate = () => {
+          intensity += direction * speed;
+
+          if (intensity >= maxIntensity) {
+            intensity = maxIntensity;
+            direction = -1;
+          } else if (intensity <= minIntensity) {
+            intensity = minIntensity;
+            direction = 1;
+          }
+
+          heading.style.textShadow = `
+            0 0 ${intensity}px {{ block.settings.glow_color }},
+            0 0 ${intensity * 2}px {{ block.settings.glow_color }},
+            0 0 ${intensity * 3}px {{ block.settings.glow_color }}
+          `;
+
+          requestAnimationFrame(animate);
+        };
+
+        animate();
+      }
+    }
+
+    customElements.define('glow-heading-{{ ai_gen_id }}', GlowHeading{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Encabezado luminoso",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Contenido"
+    },
+    {
+      "type": "text",
+      "id": "heading_text",
+      "label": "Texto del encabezado",
+      "default": "Encabezado luminoso"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Tamaño de fuente",
+      "min": 20,
+      "max": 120,
+      "step": 2,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "select",
+      "id": "text_alignment",
+      "label": "Alineación",
+      "options": [
+        {
+          "value": "left",
+          "label": "Izquierda"
+        },
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "right",
+          "label": "Derecha"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Ancho en escritorio",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Colores"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color del texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "glow_color",
+      "label": "Color del brillo",
+      "default": "#aa7d44"
+    },
+    {
+      "type": "header",
+      "content": "Efecto luminoso"
+    },
+    {
+      "type": "range",
+      "id": "glow_intensity",
+      "label": "Intensidad del brillo",
+      "min": 5,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "animation_speed",
+      "label": "Velocidad de animación",
+      "min": 0,
+      "max": 1,
+      "step": 0.1,
+      "default": 0.5
+    },
+    {
+      "type": "header",
+      "content": "Espaciado"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Espaciado superior",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Espaciado inferior",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Espaciado horizontal",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Encabezado luminoso"
+    }
+  ]
+}
+{% endschema %}

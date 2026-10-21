@@ -1,0 +1,461 @@
+{% doc %}
+  @prompt
+    haz un carrusel de 5 tarjetas que pueda poner un logo tipo icono, un header,  y un texto, las tarjetas se deslizan con el dedo al pasar el dedo y no cuentan con sombra
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-card-carousel-{{ ai_gen_id }} {
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    display: block;
+  }
+
+  .ai-card-carousel-container-{{ ai_gen_id }} {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-card-carousel-container-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-card-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: 0px;
+    padding: {{ block.settings.vertical_padding }}px 0;
+  }
+
+  .ai-card-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 {{ block.settings.card_width }}px;
+    background-color: {{ block.settings.card_background }};
+    border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    padding: {{ block.settings.card_padding }}px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: {{ block.settings.content_gap }}px;
+  }
+
+  .ai-card-carousel-icon-{{ ai_gen_id }} {
+    width: {{ block.settings.icon_size }}px;
+    height: {{ block.settings.icon_size }}px;
+    flex-shrink: 0;
+  }
+
+  .ai-card-carousel-icon-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+
+  .ai-card-carousel-icon-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 4px;
+  }
+
+  .ai-card-carousel-icon-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-card-carousel-header-{{ ai_gen_id }} {
+    font-size: {{ block.settings.header_size }}px;
+    font-weight: 600;
+    color: {{ block.settings.header_color }};
+    margin: 0;
+  }
+
+  .ai-card-carousel-text-{{ ai_gen_id }} {
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};
+    line-height: 1.5;
+    margin: 0;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-card-carousel-card-{{ ai_gen_id }} {
+      flex: 0 0 {{ block.settings.card_width_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<card-carousel-{{ ai_gen_id }} class="ai-card-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-card-carousel-container-{{ ai_gen_id }}">
+    <div class="ai-card-carousel-track-{{ ai_gen_id }}">
+      {% for i in (1..5) %}
+        {% liquid
+          assign icon_key = 'card_' | append: i | append: '_icon'
+          assign header_key = 'card_' | append: i | append: '_header'
+          assign text_key = 'card_' | append: i | append: '_text'
+
+          assign card_icon = block.settings[icon_key]
+          assign card_header = block.settings[header_key]
+          assign card_text = block.settings[text_key]
+        %}
+
+        <div class="ai-card-carousel-card-{{ ai_gen_id }}">
+          <div class="ai-card-carousel-icon-{{ ai_gen_id }}">
+            {% if card_icon %}
+              <img
+                src="{{ card_icon | image_url: width: 200 }}"
+                alt="{{ card_header | escape }}"
+                loading="lazy"
+                width="200"
+                height="200"
+              >
+            {% else %}
+              <div class="ai-card-carousel-icon-placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+
+          {% if card_header != blank %}
+            <h3 class="ai-card-carousel-header-{{ ai_gen_id }}">{{ card_header }}</h3>
+          {% endif %}
+
+          {% if card_text != blank %}
+            <p class="ai-card-carousel-text-{{ ai_gen_id }}">{{ card_text }}</p>
+          {% endif %}
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</card-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CardCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.container = this.querySelector('.ai-card-carousel-container-{{ ai_gen_id }}');
+        this.setupTouchScroll();
+      }
+
+      setupTouchScroll() {
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        this.container.addEventListener('mousedown', (e) => {
+          isDown = true;
+          this.container.style.cursor = 'grabbing';
+          startX = e.pageX - this.container.offsetLeft;
+          scrollLeft = this.container.scrollLeft;
+        });
+
+        this.container.addEventListener('mouseleave', () => {
+          isDown = false;
+          this.container.style.cursor = 'grab';
+        });
+
+        this.container.addEventListener('mouseup', () => {
+          isDown = false;
+          this.container.style.cursor = 'grab';
+        });
+
+        this.container.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - this.container.offsetLeft;
+          const walk = (x - startX) * 2;
+          this.container.scrollLeft = scrollLeft - walk;
+        });
+
+        this.container.style.cursor = 'grab';
+      }
+    }
+
+    customElements.define('card-carousel-{{ ai_gen_id }}', CardCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Carrusel de tarjetas",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Tarjeta 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_1_icon",
+      "label": "Icono"
+    },
+    {
+      "type": "text",
+      "id": "card_1_header",
+      "label": "Encabezado",
+      "default": "Característica 1"
+    },
+    {
+      "type": "textarea",
+      "id": "card_1_text",
+      "label": "Texto",
+      "default": "Descripción de la característica"
+    },
+    {
+      "type": "header",
+      "content": "Tarjeta 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_2_icon",
+      "label": "Icono"
+    },
+    {
+      "type": "text",
+      "id": "card_2_header",
+      "label": "Encabezado",
+      "default": "Característica 2"
+    },
+    {
+      "type": "textarea",
+      "id": "card_2_text",
+      "label": "Texto",
+      "default": "Descripción de la característica"
+    },
+    {
+      "type": "header",
+      "content": "Tarjeta 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_3_icon",
+      "label": "Icono"
+    },
+    {
+      "type": "text",
+      "id": "card_3_header",
+      "label": "Encabezado",
+      "default": "Característica 3"
+    },
+    {
+      "type": "textarea",
+      "id": "card_3_text",
+      "label": "Texto",
+      "default": "Descripción de la característica"
+    },
+    {
+      "type": "header",
+      "content": "Tarjeta 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_4_icon",
+      "label": "Icono"
+    },
+    {
+      "type": "text",
+      "id": "card_4_header",
+      "label": "Encabezado",
+      "default": "Característica 4"
+    },
+    {
+      "type": "textarea",
+      "id": "card_4_text",
+      "label": "Texto",
+      "default": "Descripción de la característica"
+    },
+    {
+      "type": "header",
+      "content": "Tarjeta 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_5_icon",
+      "label": "Icono"
+    },
+    {
+      "type": "text",
+      "id": "card_5_header",
+      "label": "Encabezado",
+      "default": "Característica 5"
+    },
+    {
+      "type": "textarea",
+      "id": "card_5_text",
+      "label": "Texto",
+      "default": "Descripción de la característica"
+    },
+    {
+      "type": "header",
+      "content": "Diseño de tarjetas"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Ancho de tarjeta (escritorio)",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 250
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "label": "Ancho de tarjeta (móvil)",
+      "min": 150,
+      "max": 350,
+      "step": 10,
+      "unit": "px",
+      "default": 220
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Espacio entre tarjetas",
+      "min": 8,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Relleno interno",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "content_gap",
+      "label": "Espacio entre elementos",
+      "min": 8,
+      "max": 32,
+      "step": 4,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "vertical_padding",
+      "label": "Relleno vertical",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Ancho de borde",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Ancho en escritorio",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Colores"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Fondo de tarjeta",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Color de borde",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "color",
+      "id": "header_color",
+      "label": "Color de encabezado",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color de texto",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Tipografía"
+    },
+    {
+      "type": "range",
+      "id": "icon_size",
+      "label": "Tamaño de icono",
+      "min": 32,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 48
+    },
+    {
+      "type": "range",
+      "id": "header_size",
+      "label": "Tamaño de encabezado",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 18
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Tamaño de texto",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carrusel de tarjetas"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,27 @@
+{
+  "layout": "monetta",
+  "sections": {
+    "main": {
+      "type": "monetta-product",
+      "blocks": {
+        "shipping": { "type": "service", "settings": { "icon": "truck", "text": "Envíos a todo México." } },
+        "original": { "type": "service", "settings": { "icon": "check", "text": "Producto original importado de Estados Unidos." } },
+        "description": { "type": "description", "settings": { "title": "Descripción", "open": true } },
+        "details": { "type": "details", "settings": { "title": "Detalles", "open": false } }
+      },
+      "block_order": ["shipping", "original", "description", "details"],
+      "settings": {
+        "show_dynamic_checkout": true,
+        "show_apartado": true,
+        "apartado_copy": "Solicitud manual. Enviar el mensaje no aparta la pieza ni cobra nada.",
+        "show_whatsapp_question": true,
+        "whatsapp_number": "528261066868"
+      }
+    },
+    "recommendations": {
+      "type": "monetta-product-recommendations",
+      "settings": { "heading": "También te puede gustar", "products_to_show": 8, "show_vendor_link": true }
+    }
+  },
+  "order": ["main", "recommendations"]
+}

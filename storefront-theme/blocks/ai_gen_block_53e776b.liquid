@@ -1,0 +1,649 @@
+{% doc %}
+  @prompt
+    Crea un bloque de Shopify OS 2.0 llamado expandable-text como archivo .liquid en /blocks/. El bloque debe ser completamente autocontenido (CSS y JS dentro del archivo), compatible con múltiples instancias usando block.id.
+    
+    Comportamiento:
+    
+    El primer párrafo del rich text es siempre visible
+    El resto del contenido está completamente oculto (max-height: 0, overflow: hidden, opacity: 0) hasta que el usuario haga clic
+    Al hacer clic en el botón/flecha, el contenido se expande con transición suave (max-height + opacity)
+    El botón alterna entre el label "Ver más" y "Ver menos" (ambos editables)
+    La flecha es un SVG minimalista (chevron) que rota 180° al expandirse
+    Al colapsar, regresa al estado inicial completamente
+    Usar aria-expanded para accesibilidad
+    Settings del schema — Texto principal:
+    
+    text — Richtext
+    font_family — Select: Body, Heading, Monospace
+    font_size — Range 12–36px
+    font_weight — Select: 300, 400, 500, 600, 700
+    line_height — Select: tight, normal, relaxed, loose
+    letter_spacing — Range -1 a 4px
+    text_color — Color picker
+    text_align — Select: left, center, right
+    max_width — Range 30–100% paso 5
+    horizontal_position — Select: left, center, right (para centrar el bloque de texto dentro del contenedor)
+    padding_top, padding_bottom — Range 0–80px
+    Settings del schema — Botón "Ver más":
+    
+    button_label_more — Text, default "Ver más"
+    button_label_less — Text, default "Ver menos"
+    button_mode — Select: "link" (solo texto + flecha), "outline" (borde), "solid" (fondo sólido)
+    button_font_size — Range 11–24px
+    button_font_weight — Select: 400, 500, 600, 700
+    button_color — Color picker (texto del botón y flecha)
+    button_bg_color — Color picker (fondo, solo aplica en modo solid/outline)
+    button_border_radius — Range 0–50px
+    button_padding_x — Range 0–48px
+    button_padding_y — Range 0–32px
+    button_align — Select: left, center, right
+    button_margin_top — Range 0–60px (espacio entre texto y botón)
+    show_arrow — Checkbox, default true
+    arrow_size — Range 12–32px
+    arrow_position — Select: right of text, left of text, below text (posición de la flecha relativa al label)
+    El CSS debe usar variables CSS internas derivadas de los settings para que todo sea consistente. El JS debe ser vanilla, sin dependencias.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .expandable-text-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding-top: {{ block.settings.padding_top }}px;
+    padding-bottom: {{ block.settings.padding_bottom }}px;
+  }
+
+  .expandable-text__container-{{ ai_gen_id }} {
+    max-width: {{ block.settings.max_width }}%;
+    {% if block.settings.horizontal_position == 'center' %}
+      margin-left: auto;
+      margin-right: auto;
+    {% elsif block.settings.horizontal_position == 'right' %}
+      margin-left: auto;
+      margin-right: 0;
+    {% else %}
+      margin-left: 0;
+      margin-right: auto;
+    {% endif %}
+  }
+
+  .expandable-text__content-{{ ai_gen_id }} {
+    {% if block.settings.font_family == 'heading' %}
+      font-family: var(--font-heading-family, inherit);
+    {% elsif block.settings.font_family == 'monospace' %}
+      font-family: 'Courier New', monospace;
+    {% else %}
+      font-family: var(--font-body-family, inherit);
+    {% endif %}
+    font-size: {{ block.settings.font_size }}px;
+    font-weight: {{ block.settings.font_weight }};
+    {% if block.settings.line_height == 'tight' %}
+      line-height: 1.2;
+    {% elsif block.settings.line_height == 'relaxed' %}
+      line-height: 1.75;
+    {% elsif block.settings.line_height == 'loose' %}
+      line-height: 2;
+    {% else %}
+      line-height: 1.5;
+    {% endif %}
+    letter-spacing: {{ block.settings.letter_spacing }}px;
+    color: {{ block.settings.text_color }};
+    text-align: {{ block.settings.text_align }};
+  }
+
+  .expandable-text__content-{{ ai_gen_id }} > *:first-child {
+    margin-top: 0;
+  }
+
+  .expandable-text__content-{{ ai_gen_id }} > *:last-child {
+    margin-bottom: 0;
+  }
+
+  .expandable-text__hidden-{{ ai_gen_id }} {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.4s ease, opacity 0.3s ease;
+  }
+
+  .expandable-text__hidden-{{ ai_gen_id }}.is-expanded {
+    max-height: 2000px;
+    opacity: 1;
+  }
+
+  .expandable-text__button-wrapper-{{ ai_gen_id }} {
+    margin-top: {{ block.settings.button_margin_top }}px;
+    text-align: {{ block.settings.button_align }};
+  }
+
+  .expandable-text__button-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    {% if block.settings.arrow_position == 'below' %}
+      flex-direction: column;
+    {% elsif block.settings.arrow_position == 'left' %}
+      flex-direction: row-reverse;
+    {% else %}
+      flex-direction: row;
+    {% endif %}
+    gap: 8px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: {{ block.settings.button_font_weight }};
+    color: {{ block.settings.button_color }};
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    transition: opacity 0.2s ease;
+    {% if block.settings.button_mode == 'solid' %}
+      background-color: {{ block.settings.button_bg_color }};
+      padding: {{ block.settings.button_padding_y }}px {{ block.settings.button_padding_x }}px;
+      border-radius: {{ block.settings.button_border_radius }}px;
+    {% elsif block.settings.button_mode == 'outline' %}
+      border: 1px solid {{ block.settings.button_bg_color }};
+      padding: {{ block.settings.button_padding_y }}px {{ block.settings.button_padding_x }}px;
+      border-radius: {{ block.settings.button_border_radius }}px;
+    {% endif %}
+  }
+
+  .expandable-text__button-{{ ai_gen_id }}:hover {
+    opacity: 0.7;
+  }
+
+  .expandable-text__arrow-{{ ai_gen_id }} {
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    transition: transform 0.3s ease;
+    flex-shrink: 0;
+  }
+
+  .expandable-text__arrow-{{ ai_gen_id }}.is-expanded {
+    transform: rotate(180deg);
+  }
+{% endstyle %}
+
+<expandable-text-{{ ai_gen_id }}
+  class="expandable-text-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="expandable-text__container-{{ ai_gen_id }}">
+    <div class="expandable-text__content-{{ ai_gen_id }}">
+      {% if block.settings.text != blank %}
+        {% assign paragraphs = block.settings.text | split: '</p>' %}
+        {% if paragraphs.size > 0 %}
+          {{ paragraphs[0] }}</p>
+        {% endif %}
+        
+        {% if paragraphs.size > 1 %}
+          <div class="expandable-text__hidden-{{ ai_gen_id }}" data-hidden-content>
+            {% for i in (1..paragraphs.size) %}
+              {% if i > 0 and paragraphs[i] != blank %}
+                {{ paragraphs[i] }}</p>
+              {% endif %}
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% else %}
+        <p>Agrega contenido de texto aquí. El primer párrafo será visible, el resto se expandirá al hacer clic.</p>
+      {% endif %}
+    </div>
+
+    {% if block.settings.text != blank %}
+      {% assign paragraphs = block.settings.text | split: '</p>' %}
+      {% if paragraphs.size > 1 %}
+        <div class="expandable-text__button-wrapper-{{ ai_gen_id }}">
+          <button
+            class="expandable-text__button-{{ ai_gen_id }}"
+            data-toggle-button
+            aria-expanded="false"
+          >
+            <span data-button-label>{{ block.settings.button_label_more }}</span>
+            {% if block.settings.show_arrow %}
+              <svg
+                class="expandable-text__arrow-{{ ai_gen_id }}"
+                data-arrow
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <polyline points="6 9 12 15 18 9"></polyline>
+              </svg>
+            {% endif %}
+          </button>
+        </div>
+      {% endif %}
+    {% endif %}
+  </div>
+</expandable-text-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ExpandableText{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.button = this.querySelector('[data-toggle-button]');
+        this.hiddenContent = this.querySelector('[data-hidden-content]');
+        this.arrow = this.querySelector('[data-arrow]');
+        this.label = this.querySelector('[data-button-label]');
+        
+        this.labelMore = '{{ block.settings.button_label_more }}';
+        this.labelLess = '{{ block.settings.button_label_less }}';
+        
+        if (this.button && this.hiddenContent) {
+          this.button.addEventListener('click', this.toggle.bind(this));
+        }
+      }
+
+      toggle() {
+        const isExpanded = this.hiddenContent.classList.contains('is-expanded');
+        
+        if (isExpanded) {
+          this.hiddenContent.classList.remove('is-expanded');
+          if (this.arrow) {
+            this.arrow.classList.remove('is-expanded');
+          }
+          this.button.setAttribute('aria-expanded', 'false');
+          if (this.label) {
+            this.label.textContent = this.labelMore;
+          }
+        } else {
+          this.hiddenContent.classList.add('is-expanded');
+          if (this.arrow) {
+            this.arrow.classList.add('is-expanded');
+          }
+          this.button.setAttribute('aria-expanded', 'true');
+          if (this.label) {
+            this.label.textContent = this.labelLess;
+          }
+        }
+      }
+    }
+
+    customElements.define('expandable-text-{{ ai_gen_id }}', ExpandableText{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Expandable text",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Texto principal"
+    },
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Contenido",
+      "default": "<p>Este es el primer párrafo que siempre será visible.</p><p>Este segundo párrafo estará oculto hasta que el usuario haga clic en 'Ver más'.</p><p>Y este tercer párrafo también estará oculto inicialmente.</p>"
+    },
+    {
+      "type": "select",
+      "id": "font_family",
+      "label": "Familia de fuente",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body"
+        },
+        {
+          "value": "heading",
+          "label": "Heading"
+        },
+        {
+          "value": "monospace",
+          "label": "Monospace"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Tamaño de fuente",
+      "min": 12,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        {
+          "value": "300",
+          "label": "300"
+        },
+        {
+          "value": "400",
+          "label": "400"
+        },
+        {
+          "value": "500",
+          "label": "500"
+        },
+        {
+          "value": "600",
+          "label": "600"
+        },
+        {
+          "value": "700",
+          "label": "700"
+        }
+      ],
+      "default": "400"
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "Altura de línea",
+      "options": [
+        {
+          "value": "tight",
+          "label": "Tight"
+        },
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "relaxed",
+          "label": "Relaxed"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Espaciado de letras",
+      "min": -1,
+      "max": 4,
+      "step": 0.5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color de texto",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Alineación de texto",
+      "options": [
+        {
+          "value": "left",
+          "label": "Izquierda"
+        },
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "right",
+          "label": "Derecha"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Ancho máximo",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "select",
+      "id": "horizontal_position",
+      "label": "Posición horizontal",
+      "options": [
+        {
+          "value": "left",
+          "label": "Izquierda"
+        },
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "right",
+          "label": "Derecha"
+        }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "padding_top",
+      "label": "Padding superior",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "padding_bottom",
+      "label": "Padding inferior",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Botón expandir"
+    },
+    {
+      "type": "text",
+      "id": "button_label_more",
+      "label": "Texto 'Ver más'",
+      "default": "Ver más"
+    },
+    {
+      "type": "text",
+      "id": "button_label_less",
+      "label": "Texto 'Ver menos'",
+      "default": "Ver menos"
+    },
+    {
+      "type": "select",
+      "id": "button_mode",
+      "label": "Estilo de botón",
+      "options": [
+        {
+          "value": "link",
+          "label": "Link"
+        },
+        {
+          "value": "outline",
+          "label": "Outline"
+        },
+        {
+          "value": "solid",
+          "label": "Solid"
+        }
+      ],
+      "default": "link"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Tamaño de fuente",
+      "min": 11,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "button_font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        {
+          "value": "400",
+          "label": "400"
+        },
+        {
+          "value": "500",
+          "label": "500"
+        },
+        {
+          "value": "600",
+          "label": "600"
+        },
+        {
+          "value": "700",
+          "label": "700"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Color de texto",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Color de fondo/borde",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "button_padding_x",
+      "label": "Padding horizontal",
+      "min": 0,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "button_padding_y",
+      "label": "Padding vertical",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "select",
+      "id": "button_align",
+      "label": "Alineación de botón",
+      "options": [
+        {
+          "value": "left",
+          "label": "Izquierda"
+        },
+        {
+          "value": "center",
+          "label": "Centro"
+        },
+        {
+          "value": "right",
+          "label": "Derecha"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "label": "Margen superior",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Flecha"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrow",
+      "label": "Mostrar flecha",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Tamaño de flecha",
+      "min": 12,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "select",
+      "id": "arrow_position",
+      "label": "Posición de flecha",
+      "options": [
+        {
+          "value": "right",
+          "label": "Derecha del texto"
+        },
+        {
+          "value": "left",
+          "label": "Izquierda del texto"
+        },
+        {
+          "value": "below",
+          "label": "Debajo del texto"
+        }
+      ],
+      "default": "right"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Expandable text"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,10 @@
+{
+  "layout": "monetta",
+  "sections": {
+    "main": {
+      "type": "monetta-collection",
+      "settings": { "products_per_page": 24 }
+    }
+  },
+  "order": ["main"]
+}

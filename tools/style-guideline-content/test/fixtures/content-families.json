@@ -1,0 +1,67 @@
+{
+  "campaign": {
+    "id": "fixture",
+    "headline": "Campaña de prueba",
+    "ctaLabel": "Ver",
+    "destination": { "routeId": "catalog.all" },
+    "media": {
+      "alt": "",
+      "decorative": true,
+      "sources": {
+        "compact": { "assetId": "assets/images/home_banner.jpg", "focal": { "x": 0.5, "y": 0.5 } },
+        "medium": { "assetId": "assets/images/home_banner.jpg", "focal": { "x": 0.5, "y": 0.5 } },
+        "expanded": { "assetId": "assets/images/home_banner.jpg", "focal": { "x": 0.5, "y": 0.5 } }
+      }
+    }
+  },
+  "selection": {
+    "id": "newest",
+    "title": "Novedades de prueba",
+    "source": { "kind": "collection", "provider": "storefront_collection", "ordering": "created_desc", "routeId": "catalog.all" }
+  },
+  "categories": [
+    { "id": "bags", "title": "Bolsas", "imageAssetId": "assets/images/home_collection_bags.webp", "alt": "Bolsas", "destination": { "routeId": "category.bags" } }
+  ],
+  "brands": [
+    { "id": "guess", "title": "Guess", "imageAssetId": "assets/images/brands/guess.webp", "alt": "Guess", "destination": { "routeId": "brand.guess" } }
+  ],
+  "wholesale": {
+    "headline": "Mayoreo de prueba",
+    "body": "Consulta de prueba, sin términos comerciales nuevos.",
+    "campaignId": "fixture",
+    "steps": [{ "number": "01", "title": "Consulta", "body": "Contenido de prueba." }],
+    "terms": [{ "value": "Por confirmar", "label": "Condiciones de prueba" }],
+    "pricingMode": "manual_quote",
+    "supportLinkId": "whatsapp",
+    "catalogIds": ["bags-suggested"],
+    "rewardsPolicyRef": "docs/redesign/REWARDS_CONTRACT_V1.md"
+  },
+  "services": [{ "id": "support", "title": "Soporte", "body": "Consulta de prueba.", "icon": "chat", "supportLinkId": "whatsapp" }],
+  "signup": {
+    "enabled": false,
+    "headline": "Registro de prueba",
+    "body": "Formulario de prueba sin oferta.",
+    "ctaLabel": "Enviar",
+    "submissionAdapter": "test_only",
+    "consentText": "Consentimiento de prueba.",
+    "privacyRouteId": "help.privacy"
+  },
+  "footer": {
+    "brandDescription": "Monetta",
+    "columns": [{ "id": "help", "heading": "Ayuda", "menuHandle": "footer" }],
+    "policyRouteIds": ["help.privacy"],
+    "socialLinkIds": ["instagram"],
+    "supportLinkId": "whatsapp",
+    "copyrightYear": "runtime_year"
+  },
+  "modules": [
+    { "id": "hero", "kind": "campaign", "contentRef": "campaigns.fixture" },
+    { "id": "newest", "kind": "product_selection", "contentRef": "productSelections.newest" },
+    { "id": "styles", "kind": "categories", "contentRef": "categories" },
+    { "id": "brands", "kind": "brands", "contentRef": "brands" },
+    { "id": "wholesale", "kind": "wholesale", "contentRef": "wholesale" },
+    { "id": "services", "kind": "services", "contentRef": "services" },
+    { "id": "signup", "kind": "signup", "contentRef": "signup" },
+    { "id": "footer", "kind": "footer", "contentRef": "footer" }
+  ]
+}

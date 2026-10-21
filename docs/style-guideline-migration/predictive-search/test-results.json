@@ -1,0 +1,157 @@
+{
+  "timestamp": "2026-10-21T00:08:55.102Z",
+  "scope": "Local HTML fixtures; real delivered JS/CSS; simulated Shopify section responses. No store validation or uploads.",
+  "browser": {
+    "executablePath": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+    "version": "155.0.8059.40"
+  },
+  "tests": [
+    {
+      "name": "Debounce, Shopify locale endpoint, real fragment destinations, images and price display",
+      "passed": true,
+      "milliseconds": 522
+    },
+    {
+      "name": "Out-of-order response cannot overwrite the newest results even when fetch ignores abort",
+      "passed": true,
+      "milliseconds": 607
+    },
+    {
+      "name": "Response arriving during debounce is discarded immediately",
+      "passed": true,
+      "milliseconds": 546
+    },
+    {
+      "name": "Network failure announces error and Enter keeps the native GET search working",
+      "passed": true,
+      "milliseconds": 355
+    },
+    {
+      "name": "Empty results and the all-results link preserve the full query",
+      "passed": true,
+      "milliseconds": 505
+    },
+    {
+      "name": "HTTP 417/429/503 and malformed section responses degrade to a usable search",
+      "passed": true,
+      "milliseconds": 1003
+    },
+    {
+      "name": "A stalled request times out and its late response cannot reopen results",
+      "passed": true,
+      "milliseconds": 173
+    },
+    {
+      "name": "Keyboard arrows wrap, maintain combobox focus and Enter opens the selected Shopify destination",
+      "passed": true,
+      "milliseconds": 471
+    },
+    {
+      "name": "Escape preserves the query, aborts pending work, and late responses remain closed",
+      "passed": true,
+      "milliseconds": 470
+    },
+    {
+      "name": "Close, clear, Tab, outside pointer and focus use independent, non-trapping controls",
+      "passed": true,
+      "milliseconds": 1944
+    },
+    {
+      "name": "Multiple instances isolate requests, active IDs, focus and query state",
+      "passed": true,
+      "milliseconds": 591
+    },
+    {
+      "name": "Reconnect and repeated module tags do not duplicate requests or clear events with monetta-core.js",
+      "passed": true,
+      "milliseconds": 837
+    },
+    {
+      "name": "Reconnect with the same query rejects responses from the previous connection",
+      "passed": true,
+      "milliseconds": 592
+    },
+    {
+      "name": "Inside the current Monetta dialog, first Escape closes suggestions and second closes the dialog",
+      "passed": true,
+      "milliseconds": 731
+    },
+    {
+      "name": "Blocked localStorage (getter) retains recent searches in memory and can clear them",
+      "passed": true,
+      "milliseconds": 526
+    },
+    {
+      "name": "Blocked localStorage (methods) retains recent searches in memory and can clear them",
+      "passed": true,
+      "milliseconds": 525
+    },
+    {
+      "name": "History persists on reload, is scoped by locale, and recent Enter retains the original query",
+      "passed": true,
+      "milliseconds": 891
+    },
+    {
+      "name": "Corrupt storage and untrusted recent strings stay safe and usable",
+      "passed": true,
+      "milliseconds": 76
+    },
+    {
+      "name": "IME composition waits for completion before requesting suggestions",
+      "passed": true,
+      "milliseconds": 761
+    },
+    {
+      "name": "Without JavaScript, the label, submit button and GET destination work",
+      "passed": true,
+      "milliseconds": 97
+    },
+    {
+      "name": "Without fetch support, enhancement leaves the GET form usable",
+      "passed": true,
+      "milliseconds": 90
+    },
+    {
+      "name": "Layout 390px, text 100%, long names and accessible controls",
+      "passed": true,
+      "milliseconds": 683
+    },
+    {
+      "name": "Layout 390px, text 200%, long names and accessible controls",
+      "passed": true,
+      "milliseconds": 670
+    },
+    {
+      "name": "Layout 834px, text 100%, long names and accessible controls",
+      "passed": true,
+      "milliseconds": 642
+    },
+    {
+      "name": "Layout 834px, text 200%, long names and accessible controls",
+      "passed": true,
+      "milliseconds": 631
+    },
+    {
+      "name": "Layout 1440px, text 100%, long names and accessible controls",
+      "passed": true,
+      "milliseconds": 657
+    },
+    {
+      "name": "Layout 1440px, text 200%, long names and accessible controls",
+      "passed": true,
+      "milliseconds": 676
+    },
+    {
+      "name": "Narrow right-edge field clamps the panel, follows resize and closes when its container hides",
+      "passed": true,
+      "milliseconds": 553
+    },
+    {
+      "name": "Short mobile viewport places suggestions above the field without clipping actions",
+      "passed": true,
+      "milliseconds": 457
+    }
+  ],
+  "passed": 29,
+  "failed": 0
+}

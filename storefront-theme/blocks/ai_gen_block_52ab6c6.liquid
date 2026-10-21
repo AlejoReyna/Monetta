@@ -1,0 +1,842 @@
+{% doc %}
+  @prompt
+    Shopify Liquid block. Image carousel, 3 cards, mobile-first.
+    Each card: vertical image + title + button, all as one unified unit.
+    Pop animation applies to the entire outer (image + title + button move together).
+    Never cause horizontal page overflow.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    background: transparent;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .ai-carousel-wrapper-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    margin: 0;
+    box-sizing: border-box;
+    background: transparent;
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-snap-stop: always;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    padding: {{ block.settings.track_padding_vertical }}px {{ block.settings.track_padding_horizontal }}px;
+    margin: 0;
+    box-sizing: border-box;
+    align-items: flex-start;
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  /* ── OUTER: imagen + título + botón como unidad ── */
+  .ai-carousel-card-outer-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: {{ block.settings.card_align }};
+    flex: 0 0 65vw;
+    max-width: 240px;
+    scroll-snap-align: center;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-sizing: border-box;
+    gap: 0;
+  }
+
+  /* ── IMAGEN ── */
+  .ai-carousel-card-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: {{ block.settings.card_aspect_ratio }};
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+    background: transparent;
+    will-change: transform;
+    backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
+    box-shadow:
+      0 {{ block.settings.shadow_offset_y }}px {{ block.settings.shadow_blur }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 }}),
+      0 {{ block.settings.shadow_offset_y | times: 2 }}px {{ block.settings.shadow_blur | times: 2 }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 | times: 0.7 }}),
+      0 {{ block.settings.shadow_offset_y | times: 3 }}px {{ block.settings.shadow_blur | times: 3 }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 | times: 0.5 }});
+    padding: 0;
+    box-sizing: border-box;
+    position: relative;
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+
+  .ai-carousel-card-link-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ai-carousel-card-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    display: block;
+    pointer-events: none;
+  }
+
+  /* ── TÍTULO ── */
+  .ai-carousel-title-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    box-sizing: border-box;
+    margin: {{ block.settings.title_gap }}px 0 0 0;
+    padding: 0;
+    font-family: inherit;
+    font-size: {{ block.settings.title_font_size }}px;
+    font-weight: {{ block.settings.title_font_weight }};
+    color: {{ block.settings.title_color }};
+    text-align: {{ block.settings.title_align }};
+    letter-spacing: {{ block.settings.title_letter_spacing | divided_by: 100.0 }}em;
+    line-height: {{ block.settings.title_line_height | divided_by: 10.0 }};
+    transition: opacity 0.4s ease;
+  }
+
+  /* ── BOTÓN WRAPPER ── */
+  .ai-carousel-btn-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    display: flex;
+    justify-content: {{ block.settings.btn_align }};
+    margin: {{ block.settings.btn_gap }}px 0 0 0;
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  /* ── BOTÓN ── */
+  .ai-carousel-btn-{{ ai_gen_id }} {
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+    box-sizing: border-box;
+    font-family: inherit;
+    font-size: {{ block.settings.btn_font_size }}px;
+    font-weight: {{ block.settings.btn_font_weight }};
+    color: {{ block.settings.btn_text_color }};
+    letter-spacing: 0.02em;
+    background-color: {{ block.settings.btn_bg_color }};
+    border: {{ block.settings.btn_border_width }}px solid {{ block.settings.btn_border_color }};
+    border-radius: {{ block.settings.btn_border_radius }}px;
+    padding: {{ block.settings.btn_padding_v }}px {{ block.settings.btn_padding_h }}px;
+    box-shadow:
+      0 {{ block.settings.btn_shadow_offset_y }}px {{ block.settings.btn_shadow_blur }}px rgba({{ block.settings.btn_shadow_color.red }}, {{ block.settings.btn_shadow_color.green }}, {{ block.settings.btn_shadow_color.blue }}, {{ block.settings.btn_shadow_opacity | divided_by: 100.0 }}),
+      0 {{ block.settings.btn_shadow_offset_y | times: 2 }}px {{ block.settings.btn_shadow_blur | times: 2 }}px rgba({{ block.settings.btn_shadow_color.red }}, {{ block.settings.btn_shadow_color.green }}, {{ block.settings.btn_shadow_color.blue }}, {{ block.settings.btn_shadow_opacity | divided_by: 100.0 | times: 0.6 }});
+    transition: transform 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                box-shadow 0.35s cubic-bezier(0.34, 1.56, 0.64, 1),
+                background-color 0.2s ease,
+                color 0.2s ease;
+    will-change: transform;
+  }
+
+  .ai-carousel-btn-{{ ai_gen_id }}:hover {
+    transform: translateY(-3px) scale(1.03);
+    background-color: {{ block.settings.btn_bg_color_hover }};
+    color: {{ block.settings.btn_text_color_hover }};
+    box-shadow:
+      0 {{ block.settings.btn_shadow_offset_y | times: 2 }}px {{ block.settings.btn_shadow_blur | times: 2 }}px rgba({{ block.settings.btn_shadow_color.red }}, {{ block.settings.btn_shadow_color.green }}, {{ block.settings.btn_shadow_color.blue }}, {{ block.settings.btn_shadow_opacity | divided_by: 100.0 }}),
+      0 {{ block.settings.btn_shadow_offset_y | times: 3 }}px {{ block.settings.btn_shadow_blur | times: 3 }}px rgba({{ block.settings.btn_shadow_color.red }}, {{ block.settings.btn_shadow_color.green }}, {{ block.settings.btn_shadow_color.blue }}, {{ block.settings.btn_shadow_opacity | divided_by: 100.0 | times: 0.6 }});
+  }
+
+  .ai-carousel-btn-{{ ai_gen_id }}:active {
+    transform: translateY(0px) scale(0.97);
+    transition-duration: 0.15s;
+  }
+
+  /* ── RESPONSIVE ── */
+  @media screen and (max-width: 749px) {
+    carousel-{{ ai_gen_id }},
+    .ai-carousel-wrapper-{{ ai_gen_id }} {
+      max-width: 100vw;
+      overflow: hidden;
+    }
+
+    .ai-carousel-track-{{ ai_gen_id }} {
+      padding: {{ block.settings.track_padding_vertical_mobile }}px {{ block.settings.track_padding_horizontal_mobile }}px;
+      gap: {{ block.settings.card_gap_mobile }}px;
+    }
+
+    .ai-carousel-card-outer-{{ ai_gen_id }} {
+      flex: 0 0 72vw;
+      max-width: 72vw;
+    }
+  }
+{% endstyle %}
+
+<carousel-{{ ai_gen_id }} {{ block.shopify_attributes }}>
+  <div class="ai-carousel-wrapper-{{ ai_gen_id }}">
+    <div class="ai-carousel-track-{{ ai_gen_id }}">
+
+      {% for i in (1..3) %}
+        {% liquid
+          assign image_key    = 'image_'    | append: i
+          assign link_key     = 'link_'     | append: i
+          assign btn_text_key = 'btn_text_' | append: i
+          assign btn_link_key = 'btn_link_' | append: i
+          assign title_key    = 'title_'    | append: i
+          assign image        = block.settings[image_key]
+          assign link         = block.settings[link_key]
+          assign btn_text     = block.settings[btn_text_key]
+          assign btn_link     = block.settings[btn_link_key]
+          assign title_text   = block.settings[title_key]
+        %}
+        {% if image != blank %}
+          <div class="ai-carousel-card-outer-{{ ai_gen_id }}" data-card-index="{{ i }}">
+
+            <!-- IMAGEN -->
+            <div class="ai-carousel-card-{{ ai_gen_id }}">
+              {% if link != blank %}
+                <a href="{{ link }}" class="ai-carousel-card-link-{{ ai_gen_id }}">
+                  <img
+                    src="{{ image | image_url: width: 480 }}"
+                    alt="{{ image.alt | escape }}"
+                    loading="lazy"
+                    width="480"
+                    height="640"
+                    class="ai-carousel-card-image-{{ ai_gen_id }}"
+                  >
+                </a>
+              {% else %}
+                <img
+                  src="{{ image | image_url: width: 480 }}"
+                  alt="{{ image.alt | escape }}"
+                  loading="lazy"
+                  width="480"
+                  height="640"
+                  class="ai-carousel-card-image-{{ ai_gen_id }}"
+                >
+              {% endif %}
+            </div>
+
+            <!-- TÍTULO -->
+            {% if title_text != blank %}
+              <span class="ai-carousel-title-{{ ai_gen_id }}">{{ title_text }}</span>
+            {% endif %}
+
+            <!-- BOTÓN con enlace propio -->
+            {% if btn_text != blank %}
+              <div class="ai-carousel-btn-wrapper-{{ ai_gen_id }}">
+                {% assign resolved_btn_link = btn_link | default: link %}
+                {% if resolved_btn_link != blank %}
+                  <a href="{{ resolved_btn_link }}" class="ai-carousel-btn-{{ ai_gen_id }}">{{ btn_text }}</a>
+                {% else %}
+                  <span class="ai-carousel-btn-{{ ai_gen_id }}">{{ btn_text }}</span>
+                {% endif %}
+              </div>
+            {% endif %}
+
+          </div>
+        {% endif %}
+      {% endfor %}
+
+    </div>
+  </div>
+</carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    if (!customElements.get('carousel-{{ ai_gen_id }}')) {
+      class Carousel{{ ai_gen_id }} extends HTMLElement {
+        constructor() {
+          super();
+          this.track  = null;
+          this.outers = [];
+          this._rafId = null;
+        }
+
+        connectedCallback() {
+          this.track  = this.querySelector('.ai-carousel-track-{{ ai_gen_id }}');
+          this.outers = Array.from(this.querySelectorAll('.ai-carousel-card-outer-{{ ai_gen_id }}'));
+
+          this.resetScroll();
+          this.setupAnimationLoop();
+
+          window.addEventListener('DOMContentLoaded', () => this.resetScroll());
+          window.addEventListener('load', () => this.resetScroll());
+          setTimeout(() => this.resetScroll(), 100);
+          setTimeout(() => this.resetScroll(), 500);
+        }
+
+        resetScroll() {
+          if (this.track) this.track.scrollLeft = 0;
+        }
+
+        setupAnimationLoop() {
+          const shadowOpacity = {{ block.settings.shadow_opacity }} / 100;
+          const shadowR  = {{ block.settings.shadow_color.red }};
+          const shadowG  = {{ block.settings.shadow_color.green }};
+          const shadowB  = {{ block.settings.shadow_color.blue }};
+          const offsetY  = {{ block.settings.shadow_offset_y }};
+          const blur     = {{ block.settings.shadow_blur }};
+
+          const state = this.outers.map(() => ({ progress: 0 }));
+
+          const applyCardState = () => {
+            const trackRect   = this.track.getBoundingClientRect();
+            const trackCenter = trackRect.left + trackRect.width / 2;
+
+            this.outers.forEach((outer, idx) => {
+              const card       = outer.querySelector('.ai-carousel-card-{{ ai_gen_id }}');
+              const outerRect  = outer.getBoundingClientRect();
+              const outerCenter = outerRect.left + outerRect.width / 2;
+              const distance   = Math.abs(trackCenter - outerCenter);
+              const maxDist    = trackRect.width * 0.65;
+              const target     = Math.max(0, 1 - distance / maxDist);
+
+              // Lerp ultra-smooth
+              state[idx].progress += (target - state[idx].progress) * 0.12;
+              const p = state[idx].progress;
+
+              const translateY = -14 * p;
+              const scale      = 1 + 0.04 * p;
+              const opBase     = shadowOpacity * (0.4 + 0.6 * p);
+
+              // Transform en el OUTER completo (imagen + título + botón juntos)
+              outer.style.transform = `translateY(${translateY}px) scale(${scale})`;
+
+              // Sombra solo en la card imagen
+              if (card) {
+                card.style.boxShadow = `
+                  0 ${offsetY * (1 + p)}px ${blur * (1 + p)}px rgba(${shadowR},${shadowG},${shadowB},${opBase}),
+                  0 ${offsetY * (2 + p)}px ${blur * (2 + p)}px rgba(${shadowR},${shadowG},${shadowB},${opBase * 0.7}),
+                  0 ${offsetY * (3 + p)}px ${blur * (3 + p)}px rgba(${shadowR},${shadowG},${shadowB},${opBase * 0.5})`;
+              }
+
+              // Título: fade sincronizado con el pop
+              const titleEl = outer.querySelector('.ai-carousel-title-{{ ai_gen_id }}');
+              if (titleEl) {
+                titleEl.style.opacity = 0.55 + 0.45 * p;
+              }
+            });
+          };
+
+          const loop = () => {
+            applyCardState();
+            this._rafId = requestAnimationFrame(loop);
+          };
+
+          applyCardState();
+          this._rafId = requestAnimationFrame(loop);
+        }
+
+        disconnectedCallback() {
+          if (this._rafId) cancelAnimationFrame(this._rafId);
+        }
+      }
+
+      customElements.define('carousel-{{ ai_gen_id }}', Carousel{{ ai_gen_id }});
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Image Carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Imágenes y enlaces de imagen"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Imagen 1"
+    },
+    {
+      "type": "url",
+      "id": "link_1",
+      "label": "Enlace imagen 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Imagen 2"
+    },
+    {
+      "type": "url",
+      "id": "link_2",
+      "label": "Enlace imagen 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Imagen 3"
+    },
+    {
+      "type": "url",
+      "id": "link_3",
+      "label": "Enlace imagen 3"
+    },
+    {
+      "type": "header",
+      "content": "Títulos"
+    },
+    {
+      "type": "text",
+      "id": "title_1",
+      "label": "Título tarjeta 1",
+      "default": "Título uno"
+    },
+    {
+      "type": "text",
+      "id": "title_2",
+      "label": "Título tarjeta 2",
+      "default": "Título dos"
+    },
+    {
+      "type": "text",
+      "id": "title_3",
+      "label": "Título tarjeta 3",
+      "default": "Título tres"
+    },
+    {
+      "type": "header",
+      "content": "Botones — Texto y enlace"
+    },
+    {
+      "type": "text",
+      "id": "btn_text_1",
+      "label": "Texto botón 1",
+      "default": "Ver más"
+    },
+    {
+      "type": "url",
+      "id": "btn_link_1",
+      "label": "Enlace botón 1"
+    },
+    {
+      "type": "text",
+      "id": "btn_text_2",
+      "label": "Texto botón 2",
+      "default": "Ver más"
+    },
+    {
+      "type": "url",
+      "id": "btn_link_2",
+      "label": "Enlace botón 2"
+    },
+    {
+      "type": "text",
+      "id": "btn_text_3",
+      "label": "Texto botón 3",
+      "default": "Ver más"
+    },
+    {
+      "type": "url",
+      "id": "btn_link_3",
+      "label": "Enlace botón 3"
+    },
+    {
+      "type": "header",
+      "content": "Tarjetas"
+    },
+    {
+      "type": "select",
+      "id": "card_aspect_ratio",
+      "label": "Proporción de imagen",
+      "options": [
+        { "value": "2/3", "label": "2:3 — Vertical" },
+        { "value": "3/4", "label": "3:4 — Vertical compacto" },
+        { "value": "4/5", "label": "4:5 — Cuasi-cuadrado" },
+        { "value": "1/1", "label": "1:1 — Cuadrado" }
+      ],
+      "default": "2/3"
+    },
+    {
+      "type": "select",
+      "id": "card_align",
+      "label": "Alineación del contenido",
+      "options": [
+        { "value": "flex-start", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "flex-end", "label": "Derecha" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Radio de bordes",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Separación entre tarjetas"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap — Escritorio",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_gap_mobile",
+      "label": "Gap — Móvil",
+      "min": 8,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "header",
+      "content": "Sombra de imagen"
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Color de sombra",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Opacidad",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "shadow_offset_y",
+      "label": "Desplazamiento vertical",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Difuminado",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Padding — Escritorio"
+    },
+    {
+      "type": "range",
+      "id": "track_padding_vertical",
+      "label": "Vertical",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "track_padding_horizontal",
+      "label": "Horizontal",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Padding — Móvil"
+    },
+    {
+      "type": "range",
+      "id": "track_padding_vertical_mobile",
+      "label": "Vertical",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "track_padding_horizontal_mobile",
+      "label": "Horizontal",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Títulos — Estilo"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Tamaño de fuente",
+      "min": 10,
+      "max": 36,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "title_font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        { "value": "300", "label": "Light" },
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color de texto",
+      "default": "#111111"
+    },
+    {
+      "type": "select",
+      "id": "title_align",
+      "label": "Alineación",
+      "options": [
+        { "value": "left", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "right", "label": "Derecha" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "range",
+      "id": "title_letter_spacing",
+      "label": "Espaciado de letras",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "em",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "title_line_height",
+      "label": "Altura de línea",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "lh",
+      "default": 13
+    },
+    {
+      "type": "range",
+      "id": "title_gap",
+      "label": "Espacio imagen → título",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Botones — Estilo"
+    },
+    {
+      "type": "select",
+      "id": "btn_align",
+      "label": "Alineación del botón",
+      "options": [
+        { "value": "flex-start", "label": "Izquierda" },
+        { "value": "center", "label": "Centro" },
+        { "value": "flex-end", "label": "Derecha" }
+      ],
+      "default": "center"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color",
+      "label": "Color de fondo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "btn_bg_color_hover",
+      "label": "Color de fondo (hover)",
+      "default": "#f0f0f0"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color",
+      "label": "Color de texto",
+      "default": "#111111"
+    },
+    {
+      "type": "color",
+      "id": "btn_text_color_hover",
+      "label": "Color de texto (hover)",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "btn_font_size",
+      "label": "Tamaño de fuente",
+      "min": 10,
+      "max": 22,
+      "step": 1,
+      "unit": "px",
+      "default": 13
+    },
+    {
+      "type": "select",
+      "id": "btn_font_weight",
+      "label": "Peso de fuente",
+      "options": [
+        { "value": "400", "label": "Regular" },
+        { "value": "500", "label": "Medium" },
+        { "value": "600", "label": "Semibold" },
+        { "value": "700", "label": "Bold" }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "range",
+      "id": "btn_border_radius",
+      "label": "Radio de bordes",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "btn_border_width",
+      "label": "Grosor de borde",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "btn_border_color",
+      "label": "Color de borde",
+      "default": "#cccccc"
+    },
+    {
+      "type": "range",
+      "id": "btn_padding_v",
+      "label": "Padding vertical",
+      "min": 4,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "btn_padding_h",
+      "label": "Padding horizontal",
+      "min": 8,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "btn_gap",
+      "label": "Espacio título → botón",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Botones — Sombra"
+    },
+    {
+      "type": "color",
+      "id": "btn_shadow_color",
+      "label": "Color de sombra",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "btn_shadow_opacity",
+      "label": "Opacidad",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "%",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "btn_shadow_offset_y",
+      "label": "Desplazamiento vertical",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 4
+    },
+    {
+      "type": "range",
+      "id": "btn_shadow_blur",
+      "label": "Difuminado",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Carousel"
+    }
+  ]
+}
+{% endschema %}

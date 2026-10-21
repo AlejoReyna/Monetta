@@ -1,0 +1,880 @@
+TAP version 13
+# Subtest: regression: bags-suggested cannot route to bags-wholesale or share its wholesale target
+not ok 1 - regression: bags-suggested cannot route to bags-wholesale or share its wholesale target
+  ---
+  duration_ms: 49.009208
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:47:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected CATALOG_MODE_MISMATCH at /content/catalogs/1/destination; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:51:20)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.start (node:internal/test_runner/test:1262:17)
+    startSubtestAfterBootstrap (node:internal/test_runner/harness:387:17)
+  ...
+# Subtest: regression: bags-wholesale cannot route to perfume-wholesale
+not ok 2 - regression: bags-wholesale cannot route to perfume-wholesale
+  ---
+  duration_ms: 16.613458
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:56:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected CATALOG_CATEGORY_MISMATCH at /content/catalogs/0/destination; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:60:20)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3)
+  ...
+# Subtest: all nine original category/mode pairs are preserved without identity/share validation errors
+ok 3 - all nine original category/mode pairs are preserved without identity/share validation errors
+  ---
+  duration_ms: 16.144792
+  type: 'test'
+  ...
+# Subtest: missing catalog destination metadata reports uncertainty instead of equivalence
+not ok 4 - missing catalog destination metadata reports uncertainty instead of equivalence
+  ---
+  duration_ms: 13.743333
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:81:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected CATALOG_IDENTITY_UNCONFIRMED at /content/catalogs/1/destination; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:87:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: reduced fixture still detects category, mode and real-target share mismatches
+not ok 5 - reduced fixture still detects category, mode and real-target share mismatches
+  ---
+  duration_ms: 8.016292
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:92:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected CATALOG_CATEGORY_MISMATCH at /content/catalogs/0/destination; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:97:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: regression: the real V1 selection source schema rejects collection without routeId
+not ok 6 - regression: the real V1 selection source schema rejects collection without routeId
+  ---
+  duration_ms: 6.999625
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:102:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(errors.some(error => error.code === 'SCHEMA_ANY_OF_MISMATCH'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:104:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: regression: the exact todays-picks collection mutation reports a required route with real V1 schema
+not ok 7 - regression: the exact todays-picks collection mutation reports a required route with real V1 schema
+  ---
+  duration_ms: 19.607042
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:106:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected SELECTION_ROUTE_REQUIRED at /content/productSelections/todays-picks/source/routeId; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:111:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: collection resolution requires a known route with an existing destination
+not ok 8 - collection resolution requires a known route with an existing destination
+  ---
+  duration_ms: 15.487833
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:114:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected SELECTION_DESTINATION_UNRESOLVED at /content/productSelections/todays-picks/source/routeId; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:119:5)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: collection and curated routes must be collections, not product or page destinations
+not ok 9 - collection and curated routes must be collections, not product or page destinations
+  ---
+  duration_ms: 20.845667
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:122:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected SELECTION_DESTINATION_TYPE_MISMATCH at /content/productSelections/todays-picks/source/routeId; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:125:5)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: reduced selection fixture cannot bypass collection resolution
+not ok 10 - reduced selection fixture cannot bypass collection resolution
+  ---
+  duration_ms: 13.349625
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:128:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected SELECTION_ROUTE_REQUIRED at /content/productSelections/todays-picks/source/routeId; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:131:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: real V1 rejects curated without either source
+not ok 11 - real V1 rejects curated without either source
+  ---
+  duration_ms: 0.689041
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:144:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(validateSchema(source, realSchema.$defs.selectionSource, realSchema).length > 0)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:145:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: real V1 rejects curated with an empty list
+not ok 12 - real V1 rejects curated with an empty list
+  ---
+  duration_ms: 0.216542
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:144:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(validateSchema(source, realSchema.$defs.selectionSource, realSchema).length > 0)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:145:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: real V1 rejects curated with blank handles
+ok 13 - real V1 rejects curated with blank handles
+  ---
+  duration_ms: 0.09425
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with a string instead of a list
+ok 14 - real V1 rejects curated with a string instead of a list
+  ---
+  duration_ms: 0.039833
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with non-string handles
+ok 15 - real V1 rejects curated with non-string handles
+  ---
+  duration_ms: 0.034666
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with duplicate handles
+not ok 16 - real V1 rejects curated with duplicate handles
+  ---
+  duration_ms: 0.144166
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:144:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(validateSchema(source, realSchema.$defs.selectionSource, realSchema).length > 0)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:145:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: real V1 rejects curated with ambiguous collection and handles
+not ok 17 - real V1 rejects curated with ambiguous collection and handles
+  ---
+  duration_ms: 0.19625
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:144:47'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(validateSchema(source, realSchema.$defs.selectionSource, realSchema).length > 0)
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:145:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: real V1 rejects collection with a blank route
+ok 18 - real V1 rejects collection with a blank route
+  ---
+  duration_ms: 0.767708
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve collection route
+ok 19 - real V1 and semantic checks preserve collection route
+  ---
+  duration_ms: 21.990875
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve curated collection
+ok 20 - real V1 and semantic checks preserve curated collection
+  ---
+  duration_ms: 15.452458
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve curated explicit handles
+ok 21 - real V1 and semantic checks preserve curated explicit handles
+  ---
+  duration_ms: 14.530458
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve newest provider without route
+ok 22 - real V1 and semantic checks preserve newest provider without route
+  ---
+  duration_ms: 15.363
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve recommendations provider without route
+ok 23 - real V1 and semantic checks preserve recommendations provider without route
+  ---
+  duration_ms: 22.561041
+  type: 'test'
+  ...
+# Subtest: curated without source is unresolved; using both alternatives is ambiguous even in a reduced fixture
+not ok 24 - curated without source is unresolved; using both alternatives is ambiguous even in a reduced fixture
+  ---
+  duration_ms: 11.212416
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:159:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected SELECTION_SOURCE_UNRESOLVED at /content/productSelections/todays-picks/source; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:162:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: anyOf accepts at least one branch and oneOf accepts exactly one, including nested local refs
+not ok 25 - anyOf accepts at least one branch and oneOf accepts exactly one, including nested local refs
+  ---
+  duration_ms: 0.489417
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:167:1'
+  failureType: 'testCodeFailure'
+  error: |-
+    The expression evaluated to a falsy value:
+    
+      assert.ok(validateSchema({}, { anyOf: [{ required: ['routeId'] }, { required: ['handles'] }] }).some(e => e.code === 'SCHEMA_ANY_OF_MISMATCH'))
+    
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:168:10)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: regression: a product_selection module pointing to existing rewards is incompatible
+not ok 26 - regression: a product_selection module pointing to existing rewards is incompatible
+  ---
+  duration_ms: 11.741542
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:176:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/0/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:179:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: all eight module kinds accept their corresponding real V1 structures
+ok 27 - all eight module kinds accept their corresponding real V1 structures
+  ---
+  duration_ms: 12.02475
+  type: 'test'
+  ...
+# Subtest: campaign rejects an existing reference to another family
+not ok 28 - campaign rejects an existing reference to another family
+  ---
+  duration_ms: 13.080042
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:186:56'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/0/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:190:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: product_selection rejects an existing reference to another family
+not ok 29 - product_selection rejects an existing reference to another family
+  ---
+  duration_ms: 13.81725
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:186:56'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/1/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:190:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: categories rejects an existing reference to another family
+not ok 30 - categories rejects an existing reference to another family
+  ---
+  duration_ms: 12.152459
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:186:56'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/2/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:190:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: brands rejects an existing reference to another family
+not ok 31 - brands rejects an existing reference to another family
+  ---
+  duration_ms: 11.60025
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:186:56'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/3/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:190:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: wholesale rejects an existing reference to another family
+not ok 32 - wholesale rejects an existing reference to another family
+  ---
+  duration_ms: 11.890042
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:186:56'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/4/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:190:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: services rejects an existing reference to another family
+not ok 33 - services rejects an existing reference to another family
+  ---
+  duration_ms: 15.045542
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:186:56'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/5/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:190:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: signup rejects an existing reference to another family
+not ok 34 - signup rejects an existing reference to another family
+  ---
+  duration_ms: 11.332208
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:186:56'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/6/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:190:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: footer rejects an existing reference to another family
+not ok 35 - footer rejects an existing reference to another family
+  ---
+  duration_ms: 9.140541
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:186:56'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_FAMILY_MISMATCH at /content/home/moduleOrder/7/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:190:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: campaign rejects its own family when the real V1 structure is invalid
+not ok 36 - campaign rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 10.316125
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:199:58'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_INVALID at /content/home/moduleOrder/0/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:203:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: product_selection rejects its own family when the real V1 structure is invalid
+not ok 37 - product_selection rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 9.320958
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:199:58'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_INVALID at /content/home/moduleOrder/1/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:203:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: categories rejects its own family when the real V1 structure is invalid
+not ok 38 - categories rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 10.187416
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:199:58'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_INVALID at /content/home/moduleOrder/2/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:203:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: brands rejects its own family when the real V1 structure is invalid
+not ok 39 - brands rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 12.117583
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:199:58'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_INVALID at /content/home/moduleOrder/3/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:203:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: wholesale rejects its own family when the real V1 structure is invalid
+not ok 40 - wholesale rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 11.0335
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:199:58'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_INVALID at /content/home/moduleOrder/4/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:203:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: services rejects its own family when the real V1 structure is invalid
+not ok 41 - services rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 19.034542
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:199:58'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_INVALID at /content/home/moduleOrder/5/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:203:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: signup rejects its own family when the real V1 structure is invalid
+not ok 42 - signup rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 17.521625
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:199:58'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_INVALID at /content/home/moduleOrder/6/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:203:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: footer rejects its own family when the real V1 structure is invalid
+not ok 43 - footer rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 24.522708
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:199:58'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_INVALID at /content/home/moduleOrder/7/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:203:19)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: missing, empty and non-leaf module references stay invalid
+not ok 44 - missing, empty and non-leaf module references stay invalid
+  ---
+  duration_ms: 21.684167
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:206:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_CONTENT_MISSING at /content/home/moduleOrder/0/contentRef; got [{"code":"HOME_MODULE_CONTENT_MISSING","severity":"error","path":"/content/home/moduleOrder/hero","message":"Module refers to unavailable content campaigns.absent."}]'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:211:5)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: a reduced schema reports missing structure definitions rather than silently certifying a module
+not ok 45 - a reduced schema reports missing structure definitions rather than silently certifying a module
+  ---
+  duration_ms: 27.211416
+  type: 'test'
+  location: '/Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:218:1'
+  failureType: 'testCodeFailure'
+  error: 'Expected HOME_MODULE_SCHEMA_MISSING at /content/home/moduleOrder/0/contentRef; got []'
+  code: 'ERR_ASSERTION'
+  name: 'AssertionError'
+  expected: true
+  actual: false
+  operator: '=='
+  stack: |-
+    at (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:20:10)
+    TestContext.<anonymous> (file:///Users/alexis_reyna/MyCode/Monetta/tools/style-guideline-content/test/corrections.test.mjs:221:3)
+    Test.runInAsyncScope (node:async_hooks:227:14)
+    Test.run (node:internal/test_runner/test:1402:25)
+    Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+    Test.postRun (node:internal/test_runner/test:1542:19)
+    Test.run (node:internal/test_runner/test:1467:12)
+    async Test.processPendingSubtests (node:internal/test_runner/test:974:7)
+  ...
+# Subtest: the original baseline, source manifest, snapshots and 35-test file remain byte-identical
+ok 46 - the original baseline, source manifest, snapshots and 35-test file remain byte-identical
+  ---
+  duration_ms: 76.656333
+  type: 'test'
+  ...
+1..46
+# tests 46
+# suites 0
+# pass 12
+# fail 34
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 866.366375

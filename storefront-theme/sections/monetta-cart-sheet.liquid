@@ -1,0 +1,59 @@
+{%- comment -%}
+  "En tu bolsa": the confirmation after adding. A right drawer from 768 px, a bottom sheet below (monetta-cart.js picks the
+  class when it opens). Static section in layout/monetta.liquid so the Section Rendering API can re-render it with the
+  add request; the contents are Shopify's cart: lines, discounts and the subtotal are the values the store returns.
+{%- endcomment -%}
+<dialog class="overlay overlay--sheet" id="cart-sheet" aria-labelledby="cart-sheet-title" data-cart-sheet>
+  <div class="overlay__backdrop" data-overlay-close></div>
+  <div class="overlay__panel">
+    <span hidden data-cart-total>{{ cart.item_count }}</span>
+    <div class="overlay__header">
+      <h2 class="overlay__title" id="cart-sheet-title">{% if cart.item_count > 0 %}En tu bolsa ({{ cart.item_count }}){% else %}Tu bolsa{% endif %}</h2>
+      <button type="button" class="icon-button" data-overlay-close aria-label="Cerrar">{% render 'monetta-icon', name: 'close', size: 22 %}</button>
+    </div>
+    <div class="overlay__body" data-cart-sheet-body>
+      <div class="cart-sync form-error" data-cart-sync role="alert" hidden>
+        {% render 'monetta-icon', name: 'error', size: 18 %}
+        <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de continuar al checkout.</span>
+        <button type="button" class="btn btn--outline" data-cart-resync>Actualizar bolsa</button>
+      </div>
+      {%- if cart.item_count == 0 -%}
+        <div class="empty">
+          <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'bag', size: 28 %}</span>
+          <p class="empty__title">Tu bolsa está vacía</p>
+          <p class="body-copy">Encuentra una pieza que quieras llevar contigo.</p>
+        </div>
+      {%- else -%}
+        <ul class="cart-lines cart-sheet__lines" role="list">
+          {%- for item in cart.items -%}
+            {% render 'monetta-cart-line', item: item, compact: true %}
+          {%- endfor -%}
+        </ul>
+      {%- endif -%}
+    </div>
+    {%- if cart.item_count > 0 -%}
+      <div class="overlay__footer" data-cart-sheet-footer>
+        <div class="cart-drawer__summary">
+          {%- if cart.cart_level_discount_applications.size > 0 -%}
+            {%- for discount in cart.cart_level_discount_applications -%}
+              <p class="cart-drawer__subtotal"><span>{{ discount.title | escape }}</span><span>−{{ discount.total_allocated_amount | money_without_trailing_zeros }}</span></p>
+            {%- endfor -%}
+          {%- endif -%}
+          <p class="cart-drawer__subtotal"><span>Subtotal</span><span>{{ cart.total_price | money_with_currency }}</span></p>
+          <p class="small text-muted">Envío, impuestos y descuentos se confirman en el checkout de Shopify.</p>
+        </div>
+        <form class="cart-drawer__buttons" action="{{ routes.cart_url }}" method="post">
+          <button type="submit" name="checkout" class="btn btn--primary btn--block">{% render 'monetta-icon', name: 'lock', size: 18 %} Continuar al checkout</button>
+          <a class="btn btn--outline btn--block" href="{{ routes.cart_url }}">Ver carrito</a>
+        </form>
+      </div>
+    {%- endif -%}
+  </div>
+</dialog>
+
+{% schema %}
+{
+  "name": "Monetta · Hoja de bolsa",
+  "settings": []
+}
+{% endschema %}

@@ -551,13 +551,12 @@ class _IdentityCard extends StatelessWidget {
               height: 56,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: palette.surfaceDeep,
-                border: Border.all(color: palette.gold, width: 1),
+                color: palette.action,
               ),
               alignment: Alignment.center,
               child: Text(
                 initial,
-                style: boutiqueDisplay(24, color: palette.ink),
+                style: boutiqueDisplay(24, color: palette.onAction),
               ),
             ),
             const SizedBox(width: BoutiqueSpace.lg),
@@ -575,7 +574,10 @@ class _IdentityCard extends StatelessWidget {
                   const SizedBox(height: 2),
                   Text(
                     name,
-                    style: boutiqueTitle(size: 17, color: palette.ink),
+                    style: boutiqueScreenTitle(
+                      context: context,
+                      color: palette.ink,
+                    ),
                   ),
                   if (account.displayName != null && account.email != null) ...[
                     const SizedBox(height: 2),

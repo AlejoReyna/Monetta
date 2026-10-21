@@ -1,0 +1,111 @@
+{%- comment -%}
+  Search results (search_screen.dart). Phones: the 76 px page bar ("Buscar"), the field under it and, when there is something to
+  filter, the filters icon. The page always has exactly one h1: the bar's "Buscar" when there is no query, the results
+  heading ("Resultados para “q”") once a search ran. Results, counts, filters and sort are Shopify's.
+  Predictive suggestions (/search/suggest) are the next block; the field is a real GET form, so Enter always works.
+{%- endcomment -%}
+{%- liquid
+  assign performed = search.performed
+  assign active_count = 0
+  for filter in search.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+  assign sort_by = search.sort_by | default: search.default_sort_by
+  assign encoded_terms = search.terms | url_encode
+  assign clear_url = routes.search_url | append: '?type=product&q=' | append: encoded_terms
+  assign count_text = search.results_count | append: ' piezas'
+  if search.results_count == 1
+    assign count_text = '1 pieza'
+  endif
+  assign filterable = false
+  if performed and search.results_count > 0
+    assign filterable = true
+  endif
+  if active_count > 0
+    assign filterable = true
+  endif
+-%}
+{% paginate search.results by section.settings.products_per_page %}
+  <div class="container search-page listing listing--search" data-listing {{ section.shopify_attributes }}>
+    {%- capture bar_actions -%}
+      {%- if filterable and search.filters.size > 0 -%}
+        <button type="button" class="icon-button page-bar__action" data-open-dialog="filters-drawer" aria-haspopup="dialog" aria-controls="filters-drawer" aria-label="Filtrar y ordenar{% if active_count > 0 %}, {{ active_count }} activos{% endif %}" title="Filtrar y ordenar">{% render 'monetta-icon', name: 'tune', size: 24 %}{% if active_count > 0 %}<span class="page-bar__badge" aria-hidden="true">{{ active_count }}</span>{% endif %}</button>
+      {%- endif -%}
+    {%- endcapture -%}
+    {% if performed %}
+      {% render 'monetta-page-bar', title: 'Buscar', heading: false, phone_only: true, back: routes.root_url, actions: bar_actions %}
+    {% else %}
+      {% render 'monetta-page-bar', title: 'Buscar', back: routes.root_url, actions: bar_actions %}
+    {% endif %}
+
+    <form class="search-page__field" role="search" aria-label="Editar búsqueda" action="{{ routes.search_url }}" method="get">
+      <div class="search-field">
+        {% render 'monetta-icon', name: 'search', size: 20 %}
+        <label class="visually-hidden" for="page-search-input">Buscar productos</label>
+        <input id="page-search-input" type="search" name="q" value="{{ search.terms | escape }}" placeholder="{{ section.settings.placeholder | escape }}" autocomplete="off" spellcheck="false" enterkeyhint="search" data-search-autofocus>
+        <input type="hidden" name="type" value="product">
+        <button type="button" class="icon-button search-field__clear" data-search-clear aria-label="Borrar búsqueda"{% unless performed %} hidden{% endunless %}>{% render 'monetta-icon', name: 'close', size: 20 %}</button>
+      </div>
+    </form>
+
+    {%- if performed -%}
+      <div class="page-head">
+        <nav class="breadcrumbs" aria-label="Ruta de navegación">
+          <ol>
+            <li><a href="{{ routes.root_url }}">Inicio</a></li>
+            <li><span aria-current="page">Buscar</span></li>
+          </ol>
+        </nav>
+        <div class="page-head__row">
+          <h1 class="display display--page" tabindex="-1">Resultados para “{{ search.terms | escape }}”</h1>
+          <p class="page-head__count" data-count aria-live="polite">{{ count_text }}</p>
+        </div>
+      </div>
+      {%- capture results_html -%}
+        {% render 'monetta-results',
+          products: search.results,
+          paginate: paginate,
+          total: search.results_count,
+          active_count: active_count,
+          clear_url: clear_url,
+          empty_title: 'Sin resultados',
+          empty_body: 'No encontramos piezas para esa búsqueda. Prueba con otra palabra o explora el catálogo.',
+          search_url: routes.search_url
+        %}
+      {%- endcapture -%}
+      {% render 'monetta-listing-layout',
+        filters: search.filters,
+        sort_options: search.sort_options,
+        sort_by: sort_by,
+        default_sort: search.default_sort_by,
+        base_url: routes.search_url,
+        clear_url: clear_url,
+        results_html: results_html,
+        active_count: active_count,
+        has_products: filterable,
+        query: search.terms
+      %}
+    {%- else -%}
+      <div class="search-discovery">
+        <p class="body-copy">Escribe el nombre de una pieza, una marca o un estilo. También puedes explorar el catálogo.</p>
+        <p><a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver todo el catálogo</a></p>
+      </div>
+    {%- endif -%}
+  </div>
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "Monetta · Búsqueda",
+  "settings": [
+    { "type": "range", "id": "products_per_page", "label": "Productos por página", "min": 12, "max": 48, "step": 4, "default": 24 },
+    { "type": "text", "id": "placeholder", "label": "Texto del campo", "default": "Encuentra algo muy tú" }
+  ]
+}
+{% endschema %}

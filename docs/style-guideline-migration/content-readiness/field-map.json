@@ -1,0 +1,650 @@
+{
+  "schemaVersion": "1.0.0",
+  "fields": [
+    {
+      "id": "home.order",
+      "status": "extension",
+      "currentFields": [
+        "app.home_sections",
+        "HomeSectionId (8 valores)",
+        "templates/index.json.order"
+      ],
+      "proposedFields": [
+        "home.moduleOrder[]: id,kind,contentRef"
+      ],
+      "editor": "Comercial/editor de contenido; adapters por ingeniería",
+      "summary": "Añadir tipos campaña, mayoreo, servicios, signup y footer; hoy no existe un manifiesto de composición compartido.",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "enum HomeSectionId"
+        },
+        {
+          "source": "lib/data/shopify/queries.dart",
+          "needle": "key: \"home_sections\""
+        }
+      ],
+      "pdfPages": [
+        3,
+        4
+      ]
+    },
+    {
+      "id": "campaign.copy",
+      "status": "extension",
+      "currentFields": [
+        "CampaignMedia.videoUrl,posterAsset,ctaLabel",
+        "monetta-hero settings eyebrow,heading,text,button_*"
+      ],
+      "proposedFields": [
+        "campaigns.*: id,headline,body,ctaLabel,destination,active"
+      ],
+      "editor": "Comercial/editor de contenido",
+      "summary": "Copy y CTA son independientes por canal; usar IDs estables y destino tipado.",
+      "sources": [
+        {
+          "source": "lib/domain/campaign.dart",
+          "needle": "class CampaignMedia"
+        },
+        {
+          "source": "storefront-theme/sections/monetta-hero.liquid",
+          "needle": "\"id\": \"heading\""
+        }
+      ],
+      "pdfPages": [
+        1,
+        3,
+        4,
+        10,
+        15,
+        16
+      ]
+    },
+    {
+      "id": "campaign.media",
+      "status": "extension",
+      "currentFields": [
+        "posterAsset",
+        "image_mobile",
+        "image_desktop",
+        "main_image.presentation.focal_point"
+      ],
+      "proposedFields": [
+        "media.sources.compact|medium|expanded.assetId,focal.x,focal.y",
+        "media.alt,decorative"
+      ],
+      "editor": "Diseño prepara assets; comercial aprueba; editor publica",
+      "summary": "Faltan arte por tamaño y focal normalizado 0..1. El tema usa main_image para object-position aunque picture pueda seleccionar wide.",
+      "sources": [
+        {
+          "source": "storefront-theme/sections/monetta-hero.liquid",
+          "needle": "assign main_image = phone | default: wide"
+        },
+        {
+          "source": "storefront-theme/sections/monetta-hero.liquid",
+          "needle": "main_image.presentation.focal_point"
+        }
+      ],
+      "pdfPages": [
+        1,
+        3,
+        4,
+        10,
+        15,
+        16
+      ]
+    },
+    {
+      "id": "categories.legacy",
+      "status": "existing",
+      "currentFields": [
+        "title,handle,fallbackAsset,imageUrl,category,silhouette",
+        "app.home_collections",
+        "app.home_bag_types"
+      ],
+      "proposedFields": [
+        "categories[]: id,title,imageAssetId,alt"
+      ],
+      "editor": "Comercial: metafields/colecciones; ingeniería: fallback empaquetado",
+      "summary": "Los seeds y assets existen. Las entidades reales deben comprobarse por tienda.",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "class HomeCollectionCard"
+        },
+        {
+          "source": "lib/data/shopify/queries.dart",
+          "needle": "key: \"home_collections\""
+        },
+        {
+          "source": "lib/data/shopify/queries.dart",
+          "needle": "key: \"home_bag_types\""
+        }
+      ],
+      "pdfPages": [
+        2,
+        3,
+        18
+      ]
+    },
+    {
+      "id": "destinations.typed",
+      "status": "extension",
+      "currentFields": [
+        "HomeCollectionCard.handle",
+        "block.settings.collection y link",
+        "catálogos url"
+      ],
+      "proposedFields": [
+        "destination.routeId",
+        "route-map: type,existing,source,status"
+      ],
+      "editor": "Comercial elige entidad/destino; ingeniería valida",
+      "summary": "Separar colección, página, cuenta y catálogo. Perfumes nativo es filtro por términos; web tiene catálogo externo.",
+      "sources": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "queryTerms: const ['perfume', 'fragancia']"
+        },
+        {
+          "source": "storefront-theme/sections/monetta-quick-links.liquid",
+          "needle": "assign href = block.settings.link | default: target.url"
+        }
+      ],
+      "pdfPages": [
+        3,
+        5,
+        10,
+        15,
+        18,
+        19
+      ]
+    },
+    {
+      "id": "brands.list",
+      "status": "extension",
+      "currentFields": [
+        "HomeBrandCard.title,brand,handle,fallbackAsset,imageUrl",
+        "_brands sólo actualiza artwork de seeds"
+      ],
+      "proposedFields": [
+        "brands[] lista editable e IDs estables; brandKey separado de título"
+      ],
+      "editor": "Comercial: lista y entidades; diseño: logos autorizados",
+      "summary": "Las marcas hoy no se editan como lista desde metafield; cuatro marcas del PDF carecen de seed/arte verificado.",
+      "sources": [
+        {
+          "source": "lib/data/shopify/home_content_repository.dart",
+          "needle": "_brands(fallback.brands, allByHandle)"
+        },
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "class HomeBrandCard"
+        }
+      ],
+      "pdfPages": [
+        2,
+        3,
+        18
+      ]
+    },
+    {
+      "id": "collections.pagination",
+      "status": "extension",
+      "currentFields": [
+        "collections(first: 50, sortKey: TITLE)",
+        "image.url transform 1200",
+        "collectionFromJson"
+      ],
+      "proposedFields": [
+        "lookup por handle + paginación de colecciones; media alt/focal/dimensiones"
+      ],
+      "editor": "Ingeniería; comercial gestiona contenido Shopify",
+      "summary": "Una colección fuera de las primeras 50 puede parecer ausente; no usar ausencia en esa página como prueba negativa.",
+      "sources": [
+        {
+          "source": "lib/data/shopify/queries.dart",
+          "needle": "collections(first: 50, sortKey: TITLE)"
+        },
+        {
+          "source": "lib/data/shopify/queries.dart",
+          "needle": "image { url(transform: {maxWidth: 1200}) }"
+        }
+      ],
+      "pdfPages": [
+        3,
+        6,
+        9,
+        18
+      ]
+    },
+    {
+      "id": "products.selections",
+      "status": "extension",
+      "currentFields": [
+        "monetta-todays-picks",
+        "newProducts",
+        "monetta-product-rail collection order",
+        "featured-grid all"
+      ],
+      "proposedFields": [
+        "productSelections.*.source.kind,provider,routeId,ordering"
+      ],
+      "editor": "Comercial edita selección; datos comerciales sólo Shopify",
+      "summary": "Separar novedades por fecha, selección editorial y populares; el enlace sorted no ordena el carrusel.",
+      "sources": [
+        {
+          "source": "lib/data/shopify/featured_catalog_repository.dart",
+          "needle": "'handle': 'monetta-todays-picks'"
+        },
+        {
+          "source": "storefront-theme/sections/monetta-product-rail.liquid",
+          "needle": "in that\n  collection's own order"
+        }
+      ],
+      "pdfPages": [
+        3,
+        4,
+        11
+      ]
+    },
+    {
+      "id": "wholesale.editorial",
+      "status": "existing",
+      "currentFields": [
+        "app_partner_program: eyebrow,headline,body,steps_json,terms_json,faqs_json",
+        "app_about: eyebrow,headline,body,timeline_json,trust_facts_json"
+      ],
+      "proposedFields": [
+        "wholesale.headline,body,steps,terms; campañas por referencia"
+      ],
+      "editor": "Comercial en Metaobjects (si existen y tienen acceso Storefront)",
+      "summary": "Conservar definiciones y handles actuales. WholesaleScreen usa constantes distintas del repositorio editorial.",
+      "sources": [
+        {
+          "source": "docs/EDITORIAL_CONTENT_METAOBJECTS.md",
+          "needle": "## `app_partner_program`"
+        },
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "class PartnerProgramContent"
+        }
+      ],
+      "pdfPages": [
+        10,
+        11,
+        16
+      ]
+    },
+    {
+      "id": "wholesale.policy",
+      "status": "decision",
+      "currentFields": [
+        "WholesaleTerms y _WholesaleDiscount",
+        "3 modelos / tres piezas"
+      ],
+      "proposedFields": [
+        "wholesale.pricingMode y términos aprobados"
+      ],
+      "editor": "Dueño comercial confirma; ingeniería integra",
+      "summary": "Contradicción cotización manual/descuento automático. No usar la preferencia mayoreo como autorización de precios.",
+      "sources": [
+        {
+          "source": "lib/features/wholesale/wholesale_content.dart",
+          "needle": "El precio de mayoreo se define por producto al cotizar"
+        },
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "de mayoreo se aplica automáticamente a cada producto antes"
+        }
+      ],
+      "pdfPages": [
+        2,
+        4,
+        10,
+        13
+      ]
+    },
+    {
+      "id": "services.shared",
+      "status": "extension",
+      "currentFields": [
+        "kTrustRows",
+        "WholesaleTerms.shipping,returns,paymentMethods",
+        "hero fact blocks"
+      ],
+      "proposedFields": [
+        "services[]: id,title,body,icon,supportLinkId"
+      ],
+      "editor": "Comercial/políticas; ingeniería no calcula ofertas",
+      "summary": "Sin fuente compartida; envío gratis, plazos, métodos y devoluciones requieren política coherente.",
+      "sources": [
+        {
+          "source": "lib/app/shopper_copy.dart",
+          "needle": "const List<String> kTrustRows"
+        },
+        {
+          "source": "lib/features/wholesale/wholesale_content.dart",
+          "needle": "static const String shipping"
+        }
+      ],
+      "pdfPages": [
+        4,
+        8,
+        10,
+        11,
+        17
+      ]
+    },
+    {
+      "id": "contact.known",
+      "status": "existing",
+      "currentFields": [
+        "kWhatsAppE164,kWhatsAppNumberDisplay",
+        "kMonettaContactPageUri",
+        "_whatsappGroups,_facebookGroup"
+      ],
+      "proposedFields": [
+        "contact.channels y groupLinkIds"
+      ],
+      "editor": "Propietario comercial; hoy varios destinos requieren release de código",
+      "summary": "Canales conocidos: WhatsApp, página contact, grupos y redes. No existe evidencia de correo/voz/horario.",
+      "sources": [
+        {
+          "source": "lib/features/contact/contact_screen.dart",
+          "needle": "no hay un buzón ni una línea de voz verificados"
+        },
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "const _whatsappGroups"
+        }
+      ],
+      "pdfPages": [
+        16,
+        19
+      ]
+    },
+    {
+      "id": "contact.shared",
+      "status": "extension",
+      "currentFields": [
+        "ContactScreen usa HomeContent.fallback.socialLinks por defecto",
+        "grupos sólo en PartnerHubScreen"
+      ],
+      "proposedFields": [
+        "contact.* desde fuente compartida; channels_json y group references propuestos"
+      ],
+      "editor": "Comercial en metaobject propuesto, no creado",
+      "summary": "La cuenta llama openContact sin redes runtime; propagar contenido editado y agregar grupos de forma explícita.",
+      "sources": [
+        {
+          "source": "lib/features/account/account_screen.dart",
+          "needle": "onTap: () => openContact(context)"
+        },
+        {
+          "source": "lib/features/contact/contact_screen.dart",
+          "needle": "socialLinks ?? HomeContent.fallback.socialLinks"
+        }
+      ],
+      "pdfPages": [
+        16,
+        19
+      ]
+    },
+    {
+      "id": "social.legacy",
+      "status": "existing",
+      "currentFields": [
+        "shop metafield app.social_links",
+        "HomeSocialLink: id,label,url"
+      ],
+      "proposedFields": [
+        "socialLinks[]"
+      ],
+      "editor": "Comercial en metafield; fallback por ingeniería",
+      "summary": "El repositorio sólo sobreescribe IDs existentes; no añade redes nuevas. Preservar id del perfil de Facebook.",
+      "sources": [
+        {
+          "source": "lib/data/shopify/queries.dart",
+          "needle": "key: \"social_links\""
+        },
+        {
+          "source": "lib/data/shopify/home_content_repository.dart",
+          "needle": "for (final seed in fallback)"
+        }
+      ],
+      "pdfPages": [
+        4,
+        11,
+        16,
+        19
+      ]
+    },
+    {
+      "id": "catalogs.legacy",
+      "status": "existing",
+      "currentFields": [
+        "reseller_catalog category,category_label,mode,url,description,sort_order,updated_label,active",
+        "9 URLs fallback",
+        "PartnerCatalogMode aliases"
+      ],
+      "proposedFields": [
+        "catalogs[] normalizados"
+      ],
+      "editor": "Comercial en Metaobjects con acceso Storefront; tema heredado usa ajustes independientes",
+      "summary": "Categoría × modalidad, sort numérico y host exacto HTTPS. Guardar ID/URL completos; sin importar productos de terceros.",
+      "sources": [
+        {
+          "source": "docs/EDITORIAL_CONTENT_METAOBJECTS.md",
+          "needle": "## `reseller_catalog`"
+        },
+        {
+          "source": "lib/data/shopify/editorial_content_repository.dart",
+          "needle": "isTrustedPartnerUri(uri)"
+        },
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "bool get isClientFacing => this != wholesale;"
+        }
+      ],
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18
+      ]
+    },
+    {
+      "id": "catalogs.shared-rendering",
+      "status": "extension",
+      "currentFields": [
+        "Storefront metaobjects first:50",
+        "tema como-vender URLs en bloques"
+      ],
+      "proposedFields": [
+        "theme + Flutter consumen mismos catálogos, state/revision y selección shareable"
+      ],
+      "editor": "Ingeniería integra; comercial elige share mode",
+      "summary": "Las URLs coinciden, pero tema y app no consumen hoy la misma entidad editorial. first:50 y listas parciales requieren paginación y semántica de desactivación.",
+      "sources": [
+        {
+          "source": "lib/data/shopify/queries.dart",
+          "needle": "catalogs: metaobjects(type: \"reseller_catalog\", first: 50)"
+        },
+        {
+          "source": "lib/data/shopify/editorial_content_repository.dart",
+          "needle": "catalogs: catalogs.isEmpty ? fallback.catalogs : catalogs"
+        }
+      ],
+      "pdfPages": [
+        10,
+        11,
+        15
+      ]
+    },
+    {
+      "id": "signup",
+      "status": "unknown",
+      "currentFields": [],
+      "proposedFields": [
+        "signup.enabled,headline,body,ctaLabel,submissionAdapter,consentText,privacyRouteId"
+      ],
+      "editor": "Comercial/legal aprueban; ingeniería conecta envío real",
+      "summary": "No hay signup Monetta compartido. Fallback oculta módulo; no usar envío gratis ni simular confirmación.",
+      "sources": [
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "Confirm newsletter free-shipping offer"
+        }
+      ],
+      "pdfPages": [
+        4,
+        11
+      ]
+    },
+    {
+      "id": "footer",
+      "status": "extension",
+      "currentFields": [
+        "monetta-footer groups: description,whatsapp,menus",
+        "linklists.main-menu,footer",
+        "shop.policies",
+        "now date year"
+      ],
+      "proposedFields": [
+        "footer brandDescription,columns,policyRouteIds,socialLinkIds,supportLinkId,copyrightYear"
+      ],
+      "editor": "Comercial edita menús/políticas y contenido; ingeniería resuelve URLs",
+      "summary": "Mantener año dinámico y políticas publicadas. Los rótulos del PDF no prueban páginas existentes.",
+      "sources": [
+        {
+          "source": "storefront-theme/sections/monetta-footer.liquid",
+          "needle": "for policy in shop.policies"
+        },
+        {
+          "source": "storefront-theme/sections/monetta-footer-group.json",
+          "needle": "\"menu\": \"main-menu\""
+        }
+      ],
+      "pdfPages": [
+        4,
+        11
+      ]
+    },
+    {
+      "id": "preferences.purchase-type",
+      "status": "extension",
+      "currentFields": [
+        "marcas/categorías del catálogo actual",
+        "skip UI"
+      ],
+      "proposedFields": [
+        "preferences.purchaseTypeOptions: retail,wholesale"
+      ],
+      "editor": "Comercial define rótulos; preferencia del cliente no edita tarifas",
+      "summary": "Añadir persistencia y labels consistentes con unidad comercial; no concede elegibilidad o Rewards de mayoreo.",
+      "sources": [
+        {
+          "source": "lib/features/onboarding/onboarding_sheet.dart",
+          "needle": "class OnboardingSheet"
+        },
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "Selecting wholesale is a preference, not automatic pricing eligibility."
+        }
+      ],
+      "pdfPages": [
+        2,
+        13
+      ]
+    },
+    {
+      "id": "rewards.lock",
+      "status": "existing",
+      "currentFields": [
+        "DEFAULT_PROGRAM y RewardsSummary",
+        "GET /customers/me/rewards"
+      ],
+      "proposedFields": [
+        "rewards model=mxn_balance_v1,currency=MXN,authority=accounts_orders"
+      ],
+      "editor": "Política backend; cliente sólo presenta (no editable como marketing)",
+      "summary": "Conservar centavos enteros, reglas y flags reales. No importar puntos/niveles ni bonos por compartir del PDF.",
+      "sources": [
+        {
+          "source": "services/accounts_orders/src/rewards/types.ts",
+          "needle": "currency: 'MXN'"
+        },
+        {
+          "source": "lib/features/rewards/rewards_models.dart",
+          "needle": "ningún saldo autoritativo se calcula aquí"
+        }
+      ],
+      "pdfPages": [
+        13,
+        14,
+        15
+      ]
+    },
+    {
+      "id": "reviews-commerce-runtime",
+      "status": "existing",
+      "currentFields": [
+        "product/variant,availableForSale,price,compareAtPrice",
+        "Loox repository y estado empty/live/fallback",
+        "OrderConfirmationScreen con CheckoutCompleted"
+      ],
+      "proposedFields": [
+        "Referencias a proveedores; sin precios/stock/pedidos editoriales"
+      ],
+      "editor": "Shopify y servicios autenticados; reseñas Loox",
+      "summary": "No publicar conteos/rating de fallbacks o escasez numérica como datos en vivo. Conservar estado/procedencia.",
+      "sources": [
+        {
+          "source": "lib/features/product/quick_view.dart",
+          "needle": "quantity the catalog does not carry"
+        },
+        {
+          "source": "lib/features/checkout/order_confirmation_screen.dart",
+          "needle": "Solo se presenta con evidencia [CheckoutCompleted]"
+        }
+      ],
+      "pdfPages": [
+        5,
+        6,
+        7,
+        8,
+        12,
+        17
+      ]
+    },
+    {
+      "id": "listing.covers",
+      "status": "extension",
+      "currentFields": [
+        "Collection.description,image",
+        "HomeBrandCard.imageUrl usado como logo"
+      ],
+      "proposedFields": [
+        "tile.description,coverCampaignId",
+        "cover campaign con imágenes/focal por tamaño"
+      ],
+      "editor": "Diseño prepara portada; comercial define copy; ingeniería integra",
+      "summary": "Separar logo de marca y portada de colección; el PDF usa portada Coach. Sin portada, fallback de encabezado de texto sin logo ampliado.",
+      "sources": [
+        {
+          "source": "lib/data/shopify/queries.dart",
+          "needle": "image { url(transform: {maxWidth: 1200}) }"
+        },
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "class HomeBrandCard"
+        }
+      ],
+      "pdfPages": [
+        6,
+        9
+      ]
+    }
+  ]
+}

@@ -1,0 +1,7 @@
+{
+  "layout": "monetta",
+  "sections": {
+    "main": { "type": "monetta-search", "settings": { "products_per_page": 24, "placeholder": "Encuentra algo muy tú" } }
+  },
+  "order": ["main"]
+}

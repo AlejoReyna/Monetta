@@ -1,0 +1,40 @@
+{%- comment -%}
+  Selección Monetta: a grid of full product cards from a chosen collection (two columns on phones, four from 900 px).
+{%- endcomment -%}
+{%- assign heading_id = section.id | append: '-heading' -%}
+{%- liquid
+  assign source = section.settings.collection | default: collections.all
+-%}
+<section class="section container" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+  {% render 'monetta-section-header',
+    id: heading_id,
+    kicker: section.settings.eyebrow,
+    title: section.settings.heading,
+    link_url: section.settings.link_url,
+    link_label: section.settings.link_label
+  %}
+  {%- if source.products.size > 0 -%}
+    <ul class="product-grid product-grid--four" role="list">
+      {%- for product in source.products limit: section.settings.products_to_show -%}
+        <li>{% render 'monetta-card', product: product, sizes: '(min-width: 900px) 24vw, 50vw' %}</li>
+      {%- endfor -%}
+    </ul>
+  {%- elsif request.design_mode -%}
+    <p class="body-copy">Elige una colección con productos en la configuración de esta sección.</p>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Monetta · Selección",
+  "settings": [
+    { "type": "text", "id": "eyebrow", "label": "Sobretítulo", "default": "Selección Monetta" },
+    { "type": "text", "id": "heading", "label": "Título", "default": "Catálogo de hoy" },
+    { "type": "collection", "id": "collection", "label": "Colección", "info": "Sin colección se usa todo el catálogo." },
+    { "type": "range", "id": "products_to_show", "label": "Productos", "min": 4, "max": 12, "step": 4, "default": 8 },
+    { "type": "text", "id": "link_label", "label": "Texto del enlace", "default": "Ver catálogo" },
+    { "type": "url", "id": "link_url", "label": "Enlace" }
+  ],
+  "presets": [ { "name": "Monetta · Selección" } ]
+}
+{% endschema %}

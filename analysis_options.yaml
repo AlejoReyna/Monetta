@@ -2,6 +2,9 @@ include: package:flutter_lints/flutter.yaml
 
 analyzer:
   exclude:
+    # Snippets consumed as text by the client-guide content auditor.
+    - "tools/style-guideline-content/test/fixtures/**"
+    - "docs/style-guideline-migration/content-readiness/reports/archive/**/test/fixtures/**"
     - "**/*.g.dart"
     - "**/*.freezed.dart"
     - "lib/data/shopify/generated/**"

@@ -1,0 +1,26 @@
+{
+  "type": "footer",
+  "name": "Monetta · Pie de página",
+  "sections": {
+    "footer": {
+      "type": "monetta-footer",
+      "blocks": {
+        "shop": {
+          "type": "link_list",
+          "settings": { "heading": "Comprar", "menu": "main-menu" }
+        },
+        "help": {
+          "type": "link_list",
+          "settings": { "heading": "Ayuda", "menu": "footer" }
+        }
+      },
+      "block_order": ["shop", "help"],
+      "settings": {
+        "description": "Boutique mexicana de bolsas, carteras y relojes originales importados de Estados Unidos. Envíos a todo México.",
+        "whatsapp_number": "528261066868",
+        "whatsapp_label": "WhatsApp 826 106 6868"
+      }
+    }
+  },
+  "order": ["footer"]
+}

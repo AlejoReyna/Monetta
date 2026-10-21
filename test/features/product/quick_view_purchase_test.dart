@@ -336,22 +336,22 @@ void main() {
 
   group('TYPE-01e the piece name', () {
     testWidgets(
-        'TYPE-01e the main name of the sheet is the sans of the cards, '
-        'w600, 22', (tester) async {
+        'TYPE-01e the main name of the sheet is the editorial serif, '
+        'w400, 25', (tester) async {
       final (_, product) = await _open(tester);
 
       final name = inSheet(
         find.text(shopperProductName(product.title)),
       );
       final style = styleOf(tester, name);
-      expect(style.fontFamily, kBoutiqueSansFamily, reason: 'family');
+      expect(style.fontFamily, kBoutiqueSerifFamily, reason: 'family');
       expect(
         style.fontFamilyFallback,
-        kBoutiqueSansFallback,
+        kBoutiqueSerifFallback,
         reason: 'fallback chain',
       );
-      expect(style.fontWeight, FontWeight.w600);
-      expect(style.fontSize, 22);
+      expect(style.fontWeight, FontWeight.w400);
+      expect(style.fontSize, kBoutiqueProductNameSize);
     });
   });
 }

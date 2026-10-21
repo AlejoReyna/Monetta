@@ -1,0 +1,407 @@
+{% doc %}
+  @prompt
+    haz un bloque en donde se muestren 2 columnas y filas de 5 productos, todos se mueven conforme el dedo se desliza y en ella vas a ir mostrando productos nuevos los cuales van a ir rotando dependiendo de como los meta en mi sito web , es al reves, son 5 columnas y 2 filas que son tipo carrusel , quiero el texto completamente centrado, tanto el precio como el nombre del producto, ademas que en lugar de añadir el enlace del producto, este va ir cambiando con el tiempo, dependiendo del producto que estoy seleccionando, por lo que verifica como podemos corregir eso, ya sea poniendo las tarjeas en una coleccion o algo que lo mejore 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-product-scroll-grid-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .ai-product-scroll-grid__wrapper-{{ ai_gen_id }} {
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-product-scroll-grid__wrapper-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-product-scroll-grid__container-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    grid-template-rows: repeat(2, 1fr);
+    gap: {{ block.settings.gap }}px;
+    grid-auto-flow: column;
+    width: max-content;
+    padding: {{ block.settings.padding }}px;
+  }
+
+  .ai-product-scroll-grid__item-{{ ai_gen_id }} {
+    width: {{ block.settings.card_width }}px;
+    height: {{ block.settings.card_height }}px;
+    background-color: {{ block.settings.card_background }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: {{ block.settings.card_border_width }}px solid {{ block.settings.card_border_color }};
+  }
+
+  .ai-product-scroll-grid__item-{{ ai_gen_id }}:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  }
+
+  .ai-product-scroll-grid__image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    height: 60%;
+    overflow: hidden;
+    background-color: #f5f5f5;
+    position: relative;
+  }
+
+  .ai-product-scroll-grid__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-product-scroll-grid__image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+  }
+
+  .ai-product-scroll-grid__image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-product-scroll-grid__content-{{ ai_gen_id }} {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    flex-grow: 1;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-product-scroll-grid__title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    margin: 0;
+    line-height: 1.3;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    width: 100%;
+  }
+
+  .ai-product-scroll-grid__price-{{ ai_gen_id }} {
+    font-size: {{ block.settings.price_size }}px;
+    color: {{ block.settings.price_color }};
+    font-weight: 600;
+  }
+
+  .ai-product-scroll-grid__link-{{ ai_gen_id }} {
+    text-decoration: none;
+    color: inherit;
+    display: block;
+    height: 100%;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-product-scroll-grid__container-{{ ai_gen_id }} {
+      gap: {{ block.settings.gap | times: 0.7 }}px;
+      padding: {{ block.settings.padding | times: 0.7 }}px;
+    }
+
+    .ai-product-scroll-grid__item-{{ ai_gen_id }} {
+      width: {{ block.settings.card_width | times: 0.8 }}px;
+      height: {{ block.settings.card_height | times: 0.8 }}px;
+    }
+
+    .ai-product-scroll-grid__title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size | times: 0.9 }}px;
+    }
+
+    .ai-product-scroll-grid__price-{{ ai_gen_id }} {
+      font-size: {{ block.settings.price_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<product-scroll-grid-{{ ai_gen_id }}
+  class="ai-product-scroll-grid-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-product-scroll-grid__wrapper-{{ ai_gen_id }}">
+    <div class="ai-product-scroll-grid__container-{{ ai_gen_id }}">
+      {% if block.settings.collection != blank %}
+        {% assign collection_products = block.settings.collection.products %}
+        {% assign total_products = collection_products.size %}
+        {% assign columns_needed = total_products | divided_by: 2.0 | ceil %}
+        
+        {% for col in (1..columns_needed) %}
+          {% for row in (1..2) %}
+            {% assign product_index = col | minus: 1 | times: 2 | plus: row | minus: 1 %}
+            {% if product_index < total_products %}
+              {% assign product = collection_products[product_index] %}
+              <div class="ai-product-scroll-grid__item-{{ ai_gen_id }}">
+                <a href="{{ product.url }}" class="ai-product-scroll-grid__link-{{ ai_gen_id }}">
+                  <div class="ai-product-scroll-grid__image-wrapper-{{ ai_gen_id }}">
+                    {% if product.featured_image %}
+                      <img
+                        src="{{ product.featured_image | image_url: width: 400 }}"
+                        alt="{{ product.featured_image.alt | escape }}"
+                        class="ai-product-scroll-grid__image-{{ ai_gen_id }}"
+                        loading="lazy"
+                        width="400"
+                        height="400"
+                      >
+                    {% else %}
+                      <div class="ai-product-scroll-grid__image-placeholder-{{ ai_gen_id }}">
+                        {{ 'product-1' | placeholder_svg_tag }}
+                      </div>
+                    {% endif %}
+                  </div>
+                  <div class="ai-product-scroll-grid__content-{{ ai_gen_id }}">
+                    <h3 class="ai-product-scroll-grid__title-{{ ai_gen_id }}">{{ product.title }}</h3>
+                    <div class="ai-product-scroll-grid__price-{{ ai_gen_id }}">
+                      {{ product.price | money }}
+                    </div>
+                  </div>
+                </a>
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      {% else %}
+        {% for col in (1..5) %}
+          {% for row in (1..2) %}
+            <div class="ai-product-scroll-grid__item-{{ ai_gen_id }}">
+              <div class="ai-product-scroll-grid__image-wrapper-{{ ai_gen_id }}">
+                <div class="ai-product-scroll-grid__image-placeholder-{{ ai_gen_id }}">
+                  {{ 'product-1' | placeholder_svg_tag }}
+                </div>
+              </div>
+              <div class="ai-product-scroll-grid__content-{{ ai_gen_id }}">
+                <h3 class="ai-product-scroll-grid__title-{{ ai_gen_id }}">Selecciona una colección</h3>
+                <div class="ai-product-scroll-grid__price-{{ ai_gen_id }}">$0.00</div>
+              </div>
+            </div>
+          {% endfor %}
+        {% endfor %}
+      {% endif %}
+    </div>
+  </div>
+</product-scroll-grid-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ProductScrollGrid{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.wrapper = this.querySelector('.ai-product-scroll-grid__wrapper-{{ ai_gen_id }}');
+        this.setupTouchScroll();
+      }
+
+      setupTouchScroll() {
+        if (!this.wrapper) return;
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+
+        this.wrapper.addEventListener('mousedown', (e) => {
+          isDown = true;
+          this.wrapper.style.cursor = 'grabbing';
+          startX = e.pageX - this.wrapper.offsetLeft;
+          scrollLeft = this.wrapper.scrollLeft;
+        });
+
+        this.wrapper.addEventListener('mouseleave', () => {
+          isDown = false;
+          this.wrapper.style.cursor = 'grab';
+        });
+
+        this.wrapper.addEventListener('mouseup', () => {
+          isDown = false;
+          this.wrapper.style.cursor = 'grab';
+        });
+
+        this.wrapper.addEventListener('mousemove', (e) => {
+          if (!isDown) return;
+          e.preventDefault();
+          const x = e.pageX - this.wrapper.offsetLeft;
+          const walk = (x - startX) * 2;
+          this.wrapper.scrollLeft = scrollLeft - walk;
+        });
+
+        this.wrapper.style.cursor = 'grab';
+      }
+    }
+
+    customElements.define('product-scroll-grid-{{ ai_gen_id }}', ProductScrollGrid{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Productos deslizables",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Productos"
+    },
+    {
+      "type": "collection",
+      "id": "collection",
+      "label": "Colección"
+    },
+    {
+      "type": "header",
+      "content": "Diseño"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Ancho en escritorio",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Ancho de tarjeta",
+      "min": 150,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "label": "Altura de tarjeta",
+      "min": 200,
+      "max": 500,
+      "step": 10,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Espacio entre tarjetas",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "padding",
+      "label": "Relleno",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Estilo de tarjeta"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Fondo",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 20,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "card_border_width",
+      "label": "Ancho de borde",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 1
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Color de borde",
+      "default": "#e6e6e6"
+    },
+    {
+      "type": "header",
+      "content": "Tipografía"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño de título",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color de título",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "price_size",
+      "label": "Tamaño de precio",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "price_color",
+      "label": "Color de precio",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Productos deslizables"
+    }
+  ]
+}
+{% endschema %}

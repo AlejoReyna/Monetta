@@ -1,0 +1,2419 @@
+{
+  "finishedAt": "2026-10-21T00:11:58.794Z",
+  "durationSeconds": 633,
+  "browser": {
+    "executablePath": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+    "version": "155.0.8059.40"
+  },
+  "node": "v24.21.0",
+  "totals": {
+    "checks": 247,
+    "passed": 247,
+    "failed": 0
+  },
+  "byGate": {
+    "D02": {
+      "passed": 10,
+      "failed": 0
+    },
+    "D03": {
+      "passed": 49,
+      "failed": 0
+    },
+    "D09": {
+      "passed": 50,
+      "failed": 0
+    },
+    "D06": {
+      "passed": 8,
+      "failed": 0
+    },
+    "D05": {
+      "passed": 6,
+      "failed": 0
+    },
+    "D07": {
+      "passed": 5,
+      "failed": 0
+    },
+    "D08": {
+      "passed": 3,
+      "failed": 0
+    },
+    "D11": {
+      "passed": 115,
+      "failed": 0
+    },
+    "D10": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "results": [
+    {
+      "gate": "D02",
+      "name": "Web fonts load in the weights the design uses",
+      "passed": true,
+      "details": "Inter 400 loaded · Inter 500 loaded · Inter 600 loaded · Inter 700 loaded · Playfair Display 400 loaded"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Playfair Display for: Section heading (Novedades)",
+      "passed": true,
+      "details": "Playfair Display (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Product card brand",
+      "passed": true,
+      "details": "Inter SemiBold (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Product card name",
+      "passed": true,
+      "details": "Inter (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Product card price",
+      "passed": true,
+      "details": "Inter SemiBold (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Category navigation",
+      "passed": true,
+      "details": "Inter Medium (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Primary button",
+      "passed": true,
+      "details": "Inter SemiBold (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Computed tokens match the style-guideline palette and geometry",
+      "passed": true,
+      "details": "{\"canvas\":\"rgb(251, 248, 242)\",\"ink\":\"rgb(33, 27, 22)\",\"eyebrow\":\"rgb(128, 92, 50)\",\"primaryButton\":\"rgb(116, 82, 55)\",\"buttonRadius\":\"999px\",\"cardRadius\":\"12px\",\"mediaRadius\":\"10px\",\"mediaFit\":\"contain\",\"heroFit\":\"cover\",\"searchRadius\":\"999px\",\"sectionFont\":\"400\",\"priceWeight\":\"600\"}"
+    },
+    {
+      "gate": "D02",
+      "name": "Wordmark is the app artwork at its own proportions",
+      "passed": true,
+      "details": "logo-monetta.png 132×38 rendered 111×32"
+    },
+    {
+      "gate": "D02",
+      "name": "Bottom navigation is a flat full-width bar; the active item is accent colour, weight 600 and a 2 px rule",
+      "passed": true,
+      "details": "Inicio: rgb(140, 100, 54)/600, bar 390px flat"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .purchase-dock (expected purchase) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .checkout-bar (expected checkout) · clearance 39px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-cuenta @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-board @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .purchase-dock (expected purchase) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .checkout-bar (expected checkout) · clearance 39px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-cuenta @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-board @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .purchase-dock (expected purchase) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .checkout-bar (expected checkout) · clearance 39px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-cuenta @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 28px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-board @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI .checkout-bar (expected checkout) · clearance 39px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-cuenta @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-board @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-cuenta @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-board @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-cuenta @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-board @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-cuenta @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "design-board @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): home",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): collection",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): product",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): search",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): cart",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): design-cuenta",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): design-board",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D06",
+      "name": "Predictive search shows products and suggestions while typing",
+      "passed": true,
+      "details": "8 options; keyboard active descendant search-option-1"
+    },
+    {
+      "gate": "D06",
+      "name": "Enter carries the query to the results route",
+      "passed": true,
+      "details": "Resultados para “coach” · 16 piezas"
+    },
+    {
+      "gate": "D06",
+      "name": "Sidebar filter and sort update URL, count and chips together",
+      "passed": true,
+      "details": "16 piezas → 4 piezas; first prices 3647, 3789, 5259.15, 6836.99"
+    },
+    {
+      "gate": "D06",
+      "name": "Browser Back restores the previous sort, then the unfiltered results",
+      "passed": true,
+      "details": "two Back steps restore sort and filter state"
+    },
+    {
+      "gate": "D06",
+      "name": "An impossible filter offers recovery that works",
+      "passed": true,
+      "details": "8 watches after \"Limpiar filtros\""
+    },
+    {
+      "gate": "D06",
+      "name": "Load more keeps its page in the URL and Back returns to the same spot",
+      "passed": true,
+      "details": "48 cards and scroll 4572 → 4572"
+    },
+    {
+      "gate": "D05",
+      "name": "Cards show genuine sale, sold-out and sobre-pedido states",
+      "passed": true,
+      "details": "sale −10% with $1,899.00, sold-out seal without “+”, “Sobre pedido” eyebrow"
+    },
+    {
+      "gate": "D05",
+      "name": "Long names stay complete in the DOM and clamp to two lines",
+      "passed": true,
+      "details": "73 characters, 2 lines"
+    },
+    {
+      "gate": "D05",
+      "name": "Guest favourites toggle on cards and list on the favourites page",
+      "passed": true,
+      "details": "saved, listed with device-scope notice, removed to empty state"
+    },
+    {
+      "gate": "D05",
+      "name": "Quick view requires a choice and hands the same variant to the product page",
+      "passed": true,
+      "details": "/products/bolso-coach-shoulder-negro-rectangular?variant=47886205386903"
+    },
+    {
+      "gate": "D07",
+      "name": "Two rapid clicks add one unit, with visible pending feedback",
+      "passed": true,
+      "details": "pending “Agregando…”, quantity 1, announced “Agregado al carrito: Bolso Coach Shoulder Rectangular (Color: Café).”"
+    },
+    {
+      "gate": "D07",
+      "name": "Drawer quantity, removal and undo update the cart",
+      "passed": true,
+      "details": "quantity 1→2, removed, undone, focus back on “Agregar al carrito”"
+    },
+    {
+      "gate": "D07",
+      "name": "Checkout explains the Shopify handoff and creates nothing",
+      "passed": true,
+      "details": "dialog lists the exact variant and states no order or payment"
+    },
+    {
+      "gate": "D07",
+      "name": "An emptied cart recovers to the store",
+      "passed": true,
+      "details": "empty state → Novedades"
+    },
+    {
+      "gate": "D07",
+      "name": "A failed add explains the error beside the control and keeps the cart",
+      "passed": true,
+      "details": "“No pudimos agregar la pieza. Intenta de nuevo.”, retry succeeds"
+    },
+    {
+      "gate": "D06",
+      "name": "Suggestions can fail without blocking search",
+      "passed": true,
+      "details": "error with “Reintentar”, Enter still opens results"
+    },
+    {
+      "gate": "D05",
+      "name": "Sobre pedido, sold-out and apartado states are honest",
+      "passed": true,
+      "details": "sobre pedido line, manual apartado without reservation, disabled “Agotado”"
+    },
+    {
+      "gate": "D05",
+      "name": "Blocked storage keeps favourites usable for the visit and says so",
+      "passed": true,
+      "details": "Este navegador no permite guardar datos del sitio: tus favoritos se perderán al cerrar o recargar la pestaña."
+    },
+    {
+      "gate": "D08",
+      "name": "Phone home: dock visible, search icon appears after the hero search scrolls away",
+      "passed": true,
+      "details": "dock + search handover"
+    },
+    {
+      "gate": "D08",
+      "name": "Typing hides the dock so the keyboard never stacks controls",
+      "passed": true,
+      "details": "dock transform while typing: matrix(1, 0, 0, 1, 0, 68.4899)"
+    },
+    {
+      "gate": "D08",
+      "name": "Product: purchase dock replaces the nav dock; the add sheet covers both",
+      "passed": true,
+      "details": "purchase dock → sheet (page inert) → cart with checkout bar only"
+    },
+    {
+      "gate": "D06",
+      "name": "Phone filter drawer previews the count and applies to the URL",
+      "passed": true,
+      "details": "Ver 10 piezas → applied → Back removes it"
+    },
+    {
+      "gate": "D09",
+      "name": "Menu drawer traps focus, closes on Escape and restores focus",
+      "passed": true,
+      "details": "25 Tabs stayed inside; Escape restored focus to the menu button"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: home @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: collection @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: product @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: search @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: cart @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: design-cuenta @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: design-board @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: brand page @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: favourites @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: mayoreo @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: nuestra historia @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: contacto @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: cuenta @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: política de envíos @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: no encontrada @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: menu drawer @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: filter drawer @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: quick view @ 390px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: home @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: collection @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: product @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: search @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: cart @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: design-cuenta @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: design-board @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: brand page @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: favourites @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: mayoreo @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: nuestra historia @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: contacto @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: cuenta @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: política de envíos @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: no encontrada @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: cart drawer @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: predictive search @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: checkout handoff @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "axe: prototype panel @ 1440px",
+      "passed": true,
+      "details": "no violations"
+    },
+    {
+      "gate": "D09",
+      "name": "Skip link is the first stop and moves focus to the main content",
+      "passed": true,
+      "details": "skip link → main"
+    },
+    {
+      "gate": "D09",
+      "name": "Focused controls show a visible focus indicator",
+      "passed": true,
+      "details": "14 tab stops with visible focus"
+    },
+    {
+      "gate": "D09",
+      "name": "Product dialog: focus trap, Escape and focus restoration",
+      "passed": true,
+      "details": "trap held for 30 Tabs; Escape restored the “+” button"
+    },
+    {
+      "gate": "D09",
+      "name": "Variant options are native radios operable with arrow keys",
+      "passed": true,
+      "details": "arrow key selected “Café”, URL bolso-coach-shoulder-negro-rectangular?variant=47886205386903"
+    },
+    {
+      "gate": "D09",
+      "name": "Reduced motion: editorial sections visible at once, transitions disabled",
+      "passed": true,
+      "details": "reveal-ready=false; opacities 1,1,1; transition 1e-05s"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 375px: one pinned bar (back · title · search · filters) replaces header, breadcrumbs and toolbar",
+      "passed": true,
+      "details": "Volver 48×48 · Buscar productos 48×48 · Filtrar y ordenar 48×48; title Playfair 28/400; 58 piezas"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 375px: only the bar and the style shortcuts sit above the first product",
+      "passed": true,
+      "details": "first product 141px below the strip (bar 76 + shortcuts 53 + 12); card 181.5px wide at x=0; 8 rows of equal cells"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 375px: the bar stays pinned under the strip and draws its rule on scroll",
+      "passed": true,
+      "details": "top 28 while scrolled; sticky; rule rgb(231, 220, 206)"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 375px: keyboard focus lands below the pinned bar, not under it",
+      "passed": true,
+      "details": "scroll-padding-top 120px ≥ strip + bar 104px; product aligned at y=120"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 search results @ 375px: \"Buscar\" bar, field, Inter results heading, filters in the bar",
+      "passed": true,
+      "details": "heading Inter 20px/600; first product 206px below the strip"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 search @ 375px: suggestions replace the results and take the bar's filters with them",
+      "passed": true,
+      "details": "filters hidden while suggestions show; the empty search offers none"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 bag @ 375px: back · Mi bolsa · count in one bar, lines right below",
+      "passed": true,
+      "details": "h1 + \"3 artículos\" on one row; first line 16px under the bar; count follows removals"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 390px: one pinned bar (back · title · search · filters) replaces header, breadcrumbs and toolbar",
+      "passed": true,
+      "details": "Volver 48×48 · Buscar productos 48×48 · Filtrar y ordenar 48×48; title Playfair 28/400; 58 piezas"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 390px: only the bar and the style shortcuts sit above the first product",
+      "passed": true,
+      "details": "first product 141px below the strip (bar 76 + shortcuts 53 + 12); card 189px wide at x=0; 8 rows of equal cells"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 390px: the bar stays pinned under the strip and draws its rule on scroll",
+      "passed": true,
+      "details": "top 28 while scrolled; sticky; rule rgb(231, 220, 206)"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 390px: keyboard focus lands below the pinned bar, not under it",
+      "passed": true,
+      "details": "scroll-padding-top 120px ≥ strip + bar 104px; product aligned at y=120"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 search results @ 390px: \"Buscar\" bar, field, Inter results heading, filters in the bar",
+      "passed": true,
+      "details": "heading Inter 20px/600; first product 206px below the strip"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 search @ 390px: suggestions replace the results and take the bar's filters with them",
+      "passed": true,
+      "details": "filters hidden while suggestions show; the empty search offers none"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 bag @ 390px: back · Mi bolsa · count in one bar, lines right below",
+      "passed": true,
+      "details": "h1 + \"3 artículos\" on one row; first line 16px under the bar; count follows removals"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 440px: one pinned bar (back · title · search · filters) replaces header, breadcrumbs and toolbar",
+      "passed": true,
+      "details": "Volver 48×48 · Buscar productos 48×48 · Filtrar y ordenar 48×48; title Playfair 28/400; 58 piezas"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 440px: only the bar and the style shortcuts sit above the first product",
+      "passed": true,
+      "details": "first product 141px below the strip (bar 76 + shortcuts 53 + 12); card 214px wide at x=0; 8 rows of equal cells"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 440px: the bar stays pinned under the strip and draws its rule on scroll",
+      "passed": true,
+      "details": "top 28 while scrolled; sticky; rule rgb(231, 220, 206)"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection @ 440px: keyboard focus lands below the pinned bar, not under it",
+      "passed": true,
+      "details": "scroll-padding-top 120px ≥ strip + bar 104px; product aligned at y=120"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 search results @ 440px: \"Buscar\" bar, field, Inter results heading, filters in the bar",
+      "passed": true,
+      "details": "heading Inter 20px/600; first product 206px below the strip"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 search @ 440px: suggestions replace the results and take the bar's filters with them",
+      "passed": true,
+      "details": "filters hidden while suggestions show; the empty search offers none"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 bag @ 440px: back · Mi bolsa · count in one bar, lines right below",
+      "passed": true,
+      "details": "h1 + \"3 artículos\" on one row; first line 16px under the bar; count follows removals"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 the bar arrow leaves the screen; the browser Back still steps through filters (390px)",
+      "passed": true,
+      "details": "Home → catálogo → filter: Back undoes the filter and Forward restores it; the arrow returns to Home; a deep link goes to its parent (Home, or Bolsas for a style)"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection, search and bag @ 768px keep the global header, breadcrumbs and title row",
+      "passed": true,
+      "details": "title row only (Playfair /collections/guess 30px, /search 30px, /cart 30px)"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection, search and bag @ 1024px keep the global header, breadcrumbs and title row",
+      "passed": true,
+      "details": "title row only (Playfair /collections/guess 36px, /search 36px, /cart 36px)"
+    },
+    {
+      "gate": "D11",
+      "name": "H01 collection, search and bag @ 1440px keep the global header, breadcrumbs and title row",
+      "passed": true,
+      "details": "title row only (Playfair /collections/guess 36px, /search 36px, /cart 36px)"
+    },
+    {
+      "gate": "D11",
+      "name": "H02 product header @ 375px: back + search · logo · account + bag",
+      "passed": true,
+      "details": "Volver · Buscar productos · Monetta, ir al inicio · Cuenta · Carrito, vacío; logo centred (187 of 187.5); 4px edge insets"
+    },
+    {
+      "gate": "D11",
+      "name": "H02 product header @ 390px: back + search · logo · account + bag",
+      "passed": true,
+      "details": "Volver · Buscar productos · Monetta, ir al inicio · Cuenta · Carrito, vacío; logo centred (195 of 195); 4px edge insets"
+    },
+    {
+      "gate": "D11",
+      "name": "H02 product header @ 440px: back + search · logo · account + bag",
+      "passed": true,
+      "details": "Volver · Buscar productos · Monetta, ir al inicio · Cuenta · Carrito, vacío; logo centred (220 of 220); 4px edge insets"
+    },
+    {
+      "gate": "D11",
+      "name": "H02 the product header search and account links work (390px)",
+      "passed": true,
+      "details": "search opens the search field focused; account opens the account entry (Shopify handoff)"
+    },
+    {
+      "gate": "D11",
+      "name": "H02 product header @ 768px keeps the tablet/desktop navigation",
+      "passed": true,
+      "details": "Novedades · Volver · Abrir menú · Bolsas · Monetta, ir al inicio · Carteras · Relojes · Marcas · Perfumes · Maquillaje y skincare · Cuenta · Favoritos · Carrito, vacío · Vende con Monetta · Nuestra historia"
+    },
+    {
+      "gate": "D11",
+      "name": "H02 product header @ 1440px keeps the tablet/desktop navigation",
+      "passed": true,
+      "details": "Monetta, ir al inicio · Novedades · Bolsas · Carteras · Relojes · Marcas · Perfumes · Maquillaje y skincare · Vende con Monetta · Cuenta · Nuestra historia · Favoritos · Carrito, vacío"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 recommendations @ 375px: section headings are the serif section-title role (23/400)",
+      "passed": true,
+      "details": "product-more 23px/400, product-recent 23px/400, product-reviews 23px/400; renderer: Playfair Display (web font)"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 recommendations @ 375px: tiles 52vw wide, 4:5 photo flush on the warm tile, two-line names",
+      "passed": true,
+      "details": "rail-more: 8 tiles 195px, ratio 0.80, 2 name lines; rail-recent: 1 tiles 195px, ratio 0.80, 2 name lines"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 Home @ 375px keeps the Playfair heading and the compact rail tiles",
+      "passed": true,
+      "details": "Novedades Playfair 23/400; tile 135px, square photo, one-line name"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 recommendations @ 390px: section headings are the serif section-title role (23/400)",
+      "passed": true,
+      "details": "product-more 23px/400, product-recent 23px/400, product-reviews 23px/400; renderer: Playfair Display (web font)"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 recommendations @ 390px: tiles 52vw wide, 4:5 photo flush on the warm tile, two-line names",
+      "passed": true,
+      "details": "rail-more: 8 tiles 203px, ratio 0.80, 2 name lines; rail-recent: 1 tiles 203px, ratio 0.80, 2 name lines"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 Home @ 390px keeps the Playfair heading and the compact rail tiles",
+      "passed": true,
+      "details": "Novedades Playfair 23/400; tile 140px, square photo, one-line name"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 recommendations @ 440px: section headings are the serif section-title role (23/400)",
+      "passed": true,
+      "details": "product-more 23px/400, product-recent 23px/400, product-reviews 23px/400; renderer: Playfair Display (web font)"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 recommendations @ 440px: tiles 52vw wide, 4:5 photo flush on the warm tile, two-line names",
+      "passed": true,
+      "details": "rail-more: 8 tiles 229px, ratio 0.80, 2 name lines; rail-recent: 1 tiles 229px, ratio 0.80, 2 name lines"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 Home @ 440px keeps the Playfair heading and the compact rail tiles",
+      "passed": true,
+      "details": "Novedades Playfair 23/400; tile 158px, square photo, one-line name"
+    },
+    {
+      "gate": "D11",
+      "name": "H03 recommendations from tablet up: serif headings step to 27/30 and the tiles keep the 4:5 anatomy",
+      "passed": true,
+      "details": "768px 27px · 1024px 30px, 4 tiles · 1440px 30px, 5 tiles"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 scroll-padding-bottom is the real height of the pinned bar of each page plus 16px (dock, purchase bar, checkout bar)",
+      "passed": true,
+      "details": "collection 65 · product 65 · cart 73"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 the reserve grows with the home indicator and returns when it goes (+34px, then back)",
+      "passed": true,
+      "details": "81 → 115 → 81"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 390×844 · collection: no focused control, text or ring is hidden under the pinned bars",
+      "passed": true,
+      "details": "103 stops, 19 footer stops with pixels read"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 390×844 · product: no focused control, text or ring is hidden under the pinned bars",
+      "passed": true,
+      "details": "66 stops, 19 footer stops with pixels read"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 390×844 · cart: no focused control, text or ring is hidden under the pinned bars",
+      "passed": true,
+      "details": "30 stops, 19 footer stops with pixels read"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 390×844 · home: no focused control, text or ring is hidden under the pinned bars",
+      "passed": true,
+      "details": "83 stops, 19 footer stops with pixels read"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 390×844 · search: no focused control, text or ring is hidden under the pinned bars",
+      "passed": true,
+      "details": "100 stops, 19 footer stops with pixels read"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 the audit's own footer links (Novedades, Envíos, Mi cuenta) show their text and a painted ring above the dock",
+      "passed": true,
+      "details": "dock top 780 · Novedades bottom 462 · Envíos bottom 763 · Mi cuenta bottom 501"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 375×812 · collection, product and bag: nothing hidden under the pinned bars",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 440×956 · collection, product and bag: nothing hidden under the pinned bars",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 320×568 · collection, product and bag: nothing hidden under the pinned bars",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-01 Tab traversal @ 768×1024 · bag: the checkout bar still pins below 1024px and hides nothing",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "A1 Tab through the rails, chip rows and thumbnails @ 390px (Home, collection, product): every focused item is fully on screen",
+      "passed": true,
+      "details": "stops inside scrollers: home 31 · collection 4 · product 32"
+    },
+    {
+      "gate": "D11",
+      "name": "A1 Tab through the rails, chip rows and thumbnails @ 320px (Home, collection, product): every focused item is fully on screen",
+      "passed": true,
+      "details": "stops inside scrollers: home 31 · collection 4 · product 32"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-02 Forward right after the arrow keeps the restored product (0, 150, 450 and 700 ms later)",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-02 a product opened right after the arrow is not replaced by the fallback, even at the same address",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-02 the arrow still works after Forward and keeps working",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-02 the arrow leaves a filtered screen in one step; Forward then restores the filtered list and the fallback stays quiet",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-02 a visit that began on the product: the arrow goes straight to its parent and Back returns to the product",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-02 after a reload the arrow still leaves the screen and stays gone",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-02 when a restored session lost the entries before this one, the arrow still reaches its parent after the fallback window",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-02 the browser's own Back and Forward, paused for 0, 700 and 1500 ms between them, keep the history intact",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-03 search @ 390px: one exposed h1 and no axe violation in the empty, suggestions, results, no-results and error states",
+      "passed": true,
+      "details": "empty: h1 “Buscar” · suggestions: p[role] “Buscar” · results: h1 “Resultados para “bolsa”” · noResults: h1 “Resultados para “zzzz-no-match”” · error: h1 “Buscar”"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-03 search @ 1440px: one exposed h1 and no axe violation in the empty, suggestions, results, no-results and error states",
+      "passed": true,
+      "details": "empty: h1 “Buscar” · suggestions: p[role] “Buscar” · results: h1 “Resultados para “bolsa”” · noResults: h1 “Resultados para “zzzz-no-match”” · error: h1 “Buscar”"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-03 results → another query → back to the query keeps one h1 each time, and the heading role goes with the suggestions",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-04 320px · two-line title: the bar is taller than its minimum and the reserve covers it (nearest, Shift+Tab and scrollIntoView start)",
+      "passed": true,
+      "details": "bar 97.31px, reserve 141.31px"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-04 375px · one-line title keeps the 120px reserve of the 76px bar (no regression)",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-04 the reserve follows the bar when the text gets larger and when it shrinks back",
+      "passed": true,
+      "details": "bar 76 → 115 → 76"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-04 the reserve follows a viewport resize (375 → 320 wraps the title, 320 → 375 restores it)",
+      "passed": true,
+      "details": "bar 76 → 97 → 76"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-04 a late web font changes the bar and the reserve tracks it (Playfair held back for 1.5 s)",
+      "passed": true,
+      "details": "bar 97.31 → 97.31"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-04 navigating between pages swaps the reserve: bar page → product header → back to the bar page",
+      "passed": true,
+      "details": "141.31px → 105px → 141.31px"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-04 @ 390px the \"Ver catálogos\" anchor lands below the pinned header (strip and header)",
+      "passed": true,
+      "details": "target 105 · header bottom 89"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-04 @ 1440px the \"Ver catálogos\" anchor lands below the pinned header (strip, header and category row)",
+      "passed": true,
+      "details": "target 162 · header bottom 146"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 reflow-equivalent 320×200 (1280×800 at 400 %, not the browser zoom): five pages leave the viewport to the content",
+      "passed": true,
+      "details": "free px: home 200 · collection 200 · product 200 · search 200 · cart 200"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 reflow-equivalent 360×225 (1440×900 at 400 %, not the browser zoom): five pages leave the viewport to the content",
+      "passed": true,
+      "details": "free px: home 225 · collection 225 · product 225 · search 225 · cart 225"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 reflow-equivalent 640×400 (1280×800 at 200 %, not the browser zoom): five pages leave the viewport to the content",
+      "passed": true,
+      "details": "free px: home 400 · collection 400 · product 400 · search 400 · cart 400"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 a phone on its side 667×375 (an orientation, not a zoom): five pages leave the viewport to the content",
+      "passed": true,
+      "details": "free px: home 375 · collection 375 · product 375 · search 375 · cart 375"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 a phone on its side 812×375 (an orientation, not a zoom): five pages leave the viewport to the content",
+      "passed": true,
+      "details": "free px: home 375 · collection 375 · product 375 · search 375 · cart 375"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 a phone on its side 844×390 (an orientation, not a zoom): five pages leave the viewport to the content",
+      "passed": true,
+      "details": "free px: home 390 · collection 390 · product 390 · search 390 · cart 390"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 320×200: the product's add button, the bag's checkout, the filters, the search and the dock all work",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 360×225: the product's add button, the bag's checkout, the filters, the search and the dock all work",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 640×400: the product's add button, the bag's checkout, the filters, the search and the dock all work",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 320×200 Tab traversal · product and bag (no pinned bar left to hide a focus ring)",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-05 the pinned bars come back with height: 375×812 keeps header, bar and dock pinned",
+      "passed": true,
+      "details": "collection 3 pinned · product 2 pinned"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-06 667×375 with 44px side insets (CDP emulation): controls and text of eight pages stay inside the safe region, no horizontal overflow",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-06 667×375: the product grid sits between the insets (first card at x = 44, equal columns, last card ends at 623)",
+      "passed": true,
+      "details": "/collections/guess 44.0…623.0 (card 283.5) · /search 44.0…623.0 (card 283.5)"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-06 812×375 with 44px side insets (CDP emulation): controls and text of eight pages stay inside the safe region, no horizontal overflow",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-06 812×375: the product grid sits between the insets (first card at x = 44, equal columns, last card ends at 768)",
+      "passed": true,
+      "details": "/collections/guess 44.0…768.0 (card 230.7) · /search 44.0…768.0 (card 230.7)"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-06 without insets nothing moves: the grid is edge to edge and the gutters are the design's (375px and 1440px)",
+      "passed": true,
+      "details": "375px card at 0.0 · gutter 20 · 1440px card at 328.0 · gutter 48"
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-06 drawers, sheets and dialogs keep their content out of the cut-outs (menu, filters, quick view, bag drawer)",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "GPT-06 a bag with a 21px home indicator: the checkout bar and the dock add it below their buttons",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 1024×200 behaves like 1023×200: the collection scrolled 800px leaves the whole window to the products on both sides of the width limit",
+      "passed": true,
+      "details": "free 200px at 1023 and 200px at 1024"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 1023px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+      "passed": true,
+      "details": "collection free px — 200: 200 · 360: 360 · 480: 480"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 1024px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+      "passed": true,
+      "details": "collection free px — 200: 200 · 360: 360 · 480: 480"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 1280px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+      "passed": true,
+      "details": "collection free px — 200: 200 · 360: 360 · 480: 480"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 1440px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+      "passed": true,
+      "details": "collection free px — 200: 200 · 360: 360 · 480: 480"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 in a short window the desktop columns flow with the page: filters, product panel and bag summary are not sticky and the gallery keeps its natural size (1024×200, 1280×200, 1440×360)",
+      "passed": true,
+      "details": "1024×200 viewer 432×540 · 1280×200 viewer 571×714 · 1440×360 viewer 664×830"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 across the 480px height limit the header changes (static at 480, pinned at 481) and normal windows keep their pinned header, sticky columns and fitted gallery (1024 and 1440 wide, 481 / 768 / 900 tall)",
+      "passed": true,
+      "details": "1024×480 static · 1440×480 static · 1024×481 sticky · 1440×481 sticky · 1024×768 sticky · 1440×900 sticky"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 1024×200: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 1280×240: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 1440×360: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 Tab traversal in short desktop windows (product at 1024×200, bag at 1280×240, collection at 1440×360): no focused control, text or ring is hidden, footer links included",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "RE-01 with 44px emulated insets the header is not pinned at 1024×200 or 812×300 and controls and text stay inside the safe region (home, collection, product, bag, search)",
+      "passed": true,
+      "details": ""
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 768×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+      "passed": true,
+      "details": "9 links, last “Nuestra historia” 537…667 (text to 655), fade from 676"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 812×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+      "passed": true,
+      "details": "9 links, last “Nuestra historia” 576…706 (text to 694), fade from 715"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 1023×768 (tablet, one pixel below the width limit): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+      "passed": true,
+      "details": "9 links, last “Nuestra historia” 770…900 (text to 888), fade from 900"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 1024×768 (desktop, one pixel above it): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+      "passed": true,
+      "details": "9 links, last “Nuestra historia” 882…1012 (text to 1000), fade from none"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 1440×900 (desktop): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+      "passed": true,
+      "details": "9 links, last “Nuestra historia” 1102…1232 (text to 1220), fade from none"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 768×1024 (tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+      "passed": true,
+      "details": "9 links, last “Nuestra historia” 537…667 (text to 655), fade from 676"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 812×375 (short tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+      "passed": true,
+      "details": "9 links, last “Nuestra historia” 576…706 (text to 694), fade from 715"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 the desktop row stays centred when its links fit (1280, 1440) and starts on the gutter, or on the inset, when they overflow a little (1024 with and without 44px insets)",
+      "passed": true,
+      "details": "1280px: 128.3…1151.7 · 1440px: 208.3…1231.7 · 1024px: 40.0…1017.4 (overflow 33px) · 1024px with insets: 44.0…1021.4 (overflow 41px)"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 768×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+      "passed": true,
+      "details": "scrolled to 330, link ends at 667, fade from 676"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 812×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+      "passed": true,
+      "details": "scrolled to 291, link ends at 706, fade from 715"
+    },
+    {
+      "gate": "D11",
+      "name": "RE-02 1023×768: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+      "passed": true,
+      "details": "scrolled to 97, link ends at 900, fade from 900"
+    },
+    {
+      "gate": "D10",
+      "name": "No console errors, page errors or failed requests during the checks",
+      "passed": true,
+      "details": "none"
+    }
+  ],
+  "problems": [],
+  "layout": [
+    {
+      "page": "home",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 89,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": "dock",
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 28,
+      "h1": "Bolsas",
+      "expectedUi": "dock",
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".purchase-dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": "purchase",
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 28,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": "dock",
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".checkout-bar"
+      ],
+      "footerClearance": 39,
+      "headerHeight": 28,
+      "h1": "Mi bolsa",
+      "expectedUi": "checkout",
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "design-cuenta",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 89,
+      "h1": "Mi cuenta",
+      "expectedUi": "dock",
+      "passed": "Mi cuenta"
+    },
+    {
+      "page": "design-board",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Tablero de componentes",
+      "expectedUi": "dock",
+      "passed": "Tablero de componentes"
+    },
+    {
+      "page": "home",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 89,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": "dock",
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 28,
+      "h1": "Bolsas",
+      "expectedUi": "dock",
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".purchase-dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": "purchase",
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 28,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": "dock",
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".checkout-bar"
+      ],
+      "footerClearance": 39,
+      "headerHeight": 28,
+      "h1": "Mi bolsa",
+      "expectedUi": "checkout",
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "design-cuenta",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 89,
+      "h1": "Mi cuenta",
+      "expectedUi": "dock",
+      "passed": "Mi cuenta"
+    },
+    {
+      "page": "design-board",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Tablero de componentes",
+      "expectedUi": "dock",
+      "passed": "Tablero de componentes"
+    },
+    {
+      "page": "home",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 89,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": "dock",
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 28,
+      "h1": "Bolsas",
+      "expectedUi": "dock",
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".purchase-dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": "purchase",
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 28,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": "dock",
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".checkout-bar"
+      ],
+      "footerClearance": 39,
+      "headerHeight": 28,
+      "h1": "Mi bolsa",
+      "expectedUi": "checkout",
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "design-cuenta",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 28,
+      "headerHeight": 89,
+      "h1": "Mi cuenta",
+      "expectedUi": "dock",
+      "passed": "Mi cuenta"
+    },
+    {
+      "page": "design-board",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Tablero de componentes",
+      "expectedUi": "dock",
+      "passed": "Tablero de componentes"
+    },
+    {
+      "page": "home",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": null,
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Bolsas",
+      "expectedUi": null,
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": null,
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": null,
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".checkout-bar"
+      ],
+      "footerClearance": 39,
+      "headerHeight": 138,
+      "h1": "Mi bolsa",
+      "expectedUi": "checkout",
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "design-cuenta",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Mi cuenta",
+      "expectedUi": null,
+      "passed": "Mi cuenta"
+    },
+    {
+      "page": "design-board",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Tablero de componentes",
+      "expectedUi": null,
+      "passed": "Tablero de componentes"
+    },
+    {
+      "page": "home",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": null,
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolsas",
+      "expectedUi": null,
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": null,
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": null,
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi bolsa",
+      "expectedUi": null,
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "design-cuenta",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi cuenta",
+      "expectedUi": null,
+      "passed": "Mi cuenta"
+    },
+    {
+      "page": "design-board",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Tablero de componentes",
+      "expectedUi": null,
+      "passed": "Tablero de componentes"
+    },
+    {
+      "page": "home",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": null,
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolsas",
+      "expectedUi": null,
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": null,
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": null,
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi bolsa",
+      "expectedUi": null,
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "design-cuenta",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi cuenta",
+      "expectedUi": null,
+      "passed": "Mi cuenta"
+    },
+    {
+      "page": "design-board",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Tablero de componentes",
+      "expectedUi": null,
+      "passed": "Tablero de componentes"
+    },
+    {
+      "page": "home",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": null,
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolsas",
+      "expectedUi": null,
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": null,
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": null,
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi bolsa",
+      "expectedUi": null,
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "design-cuenta",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi cuenta",
+      "expectedUi": null,
+      "passed": "Mi cuenta"
+    },
+    {
+      "page": "design-board",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Tablero de componentes",
+      "expectedUi": null,
+      "passed": "Tablero de componentes"
+    }
+  ],
+  "a11y": [
+    {
+      "state": "home @ 390",
+      "violations": []
+    },
+    {
+      "state": "collection @ 390",
+      "violations": []
+    },
+    {
+      "state": "product @ 390",
+      "violations": []
+    },
+    {
+      "state": "search @ 390",
+      "violations": []
+    },
+    {
+      "state": "cart @ 390",
+      "violations": []
+    },
+    {
+      "state": "design-cuenta @ 390",
+      "violations": []
+    },
+    {
+      "state": "design-board @ 390",
+      "violations": []
+    },
+    {
+      "state": "brand page @ 390",
+      "violations": []
+    },
+    {
+      "state": "favourites @ 390",
+      "violations": []
+    },
+    {
+      "state": "mayoreo @ 390",
+      "violations": []
+    },
+    {
+      "state": "nuestra historia @ 390",
+      "violations": []
+    },
+    {
+      "state": "contacto @ 390",
+      "violations": []
+    },
+    {
+      "state": "cuenta @ 390",
+      "violations": []
+    },
+    {
+      "state": "política de envíos @ 390",
+      "violations": []
+    },
+    {
+      "state": "no encontrada @ 390",
+      "violations": []
+    },
+    {
+      "state": "menu drawer @ 390",
+      "violations": []
+    },
+    {
+      "state": "filter drawer @ 390",
+      "violations": []
+    },
+    {
+      "state": "quick view @ 390",
+      "violations": []
+    },
+    {
+      "state": "home @ 1440",
+      "violations": []
+    },
+    {
+      "state": "collection @ 1440",
+      "violations": []
+    },
+    {
+      "state": "product @ 1440",
+      "violations": []
+    },
+    {
+      "state": "search @ 1440",
+      "violations": []
+    },
+    {
+      "state": "cart @ 1440",
+      "violations": []
+    },
+    {
+      "state": "design-cuenta @ 1440",
+      "violations": []
+    },
+    {
+      "state": "design-board @ 1440",
+      "violations": []
+    },
+    {
+      "state": "brand page @ 1440",
+      "violations": []
+    },
+    {
+      "state": "favourites @ 1440",
+      "violations": []
+    },
+    {
+      "state": "mayoreo @ 1440",
+      "violations": []
+    },
+    {
+      "state": "nuestra historia @ 1440",
+      "violations": []
+    },
+    {
+      "state": "contacto @ 1440",
+      "violations": []
+    },
+    {
+      "state": "cuenta @ 1440",
+      "violations": []
+    },
+    {
+      "state": "política de envíos @ 1440",
+      "violations": []
+    },
+    {
+      "state": "no encontrada @ 1440",
+      "violations": []
+    },
+    {
+      "state": "cart drawer @ 1440",
+      "violations": []
+    },
+    {
+      "state": "predictive search @ 1440",
+      "violations": []
+    },
+    {
+      "state": "checkout handoff @ 1440",
+      "violations": []
+    },
+    {
+      "state": "prototype panel @ 1440",
+      "violations": []
+    }
+  ]
+}

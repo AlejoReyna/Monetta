@@ -1,0 +1,568 @@
+{
+  "archivedAt": "2026-10-20T23:56:27.198Z",
+  "auditorVersion": "1.0.0",
+  "files": [
+    {
+      "original": "docs/style-guideline-migration/content-readiness/reports/offline/audit.json",
+      "archived": "reports/offline/audit.json",
+      "sha256": "1b34de6d012e007da326e16d6463400ca8385c83b938715166cbee5442d31155"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/reports/offline/audit.md",
+      "archived": "reports/offline/audit.md",
+      "sha256": "996f5030c2cb94ca2c1af95304349cdfac28f071e39483c7ccd49e9a03d74d28"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/reports/live/audit.json",
+      "archived": "reports/live/audit.json",
+      "sha256": "d7aef3f640b525aefa7ab7574084c86f86dcfecd748fb6d7635056923044e9b2"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/reports/live/audit.md",
+      "archived": "reports/live/audit.md",
+      "sha256": "c89f11053c89a973968e6093dcd7d6a16e97f4014ba2f1ff0b59e2122283935c"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/reports/reproducibility.json",
+      "archived": "reports/reproducibility.json",
+      "sha256": "66ab9a72fae4c79ecfee9d53e77849d2e893eec70c5b4e66be8da2651b2e2f89"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/reports/tests.tap",
+      "archived": "reports/tests.tap",
+      "sha256": "6d0cfba0c1a58c7fc17c46c322d7b41297ae2eaf053d8c74b3d7f180cf28ec4d"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/REPORT.md",
+      "archived": "docs/REPORT.md",
+      "sha256": "f0cee48a7e97a883494f7aacf840b8d7242404e004c88c908c5b938cfc7dce17"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/CONTENT_CONTRACT.md",
+      "archived": "docs/CONTENT_CONTRACT.md",
+      "sha256": "d8f5291a88435eff4e05e6ab1b2ecc954d026ec29e9232dc5532bb8cfde5c0c7"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/content-contract.v1.schema.json",
+      "archived": "inputs/content-contract.v1.schema.json",
+      "sha256": "d40b3087bb803d9e9963772beeb37f89b9015068ab04026297f197d41fffde25"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/content-baseline.json",
+      "archived": "inputs/content-baseline.json",
+      "sha256": "c6b56082a2e60981135bf529247e4bbce39b8c5903ec63682a95010831f067c0"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/route-map.json",
+      "archived": "inputs/route-map.json",
+      "sha256": "5866560486f9e6546c55a19348e6807d45b7f2e0e203c9d589e6e1132dbb8af7"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/screen-requirements.json",
+      "archived": "inputs/screen-requirements.json",
+      "sha256": "dac1c9713e1a047f7d792a6a7733ce8bc7872c89a694eac50039c11a3dec4fb3"
+    },
+    {
+      "original": "docs/style-guideline-migration/content-readiness/field-map.json",
+      "archived": "inputs/field-map.json",
+      "sha256": "f55be12edceb40c7903db9eeaf84a39fc96628aebcb6f20243410dc77c50a6ec"
+    },
+    {
+      "original": "tools/style-guideline-content/README.md",
+      "archived": "implementation/README.md",
+      "sha256": "aacf7caaea150c232eb4b9bdd3f06a719b2723c1f1c7ec6bc8b8f15ee706e084"
+    },
+    {
+      "original": "tools/style-guideline-content/audit.mjs",
+      "archived": "implementation/audit.mjs",
+      "sha256": "445747e3d9079fd451b82fcacd93cacd5f87c582132e5eaeb33c2d7e44133cdf"
+    },
+    {
+      "original": "tools/style-guideline-content/build-inventory.mjs",
+      "archived": "implementation/build-inventory.mjs",
+      "sha256": "fa38838869e572effc0a9402f9e691009f18fd0a94ec22433beddc86fa021594"
+    },
+    {
+      "original": "tools/style-guideline-content/capture-sources.mjs",
+      "archived": "implementation/capture-sources.mjs",
+      "sha256": "8539eab5b038aa764ef445fe28e3ec32d559d7eeda111357548e810601d516ff"
+    },
+    {
+      "original": "tools/style-guideline-content/lib/auditor.mjs",
+      "archived": "implementation/lib/auditor.mjs",
+      "sha256": "0929ee7e7c4eeeb594a40be8f7021021f2c245d3aceaae73bf5ee6e09cf3a04a"
+    },
+    {
+      "original": "tools/style-guideline-content/lib/schema.mjs",
+      "archived": "implementation/lib/schema.mjs",
+      "sha256": "61bf6bcb9e75364414cc16768affbf3407f18f8bf2b45f880c79d34724cd824f"
+    },
+    {
+      "original": "tools/style-guideline-content/package.json",
+      "archived": "implementation/package.json",
+      "sha256": "5559beacead63744131e32756461488cd1f27f31cd25b560a68ae61f7462f827"
+    },
+    {
+      "original": "tools/style-guideline-content/source-list.json",
+      "archived": "implementation/source-list.json",
+      "sha256": "c8045153dfb6bb4f7c3b1a630b1ea6d701b4103e79a3a48b38563e8fa9d5d9ff"
+    },
+    {
+      "original": "tools/style-guideline-content/test/auditor.test.mjs",
+      "archived": "implementation/test/auditor.test.mjs",
+      "sha256": "55ea4e5991c56ff34b0cdfff6661de3aa31318a60955b173e0aab65c7d9dffb3"
+    },
+    {
+      "original": "tools/style-guideline-content/test/fixtures/fixture.dart",
+      "archived": "implementation/test/fixtures/fixture.dart",
+      "sha256": "3b9e006056db3a92029a719cb580d7d386c49f15e9421ee48f9d901eae4715a0"
+    },
+    {
+      "original": "tools/style-guideline-content/test/fixtures/minimal.json",
+      "archived": "implementation/test/fixtures/minimal.json",
+      "sha256": "ffb533d96757c21d8f045d9ad0ef802a924667dcd67120329bfd7c16c5319e1b"
+    }
+  ],
+  "frozenInputs": [
+    {
+      "path": "docs/style-guideline-migration/content-readiness/content-baseline.json",
+      "sha256": "c6b56082a2e60981135bf529247e4bbce39b8c5903ec63682a95010831f067c0"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/source-manifest.json",
+      "sha256": "094a6280460526b659aaa890538367b21e8bb0ca76f49b5d3da32d7af30a7c5a"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/060a910c48e156610c351d5c3347398d144cee70c33a1bcda3930b13770f090c.txt",
+      "sha256": "060a910c48e156610c351d5c3347398d144cee70c33a1bcda3930b13770f090c"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/07409fa531fa340d4d5fa55d8b3d7ce5cc7841fcb210112eeff3653ebc18587c.txt",
+      "sha256": "07409fa531fa340d4d5fa55d8b3d7ce5cc7841fcb210112eeff3653ebc18587c"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/07cee284de4fe0032693de8487067a767734547ea3dc2da7e47555e75815b044.txt",
+      "sha256": "07cee284de4fe0032693de8487067a767734547ea3dc2da7e47555e75815b044"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/08bc59195bb44232ef465694a2f33f936acf35b6dcd2526a624fe6402864f33d.txt",
+      "sha256": "08bc59195bb44232ef465694a2f33f936acf35b6dcd2526a624fe6402864f33d"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/09fe69d30b42e4439915bbfcecf701ad6c4e18077d92652f613910b1895e53fd.txt",
+      "sha256": "09fe69d30b42e4439915bbfcecf701ad6c4e18077d92652f613910b1895e53fd"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/0e241cca0c1de27b4264b4f056e70f4288741e4065098fb6f8b89e832aea532c.txt",
+      "sha256": "0e241cca0c1de27b4264b4f056e70f4288741e4065098fb6f8b89e832aea532c"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/10ae3432ac474f2b36760c6722dbf99fe3695d8af2b1e0a86b139167b857f716.txt",
+      "sha256": "10ae3432ac474f2b36760c6722dbf99fe3695d8af2b1e0a86b139167b857f716"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/1175c00013a2676673c7b5227876b33c16b6ecab1287f280687d21a72b53d9c9.txt",
+      "sha256": "1175c00013a2676673c7b5227876b33c16b6ecab1287f280687d21a72b53d9c9"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/141e3337286cf56efd6aeca33c821adf6b051c6906a52795c68511b21fd10c5d.txt",
+      "sha256": "141e3337286cf56efd6aeca33c821adf6b051c6906a52795c68511b21fd10c5d"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/17878f01ac2bf572b16b3059bd988d3d674c777149e0d06070b4d3709784caa3.txt",
+      "sha256": "17878f01ac2bf572b16b3059bd988d3d674c777149e0d06070b4d3709784caa3"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/22177b682e33038fa9f82f1b9c69d058bf15332a48cc617dc33bdac63e72d207.txt",
+      "sha256": "22177b682e33038fa9f82f1b9c69d058bf15332a48cc617dc33bdac63e72d207"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/25139da615108cfe458ec35652ad12be61d302d8bca034ed96532e45c48980d0.txt",
+      "sha256": "25139da615108cfe458ec35652ad12be61d302d8bca034ed96532e45c48980d0"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/2b2f734aa67bf567fdaf055df209d07e5ef81b7a4dd17c0a913ac55c230eda24.txt",
+      "sha256": "2b2f734aa67bf567fdaf055df209d07e5ef81b7a4dd17c0a913ac55c230eda24"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/2ce29e3d46d7d817bd10aa06cdbc89c2d94484f865623ccbe09177841f3271ac.txt",
+      "sha256": "2ce29e3d46d7d817bd10aa06cdbc89c2d94484f865623ccbe09177841f3271ac"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/2dac40aee6df53577afbeb4c85f716f241a46ddcb047cd45586bb89382c27ff5.txt",
+      "sha256": "2dac40aee6df53577afbeb4c85f716f241a46ddcb047cd45586bb89382c27ff5"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/32469b90903f26a831de1008c8fe7f8befe209b59ba7c8b8912bdcd4342e2763.txt",
+      "sha256": "32469b90903f26a831de1008c8fe7f8befe209b59ba7c8b8912bdcd4342e2763"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/32b92fc53e7e19d48af83259d2d5ffe0c3233524f4b4373412be33918b6b237f.txt",
+      "sha256": "32b92fc53e7e19d48af83259d2d5ffe0c3233524f4b4373412be33918b6b237f"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/32f8ee4394eb0892de00dac5f30fdb3b885cf7d1487b105dcfddc78e94ac6df0.txt",
+      "sha256": "32f8ee4394eb0892de00dac5f30fdb3b885cf7d1487b105dcfddc78e94ac6df0"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/335ef9deeda736aaa1c5c7223d09bafe334f826c3ca85e848a8a2a9b99085917.txt",
+      "sha256": "335ef9deeda736aaa1c5c7223d09bafe334f826c3ca85e848a8a2a9b99085917"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/33b8da8efef72ef8de5999b9eaf1c6999fcf61cd525bc0e3a3b87e526a1e2d14.txt",
+      "sha256": "33b8da8efef72ef8de5999b9eaf1c6999fcf61cd525bc0e3a3b87e526a1e2d14"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/3842d36525bd8439f3b6d6ea1458f1416e34cb314c67eaeba484e3b7dbb3f549.txt",
+      "sha256": "3842d36525bd8439f3b6d6ea1458f1416e34cb314c67eaeba484e3b7dbb3f549"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/3a838a31339fbde060a622b76342c460d92fa992da5b765e8762c2d84ca3502c.txt",
+      "sha256": "3a838a31339fbde060a622b76342c460d92fa992da5b765e8762c2d84ca3502c"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/3e1b182ea272c26a44dcf71d7c38bba986d6588cd981c3b4a1949204309e7ccd.txt",
+      "sha256": "3e1b182ea272c26a44dcf71d7c38bba986d6588cd981c3b4a1949204309e7ccd"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/3ee59ae1d57b24bee85b8aab09585f868266db2ee5ea489efb6691608461ebd7.txt",
+      "sha256": "3ee59ae1d57b24bee85b8aab09585f868266db2ee5ea489efb6691608461ebd7"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/4738df2897c5e47841245beaf731b1e42d60e1b6385ab7aab09631536668ad59.txt",
+      "sha256": "4738df2897c5e47841245beaf731b1e42d60e1b6385ab7aab09631536668ad59"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/4ed84b718707fb2d1bf894114d6d290bf0801b22305e139df83bc18682c030f8.txt",
+      "sha256": "4ed84b718707fb2d1bf894114d6d290bf0801b22305e139df83bc18682c030f8"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/55788d9ff03dc2a5782f1ae6f61436c2da66f0ab20b03727c199d6f334b12644.txt",
+      "sha256": "55788d9ff03dc2a5782f1ae6f61436c2da66f0ab20b03727c199d6f334b12644"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/560b5c966cbb6389c4163b0604e8131ba0099c21ed0642ea511e03233c619ef9.txt",
+      "sha256": "560b5c966cbb6389c4163b0604e8131ba0099c21ed0642ea511e03233c619ef9"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/57743bdb35b8f1c39d7dc0bf02bafab5c32795c367157a2b9f1cceb434ef37af.txt",
+      "sha256": "57743bdb35b8f1c39d7dc0bf02bafab5c32795c367157a2b9f1cceb434ef37af"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/58eaef1066ef148cad1571ddd9742bcc5839fb0d25d0170f1462759e2cf1e973.txt",
+      "sha256": "58eaef1066ef148cad1571ddd9742bcc5839fb0d25d0170f1462759e2cf1e973"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/601e2cb1a29f704feb62c29dc23e8e1642cdcd3ac7a7bf108ad23baba185433d.txt",
+      "sha256": "601e2cb1a29f704feb62c29dc23e8e1642cdcd3ac7a7bf108ad23baba185433d"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/636d2815e5543b8262c70eb5312b149a75a2c83e1850cf43544ccdd667458e06.txt",
+      "sha256": "636d2815e5543b8262c70eb5312b149a75a2c83e1850cf43544ccdd667458e06"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/64bfb5bb0f803841b04901d78ec0f38b1d0e118cda13493133c786ca8aef7f15.txt",
+      "sha256": "64bfb5bb0f803841b04901d78ec0f38b1d0e118cda13493133c786ca8aef7f15"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/657c8d260ea91193374fce30130fd7ec0561e40f474f6c6064d87abf8a3f554b.txt",
+      "sha256": "657c8d260ea91193374fce30130fd7ec0561e40f474f6c6064d87abf8a3f554b"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/663fc625181e6ff44df39d6565cf6a8a7b96736e72ef29f1d461319003816ef7.txt",
+      "sha256": "663fc625181e6ff44df39d6565cf6a8a7b96736e72ef29f1d461319003816ef7"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/66fa2d920e1788662cfed79dbe4a0589daa91bb49c102209bf276b19ee68b9c3.txt",
+      "sha256": "66fa2d920e1788662cfed79dbe4a0589daa91bb49c102209bf276b19ee68b9c3"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/67a2cac40076708c1289af25189bcbcbf706e9a0c040d446ee0772ddf054f089.txt",
+      "sha256": "67a2cac40076708c1289af25189bcbcbf706e9a0c040d446ee0772ddf054f089"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/67bd65c752e65b825b308446592aad470f5f509fb4a0cb7f1f3056111c2f118b.txt",
+      "sha256": "67bd65c752e65b825b308446592aad470f5f509fb4a0cb7f1f3056111c2f118b"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/6e4e7a071dc5a6dd79f4a38cc478b2fb420bd219ff111892d73491c1fb7ed31b.txt",
+      "sha256": "6e4e7a071dc5a6dd79f4a38cc478b2fb420bd219ff111892d73491c1fb7ed31b"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/6effa155d8fa075f081c51b5347964e65ebde0aeb800df834305cf915447a5bd.txt",
+      "sha256": "6effa155d8fa075f081c51b5347964e65ebde0aeb800df834305cf915447a5bd"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/725186d233806af1e323621afdf579bd777155b3ed847dfe6157ae0dfcc8673b.txt",
+      "sha256": "725186d233806af1e323621afdf579bd777155b3ed847dfe6157ae0dfcc8673b"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/726089bb858a3953114b6dfe33bb953df0760723af93727a0715c21e133fe160.txt",
+      "sha256": "726089bb858a3953114b6dfe33bb953df0760723af93727a0715c21e133fe160"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/728163c700f076c15a00b3a7ad602c14777d55fbce28177062b68cb26007a37b.txt",
+      "sha256": "728163c700f076c15a00b3a7ad602c14777d55fbce28177062b68cb26007a37b"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/75b71149696c451cafd95ecd737f17fd3afa591ca22a693442a5ddbef439ff93.txt",
+      "sha256": "75b71149696c451cafd95ecd737f17fd3afa591ca22a693442a5ddbef439ff93"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/763bb75df2f21d4d0f73acf12f0bacbbaef7b8a956adc79aa02a59ccb61aa97d.txt",
+      "sha256": "763bb75df2f21d4d0f73acf12f0bacbbaef7b8a956adc79aa02a59ccb61aa97d"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26.txt",
+      "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/798f0d523e10cef0623a3f667013ad985e450c418554cd1587f9e11404afadda.txt",
+      "sha256": "798f0d523e10cef0623a3f667013ad985e450c418554cd1587f9e11404afadda"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/7affe3f918c3af743242dda46d76fa8ddf5c80542e7b6413cf5e215b5f97323e.txt",
+      "sha256": "7affe3f918c3af743242dda46d76fa8ddf5c80542e7b6413cf5e215b5f97323e"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/7cc9c23fd10356dcd28540cceddf43749ca14ba8dc92a0b88b82e58823bed061.txt",
+      "sha256": "7cc9c23fd10356dcd28540cceddf43749ca14ba8dc92a0b88b82e58823bed061"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/81719078df46dce07d8a8efbfee8d353c4435959908e59b3759adaf67552ddfe.txt",
+      "sha256": "81719078df46dce07d8a8efbfee8d353c4435959908e59b3759adaf67552ddfe"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/823a3dc9ec225279079714a3d3312976415e5dced4760398fb390f599cb67670.txt",
+      "sha256": "823a3dc9ec225279079714a3d3312976415e5dced4760398fb390f599cb67670"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/83aafa3f60a23fc8a7473015a8562c8328610b818aa3ffa0b877338a6a5b72e8.txt",
+      "sha256": "83aafa3f60a23fc8a7473015a8562c8328610b818aa3ffa0b877338a6a5b72e8"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/8567b25c119c7581309ce2b0dcd2aec39d4f0d025c92a29ca5fab74acb14710a.txt",
+      "sha256": "8567b25c119c7581309ce2b0dcd2aec39d4f0d025c92a29ca5fab74acb14710a"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/876e1696dc9f8845c95d59a33cc11573614c77b12e521aee95eab4ffc64ff7e7.txt",
+      "sha256": "876e1696dc9f8845c95d59a33cc11573614c77b12e521aee95eab4ffc64ff7e7"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/8baca131cce0391318fbcd4f587614726c57ac0888683b2aabf28aac407691aa.txt",
+      "sha256": "8baca131cce0391318fbcd4f587614726c57ac0888683b2aabf28aac407691aa"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/8e9513e8f0033ed4db9ab6f01c103f2d05010329548153cbaddb92ee8a00f023.txt",
+      "sha256": "8e9513e8f0033ed4db9ab6f01c103f2d05010329548153cbaddb92ee8a00f023"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/8fea9497fa5a10916688b4065f846ff592e646a31b79294f573868a7bfa0f72a.txt",
+      "sha256": "8fea9497fa5a10916688b4065f846ff592e646a31b79294f573868a7bfa0f72a"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/902a0894fac027a778fcdeb2982e1ba21ff5f7c81ca41a5e933724d229b10446.txt",
+      "sha256": "902a0894fac027a778fcdeb2982e1ba21ff5f7c81ca41a5e933724d229b10446"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/94d38d311a3beef54f18c99446f98cd14286627d01a6cb4b14e7680a3f5814c9.txt",
+      "sha256": "94d38d311a3beef54f18c99446f98cd14286627d01a6cb4b14e7680a3f5814c9"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/9ac678e7b129f1ec32892456c803dd116ff76c630a3edd20163e726c9c068a80.txt",
+      "sha256": "9ac678e7b129f1ec32892456c803dd116ff76c630a3edd20163e726c9c068a80"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/9b86a65d48e5246a9c43c0563e147f02aa2e2a9da99496f61c1fc0c6ce5d88d8.txt",
+      "sha256": "9b86a65d48e5246a9c43c0563e147f02aa2e2a9da99496f61c1fc0c6ce5d88d8"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/9f4d04fc652e3f335083b0629feb105584306eb241d842d26be0cf79e2a11a51.txt",
+      "sha256": "9f4d04fc652e3f335083b0629feb105584306eb241d842d26be0cf79e2a11a51"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/a1905e622baf90e475bd84680f72064f6a0b6cad130574b22fb20ba3a1da70b6.txt",
+      "sha256": "a1905e622baf90e475bd84680f72064f6a0b6cad130574b22fb20ba3a1da70b6"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/a1b2491eecba01289e1bbfebbffa077f1a59e44aa3f21f5dc797c51c7330cfc2.txt",
+      "sha256": "a1b2491eecba01289e1bbfebbffa077f1a59e44aa3f21f5dc797c51c7330cfc2"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/a1ff27caf70a9724d40a14e55e8d4d28d9ab1449d970bda60d798e303bec3a0f.txt",
+      "sha256": "a1ff27caf70a9724d40a14e55e8d4d28d9ab1449d970bda60d798e303bec3a0f"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/a2d0a6bc500e1601f9d8be0dcaeb5925497dfe0ebc9aff226daad19a150373f8.txt",
+      "sha256": "a2d0a6bc500e1601f9d8be0dcaeb5925497dfe0ebc9aff226daad19a150373f8"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/a5445289925d3bd381e96ee3b3eb80b1a411bfb9b5e8f507e37d96d18d8f5e0b.txt",
+      "sha256": "a5445289925d3bd381e96ee3b3eb80b1a411bfb9b5e8f507e37d96d18d8f5e0b"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/a7b927c061e118d873ce932bf2a53ab9df7b7abe2794d8e35ea9765223f2730d.txt",
+      "sha256": "a7b927c061e118d873ce932bf2a53ab9df7b7abe2794d8e35ea9765223f2730d"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/a9ce209b682db61c9cad144219eceb9e656a43683dcba1d09cc1acaf338ebdd3.txt",
+      "sha256": "a9ce209b682db61c9cad144219eceb9e656a43683dcba1d09cc1acaf338ebdd3"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/af68240c9886a54c5a106cffa7eecb28219e79d1b6a0c01262bc774a1d9fb01c.txt",
+      "sha256": "af68240c9886a54c5a106cffa7eecb28219e79d1b6a0c01262bc774a1d9fb01c"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/b5f482a8f91a573c200ea0cb53bd7d89928180ac749a4a00713b4ea104be49e0.txt",
+      "sha256": "b5f482a8f91a573c200ea0cb53bd7d89928180ac749a4a00713b4ea104be49e0"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/ba90f0b938de6115237feca326ed8cc7e1f1ed2304cd3d65438154df0c568851.txt",
+      "sha256": "ba90f0b938de6115237feca326ed8cc7e1f1ed2304cd3d65438154df0c568851"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/bb4743636e4df44c2a7506287620829206a867032790049b4ca90cbde102d6aa.txt",
+      "sha256": "bb4743636e4df44c2a7506287620829206a867032790049b4ca90cbde102d6aa"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/c2839bf2ef6c94e8c65c02ba1597b53b1357175aca50acba30141426c0c387cc.txt",
+      "sha256": "c2839bf2ef6c94e8c65c02ba1597b53b1357175aca50acba30141426c0c387cc"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/c301dc22a83403524d5f27b50e5a95fa98c78958f46f890737b65147457c9401.txt",
+      "sha256": "c301dc22a83403524d5f27b50e5a95fa98c78958f46f890737b65147457c9401"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/c5a6def8a79c530ffc3351bf1ebb3d32525a654890ae59f02538b92f19fac3cd.txt",
+      "sha256": "c5a6def8a79c530ffc3351bf1ebb3d32525a654890ae59f02538b92f19fac3cd"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/c8c72f2b8dbefcbbfd7e4b1298041e1c781ebdd6b824b2c00b37f8b5e9158d75.txt",
+      "sha256": "c8c72f2b8dbefcbbfd7e4b1298041e1c781ebdd6b824b2c00b37f8b5e9158d75"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/ccb77e379096c132858f7294325e367555377d4297cd485e9edbb2cbac7f8d1e.txt",
+      "sha256": "ccb77e379096c132858f7294325e367555377d4297cd485e9edbb2cbac7f8d1e"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/cda82c8dc778c3199bad63507e37570ea94f59b5b51a5ca55079f9de5543a5c1.txt",
+      "sha256": "cda82c8dc778c3199bad63507e37570ea94f59b5b51a5ca55079f9de5543a5c1"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/cdde54ace80c2fa234dc2a544b34e92a11ad5f3dee64f3afc17122f3e3a698c1.txt",
+      "sha256": "cdde54ace80c2fa234dc2a544b34e92a11ad5f3dee64f3afc17122f3e3a698c1"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/d42a7b09e6ce01dc1a61bb95b8d82f60e9e384135649f7b8f88e251ed2c7ed01.txt",
+      "sha256": "d42a7b09e6ce01dc1a61bb95b8d82f60e9e384135649f7b8f88e251ed2c7ed01"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/d640bd29237a2d9006bdcb27af2fa046bad4b459e93b4141404137b7b52a54e3.txt",
+      "sha256": "d640bd29237a2d9006bdcb27af2fa046bad4b459e93b4141404137b7b52a54e3"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/d965c6c7d3ec0bb8ec61cf01c9a7dc4ae92b72c9d13e6c23ec7e89b816d2bcba.txt",
+      "sha256": "d965c6c7d3ec0bb8ec61cf01c9a7dc4ae92b72c9d13e6c23ec7e89b816d2bcba"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/d9c6e7c5185dd2c6c1ccbe36a6039554f63ed15285a3b4660df4443efb3bf8de.txt",
+      "sha256": "d9c6e7c5185dd2c6c1ccbe36a6039554f63ed15285a3b4660df4443efb3bf8de"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/da3008f19d552375a527bca6caf3e092647ef89457efa391756e9850266944ef.txt",
+      "sha256": "da3008f19d552375a527bca6caf3e092647ef89457efa391756e9850266944ef"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/e1560b2f9563a2fa890f288c3fe1c0be12f20c8c17169f0292a40870d80f8c66.txt",
+      "sha256": "e1560b2f9563a2fa890f288c3fe1c0be12f20c8c17169f0292a40870d80f8c66"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/e23f3ebc3b1091f9b34b00baca171037b1a25dff4a2886a00e14159a3217f9f2.txt",
+      "sha256": "e23f3ebc3b1091f9b34b00baca171037b1a25dff4a2886a00e14159a3217f9f2"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/e62321cf08b6cffa22a730cf8545e678300252c8a9010aebda82eca9df572e4c.txt",
+      "sha256": "e62321cf08b6cffa22a730cf8545e678300252c8a9010aebda82eca9df572e4c"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/e6799765f8d7cd6b875aeca60c136b0047ab7c9f8acd42f2bf6beb35cba7d1db.txt",
+      "sha256": "e6799765f8d7cd6b875aeca60c136b0047ab7c9f8acd42f2bf6beb35cba7d1db"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/e81fc595b1c5f696b91d645ef16d0aeff5e9bc1c62e02e3555222f5ee6602155.txt",
+      "sha256": "e81fc595b1c5f696b91d645ef16d0aeff5e9bc1c62e02e3555222f5ee6602155"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/eae91fdf73d0d3030b7e6a7597830cbfa80579de2efdd4a14c55879bf87154f2.txt",
+      "sha256": "eae91fdf73d0d3030b7e6a7597830cbfa80579de2efdd4a14c55879bf87154f2"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/ed627fd64c2d1d319e4d4db03fe591080d2bbc92e80b5bf3337e2be28a4c3eee.txt",
+      "sha256": "ed627fd64c2d1d319e4d4db03fe591080d2bbc92e80b5bf3337e2be28a4c3eee"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/f262d2a61d58194e2c1e98677dce238cead03d9b08c1386b5cd9d342d28de77f.txt",
+      "sha256": "f262d2a61d58194e2c1e98677dce238cead03d9b08c1386b5cd9d342d28de77f"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/f332fdfd1c03fa175272e18460782ba44a7ff7134b8c1901afccb39805ab6209.txt",
+      "sha256": "f332fdfd1c03fa175272e18460782ba44a7ff7134b8c1901afccb39805ab6209"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/f4ee9c32d0e4dfd40b9aa17e87c446a0d4b623e8af292fe5faef5203ce1924d0.txt",
+      "sha256": "f4ee9c32d0e4dfd40b9aa17e87c446a0d4b623e8af292fe5faef5203ce1924d0"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/f51a47e962af1cdfb9bad89712e4d19602767a1cedce32090b58a33e83d95f78.txt",
+      "sha256": "f51a47e962af1cdfb9bad89712e4d19602767a1cedce32090b58a33e83d95f78"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/f5e825ff8bcf25525fba82cd81c1c3c938d88df85b154cae119d44ce15b9ae25.txt",
+      "sha256": "f5e825ff8bcf25525fba82cd81c1c3c938d88df85b154cae119d44ce15b9ae25"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/f6c084713cd2558ebf7568b303dc0ca4397e886abc92fbcca66281d069e17207.txt",
+      "sha256": "f6c084713cd2558ebf7568b303dc0ca4397e886abc92fbcca66281d069e17207"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/faa9c488bc112dafb94be9fd0feb3a44291e0b681abb90c82093efb5dcdbb0a4.txt",
+      "sha256": "faa9c488bc112dafb94be9fd0feb3a44291e0b681abb90c82093efb5dcdbb0a4"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/fb78a544135437f68afdc477e82b9874a683b29cdc9b38ce82aafc665ce43d94.txt",
+      "sha256": "fb78a544135437f68afdc477e82b9874a683b29cdc9b38ce82aafc665ce43d94"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/fbfa9de336c10fd0f947fd03fcea6884eb0430e1a62d62e2de04adacadf979db.txt",
+      "sha256": "fbfa9de336c10fd0f947fd03fcea6884eb0430e1a62d62e2de04adacadf979db"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/fc8a0a25f8fb44ba6b0c436d2d04de50841c4a5b893dc57443073495b229162b.txt",
+      "sha256": "fc8a0a25f8fb44ba6b0c436d2d04de50841c4a5b893dc57443073495b229162b"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/ff1b336d83a649321868405ef31f79eaa8648b30c245d70b476478859f5d29e6.txt",
+      "sha256": "ff1b336d83a649321868405ef31f79eaa8648b30c245d70b476478859f5d29e6"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/evidence/snapshots/ff2d81d598e6b99bd7d38222eceb22754abcc0daf332275a110e22d6da5337d7.txt",
+      "sha256": "ff2d81d598e6b99bd7d38222eceb22754abcc0daf332275a110e22d6da5337d7"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/route-map.json",
+      "sha256": "5866560486f9e6546c55a19348e6807d45b7f2e0e203c9d589e6e1132dbb8af7"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/screen-requirements.json",
+      "sha256": "dac1c9713e1a047f7d792a6a7733ce8bc7872c89a694eac50039c11a3dec4fb3"
+    },
+    {
+      "path": "docs/style-guideline-migration/content-readiness/field-map.json",
+      "sha256": "f55be12edceb40c7903db9eeaf84a39fc96628aebcb6f20243410dc77c50a6ec"
+    }
+  ],
+  "unchangedOriginalTest": {
+    "path": "tools/style-guideline-content/test/auditor.test.mjs",
+    "sha256": "55ea4e5991c56ff34b0cdfff6661de3aa31318a60955b173e0aab65c7d9dffb3"
+  }
+}

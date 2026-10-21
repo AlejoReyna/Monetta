@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/domain/catalog_item.dart';
@@ -12,8 +13,8 @@ import 'package:monetta_app/features/catalog/product_tile.dart';
 import 'package:monetta_app/features/home/home_account_invitation.dart';
 import 'package:monetta_app/main.dart';
 
-// Product-related titles share the family and fallback chain of the card
-// names (`boutiqueText`): Inter + the platform sans (FICHA-T1, BRIEF 2.3).
+// The client guide sets screen and banner titles in the editorial serif.
+// Filter panels, compact bar titles and product card labels retain the sans.
 // Editorial surfaces (Home, welcome, account...) must stay serif.
 //
 // These tests read the style handed to each `Text`, so the Ahem test font is
@@ -69,6 +70,16 @@ TextStyle _cardNameStyle(WidgetTester tester, CatalogItem item) {
   );
 }
 
+void _expectSerif(TextStyle style, {required String reason}) {
+  expect(style.fontFamily, kBoutiqueSerifFamily, reason: '$reason: family');
+  expect(
+    style.fontFamilyFallback,
+    kBoutiqueSerifFallback,
+    reason: '$reason: fallback chain',
+  );
+  expect(style.fontWeight, FontWeight.w400, reason: '$reason: weight');
+}
+
 void _expectSans(TextStyle style, {required String reason}) {
   expect(style.fontFamily, kBoutiqueSansFamily, reason: '$reason: family');
   expect(
@@ -94,33 +105,35 @@ Future<void> _openCatalogPanel(WidgetTester tester) async {
 }
 
 void main() {
-  group('TYPE-01 catalog titles use the sans of the product cards', () {
-    testWidgets('TYPE-01 "Productos" is sans w600, 22-24, like the card names',
-        (tester) async {
+  group('TYPE-01 catalog titles follow the client guide', () {
+    testWidgets('TYPE-01 "Productos" is serif w400, 26', (tester) async {
       _view(tester);
       final items = [_item(1), _item(2), _item(3)];
       await tester.pumpWidget(_app(CatalogBrowseScreen(items: items)));
       await tester.pump();
 
       final title = _styleOf(tester, find.text('Productos'));
-      _expectSans(title, reason: 'Productos');
-      expect(title.fontSize, inInclusiveRange(22, 24));
-      _expectSameFace(title, _cardNameStyle(tester, items.first), 'vs card');
+      _expectSerif(title, reason: 'Productos');
+      expect(title.fontSize, MonettaTokens.screenTitle.compact);
+      expect(
+        _cardNameStyle(tester, items.first).fontFamily,
+        kBoutiqueSansFamily,
+      );
     });
 
-    testWidgets('TYPE-01b "Sin resultados" of the empty catalog is sans w600',
+    testWidgets('TYPE-01b "Sin resultados" of the empty catalog is serif w400',
         (tester) async {
       _view(tester);
       await tester.pumpWidget(_app(const CatalogBrowseScreen(items: [])));
       await tester.pump();
 
-      _expectSans(
+      _expectSerif(
         _styleOf(tester, find.text('Sin resultados')),
         reason: 'catalog empty state',
       );
     });
 
-    testWidgets('TYPE-01b "Sin resultados" of CatalogEmptyState is sans w600',
+    testWidgets('TYPE-01b "Sin resultados" of CatalogEmptyState is serif w400',
         (tester) async {
       _view(tester);
       await tester.pumpWidget(
@@ -132,7 +145,7 @@ void main() {
       );
       await tester.pump();
 
-      _expectSans(
+      _expectSerif(
         _styleOf(tester, find.text('Sin resultados')),
         reason: 'CatalogEmptyState',
       );
@@ -178,7 +191,7 @@ void main() {
     });
   });
 
-  group('TYPE-01c collection titles use the sans of the product cards', () {
+  group('TYPE-01c collection titles follow the client guide', () {
     Future<CatalogStore> pump(
       WidgetTester tester, {
       String? heroImageAsset,
@@ -207,7 +220,7 @@ void main() {
         .map((text) => text.style!)
         .toList();
 
-    testWidgets('TYPE-01c typographic banner title is sans w600, 22-24',
+    testWidgets('TYPE-01c typographic banner title is serif w400, 26',
         (tester) async {
       await pump(tester);
 
@@ -218,11 +231,11 @@ void main() {
           matching: find.text('Bolsas'),
         ),
       );
-      _expectSans(title, reason: 'banner title');
-      expect(title.fontSize, inInclusiveRange(22, 24));
+      _expectSerif(title, reason: 'banner title');
+      expect(title.fontSize, MonettaTokens.screenTitle.compact);
     });
 
-    testWidgets('TYPE-01c photo banner title is sans w600, 22-24',
+    testWidgets('TYPE-01c photo banner title is serif w400, 26',
         (tester) async {
       await pump(tester, heroImageAsset: 'assets/images/campaign_olive.jpg');
 
@@ -233,8 +246,8 @@ void main() {
           matching: find.text('Bolsas'),
         ),
       );
-      _expectSans(title, reason: 'photo banner title');
-      expect(title.fontSize, inInclusiveRange(22, 24));
+      _expectSerif(title, reason: 'photo banner title');
+      expect(title.fontSize, MonettaTokens.screenTitle.compact);
     });
 
     testWidgets('TYPE-01c the collapsed bar title is sans w600',
@@ -283,7 +296,11 @@ void main() {
       final titles = stylesOfTitle(tester).toList();
       expect(titles.length, greaterThanOrEqualTo(2));
       for (final style in titles) {
-        _expectSans(style, reason: 'every copy of the title over a photo');
+        if (style.fontSize == MonettaTokens.screenTitle.compact) {
+          _expectSerif(style, reason: 'photo banner');
+        } else {
+          _expectSans(style, reason: 'compact bar title');
+        }
       }
 
       // The bar title is the copy that is not inside the banner.

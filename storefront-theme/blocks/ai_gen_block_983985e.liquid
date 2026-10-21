@@ -1,0 +1,315 @@
+{% doc %}
+  @prompt
+    Haz una etiqueta que sea removible y que solamente aparezca a los nuevos usuarios
+    
+    En ella voy a poner nuestro descuento de envio gratis al ser nuevo usuario, por lo que debo de tener un texto que sea modificable en todo sentido, y que pueda añadir un enlace al texti
+    
+    tambien debe tener una x la cual te permite eliminar la etiqueta en caso de que no te interese, pero recuerda que esto solo le aparece a ususarios que no estan registrados o no han realizado una compra anteriormente
+    
+    La seccion debe ser personalizable en tamaño y colores, con una transparencia igualmente en el fondo 
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-new-user-banner-{{ ai_gen_id }} {
+    display: block;
+    position: fixed;
+    bottom: {{ block.settings.position_bottom }}px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 9999;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    background-color: {{ block.settings.background_color }};
+    border-radius: {{ block.settings.border_radius }}px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+  }
+
+  .ai-new-user-banner-{{ ai_gen_id }}.ai-visible-{{ ai_gen_id }} {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  .ai-new-user-banner-content-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+
+  .ai-new-user-banner-text-{{ ai_gen_id }} {
+    flex: 1;
+    color: {{ block.settings.text_color }};
+    font-size: {{ block.settings.text_size }}px;
+    line-height: 1.4;
+  }
+
+  .ai-new-user-banner-text-{{ ai_gen_id }} a {
+    color: {{ block.settings.link_color }};
+    text-decoration: underline;
+  }
+
+  .ai-new-user-banner-text-{{ ai_gen_id }} a:hover {
+    color: {{ block.settings.link_hover_color }};
+  }
+
+  .ai-new-user-banner-close-{{ ai_gen_id }} {
+    flex-shrink: 0;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: {{ block.settings.close_button_color }};
+    transition: color 0.2s ease;
+  }
+
+  .ai-new-user-banner-close-{{ ai_gen_id }}:hover {
+    color: {{ block.settings.close_button_hover_color }};
+  }
+
+  .ai-new-user-banner-close-{{ ai_gen_id }} svg {
+    width: {{ block.settings.close_button_size }}px;
+    height: {{ block.settings.close_button_size }}px;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-new-user-banner-{{ ai_gen_id }} {
+      width: 90%;
+      padding: {{ block.settings.padding_vertical | times: 0.8 }}px {{ block.settings.padding_horizontal | times: 0.8 }}px;
+    }
+
+    .ai-new-user-banner-text-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size | times: 0.9 }}px;
+    }
+  }
+{% endstyle %}
+
+<new-user-banner-{{ ai_gen_id }}
+  class="ai-new-user-banner-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-new-user-banner-content-{{ ai_gen_id }}">
+    <div class="ai-new-user-banner-text-{{ ai_gen_id }}">
+      {{ block.settings.banner_text }}
+    </div>
+    <button
+      class="ai-new-user-banner-close-{{ ai_gen_id }}"
+      aria-label="Cerrar banner"
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+</new-user-banner-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class NewUserBanner{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.storageKey = 'ai_new_user_banner_dismissed_{{ ai_gen_id }}';
+      }
+
+      connectedCallback() {
+        this.checkAndShowBanner();
+        this.setupEventListeners();
+      }
+
+      checkAndShowBanner() {
+        const isDismissed = localStorage.getItem(this.storageKey);
+        
+        if (isDismissed) {
+          return;
+        }
+
+        const isLoggedIn = window.Shopify && window.Shopify.customer;
+        
+        if (!isLoggedIn) {
+          this.showBanner();
+        }
+      }
+
+      showBanner() {
+        setTimeout(() => {
+          this.classList.add('ai-visible-{{ ai_gen_id }}');
+        }, 500);
+      }
+
+      setupEventListeners() {
+        const closeButton = this.querySelector('.ai-new-user-banner-close-{{ ai_gen_id }}');
+        
+        if (closeButton) {
+          closeButton.addEventListener('click', () => {
+            this.dismissBanner();
+          });
+        }
+      }
+
+      dismissBanner() {
+        this.classList.remove('ai-visible-{{ ai_gen_id }}');
+        localStorage.setItem(this.storageKey, 'true');
+      }
+    }
+
+    customElements.define('new-user-banner-{{ ai_gen_id }}', NewUserBanner{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Banner nuevos usuarios",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Contenido"
+    },
+    {
+      "type": "richtext",
+      "id": "banner_text",
+      "label": "Texto del banner",
+      "default": "<p>¡Bienvenido! Obtén <a href=\"/collections/all\">envío gratis</a> en tu primera compra.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Posición"
+    },
+    {
+      "type": "range",
+      "id": "position_bottom",
+      "label": "Distancia desde abajo",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Ancho en escritorio",
+      "min": 30,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 50
+    },
+    {
+      "type": "header",
+      "content": "Estilo"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Color de fondo",
+      "default": "#aa7d44"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color de texto",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "link_color",
+      "label": "Color de enlace",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "link_hover_color",
+      "label": "Color de enlace al pasar",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Tamaño de texto",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Espaciado vertical",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Espaciado horizontal",
+      "min": 12,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Botón de cerrar"
+    },
+    {
+      "type": "color",
+      "id": "close_button_color",
+      "label": "Color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "close_button_hover_color",
+      "label": "Color al pasar",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "range",
+      "id": "close_button_size",
+      "label": "Tamaño",
+      "min": 16,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    }
+  ],
+  "presets": [
+    {
+      "name": "Banner nuevos usuarios"
+    }
+  ]
+}
+{% endschema %}

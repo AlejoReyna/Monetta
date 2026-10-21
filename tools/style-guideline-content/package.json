@@ -1,0 +1,14 @@
+{
+  "name": "monetta-style-guideline-content-audit",
+  "version": "1.0.1",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "audit": "node audit.mjs",
+    "audit:live": "node audit.mjs --live",
+    "audit:strict": "node audit.mjs --strict",
+    "test": "node --test test/*.test.mjs",
+    "verify:corrections": "node verify-corrections.mjs"
+  }
+}

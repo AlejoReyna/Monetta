@@ -1,0 +1,2683 @@
+{
+  "auditVersion": "1.0.0",
+  "mode": "offline-frozen-sources",
+  "contractVersion": "1.0.0",
+  "sourceCaptureCompletedAt": "2026-10-20T23:20:50.425Z",
+  "inputSha256": "c85b57c140872556d72f691b28c276ae39e0ee4e0c11874a4d4c28b056c5fe90",
+  "ready": false,
+  "summary": {
+    "error": 47,
+    "warning": 196,
+    "info": 0,
+    "total": 243,
+    "byCode": {
+      "CAPABILITY_NOT_READY": 14,
+      "CATALOG_CONTENT_UNCONFIRMED": 9,
+      "COMMERCIAL_DECISION_REQUIRED": 9,
+      "CONTENT_CONTRACT_GAP": 15,
+      "CONTENT_DESTINATION_PENDING": 21,
+      "DESIGN_CONTENT_MISSING": 6,
+      "DESIGN_DESTINATION_TYPE_GAP": 1,
+      "DESTINATION_MISSING": 22,
+      "DESTINATION_NOT_READY": 23,
+      "ENTITY_UNCONFIRMED": 21,
+      "HOME_MODULE_MISSING": 10,
+      "KNOWN_ROUTE_INCONSISTENCY": 23,
+      "LISTING_COVER_MISSING": 1,
+      "PRODUCT_SELECTION_ORDER_MISMATCH": 1,
+      "REQUIRED_FIELD_MISSING": 23,
+      "RESPONSIVE_VISUAL_MISSING": 15,
+      "SCREEN_CONTENT_MISSING": 1,
+      "TEMPLATE_LAYOUT_PENDING": 5,
+      "VISUAL_APPROVAL_PENDING": 23
+    },
+    "routes": {
+      "total": 78,
+      "byStatus": {
+        "verificado": 33,
+        "propuesto": 2,
+        "desconocido": 19,
+        "pendiente": 24
+      }
+    },
+    "screens": {
+      "total": 19,
+      "pending": 19
+    }
+  },
+  "coverage": [
+    {
+      "page": 1,
+      "title": "Bienvenida",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 7
+    },
+    {
+      "page": 2,
+      "title": "Personalización",
+      "status": "pending",
+      "missingPaths": [
+        "preferences.purchaseTypeOptions"
+      ],
+      "findingCount": 55
+    },
+    {
+      "page": 3,
+      "title": "Inicio",
+      "status": "pending",
+      "missingPaths": [
+        "home.moduleOrder"
+      ],
+      "findingCount": 79
+    },
+    {
+      "page": 4,
+      "title": "Inicio: continuación",
+      "status": "pending",
+      "missingPaths": [
+        "home.moduleOrder"
+      ],
+      "findingCount": 39
+    },
+    {
+      "page": 5,
+      "title": "Búsqueda",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 52
+    },
+    {
+      "page": 6,
+      "title": "Colección / categoría",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 58
+    },
+    {
+      "page": 7,
+      "title": "Preview del producto",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 2
+    },
+    {
+      "page": 8,
+      "title": "Producto",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 2
+    },
+    {
+      "page": 9,
+      "title": "Colección / categoría: variante",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 57
+    },
+    {
+      "page": 10,
+      "title": "Mayoreo",
+      "status": "pending",
+      "missingPaths": [
+        "wholesale.pricingMode"
+      ],
+      "findingCount": 18
+    },
+    {
+      "page": 11,
+      "title": "Mayoreo: continuación",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 18
+    },
+    {
+      "page": 12,
+      "title": "Mis pedidos",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 3
+    },
+    {
+      "page": 13,
+      "title": "Mi cuenta",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 8
+    },
+    {
+      "page": 14,
+      "title": "Rewards: conservar saldo MXN",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 3
+    },
+    {
+      "page": 15,
+      "title": "Compartir catálogo",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 15
+    },
+    {
+      "page": 16,
+      "title": "Contacto",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 11
+    },
+    {
+      "page": 17,
+      "title": "Confirmación de compra",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 4
+    },
+    {
+      "page": 18,
+      "title": "Categorías y marcas",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 63
+    },
+    {
+      "page": 19,
+      "title": "Menú",
+      "status": "pending",
+      "missingPaths": [],
+      "findingCount": 10
+    }
+  ],
+  "findings": [
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/categoryBrandHub",
+      "message": "PDF 18: categoryBrandHub is pending.",
+      "screens": [
+        18
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/contactGroupCards",
+      "message": "PDF 16: contactGroupCards is pending.",
+      "screens": [
+        16
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/hostedAccountBranding",
+      "message": "PDF 12: hostedAccountBranding is unknown.",
+      "screens": [
+        12
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/hostedAccountBranding",
+      "message": "PDF 13: hostedAccountBranding is unknown.",
+      "screens": [
+        13
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/hostedThankYouBranding",
+      "message": "PDF 17: hostedThankYouBranding is unknown.",
+      "screens": [
+        17
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/purchaseTypePreference",
+      "message": "PDF 2: purchaseTypePreference is pending.",
+      "screens": [
+        2
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/rewardsWebIntegration",
+      "message": "PDF 14: rewardsWebIntegration is unknown.",
+      "screens": [
+        14
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/shopifyFavorites",
+      "message": "PDF 6: shopifyFavorites is pending.",
+      "screens": [
+        6
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/shopifyFavorites",
+      "message": "PDF 8: shopifyFavorites is pending.",
+      "screens": [
+        8
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/shopifyPredictiveSearch",
+      "message": "PDF 5: shopifyPredictiveSearch is pending.",
+      "screens": [
+        5
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/shopifyQuickView",
+      "message": "PDF 7: shopifyQuickView is pending.",
+      "screens": [
+        7
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/signupSubmission",
+      "message": "PDF 11: signupSubmission is unknown.",
+      "screens": [
+        11
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/signupSubmission",
+      "message": "PDF 4: signupSubmission is unknown.",
+      "screens": [
+        4
+      ]
+    },
+    {
+      "code": "CAPABILITY_NOT_READY",
+      "severity": "warning",
+      "path": "/capabilities/webCatalogSharing",
+      "message": "PDF 15: webCatalogSharing is pending.",
+      "screens": [
+        15
+      ]
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/69",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.bags-wholesale"
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/70",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.bags-suggested"
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/71",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.bags-no-prices"
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/72",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.beauty-wholesale"
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/73",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.beauty-suggested"
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/74",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.beauty-no-prices"
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/75",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.perfume-wholesale"
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/76",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.perfume-suggested"
+    },
+    {
+      "code": "CATALOG_CONTENT_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/77",
+      "message": "Saved URL is backed locally; remote document identity/access/validity remain unknown. This is not evidence of a broken link.",
+      "routeId": "catalog.perfume-no-prices"
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/brands-and-categories",
+      "message": "Confirmar surtido, identidad CH, cuatro marcas del PDF y Handbags/Accesorios antes de crear tiles, logos o handles.",
+      "decisionId": "brands-and-categories",
+      "evidence": [
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "Confirm which brands/categories are stocked",
+          "capturedAt": "2026-10-20T23:15:25.390Z",
+          "sha256": "09fe69d30b42e4439915bbfcecf701ad6c4e18077d92652f613910b1895e53fd",
+          "line": 220
+        }
+      ]
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/delivery-estimate",
+      "message": "Confirmación muestra 3 a 5 días hábiles, Mayoreo 2 a 7 y PDF 5 a 7. Falta una política compartida confirmada.",
+      "decisionId": "delivery-estimate",
+      "evidence": [
+        {
+          "source": "lib/features/checkout/order_confirmation_screen.dart",
+          "needle": "return '3 a 5 días hábiles';",
+          "capturedAt": "2026-10-20T23:19:47.916Z",
+          "sha256": "d42a7b09e6ce01dc1a61bb95b8d82f60e9e384135649f7b8f88e251ed2c7ed01",
+          "line": 25
+        },
+        {
+          "source": "lib/features/wholesale/wholesale_content.dart",
+          "needle": "La entrega toma entre 2 y 7 días hábiles",
+          "capturedAt": "2026-10-20T23:15:25.415Z",
+          "sha256": "22177b682e33038fa9f82f1b9c69d058bf15332a48cc617dc33bdac63e72d207",
+          "line": 87
+        }
+      ]
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/legacy-product-count",
+      "message": "No perpetuar más de 3,000 productos del fallback como cantidad comercial actual.",
+      "decisionId": "legacy-product-count",
+      "evidence": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "Comparte más de 3,000 productos originales con tus clientes y",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "08bc59195bb44232ef465694a2f33f936acf35b6dcd2526a624fe6402864f33d",
+          "line": 243
+        }
+      ]
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/share-catalog-mode",
+      "message": "Elegir precios sugeridos o sin precios para compartir. Mayoreo prepara cotización; compartir no prueba vistas/compra ni genera comisión.",
+      "decisionId": "share-catalog-mode",
+      "evidence": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "bool get isClientFacing => this != wholesale;",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "08bc59195bb44232ef465694a2f33f936acf35b6dcd2526a624fe6402864f33d",
+          "line": 19
+        },
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "Opening WhatsApp or a catalog link does not approve reseller status",
+          "capturedAt": "2026-10-20T23:15:25.412Z",
+          "sha256": "faa9c488bc112dafb94be9fd0feb3a44291e0b681abb90c82093efb5dcdbb0a4",
+          "line": 2
+        }
+      ]
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/shared-store",
+      "message": "La entrega no demuestra catálogo/cuentas/sesiones compartidos. Alinear la tienda por canal antes de validar paridad.",
+      "decisionId": "shared-store",
+      "evidence": [
+        {
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md",
+          "needle": "No está demostrado que app y web operen sobre la misma tienda",
+          "capturedAt": "2026-10-20T23:15:25.391Z",
+          "sha256": "060a910c48e156610c351d5c3347398d144cee70c33a1bcda3930b13770f090c",
+          "line": 99
+        }
+      ]
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/shipping-offers",
+      "message": "La app publica gratis desde $1,499; PDF muestra otro umbral y oferta signup. Confirmar política sin autorizar incentivos nuevos.",
+      "decisionId": "shipping-offers",
+      "evidence": [
+        {
+          "source": "lib/app/shopper_copy.dart",
+          "needle": "Envío a todo México · gratis desde",
+          "capturedAt": "2026-10-20T23:15:25.397Z",
+          "sha256": "10ae3432ac474f2b36760c6722dbf99fe3695d8af2b1e0a86b139167b857f716",
+          "line": 246
+        },
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "The PDF includes $1,999 and 5-7 days",
+          "capturedAt": "2026-10-20T23:15:25.390Z",
+          "sha256": "09fe69d30b42e4439915bbfcecf701ad6c4e18077d92652f613910b1895e53fd",
+          "line": 217
+        }
+      ]
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/signup",
+      "message": "Faltan copy aprobado, consentimiento, adapter y privacidad publicada. enabled:false es fallback propuesto; no describe configuración remota.",
+      "decisionId": "signup",
+      "evidence": [
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "Confirm newsletter free-shipping offer",
+          "capturedAt": "2026-10-20T23:15:25.390Z",
+          "sha256": "09fe69d30b42e4439915bbfcecf701ad6c4e18077d92652f613910b1895e53fd",
+          "line": 217
+        }
+      ]
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/wholesale-mode",
+      "message": "Cotización manual por producto frente a descuento automático prometido en PartnerHub y tema. Resolver antes de publicar pricingMode.",
+      "decisionId": "wholesale-mode",
+      "evidence": [
+        {
+          "source": "lib/features/wholesale/wholesale_content.dart",
+          "needle": "El precio de mayoreo se define por producto al cotizar",
+          "capturedAt": "2026-10-20T23:15:25.415Z",
+          "sha256": "22177b682e33038fa9f82f1b9c69d058bf15332a48cc617dc33bdac63e72d207",
+          "line": 71
+        },
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "de mayoreo se aplica automáticamente a cada producto antes",
+          "capturedAt": "2026-10-20T23:15:25.412Z",
+          "sha256": "faa9c488bc112dafb94be9fd0feb3a44291e0b681abb90c82093efb5dcdbb0a4",
+          "line": 410
+        },
+        {
+          "source": "storefront-theme/templates/page.mayoreo.json",
+          "needle": "el descuento de mayoreo se aplicará automáticamente",
+          "capturedAt": "2026-10-20T23:15:25.438Z",
+          "sha256": "57743bdb35b8f1c39d7dc0bf02bafab5c32795c367157a2b9f1cceb434ef37af",
+          "line": 194
+        }
+      ]
+    },
+    {
+      "code": "COMMERCIAL_DECISION_REQUIRED",
+      "severity": "warning",
+      "path": "/decisions/wholesale-unit",
+      "message": "3 modelos, 3 piezas y más de tres piezas no son unidades/umbrales equivalentes. No convertir a tramos nuevos.",
+      "decisionId": "wholesale-unit",
+      "evidence": [
+        {
+          "source": "lib/features/wholesale/wholesale_content.dart",
+          "needle": "static const int minModels = 3;",
+          "capturedAt": "2026-10-20T23:15:25.415Z",
+          "sha256": "22177b682e33038fa9f82f1b9c69d058bf15332a48cc617dc33bdac63e72d207",
+          "line": 16
+        },
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "accede a precios de mayoreo desde tres piezas.",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "08bc59195bb44232ef465694a2f33f936acf35b6dcd2526a624fe6402864f33d",
+          "line": 244
+        }
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/brands.list",
+      "message": "extension: Las marcas hoy no se editan como lista desde metafield; cuatro marcas del PDF carecen de seed/arte verificado.",
+      "fieldId": "brands.list",
+      "screens": [
+        2,
+        3,
+        18
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/campaign.copy",
+      "message": "extension: Copy y CTA son independientes por canal; usar IDs estables y destino tipado.",
+      "fieldId": "campaign.copy",
+      "screens": [
+        1,
+        3,
+        4,
+        10,
+        15,
+        16
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/campaign.media",
+      "message": "extension: Faltan arte por tamaño y focal normalizado 0..1. El tema usa main_image para object-position aunque picture pueda seleccionar wide.",
+      "fieldId": "campaign.media",
+      "screens": [
+        1,
+        3,
+        4,
+        10,
+        15,
+        16
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/catalogs.shared-rendering",
+      "message": "extension: Las URLs coinciden, pero tema y app no consumen hoy la misma entidad editorial. first:50 y listas parciales requieren paginación y semántica de desactivación.",
+      "fieldId": "catalogs.shared-rendering",
+      "screens": [
+        10,
+        11,
+        15
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/collections.pagination",
+      "message": "extension: Una colección fuera de las primeras 50 puede parecer ausente; no usar ausencia en esa página como prueba negativa.",
+      "fieldId": "collections.pagination",
+      "screens": [
+        3,
+        6,
+        9,
+        18
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/contact.shared",
+      "message": "extension: La cuenta llama openContact sin redes runtime; propagar contenido editado y agregar grupos de forma explícita.",
+      "fieldId": "contact.shared",
+      "screens": [
+        16,
+        19
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/destinations.typed",
+      "message": "extension: Separar colección, página, cuenta y catálogo. Perfumes nativo es filtro por términos; web tiene catálogo externo.",
+      "fieldId": "destinations.typed",
+      "screens": [
+        3,
+        5,
+        10,
+        15,
+        18,
+        19
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/footer",
+      "message": "extension: Mantener año dinámico y políticas publicadas. Los rótulos del PDF no prueban páginas existentes.",
+      "fieldId": "footer",
+      "screens": [
+        4,
+        11
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/home.order",
+      "message": "extension: Añadir tipos campaña, mayoreo, servicios, signup y footer; hoy no existe un manifiesto de composición compartido.",
+      "fieldId": "home.order",
+      "screens": [
+        3,
+        4
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/listing.covers",
+      "message": "extension: Separar logo de marca y portada de colección; el PDF usa portada Coach. Sin portada, fallback de encabezado de texto sin logo ampliado.",
+      "fieldId": "listing.covers",
+      "screens": [
+        6,
+        9
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/preferences.purchase-type",
+      "message": "extension: Añadir persistencia y labels consistentes con unidad comercial; no concede elegibilidad o Rewards de mayoreo.",
+      "fieldId": "preferences.purchase-type",
+      "screens": [
+        2,
+        13
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/products.selections",
+      "message": "extension: Separar novedades por fecha, selección editorial y populares; el enlace sorted no ordena el carrusel.",
+      "fieldId": "products.selections",
+      "screens": [
+        3,
+        4,
+        11
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/services.shared",
+      "message": "extension: Sin fuente compartida; envío gratis, plazos, métodos y devoluciones requieren política coherente.",
+      "fieldId": "services.shared",
+      "screens": [
+        4,
+        8,
+        10,
+        11,
+        17
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/signup",
+      "message": "unknown: No hay signup Monetta compartido. Fallback oculta módulo; no usar envío gratis ni simular confirmación.",
+      "fieldId": "signup",
+      "screens": [
+        4,
+        11
+      ]
+    },
+    {
+      "code": "CONTENT_CONTRACT_GAP",
+      "severity": "warning",
+      "path": "/fieldMap/wholesale.policy",
+      "message": "decision: Contradicción cotización manual/descuento automático. No usar la preferencia mayoreo como autorización de precios.",
+      "fieldId": "wholesale.policy",
+      "screens": [
+        2,
+        4,
+        10,
+        13
+      ]
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/0/destination/routeId",
+      "message": "Content references brand.coach, whose destination is not ready.",
+      "routeId": "brand.coach"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/1/destination/routeId",
+      "message": "Content references brand.michael-kors, whose destination is not ready.",
+      "routeId": "brand.michael-kors"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/10/destination/routeId",
+      "message": "Content references brand.laneige, whose destination is not ready.",
+      "routeId": "brand.laneige"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/11/destination/routeId",
+      "message": "Content references brand.rhode, whose destination is not ready.",
+      "routeId": "brand.rhode"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/2/destination/routeId",
+      "message": "Content references brand.anne-klein, whose destination is not ready.",
+      "routeId": "brand.anne-klein"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/3/destination/routeId",
+      "message": "Content references brand.guess, whose destination is not ready.",
+      "routeId": "brand.guess"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/4/destination/routeId",
+      "message": "Content references brand.steve-madden, whose destination is not ready.",
+      "routeId": "brand.steve-madden"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/5/destination/routeId",
+      "message": "Content references brand.tommy-hilfiger, whose destination is not ready.",
+      "routeId": "brand.tommy-hilfiger"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/6/destination/routeId",
+      "message": "Content references brand.olaplex, whose destination is not ready.",
+      "routeId": "brand.olaplex"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/7/destination/routeId",
+      "message": "Content references brand.dior, whose destination is not ready.",
+      "routeId": "brand.dior"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/8/destination/routeId",
+      "message": "Content references brand.the-ordinary, whose destination is not ready.",
+      "routeId": "brand.the-ordinary"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/9/destination/routeId",
+      "message": "Content references brand.summer-fridays, whose destination is not ready.",
+      "routeId": "brand.summer-fridays"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/0/destination/routeId",
+      "message": "Content references category.bags, whose destination is not ready.",
+      "routeId": "category.bags"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/1/destination/routeId",
+      "message": "Content references category.wallets, whose destination is not ready.",
+      "routeId": "category.wallets"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/2/destination/routeId",
+      "message": "Content references category.watches, whose destination is not ready.",
+      "routeId": "category.watches"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/3/destination/routeId",
+      "message": "Content references category.tote, whose destination is not ready.",
+      "routeId": "category.tote"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/4/destination/routeId",
+      "message": "Content references category.crossbody, whose destination is not ready.",
+      "routeId": "category.crossbody"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/5/destination/routeId",
+      "message": "Content references category.shoulder, whose destination is not ready.",
+      "routeId": "category.shoulder"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/6/destination/routeId",
+      "message": "Content references category.satchel, whose destination is not ready.",
+      "routeId": "category.satchel"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/7/destination/routeId",
+      "message": "Content references category.hobo, whose destination is not ready.",
+      "routeId": "category.hobo"
+    },
+    {
+      "code": "CONTENT_DESTINATION_PENDING",
+      "severity": "warning",
+      "path": "/content/productSelections/todays-picks/source/routeId",
+      "message": "Content references selection.todays-picks, whose destination is not ready.",
+      "routeId": "selection.todays-picks"
+    },
+    {
+      "code": "DESIGN_CONTENT_MISSING",
+      "severity": "error",
+      "path": "/content/brands/ch",
+      "message": "Required design item ch is absent; no business/catalog data is inferred."
+    },
+    {
+      "code": "DESIGN_CONTENT_MISSING",
+      "severity": "error",
+      "path": "/content/brands/kate-spade",
+      "message": "Required design item kate-spade is absent; no business/catalog data is inferred."
+    },
+    {
+      "code": "DESIGN_CONTENT_MISSING",
+      "severity": "error",
+      "path": "/content/brands/marc-jacobs",
+      "message": "Required design item marc-jacobs is absent; no business/catalog data is inferred."
+    },
+    {
+      "code": "DESIGN_CONTENT_MISSING",
+      "severity": "error",
+      "path": "/content/brands/tory-burch",
+      "message": "Required design item tory-burch is absent; no business/catalog data is inferred."
+    },
+    {
+      "code": "DESIGN_CONTENT_MISSING",
+      "severity": "error",
+      "path": "/content/categories/accessories",
+      "message": "Required design item accessories is absent; no business/catalog data is inferred."
+    },
+    {
+      "code": "DESIGN_CONTENT_MISSING",
+      "severity": "error",
+      "path": "/content/categories/handbags",
+      "message": "Required design item handbags is absent; no business/catalog data is inferred."
+    },
+    {
+      "code": "DESIGN_DESTINATION_TYPE_GAP",
+      "severity": "warning",
+      "path": "/routes/4",
+      "message": "Design requires pagina_interna; current destination is coleccion.",
+      "routeId": "navigation.categories"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/17",
+      "message": "No evidenced destination for Handbags.",
+      "routeId": "category.handbags",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/18",
+      "message": "No evidenced destination for Accesorios.",
+      "routeId": "category.accessories",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/33",
+      "message": "No evidenced destination for Tory Burch.",
+      "routeId": "brand.tory-burch",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/34",
+      "message": "No evidenced destination for Kate Spade.",
+      "routeId": "brand.kate-spade",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/35",
+      "message": "No evidenced destination for Marc Jacobs.",
+      "routeId": "brand.marc-jacobs",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/36",
+      "message": "No evidenced destination for CH (identidad comercial por confirmar).",
+      "routeId": "brand.ch",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/5",
+      "message": "No evidenced destination for Todas las marcas.",
+      "routeId": "brands.directory",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/50",
+      "message": "No evidenced destination for Pedidos web.",
+      "routeId": "orders.hosted",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/51",
+      "message": "No evidenced destination for Direcciones.",
+      "routeId": "addresses.hosted",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/52",
+      "message": "No evidenced destination for Métodos de pago.",
+      "routeId": "payments.hosted",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/54",
+      "message": "No evidenced destination for Rewards web.",
+      "routeId": "rewards.hosted",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/56",
+      "message": "No evidenced destination for Favoritos web.",
+      "routeId": "favorites.web",
+      "status": "propuesto"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/58",
+      "message": "No evidenced destination for Preferencias web.",
+      "routeId": "preferences.web",
+      "status": "propuesto"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/60",
+      "message": "No evidenced destination for Gracias / estado del pedido web.",
+      "routeId": "confirmation.hosted",
+      "status": "pendiente"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/62",
+      "message": "No evidenced destination for Preguntas frecuentes.",
+      "routeId": "help.faq",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/63",
+      "message": "No evidenced destination for Envíos.",
+      "routeId": "help.shipping",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/64",
+      "message": "No evidenced destination for Cambios y devoluciones.",
+      "routeId": "help.returns",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/65",
+      "message": "No evidenced destination for Aviso de privacidad.",
+      "routeId": "help.privacy",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/66",
+      "message": "No evidenced destination for Términos y condiciones.",
+      "routeId": "help.terms",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/67",
+      "message": "No evidenced destination for Política de compra.",
+      "routeId": "help.purchase-policy",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/68",
+      "message": "No evidenced destination for Política de distribución.",
+      "routeId": "help.distribution",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_MISSING",
+      "severity": "warning",
+      "path": "/routes/8",
+      "message": "No evidenced destination for Lo más buscado / populares.",
+      "routeId": "selection.popular",
+      "status": "desconocido"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/10",
+      "message": "Destination status: pendiente.",
+      "routeId": "category.wallets"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/11",
+      "message": "Destination status: pendiente.",
+      "routeId": "category.watches"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/12",
+      "message": "Destination status: pendiente.",
+      "routeId": "category.tote"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/13",
+      "message": "Destination status: pendiente.",
+      "routeId": "category.crossbody"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/14",
+      "message": "Destination status: pendiente.",
+      "routeId": "category.shoulder"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/15",
+      "message": "Destination status: pendiente.",
+      "routeId": "category.satchel"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/16",
+      "message": "Destination status: pendiente.",
+      "routeId": "category.hobo"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/21",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.coach"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/22",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.michael-kors"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/23",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.anne-klein"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/24",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.guess"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/25",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.steve-madden"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/26",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.tommy-hilfiger"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/27",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.olaplex"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/28",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.dior"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/29",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.the-ordinary"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/30",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.summer-fridays"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/31",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.laneige"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/32",
+      "message": "Destination status: pendiente.",
+      "routeId": "brand.rhode"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/4",
+      "message": "Destination status: pendiente.",
+      "routeId": "navigation.categories"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/44",
+      "message": "Destination status: pendiente.",
+      "routeId": "wholesale.native"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/7",
+      "message": "Destination status: pendiente.",
+      "routeId": "selection.todays-picks"
+    },
+    {
+      "code": "DESTINATION_NOT_READY",
+      "severity": "warning",
+      "path": "/routes/9",
+      "message": "Destination status: pendiente.",
+      "routeId": "category.bags"
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/10",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "category.wallets",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Carteras',\n        handle: 'carteras-1',\n        category: 'cartera',",
+          "value": "carteras-1",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 227
+        }
+      ],
+      "observations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/11",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "category.watches",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Relojes',\n        handle: 'relojes',\n        category: 'reloj',",
+          "value": "relojes",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 233
+        }
+      ],
+      "observations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/12",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "category.tote",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Totes',\n        handle: 'totes',\n        category: 'bolsa',\n        silhouette: 'tote',",
+          "value": "totes",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 241
+        }
+      ],
+      "observations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/13",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "category.crossbody",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Crossbodys',\n        handle: 'crossbodys',\n        category: 'bolsa',\n        silhouette: 'crossbody',",
+          "value": "crossbodys",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 248
+        }
+      ],
+      "observations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/14",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "category.shoulder",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Hombro',\n        handle: 'hombro',\n        category: 'bolsa',\n        silhouette: 'shoulder',",
+          "value": "hombro",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 255
+        }
+      ],
+      "observations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/15",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "category.satchel",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Satchel',\n        handle: 'satchel',\n        category: 'bolsa',\n        silhouette: 'satchel',",
+          "value": "satchel",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 262
+        }
+      ],
+      "observations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/16",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "category.hobo",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Hobo',\n        handle: 'hobo',\n        category: 'bolsa',\n        silhouette: 'hobo',",
+          "value": "hobo",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 269
+        }
+      ],
+      "observations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/21",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.coach",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Coach',\n        brand: 'Coach',\n        handle: 'coach',",
+          "value": "coach",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 278
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/22",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.michael-kors",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Michael Kors',\n        brand: 'Michael Kors',\n        handle: 'michael-kors',",
+          "value": "michael-kors",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 284
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/23",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.anne-klein",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Anne Klein',\n        brand: 'Anne Klein',\n        handle: 'anne-klein',",
+          "value": "anne-klein",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 290
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/24",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.guess",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Guess',\n        brand: 'Guess',\n        handle: 'guess-1',",
+          "value": "guess-1",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 296
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/25",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.steve-madden",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Steve Madden',\n        brand: 'Steve Madden',\n        handle: 'steve-madden',",
+          "value": "steve-madden",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 302
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/26",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.tommy-hilfiger",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Tommy Hilfiger',\n        brand: 'Tommy Hilfiger',\n        handle: 'tommy-hilfiger',",
+          "value": "tommy-hilfiger",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 308
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/27",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.olaplex",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Olaplex',\n        brand: 'Olaplex',\n        handle: 'olalplex',",
+          "value": "olalplex",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 314
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/28",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.dior",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Dior',\n        brand: 'Christian Dior',\n        handle: 'christian-dior',",
+          "value": "christian-dior",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 320
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/29",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.the-ordinary",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'The Ordinary',\n        brand: 'The Ordinary',\n        handle: 'the-ordinary',",
+          "value": "the-ordinary",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 326
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/30",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.summer-fridays",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Summer Fridays',\n        brand: 'Summer Fridays',\n        handle: 'summer-fridays',",
+          "value": "summer-fridays",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 332
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/31",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.laneige",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Laneige',\n        brand: 'Laneige',\n        handle: 'laneige',",
+          "value": "laneige",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 338
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/32",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "brand.rhode",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Rhode',\n        brand: 'Rhode',\n        handle: 'rhode',",
+          "value": "rhode",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 344
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/7",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "selection.todays-picks",
+      "evidence": [
+        {
+          "source": "lib/data/shopify/featured_catalog_repository.dart",
+          "needle": "'handle': 'monetta-todays-picks'",
+          "value": "monetta-todays-picks",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.398Z",
+          "sha256": "f51a47e962af1cdfb9bad89712e4d19602767a1cedce32090b58a33e83d95f78",
+          "line": 19
+        }
+      ],
+      "observations": []
+    },
+    {
+      "code": "ENTITY_UNCONFIRMED",
+      "severity": "warning",
+      "path": "/routes/9",
+      "message": "A local reference does not establish collection membership/publication in the target store.",
+      "routeId": "category.bags",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Bolsas',\n        handle: 'guess',\n        category: 'bolsa',",
+          "value": "guess",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 221
+        }
+      ],
+      "observations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module brands."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module campaign."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module footer."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module hero."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module newest."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module popular."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module services."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module signup."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module styles."
+    },
+    {
+      "code": "HOME_MODULE_MISSING",
+      "severity": "warning",
+      "path": "/content/home/moduleOrder",
+      "message": "Missing shared home module wholesale."
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/15",
+      "message": "Fallback reutiliza arte de tote; falta arte específico aprobado.",
+      "routeId": "category.satchel",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Satchel',\n        handle: 'satchel',\n        category: 'bolsa',\n        silhouette: 'satchel',",
+          "value": "satchel",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 262
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/16",
+      "message": "Fallback reutiliza arte de shoulder; falta arte específico aprobado.",
+      "routeId": "category.hobo",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Hobo',\n        handle: 'hobo',\n        category: 'bolsa',\n        silhouette: 'hobo',",
+          "value": "hobo",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 269
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/19",
+      "message": "Búsqueda de productos propios por términos; no acredita /collections/perfumes ni equivalencia con el catálogo PDF externo.",
+      "routeId": "category.perfume.native",
+      "evidence": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "onPerfumes: () => _openCatalogSection(\n        title: 'Perfumes',\n        queryTerms: const ['perfume', 'fragancia'],",
+          "value": "_openCatalogSection",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.410Z",
+          "sha256": "a5445289925d3bd381e96ee3b3eb80b1a411bfb9b5e8f507e37d96d18d8f5e0b",
+          "line": 573
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/2",
+      "message": "Tipo de compra del PDF ausente de preferencias actuales.",
+      "routeId": "preferences.native",
+      "evidence": [
+        {
+          "source": "lib/features/onboarding/onboarding_sheet.dart",
+          "needle": "class OnboardingSheet extends StatefulWidget",
+          "value": "OnboardingSheet",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.412Z",
+          "sha256": "eae91fdf73d0d3030b7e6a7597830cbfa80579de2efdd4a14c55879bf87154f2",
+          "line": 63
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/20",
+      "message": "Productos propios y catálogos externos de beauty son destinos distintos.",
+      "routeId": "category.beauty.native",
+      "evidence": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "onBeauty: () => _openCatalogSection(\n        title: 'Maquillaje y skincare',\n        queryTerms: const ['maquillaje', 'skincare'],",
+          "value": "_openCatalogSection",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.410Z",
+          "sha256": "a5445289925d3bd381e96ee3b3eb80b1a411bfb9b5e8f507e37d96d18d8f5e0b",
+          "line": 577
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/24",
+      "message": "guess-1 es marca Guess. El clic nativo filtra brand: Guess.",
+      "routeId": "brand.guess",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Guess',\n        brand: 'Guess',\n        handle: 'guess-1',",
+          "value": "guess-1",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 296
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/27",
+      "message": "El valor configurado es olalplex; no corregir sin comprobar la entidad.",
+      "routeId": "brand.olaplex",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Olaplex',\n        brand: 'Olaplex',\n        handle: 'olalplex',",
+          "value": "olalplex",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 314
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/28",
+      "message": "Dior es etiqueta visible; Christian Dior es clave de marca. No sustituir taxonomía por etiqueta.",
+      "routeId": "brand.dior",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Dior',\n        brand: 'Christian Dior',\n        handle: 'christian-dior',",
+          "value": "christian-dior",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 320
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/37",
+      "message": "GET /search existe; la entrega del tema excluye predictive search.",
+      "routeId": "search",
+      "evidence": [
+        {
+          "source": "storefront-theme/sections/monetta-header.liquid",
+          "needle": "href=\"{{ routes.search_url }}\"",
+          "value": "routes.search_url",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.421Z",
+          "sha256": "876e1696dc9f8845c95d59a33cc11573614c77b12e521aee95eab4ffc64ff7e7",
+          "line": 47
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/39",
+      "message": "Existe nativo; quick view Shopify pendiente. Sin cantidad nativa fiable para urgencia numérica.",
+      "routeId": "product.preview.native",
+      "evidence": [
+        {
+          "source": "lib/features/product/quick_view.dart",
+          "needle": "Future<void> showProductQuickView(",
+          "value": "showProductQuickView",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:19:47.916Z",
+          "sha256": "67bd65c752e65b825b308446592aad470f5f509fb4a0cb7f1f3056111c2f118b",
+          "line": 41
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/4",
+      "message": "El dock abre todos los productos. El PDF pide un directorio. list-collections.json existe con layout Atelier; contenido/publicación sin confirmar.",
+      "routeId": "navigation.categories",
+      "evidence": [
+        {
+          "source": "storefront-theme/snippets/monetta-dock.liquid",
+          "needle": "href=\"{{ routes.all_products_collection_url }}\"",
+          "value": "routes.all_products_collection_url",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.428Z",
+          "sha256": "75b71149696c451cafd95ecd737f17fd3afa591ca22a693442a5ddbef439ff93",
+          "line": 21
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/41",
+      "message": "Plantilla con layout Atelier; asignación y reglas comerciales pendientes por tienda.",
+      "routeId": "wholesale.web",
+      "evidence": [
+        {
+          "source": "storefront-theme/templates/page.contact.json",
+          "needle": "\"button_link\": \"shopify://pages/mayoreo\"",
+          "value": "mayoreo",
+          "method": "page_handle",
+          "capturedAt": "2026-10-20T23:15:25.437Z",
+          "sha256": "3e1b182ea272c26a44dcf71d7c38bba986d6588cd981c3b4a1949204309e7ccd",
+          "line": 519
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/42",
+      "message": "como-vender es página; vende-con-monetta es handle del metaobject. No implica atribución o comisiones.",
+      "routeId": "partner.web",
+      "evidence": [
+        {
+          "source": "storefront-theme/templates/page.mayoreo.json",
+          "needle": "\"button_link\": \"shopify://pages/como-vender\"",
+          "value": "como-vender",
+          "method": "page_handle",
+          "capturedAt": "2026-10-20T23:15:25.438Z",
+          "sha256": "57743bdb35b8f1c39d7dc0bf02bafab5c32795c367157a2b9f1cceb434ef37af",
+          "line": 304
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/43",
+      "message": "Home abre PartnerHubScreen, sin abrir WholesaleScreen.",
+      "routeId": "partner.native",
+      "evidence": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "builder: (_) => PartnerHubScreen(",
+          "value": "PartnerHubScreen",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.410Z",
+          "sha256": "a5445289925d3bd381e96ee3b3eb80b1a411bfb9b5e8f507e37d96d18d8f5e0b",
+          "line": 256
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/44",
+      "message": "Clase existente; sin invocación activa encontrada desde home/cuenta. Revisar unificación con PartnerHubScreen.",
+      "routeId": "wholesale.native",
+      "evidence": [
+        {
+          "source": "lib/features/wholesale/wholesale_screen.dart",
+          "needle": "class WholesaleScreen extends StatelessWidget",
+          "value": "WholesaleScreen",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.415Z",
+          "sha256": "94d38d311a3beef54f18c99446f98cd14286627d01a6cb4b14e7680a3f5814c9",
+          "line": 23
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/45",
+      "message": "Evitar salto a producción desde tema staging; contact usa Atelier.",
+      "routeId": "contact.web",
+      "evidence": [
+        {
+          "source": "lib/features/contact/contact_screen.dart",
+          "needle": "Uri.parse('https://monetta.mx/pages/contact')",
+          "value": "https://monetta.mx/pages/contact",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.408Z",
+          "sha256": "9b86a65d48e5246a9c43c0563e147f02aa2e2a9da99496f61c1fc0c6ce5d88d8",
+          "line": 28
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/46",
+      "message": "Cuenta abre ContactScreen; menú home abre WhatsApp. Grupos residen en PartnerHubScreen.",
+      "routeId": "contact.native",
+      "evidence": [
+        {
+          "source": "lib/features/contact/contact_screen.dart",
+          "needle": "Future<void> openContact(",
+          "value": "openContact",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.408Z",
+          "sha256": "9b86a65d48e5246a9c43c0563e147f02aa2e2a9da99496f61c1fc0c6ce5d88d8",
+          "line": 94
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/47",
+      "message": "Resolver con routes.account_url. Configuración de cuentas, capacidades y Rewards web no certificados.",
+      "routeId": "account.hosted",
+      "evidence": [
+        {
+          "source": "storefront-theme/sections/monetta-header.liquid",
+          "needle": "href=\"{{ routes.account_url }}\"",
+          "value": "routes.account_url",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.421Z",
+          "sha256": "876e1696dc9f8845c95d59a33cc11573614c77b12e521aee95eab4ffc64ff7e7",
+          "line": 70
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/53",
+      "message": "Autoridad accounts_orders. Sin conversión a puntos/niveles ni premios por compartir.",
+      "routeId": "rewards.native",
+      "evidence": [
+        {
+          "source": "lib/features/rewards/rewards_section.dart",
+          "needle": "class RewardsSection extends StatefulWidget",
+          "value": "RewardsSection",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:20:50.407Z",
+          "sha256": "d640bd29237a2d9006bdcb27af2fa046bad4b459e93b4141404137b7b52a54e3",
+          "line": 279
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/6",
+      "message": "El enlace ordena por fecha; el carrusel usa el orden de la colección. Colección de campaña curada sin confirmar.",
+      "routeId": "selection.newest",
+      "evidence": [
+        {
+          "source": "storefront-theme/templates/index.json",
+          "needle": "\"button_1_link\": \"/collections/all?sort_by=created-descending\"",
+          "value": "/collections/all?sort_by=created-descending",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.436Z",
+          "sha256": "33b8da8efef72ef8de5999b9eaf1c6999fcf61cd525bc0e3a3b87e526a1e2d14",
+          "line": 13
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/61",
+      "message": "shop.policies dinámico; falta inventario de políticas publicadas por tienda.",
+      "routeId": "footer.policies",
+      "evidence": [
+        {
+          "source": "storefront-theme/sections/monetta-footer.liquid",
+          "needle": "href=\"{{ policy.url }}\"",
+          "value": "policy.url",
+          "method": "literal",
+          "capturedAt": "2026-10-20T23:15:25.419Z",
+          "sha256": "c301dc22a83403524d5f27b50e5a95fa98c78958f46f890737b65147457c9401",
+          "line": 36
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/7",
+      "message": "Flutter usa monetta-todays-picks; Selección en templates/index.json usa all. No son equivalentes.",
+      "routeId": "selection.todays-picks",
+      "evidence": [
+        {
+          "source": "lib/data/shopify/featured_catalog_repository.dart",
+          "needle": "'handle': 'monetta-todays-picks'",
+          "value": "monetta-todays-picks",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.398Z",
+          "sha256": "f51a47e962af1cdfb9bad89712e4d19602767a1cedce32090b58a33e83d95f78",
+          "line": 19
+        }
+      ]
+    },
+    {
+      "code": "KNOWN_ROUTE_INCONSISTENCY",
+      "severity": "warning",
+      "path": "/routes/9",
+      "message": "guess es Bolsas; guess-1 es la marca Guess. No fusionar.",
+      "routeId": "category.bags",
+      "evidence": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Bolsas',\n        handle: 'guess',\n        category: 'bolsa',",
+          "value": "guess",
+          "method": "collection_handle",
+          "capturedAt": "2026-10-20T23:15:25.405Z",
+          "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+          "line": 221
+        }
+      ]
+    },
+    {
+      "code": "LISTING_COVER_MISSING",
+      "severity": "error",
+      "path": "/content/cover/brand.coach",
+      "message": "The listing needs campaign art/copy distinct from its brand logo or category tile.",
+      "routeId": "brand.coach",
+      "screens": [
+        6,
+        9
+      ]
+    },
+    {
+      "code": "PRODUCT_SELECTION_ORDER_MISMATCH",
+      "severity": "error",
+      "path": "/content/productSelections/newest/source/ordering",
+      "message": "Required created_desc; available collection_default."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/contact/ctaLabel",
+      "message": "Missing required field ctaLabel."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/home/media/sources/compact/focal",
+      "message": "Missing required field focal."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/seasonal/ctaLabel",
+      "message": "Missing required field ctaLabel."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/seasonal/destination",
+      "message": "Missing required field destination."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/seasonal/headline",
+      "message": "Missing required field headline."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/share/ctaLabel",
+      "message": "Missing required field ctaLabel."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/share/headline",
+      "message": "Missing required field headline."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/welcome/destination",
+      "message": "Missing required field destination."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/welcome/media/sources/compact/focal",
+      "message": "Missing required field focal."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/wholesale/media/sources/compact/focal",
+      "message": "Missing required field focal."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/categories/8/alt",
+      "message": "Missing required field alt."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/categories/8/imageAssetId",
+      "message": "Missing required field imageAssetId."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/footer/policyRouteIds",
+      "message": "Missing required field policyRouteIds."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/home",
+      "message": "Missing required field home."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/preferences/purchaseTypeOptions",
+      "message": "Missing required field purchaseTypeOptions."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/productSelections/popular/source",
+      "message": "Missing required field source."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/signup/body",
+      "message": "Missing required field body."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/signup/consentText",
+      "message": "Missing required field consentText."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/signup/ctaLabel",
+      "message": "Missing required field ctaLabel."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/signup/headline",
+      "message": "Missing required field headline."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/signup/privacyRouteId",
+      "message": "Missing required field privacyRouteId."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/signup/submissionAdapter",
+      "message": "Missing required field submissionAdapter."
+    },
+    {
+      "code": "REQUIRED_FIELD_MISSING",
+      "severity": "error",
+      "path": "/content/wholesale/pricingMode",
+      "message": "Missing required field pricingMode."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/contact/media/sources/compact",
+      "message": "Missing required field compact."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/contact/media/sources/expanded",
+      "message": "Missing required field expanded."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/contact/media/sources/medium",
+      "message": "Missing required field medium."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/home/media/sources/expanded",
+      "message": "Missing required field expanded."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/home/media/sources/medium",
+      "message": "Missing required field medium."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/seasonal/media/sources/compact",
+      "message": "Missing required field compact."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/seasonal/media/sources/expanded",
+      "message": "Missing required field expanded."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/seasonal/media/sources/medium",
+      "message": "Missing required field medium."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/share/media/sources/compact",
+      "message": "Missing required field compact."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/share/media/sources/expanded",
+      "message": "Missing required field expanded."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/share/media/sources/medium",
+      "message": "Missing required field medium."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/welcome/media/sources/expanded",
+      "message": "Missing required field expanded."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/welcome/media/sources/medium",
+      "message": "Missing required field medium."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/wholesale/media/sources/expanded",
+      "message": "Missing required field expanded."
+    },
+    {
+      "code": "RESPONSIVE_VISUAL_MISSING",
+      "severity": "error",
+      "path": "/content/campaigns/wholesale/media/sources/medium",
+      "message": "Missing required field medium."
+    },
+    {
+      "code": "SCREEN_CONTENT_MISSING",
+      "severity": "error",
+      "path": "/content/home/moduleOrder",
+      "message": "PDF 3: required content home.moduleOrder is unavailable.",
+      "screens": [
+        3
+      ]
+    },
+    {
+      "code": "TEMPLATE_LAYOUT_PENDING",
+      "severity": "warning",
+      "path": "storefront-theme/templates/list-collections.json",
+      "message": "Current layout theme (default); required monetta.",
+      "screens": [
+        18
+      ]
+    },
+    {
+      "code": "TEMPLATE_LAYOUT_PENDING",
+      "severity": "warning",
+      "path": "storefront-theme/templates/page.como-vender.json",
+      "message": "Current layout theme (default); required monetta.",
+      "screens": [
+        10,
+        11,
+        15
+      ]
+    },
+    {
+      "code": "TEMPLATE_LAYOUT_PENDING",
+      "severity": "warning",
+      "path": "storefront-theme/templates/page.contact.json",
+      "message": "Current layout theme (default); required monetta.",
+      "screens": [
+        16
+      ]
+    },
+    {
+      "code": "TEMPLATE_LAYOUT_PENDING",
+      "severity": "warning",
+      "path": "storefront-theme/templates/page.json",
+      "message": "Current layout theme (default); required monetta.",
+      "screens": [
+        4,
+        11
+      ]
+    },
+    {
+      "code": "TEMPLATE_LAYOUT_PENDING",
+      "severity": "warning",
+      "path": "storefront-theme/templates/page.mayoreo.json",
+      "message": "Current layout theme (default); required monetta.",
+      "screens": [
+        10,
+        11
+      ]
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/0/imageAssetId",
+      "message": "assets/images/brands/coach.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/coach.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/1/imageAssetId",
+      "message": "assets/images/brands/michael_kors.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/michael_kors.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/10/imageAssetId",
+      "message": "assets/images/brands/laneige.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/laneige.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/11/imageAssetId",
+      "message": "assets/images/brands/rhode.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/rhode.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/2/imageAssetId",
+      "message": "assets/images/brands/anne_klein.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/anne_klein.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/3/imageAssetId",
+      "message": "assets/images/brands/guess.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/guess.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/4/imageAssetId",
+      "message": "assets/images/brands/steve_madden.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/steve_madden.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/5/imageAssetId",
+      "message": "assets/images/brands/tommy_hilfiger.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/tommy_hilfiger.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/6/imageAssetId",
+      "message": "assets/images/brands/olaplex.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/olaplex.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/7/imageAssetId",
+      "message": "assets/images/brands/dior.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/dior.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/8/imageAssetId",
+      "message": "assets/images/brands/the_ordinary.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/the_ordinary.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/brands/9/imageAssetId",
+      "message": "assets/images/brands/summer_fridays.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/brands/summer_fridays.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/campaigns/home/media/sources/compact/assetId",
+      "message": "assets/images/home_banner.jpg is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_banner.jpg"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/campaigns/welcome/media/sources/compact/assetId",
+      "message": "assets/images/campaign_terracotta.jpg is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/campaign_terracotta.jpg"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/campaigns/wholesale/media/sources/compact/assetId",
+      "message": "assets/images/campaign_olive.jpg is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/campaign_olive.jpg"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/0/imageAssetId",
+      "message": "assets/images/home_collection_bags.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_collection_bags.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/1/imageAssetId",
+      "message": "assets/images/home_collection_wallets.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_collection_wallets.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/2/imageAssetId",
+      "message": "assets/images/home_collection_watches.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_collection_watches.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/3/imageAssetId",
+      "message": "assets/images/home_bag_tote.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_bag_tote.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/4/imageAssetId",
+      "message": "assets/images/home_bag_crossbody.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_bag_crossbody.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/5/imageAssetId",
+      "message": "assets/images/home_bag_shoulder.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_bag_shoulder.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/6/imageAssetId",
+      "message": "assets/images/home_bag_tote.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_bag_tote.webp"
+    },
+    {
+      "code": "VISUAL_APPROVAL_PENDING",
+      "severity": "warning",
+      "path": "/content/categories/7/imageAssetId",
+      "message": "assets/images/home_bag_shoulder.webp is a legacy fallback; the PDF composition/crop is not approved.",
+      "assetId": "assets/images/home_bag_shoulder.webp"
+    }
+  ]
+}

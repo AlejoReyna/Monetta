@@ -1,0 +1,452 @@
+{% doc %}
+  @prompt
+    Shopify Liquid block. Image carousel, 3 cards, mobile-first. Full-bleed images only, no text, all backgrounds transparent.
+    
+    Never cause horizontal page overflow. Custom element and wrapper must have display: block, width: 100%, max-width: 100%, overflow: hidden, margin: 0, box-sizing: border-box. Only the scroll track has overflow-x: auto. Never use overflow: visible, force-full-width, negative margins, or width: 100vw. Define custom element in CSS: carousel-[id] { display: block; width: 100%; max-width: 100%; overflow: hidden; background: transparent; }. Use if (!customElements.get(...)) guard before registering.
+    
+    Cards: flex: 0 0 65vw, max-width: 240px, aspect-ratio: 3/4, border-radius: 24px, overflow: hidden, background: transparent, scroll-snap-align: center, will-change: transform. Image: width: 100%, height: 100%, object-fit: cover, display: block, pointer-events: none. Zero padding inside card. Resting shadow: 0 4px 8px rgba(0,0,0,0.10), 0 10px 20px rgba(0,0,0,0.10), 0 18px 28px rgba(0,0,0,0.08). Transition on transform and box-shadow: 0.7s cubic-bezier(0.34, 1.56, 0.64, 1).
+    
+    Scroll-driven pop with Intersection Observer using threshold array [0, 0.5, 0.85, 1.0] for progressive animation. As intersectionRatio increases progressively interpolate transform and shadow. At intersectionRatio above 0.85 apply full pop: transform: translateY(-14px) scale(1.04), shadow: 0 6px 12px rgba(0,0,0,0.12), 0 14px 28px rgba(0,0,0,0.14), 0 24px 40px rgba(0,0,0,0.10). At intersectionRatio below 0.5 fully restore resting state. This creates a gradual fluid pop as the card slides into view.
+    
+    Hover and active: transform: translateY(-18px) scale(1.06), shadow: 0 6px 12px rgba(0,0,0,0.12), 0 14px 28px rgba(0,0,0,0.14), 0 24px 40px rgba(0,0,0,0.10). Transition: 0.5s cubic-bezier(0.34, 1.56, 0.64, 1).
+    
+    Scroll track: display: flex, gap: 32px, overflow-x: auto, overflow-y: hidden, scroll-snap-type: x mandatory, scroll-snap-stop: always, -webkit-overflow-scrolling: touch, scrollbar-width: none, scroll-behavior: smooth, padding: 56px 40px, margin: 0. Add scrollend event listener to re-evaluate Intersection Observer so active card pop stays in sync with final scroll position. Never use justify-content: center or margin: auto on scroll track.
+    
+    Force scrollLeft = 0 on DOMContentLoaded, load, setTimeout 100ms and 500ms.
+    
+    Settings: image_1, image_2, image_3 as image pickers. link_1, link_2, link_3 as URL pickers. border-radius range default 24 min 0 max 40 step 2. shadow-opacity range default 10 min 0 max 30 step 1.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    background: transparent;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .ai-carousel-wrapper-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    overflow: hidden;
+    margin: 0;
+    box-sizing: border-box;
+    background: transparent;
+
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    scroll-snap-stop: always;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    scroll-behavior: smooth;
+    padding: {{ block.settings.track_padding_vertical }}px {{ block.settings.track_padding_horizontal }}px;
+    margin: 0;
+    box-sizing: border-box;
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 65vw;
+    max-width: 240px;
+    aspect-ratio: 3/4;
+    border-radius: {{ block.settings.border_radius }}px;
+    overflow: hidden;
+    background: transparent;
+    scroll-snap-align: center;
+    will-change: transform;
+    backface-visibility: hidden;
+-webkit-backface-visibility: hidden;
+    box-shadow:
+      0 {{ block.settings.shadow_offset_y }}px {{ block.settings.shadow_blur }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 }}),
+      0 {{ block.settings.shadow_offset_y | times: 2 }}px {{ block.settings.shadow_blur | times: 2 }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 | times: 0.7 }}),
+      0 {{ block.settings.shadow_offset_y | times: 3 }}px {{ block.settings.shadow_blur | times: 3 }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 | times: 0.5 }});
+    padding: 0;
+    box-sizing: border-box;
+    position: relative;
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }}:hover,
+  .ai-carousel-card-{{ ai_gen_id }}:active {
+    transform: translateY(-18px) scale(1.06);
+    box-shadow:
+      0 {{ block.settings.shadow_offset_y | times: 2 }}px {{ block.settings.shadow_blur | times: 2 }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 }}),
+      0 {{ block.settings.shadow_offset_y | times: 3 }}px {{ block.settings.shadow_blur | times: 3 }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 | times: 0.7 }}),
+      0 {{ block.settings.shadow_offset_y | times: 4 }}px {{ block.settings.shadow_blur | times: 4 }}px rgba({{ block.settings.shadow_color.red }}, {{ block.settings.shadow_color.green }}, {{ block.settings.shadow_color.blue }}, {{ block.settings.shadow_opacity | divided_by: 100.0 | times: 0.5 }});
+    transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+  }
+
+  .ai-carousel-card-link-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .ai-carousel-card-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+  }
+
+  .ai-carousel-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-carousel-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  @media screen and (max-width: 749px) {
+    carousel-{{ ai_gen_id }} {
+      max-width: 100vw;
+      overflow: hidden;
+    }
+
+    .ai-carousel-wrapper-{{ ai_gen_id }} {
+      max-width: 100vw;
+      overflow: hidden;
+    }
+
+    .ai-carousel-track-{{ ai_gen_id }} {
+      padding: {{ block.settings.track_padding_vertical_mobile }}px {{ block.settings.track_padding_horizontal_mobile }}px;
+      gap: {{ block.settings.card_gap_mobile }}px;
+    }
+
+    .ai-carousel-card-{{ ai_gen_id }} {
+      flex: 0 0 72vw;
+      max-width: 72vw;
+      transition: transform 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+            box-shadow 0.45s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .ai-carousel-card-{{ ai_gen_id }}:hover,
+    .ai-carousel-card-{{ ai_gen_id }}:active {
+      transform: translateY(-4px) scale(1.01);
+    }
+  }
+{% endstyle %}
+
+<carousel-{{ ai_gen_id }} {{ block.shopify_attributes }}>
+  <div class="ai-carousel-wrapper-{{ ai_gen_id }}">
+    <div class="ai-carousel-track-{{ ai_gen_id }}">
+{% for i in (1..3) %}
+  {% liquid
+    assign image_key = 'image_' | append: i
+    assign link_key = 'link_' | append: i
+    assign image = block.settings[image_key]
+    assign link = block.settings[link_key]
+  %}
+  {% if image != blank %}
+    <div class="ai-carousel-card-{{ ai_gen_id }}" data-card-index="{{ i }}">
+      {% if link != blank %}
+        <a href="{{ link }}" class="ai-carousel-card-link-{{ ai_gen_id }}">
+          <img
+            src="{{ image | image_url: width: 480 }}"
+            alt="{{ image.alt | escape }}"
+            loading="lazy"
+            width="480"
+            height="640"
+            class="ai-carousel-card-image-{{ ai_gen_id }}"
+          >
+        </a>
+      {% else %}
+        <img
+          src="{{ image | image_url: width: 480 }}"
+          alt="{{ image.alt | escape }}"
+          loading="lazy"
+          width="480"
+          height="640"
+          class="ai-carousel-card-image-{{ ai_gen_id }}"
+        >
+      {% endif %}
+    </div>
+  {% endif %}
+{% endfor %}
+    </div>
+  </div>
+</carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    if (!customElements.get('carousel-{{ ai_gen_id }}')) {
+      class Carousel{{ ai_gen_id }} extends HTMLElement {
+        constructor() {
+          super();
+          this.track = null;
+          this.cards = [];
+          this._rafId = null;
+        }
+
+        connectedCallback() {
+          this.track = this.querySelector('.ai-carousel-track-{{ ai_gen_id }}');
+          this.cards = Array.from(this.querySelectorAll('.ai-carousel-card-{{ ai_gen_id }}'));
+
+          this.resetScroll();
+          this.setupIntersectionObserver();
+
+          window.addEventListener('DOMContentLoaded', () => this.resetScroll());
+          window.addEventListener('load', () => this.resetScroll());
+          setTimeout(() => this.resetScroll(), 100);
+          setTimeout(() => this.resetScroll(), 500);
+        }
+
+        resetScroll() {
+          if (this.track) {
+            this.track.scrollLeft = 0;
+          }
+        }
+
+        setupIntersectionObserver() {
+          const shadowOpacity = {{ block.settings.shadow_opacity }} / 100;
+          const shadowR = {{ block.settings.shadow_color.red }};
+          const shadowG = {{ block.settings.shadow_color.green }};
+          const shadowB = {{ block.settings.shadow_color.blue }};
+          const offsetY = {{ block.settings.shadow_offset_y }};
+          const blur = {{ block.settings.shadow_blur }};
+
+          let lastScrollLeft = -1;
+
+          const applyCardState = () => {
+            const trackRect = this.track.getBoundingClientRect();
+            const trackCenter = trackRect.left + trackRect.width / 2;
+
+            this.cards.forEach((card) => {
+              const cardRect = card.getBoundingClientRect();
+              const cardCenter = cardRect.left + cardRect.width / 2;
+              const distance = Math.abs(trackCenter - cardCenter);
+              const maxDistance = trackRect.width * 0.65;
+              const progress = Math.max(0, 1 - distance / maxDistance);
+
+              const translateY = -14 * progress;
+              const scale = 1 + (0.04 * progress);
+              const opBase = shadowOpacity * (0.4 + 0.6 * progress);
+
+              card.style.transition = 'none';
+              card.style.transform = `translateY(${translateY}px) scale(${scale})`;
+              card.style.boxShadow = `
+                0 ${offsetY * (1 + progress)}px ${blur * (1 + progress)}px rgba(${shadowR},${shadowG},${shadowB},${opBase}),
+                0 ${offsetY * (2 + progress)}px ${blur * (2 + progress)}px rgba(${shadowR},${shadowG},${shadowB},${opBase * 0.7}),
+                0 ${offsetY * (3 + progress)}px ${blur * (3 + progress)}px rgba(${shadowR},${shadowG},${shadowB},${opBase * 0.5})`;
+            });
+          };
+
+          const loop = () => {
+            const currentScroll = this.track.scrollLeft;
+            if (currentScroll !== lastScrollLeft) {
+              lastScrollLeft = currentScroll;
+              applyCardState();
+            }
+            this._rafId = requestAnimationFrame(loop);
+          };
+
+          applyCardState();
+          this._rafId = requestAnimationFrame(loop);
+        }
+
+        disconnectedCallback() {
+          if (this._rafId) cancelAnimationFrame(this._rafId);
+        }
+      }
+
+      customElements.define('carousel-{{ ai_gen_id }}', Carousel{{ ai_gen_id }});
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Image Carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Imágenes y enlaces"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Imagen 1"
+    },
+    {
+      "type": "url",
+      "id": "link_1",
+      "label": "Enlace 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Imagen 2"
+    },
+    {
+      "type": "url",
+      "id": "link_2",
+      "label": "Enlace 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Imagen 3"
+    },
+    {
+      "type": "url",
+      "id": "link_3",
+      "label": "Enlace 3"
+    },
+    {
+      "type": "header",
+      "content": "Tarjetas"
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Radio de bordes",
+      "min": 0,
+      "max": 40,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Separación entre tarjetas"
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap — Escritorio",
+      "min": 8,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "card_gap_mobile",
+      "label": "Gap — Móvil",
+      "min": 8,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Sombra"
+    },
+    {
+      "type": "color",
+      "id": "shadow_color",
+      "label": "Color de sombra",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Opacidad",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "shadow_offset_y",
+      "label": "Desplazamiento vertical",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "shadow_blur",
+      "label": "Difuminado",
+      "min": 0,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Padding — Escritorio"
+    },
+    {
+      "type": "range",
+      "id": "track_padding_vertical",
+      "label": "Vertical",
+      "min": 20,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 56
+    },
+    {
+      "type": "range",
+      "id": "track_padding_horizontal",
+      "label": "Horizontal",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Padding — Móvil"
+    },
+    {
+      "type": "range",
+      "id": "track_padding_vertical_mobile",
+      "label": "Vertical",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "track_padding_horizontal_mobile",
+      "label": "Horizontal",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    }
+  ],
+  "presets": [
+    {
+      "name": "Image Carousel"
+    }
+  ]
+}
+{% endschema %}

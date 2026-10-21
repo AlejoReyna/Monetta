@@ -1,0 +1,597 @@
+{% doc %}
+  @prompt
+    Create a Shopify OS 2.0 custom section block called "Two Column Card Slider" for a Dawn-based theme. The block must render as a single compact horizontal row with two equal columns (50% / 50%) that never stack on desktop.
+    
+    LEFT COLUMN — Static Text Panel:
+    
+    Vertically centered within the row
+    Contains: a small eyebrow label (uppercase, letter-spacing 0.1em, ~12px), a heading (H2, bold, ~28–32px), a short paragraph description (~14–16px, muted color), and an optional CTA button (outlined or filled, editable from theme editor)
+    All text left-aligned
+    Padding: 40px on all sides
+    Background: transparent or editable solid color
+    RIGHT COLUMN — Horizontal Card Slider:
+    
+    3 cards displayed in a horizontal swipeable carousel (overflow hidden, scroll-snap)
+    Each card: rounded corners (12px), subtle box-shadow (0 4px 20px rgba(0,0,0,0.08)), white background
+    Card anatomy (top to bottom): full-width image (aspect-ratio 4:3, object-fit cover), card title (bold, ~15px), short card description (~13px, muted)
+    Synchronized text label: above the slider track, outside the cards, a single line of text that updates smoothly (CSS opacity + transform transition, ~350ms ease) to show the title of the currently active/visible card
+    Swipe/drag enabled (touch and mouse), no arrows, no dots
+    Scroll-snap-type: x mandatory on the track; each card snaps to center
+    Visible peek of next card (~15px) to hint at swipeability
+    Transitions & Polish:
+    
+    Slider scroll: scroll-behavior: smooth
+    Synchronized label transition: opacity 0.35s ease, transform 0.35s ease (slides up slightly on change)
+    Card hover: subtle lift (transform: translateY(-3px), shadow deepens)
+    Theme Editor Controls (schema settings):
+    
+    Eyebrow label text
+    Heading text
+    Description text
+    CTA label + URL
+    Button style (filled / outlined)
+    For each of the 3 cards: image picker, card title, card description
+    Section background color
+    Text color
+    Card background color
+    Responsive behavior:
+    
+    Desktop (≥768px): strict 50/50 horizontal layout, fixed section height ~420px
+    Mobile (<768px): columns stack vertically — text panel on top, slider below; cards become full-width single scroll
+    File output needed:
+    
+    sections/two-column-card-slider.liquid — full Liquid + HTML + CSS + JS (vanilla, no dependencies) + schema JSON block
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-two-col-slider-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.section_bg_color }};
+  }
+
+  .ai-two-col-slider__container-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    min-height: 420px;
+    max-width: 100%;
+  }
+
+  .ai-two-col-slider__left-{{ ai_gen_id }} {
+    flex: 0 0 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    background-color: {{ block.settings.text_panel_bg_color }};
+    color: {{ block.settings.text_color }};
+  }
+
+  .ai-two-col-slider__eyebrow-{{ ai_gen_id }} {
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 12px;
+    color: {{ block.settings.text_color }};
+    opacity: 0.7;
+  }
+
+  .ai-two-col-slider__heading-{{ ai_gen_id }} {
+    font-size: 32px;
+    font-weight: 700;
+    margin: 0 0 16px 0;
+    color: {{ block.settings.text_color }};
+    line-height: 1.2;
+  }
+
+  .ai-two-col-slider__description-{{ ai_gen_id }} {
+    font-size: 16px;
+    line-height: 1.5;
+    margin-bottom: 24px;
+    color: {{ block.settings.text_color }};
+    opacity: 0.8;
+  }
+
+  .ai-two-col-slider__cta-{{ ai_gen_id }} {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 32px;
+    font-size: 14px;
+    text-decoration: none;
+    border-radius: 100px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 500;
+  }
+
+  .ai-two-col-slider__cta--filled-{{ ai_gen_id }} {
+    background-color: {{ block.settings.text_color }};
+    color: {{ block.settings.text_panel_bg_color }};
+    border: 2px solid {{ block.settings.text_color }};
+  }
+
+  .ai-two-col-slider__cta--filled-{{ ai_gen_id }}:hover {
+    opacity: 0.8;
+  }
+
+  .ai-two-col-slider__cta--outlined-{{ ai_gen_id }} {
+    background-color: transparent;
+    color: {{ block.settings.text_color }};
+    border: 2px solid {{ block.settings.text_color }};
+  }
+
+  .ai-two-col-slider__cta--outlined-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.text_color }};
+    color: {{ block.settings.text_panel_bg_color }};
+  }
+
+  .ai-two-col-slider__right-{{ ai_gen_id }} {
+    flex: 0 0 50%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 40px;
+    overflow: hidden;
+  }
+
+  .ai-two-col-slider__label-{{ ai_gen_id }} {
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: {{ block.settings.text_color }};
+    min-height: 21px;
+    opacity: 1;
+    transform: translateY(0);
+    transition: opacity 0.35s ease, transform 0.35s ease;
+  }
+
+  .ai-two-col-slider__label--hidden-{{ ai_gen_id }} {
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+
+  .ai-two-col-slider__track-{{ ai_gen_id }} {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-right: 15px;
+  }
+
+  .ai-two-col-slider__track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-two-col-slider__card-{{ ai_gen_id }} {
+    flex: 0 0 calc(33.333% - 14px);
+    min-width: calc(33.333% - 14px);
+    scroll-snap-align: center;
+    background-color: {{ block.settings.card_bg_color }};
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    cursor: pointer;
+  }
+
+  .ai-two-col-slider__card-{{ ai_gen_id }}:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+  }
+
+  .ai-two-col-slider__card-image-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-two-col-slider__card-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 4 / 3;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-two-col-slider__card-image-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-two-col-slider__card-content-{{ ai_gen_id }} {
+    padding: 20px;
+  }
+
+  .ai-two-col-slider__card-title-{{ ai_gen_id }} {
+    font-size: 15px;
+    font-weight: 700;
+    margin: 0 0 8px 0;
+    color: #000000;
+  }
+
+  .ai-two-col-slider__card-desc-{{ ai_gen_id }} {
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 0;
+    color: #666666;
+  }
+
+  @media screen and (max-width: 767px) {
+    .ai-two-col-slider__container-{{ ai_gen_id }} {
+      flex-direction: column;
+      min-height: auto;
+    }
+
+    .ai-two-col-slider__left-{{ ai_gen_id }},
+    .ai-two-col-slider__right-{{ ai_gen_id }} {
+      flex: 1 1 auto;
+      padding: 30px 20px;
+    }
+
+    .ai-two-col-slider__heading-{{ ai_gen_id }} {
+      font-size: 24px;
+    }
+
+    .ai-two-col-slider__description-{{ ai_gen_id }} {
+      font-size: 14px;
+    }
+
+    .ai-two-col-slider__card-{{ ai_gen_id }} {
+      flex: 0 0 85%;
+      min-width: 85%;
+    }
+
+    .ai-two-col-slider__track-{{ ai_gen_id }} {
+      padding-right: 0;
+    }
+  }
+{% endstyle %}
+
+<two-column-card-slider-{{ ai_gen_id }}
+  class="ai-two-col-slider-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-two-col-slider__container-{{ ai_gen_id }}">
+    <div class="ai-two-col-slider__left-{{ ai_gen_id }}">
+      {% if block.settings.eyebrow != blank %}
+        <div class="ai-two-col-slider__eyebrow-{{ ai_gen_id }}">
+          {{ block.settings.eyebrow }}
+        </div>
+      {% endif %}
+
+      {% if block.settings.heading != blank %}
+        <h2 class="ai-two-col-slider__heading-{{ ai_gen_id }}">
+          {{ block.settings.heading }}
+        </h2>
+      {% endif %}
+
+      {% if block.settings.description != blank %}
+        <div class="ai-two-col-slider__description-{{ ai_gen_id }}">
+          {{ block.settings.description }}
+        </div>
+      {% endif %}
+
+      {% if block.settings.cta_label != blank and block.settings.cta_url != blank %}
+        <a
+          href="{{ block.settings.cta_url }}"
+          class="ai-two-col-slider__cta-{{ ai_gen_id }} ai-two-col-slider__cta--{{ block.settings.button_style }}-{{ ai_gen_id }}"
+        >
+          {{ block.settings.cta_label }}
+        </a>
+      {% endif %}
+    </div>
+
+    <div class="ai-two-col-slider__right-{{ ai_gen_id }}">
+      <div
+        class="ai-two-col-slider__label-{{ ai_gen_id }}"
+        data-slider-label
+      >
+        {% if block.settings.card_1_title != blank %}
+          {{ block.settings.card_1_title }}
+        {% endif %}
+      </div>
+
+      <div
+        class="ai-two-col-slider__track-{{ ai_gen_id }}"
+        data-slider-track
+      >
+        {% for i in (1..3) %}
+          {% liquid
+            assign card_image_key = 'card_' | append: i | append: '_image'
+            assign card_title_key = 'card_' | append: i | append: '_title'
+            assign card_desc_key = 'card_' | append: i | append: '_description'
+
+            assign card_image = block.settings[card_image_key]
+            assign card_title = block.settings[card_title_key]
+            assign card_desc = block.settings[card_desc_key]
+          %}
+
+          <div
+            class="ai-two-col-slider__card-{{ ai_gen_id }}"
+            data-card-title="{{ card_title | escape }}"
+          >
+            {% if card_image != blank %}
+              <img
+                src="{{ card_image | image_url: width: 600 }}"
+                alt="{{ card_image.alt | escape }}"
+                class="ai-two-col-slider__card-image-{{ ai_gen_id }}"
+                loading="lazy"
+                width="600"
+                height="450"
+              >
+            {% else %}
+              <div class="ai-two-col-slider__card-image-placeholder-{{ ai_gen_id }}">
+                {{ 'image' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+
+            <div class="ai-two-col-slider__card-content-{{ ai_gen_id }}">
+              {% if card_title != blank %}
+                <h3 class="ai-two-col-slider__card-title-{{ ai_gen_id }}">
+                  {{ card_title }}
+                </h3>
+              {% endif %}
+
+              {% if card_desc != blank %}
+                <p class="ai-two-col-slider__card-desc-{{ ai_gen_id }}">
+                  {{ card_desc }}
+                </p>
+              {% endif %}
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</two-column-card-slider-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class TwoColumnCardSlider{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = null;
+        this.label = null;
+        this.cards = [];
+        this.currentTitle = '';
+        this.isTransitioning = false;
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('[data-slider-track]');
+        this.label = this.querySelector('[data-slider-label]');
+        this.cards = Array.from(this.querySelectorAll('.ai-two-col-slider__card-{{ ai_gen_id }}'));
+
+        if (!this.track || !this.label || this.cards.length === 0) return;
+
+        this.setupEventListeners();
+        this.updateLabel();
+      }
+
+      setupEventListeners() {
+        this.track.addEventListener('scroll', this.handleScroll.bind(this));
+
+        this.cards.forEach((card) => {
+          card.addEventListener('click', () => {
+            const cardRect = card.getBoundingClientRect();
+            const trackRect = this.track.getBoundingClientRect();
+            const scrollLeft = this.track.scrollLeft + cardRect.left - trackRect.left - (trackRect.width / 2) + (cardRect.width / 2);
+
+            this.track.scrollTo({
+              left: scrollLeft,
+              behavior: 'smooth'
+            });
+          });
+        });
+      }
+
+      handleScroll() {
+        if (!this.isTransitioning) {
+          requestAnimationFrame(() => {
+            this.updateLabel();
+            this.isTransitioning = false;
+          });
+          this.isTransitioning = true;
+        }
+      }
+
+      updateLabel() {
+        const trackRect = this.track.getBoundingClientRect();
+        const trackCenter = trackRect.left + trackRect.width / 2;
+
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(trackCenter - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        if (closestCard) {
+          const newTitle = closestCard.getAttribute('data-card-title') || '';
+
+          if (newTitle !== this.currentTitle) {
+            this.label.classList.add('ai-two-col-slider__label--hidden-{{ ai_gen_id }}');
+
+            setTimeout(() => {
+              this.label.textContent = newTitle;
+              this.currentTitle = newTitle;
+              this.label.classList.remove('ai-two-col-slider__label--hidden-{{ ai_gen_id }}');
+            }, 350);
+          }
+        }
+      }
+    }
+
+    customElements.define('two-column-card-slider-{{ ai_gen_id }}', TwoColumnCardSlider{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Two column card slider",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Text panel"
+    },
+    {
+      "type": "text",
+      "id": "eyebrow",
+      "label": "Eyebrow label",
+      "default": "Discover"
+    },
+    {
+      "type": "text",
+      "id": "heading",
+      "label": "Heading",
+      "default": "Explore Our Collection"
+    },
+    {
+      "type": "textarea",
+      "id": "description",
+      "label": "Description",
+      "default": "Swipe through our curated selection of premium products designed with you in mind."
+    },
+    {
+      "type": "text",
+      "id": "cta_label",
+      "label": "Button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "url",
+      "id": "cta_url",
+      "label": "Button link"
+    },
+    {
+      "type": "select",
+      "id": "button_style",
+      "label": "Button style",
+      "options": [
+        {
+          "value": "filled",
+          "label": "Filled"
+        },
+        {
+          "value": "outlined",
+          "label": "Outlined"
+        }
+      ],
+      "default": "filled"
+    },
+    {
+      "type": "header",
+      "content": "Card 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_1_title",
+      "label": "Title",
+      "default": "Premium Quality"
+    },
+    {
+      "type": "textarea",
+      "id": "card_1_description",
+      "label": "Description",
+      "default": "Crafted with attention to detail and the finest materials."
+    },
+    {
+      "type": "header",
+      "content": "Card 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_2_title",
+      "label": "Title",
+      "default": "Sustainable Design"
+    },
+    {
+      "type": "textarea",
+      "id": "card_2_description",
+      "label": "Description",
+      "default": "Eco-friendly products that care for you and the planet."
+    },
+    {
+      "type": "header",
+      "content": "Card 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "card_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "card_3_title",
+      "label": "Title",
+      "default": "Timeless Style"
+    },
+    {
+      "type": "textarea",
+      "id": "card_3_description",
+      "label": "Description",
+      "default": "Classic designs that never go out of fashion."
+    },
+    {
+      "type": "header",
+      "content": "Colors"
+    },
+    {
+      "type": "color",
+      "id": "section_bg_color",
+      "label": "Section background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_panel_bg_color",
+      "label": "Text panel background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Card background",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Two column card slider"
+    }
+  ]
+}
+{% endschema %}
