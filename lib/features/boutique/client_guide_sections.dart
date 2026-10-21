@@ -11,13 +11,13 @@ class ClientGuideEditorial extends StatelessWidget {
   const ClientGuideEditorial({
     required this.title,
     required this.subtitle,
-    required this.imageAsset,
+    this.imageAsset,
     this.action,
     super.key,
   });
   final String title;
   final String subtitle;
-  final String imageAsset;
+  final String? imageAsset;
   final Widget? action;
 
   @override
@@ -55,12 +55,31 @@ class ClientGuideEditorial extends StatelessWidget {
               ],
             ),
           );
-          final photo = Image.asset(
-            imageAsset,
-            fit: BoxFit.cover,
-            excludeFromSemantics: true,
-            errorBuilder: (_, __, ___) => ColoredBox(color: palette.surface),
-          );
+          final photo = imageAsset == null
+              ? ColoredBox(
+                  color: palette.surface,
+                  child: Center(
+                    child: Padding(
+                      padding: EdgeInsets.all(MonettaTokens.space[3]),
+                      child: Text(
+                        'Imagen pendiente',
+                        textAlign: TextAlign.center,
+                        style: clientGuideStyle(
+                          context,
+                          MonettaTokens.cardLabel,
+                          color: palette.inkMuted,
+                        ),
+                      ),
+                    ),
+                  ),
+                )
+              : Image.asset(
+                  imageAsset!,
+                  fit: BoxFit.cover,
+                  excludeFromSemantics: true,
+                  errorBuilder: (_, __, ___) =>
+                      ColoredBox(color: palette.surface),
+                );
           // At large text sizes the copy gets the full width and natural height.
           if (compact && MediaQuery.textScalerOf(context).scale(1) > 1.3) {
             return Column(

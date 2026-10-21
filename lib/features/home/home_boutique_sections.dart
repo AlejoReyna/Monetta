@@ -240,10 +240,12 @@ class HomeNewArrivalsRail extends StatelessWidget {
   const HomeNewArrivalsRail({
     required this.products,
     required this.onOpenAll,
+    this.title = 'Novedades',
     super.key,
   });
 
   final List<Product> products;
+  final String title;
   final VoidCallback onOpenAll;
 
   static const ProductTileDensity _density = ProductTileDensity.compact;
@@ -262,7 +264,7 @@ class HomeNewArrivalsRail extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BoutiqueSectionHeader(
-          title: 'Novedades',
+          title: title,
           actionLabel: 'Ver todo',
           onAction: onOpenAll,
         ),

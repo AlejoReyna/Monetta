@@ -23,7 +23,7 @@ class ClientGuideScaffold extends StatelessWidget {
     this.accountController,
     super.key,
   });
-  final ClientGuideDestination current;
+  final ClientGuideDestination? current;
   final Widget body;
   final AccountController? accountController;
 

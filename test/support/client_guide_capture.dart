@@ -57,6 +57,15 @@ Future<void> captureClientGuide(WidgetTester tester, String name) async {
   final directory = Platform.environment['MONETTA_M3_CAPTURE_DIR'] ??
       Platform.environment['MONETTA_M2_CAPTURE_DIR'];
   if (directory == null) return;
+  await tester.runAsync(() async {
+    for (final element in find.byType(Image).evaluate()) {
+      final widget = element.widget as Image;
+      if (widget.image is AssetImage) {
+        await precacheImage(widget.image, element, onError: (_, __) {});
+      }
+    }
+  });
+  await tester.pumpAndSettle();
   final boundary = tester
       .renderObject<RenderRepaintBoundary>(find.byKey(clientGuideCaptureKey));
   await tester.runAsync(() async {

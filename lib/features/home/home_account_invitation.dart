@@ -18,7 +18,7 @@ class HomeAccountInvitation extends StatelessWidget {
     super.key,
   });
 
-  final VoidCallback onRegister;
+  final VoidCallback? onRegister;
   final bool isSignedIn;
 
   @override
