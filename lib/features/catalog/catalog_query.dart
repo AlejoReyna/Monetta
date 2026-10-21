@@ -31,15 +31,27 @@ List<String> productSearchTerms(CatalogStore store, Product product) {
   ].where((term) => term.trim().isNotEmpty).toList(growable: false);
 }
 
-/// True when any term contains [normalizedQuery] (already normalized).
+/// True when every word of [normalizedQuery] appears in some search term.
+///
+/// Already normalized. "guess negro" matches a title such as
+/// "Bolso Guess Crossbody Negro" even though those two words are not adjacent.
+/// A single word keeps the previous containment check.
 bool productMatchesNormalizedQuery(
   CatalogStore store,
   Product product,
   String normalizedQuery,
 ) {
   if (normalizedQuery.isEmpty) return true;
-  return productSearchTerms(store, product).any(
-    (term) => normalizeSearchText(term).contains(normalizedQuery),
+  final tokens = normalizedQuery
+      .split(' ')
+      .where((token) => token.isNotEmpty)
+      .toList(growable: false);
+  if (tokens.isEmpty) return true;
+  final terms = productSearchTerms(store, product)
+      .map(normalizeSearchText)
+      .toList(growable: false);
+  return tokens.every(
+    (token) => terms.any((term) => term.contains(token)),
   );
 }
 
