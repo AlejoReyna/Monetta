@@ -26,15 +26,19 @@ void main() {
     );
   }
 
-  testWidgets('presents the first-order benefit and account action', (
+  testWidgets('presents account action without unapproved shipping promises', (
     tester,
   ) async {
     var registerCalls = 0;
     await tester.pumpWidget(app(onRegister: () => registerCalls++));
 
     expect(find.text('REGÍSTRATE'), findsOneWidget);
-    expect(find.text('Obtén envío gratis en tu primer pedido'), findsOneWidget);
-    expect(find.text('ENVÍOS RÁPIDOS Y PAGOS SEGUROS'), findsOneWidget);
+    expect(find.text('Consulta tus pedidos y datos de compra'), findsOneWidget);
+    expect(
+      find.textContaining('contenido pendiente de aprobación'),
+      findsOneWidget,
+    );
+    expect(find.text('Pagos seguros con Shopify.'), findsOneWidget);
 
     await tester.tap(find.byKey(const ValueKey('home-register-button')));
     expect(registerCalls, 1);
@@ -52,7 +56,7 @@ void main() {
     expect(find.text('REGÍSTRATE'), findsNothing);
   });
 
-  testWidgets('keeps every payment method on a narrow home viewport', (
+  testWidgets('keeps payment logos off and never guesses active methods', (
     tester,
   ) async {
     final semantics = tester.ensureSemantics();
@@ -64,9 +68,12 @@ void main() {
           .getSemantics(find.byKey(const ValueKey('home-payment-methods')))
           .label,
       contains(
-        'Apple Pay, Google Pay, Maestro, Mastercard, PayPal, Shop Pay y Visa',
+        'Pagos seguros con Shopify.',
       ),
     );
+    expect(find.byIcon(Icons.apple), findsNothing);
+    expect(find.textContaining('Visa'), findsNothing);
+    expect(find.textContaining('PayPal'), findsNothing);
     semantics.dispose();
   });
 }

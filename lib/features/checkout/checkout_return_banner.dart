@@ -7,6 +7,8 @@ library;
 import 'package:flutter/material.dart';
 
 import '../boutique/boutique_tokens.dart';
+import '../boutique/client_guide_components.dart';
+import '../../app/monetta_tokens.g.dart';
 import 'checkout_return.dart';
 
 class CheckoutReturnBanner extends StatelessWidget {
@@ -35,7 +37,7 @@ class CheckoutReturnBanner extends StatelessWidget {
         liveRegion: true,
         label: kCheckoutReturnConfirmingText,
         child: Padding(
-          padding: const EdgeInsets.only(bottom: 16),
+          padding: EdgeInsets.only(bottom: MonettaTokens.space[3]),
           child: Row(
             children: [
               SizedBox(
@@ -81,10 +83,10 @@ class CheckoutReturnBanner extends StatelessWidget {
       label: title,
       child: Container(
         width: double.infinity,
-        margin: const EdgeInsets.only(bottom: 16),
-        padding: const EdgeInsets.all(16),
+        margin: EdgeInsets.only(bottom: MonettaTokens.space[3]),
+        padding: EdgeInsets.all(MonettaTokens.space[3]),
         decoration: BoxDecoration(
-          color: palette.surface,
+          color: palette.surfaceDeep,
           borderRadius: BoutiqueRadius.card,
           border: Border.all(color: palette.hairline, width: .5),
         ),
@@ -93,20 +95,20 @@ class CheckoutReturnBanner extends StatelessWidget {
           children: [
             Text(
               title,
-              style: boutiqueText(
-                size: 16,
-                weight: FontWeight.w600,
-                color: palette.ink,
-              ),
+              style: clientGuideStyle(context, MonettaTokens.sectionTitle),
             ),
-            const SizedBox(height: 6),
+            SizedBox(height: MonettaTokens.space[1]),
             Text(
               body,
-              style: boutiqueText(size: 12, color: palette.inkMuted),
+              style: clientGuideStyle(
+                context,
+                MonettaTokens.body,
+                color: palette.inkMuted,
+              ),
             ),
             if (phase == CheckoutReturnPhase.paymentNotCompleted ||
                 phase == CheckoutReturnPhase.sheetDidNotOpen) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: MonettaTokens.space[3]),
               BoutiqueButton(
                 key: const ValueKey('checkout-retry-button'),
                 label: kCheckoutReturnRetryLabel,
@@ -114,13 +116,13 @@ class CheckoutReturnBanner extends StatelessWidget {
               ),
             ],
             if (phase == CheckoutReturnPhase.reviewing) ...[
-              const SizedBox(height: 16),
+              SizedBox(height: MonettaTokens.space[3]),
               BoutiqueButton(
                 key: const ValueKey('checkout-view-orders-button'),
                 label: kCheckoutReturnViewOrdersLabel,
                 onPressed: onViewOrders,
               ),
-              const SizedBox(height: 10),
+              SizedBox(height: MonettaTokens.space[1]),
               BoutiqueButton(
                 key: const ValueKey('checkout-whatsapp-button'),
                 label: kCheckoutReturnWhatsAppLabel,
