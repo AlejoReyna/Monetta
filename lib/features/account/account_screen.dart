@@ -30,6 +30,7 @@ import '../notifications/notifications_screen.dart';
 import '../orders/order_detail_screen.dart';
 import '../orders/order_status.dart';
 import '../orders/orders_screen.dart';
+import '../personalization/personalization_screen.dart';
 import '../rewards/rewards_section.dart';
 import 'account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
@@ -293,6 +294,13 @@ class _SignedIn extends StatelessWidget {
                 title: 'Contacto y ayuda',
                 subtitle: 'WhatsApp, sitio y redes',
                 onTap: () => openContact(context),
+              ),
+              EAccessRow(
+                key: const ValueKey('account-open-personalization'),
+                icon: Icons.tune_outlined,
+                title: 'Personalización',
+                subtitle: 'Marcas, categorías y tipo de compra',
+                onTap: () => openPersonalization(context),
               ),
             ],
           ),
