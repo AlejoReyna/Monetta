@@ -36,7 +36,8 @@ void main() {
     expect(shippingFor(kFreeShippingThreshold), 0);
   });
 
-  testWidgets('bag shows incentive, save-for-later and recommendations',
+  testWidgets(
+      'bag shows policy placeholder, save-for-later and recommendations',
       (tester) async {
     final store = await _loadedStore();
     final product = store.products.firstWhere((item) => item.isInStock);
@@ -50,13 +51,11 @@ void main() {
       find.byKey(const ValueKey('free-shipping-incentive')),
       findsOneWidget,
     );
-    // Incentivo real: o faltante o gratis, nunca cifra inventada.
     expect(
-      find.textContaining(
-        RegExp(r'(Te faltan|Tienes envío gratis)'),
-      ),
+      find.textContaining('contenido pendiente de aprobación'),
       findsWidgets,
     );
+    expect(find.textContaining('Tienes envío gratis'), findsNothing);
     // Guardar para después = favorito.
     expect(find.text('Guardar para después'), findsOneWidget);
     await tester.tap(find.text('Guardar para después'));
@@ -172,7 +171,7 @@ void main() {
       findsOneWidget,
     );
     // Volver del navegador jamás confirma: seguimos en revisión, sin éxito.
-    expect(find.text('¡Listo!'), findsNothing);
+    expect(find.text('¡Gracias por tu compra!'), findsNothing);
   });
 
   testWidgets('mini cart shows the added line and both exits', (tester) async {

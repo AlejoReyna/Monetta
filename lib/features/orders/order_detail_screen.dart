@@ -15,6 +15,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../app/account_controller.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../boutique/client_guide_components.dart';
 import '../../data/local/database.dart' show OrderSummary;
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
@@ -121,7 +123,7 @@ class OrderDetailScreen extends StatelessWidget {
         scrolledUnderElevation: 0,
         title: Text(
           'Detalle del pedido',
-          style: boutiqueTitle(size: 15, color: palette.ink),
+          style: clientGuideStyle(context, MonettaTokens.cardLabel),
         ),
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(.5),
@@ -130,7 +132,9 @@ class OrderDetailScreen extends StatelessWidget {
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+          padding: EdgeInsets.all(
+            MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -147,6 +151,11 @@ class OrderDetailScreen extends StatelessWidget {
                   EStatusCapsule.forOrderKey(
                     status.key,
                     label: status.label,
+                    guideIcon: status.key == 'in_transit'
+                        ? Icons.local_shipping_outlined
+                        : status.key == 'delivered'
+                            ? Icons.check_circle_outline
+                            : Icons.receipt_long_outlined,
                   ),
                   const SizedBox(height: BoutiqueSpace.sm),
                   Text(
@@ -292,9 +301,9 @@ class OrderDetailScreen extends StatelessWidget {
                   ..._timeline(context),
                   const SizedBox(height: BoutiqueSpace.sm),
                   Text(
-                    'Cuando tu pedido se envíe recibirás la guía por correo. '
-                    'Sin número de guía no mostramos fechas estimadas '
-                    'inventadas.',
+                    'Sin número de guía no mostramos fechas estimadas. '
+                    'Envíos: contenido pendiente de aprobación. '
+                    'Devoluciones y garantía: contenido pendiente de aprobación.',
                     style: boutiqueText(
                       size: 12,
                       color: palette.inkMuted,

@@ -19,6 +19,9 @@ import '../../app/cart_controller.dart';
 import '../../app/checkout_buyer_identity.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../boutique/client_guide_components.dart';
+import 'purchase_notices.dart';
 import '../../app/shopify_checkout_coordinator.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
@@ -383,7 +386,9 @@ class _BagContents extends StatelessWidget {
 
         final incentive = Padding(
           padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
-          child: _FreeShippingBar(subtotal: subtotal),
+          child: const PurchasePolicyNotice(
+            key: ValueKey('free-shipping-incentive'),
+          ),
         );
 
         final controller = cartController;
@@ -435,7 +440,9 @@ class _BagContents extends StatelessWidget {
                             padding: const EdgeInsets.only(top: 64),
                             child: Column(
                               children: [
-                                _FreeShippingBar(subtotal: subtotal),
+                                const PurchasePolicyNotice(
+                                  key: ValueKey('free-shipping-incentive'),
+                                ),
                                 const SizedBox(height: 16),
                                 summary,
                               ],
@@ -1078,81 +1085,6 @@ class _ProgressStep extends StatelessWidget {
   }
 }
 
-class _FreeShippingBar extends StatelessWidget {
-  const _FreeShippingBar({required this.subtotal});
-
-  final double subtotal;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final remaining = remainingForFreeShipping(subtotal);
-    final progress =
-        (subtotal / kFreeShippingThreshold).clamp(0.0, 1.0).toDouble();
-    final done = remaining == 0;
-    return Semantics(
-      liveRegion: true,
-      label: done
-          ? 'Tienes envío gratis en este pedido'
-          : 'Te faltan ${kMoney.format(remaining)} para el envío gratis',
-      child: Container(
-        key: const ValueKey('free-shipping-incentive'),
-        padding: const EdgeInsets.all(16),
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BoutiqueRadius.card,
-          border: Border.all(color: palette.hairline, width: .5),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(
-                  done ? Icons.check_circle : Icons.local_shipping_outlined,
-                  size: 18,
-                  color: done ? palette.goldText : palette.ink,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    done
-                        ? 'Tienes envío gratis en este pedido.'
-                        : 'Te faltan ${kMoney.format(remaining)} para el envío gratis',
-                    style: boutiqueText(
-                      size: 13,
-                      weight: FontWeight.w500,
-                      color: palette.ink,
-                      height: 1.35,
-                    ),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            ClipRRect(
-              borderRadius: BoutiqueRadius.capsule,
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 6,
-                backgroundColor: palette.surfaceDeep,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  done ? palette.gold : palette.ink,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)}',
-              style: boutiqueText(size: 11, color: palette.inkMuted),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
 class _BagLineTile extends StatelessWidget {
   const _BagLineTile({
     required this.line,
@@ -1457,12 +1389,15 @@ class _OrderSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Resumen de compra', style: boutiqueTitle(color: palette.ink)),
+          Text(
+            'Resumen de compra',
+            style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+          ),
           const SizedBox(height: 18),
           _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
           const SizedBox(height: 10),
           _SummaryRow(
-            label: 'Envío',
+            label: 'Envío estimado',
             value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
           ),
           Padding(
@@ -1470,7 +1405,7 @@ class _OrderSummary extends StatelessWidget {
             child: Container(height: .5, color: palette.hairline),
           ),
           _SummaryRow(
-            label: 'Total',
+            label: 'Total estimado',
             value: kMoney.format(subtotal + shipping),
             prominent: true,
           ),
@@ -1490,7 +1425,7 @@ class _OrderSummary extends StatelessWidget {
             children: [
               Icon(Icons.lock_outline, size: 14, color: palette.inkMuted),
               Text(
-                'Pago procesado de forma segura',
+                'Pagos seguros con Shopify.',
                 textAlign: TextAlign.center,
                 style: boutiqueText(size: 11, color: palette.inkMuted),
               ),
@@ -1710,7 +1645,7 @@ class _DeliveryOption extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Recíbelo en 3 a 5 días hábiles',
+                  'Envíos: contenido pendiente de aprobación.',
                   style: boutiqueText(size: 11, color: palette.inkMuted),
                 ),
               ],
@@ -1794,7 +1729,7 @@ class _ReviewPanel extends StatelessWidget {
         ),
         _ReviewBlock(
           title: 'Método de envío',
-          value: 'Envío estándar · 3 a 5 días hábiles\n'
+          value: 'Envíos: contenido pendiente de aprobación.\n'
               'Estimado previo: ${shipping == 0 ? 'gratis' : kMoney.format(shipping)} (no final)',
         ),
         _PaymentBlock(
@@ -1893,7 +1828,7 @@ class _PaymentBlock extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Pago seguro en Shopify',
+                    'Pagos seguros con Shopify.',
                     style: boutiqueText(
                       size: 13,
                       weight: FontWeight.w600,
@@ -1937,6 +1872,8 @@ class _PaymentBlock extends StatelessWidget {
               selected: (selected ?? methods.first) == method,
               onTap: () => onSelect(method),
             ),
+          SizedBox(height: MonettaTokens.space[3]),
+          SecurePaymentLine(methods: methods),
         ],
       ),
     );
@@ -2075,8 +2012,10 @@ class _CheckoutSummary extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child:
-                    Text('Tu pedido', style: boutiqueTitle(color: palette.ink)),
+                child: Text(
+                  'Tu pedido',
+                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+                ),
               ),
               Text(
                 '${lines.fold(0, (sum, line) => sum + line.quantity)} ART.',
