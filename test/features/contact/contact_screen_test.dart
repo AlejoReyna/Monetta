@@ -24,6 +24,7 @@ void main() {
       expect(find.text('Contáctanos'), findsOneWidget);
       expect(find.text('WhatsApp'), findsOneWidget);
       expect(find.text('826 106 6868'), findsOneWidget);
+      await tester.scrollUntilVisible(find.text('Mayoreo por WhatsApp'), 300);
       expect(find.text('Mayoreo por WhatsApp'), findsOneWidget);
       expect(find.text('Contacto en monetta.mx'), findsOneWidget);
       expect(find.text('Instagram'), findsOneWidget);

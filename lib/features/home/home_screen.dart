@@ -12,8 +12,11 @@ import '../../app/card_lift.dart';
 import '../../app/catalog_store.dart';
 import '../../app/home_content_controller.dart';
 import '../../app/motion.dart';
+import '../boutique/client_guide_components.dart';
+import '../boutique/client_guide_sections.dart';
+import '../wholesale/wholesale_screen.dart';
+import '../contact/contact_screen.dart';
 import '../../app/mixed_feed.dart';
-import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
 import '../../data/media/media_url.dart';
@@ -26,6 +29,7 @@ import '../account/account_screen.dart';
 import '../about/about_monetta_screen.dart';
 import '../admin/admin_screen.dart';
 import '../catalog/catalog_browse_screen.dart';
+import '../catalog/categories_screen.dart';
 import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
 import '../catalog/search_screen.dart';
@@ -239,8 +243,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
-  void _openWhatsApp(Uri uri) {
-    unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
+  void _openWholesale() {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => const WholesaleScreen(),
+      ),
+    );
   }
 
   void _openExternal(Uri uri) {
@@ -302,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           );
         }
       case MonettaBottomDestination.catalog:
-        _openFullCatalog();
+        unawaited(openCategories(context));
       case MonettaBottomDestination.bag:
         unawaited(openBag(context));
       case MonettaBottomDestination.account:
@@ -417,11 +425,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 scrollController: _scroll,
                 offset: 0,
                 child: _HomeOffersSection(
-                  onOpenCatalog: _openFullCatalog,
-                  onOpenPartner: _openPartner,
+                  onOpenPartner: _openWholesale,
                 ),
               ),
             ),
+            const ClientGuideServices(),
             Padding(
               padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
               child: RevealOnScroll(
@@ -435,6 +443,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   onRegister: _openAccount,
                 ),
               ),
+            ),
+            ClientGuideFooter(
+              onContact: () => unawaited(
+                openContact(context, socialLinks: homeContent.socialLinks),
+              ),
+              onAbout: _openAbout,
             ),
             // The home body extends beneath the persistent navigation. Keep
             // that trailing scroll clearance in the invitation's surface so
@@ -575,6 +589,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return MonettaSideMenu(
       onSearch: _openSearch,
       onCatalog: _openFullCatalog,
+      onCategories: () => unawaited(openCategories(context)),
       onBags: () => _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
       onWallets: () =>
           _openCatalogSection(title: 'Carteras', category: 'cartera'),
@@ -589,8 +604,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
       onToggleTheme: _toggleTheme,
       onAbout: _openAbout,
-      onPartner: _openPartner,
-      onSupport: () => _openWhatsApp(conciergeWhatsAppUri()),
+      onPartner: _openWholesale,
+      onSupport: () => unawaited(
+        openContact(
+          context,
+          socialLinks: HomeContentScope.maybeOf(context)?.content.socialLinks,
+        ),
+      ),
     );
   }
 
@@ -663,231 +683,23 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 
 class _HomeOffersSection extends StatelessWidget {
   const _HomeOffersSection({
-    required this.onOpenCatalog,
     required this.onOpenPartner,
   });
-
-  static const _offers = <_OfferData>[
-    _OfferData(
-      imageAsset: 'assets/images/campaign_olive.jpg',
-      eyebrow: 'OFERTA MONETTA',
-      title: '20% en bolsos seleccionados',
-      description: 'Una selección especial para encontrar tu próxima pieza.',
-      actionLabel: 'Ver la selección',
-      destination: _OfferDestination.catalog,
-    ),
-    _OfferData(
-      imageAsset: 'assets/images/campaign_coral.jpg',
-      eyebrow: 'NUEVO EN MONETTA',
-      title: 'Piezas que acaban de llegar',
-      description: 'Color, formas y favoritos para estrenar esta temporada.',
-      actionLabel: 'Descubrir novedades',
-      destination: _OfferDestination.catalog,
-    ),
-    _OfferData(
-      imageAsset: 'assets/images/campaign_terracotta.jpg',
-      eyebrow: 'VENDE CON MONETTA',
-      title: 'Haz crecer tu negocio con mayoreo',
-      description:
-          'Precios desde tres modelos y catálogos listos para compartir.',
-      actionLabel: 'Conocer mayoreo',
-      destination: _OfferDestination.partner,
-    ),
-  ];
-
-  final VoidCallback onOpenCatalog;
   final VoidCallback onOpenPartner;
 
   @override
-  Widget build(BuildContext context) {
-    final viewportWidth = MediaQuery.sizeOf(context).width;
-    final cardWidth = (viewportWidth * .84).clamp(304.0, 420.0);
-    return Column(
-      key: const ValueKey('home-section-offers'),
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const BoutiqueSectionHeader(
-          kicker: 'Para comprar, estrenar o crecer',
-          title: 'Lo mejor de Monetta, hoy',
+  Widget build(BuildContext context) => ClientGuideEditorial(
+        key: const ValueKey('home-section-offers'),
+        title: 'PRECIOS DE MAYOREO',
+        subtitle: 'Precios y mínimo de piezas: pendientes de confirmación.',
+        imageAsset: 'assets/images/home_collection_bags.webp',
+        action: ClientGuideButton(
+          key: const ValueKey('home-wholesale-button'),
+          label: 'CONOCE MÁS',
+          onPressed: onOpenPartner,
+          chevron: true,
         ),
-        SizedBox(
-          key: const ValueKey('home-offers-rail'),
-          height: 430,
-          child: ListView.separated(
-            key: const PageStorageKey<String>('home-offers-scroll'),
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(
-              horizontal: BoutiqueSpace.gutter,
-            ),
-            itemCount: _offers.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(width: BoutiqueSpace.md),
-            itemBuilder: (context, index) => SizedBox(
-              width: cardWidth,
-              child: _OfferCard(
-                key: ValueKey('home-offer-card-$index'),
-                data: _offers[index],
-                onTap: _offers[index].destination == _OfferDestination.partner
-                    ? onOpenPartner
-                    : onOpenCatalog,
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _OfferData {
-  const _OfferData({
-    required this.imageAsset,
-    required this.eyebrow,
-    required this.title,
-    required this.description,
-    required this.actionLabel,
-    required this.destination,
-  });
-
-  final String imageAsset;
-  final String eyebrow;
-  final String title;
-  final String description;
-  final String actionLabel;
-  final _OfferDestination destination;
-}
-
-enum _OfferDestination { catalog, partner }
-
-class _OfferCard extends StatelessWidget {
-  const _OfferCard({required this.data, required this.onTap, super.key});
-
-  final _OfferData data;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Semantics(
-      button: true,
-      label: '${data.eyebrow}. ${data.title}. ${data.description}. '
-          '${data.actionLabel}',
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: MonettaCardLift(
-          borderRadius: BoutiqueRadius.card,
-          child: Container(
-            clipBehavior: Clip.antiAlias,
-            decoration: BoxDecoration(
-              color: palette.surface,
-              borderRadius: BoutiqueRadius.card,
-              border: Border.all(color: palette.hairline, width: 1),
-            ),
-            child: Column(
-              children: [
-                Expanded(
-                  flex: 11,
-                  child: SizedBox.expand(
-                    key: const ValueKey('home-offer-media'),
-                    child: Image.asset(
-                      data.imageAsset,
-                      fit: BoxFit.cover,
-                      alignment: Alignment.center,
-                    ),
-                  ),
-                ),
-                Expanded(
-                  flex: 10,
-                  child: Padding(
-                    key: const ValueKey('home-offer-content'),
-                    padding: const EdgeInsets.fromLTRB(
-                      BoutiqueSpace.lg,
-                      BoutiqueSpace.lg,
-                      BoutiqueSpace.lg,
-                      BoutiqueSpace.lg,
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          data.eyebrow,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: boutiqueEyebrow(
-                            size: 11,
-                            color: palette.goldText,
-                          ),
-                        ),
-                        const SizedBox(height: BoutiqueSpace.sm),
-                        Text(
-                          data.title,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: boutiqueDisplay(22, color: palette.ink),
-                        ),
-                        const SizedBox(height: BoutiqueSpace.sm),
-                        Text(
-                          data.description,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: boutiqueText(
-                            size: 13,
-                            color: palette.inkMuted,
-                            height: 1.35,
-                          ),
-                        ),
-                        const Spacer(),
-                        Container(
-                          key: ValueKey(
-                            'home-offer-action-${data.destination.name}',
-                          ),
-                          height: BoutiqueSpace.tapTarget,
-                          width: double.infinity,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: BoutiqueSpace.lg,
-                          ),
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            color: palette.ink,
-                            borderRadius: BoutiqueRadius.control,
-                          ),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Flexible(
-                                child: Text(
-                                  data.actionLabel,
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: boutiqueText(
-                                    size: 13,
-                                    color: palette.canvas,
-                                    weight: FontWeight.w600,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(width: BoutiqueSpace.sm),
-                              Icon(
-                                Icons.arrow_forward,
-                                size: 16,
-                                color: palette.canvas,
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
+      );
 }
 
 class _HomeCollectionsSection extends StatelessWidget {

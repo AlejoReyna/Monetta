@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
+import '../../support/bundled_fonts.dart';
 
 // Target-state tests for the docked, flat bottom navigation (NAV-02..NAV-11,
 // the Home clearance test lives in home_bottom_clearance_test.dart). NAV-01 is
@@ -15,8 +16,8 @@ import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
 
 const _destinations = MonettaBottomDestination.values;
 const _labels = {
-  MonettaBottomDestination.home: 'Home',
-  MonettaBottomDestination.catalog: 'Catálogo',
+  MonettaBottomDestination.home: 'Inicio',
+  MonettaBottomDestination.catalog: 'Categorías',
   MonettaBottomDestination.bag: 'Carrito',
   MonettaBottomDestination.account: 'Cuenta',
 };
@@ -308,7 +309,7 @@ void main() {
       ]);
       expect(
         [for (final d in byX) _labelText(tester, d)],
-        ['Home', 'Catálogo', 'Carrito', 'Cuenta'],
+        ['Inicio', 'Categorías', 'Carrito', 'Cuenta'],
       );
     });
   });
@@ -699,6 +700,7 @@ void main() {
 
     testWidgets('NAV-09 on a wide screen the label follows the system scale',
         (tester) async {
+      await tester.runAsync(loadBundledFonts);
       _phone(tester, width: 800, height: 600);
       await tester.pumpWidget(
         _Harness(

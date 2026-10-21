@@ -1,16 +1,3 @@
-/// Contacto (paquete E): canales configurados y enlaces funcionales.
-///
-/// Solo canales verificados en el repositorio:
-/// - WhatsApp conserjería y mayoreo ([conciergeWhatsAppUri],
-///   [wholesaleWhatsAppUri], número `826 106 6868`).
-/// - Sitio de contacto `https://monetta.mx/pages/contact` (ya referenciado en
-///   el partner hub).
-/// - Redes configuradas en [HomeContent.fallback] (Instagram, TikTok,
-///   Facebook con URLs reales).
-///
-/// La lámina dibuja además un correo y un teléfono de voz con cifras
-/// ilustrativas; no hay un buzón ni una línea de voz verificados en código o
-/// configuración, así que no se renderizan. Ver `PAQUETE_E_ENTREGA.md`.
 library;
 
 import 'package:flutter/material.dart';
@@ -18,7 +5,12 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shopper_copy.dart';
 import '../../domain/home_content.dart';
-import '../account/account_boutique.dart';
+import '../../main.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../boutique/client_guide_components.dart';
+import '../boutique/client_guide_scaffold.dart';
+import '../boutique/client_guide_sections.dart';
+import 'contact_links.dart';
 import '../boutique/boutique_tokens.dart';
 
 /// Contacto web verificado (partner hub lo usa como "contacto").
@@ -56,11 +48,26 @@ List<ContactChannel> monettaContactChannels({
       subtitle: kWhatsAppNumberDisplay,
       uri: conciergeWhatsAppUri(),
     ),
+    for (var i = 0; i < monettaWhatsAppGroups.length; i++)
+      ContactChannel(
+        key: 'grupo-${i + 1}',
+        icon: Icons.groups_outlined,
+        title: 'Grupo ${i + 1}',
+        subtitle: 'Únete a nuestro grupo de WhatsApp',
+        uri: Uri.parse(monettaWhatsAppGroups[i]),
+      ),
+    ContactChannel(
+      key: 'facebook-group',
+      icon: Icons.facebook,
+      title: 'Grupo de Facebook',
+      subtitle: 'Únete a nuestra comunidad',
+      uri: Uri.parse(monettaFacebookGroup),
+    ),
     ContactChannel(
       key: 'mayoreo',
       icon: Icons.storefront_outlined,
       title: 'Mayoreo por WhatsApp',
-      subtitle: 'Desde 3 piezas',
+      subtitle: 'Consulta las condiciones vigentes',
       uri: wholesaleWhatsAppUri(),
     ),
     ContactChannel(
@@ -119,8 +126,12 @@ class ContactScreen extends StatelessWidget {
   Future<void> _open(BuildContext context, Uri uri) async {
     final open =
         openUri ?? ((u) => launchUrl(u, mode: LaunchMode.externalApplication));
-    final ok = await open(uri);
-    if (!ok && context.mounted) {
+    try {
+      if (await open(uri) || !context.mounted) return;
+    } on Exception {
+      if (!context.mounted) return;
+    }
+    if (context.mounted) {
       ScaffoldMessenger.maybeOf(context)?.showSnackBar(
         const SnackBar(content: Text('No se pudo abrir el enlace.')),
       );
@@ -130,51 +141,141 @@ class ContactScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final channels = monettaContactChannels(socialLinks: socialLinks);
-    return Scaffold(
-      backgroundColor: palette.canvas,
-      appBar: AppBar(
-        backgroundColor: palette.bar,
-        foregroundColor: palette.ink,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          'Contacto',
-          style: boutiqueTitle(size: 15, color: palette.ink),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(.5),
-          child: Container(height: .5, color: palette.hairline),
-        ),
-      ),
-      body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
-          children: [
-            const AccountPageHeader(
-              kicker: 'Ayuda',
-              title: 'Contáctanos',
-              subtitle: 'Estamos para ayudarte a elegir tu próxima pieza.',
-            ),
-            const SizedBox(height: BoutiqueSpace.lg),
-            ECard(
-              padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+    final channels = monettaContactChannels(
+      socialLinks:
+          socialLinks ?? HomeContentScope.maybeOf(context)?.content.socialLinks,
+    );
+    final primary = channels.where(
+      (c) =>
+          c.key == 'whatsapp' ||
+          c.key.startsWith('grupo-') ||
+          c.key == 'facebook-group',
+    );
+    final socials = channels.where((c) => c.key.startsWith('social-'));
+    final secondary =
+        channels.where((c) => c.key == 'mayoreo' || c.key == 'sitio');
+    return ClientGuideScaffold(
+      current: null,
+      body: ListView(
+        key: const ValueKey('contact-scroll'),
+        padding: EdgeInsets.zero,
+        children: [
+          const ClientGuideEditorial(
+            title: 'Tu boutique y proveedor de confianza.',
+            subtitle:
+                'Descubre nuestras marcas favoritas. Estamos para ayudarte.',
+            imageAsset: 'assets/images/home_bag_shoulder.webp',
+          ),
+          Padding(
+            padding: EdgeInsets.all(MonettaTokens.space[4]),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                for (final channel in channels)
+                Text(
+                  'Contáctanos',
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.screenTitle,
+                  ),
+                ),
+                SizedBox(height: MonettaTokens.space[1]),
+                Text(
+                  'Estamos para ayudarte',
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.body,
+                    color: palette.inkMuted,
+                  ),
+                ),
+                SizedBox(height: MonettaTokens.space[3]),
+                for (final channel in primary) ...[
                   _ChannelRow(
                     channel: channel,
                     onTap: () => _open(context, channel.uri),
                   ),
+                  SizedBox(height: MonettaTokens.space[1]),
+                ],
+                SizedBox(height: MonettaTokens.space[3]),
+                Divider(color: palette.hairline),
+                Text(
+                  'Síguenos en redes',
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.sectionTitle,
+                  ),
+                ),
+                SizedBox(height: MonettaTokens.space[1]),
+                Text(
+                  'Descubre novedades, lanzamientos y más.',
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.body,
+                    color: palette.inkMuted,
+                  ),
+                ),
+                SizedBox(height: MonettaTokens.space[3]),
+                if (socials.isEmpty)
+                  Text(
+                    'Redes sociales: enlaces pendientes.',
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.cardLabel,
+                    ),
+                  ),
+                Wrap(
+                  alignment: WrapAlignment.center,
+                  spacing: MonettaTokens.space[2],
+                  runSpacing: MonettaTokens.space[2],
+                  children: [
+                    for (final channel in socials)
+                      TextButton.icon(
+                        key: ValueKey(
+                          'contact-channel-${channel.key}',
+                        ),
+                        onPressed: () => _open(context, channel.uri),
+                        icon: Icon(
+                          channel.icon,
+                          size: MonettaTokens.logoHeight,
+                        ),
+                        label: Text(
+                          channel.title,
+                          style: clientGuideStyle(
+                            context,
+                            MonettaTokens.cardLabel,
+                          ),
+                        ),
+                      ),
+                  ],
+                ),
+                SizedBox(height: MonettaTokens.space[4]),
+                Text(
+                  'Más ayuda',
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.sectionTitle,
+                  ),
+                ),
+                SizedBox(height: MonettaTokens.space[2]),
+                for (final channel in secondary) ...[
+                  _ChannelRow(
+                    channel: channel,
+                    onTap: () => _open(context, channel.uri),
+                  ),
+                  SizedBox(height: MonettaTokens.space[1]),
+                ],
+                SizedBox(height: MonettaTokens.space[3]),
+                Text(
+                  'Horario, correo y teléfono de voz: pendientes de confirmación.',
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.cardLabel,
+                    color: palette.inkMuted,
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: BoutiqueSpace.lg),
-            Text(
-              'Horario y tiempos de respuesta se confirman por WhatsApp. '
-              'Nunca te pediremos contraseñas ni códigos por estos canales.',
-              style: boutiqueText(size: 12, color: palette.inkMuted),
-            ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -189,63 +290,64 @@ class _ChannelRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Semantics(
-      button: true,
-      label: '${channel.title}. ${channel.subtitle}',
+    return Material(
+      color: palette.surfaceDeep,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(MonettaTokens.radiusCard),
+        side: BorderSide(color: palette.hairline),
+      ),
       child: InkWell(
         key: ValueKey('contact-channel-${channel.key}'),
+        borderRadius: BorderRadius.circular(MonettaTokens.radiusCard),
         onTap: onTap,
-        borderRadius: BoutiqueRadius.control,
-        child: Container(
+        child: ConstrainedBox(
           constraints:
-              const BoxConstraints(minHeight: BoutiqueSpace.tapTarget + 8),
-          padding: const EdgeInsets.symmetric(vertical: BoutiqueSpace.md),
-          decoration: BoxDecoration(
-            border: Border(
-              bottom: BorderSide(color: palette.hairline, width: .5),
+              const BoxConstraints(minHeight: MonettaTokens.controlHeight),
+          child: Padding(
+            padding: EdgeInsets.all(MonettaTokens.space[2]),
+            child: Row(
+              children: [
+                CircleAvatar(
+                  radius: MonettaTokens.space[4],
+                  backgroundColor: palette.action,
+                  child: Icon(
+                    channel.icon,
+                    size: MonettaTokens.logoHeight,
+                    color: palette.onAction,
+                  ),
+                ),
+                SizedBox(width: MonettaTokens.space[3]),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        channel.title,
+                        style: clientGuideStyle(
+                          context,
+                          MonettaTokens.accountRow,
+                        ),
+                      ),
+                      SizedBox(height: MonettaTokens.space[0]),
+                      Text(
+                        channel.subtitle,
+                        style: clientGuideStyle(
+                          context,
+                          MonettaTokens.navLabel,
+                          color: palette.inkMuted,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(width: MonettaTokens.space[1]),
+                Icon(
+                  Icons.chevron_right,
+                  size: MonettaTokens.logoHeight,
+                  color: palette.goldText,
+                ),
+              ],
             ),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: palette.ink,
-                ),
-                child: Icon(channel.icon, size: 20, color: palette.canvas),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      channel.title,
-                      style: boutiqueText(
-                        size: 14,
-                        weight: FontWeight.w500,
-                        color: palette.ink,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      channel.subtitle,
-                      style: boutiqueText(
-                        size: 12,
-                        color: palette.inkMuted,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Icon(
-                Icons.open_in_new_rounded,
-                size: 18,
-                color: palette.inkMuted,
-              ),
-            ],
           ),
         ),
       ),

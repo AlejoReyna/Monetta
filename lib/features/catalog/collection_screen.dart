@@ -24,6 +24,7 @@ import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import 'brand_screen.dart';
 import 'catalog_browse_screen.dart';
+import 'categories_screen.dart';
 import 'catalog_controls.dart';
 import 'catalog_query.dart';
 import 'product_card.dart';
@@ -270,7 +271,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
       case MonettaBottomDestination.home:
         Navigator.of(context).popUntil((route) => route.isFirst);
       case MonettaBottomDestination.catalog:
-        _openFullCatalog();
+        unawaited(openCategories(context));
       case MonettaBottomDestination.bag:
         unawaited(openBag(context));
       case MonettaBottomDestination.account:

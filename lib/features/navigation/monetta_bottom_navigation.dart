@@ -6,6 +6,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
+import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 
 enum MonettaBottomDestination { home, catalog, bag, account }
@@ -24,8 +25,8 @@ const double _kLabelHeight = 1.25;
 const double _kPressedOpacity = 0.55;
 
 String _labelOf(MonettaBottomDestination destination) => switch (destination) {
-      MonettaBottomDestination.home => 'Home',
-      MonettaBottomDestination.catalog => 'Catálogo',
+      MonettaBottomDestination.home => 'Inicio',
+      MonettaBottomDestination.catalog => 'Categorías',
       MonettaBottomDestination.bag => 'Carrito',
       MonettaBottomDestination.account => 'Cuenta',
     };
@@ -343,18 +344,22 @@ class _NavGlyphPainter extends CustomPainter {
             ..close(),
           paint,
         );
-      // Three index lines beside a magnifier.
+      // Categories: four cells, matching the directory destination.
       case MonettaBottomDestination.catalog:
-        canvas
-          ..drawLine(const Offset(1.5, 4.19), const Offset(7.18, 4.19), paint)
-          ..drawLine(const Offset(1.5, 7.72), const Offset(5.29, 7.72), paint)
-          ..drawLine(const Offset(1.5, 11.61), const Offset(3.71, 11.61), paint)
-          ..drawCircle(const Offset(14.13, 11.76), 6.63, paint)
-          ..drawLine(
-            const Offset(18.82, 16.45),
-            const Offset(22.5, 19.81),
-            paint,
-          );
+        final inset = MonettaTokens.space[0];
+        final gap = MonettaTokens.space[0];
+        final cell = (MonettaTokens.logoHeight - inset * 2 - gap) / 2;
+        for (final x in [inset, inset + cell + gap]) {
+          for (final y in [inset, inset + cell + gap]) {
+            canvas.drawRRect(
+              RRect.fromRectAndRadius(
+                Rect.fromLTWH(x, y, cell, cell),
+                Radius.circular(inset / 2),
+              ),
+              paint,
+            );
+          }
+        }
       // Body narrowing towards the base, curved handle.
       case MonettaBottomDestination.bag:
         canvas

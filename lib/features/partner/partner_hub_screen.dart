@@ -8,6 +8,7 @@ import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/shopper_copy.dart';
+import '../contact/contact_links.dart';
 import '../../app/theme.dart';
 import '../../domain/editorial_content.dart';
 import '../../domain/home_content.dart';
@@ -18,12 +19,6 @@ typedef PartnerCatalogSharer = Future<void> Function(
   Rect? origin,
 );
 
-const _whatsappGroups = <String>[
-  'https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec',
-  'https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC',
-];
-
-const _facebookGroup = 'https://www.facebook.com/share/g/1937VZAXta/';
 const _aboutMonetta = 'https://monetta.mx/pages/contact';
 
 const _wholesaleDetails = <PartnerFaq>[
@@ -952,12 +947,12 @@ class _CommunitySection extends StatelessWidget {
                         'actualizaciones para tu negocio.',
                     actions: [
                       for (var index = 0;
-                          index < _whatsappGroups.length;
+                          index < monettaWhatsAppGroups.length;
                           index++)
                         _CommunityAction(
                           label: 'GRUPO ${index + 1}',
                           onTap: () =>
-                              onOpen(Uri.parse(_whatsappGroups[index])),
+                              onOpen(Uri.parse(monettaWhatsAppGroups[index])),
                         ),
                     ],
                   ),
@@ -970,7 +965,7 @@ class _CommunitySection extends StatelessWidget {
                     actions: [
                       _CommunityAction(
                         label: 'IR AL GRUPO',
-                        onTap: () => onOpen(Uri.parse(_facebookGroup)),
+                        onTap: () => onOpen(Uri.parse(monettaFacebookGroup)),
                       ),
                     ],
                   ),

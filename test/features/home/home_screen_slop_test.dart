@@ -255,7 +255,7 @@ void main() {
     expect(find.byKey(const ValueKey('search-empty-state')), findsOneWidget);
   });
 
-  testWidgets('mayoreo editorial card opens the partner view', (tester) async {
+  testWidgets('mayoreo editorial banner opens wholesale', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 2000);
     tester.view.devicePixelRatio = 1.0;
@@ -266,19 +266,15 @@ void main() {
     await tester.pump();
 
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('home-offers-rail')),
+      find.byKey(const ValueKey('home-wholesale-button')),
       800,
       scrollable: _homeScroll(),
     );
     await tester.pumpAndSettle();
-    await tester.drag(
-      find.byKey(const ValueKey('home-offers-rail')),
-      const Offset(-620, 0),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Conocer mayoreo'));
+
+    await tester.tap(find.byKey(const ValueKey('home-wholesale-button')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('partner-hub-scroll')), findsOneWidget);
+    expect(find.byKey(const ValueKey('wholesale-scroll')), findsOneWidget);
   });
 }

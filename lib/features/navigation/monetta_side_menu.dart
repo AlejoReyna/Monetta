@@ -9,6 +9,7 @@ class MonettaSideMenu extends StatelessWidget {
   const MonettaSideMenu({
     required this.onSearch,
     required this.onCatalog,
+    this.onCategories,
     required this.onBags,
     required this.onWallets,
     required this.onWatches,
@@ -23,6 +24,7 @@ class MonettaSideMenu extends StatelessWidget {
 
   final VoidCallback onSearch;
   final VoidCallback onCatalog;
+  final VoidCallback? onCategories;
   final VoidCallback onBags;
   final VoidCallback onWallets;
   final VoidCallback onWatches;
@@ -124,6 +126,12 @@ class MonettaSideMenu extends StatelessWidget {
               child: ListView(
                 padding: const EdgeInsets.fromLTRB(18, 0, 18, 22),
                 children: [
+                  if (onCategories != null)
+                    _MenuLink(
+                      key: const Key('side-menu-categories'),
+                      label: 'Categorías',
+                      onTap: () => _select(context, onCategories!),
+                    ),
                   _MenuLink(
                     key: const Key('side-menu-bags'),
                     label: 'Bolsas',

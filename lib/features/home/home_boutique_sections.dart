@@ -33,7 +33,8 @@ final CampaignMedia kHomeBannerCampaign = CampaignMedia(
 /// phone still gets a banner worth looking at and a tall one does not hand the
 /// whole first fold to a single image.
 double homeBannerHeight(BuildContext context) =>
-    (MediaQuery.sizeOf(context).height * 0.29).clamp(200.0, 320.0);
+    (MediaQuery.sizeOf(context).height * 0.29).clamp(200.0, 320.0) *
+    MediaQuery.textScalerOf(context).scale(1).clamp(1.0, double.infinity);
 
 // ---------------------------------------------------------------------------
 // Search
@@ -239,10 +240,12 @@ class HomeNewArrivalsRail extends StatelessWidget {
   const HomeNewArrivalsRail({
     required this.products,
     required this.onOpenAll,
+    this.title = 'Novedades',
     super.key,
   });
 
   final List<Product> products;
+  final String title;
   final VoidCallback onOpenAll;
 
   static const ProductTileDensity _density = ProductTileDensity.compact;
@@ -261,7 +264,7 @@ class HomeNewArrivalsRail extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BoutiqueSectionHeader(
-          title: 'Novedades',
+          title: title,
           actionLabel: 'Ver todo',
           onAction: onOpenAll,
         ),
