@@ -4,7 +4,7 @@ import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/boutique/client_guide_scaffold.dart';
-import 'package:monetta_app/features/catalog/collection_screen.dart';
+import 'package:monetta_app/features/catalog/categories_screen.dart';
 import 'package:monetta_app/features/catalog/search_screen.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/main.dart';
@@ -33,7 +33,7 @@ void main() {
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
     await tester.tap(find.byKey(const ValueKey('guide-nav-categories')));
     await tester.pumpAndSettle();
-    expect(find.byType(CollectionScreen), findsOneWidget);
+    expect(find.byType(CategoriesScreen), findsOneWidget);
     navigator.pop();
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('guide-search-button')));

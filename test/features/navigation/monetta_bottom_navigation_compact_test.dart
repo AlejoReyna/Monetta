@@ -246,15 +246,15 @@ void main() {
         );
 
         expect(
-          find.semantics.byLabel('Catálogo').evaluate().single,
+          find.semantics.byLabel('Categorías').evaluate().single,
           isSemantics(
-            label: 'Catálogo',
+            label: 'Categorías',
             isButton: true,
             hasTapAction: true,
             isSelected: true,
           ),
         );
-        for (final other in ['Home', 'Cuenta']) {
+        for (final other in ['Inicio', 'Cuenta']) {
           expect(
             find.semantics.byLabel(other).evaluate().single,
             isSemantics(

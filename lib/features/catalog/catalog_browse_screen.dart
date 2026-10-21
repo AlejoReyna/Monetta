@@ -23,6 +23,7 @@ import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
 import '../product/product_screen.dart';
 import 'catalog_controls.dart';
+import 'categories_screen.dart';
 import 'extracted_badge.dart';
 import 'product_tile.dart';
 import 'quick_add_button.dart';
@@ -409,7 +410,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             case MonettaBottomDestination.home:
               Navigator.of(context).popUntil((route) => route.isFirst);
             case MonettaBottomDestination.catalog:
-              break;
+              unawaited(openCategories(context));
             case MonettaBottomDestination.bag:
               unawaited(openBag(context));
             case MonettaBottomDestination.account:

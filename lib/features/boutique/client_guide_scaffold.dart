@@ -8,7 +8,9 @@ import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 import '../../main.dart';
 import '../account/account_screen.dart';
-import '../catalog/collection_screen.dart';
+import '../catalog/categories_screen.dart';
+import '../contact/contact_screen.dart';
+import '../wholesale/wholesale_screen.dart';
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
 import 'boutique_tokens.dart';
@@ -37,7 +39,9 @@ class ClientGuideScaffold extends StatelessWidget {
         case ClientGuideDestination.home:
           Navigator.of(context).popUntil((route) => route.isFirst);
         case ClientGuideDestination.categories:
-          openCollection(context, const CollectionScreen(title: 'Categorías'));
+          if (current != ClientGuideDestination.categories) {
+            unawaited(openCategories(context));
+          }
         case ClientGuideDestination.bag:
           unawaited(openBag(context));
         case ClientGuideDestination.account:
@@ -48,7 +52,9 @@ class ClientGuideScaffold extends StatelessWidget {
     }
 
     bool enabled(ClientGuideDestination destination) => switch (destination) {
-          ClientGuideDestination.home => true,
+          ClientGuideDestination.home ||
+          ClientGuideDestination.categories =>
+            true,
           ClientGuideDestination.account => account != null,
           _ => store != null,
         };
@@ -103,6 +109,28 @@ class ClientGuideScaffold extends StatelessWidget {
                     select(destination);
                   },
                 ),
+              ListTile(
+                key: const ValueKey('guide-menu-wholesale'),
+                leading: const Icon(Icons.storefront_outlined),
+                title: const Text('Mayoreo'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  Navigator.of(context).push(
+                    MaterialPageRoute<void>(
+                      builder: (_) => const WholesaleScreen(),
+                    ),
+                  );
+                },
+              ),
+              ListTile(
+                key: const ValueKey('guide-menu-contact'),
+                leading: const Icon(Icons.chat_outlined),
+                title: const Text('Contacto'),
+                onTap: () {
+                  Navigator.of(context).pop();
+                  unawaited(openContact(context));
+                },
+              ),
             ],
           ),
         ),

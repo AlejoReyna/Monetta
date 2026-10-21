@@ -29,6 +29,7 @@ import '../account/account_screen.dart';
 import '../about/about_monetta_screen.dart';
 import '../admin/admin_screen.dart';
 import '../catalog/catalog_browse_screen.dart';
+import '../catalog/categories_screen.dart';
 import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
 import '../catalog/search_screen.dart';
@@ -309,7 +310,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           );
         }
       case MonettaBottomDestination.catalog:
-        _openFullCatalog();
+        unawaited(openCategories(context));
       case MonettaBottomDestination.bag:
         unawaited(openBag(context));
       case MonettaBottomDestination.account:
@@ -588,6 +589,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     return MonettaSideMenu(
       onSearch: _openSearch,
       onCatalog: _openFullCatalog,
+      onCategories: () => unawaited(openCategories(context)),
       onBags: () => _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
       onWallets: () =>
           _openCatalogSection(title: 'Carteras', category: 'cartera'),
