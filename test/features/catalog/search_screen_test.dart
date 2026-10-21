@@ -401,23 +401,34 @@ void main() {
     expect(history.queries, isEmpty);
   });
 
-  testWidgets('search capture', (tester) async {
-    final store = await _loadedStore();
-    addTearDown(store.dispose);
-    await pumpClientGuide(
-      tester,
-      StoreScope(
-        notifier: store,
-        child: SearchScreen(prompt: 'Bolso coach', history: SearchHistory()),
-      ),
-      size: const Size(390, 1200),
-    );
-    await tester.enterText(
-      find.byKey(const ValueKey('search-query-field')),
-      'guess negro',
-    );
-    await tester.pumpAndSettle();
-    await captureClientGuide(tester, 'search-390-light');
-    expect(find.byKey(const ValueKey('search-live-results')), findsOneWidget);
-  });
+  for (final (size, brightness) in [
+    (const Size(390, 1200), Brightness.light),
+    (const Size(390, 1200), Brightness.dark),
+    (const Size(834, 1200), Brightness.light),
+  ]) {
+    testWidgets('search capture ${size.width} ${brightness.name}',
+        (tester) async {
+      final store = await _loadedStore();
+      addTearDown(store.dispose);
+      await pumpClientGuide(
+        tester,
+        StoreScope(
+          notifier: store,
+          child: SearchScreen(prompt: 'Bolso coach', history: SearchHistory()),
+        ),
+        size: size,
+        brightness: brightness,
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('search-query-field')),
+        'guess negro',
+      );
+      await tester.pumpAndSettle();
+      await captureClientGuide(
+        tester,
+        'search-${size.width.toInt()}-${brightness.name}',
+      );
+      expect(find.byKey(const ValueKey('search-live-results')), findsOneWidget);
+    });
+  }
 }

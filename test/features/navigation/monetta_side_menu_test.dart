@@ -143,33 +143,44 @@ void main() {
     expect(social.single.toString(), contains('instagram.com'));
   });
 
-  testWidgets('menu capture', (tester) async {
-    await pumpClientGuide(
-      tester,
-      MonettaSideMenu(
-        onSearch: () {},
-        onCatalog: () {},
-        onCategories: () {},
-        onBags: () {},
-        onWallets: () {},
-        onWatches: () {},
-        onPerfumes: () {},
-        onBeauty: () {},
-        onToggleTheme: () {},
-        onAbout: () {},
-        onPartner: () {},
-        onSupport: () {},
-        identityName: 'Ana',
-        identityDetail: 'ana@example.com',
-        onNotifications: () {},
-        onShare: () {},
-        onWhatsApp: () {},
-        socialLinks: HomeContent.fallback.socialLinks,
-        onOpenSocial: (_) {},
-      ),
-      size: const Size(390, 1200),
-    );
-    await captureClientGuide(tester, 'menu-390-light');
-    expect(find.text('Bolsas'), findsOneWidget);
-  });
+  for (final (size, brightness) in [
+    (const Size(390, 1400), Brightness.light),
+    (const Size(390, 1400), Brightness.dark),
+    (const Size(834, 1400), Brightness.light),
+  ]) {
+    testWidgets('menu capture ${size.width} ${brightness.name}',
+        (tester) async {
+      await pumpClientGuide(
+        tester,
+        MonettaSideMenu(
+          onSearch: () {},
+          onCatalog: () {},
+          onCategories: () {},
+          onBags: () {},
+          onWallets: () {},
+          onWatches: () {},
+          onPerfumes: () {},
+          onBeauty: () {},
+          onToggleTheme: () {},
+          onAbout: () {},
+          onPartner: () {},
+          onSupport: () {},
+          identityName: 'Ana',
+          identityDetail: 'ana@example.com',
+          onNotifications: () {},
+          onShare: () {},
+          onWhatsApp: () {},
+          socialLinks: HomeContent.fallback.socialLinks,
+          onOpenSocial: (_) {},
+        ),
+        size: size,
+        brightness: brightness,
+      );
+      await captureClientGuide(
+        tester,
+        'menu-${size.width.toInt()}-${brightness.name}',
+      );
+      expect(find.text('Bolsas'), findsOneWidget);
+    });
+  }
 }
