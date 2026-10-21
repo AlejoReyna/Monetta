@@ -33,7 +33,8 @@ final CampaignMedia kHomeBannerCampaign = CampaignMedia(
 /// phone still gets a banner worth looking at and a tall one does not hand the
 /// whole first fold to a single image.
 double homeBannerHeight(BuildContext context) =>
-    (MediaQuery.sizeOf(context).height * 0.29).clamp(200.0, 320.0);
+    (MediaQuery.sizeOf(context).height * 0.29).clamp(200.0, 320.0) *
+    MediaQuery.textScalerOf(context).scale(1).clamp(1.0, double.infinity);
 
 // ---------------------------------------------------------------------------
 // Search

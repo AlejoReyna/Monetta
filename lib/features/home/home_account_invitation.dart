@@ -4,6 +4,8 @@ library;
 import 'package:flutter/material.dart';
 
 import '../boutique/boutique_tokens.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../boutique/client_guide_components.dart';
 
 import '../checkout/purchase_notices.dart';
 
@@ -28,43 +30,45 @@ class HomeAccountInvitation extends StatelessWidget {
       decoration: BoxDecoration(
         color: palette.surfaceDeep,
         border: Border(
-          top: BorderSide(color: palette.hairline, width: .5),
+          top: BorderSide(color: palette.hairline, width: 1),
         ),
       ),
-      padding: const EdgeInsets.fromLTRB(
-        BoutiqueSpace.gutter,
-        BoutiqueSpace.xxl,
-        BoutiqueSpace.gutter,
-        BoutiqueSpace.xxl,
-      ),
+      padding: EdgeInsets.all(MonettaTokens.space[4]),
       child: Center(
         child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 620),
+          constraints:
+              const BoxConstraints(maxWidth: MonettaTokens.breakpointMedium),
           child: Column(
             children: [
               Text(
                 isSignedIn ? 'TU CUENTA' : 'REGÍSTRATE',
                 textAlign: TextAlign.center,
-                style: boutiqueDisplay(28, color: palette.ink),
+                style: clientGuideStyle(context, MonettaTokens.sectionTitle),
               ),
-              const SizedBox(height: BoutiqueSpace.md),
+              SizedBox(height: MonettaTokens.space[2]),
               Text(
                 'Consulta tus pedidos y datos de compra',
                 textAlign: TextAlign.center,
-                style: boutiqueText(size: 14, color: palette.inkMuted),
+                style: clientGuideStyle(
+                  context,
+                  MonettaTokens.body,
+                  color: palette.inkMuted,
+                ),
               ),
-              const SizedBox(height: BoutiqueSpace.xl),
+              SizedBox(height: MonettaTokens.space[3]),
               ConstrainedBox(
-                constraints: const BoxConstraints(maxWidth: 420),
-                child: BoutiqueButton(
+                constraints: const BoxConstraints(
+                  maxWidth: MonettaTokens.breakpointMedium,
+                ),
+                child: ClientGuideButton(
                   key: const ValueKey('home-register-button'),
                   label: isSignedIn ? 'VER MI CUENTA' : 'REGISTRARME AHORA',
                   onPressed: onRegister,
                 ),
               ),
-              const SizedBox(height: BoutiqueSpace.xxl),
+              SizedBox(height: MonettaTokens.space[4]),
               const SecurePaymentLine(key: ValueKey('home-payment-methods')),
-              const SizedBox(height: BoutiqueSpace.lg),
+              SizedBox(height: MonettaTokens.space[3]),
               const PurchasePolicyNotice(),
             ],
           ),
