@@ -1,0 +1,323 @@
+{% doc %}
+  @prompt
+    Tengo un bloque personalizado de Shopify OS 2.0 llamado "Expandable text" generado por IA. Necesito que funcione correctamente y tenga más opciones de edición en el theme editor. Dame el código completo del bloque (archivo .liquid en /blocks/) con lo siguiente:
+    
+    Funcionalidad expandible:
+    
+    Mostrar solo el primer párrafo por defecto
+    Botón "Ver más" con flecha ↓ al hacer clic expande el resto del contenido con animación suave (max-height transition)
+    Al expandirse, la flecha rota ↑ y el texto cambia a "Ver menos"
+    Al hacer clic de nuevo, colapsa de regreso al estado inicial
+    Usar JavaScript vanilla, sin frameworks. Usar aria-expanded para accesibilidad
+    Settings editables desde el theme editor (schema):
+    
+    text — Rich text (el contenido)
+    font_family — Select con opciones: Body font, Heading font
+    font_size — Range de 12px a 32px, paso 1, default 14
+    line_height — Select: normal, relaxed, loose
+    text_align — Select: left, center, right
+    max_width — Select: 100%, 80%, 60%, 40%
+    button_label_more — Text, default "Ver más"
+    button_label_less — Text, default "Ver menos"
+    button_color — Color picker
+    El bloque debe ser autocontenido, con CSS en <style> y JS en <script> dentro del mismo archivo. Compatible con múltiples instancias en la misma página usando el block.id como identificador único.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-expandable-text-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+  }
+
+  .ai-expandable-text__container-{{ ai_gen_id }} {
+    {% if block.settings.max_width == '100%' %}
+      width: 100%;
+    {% elsif block.settings.max_width == '80%' %}
+      width: 80%;
+      margin-left: auto;
+      margin-right: auto;
+    {% elsif block.settings.max_width == '60%' %}
+      width: 60%;
+      margin-left: auto;
+      margin-right: auto;
+    {% elsif block.settings.max_width == '40%' %}
+      width: 40%;
+      margin-left: auto;
+      margin-right: auto;
+    {% endif %}
+  }
+
+  .ai-expandable-text__content-{{ ai_gen_id }} {
+    {% if block.settings.font_family == 'body' %}
+      font-family: var(--font-body-family);
+    {% elsif block.settings.font_family == 'heading' %}
+      font-family: var(--font-heading-family);
+    {% endif %}
+    font-size: {{ block.settings.font_size }}px;
+    {% if block.settings.line_height == 'normal' %}
+      line-height: 1.5;
+    {% elsif block.settings.line_height == 'relaxed' %}
+      line-height: 1.75;
+    {% elsif block.settings.line_height == 'loose' %}
+      line-height: 2;
+    {% endif %}
+    text-align: {{ block.settings.text_align }};
+    overflow: hidden;
+    transition: max-height 0.4s ease;
+  }
+
+  .ai-expandable-text__content-{{ ai_gen_id }}.collapsed {
+    max-height: calc({{ block.settings.font_size }}px * {% if block.settings.line_height == 'normal' %}1.5{% elsif block.settings.line_height == 'relaxed' %}1.75{% elsif block.settings.line_height == 'loose' %}2{% endif %} * 3);
+  }
+
+  .ai-expandable-text__button-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    color: {{ block.settings.button_color }};
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 0;
+    margin-top: 12px;
+    font-size: {{ block.settings.font_size }}px;
+    {% if block.settings.font_family == 'body' %}
+      font-family: var(--font-body-family);
+    {% elsif block.settings.font_family == 'heading' %}
+      font-family: var(--font-heading-family);
+    {% endif %}
+  }
+
+  .ai-expandable-text__button-{{ ai_gen_id }}:hover {
+    opacity: 0.8;
+  }
+
+  .ai-expandable-text__arrow-{{ ai_gen_id }} {
+    display: inline-block;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-expandable-text__arrow-{{ ai_gen_id }}.rotated {
+    transform: rotate(180deg);
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-expandable-text__container-{{ ai_gen_id }} {
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<expandable-text-{{ ai_gen_id }} class="ai-expandable-text-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-expandable-text__container-{{ ai_gen_id }}">
+    <div class="ai-expandable-text__content-{{ ai_gen_id }} collapsed" data-content>
+      {{ block.settings.text }}
+    </div>
+    <button 
+      class="ai-expandable-text__button-{{ ai_gen_id }}" 
+      data-toggle
+      aria-expanded="false"
+    >
+      <span data-label-more>{{ block.settings.button_label_more }}</span>
+      <span data-label-less style="display: none;">{{ block.settings.button_label_less }}</span>
+      <span class="ai-expandable-text__arrow-{{ ai_gen_id }}" data-arrow>↓</span>
+    </button>
+  </div>
+</expandable-text-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class ExpandableText{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.content = this.querySelector('[data-content]');
+        this.button = this.querySelector('[data-toggle]');
+        this.arrow = this.querySelector('[data-arrow]');
+        this.labelMore = this.querySelector('[data-label-more]');
+        this.labelLess = this.querySelector('[data-label-less]');
+        this.isExpanded = false;
+
+        this.button.addEventListener('click', () => this.toggle());
+        
+        this.checkIfExpandable();
+      }
+
+      checkIfExpandable() {
+        const contentHeight = this.content.scrollHeight;
+        const collapsedHeight = this.content.offsetHeight;
+        
+        if (contentHeight <= collapsedHeight) {
+          this.button.style.display = 'none';
+        }
+      }
+
+      toggle() {
+        this.isExpanded = !this.isExpanded;
+
+        if (this.isExpanded) {
+          this.content.style.maxHeight = this.content.scrollHeight + 'px';
+          this.content.classList.remove('collapsed');
+          this.arrow.classList.add('rotated');
+          this.arrow.textContent = '↑';
+          this.labelMore.style.display = 'none';
+          this.labelLess.style.display = 'inline';
+          this.button.setAttribute('aria-expanded', 'true');
+        } else {
+          this.content.style.maxHeight = '';
+          this.content.classList.add('collapsed');
+          this.arrow.classList.remove('rotated');
+          this.arrow.textContent = '↓';
+          this.labelMore.style.display = 'inline';
+          this.labelLess.style.display = 'none';
+          this.button.setAttribute('aria-expanded', 'false');
+        }
+      }
+    }
+
+    customElements.define('expandable-text-{{ ai_gen_id }}', ExpandableText{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Expandable text",
+  "tag": null,
+  "settings": [
+    {
+      "type": "richtext",
+      "id": "text",
+      "label": "Text",
+      "default": "<p>Este es el primer párrafo que siempre será visible. Contiene información importante que el usuario verá de inmediato.</p><p>Este es el segundo párrafo que estará oculto inicialmente. Aquí puedes agregar más detalles sobre tu producto o servicio.</p><p>Y este es el tercer párrafo con información adicional que se mostrará cuando el usuario haga clic en 'Ver más'.</p>"
+    },
+    {
+      "type": "header",
+      "content": "Typography"
+    },
+    {
+      "type": "select",
+      "id": "font_family",
+      "label": "Font",
+      "options": [
+        {
+          "value": "body",
+          "label": "Body font"
+        },
+        {
+          "value": "heading",
+          "label": "Heading font"
+        }
+      ],
+      "default": "body"
+    },
+    {
+      "type": "range",
+      "id": "font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 32,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "select",
+      "id": "line_height",
+      "label": "Line height",
+      "options": [
+        {
+          "value": "normal",
+          "label": "Normal"
+        },
+        {
+          "value": "relaxed",
+          "label": "Relaxed"
+        },
+        {
+          "value": "loose",
+          "label": "Loose"
+        }
+      ],
+      "default": "normal"
+    },
+    {
+      "type": "select",
+      "id": "text_align",
+      "label": "Text alignment",
+      "options": [
+        {
+          "value": "left",
+          "label": "Left"
+        },
+        {
+          "value": "center",
+          "label": "Center"
+        },
+        {
+          "value": "right",
+          "label": "Right"
+        }
+      ],
+      "default": "left"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "select",
+      "id": "max_width",
+      "label": "Max width",
+      "options": [
+        {
+          "value": "100%",
+          "label": "100%"
+        },
+        {
+          "value": "80%",
+          "label": "80%"
+        },
+        {
+          "value": "60%",
+          "label": "60%"
+        },
+        {
+          "value": "40%",
+          "label": "40%"
+        }
+      ],
+      "default": "100%"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label_more",
+      "label": "Button label (more)",
+      "default": "Ver más"
+    },
+    {
+      "type": "text",
+      "id": "button_label_less",
+      "label": "Button label (less)",
+      "default": "Ver menos"
+    },
+    {
+      "type": "color",
+      "id": "button_color",
+      "label": "Button color",
+      "default": "#000000"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Expandable text"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,7 @@
+{
+  "layout": "monetta",
+  "sections": {
+    "cart": { "type": "monetta-cart", "settings": { "rail_heading": "Novedades", "collection": "all" } }
+  },
+  "order": ["cart"]
+}

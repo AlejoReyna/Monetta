@@ -1,0 +1,86 @@
+{%- comment -%}
+  Collection / brand / category page. Phones: the pinned 76 px page bar (back, Playfair title, count, search and filters) in
+  place of the global header; tablet and desktop: breadcrumbs, title row, toolbar and, from 1200 px, a sticky filter sidebar.
+  Products, prices, availability, filters, sort options and pagination are Shopify's (storefront filtering + paginate).
+  Merchants only choose how many products per page and which menu feeds the shortcut chips.
+{%- endcomment -%}
+{%- liquid
+  assign shortcuts = linklists[section.settings.shortcuts_menu]
+  assign active_count = 0
+  for filter in collection.filters
+    if filter.type == 'price_range'
+      if filter.min_value.value != blank or filter.max_value.value != blank
+        assign active_count = active_count | plus: 1
+      endif
+    else
+      assign active_count = active_count | plus: filter.active_values.size
+    endif
+  endfor
+  assign sort_by = collection.sort_by | default: collection.default_sort_by
+  assign clear_url = collection.url
+  if sort_by != collection.default_sort_by
+    assign clear_url = collection.url | append: '?sort_by=' | append: sort_by
+  endif
+  assign count_text = collection.products_count | append: ' piezas'
+  if collection.products_count == 1
+    assign count_text = '1 pieza'
+  endif
+-%}
+{% paginate collection.products by section.settings.products_per_page %}
+  <div class="container listing listing--collection" data-listing {{ section.shopify_attributes }}>
+    <div class="page-head page-head--bar">
+      <nav class="breadcrumbs" aria-label="Ruta de navegación">
+        <ol>
+          <li><a href="{{ routes.root_url }}">Inicio</a></li>
+          <li><span aria-current="page">{{ collection.title | escape }}</span></li>
+        </ol>
+      </nav>
+      {%- capture bar_sub -%}<p class="page-bar__sub" data-count aria-live="polite">{{ count_text }}</p>{%- endcapture -%}
+      {%- capture bar_actions -%}
+        <a class="icon-button page-bar__action" href="{{ routes.search_url }}" aria-label="Buscar productos" title="Buscar">{% render 'monetta-icon', name: 'search', size: 22 %}</a>
+        {%- if collection.filters.size > 0 or collection.sort_options.size > 1 -%}
+          <button type="button" class="icon-button page-bar__action" data-open-dialog="filters-drawer" aria-haspopup="dialog" aria-controls="filters-drawer" aria-label="Filtrar y ordenar{% if active_count > 0 %}, {{ active_count }} activos{% endif %}" title="Filtrar y ordenar">{% render 'monetta-icon', name: 'tune', size: 24 %}{% if active_count > 0 %}<span class="page-bar__badge" aria-hidden="true">{{ active_count }}</span>{% endif %}</button>
+        {%- endif -%}
+      {%- endcapture -%}
+      {% render 'monetta-page-bar', title: collection.title, back: routes.root_url, sub: bar_sub, actions: bar_actions %}
+      {%- if collection.description != blank and paginate.current_page == 1 -%}
+        <div class="body-copy page-intro">{{ collection.description }}</div>
+      {%- endif -%}
+    </div>
+
+    {%- if shortcuts.links.size > 0 -%}
+      <nav class="collection-shortcuts" aria-label="Atajos">
+        <ul class="chips chips--scroll" role="list">
+          {%- for link in shortcuts.links -%}
+            <li><a class="chip" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
+          {%- endfor -%}
+        </ul>
+      </nav>
+    {%- endif -%}
+
+    {%- capture results_html -%}
+      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.' %}
+    {%- endcapture -%}
+    {% render 'monetta-listing-layout',
+      filters: collection.filters,
+      sort_options: collection.sort_options,
+      sort_by: sort_by,
+      default_sort: collection.default_sort_by,
+      base_url: collection.url,
+      clear_url: clear_url,
+      results_html: results_html,
+      active_count: active_count,
+      has_products: collection.all_products_count
+    %}
+  </div>
+{% endpaginate %}
+
+{% schema %}
+{
+  "name": "Monetta · Colección",
+  "settings": [
+    { "type": "range", "id": "products_per_page", "label": "Productos por página", "min": 12, "max": 48, "step": 4, "default": 24 },
+    { "type": "link_list", "id": "shortcuts_menu", "label": "Menú de atajos", "info": "Opcional. Sus enlaces aparecen como botones bajo el título (por ejemplo estilos de bolsa)." }
+  ]
+}
+{% endschema %}

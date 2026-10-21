@@ -1,0 +1,758 @@
+{% doc %}
+  @prompt
+    Create a Shopify OS 2.0 block called "Vertical Timeline Accordion" with a premium, interactive design. Full requirements:
+    
+    Layout & Frame: Each timeline entry must have a visible card frame (rounded corners 12px, subtle border 1px solid #ece9e3, soft box-shadow 0 2px 16px rgba(0,0,0,0.06)) wrapping the content. Inside each card: an optional image (full-width, object-fit: cover, max-height 220px, border-radius 8px), a date/year label (uppercase, spaced, muted), a title, and a description. Generous internal padding (1.5rem 1.75rem).
+    
+    Timeline line: A vertical connector line (1px, color #d4d0cb) runs on the left side through all entries. Each entry has a dot/circle marker. The dot is fully configurable via theme editor settings: size (range 8–32px, default 14px), fill color, border color, and border width (1–4px). Dot position is centered on the line. When an entry becomes visible via scroll, optionally apply a pulse animation (configurable: pulse / none).
+    
+    Scroll-reveal: Each entry uses IntersectionObserver (no external libraries) to fade in (opacity 0→1) and slide up (translateY 20px→0) with 0.5s ease transition. Entries animate sequentially — only when they enter the viewport.
+    
+    Accordion behavior: Only the first entry is visible by default. All remaining entries are hidden (display: none). A "Ver más" button appears below, centered, styled as a pill (border-radius: 999px, border: 1px solid #ccc, uppercase, spaced text). The chevron arrow icon is placed below the button text (stacked vertically using flex-direction: column), not inline. On click: hidden entries are shown one by one with a staggered reveal (80ms delay per entry index) using IntersectionObserver. Button label changes to "Ver menos" and chevron rotates 180°. Clicking again collapses all extra entries and resets their visibility state.
+    
+    Style: Minimalist and editorial. Clean sans-serif typography. Neutral palette. Premium spa-like feel with generous whitespace. No decorative elements beyond the timeline line and dots.
+    
+    Theme editor settings:
+    
+    Section heading (text)
+    Dot size (range: 8–32px, step 2, default 14px)
+    Dot color (color picker, default #2a2a2a)
+    Dot border color (color picker, default #d4d0cb)
+    Dot border width (range: 1–4px, step 1, default 2px)
+    Dot animation (select: none / pulse)
+    Up to 6 timeline entries as nested blocks (type: timeline_entry), each with: image_picker, date/year text, entry title, entry description (textarea)
+    Technical requirements:
+    
+    All JS scoped inside an IIFE using block.id (converted to safe variable name) so multiple instances work independently on the same page
+    CSS inside a scoped <style> tag using #tl-{{ bid }} as root selector with CSS custom properties for dot size, color, border
+    Pulse animation defined as a scoped @keyframes block, only injected when dot_animation == 'pulse' (using Liquid {% if %})
+    No external JS or CSS dependencies
+    Compatible with Shopify OS 2.0 (block schema with "target": "section", "presets" array, max 6 blocks)
+    Schema at the bottom of the file in {% schema %} JSON
+{% enddoc %}
+{% assign bid = block.id | replace: '_', '' | replace: '-', '' | downcase %}
+
+{% style %}
+  #tl-{{ bid }} {
+    --dot-size: {{ block.settings.dot_size }}px;
+    --dot-color: {{ block.settings.dot_color }};
+    --dot-border-color: {{ block.settings.dot_border_color }};
+    --dot-border-width: {{ block.settings.dot_border_width }}px;
+    --timeline-line-color: #d4d0cb;
+    
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 3rem 1.5rem;
+  }
+
+  .tl-heading-{{ bid }} {
+    font-size: 2rem;
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    margin: 0 0 3rem;
+    text-align: center;
+    color: #2a2a2a;
+  }
+
+  .tl-container-{{ bid }} {
+    position: relative;
+    padding-left: 3rem;
+  }
+
+  .tl-line-{{ bid }} {
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--timeline-line-color);
+  }
+
+  .tl-entry-{{ bid }} {
+    position: relative;
+    margin-bottom: 2.5rem;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  .tl-entry-{{ bid }}.tl-visible-{{ bid }} {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tl-entry-{{ bid }}.tl-hidden-{{ bid }} {
+    display: none;
+  }
+
+  .tl-dot-{{ bid }} {
+    position: absolute;
+    left: calc(-3rem - (var(--dot-size) / 2) + 0.5px);
+    top: 1.75rem;
+    width: var(--dot-size);
+    height: var(--dot-size);
+    border-radius: 50%;
+    background-color: var(--dot-color);
+    border: var(--dot-border-width) solid var(--dot-border-color);
+    z-index: 2;
+  }
+
+  {% if block.settings.dot_animation == 'pulse' %}
+  .tl-dot-{{ bid }}.tl-animate-{{ bid }} {
+    animation: tl-pulse-{{ bid }} 1.5s ease-in-out;
+  }
+
+  @keyframes tl-pulse-{{ bid }} {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.3);
+      opacity: 0.7;
+    }
+  }
+  {% endif %}
+
+  .tl-card-{{ bid }} {
+    background: #ffffff;
+    border: 1px solid #ece9e3;
+    border-radius: 12px;
+    box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06);
+    overflow: hidden;
+    padding: 1.5rem 1.75rem;
+  }
+
+  .tl-image-{{ bid }} {
+    width: calc(100% + 3.5rem);
+    margin: -1.5rem -1.75rem 1.5rem;
+    max-height: 220px;
+    object-fit: cover;
+    border-radius: 8px 8px 0 0;
+  }
+
+  .tl-date-{{ bid }} {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #999;
+    margin-bottom: 0.75rem;
+  }
+
+  .tl-title-{{ bid }} {
+    font-size: 1.25rem;
+    font-weight: 500;
+    color: #2a2a2a;
+    margin: 0 0 0.75rem;
+    line-height: 1.4;
+  }
+
+  .tl-description-{{ bid }} {
+    font-size: 0.95rem;
+    line-height: 1.7;
+    color: #555;
+    margin: 0;
+    white-space: pre-wrap;
+  }
+
+  .tl-toggle-wrapper-{{ bid }} {
+    display: flex;
+    justify-content: center;
+    margin-top: 2rem;
+  }
+
+  .tl-toggle-btn-{{ bid }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.875rem 2rem;
+    background: transparent;
+    border: 1px solid #ccc;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: #555;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  .tl-toggle-btn-{{ bid }}:hover {
+    border-color: #999;
+    color: #2a2a2a;
+  }
+
+  .tl-chevron-{{ bid }} {
+    width: 12px;
+    height: 12px;
+    transition: transform 0.3s ease;
+  }
+
+  .tl-toggle-btn-{{ bid }}.tl-expanded-{{ bid }} .tl-chevron-{{ bid }} {
+    transform: rotate(180deg);
+  }
+
+  @media screen and (max-width: 749px) {
+    #tl-{{ bid }} {
+      padding: 2rem 1rem;
+    }
+
+    .tl-heading-{{ bid }} {
+      font-size: 1.5rem;
+      margin-bottom: 2rem;
+    }
+
+    .tl-container-{{ bid }} {
+      padding-left: 2rem;
+    }
+
+    .tl-dot-{{ bid }} {
+      left: calc(-2rem - (var(--dot-size) / 2) + 0.5px);
+    }
+
+    .tl-card-{{ bid }} {
+      padding: 1.25rem 1.5rem;
+    }
+
+    .tl-image-{{ bid }} {
+      width: calc(100% + 3rem);
+      margin: -1.25rem -1.5rem 1.25rem;
+    }
+  }
+{% endstyle %}
+
+<vertical-timeline-accordion-{{ bid }} id="tl-{{ bid }}" {{ block.shopify_attributes }}>
+  {% if block.settings.section_heading != blank %}
+    <h2 class="tl-heading-{{ bid }}">{{ block.settings.section_heading }}</h2>
+  {% endif %}
+
+  <div class="tl-container-{{ bid }}">
+    <div class="tl-line-{{ bid }}"></div>
+
+    {% assign has_entries = false %}
+    {% if block.settings.entry_1_title != blank %}
+      {% assign has_entries = true %}
+      <div class="tl-entry-{{ bid }}" data-entry-index="0">
+        <div class="tl-dot-{{ bid }}"></div>
+        <div class="tl-card-{{ bid }}">
+          {% if block.settings.entry_1_image %}
+            <img 
+              src="{{ block.settings.entry_1_image | image_url: width: 800 }}" 
+              alt="{{ block.settings.entry_1_title | escape }}"
+              class="tl-image-{{ bid }}"
+              loading="lazy"
+              width="800"
+              height="220"
+            >
+          {% endif %}
+          {% if block.settings.entry_1_date != blank %}
+            <div class="tl-date-{{ bid }}">{{ block.settings.entry_1_date }}</div>
+          {% endif %}
+          <h3 class="tl-title-{{ bid }}">{{ block.settings.entry_1_title }}</h3>
+          {% if block.settings.entry_1_description != blank %}
+            <p class="tl-description-{{ bid }}">{{ block.settings.entry_1_description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.entry_2_title != blank %}
+      <div class="tl-entry-{{ bid }} tl-hidden-{{ bid }}" data-entry-index="1">
+        <div class="tl-dot-{{ bid }}"></div>
+        <div class="tl-card-{{ bid }}">
+          {% if block.settings.entry_2_image %}
+            <img 
+              src="{{ block.settings.entry_2_image | image_url: width: 800 }}" 
+              alt="{{ block.settings.entry_2_title | escape }}"
+              class="tl-image-{{ bid }}"
+              loading="lazy"
+              width="800"
+              height="220"
+            >
+          {% endif %}
+          {% if block.settings.entry_2_date != blank %}
+            <div class="tl-date-{{ bid }}">{{ block.settings.entry_2_date }}</div>
+          {% endif %}
+          <h3 class="tl-title-{{ bid }}">{{ block.settings.entry_2_title }}</h3>
+          {% if block.settings.entry_2_description != blank %}
+            <p class="tl-description-{{ bid }}">{{ block.settings.entry_2_description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.entry_3_title != blank %}
+      <div class="tl-entry-{{ bid }} tl-hidden-{{ bid }}" data-entry-index="2">
+        <div class="tl-dot-{{ bid }}"></div>
+        <div class="tl-card-{{ bid }}">
+          {% if block.settings.entry_3_image %}
+            <img 
+              src="{{ block.settings.entry_3_image | image_url: width: 800 }}" 
+              alt="{{ block.settings.entry_3_title | escape }}"
+              class="tl-image-{{ bid }}"
+              loading="lazy"
+              width="800"
+              height="220"
+            >
+          {% endif %}
+          {% if block.settings.entry_3_date != blank %}
+            <div class="tl-date-{{ bid }}">{{ block.settings.entry_3_date }}</div>
+          {% endif %}
+          <h3 class="tl-title-{{ bid }}">{{ block.settings.entry_3_title }}</h3>
+          {% if block.settings.entry_3_description != blank %}
+            <p class="tl-description-{{ bid }}">{{ block.settings.entry_3_description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.entry_4_title != blank %}
+      <div class="tl-entry-{{ bid }} tl-hidden-{{ bid }}" data-entry-index="3">
+        <div class="tl-dot-{{ bid }}"></div>
+        <div class="tl-card-{{ bid }}">
+          {% if block.settings.entry_4_image %}
+            <img 
+              src="{{ block.settings.entry_4_image | image_url: width: 800 }}" 
+              alt="{{ block.settings.entry_4_title | escape }}"
+              class="tl-image-{{ bid }}"
+              loading="lazy"
+              width="800"
+              height="220"
+            >
+          {% endif %}
+          {% if block.settings.entry_4_date != blank %}
+            <div class="tl-date-{{ bid }}">{{ block.settings.entry_4_date }}</div>
+          {% endif %}
+          <h3 class="tl-title-{{ bid }}">{{ block.settings.entry_4_title }}</h3>
+          {% if block.settings.entry_4_description != blank %}
+            <p class="tl-description-{{ bid }}">{{ block.settings.entry_4_description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.entry_5_title != blank %}
+      <div class="tl-entry-{{ bid }} tl-hidden-{{ bid }}" data-entry-index="4">
+        <div class="tl-dot-{{ bid }}"></div>
+        <div class="tl-card-{{ bid }}">
+          {% if block.settings.entry_5_image %}
+            <img 
+              src="{{ block.settings.entry_5_image | image_url: width: 800 }}" 
+              alt="{{ block.settings.entry_5_title | escape }}"
+              class="tl-image-{{ bid }}"
+              loading="lazy"
+              width="800"
+              height="220"
+            >
+          {% endif %}
+          {% if block.settings.entry_5_date != blank %}
+            <div class="tl-date-{{ bid }}">{{ block.settings.entry_5_date }}</div>
+          {% endif %}
+          <h3 class="tl-title-{{ bid }}">{{ block.settings.entry_5_title }}</h3>
+          {% if block.settings.entry_5_description != blank %}
+            <p class="tl-description-{{ bid }}">{{ block.settings.entry_5_description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+
+    {% if block.settings.entry_6_title != blank %}
+      <div class="tl-entry-{{ bid }} tl-hidden-{{ bid }}" data-entry-index="5">
+        <div class="tl-dot-{{ bid }}"></div>
+        <div class="tl-card-{{ bid }}">
+          {% if block.settings.entry_6_image %}
+            <img 
+              src="{{ block.settings.entry_6_image | image_url: width: 800 }}" 
+              alt="{{ block.settings.entry_6_title | escape }}"
+              class="tl-image-{{ bid }}"
+              loading="lazy"
+              width="800"
+              height="220"
+            >
+          {% endif %}
+          {% if block.settings.entry_6_date != blank %}
+            <div class="tl-date-{{ bid }}">{{ block.settings.entry_6_date }}</div>
+          {% endif %}
+          <h3 class="tl-title-{{ bid }}">{{ block.settings.entry_6_title }}</h3>
+          {% if block.settings.entry_6_description != blank %}
+            <p class="tl-description-{{ bid }}">{{ block.settings.entry_6_description }}</p>
+          {% endif %}
+        </div>
+      </div>
+    {% endif %}
+  </div>
+
+  {% assign entry_count = 0 %}
+  {% if block.settings.entry_1_title != blank %}{% assign entry_count = entry_count | plus: 1 %}{% endif %}
+  {% if block.settings.entry_2_title != blank %}{% assign entry_count = entry_count | plus: 1 %}{% endif %}
+  {% if block.settings.entry_3_title != blank %}{% assign entry_count = entry_count | plus: 1 %}{% endif %}
+  {% if block.settings.entry_4_title != blank %}{% assign entry_count = entry_count | plus: 1 %}{% endif %}
+  {% if block.settings.entry_5_title != blank %}{% assign entry_count = entry_count | plus: 1 %}{% endif %}
+  {% if block.settings.entry_6_title != blank %}{% assign entry_count = entry_count | plus: 1 %}{% endif %}
+
+  {% if entry_count > 1 %}
+    <div class="tl-toggle-wrapper-{{ bid }}">
+      <button class="tl-toggle-btn-{{ bid }}" type="button" aria-expanded="false">
+        <span class="tl-toggle-text-{{ bid }}">Ver más</span>
+        <svg class="tl-chevron-{{ bid }}" viewBox="0 0 12 8" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="1 1, 6 6, 11 1"></polyline>
+        </svg>
+      </button>
+    </div>
+  {% endif %}
+</vertical-timeline-accordion-{{ bid }}>
+
+<script>
+(function() {
+  class VerticalTimelineAccordion{{ bid }} extends HTMLElement {
+    constructor() {
+      super();
+      this.entries = Array.from(this.querySelectorAll('.tl-entry-{{ bid }}'));
+      this.toggleBtn = this.querySelector('.tl-toggle-btn-{{ bid }}');
+      this.toggleText = this.querySelector('.tl-toggle-text-{{ bid }}');
+      this.isExpanded = false;
+      this.observer = null;
+    }
+
+    connectedCallback() {
+      this.setupIntersectionObserver();
+      if (this.toggleBtn) {
+        this.toggleBtn.addEventListener('click', () => this.handleToggle());
+      }
+      this.observeVisibleEntries();
+    }
+
+    setupIntersectionObserver() {
+      const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.2
+      };
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            const element = entry.target;
+            element.classList.add('tl-visible-{{ bid }}');
+            
+            const dot = element.querySelector('.tl-dot-{{ bid }}');
+            if (dot) {
+              dot.classList.add('tl-animate-{{ bid }}');
+            }
+            
+            this.observer.unobserve(element);
+          }
+        });
+      }, options);
+    }
+
+    observeVisibleEntries() {
+      this.entries.forEach(entry => {
+        if (!entry.classList.contains('tl-hidden-{{ bid }}')) {
+          this.observer.observe(entry);
+        }
+      });
+    }
+
+    handleToggle() {
+      this.isExpanded = !this.isExpanded;
+      this.toggleBtn.classList.toggle('tl-expanded-{{ bid }}', this.isExpanded);
+      this.toggleBtn.setAttribute('aria-expanded', this.isExpanded);
+
+      if (this.isExpanded) {
+        this.toggleText.textContent = 'Ver menos';
+        this.expandEntries();
+      } else {
+        this.toggleText.textContent = 'Ver más';
+        this.collapseEntries();
+      }
+    }
+
+    expandEntries() {
+      this.entries.forEach((entry, index) => {
+        if (index > 0) {
+          setTimeout(() => {
+            entry.classList.remove('tl-hidden-{{ bid }}');
+            entry.style.opacity = '0';
+            entry.style.transform = 'translateY(20px)';
+            
+            requestAnimationFrame(() => {
+              this.observer.observe(entry);
+            });
+          }, index * 80);
+        }
+      });
+    }
+
+    collapseEntries() {
+      this.entries.forEach((entry, index) => {
+        if (index > 0) {
+          entry.classList.add('tl-hidden-{{ bid }}');
+          entry.classList.remove('tl-visible-{{ bid }}');
+          entry.style.opacity = '0';
+          entry.style.transform = 'translateY(20px)';
+          
+          const dot = entry.querySelector('.tl-dot-{{ bid }}');
+          if (dot) {
+            dot.classList.remove('tl-animate-{{ bid }}');
+          }
+        }
+      });
+
+      const firstEntry = this.entries[0];
+      if (firstEntry) {
+        firstEntry.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      }
+    }
+
+    disconnectedCallback() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+      if (this.toggleBtn) {
+        this.toggleBtn.removeEventListener('click', this.handleToggle);
+      }
+    }
+  }
+
+  customElements.define('vertical-timeline-accordion-{{ bid }}', VerticalTimelineAccordion{{ bid }});
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Timeline accordion",
+  "tag": null,
+  "settings": [
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Section heading",
+      "default": "Our Journey"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "header",
+      "content": "Timeline dot"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "dot_border_color",
+      "label": "Dot border color",
+      "default": "#d4d0cb"
+    },
+    {
+      "type": "range",
+      "id": "dot_border_width",
+      "label": "Dot border width",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "select",
+      "id": "dot_animation",
+      "label": "Dot animation",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "pulse",
+          "label": "Pulse"
+        }
+      ],
+      "default": "pulse"
+    },
+    {
+      "type": "header",
+      "content": "Entry 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_1_date",
+      "label": "Date or year",
+      "default": "2024"
+    },
+    {
+      "type": "text",
+      "id": "entry_1_title",
+      "label": "Title",
+      "default": "Our Beginning"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_1_description",
+      "label": "Description",
+      "default": "The journey started with a vision to create something meaningful."
+    },
+    {
+      "type": "header",
+      "content": "Entry 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_2_date",
+      "label": "Date or year",
+      "default": "2023"
+    },
+    {
+      "type": "text",
+      "id": "entry_2_title",
+      "label": "Title",
+      "default": "First Milestone"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_2_description",
+      "label": "Description",
+      "default": "We reached our first major achievement and expanded our vision."
+    },
+    {
+      "type": "header",
+      "content": "Entry 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_3_date",
+      "label": "Date or year",
+      "default": "2022"
+    },
+    {
+      "type": "text",
+      "id": "entry_3_title",
+      "label": "Title",
+      "default": "Foundation"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_3_description",
+      "label": "Description",
+      "default": "Laying the groundwork for future success and growth."
+    },
+    {
+      "type": "header",
+      "content": "Entry 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_4_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_4_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_4_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_5_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_5_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_5_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_5_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_6_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_6_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_6_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_6_description",
+      "label": "Description"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Timeline accordion"
+    }
+  ]
+}
+{% endschema %}

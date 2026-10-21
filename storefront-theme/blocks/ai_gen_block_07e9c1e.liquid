@@ -1,0 +1,560 @@
+{% doc %}
+  @prompt
+    Create a Shopify OS 2.0 liquid block called "Collection carousel with static cards". It must match the following design exactly in structure, proportions, shadows, and spacing.
+    
+    CAROUSEL LAYOUT:
+    
+    Horizontal scrollable carousel with scroll-snap enabled (scroll-snap-type: x mandatory, scroll-snap-align: start on each card)
+    Scrollbar completely hidden
+    Gap between cards: controlled by a range setting (min: 4px, max: 40px, default: 10px)
+    Carousel wrapper must have padding: 16px on all sides so box shadows are never clipped
+    Padding of the carousel wrapper must be a range setting (min: 8px, max: 40px, default: 16px) labeled "Shadow spacing"
+    The scroll container must use overflow-x: auto with overflow-y: visible. Do NOT use overflow: hidden anywhere in the carousel or its parent containers
+    Smooth scroll behavior
+    CARD SIZE:
+    
+    Card width controlled by a range setting (min: 60%, max: 100%, default: 85%) labeled "Card width"
+    All 5 cards must be equal in height, width, and proportions at all times
+    CARD DESIGN (identical for ALL 5 cards):
+    
+    Background color: #ffffff (color picker setting)
+    Card border radius: 50px (range setting, min: 0, max: 60px)
+    Box shadow: 0px 8px 20px rgba(0,0,0,0.2) — soft drop shadow, never clipped
+    Shadow opacity controlled by a range setting (min: 0, max: 1, step: 0.05, default: 0.2)
+    Image border radius: 50px (range setting, min: 0, max: 60px)
+    Image aspect ratio: 4:5 (portrait), object-fit: cover, full width of card
+    Internal card padding: 16px
+    Content alignment: centered
+    CARDS 1–3: Dynamic collection cards Each card has an independent Shopify collection picker. Displays:
+    
+    Collection featured image (aspect-ratio 4:5, border-radius matches image border radius setting, object-fit: cover)
+    Collection title as heading
+    Collection description (optional, controlled by a show/hide checkbox toggle)
+    A button that links to the collection URL
+    CARDS 4–5: Static custom cards (visually identical to collection cards) Each card has its own independent fields:
+    
+    Image picker (custom uploaded image)
+    Text field: custom heading
+    Text field: button label
+    URL field: custom link for the button No description field needed on these cards. These cards must match cards 1–3 exactly in height, padding, image proportions, shadow, and border radius.
+    TYPOGRAPHY — Title (all cards):
+    
+    Font picker setting (default: Aleo)
+    Size range setting (default: 26px)
+    Color picker (default: #000000)
+    TYPOGRAPHY — Description (collection cards only):
+    
+    Font picker setting (default: System UI)
+    Size range setting (default: 15px)
+    Color picker (default: #666666)
+    Show/hide checkbox toggle
+    BUTTON (shared settings for all 5 cards):
+    
+    Font picker setting (default: Andada Pro)
+    Size range setting (default: 14px)
+    Background color picker (default: #dedede)
+    Text color picker (default: #000000)
+    Hover background color picker (default: #dedede)
+    Hover text color picker (default: #aa7d44)
+    Border radius range setting (default: 50px)
+    Padding: 10px 24px
+    CRITICAL REQUIREMENTS:
+    
+    All 5 cards must look visually identical in structure, height, proportions, shadows, and spacing — only the data source differs
+    Box shadows must never be clipped by any parent container
+    All key visual properties (card width, shadow spacing, gap, border radii, colors, fonts, sizes) must be editable from the Shopify theme editor
+    The block must be fully compatible with Shopify OS 2.0 theme architecture and render correctly in the theme editor preview
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    padding: {{ block.settings.shadow_spacing }}px;
+  }
+
+  .ai-collection-carousel-scroll-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    overflow-y: visible;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .ai-collection-carousel-scroll-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 {{ block.settings.card_width }}%;
+    scroll-snap-align: start;
+    background-color: {{ block.settings.card_bg_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, {{ block.settings.shadow_opacity | divided_by: 10.0 }});
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .ai-collection-carousel-image-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    object-fit: cover;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    margin-bottom: 16px;
+  }
+
+  .ai-collection-carousel-image-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: {{ block.settings.image_border_radius }}px;
+    margin-bottom: 16px;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-carousel-image-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-collection-carousel-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-weight: {{ block.settings.title_font.weight }};
+    font-style: {{ block.settings.title_font.style }};
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 12px 0;
+  }
+
+  .ai-collection-carousel-description-{{ ai_gen_id }} {
+    font-family: {{ block.settings.description_font.family }}, {{ block.settings.description_font.fallback_families }};
+    font-weight: {{ block.settings.description_font.weight }};
+    font-style: {{ block.settings.description_font.style }};
+    font-size: {{ block.settings.description_size }}px;
+    color: {{ block.settings.description_color }};
+    margin: 0 0 16px 0;
+  }
+
+  .ai-collection-carousel-button-{{ ai_gen_id }} {
+    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-weight: {{ block.settings.button_font.weight }};
+    font-style: {{ block.settings.button_font.style }};
+    font-size: {{ block.settings.button_size }}px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    border: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    padding: 10px 24px;
+    text-decoration: none;
+    display: inline-block;
+    cursor: pointer;
+    transition: background-color 0.3s ease, color 0.3s ease;
+    margin-top: auto;
+  }
+
+  .ai-collection-carousel-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg_color }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+{% endstyle %}
+
+<collection-carousel-{{ ai_gen_id }} class="ai-collection-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-collection-carousel-scroll-{{ ai_gen_id }}">
+    {% for i in (1..3) %}
+      {% liquid
+        assign collection_key = 'collection_' | append: i
+        assign collection = block.settings[collection_key]
+      %}
+      <div class="ai-collection-carousel-card-{{ ai_gen_id }}">
+        {% if collection.featured_image %}
+          <img
+            src="{{ collection.featured_image | image_url: width: 800 }}"
+            alt="{{ collection.featured_image.alt | escape }}"
+            class="ai-collection-carousel-image-{{ ai_gen_id }}"
+            loading="lazy"
+            width="800"
+            height="1000"
+          >
+        {% else %}
+          <div class="ai-collection-carousel-image-placeholder-{{ ai_gen_id }}">
+            {{ 'collection-1' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+
+        {% if collection.title != blank %}
+          <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+        {% else %}
+          <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">Collection {{ i }}</h3>
+        {% endif %}
+
+        {% if block.settings.show_description and collection.description != blank %}
+          <div class="ai-collection-carousel-description-{{ ai_gen_id }}">{{ collection.description }}</div>
+        {% endif %}
+
+        {% if collection.url != blank %}
+          <a href="{{ collection.url }}" class="ai-collection-carousel-button-{{ ai_gen_id }}">
+            {{ block.settings.button_label }}
+          </a>
+        {% else %}
+          <a href="#" class="ai-collection-carousel-button-{{ ai_gen_id }}">
+            {{ block.settings.button_label }}
+          </a>
+        {% endif %}
+      </div>
+    {% endfor %}
+
+    {% for i in (4..5) %}
+      {% liquid
+        assign image_key = 'custom_image_' | append: i
+        assign heading_key = 'custom_heading_' | append: i
+        assign button_label_key = 'custom_button_label_' | append: i
+        assign link_key = 'custom_link_' | append: i
+
+        assign custom_image = block.settings[image_key]
+        assign custom_heading = block.settings[heading_key]
+        assign custom_button_label = block.settings[button_label_key]
+        assign custom_link = block.settings[link_key]
+      %}
+      <div class="ai-collection-carousel-card-{{ ai_gen_id }}">
+        {% if custom_image %}
+          <img
+            src="{{ custom_image | image_url: width: 800 }}"
+            alt="{{ custom_image.alt | escape }}"
+            class="ai-collection-carousel-image-{{ ai_gen_id }}"
+            loading="lazy"
+            width="800"
+            height="1000"
+          >
+        {% else %}
+          <div class="ai-collection-carousel-image-placeholder-{{ ai_gen_id }}">
+            {{ 'collection-1' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+
+        {% if custom_heading != blank %}
+          <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">{{ custom_heading }}</h3>
+        {% else %}
+          <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">Custom Card {{ i }}</h3>
+        {% endif %}
+
+        {% if custom_link != blank %}
+          <a href="{{ custom_link }}" class="ai-collection-carousel-button-{{ ai_gen_id }}">
+            {% if custom_button_label != blank %}
+              {{ custom_button_label }}
+            {% else %}
+              {{ block.settings.button_label }}
+            {% endif %}
+          </a>
+        {% else %}
+          <a href="#" class="ai-collection-carousel-button-{{ ai_gen_id }}">
+            {% if custom_button_label != blank %}
+              {{ custom_button_label }}
+            {% else %}
+              {{ block.settings.button_label }}
+            {% endif %}
+          </a>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</collection-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.scrollContainer = this.querySelector('.ai-collection-carousel-scroll-{{ ai_gen_id }}');
+      }
+    }
+
+    customElements.define('collection-carousel-{{ ai_gen_id }}', CollectionCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Carousel layout"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Card width",
+      "min": 60,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 85
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 4,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "shadow_spacing",
+      "label": "Shadow spacing",
+      "min": 8,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Card design"
+    },
+    {
+      "type": "color",
+      "id": "card_bg_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Card border radius",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Image border radius",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Shadow opacity",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "default": 2
+    },
+    {
+      "type": "header",
+      "content": "Collection cards (1-3)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Show collection description",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Custom card 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_image_4",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "custom_heading_4",
+      "label": "Heading",
+      "default": "Custom Card 4"
+    },
+    {
+      "type": "text",
+      "id": "custom_button_label_4",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "custom_link_4",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Custom card 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "custom_image_5",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "custom_heading_5",
+      "label": "Heading",
+      "default": "Custom Card 5"
+    },
+    {
+      "type": "text",
+      "id": "custom_button_label_5",
+      "label": "Button label"
+    },
+    {
+      "type": "url",
+      "id": "custom_link_5",
+      "label": "Link"
+    },
+    {
+      "type": "header",
+      "content": "Title typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Size",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 26
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Description typography"
+    },
+    {
+      "type": "font_picker",
+      "id": "description_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "Size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 15
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Default button label",
+      "default": "Shop now"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Font",
+      "default": "assistant_n4"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Size",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Background color",
+      "default": "#dedede"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Hover background color",
+      "default": "#dedede"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#aa7d44"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

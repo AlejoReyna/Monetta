@@ -1,0 +1,503 @@
+{% doc %}
+  @prompt
+    Task: Create a Premium 3-Row Image-Only Collection Carousel.
+    
+    1. Layout Structure:
+    
+    Create a horizontal carousel consisting of a 3x3 grid (3 rows of cards that scroll together horizontally).
+    
+    Initial View: Ensure exactly the first 2 columns are fully visible, with a very subtle 5% to 10% peek of the 3rd column on the right side to signal scrollability.
+    
+    Background: Use a strictly Pure White (#FFFFFF) background for the entire section.
+    
+    2. Card Specification (Edge-to-Edge):
+    
+    No Content: Cards must contain ONLY images. Remove all titles, text, buttons, and internal margins (padding). The image must cover 100% of the card area.
+    
+    Geometry: 24px border-radius for each card to maintain a soft but modern look.
+    
+    Shadow: Apply a very thin, elegant drop shadow only at the bottom of each card to create a subtle lift effect.
+    
+    3. Motion & Interaction:
+    
+    Pop-Up Effect: As the user scrolls, the cards in the center of the viewport should have a slight "Pop-Up" scale animation and the shadow should become slightly more defined.
+    
+    Frictionless Swipe: Use a high-end, fluid transition (Apple-style) with a magnetic snap so each column locks perfectly into place.
+    
+    Spacing: Maintain a consistent 15px gap between all cards (vertically and horizontally).
+    
+    4. Mobile Optimization:
+    
+    Ensure the 3-row layout remains intact on mobile; do NOT stack them vertically.
+    
+    Hide all scrollbars and UI indicators for a clean, immersive "app-like" experience.
+    
+    Add exactly 60px of vertical padding at the top and bottom of the section to let the grid breathe., las tarjetas son demasiado grandes, reduce la seccion en un 40% y las tarjetas hazlas con un margen de distancia entre cada una que sea suficiente , haz que el padding de abajo sea mas, para que las tarjetas no choquen. Tambien quiero que me dejes poner un texto en la parte  superior de la seccion. Igualmente haz que las tarjetas de la izquierda esten mas a la izquierda, casi en la orilla, las tarjetas de abajo estan siendo cortadas por el diseño, como se corrige
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-carousel-container-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: #FFFFFF;
+    padding: 36px 0 100px 0;
+    overflow: visible;
+  }
+
+  .ai-carousel-header-{{ ai_gen_id }} {
+    text-align: center;
+    margin-bottom: 32px;
+    padding: 0 20px;
+  }
+
+  .ai-carousel-title-{{ ai_gen_id }} {
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    margin: 0;
+  }
+
+  .ai-carousel-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    overflow: visible;
+    padding-bottom: 20px;
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding-left: 20px;
+    padding-right: calc((100vw - ({{ block.settings.card_width }}px * 2 + 20px)) / 2);
+    padding-bottom: 20px;
+  }
+
+  .ai-carousel-track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-carousel-column-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    flex-shrink: 0;
+    scroll-snap-align: start;
+    width: {{ block.settings.card_width }}px;
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }} {
+    position: relative;
+    width: {{ block.settings.card_width }}px;
+    height: {{ block.settings.card_height }}px;
+    border-radius: 24px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.08);
+    transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }}.ai-carousel-card-active-{{ ai_gen_id }} {
+    transform: scale(1.05);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.12);
+  }
+
+  .ai-carousel-card-{{ ai_gen_id }} img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .ai-carousel-card-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-carousel-card-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-carousel-container-{{ ai_gen_id }} {
+      padding-bottom: 120px;
+    }
+
+    .ai-carousel-track-{{ ai_gen_id }} {
+      padding-left: 15px;
+      padding-right: calc((100vw - ({{ block.settings.mobile_card_width }}px * 2 + 20px)) / 2);
+      padding-bottom: 30px;
+    }
+
+    .ai-carousel-column-{{ ai_gen_id }} {
+      width: {{ block.settings.mobile_card_width }}px;
+    }
+
+    .ai-carousel-card-{{ ai_gen_id }} {
+      width: {{ block.settings.mobile_card_width }}px;
+      height: {{ block.settings.mobile_card_height }}px;
+    }
+
+    .ai-carousel-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.mobile_title_size }}px;
+    }
+  }
+{% endstyle %}
+
+<premium-carousel-{{ ai_gen_id }} class="ai-carousel-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  {% if block.settings.title != blank %}
+    <div class="ai-carousel-header-{{ ai_gen_id }}">
+      <h2 class="ai-carousel-title-{{ ai_gen_id }}">{{ block.settings.title }}</h2>
+    </div>
+  {% endif %}
+
+  <div class="ai-carousel-wrapper-{{ ai_gen_id }}">
+    <div class="ai-carousel-track-{{ ai_gen_id }}" data-carousel-track>
+      {% for i in (1..9) %}
+        {% assign column_index = i | minus: 1 | modulo: 3 | plus: 1 %}
+        {% if column_index == 1 %}
+          <div class="ai-carousel-column-{{ ai_gen_id }}">
+        {% endif %}
+
+        {% assign image_key = 'image_' | append: i %}
+        {% assign collection_key = 'collection_' | append: i %}
+        {% assign image = block.settings[image_key] %}
+        {% assign collection = block.settings[collection_key] %}
+
+        <div class="ai-carousel-card-{{ ai_gen_id }}" data-card>
+          {% if collection != blank %}
+            <a href="{{ collection.url }}">
+              {% if image != blank %}
+                <img
+                  src="{{ image | image_url: width: 800 }}"
+                  alt="{{ image.alt | escape }}"
+                  loading="lazy"
+                  width="{{ block.settings.card_width }}"
+                  height="{{ block.settings.card_height }}"
+                >
+              {% elsif collection.featured_image %}
+                <img
+                  src="{{ collection.featured_image | image_url: width: 800 }}"
+                  alt="{{ collection.title | escape }}"
+                  loading="lazy"
+                  width="{{ block.settings.card_width }}"
+                  height="{{ block.settings.card_height }}"
+                >
+              {% else %}
+                <div class="ai-carousel-card-placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </a>
+          {% else %}
+            {% if image != blank %}
+              <img
+                src="{{ image | image_url: width: 800 }}"
+                alt="{{ image.alt | escape }}"
+                loading="lazy"
+                width="{{ block.settings.card_width }}"
+                height="{{ block.settings.card_height }}"
+              >
+            {% else %}
+              <div class="ai-carousel-card-placeholder-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          {% endif %}
+        </div>
+
+        {% if column_index == 3 or forloop.last %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </div>
+  </div>
+</premium-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class PremiumCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = null;
+        this.cards = [];
+        this.isScrolling = false;
+        this.scrollTimeout = null;
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('[data-carousel-track]');
+        this.cards = Array.from(this.querySelectorAll('[data-card]'));
+        
+        if (!this.track) return;
+
+        this.setupIntersectionObserver();
+        this.track.addEventListener('scroll', this.handleScroll.bind(this));
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: this.track,
+          threshold: 0.6,
+          rootMargin: '0px'
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('ai-carousel-card-active-{{ ai_gen_id }}');
+            } else {
+              entry.target.classList.remove('ai-carousel-card-active-{{ ai_gen_id }}');
+            }
+          });
+        }, options);
+
+        this.cards.forEach(card => observer.observe(card));
+      }
+
+      handleScroll() {
+        if (this.scrollTimeout) {
+          clearTimeout(this.scrollTimeout);
+        }
+
+        this.scrollTimeout = setTimeout(() => {
+          this.snapToNearestColumn();
+        }, 150);
+      }
+
+      snapToNearestColumn() {
+        const columns = this.querySelectorAll('.ai-carousel-column-{{ ai_gen_id }}');
+        const scrollLeft = this.track.scrollLeft;
+        const isMobile = window.innerWidth <= 749;
+        const cardWidth = isMobile ? {{ block.settings.mobile_card_width }} : {{ block.settings.card_width }};
+        const gap = 20;
+
+        let nearestColumn = 0;
+        let minDistance = Infinity;
+
+        columns.forEach((column, index) => {
+          const columnLeft = column.offsetLeft - this.track.offsetLeft;
+          const distance = Math.abs(scrollLeft - columnLeft);
+          
+          if (distance < minDistance) {
+            minDistance = distance;
+            nearestColumn = index;
+          }
+        });
+
+        const targetScroll = columns[nearestColumn].offsetLeft - this.track.offsetLeft;
+        
+        this.track.scrollTo({
+          left: targetScroll,
+          behavior: 'smooth'
+        });
+      }
+    }
+
+    customElements.define('premium-carousel-{{ ai_gen_id }}', PremiumCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "3-row image carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Title"
+    },
+    {
+      "type": "text",
+      "id": "title",
+      "label": "Title"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Desktop title size",
+      "min": 16,
+      "max": 72,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "mobile_title_size",
+      "label": "Mobile title size",
+      "min": 14,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "header",
+      "content": "Card dimensions"
+    },
+    {
+      "type": "range",
+      "id": "card_width",
+      "label": "Desktop card width",
+      "min": 120,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 180
+    },
+    {
+      "type": "range",
+      "id": "card_height",
+      "label": "Desktop card height",
+      "min": 120,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 240
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_width",
+      "label": "Mobile card width",
+      "min": 80,
+      "max": 250,
+      "step": 10,
+      "unit": "px",
+      "default": 110
+    },
+    {
+      "type": "range",
+      "id": "mobile_card_height",
+      "label": "Mobile card height",
+      "min": 100,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 150
+    },
+    {
+      "type": "header",
+      "content": "Row 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Image 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Image 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Image 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "header",
+      "content": "Row 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_4",
+      "label": "Image 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_5",
+      "label": "Image 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_6",
+      "label": "Image 6"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "header",
+      "content": "Row 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_7",
+      "label": "Image 7"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_8",
+      "label": "Image 8"
+    },
+    {
+      "type": "collection",
+      "id": "collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_9",
+      "label": "Image 9"
+    },
+    {
+      "type": "collection",
+      "id": "collection_9",
+      "label": "Collection 9"
+    }
+  ],
+  "presets": [
+    {
+      "name": "3-row image carousel"
+    }
+  ]
+}
+{% endschema %}

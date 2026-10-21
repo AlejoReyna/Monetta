@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="es-MX">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#fbf8f2">
+    <meta name="robots" content="noindex">
+    <meta name="description" content="Prototipo de diseño responsivo de monetta.mx: bolsas, carteras y relojes originales. Datos de muestra; no es la tienda en vivo.">
+    <title>Monetta · Prototipo web</title>
+    <link rel="icon" type="image/png" sizes="32x32" href="/media/brand/favicon-32.png">
+    <link rel="icon" type="image/png" sizes="96x96" href="/media/brand/favicon-96.png">
+    <link rel="preload" href="/fonts/inter/Inter-Regular.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/inter/Inter-SemiBold.woff2" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="/fonts/playfair/PlayfairDisplay-Regular.woff2" as="font" type="font/woff2" crossorigin>
+  </head>
+  <body>
+    <a class="skip-link" href="#main">Saltar al contenido</a>
+    <div id="page">
+      <div class="site-top" id="site-top"></div>
+      <main id="main" tabindex="-1"></main>
+      <footer class="site-footer" id="site-footer"></footer>
+      <nav class="dock" id="dock" aria-label="Navegación principal"></nav>
+    </div>
+    <div id="overlay-root"></div>
+    <div id="toast-root"></div>
+    <div class="visually-hidden" id="status-live" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div class="visually-hidden" id="alert-live" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <noscript><p style="padding:24px;font-family:sans-serif">Este prototipo necesita JavaScript. La tienda publicada renderiza su contenido en el servidor con Shopify.</p></noscript>
+    <script type="module" src="/src/main.js"></script>
+  </body>
+</html>

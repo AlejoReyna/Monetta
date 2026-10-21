@@ -1,0 +1,348 @@
+{% doc %}
+  @prompt
+    Task: Create a "Full-Bleed Visual Hero" section with zero-margin configuration.
+    
+    1. Structural Constraints (Strict):
+    
+    Set Section Height to exactly 100vh (Full Viewport Height).
+    
+    Set Vertical Padding (Top and Bottom) to 0px.
+    
+    Set Horizontal Padding to 0px.
+    
+    Disable any "Container Max-Width" settings to ensure the section is edge-to-edge.
+    
+    2. Content Layout:
+    
+    Main Element: Place a single high-resolution image with a transparent background in the absolute center.
+    
+    Sizing: The image must scale to fill 90% of the vertical height of the section.
+    
+    Text/Buttons: Remove all text blocks, headings, and CTA buttons.
+    
+    3. Navigation Cue (Scroll Indicator):
+    
+    Position: Absolute bottom center (5px from the edge).
+    
+    Components: A minimalist downward arrow icon and the text "VER MÁS".
+    
+    Typography: Small, clean, sans-serif, uppercase with 5px letter-spacing.
+    
+    Animation: Apply a subtle "Floating/Bobbing" effect to the arrow icon.
+    
+    4. Aesthetic:
+    
+    Background: Solid Pure White (#FFFFFF).
+    
+    Atmosphere: High-end boutique, minimalist, visual-focused.
+    
+    5. Final Instruction: Ensure no white gaps exist between the Header and this section. If necessary, use a negative margin to pull the image upward.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-fullbleed-hero-{{ ai_gen_id }} {
+    display: block;
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    background-color: {{ block.settings.background_color }};
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .ai-fullbleed-hero-container-{{ ai_gen_id }} {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-fullbleed-hero-image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: auto;
+    height: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-fullbleed-hero-image-{{ ai_gen_id }} {
+    max-height: 100%;
+    max-width: 100%;
+    width: auto;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .ai-fullbleed-hero-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 90%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f4f4f4;
+  }
+
+  .ai-fullbleed-hero-placeholder-{{ ai_gen_id }} svg {
+    width: 100%;
+    height: 100%;
+    max-width: 600px;
+    max-height: 600px;
+    opacity: 0.3;
+  }
+
+  .ai-fullbleed-hero-scroll-indicator-{{ ai_gen_id }} {
+    position: absolute;
+    bottom: {{ block.settings.scroll_indicator_bottom }}px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    z-index: 10;
+  }
+
+  .ai-fullbleed-hero-arrow-{{ ai_gen_id }} {
+    width: {{ block.settings.arrow_size }}px;
+    height: {{ block.settings.arrow_size }}px;
+    color: {{ block.settings.scroll_indicator_color }};
+    animation: ai-fullbleed-hero-float-{{ ai_gen_id }} {{ block.settings.animation_duration }}s ease-in-out infinite;
+  }
+
+  .ai-fullbleed-hero-text-{{ ai_gen_id }} {
+    font-family: {{ block.settings.scroll_text_font }}, sans-serif;
+    font-size: {{ block.settings.scroll_text_size }}px;
+    color: {{ block.settings.scroll_indicator_color }};
+    text-transform: uppercase;
+    letter-spacing: {{ block.settings.letter_spacing }}px;
+    font-weight: 400;
+  }
+
+  @keyframes ai-fullbleed-hero-float-{{ ai_gen_id }} {
+    0%, 100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY({{ block.settings.float_distance }}px);
+    }
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-fullbleed-hero-image-wrapper-{{ ai_gen_id }} {
+      height: 85%;
+    }
+
+    .ai-fullbleed-hero-arrow-{{ ai_gen_id }} {
+      width: calc({{ block.settings.arrow_size }}px * 0.8);
+      height: calc({{ block.settings.arrow_size }}px * 0.8);
+    }
+
+    .ai-fullbleed-hero-text-{{ ai_gen_id }} {
+      font-size: calc({{ block.settings.scroll_text_size }}px * 0.9);
+    }
+  }
+{% endstyle %}
+
+<full-bleed-hero-{{ ai_gen_id }}
+  class="ai-fullbleed-hero-{{ ai_gen_id }}"
+  style="margin-top: {{ block.settings.negative_margin }}px;"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-fullbleed-hero-container-{{ ai_gen_id }}">
+    <div class="ai-fullbleed-hero-image-wrapper-{{ ai_gen_id }}">
+      {% if block.settings.hero_image %}
+        <img
+          src="{{ block.settings.hero_image | image_url: width: 2000 }}"
+          alt="{{ block.settings.hero_image.alt | escape }}"
+          loading="eager"
+          width="{{ block.settings.hero_image.width }}"
+          height="{{ block.settings.hero_image.height }}"
+          class="ai-fullbleed-hero-image-{{ ai_gen_id }}"
+        >
+      {% else %}
+        <div class="ai-fullbleed-hero-placeholder-{{ ai_gen_id }}">
+          {{ 'image' | placeholder_svg_tag }}
+        </div>
+      {% endif %}
+    </div>
+
+    {% if block.settings.show_scroll_indicator %}
+      <div class="ai-fullbleed-hero-scroll-indicator-{{ ai_gen_id }}">
+        <svg
+          class="ai-fullbleed-hero-arrow-{{ ai_gen_id }}"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="6 9 12 15 18 9"></polyline>
+        </svg>
+        <span class="ai-fullbleed-hero-text-{{ ai_gen_id }}">{{ block.settings.scroll_text }}</span>
+      </div>
+    {% endif %}
+  </div>
+</full-bleed-hero-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class FullBleedHero{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.setupScrollBehavior();
+      }
+
+      setupScrollBehavior() {
+        const scrollIndicator = this.querySelector('.ai-fullbleed-hero-scroll-indicator-{{ ai_gen_id }}');
+        
+        if (scrollIndicator) {
+          scrollIndicator.addEventListener('click', () => {
+            const heroHeight = this.offsetHeight;
+            window.scrollTo({
+              top: heroHeight,
+              behavior: 'smooth'
+            });
+          });
+
+          scrollIndicator.style.cursor = 'pointer';
+        }
+      }
+    }
+
+    customElements.define('full-bleed-hero-{{ ai_gen_id }}', FullBleedHero{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Full-bleed visual hero",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Image"
+    },
+    {
+      "type": "image_picker",
+      "id": "hero_image",
+      "label": "Hero image"
+    },
+    {
+      "type": "color",
+      "id": "background_color",
+      "label": "Background color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "negative_margin",
+      "label": "Negative top margin",
+      "min": -200,
+      "max": 0,
+      "step": 5,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "header",
+      "content": "Scroll indicator"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_scroll_indicator",
+      "label": "Show scroll indicator",
+      "default": true
+    },
+    {
+      "type": "text",
+      "id": "scroll_text",
+      "label": "Scroll text",
+      "default": "VER MÁS"
+    },
+    {
+      "type": "color",
+      "id": "scroll_indicator_color",
+      "label": "Indicator color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "scroll_text_size",
+      "label": "Text size",
+      "min": 8,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    },
+    {
+      "type": "range",
+      "id": "letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 10,
+      "step": 1,
+      "unit": "px",
+      "default": 5
+    },
+    {
+      "type": "range",
+      "id": "arrow_size",
+      "label": "Arrow size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "scroll_indicator_bottom",
+      "label": "Distance from bottom",
+      "min": 5,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Animation"
+    },
+    {
+      "type": "range",
+      "id": "animation_duration",
+      "label": "Float duration",
+      "min": 1,
+      "max": 5,
+      "step": 0.5,
+      "unit": "s",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "float_distance",
+      "label": "Float distance",
+      "min": 5,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    }
+  ],
+  "presets": [
+    {
+      "name": "Full-bleed visual hero"
+    }
+  ]
+}
+{% endschema %}

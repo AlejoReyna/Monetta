@@ -1,0 +1,1080 @@
+{% doc %}
+  @prompt
+    Create a Shopify OS 2.0 block called "Vertical Timeline Accordion" with a premium, interactive design. Full requirements:
+    
+    Layout & Frame: Each timeline entry must have a visible card frame (rounded corners 12px, subtle border 1px solid #ece9e3, soft box-shadow 0 2px 16px rgba(0,0,0,0.06)) wrapping the content. Inside each card: an optional image (full-width, object-fit: cover, max-height 220px, border-radius 8px), a date/year label (uppercase, spaced, muted), a title, and a description. Generous internal padding (1.5rem 1.75rem).
+    
+    Timeline line: A vertical connector line (1px, color #d4d0cb) runs on the left side through all entries. Each entry has a dot/circle marker. The dot is fully configurable via theme editor settings: size (range 8–32px, default 14px), fill color, border color, and border width (1–4px). Dot position is centered on the line. When an entry becomes visible via scroll, optionally apply a pulse animation (configurable: pulse / none).
+    
+    Scroll-reveal: Each entry uses IntersectionObserver (no external libraries) to fade in (opacity 0→1) and slide up (translateY 20px→0) with 0.5s ease transition. Entries animate sequentially — only when they enter the viewport.
+    
+    Accordion behavior: Only the first entry is visible by default. All remaining entries are hidden (display: none). A "Ver más" button appears below, centered, styled as a pill (border-radius: 999px, border: 1px solid #ccc, uppercase, spaced text). The chevron arrow icon is placed below the button text (stacked vertically using flex-direction: column), not inline. On click: hidden entries are shown one by one with a staggered reveal (80ms delay per entry index) using IntersectionObserver. Button label changes to "Ver menos" and chevron rotates 180°. Clicking again collapses all extra entries and resets their visibility state.
+    
+    Style: Minimalist and editorial. Clean sans-serif typography. Neutral palette. Premium spa-like feel with generous whitespace. No decorative elements beyond the timeline line and dots.
+    
+    Theme editor settings:
+    
+    Section heading (text)
+    Dot size (range: 8–32px, step 2, default 14px)
+    Dot color (color picker, default #2a2a2a)
+    Dot border color (color picker, default #d4d0cb)
+    Dot border width (range: 1–4px, step 1, default 2px)
+    Dot animation (select: none / pulse)
+    Up to 6 timeline entries as nested blocks (type: timeline_entry), each with: image_picker, date/year text, entry title, entry description (textarea)
+    Technical requirements:
+    
+    All JS scoped inside an IIFE using block.id (converted to safe variable name) so multiple instances work independently on the same page
+    CSS inside a scoped <style> tag using #tl-{{ bid }} as root selector with CSS custom properties for dot size, color, border
+    Pulse animation defined as a scoped @keyframes block, only injected when dot_animation == 'pulse' (using Liquid {% if %})
+    No external JS or CSS dependencies
+    Compatible with Shopify OS 2.0 (block schema with "target": "section", "presets" array, max 6 blocks)
+    Schema at the bottom of the file in {% schema %} JSON... el bloque tiene j  problema y es quw duando le das a ver mas, no se muestran las demas tarjetas, corrigele y tambien añade opciones de personalizacion estetica, tamaño y posiciónamiento a todos los elementos, tambien al ver mas, el cual quiero que se vea en la parte de abajo de la primer tarjeta
+{% enddoc %}
+{% assign bid = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  #tl-{{ bid }} {
+    --tl-dot-size: {{ block.settings.dot_size }}px;
+    --tl-dot-color: {{ block.settings.dot_color }};
+    --tl-dot-border-color: {{ block.settings.dot_border_color }};
+    --tl-dot-border-width: {{ block.settings.dot_border_width }}px;
+    --tl-line-color: {{ block.settings.line_color }};
+    --tl-card-bg: {{ block.settings.card_background }};
+    --tl-card-border: {{ block.settings.card_border_color }};
+    --tl-card-shadow: {{ block.settings.card_shadow_color }};
+    --tl-card-radius: {{ block.settings.card_border_radius }}px;
+    --tl-card-padding: {{ block.settings.card_padding }}px;
+    --tl-date-color: {{ block.settings.date_color }};
+    --tl-date-size: {{ block.settings.date_font_size }}px;
+    --tl-title-color: {{ block.settings.title_color }};
+    --tl-title-size: {{ block.settings.title_font_size }}px;
+    --tl-desc-color: {{ block.settings.description_color }};
+    --tl-desc-size: {{ block.settings.description_font_size }}px;
+    --tl-btn-bg: {{ block.settings.button_background }};
+    --tl-btn-text: {{ block.settings.button_text_color }};
+    --tl-btn-border: {{ block.settings.button_border_color }};
+    --tl-btn-hover-bg: {{ block.settings.button_hover_background }};
+    --tl-btn-hover-text: {{ block.settings.button_hover_text_color }};
+    --tl-btn-radius: {{ block.settings.button_border_radius }}px;
+    --tl-btn-padding-v: {{ block.settings.button_padding_vertical }}px;
+    --tl-btn-padding-h: {{ block.settings.button_padding_horizontal }}px;
+    --tl-btn-font-size: {{ block.settings.button_font_size }}px;
+    --tl-btn-margin-top: {{ block.settings.button_margin_top }}px;
+    --tl-img-radius: {{ block.settings.image_border_radius }}px;
+    --tl-img-height: {{ block.settings.image_max_height }}px;
+    --tl-gap: {{ block.settings.entry_spacing }}px;
+    --tl-line-offset: {{ block.settings.line_offset }}px;
+    --tl-dot-offset: {{ block.settings.dot_offset }}px;
+    
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    margin: 0 auto;
+    position: relative;
+  }
+
+  #tl-{{ bid }} .tl-container {
+    position: relative;
+    padding-left: var(--tl-line-offset);
+  }
+
+  #tl-{{ bid }} .tl-line {
+    position: absolute;
+    left: var(--tl-dot-offset);
+    top: 0;
+    bottom: 0;
+    width: 1px;
+    background-color: var(--tl-line-color);
+  }
+
+  #tl-{{ bid }} .tl-entries {
+    display: flex;
+    flex-direction: column;
+    gap: var(--tl-gap);
+  }
+
+  #tl-{{ bid }} .tl-entry {
+    position: relative;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+  }
+
+  #tl-{{ bid }} .tl-entry.tl-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  #tl-{{ bid }} .tl-entry.tl-hidden {
+    display: none;
+  }
+
+  #tl-{{ bid }} .tl-card {
+    background-color: var(--tl-card-bg);
+    border: 1px solid var(--tl-card-border);
+    border-radius: var(--tl-card-radius);
+    box-shadow: 0 2px 16px rgba(0, 0, 0, {{ block.settings.card_shadow_opacity | divided_by: 100.0 }});
+    padding: var(--tl-card-padding);
+    position: relative;
+  }
+
+  #tl-{{ bid }} .tl-dot {
+    position: absolute;
+    left: calc(var(--tl-dot-offset) - var(--tl-dot-size) / 2);
+    top: {{ block.settings.dot_vertical_position }}px;
+    width: var(--tl-dot-size);
+    height: var(--tl-dot-size);
+    border-radius: 50%;
+    background-color: var(--tl-dot-color);
+    border: var(--tl-dot-border-width) solid var(--tl-dot-border-color);
+    z-index: 2;
+  }
+
+  {% if block.settings.dot_animation == 'pulse' %}
+  #tl-{{ bid }} .tl-entry.tl-visible .tl-dot {
+    animation: tl-pulse-{{ bid }} 2s ease-in-out infinite;
+  }
+
+  @keyframes tl-pulse-{{ bid }} {
+    0%, 100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.2);
+      opacity: 0.8;
+    }
+  }
+  {% endif %}
+
+  #tl-{{ bid }} .tl-image {
+    width: 100%;
+    max-height: var(--tl-img-height);
+    object-fit: cover;
+    border-radius: var(--tl-img-radius);
+    margin-bottom: {{ block.settings.image_margin_bottom }}px;
+  }
+
+  #tl-{{ bid }} .tl-date {
+    color: var(--tl-date-color);
+    font-size: var(--tl-date-size);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: {{ block.settings.date_margin_bottom }}px;
+  }
+
+  #tl-{{ bid }} .tl-title {
+    color: var(--tl-title-color);
+    font-size: var(--tl-title-size);
+    font-weight: 600;
+    margin-bottom: {{ block.settings.title_margin_bottom }}px;
+  }
+
+  #tl-{{ bid }} .tl-description {
+    color: var(--tl-desc-color);
+    font-size: var(--tl-desc-size);
+    line-height: 1.6;
+  }
+
+  #tl-{{ bid }} .tl-toggle-wrapper {
+    display: flex;
+    justify-content: center;
+    margin-top: var(--tl-btn-margin-top);
+  }
+
+  #tl-{{ bid }} .tl-toggle-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    background-color: var(--tl-btn-bg);
+    color: var(--tl-btn-text);
+    border: 1px solid var(--tl-btn-border);
+    border-radius: var(--tl-btn-radius);
+    padding: var(--tl-btn-padding-v) var(--tl-btn-padding-h);
+    font-size: var(--tl-btn-font-size);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.3s ease;
+  }
+
+  #tl-{{ bid }} .tl-toggle-btn:hover {
+    background-color: var(--tl-btn-hover-bg);
+    color: var(--tl-btn-hover-text);
+  }
+
+  #tl-{{ bid }} .tl-chevron {
+    width: 16px;
+    height: 16px;
+    transition: transform 0.3s ease;
+  }
+
+  #tl-{{ bid }} .tl-toggle-btn.tl-expanded .tl-chevron {
+    transform: rotate(180deg);
+  }
+
+  @media screen and (max-width: 749px) {
+    #tl-{{ bid }} {
+      width: 100%;
+    }
+  }
+{% endstyle %}
+
+<vertical-timeline-{{ bid }} id="tl-{{ bid }}" {{ block.shopify_attributes }}>
+  {% if block.settings.section_heading != blank %}
+    <h2 style="text-align: center; margin-bottom: {{ block.settings.heading_margin_bottom }}px; font-size: {{ block.settings.heading_font_size }}px; color: {{ block.settings.heading_color }};">
+      {{ block.settings.section_heading }}
+    </h2>
+  {% endif %}
+
+  <div class="tl-container">
+    <div class="tl-line"></div>
+    <div class="tl-entries">
+      {% assign entry_count = 0 %}
+      {% if block.settings.entry_1_title != blank or block.settings.entry_1_description != blank %}
+        {% assign entry_count = entry_count | plus: 1 %}
+        <div class="tl-entry" data-index="1">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            {% if block.settings.entry_1_image != blank %}
+              <img
+                src="{{ block.settings.entry_1_image | image_url: width: 800 }}"
+                alt="{{ block.settings.entry_1_image.alt | escape }}"
+                class="tl-image"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% endif %}
+            {% if block.settings.entry_1_date != blank %}
+              <div class="tl-date">{{ block.settings.entry_1_date }}</div>
+            {% endif %}
+            {% if block.settings.entry_1_title != blank %}
+              <h3 class="tl-title">{{ block.settings.entry_1_title }}</h3>
+            {% endif %}
+            {% if block.settings.entry_1_description != blank %}
+              <div class="tl-description">{{ block.settings.entry_1_description }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.entry_2_title != blank or block.settings.entry_2_description != blank %}
+        {% assign entry_count = entry_count | plus: 1 %}
+        <div class="tl-entry tl-hidden" data-index="2">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            {% if block.settings.entry_2_image != blank %}
+              <img
+                src="{{ block.settings.entry_2_image | image_url: width: 800 }}"
+                alt="{{ block.settings.entry_2_image.alt | escape }}"
+                class="tl-image"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% endif %}
+            {% if block.settings.entry_2_date != blank %}
+              <div class="tl-date">{{ block.settings.entry_2_date }}</div>
+            {% endif %}
+            {% if block.settings.entry_2_title != blank %}
+              <h3 class="tl-title">{{ block.settings.entry_2_title }}</h3>
+            {% endif %}
+            {% if block.settings.entry_2_description != blank %}
+              <div class="tl-description">{{ block.settings.entry_2_description }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.entry_3_title != blank or block.settings.entry_3_description != blank %}
+        {% assign entry_count = entry_count | plus: 1 %}
+        <div class="tl-entry tl-hidden" data-index="3">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            {% if block.settings.entry_3_image != blank %}
+              <img
+                src="{{ block.settings.entry_3_image | image_url: width: 800 }}"
+                alt="{{ block.settings.entry_3_image.alt | escape }}"
+                class="tl-image"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% endif %}
+            {% if block.settings.entry_3_date != blank %}
+              <div class="tl-date">{{ block.settings.entry_3_date }}</div>
+            {% endif %}
+            {% if block.settings.entry_3_title != blank %}
+              <h3 class="tl-title">{{ block.settings.entry_3_title }}</h3>
+            {% endif %}
+            {% if block.settings.entry_3_description != blank %}
+              <div class="tl-description">{{ block.settings.entry_3_description }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.entry_4_title != blank or block.settings.entry_4_description != blank %}
+        {% assign entry_count = entry_count | plus: 1 %}
+        <div class="tl-entry tl-hidden" data-index="4">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            {% if block.settings.entry_4_image != blank %}
+              <img
+                src="{{ block.settings.entry_4_image | image_url: width: 800 }}"
+                alt="{{ block.settings.entry_4_image.alt | escape }}"
+                class="tl-image"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% endif %}
+            {% if block.settings.entry_4_date != blank %}
+              <div class="tl-date">{{ block.settings.entry_4_date }}</div>
+            {% endif %}
+            {% if block.settings.entry_4_title != blank %}
+              <h3 class="tl-title">{{ block.settings.entry_4_title }}</h3>
+            {% endif %}
+            {% if block.settings.entry_4_description != blank %}
+              <div class="tl-description">{{ block.settings.entry_4_description }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.entry_5_title != blank or block.settings.entry_5_description != blank %}
+        {% assign entry_count = entry_count | plus: 1 %}
+        <div class="tl-entry tl-hidden" data-index="5">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            {% if block.settings.entry_5_image != blank %}
+              <img
+                src="{{ block.settings.entry_5_image | image_url: width: 800 }}"
+                alt="{{ block.settings.entry_5_image.alt | escape }}"
+                class="tl-image"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% endif %}
+            {% if block.settings.entry_5_date != blank %}
+              <div class="tl-date">{{ block.settings.entry_5_date }}</div>
+            {% endif %}
+            {% if block.settings.entry_5_title != blank %}
+              <h3 class="tl-title">{{ block.settings.entry_5_title }}</h3>
+            {% endif %}
+            {% if block.settings.entry_5_description != blank %}
+              <div class="tl-description">{{ block.settings.entry_5_description }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+      {% if block.settings.entry_6_title != blank or block.settings.entry_6_description != blank %}
+        {% assign entry_count = entry_count | plus: 1 %}
+        <div class="tl-entry tl-hidden" data-index="6">
+          <div class="tl-dot"></div>
+          <div class="tl-card">
+            {% if block.settings.entry_6_image != blank %}
+              <img
+                src="{{ block.settings.entry_6_image | image_url: width: 800 }}"
+                alt="{{ block.settings.entry_6_image.alt | escape }}"
+                class="tl-image"
+                loading="lazy"
+                width="800"
+                height="auto"
+              >
+            {% endif %}
+            {% if block.settings.entry_6_date != blank %}
+              <div class="tl-date">{{ block.settings.entry_6_date }}</div>
+            {% endif %}
+            {% if block.settings.entry_6_title != blank %}
+              <h3 class="tl-title">{{ block.settings.entry_6_title }}</h3>
+            {% endif %}
+            {% if block.settings.entry_6_description != blank %}
+              <div class="tl-description">{{ block.settings.entry_6_description }}</div>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    {% if entry_count > 1 %}
+      <div class="tl-toggle-wrapper">
+        <button class="tl-toggle-btn" aria-expanded="false">
+          <span class="tl-toggle-text">{{ block.settings.button_text_more }}</span>
+          <svg class="tl-chevron" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </button>
+      </div>
+    {% endif %}
+  </div>
+</vertical-timeline-{{ bid }}>
+
+<script>
+(function() {
+  class VerticalTimeline{{ bid }} extends HTMLElement {
+    constructor() {
+      super();
+      this.entries = Array.from(this.querySelectorAll('.tl-entry'));
+      this.toggleBtn = this.querySelector('.tl-toggle-btn');
+      this.toggleText = this.querySelector('.tl-toggle-text');
+      this.isExpanded = false;
+      this.observer = null;
+      this.moreText = '{{ block.settings.button_text_more }}';
+      this.lessText = '{{ block.settings.button_text_less }}';
+    }
+
+    connectedCallback() {
+      this.setupIntersectionObserver();
+      if (this.toggleBtn) {
+        this.toggleBtn.addEventListener('click', () => this.toggleEntries());
+      }
+    }
+
+    setupIntersectionObserver() {
+      const options = {
+        root: null,
+        rootMargin: '0px',
+        threshold: 0.1
+      };
+
+      this.observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('tl-visible');
+          }
+        });
+      }, options);
+
+      this.entries.forEach((entry) => {
+        if (!entry.classList.contains('tl-hidden')) {
+          this.observer.observe(entry);
+        }
+      });
+    }
+
+    toggleEntries() {
+      if (!this.isExpanded) {
+        this.expandEntries();
+      } else {
+        this.collapseEntries();
+      }
+    }
+
+    expandEntries() {
+      const hiddenEntries = this.entries.filter(entry => entry.classList.contains('tl-hidden'));
+      
+      hiddenEntries.forEach((entry, index) => {
+        setTimeout(() => {
+          entry.classList.remove('tl-hidden');
+          this.observer.observe(entry);
+        }, index * 80);
+      });
+
+      this.isExpanded = true;
+      this.toggleBtn.classList.add('tl-expanded');
+      this.toggleBtn.setAttribute('aria-expanded', 'true');
+      this.toggleText.textContent = this.lessText;
+    }
+
+    collapseEntries() {
+      this.entries.forEach((entry, index) => {
+        if (index > 0) {
+          entry.classList.add('tl-hidden');
+          entry.classList.remove('tl-visible');
+          entry.style.opacity = '0';
+          entry.style.transform = 'translateY(20px)';
+          this.observer.unobserve(entry);
+        }
+      });
+
+      this.isExpanded = false;
+      this.toggleBtn.classList.remove('tl-expanded');
+      this.toggleBtn.setAttribute('aria-expanded', 'false');
+      this.toggleText.textContent = this.moreText;
+    }
+
+    disconnectedCallback() {
+      if (this.observer) {
+        this.observer.disconnect();
+      }
+    }
+  }
+
+  customElements.define('vertical-timeline-{{ bid }}', VerticalTimeline{{ bid }});
+})();
+</script>
+
+{% schema %}
+{
+  "name": "Timeline accordion",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Section heading"
+    },
+    {
+      "type": "text",
+      "id": "section_heading",
+      "label": "Heading"
+    },
+    {
+      "type": "range",
+      "id": "heading_font_size",
+      "label": "Heading font size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "heading_color",
+      "label": "Heading color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "heading_margin_bottom",
+      "label": "Heading bottom spacing",
+      "min": 0,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "entry_spacing",
+      "label": "Space between entries",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Timeline line"
+    },
+    {
+      "type": "color",
+      "id": "line_color",
+      "label": "Line color",
+      "default": "#d4d0cb"
+    },
+    {
+      "type": "range",
+      "id": "line_offset",
+      "label": "Line left offset",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Timeline dots"
+    },
+    {
+      "type": "range",
+      "id": "dot_size",
+      "label": "Dot size",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "dot_color",
+      "label": "Dot color",
+      "default": "#2a2a2a"
+    },
+    {
+      "type": "color",
+      "id": "dot_border_color",
+      "label": "Dot border color",
+      "default": "#d4d0cb"
+    },
+    {
+      "type": "range",
+      "id": "dot_border_width",
+      "label": "Dot border width",
+      "min": 1,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "dot_offset",
+      "label": "Dot left offset",
+      "min": 20,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "dot_vertical_position",
+      "label": "Dot vertical position",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "select",
+      "id": "dot_animation",
+      "label": "Dot animation",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "pulse",
+          "label": "Pulse"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "card_border_color",
+      "label": "Border color",
+      "default": "#ece9e3"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "card_shadow_color",
+      "label": "Shadow color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_opacity",
+      "label": "Shadow opacity",
+      "min": 0,
+      "max": 30,
+      "step": 1,
+      "unit": "%",
+      "default": 6
+    },
+    {
+      "type": "range",
+      "id": "card_padding",
+      "label": "Card padding",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "header",
+      "content": "Image style"
+    },
+    {
+      "type": "range",
+      "id": "image_max_height",
+      "label": "Max height",
+      "min": 100,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 220
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 24,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "range",
+      "id": "image_margin_bottom",
+      "label": "Bottom spacing",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "header",
+      "content": "Date style"
+    },
+    {
+      "type": "color",
+      "id": "date_color",
+      "label": "Color",
+      "default": "#999999"
+    },
+    {
+      "type": "range",
+      "id": "date_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "date_margin_bottom",
+      "label": "Bottom spacing",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Title style"
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "title_font_size",
+      "label": "Font size",
+      "min": 14,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "title_margin_bottom",
+      "label": "Bottom spacing",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Description style"
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "range",
+      "id": "description_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "header",
+      "content": "Toggle button"
+    },
+    {
+      "type": "text",
+      "id": "button_text_more",
+      "label": "Show more text",
+      "default": "Ver más"
+    },
+    {
+      "type": "text",
+      "id": "button_text_less",
+      "label": "Show less text",
+      "default": "Ver menos"
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Border color",
+      "default": "#cccccc"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 100,
+      "step": 4,
+      "unit": "px",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "button_padding_vertical",
+      "label": "Vertical padding",
+      "min": 8,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 16,
+      "max": 64,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_margin_top",
+      "label": "Top spacing",
+      "min": 16,
+      "max": 80,
+      "step": 4,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "header",
+      "content": "Entry 1"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_1_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_1_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_1_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_1_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 2"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_2_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_2_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_2_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_2_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 3"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_3_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_3_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_3_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_3_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 4"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_4_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_4_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_4_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_4_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 5"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_5_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_5_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_5_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_5_description",
+      "label": "Description"
+    },
+    {
+      "type": "header",
+      "content": "Entry 6"
+    },
+    {
+      "type": "image_picker",
+      "id": "entry_6_image",
+      "label": "Image"
+    },
+    {
+      "type": "text",
+      "id": "entry_6_date",
+      "label": "Date or year"
+    },
+    {
+      "type": "text",
+      "id": "entry_6_title",
+      "label": "Title"
+    },
+    {
+      "type": "textarea",
+      "id": "entry_6_description",
+      "label": "Description"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Timeline accordion"
+    }
+  ]
+}
+{% endschema %}

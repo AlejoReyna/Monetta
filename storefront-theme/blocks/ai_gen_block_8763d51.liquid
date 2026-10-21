@@ -1,0 +1,539 @@
+{% doc %}
+  @prompt
+    Task: Create a High-Visibility "Collection List" Mobile Carousel.
+    5 collections, snap animation, scale effect, no bounce bug.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-carousel-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    position: relative;
+    overflow: visible; 
+    height: 370px;
+    padding: 20px 0;   
+    box-sizing: border-box;
+    background-color: transparent;
+}
+
+  .ai-collection-carousel-container-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    width: 100%;
+    background-color: #ffffff;
+  }
+
+  .ai-collection-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    gap: {{ block.settings.card_gap }}px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 20px 8vw;
+    background-color: #ffffff;
+    align-items: center;
+  }
+
+  .ai-collection-carousel-track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 72vw;
+    min-width: 72vw;
+    background-color: var(--color-base-background-2) !important;
+    border-radius: {{ block.settings.card_border_radius }}px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, {{ block.settings.shadow_opacity }});
+    scroll-snap-align: center;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.3s ease;
+    transform: scale(0.85);
+    overflow: hidden;
+    height: 390px;
+    max-height: 390px;
+  }
+
+  .ai-collection-carousel-card-{{ ai_gen_id }}.active {
+    transform: scale(1.0);
+  }
+
+  .ai-collection-carousel-image-wrapper-{{ ai_gen_id }} {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    height: 255px;
+    flex-shrink: 0;
+  }
+
+  .ai-collection-carousel-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-collection-carousel-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: {{ block.settings.image_border_radius }}px;
+  }
+
+  .ai-collection-carousel-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-collection-carousel-content-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    text-align: center;
+    padding: 10px 15px 20px 15px;
+    gap: 20px;
+    height: 120px;
+    flex-shrink: 0;
+    overflow: hidden;
+    flex: 1;
+  }
+
+  .ai-collection-carousel-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-weight: {{ block.settings.title_font.weight }};
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    margin: 0;
+    letter-spacing: 1px;
+  }
+
+  .ai-collection-carousel-description-{{ ai_gen_id }} {
+    font-family: {{ block.settings.description_font.family }}, {{ block.settings.description_font.fallback_families }};
+    font-weight: {{ block.settings.description_font.weight }};
+    font-size: {{ block.settings.description_size }}px;
+    color: {{ block.settings.description_color }};
+    margin: 0;
+    line-height: 1.6;
+  }
+
+  .ai-collection-carousel-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 14px 32px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-weight: {{ block.settings.button_font.weight }};
+    font-size: {{ block.settings.button_size }}px;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+
+  .ai-collection-carousel-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .ai-collection-carousel-card-{{ ai_gen_id }} {
+      flex: 0 0 {{ block.settings.desktop_card_width }}vw;
+      min-width: {{ block.settings.desktop_card_width }}vw;
+    }
+  }
+{% endstyle %}
+
+<collection-carousel-{{ ai_gen_id }}
+  class="ai-collection-carousel-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-collection-carousel-container-{{ ai_gen_id }}">
+    <div class="ai-collection-carousel-track-{{ ai_gen_id }}" data-carousel-track>
+      {% for i in (1..5) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+
+        <div class="ai-collection-carousel-card-{{ ai_gen_id }}" data-card-index="{{ forloop.index0 }}">
+          <div class="ai-collection-carousel-image-wrapper-{{ ai_gen_id }}">
+            {% if collection.featured_image %}
+              <img
+                src="{{ collection.featured_image | image_url: width: 800 }}"
+                alt="{{ collection.featured_image.alt | escape }}"
+                loading="lazy"
+                width="800"
+                height="800"
+                class="ai-collection-carousel-image-{{ ai_gen_id }}"
+              >
+            {% else %}
+              <div class="ai-collection-carousel-placeholder-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </div>
+
+          <div class="ai-collection-carousel-content-{{ ai_gen_id }}">
+            {% if collection.title %}
+              <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+            {% else %}
+              <h3 class="ai-collection-carousel-title-{{ ai_gen_id }}">Colección {{ i }}</h3>
+            {% endif %}
+
+            {% if block.settings.show_description and collection.description != blank %}
+              <p class="ai-collection-carousel-description-{{ ai_gen_id }}">
+                {{ collection.description | strip_html | truncate: 120 }}
+              </p>
+            {% endif %}
+
+            {% if collection %}
+              <a href="{{ collection.url }}" class="ai-collection-carousel-button-{{ ai_gen_id }}">
+                {{ block.settings.button_text }}
+              </a>
+            {% else %}
+              <a href="#" class="ai-collection-carousel-button-{{ ai_gen_id }}">
+                {{ block.settings.button_text }}
+              </a>
+            {% endif %}
+          </div>
+        </div>
+      {% endfor %}
+    </div>
+  </div>
+</collection-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = null;
+        this.cards = [];
+        this.currentIndex = 0;
+        this.isSnapping = false; // ← FLAG ANTI-REBOTE
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('[data-carousel-track]');
+        this.cards = Array.from(this.querySelectorAll('[data-card-index]'));
+
+        if (!this.track || this.cards.length === 0) return;
+
+        this.setupScrollListener();
+
+        // Activar la primera tarjeta al cargar
+        requestAnimationFrame(() => {
+          this.updateActiveCard();
+        });
+      }
+
+      setupScrollListener() {
+        let scrollTimeout;
+
+        this.track.addEventListener('scroll', () => {
+          // Si estamos en medio de un snap programático, ignorar
+          if (this.isSnapping) return;
+
+          clearTimeout(scrollTimeout);
+          this.updateActiveCard();
+
+          scrollTimeout = setTimeout(() => {
+            this.snapToNearestCard();
+          }, 150);
+        });
+      }
+
+      updateActiveCard() {
+        const trackRect = this.track.getBoundingClientRect();
+        const trackCenter = trackRect.left + trackRect.width / 2;
+
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardRect = card.getBoundingClientRect();
+          const cardCenter = cardRect.left + cardRect.width / 2;
+          const distance = Math.abs(trackCenter - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        this.cards.forEach((card) => card.classList.remove('active'));
+
+        if (closestCard) {
+          closestCard.classList.add('active');
+          this.currentIndex = parseInt(closestCard.dataset.cardIndex);
+        }
+      }
+
+      snapToNearestCard() {
+        if (this.cards.length === 0) return;
+
+        const activeCard = this.cards[this.currentIndex];
+        if (!activeCard) return;
+
+        const trackRect = this.track.getBoundingClientRect();
+        const cardRect = activeCard.getBoundingClientRect();
+        const trackCenter = trackRect.left + trackRect.width / 2;
+        const cardCenter = cardRect.left + cardRect.width / 2;
+        const offset = cardCenter - trackCenter;
+
+        // Si ya está centrada, no hacer nada (evita loop)
+        if (Math.abs(offset) < 1) return;
+
+        this.isSnapping = true;
+
+        this.track.scrollBy({
+          left: offset,
+          behavior: 'smooth'
+        });
+
+        // Liberar la bandera después de que termine la animación smooth
+        setTimeout(() => {
+          this.isSnapping = false;
+          this.updateActiveCard();
+        }, 400);
+      }
+    }
+
+    if (!customElements.get('collection-carousel-{{ ai_gen_id }}')) {
+      customElements.define('collection-carousel-{{ ai_gen_id }}', CollectionCarousel{{ ai_gen_id }});
+    }
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection carousel",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colecciones"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Colección 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Colección 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Colección 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Colección 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Colección 5"
+    },
+    {
+      "type": "header",
+      "content": "Diseño de tarjeta"
+    },
+    {
+      "type": "range",
+      "id": "desktop_card_width",
+      "label": "Ancho de tarjeta (escritorio)",
+      "min": 50,
+      "max": 90,
+      "step": 5,
+      "unit": "vw",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Espacio entre tarjetas",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Fondo de tarjeta",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Radio de borde de tarjeta",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 36
+    },
+    {
+      "type": "range",
+      "id": "image_border_radius",
+      "label": "Radio de borde de imagen",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Opacidad de sombra",
+      "min": 0,
+      "max": 0.5,
+      "step": 0.1,
+      "default": 0.1
+    },
+    {
+      "type": "header",
+      "content": "Título"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Fuente de título",
+      "default": "serif"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño de título",
+      "min": 20,
+      "max": 60,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color de título",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Descripción"
+    },
+    {
+      "type": "checkbox",
+      "id": "show_description",
+      "label": "Mostrar descripción",
+      "default": true
+    },
+    {
+      "type": "font_picker",
+      "id": "description_font",
+      "label": "Fuente de descripción",
+      "default": "sans-serif"
+    },
+    {
+      "type": "range",
+      "id": "description_size",
+      "label": "Tamaño de descripción",
+      "min": 12,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "description_color",
+      "label": "Color de descripción",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Texto del botón",
+      "default": "Ver colección"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Fuente del botón",
+      "default": "sans-serif"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Tamaño del botón",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Fondo del botón",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Color de texto del botón",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Fondo del botón (hover)",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Color de texto del botón (hover)",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Radio de borde del botón",
+      "min": 0,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection carousel"
+    }
+  ]
+}
+{% endschema %}

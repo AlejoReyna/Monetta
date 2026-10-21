@@ -1,0 +1,27 @@
+{%- doc -%}
+  The Monetta wordmark at a given height. Uses the merchant's image when one is set, otherwise the app artwork
+  bundled in the theme (1x/2x/3x, ratio 132:38). Never recoloured or redrawn.
+
+  @param {number} height - Rendered height in px.
+  @param {object} [logo] - Optional image_picker value that overrides the bundled artwork.
+{%- enddoc -%}
+{%- liquid
+  assign w = height | times: 132 | divided_by: 38.0 | round
+-%}
+{%- if logo != blank -%}
+  <img
+    src="{{ logo | image_url: width: 396 }}"
+    srcset="{{ logo | image_url: width: w }} 1x, {{ logo | image_url: width: w | times: 2 }} 2x, {{ logo | image_url: width: w | times: 3 }} 3x"
+    width="{{ w }}"
+    height="{{ height }}"
+    alt="{{ shop.name | escape }}"
+  >
+{%- else -%}
+  <img
+    src="{{ 'monetta-logo-3x.png' | asset_url }}"
+    srcset="{{ 'monetta-logo.png' | asset_url }} 1x, {{ 'monetta-logo-2x.png' | asset_url }} 2x, {{ 'monetta-logo-3x.png' | asset_url }} 3x"
+    width="{{ w }}"
+    height="{{ height }}"
+    alt="{{ shop.name | escape }}"
+  >
+{%- endif -%}

@@ -1,0 +1,27 @@
+{
+  "name": "monetta-web-design-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Responsive web design prototype for monetta.mx. Local demo data only; no live Shopify cart, checkout or account.",
+  "engines": {
+    "node": "24.x"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview --port 4173 --strictPort",
+    "test": "node --test tests/unit/*.test.mjs",
+    "verify": "node verify/run-all.mjs",
+    "capture": "node verify/capture.mjs",
+    "capture:fidelity": "node verify/capture-fidelity.mjs",
+    "fixtures": "node scripts/build-fixtures.mjs",
+    "capture:keyframes": "node verify/capture-keyframes.mjs",
+    "tokens:check": "node ../design-system/build.mjs --check --only=css"
+  },
+  "devDependencies": {
+    "axe-core": "4.13.0",
+    "playwright-core": "1.63.0",
+    "vite": "6.4.3"
+  }
+}

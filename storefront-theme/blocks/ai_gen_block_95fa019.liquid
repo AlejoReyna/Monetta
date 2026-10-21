@@ -1,0 +1,495 @@
+{% doc %}
+  @prompt
+    Directives for Shopify Liquid & CSS Code Generation:
+    
+    Task: Create a high-end, Infinite-Loop-style Collection Carousel for a "Custom Liquid" section.
+    
+    1. The "Infinite" Logic (Pure CSS/Liquid):
+    
+    Generate a horizontal scroll container using scroll-snap-type: x mandatory.
+    
+    Cloning Strategy: To simulate an infinite loop without complex JS, duplicate the collection list (render the 3 collections twice in the Liquid code) so the user can scroll seamlessly through a continuous loop.
+    
+    Set scroll-behavior: smooth.
+    
+    2. Mobile UX & "The Peek" Effect:
+    
+    Visibility: On mobile, center the active card but ensure the following card is 30% visible and the previous card is 10% visible. This "peek" effect must be achieved using padding on the container and min-width on the cards (e.g., 80%).
+    
+    Snap Physics: Use scroll-snap-align: center.
+    
+    3. Visual Identity (Premium Card-Centric):
+    
+    The Container: Each collection must be encapsulated within a single card with a border-radius: 40px.
+    
+    Shadow & Depth: Add a soft-depth effect using box-shadow: 0 30px 60px rgba(0,0,0,0.03).
+    
+    Aspect Ratio: Enforce an aspect-ratio: 4 / 5 to ensure the cards are tall, elegant, and fill the vertical space of the mobile screen.
+    
+    Background: Pure white #FFFFFF.
+    
+    4. Buttery-Smooth Animation:
+    
+    Scroll Transition: Apply a transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1).
+    
+    Dynamic Scaling: Use CSS view-timeline or an intersection-based approach (or simple scale-on-focus if available) where the centered card is scale(1.0) and the side cards are scale(0.88) with opacity: 0.4.
+    
+    Performance: Include will-change: transform and backface-visibility: hidden to ensure 60fps scrolling on iPhone and Android.
+    
+    5. Content Structure:
+    
+    Loop through 3 collections: BOLSAS, CARTERAS, RELOJES.
+    
+    Each card must include:
+    
+    A large <img> tag for the transparent PNG.
+    
+    A centered <h3> in Serif typography.
+    
+    A minimalist <a> button styled as a "Call to Action" with wide letter-spacing.
+    
+    6. Constraints:
+    
+    No Scrollbars: Hide them completely across all browsers (display: none and scrollbar-width: none).
+    
+    Namespace: All CSS classes must start with .lux-loop-.
+    
+    Self-Contained: Everything (HTML/CSS) must be inside the same Liquid block.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .lux-loop-container-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .lux-loop-scroll-{{ ai_gen_id }} {
+    display: flex;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    scroll-behavior: smooth;
+    gap: {{ block.settings.card_gap }}px;
+    padding: {{ block.settings.container_padding_vertical }}px {{ block.settings.container_padding_horizontal }}%;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .lux-loop-scroll-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lux-loop-card-{{ ai_gen_id }} {
+    flex: 0 0 {{ block.settings.card_width_mobile }}%;
+    min-width: {{ block.settings.card_width_mobile }}%;
+    scroll-snap-align: center;
+    background: #FFFFFF;
+    border-radius: 40px;
+    box-shadow: 0 30px 60px rgba(0, 0, 0, 0.03);
+    aspect-ratio: 4 / 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 30px;
+    text-align: center;
+    position: relative;
+    transition: transform 0.8s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+    will-change: transform;
+    backface-visibility: hidden;
+    transform: scale(0.88);
+    opacity: 0.4;
+  }
+
+  .lux-loop-card-{{ ai_gen_id }}.lux-loop-card-active-{{ ai_gen_id }} {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .lux-loop-card-image-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: {{ block.settings.image_max_width }}px;
+    height: auto;
+    margin-bottom: 30px;
+    object-fit: contain;
+  }
+
+  .lux-loop-card-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font }}, serif;
+    font-size: {{ block.settings.title_size_mobile }}px;
+    line-height: 1.2;
+    color: {{ block.settings.title_color }};
+    margin: 0 0 20px;
+    font-weight: 400;
+  }
+
+  .lux-loop-card-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 32px;
+    background: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    font-size: {{ block.settings.button_font_size }}px;
+    letter-spacing: {{ block.settings.button_letter_spacing }}px;
+    text-transform: uppercase;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    transition: all 0.3s ease;
+    font-weight: 500;
+  }
+
+  .lux-loop-card-button-{{ ai_gen_id }}:hover {
+    background: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .lux-loop-card-{{ ai_gen_id }} {
+      flex: 0 0 {{ block.settings.card_width_desktop }}%;
+      min-width: {{ block.settings.card_width_desktop }}%;
+    }
+
+    .lux-loop-card-title-{{ ai_gen_id }} {
+      font-size: {{ block.settings.title_size_desktop }}px;
+    }
+  }
+{% endstyle %}
+
+<lux-loop-carousel-{{ ai_gen_id }} class="lux-loop-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="lux-loop-scroll-{{ ai_gen_id }}" data-carousel-scroll>
+    {% assign collections_array = block.settings.collection_1 | append: ',' | append: block.settings.collection_2 | append: ',' | append: block.settings.collection_3 %}
+    {% assign collections = collections_array | split: ',' %}
+    
+    {% for i in (1..2) %}
+      {% for j in (1..3) %}
+        {% liquid
+          if j == 1
+            assign collection = block.settings.collection_1
+          elsif j == 2
+            assign collection = block.settings.collection_2
+          else
+            assign collection = block.settings.collection_3
+          endif
+        %}
+        
+        {% if collection != blank %}
+          <div class="lux-loop-card-{{ ai_gen_id }}" data-card-index="{{ forloop.index }}">
+            {% if collection.image %}
+              <img
+                src="{{ collection.image | image_url: width: 800 }}"
+                alt="{{ collection.image.alt | escape }}"
+                class="lux-loop-card-image-{{ ai_gen_id }}"
+                loading="lazy"
+                width="800"
+                height="1000"
+              >
+            {% else %}
+              <div class="lux-loop-card-image-{{ ai_gen_id }}">
+                {{ 'collection-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+            
+            <h3 class="lux-loop-card-title-{{ ai_gen_id }}">{{ collection.title }}</h3>
+            
+            <a href="{{ collection.url }}" class="lux-loop-card-button-{{ ai_gen_id }}">
+              {{ block.settings.button_text }}
+            </a>
+          </div>
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+</lux-loop-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class LuxLoopCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.scrollContainer = this.querySelector('[data-carousel-scroll]');
+        this.cards = this.querySelectorAll('.lux-loop-card-{{ ai_gen_id }}');
+        this.isScrolling = false;
+        this.scrollTimeout = null;
+      }
+
+      connectedCallback() {
+        if (!this.scrollContainer || this.cards.length === 0) return;
+        
+        this.updateActiveCard();
+        this.scrollContainer.addEventListener('scroll', this.handleScroll.bind(this));
+        
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('lux-loop-card-active-{{ ai_gen_id }}');
+              } else {
+                entry.target.classList.remove('lux-loop-card-active-{{ ai_gen_id }}');
+              }
+            });
+          },
+          {
+            root: this.scrollContainer,
+            threshold: 0.5
+          }
+        );
+
+        this.cards.forEach((card) => observer.observe(card));
+      }
+
+      handleScroll() {
+        clearTimeout(this.scrollTimeout);
+        this.scrollTimeout = setTimeout(() => {
+          this.updateActiveCard();
+        }, 100);
+      }
+
+      updateActiveCard() {
+        const scrollLeft = this.scrollContainer.scrollLeft;
+        const containerWidth = this.scrollContainer.offsetWidth;
+        const centerPosition = scrollLeft + containerWidth / 2;
+
+        let closestCard = null;
+        let closestDistance = Infinity;
+
+        this.cards.forEach((card) => {
+          const cardLeft = card.offsetLeft;
+          const cardWidth = card.offsetWidth;
+          const cardCenter = cardLeft + cardWidth / 2;
+          const distance = Math.abs(centerPosition - cardCenter);
+
+          if (distance < closestDistance) {
+            closestDistance = distance;
+            closestCard = card;
+          }
+        });
+
+        this.cards.forEach((card) => {
+          card.classList.remove('lux-loop-card-active-{{ ai_gen_id }}');
+        });
+
+        if (closestCard) {
+          closestCard.classList.add('lux-loop-card-active-{{ ai_gen_id }}');
+        }
+      }
+    }
+
+    customElements.define('lux-loop-carousel-{{ ai_gen_id }}', LuxLoopCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Infinite loop carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "header",
+      "content": "Card layout"
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "label": "Mobile card width",
+      "min": 70,
+      "max": 95,
+      "step": 5,
+      "unit": "%",
+      "default": 80
+    },
+    {
+      "type": "range",
+      "id": "card_width_desktop",
+      "label": "Desktop card width",
+      "min": 25,
+      "max": 50,
+      "step": 5,
+      "unit": "%",
+      "default": 30
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Gap between cards",
+      "min": 10,
+      "max": 50,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "container_padding_vertical",
+      "label": "Vertical padding",
+      "min": 20,
+      "max": 100,
+      "step": 10,
+      "unit": "px",
+      "default": 60
+    },
+    {
+      "type": "range",
+      "id": "container_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 0,
+      "max": 20,
+      "step": 5,
+      "unit": "%",
+      "default": 5
+    },
+    {
+      "type": "header",
+      "content": "Card content"
+    },
+    {
+      "type": "range",
+      "id": "image_max_width",
+      "label": "Image max width",
+      "min": 100,
+      "max": 400,
+      "step": 20,
+      "unit": "px",
+      "default": 280
+    },
+    {
+      "type": "select",
+      "id": "title_font",
+      "label": "Title font",
+      "options": [
+        {
+          "value": "Georgia",
+          "label": "Georgia"
+        },
+        {
+          "value": "Times New Roman",
+          "label": "Times New Roman"
+        },
+        {
+          "value": "Playfair Display",
+          "label": "Playfair Display"
+        },
+        {
+          "value": "Newsreader",
+          "label": "Newsreader"
+        }
+      ],
+      "default": "Newsreader"
+    },
+    {
+      "type": "range",
+      "id": "title_size_mobile",
+      "label": "Title size mobile",
+      "min": 20,
+      "max": 50,
+      "step": 2,
+      "unit": "px",
+      "default": 32
+    },
+    {
+      "type": "range",
+      "id": "title_size_desktop",
+      "label": "Title size desktop",
+      "min": 30,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 50
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Title color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "text",
+      "id": "button_text",
+      "label": "Button text",
+      "default": "Explorar"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Font size",
+      "min": 10,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "button_letter_spacing",
+      "label": "Letter spacing",
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "unit": "px",
+      "default": 2
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Background",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Hover background",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#FFFFFF"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Infinite loop carousel"
+    }
+  ]
+}
+{% endschema %}
