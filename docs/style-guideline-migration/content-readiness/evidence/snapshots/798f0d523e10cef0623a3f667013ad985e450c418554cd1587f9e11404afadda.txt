@@ -1,0 +1,67 @@
+{%- comment -%}
+  Accesos (Compra por estilo): a row of contained silhouettes with a label, each pointing at a collection or any link
+  chosen in the editor. A tile without art shows the arrow circle used by the final "Todas las bolsas" tile.
+{%- endcomment -%}
+{%- assign heading_id = section.id | append: '-heading' -%}
+{%- assign any_art = false -%}
+{%- for block in section.blocks -%}
+  {%- if block.settings.image or block.settings.collection.featured_image -%}{%- assign any_art = true -%}{%- endif -%}
+{%- endfor -%}
+<section class="section container style-grid{% unless any_art %} style-grid--plain{% endunless %}" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+  {% render 'monetta-section-header',
+    id: heading_id,
+    title: section.settings.heading,
+    link_url: section.settings.link_url,
+    link_label: section.settings.link_label
+  %}
+  <div class="rail">
+    <ul class="rail__track" role="list" aria-label="{{ section.settings.heading | escape }}">
+      {%- for block in section.blocks -%}
+        {%- liquid
+          assign target = block.settings.collection
+          assign href = block.settings.link | default: target.url
+          assign label = block.settings.title | default: target.title
+          assign art = block.settings.image | default: target.featured_image
+        -%}
+        {%- if href != blank and label != blank -%}
+          <li {{ block.shopify_attributes }}>
+            <a class="style-tile{% unless art %} style-tile--all{% endunless %}" href="{{ href }}">
+              <span class="style-tile__art">
+                {%- if art -%}
+                  {% render 'monetta-image', image: art, widths: '240,360,480', sizes: '(min-width: 1024px) 25vw, 33vw', alt: '' %}
+                {%- else -%}
+                  <span class="style-tile__circle">{% render 'monetta-icon', name: 'arrowForward', size: 24 %}</span>
+                {%- endif -%}
+              </span>
+              <span>{{ label | escape }}</span>
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Monetta · Accesos",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Título", "default": "Compra por estilo" },
+    { "type": "text", "id": "link_label", "label": "Texto del enlace", "default": "Ver todo" },
+    { "type": "url", "id": "link_url", "label": "Enlace" }
+  ],
+  "blocks": [
+    {
+      "type": "tile",
+      "name": "Acceso",
+      "settings": [
+        { "type": "image_picker", "id": "image", "label": "Imagen", "info": "PNG o WebP transparente, 600×600. Sin imagen se usa la de la colección y, si no hay, un círculo con flecha." },
+        { "type": "text", "id": "title", "label": "Título", "info": "Sin título se usa el de la colección." },
+        { "type": "collection", "id": "collection", "label": "Colección" },
+        { "type": "url", "id": "link", "label": "Enlace", "info": "Tiene prioridad sobre la colección." }
+      ]
+    }
+  ],
+  "presets": [ { "name": "Monetta · Accesos", "blocks": [ { "type": "tile" }, { "type": "tile" } ] } ]
+}
+{% endschema %}

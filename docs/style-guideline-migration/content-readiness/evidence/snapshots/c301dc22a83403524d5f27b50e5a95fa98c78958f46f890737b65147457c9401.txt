@@ -1,0 +1,64 @@
+{%- comment -%}
+  Monetta footer: brand text with a WhatsApp button, three editable link columns (each reads a menu from
+  Online Store > Navigation) and the legal row built from the store's published policies.
+  Anatomy: prototype src/components/shell.js (footer). The phone dock reserves its height through --bottom-ui.
+{%- endcomment -%}
+<div class="container">
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <a class="wordmark" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}, ir al inicio">{% render 'monetta-logo', height: 26, logo: section.settings.logo %}</a>
+      {%- if section.settings.description != blank -%}
+        <p>{{ section.settings.description | escape }}</p>
+      {%- endif -%}
+      {%- assign whatsapp = section.settings.whatsapp_number | replace: '+', '' | replace: ' ', '' | replace: '-', '' -%}
+      {%- if whatsapp != blank -%}
+        <a class="btn btn--outline btn--sm" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">{% render 'monetta-icon', name: 'chat', size: 18 %} {{ section.settings.whatsapp_label | escape }}<span class="visually-hidden"> (se abre en una pestaña nueva)</span></a>
+      {%- endif -%}
+    </div>
+    {%- for block in section.blocks -%}
+      {%- if block.type == 'link_list' -%}
+        <div class="footer-col" {{ block.shopify_attributes }}>
+          {%- if block.settings.heading != blank -%}<h2>{{ block.settings.heading | escape }}</h2>{%- endif -%}
+          <ul role="list">
+            {%- for link in linklists[block.settings.menu].links -%}
+              <li><a href="{{ link.url }}"{% render 'monetta-store-lang' %}>{{ link.title }}</a></li>
+            {%- endfor -%}
+          </ul>
+        </div>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+  <div class="footer-bottom">
+    <span>© {{ 'now' | date: '%Y' }} {{ shop.name | escape }}</span>
+    <span>
+      {%- for policy in shop.policies -%}
+        {%- unless forloop.first %} · {% endunless -%}
+        <a href="{{ policy.url }}">{{ policy.title }}</a>
+      {%- endfor -%}
+    </span>
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Monetta · Pie de página",
+  "enabled_on": { "groups": ["footer"] },
+  "max_blocks": 4,
+  "settings": [
+    { "type": "image_picker", "id": "logo", "label": "Logotipo", "info": "Opcional. Sin imagen se usa el logotipo original incluido en el tema." },
+    { "type": "textarea", "id": "description", "label": "Texto de marca", "default": "Boutique mexicana de bolsas, carteras y relojes originales importados de Estados Unidos. Envíos a todo México." },
+    { "type": "text", "id": "whatsapp_number", "label": "WhatsApp (número con lada)", "default": "528261066868", "info": "Solo dígitos, con 52 al inicio. Déjalo vacío para ocultar el botón." },
+    { "type": "text", "id": "whatsapp_label", "label": "Texto del botón de WhatsApp", "default": "WhatsApp 826 106 6868" }
+  ],
+  "blocks": [
+    {
+      "type": "link_list",
+      "name": "Columna de enlaces",
+      "settings": [
+        { "type": "text", "id": "heading", "label": "Título", "default": "Comprar" },
+        { "type": "link_list", "id": "menu", "label": "Menú" }
+      ]
+    }
+  ]
+}
+{% endschema %}

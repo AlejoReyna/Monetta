@@ -1,0 +1,61 @@
+{%- doc -%}
+  The product grid of a listing with its pagination: edge-to-edge two-column grid on phones, "Ver más piezas" appends the
+  next page (and remains a normal link to ?page=n without JavaScript), and a page after the first offers the previous one.
+  Must be rendered inside the {% paginate %} block, whose object is passed in.
+
+  @param {object} products - The current page's products.
+  @param {object} paginate - The paginate object.
+  @param {number} total - Total products matching the filters.
+  @param {number} active_count - Number of active filters (decides the empty-state copy).
+  @param {string} clear_url - URL without filters.
+  @param {string} [empty_title] - Empty-state title when nothing matches and no filter is active.
+  @param {string} [empty_body] - Its body.
+  @param {string} [search_url] - On the search page, the URL of an empty search (adds "Limpiar búsqueda").
+{%- enddoc -%}
+{%- if total == 0 -%}
+  <div class="empty">
+    <span class="empty__mark" aria-hidden="true">{% if active_count > 0 %}{% render 'monetta-icon', name: 'tune', size: 28 %}{% else %}{% render 'monetta-icon', name: 'bag', size: 28 %}{% endif %}</span>
+    {%- if active_count > 0 -%}
+      <h2 class="empty__title" tabindex="-1" id="empty-heading">Sin resultados</h2>
+      <p class="body-copy">No hay piezas con esos filtros. Quita uno para volver a ver productos.</p>
+      <div class="empty__actions">
+        <a class="btn btn--primary" href="{{ clear_url }}">Limpiar filtros</a>
+        <a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver todo el catálogo</a>
+      </div>
+    {%- else -%}
+      <h2 class="empty__title" tabindex="-1" id="empty-heading">{{ empty_title | default: 'Muy pronto encontrarás nuevas piezas aquí' }}</h2>
+      {%- if empty_body != blank -%}<p class="body-copy">{{ empty_body }}</p>{%- endif -%}
+      <div class="empty__actions">
+        {%- if search_url != blank -%}<a class="btn btn--primary" href="#page-search-input" data-edit-search>Editar búsqueda</a><a class="btn btn--outline" href="{{ search_url }}">Limpiar búsqueda</a>{%- else -%}<a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">Ver todo el catálogo</a>{%- endif -%}
+      </div>
+    {%- endif -%}
+  </div>
+{%- else -%}
+  <h2 class="visually-hidden" id="results-heading">Productos</h2>
+  {%- if paginate.previous -%}
+    <p class="load-more"><a class="btn btn--outline" href="{{ paginate.previous.url }}" data-previous>Ver piezas anteriores</a></p>
+  {%- endif -%}
+  <ul class="product-grid product-grid--wide product-grid--flush" role="list" aria-labelledby="results-heading" data-grid>
+    {%- for product in products -%}
+      {%- if product.object_type != blank and product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
+      {%- assign eager = false -%}
+      {%- if forloop.index <= 4 %}{% assign eager = true %}{% endif -%}
+      <li>{% render 'monetta-card', product: product, eager: eager %}</li>
+    {%- endfor -%}
+  </ul>
+  {%- liquid
+    assign shown = paginate.current_offset | plus: products.size
+    assign percent = shown | times: 100.0 | divided_by: paginate.items | round
+  -%}
+  {%- if paginate.pages > 1 -%}
+    <div class="load-more" data-load-more>
+      <p class="small text-muted" data-progress-text>Se muestran {{ shown }} de {{ paginate.items }} piezas</p>
+      <div class="load-more__progress" aria-hidden="true"><span style="width: {{ percent }}%"></span></div>
+      {%- if paginate.next -%}
+        <a class="btn btn--outline" href="{{ paginate.next.url }}" data-more>Ver más piezas</a>
+      {%- else -%}
+        <p class="small text-muted">Viste las {{ paginate.items }} piezas.</p>
+      {%- endif -%}
+    </div>
+  {%- endif -%}
+{%- endif -%}

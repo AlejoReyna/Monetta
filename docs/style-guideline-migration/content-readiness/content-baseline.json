@@ -1,0 +1,1423 @@
+{
+  "schemaVersion": "1.0.0",
+  "description": "Readiness snapshot, intentionally incomplete; not publishable commerce data. Normalized IDs connect existing sources. Nothing sent to Shopify. Preference IDs are candidate editorial options, never selected shopper preferences or live availability.",
+  "snapshotClosedAt": "2026-10-20T23:20:50.425Z",
+  "unknownFields": [
+    "contact.email",
+    "contact.voice",
+    "contact.hours",
+    "responsive focal points",
+    "remote catalog access/content",
+    "published policy destinations",
+    "deployed Rewards flags",
+    "shared Shopify store",
+    "brand/category membership"
+  ],
+  "assets": [
+    {
+      "id": "assets/images/2.0x/logo_monetta.png",
+      "path": "assets/images/2.0x/logo_monetta.png",
+      "sha256": "9e58f0565b1e54c18db39be13fd01dd92646417bf081b8a4d8464f329696eda8",
+      "width": 264,
+      "height": 76,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/2.0x/monetta_favicon.png",
+      "path": "assets/images/2.0x/monetta_favicon.png",
+      "sha256": "8ae9575e4fc88f1c0912996b8984278c824a275e265920e8978245521df74d03",
+      "width": 64,
+      "height": 64,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/3.0x/logo_monetta.png",
+      "path": "assets/images/3.0x/logo_monetta.png",
+      "sha256": "bb72488586bb2bc1d3ac9e2cee9eff68ac8c5701cb776ccd475d1c684989c070",
+      "width": 396,
+      "height": 113,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/3.0x/monetta_favicon.png",
+      "path": "assets/images/3.0x/monetta_favicon.png",
+      "sha256": "32eaa76816f399037e12c5bd3a5884de9302fe2411eee1e8e1157c0415375a3e",
+      "width": 96,
+      "height": 96,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/anne_klein.webp",
+      "path": "assets/images/brands/anne_klein.webp",
+      "sha256": "2b34ec71c0412b06cf6a89fa865a42b0a9b6c45a854cb1df43fd81258d029bb6",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/coach.webp",
+      "path": "assets/images/brands/coach.webp",
+      "sha256": "6f631955e11fc746389add84395e86dadcdfd3dae28c27e66c7c6f4171001dd5",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/dior.webp",
+      "path": "assets/images/brands/dior.webp",
+      "sha256": "f1fee0e140ac3a72b670e9c7b8127e72ecbefbd144ce23bbf160a6dfb7d43f25",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/guess.webp",
+      "path": "assets/images/brands/guess.webp",
+      "sha256": "0397dc07ee4c91bc5ddbe83cef47384fdefedf420a94d1fb43287383b1a7a4e4",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/laneige.webp",
+      "path": "assets/images/brands/laneige.webp",
+      "sha256": "ae252a06d63d788ee2d6cf61402e59133657e52b5f08ff927f996b22b06384c6",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/michael_kors.webp",
+      "path": "assets/images/brands/michael_kors.webp",
+      "sha256": "2a935c1a57c333528fd3eae54cdac6b1a57ef741290617b6daf5a57950fee012",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/olaplex.webp",
+      "path": "assets/images/brands/olaplex.webp",
+      "sha256": "a912e62889edcb4f29d89c3d94e30b258093475f0ae8844cef65e41f9639b31f",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/rhode.webp",
+      "path": "assets/images/brands/rhode.webp",
+      "sha256": "a3b3374d4082ee50ba0d69d3a1ba67694bd71b63bea1d96bb7d473ab53be5a3b",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/steve_madden.webp",
+      "path": "assets/images/brands/steve_madden.webp",
+      "sha256": "95d6e2c723e85f90de7d125fd94c6d8fee7aedf372c2a5f4049dc13d4bed3b5d",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/summer_fridays.webp",
+      "path": "assets/images/brands/summer_fridays.webp",
+      "sha256": "cd28387db965ac60c5395ac84b2c4ca3431321b7ddbca28af5926916a01b85c9",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/the_ordinary.webp",
+      "path": "assets/images/brands/the_ordinary.webp",
+      "sha256": "569459ce1c8848b7c38f65c761d8d1791c8d8ed4ebb4a6c2b049523f7fc7c337",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/brands/tommy_hilfiger.webp",
+      "path": "assets/images/brands/tommy_hilfiger.webp",
+      "sha256": "9d8eea858138dc48d1808e95392f43318591ec3d12fe0dbc426701ffcde9b2a0",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/campaign_coral.jpg",
+      "path": "assets/images/campaign_coral.jpg",
+      "sha256": "12747e5dd96c23cb31dec15a3e8f900fbce7928ad33cfc79bc5d6ba6208d75d9",
+      "width": 1122,
+      "height": 1402,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/campaign_olive.jpg",
+      "path": "assets/images/campaign_olive.jpg",
+      "sha256": "68875a5c0195f22b19be1c5fcd71f6fc11aace0a27182ab0ac549f9aac6d53ba",
+      "width": 1122,
+      "height": 1402,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/campaign_terracotta.jpg",
+      "path": "assets/images/campaign_terracotta.jpg",
+      "sha256": "7981f12fcb233cf6872bb9cb035a6c60ce10a877f929946940b56c1d905033ab",
+      "width": 1122,
+      "height": 1402,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/campaign_welcome.png",
+      "path": "assets/images/campaign_welcome.png",
+      "sha256": "d24d785d98d84dba570b79012d915cf2ccee9e41af1e743f41daaf4ce511cabf",
+      "width": 638,
+      "height": 936,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/hero_poster.jpg",
+      "path": "assets/images/hero_poster.jpg",
+      "sha256": "3874dcbb54525008db90a7f4b98050a569e0902dec27341212df4776cf94e40d",
+      "width": 1280,
+      "height": 720,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_about.webp",
+      "path": "assets/images/home_about.webp",
+      "sha256": "dae8e1bf15aeae5f7cc6a9ded1bc4462e5d64b598e8a1ec3bbe96f52213a80a5",
+      "width": 1200,
+      "height": 900,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_bag_crossbody.webp",
+      "path": "assets/images/home_bag_crossbody.webp",
+      "sha256": "a0ff8544ddf9a302970727b1e384f17b2e6a0ab4ee650ca352411c33972b0b07",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_bag_shoulder.webp",
+      "path": "assets/images/home_bag_shoulder.webp",
+      "sha256": "2b0137b0bf3bbc1e0854ec927bc5a00cda1135f5a16b28bd8d058404b263a08d",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_bag_tote.webp",
+      "path": "assets/images/home_bag_tote.webp",
+      "sha256": "8dff302eacd6afdbfd5c0cc776402b979e846505b14449040e797373f4415c79",
+      "width": 600,
+      "height": 600,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_banner.jpg",
+      "path": "assets/images/home_banner.jpg",
+      "sha256": "795cc80041e6c3517abe09f30ac571cb54553f24688af35e17e1dd54aeaf59a1",
+      "width": 736,
+      "height": 981,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_collection_bags.webp",
+      "path": "assets/images/home_collection_bags.webp",
+      "sha256": "ecb3d077b12cd8c501a7159f550719196b871d1775650cf29744ceaf78dbbc90",
+      "width": 800,
+      "height": 930,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_collection_wallets.webp",
+      "path": "assets/images/home_collection_wallets.webp",
+      "sha256": "ee089e1844003a5b64223afbff76d7e79fb1d324e2df98aead78c7e97a8212f0",
+      "width": 800,
+      "height": 1000,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_collection_watches.webp",
+      "path": "assets/images/home_collection_watches.webp",
+      "sha256": "7673b57da1040b65ca9dc96c3af52091775cc75f5daaeee7a176cc9718a4711c",
+      "width": 800,
+      "height": 815,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_review_gaby.jpg",
+      "path": "assets/images/home_review_gaby.jpg",
+      "sha256": "e8b2bdb324b9287db2bfc48d464eb83178bc144dfdbf7291829e78b6dadce616",
+      "width": 1440,
+      "height": 1080,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_review_guadalupe.jpg",
+      "path": "assets/images/home_review_guadalupe.jpg",
+      "sha256": "1d785b924a9cf9be07d4afb85a1cb70aa5751d74213dd803d8adc3a76d3bcb25",
+      "width": 1080,
+      "height": 1440,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_review_monse.jpg",
+      "path": "assets/images/home_review_monse.jpg",
+      "sha256": "c1febcc6f2fc86a40325a62195ab4fb61258a01ee00d83bb2b181099150f71d8",
+      "width": 1080,
+      "height": 1440,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_social_facebook.webp",
+      "path": "assets/images/home_social_facebook.webp",
+      "sha256": "800b3569ece94a769db7196c956d9bdeb3389508fd74e0833389a8dd580875ec",
+      "width": 440,
+      "height": 420,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_social_instagram.webp",
+      "path": "assets/images/home_social_instagram.webp",
+      "sha256": "0c50d5cd1a84b49820c8b7eb2677bfd6fb40ebe80387280406d2b913dde750c3",
+      "width": 440,
+      "height": 420,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/home_social_tiktok.webp",
+      "path": "assets/images/home_social_tiktok.webp",
+      "sha256": "55749ecf0321b91b76dd0156faffaeda9c7fa37ace25193d487fcd7fcce28aa7",
+      "width": 440,
+      "height": 420,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/logo_monetta.png",
+      "path": "assets/images/logo_monetta.png",
+      "sha256": "9a8d9d578ee29fde762a7be00338a6b259e2cb235253411e5e134d297266aff3",
+      "width": 132,
+      "height": 38,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/monetta_favicon.png",
+      "path": "assets/images/monetta_favicon.png",
+      "sha256": "23fd280bdc22c254d26161fea19f2ef19a42615078c91b2388f986635ca10bcd",
+      "width": 32,
+      "height": 32,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    },
+    {
+      "id": "assets/images/monetta_logo.png",
+      "path": "assets/images/monetta_logo.png",
+      "sha256": "540e6e7c476e273e1cf4ad7df9d7291f800f591b66c165387872a38ff25b7cb4",
+      "width": 1080,
+      "height": 1080,
+      "approval": "legacy_fallback",
+      "availableAtCapture": true
+    }
+  ],
+  "content": {
+    "contractVersion": "1.0.0",
+    "locale": "es-MX",
+    "campaigns": {
+      "welcome": {
+        "id": "welcome",
+        "headline": "Tu boutique de marcas originales\nimportadas de EE.UU.",
+        "ctaLabel": "Comenzar",
+        "media": {
+          "alt": "",
+          "decorative": true,
+          "sources": {
+            "compact": {
+              "assetId": "assets/images/campaign_terracotta.jpg"
+            }
+          }
+        }
+      },
+      "home": {
+        "id": "home",
+        "headline": "Bolsas, carteras y relojes originales.",
+        "ctaLabel": "Ver novedades",
+        "destination": {
+          "routeId": "selection.newest"
+        },
+        "media": {
+          "alt": "",
+          "decorative": true,
+          "sources": {
+            "compact": {
+              "assetId": "assets/images/home_banner.jpg"
+            }
+          }
+        }
+      },
+      "seasonal": {
+        "id": "seasonal",
+        "media": {
+          "alt": "",
+          "decorative": true,
+          "sources": {}
+        }
+      },
+      "wholesale": {
+        "id": "wholesale",
+        "headline": "Mayoreo sin letras chicas",
+        "ctaLabel": "Vende con Monetta",
+        "destination": {
+          "routeId": "wholesale.web"
+        },
+        "media": {
+          "alt": "",
+          "decorative": true,
+          "sources": {
+            "compact": {
+              "assetId": "assets/images/campaign_olive.jpg"
+            }
+          }
+        }
+      },
+      "share": {
+        "id": "share",
+        "destination": {
+          "routeId": "partner.web"
+        },
+        "media": {
+          "alt": "",
+          "decorative": true,
+          "sources": {}
+        }
+      },
+      "contact": {
+        "id": "contact",
+        "headline": "Tu boutique y proveedor de confianza.",
+        "destination": {
+          "routeId": "contact.web"
+        },
+        "media": {
+          "alt": "",
+          "decorative": true,
+          "sources": {}
+        }
+      }
+    },
+    "categories": [
+      {
+        "id": "bags",
+        "title": "Bolsas",
+        "imageAssetId": "assets/images/home_collection_bags.webp",
+        "alt": "Bolsas",
+        "destination": {
+          "routeId": "category.bags"
+        }
+      },
+      {
+        "id": "wallets",
+        "title": "Carteras",
+        "imageAssetId": "assets/images/home_collection_wallets.webp",
+        "alt": "Carteras",
+        "destination": {
+          "routeId": "category.wallets"
+        }
+      },
+      {
+        "id": "watches",
+        "title": "Relojes",
+        "imageAssetId": "assets/images/home_collection_watches.webp",
+        "alt": "Relojes",
+        "destination": {
+          "routeId": "category.watches"
+        }
+      },
+      {
+        "id": "tote",
+        "title": "Totes",
+        "imageAssetId": "assets/images/home_bag_tote.webp",
+        "alt": "Totes",
+        "destination": {
+          "routeId": "category.tote"
+        }
+      },
+      {
+        "id": "crossbody",
+        "title": "Crossbodys",
+        "imageAssetId": "assets/images/home_bag_crossbody.webp",
+        "alt": "Crossbodys",
+        "destination": {
+          "routeId": "category.crossbody"
+        }
+      },
+      {
+        "id": "shoulder",
+        "title": "Hombro",
+        "imageAssetId": "assets/images/home_bag_shoulder.webp",
+        "alt": "Hombro",
+        "destination": {
+          "routeId": "category.shoulder"
+        }
+      },
+      {
+        "id": "satchel",
+        "title": "Satchel",
+        "imageAssetId": "assets/images/home_bag_tote.webp",
+        "alt": "Satchel",
+        "destination": {
+          "routeId": "category.satchel"
+        }
+      },
+      {
+        "id": "hobo",
+        "title": "Hobo",
+        "imageAssetId": "assets/images/home_bag_shoulder.webp",
+        "alt": "Hobo",
+        "destination": {
+          "routeId": "category.hobo"
+        }
+      },
+      {
+        "id": "perfume",
+        "title": "Perfumes",
+        "destination": {
+          "routeId": "catalog.perfume-suggested"
+        },
+        "nativeDestination": {
+          "routeId": "category.perfume.native"
+        }
+      }
+    ],
+    "brands": [
+      {
+        "id": "coach",
+        "title": "Coach",
+        "brandKey": "Coach",
+        "imageAssetId": "assets/images/brands/coach.webp",
+        "alt": "Coach",
+        "destination": {
+          "routeId": "brand.coach"
+        }
+      },
+      {
+        "id": "michael-kors",
+        "title": "Michael Kors",
+        "brandKey": "Michael Kors",
+        "imageAssetId": "assets/images/brands/michael_kors.webp",
+        "alt": "Michael Kors",
+        "destination": {
+          "routeId": "brand.michael-kors"
+        }
+      },
+      {
+        "id": "anne-klein",
+        "title": "Anne Klein",
+        "brandKey": "Anne Klein",
+        "imageAssetId": "assets/images/brands/anne_klein.webp",
+        "alt": "Anne Klein",
+        "destination": {
+          "routeId": "brand.anne-klein"
+        }
+      },
+      {
+        "id": "guess",
+        "title": "Guess",
+        "brandKey": "Guess",
+        "imageAssetId": "assets/images/brands/guess.webp",
+        "alt": "Guess",
+        "destination": {
+          "routeId": "brand.guess"
+        }
+      },
+      {
+        "id": "steve-madden",
+        "title": "Steve Madden",
+        "brandKey": "Steve Madden",
+        "imageAssetId": "assets/images/brands/steve_madden.webp",
+        "alt": "Steve Madden",
+        "destination": {
+          "routeId": "brand.steve-madden"
+        }
+      },
+      {
+        "id": "tommy-hilfiger",
+        "title": "Tommy Hilfiger",
+        "brandKey": "Tommy Hilfiger",
+        "imageAssetId": "assets/images/brands/tommy_hilfiger.webp",
+        "alt": "Tommy Hilfiger",
+        "destination": {
+          "routeId": "brand.tommy-hilfiger"
+        }
+      },
+      {
+        "id": "olaplex",
+        "title": "Olaplex",
+        "brandKey": "Olaplex",
+        "imageAssetId": "assets/images/brands/olaplex.webp",
+        "alt": "Olaplex",
+        "destination": {
+          "routeId": "brand.olaplex"
+        }
+      },
+      {
+        "id": "dior",
+        "title": "Dior",
+        "brandKey": "Christian Dior",
+        "imageAssetId": "assets/images/brands/dior.webp",
+        "alt": "Dior",
+        "destination": {
+          "routeId": "brand.dior"
+        }
+      },
+      {
+        "id": "the-ordinary",
+        "title": "The Ordinary",
+        "brandKey": "The Ordinary",
+        "imageAssetId": "assets/images/brands/the_ordinary.webp",
+        "alt": "The Ordinary",
+        "destination": {
+          "routeId": "brand.the-ordinary"
+        }
+      },
+      {
+        "id": "summer-fridays",
+        "title": "Summer Fridays",
+        "brandKey": "Summer Fridays",
+        "imageAssetId": "assets/images/brands/summer_fridays.webp",
+        "alt": "Summer Fridays",
+        "destination": {
+          "routeId": "brand.summer-fridays"
+        }
+      },
+      {
+        "id": "laneige",
+        "title": "Laneige",
+        "brandKey": "Laneige",
+        "imageAssetId": "assets/images/brands/laneige.webp",
+        "alt": "Laneige",
+        "destination": {
+          "routeId": "brand.laneige"
+        }
+      },
+      {
+        "id": "rhode",
+        "title": "Rhode",
+        "brandKey": "Rhode",
+        "imageAssetId": "assets/images/brands/rhode.webp",
+        "alt": "Rhode",
+        "destination": {
+          "routeId": "brand.rhode"
+        }
+      }
+    ],
+    "productSelections": {
+      "newest": {
+        "id": "newest",
+        "title": "Novedades",
+        "source": {
+          "kind": "newest",
+          "provider": "shopify_collection",
+          "routeId": "selection.newest",
+          "ordering": "collection_default"
+        }
+      },
+      "todays-picks": {
+        "id": "todays-picks",
+        "title": "Catálogo de hoy",
+        "source": {
+          "kind": "curated",
+          "provider": "storefront_collection",
+          "routeId": "selection.todays-picks",
+          "ordering": "editorial"
+        }
+      },
+      "popular": {
+        "id": "popular",
+        "title": "Lo más buscado"
+      },
+      "related": {
+        "id": "related",
+        "title": "También te puede gustar",
+        "source": {
+          "kind": "recommendations",
+          "provider": "shopify_recommendations",
+          "ordering": "provider_defined"
+        }
+      }
+    },
+    "wholesale": {
+      "headline": "Mayoreo sin letras chicas",
+      "body": "El precio de mayoreo se define por producto al cotizar: a mayor volumen, mejor precio. Los tramos exactos se confirman por WhatsApp con tus modelos elegidos; la app no publica tarifas por tramo.",
+      "campaignId": "wholesale",
+      "steps": [
+        {
+          "number": "01",
+          "title": "Elige tus modelos",
+          "body": "Explora el catálogo o usa el creador de catálogo para armar tu selección con precios e imágenes reales."
+        },
+        {
+          "number": "02",
+          "title": "Cotiza por WhatsApp",
+          "body": "Envíanos tus modelos al 826 106 6868. Te confirmamos disponibilidad y precio de mayoreo por producto."
+        },
+        {
+          "number": "03",
+          "title": "Aparta y liquida",
+          "body": "Aparta con $800 MXN y liquida en hasta 20 días. Abrir el chat no reserva stock ni crea el pedido automáticamente."
+        }
+      ],
+      "terms": [
+        {
+          "value": "3",
+          "label": "modelos para mayoreo"
+        },
+        {
+          "value": "$800",
+          "label": "anticipo mayoreo"
+        },
+        {
+          "value": "20 días",
+          "label": "para liquidar"
+        },
+        {
+          "value": "100%",
+          "label": "productos originales"
+        }
+      ],
+      "supportLinkId": "whatsapp",
+      "catalogIds": [
+        "bags-wholesale",
+        "bags-suggested",
+        "bags-no-prices",
+        "beauty-wholesale",
+        "beauty-suggested",
+        "beauty-no-prices",
+        "perfume-wholesale",
+        "perfume-suggested",
+        "perfume-no-prices"
+      ],
+      "rewardsPolicyRef": "docs/redesign/REWARDS_CONTRACT_V1.md"
+    },
+    "services": [
+      {
+        "id": "original",
+        "title": "Productos originales",
+        "body": "Piezas originales importadas de Estados Unidos",
+        "icon": "check"
+      },
+      {
+        "id": "shipping",
+        "title": "Envíos a todo México",
+        "body": "Envíos a todo México",
+        "icon": "truck"
+      },
+      {
+        "id": "support",
+        "title": "WhatsApp",
+        "body": "WhatsApp 826 106 6868",
+        "icon": "chat",
+        "supportLinkId": "whatsapp"
+      }
+    ],
+    "contact": {
+      "headline": "Contáctanos",
+      "campaignId": "contact",
+      "channels": [
+        {
+          "id": "whatsapp",
+          "label": "WhatsApp 826 106 6868",
+          "url": "https://wa.me/528261066868",
+          "kind": "whatsapp"
+        },
+        {
+          "id": "contact-web",
+          "label": "Contacto en monetta.mx",
+          "kind": "web_contact",
+          "url": "https://monetta.mx/pages/contact"
+        }
+      ],
+      "groupLinkIds": [
+        "group-whatsapp-1",
+        "group-whatsapp-2",
+        "group-facebook"
+      ]
+    },
+    "socialLinks": [
+      {
+        "id": "instagram",
+        "label": "Instagram",
+        "url": "https://www.instagram.com/_monetta.mx",
+        "kind": "social"
+      },
+      {
+        "id": "tiktok",
+        "label": "TikTok",
+        "url": "https://www.tiktok.com/@monetta.oficial",
+        "kind": "social"
+      },
+      {
+        "id": "facebook",
+        "label": "Facebook",
+        "url": "https://www.facebook.com/profile.php?id=100091065527635",
+        "kind": "social"
+      }
+    ],
+    "catalogs": [
+      {
+        "id": "bags-wholesale",
+        "category": "bags",
+        "categoryLabel": "Bolsas y carteras",
+        "mode": "wholesale",
+        "destination": {
+          "routeId": "catalog.bags-wholesale"
+        },
+        "description": "Precios para preparar y cotizar tu pedido.",
+        "sortOrder": 0,
+        "active": true,
+        "shareable": false
+      },
+      {
+        "id": "bags-suggested",
+        "category": "bags",
+        "categoryLabel": "Bolsas y carteras",
+        "mode": "suggested_prices",
+        "destination": {
+          "routeId": "catalog.bags-suggested"
+        },
+        "description": "Listo para compartir con precios sugeridos de venta.",
+        "sortOrder": 1,
+        "active": true,
+        "shareable": true
+      },
+      {
+        "id": "bags-no-prices",
+        "category": "bags",
+        "categoryLabel": "Bolsas y carteras",
+        "mode": "no_prices",
+        "destination": {
+          "routeId": "catalog.bags-no-prices"
+        },
+        "description": "Comparte los modelos y decide tu precio final.",
+        "sortOrder": 2,
+        "active": true,
+        "shareable": true
+      },
+      {
+        "id": "beauty-wholesale",
+        "category": "beauty",
+        "categoryLabel": "Skincare y makeup",
+        "mode": "wholesale",
+        "destination": {
+          "routeId": "catalog.beauty-wholesale"
+        },
+        "description": "Precios para preparar y cotizar tu pedido.",
+        "sortOrder": 3,
+        "active": true,
+        "shareable": false
+      },
+      {
+        "id": "beauty-suggested",
+        "category": "beauty",
+        "categoryLabel": "Skincare y makeup",
+        "mode": "suggested_prices",
+        "destination": {
+          "routeId": "catalog.beauty-suggested"
+        },
+        "description": "Listo para compartir con precios sugeridos de venta.",
+        "sortOrder": 4,
+        "active": true,
+        "shareable": true
+      },
+      {
+        "id": "beauty-no-prices",
+        "category": "beauty",
+        "categoryLabel": "Skincare y makeup",
+        "mode": "no_prices",
+        "destination": {
+          "routeId": "catalog.beauty-no-prices"
+        },
+        "description": "Comparte los modelos y decide tu precio final.",
+        "sortOrder": 5,
+        "active": true,
+        "shareable": true
+      },
+      {
+        "id": "perfume-wholesale",
+        "category": "perfume",
+        "categoryLabel": "Perfumes",
+        "mode": "wholesale",
+        "destination": {
+          "routeId": "catalog.perfume-wholesale"
+        },
+        "description": "Precios para preparar y cotizar tu pedido.",
+        "sortOrder": 6,
+        "active": true,
+        "shareable": false
+      },
+      {
+        "id": "perfume-suggested",
+        "category": "perfume",
+        "categoryLabel": "Perfumes",
+        "mode": "suggested_prices",
+        "destination": {
+          "routeId": "catalog.perfume-suggested"
+        },
+        "description": "Listo para compartir con precios sugeridos de venta.",
+        "sortOrder": 7,
+        "active": true,
+        "shareable": true
+      },
+      {
+        "id": "perfume-no-prices",
+        "category": "perfume",
+        "categoryLabel": "Perfumes",
+        "mode": "no_prices",
+        "destination": {
+          "routeId": "catalog.perfume-no-prices"
+        },
+        "description": "Comparte los modelos y decide tu precio final.",
+        "sortOrder": 8,
+        "active": true,
+        "shareable": true
+      }
+    ],
+    "signup": {
+      "enabled": false
+    },
+    "footer": {
+      "brandDescription": "Boutique mexicana de bolsas, carteras y relojes originales importados de Estados Unidos. Envíos a todo México.",
+      "columns": [
+        {
+          "id": "shop",
+          "heading": "Comprar",
+          "menuHandle": "main-menu"
+        },
+        {
+          "id": "help",
+          "heading": "Ayuda",
+          "menuHandle": "footer"
+        }
+      ],
+      "socialLinkIds": [
+        "instagram",
+        "tiktok",
+        "facebook"
+      ],
+      "supportLinkId": "whatsapp",
+      "copyrightYear": "runtime_year"
+    },
+    "preferences": {
+      "skipAllowed": true,
+      "brandOptionIds": [
+        "coach",
+        "michael-kors",
+        "anne-klein",
+        "guess",
+        "steve-madden",
+        "tommy-hilfiger",
+        "olaplex",
+        "dior",
+        "the-ordinary",
+        "summer-fridays",
+        "laneige",
+        "rhode"
+      ],
+      "categoryOptionIds": [
+        "bags",
+        "wallets",
+        "watches",
+        "tote",
+        "crossbody",
+        "shoulder",
+        "satchel",
+        "hobo",
+        "perfume"
+      ]
+    },
+    "rewards": {
+      "model": "mxn_balance_v1",
+      "currency": "MXN",
+      "authority": "accounts_orders",
+      "policyRef": "docs/redesign/REWARDS_CONTRACT_V1.md",
+      "capabilitySource": "GET /customers/me/rewards program + incentives (runtime, not editorial)"
+    }
+  },
+  "provenance": {
+    "campaigns.welcome": [
+      {
+        "source": "lib/features/welcome/welcome_screen.dart",
+        "needle": "Tu boutique de marcas originales\\nimportadas de EE.UU."
+      },
+      {
+        "source": "lib/features/welcome/welcome_screen.dart",
+        "needle": "kWelcomePhotoAsset = 'assets/images/campaign_terracotta.jpg'"
+      }
+    ],
+    "campaigns.home": [
+      {
+        "source": "storefront-theme/sections/monetta-hero.liquid",
+        "needle": "Bolsas, carteras y relojes originales."
+      },
+      {
+        "source": "storefront-theme/templates/index.json",
+        "needle": "Ver novedades"
+      }
+    ],
+    "campaigns.wholesale": [
+      {
+        "source": "lib/features/wholesale/wholesale_screen.dart",
+        "needle": "Mayoreo sin letras chicas"
+      },
+      {
+        "source": "lib/features/wholesale/wholesale_screen.dart",
+        "needle": "assets/images/campaign_olive.jpg"
+      }
+    ],
+    "campaigns.contact": [
+      {
+        "source": "lib/domain/editorial_content.dart",
+        "needle": "Tu boutique y proveedor de confianza."
+      }
+    ],
+    "categories": [
+      {
+        "source": "lib/domain/home_content.dart",
+        "needle": "collections: <HomeCollectionCard>["
+      },
+      {
+        "source": "lib/domain/home_content.dart",
+        "needle": "bagTypes: <HomeCollectionCard>["
+      }
+    ],
+    "brands": [
+      {
+        "source": "lib/domain/home_content.dart",
+        "needle": "brands: <HomeBrandCard>["
+      }
+    ],
+    "productSelections.newest": [
+      {
+        "source": "storefront-theme/sections/monetta-product-rail.liquid",
+        "needle": "assign source = section.settings.collection | default: collections.all"
+      }
+    ],
+    "productSelections.todays-picks": [
+      {
+        "source": "lib/data/shopify/featured_catalog_repository.dart",
+        "needle": "'handle': 'monetta-todays-picks'"
+      }
+    ],
+    "productSelections.related": [
+      {
+        "source": "storefront-theme/sections/monetta-product-recommendations.liquid",
+        "needle": "recommendations"
+      }
+    ],
+    "wholesale": [
+      {
+        "source": "lib/features/wholesale/wholesale_content.dart",
+        "needle": "El precio de mayoreo se define por producto al cotizar"
+      },
+      {
+        "source": "lib/domain/editorial_content.dart",
+        "needle": "PartnerTerm(value: '3', label: 'modelos para mayoreo')"
+      }
+    ],
+    "services": [
+      {
+        "source": "lib/app/shopper_copy.dart",
+        "needle": "Piezas originales importadas de Estados Unidos"
+      },
+      {
+        "source": "storefront-theme/templates/index.json",
+        "needle": "Envíos a todo México"
+      }
+    ],
+    "contact": [
+      {
+        "source": "lib/features/contact/contact_screen.dart",
+        "needle": "List<ContactChannel> monettaContactChannels"
+      },
+      {
+        "source": "lib/features/partner/partner_hub_screen.dart",
+        "needle": "https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec"
+      }
+    ],
+    "socialLinks": [
+      {
+        "source": "lib/domain/home_content.dart",
+        "needle": "socialLinks: <HomeSocialLink>["
+      }
+    ],
+    "catalogs": [
+      {
+        "source": "lib/domain/editorial_content.dart",
+        "needle": "catalogs: <PartnerCatalog>["
+      },
+      {
+        "source": "lib/domain/editorial_content.dart",
+        "needle": "'suggested_prices'"
+      }
+    ],
+    "footer": [
+      {
+        "source": "storefront-theme/sections/monetta-footer-group.json",
+        "needle": "\"heading\": \"Comprar\", \"menu\": \"main-menu\""
+      },
+      {
+        "source": "storefront-theme/sections/monetta-footer.liquid",
+        "needle": "'now' | date: '%Y'"
+      }
+    ],
+    "preferences": [
+      {
+        "source": "lib/features/onboarding/onboarding_sheet.dart",
+        "needle": "class OnboardingSheet"
+      }
+    ],
+    "rewards": [
+      {
+        "source": "services/accounts_orders/src/rewards/types.ts",
+        "needle": "currency: 'MXN'"
+      },
+      {
+        "source": "services/accounts_orders/src/rewards/types.ts",
+        "needle": "wholesaleEarns: false"
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "id": "wholesale-mode",
+      "status": "pending",
+      "summary": "Cotización manual por producto frente a descuento automático prometido en PartnerHub y tema. Resolver antes de publicar pricingMode.",
+      "sources": [
+        {
+          "source": "lib/features/wholesale/wholesale_content.dart",
+          "needle": "El precio de mayoreo se define por producto al cotizar"
+        },
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "de mayoreo se aplica automáticamente a cada producto antes"
+        },
+        {
+          "source": "storefront-theme/templates/page.mayoreo.json",
+          "needle": "el descuento de mayoreo se aplicará automáticamente"
+        }
+      ]
+    },
+    {
+      "id": "wholesale-unit",
+      "status": "pending",
+      "summary": "3 modelos, 3 piezas y más de tres piezas no son unidades/umbrales equivalentes. No convertir a tramos nuevos.",
+      "sources": [
+        {
+          "source": "lib/features/wholesale/wholesale_content.dart",
+          "needle": "static const int minModels = 3;"
+        },
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "accede a precios de mayoreo desde tres piezas."
+        }
+      ]
+    },
+    {
+      "id": "shipping-offers",
+      "status": "pending",
+      "summary": "La app publica gratis desde $1,499; PDF muestra otro umbral y oferta signup. Confirmar política sin autorizar incentivos nuevos.",
+      "sources": [
+        {
+          "source": "lib/app/shopper_copy.dart",
+          "needle": "Envío a todo México · gratis desde"
+        },
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "The PDF includes $1,999 and 5-7 days"
+        }
+      ]
+    },
+    {
+      "id": "delivery-estimate",
+      "status": "pending",
+      "summary": "Confirmación muestra 3 a 5 días hábiles, Mayoreo 2 a 7 y PDF 5 a 7. Falta una política compartida confirmada.",
+      "sources": [
+        {
+          "source": "lib/features/checkout/order_confirmation_screen.dart",
+          "needle": "return '3 a 5 días hábiles';"
+        },
+        {
+          "source": "lib/features/wholesale/wholesale_content.dart",
+          "needle": "La entrega toma entre 2 y 7 días hábiles"
+        }
+      ]
+    },
+    {
+      "id": "signup",
+      "status": "pending",
+      "summary": "Faltan copy aprobado, consentimiento, adapter y privacidad publicada. enabled:false es fallback propuesto; no describe configuración remota.",
+      "sources": [
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "Confirm newsletter free-shipping offer"
+        }
+      ]
+    },
+    {
+      "id": "brands-and-categories",
+      "status": "pending",
+      "summary": "Confirmar surtido, identidad CH, cuatro marcas del PDF y Handbags/Accesorios antes de crear tiles, logos o handles.",
+      "sources": [
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "Confirm which brands/categories are stocked"
+        }
+      ]
+    },
+    {
+      "id": "share-catalog-mode",
+      "status": "pending",
+      "summary": "Elegir precios sugeridos o sin precios para compartir. Mayoreo prepara cotización; compartir no prueba vistas/compra ni genera comisión.",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "bool get isClientFacing => this != wholesale;"
+        },
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "Opening WhatsApp or a catalog link does not approve reseller status"
+        }
+      ]
+    },
+    {
+      "id": "shared-store",
+      "status": "pending",
+      "summary": "La entrega no demuestra catálogo/cuentas/sesiones compartidos. Alinear la tienda por canal antes de validar paridad.",
+      "sources": [
+        {
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md",
+          "needle": "No está demostrado que app y web operen sobre la misma tienda"
+        }
+      ]
+    },
+    {
+      "id": "legacy-product-count",
+      "status": "pending",
+      "summary": "No perpetuar más de 3,000 productos del fallback como cantidad comercial actual.",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "Comparte más de 3,000 productos originales con tus clientes y"
+        }
+      ]
+    }
+  ],
+  "capabilities": {
+    "nativeWelcome": {
+      "status": "available",
+      "evidence": [
+        {
+          "source": "lib/features/welcome/welcome_screen.dart",
+          "needle": "class WelcomeScreen extends StatelessWidget"
+        }
+      ],
+      "note": ""
+    },
+    "nativePreferences": {
+      "status": "available",
+      "evidence": [
+        {
+          "source": "lib/features/onboarding/onboarding_sheet.dart",
+          "needle": "class OnboardingSheet extends StatefulWidget"
+        }
+      ],
+      "note": ""
+    },
+    "purchaseTypePreference": {
+      "status": "pending",
+      "evidence": [
+        {
+          "source": "lib/features/onboarding/onboarding_sheet.dart",
+          "needle": "class OnboardingSheet extends StatefulWidget"
+        }
+      ],
+      "note": "Tipo de compra no está implementado."
+    },
+    "shopifyPredictiveSearch": {
+      "status": "pending",
+      "evidence": [
+        {
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md",
+          "needle": "sugerencias en el siguiente bloque"
+        }
+      ],
+      "note": ""
+    },
+    "shopifyQuickView": {
+      "status": "pending",
+      "evidence": [
+        {
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md",
+          "needle": "Sin corazón ni página de favoritos"
+        }
+      ],
+      "note": ""
+    },
+    "shopifyFavorites": {
+      "status": "pending",
+      "evidence": [
+        {
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md",
+          "needle": "Sin corazón ni página de favoritos"
+        }
+      ],
+      "note": ""
+    },
+    "categoryBrandHub": {
+      "status": "pending",
+      "evidence": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "void _openFullCatalog()"
+        }
+      ],
+      "note": ""
+    },
+    "nativeOrders": {
+      "status": "available",
+      "evidence": [
+        {
+          "source": "lib/features/orders/orders_screen.dart",
+          "needle": "class OrdersScreen extends StatefulWidget"
+        }
+      ],
+      "note": ""
+    },
+    "hostedAccountBranding": {
+      "status": "unknown",
+      "evidence": [
+        {
+          "source": "storefront-theme/sections/monetta-header.liquid",
+          "needle": "routes.account_url"
+        }
+      ],
+      "note": ""
+    },
+    "rewardsMXN": {
+      "status": "available",
+      "evidence": [
+        {
+          "source": "services/accounts_orders/src/rewards/types.ts",
+          "needle": "currency: 'MXN'"
+        }
+      ],
+      "note": "Contrato local disponible; flags desplegados desconocidos."
+    },
+    "rewardsWebIntegration": {
+      "status": "unknown",
+      "evidence": [
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "required server authentication bridge"
+        }
+      ],
+      "note": ""
+    },
+    "nativeCatalogSharing": {
+      "status": "available",
+      "evidence": [
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "catalog.shareText"
+        }
+      ],
+      "note": ""
+    },
+    "webCatalogSharing": {
+      "status": "pending",
+      "evidence": [
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "btn_link_1"
+        }
+      ],
+      "note": "Links existentes no prueban copiar/compartir."
+    },
+    "signupSubmission": {
+      "status": "unknown",
+      "evidence": [
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "signup"
+        }
+      ],
+      "note": ""
+    },
+    "contactGroupCards": {
+      "status": "pending",
+      "evidence": [
+        {
+          "source": "lib/features/contact/contact_screen.dart",
+          "needle": "List<ContactChannel> monettaContactChannels"
+        }
+      ],
+      "note": "Grupos existen en hub; faltan en contacto."
+    },
+    "confirmationEvidence": {
+      "status": "available",
+      "evidence": [
+        {
+          "source": "lib/features/checkout/order_confirmation_screen.dart",
+          "needle": "Solo se presenta con evidencia [CheckoutCompleted]"
+        }
+      ],
+      "note": ""
+    },
+    "hostedThankYouBranding": {
+      "status": "unknown",
+      "evidence": [
+        {
+          "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+          "needle": "thank-you and order-status"
+        }
+      ],
+      "note": ""
+    }
+  }
+}

@@ -1,0 +1,9 @@
+{%- doc -%}
+  Outputs ` lang="xx"` when the store's own language is not Spanish, and nothing when it is. The Monetta interface is written in
+  Spanish and the page declares it (layout/monetta.liquid), but a few fragments are rendered by Shopify in the store's language
+  (menu titles the merchant typed in the admin, the accelerated-checkout buttons, store-side error messages). Marking them lets a
+  screen reader pronounce them in that language instead of the page's. The store locale is the best signal available: Shopify gives
+  no language per menu title, and a multilingual store is out of scope for this delivery.
+{%- enddoc -%}
+{%- assign store_language = request.locale.iso_code | slice: 0, 2 -%}
+{% unless store_language == 'es' %} lang="{{ request.locale.iso_code }}"{%- endunless -%}

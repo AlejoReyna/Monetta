@@ -1,0 +1,81 @@
+{%- doc -%}
+  One bag line. Amounts, discounts and the quantity ceiling come from Shopify; nothing is recomputed here.
+  The line is identified by its key (variant + properties + selling plan), never by position. The editable line also carries
+  data-restore: the variant, quantity, properties (public and private) and selling plan it has right now, so that "Deshacer"
+  can put back that very line and not just another purchase of the same variant.
+
+  @param {object} item - A cart line item.
+  @param {boolean} [compact] - Read-only variant for the "En tu bolsa" sheet.
+{%- enddoc -%}
+{%- liquid
+  assign variant = item.variant
+  assign max_qty = 99
+  if variant.inventory_management == 'shopify' and variant.inventory_policy == 'deny'
+    assign max_qty = variant.inventory_quantity
+  endif
+  assign discounted = false
+  if item.original_price != item.final_price
+    assign discounted = true
+  endif
+  assign marked_down = false
+  if variant.compare_at_price > item.original_price
+    assign marked_down = true
+  endif
+  assign restore_plan = 'null'
+  if item.selling_plan_allocation
+    assign restore_plan = item.selling_plan_allocation.selling_plan.id
+  endif
+-%}
+{%- comment -%}`item.properties | json` serialises the pairs as an array, which would read back as "no properties"; write the object explicitly.{%- endcomment -%}
+{%- capture restore_properties -%}{ {%- for property in item.properties -%}{{ property.first | json }}:{{ property.last | json }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }{%- endcapture -%}
+{%- capture restore_json -%}{"id":{{ item.variant_id }},"quantity":{{ item.quantity }},"properties":{{ restore_properties }},"selling_plan":{{ restore_plan }}}{%- endcapture -%}
+<li class="cart-line"{% unless compact %} data-line="{{ item.key }}" data-restore="{{ restore_json | escape }}"{% endunless %} data-variant-id="{{ item.variant_id }}">
+  <a class="cart-line__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+    {%- if item.image -%}
+      <img src="{{ item.image | image_url: width: 240 }}" srcset="{{ item.image | image_url: width: 240 }} 240w, {{ item.image | image_url: width: 360 }} 360w" sizes="(min-width: 1024px) 112px, 88px" alt="" width="{{ item.image.width | at_most: 240 }}" height="{{ item.image.height | times: 240 | divided_by: item.image.width }}" loading="lazy">
+    {%- endif -%}
+  </a>
+  <div class="cart-line__info">
+    {%- if item.product.vendor != blank -%}<p class="eyebrow eyebrow--muted">{{ item.product.vendor | escape }}</p>{%- endif -%}
+    <a class="cart-line__name" href="{{ item.url }}">{{ item.product.title | escape }}</a>
+    {%- unless item.product.has_only_default_variant -%}
+      <p class="cart-line__variant">{{ variant.title | escape }}</p>
+    {%- endunless -%}
+    {%- for property in item.properties -%}
+      {%- unless property.last == blank or property.first contains '_' -%}
+        <p class="cart-line__variant">{{ property.first | escape }}: {{ property.last | escape }}</p>
+      {%- endunless -%}
+    {%- endfor -%}
+    <p class="cart-line__price">
+      <span class="price">{{ item.final_price | money_without_trailing_zeros }}</span>
+      {%- if discounted -%}
+        <span class="visually-hidden">, antes</span><s class="price-compare">{{ item.original_price | money_without_trailing_zeros }}</s>
+      {%- elsif marked_down -%}
+        <span class="visually-hidden">, antes</span><s class="price-compare">{{ variant.compare_at_price | money_without_trailing_zeros }}</s>
+      {%- endif -%}
+    </p>
+    {%- for allocation in item.line_level_discount_allocations -%}
+      <p class="cart-line__note cart-line__note--discount">{{ allocation.discount_application.title | escape }}: −{{ allocation.amount | money_without_trailing_zeros }}</p>
+    {%- endfor -%}
+    {%- if compact -%}
+      <p class="cart-line__variant">Cantidad: {{ item.quantity }}</p>
+    {%- else -%}
+      <form class="cart-line__controls" action="{{ routes.cart_change_url }}" method="post" data-line-form>
+        <input type="hidden" name="id" value="{{ item.key }}">
+        <input type="hidden" name="return_to" value="{{ routes.cart_url }}">
+        <div class="stepper" role="group" aria-label="Cantidad">
+          <button type="submit" class="stepper__button" name="quantity" value="{{ item.quantity | minus: 1 }}" data-step="-1" aria-label="Quitar una pieza de {{ item.product.title | escape }}"{% if item.quantity <= 1 %} disabled{% endif %}>{% render 'monetta-icon', name: 'remove', size: 20 %}</button>
+          <output class="stepper__value" aria-live="polite">{{ item.quantity }}</output>
+          <button type="submit" class="stepper__button" name="quantity" value="{{ item.quantity | plus: 1 }}" data-step="1" aria-label="Agregar una pieza de {{ item.product.title | escape }}"{% if item.quantity >= max_qty %} disabled{% endif %}>{% render 'monetta-icon', name: 'add', size: 20 %}</button>
+        </div>
+        <button type="submit" class="cart-line__remove" name="quantity" value="0" data-remove-line>Eliminar<span class="visually-hidden"> {{ item.product.title | escape }}</span></button>
+        {%- if item.quantity > 1 -%}
+          <span class="cart-line__total"><span class="visually-hidden">Total de la línea: </span>{{ item.final_line_price | money_without_trailing_zeros }}</span>
+        {%- endif -%}
+      </form>
+      {%- if item.quantity >= max_qty and max_qty < 99 -%}
+        <p class="cart-line__note">Solo hay {{ max_qty }} disponibles de esta opción.</p>
+      {%- endif -%}
+    {%- endif -%}
+  </div>
+</li>

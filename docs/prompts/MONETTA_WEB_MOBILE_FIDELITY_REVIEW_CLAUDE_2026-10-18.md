@@ -1,0 +1,27 @@
+# Revisión de fidelidad del prototipo web entregado el 17 de octubre
+
+Continúa el prototipo existente de Monetta creado ayer, **17 de octubre de 2026**. Su encargo original está en `docs/prompts/MONETTA_WEB_DESIGN_CLAUDE.md`; consérvalo como antecedente. La petición actual del usuario es comprobar que ese prototipo esté acorde con el diseño de la app móvil.
+
+Revisa y corrige la fidelidad visual del prototipo existente. Trabaja sobre `design-prototype/` y sus documentos de entrega. Empieza leyendo `git status --short`, las instrucciones del proyecto, el encargo original, `docs/web-redesign/STATUS.md` y `docs/web-redesign/audit-2026-10-18/REVISION_FIDELIDAD_MOBILE.md`. Preserva el trabajo concurrente y las evidencias originales.
+
+La fuente de diseño es el **código actual que renderiza la app** y sus assets. Las capturas históricas y la propuesta web se interpretan contra esa fuente. No basta con compartir colores y familias tipográficas: comprueba el rol concreto de cada título, la anatomía de tarjetas, el tamaño de imágenes, la distribución de acciones, la densidad y el primer pantallazo. No rediseñes la app Flutter para hacerla coincidir con la web.
+
+La auditoría del 18 de octubre incluye capturas nuevas de Flutter y navegador, mediciones y un comparador local en `docs/web-redesign/audit-2026-10-18/comparacion.html`. Valida cada hallazgo contra los archivos actuales; usa la auditoría como evidencia, no como sustituto de inspeccionar el resultado.
+
+## Prioridades concretas
+
+1. **H01 — Encabezados interiores en teléfono.** Compara `lib/features/navigation/monetta_page_header.dart`, `collection_screen.dart`, `search_screen.dart` y la bolsa con el shell y listing web. La colección de 375 px empieza a mostrar tarjetas en y=88 en Flutter y y=351,63 en web (235,63 px adicionales después de descontar el aviso de prototipo). Recupera un encabezado móvil compacto con volver, título y acciones relevantes; reduce la acumulación de barra, migas, título, atajos y filtros. Mantén filtros, orden, estados, URLs y objetivos táctiles. Revisa búsqueda y bolsa con el mismo criterio. No traslades sin cambios la barra extensa de escritorio al teléfono.
+2. **H02 — Encabezado de ficha.** Sigue `lib/features/product/product_header.dart` y los actions actuales de `product_screen.dart`: volver y buscar a la izquierda, logo centrado, cuenta y bolsa a la derecha. En la web móvil el menú sustituye la posición de búsqueda y cuenta desaparece. Conserva el acceso a cuenta como handoff a Shopify y mantén la navegación de escritorio.
+3. **H03 — Recomendaciones de ficha.** “Más de {marca}” y “Vistas hace un momento” usan Inter 17/600 en la app, no el Playfair 24/400 del helper editorial web. Su carrusel móvil usa ancho 52vw, foto 4:5 y nombres de dos líneas; la web reutiliza 36vw, foto cuadrada y nombre de una línea. Crea los roles o variantes apropiados sin cambiar Novedades de Inicio, donde el estilo compacto y el encabezado Playfair sí corresponden.
+
+Conserva las coincidencias comprobadas: logo y assets auténticos, paleta boutique, tipografías por rol, composición de Inicio, dock flotante, galería, compra y tono en español. Mantén las adaptaciones de tablet/escritorio justificadas en el encargo. No copies errores comerciales de la app, como un umbral de envío gratis sin una regla de negocio válida.
+
+## Forma de comprobar y entregar
+
+- Captura y abre como imágenes los pares app/web a **375×812 y 440×956** para Inicio, colección, ficha, búsqueda y bolsa; incluye los estados de recomendaciones y los controles cambiados. Compara a la misma escala lógica: Flutter está a DPR 3 y las capturas web de esta auditoría a DPR 1. Descuenta los 28 px del aviso de prototipo al comparar posiciones. No reemplaces los golden masters de la app.
+- Inspecciona los cambios en tablet y escritorio (768 y 1440, además de las anchuras intermedias de los checks existentes). Comprueba navegación, filtros, selección de variante, compra local, overlays y foco. Mantén las adaptaciones útiles de web con su razón documentada.
+- Reutiliza las comprobaciones existentes y ejecuta `npm test`, `npm run build` y `npm run verify` según los cambios. Añade comprobaciones independientes solo donde protejan una regresión concreta, por ejemplo las acciones visibles de la ficha móvil y el rol tipográfico de recomendaciones. No confundas pruebas de valores web con una comparación real contra la app.
+- Guarda nuevas capturas en una carpeta posterior claramente identificada. Conserva `audit-2026-10-18/` como evidencia del estado previo. Actualiza `DESIGN_SPEC.md`, `VERIFICATION.md`, `IMPLEMENTATION_HANDOFF.md` cuando corresponda y `STATUS.md` con el estado de H01–H03. No cierres D11 hasta inspeccionar el resultado y resolver o justificar cada diferencia con evidencia concreta.
+- Entrega un reporte breve por hallazgo: antes, después, archivos, capturas y comprobaciones ejecutadas; distingue lo corregido de las limitaciones pendientes. Continúa con las decisiones reversibles sin pedir aprobación de rutina.
+
+Límites del encargo original: trabajo local en el prototipo y documentación; Flutter y backend como referencias de lectura; no publicar ni escribir en Shopify, no compras, no cambios de secretos/settings, no commits ni pushes y no instalación de Chrome. No invoques el programa de refactor Flutter. El resultado sigue siendo un prototipo web revisado y su documentación de implementación.

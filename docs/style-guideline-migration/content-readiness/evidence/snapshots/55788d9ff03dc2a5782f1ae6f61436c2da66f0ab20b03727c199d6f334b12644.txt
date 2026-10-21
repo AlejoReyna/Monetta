@@ -1,0 +1,128 @@
+{%- comment -%}
+  Monetta storefront layout (first delivery). Used by the redesigned templates (home, collection, search, product,
+  cart) through the "layout" key of their JSON templates. It deliberately loads none of Atelier's base.css or
+  scripts, so the approved design's CSS runs unchanged; the templates not yet ported keep layout/theme.liquid.
+  Commerce stays Shopify's: catalog, cart and checkout come from the store; this file only frames them.
+
+  Language: every text this theme writes is Spanish (Mexico), so the document declares es-MX instead of the store locale (the staging
+  store's is English, which made a Spanish page announce itself as English). Fragments Shopify renders in the store's own language
+  are marked individually with the monetta-store-lang snippet; the store's language setting is not touched and a multilingual
+  store is out of scope.
+{%- endcomment -%}
+{%- liquid
+  assign t = template.name
+  assign has_page_bar = false
+  assign dock_mode = 'nav'
+  assign dock_active = ''
+  if t == 'collection' or t == 'search' or t == 'cart'
+    assign has_page_bar = true
+  endif
+  if t == 'product'
+    assign dock_mode = 'purchase'
+  elsif t == 'cart' and cart.item_count > 0
+    assign dock_mode = 'checkout'
+  endif
+  case t
+    when 'index'
+      assign dock_active = 'home'
+    when 'collection', 'search'
+      assign dock_active = 'catalog'
+    when 'cart'
+      assign dock_active = 'cart'
+  endcase
+  assign og_image = page_image | default: shop.brand.logo
+-%}
+<!doctype html>
+<html lang="es-MX"{% if request.design_mode %} class="shopify-design-mode"{% endif %}>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="canonical" href="{{ canonical_url }}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{{ 'monetta-favicon-32.png' | asset_url }}">
+    <link rel="icon" type="image/png" sizes="96x96" href="{{ 'monetta-favicon-96.png' | asset_url }}">
+
+    <title>
+      {{- page_title -}}
+      {%- if current_tags %} &ndash; etiquetas: {{ current_tags | join: ', ' }}{% endif -%}
+      {%- if current_page != 1 %} &ndash; página {{ current_page }}{% endif -%}
+      {%- unless page_title contains shop.name %} &ndash; {{ shop.name }}{% endunless -%}
+    </title>
+    {%- if page_description %}
+      <meta name="description" content="{{ page_description | escape }}">
+    {%- endif %}
+    <meta property="og:site_name" content="{{ shop.name }}">
+    <meta property="og:url" content="{{ canonical_url }}">
+    <meta property="og:title" content="{{ page_title | escape }}">
+    <meta property="og:type" content="{% if t == 'product' %}product{% else %}website{% endif %}">
+    {%- if page_description %}
+      <meta property="og:description" content="{{ page_description | escape }}">
+    {%- endif %}
+    {%- if og_image %}
+      <meta property="og:image" content="https:{{ og_image | image_url: width: 1200 }}">
+    {%- endif %}
+    <meta name="twitter:card" content="summary_large_image">
+
+    {% render 'monetta-fonts' %}
+    {{ 'monetta-tokens.css' | asset_url | stylesheet_tag }}
+    {{ 'monetta-base.css' | asset_url | stylesheet_tag }}
+    {{ 'monetta-components.css' | asset_url | stylesheet_tag }}
+    {{ 'monetta-pages.css' | asset_url | stylesheet_tag }}
+    {{ 'monetta-theme.css' | asset_url | stylesheet_tag }}
+
+    <script>
+      document.documentElement.classList.add('js');
+      window.MonettaConfig = {
+        routes: {
+          root: {{ routes.root_url | json }},
+          cart: {{ routes.cart_url | json }},
+          cartAdd: {{ routes.cart_add_url | append: '.js' | json }},
+          cartChange: {{ routes.cart_change_url | append: '.js' | json }},
+          cartJson: {{ routes.cart_url | append: '.js' | json }},
+          search: {{ routes.search_url | json }},
+          allProducts: {{ routes.all_products_collection_url | json }}
+        },
+        template: {{ t | json }},
+        currency: {{ cart.currency.iso_code | json }},
+        storeLang: {{ request.locale.iso_code | json }}
+      };
+    </script>
+    <script src="{{ 'monetta-core.js' | asset_url }}" defer></script>
+    <script src="{{ 'monetta-cart.js' | asset_url }}" defer></script>
+    {%- if t == 'collection' or t == 'search' %}
+      <script src="{{ 'monetta-listing.js' | asset_url }}" defer></script>
+    {%- endif %}
+    {%- if t == 'product' %}
+      <script src="{{ 'monetta-product.js' | asset_url }}" defer></script>
+    {%- endif %}
+
+    {{ content_for_header }}
+  </head>
+
+  <body
+    class="mw {% case dock_mode %}{% when 'nav' %}has-dock{% when 'purchase' %}has-purchase-dock{% else %}has-checkout-bar{% endcase %}{% if has_page_bar %} has-page-bar{% endif %}"
+    data-template="{{ t }}"
+    data-dock-active="{{ dock_active }}"
+  >
+    <a class="skip-link" href="#MainContent">Saltar al contenido</a>
+
+    <div id="page">
+      <div class="site-top" id="site-top" data-template="{{ t }}">
+        {%- sections 'monetta-header-group' -%}
+      </div>
+      <main id="MainContent" tabindex="-1">
+        {{ content_for_layout }}
+      </main>
+      <footer class="site-footer" id="site-footer">
+        {%- sections 'monetta-footer-group' -%}
+      </footer>
+      {%- render 'monetta-dock', dock_active: dock_active -%}
+    </div>
+
+    {%- section 'monetta-cart-sheet' -%}
+    <div id="toast-root"></div>
+    <div class="visually-hidden" id="status-live" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div class="visually-hidden" id="alert-live" role="alert" aria-live="assertive" aria-atomic="true"></div>
+    <noscript><p class="noscript-note">Algunas funciones (galería, cambios de cantidad en el momento) mejoran con JavaScript; puedes comprar sin él.</p></noscript>
+  </body>
+</html>

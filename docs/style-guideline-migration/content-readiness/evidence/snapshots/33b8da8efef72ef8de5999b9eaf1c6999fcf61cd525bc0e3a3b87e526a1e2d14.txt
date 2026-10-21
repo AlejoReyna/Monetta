@@ -1,0 +1,54 @@
+{
+  "layout": "monetta",
+  "sections": {
+    "hero": {
+      "type": "monetta-hero",
+      "blocks": {
+        "original": { "type": "fact", "settings": { "icon": "check", "text": "Productos originales" } },
+        "shipping": { "type": "fact", "settings": { "icon": "truck", "text": "Envíos a todo México" } }
+      },
+      "block_order": ["original", "shipping"],
+      "settings": {
+        "button_1_label": "Ver novedades",
+        "button_1_link": "/collections/all?sort_by=created-descending",
+        "button_2_label": "Ver catálogo",
+        "button_2_link": "/collections/all"
+      }
+    },
+    "novedades": {
+      "type": "monetta-product-rail",
+      "settings": {
+        "heading": "Novedades",
+        "collection": "all",
+        "products_to_show": 8,
+        "link_label": "Ver todo",
+        "link_url": "/collections/all?sort_by=created-descending"
+      }
+    },
+    "accesos": {
+      "type": "monetta-quick-links",
+      "blocks": {
+        "novedades": { "type": "tile", "settings": { "title": "Novedades", "link": "/collections/all?sort_by=created-descending" } },
+        "catalogo": { "type": "tile", "settings": { "title": "Todo el catálogo", "link": "/collections/all" } }
+      },
+      "block_order": ["novedades", "catalogo"],
+      "settings": {
+        "heading": "Compra por estilo",
+        "link_label": "Ver todo",
+        "link_url": "/collections/all"
+      }
+    },
+    "seleccion": {
+      "type": "monetta-featured-grid",
+      "settings": {
+        "eyebrow": "Selección Monetta",
+        "heading": "Catálogo de hoy",
+        "collection": "all",
+        "products_to_show": 8,
+        "link_label": "Ver catálogo",
+        "link_url": "/collections/all"
+      }
+    }
+  },
+  "order": ["hero", "novedades", "accesos", "seleccion"]
+}

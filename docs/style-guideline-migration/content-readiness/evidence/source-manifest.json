@@ -1,0 +1,1304 @@
+{
+  "schemaVersion": "1.0.0",
+  "algorithm": "sha256",
+  "captureStartedAt": "2026-10-20T23:15:25.483Z",
+  "captureCompletedAt": "2026-10-20T23:20:50.425Z",
+  "sources": [
+    {
+      "path": "/Users/alexis_reyna/Desktop/guideline.pdf",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.483Z",
+      "mtime": "2026-10-20T22:09:35.435Z",
+      "size": 25573616,
+      "sha256": "7e7414def29c38c65c1ab5ce25dd5f250cc50d65db66a291d67536b45dbb97db",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/.gitkeep",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.439Z",
+      "mtime": "2026-09-28T01:01:14.086Z",
+      "size": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/2.0x/logo_monetta.png",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.439Z",
+      "mtime": "2026-09-28T01:01:14.086Z",
+      "size": 13091,
+      "sha256": "9e58f0565b1e54c18db39be13fd01dd92646417bf081b8a4d8464f329696eda8",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/2.0x/monetta_favicon.png",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.439Z",
+      "mtime": "2026-09-28T01:01:14.086Z",
+      "size": 4192,
+      "sha256": "8ae9575e4fc88f1c0912996b8984278c824a275e265920e8978245521df74d03",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/3.0x/logo_monetta.png",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.440Z",
+      "mtime": "2026-09-28T01:01:14.086Z",
+      "size": 21395,
+      "sha256": "bb72488586bb2bc1d3ac9e2cee9eff68ac8c5701cb776ccd475d1c684989c070",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/3.0x/monetta_favicon.png",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.440Z",
+      "mtime": "2026-09-28T01:01:14.087Z",
+      "size": 6443,
+      "sha256": "32eaa76816f399037e12c5bd3a5884de9302fe2411eee1e8e1157c0415375a3e",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/anne_klein.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.440Z",
+      "mtime": "2026-09-28T01:01:14.087Z",
+      "size": 4936,
+      "sha256": "2b34ec71c0412b06cf6a89fa865a42b0a9b6c45a854cb1df43fd81258d029bb6",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/coach.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.440Z",
+      "mtime": "2026-09-28T01:01:14.087Z",
+      "size": 4836,
+      "sha256": "6f631955e11fc746389add84395e86dadcdfd3dae28c27e66c7c6f4171001dd5",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/dior.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.440Z",
+      "mtime": "2026-09-28T01:01:14.087Z",
+      "size": 4782,
+      "sha256": "f1fee0e140ac3a72b670e9c7b8127e72ecbefbd144ce23bbf160a6dfb7d43f25",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/guess.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.441Z",
+      "mtime": "2026-09-28T01:01:14.087Z",
+      "size": 5386,
+      "sha256": "0397dc07ee4c91bc5ddbe83cef47384fdefedf420a94d1fb43287383b1a7a4e4",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/laneige.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.441Z",
+      "mtime": "2026-09-28T01:01:14.087Z",
+      "size": 4636,
+      "sha256": "ae252a06d63d788ee2d6cf61402e59133657e52b5f08ff927f996b22b06384c6",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/michael_kors.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.441Z",
+      "mtime": "2026-09-28T01:01:14.088Z",
+      "size": 5856,
+      "sha256": "2a935c1a57c333528fd3eae54cdac6b1a57ef741290617b6daf5a57950fee012",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/olaplex.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.441Z",
+      "mtime": "2026-09-28T01:01:14.088Z",
+      "size": 4884,
+      "sha256": "a912e62889edcb4f29d89c3d94e30b258093475f0ae8844cef65e41f9639b31f",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/rhode.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.441Z",
+      "mtime": "2026-09-28T01:01:14.088Z",
+      "size": 5214,
+      "sha256": "a3b3374d4082ee50ba0d69d3a1ba67694bd71b63bea1d96bb7d473ab53be5a3b",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/steve_madden.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.441Z",
+      "mtime": "2026-09-28T01:01:14.088Z",
+      "size": 6020,
+      "sha256": "95d6e2c723e85f90de7d125fd94c6d8fee7aedf372c2a5f4049dc13d4bed3b5d",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/summer_fridays.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.442Z",
+      "mtime": "2026-09-28T01:01:14.088Z",
+      "size": 7306,
+      "sha256": "cd28387db965ac60c5395ac84b2c4ca3431321b7ddbca28af5926916a01b85c9",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/the_ordinary.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.442Z",
+      "mtime": "2026-09-28T01:01:14.088Z",
+      "size": 6402,
+      "sha256": "569459ce1c8848b7c38f65c761d8d1791c8d8ed4ebb4a6c2b049523f7fc7c337",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/brands/tommy_hilfiger.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.442Z",
+      "mtime": "2026-09-28T01:01:14.088Z",
+      "size": 7718,
+      "sha256": "9d8eea858138dc48d1808e95392f43318591ec3d12fe0dbc426701ffcde9b2a0",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/campaign_coral.jpg",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.442Z",
+      "mtime": "2026-09-28T01:01:14.090Z",
+      "size": 462348,
+      "sha256": "12747e5dd96c23cb31dec15a3e8f900fbce7928ad33cfc79bc5d6ba6208d75d9",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/campaign_olive.jpg",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.443Z",
+      "mtime": "2026-09-28T01:01:14.091Z",
+      "size": 377399,
+      "sha256": "68875a5c0195f22b19be1c5fcd71f6fc11aace0a27182ab0ac549f9aac6d53ba",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/campaign_terracotta.jpg",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.444Z",
+      "mtime": "2026-09-28T01:01:14.093Z",
+      "size": 401419,
+      "sha256": "7981f12fcb233cf6872bb9cb035a6c60ce10a877f929946940b56c1d905033ab",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/campaign_welcome.png",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.444Z",
+      "mtime": "2026-09-28T01:01:14.096Z",
+      "size": 220451,
+      "sha256": "d24d785d98d84dba570b79012d915cf2ccee9e41af1e743f41daaf4ce511cabf",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/hero_poster.jpg",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.445Z",
+      "mtime": "2026-09-28T01:01:14.097Z",
+      "size": 13155,
+      "sha256": "3874dcbb54525008db90a7f4b98050a569e0902dec27341212df4776cf94e40d",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_about.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.445Z",
+      "mtime": "2026-09-28T01:01:14.097Z",
+      "size": 41794,
+      "sha256": "dae8e1bf15aeae5f7cc6a9ded1bc4462e5d64b598e8a1ec3bbe96f52213a80a5",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_bag_crossbody.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.445Z",
+      "mtime": "2026-09-28T01:01:14.097Z",
+      "size": 24982,
+      "sha256": "a0ff8544ddf9a302970727b1e384f17b2e6a0ab4ee650ca352411c33972b0b07",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_bag_shoulder.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.446Z",
+      "mtime": "2026-09-28T01:01:14.097Z",
+      "size": 29138,
+      "sha256": "2b0137b0bf3bbc1e0854ec927bc5a00cda1135f5a16b28bd8d058404b263a08d",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_bag_tote.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.446Z",
+      "mtime": "2026-09-28T01:01:14.097Z",
+      "size": 22936,
+      "sha256": "8dff302eacd6afdbfd5c0cc776402b979e846505b14449040e797373f4415c79",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_banner.jpg",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.446Z",
+      "mtime": "2026-10-14T07:01:13.614Z",
+      "size": 102713,
+      "sha256": "795cc80041e6c3517abe09f30ac571cb54553f24688af35e17e1dd54aeaf59a1",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_collection_bags.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.447Z",
+      "mtime": "2026-09-28T01:01:14.097Z",
+      "size": 62998,
+      "sha256": "ecb3d077b12cd8c501a7159f550719196b871d1775650cf29744ceaf78dbbc90",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_collection_wallets.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.447Z",
+      "mtime": "2026-09-28T01:01:14.098Z",
+      "size": 71954,
+      "sha256": "ee089e1844003a5b64223afbff76d7e79fb1d324e2df98aead78c7e97a8212f0",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_collection_watches.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.447Z",
+      "mtime": "2026-09-28T01:01:14.098Z",
+      "size": 65550,
+      "sha256": "7673b57da1040b65ca9dc96c3af52091775cc75f5daaeee7a176cc9718a4711c",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_review_gaby.jpg",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.448Z",
+      "mtime": "2026-09-28T01:01:14.099Z",
+      "size": 305171,
+      "sha256": "e8b2bdb324b9287db2bfc48d464eb83178bc144dfdbf7291829e78b6dadce616",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_review_guadalupe.jpg",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.448Z",
+      "mtime": "2026-09-28T01:01:14.100Z",
+      "size": 205389,
+      "sha256": "1d785b924a9cf9be07d4afb85a1cb70aa5751d74213dd803d8adc3a76d3bcb25",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_review_monse.jpg",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.449Z",
+      "mtime": "2026-09-28T01:01:14.100Z",
+      "size": 164130,
+      "sha256": "c1febcc6f2fc86a40325a62195ab4fb61258a01ee00d83bb2b181099150f71d8",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_social_facebook.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.449Z",
+      "mtime": "2026-10-12T10:27:46.951Z",
+      "size": 63804,
+      "sha256": "800b3569ece94a769db7196c956d9bdeb3389508fd74e0833389a8dd580875ec",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_social_instagram.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.450Z",
+      "mtime": "2026-10-12T10:27:45.732Z",
+      "size": 122578,
+      "sha256": "0c50d5cd1a84b49820c8b7eb2677bfd6fb40ebe80387280406d2b913dde750c3",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/home_social_tiktok.webp",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.450Z",
+      "mtime": "2026-10-12T10:27:46.346Z",
+      "size": 78292,
+      "sha256": "55749ecf0321b91b76dd0156faffaeda9c7fa37ace25193d487fcd7fcce28aa7",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/logo_monetta.png",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.450Z",
+      "mtime": "2026-09-28T01:01:14.100Z",
+      "size": 5560,
+      "sha256": "9a8d9d578ee29fde762a7be00338a6b259e2cb235253411e5e134d297266aff3",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/monetta_favicon.png",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.450Z",
+      "mtime": "2026-09-28T01:01:14.100Z",
+      "size": 1497,
+      "sha256": "23fd280bdc22c254d26161fea19f2ef19a42615078c91b2388f986635ca10bcd",
+      "snapshot": null
+    },
+    {
+      "path": "assets/images/monetta_logo.png",
+      "kind": "binary",
+      "capturedAt": "2026-10-20T23:15:25.451Z",
+      "mtime": "2026-09-28T01:01:14.102Z",
+      "size": 143596,
+      "sha256": "540e6e7c476e273e1cf4ad7df9d7291f800f591b66c165387872a38ff25b7cb4",
+      "snapshot": null
+    },
+    {
+      "path": "design-prototype/src/components/shell.js",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:20:50.405Z",
+      "mtime": "2026-10-18T21:12:16.613Z",
+      "size": 14559,
+      "sha256": "d9c6e7c5185dd2c6c1ccbe36a6039554f63ed15285a3b4660df4443efb3bf8de",
+      "snapshot": "snapshots/d9c6e7c5185dd2c6c1ccbe36a6039554f63ed15285a3b4660df4443efb3bf8de.txt"
+    },
+    {
+      "path": "design-prototype/src/data/content.js",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:20:50.407Z",
+      "mtime": "2026-10-18T03:17:32.899Z",
+      "size": 11395,
+      "sha256": "e81fc595b1c5f696b91d645ef16d0aeff5e9bc1c62e02e3555222f5ee6602155",
+      "snapshot": "snapshots/e81fc595b1c5f696b91d645ef16d0aeff5e9bc1c62e02e3555222f5ee6602155.txt"
+    },
+    {
+      "path": "design-prototype/src/main.js",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:20:50.406Z",
+      "mtime": "2026-10-20T22:53:10.914Z",
+      "size": 9515,
+      "sha256": "763bb75df2f21d4d0f73acf12f0bacbbaef7b8a956adc79aa02a59ccb61aa97d",
+      "snapshot": "snapshots/763bb75df2f21d4d0f73acf12f0bacbbaef7b8a956adc79aa02a59ccb61aa97d.txt"
+    },
+    {
+      "path": "design-prototype/src/pages/home.js",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:20:50.406Z",
+      "mtime": "2026-10-18T03:57:10.082Z",
+      "size": 9082,
+      "sha256": "a1905e622baf90e475bd84680f72064f6a0b6cad130574b22fb20ba3a1da70b6",
+      "snapshot": "snapshots/a1905e622baf90e475bd84680f72064f6a0b6cad130574b22fb20ba3a1da70b6.txt"
+    },
+    {
+      "path": "design-prototype/src/pages/simple-pages.js",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:20:50.404Z",
+      "mtime": "2026-10-18T03:36:17.679Z",
+      "size": 17662,
+      "sha256": "0e241cca0c1de27b4264b4f056e70f4288741e4065098fb6f8b89e832aea532c",
+      "snapshot": "snapshots/0e241cca0c1de27b4264b4f056e70f4288741e4065098fb6f8b89e832aea532c.txt"
+    },
+    {
+      "path": "docs/EDITORIAL_CONTENT_METAOBJECTS.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.384Z",
+      "mtime": "2026-09-28T01:01:14.109Z",
+      "size": 1913,
+      "sha256": "601e2cb1a29f704feb62c29dc23e8e1642cdcd3ac7a7bf108ad23baba185433d",
+      "snapshot": "snapshots/601e2cb1a29f704feb62c29dc23e8e1642cdcd3ac7a7bf108ad23baba185433d.txt"
+    },
+    {
+      "path": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.390Z",
+      "mtime": "2026-10-20T22:22:40.601Z",
+      "size": 50197,
+      "sha256": "09fe69d30b42e4439915bbfcecf701ad6c4e18077d92652f613910b1895e53fd",
+      "snapshot": "snapshots/09fe69d30b42e4439915bbfcecf701ad6c4e18077d92652f613910b1895e53fd.txt"
+    },
+    {
+      "path": "docs/redesign/REWARDS_CONTRACT_V1.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.905Z",
+      "mtime": "2026-10-07T12:27:01.299Z",
+      "size": 12406,
+      "sha256": "e6799765f8d7cd6b875aeca60c136b0047ab7c9f8acd42f2bf6beb35cba7d1db",
+      "snapshot": "snapshots/e6799765f8d7cd6b875aeca60c136b0047ab7c9f8acd42f2bf6beb35cba7d1db.txt"
+    },
+    {
+      "path": "docs/web-redesign/IMPLEMENTATION_HANDOFF.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:20:50.395Z",
+      "mtime": "2026-10-19T05:11:18.605Z",
+      "size": 34942,
+      "sha256": "6e4e7a071dc5a6dd79f4a38cc478b2fb420bd219ff111892d73491c1fb7ed31b",
+      "snapshot": "snapshots/6e4e7a071dc5a6dd79f4a38cc478b2fb420bd219ff111892d73491c1fb7ed31b.txt"
+    },
+    {
+      "path": "docs/web-redesign/shopify-staging/audit-codex-2026-10-19/AUDITORIA.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.393Z",
+      "mtime": "2026-10-19T18:08:42.061Z",
+      "size": 12823,
+      "sha256": "e1560b2f9563a2fa890f288c3fe1c0be12f20c8c17169f0292a40870d80f8c66",
+      "snapshot": "snapshots/e1560b2f9563a2fa890f288c3fe1c0be12f20c8c17169f0292a40870d80f8c66.txt"
+    },
+    {
+      "path": "docs/web-redesign/shopify-staging/correcciones-auditoria-codex-2026-10-19/despues/proxy-incidentes.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.394Z",
+      "mtime": "2026-10-19T22:18:12.324Z",
+      "size": 1873,
+      "sha256": "ba90f0b938de6115237feca326ed8cc7e1f1ed2304cd3d65438154df0c568851",
+      "snapshot": "snapshots/ba90f0b938de6115237feca326ed8cc7e1f1ed2304cd3d65438154df0c568851.txt"
+    },
+    {
+      "path": "docs/web-redesign/shopify-staging/ENTREGA.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.391Z",
+      "mtime": "2026-10-19T14:28:11.610Z",
+      "size": 31961,
+      "sha256": "060a910c48e156610c351d5c3347398d144cee70c33a1bcda3930b13770f090c",
+      "snapshot": "snapshots/060a910c48e156610c351d5c3347398d144cee70c33a1bcda3930b13770f090c.txt"
+    },
+    {
+      "path": "docs/web-redesign/shopify-staging/README.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.391Z",
+      "mtime": "2026-10-19T08:03:39.569Z",
+      "size": 1307,
+      "sha256": "81719078df46dce07d8a8efbfee8d353c4435959908e59b3759adaf67552ddfe",
+      "snapshot": "snapshots/81719078df46dce07d8a8efbfee8d353c4435959908e59b3759adaf67552ddfe.txt"
+    },
+    {
+      "path": "docs/web-redesign/shopify-staging/RUNS.md",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.392Z",
+      "mtime": "2026-10-19T22:31:54.659Z",
+      "size": 40315,
+      "sha256": "ccb77e379096c132858f7294325e367555377d4297cd485e9edbb2cbac7f8d1e",
+      "snapshot": "snapshots/ccb77e379096c132858f7294325e367555377d4297cd485e9edbb2cbac7f8d1e.txt"
+    },
+    {
+      "path": "lib/app/editorial_content_controller.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.395Z",
+      "mtime": "2026-09-28T01:01:14.160Z",
+      "size": 989,
+      "sha256": "fc8a0a25f8fb44ba6b0c436d2d04de50841c4a5b893dc57443073495b229162b",
+      "snapshot": "snapshots/fc8a0a25f8fb44ba6b0c436d2d04de50841c4a5b893dc57443073495b229162b.txt"
+    },
+    {
+      "path": "lib/app/external_catalog_config.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.396Z",
+      "mtime": "2026-10-08T21:07:03.800Z",
+      "size": 773,
+      "sha256": "335ef9deeda736aaa1c5c7223d09bafe334f826c3ca85e848a8a2a9b99085917",
+      "snapshot": "snapshots/335ef9deeda736aaa1c5c7223d09bafe334f826c3ca85e848a8a2a9b99085917.txt"
+    },
+    {
+      "path": "lib/app/home_content_controller.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.396Z",
+      "mtime": "2026-09-28T01:01:14.160Z",
+      "size": 2521,
+      "sha256": "bb4743636e4df44c2a7506287620829206a867032790049b4ca90cbde102d6aa",
+      "snapshot": "snapshots/bb4743636e4df44c2a7506287620829206a867032790049b4ca90cbde102d6aa.txt"
+    },
+    {
+      "path": "lib/app/shopper_copy.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.397Z",
+      "mtime": "2026-10-08T21:07:03.800Z",
+      "size": 8805,
+      "sha256": "10ae3432ac474f2b36760c6722dbf99fe3695d8af2b1e0a86b139167b857f716",
+      "snapshot": "snapshots/10ae3432ac474f2b36760c6722dbf99fe3695d8af2b1e0a86b139167b857f716.txt"
+    },
+    {
+      "path": "lib/data/customer_auth/customer_account_config.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.915Z",
+      "mtime": "2026-10-08T21:07:03.801Z",
+      "size": 5538,
+      "sha256": "c8c72f2b8dbefcbbfd7e4b1298041e1c781ebdd6b824b2c00b37f8b5e9158d75",
+      "snapshot": "snapshots/c8c72f2b8dbefcbbfd7e4b1298041e1c781ebdd6b824b2c00b37f8b5e9158d75.txt"
+    },
+    {
+      "path": "lib/data/customer_auth/customer_auth_gateway.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.915Z",
+      "mtime": "2026-09-28T01:01:14.163Z",
+      "size": 6028,
+      "sha256": "83aafa3f60a23fc8a7473015a8562c8328610b818aa3ffa0b877338a6a5b72e8",
+      "snapshot": "snapshots/83aafa3f60a23fc8a7473015a8562c8328610b818aa3ffa0b877338a6a5b72e8.txt"
+    },
+    {
+      "path": "lib/data/shopify/editorial_content_repository.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.398Z",
+      "mtime": "2026-09-28T01:01:14.170Z",
+      "size": 7408,
+      "sha256": "ff1b336d83a649321868405ef31f79eaa8648b30c245d70b476478859f5d29e6",
+      "snapshot": "snapshots/ff1b336d83a649321868405ef31f79eaa8648b30c245d70b476478859f5d29e6.txt"
+    },
+    {
+      "path": "lib/data/shopify/featured_catalog_repository.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.398Z",
+      "mtime": "2026-09-28T01:01:14.170Z",
+      "size": 1029,
+      "sha256": "f51a47e962af1cdfb9bad89712e4d19602767a1cedce32090b58a33e83d95f78",
+      "snapshot": "snapshots/f51a47e962af1cdfb9bad89712e4d19602767a1cedce32090b58a33e83d95f78.txt"
+    },
+    {
+      "path": "lib/data/shopify/home_content_repository.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.399Z",
+      "mtime": "2026-09-28T01:01:14.170Z",
+      "size": 6822,
+      "sha256": "66fa2d920e1788662cfed79dbe4a0589daa91bb49c102209bf276b19ee68b9c3",
+      "snapshot": "snapshots/66fa2d920e1788662cfed79dbe4a0589daa91bb49c102209bf276b19ee68b9c3.txt"
+    },
+    {
+      "path": "lib/data/shopify/mappers.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.399Z",
+      "mtime": "2026-09-28T01:01:14.170Z",
+      "size": 9838,
+      "sha256": "8baca131cce0391318fbcd4f587614726c57ac0888683b2aabf28aac407691aa",
+      "snapshot": "snapshots/8baca131cce0391318fbcd4f587614726c57ac0888683b2aabf28aac407691aa.txt"
+    },
+    {
+      "path": "lib/data/shopify/queries.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.400Z",
+      "mtime": "2026-09-28T01:01:14.171Z",
+      "size": 11853,
+      "sha256": "ed627fd64c2d1d319e4d4db03fe591080d2bbc92e80b5bf3337e2be28a4c3eee",
+      "snapshot": "snapshots/ed627fd64c2d1d319e4d4db03fe591080d2bbc92e80b5bf3337e2be28a4c3eee.txt"
+    },
+    {
+      "path": "lib/domain/admin_control.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.401Z",
+      "mtime": "2026-10-08T21:23:38.398Z",
+      "size": 8099,
+      "sha256": "25139da615108cfe458ec35652ad12be61d302d8bca034ed96532e45c48980d0",
+      "snapshot": "snapshots/25139da615108cfe458ec35652ad12be61d302d8bca034ed96532e45c48980d0.txt"
+    },
+    {
+      "path": "lib/domain/campaign.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.402Z",
+      "mtime": "2026-09-28T01:01:14.171Z",
+      "size": 722,
+      "sha256": "58eaef1066ef148cad1571ddd9742bcc5839fb0d25d0170f1462759e2cf1e973",
+      "snapshot": "snapshots/58eaef1066ef148cad1571ddd9742bcc5839fb0d25d0170f1462759e2cf1e973.txt"
+    },
+    {
+      "path": "lib/domain/collection.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.404Z",
+      "mtime": "2026-09-28T01:01:14.171Z",
+      "size": 1762,
+      "sha256": "8e9513e8f0033ed4db9ab6f01c103f2d05010329548153cbaddb92ee8a00f023",
+      "snapshot": "snapshots/8e9513e8f0033ed4db9ab6f01c103f2d05010329548153cbaddb92ee8a00f023.txt"
+    },
+    {
+      "path": "lib/domain/editorial_content.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.405Z",
+      "mtime": "2026-09-28T01:01:14.172Z",
+      "size": 12880,
+      "sha256": "08bc59195bb44232ef465694a2f33f936acf35b6dcd2526a624fe6402864f33d",
+      "snapshot": "snapshots/08bc59195bb44232ef465694a2f33f936acf35b6dcd2526a624fe6402864f33d.txt"
+    },
+    {
+      "path": "lib/domain/home_content.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.405Z",
+      "mtime": "2026-10-12T08:27:28.278Z",
+      "size": 11055,
+      "sha256": "798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26",
+      "snapshot": "snapshots/798a10288b4a6e74574327712f2f1ba2dfd0760c1b86825a74f64f858c760b26.txt"
+    },
+    {
+      "path": "lib/features/about/about_monetta_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.406Z",
+      "mtime": "2026-10-12T09:00:05.948Z",
+      "size": 8592,
+      "sha256": "7affe3f918c3af743242dda46d76fa8ddf5c80542e7b6413cf5e215b5f97323e",
+      "snapshot": "snapshots/7affe3f918c3af743242dda46d76fa8ddf5c80542e7b6413cf5e215b5f97323e.txt"
+    },
+    {
+      "path": "lib/features/account/account_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.406Z",
+      "mtime": "2026-10-13T16:07:15.293Z",
+      "size": 30638,
+      "sha256": "a9ce209b682db61c9cad144219eceb9e656a43683dcba1d09cc1acaf338ebdd3",
+      "snapshot": "snapshots/a9ce209b682db61c9cad144219eceb9e656a43683dcba1d09cc1acaf338ebdd3.txt"
+    },
+    {
+      "path": "lib/features/catalog/catalog_browse_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.407Z",
+      "mtime": "2026-10-13T16:07:15.574Z",
+      "size": 40499,
+      "sha256": "cdde54ace80c2fa234dc2a544b34e92a11ad5f3dee64f3afc17122f3e3a698c1",
+      "snapshot": "snapshots/cdde54ace80c2fa234dc2a544b34e92a11ad5f3dee64f3afc17122f3e3a698c1.txt"
+    },
+    {
+      "path": "lib/features/catalog/collection_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.408Z",
+      "mtime": "2026-10-13T16:07:15.294Z",
+      "size": 34537,
+      "sha256": "67a2cac40076708c1289af25189bcbcbf706e9a0c040d446ee0772ddf054f089",
+      "snapshot": "snapshots/67a2cac40076708c1289af25189bcbcbf706e9a0c040d446ee0772ddf054f089.txt"
+    },
+    {
+      "path": "lib/features/catalog/search_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.918Z",
+      "mtime": "2026-10-12T10:42:00.906Z",
+      "size": 30622,
+      "sha256": "a1ff27caf70a9724d40a14e55e8d4d28d9ab1449d970bda60d798e303bec3a0f",
+      "snapshot": "snapshots/a1ff27caf70a9724d40a14e55e8d4d28d9ab1449d970bda60d798e303bec3a0f.txt"
+    },
+    {
+      "path": "lib/features/checkout/order_confirmation_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.916Z",
+      "mtime": "2026-10-12T10:42:00.914Z",
+      "size": 6399,
+      "sha256": "d42a7b09e6ce01dc1a61bb95b8d82f60e9e384135649f7b8f88e251ed2c7ed01",
+      "snapshot": "snapshots/d42a7b09e6ce01dc1a61bb95b8d82f60e9e384135649f7b8f88e251ed2c7ed01.txt"
+    },
+    {
+      "path": "lib/features/contact/contact_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.408Z",
+      "mtime": "2026-10-12T09:00:05.957Z",
+      "size": 7479,
+      "sha256": "9b86a65d48e5246a9c43c0563e147f02aa2e2a9da99496f61c1fc0c6ce5d88d8",
+      "snapshot": "snapshots/9b86a65d48e5246a9c43c0563e147f02aa2e2a9da99496f61c1fc0c6ce5d88d8.txt"
+    },
+    {
+      "path": "lib/features/favorites/favorites_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.918Z",
+      "mtime": "2026-10-12T09:58:45.924Z",
+      "size": 4653,
+      "sha256": "32b92fc53e7e19d48af83259d2d5ffe0c3233524f4b4373412be33918b6b237f",
+      "snapshot": "snapshots/32b92fc53e7e19d48af83259d2d5ffe0c3233524f4b4373412be33918b6b237f.txt"
+    },
+    {
+      "path": "lib/features/home/home_account_invitation.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.409Z",
+      "mtime": "2026-10-12T10:54:17.192Z",
+      "size": 11781,
+      "sha256": "9f4d04fc652e3f335083b0629feb105584306eb241d842d26be0cf79e2a11a51",
+      "snapshot": "snapshots/9f4d04fc652e3f335083b0629feb105584306eb241d842d26be0cf79e2a11a51.txt"
+    },
+    {
+      "path": "lib/features/home/home_boutique_sections.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.409Z",
+      "mtime": "2026-10-14T07:03:24.407Z",
+      "size": 12150,
+      "sha256": "4ed84b718707fb2d1bf894114d6d290bf0801b22305e139df83bc18682c030f8",
+      "snapshot": "snapshots/4ed84b718707fb2d1bf894114d6d290bf0801b22305e139df83bc18682c030f8.txt"
+    },
+    {
+      "path": "lib/features/home/home_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.410Z",
+      "mtime": "2026-10-14T08:09:30.259Z",
+      "size": 56416,
+      "sha256": "a5445289925d3bd381e96ee3b3eb80b1a411bfb9b5e8f507e37d96d18d8f5e0b",
+      "snapshot": "snapshots/a5445289925d3bd381e96ee3b3eb80b1a411bfb9b5e8f507e37d96d18d8f5e0b.txt"
+    },
+    {
+      "path": "lib/features/navigation/monetta_bottom_navigation.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.411Z",
+      "mtime": "2026-10-12T10:45:11.214Z",
+      "size": 15220,
+      "sha256": "f262d2a61d58194e2c1e98677dce238cead03d9b08c1386b5cd9d342d28de77f",
+      "snapshot": "snapshots/f262d2a61d58194e2c1e98677dce238cead03d9b08c1386b5cd9d342d28de77f.txt"
+    },
+    {
+      "path": "lib/features/navigation/monetta_side_menu.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.411Z",
+      "mtime": "2026-10-14T08:13:27.264Z",
+      "size": 11347,
+      "sha256": "3a838a31339fbde060a622b76342c460d92fa992da5b765e8762c2d84ca3502c",
+      "snapshot": "snapshots/3a838a31339fbde060a622b76342c460d92fa992da5b765e8762c2d84ca3502c.txt"
+    },
+    {
+      "path": "lib/features/onboarding/onboarding_sheet.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.412Z",
+      "mtime": "2026-09-28T01:01:14.178Z",
+      "size": 18332,
+      "sha256": "eae91fdf73d0d3030b7e6a7597830cbfa80579de2efdd4a14c55879bf87154f2",
+      "snapshot": "snapshots/eae91fdf73d0d3030b7e6a7597830cbfa80579de2efdd4a14c55879bf87154f2.txt"
+    },
+    {
+      "path": "lib/features/orders/order_detail_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.917Z",
+      "mtime": "2026-10-12T09:00:05.966Z",
+      "size": 14610,
+      "sha256": "a1b2491eecba01289e1bbfebbffa077f1a59e44aa3f21f5dc797c51c7330cfc2",
+      "snapshot": "snapshots/a1b2491eecba01289e1bbfebbffa077f1a59e44aa3f21f5dc797c51c7330cfc2.txt"
+    },
+    {
+      "path": "lib/features/orders/orders_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.917Z",
+      "mtime": "2026-10-12T09:00:05.969Z",
+      "size": 16054,
+      "sha256": "af68240c9886a54c5a106cffa7eecb28219e79d1b6a0c01262bc774a1d9fb01c",
+      "snapshot": "snapshots/af68240c9886a54c5a106cffa7eecb28219e79d1b6a0c01262bc774a1d9fb01c.txt"
+    },
+    {
+      "path": "lib/features/partner/partner_hub_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.412Z",
+      "mtime": "2026-10-12T09:00:05.963Z",
+      "size": 38591,
+      "sha256": "faa9c488bc112dafb94be9fd0feb3a44291e0b681abb90c82093efb5dcdbb0a4",
+      "snapshot": "snapshots/faa9c488bc112dafb94be9fd0feb3a44291e0b681abb90c82093efb5dcdbb0a4.txt"
+    },
+    {
+      "path": "lib/features/product/quick_view.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.916Z",
+      "mtime": "2026-10-12T10:19:08.773Z",
+      "size": 21643,
+      "sha256": "67bd65c752e65b825b308446592aad470f5f509fb4a0cb7f1f3056111c2f118b",
+      "snapshot": "snapshots/67bd65c752e65b825b308446592aad470f5f509fb4a0cb7f1f3056111c2f118b.txt"
+    },
+    {
+      "path": "lib/features/rewards/rewards_api.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.413Z",
+      "mtime": "2026-10-07T12:27:01.299Z",
+      "size": 8268,
+      "sha256": "8fea9497fa5a10916688b4065f846ff592e646a31b79294f573868a7bfa0f72a",
+      "snapshot": "snapshots/8fea9497fa5a10916688b4065f846ff592e646a31b79294f573868a7bfa0f72a.txt"
+    },
+    {
+      "path": "lib/features/rewards/rewards_models.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.414Z",
+      "mtime": "2026-10-07T12:27:01.298Z",
+      "size": 9149,
+      "sha256": "e62321cf08b6cffa22a730cf8545e678300252c8a9010aebda82eca9df572e4c",
+      "snapshot": "snapshots/e62321cf08b6cffa22a730cf8545e678300252c8a9010aebda82eca9df572e4c.txt"
+    },
+    {
+      "path": "lib/features/rewards/rewards_section.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:20:50.407Z",
+      "mtime": "2026-10-07T03:23:23.871Z",
+      "size": 24451,
+      "sha256": "d640bd29237a2d9006bdcb27af2fa046bad4b459e93b4141404137b7b52a54e3",
+      "snapshot": "snapshots/d640bd29237a2d9006bdcb27af2fa046bad4b459e93b4141404137b7b52a54e3.txt"
+    },
+    {
+      "path": "lib/features/welcome/welcome_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.414Z",
+      "mtime": "2026-09-28T01:01:14.180Z",
+      "size": 6019,
+      "sha256": "663fc625181e6ff44df39d6565cf6a8a7b96736e72ef29f1d461319003816ef7",
+      "snapshot": "snapshots/663fc625181e6ff44df39d6565cf6a8a7b96736e72ef29f1d461319003816ef7.txt"
+    },
+    {
+      "path": "lib/features/wholesale/wholesale_content.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.415Z",
+      "mtime": "2026-09-28T01:01:14.180Z",
+      "size": 3816,
+      "sha256": "22177b682e33038fa9f82f1b9c69d058bf15332a48cc617dc33bdac63e72d207",
+      "snapshot": "snapshots/22177b682e33038fa9f82f1b9c69d058bf15332a48cc617dc33bdac63e72d207.txt"
+    },
+    {
+      "path": "lib/features/wholesale/wholesale_screen.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.415Z",
+      "mtime": "2026-10-12T09:00:06.009Z",
+      "size": 16534,
+      "sha256": "94d38d311a3beef54f18c99446f98cd14286627d01a6cb4b14e7680a3f5814c9",
+      "snapshot": "snapshots/94d38d311a3beef54f18c99446f98cd14286627d01a6cb4b14e7680a3f5814c9.txt"
+    },
+    {
+      "path": "lib/main.dart",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.416Z",
+      "mtime": "2026-10-18T03:25:20.404Z",
+      "size": 40931,
+      "sha256": "f6c084713cd2558ebf7568b303dc0ca4397e886abc92fbcca66281d069e17207",
+      "snapshot": "snapshots/f6c084713cd2558ebf7568b303dc0ca4397e886abc92fbcca66281d069e17207.txt"
+    },
+    {
+      "path": "pubspec.yaml",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.417Z",
+      "mtime": "2026-10-14T08:09:10.085Z",
+      "size": 3105,
+      "sha256": "ff2d81d598e6b99bd7d38222eceb22754abcc0daf332275a110e22d6da5337d7",
+      "snapshot": "snapshots/ff2d81d598e6b99bd7d38222eceb22754abcc0daf332275a110e22d6da5337d7.txt"
+    },
+    {
+      "path": "services/accounts_orders/src/admin/shopifyAdminClient.ts",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.914Z",
+      "mtime": "2026-09-28T01:01:14.185Z",
+      "size": 23437,
+      "sha256": "902a0894fac027a778fcdeb2982e1ba21ff5f7c81ca41a5e933724d229b10446",
+      "snapshot": "snapshots/902a0894fac027a778fcdeb2982e1ba21ff5f7c81ca41a5e933724d229b10446.txt"
+    },
+    {
+      "path": "services/accounts_orders/src/rewards/types.ts",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.913Z",
+      "mtime": "2026-09-28T01:01:14.191Z",
+      "size": 2808,
+      "sha256": "725186d233806af1e323621afdf579bd777155b3ed847dfe6157ae0dfcc8673b",
+      "snapshot": "snapshots/725186d233806af1e323621afdf579bd777155b3ed847dfe6157ae0dfcc8673b.txt"
+    },
+    {
+      "path": "storefront-theme/config/settings_data.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:19:47.920Z",
+      "mtime": "2026-10-19T06:31:34.337Z",
+      "size": 27295,
+      "sha256": "2b2f734aa67bf567fdaf055df209d07e5ef81b7a4dd17c0a913ac55c230eda24",
+      "snapshot": "snapshots/2b2f734aa67bf567fdaf055df209d07e5ef81b7a4dd17c0a913ac55c230eda24.txt"
+    },
+    {
+      "path": "storefront-theme/layout/monetta.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.417Z",
+      "mtime": "2026-10-19T21:56:50.429Z",
+      "size": 5847,
+      "sha256": "55788d9ff03dc2a5782f1ae6f61436c2da66f0ab20b03727c199d6f334b12644",
+      "snapshot": "snapshots/55788d9ff03dc2a5782f1ae6f61436c2da66f0ab20b03727c199d6f334b12644.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-cart-sheet.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.417Z",
+      "mtime": "2026-10-19T21:59:42.446Z",
+      "size": 3279,
+      "sha256": "2ce29e3d46d7d817bd10aa06cdbc89c2d94484f865623ccbe09177841f3271ac",
+      "snapshot": "snapshots/2ce29e3d46d7d817bd10aa06cdbc89c2d94484f865623ccbe09177841f3271ac.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-cart.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.418Z",
+      "mtime": "2026-10-19T21:59:42.446Z",
+      "size": 6399,
+      "sha256": "7cc9c23fd10356dcd28540cceddf43749ca14ba8dc92a0b88b82e58823bed061",
+      "snapshot": "snapshots/7cc9c23fd10356dcd28540cceddf43749ca14ba8dc92a0b88b82e58823bed061.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-collection-cards.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.418Z",
+      "mtime": "2026-10-19T06:50:56.045Z",
+      "size": 2344,
+      "sha256": "a2d0a6bc500e1601f9d8be0dcaeb5925497dfe0ebc9aff226daad19a150373f8",
+      "snapshot": "snapshots/a2d0a6bc500e1601f9d8be0dcaeb5925497dfe0ebc9aff226daad19a150373f8.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-collection.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.418Z",
+      "mtime": "2026-10-19T07:18:05.314Z",
+      "size": 4512,
+      "sha256": "c5a6def8a79c530ffc3351bf1ebb3d32525a654890ae59f02538b92f19fac3cd",
+      "snapshot": "snapshots/c5a6def8a79c530ffc3351bf1ebb3d32525a654890ae59f02538b92f19fac3cd.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-featured-grid.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.419Z",
+      "mtime": "2026-10-19T06:50:56.046Z",
+      "size": 1852,
+      "sha256": "f332fdfd1c03fa175272e18460782ba44a7ff7134b8c1901afccb39805ab6209",
+      "snapshot": "snapshots/f332fdfd1c03fa175272e18460782ba44a7ff7134b8c1901afccb39805ab6209.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-footer-group.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.419Z",
+      "mtime": "2026-10-19T06:46:22.968Z",
+      "size": 736,
+      "sha256": "fb78a544135437f68afdc477e82b9874a683b29cdc9b38ce82aafc665ce43d94",
+      "snapshot": "snapshots/fb78a544135437f68afdc477e82b9874a683b29cdc9b38ce82aafc665ce43d94.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-footer.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.419Z",
+      "mtime": "2026-10-19T21:56:40.500Z",
+      "size": 3189,
+      "sha256": "c301dc22a83403524d5f27b50e5a95fa98c78958f46f890737b65147457c9401",
+      "snapshot": "snapshots/c301dc22a83403524d5f27b50e5a95fa98c78958f46f890737b65147457c9401.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-header-group.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.420Z",
+      "mtime": "2026-10-19T06:46:22.966Z",
+      "size": 313,
+      "sha256": "cda82c8dc778c3199bad63507e37570ea94f59b5b51a5ca55079f9de5543a5c1",
+      "snapshot": "snapshots/cda82c8dc778c3199bad63507e37570ea94f59b5b51a5ca55079f9de5543a5c1.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-header.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.421Z",
+      "mtime": "2026-10-19T22:22:49.096Z",
+      "size": 8417,
+      "sha256": "876e1696dc9f8845c95d59a33cc11573614c77b12e521aee95eab4ffc64ff7e7",
+      "snapshot": "snapshots/876e1696dc9f8845c95d59a33cc11573614c77b12e521aee95eab4ffc64ff7e7.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-hero.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.423Z",
+      "mtime": "2026-10-19T06:51:13.201Z",
+      "size": 5875,
+      "sha256": "f4ee9c32d0e4dfd40b9aa17e87c446a0d4b623e8af292fe5faef5203ce1924d0",
+      "snapshot": "snapshots/f4ee9c32d0e4dfd40b9aa17e87c446a0d4b623e8af292fe5faef5203ce1924d0.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-product-rail.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.424Z",
+      "mtime": "2026-10-19T06:50:56.045Z",
+      "size": 2227,
+      "sha256": "6effa155d8fa075f081c51b5347964e65ebde0aeb800df834305cf915447a5bd",
+      "snapshot": "snapshots/6effa155d8fa075f081c51b5347964e65ebde0aeb800df834305cf915447a5bd.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-product-recommendations.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.425Z",
+      "mtime": "2026-10-19T06:58:34.899Z",
+      "size": 2420,
+      "sha256": "3ee59ae1d57b24bee85b8aab09585f868266db2ee5ea489efb6691608461ebd7",
+      "snapshot": "snapshots/3ee59ae1d57b24bee85b8aab09585f868266db2ee5ea489efb6691608461ebd7.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-product.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.425Z",
+      "mtime": "2026-10-19T21:56:26.170Z",
+      "size": 21664,
+      "sha256": "8567b25c119c7581309ce2b0dcd2aec39d4f0d025c92a29ca5fab74acb14710a",
+      "snapshot": "snapshots/8567b25c119c7581309ce2b0dcd2aec39d4f0d025c92a29ca5fab74acb14710a.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-quick-links.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.426Z",
+      "mtime": "2026-10-19T06:54:33.957Z",
+      "size": 3123,
+      "sha256": "798f0d523e10cef0623a3f667013ad985e450c418554cd1587f9e11404afadda",
+      "snapshot": "snapshots/798f0d523e10cef0623a3f667013ad985e450c418554cd1587f9e11404afadda.txt"
+    },
+    {
+      "path": "storefront-theme/sections/monetta-search.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.426Z",
+      "mtime": "2026-10-19T07:20:02.778Z",
+      "size": 5436,
+      "sha256": "141e3337286cf56efd6aeca33c821adf6b051c6906a52795c68511b21fd10c5d",
+      "snapshot": "snapshots/141e3337286cf56efd6aeca33c821adf6b051c6906a52795c68511b21fd10c5d.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-card.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.427Z",
+      "mtime": "2026-10-19T06:48:40.177Z",
+      "size": 3838,
+      "sha256": "f5e825ff8bcf25525fba82cd81c1c3c938d88df85b154cae119d44ce15b9ae25",
+      "snapshot": "snapshots/f5e825ff8bcf25525fba82cd81c1c3c938d88df85b154cae119d44ce15b9ae25.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-cart-line.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.427Z",
+      "mtime": "2026-10-19T22:02:21.775Z",
+      "size": 5550,
+      "sha256": "07409fa531fa340d4d5fa55d8b3d7ce5cc7841fcb210112eeff3653ebc18587c",
+      "snapshot": "snapshots/07409fa531fa340d4d5fa55d8b3d7ce5cc7841fcb210112eeff3653ebc18587c.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-dock.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.428Z",
+      "mtime": "2026-10-19T06:45:36.312Z",
+      "size": 1846,
+      "sha256": "75b71149696c451cafd95ecd737f17fd3afa591ca22a693442a5ddbef439ff93",
+      "snapshot": "snapshots/75b71149696c451cafd95ecd737f17fd3afa591ca22a693442a5ddbef439ff93.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-filter-groups.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.428Z",
+      "mtime": "2026-10-19T07:03:35.402Z",
+      "size": 3596,
+      "sha256": "726089bb858a3953114b6dfe33bb953df0760723af93727a0715c21e133fe160",
+      "snapshot": "snapshots/726089bb858a3953114b6dfe33bb953df0760723af93727a0715c21e133fe160.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-fonts.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.429Z",
+      "mtime": "2026-10-19T07:03:35.439Z",
+      "size": 1604,
+      "sha256": "636d2815e5543b8262c70eb5312b149a75a2c83e1850cf43544ccdd667458e06",
+      "snapshot": "snapshots/636d2815e5543b8262c70eb5312b149a75a2c83e1850cf43544ccdd667458e06.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-hidden-filters.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.429Z",
+      "mtime": "2026-10-19T07:03:35.402Z",
+      "size": 1158,
+      "sha256": "2dac40aee6df53577afbeb4c85f716f241a46ddcb047cd45586bb89382c27ff5",
+      "snapshot": "snapshots/2dac40aee6df53577afbeb4c85f716f241a46ddcb047cd45586bb89382c27ff5.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-icon.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.430Z",
+      "mtime": "2026-10-19T06:44:38.785Z",
+      "size": 14282,
+      "sha256": "32f8ee4394eb0892de00dac5f30fdb3b885cf7d1487b105dcfddc78e94ac6df0",
+      "snapshot": "snapshots/32f8ee4394eb0892de00dac5f30fdb3b885cf7d1487b105dcfddc78e94ac6df0.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-image.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.430Z",
+      "mtime": "2026-10-19T06:48:40.173Z",
+      "size": 1743,
+      "sha256": "fbfa9de336c10fd0f947fd03fcea6884eb0430e1a62d62e2de04adacadf979db",
+      "snapshot": "snapshots/fbfa9de336c10fd0f947fd03fcea6884eb0430e1a62d62e2de04adacadf979db.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-listing-layout.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.431Z",
+      "mtime": "2026-10-19T07:28:17.530Z",
+      "size": 6223,
+      "sha256": "728163c700f076c15a00b3a7ad602c14777d55fbce28177062b68cb26007a37b",
+      "snapshot": "snapshots/728163c700f076c15a00b3a7ad602c14777d55fbce28177062b68cb26007a37b.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-logo.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.431Z",
+      "mtime": "2026-10-19T06:45:36.310Z",
+      "size": 1050,
+      "sha256": "657c8d260ea91193374fce30130fd7ec0561e40f474f6c6064d87abf8a3f554b",
+      "snapshot": "snapshots/657c8d260ea91193374fce30130fd7ec0561e40f474f6c6064d87abf8a3f554b.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-menu-icon.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.432Z",
+      "mtime": "2026-10-19T08:02:27.289Z",
+      "size": 1271,
+      "sha256": "32469b90903f26a831de1008c8fe7f8befe209b59ba7c8b8912bdcd4342e2763",
+      "snapshot": "snapshots/32469b90903f26a831de1008c8fe7f8befe209b59ba7c8b8912bdcd4342e2763.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-page-bar.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.432Z",
+      "mtime": "2026-10-19T07:01:18.918Z",
+      "size": 2195,
+      "sha256": "17878f01ac2bf572b16b3059bd988d3d674c777149e0d06070b4d3709784caa3",
+      "snapshot": "snapshots/17878f01ac2bf572b16b3059bd988d3d674c777149e0d06070b4d3709784caa3.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-results.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.432Z",
+      "mtime": "2026-10-19T22:00:11.807Z",
+      "size": 3756,
+      "sha256": "64bfb5bb0f803841b04901d78ec0f38b1d0e118cda13493133c786ca8aef7f15",
+      "snapshot": "snapshots/64bfb5bb0f803841b04901d78ec0f38b1d0e118cda13493133c786ca8aef7f15.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-section-header.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.433Z",
+      "mtime": "2026-10-19T06:48:40.175Z",
+      "size": 1986,
+      "sha256": "b5f482a8f91a573c200ea0cb53bd7d89928180ac749a4a00713b4ea104be49e0",
+      "snapshot": "snapshots/b5f482a8f91a573c200ea0cb53bd7d89928180ac749a4a00713b4ea104be49e0.txt"
+    },
+    {
+      "path": "storefront-theme/snippets/monetta-store-lang.liquid",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.433Z",
+      "mtime": "2026-10-19T21:56:40.470Z",
+      "size": 796,
+      "sha256": "560b5c966cbb6389c4163b0604e8131ba0099c21ed0642ea511e03233c619ef9",
+      "snapshot": "snapshots/560b5c966cbb6389c4163b0604e8131ba0099c21ed0642ea511e03233c619ef9.txt"
+    },
+    {
+      "path": "storefront-theme/templates/404.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.434Z",
+      "mtime": "2026-10-19T06:31:34.342Z",
+      "size": 16284,
+      "sha256": "da3008f19d552375a527bca6caf3e092647ef89457efa391756e9850266944ef",
+      "snapshot": "snapshots/da3008f19d552375a527bca6caf3e092647ef89457efa391756e9850266944ef.txt"
+    },
+    {
+      "path": "storefront-theme/templates/article.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.434Z",
+      "mtime": "2026-10-19T06:31:34.342Z",
+      "size": 2807,
+      "sha256": "1175c00013a2676673c7b5227876b33c16b6ecab1287f280687d21a72b53d9c9",
+      "snapshot": "snapshots/1175c00013a2676673c7b5227876b33c16b6ecab1287f280687d21a72b53d9c9.txt"
+    },
+    {
+      "path": "storefront-theme/templates/blog.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.434Z",
+      "mtime": "2026-10-19T06:31:34.344Z",
+      "size": 3429,
+      "sha256": "4738df2897c5e47841245beaf731b1e42d60e1b6385ab7aab09631536668ad59",
+      "snapshot": "snapshots/4738df2897c5e47841245beaf731b1e42d60e1b6385ab7aab09631536668ad59.txt"
+    },
+    {
+      "path": "storefront-theme/templates/cart.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.435Z",
+      "mtime": "2026-10-19T07:02:25.571Z",
+      "size": 173,
+      "sha256": "823a3dc9ec225279079714a3d3312976415e5dced4760398fb390f599cb67670",
+      "snapshot": "snapshots/823a3dc9ec225279079714a3d3312976415e5dced4760398fb390f599cb67670.txt"
+    },
+    {
+      "path": "storefront-theme/templates/collection.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.435Z",
+      "mtime": "2026-10-19T06:56:12.538Z",
+      "size": 170,
+      "sha256": "9ac678e7b129f1ec32892456c803dd116ff76c630a3edd20163e726c9c068a80",
+      "snapshot": "snapshots/9ac678e7b129f1ec32892456c803dd116ff76c630a3edd20163e726c9c068a80.txt"
+    },
+    {
+      "path": "storefront-theme/templates/index.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.436Z",
+      "mtime": "2026-10-19T06:51:13.201Z",
+      "size": 1789,
+      "sha256": "33b8da8efef72ef8de5999b9eaf1c6999fcf61cd525bc0e3a3b87e526a1e2d14",
+      "snapshot": "snapshots/33b8da8efef72ef8de5999b9eaf1c6999fcf61cd525bc0e3a3b87e526a1e2d14.txt"
+    },
+    {
+      "path": "storefront-theme/templates/list-collections.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.436Z",
+      "mtime": "2026-10-19T06:31:34.344Z",
+      "size": 6253,
+      "sha256": "d965c6c7d3ec0bb8ec61cf01c9a7dc4ae92b72c9d13e6c23ec7e89b816d2bcba",
+      "snapshot": "snapshots/d965c6c7d3ec0bb8ec61cf01c9a7dc4ae92b72c9d13e6c23ec7e89b816d2bcba.txt"
+    },
+    {
+      "path": "storefront-theme/templates/page.como-vender.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.437Z",
+      "mtime": "2026-10-19T06:31:34.345Z",
+      "size": 39212,
+      "sha256": "3842d36525bd8439f3b6d6ea1458f1416e34cb314c67eaeba484e3b7dbb3f549",
+      "snapshot": "snapshots/3842d36525bd8439f3b6d6ea1458f1416e34cb314c67eaeba484e3b7dbb3f549.txt"
+    },
+    {
+      "path": "storefront-theme/templates/page.contact.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.437Z",
+      "mtime": "2026-10-19T06:31:34.341Z",
+      "size": 50863,
+      "sha256": "3e1b182ea272c26a44dcf71d7c38bba986d6588cd981c3b4a1949204309e7ccd",
+      "snapshot": "snapshots/3e1b182ea272c26a44dcf71d7c38bba986d6588cd981c3b4a1949204309e7ccd.txt"
+    },
+    {
+      "path": "storefront-theme/templates/page.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.437Z",
+      "mtime": "2026-10-19T06:31:34.345Z",
+      "size": 1010,
+      "sha256": "07cee284de4fe0032693de8487067a767734547ea3dc2da7e47555e75815b044",
+      "snapshot": "snapshots/07cee284de4fe0032693de8487067a767734547ea3dc2da7e47555e75815b044.txt"
+    },
+    {
+      "path": "storefront-theme/templates/page.mayoreo.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.438Z",
+      "mtime": "2026-10-19T06:31:34.341Z",
+      "size": 45480,
+      "sha256": "57743bdb35b8f1c39d7dc0bf02bafab5c32795c367157a2b9f1cceb434ef37af",
+      "snapshot": "snapshots/57743bdb35b8f1c39d7dc0bf02bafab5c32795c367157a2b9f1cceb434ef37af.txt"
+    },
+    {
+      "path": "storefront-theme/templates/password.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.438Z",
+      "mtime": "2026-10-19T06:31:34.339Z",
+      "size": 1875,
+      "sha256": "a7b927c061e118d873ce932bf2a53ab9df7b7abe2794d8e35ea9765223f2730d",
+      "snapshot": "snapshots/a7b927c061e118d873ce932bf2a53ab9df7b7abe2794d8e35ea9765223f2730d.txt"
+    },
+    {
+      "path": "storefront-theme/templates/product.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.438Z",
+      "mtime": "2026-10-19T06:58:51.941Z",
+      "size": 1151,
+      "sha256": "e23f3ebc3b1091f9b34b00baca171037b1a25dff4a2886a00e14159a3217f9f2",
+      "snapshot": "snapshots/e23f3ebc3b1091f9b34b00baca171037b1a25dff4a2886a00e14159a3217f9f2.txt"
+    },
+    {
+      "path": "storefront-theme/templates/search.json",
+      "kind": "text",
+      "capturedAt": "2026-10-20T23:15:25.439Z",
+      "mtime": "2026-10-19T07:02:00.701Z",
+      "size": 191,
+      "sha256": "c2839bf2ef6c94e8c65c02ba1597b53b1357175aca50acba30141426c0c387cc",
+      "snapshot": "snapshots/c2839bf2ef6c94e8c65c02ba1597b53b1357175aca50acba30141426c0c387cc.txt"
+    }
+  ]
+}

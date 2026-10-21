@@ -1,0 +1,42 @@
+{
+  "checkedAt": "2026-10-20T23:44:29.250Z",
+  "jsonByteIdentical": true,
+  "markdownByteIdentical": true,
+  "jsonSha256": "1b34de6d012e007da326e16d6463400ca8385c83b938715166cbee5442d31155",
+  "markdownSha256": "996f5030c2cb94ca2c1af95304349cdfac28f071e39483c7ccd49e9a03d74d28",
+  "normalExitCode": 0,
+  "strictExitCode": 1,
+  "liveComparedAt": "2026-10-20T23:44:29.236Z",
+  "localSourceCount": 144,
+  "drift": [],
+  "implementation": [
+    {
+      "path": "tools/style-guideline-content/audit.mjs",
+      "sha256": "445747e3d9079fd451b82fcacd93cacd5f87c582132e5eaeb33c2d7e44133cdf"
+    },
+    {
+      "path": "tools/style-guideline-content/capture-sources.mjs",
+      "sha256": "8539eab5b038aa764ef445fe28e3ec32d559d7eeda111357548e810601d516ff"
+    },
+    {
+      "path": "tools/style-guideline-content/build-inventory.mjs",
+      "sha256": "fa38838869e572effc0a9402f9e691009f18fd0a94ec22433beddc86fa021594"
+    },
+    {
+      "path": "tools/style-guideline-content/lib/auditor.mjs",
+      "sha256": "0929ee7e7c4eeeb594a40be8f7021021f2c245d3aceaae73bf5ee6e09cf3a04a"
+    },
+    {
+      "path": "tools/style-guideline-content/lib/schema.mjs",
+      "sha256": "61bf6bcb9e75364414cc16768affbf3407f18f8bf2b45f880c79d34724cd824f"
+    },
+    {
+      "path": "tools/style-guideline-content/package.json",
+      "sha256": "5559beacead63744131e32756461488cd1f27f31cd25b560a68ae61f7462f827"
+    },
+    {
+      "path": "tools/style-guideline-content/test/auditor.test.mjs",
+      "sha256": "55ea4e5991c56ff34b0cdfff6661de3aa31318a60955b173e0aab65c7d9dffb3"
+    }
+  ]
+}

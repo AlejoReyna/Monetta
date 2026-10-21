@@ -1,0 +1,460 @@
+{
+  "schemaVersion": "1.0.0",
+  "designSource": "/Users/alexis_reyna/Desktop/guideline.pdf",
+  "designSha256": "7e7414def29c38c65c1ab5ce25dd5f250cc50d65db66a291d67536b45dbb97db",
+  "interpretation": "PDF establishes screen families, asset roles and labels. Prices, counts, stock urgency, offers, points and catalogo URLs are illustrative; never used as commercial facts.",
+  "sizes": {
+    "compact": "320–767 logical/CSS px",
+    "medium": "768–1023",
+    "expanded": "1024+; web desktop"
+  },
+  "requiredItems": {
+    "categories": [
+      "tote",
+      "crossbody",
+      "shoulder",
+      "handbags",
+      "wallets",
+      "perfume",
+      "accessories",
+      "watches",
+      "satchel",
+      "hobo"
+    ],
+    "brands": [
+      "coach",
+      "michael-kors",
+      "guess",
+      "steve-madden",
+      "tommy-hilfiger",
+      "tory-burch",
+      "kate-spade",
+      "marc-jacobs",
+      "ch"
+    ]
+  },
+  "selectionPolicies": [
+    {
+      "id": "newest",
+      "expectedOrdering": "created_desc"
+    }
+  ],
+  "requiredHomeModules": [
+    "hero",
+    "styles",
+    "brands",
+    "newest",
+    "campaign",
+    "popular",
+    "wholesale",
+    "services",
+    "signup",
+    "footer"
+  ],
+  "templateRequirements": [
+    {
+      "source": "storefront-theme/templates/index.json",
+      "layout": "monetta",
+      "pdfPages": [
+        3,
+        4
+      ]
+    },
+    {
+      "source": "storefront-theme/templates/collection.json",
+      "layout": "monetta",
+      "pdfPages": [
+        6,
+        9
+      ]
+    },
+    {
+      "source": "storefront-theme/templates/product.json",
+      "layout": "monetta",
+      "pdfPages": [
+        8
+      ]
+    },
+    {
+      "source": "storefront-theme/templates/search.json",
+      "layout": "monetta",
+      "pdfPages": [
+        5
+      ]
+    },
+    {
+      "source": "storefront-theme/templates/page.mayoreo.json",
+      "layout": "monetta",
+      "pdfPages": [
+        10,
+        11
+      ]
+    },
+    {
+      "source": "storefront-theme/templates/page.como-vender.json",
+      "layout": "monetta",
+      "pdfPages": [
+        10,
+        11,
+        15
+      ]
+    },
+    {
+      "source": "storefront-theme/templates/page.contact.json",
+      "layout": "monetta",
+      "pdfPages": [
+        16
+      ]
+    },
+    {
+      "source": "storefront-theme/templates/page.json",
+      "layout": "monetta",
+      "pdfPages": [
+        4,
+        11
+      ]
+    },
+    {
+      "source": "storefront-theme/templates/list-collections.json",
+      "layout": "monetta",
+      "pdfPages": [
+        18
+      ]
+    }
+  ],
+  "screens": [
+    {
+      "page": 1,
+      "title": "Bienvenida",
+      "requiredPaths": [
+        "campaigns.welcome"
+      ],
+      "routeIds": [
+        "welcome.native",
+        "home"
+      ],
+      "requiredCapabilities": [
+        "nativeWelcome"
+      ]
+    },
+    {
+      "page": 2,
+      "title": "Personalización",
+      "requiredPaths": [
+        "preferences",
+        "preferences.purchaseTypeOptions",
+        "categories",
+        "brands"
+      ],
+      "routeIds": [
+        "preferences.native",
+        "preferences.web"
+      ],
+      "requiredCapabilities": [
+        "nativePreferences",
+        "purchaseTypePreference"
+      ]
+    },
+    {
+      "page": 3,
+      "title": "Inicio",
+      "requiredPaths": [
+        "home.moduleOrder",
+        "campaigns.home",
+        "categories",
+        "brands",
+        "productSelections.newest"
+      ],
+      "routeIds": [
+        "home",
+        "selection.newest",
+        "brands.directory",
+        "category.bags",
+        "brand.guess"
+      ],
+      "requiredCapabilities": []
+    },
+    {
+      "page": 4,
+      "title": "Inicio: continuación",
+      "requiredPaths": [
+        "home.moduleOrder",
+        "campaigns.seasonal",
+        "productSelections.popular",
+        "wholesale",
+        "services",
+        "signup",
+        "footer"
+      ],
+      "routeIds": [
+        "wholesale.web",
+        "selection.popular",
+        "footer.policies"
+      ],
+      "requiredCapabilities": [
+        "signupSubmission"
+      ]
+    },
+    {
+      "page": 5,
+      "title": "Búsqueda",
+      "requiredPaths": [
+        "categories",
+        "brands"
+      ],
+      "routeIds": [
+        "search",
+        "category.perfume.native",
+        "product.detail"
+      ],
+      "requiredCapabilities": [
+        "shopifyPredictiveSearch"
+      ]
+    },
+    {
+      "page": 6,
+      "title": "Colección / categoría",
+      "requiredPaths": [
+        "categories",
+        "brands"
+      ],
+      "routeIds": [
+        "category.bags",
+        "brand.coach",
+        "favorites.web"
+      ],
+      "requiredCapabilities": [
+        "shopifyFavorites"
+      ]
+    },
+    {
+      "page": 7,
+      "title": "Preview del producto",
+      "requiredPaths": [
+        "productSelections.related",
+        "services"
+      ],
+      "routeIds": [
+        "product.detail",
+        "product.preview.native"
+      ],
+      "requiredCapabilities": [
+        "shopifyQuickView"
+      ]
+    },
+    {
+      "page": 8,
+      "title": "Producto",
+      "requiredPaths": [
+        "productSelections.related",
+        "services"
+      ],
+      "routeIds": [
+        "product.detail",
+        "cart"
+      ],
+      "requiredCapabilities": [
+        "shopifyFavorites"
+      ]
+    },
+    {
+      "page": 9,
+      "title": "Colección / categoría: variante",
+      "requiredPaths": [
+        "categories",
+        "brands"
+      ],
+      "routeIds": [
+        "category.wallets",
+        "category.watches",
+        "brand.coach"
+      ],
+      "requiredCapabilities": []
+    },
+    {
+      "page": 10,
+      "title": "Mayoreo",
+      "requiredPaths": [
+        "campaigns.wholesale",
+        "wholesale",
+        "wholesale.pricingMode",
+        "catalogs",
+        "services"
+      ],
+      "routeIds": [
+        "wholesale.native",
+        "wholesale.web",
+        "catalog.bags-wholesale",
+        "catalog.perfume-wholesale"
+      ],
+      "requiredCapabilities": []
+    },
+    {
+      "page": 11,
+      "title": "Mayoreo: continuación",
+      "requiredPaths": [
+        "productSelections.related",
+        "signup",
+        "footer",
+        "contact"
+      ],
+      "routeIds": [
+        "partner.web",
+        "contact.web"
+      ],
+      "requiredCapabilities": [
+        "signupSubmission"
+      ]
+    },
+    {
+      "page": 12,
+      "title": "Mis pedidos",
+      "requiredPaths": [],
+      "routeIds": [
+        "orders.native",
+        "orders.hosted",
+        "account.hosted"
+      ],
+      "requiredCapabilities": [
+        "nativeOrders",
+        "hostedAccountBranding"
+      ]
+    },
+    {
+      "page": 13,
+      "title": "Mi cuenta",
+      "requiredPaths": [
+        "rewards",
+        "preferences"
+      ],
+      "routeIds": [
+        "account.native",
+        "account.hosted",
+        "addresses.hosted",
+        "payments.hosted",
+        "favorites.native",
+        "notifications.native",
+        "rewards.hosted"
+      ],
+      "requiredCapabilities": [
+        "hostedAccountBranding"
+      ]
+    },
+    {
+      "page": 14,
+      "title": "Rewards: conservar saldo MXN",
+      "requiredPaths": [
+        "rewards"
+      ],
+      "routeIds": [
+        "rewards.native",
+        "rewards.hosted"
+      ],
+      "requiredCapabilities": [
+        "rewardsMXN",
+        "rewardsWebIntegration"
+      ]
+    },
+    {
+      "page": 15,
+      "title": "Compartir catálogo",
+      "requiredPaths": [
+        "campaigns.share",
+        "catalogs"
+      ],
+      "routeIds": [
+        "partner.native",
+        "partner.web",
+        "catalog.bags-suggested",
+        "catalog.perfume-suggested"
+      ],
+      "requiredCapabilities": [
+        "nativeCatalogSharing",
+        "webCatalogSharing"
+      ]
+    },
+    {
+      "page": 16,
+      "title": "Contacto",
+      "requiredPaths": [
+        "campaigns.contact",
+        "contact",
+        "socialLinks"
+      ],
+      "routeIds": [
+        "contact.native",
+        "contact.web"
+      ],
+      "requiredCapabilities": [
+        "contactGroupCards"
+      ]
+    },
+    {
+      "page": 17,
+      "title": "Confirmación de compra",
+      "requiredPaths": [],
+      "routeIds": [
+        "confirmation.native",
+        "confirmation.hosted",
+        "orders.native",
+        "orders.hosted"
+      ],
+      "requiredCapabilities": [
+        "confirmationEvidence",
+        "hostedThankYouBranding"
+      ]
+    },
+    {
+      "page": 18,
+      "title": "Categorías y marcas",
+      "requiredPaths": [
+        "categories",
+        "brands"
+      ],
+      "routeIds": [
+        "navigation.categories",
+        "brands.directory",
+        "category.handbags",
+        "category.accessories",
+        "brand.tory-burch",
+        "brand.kate-spade",
+        "brand.marc-jacobs",
+        "brand.ch"
+      ],
+      "requiredCapabilities": [
+        "categoryBrandHub"
+      ]
+    },
+    {
+      "page": 19,
+      "title": "Menú",
+      "requiredPaths": [
+        "campaigns.share",
+        "contact",
+        "socialLinks"
+      ],
+      "routeIds": [
+        "partner.native",
+        "contact.native",
+        "brands.directory",
+        "notifications.native"
+      ],
+      "requiredCapabilities": []
+    }
+  ],
+  "distinctDestinations": [
+    [
+      "category.bags",
+      "brand.guess"
+    ]
+  ],
+  "requiredListingCovers": [
+    {
+      "routeId": "brand.coach",
+      "pdfPages": [
+        6,
+        9
+      ]
+    }
+  ]
+}

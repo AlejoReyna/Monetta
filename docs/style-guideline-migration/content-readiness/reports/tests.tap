@@ -1,0 +1,496 @@
+TAP version 13
+# Subtest: small explicit fixture is ready and keeps bags and Guess separate
+ok 1 - small explicit fixture is ready and keeps bags and Guess separate
+  ---
+  duration_ms: 3.790417
+  type: 'test'
+  ...
+# Subtest: missing and blank required fields are reported
+ok 2 - missing and blank required fields are reported
+  ---
+  duration_ms: 22.2555
+  type: 'test'
+  ...
+# Subtest: incorrect collection group type is reported without crashing
+ok 3 - incorrect collection group type is reported without crashing
+  ---
+  duration_ms: 0.35125
+  type: 'test'
+  ...
+# Subtest: unsupported contract version is rejected
+ok 4 - unsupported contract version is rejected
+  ---
+  duration_ms: 0.250541
+  type: 'test'
+  ...
+# Subtest: a path cannot claim account type when it is a collection
+ok 5 - a path cannot claim account type when it is a collection
+  ---
+  duration_ms: 0.217417
+  type: 'test'
+  ...
+# Subtest: category hub design is distinct from the existing all-products link
+ok 6 - category hub design is distinct from the existing all-products link
+  ---
+  duration_ms: 0.183208
+  type: 'test'
+  ...
+# Subtest: an anchor elsewhere in a source does not back a different handle
+ok 7 - an anchor elsewhere in a source does not back a different handle
+  ---
+  duration_ms: 0.381959
+  type: 'test'
+  ...
+# Subtest: missing evidence and tampered snapshots are detected
+ok 8 - missing evidence and tampered snapshots are detected
+  ---
+  duration_ms: 0.356292
+  type: 'test'
+  ...
+# Subtest: a missing frozen file is a finding, not an implicit live read
+ok 9 - a missing frozen file is a finding, not an implicit live read
+  ---
+  duration_ms: 0.284417
+  type: 'test'
+  ...
+# Subtest: bags and Guess cannot collapse even if route-local guards are removed
+ok 10 - bags and Guess cannot collapse even if route-local guards are removed
+  ---
+  duration_ms: 0.355292
+  type: 'test'
+  ...
+# Subtest: an alias cannot assert equivalence without independent support
+ok 11 - an alias cannot assert equivalence without independent support
+  ---
+  duration_ms: 0.207
+  type: 'test'
+  ...
+# Subtest: proposed routes remain missing destinations
+ok 12 - proposed routes remain missing destinations
+  ---
+  duration_ms: 0.244959
+  type: 'test'
+  ...
+# Subtest: a referenced collection does not prove target-store membership
+ok 13 - a referenced collection does not prove target-store membership
+  ---
+  duration_ms: 0.346625
+  type: 'test'
+  ...
+# Subtest: wrong catalog URL is unsupported and exact host allowlist is enforced
+ok 14 - wrong catalog URL is unsupported and exact host allowlist is enforced
+  ---
+  duration_ms: 0.340333
+  type: 'test'
+  ...
+# Subtest: HTTP, credentials and executable URL schemes are refused
+ok 15 - HTTP, credentials and executable URL schemes are refused
+  ---
+  duration_ms: 1.239208
+  type: 'test'
+  ...
+# Subtest: HTTP 200 cannot certify the catalog identity or content
+ok 16 - HTTP 200 cannot certify the catalog identity or content
+  ---
+  duration_ms: 0.174334
+  type: 'test'
+  ...
+# Subtest: a catalog document can use the exact trusted Monetta host without becoming a page
+ok 17 - a catalog document can use the exact trusted Monetta host without becoming a page
+  ---
+  duration_ms: 0.227417
+  type: 'test'
+  ...
+# Subtest: restricted access leaves catalog content unknown; no broken-link assertion
+ok 18 - restricted access leaves catalog content unknown; no broken-link assertion
+  ---
+  duration_ms: 0.137583
+  type: 'test'
+  ...
+# Subtest: catalog slots cannot point to collections; wholesale catalogs cannot be default public shares
+ok 19 - catalog slots cannot point to collections; wholesale catalogs cannot be default public shares
+  ---
+  duration_ms: 0.146916
+  type: 'test'
+  ...
+# Subtest: unknown route and visual resources are detected
+ok 20 - unknown route and visual resources are detected
+  ---
+  duration_ms: 0.129042
+  type: 'test'
+  ...
+# Subtest: a brand logo does not fulfill the required listing campaign cover
+ok 21 - a brand logo does not fulfill the required listing campaign cover
+  ---
+  duration_ms: 0.169791
+  type: 'test'
+  ...
+# Subtest: privacy/policy routes and preference options resolve to typed known IDs
+ok 22 - privacy/policy routes and preference options resolve to typed known IDs
+  ---
+  duration_ms: 0.2105
+  type: 'test'
+  ...
+# Subtest: module content references and catalog file ID changes are detected
+ok 23 - module content references and catalog file ID changes are detected
+  ---
+  duration_ms: 0.349666
+  type: 'test'
+  ...
+# Subtest: real v1 media schema requires each size and normalized focal points
+ok 24 - real v1 media schema requires each size and normalized focal points
+  ---
+  duration_ms: 0.150833
+  type: 'test'
+  ...
+# Subtest: real v1 contract forbids invented price fields and changing the Rewards policy
+ok 25 - real v1 contract forbids invented price fields and changing the Rewards policy
+  ---
+  duration_ms: 0.10725
+  type: 'test'
+  ...
+# Subtest: editorial commerce values and points/tier conversion are rejected
+ok 26 - editorial commerce values and points/tier conversion are rejected
+  ---
+  duration_ms: 0.198833
+  type: 'test'
+  ...
+# Subtest: requirements expose missing brands and invalid selection ordering
+ok 27 - requirements expose missing brands and invalid selection ordering
+  ---
+  duration_ms: 0.199917
+  type: 'test'
+  ...
+# Subtest: Shopify leading block comment is accepted without damaging HTTPS URLs
+ok 28 - Shopify leading block comment is accepted without damaging HTTPS URLs
+  ---
+  duration_ms: 1.255208
+  type: 'test'
+  ...
+# Subtest: legacy template layout is a readiness gap
+ok 29 - legacy template layout is a readiness gap
+  ---
+  duration_ms: 0.178708
+  type: 'test'
+  ...
+# Subtest: support URLs and ID references must agree with source inventory
+ok 30 - support URLs and ID references must agree with source inventory
+  ---
+  duration_ms: 0.589958
+  type: 'test'
+  ...
+# Subtest: missing PDF pages are caught and evidence includes capture hash/date/line
+ok 31 - missing PDF pages are caught and evidence includes capture hash/date/line
+  ---
+  duration_ms: 0.209208
+  type: 'test'
+  ...
+# Subtest: live comparison reports drift/missing files without changing frozen evidence
+ok 32 - live comparison reports drift/missing files without changing frozen evidence
+  ---
+  duration_ms: 14.4675
+  type: 'test'
+  ...
+# Subtest: destination inference distinguishes collection, product, account and external catalog
+ok 33 - destination inference distinguishes collection, product, account and external catalog
+  ---
+  duration_ms: 0.317625
+  type: 'test'
+  ...
+# Subtest: offline delivery reproduces exactly with network unavailable
+ok 34 - offline delivery reproduces exactly with network unavailable
+  ---
+  duration_ms: 58.497416
+  type: 'test'
+  ...
+# Subtest: CLI writes both reports; strict readiness exits 1; invalid option exits 2
+ok 35 - CLI writes both reports; strict readiness exits 1; invalid option exits 2
+  ---
+  duration_ms: 196.098958
+  type: 'test'
+  ...
+# Subtest: regression: bags-suggested cannot route to bags-wholesale or share its wholesale target
+ok 36 - regression: bags-suggested cannot route to bags-wholesale or share its wholesale target
+  ---
+  duration_ms: 40.671208
+  type: 'test'
+  ...
+# Subtest: regression: bags-wholesale cannot route to perfume-wholesale
+ok 37 - regression: bags-wholesale cannot route to perfume-wholesale
+  ---
+  duration_ms: 23.133958
+  type: 'test'
+  ...
+# Subtest: all nine original category/mode pairs are preserved without identity/share validation errors
+ok 38 - all nine original category/mode pairs are preserved without identity/share validation errors
+  ---
+  duration_ms: 12.960125
+  type: 'test'
+  ...
+# Subtest: missing catalog destination metadata reports uncertainty instead of equivalence
+ok 39 - missing catalog destination metadata reports uncertainty instead of equivalence
+  ---
+  duration_ms: 36.380834
+  type: 'test'
+  ...
+# Subtest: reduced fixture still detects category, mode and real-target share mismatches
+ok 40 - reduced fixture still detects category, mode and real-target share mismatches
+  ---
+  duration_ms: 14.229708
+  type: 'test'
+  ...
+# Subtest: regression: the real V1 selection source schema rejects collection without routeId
+ok 41 - regression: the real V1 selection source schema rejects collection without routeId
+  ---
+  duration_ms: 0.271875
+  type: 'test'
+  ...
+# Subtest: regression: the exact todays-picks collection mutation reports a required route with real V1 schema
+ok 42 - regression: the exact todays-picks collection mutation reports a required route with real V1 schema
+  ---
+  duration_ms: 22.313375
+  type: 'test'
+  ...
+# Subtest: collection resolution requires a known route with an existing destination
+ok 43 - collection resolution requires a known route with an existing destination
+  ---
+  duration_ms: 48.741
+  type: 'test'
+  ...
+# Subtest: collection and curated routes must be collections, not product or page destinations
+ok 44 - collection and curated routes must be collections, not product or page destinations
+  ---
+  duration_ms: 58.183875
+  type: 'test'
+  ...
+# Subtest: reduced selection fixture cannot bypass collection resolution
+ok 45 - reduced selection fixture cannot bypass collection resolution
+  ---
+  duration_ms: 10.6495
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated without either source
+ok 46 - real V1 rejects curated without either source
+  ---
+  duration_ms: 0.193625
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with an empty list
+ok 47 - real V1 rejects curated with an empty list
+  ---
+  duration_ms: 0.07125
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with blank handles
+ok 48 - real V1 rejects curated with blank handles
+  ---
+  duration_ms: 0.075
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with a string instead of a list
+ok 49 - real V1 rejects curated with a string instead of a list
+  ---
+  duration_ms: 0.0415
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with non-string handles
+ok 50 - real V1 rejects curated with non-string handles
+  ---
+  duration_ms: 0.036333
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with duplicate handles
+ok 51 - real V1 rejects curated with duplicate handles
+  ---
+  duration_ms: 0.034625
+  type: 'test'
+  ...
+# Subtest: real V1 rejects curated with ambiguous collection and handles
+ok 52 - real V1 rejects curated with ambiguous collection and handles
+  ---
+  duration_ms: 0.035125
+  type: 'test'
+  ...
+# Subtest: real V1 rejects collection with a blank route
+ok 53 - real V1 rejects collection with a blank route
+  ---
+  duration_ms: 0.026083
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve collection route
+ok 54 - real V1 and semantic checks preserve collection route
+  ---
+  duration_ms: 10.374375
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve curated collection
+ok 55 - real V1 and semantic checks preserve curated collection
+  ---
+  duration_ms: 11.877875
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve curated explicit handles
+ok 56 - real V1 and semantic checks preserve curated explicit handles
+  ---
+  duration_ms: 10.286
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve newest provider without route
+ok 57 - real V1 and semantic checks preserve newest provider without route
+  ---
+  duration_ms: 8.696916
+  type: 'test'
+  ...
+# Subtest: real V1 and semantic checks preserve recommendations provider without route
+ok 58 - real V1 and semantic checks preserve recommendations provider without route
+  ---
+  duration_ms: 9.662834
+  type: 'test'
+  ...
+# Subtest: curated without source is unresolved; using both alternatives is ambiguous even in a reduced fixture
+ok 59 - curated without source is unresolved; using both alternatives is ambiguous even in a reduced fixture
+  ---
+  duration_ms: 16.449208
+  type: 'test'
+  ...
+# Subtest: anyOf accepts at least one branch and oneOf accepts exactly one, including nested local refs
+ok 60 - anyOf accepts at least one branch and oneOf accepts exactly one, including nested local refs
+  ---
+  duration_ms: 0.141958
+  type: 'test'
+  ...
+# Subtest: regression: a product_selection module pointing to existing rewards is incompatible
+ok 61 - regression: a product_selection module pointing to existing rewards is incompatible
+  ---
+  duration_ms: 8.933333
+  type: 'test'
+  ...
+# Subtest: all eight module kinds accept their corresponding real V1 structures
+ok 62 - all eight module kinds accept their corresponding real V1 structures
+  ---
+  duration_ms: 8.967333
+  type: 'test'
+  ...
+# Subtest: campaign rejects an existing reference to another family
+ok 63 - campaign rejects an existing reference to another family
+  ---
+  duration_ms: 8.725125
+  type: 'test'
+  ...
+# Subtest: product_selection rejects an existing reference to another family
+ok 64 - product_selection rejects an existing reference to another family
+  ---
+  duration_ms: 10.390125
+  type: 'test'
+  ...
+# Subtest: categories rejects an existing reference to another family
+ok 65 - categories rejects an existing reference to another family
+  ---
+  duration_ms: 13.936709
+  type: 'test'
+  ...
+# Subtest: brands rejects an existing reference to another family
+ok 66 - brands rejects an existing reference to another family
+  ---
+  duration_ms: 9.085125
+  type: 'test'
+  ...
+# Subtest: wholesale rejects an existing reference to another family
+ok 67 - wholesale rejects an existing reference to another family
+  ---
+  duration_ms: 9.1425
+  type: 'test'
+  ...
+# Subtest: services rejects an existing reference to another family
+ok 68 - services rejects an existing reference to another family
+  ---
+  duration_ms: 9.057208
+  type: 'test'
+  ...
+# Subtest: signup rejects an existing reference to another family
+ok 69 - signup rejects an existing reference to another family
+  ---
+  duration_ms: 10.59475
+  type: 'test'
+  ...
+# Subtest: footer rejects an existing reference to another family
+ok 70 - footer rejects an existing reference to another family
+  ---
+  duration_ms: 10.8715
+  type: 'test'
+  ...
+# Subtest: campaign rejects its own family when the real V1 structure is invalid
+ok 71 - campaign rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 10.054708
+  type: 'test'
+  ...
+# Subtest: product_selection rejects its own family when the real V1 structure is invalid
+ok 72 - product_selection rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 8.7925
+  type: 'test'
+  ...
+# Subtest: categories rejects its own family when the real V1 structure is invalid
+ok 73 - categories rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 9.088625
+  type: 'test'
+  ...
+# Subtest: brands rejects its own family when the real V1 structure is invalid
+ok 74 - brands rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 8.566292
+  type: 'test'
+  ...
+# Subtest: wholesale rejects its own family when the real V1 structure is invalid
+ok 75 - wholesale rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 9.723916
+  type: 'test'
+  ...
+# Subtest: services rejects its own family when the real V1 structure is invalid
+ok 76 - services rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 9.174375
+  type: 'test'
+  ...
+# Subtest: signup rejects its own family when the real V1 structure is invalid
+ok 77 - signup rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 9.636
+  type: 'test'
+  ...
+# Subtest: footer rejects its own family when the real V1 structure is invalid
+ok 78 - footer rejects its own family when the real V1 structure is invalid
+  ---
+  duration_ms: 10.215166
+  type: 'test'
+  ...
+# Subtest: missing, empty and non-leaf module references stay invalid
+ok 79 - missing, empty and non-leaf module references stay invalid
+  ---
+  duration_ms: 43.877667
+  type: 'test'
+  ...
+# Subtest: a reduced schema reports missing structure definitions rather than silently certifying a module
+ok 80 - a reduced schema reports missing structure definitions rather than silently certifying a module
+  ---
+  duration_ms: 10.467791
+  type: 'test'
+  ...
+# Subtest: the original baseline, source manifest, snapshots and 35-test file remain byte-identical
+ok 81 - the original baseline, source manifest, snapshots and 35-test file remain byte-identical
+  ---
+  duration_ms: 23.209291
+  type: 'test'
+  ...
+1..81
+# tests 81
+# suites 0
+# pass 81
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 683.185959
