@@ -29,6 +29,7 @@ import '../notifications/notification_inbox.dart';
 import '../notifications/notifications_screen.dart';
 import '../orders/order_detail_screen.dart';
 import '../orders/order_status.dart';
+import '../onboarding/onboarding_sheet.dart';
 import '../orders/orders_screen.dart';
 import '../rewards/rewards_section.dart';
 import 'account_boutique.dart';
@@ -286,6 +287,13 @@ class _SignedIn extends StatelessWidget {
                   accountController: controller,
                   rewardsReader: rewardsReader,
                 ),
+              ),
+              EAccessRow(
+                key: const ValueKey('account-open-personalization'),
+                icon: Icons.tune_outlined,
+                title: 'Personalización',
+                subtitle: 'Marcas, categorías y tipo de compra',
+                onTap: () => openPersonalization(context),
               ),
               EAccessRow(
                 key: const ValueKey('account-open-contact'),

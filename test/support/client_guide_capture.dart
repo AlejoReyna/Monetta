@@ -54,7 +54,8 @@ Future<void> pumpClientGuide(
 
 /// Optional review evidence, never updates or approves reference goldens.
 Future<void> captureClientGuide(WidgetTester tester, String name) async {
-  final directory = Platform.environment['MONETTA_M3_CAPTURE_DIR'] ??
+  final directory = Platform.environment['MONETTA_M4_CAPTURE_DIR'] ??
+      Platform.environment['MONETTA_M3_CAPTURE_DIR'] ??
       Platform.environment['MONETTA_M2_CAPTURE_DIR'];
   if (directory == null) return;
   await tester.runAsync(() async {

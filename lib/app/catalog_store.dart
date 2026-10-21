@@ -421,10 +421,12 @@ class CatalogStore extends ChangeNotifier {
   void seedFrom({
     required List<String> brands,
     required List<String> categories,
+    List<String> silhouettes = const [],
   }) {
     profile = seedProfileFromOnboarding(
       brands: brands,
       categories: categories,
+      silhouettes: silhouettes,
       now: DateTime.now(),
     );
     notifyListeners();

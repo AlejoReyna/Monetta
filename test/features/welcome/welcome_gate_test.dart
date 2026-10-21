@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/onboarding_controller.dart';
@@ -25,6 +26,7 @@ void main() {
     onboarding = OnboardingController(store: OnboardingPreferenceStore(db));
     await store.loadFromAsset();
     await onboarding.restore();
+    SharedPreferences.setMockInitialValues({});
   }
 
   setUp(() async {
@@ -91,7 +93,7 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('welcome-start-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('Personaliza tu experiencia'), findsOneWidget);
+    expect(find.text('Personalización'), findsOneWidget);
     expect(find.byKey(const ValueKey('onboarding-continue')), findsOneWidget);
     expect(find.byKey(const ValueKey('onboarding-skip')), findsOneWidget);
   });
@@ -133,6 +135,18 @@ void main() {
     await tester.tap(find.byKey(const ValueKey('welcome-start-button')));
     await tester.pumpAndSettle();
 
+    await tester.scrollUntilVisible(
+      find.byKey(ValueKey('onboarding-brand-$brand')),
+      200,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const ValueKey('onboarding-scroll')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(ValueKey('onboarding-brand-$brand')));
     await tester.pump();
     await tester.tap(find.byKey(const ValueKey('onboarding-continue')));

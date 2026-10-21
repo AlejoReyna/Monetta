@@ -40,6 +40,8 @@ import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
 import '../partner/partner_hub_screen.dart';
 import '../welcome/welcome_gate.dart';
+import '../onboarding/onboarding_sheet.dart';
+import '../onboarding/personalization_preferences.dart';
 import 'customer_experiences_section.dart';
 import 'customer_experiences_screen.dart';
 import 'home_account_invitation.dart';
@@ -86,6 +88,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   double _heroHeight = double.infinity;
   bool _foreground = true;
   bool _firstRunPrepared = false;
+  String? _personalizationScope;
   late String _searchPrompt;
 
   @override
@@ -110,6 +113,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void didChangeDependencies() {
     super.didChangeDependencies();
     _maybePrepareFirstRunExperience();
+    final scope = AccountScope.maybeOf(context)?.account?.localAccountId ?? '';
+    if (_personalizationScope != scope) {
+      _personalizationScope = scope;
+      unawaited(_restorePersonalization(scope));
+    }
+  }
+
+  Future<void> _restorePersonalization(String scope) async {
+    try {
+      final preferences =
+          await const LocalPersonalizationPreferencesStore().load(scope);
+      if (!mounted || _personalizationScope != scope) return;
+      final store = StoreScope.of(context);
+      // Observed browsing still takes precedence on subsequent launches.
+      if (store.profile.isEmpty &&
+          (preferences.brands.isNotEmpty ||
+              preferences.collections.isNotEmpty)) {
+        applyPersonalization(store, preferences);
+      }
+    } on Object {
+      // The editor presents a retry if local storage is unavailable.
+    }
   }
 
   /// Notification permission is asked for once, on the home, and deliberately
