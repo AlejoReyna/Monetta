@@ -61,7 +61,7 @@ void main() {
     await pumpApp(tester);
 
     expect(find.byKey(const ValueKey('welcome-screen')), findsOneWidget);
-    expect(find.text('Comenzar'), findsOneWidget);
+    expect(find.text('COMENZAR'), findsOneWidget);
     expect(find.byType(MonettaWordmark), findsWidgets);
   });
 
