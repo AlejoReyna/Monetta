@@ -31,6 +31,7 @@ import '../orders/order_detail_screen.dart';
 import '../orders/order_status.dart';
 import '../orders/orders_screen.dart';
 import '../personalization/personalization_screen.dart';
+import '../rewards/rewards_guide_screen.dart';
 import '../rewards/rewards_section.dart';
 import 'account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
@@ -301,6 +302,17 @@ class _SignedIn extends StatelessWidget {
                 title: 'Personalización',
                 subtitle: 'Marcas, categorías y tipo de compra',
                 onTap: () => openPersonalization(context),
+              ),
+              EAccessRow(
+                key: const ValueKey('account-open-rewards-guide'),
+                icon: Icons.workspace_premium_outlined,
+                title: 'Monetta Rewards',
+                subtitle: 'Saldo del contrato y catálogos',
+                onTap: () => openRewardsGuide(
+                  context,
+                  controller: controller,
+                  reader: rewardsReader,
+                ),
               ),
             ],
           ),
