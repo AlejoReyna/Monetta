@@ -283,7 +283,7 @@ class _SignedIn extends StatelessWidget {
                 subtitle: 'Avisos de pedidos y saldo',
                 onTap: () => openNotifications(
                   context,
-                  inbox: notificationInbox ?? _sharedAccountInbox,
+                  inbox: notificationInbox ?? sharedAccountNotificationInbox,
                   ownerId: account.localAccountId,
                   accountController: controller,
                   rewardsReader: rewardsReader,
@@ -539,7 +539,7 @@ class _PrivacyLinks extends StatelessWidget {
 
 /// Bandeja compartida de respaldo hasta que la integración global alimente
 /// una por sesión. Aislada por cuenta igual que cualquier otra.
-final NotificationInbox _sharedAccountInbox = NotificationInbox();
+final NotificationInbox sharedAccountNotificationInbox = NotificationInbox();
 
 class _IdentityCard extends StatelessWidget {
   const _IdentityCard({

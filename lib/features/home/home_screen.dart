@@ -6,6 +6,7 @@ import 'dart:async';
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/card_lift.dart';
@@ -17,6 +18,7 @@ import '../boutique/client_guide_sections.dart';
 import '../wholesale/wholesale_screen.dart';
 import '../contact/contact_screen.dart';
 import '../../app/mixed_feed.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
 import '../../data/media/media_url.dart';
@@ -36,6 +38,7 @@ import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../product/quick_view.dart';
 import '../boutique/boutique_tokens.dart';
+import '../notifications/notifications_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../navigation/monetta_side_menu.dart';
 import '../partner/partner_hub_screen.dart';
@@ -586,6 +589,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   Widget _buildSideMenu(CatalogStore store) {
+    final account = AccountScope.maybeOf(context)?.account;
+    final display = account?.displayName?.trim();
+    final email = account?.email?.trim();
+    final name = (display != null && display.isNotEmpty) ? display : email;
+    final content = HomeContentScope.maybeOf(context)?.content;
     return MonettaSideMenu(
       onSearch: _openSearch,
       onCatalog: _openFullCatalog,
@@ -608,9 +616,28 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onSupport: () => unawaited(
         openContact(
           context,
-          socialLinks: HomeContentScope.maybeOf(context)?.content.socialLinks,
+          socialLinks: content?.socialLinks,
         ),
       ),
+      identityName: name,
+      identityDetail:
+          email != null && email.isNotEmpty && email != name ? email : null,
+      onNotifications: () {
+        unawaited(
+          openNotifications(
+            context,
+            inbox: sharedAccountNotificationInbox,
+            ownerId: account?.localAccountId ?? '',
+            accountController: AccountScope.maybeOf(context),
+          ),
+        );
+      },
+      onShare: () {
+        unawaited(Share.share('Únete al mundo de Monetta'));
+      },
+      onWhatsApp: () => _openExternal(conciergeWhatsAppUri()),
+      socialLinks: content?.socialLinks ?? HomeContent.fallback.socialLinks,
+      onOpenSocial: _openExternal,
     );
   }
 
