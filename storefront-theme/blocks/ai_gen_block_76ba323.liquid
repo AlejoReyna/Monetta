@@ -1,0 +1,515 @@
+{% doc %}
+  @prompt
+    Create a custom block inside the section "Sección personalizada" with the following layout:
+    
+    Circular Collection Cards with Expandable Drawer
+    
+    Display 3 circular collection cards in a horizontal row (first visible row). Each card has:
+    
+    A circular image (aspect ratio 1:1, fully rounded with border-radius: 50%)
+    Collection name centered below the circle
+    A subtle premium drop shadow (box-shadow: 0 4px 20px rgba(0,0,0,0.08))
+    Hover effect: slight scale-up (transform: scale(1.04))
+    Below the 3 cards, show a centered chevron/arrow icon pointing downward (▼). When clicked, it smoothly expands to reveal 2 additional circular collection cards in the same style, arranged horizontally. Clicking the arrow again collapses them.
+    
+    The expand/collapse animation should be smooth (max-height transition, ~300ms ease).
+    
+    Total of 5 collection slots, each configurable in the theme editor (collection picker).
+    
+    The block should be fully responsive: on mobile, wrap cards to 2 per row or 1 per row if needed.
+    
+    Use clean, minimal CSS with no external dependencies. All logic in vanilla JS within the block's Liquid/JS.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-cards-{{ ai_gen_id }} {
+    display: block;
+    width: {{ block.settings.desktop_width_percent }}%;
+    max-width: 100%;
+    padding: {{ block.settings.section_padding }}px 0;
+  }
+
+  .ai-collection-cards__container-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: {{ block.settings.spacing_between_rows }}px;
+  }
+
+  .ai-collection-cards__row-{{ ai_gen_id }} {
+    display: flex;
+    justify-content: center;
+    gap: {{ block.settings.card_gap }}px;
+    flex-wrap: wrap;
+    width: 100%;
+  }
+
+  .ai-collection-cards__expandable-{{ ai_gen_id }} {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease;
+    width: 100%;
+  }
+
+  .ai-collection-cards__expandable-{{ ai_gen_id }}.expanded {
+    max-height: 1000px;
+  }
+
+  .ai-collection-card-{{ ai_gen_id }} {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: {{ block.settings.text_gap }}px;
+    text-decoration: none;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-collection-card-{{ ai_gen_id }}:hover {
+    transform: scale(1.04);
+  }
+
+  .ai-collection-card__image-wrapper-{{ ai_gen_id }} {
+    position: relative;
+    width: {{ block.settings.circle_size }}px;
+    height: {{ block.settings.circle_size }}px;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  }
+
+  .ai-collection-card__image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .ai-collection-card__placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: {{ block.settings.placeholder_bg_color }};
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-card__placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .ai-collection-card__name-{{ ai_gen_id }} {
+    font-size: {{ block.settings.text_size }}px;
+    color: {{ block.settings.text_color }};
+    text-align: center;
+    font-weight: {{ block.settings.text_weight }};
+    text-transform: {{ block.settings.text_transform }};
+  }
+
+  .ai-collection-cards__toggle-{{ ai_gen_id }} {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: {{ block.settings.toggle_padding }}px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.3s ease;
+  }
+
+  .ai-collection-cards__toggle-{{ ai_gen_id }}:hover {
+    transform: scale(1.1);
+  }
+
+  .ai-collection-cards__toggle-icon-{{ ai_gen_id }} {
+    width: {{ block.settings.toggle_size }}px;
+    height: {{ block.settings.toggle_size }}px;
+    fill: {{ block.settings.toggle_color }};
+    transition: transform 0.3s ease;
+  }
+
+  .ai-collection-cards__toggle-{{ ai_gen_id }}.expanded .ai-collection-cards__toggle-icon-{{ ai_gen_id }} {
+    transform: rotate(180deg);
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-card__image-wrapper-{{ ai_gen_id }} {
+      width: {{ block.settings.circle_size_mobile }}px;
+      height: {{ block.settings.circle_size_mobile }}px;
+    }
+
+    .ai-collection-card__name-{{ ai_gen_id }} {
+      font-size: {{ block.settings.text_size_mobile }}px;
+    }
+
+    .ai-collection-cards__row-{{ ai_gen_id }} {
+      gap: {{ block.settings.card_gap_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<circular-collection-cards-{{ ai_gen_id }}
+  class="ai-collection-cards-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-collection-cards__container-{{ ai_gen_id }}">
+    <div class="ai-collection-cards__row-{{ ai_gen_id }}">
+      {% for i in (1..3) %}
+        {% liquid
+          assign collection_key = 'collection_' | append: i
+          assign collection = block.settings[collection_key]
+        %}
+        
+        {% if collection != blank %}
+          <a href="{{ collection.url }}" class="ai-collection-card-{{ ai_gen_id }}">
+            <div class="ai-collection-card__image-wrapper-{{ ai_gen_id }}">
+              {% if collection.image %}
+                <img
+                  src="{{ collection.image | image_url: width: 400 }}"
+                  alt="{{ collection.title | escape }}"
+                  class="ai-collection-card__image-{{ ai_gen_id }}"
+                  loading="lazy"
+                  width="400"
+                  height="400"
+                >
+              {% else %}
+                <div class="ai-collection-card__placeholder-{{ ai_gen_id }}">
+                  {{ 'collection-1' | placeholder_svg_tag }}
+                </div>
+              {% endif %}
+            </div>
+            <div class="ai-collection-card__name-{{ ai_gen_id }}">
+              {{ collection.title }}
+            </div>
+          </a>
+        {% endif %}
+      {% endfor %}
+    </div>
+
+    <button
+      class="ai-collection-cards__toggle-{{ ai_gen_id }}"
+      aria-label="Toggle additional collections"
+      aria-expanded="false"
+    >
+      <svg
+        class="ai-collection-cards__toggle-icon-{{ ai_gen_id }}"
+        viewBox="0 0 24 24"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path d="M7 10l5 5 5-5z"/>
+      </svg>
+    </button>
+
+    <div class="ai-collection-cards__expandable-{{ ai_gen_id }}">
+      <div class="ai-collection-cards__row-{{ ai_gen_id }}">
+        {% for i in (4..5) %}
+          {% liquid
+            assign collection_key = 'collection_' | append: i
+            assign collection = block.settings[collection_key]
+          %}
+          
+          {% if collection != blank %}
+            <a href="{{ collection.url }}" class="ai-collection-card-{{ ai_gen_id }}">
+              <div class="ai-collection-card__image-wrapper-{{ ai_gen_id }}">
+                {% if collection.image %}
+                  <img
+                    src="{{ collection.image | image_url: width: 400 }}"
+                    alt="{{ collection.title | escape }}"
+                    class="ai-collection-card__image-{{ ai_gen_id }}"
+                    loading="lazy"
+                    width="400"
+                    height="400"
+                  >
+                {% else %}
+                  <div class="ai-collection-card__placeholder-{{ ai_gen_id }}">
+                    {{ 'collection-1' | placeholder_svg_tag }}
+                  </div>
+                {% endif %}
+              </div>
+              <div class="ai-collection-card__name-{{ ai_gen_id }}">
+                {{ collection.title }}
+              </div>
+            </a>
+          {% endif %}
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+</circular-collection-cards-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CircularCollectionCards{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+      }
+
+      connectedCallback() {
+        this.toggleButton = this.querySelector('.ai-collection-cards__toggle-{{ ai_gen_id }}');
+        this.expandableSection = this.querySelector('.ai-collection-cards__expandable-{{ ai_gen_id }}');
+        
+        if (this.toggleButton && this.expandableSection) {
+          this.toggleButton.addEventListener('click', this.handleToggle.bind(this));
+        }
+      }
+
+      handleToggle() {
+        const isExpanded = this.expandableSection.classList.contains('expanded');
+        
+        if (isExpanded) {
+          this.expandableSection.classList.remove('expanded');
+          this.toggleButton.classList.remove('expanded');
+          this.toggleButton.setAttribute('aria-expanded', 'false');
+        } else {
+          this.expandableSection.classList.add('expanded');
+          this.toggleButton.classList.add('expanded');
+          this.toggleButton.setAttribute('aria-expanded', 'true');
+        }
+      }
+    }
+
+    customElements.define('circular-collection-cards-{{ ai_gen_id }}', CircularCollectionCards{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Circular collection cards",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "header",
+      "content": "Layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_width_percent",
+      "label": "Desktop width",
+      "min": 50,
+      "max": 100,
+      "step": 5,
+      "unit": "%",
+      "default": 100
+    },
+    {
+      "type": "range",
+      "id": "section_padding",
+      "label": "Section padding",
+      "min": 0,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_gap",
+      "label": "Card gap (desktop)",
+      "min": 10,
+      "max": 100,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "range",
+      "id": "card_gap_mobile",
+      "label": "Card gap (mobile)",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "spacing_between_rows",
+      "label": "Spacing between rows",
+      "min": 10,
+      "max": 60,
+      "step": 5,
+      "unit": "px",
+      "default": 30
+    },
+    {
+      "type": "header",
+      "content": "Circle style"
+    },
+    {
+      "type": "range",
+      "id": "circle_size",
+      "label": "Circle size (desktop)",
+      "min": 100,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "circle_size_mobile",
+      "label": "Circle size (mobile)",
+      "min": 80,
+      "max": 200,
+      "step": 10,
+      "unit": "px",
+      "default": 120
+    },
+    {
+      "type": "color",
+      "id": "placeholder_bg_color",
+      "label": "Placeholder background",
+      "default": "#f4f4f4"
+    },
+    {
+      "type": "header",
+      "content": "Text style"
+    },
+    {
+      "type": "range",
+      "id": "text_size",
+      "label": "Text size (desktop)",
+      "min": 10,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "text_size_mobile",
+      "label": "Text size (mobile)",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Text color",
+      "default": "#000000"
+    },
+    {
+      "type": "select",
+      "id": "text_weight",
+      "label": "Text weight",
+      "options": [
+        {
+          "value": "400",
+          "label": "Normal"
+        },
+        {
+          "value": "500",
+          "label": "Medium"
+        },
+        {
+          "value": "600",
+          "label": "Semibold"
+        },
+        {
+          "value": "700",
+          "label": "Bold"
+        }
+      ],
+      "default": "500"
+    },
+    {
+      "type": "select",
+      "id": "text_transform",
+      "label": "Text transform",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "uppercase",
+          "label": "Uppercase"
+        },
+        {
+          "value": "capitalize",
+          "label": "Capitalize"
+        }
+      ],
+      "default": "none"
+    },
+    {
+      "type": "range",
+      "id": "text_gap",
+      "label": "Gap between image and text",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "header",
+      "content": "Toggle button"
+    },
+    {
+      "type": "range",
+      "id": "toggle_size",
+      "label": "Toggle icon size",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "toggle_color",
+      "label": "Toggle icon color",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "toggle_padding",
+      "label": "Toggle padding",
+      "min": 5,
+      "max": 30,
+      "step": 1,
+      "unit": "px",
+      "default": 10
+    }
+  ],
+  "presets": [
+    {
+      "name": "Circular collection cards"
+    }
+  ]
+}
+{% endschema %}

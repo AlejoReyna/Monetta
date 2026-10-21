@@ -1,0 +1,342 @@
+{% doc %}
+  @prompt
+    Shopify liquid block. Horizontally scrollable 3-row × 3-column collection image grid. 9 collections total.
+    
+    MOBILE OVERFLOW FIX — CRITICAL: On mobile (max-width: 749px), wrapper must use: width: 100vw, position: relative, left: 50%, transform: translateX(-50%), box-sizing: border-box, overflow: visible. This breaks out of the parent grid column without widening the page. Never use overflow: hidden on the wrapper.
+    
+    WRAPPER: padding: 0 on ALL breakpoints. No horizontal padding on the wrapper ever. box-sizing: border-box, overflow: visible, background: transparent, width: 100%, max-width: 100vw.
+    
+    SCROLL CONTAINER: display: grid, grid-template-rows: repeat(3, auto), grid-auto-flow: column, overflow-x: auto, overflow-y: visible, padding: [padding_vertical]px [padding_horizontal]px (use the setting value for BOTH axes — never hardcode 16px), gap: [gap]px, scroll-snap-type: x mandatory, scroll-snap-stop: always, -webkit-overflow-scrolling: touch, scrollbar-width: none. The padding gives shadow room to breathe on all sides — never clip it.
+    
+    CARDS — SHADOW MUST FOLLOW BORDER RADIUS EXACTLY: Each card must have overflow: hidden, border-radius matching the setting, background: transparent. box-shadow: 0 2px 8px rgba(0,0,0,0.06), 0 8px 24px rgba(0,0,0,[shadow_opacity]), 0 20px 48px rgba(0,0,0,0.04). NO background color on the card — transparent only.
+    
+    IMAGE FILL: object-fit: cover, width: 100%, height: 100%, display: block. Image must fill every pixel of the card including corners. No gap between image and card edge.
+    
+    HOVER/TOUCH: transform: translateY(-5px) scale(1.02), box-shadow: 0 8px 24px rgba(0,0,0,0.10), 0 20px 48px rgba(0,0,0,0.10), 0 32px 64px rgba(0,0,0,0.06), transition cubic-bezier(0.25,0.46,0.45,0.94) 0.3s.
+    
+    SCROLL START: Force scrollLeft = 0 using: immediate execution, DOMContentLoaded, window load, setTimeout 100ms, setTimeout 500ms.
+    
+    SECTION SPACING — CRITICAL: The block itself must NOT add any extra vertical margin or padding beyond what the scroll container padding provides. Set margin: 0 on the wrapper. The section padding in the theme editor controls vertical spacing — do not duplicate it inside the block.
+    
+    THEME SETTINGS (all editable in theme editor): card width desktop default 200px, card width mobile default 150px, gap default 28px, border-radius default 20px, shadow opacity default 8%, padding horizontal default 16px, vertical padding default 28px.
+    
+    aspect-ratio: 2.3/1 on all cards. No text, no title, no overlay on cards.
+    
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-collection-grid-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    max-width: 100vw;
+    box-sizing: border-box;
+    overflow: visible;
+    background: transparent;
+    padding: 0;
+    margin: 0;
+    display: block;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-grid-wrapper-{{ ai_gen_id }} {
+      width: 100vw;
+      position: relative;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  .ai-collection-grid-scroll-{{ ai_gen_id }} {
+    display: grid;
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    overflow-x: auto;
+    overflow-y: visible;
+    padding: {{ block.settings.padding_vertical }}px {{ block.settings.padding_horizontal }}px;
+    gap: {{ block.settings.gap }}px;
+    scroll-snap-type: x mandatory;
+    scroll-snap-stop: always;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+
+  .ai-collection-grid-scroll-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-collection-grid-card-{{ ai_gen_id }} {
+    width: {{ block.settings.card_width_desktop }}px;
+    aspect-ratio: 2.3 / 1;
+    overflow: hidden;
+    border-radius: {{ block.settings.border_radius }}px;
+    background: transparent;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06),
+                0 8px 24px rgba(0, 0, 0, {{ block.settings.shadow_opacity | divided_by: 100.0 }}),
+                0 20px 48px rgba(0, 0, 0, 0.04);
+    transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94),
+                box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    scroll-snap-align: start;
+    position: relative;
+  }
+
+  .ai-collection-grid-card-{{ ai_gen_id }}:hover,
+  .ai-collection-grid-card-{{ ai_gen_id }}:active {
+    transform: translateY(-5px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.10),
+                0 20px 48px rgba(0, 0, 0, 0.10),
+                0 32px 64px rgba(0, 0, 0, 0.06);
+  }
+
+  .ai-collection-grid-card-{{ ai_gen_id }} a {
+    display: block;
+    width: 100%;
+    height: 100%;
+    text-decoration: none;
+  }
+
+  .ai-collection-grid-card-{{ ai_gen_id }} img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    display: block;
+  }
+
+  .ai-collection-grid-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-collection-grid-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-collection-grid-card-{{ ai_gen_id }} {
+      width: {{ block.settings.card_width_mobile }}px;
+    }
+  }
+{% endstyle %}
+
+<collection-grid-{{ ai_gen_id }}
+  class="ai-collection-grid-wrapper-{{ ai_gen_id }}"
+  {{ block.shopify_attributes }}
+>
+  <div class="ai-collection-grid-scroll-{{ ai_gen_id }}">
+    {% for i in (1..9) %}
+      {% liquid
+        assign collection_key = 'collection_' | append: i
+        assign collection = block.settings[collection_key]
+      %}
+      <div class="ai-collection-grid-card-{{ ai_gen_id }}">
+        {% if collection != blank %}
+          <a href="{{ collection.url }}">
+            {% if collection.featured_image %}
+              <img
+                src="{{ collection.featured_image | image_url: width: 600 }}"
+                alt="{{ collection.featured_image.alt | escape }}"
+                loading="lazy"
+                width="600"
+                height="{{ 600 | divided_by: 2.3 | round }}"
+              >
+            {% else %}
+              <div class="ai-collection-grid-placeholder-{{ ai_gen_id }}">
+                {{ 'collection-apparel-1' | placeholder_svg_tag }}
+              </div>
+            {% endif %}
+          </a>
+        {% else %}
+          <div class="ai-collection-grid-placeholder-{{ ai_gen_id }}">
+            {{ 'collection-apparel-1' | placeholder_svg_tag }}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
+</collection-grid-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class CollectionGrid{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.scrollContainer = null;
+      }
+
+      connectedCallback() {
+        this.scrollContainer = this.querySelector('.ai-collection-grid-scroll-{{ ai_gen_id }}');
+        this.resetScroll();
+      }
+
+      resetScroll() {
+        if (!this.scrollContainer) return;
+
+        this.scrollContainer.scrollLeft = 0;
+
+        document.addEventListener('DOMContentLoaded', () => {
+          this.scrollContainer.scrollLeft = 0;
+        });
+
+        window.addEventListener('load', () => {
+          this.scrollContainer.scrollLeft = 0;
+        });
+
+        setTimeout(() => {
+          this.scrollContainer.scrollLeft = 0;
+        }, 100);
+
+        setTimeout(() => {
+          this.scrollContainer.scrollLeft = 0;
+        }, 500);
+      }
+    }
+
+    customElements.define('collection-grid-{{ ai_gen_id }}', CollectionGrid{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Collection grid",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Collections"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Collection 1"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Collection 2"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Collection 3"
+    },
+    {
+      "type": "collection",
+      "id": "collection_4",
+      "label": "Collection 4"
+    },
+    {
+      "type": "collection",
+      "id": "collection_5",
+      "label": "Collection 5"
+    },
+    {
+      "type": "collection",
+      "id": "collection_6",
+      "label": "Collection 6"
+    },
+    {
+      "type": "collection",
+      "id": "collection_7",
+      "label": "Collection 7"
+    },
+    {
+      "type": "collection",
+      "id": "collection_8",
+      "label": "Collection 8"
+    },
+    {
+      "type": "collection",
+      "id": "collection_9",
+      "label": "Collection 9"
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "range",
+      "id": "card_width_desktop",
+      "label": "Desktop card width",
+      "min": 100,
+      "max": 400,
+      "step": 10,
+      "unit": "px",
+      "default": 200
+    },
+    {
+      "type": "range",
+      "id": "card_width_mobile",
+      "label": "Mobile card width",
+      "min": 100,
+      "max": 300,
+      "step": 10,
+      "unit": "px",
+      "default": 150
+    },
+    {
+      "type": "range",
+      "id": "gap",
+      "label": "Gap",
+      "min": 4,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    },
+    {
+      "type": "range",
+      "id": "border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 40,
+      "step": 4,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "range",
+      "id": "shadow_opacity",
+      "label": "Shadow opacity",
+      "min": 0,
+      "max": 20,
+      "step": 1,
+      "unit": "%",
+      "default": 8
+    },
+    {
+      "type": "header",
+      "content": "Spacing"
+    },
+    {
+      "type": "range",
+      "id": "padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 16
+    },
+    {
+      "type": "range",
+      "id": "padding_vertical",
+      "label": "Vertical padding",
+      "min": 0,
+      "max": 60,
+      "step": 4,
+      "unit": "px",
+      "default": 28
+    }
+  ],
+  "presets": [
+    {
+      "name": "Collection grid"
+    }
+  ]
+}
+{% endschema %}

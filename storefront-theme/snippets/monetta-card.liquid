@@ -1,0 +1,72 @@
+{%- doc -%}
+  The shared product card (MonettaProductTile): white card, 12px radius, 4:5 photo on #FAFAFA, brand, two-line name and
+  price. Everything shown is read from the product at render time (price, compare-at, availability); nothing is cached.
+
+  @param {object} product - Shopify product.
+  @param {string} [density] - 'grid' (default; 4:5 photo, two-line name) or 'compact' (square photo, one line) for Home rails.
+  @param {boolean} [flush] - Photo fills the frame on white (product-page recommendation rails).
+  @param {boolean} [eager] - Eager-load the photo (first row only).
+  @param {boolean} [quick_add] - Show the "+" for single-variant products that can be bought (default true).
+  @param {string} [sizes] - The sizes attribute of the photo's slot.
+{%- enddoc -%}
+{%- liquid
+  assign density = density | default: 'grid'
+  assign sizes = sizes | default: '(min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw'
+  assign variant = product.selected_or_first_available_variant
+  assign in_stock = product.available
+  assign pct = 0
+  if in_stock and variant.compare_at_price > variant.price
+    assign pct = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
+  endif
+  assign brand = product.metafields.custom.marca.value | default: product.vendor
+  assign eyebrow = ''
+  if in_stock
+    assign delivery = product.metafields.custom.entrega.value
+    if delivery != blank
+      assign eyebrow = delivery
+    elsif product.tags contains 'Envío inmediato'
+      assign eyebrow = 'Envío inmediato'
+    endif
+  endif
+  assign can_quick_add = false
+  if quick_add != false and in_stock and product.has_only_default_variant
+    assign can_quick_add = true
+  endif
+  assign image = product.featured_image
+-%}
+<article class="card card--{{ density }}{% if flush %} card--flush{% endif %}" data-product-handle="{{ product.handle }}">
+  <a class="card__link" href="{{ product.url }}">
+    <div class="card__media">
+      {%- if image -%}
+        {% render 'monetta-image', image: image, widths: '240,360,480,600', sizes: sizes, alt: '', eager: eager %}
+      {%- else -%}
+        {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
+      {%- endif -%}
+      {%- if pct > 0 -%}<span class="badge badge--sale card__badge">-{{ pct }}%</span>{%- endif -%}
+      {%- unless in_stock -%}<span class="card__soldout"><span class="badge badge--seal">Agotado</span></span>{%- endunless -%}
+    </div>
+    <div class="card__body">
+      {%- if eyebrow != blank -%}<p class="card__eyebrow">{{ eyebrow | escape }}</p>{%- endif -%}
+      {%- if brand != blank -%}<p class="card__brand">{{ brand | escape }}</p>{%- endif -%}
+      <h3 class="card__name">{{ product.title | escape }}</h3>
+      <p class="card__price">
+        <span class="price">
+          {%- if product.price_varies -%}Desde {{ product.price_min | money_without_trailing_zeros }}{%- else -%}{{ variant.price | money_without_trailing_zeros }}{%- endif -%}
+        </span>
+        {%- if pct > 0 -%}
+          <span class="visually-hidden">, antes</span><s class="price-compare">{{ variant.compare_at_price | money_without_trailing_zeros }}</s>
+        {%- endif -%}
+        {%- unless in_stock -%}<span class="visually-hidden">, agotado</span>{%- endunless -%}
+      </p>
+    </div>
+  </a>
+  {%- if can_quick_add -%}
+    <div class="card__actions">
+      <form action="{{ routes.cart_add_url }}" method="post" data-quick-add>
+        <input type="hidden" name="id" value="{{ variant.id }}">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit" class="card__quick" aria-label="Agregar {{ product.title | escape }} al carrito"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
+      </form>
+    </div>
+  {%- endif -%}
+</article>

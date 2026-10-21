@@ -1,0 +1,48 @@
+{%- comment -%}
+  Recommendation rail on the product page (product_screen.dart _Rail): Inter 600 heading, tiles 52vw (max 260 px) on phones,
+  4:5 photo that fills the frame on white, two-line names, equal-height tiles. The list is Shopify's own product
+  recommendations, requested lazily (assets/monetta-product.js) because the API only answers in a section-rendering request.
+  Shopify's recommendations are not brand-filtered: a "Más de {marca}" rail needs the custom.marca product metafield first.
+{%- endcomment -%}
+{%- assign heading_id = section.id | append: '-heading' -%}
+{%- assign rail_id = 'rail-' | append: section.id -%}
+<div
+  data-recommendations
+  data-url="{{ routes.product_recommendations_url }}?section_id={{ section.id }}&product_id={{ product.id }}&limit={{ section.settings.products_to_show }}&intent=related"
+>
+  {%- if recommendations.performed and recommendations.products_count > 0 -%}
+    <section class="section container" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+      {%- assign see_all = '' -%}
+      {%- if section.settings.show_vendor_link and product.vendor != blank -%}
+        {%- assign see_all = product.vendor | url_for_vendor -%}
+      {%- endif -%}
+      {% render 'monetta-section-header',
+        id: heading_id,
+        title: section.settings.heading,
+        link_url: see_all,
+        link_label: 'Ver todo',
+        rail_id: rail_id,
+        role: 'product'
+      %}
+      <div class="rail rail--recs">
+        <ul class="rail__track" id="{{ rail_id }}" role="list" aria-label="{{ section.settings.heading | escape }}">
+          {%- for item in recommendations.products limit: section.settings.products_to_show -%}
+            <li>{% render 'monetta-card', product: item, flush: true, sizes: '(min-width: 1200px) 20vw, (min-width: 768px) 30vw, 52vw' %}</li>
+          {%- endfor -%}
+        </ul>
+      </div>
+    </section>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Monetta · Recomendados",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Título", "default": "También te puede gustar" },
+    { "type": "range", "id": "products_to_show", "label": "Productos", "min": 4, "max": 8, "step": 1, "default": 8 },
+    { "type": "checkbox", "id": "show_vendor_link", "label": "Enlace «Ver todo» a la marca del producto", "default": true }
+  ],
+  "presets": [ { "name": "Monetta · Recomendados" } ]
+}
+{% endschema %}

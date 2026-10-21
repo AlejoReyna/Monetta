@@ -1,0 +1,393 @@
+{% doc %}
+  @prompt
+    Goal: Create a 100% mobile-optimized collection carousel that fits perfectly within the screen width without causing horizontal page overflow.
+    
+    1. Layout & Width Control (Anti-Overflow):
+    
+    Main Container: Set width: 100vw and strictly apply overflow: hidden. The carousel must NOT make the entire page wider.
+    
+    The Track: Use display: flex. The scrolling track must be contained so that only one card is centered at a time.
+    
+    2. Card Sizing & "The Peek":
+    
+    Precise Width: Each card must be exactly 75% of the screen width (75vw).
+    
+    Centering: Use scroll-snap-align: center. Add a 12.5% padding to the left and right of the main container so the first card starts perfectly in the middle and the next card "peeks" exactly 12.5% from the edge.
+    
+    Aspect Ratio: Use a 4:5 vertical ratio for the cards.
+    
+    3. Ultra-Clean Rounded Aesthetic:
+    
+    Borders: Apply a 36px border-radius to the cards. Use overflow: hidden on the card level to ensure a perfectly clean, rounded contour for both the card and the image inside.
+    
+    Styling: Cards must be white (#FFFFFF) with a very thin border (1px solid #eeeeee) and a soft, diffused shadow (box-shadow: 0 10px 40px rgba(0,0,0,0.03)).
+    
+    4. Element Proportions (No Oversizing):
+    
+    Image: The product image should be centered and occupy no more than 55% of the card's height.
+    
+    Button & Text: Use a small Serif font for titles. The "EXPLORAR" button must be compact (max-width 130px) and centered at the bottom with proper margins.
+    
+    5. Physics & Animation:
+    
+    Frictionless Swipe: Use scroll-snap-type: x mandatory for a "magnetic" snap to the next card.
+    
+    Smoothness: Implement transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1). As the user swipes, the active card scales to 1.0, while side cards scale to 0.9.
+    
+    6. Content: > * Build 3 collection cards: BOLSAS, CARTERAS, RELOJES.
+    
+    Hide all scrollbars to maintain a clean app-like interface.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-mobile-carousel-{{ ai_gen_id }} {
+    width: 100vw;
+    overflow: hidden;
+    position: relative;
+    display: block;
+    margin: 0;
+    padding: 0;
+  }
+
+  .ai-mobile-carousel-track-{{ ai_gen_id }} {
+    display: flex;
+    overflow-x: scroll;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+    padding: 0 12.5vw;
+    gap: 0;
+  }
+
+  .ai-mobile-carousel-track-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .ai-mobile-carousel-card-{{ ai_gen_id }} {
+    flex: 0 0 75vw;
+    width: 75vw;
+    aspect-ratio: 4 / 5;
+    scroll-snap-align: center;
+    background-color: #FFFFFF;
+    border: 1px solid #eeeeee;
+    border-radius: 36px;
+    overflow: hidden;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.03);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px;
+    transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+    transform: scale(0.9);
+    opacity: 0.6;
+  }
+
+  .ai-mobile-carousel-card-{{ ai_gen_id }}.active {
+    transform: scale(1);
+    opacity: 1;
+  }
+
+  .ai-mobile-carousel-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    height: 55%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .ai-mobile-carousel-image-{{ ai_gen_id }} {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  .ai-mobile-carousel-content-{{ ai_gen_id }} {
+    text-align: center;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ai-mobile-carousel-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, serif;
+    font-size: {{ block.settings.title_size }}px;
+    font-weight: 400;
+    color: {{ block.settings.text_color }};
+    margin: 0;
+    letter-spacing: 0.5px;
+  }
+
+  .ai-mobile-carousel-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: {{ block.settings.button_bg_color }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    border-radius: 0;
+    border: 1px solid {{ block.settings.button_border_color }};
+    max-width: 130px;
+    width: 100%;
+    text-align: center;
+    transition: all 0.3s ease;
+  }
+
+  .ai-mobile-carousel-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_bg_color }};
+    color: {{ block.settings.button_hover_text_color }};
+    border-color: {{ block.settings.button_hover_border_color }};
+  }
+
+  .ai-mobile-carousel-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    background-color: #f4f4f4;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .ai-mobile-carousel-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+{% endstyle %}
+
+<mobile-carousel-{{ ai_gen_id }} class="ai-mobile-carousel-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-mobile-carousel-track-{{ ai_gen_id }}">
+    {% for i in (1..3) %}
+      {% liquid
+        assign collection_key = 'collection_' | append: i
+        assign collection = block.settings[collection_key]
+        
+        if i == 1
+          assign title = 'BOLSAS'
+        elsif i == 2
+          assign title = 'CARTERAS'
+        else
+          assign title = 'RELOJES'
+        endif
+      %}
+      
+      <div class="ai-mobile-carousel-card-{{ ai_gen_id }}" data-card-index="{{ forloop.index0 }}">
+        <div class="ai-mobile-carousel-image-wrapper-{{ ai_gen_id }}">
+          {% if collection and collection.image %}
+            <img
+              src="{{ collection.image | image_url: width: 800 }}"
+              alt="{{ collection.title | escape }}"
+              class="ai-mobile-carousel-image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="800"
+            >
+          {% elsif collection and collection.products.first and collection.products.first.featured_image %}
+            <img
+              src="{{ collection.products.first.featured_image | image_url: width: 800 }}"
+              alt="{{ collection.title | escape }}"
+              class="ai-mobile-carousel-image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="800"
+            >
+          {% else %}
+            <div class="ai-mobile-carousel-placeholder-{{ ai_gen_id }}">
+              {{ 'product-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+        
+        <div class="ai-mobile-carousel-content-{{ ai_gen_id }}">
+          <h3 class="ai-mobile-carousel-title-{{ ai_gen_id }}">
+            {% if collection %}
+              {{ collection.title }}
+            {% else %}
+              {{ title }}
+            {% endif %}
+          </h3>
+          
+          {% if collection %}
+            <a href="{{ collection.url }}" class="ai-mobile-carousel-button-{{ ai_gen_id }}">
+              EXPLORAR
+            </a>
+          {% else %}
+            <a href="#" class="ai-mobile-carousel-button-{{ ai_gen_id }}">
+              EXPLORAR
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %}
+  </div>
+</mobile-carousel-{{ ai_gen_id }}>
+
+<script>
+  (function() {
+    class MobileCarousel{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.track = null;
+        this.cards = [];
+        this.currentIndex = 0;
+      }
+
+      connectedCallback() {
+        this.track = this.querySelector('.ai-mobile-carousel-track-{{ ai_gen_id }}');
+        this.cards = Array.from(this.querySelectorAll('.ai-mobile-carousel-card-{{ ai_gen_id }}'));
+        
+        if (!this.track || this.cards.length === 0) return;
+
+        this.setupIntersectionObserver();
+        this.track.addEventListener('scroll', this.handleScroll.bind(this));
+        
+        this.updateActiveCard();
+      }
+
+      setupIntersectionObserver() {
+        const options = {
+          root: this.track,
+          threshold: 0.5
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+          entries.forEach(entry => {
+            if (entry.isIntersecting) {
+              this.cards.forEach(card => card.classList.remove('active'));
+              entry.target.classList.add('active');
+            }
+          });
+        }, options);
+
+        this.cards.forEach(card => observer.observe(card));
+      }
+
+      handleScroll() {
+        const scrollLeft = this.track.scrollLeft;
+        const cardWidth = this.cards[0].offsetWidth;
+        const padding = window.innerWidth * 0.125;
+        
+        this.currentIndex = Math.round((scrollLeft + padding) / cardWidth);
+        this.updateActiveCard();
+      }
+
+      updateActiveCard() {
+        this.cards.forEach((card, index) => {
+          if (index === this.currentIndex) {
+            card.classList.add('active');
+          } else {
+            card.classList.remove('active');
+          }
+        });
+      }
+    }
+
+    customElements.define('mobile-carousel-{{ ai_gen_id }}', MobileCarousel{{ ai_gen_id }});
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Carrusel de colecciones",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colecciones"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Colección 1 (BOLSAS)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Colección 2 (CARTERAS)"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Colección 3 (RELOJES)"
+    },
+    {
+      "type": "header",
+      "content": "Estilo de título"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Fuente del título",
+      "default": "newsreader_n2"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño del título",
+      "min": 16,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "text_color",
+      "label": "Color del texto",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Estilo del botón"
+    },
+    {
+      "type": "color",
+      "id": "button_bg_color",
+      "label": "Fondo del botón",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Texto del botón",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_border_color",
+      "label": "Borde del botón",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_bg_color",
+      "label": "Fondo del botón (hover)",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Texto del botón (hover)",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border_color",
+      "label": "Borde del botón (hover)",
+      "default": "#383838"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Carrusel de colecciones"
+    }
+  ]
+}
+{% endschema %}

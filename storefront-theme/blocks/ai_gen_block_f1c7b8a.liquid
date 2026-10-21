@@ -1,0 +1,321 @@
+{% doc %}
+  @prompt
+    Create a custom Shopify theme block called "Horizontal Banner Card". It should render as a full-width horizontal band/strip that spans the entire section width. Inside the band, display a floating card that is also fully horizontal (wide, not tall), with a subtle box-shadow to give it a floating/elevated appearance. The card should contain:
+    
+    A short headline text (editable via theme settings, schema type: text)
+    An optional subtext or description (editable via theme settings, schema type: textarea)
+    An optional CTA button with customizable label and URL
+    Style requirements:
+    
+    The band background color should be customizable (schema type: color)
+    The floating card should have a white or light background, rounded corners (border-radius: 12–16px), and a soft drop shadow
+    Card layout: flexbox, horizontal alignment, content centered vertically
+    Fully responsive: on mobile, stack content vertically inside the card
+    Padding inside the card: 24px vertical, 40px horizontal
+    The card should have a max-width of 1100px and be centered within the band
+    Output: valid Liquid + JSON schema for a Shopify OS 2.0 section block. Include all schema settings.
+    
+    
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .ai-horizontal-banner-{{ ai_gen_id }} {
+    display: block;
+    width: 100%;
+    background-color: {{ block.settings.band_background_color }};
+    padding: {{ block.settings.band_padding_vertical }}px 20px;
+  }
+
+  .ai-horizontal-banner-card-{{ ai_gen_id }} {
+    max-width: 1100px;
+    margin: 0 auto;
+    background-color: {{ block.settings.card_background_color }};
+    border-radius: {{ block.settings.card_border_radius }}px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, {{ block.settings.card_shadow_opacity }});
+    padding: {{ block.settings.card_padding_vertical }}px {{ block.settings.card_padding_horizontal }}px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+  }
+
+  .ai-horizontal-banner-content-{{ ai_gen_id }} {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .ai-horizontal-banner-headline-{{ ai_gen_id }} {
+    margin: 0;
+    font-size: {{ block.settings.headline_font_size }}px;
+    color: {{ block.settings.headline_color }};
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .ai-horizontal-banner-subtext-{{ ai_gen_id }} {
+    margin: 0;
+    font-size: {{ block.settings.subtext_font_size }}px;
+    color: {{ block.settings.subtext_color }};
+    line-height: 1.5;
+  }
+
+  .ai-horizontal-banner-cta-{{ ai_gen_id }} {
+    flex-shrink: 0;
+  }
+
+  .ai-horizontal-banner-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 24px;
+    background-color: {{ block.settings.button_background_color }};
+    color: {{ block.settings.button_text_color }};
+    text-decoration: none;
+    border-radius: {{ block.settings.button_border_radius }}px;
+    font-size: {{ block.settings.button_font_size }}px;
+    font-weight: 500;
+    transition: background-color 0.3s ease;
+    white-space: nowrap;
+  }
+
+  .ai-horizontal-banner-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background_color }};
+    color: {{ block.settings.button_hover_text_color }};
+  }
+
+  @media screen and (max-width: 749px) {
+    .ai-horizontal-banner-card-{{ ai_gen_id }} {
+      flex-direction: column;
+      align-items: stretch;
+      text-align: center;
+    }
+
+    .ai-horizontal-banner-cta-{{ ai_gen_id }} {
+      width: 100%;
+    }
+
+    .ai-horizontal-banner-button-{{ ai_gen_id }} {
+      width: 100%;
+      text-align: center;
+    }
+  }
+{% endstyle %}
+
+<div class="ai-horizontal-banner-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="ai-horizontal-banner-card-{{ ai_gen_id }}">
+    <div class="ai-horizontal-banner-content-{{ ai_gen_id }}">
+      {% if block.settings.headline != blank %}
+        <h3 class="ai-horizontal-banner-headline-{{ ai_gen_id }}">{{ block.settings.headline }}</h3>
+      {% endif %}
+      {% if block.settings.subtext != blank %}
+        <p class="ai-horizontal-banner-subtext-{{ ai_gen_id }}">{{ block.settings.subtext }}</p>
+      {% endif %}
+    </div>
+    {% if block.settings.button_label != blank and block.settings.button_link != blank %}
+      <div class="ai-horizontal-banner-cta-{{ ai_gen_id }}">
+        <a href="{{ block.settings.button_link }}" class="ai-horizontal-banner-button-{{ ai_gen_id }}">
+          {{ block.settings.button_label }}
+        </a>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+{% schema %}
+{
+  "name": "Horizontal banner card",
+  "tag": null,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Content"
+    },
+    {
+      "type": "text",
+      "id": "headline",
+      "label": "Headline",
+      "default": "Special Offer"
+    },
+    {
+      "type": "textarea",
+      "id": "subtext",
+      "label": "Subtext",
+      "default": "Get 20% off your first order with code WELCOME20"
+    },
+    {
+      "type": "text",
+      "id": "button_label",
+      "label": "Button label",
+      "default": "Shop Now"
+    },
+    {
+      "type": "url",
+      "id": "button_link",
+      "label": "Button link"
+    },
+    {
+      "type": "header",
+      "content": "Band style"
+    },
+    {
+      "type": "color",
+      "id": "band_background_color",
+      "label": "Background color",
+      "default": "#f5f5f5"
+    },
+    {
+      "type": "range",
+      "id": "band_padding_vertical",
+      "label": "Vertical padding",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Card style"
+    },
+    {
+      "type": "color",
+      "id": "card_background_color",
+      "label": "Background color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "range",
+      "id": "card_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "range",
+      "id": "card_shadow_opacity",
+      "label": "Shadow opacity",
+      "min": 0,
+      "max": 0.5,
+      "step": 0.1,
+      "default": 0.1
+    },
+    {
+      "type": "range",
+      "id": "card_padding_vertical",
+      "label": "Vertical padding",
+      "min": 12,
+      "max": 48,
+      "step": 4,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "range",
+      "id": "card_padding_horizontal",
+      "label": "Horizontal padding",
+      "min": 20,
+      "max": 80,
+      "step": 5,
+      "unit": "px",
+      "default": 40
+    },
+    {
+      "type": "header",
+      "content": "Headline"
+    },
+    {
+      "type": "range",
+      "id": "headline_font_size",
+      "label": "Font size",
+      "min": 14,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 24
+    },
+    {
+      "type": "color",
+      "id": "headline_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Subtext"
+    },
+    {
+      "type": "range",
+      "id": "subtext_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "color",
+      "id": "subtext_color",
+      "label": "Color",
+      "default": "#666666"
+    },
+    {
+      "type": "header",
+      "content": "Button"
+    },
+    {
+      "type": "range",
+      "id": "button_font_size",
+      "label": "Font size",
+      "min": 12,
+      "max": 20,
+      "step": 1,
+      "unit": "px",
+      "default": 14
+    },
+    {
+      "type": "range",
+      "id": "button_border_radius",
+      "label": "Border radius",
+      "min": 0,
+      "max": 32,
+      "step": 2,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "color",
+      "id": "button_background_color",
+      "label": "Background color",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text_color",
+      "label": "Text color",
+      "default": "#ffffff"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background_color",
+      "label": "Hover background color",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text_color",
+      "label": "Hover text color",
+      "default": "#ffffff"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Horizontal banner card"
+    }
+  ]
+}
+{% endschema %}

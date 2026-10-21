@@ -1,0 +1,485 @@
+{% doc %}
+  @prompt
+    Act as a Senior Frontend Developer. Generate a 'Custom Liquid' code for a luxury Collection Carousel with the following specific mobile optimizations:
+    
+    1. Mobile "Peek" Design (UX):
+    
+    On mobile devices, the first card must be centered, but the second card MUST be partially visible (approx. 20%) on the right edge of the screen. This is critical to show the user there is more content to swipe.
+    
+    Use scroll-snap-type: x mandatory and scroll-padding: 20px to ensure the cards always snap perfectly into place after swiping.
+    
+    2. Visual Style (Rounded & Premium):
+    
+    Background: Pure white (#FFFFFF).
+    
+    Rounded Contours: Apply a generous border-radius: 24px to the image containers to create that soft, modern, and rounded look.
+    
+    Image Area: Keep it tall and wide (4:5 aspect ratio). Ensure images (transparent PNGs) have enough "breathing room" inside the rounded containers.
+    
+    Shadows: Add an extremely subtle, large-spread soft shadow (box-shadow) to the cards to make the rounded edges pop against the white background.
+    
+    3. Ultra-Smooth Transitions:
+    
+    Use cubic-bezier(0.22, 1, 0.36, 1) for the scroll transition to make it feel "buttery smooth" and expensive.
+    
+    Implement a subtle scale effect: the active (centered) card should be scale(1.0), while the side cards are scale(0.9) and opacity: 0.7.
+    
+    4. Content & Links:
+    
+    Card 1: Title "BOLSAS", Link: "/collections/bolsas".
+    
+    Card 2: Title "CARTERAS", Link: "/collections/carteras".
+    
+    Card 3: Title "RELOJES", Link: "/collections/relojes".
+    
+    Each card must have a minimalist "EXPLORAR" button below the title.
+    
+    5. Technical:
+    
+    100% Pure HTML/CSS. No JavaScript.
+    
+    Scope all styles using the prefix .lux-mobile-swipe-.
+    
+    Hide scrollbars completely using ::-webkit-scrollbar { display: none; }.
+{% enddoc %}
+{% assign ai_gen_id = block.id | replace: '_', '' | downcase %}
+
+{% style %}
+  .lux-mobile-swipe-container-{{ ai_gen_id }} {
+    width: 100%;
+    background-color: #FFFFFF;
+    padding: 40px 0;
+    overflow: hidden;
+  }
+
+  .lux-mobile-swipe-scroll-{{ ai_gen_id }} {
+    display: flex;
+    gap: 16px;
+    overflow-x: auto;
+    scroll-snap-type: x mandatory;
+    scroll-padding: 20px;
+    padding: 0 20px;
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+    transition: scroll 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lux-mobile-swipe-scroll-{{ ai_gen_id }}::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lux-mobile-swipe-scroll-{{ ai_gen_id }} {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .lux-mobile-swipe-card-{{ ai_gen_id }} {
+    flex: 0 0 calc(100% - 40px - 20%);
+    scroll-snap-align: center;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: transform 0.6s cubic-bezier(0.22, 1, 0.36, 1), opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: scale(0.9);
+    opacity: 0.7;
+  }
+
+  .lux-mobile-swipe-card-{{ ai_gen_id }}.lux-mobile-swipe-active-{{ ai_gen_id }} {
+    transform: scale(1.0);
+    opacity: 1;
+  }
+
+  .lux-mobile-swipe-image-wrapper-{{ ai_gen_id }} {
+    width: 100%;
+    aspect-ratio: 4 / 5;
+    border-radius: 24px;
+    overflow: hidden;
+    background-color: {{ block.settings.card_background }};
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08), 0 8px 24px rgba(0, 0, 0, 0.04);
+    margin-bottom: 20px;
+    position: relative;
+  }
+
+  .lux-mobile-swipe-image-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 20px;
+  }
+
+  .lux-mobile-swipe-placeholder-{{ ai_gen_id }} {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f8f8f8;
+  }
+
+  .lux-mobile-swipe-placeholder-{{ ai_gen_id }} svg {
+    width: 60%;
+    height: 60%;
+    opacity: 0.3;
+  }
+
+  .lux-mobile-swipe-title-{{ ai_gen_id }} {
+    font-family: {{ block.settings.title_font.family }}, {{ block.settings.title_font.fallback_families }};
+    font-weight: {{ block.settings.title_font.weight }};
+    font-size: {{ block.settings.title_size }}px;
+    color: {{ block.settings.title_color }};
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    text-align: center;
+  }
+
+  .lux-mobile-swipe-button-{{ ai_gen_id }} {
+    display: inline-block;
+    padding: 12px 32px;
+    background-color: {{ block.settings.button_background }};
+    color: {{ block.settings.button_text }};
+    font-family: {{ block.settings.button_font.family }}, {{ block.settings.button_font.fallback_families }};
+    font-weight: {{ block.settings.button_font.weight }};
+    font-size: {{ block.settings.button_size }}px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    border: {{ block.settings.button_border_width }}px solid {{ block.settings.button_border }};
+    border-radius: {{ block.settings.button_radius }}px;
+    text-decoration: none;
+    transition: all 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+  }
+
+  .lux-mobile-swipe-button-{{ ai_gen_id }}:hover {
+    background-color: {{ block.settings.button_hover_background }};
+    color: {{ block.settings.button_hover_text }};
+    border-color: {{ block.settings.button_hover_border }};
+  }
+
+  @media screen and (min-width: 750px) {
+    .lux-mobile-swipe-container-{{ ai_gen_id }} {
+      padding: 60px 0;
+    }
+
+    .lux-mobile-swipe-scroll-{{ ai_gen_id }} {
+      gap: 32px;
+      padding: 0 40px;
+      justify-content: center;
+    }
+
+    .lux-mobile-swipe-card-{{ ai_gen_id }} {
+      flex: 0 0 calc((100% - 80px - 64px) / 3);
+      max-width: 400px;
+    }
+
+    .lux-mobile-swipe-image-wrapper-{{ ai_gen_id }} {
+      margin-bottom: 24px;
+    }
+  }
+{% endstyle %}
+
+<div class="lux-mobile-swipe-container-{{ ai_gen_id }}" {{ block.shopify_attributes }}>
+  <div class="lux-mobile-swipe-scroll-{{ ai_gen_id }}">
+    {% if block.settings.collection_1 != blank %}
+      <a href="/collections/bolsas" class="lux-mobile-swipe-card-{{ ai_gen_id }}">
+        <div class="lux-mobile-swipe-image-wrapper-{{ ai_gen_id }}">
+          {% if block.settings.image_1 != blank %}
+            <img
+              src="{{ block.settings.image_1 | image_url: width: 800 }}"
+              alt="{{ block.settings.image_1.alt | escape }}"
+              class="lux-mobile-swipe-image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="1000"
+            >
+          {% else %}
+            <div class="lux-mobile-swipe-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-1' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+        <h3 class="lux-mobile-swipe-title-{{ ai_gen_id }}">BOLSAS</h3>
+        <span class="lux-mobile-swipe-button-{{ ai_gen_id }}">EXPLORAR</span>
+      </a>
+    {% endif %}
+
+    {% if block.settings.collection_2 != blank %}
+      <a href="/collections/carteras" class="lux-mobile-swipe-card-{{ ai_gen_id }}">
+        <div class="lux-mobile-swipe-image-wrapper-{{ ai_gen_id }}">
+          {% if block.settings.image_2 != blank %}
+            <img
+              src="{{ block.settings.image_2 | image_url: width: 800 }}"
+              alt="{{ block.settings.image_2.alt | escape }}"
+              class="lux-mobile-swipe-image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="1000"
+            >
+          {% else %}
+            <div class="lux-mobile-swipe-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-2' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+        <h3 class="lux-mobile-swipe-title-{{ ai_gen_id }}">CARTERAS</h3>
+        <span class="lux-mobile-swipe-button-{{ ai_gen_id }}">EXPLORAR</span>
+      </a>
+    {% endif %}
+
+    {% if block.settings.collection_3 != blank %}
+      <a href="/collections/relojes" class="lux-mobile-swipe-card-{{ ai_gen_id }}">
+        <div class="lux-mobile-swipe-image-wrapper-{{ ai_gen_id }}">
+          {% if block.settings.image_3 != blank %}
+            <img
+              src="{{ block.settings.image_3 | image_url: width: 800 }}"
+              alt="{{ block.settings.image_3.alt | escape }}"
+              class="lux-mobile-swipe-image-{{ ai_gen_id }}"
+              loading="lazy"
+              width="800"
+              height="1000"
+            >
+          {% else %}
+            <div class="lux-mobile-swipe-placeholder-{{ ai_gen_id }}">
+              {{ 'collection-3' | placeholder_svg_tag }}
+            </div>
+          {% endif %}
+        </div>
+        <h3 class="lux-mobile-swipe-title-{{ ai_gen_id }}">RELOJES</h3>
+        <span class="lux-mobile-swipe-button-{{ ai_gen_id }}">EXPLORAR</span>
+      </a>
+    {% endif %}
+  </div>
+</div>
+
+<script>
+  (function() {
+    class LuxMobileSwipe{{ ai_gen_id }} extends HTMLElement {
+      constructor() {
+        super();
+        this.scrollContainer = this.querySelector('.lux-mobile-swipe-scroll-{{ ai_gen_id }}');
+        this.cards = this.querySelectorAll('.lux-mobile-swipe-card-{{ ai_gen_id }}');
+      }
+
+      connectedCallback() {
+        if (!this.scrollContainer || this.cards.length === 0) return;
+
+        this.updateActiveCard();
+        this.scrollContainer.addEventListener('scroll', () => this.updateActiveCard());
+
+        const observer = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('lux-mobile-swipe-active-{{ ai_gen_id }}');
+              } else {
+                entry.target.classList.remove('lux-mobile-swipe-active-{{ ai_gen_id }}');
+              }
+            });
+          },
+          {
+            root: this.scrollContainer,
+            threshold: 0.6
+          }
+        );
+
+        this.cards.forEach((card) => observer.observe(card));
+      }
+
+      updateActiveCard() {
+        const scrollLeft = this.scrollContainer.scrollLeft;
+        const containerWidth = this.scrollContainer.offsetWidth;
+        const centerPosition = scrollLeft + containerWidth / 2;
+
+        this.cards.forEach((card) => {
+          const cardLeft = card.offsetLeft;
+          const cardWidth = card.offsetWidth;
+          const cardCenter = cardLeft + cardWidth / 2;
+
+          if (Math.abs(centerPosition - cardCenter) < cardWidth / 2) {
+            card.classList.add('lux-mobile-swipe-active-{{ ai_gen_id }}');
+          } else {
+            card.classList.remove('lux-mobile-swipe-active-{{ ai_gen_id }}');
+          }
+        });
+      }
+    }
+
+    customElements.define('lux-mobile-swipe-{{ ai_gen_id }}', LuxMobileSwipe{{ ai_gen_id }});
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const container = document.querySelector('.lux-mobile-swipe-container-{{ ai_gen_id }}');
+      if (container && !customElements.get('lux-mobile-swipe-{{ ai_gen_id }}')) {
+        const wrapper = document.createElement('lux-mobile-swipe-{{ ai_gen_id }}');
+        container.parentNode.insertBefore(wrapper, container);
+        wrapper.appendChild(container);
+      }
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Luxury carousel",
+  "settings": [
+    {
+      "type": "header",
+      "content": "Colección 1 - BOLSAS"
+    },
+    {
+      "type": "collection",
+      "id": "collection_1",
+      "label": "Colección"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_1",
+      "label": "Imagen"
+    },
+    {
+      "type": "header",
+      "content": "Colección 2 - CARTERAS"
+    },
+    {
+      "type": "collection",
+      "id": "collection_2",
+      "label": "Colección"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_2",
+      "label": "Imagen"
+    },
+    {
+      "type": "header",
+      "content": "Colección 3 - RELOJES"
+    },
+    {
+      "type": "collection",
+      "id": "collection_3",
+      "label": "Colección"
+    },
+    {
+      "type": "image_picker",
+      "id": "image_3",
+      "label": "Imagen"
+    },
+    {
+      "type": "header",
+      "content": "Estilo de tarjeta"
+    },
+    {
+      "type": "color",
+      "id": "card_background",
+      "label": "Fondo de tarjeta",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "header",
+      "content": "Título"
+    },
+    {
+      "type": "font_picker",
+      "id": "title_font",
+      "label": "Fuente",
+      "default": "newsreader_n2"
+    },
+    {
+      "type": "range",
+      "id": "title_size",
+      "label": "Tamaño",
+      "min": 12,
+      "max": 48,
+      "step": 2,
+      "unit": "px",
+      "default": 20
+    },
+    {
+      "type": "color",
+      "id": "title_color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "header",
+      "content": "Botón"
+    },
+    {
+      "type": "font_picker",
+      "id": "button_font",
+      "label": "Fuente",
+      "default": "red_hat_text_n4"
+    },
+    {
+      "type": "range",
+      "id": "button_size",
+      "label": "Tamaño",
+      "min": 10,
+      "max": 24,
+      "step": 1,
+      "unit": "px",
+      "default": 12
+    },
+    {
+      "type": "color",
+      "id": "button_background",
+      "label": "Fondo",
+      "default": "#000000"
+    },
+    {
+      "type": "color",
+      "id": "button_text",
+      "label": "Texto",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_border",
+      "label": "Borde",
+      "default": "#000000"
+    },
+    {
+      "type": "range",
+      "id": "button_border_width",
+      "label": "Ancho de borde",
+      "min": 0,
+      "max": 4,
+      "step": 1,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Radio de borde",
+      "min": 0,
+      "max": 40,
+      "step": 2,
+      "unit": "px",
+      "default": 0
+    },
+    {
+      "type": "color",
+      "id": "button_hover_background",
+      "label": "Fondo al pasar",
+      "default": "#383838"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_text",
+      "label": "Texto al pasar",
+      "default": "#FFFFFF"
+    },
+    {
+      "type": "color",
+      "id": "button_hover_border",
+      "label": "Borde al pasar",
+      "default": "#383838"
+    }
+  ],
+  "presets": [
+    {
+      "name": "Luxury carousel"
+    }
+  ]
+}
+{% endschema %}

@@ -1,0 +1,105 @@
+{%- comment -%}
+  The bag (/cart). Phones: pinned page bar (back, "Mi bolsa", item count), the lines, the summary and a checkout bar that
+  replaces the dock. Lines are exact variants identified by their key; quantity and removal are real forms to /cart/change
+  (monetta-cart.js upgrades them to in-page requests that re-render this very section). Every amount, discount, limit and error
+  is Shopify's; the theme adds nothing up. Checkout is Shopify's: the form posts to /cart with the checkout button. While a change
+  is in flight, or its result could not be confirmed, monetta-cart.js disables every way to checkout (buttons and the accelerated
+  checkout area below) and shows [data-cart-sync] when the only way out is to read the bag again.
+{%- endcomment -%}
+{%- liquid
+  assign count_label = cart.item_count | append: ' artículos'
+  if cart.item_count == 1
+    assign count_label = '1 artículo'
+  endif
+  assign rail_source = section.settings.collection | default: collections.all
+  assign rail_heading_id = section.id | append: '-rail-heading'
+-%}
+<div data-cart-section data-section-id="{{ section.id }}" data-item-count="{{ cart.item_count }}" {{ section.shopify_attributes }}>
+  <div class="container">
+    <div class="page-head page-head--bar">
+      {%- capture bar_trailing -%}<p class="page-bar__trailing" data-cart-heading-count aria-live="polite">{{ count_label }}</p>{%- endcapture -%}
+      {% render 'monetta-page-bar', title: 'Mi bolsa', back: routes.root_url, ruled: true, trailing: bar_trailing %}
+    </div>
+
+    <div class="cart-sync form-error" data-cart-sync role="alert" hidden>
+      {% render 'monetta-icon', name: 'error', size: 18 %}
+      <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de continuar al checkout.</span>
+      <button type="button" class="btn btn--outline" data-cart-resync>Actualizar bolsa</button>
+    </div>
+
+    {%- if cart.item_count == 0 -%}
+      <div class="empty">
+        <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'bag', size: 28 %}</span>
+        <h2 class="empty__title" id="cart-empty" tabindex="-1">Tu bolsa está vacía</h2>
+        <p class="body-copy">Encuentra una pieza que quieras llevar contigo.</p>
+        <div class="empty__actions">
+          <a class="btn btn--primary" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">Volver a la tienda</a>
+        </div>
+      </div>
+      {%- if rail_source.products.size > 0 -%}
+        <section class="section" aria-labelledby="{{ rail_heading_id }}">
+          {% render 'monetta-section-header', id: rail_heading_id, title: section.settings.rail_heading, link_url: routes.all_products_collection_url, link_label: 'Ver todo', rail_id: 'rail-cart' %}
+          <div class="rail">
+            <ul class="rail__track" id="rail-cart" role="list" aria-label="{{ section.settings.rail_heading | escape }}">
+              {%- for product in rail_source.products limit: 8 -%}
+                <li>{% render 'monetta-card', product: product, density: 'compact', sizes: '(min-width: 1024px) 25vw, 36vw' %}</li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        </section>
+      {%- endif -%}
+    {%- else -%}
+      <div class="cart-layout">
+        <section aria-labelledby="cart-lines-title">
+          <h2 class="visually-hidden" id="cart-lines-title">Piezas en tu bolsa ({{ cart.item_count }})</h2>
+          <ul class="cart-lines" role="list">
+            {%- for item in cart.items -%}
+              {% render 'monetta-cart-line', item: item %}
+            {%- endfor -%}
+          </ul>
+          <a class="btn btn--text" href="{{ routes.all_products_collection_url }}" style="margin-top:8px">{% render 'monetta-icon', name: 'arrowBack', size: 18 %} Seguir comprando</a>
+        </section>
+
+        <aside class="summary" aria-labelledby="summary-title">
+          <h2 class="summary__title" id="summary-title">Resumen de compra</h2>
+          <dl>
+            <div class="summary__row"><dt>Subtotal ({{ count_label }})</dt><dd>{{ cart.original_total_price | money_without_trailing_zeros }}</dd></div>
+            {%- if cart.total_discount > 0 -%}
+              {%- for discount in cart.cart_level_discount_applications -%}
+                <div class="summary__row"><dt>{{ discount.title | escape }}</dt><dd>−{{ discount.total_allocated_amount | money_without_trailing_zeros }}</dd></div>
+              {%- endfor -%}
+              <div class="summary__row"><dt>Descuentos aplicados</dt><dd>−{{ cart.total_discount | money_without_trailing_zeros }}</dd></div>
+            {%- endif -%}
+            <div class="summary__row"><dt>Envío</dt><dd>Se calcula en el checkout</dd></div>
+            <div class="summary__row summary__row--total"><dt>Total estimado</dt><dd>{{ cart.total_price | money_with_currency }}</dd></div>
+          </dl>
+          <p class="summary__note">Los descuentos, impuestos y el envío finales se confirman en el checkout de Shopify.</p>
+          <form action="{{ routes.cart_url }}" method="post" id="cart-checkout-form" novalidate>
+            <button type="submit" name="checkout" class="btn btn--primary btn--block">{% render 'monetta-icon', name: 'lock', size: 18 %} Continuar al checkout</button>
+            {%- if additional_checkout_buttons -%}
+              <div class="cart-additional-checkout">{{ content_for_additional_checkout_buttons }}</div>
+            {%- endif -%}
+          </form>
+          <p class="secure-note">{% render 'monetta-icon', name: 'lock', size: 14 %} Pago procesado por Shopify</p>
+        </aside>
+      </div>
+    {%- endif -%}
+  </div>
+
+  {%- if cart.item_count > 0 -%}
+    <div class="checkout-bar" data-checkout-bar>
+      <div class="checkout-bar__total"><span>Total estimado</span><strong>{{ cart.total_price | money_with_currency }}</strong></div>
+      <button type="submit" form="cart-checkout-form" name="checkout" class="btn btn--primary">{% render 'monetta-icon', name: 'lock', size: 18 %} Ir al checkout</button>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Monetta · Bolsa",
+  "settings": [
+    { "type": "text", "id": "rail_heading", "label": "Título del carrusel (bolsa vacía)", "default": "Novedades" },
+    { "type": "collection", "id": "collection", "label": "Colección del carrusel (bolsa vacía)", "info": "Sin colección se usa todo el catálogo." }
+  ]
+}
+{% endschema %}

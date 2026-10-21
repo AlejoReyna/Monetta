@@ -1,0 +1,98 @@
+{%- comment -%}
+  Home hero (HomeEditorialBanner). Phone: a light photograph with the search pill on its lower edge. Tablet and desktop: the
+  photograph beside a panel with eyebrow, tagline, copy, two buttons and fact lines. Images are theme settings (with the
+  Shopify focal point as object-position); without them the app's bundled banner is used.
+{%- endcomment -%}
+{%- liquid
+  assign phone = section.settings.image_mobile
+  assign wide = section.settings.image_desktop
+  assign main_image = phone | default: wide
+-%}
+<h1 class="visually-hidden" tabindex="-1">{{ section.settings.page_heading | default: shop.name | escape }}</h1>
+<section class="home-hero" aria-label="Portada" {{ section.shopify_attributes }}>
+  <div class="home-hero__photo">
+    {%- if main_image -%}
+      <picture>
+        {%- if wide and phone -%}
+          <source media="(min-width: 768px)" srcset="{{ wide | image_url: width: 900 }} 900w, {{ wide | image_url: width: 1400 }} 1400w, {{ wide | image_url: width: 1800 }} 1800w" sizes="(min-width: 1024px) 58vw, 55vw">
+        {%- endif -%}
+        <img
+          src="{{ main_image | image_url: width: 900 }}"
+          srcset="{{ main_image | image_url: width: 540 }} 540w, {{ main_image | image_url: width: 900 }} 900w, {{ main_image | image_url: width: 1400 }} 1400w"
+          sizes="(min-width: 1024px) 58vw, (min-width: 768px) 55vw, 100vw"
+          width="{{ main_image.width }}"
+          height="{{ main_image.height }}"
+          alt=""
+          fetchpriority="high"
+          decoding="async"
+          {% if main_image.presentation.focal_point %}style="object-position: {{ main_image.presentation.focal_point }}"{% endif %}
+        >
+      </picture>
+    {%- else -%}
+      <img src="{{ 'monetta-home-banner.jpg' | asset_url }}" width="736" height="981" alt="" fetchpriority="high" decoding="async">
+    {%- endif -%}
+  </div>
+  <div class="home-hero__search">
+    <a class="search-pill" href="{{ routes.search_url }}">{% render 'monetta-icon', name: 'search', size: 20 %}<span>{{ section.settings.search_text | escape }}</span><span class="visually-hidden"> — buscar productos</span></a>
+  </div>
+  <div class="home-hero__panel">
+    {%- if section.settings.eyebrow != blank -%}<p class="eyebrow">{{ section.settings.eyebrow | escape }}</p>{%- endif -%}
+    {%- if section.settings.heading != blank -%}<p class="display display--hero">{{ section.settings.heading | escape }}</p>{%- endif -%}
+    {%- if section.settings.text != blank -%}<p class="body-copy">{{ section.settings.text | escape }}</p>{%- endif -%}
+    <div class="home-hero__actions">
+      {%- if section.settings.button_1_label != blank and section.settings.button_1_link != blank -%}
+        <a class="btn btn--primary" href="{{ section.settings.button_1_link }}">{{ section.settings.button_1_label | escape }}</a>
+      {%- endif -%}
+      {%- if section.settings.button_2_label != blank and section.settings.button_2_link != blank -%}
+        <a class="btn btn--outline" href="{{ section.settings.button_2_link }}">{{ section.settings.button_2_label | escape }}</a>
+      {%- endif -%}
+    </div>
+    {%- if section.blocks.size > 0 -%}
+      <ul class="home-hero__facts" role="list">
+        {%- for block in section.blocks -%}
+          <li {{ block.shopify_attributes }}>{% render 'monetta-icon', name: block.settings.icon, size: 16 %} {{ block.settings.text | escape }}</li>
+        {%- endfor -%}
+      </ul>
+    {%- endif -%}
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Monetta · Portada",
+  "max_blocks": 4,
+  "settings": [
+    { "type": "image_picker", "id": "image_mobile", "label": "Imagen para teléfono", "info": "Vertical, 1080×1440 o mayor, clara y sin texto. Sin imagen se usa el banner original de la app." },
+    { "type": "image_picker", "id": "image_desktop", "label": "Imagen para tablet y escritorio", "info": "Horizontal, 1600×1000 o mayor. Si se omite se reutiliza la del teléfono." },
+    { "type": "text", "id": "page_heading", "label": "Encabezado de la página (solo para lectores de pantalla y buscadores)", "default": "Monetta: bolsas, carteras y relojes originales" },
+    { "type": "text", "id": "search_text", "label": "Texto del buscador (teléfono)", "default": "Encuentra algo muy tú" },
+    { "type": "header", "content": "Panel (tablet y escritorio)" },
+    { "type": "text", "id": "eyebrow", "label": "Sobretítulo", "default": "Boutique Monetta" },
+    { "type": "text", "id": "heading", "label": "Título", "default": "Bolsas, carteras y relojes originales." },
+    { "type": "textarea", "id": "text", "label": "Texto", "default": "Piezas importadas de Estados Unidos, elegidas para consentirte o para hacer crecer tu negocio, con envíos a todo México." },
+    { "type": "text", "id": "button_1_label", "label": "Botón principal: texto", "default": "Ver novedades" },
+    { "type": "url", "id": "button_1_link", "label": "Botón principal: enlace" },
+    { "type": "text", "id": "button_2_label", "label": "Botón secundario: texto", "default": "Ver catálogo" },
+    { "type": "url", "id": "button_2_link", "label": "Botón secundario: enlace" }
+  ],
+  "blocks": [
+    {
+      "type": "fact",
+      "name": "Dato",
+      "settings": [
+        { "type": "select", "id": "icon", "label": "Icono", "default": "check", "options": [
+          { "value": "check", "label": "Palomita" },
+          { "value": "truck", "label": "Envío" },
+          { "value": "work", "label": "Maletín" },
+          { "value": "refresh", "label": "Cambios" },
+          { "value": "lock", "label": "Candado" }
+        ] },
+        { "type": "text", "id": "text", "label": "Texto", "default": "Productos originales" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Monetta · Portada", "blocks": [ { "type": "fact" }, { "type": "fact", "settings": { "icon": "truck", "text": "Envíos a todo México" } } ] }
+  ]
+}
+{% endschema %}

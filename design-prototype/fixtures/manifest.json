@@ -1,0 +1,1111 @@
+{
+  "generatedBy": "scripts/build-fixtures.mjs",
+  "capturedAt": "2026-10-17T20:56:00-06:00",
+  "sources": {
+    "products": [
+      "https://monetta.mx/products.json?limit=250&page=1",
+      "https://monetta.mx/products.json?limit=250&page=2"
+    ],
+    "collections": "https://monetta.mx/collections.json?limit=250",
+    "membership": "https://monetta.mx/collections/<handle>/products.json?limit=250",
+    "rules": "assets/rules/normalization_rules.json (app repository, copied to fixtures/source/)"
+  },
+  "selection": {
+    "count": 86,
+    "liveCount": 311,
+    "mustInclude": [
+      "bolso-coach-shoulder-negro-rectangular",
+      "bolso-steve-madden-crossbody-3",
+      "bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "bolso-michael-kors-jet-set-travel-vanilla",
+      "bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro",
+      "cartera-michael-kors-greenwich-medium-leather-trifold-wallet-negro-1",
+      "bolso-coach-station-tote-bag-negro",
+      "reloj-coach-sammy-gold-white",
+      "bolso-tommy-hilfiger-crossbody-beige-y-rojo",
+      "bolso-guess-crossbody-negro-1",
+      "bolsa-guess-crossbody-camera-camel",
+      "bolsa-guess-tote-cafe-monograma-dijes",
+      "cartera-calvin-klein-negra-texturizada",
+      "bolsa-juicy-couture-hobo-rosa",
+      "bolsa-juicy-couture-crossbody-satchel-blanca",
+      "bolsa-juicy-couture-crossbody-satchel-negra",
+      "bolsa-steve-madden-hobo-animal-print-piton-cafe",
+      "bolsa-steve-madden-crossbody-satchel-azul-denim-estampado-cerezas",
+      "cartera-guess-compacta-negro",
+      "bolsa-guess-shoulder-vino-brillante",
+      "reloj-michael-kors-lennox-pave-gold",
+      "reloj-michael-kors-mini-aspyn-rose-gold",
+      "reloj-coach-olivia-gold",
+      "reloj-coach-talia-saddle"
+    ],
+    "brandCaps": {
+      "guess": 22,
+      "steve_madden": 16,
+      "coach": 16,
+      "michael_kors": 16,
+      "tommy_hilfiger": 12,
+      "juicy_couture": 3,
+      "calvin_klein": 1
+    }
+  },
+  "synthetic": [
+    {
+      "handle": "bolsa-guess-shoulder-vino-brillante",
+      "soldOut": true,
+      "note": "Agotado de demostración: ningún producto estaba agotado por completo en el snapshot del 17-oct-2026."
+    },
+    {
+      "handle": "cartera-guess-compacta-negro",
+      "inventoryLimit": 2,
+      "note": "Límite de existencia de demostración (2 piezas): la API pública no expone cantidades."
+    }
+  ],
+  "images": [
+    {
+      "file": "public/media/products/cartera-calvin-klein-negra-texturizada/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/calvin-klein-cartera-negra-texturizada.jpg?v=1792040918&width=800",
+      "product": "cartera-calvin-klein-negra-texturizada"
+    },
+    {
+      "file": "public/media/products/bolsa-juicy-couture-hobo-rosa/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/juicy-couture-rosa-hombro.jpg?v=1792040911&width=800",
+      "product": "bolsa-juicy-couture-hobo-rosa"
+    },
+    {
+      "file": "public/media/products/bolsa-juicy-couture-crossbody-satchel-blanca/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/juicy-couture-blanca-crossbody.jpg?v=1792040906&width=800",
+      "product": "bolsa-juicy-couture-crossbody-satchel-blanca"
+    },
+    {
+      "file": "public/media/products/bolsa-juicy-couture-crossbody-satchel-negra/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/juicy-couture-negra-crossbody.jpg?v=1792040899&width=800",
+      "product": "bolsa-juicy-couture-crossbody-satchel-negra"
+    },
+    {
+      "file": "public/media/products/cartera-michael-kors-slim-billfold-taupe/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/michael-kors-slim-billfold-taupe.jpg?v=1792039062&width=800",
+      "product": "cartera-michael-kors-slim-billfold-taupe"
+    },
+    {
+      "file": "public/media/products/cartera-michael-kors-slim-billfold-azul-monograma-mk/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/michael-kors-slim-billfold-azul-monograma.jpg?v=1792039055&width=800",
+      "product": "cartera-michael-kors-slim-billfold-azul-monograma-mk"
+    },
+    {
+      "file": "public/media/products/cartera-michael-kors-slim-billfold-negra-monograma-mk/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/michael-kors-slim-billfold-negra-monograma.jpg?v=1792039047&width=800",
+      "product": "cartera-michael-kors-slim-billfold-negra-monograma-mk"
+    },
+    {
+      "file": "public/media/products/bolsa-michael-kors-crossbody-negra/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/michael-kors-crossbody-negra-cadena-dorada.jpg?v=1792037027&width=800",
+      "product": "bolsa-michael-kors-crossbody-negra"
+    },
+    {
+      "file": "public/media/products/cartera-tommy-hilfiger-zip-vino-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-cartera-zip-vino-monograma.jpg?v=1792037021&width=800",
+      "product": "cartera-tommy-hilfiger-zip-vino-monograma"
+    },
+    {
+      "file": "public/media/products/cartera-tommy-hilfiger-grande-roja-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-cartera-roja-monograma.jpg?v=1792037014&width=800",
+      "product": "cartera-tommy-hilfiger-grande-roja-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-crossbody-flap-beige-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-crossbody-flap-beige-monograma.jpg?v=1792036248&width=800",
+      "product": "bolsa-tommy-hilfiger-crossbody-flap-beige-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-crossbody-flap-rojo/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-crossbody-flap-rojo.jpg?v=1792036241&width=800",
+      "product": "bolsa-tommy-hilfiger-crossbody-flap-rojo"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-crossbody-clutch-rojo/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-crossbody-clutch-rojo.jpg?v=1792035818&width=800",
+      "product": "bolsa-tommy-hilfiger-crossbody-clutch-rojo"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-crossbody-satchel-azul/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-crossbody-satchel-azul.jpg?v=1792035812&width=800",
+      "product": "bolsa-tommy-hilfiger-crossbody-satchel-azul"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-crossbody-clutch-vino/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-crossbody-clutch-vino.jpg?v=1792035805&width=800",
+      "product": "bolsa-tommy-hilfiger-crossbody-clutch-vino"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-crossbody-satchel-azul-rojo-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-crossbody-satchel-azul-rojo-monograma.jpg?v=1792035792&width=800",
+      "product": "bolsa-tommy-hilfiger-crossbody-satchel-azul-rojo-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-hobo-negro-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-hobo-negro-monograma.jpg?v=1792035780&width=800",
+      "product": "bolsa-tommy-hilfiger-hobo-negro-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-hobo-cafe-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-hobo-cafe-monograma.jpg?v=1792035772&width=800",
+      "product": "bolsa-tommy-hilfiger-hobo-cafe-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-tommy-hilfiger-tote-negro-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/tommy-hilfiger-tote-negro-monograma.jpg?v=1792034896&width=800",
+      "product": "bolsa-tommy-hilfiger-tote-negro-monograma"
+    },
+    {
+      "file": "public/media/products/cartera-steve-madden-verde-acolchada/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-cartera-verde-acolchada.jpg?v=1792034883&width=800",
+      "product": "cartera-steve-madden-verde-acolchada"
+    },
+    {
+      "file": "public/media/products/cartera-steve-madden-cafe-patchwork/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-cartera-cafe-patchwork.jpg?v=1792034877&width=800",
+      "product": "cartera-steve-madden-cafe-patchwork"
+    },
+    {
+      "file": "public/media/products/munequera-steve-madden-negro-candado/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-munequera-negra-candado.jpg?v=1792034869&width=800",
+      "product": "munequera-steve-madden-negro-candado"
+    },
+    {
+      "file": "public/media/products/munequera-steve-madden-negro-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-munequera-negra-monograma.jpg?v=1792034864&width=800",
+      "product": "munequera-steve-madden-negro-monograma"
+    },
+    {
+      "file": "public/media/products/tarjetero-steve-madden-rosa/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-tarjetero-rosa.jpg?v=1792033545&width=800",
+      "product": "tarjetero-steve-madden-rosa"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-crossbody-mini-satchel-rojo/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-bolsa-crossbody-mini-satchel-rojo.jpg?v=1792014379&width=800",
+      "product": "bolsa-steve-madden-crossbody-mini-satchel-rojo"
+    },
+    {
+      "file": "public/media/products/tarjetero-steve-madden-negro-con-monedero-rojo/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-tarjetero-negro-monedero-rojo.jpg?v=1792007787&width=800",
+      "product": "tarjetero-steve-madden-negro-con-monedero-rojo"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-crossbody-hobo-vino/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-crossbody-hobo-vino.jpg?v=1792007769&width=800",
+      "product": "bolsa-steve-madden-crossbody-hobo-vino"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-crossbody-messenger-cafe-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-crossbody-messenger-cafe-monograma.jpg?v=1792007760&width=800",
+      "product": "bolsa-steve-madden-crossbody-messenger-cafe-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-shoulder-vino-croco/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-shoulder-vino-croco.jpg?v=1792007753&width=800",
+      "product": "bolsa-steve-madden-shoulder-vino-croco"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-crossbody-tote-vino/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-crossbody-tote-vino.jpg?v=1792007214&width=800",
+      "product": "bolsa-steve-madden-crossbody-tote-vino"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-crossbody-satchel-camel-monograma-1/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-crossbody-satchel-camel-monograma-211809.jpg?v=1792007206&width=800",
+      "product": "bolsa-steve-madden-crossbody-satchel-camel-monograma-1"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-crossbody-clutch-azul-claro-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-crossbody-clutch-azul-claro-monograma.jpg?v=1792007183&width=800",
+      "product": "bolsa-steve-madden-crossbody-clutch-azul-claro-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-crossbody-satchel-azul-denim-estampado-cerezas/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-crossbody-satchel-azul-denim-cerezas.jpg?v=1792004542&width=800",
+      "product": "bolsa-steve-madden-crossbody-satchel-azul-denim-estampado-cerezas"
+    },
+    {
+      "file": "public/media/products/bolsa-steve-madden-hobo-animal-print-piton-cafe/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/steve-madden-hobo-animal-print-piton-cafe.jpg?v=1792002326&width=800",
+      "product": "bolsa-steve-madden-hobo-animal-print-piton-cafe"
+    },
+    {
+      "file": "public/media/products/cartera-guess-flap-cafe-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/cartera-guess-flap-cafe-monograma.jpg?v=1791931669&width=800",
+      "product": "cartera-guess-flap-cafe-monograma"
+    },
+    {
+      "file": "public/media/products/cartera-guess-flap-azul-marino-monograma-solapa-recta/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/cartera-guess-flap-azul-marino-monograma-solapa-recta.jpg?v=1791931662&width=800",
+      "product": "cartera-guess-flap-azul-marino-monograma-solapa-recta"
+    },
+    {
+      "file": "public/media/products/cartera-guess-compacta-negro/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-cartera-compacta-negro-14x9x3.jpg?v=1791929326&width=800",
+      "product": "cartera-guess-compacta-negro"
+    },
+    {
+      "file": "public/media/products/set-guess-tarjetero-y-monedero-cafe-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-set-tarjetero-monedero-cafe-monograma-11x8x2.jpg?v=1791929318&width=800",
+      "product": "set-guess-tarjetero-y-monedero-cafe-monograma"
+    },
+    {
+      "file": "public/media/products/set-cartera-guess-monograma-cafe-con-monedero-animal-print/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-set-cartera-monograma-cafe-monedero-animal-print-18x10x2.jpg?v=1791929311&width=800",
+      "product": "set-cartera-guess-monograma-cafe-con-monedero-animal-print"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-shoulder-cafe-geometrico/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-crossbody-shoulder-cafe-geometrico-22x14x7.jpg?v=1791928930&width=800",
+      "product": "bolsa-guess-crossbody-shoulder-cafe-geometrico"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-camera-cafe-geometrico/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-crossbody-camera-cafe-geometrico-22x14x7.jpg?v=1791928924&width=800",
+      "product": "bolsa-guess-crossbody-camera-cafe-geometrico"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-camera-negro-geometrico/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-crossbody-camera-negro-geometrico-22x14x7.jpg?v=1791928916&width=800",
+      "product": "bolsa-guess-crossbody-camera-negro-geometrico"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-camera-mini-beige-cafe-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-crossbody-camera-mini-beige-cafe-monograma-10x10x10.jpg?v=1791928902&width=800",
+      "product": "bolsa-guess-crossbody-camera-mini-beige-cafe-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-satchel-mini-gris-oscuro-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-crossbody-satchel-mini-gris-oscuro-monograma-10x10x10.jpg?v=1791928889&width=800",
+      "product": "bolsa-guess-crossbody-satchel-mini-gris-oscuro-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-camera-camel/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-crossbody-camera-camel-22x15x7.jpg?v=1791928130&width=800",
+      "product": "bolsa-guess-crossbody-camera-camel"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-shoulder-negro-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-bolsa-negra-24x14x5.jpg?v=1791928099&width=800",
+      "product": "bolsa-guess-crossbody-shoulder-negro-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-satchel-blanco-taupe-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-crossbody-satchel-blanco-taupe-monograma-27x16x8.jpg?v=1791927479&width=800",
+      "product": "bolsa-guess-crossbody-satchel-blanco-taupe-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-crossbody-hobo-negro-monograma/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-crossbody-hobo-negro-monograma-25x20x8.jpg?v=1791927023&width=800",
+      "product": "bolsa-guess-crossbody-hobo-negro-monograma"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-shoulder-vino-brillante/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-shoulder-vino-brillante-29x20x9.jpg?v=1791926358&width=800",
+      "product": "bolsa-guess-shoulder-vino-brillante"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-tote-cafe-monograma-dijes/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-tote-cafe-monograma-dijes-30x21x12.jpg?v=1791925453&width=800",
+      "product": "bolsa-guess-tote-cafe-monograma-dijes"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-tote-negro-blanco/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-tote-negro-blanco-33x24x11.jpg?v=1791925438&width=800",
+      "product": "bolsa-guess-tote-negro-blanco"
+    },
+    {
+      "file": "public/media/products/bolsa-guess-tote-negra-monograma-barra-logo/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/guess-tote-negra-monograma-barra-logo-38x29x11.jpg?v=1791924795&width=800",
+      "product": "bolsa-guess-tote-negra-monograma-barra-logo"
+    },
+    {
+      "file": "public/media/products/bolso-guess-hobo-vino/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/062509F1-78A1-4F46-8E75-C058C7569017.jpg?v=1791662383&width=800",
+      "product": "bolso-guess-hobo-vino"
+    },
+    {
+      "file": "public/media/products/bolso-tommy-hilfiger-crossbody-beige-y-rojo/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/8F6429A4-06E2-4D46-A86A-827C814DA571.png?v=1788484211&width=800",
+      "product": "bolso-tommy-hilfiger-crossbody-beige-y-rojo"
+    },
+    {
+      "file": "public/media/products/bolso-tommy-hilfiger-crossbody-beige-y-rojo/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/B8D22F82-5F40-453A-B22A-52AE8C489356.png?v=1788484212&width=800",
+      "product": "bolso-tommy-hilfiger-crossbody-beige-y-rojo"
+    },
+    {
+      "file": "public/media/products/bolso-guess-crossbody-negro-1/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/E7922052-8611-4F25-987D-8D5BB7EDDFD9.png?v=1788477216&width=800",
+      "product": "bolso-guess-crossbody-negro-1"
+    },
+    {
+      "file": "public/media/products/bolso-guess-crossbody-negro-1/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/59D7D395-E903-4DF0-B641-8117134BD43F.png?v=1788477216&width=800",
+      "product": "bolso-guess-crossbody-negro-1"
+    },
+    {
+      "file": "public/media/products/bolso-crossbosy-doble-cierre-guess-rojo-copia/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/FCB88530-C9A3-4BFB-A273-BB271150B7DF.png?v=1788453057&width=800",
+      "product": "bolso-crossbosy-doble-cierre-guess-rojo-copia"
+    },
+    {
+      "file": "public/media/products/bolso-crossbosy-doble-cierre-guess-rojo-copia/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/5D7C87D0-B269-4E2E-B77C-B3B21FDE6C1A.png?v=1788453056&width=800",
+      "product": "bolso-crossbosy-doble-cierre-guess-rojo-copia"
+    },
+    {
+      "file": "public/media/products/bolso-crossbosy-doble-cierre-guess-rojo/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/664B08E5-DEC3-433E-BF74-AF5290AC8B6D.png?v=1788452495&width=800",
+      "product": "bolso-crossbosy-doble-cierre-guess-rojo"
+    },
+    {
+      "file": "public/media/products/bolso-crossbosy-doble-cierre-guess-rojo/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/272C3FC6-A39C-435B-B0DB-42C015BECBE9.png?v=1788452495&width=800",
+      "product": "bolso-crossbosy-doble-cierre-guess-rojo"
+    },
+    {
+      "file": "public/media/products/bolso-steve-madden-crossbody-3/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/2F460325-CA33-4C27-8F11-250133D3CA6E.jpg?v=1786440158&width=800",
+      "product": "bolso-steve-madden-crossbody-3"
+    },
+    {
+      "file": "public/media/products/bolso-steve-madden-crossbody-3/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/2DD173DC-A381-4A5F-9688-900F0897B784.jpg?v=1786440215&width=800",
+      "product": "bolso-steve-madden-crossbody-3"
+    },
+    {
+      "file": "public/media/products/bolso-steve-madden-crossbody-3/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/739A37A9-BC50-4967-81A0-03F9AD464AA7.jpg?v=1786440007&width=800",
+      "product": "bolso-steve-madden-crossbody-3"
+    },
+    {
+      "file": "public/media/products/bolso-steve-madden-crossbody-3/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/608CD28F-5949-4550-98D8-51133C159283.jpg?v=1786440267&width=800",
+      "product": "bolso-steve-madden-crossbody-3"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-sammy-medium-black-copy/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8101.png?v=1781334060&width=800",
+      "product": "bolso-michael-kors-sammy-medium-black-copy"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-sammy-medium-black-copy/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8103.png?v=1781334152&width=800",
+      "product": "bolso-michael-kors-sammy-medium-black-copy"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-sammy-medium-black-copy/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8107.png?v=1781334287&width=800",
+      "product": "bolso-michael-kors-sammy-medium-black-copy"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-sammy-medium-black-copy/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8104.png?v=1781334223&width=800",
+      "product": "bolso-michael-kors-sammy-medium-black-copy"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-sammy-medium-black-copy/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8108.png?v=1781334358&width=800",
+      "product": "bolso-michael-kors-sammy-medium-black-copy"
+    },
+    {
+      "file": "public/media/products/cartera-michael-kors-greenwich-medium-leather-trifold-wallet-negro-1/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/917BEF6F-729F-4C24-9823-25D31BA4F0AD.png?v=1781266074&width=800",
+      "product": "cartera-michael-kors-greenwich-medium-leather-trifold-wallet-negro-1"
+    },
+    {
+      "file": "public/media/products/cartera-michael-kors-greenwich-medium-leather-trifold-wallet-negro-1/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/FB82A1EA-CADA-437B-AA5C-1B4A4EEF8DC3.png?v=1781266213&width=800",
+      "product": "cartera-michael-kors-greenwich-medium-leather-trifold-wallet-negro-1"
+    },
+    {
+      "file": "public/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/96F906F5-CCCF-434A-BD46-53D278F173D3.png?v=1781074811&width=800",
+      "product": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa"
+    },
+    {
+      "file": "public/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/28397D40-3D93-4335-BE5D-3380F940526F.png?v=1781075197&width=800",
+      "product": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa"
+    },
+    {
+      "file": "public/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/B9E603EB-BD3C-44E8-8054-1BC4490FF371.png?v=1781075259&width=800",
+      "product": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa"
+    },
+    {
+      "file": "public/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/486AC845-AD5D-48CD-B213-A2D8CAA903C1.png?v=1781114732&width=800",
+      "product": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa"
+    },
+    {
+      "file": "public/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/E5BA0DE1-C6C5-4112-B023-7AB5173F1F5E.png?v=1781075430&width=800",
+      "product": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa"
+    },
+    {
+      "file": "public/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/51F1C829-1593-424D-B840-06A186B271F7.png?v=1781075620&width=800",
+      "product": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa"
+    },
+    {
+      "file": "public/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/7.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/11F4D170-B82B-4A1D-868B-9B43E3CEA0E0.png?v=1781075740&width=800",
+      "product": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa"
+    },
+    {
+      "file": "public/media/products/cartera-coach-long-zip-around-wallet-signature-stripe-rosa/8.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/0C06D04E-310F-4719-9B85-333406EE2116.png?v=1781075815&width=800",
+      "product": "cartera-coach-long-zip-around-wallet-signature-stripe-rosa"
+    },
+    {
+      "file": "public/media/products/cartera-coach-snap-wallet-negro-3/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7803.png?v=1780984309&width=800",
+      "product": "cartera-coach-snap-wallet-negro-3"
+    },
+    {
+      "file": "public/media/products/cartera-coach-snap-wallet-negro-3/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/3C593DDF-1F96-48D4-8282-E08784FBBE4A.png?v=1781114846&width=800",
+      "product": "cartera-coach-snap-wallet-negro-3"
+    },
+    {
+      "file": "public/media/products/cartera-coach-snap-wallet-negro-3/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/85B5EC7B-DA35-4235-AFC0-0A1751486514.png?v=1781114897&width=800",
+      "product": "cartera-coach-snap-wallet-negro-3"
+    },
+    {
+      "file": "public/media/products/cartera-coach-snap-wallet-negro-3/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/3792D7BC-715A-450C-8ACD-D84E94E42EF4.png?v=1781114980&width=800",
+      "product": "cartera-coach-snap-wallet-negro-3"
+    },
+    {
+      "file": "public/media/products/cartera-coach-snap-wallet-negro-3/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/EE6CFD5A-FCB9-455F-9C55-ECABB56D02FF.png?v=1781115041&width=800",
+      "product": "cartera-coach-snap-wallet-negro-3"
+    },
+    {
+      "file": "public/media/products/cartera-coach-snap-wallet-negro-3/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/333B3061-CB29-4388-AAA3-B1CECCE1FAA2.png?v=1781115112&width=800",
+      "product": "cartera-coach-snap-wallet-negro-3"
+    },
+    {
+      "file": "public/media/products/cartera-coach-snap-wallet-negro-3/7.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/09009A7A-CFD9-4B31-9A7B-432A1E7AB838.png?v=1781115163&width=800",
+      "product": "cartera-coach-snap-wallet-negro-3"
+    },
+    {
+      "file": "public/media/products/cartera-coach-snap-wallet-negro-3/8.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/C6A0E346-9C95-4612-B8A9-A61AB46E25E1.png?v=1781115297&width=800",
+      "product": "cartera-coach-snap-wallet-negro-3"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7862.png?v=1780997574&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7990.png?v=1781256454&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7992.png?v=1781256941&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/54BD8FCE-15A6-4CE0-B7D7-5331BA10B829.png?v=1781256201&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/3BB5154C-3EDA-4F37-A31C-ECB6D7C2440B.png?v=1781256201&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/8AA6CA14-0D78-416B-B1E6-66E95EBED511.png?v=1781256201&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-rosa/7.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/88411BA1-D67F-4547-9A67-7BBC8D9D2AA9.png?v=1781256201&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7985.png?v=1781255653&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-cafe"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7988.png?v=1781256007&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-cafe"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7987.png?v=1781255922&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-cafe"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7982.png?v=1781255323&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-cafe"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7981.png?v=1781255236&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-cafe"
+    },
+    {
+      "file": "public/media/products/bolso-coach-jet-shoulder-bag-signature-cafe/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7980.png?v=1781255236&width=800",
+      "product": "bolso-coach-jet-shoulder-bag-signature-cafe"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/1797A613-D45B-4C38-881B-65F57F066BC1.png?v=1781248511&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/A9F7BA6C-65C7-45D7-BAF6-499E982C1B9F.png?v=1781251434&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/47A8768D-9D86-466B-B0A0-B2D31BDD65D8.png?v=1781250794&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/721A20E8-A506-4EB4-8F09-F91AF4A966C1.png?v=1781250794&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7970.png?v=1781249864&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/73E34160-85D7-4210-8402-C1CE3C49ED1F.png?v=1781249941&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/7.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/776B1B91-0D5C-4121-9BFF-52C39B18EBC6.png?v=1781249941&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/8.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7965.png?v=1781249113&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/9.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7966.png?v=1781249291&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/10.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7963.png?v=1781248856&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/11.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7962.png?v=1781248856&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/12.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7961.png?v=1781248617&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-station-tote-bag-negro/13.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/0F9636BD-B2D4-4561-8F1F-04AFB2FDF780.png?v=1781248511&width=800",
+      "product": "bolso-coach-station-tote-bag-negro"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mollie-tote-bag-25-signature-blanco/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7957.png?v=1781247351&width=800",
+      "product": "bolso-coach-mollie-tote-bag-25-signature-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mollie-tote-bag-25-signature-blanco/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7958.png?v=1781247571&width=800",
+      "product": "bolso-coach-mollie-tote-bag-25-signature-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mollie-tote-bag-25-signature-blanco/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7956.png?v=1781247369&width=800",
+      "product": "bolso-coach-mollie-tote-bag-25-signature-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rowan-bucket-bag-blanco/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7954.png?v=1781246566&width=800",
+      "product": "bolso-coach-rowan-bucket-bag-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rowan-bucket-bag-blanco/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7953.png?v=1781246587&width=800",
+      "product": "bolso-coach-rowan-bucket-bag-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rowan-bucket-bag-blanco/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7955.png?v=1781246644&width=800",
+      "product": "bolso-coach-rowan-bucket-bag-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rainer-crossbody-quilted-blanco/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7947.png?v=1781245143&width=800",
+      "product": "bolso-coach-rainer-crossbody-quilted-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rainer-crossbody-quilted-blanco/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7950.png?v=1781245514&width=800",
+      "product": "bolso-coach-rainer-crossbody-quilted-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rainer-crossbody-quilted-blanco/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7948.png?v=1781245225&width=800",
+      "product": "bolso-coach-rainer-crossbody-quilted-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rainer-crossbody-quilted-blanco/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7952.png?v=1781245767&width=800",
+      "product": "bolso-coach-rainer-crossbody-quilted-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rainer-crossbody-quilted-blanco/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7951.png?v=1781245622&width=800",
+      "product": "bolso-coach-rainer-crossbody-quilted-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-rainer-crossbody-quilted-blanco/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7946.png?v=1781245171&width=800",
+      "product": "bolso-coach-rainer-crossbody-quilted-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7870.png?v=1780998573&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7871.png?v=1780998729&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7872.png?v=1780998840&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7873.png?v=1780999006&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7911.png?v=1781155626&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7874.png?v=1780999132&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/7.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7876.png?v=1780999629&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/8.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7877.png?v=1781000054&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/9.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7878.png?v=1781000166&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-signature-beige-blanco/10.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7875.png?v=1780999256&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-signature-beige-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-cafe/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7908.png?v=1781154669&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-cafe"
+    },
+    {
+      "file": "public/media/products/bolso-coach-mini-klare-crossbody-cafe/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7909.png?v=1781154830&width=800",
+      "product": "bolso-coach-mini-klare-crossbody-cafe"
+    },
+    {
+      "file": "public/media/products/bolso-coach-lara-mini-satchel-blanco/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7905.png?v=1781153716&width=800",
+      "product": "bolso-coach-lara-mini-satchel-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-lara-mini-satchel-blanco/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7906.png?v=1781153933&width=800",
+      "product": "bolso-coach-lara-mini-satchel-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-lara-mini-satchel-blanco/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7907.png?v=1781154050&width=800",
+      "product": "bolso-coach-lara-mini-satchel-blanco"
+    },
+    {
+      "file": "public/media/products/bolso-coach-shoulder-negro-rectangular/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7888.png?v=1781119822&width=800",
+      "product": "bolso-coach-shoulder-negro-rectangular"
+    },
+    {
+      "file": "public/media/products/bolso-coach-shoulder-negro-rectangular/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7904.png?v=1781152864&width=800",
+      "product": "bolso-coach-shoulder-negro-rectangular"
+    },
+    {
+      "file": "public/media/products/bolso-coach-shoulder-negro-rectangular/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7902.png?v=1781152673&width=800",
+      "product": "bolso-coach-shoulder-negro-rectangular"
+    },
+    {
+      "file": "public/media/products/bolso-coach-shoulder-negro-rectangular/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7901.png?v=1781152532&width=800",
+      "product": "bolso-coach-shoulder-negro-rectangular"
+    },
+    {
+      "file": "public/media/products/bolso-coach-shoulder-negro-rectangular/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7900.png?v=1781152459&width=800",
+      "product": "bolso-coach-shoulder-negro-rectangular"
+    },
+    {
+      "file": "public/media/products/bolso-coach-shoulder-negro-rectangular/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7898.png?v=1781152262&width=800",
+      "product": "bolso-coach-shoulder-negro-rectangular"
+    },
+    {
+      "file": "public/media/products/bolso-coach-shoulder-negro-rectangular/7.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7899.png?v=1781152307&width=800",
+      "product": "bolso-coach-shoulder-negro-rectangular"
+    },
+    {
+      "file": "public/media/products/bolso-coach-shoulder-negro-rectangular/8.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7903.png?v=1781152790&width=800",
+      "product": "bolso-coach-shoulder-negro-rectangular"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-eva-large-saffiano-leather-tote-negro/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8030.png?v=1781268238&width=800",
+      "product": "bolso-michael-kors-eva-large-saffiano-leather-tote-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-eva-large-saffiano-leather-tote-negro/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8031.png?v=1781268290&width=800",
+      "product": "bolso-michael-kors-eva-large-saffiano-leather-tote-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8032.png?v=1781268753&width=800",
+      "product": "bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8034.png?v=1781268818&width=800",
+      "product": "bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8035.png?v=1781268931&width=800",
+      "product": "bolso-michael-kors-thompson-medium-pebbled-leather-satchel-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-medium-pocket-tote-negro/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8092.png?v=1781333268&width=800",
+      "product": "bolso-michael-kors-jet-set-medium-pocket-tote-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-medium-pocket-tote-negro/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8094.png?v=1781333431&width=800",
+      "product": "bolso-michael-kors-jet-set-medium-pocket-tote-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-medium-pocket-tote-negro/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8098.png?v=1781333779&width=800",
+      "product": "bolso-michael-kors-jet-set-medium-pocket-tote-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-medium-pocket-tote-negro/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8095.png?v=1781333686&width=800",
+      "product": "bolso-michael-kors-jet-set-medium-pocket-tote-negro"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8112.png?v=1781335059&width=800",
+      "product": "bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8115.png?v=1781335150&width=800",
+      "product": "bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8120.png?v=1781335598&width=800",
+      "product": "bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8121.png?v=1781335672&width=800",
+      "product": "bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8118.png?v=1781335530&width=800",
+      "product": "bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-large-logo-shoulder-vanilla/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8096.png?v=1781333703&width=800",
+      "product": "bolso-michael-kors-jet-set-large-logo-shoulder-vanilla"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-large-logo-shoulder-vanilla/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8099.png?v=1781333875&width=800",
+      "product": "bolso-michael-kors-jet-set-large-logo-shoulder-vanilla"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-large-logo-shoulder-vanilla/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8097.png?v=1781333751&width=800",
+      "product": "bolso-michael-kors-jet-set-large-logo-shoulder-vanilla"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-large-logo-shoulder-vanilla/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8100.png?v=1781334491&width=800",
+      "product": "bolso-michael-kors-jet-set-large-logo-shoulder-vanilla"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-travel-vanilla/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8068.png?v=1781318636&width=800",
+      "product": "bolso-michael-kors-jet-set-travel-vanilla"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-travel-vanilla/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8071.png?v=1781319262&width=800",
+      "product": "bolso-michael-kors-jet-set-travel-vanilla"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-travel-vanilla/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8072.png?v=1781319419&width=800",
+      "product": "bolso-michael-kors-jet-set-travel-vanilla"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-travel-vanilla/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8070.png?v=1781319263&width=800",
+      "product": "bolso-michael-kors-jet-set-travel-vanilla"
+    },
+    {
+      "file": "public/media/products/bolso-michael-kors-jet-set-travel-vanilla/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8069.png?v=1781318636&width=800",
+      "product": "bolso-michael-kors-jet-set-travel-vanilla"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-mini-aspyn-rose-gold/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8022.png?v=1781265785&width=800",
+      "product": "reloj-michael-kors-mini-aspyn-rose-gold"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-mini-aspyn-rose-gold/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8023.png?v=1781265885&width=800",
+      "product": "reloj-michael-kors-mini-aspyn-rose-gold"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-monroe-silver-leather/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8018.png?v=1781264879&width=800",
+      "product": "reloj-michael-kors-monroe-silver-leather"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-monroe-silver-leather/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8019.png?v=1781265106&width=800",
+      "product": "reloj-michael-kors-monroe-silver-leather"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-monroe-silver-leather/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8017.png?v=1781264773&width=800",
+      "product": "reloj-michael-kors-monroe-silver-leather"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-monroe-silver-leather/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8020.png?v=1781265359&width=800",
+      "product": "reloj-michael-kors-monroe-silver-leather"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-oversized-callum-gold/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8012.png?v=1781264174&width=800",
+      "product": "reloj-michael-kors-oversized-callum-gold"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-oversized-callum-gold/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8013.png?v=1781264367&width=800",
+      "product": "reloj-michael-kors-oversized-callum-gold"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-oversized-callum-gold/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8014.png?v=1781264459&width=800",
+      "product": "reloj-michael-kors-oversized-callum-gold"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-lennox-pave-gold/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8001.png?v=1781262249&width=800",
+      "product": "reloj-michael-kors-lennox-pave-gold"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-lennox-pave-gold/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8003.png?v=1781262542&width=800",
+      "product": "reloj-michael-kors-lennox-pave-gold"
+    },
+    {
+      "file": "public/media/products/reloj-michael-kors-lennox-pave-gold/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-8002.png?v=1781262367&width=800",
+      "product": "reloj-michael-kors-lennox-pave-gold"
+    },
+    {
+      "file": "public/media/products/reloj-coach-iris-rose-gold/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7609.png?v=1780702269&width=800",
+      "product": "reloj-coach-iris-rose-gold"
+    },
+    {
+      "file": "public/media/products/reloj-coach-iris-rose-gold/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/CF911EBA-FE07-4BD4-A3AC-028F609556DC.png?v=1781151414&width=800",
+      "product": "reloj-coach-iris-rose-gold"
+    },
+    {
+      "file": "public/media/products/reloj-coach-iris-rose-gold/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/95CD4C95-3DDE-45CD-8F3F-251067AAF829.png?v=1781151453&width=800",
+      "product": "reloj-coach-iris-rose-gold"
+    },
+    {
+      "file": "public/media/products/reloj-coach-olivia-gold/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7601.png?v=1780701037&width=800",
+      "product": "reloj-coach-olivia-gold"
+    },
+    {
+      "file": "public/media/products/reloj-coach-olivia-gold/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/30D9666D-C8BE-4E99-88AF-0E819C43B9E9.png?v=1781150404&width=800",
+      "product": "reloj-coach-olivia-gold"
+    },
+    {
+      "file": "public/media/products/reloj-coach-olivia-gold/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/60232C7E-264E-421C-8058-B176CA3EB76E.png?v=1781150488&width=800",
+      "product": "reloj-coach-olivia-gold"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7584.png?v=1780697009&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/F7F54729-DD15-4F3D-B11F-5518EB7C4E67.png?v=1781147971&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/574601CB-65ED-46DD-B42B-71F6C21FA73A.png?v=1781147933&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/7DEC983A-8B13-4ECC-B0EF-9AA4F3A205F1.png?v=1781148033&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/6DAE1761-0868-42ED-AFB8-3640131C7A8C.png?v=1781148103&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/AE4322E9-4378-4436-BC6A-8B6D50692947.png?v=1781148146&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/7.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/3152D17A-A8B1-4914-A93C-1C98541C6426.png?v=1781148290&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/8.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/5F74EF97-A335-45CB-A0DC-7EE8A6AB61CA.png?v=1781148328&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/9.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/45F424B7-A6F7-4D5C-B7E2-93C25E58053C.png?v=1781148366&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/10.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/5B6E6F91-8DD8-4F1E-AF1F-9E9B7D0EA943.png?v=1781148395&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-sammy-gold-white/11.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/FF336C58-D5ED-4269-956E-C07B096A3032.png?v=1781148465&width=800",
+      "product": "reloj-coach-sammy-gold-white"
+    },
+    {
+      "file": "public/media/products/reloj-coach-talia-saddle/1.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/IMG-7565.png?v=1780627242&width=800",
+      "product": "reloj-coach-talia-saddle"
+    },
+    {
+      "file": "public/media/products/reloj-coach-talia-saddle/2.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/1790282F-51A2-4449-B563-DD40E4D3BA6F.png?v=1781143534&width=800",
+      "product": "reloj-coach-talia-saddle"
+    },
+    {
+      "file": "public/media/products/reloj-coach-talia-saddle/3.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/47A9379A-C4F1-471E-A881-AC30AD634C4B.png?v=1781143702&width=800",
+      "product": "reloj-coach-talia-saddle"
+    },
+    {
+      "file": "public/media/products/reloj-coach-talia-saddle/4.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/DE853713-DC41-4239-B9A6-7AD9B1C0BFF8.png?v=1781143793&width=800",
+      "product": "reloj-coach-talia-saddle"
+    },
+    {
+      "file": "public/media/products/reloj-coach-talia-saddle/5.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/038089E3-4DB6-4C68-92FB-71D5140EEEF2.png?v=1781143880&width=800",
+      "product": "reloj-coach-talia-saddle"
+    },
+    {
+      "file": "public/media/products/reloj-coach-talia-saddle/6.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/A8A128B8-2844-4909-AD64-D2C523BF9B43.png?v=1781143927&width=800",
+      "product": "reloj-coach-talia-saddle"
+    },
+    {
+      "file": "public/media/products/reloj-coach-talia-saddle/7.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/78BDB45C-36A4-4667-AB23-D20FA52BEFE7.png?v=1781143996&width=800",
+      "product": "reloj-coach-talia-saddle"
+    },
+    {
+      "file": "public/media/products/reloj-coach-talia-saddle/8.webp",
+      "source": "https://cdn.shopify.com/s/files/1/0723/9165/5575/files/C300C9A0-94AB-4531-B995-1C7E0F04BCC4.png?v=1781144031&width=800",
+      "product": "reloj-coach-talia-saddle"
+    }
+  ]
+}

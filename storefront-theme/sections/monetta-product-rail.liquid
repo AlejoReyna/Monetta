@@ -1,0 +1,44 @@
+{%- comment -%}
+  Home rail of compact product cards (Novedades). Products come from the collection chosen in the editor, in that
+  collection's own order (set it to "newest first" in the admin for a Novedades rail). Prices, compare-at and sold-out
+  states are rendered by Shopify at request time. The next card peeks on phones; buttons appear from 1024 px.
+{%- endcomment -%}
+{%- assign heading_id = section.id | append: '-heading' -%}
+{%- liquid
+  assign source = section.settings.collection | default: collections.all
+  assign rail_id = 'rail-' | append: section.id
+-%}
+<section class="section container" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+  {% render 'monetta-section-header',
+    id: heading_id,
+    title: section.settings.heading,
+    link_url: section.settings.link_url,
+    link_label: section.settings.link_label,
+    rail_id: rail_id
+  %}
+  {%- if source.products.size > 0 -%}
+    <div class="rail">
+      <ul class="rail__track" id="{{ rail_id }}" role="list" aria-label="{{ section.settings.heading | escape }}">
+        {%- for product in source.products limit: section.settings.products_to_show -%}
+          <li>{% render 'monetta-card', product: product, density: 'compact', eager: forloop.first, sizes: '(min-width: 1024px) 25vw, 36vw' %}</li>
+        {%- endfor -%}
+      </ul>
+    </div>
+  {%- else -%}
+    <p class="body-copy">{% if request.design_mode %}Elige una colección con productos en la configuración de esta sección.{% else %}Pronto habrá piezas nuevas aquí.{% endif %}</p>
+  {%- endif -%}
+</section>
+
+{% schema %}
+{
+  "name": "Monetta · Carrusel",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Título", "default": "Novedades" },
+    { "type": "collection", "id": "collection", "label": "Colección", "info": "Sin colección se usa todo el catálogo. El orden es el de la colección." },
+    { "type": "range", "id": "products_to_show", "label": "Productos", "min": 4, "max": 12, "step": 1, "default": 8 },
+    { "type": "text", "id": "link_label", "label": "Texto del enlace", "default": "Ver todo" },
+    { "type": "url", "id": "link_url", "label": "Enlace" }
+  ],
+  "presets": [ { "name": "Monetta · Carrusel" } ]
+}
+{% endschema %}
