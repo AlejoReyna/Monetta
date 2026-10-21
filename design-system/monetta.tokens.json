@@ -1,0 +1,106 @@
+{
+  "$schema": "./monetta.tokens.schema.md",
+  "name": "monetta-tokens",
+  "version": "1.0.0-m1",
+  "status": "proposed",
+  "source": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md §3; hex values re-sampled from the rendered PDF pages on 2026-10-20 (docs/style-guideline-migration/2026-10-20/pdf-color-samples.md). Final values wait for the original artwork.",
+  "color": {
+    "light": {
+      "canvas": "#FBF8F2",
+      "bar": "#F7F3EC",
+      "surface": "#FFFFFF",
+      "surfaceWarm": "#F3EADF",
+      "surfaceTile": "#F4EEE5",
+      "ink": "#211B16",
+      "inkMuted": "#73665D",
+      "actionPrimary": "#745237",
+      "onActionPrimary": "#FFFFFF",
+      "actionDark": "#2D1E14",
+      "onActionDark": "#FBF8F2",
+      "accentText": "#805C32",
+      "gold": "#C5A052",
+      "divider": "#E7DCCE",
+      "borderControl": "#8A7766",
+      "navigationActive": "#8C6436",
+      "navigationInactive": "#211B16",
+      "sale": "#A3342B",
+      "saleSurface": "#F6DEDA",
+      "success": "#3B7B4A",
+      "successSurface": "#EAF4EC",
+      "scrim": "#211B1673",
+      "onPhoto": "#F8F5EE"
+    },
+    "darkRolesOnly": {
+      "$comment": "Dark mode keeps MonettaColors.dark. Only roles that did not exist before are defined here, so a dark build never reads an undefined value.",
+      "surfaceWarm": "#282521",
+      "surfaceTile": "#242220",
+      "actionPrimary": "#C49A65",
+      "onActionPrimary": "#11100F",
+      "actionDark": "#F5F2EC",
+      "onActionDark": "#171615",
+      "borderControl": "#8E8A85",
+      "saleSurface": "#3A1F1B"
+    }
+  },
+  "contrast": [
+    { "fg": "ink", "bg": "canvas", "min": 4.5, "use": "body copy on the page ground" },
+    { "fg": "ink", "bg": "surfaceWarm", "min": 4.5, "use": "headings on campaign and service panels" },
+    { "fg": "ink", "bg": "surfaceTile", "min": 4.5, "use": "tile labels" },
+    { "fg": "ink", "bg": "bar", "min": 4.5, "use": "header icons and title" },
+    { "fg": "inkMuted", "bg": "canvas", "min": 4.5, "use": "supporting copy" },
+    { "fg": "inkMuted", "bg": "surfaceWarm", "min": 4.5, "use": "supporting copy on panels" },
+    { "fg": "inkMuted", "bg": "surfaceTile", "min": 4.5, "use": "supporting copy on tiles" },
+    { "fg": "inkMuted", "bg": "bar", "min": 4.5, "use": "muted copy in bars" },
+    { "fg": "onActionPrimary", "bg": "actionPrimary", "min": 4.5, "use": "purchase button label" },
+    { "fg": "onActionDark", "bg": "actionDark", "min": 4.5, "use": "dark pill label" },
+    { "fg": "accentText", "bg": "canvas", "min": 4.5, "use": "accent links and kickers" },
+    { "fg": "accentText", "bg": "surfaceWarm", "min": 4.5, "use": "accent labels on panels" },
+    { "fg": "accentText", "bg": "bar", "min": 4.5, "use": "active navigation label" },
+    { "fg": "navigationActive", "bg": "bar", "min": 4.5, "use": "active navigation label" },
+    { "fg": "navigationInactive", "bg": "bar", "min": 4.5, "use": "inactive navigation label" },
+    { "fg": "navigationActive", "bg": "navigationInactive", "min": 3.0, "use": "active vs inactive: selection also carries weight and a rule, but a colour-only reading must still hold (NAV-03)" },
+    { "fg": "sale", "bg": "canvas", "min": 4.5, "use": "sale price" },
+    { "fg": "sale", "bg": "saleSurface", "min": 4.5, "use": "discount and stock chips" },
+    { "fg": "success", "bg": "successSurface", "min": 4.5, "use": "success chips" },
+    { "fg": "borderControl", "bg": "canvas", "min": 3.0, "use": "outlined control boundary (WCAG 1.4.11)" },
+    { "fg": "borderControl", "bg": "surface", "min": 3.0, "use": "outlined control boundary on raised surface" },
+    { "fg": "gold", "bg": "canvas", "min": 1.0, "use": "decorative mark only; never text. Listed so its ratio is on record" }
+  ],
+  "type": {
+    "family": {
+      "serif": { "name": "Playfair Display", "fallback": ["New York", "Iowan Old Style", "Baskerville", "Georgia", "Times New Roman", "serif"], "note": "Bundled pair kept until the owners identify the PDF's font." },
+      "sans": { "name": "Inter", "fallback": ["SF Pro Text", "Helvetica Neue", "Helvetica", "Arial", "sans-serif"] }
+    },
+    "role": {
+      "campaign": { "family": "serif", "weight": 400, "lineHeight": 1.08, "tracking": -0.012, "size": { "compact": 32, "medium": 40, "expanded": 52 } },
+      "screenTitle": { "family": "serif", "weight": 400, "lineHeight": 1.12, "tracking": -0.012, "size": { "compact": 26, "medium": 30, "expanded": 36 } },
+      "sectionTitle": { "family": "serif", "weight": 400, "lineHeight": 1.15, "tracking": -0.01, "size": { "compact": 23, "medium": 27, "expanded": 30 } },
+      "productName": { "family": "serif", "weight": 400, "lineHeight": 1.15, "tracking": -0.01, "size": { "compact": 25, "medium": 29, "expanded": 32 } },
+      "accountRow": { "family": "serif", "weight": 400, "lineHeight": 1.25, "tracking": 0, "size": { "compact": 18, "medium": 19, "expanded": 20 } },
+      "body": { "family": "sans", "weight": 400, "lineHeight": 1.5, "tracking": 0, "size": { "compact": 15, "medium": 16, "expanded": 17 } },
+      "cardLabel": { "family": "sans", "weight": 500, "lineHeight": 1.35, "tracking": 0, "size": { "compact": 14, "medium": 15, "expanded": 16 } },
+      "price": { "family": "sans", "weight": 600, "lineHeight": 1.3, "tracking": 0, "size": { "compact": 15, "medium": 16, "expanded": 17 } },
+      "control": { "family": "sans", "weight": 600, "lineHeight": 1.1, "tracking": 0.02, "size": { "compact": 14, "medium": 15, "expanded": 15 } },
+      "navLabel": { "family": "sans", "weight": 500, "lineHeight": 1.2, "tracking": 0, "size": { "compact": 12, "medium": 13, "expanded": 13 } },
+      "eyebrow": { "family": "sans", "weight": 500, "lineHeight": 1.3, "tracking": 0.14, "size": { "compact": 11, "medium": 11, "expanded": 12 } }
+    }
+  },
+  "space": [4, 8, 12, 16, 24, 32, 48, 64],
+  "radius": { "card": 12, "control": 12, "tile": 10, "chip": 999, "pill": 999, "sheet": 20, "bar": 0 },
+  "size": { "control": 52, "tap": 48, "headerCompact": 60, "headerMedium": 64, "headerExpanded": 72, "logoHeight": 24 },
+  "layout": {
+    "breakpoint": { "medium": 768, "expanded": 1024, "wide": 1280 },
+    "gutter": { "narrow": 16, "compact": 20, "medium": 32, "expanded": 40, "wide": 48 },
+    "contentMax": 1440,
+    "columns": {
+      "product": { "narrow": 1, "compact": 2, "medium": 3, "expanded": 4 },
+      "category": { "compact": 3, "medium": 4, "expanded": 6 }
+    }
+  },
+  "motion": { "snap": 180, "swap": 280, "settle": 480, "easing": [0.16, 1, 0.3, 1] },
+  "elevation": {
+    "card": "0 4px 14px #3D2B1C0F",
+    "float": "0 1px 6px #3D2B1C1F",
+    "panel": "0 24px 64px #3D2B1C2E"
+  }
+}
