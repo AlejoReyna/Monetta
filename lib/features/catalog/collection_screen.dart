@@ -28,6 +28,7 @@ import 'categories_screen.dart';
 import 'catalog_controls.dart';
 import 'catalog_query.dart';
 import 'product_card.dart';
+import 'search_history.dart';
 import '../product/quick_view.dart';
 
 enum _Sort { newest, priceAsc, priceDesc }
@@ -204,12 +205,11 @@ class _CollectionScreenState extends State<CollectionScreen> {
   /// Everything the destination contains, before the sheet's own choices.
   List<Product> _scopedItems() {
     final store = StoreScope.of(context);
-    final queryTerms = <String>{
-      if (widget.filter.query?.trim() case final query? when query.isNotEmpty)
-        query,
+    final query = normalizeSearchText(widget.filter.query ?? '');
+    final queryTerms = <String>[
       for (final term in widget.filter.queryTerms)
         if (term.trim().isNotEmpty) term.trim(),
-    };
+    ];
     return store.products.where((product) {
       final facets = store.facetsFor(product.id);
       if (widget.filter.category != null &&
@@ -223,7 +223,15 @@ class _CollectionScreenState extends State<CollectionScreen> {
       }
       // Same matcher the search screen counts with, so "Ver todo" lands on
       // the same number of pieces the shopper was just looking at.
-      return productMatchesAnyTerm(store, product, queryTerms);
+      if (query.isNotEmpty &&
+          !productMatchesNormalizedQuery(store, product, query)) {
+        return false;
+      }
+      if (queryTerms.isNotEmpty &&
+          !productMatchesAnyTerm(store, product, queryTerms)) {
+        return false;
+      }
+      return true;
     }).toList(growable: false);
   }
 

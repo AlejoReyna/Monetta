@@ -121,6 +121,18 @@ class _SearchScreenState extends State<SearchScreen> {
   List<Product> _matches(String raw) =>
       searchProducts(StoreScope.of(context), raw);
 
+  List<String> _matchingHistory(String raw) {
+    final tokens =
+        normalizeSearchText(raw).split(' ').where((token) => token.isNotEmpty);
+    return <String>[
+      for (final entry in _history.queries)
+        if (tokens.every(
+          (token) => normalizeSearchText(entry).contains(token),
+        ))
+          entry,
+    ];
+  }
+
   List<_SearchSuggestion> _suggestions(String raw) {
     final query = normalizeSearchText(raw);
     if (query.isEmpty) return const [];
@@ -330,10 +342,20 @@ class _SearchScreenState extends State<SearchScreen> {
                               products: matches,
                               onSeeAll: () => _openAllResults(query.trim()),
                             )
-                      : _SearchSuggestions(
-                          query: query,
+                      : _LiveQuery(
+                          query: query.trim(),
+                          history: _matchingHistory(query),
                           suggestions: suggestions,
-                          onSelected: _selectSuggestion,
+                          products: matches,
+                          categories: _availableCategories(),
+                          onQuery: _runQuery,
+                          onForget: (value) =>
+                              unawaited(_history.forget(value)),
+                          onSuggestion: _selectSuggestion,
+                          onSeeAll: () => _openAllResults(query.trim()),
+                          onEdit: _edit,
+                          onClear: _clear,
+                          onCategory: _openCategory,
                         ),
             ),
           ],
@@ -721,7 +743,7 @@ class _CategoryRow extends StatelessWidget {
 }
 
 class _ProductRail extends StatelessWidget {
-  const _ProductRail({required this.products});
+  const _ProductRail({required this.products, super.key});
 
   final List<Product> products;
 
@@ -761,8 +783,96 @@ class _ProductRail extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Typing
+// Typing — live catalog matches, not only after submit
 // ---------------------------------------------------------------------------
+
+class _LiveQuery extends StatelessWidget {
+  const _LiveQuery({
+    required this.query,
+    required this.history,
+    required this.suggestions,
+    required this.products,
+    required this.categories,
+    required this.onQuery,
+    required this.onForget,
+    required this.onSuggestion,
+    required this.onSeeAll,
+    required this.onEdit,
+    required this.onClear,
+    required this.onCategory,
+  });
+
+  final String query;
+  final List<String> history;
+  final List<_SearchSuggestion> suggestions;
+  final List<Product> products;
+  final List<String> categories;
+  final ValueChanged<String> onQuery;
+  final ValueChanged<String> onForget;
+  final ValueChanged<_SearchSuggestion> onSuggestion;
+  final VoidCallback onSeeAll;
+  final VoidCallback onEdit;
+  final VoidCallback onClear;
+  final ValueChanged<String> onCategory;
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = products.take(8).toList(growable: false);
+    return ListView(
+      key: const ValueKey('search-live-query'),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.only(bottom: BoutiqueSpace.xxl),
+      children: [
+        if (history.isNotEmpty) ...[
+          const _SectionTitle(title: 'Búsquedas recientes'),
+          for (final entry in history)
+            _HistoryRow(
+              key: ValueKey('search-history-$entry'),
+              query: entry,
+              onTap: () => onQuery(entry),
+              onForget: () => onForget(entry),
+            ),
+        ],
+        if (suggestions.isNotEmpty)
+          _SearchSuggestions(
+            query: query,
+            suggestions: suggestions,
+            onSelected: onSuggestion,
+          ),
+        if (preview.isEmpty)
+          _NoResults(
+            query: query,
+            categories: categories,
+            onEdit: onEdit,
+            onClear: onClear,
+            onCategory: onCategory,
+            shrinkWrap: true,
+          )
+        else ...[
+          const _SectionTitle(title: 'Productos'),
+          _ProductRail(
+            key: const ValueKey('search-live-results'),
+            products: preview,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              BoutiqueSpace.gutter,
+              BoutiqueSpace.lg,
+              BoutiqueSpace.gutter,
+              BoutiqueSpace.md,
+            ),
+            child: BoutiqueButton(
+              key: const ValueKey('search-see-all'),
+              label: 'Ver todo',
+              onPressed: onSeeAll,
+              filled: false,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
 
 class _SearchSuggestion {
   const _SearchSuggestion({required this.label, required this.priority});
@@ -791,7 +901,8 @@ class _SearchSuggestions extends StatelessWidget {
     return ListView.separated(
       key: const ValueKey('search-suggestions'),
       padding: EdgeInsets.zero,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: suggestions.length,
       separatorBuilder: (context, _) => Divider(
         height: .5,
@@ -958,6 +1069,7 @@ class _NoResults extends StatelessWidget {
     required this.onEdit,
     required this.onClear,
     required this.onCategory,
+    this.shrinkWrap = false,
   });
 
   final String query;
@@ -965,11 +1077,14 @@ class _NoResults extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onClear;
   final ValueChanged<String> onCategory;
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       key: const ValueKey('search-no-results'),
+      shrinkWrap: shrinkWrap,
+      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
         CatalogEmptyState(

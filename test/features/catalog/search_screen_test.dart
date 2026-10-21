@@ -18,6 +18,8 @@ import 'package:monetta_app/features/catalog/search_history.dart';
 import 'package:monetta_app/features/catalog/search_screen.dart';
 import 'package:monetta_app/main.dart';
 
+import '../../support/client_guide_capture.dart';
+
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
   await store.loadFromAsset();
@@ -96,8 +98,10 @@ void main() {
     await _type(tester, 'steve');
 
     expect(find.byKey(const ValueKey('search-suggestions')), findsOneWidget);
-    expect(find.text('Steve Madden', findRichText: true), findsOneWidget);
+    expect(find.text('Steve Madden', findRichText: true), findsWidgets);
+    expect(find.byKey(const ValueKey('search-live-results')), findsOneWidget);
     expect(find.byKey(const ValueKey('search-result-grid')), findsNothing);
+    expect(searchProducts(store, 'steve'), isNotEmpty);
 
     await tester.tap(
       find
@@ -330,4 +334,101 @@ void main() {
       findsNothing,
     );
   });
+
+  test('multi-word queries match every word in the catalog', () async {
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+    final matches = searchProducts(store, 'guess negro');
+    expect(
+      normalizeSearchText('Bolso Guess Crossbody Negro')
+          .contains('guess negro'),
+      isFalse,
+    );
+    expect(matches, isNotEmpty);
+    expect(
+      matches.every(
+        (product) => productMatchesNormalizedQuery(
+          store,
+          product,
+          normalizeSearchText('guess negro'),
+        ),
+      ),
+      isTrue,
+    );
+    expect(searchProducts(store, 'guess zzzno'), isEmpty);
+  });
+
+  testWidgets('live results follow a multi-word query into Ver todo', (
+    tester,
+  ) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1;
+
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+    await tester.pumpWidget(_app(store));
+    await tester.pump();
+
+    await _type(tester, 'guess negro');
+    expect(find.byKey(const ValueKey('search-live-results')), findsOneWidget);
+    expect(find.byKey(const ValueKey('search-result-grid')), findsNothing);
+    expect(store.products, isNotEmpty);
+
+    await tester.ensureVisible(find.byKey(const ValueKey('search-see-all')));
+    await tester.tap(find.byKey(const ValueKey('search-see-all')));
+    await tester.pumpAndSettle();
+
+    final screen =
+        tester.widget<CollectionScreen>(find.byType(CollectionScreen));
+    expect(screen.filter.query, 'guess negro');
+    expect(find.text('guess negro'), findsWidgets);
+  });
+
+  testWidgets('an unknown query shows the empty state while typing', (
+    tester,
+  ) async {
+    final history = SearchHistory();
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+    await tester.pumpWidget(_app(store, history: history));
+    await tester.pump();
+
+    await _type(tester, 'xyznoexiste');
+    expect(find.byKey(const ValueKey('search-no-results')), findsOneWidget);
+    expect(find.byKey(const ValueKey('search-live-results')), findsNothing);
+    expect(find.text('Sin resultados'), findsOneWidget);
+    expect(history.queries, isEmpty);
+  });
+
+  for (final (size, brightness) in [
+    (const Size(390, 1200), Brightness.light),
+    (const Size(390, 1200), Brightness.dark),
+    (const Size(834, 1200), Brightness.light),
+  ]) {
+    testWidgets('search capture ${size.width} ${brightness.name}',
+        (tester) async {
+      final store = await _loadedStore();
+      addTearDown(store.dispose);
+      await pumpClientGuide(
+        tester,
+        StoreScope(
+          notifier: store,
+          child: SearchScreen(prompt: 'Bolso coach', history: SearchHistory()),
+        ),
+        size: size,
+        brightness: brightness,
+      );
+      await tester.enterText(
+        find.byKey(const ValueKey('search-query-field')),
+        'guess negro',
+      );
+      await tester.pumpAndSettle();
+      await captureClientGuide(
+        tester,
+        'search-${size.width.toInt()}-${brightness.name}',
+      );
+      expect(find.byKey(const ValueKey('search-live-results')), findsOneWidget);
+    });
+  }
 }

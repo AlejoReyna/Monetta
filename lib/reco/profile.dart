@@ -189,12 +189,14 @@ class ProfileBuilder {
 TasteProfile seedProfileFromOnboarding({
   required List<String> brands,
   required List<String> categories,
+  List<String> silhouettes = const [],
   String? priceBand,
   required DateTime now,
 }) {
   final raw = <String, double>{
     for (final brand in brands) 'brand:$brand': 1.0,
     for (final category in categories) 'category:$category': 0.8,
+    for (final silhouette in silhouettes) 'silhouette:$silhouette': 0.8,
     if (priceBand != null) 'price_band:$priceBand': 0.6,
   };
   if (raw.isEmpty) return const TasteProfile.empty();
