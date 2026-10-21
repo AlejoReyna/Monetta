@@ -1,0 +1,865 @@
+{
+  "finishedAt": "2026-10-20T22:14:34.672Z",
+  "durationSeconds": 71,
+  "browser": {
+    "executablePath": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+    "version": "155.0.8059.40"
+  },
+  "node": "v24.21.0",
+  "totals": {
+    "checks": 51,
+    "passed": 51,
+    "failed": 0
+  },
+  "byGate": {
+    "D02": {
+      "passed": 10,
+      "failed": 0
+    },
+    "D03": {
+      "passed": 35,
+      "failed": 0
+    },
+    "D09": {
+      "passed": 5,
+      "failed": 0
+    },
+    "D10": {
+      "passed": 1,
+      "failed": 0
+    }
+  },
+  "results": [
+    {
+      "gate": "D02",
+      "name": "Web fonts load in the weights the design uses",
+      "passed": true,
+      "details": "Inter 400 loaded · Inter 500 loaded · Inter 600 loaded · Inter 700 loaded · Playfair Display 400 loaded"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Playfair Display for: Section heading (Novedades)",
+      "passed": true,
+      "details": "Playfair Display (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Product card brand",
+      "passed": true,
+      "details": "Inter SemiBold (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Product card name",
+      "passed": true,
+      "details": "Inter (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Product card price",
+      "passed": true,
+      "details": "Inter (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Category navigation",
+      "passed": true,
+      "details": "Inter Medium (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Renderer uses Inter for: Primary button",
+      "passed": true,
+      "details": "Inter SemiBold (web font)"
+    },
+    {
+      "gate": "D02",
+      "name": "Computed tokens match the boutique palette and geometry",
+      "passed": true,
+      "details": "{\"canvas\":\"rgb(255, 255, 255)\",\"ink\":\"rgb(17, 17, 17)\",\"eyebrow\":\"rgb(143, 104, 56)\",\"primaryButton\":\"rgb(17, 17, 17)\",\"buttonRadius\":\"10px\",\"cardRadius\":\"12px\",\"mediaRadius\":\"8px\",\"mediaFit\":\"contain\",\"heroFit\":\"cover\",\"searchRadius\":\"999px\",\"sectionFont\":\"400\",\"priceWeight\":\"700\"}"
+    },
+    {
+      "gate": "D02",
+      "name": "Wordmark is the app artwork at its own proportions",
+      "passed": true,
+      "details": "logo-monetta.png 132×38 rendered 111×32"
+    },
+    {
+      "gate": "D02",
+      "name": "Selected dock item uses boutique gold with dark text",
+      "passed": true,
+      "details": "Inicio: rgb(197, 160, 82) / rgb(23, 23, 21)"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .purchase-dock (expected purchase) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 375px",
+      "passed": true,
+      "details": "scroll 375/375 · escaping none · broken 0 · bottom UI .checkout-bar (expected checkout) · clearance 39px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .purchase-dock (expected purchase) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 390px",
+      "passed": true,
+      "details": "scroll 390/390 · escaping none · broken 0 · bottom UI .checkout-bar (expected checkout) · clearance 39px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .purchase-dock (expected purchase) · clearance 27px · header 89px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .dock (expected dock) · clearance 26px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 440px",
+      "passed": true,
+      "details": "scroll 440/440 · escaping none · broken 0 · bottom UI .checkout-bar (expected checkout) · clearance 39px · header 28px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 768px",
+      "passed": true,
+      "details": "scroll 768/768 · escaping none · broken 0 · bottom UI .checkout-bar (expected checkout) · clearance 39px · header 138px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 1024px",
+      "passed": true,
+      "details": "scroll 1024/1024 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 1280px",
+      "passed": true,
+      "details": "scroll 1280/1280 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "home @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "collection @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "product @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "search @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D03",
+      "name": "cart @ 1440px",
+      "passed": true,
+      "details": "scroll 1440/1440 · escaping none · broken 0 · bottom UI none (expected none) · clearance 28px · header 146px"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): home",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): collection",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): product",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): search",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D09",
+      "name": "Reflow at 320px (400% zoom equivalent): cart",
+      "passed": true,
+      "details": "scroll 320/320"
+    },
+    {
+      "gate": "D10",
+      "name": "No console errors, page errors or failed requests during the checks",
+      "passed": true,
+      "details": "none"
+    }
+  ],
+  "problems": [],
+  "layout": [
+    {
+      "page": "home",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 89,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": "dock",
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 28,
+      "h1": "Bolsas",
+      "expectedUi": "dock",
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".purchase-dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": "purchase",
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 28,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": "dock",
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 375,
+      "scrollWidth": 375,
+      "viewport": 375,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".checkout-bar"
+      ],
+      "footerClearance": 39,
+      "headerHeight": 28,
+      "h1": "Mi bolsa",
+      "expectedUi": "checkout",
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "home",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 89,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": "dock",
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 28,
+      "h1": "Bolsas",
+      "expectedUi": "dock",
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".purchase-dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": "purchase",
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 28,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": "dock",
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 390,
+      "scrollWidth": 390,
+      "viewport": 390,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".checkout-bar"
+      ],
+      "footerClearance": 39,
+      "headerHeight": 28,
+      "h1": "Mi bolsa",
+      "expectedUi": "checkout",
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "home",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 89,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": "dock",
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 28,
+      "h1": "Bolsas",
+      "expectedUi": "dock",
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".purchase-dock"
+      ],
+      "footerClearance": 27,
+      "headerHeight": 89,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": "purchase",
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".dock"
+      ],
+      "footerClearance": 26,
+      "headerHeight": 28,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": "dock",
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 440,
+      "scrollWidth": 440,
+      "viewport": 440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".checkout-bar"
+      ],
+      "footerClearance": 39,
+      "headerHeight": 28,
+      "h1": "Mi bolsa",
+      "expectedUi": "checkout",
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "home",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": null,
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Bolsas",
+      "expectedUi": null,
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": null,
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 138,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": null,
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 768,
+      "scrollWidth": 768,
+      "viewport": 768,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [
+        ".checkout-bar"
+      ],
+      "footerClearance": 39,
+      "headerHeight": 138,
+      "h1": "Mi bolsa",
+      "expectedUi": "checkout",
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "home",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": null,
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolsas",
+      "expectedUi": null,
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": null,
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": null,
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 1024,
+      "scrollWidth": 1024,
+      "viewport": 1024,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi bolsa",
+      "expectedUi": null,
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "home",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": null,
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolsas",
+      "expectedUi": null,
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": null,
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": null,
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 1280,
+      "scrollWidth": 1280,
+      "viewport": 1280,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi bolsa",
+      "expectedUi": null,
+      "passed": "Mi bolsa"
+    },
+    {
+      "page": "home",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Monetta: bolsas, carteras y relojes orig",
+      "expectedUi": null,
+      "passed": "Monetta: bolsas, carteras y relojes orig"
+    },
+    {
+      "page": "collection",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolsas",
+      "expectedUi": null,
+      "passed": "Bolsas"
+    },
+    {
+      "page": "product",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Bolso Coach Shoulder Rectangular",
+      "expectedUi": null,
+      "passed": "Bolso Coach Shoulder Rectangular"
+    },
+    {
+      "page": "search",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Resultados para “bolsa”",
+      "expectedUi": null,
+      "passed": "Resultados para “bolsa”"
+    },
+    {
+      "page": "cart",
+      "width": 1440,
+      "scrollWidth": 1440,
+      "viewport": 1440,
+      "escaping": [],
+      "broken": [],
+      "bottomUi": [],
+      "footerClearance": 28,
+      "headerHeight": 146,
+      "h1": "Mi bolsa",
+      "expectedUi": null,
+      "passed": "Mi bolsa"
+    }
+  ]
+}

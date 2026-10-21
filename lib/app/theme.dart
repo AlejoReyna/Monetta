@@ -367,7 +367,7 @@ String formatCatalogMoney(Money? money) {
 // Typography
 // ---------------------------------------------------------------------------
 
-const String _displayFamily = 'Helvetica Neue';
+const String _displayFamily = 'Inter';
 const List<String> _displayFallback = <String>[
   'Helvetica',
   'Arial',
@@ -376,10 +376,10 @@ const List<String> _displayFallback = <String>[
 
 /// Serif used by Monetta's storefront navigation and editorial section titles.
 ///
-/// The live storefront uses New York as its menu face. The fallbacks preserve
-/// that high-contrast editorial character on platforms that do not ship it.
-const String kEditorialFontFamily = 'New York';
+/// The client guide uses the bundled Playfair face; system serifs remain fallbacks.
+const String kEditorialFontFamily = 'Playfair Display';
 const List<String> _editorialFallback = <String>[
+  'New York',
   'Iowan Old Style',
   'Baskerville',
   'Georgia',
@@ -439,6 +439,8 @@ TextStyle eyebrow({
   FontWeight weight = FontWeight.w500,
 }) =>
     TextStyle(
+      fontFamily: _displayFamily,
+      fontFamilyFallback: _displayFallback,
       fontSize: size,
       fontWeight: weight,
       letterSpacing: 1.8,
@@ -455,6 +457,8 @@ TextStyle sans({
   TextDecoration? decoration,
 }) =>
     TextStyle(
+      fontFamily: _displayFamily,
+      fontFamilyFallback: _displayFallback,
       fontSize: size,
       fontWeight: weight,
       height: height,
@@ -794,6 +798,8 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
 
   return ThemeData(
     useMaterial3: true,
+    fontFamily: _displayFamily,
+    fontFamilyFallback: _displayFallback,
     brightness: brightness,
     colorScheme: scheme,
     extensions: <ThemeExtension<dynamic>>[colors],

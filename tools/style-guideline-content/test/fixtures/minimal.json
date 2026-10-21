@@ -1,0 +1,39 @@
+{
+  "content": {
+    "contractVersion": "1.0.0",
+    "categories": [{ "id": "bags", "title": "Bolsas", "destination": { "routeId": "category.bags" } }],
+    "brands": [{ "id": "guess", "title": "Guess", "destination": { "routeId": "brand.guess" } }]
+  },
+  "routes": [
+    {
+      "id": "category.bags",
+      "requestedByDesign": "Bolsas",
+      "type": "coleccion",
+      "existing": "/collections/guess",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [{ "source": "fixture.dart", "needle": "title: 'Bolsas', handle: 'guess'", "value": "guess", "method": "collection_handle" }]
+    },
+    {
+      "id": "brand.guess",
+      "requestedByDesign": "Marca Guess",
+      "type": "coleccion",
+      "existing": "/collections/guess-1",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [{ "source": "fixture.dart", "needle": "title: 'Guess', handle: 'guess-1'", "value": "guess-1", "method": "collection_handle" }]
+    }
+  ],
+  "externalCatalog": {
+    "id": "catalog.perfume-suggested",
+    "requestedByDesign": "Perfumes con precios sugeridos",
+    "type": "catalogo_externo",
+    "existing": "https://drive.google.com/file/d/test-perfume/view?usp=sharing",
+    "representation": "literal",
+    "status": "verificado",
+    "catalogCategory": "perfume",
+    "catalogMode": "suggested_prices",
+    "remoteContentReview": "unknown",
+    "sources": [{ "source": "fixture.dart", "needle": "https://drive.google.com/file/d/test-perfume/view?usp=sharing", "value": "https://drive.google.com/file/d/test-perfume/view?usp=sharing", "method": "literal" }]
+  }
+}

@@ -575,7 +575,9 @@ class _IdentityCard extends StatelessWidget {
                   Text(
                     name,
                     style: boutiqueScreenTitle(
-                        context: context, color: palette.ink),
+                      context: context,
+                      color: palette.ink,
+                    ),
                   ),
                   if (account.displayName != null && account.email != null) ...[
                     const SizedBox(height: 2),

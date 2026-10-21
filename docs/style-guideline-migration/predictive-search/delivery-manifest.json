@@ -1,0 +1,69 @@
+{
+  "branch": "refactor/rf-17-tipografia",
+  "validation_timestamp": "2026-10-21T00:08:55.102Z",
+  "local_checks": {
+    "passed": 29,
+    "failed": 0,
+    "theme_check_findings": 0
+  },
+  "store_validation": false,
+  "production_files": [
+    {
+      "file": "storefront-theme/assets/monetta-predictive-search.css",
+      "bytes": 6307,
+      "sha256": "52fb8b8d9c0392cc8a0630c617f695162f06b922f43da9a53559f3889a57c0ad"
+    },
+    {
+      "file": "storefront-theme/assets/monetta-predictive-search.js",
+      "bytes": 18514,
+      "sha256": "067fa0a6afcafb0457b9922d320419bbc9eb3c0af471c9008f2b015a6c82be8a"
+    },
+    {
+      "file": "storefront-theme/snippets/monetta-predictive-copy.liquid",
+      "bytes": 2526,
+      "sha256": "c4e0d164fead1aedbda4a7358361620a1a30ce6ed16a89252a56d36aba8e1a03"
+    },
+    {
+      "file": "storefront-theme/snippets/monetta-predictive-search.liquid",
+      "bytes": 6873,
+      "sha256": "227ae51da492a6d8fba63da3a7f7bbfe311316fe6847974c8e3c89c7178f9f00"
+    },
+    {
+      "file": "storefront-theme/sections/monetta-predictive-results.liquid",
+      "bytes": 2191,
+      "sha256": "b39cc299c99d00b35be6b4505ff2476af15fcaef338a5f42e0069faf514dcd07"
+    },
+    {
+      "file": "storefront-theme/sections/monetta-predictive-search.liquid",
+      "bytes": 1617,
+      "sha256": "8977d936058a0b1a757811598672666c5f823abf382fa1241cdcd94fc9e2bec6"
+    }
+  ],
+  "write_scope": [
+    "storefront-theme/{assets,snippets,sections}/monetta-predictive-*",
+    "tools/style-guideline-predictive-search/",
+    "docs/style-guideline-migration/predictive-search/"
+  ],
+  "reference_inputs": [
+    {
+      "file": "storefront-theme/sections/monetta-header.liquid",
+      "sha256": "876e1696dc9f8845c95d59a33cc11573614c77b12e521aee95eab4ffc64ff7e7"
+    },
+    {
+      "file": "storefront-theme/sections/monetta-search.liquid",
+      "sha256": "141e3337286cf56efd6aeca33c821adf6b051c6906a52795c68511b21fd10c5d"
+    },
+    {
+      "file": "storefront-theme/assets/monetta-core.js",
+      "sha256": "9e0cd64e6b81f96649a66cdd400cac278d99db46888b32f146ab9bbea2f95964"
+    },
+    {
+      "file": "storefront-theme/assets/monetta-listing.js",
+      "sha256": "58a0416aa57dd3e521deec006e334755993af0eef25cb959e2a4a153696ced3c"
+    },
+    {
+      "file": "storefront-theme/assets/monetta-tokens.css",
+      "sha256": "18a908ab67fa90149889a99c9477149675678df474d21c4749e7c3e9106d3460"
+    }
+  ]
+}

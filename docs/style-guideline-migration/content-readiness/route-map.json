@@ -1,0 +1,2643 @@
+{
+  "schemaVersion": "1.0.0",
+  "capturedFrom": "evidence/source-manifest.json",
+  "statusDefinitions": {
+    "verificado": "Referencia exacta comprobada contra fuente local congelada. No certifica publicación, membresía, acceso ni contenido remoto.",
+    "pendiente": "Requiere implementación, alineación de destino o confirmación por tienda.",
+    "propuesto": "Alternativa sin asumir entidad/ruta desplegada.",
+    "desconocido": "Sin evidencia de destino exacto."
+  },
+  "types": {
+    "coleccion": "Listado/selección de productos, incluido filtro nativo (no infiere handle Shopify).",
+    "producto": "Producto real o preview.",
+    "pagina_interna": "Pantalla, búsqueda, bolsa, política o confirmación; hosting se indica aparte.",
+    "cuenta_alojada": "Cuenta web y sus pedidos; no asume subrutas/capacidades y no equivale al checkout.",
+    "catalogo_externo": "Documento público externo; no implica importar productos a Shopify."
+  },
+  "trustedCatalogHosts": [
+    "canva.link",
+    "canva.com",
+    "www.canva.com",
+    "drive.google.com",
+    "docs.google.com",
+    "monetta.mx",
+    "www.monetta.mx"
+  ],
+  "routePolicy": {
+    "internalShopify": "Resolver en tienda/locale activos con routes y resource URLs. Contacto absoluto describe sólo enlace nativo actual.",
+    "externalCatalogs": "Preservar IDs, mayúsculas y queries significativos. Sin reescritura o confianza automática en redirecciones.",
+    "pdfExamples": "monetta.com/catalogo/bolsos y /perfumes son ilustrativos.",
+    "retiredMonitor": "ENABLE_EXTERNAL_CATALOG es el agregador retirado; distinto de reseller_catalog. No reactivar."
+  },
+  "routes": [
+    {
+      "id": "home",
+      "requestedByDesign": "Inicio",
+      "pdfPages": [
+        1,
+        3,
+        4,
+        17,
+        19
+      ],
+      "type": "pagina_interna",
+      "existing": "routes.root_url",
+      "representation": "liquid",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/sections/monetta-header.liquid",
+          "needle": "href=\"{{ routes.root_url }}\"",
+          "value": "routes.root_url",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "nativeBinding": "HomeScreen"
+    },
+    {
+      "id": "welcome.native",
+      "requestedByDesign": "Bienvenida",
+      "pdfPages": [
+        1
+      ],
+      "type": "pagina_interna",
+      "existing": "WelcomeScreen",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/welcome/welcome_screen.dart",
+          "needle": "class WelcomeScreen extends StatelessWidget",
+          "value": "WelcomeScreen",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Primera visita con WelcomeGate; la bienvenida web se adapta al hero."
+      ]
+    },
+    {
+      "id": "preferences.native",
+      "requestedByDesign": "Personalización",
+      "pdfPages": [
+        2,
+        13
+      ],
+      "type": "pagina_interna",
+      "existing": "OnboardingSheet",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/onboarding/onboarding_sheet.dart",
+          "needle": "class OnboardingSheet extends StatefulWidget",
+          "value": "OnboardingSheet",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Tipo de compra del PDF ausente de preferencias actuales."
+      ]
+    },
+    {
+      "id": "catalog.all",
+      "requestedByDesign": "Todos los productos",
+      "pdfPages": [
+        3,
+        4,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/all",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/templates/index.json",
+          "needle": "\"button_2_link\": \"/collections/all\"",
+          "value": "/collections/all",
+          "method": "literal"
+        }
+      ],
+      "aliases": [
+        {
+          "value": "/collections/todos-los-productos-1",
+          "equivalent": null,
+          "rewriteAllowed": false,
+          "reason": "Handle heredado; equivalencia con all sin probar.",
+          "sources": [
+            {
+              "source": "storefront-theme/templates/page.mayoreo.json",
+              "needle": "\"collection\": \"todos-los-productos-1\""
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "nativeBinding": "openCatalogBrowse"
+    },
+    {
+      "id": "navigation.categories",
+      "requestedByDesign": "Pestaña Categorías / directorio",
+      "pdfPages": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        11,
+        12,
+        13,
+        14,
+        15,
+        16,
+        17,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "routes.all_products_collection_url",
+      "representation": "liquid",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "storefront-theme/snippets/monetta-dock.liquid",
+          "needle": "href=\"{{ routes.all_products_collection_url }}\"",
+          "value": "routes.all_products_collection_url",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "desiredType": "pagina_interna",
+      "proposed": "/collections",
+      "nativeBinding": "MonettaBottomDestination.catalog -> openCatalogBrowse",
+      "issues": [
+        "El dock abre todos los productos. El PDF pide un directorio. list-collections.json existe con layout Atelier; contenido/publicación sin confirmar."
+      ]
+    },
+    {
+      "id": "brands.directory",
+      "requestedByDesign": "Todas las marcas",
+      "pdfPages": [
+        3,
+        18,
+        19
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "onCatalog abre todos los productos; sin directorio dedicado confirmado."
+      ]
+    },
+    {
+      "id": "selection.newest",
+      "requestedByDesign": "Nueva colección / novedades",
+      "pdfPages": [
+        3,
+        4
+      ],
+      "type": "coleccion",
+      "existing": "/collections/all?sort_by=created-descending",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/templates/index.json",
+          "needle": "\"button_1_link\": \"/collections/all?sort_by=created-descending\"",
+          "value": "/collections/all?sort_by=created-descending",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "El enlace ordena por fecha; el carrusel usa el orden de la colección. Colección de campaña curada sin confirmar."
+      ]
+    },
+    {
+      "id": "selection.todays-picks",
+      "requestedByDesign": "Catálogo de hoy",
+      "pdfPages": [
+        3,
+        4,
+        11
+      ],
+      "type": "coleccion",
+      "existing": "/collections/monetta-todays-picks",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/data/shopify/featured_catalog_repository.dart",
+          "needle": "'handle': 'monetta-todays-picks'",
+          "value": "monetta-todays-picks",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "issues": [
+        "Flutter usa monetta-todays-picks; Selección en templates/index.json usa all. No son equivalentes."
+      ]
+    },
+    {
+      "id": "selection.popular",
+      "requestedByDesign": "Lo más buscado / populares",
+      "pdfPages": [
+        4
+      ],
+      "type": "coleccion",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Sin selección compartida ni autoridad de ranking confirmada."
+      ]
+    },
+    {
+      "id": "category.bags",
+      "requestedByDesign": "Bolsas",
+      "pdfPages": [
+        2,
+        3,
+        5,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/guess",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Bolsas',\n        handle: 'guess',\n        category: 'bolsa',",
+          "value": "guess",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "nativeBinding": "CollectionFilter(collectionHandle, category, silhouette); menú principal filtra category",
+      "entityObservations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ],
+      "mustDifferFrom": [
+        "brand.guess"
+      ],
+      "issues": [
+        "guess es Bolsas; guess-1 es la marca Guess. No fusionar."
+      ]
+    },
+    {
+      "id": "category.wallets",
+      "requestedByDesign": "Carteras",
+      "pdfPages": [
+        2,
+        3,
+        5,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/carteras-1",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Carteras',\n        handle: 'carteras-1',\n        category: 'cartera',",
+          "value": "carteras-1",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [
+        {
+          "value": "/collections/carteras",
+          "equivalent": null,
+          "rewriteAllowed": false,
+          "reason": "Handle heredado distinto; confirmar identidad y redirección.",
+          "sources": [
+            {
+              "source": "storefront-theme/templates/page.como-vender.json",
+              "needle": "\"collection_4\": \"carteras\""
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "nativeBinding": "CollectionFilter(collectionHandle, category, silhouette); menú principal filtra category",
+      "entityObservations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "id": "category.watches",
+      "requestedByDesign": "Relojes",
+      "pdfPages": [
+        2,
+        3,
+        5,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/relojes",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Relojes',\n        handle: 'relojes',\n        category: 'reloj',",
+          "value": "relojes",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [
+        {
+          "value": "/collections/relojes-1",
+          "equivalent": null,
+          "rewriteAllowed": false,
+          "reason": "Handle heredado distinto; confirmar identidad y redirección.",
+          "sources": [
+            {
+              "source": "storefront-theme/templates/page.como-vender.json",
+              "needle": "\"collection_5\": \"relojes-1\""
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "nativeBinding": "CollectionFilter(collectionHandle, category, silhouette); menú principal filtra category",
+      "entityObservations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "id": "category.tote",
+      "requestedByDesign": "Totes",
+      "pdfPages": [
+        2,
+        3,
+        5,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/totes",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Totes',\n        handle: 'totes',\n        category: 'bolsa',\n        silhouette: 'tote',",
+          "value": "totes",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "nativeBinding": "CollectionFilter(collectionHandle, category, silhouette); menú principal filtra category",
+      "entityObservations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "id": "category.crossbody",
+      "requestedByDesign": "Crossbodys",
+      "pdfPages": [
+        2,
+        3,
+        5,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/crossbodys",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Crossbodys',\n        handle: 'crossbodys',\n        category: 'bolsa',\n        silhouette: 'crossbody',",
+          "value": "crossbodys",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "nativeBinding": "CollectionFilter(collectionHandle, category, silhouette); menú principal filtra category",
+      "entityObservations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "id": "category.shoulder",
+      "requestedByDesign": "Hombro",
+      "pdfPages": [
+        2,
+        3,
+        5,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/hombro",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Hombro',\n        handle: 'hombro',\n        category: 'bolsa',\n        silhouette: 'shoulder',",
+          "value": "hombro",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "nativeBinding": "CollectionFilter(collectionHandle, category, silhouette); menú principal filtra category",
+      "entityObservations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ]
+    },
+    {
+      "id": "category.satchel",
+      "requestedByDesign": "Satchel",
+      "pdfPages": [
+        2,
+        3,
+        5,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/satchel",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Satchel',\n        handle: 'satchel',\n        category: 'bolsa',\n        silhouette: 'satchel',",
+          "value": "satchel",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "nativeBinding": "CollectionFilter(collectionHandle, category, silhouette); menú principal filtra category",
+      "entityObservations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ],
+      "issues": [
+        "Fallback reutiliza arte de tote; falta arte específico aprobado."
+      ]
+    },
+    {
+      "id": "category.hobo",
+      "requestedByDesign": "Hobo",
+      "pdfPages": [
+        2,
+        3,
+        5,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/hobo",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Hobo',\n        handle: 'hobo',\n        category: 'bolsa',\n        silhouette: 'hobo',",
+          "value": "hobo",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "nativeBinding": "CollectionFilter(collectionHandle, category, silhouette); menú principal filtra category",
+      "entityObservations": [
+        {
+          "store": "monetta-staging.myshopify.com",
+          "observedAt": "2026-10-19",
+          "state": "dated_report_only",
+          "observation": "Entrega informa ausencia de colecciones de navegación; no es una consulta actual.",
+          "source": "docs/web-redesign/shopify-staging/ENTREGA.md"
+        }
+      ],
+      "issues": [
+        "Fallback reutiliza arte de shoulder; falta arte específico aprobado."
+      ]
+    },
+    {
+      "id": "category.handbags",
+      "requestedByDesign": "Handbags",
+      "pdfPages": [
+        2,
+        6,
+        9,
+        18
+      ],
+      "type": "coleccion",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Sin handle o filtro dedicado respaldado; no inferirlo del PDF."
+      ]
+    },
+    {
+      "id": "category.accessories",
+      "requestedByDesign": "Accesorios",
+      "pdfPages": [
+        2,
+        6,
+        9,
+        18
+      ],
+      "type": "coleccion",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Sin handle o filtro dedicado respaldado; no inferirlo del PDF."
+      ]
+    },
+    {
+      "id": "category.perfume.native",
+      "requestedByDesign": "Perfumes: listado nativo",
+      "pdfPages": [
+        2,
+        5,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "_openCatalogSection",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "onPerfumes: () => _openCatalogSection(\n        title: 'Perfumes',\n        queryTerms: const ['perfume', 'fragancia'],",
+          "value": "_openCatalogSection",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Búsqueda de productos propios por términos; no acredita /collections/perfumes ni equivalencia con el catálogo PDF externo."
+      ]
+    },
+    {
+      "id": "category.beauty.native",
+      "requestedByDesign": "Maquillaje y skincare: listado nativo",
+      "pdfPages": [
+        19
+      ],
+      "type": "coleccion",
+      "existing": "_openCatalogSection",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "onBeauty: () => _openCatalogSection(\n        title: 'Maquillaje y skincare',\n        queryTerms: const ['maquillaje', 'skincare'],",
+          "value": "_openCatalogSection",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Productos propios y catálogos externos de beauty son destinos distintos."
+      ]
+    },
+    {
+      "id": "brand.coach",
+      "requestedByDesign": "Coach",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/coach",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Coach',\n        brand: 'Coach',\n        handle: 'coach',",
+          "value": "coach",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Coach",
+      "nativeBinding": "CollectionFilter(brand: Coach)"
+    },
+    {
+      "id": "brand.michael-kors",
+      "requestedByDesign": "Michael Kors",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/michael-kors",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Michael Kors',\n        brand: 'Michael Kors',\n        handle: 'michael-kors',",
+          "value": "michael-kors",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Michael Kors",
+      "nativeBinding": "CollectionFilter(brand: Michael Kors)"
+    },
+    {
+      "id": "brand.anne-klein",
+      "requestedByDesign": "Anne Klein",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/anne-klein",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Anne Klein',\n        brand: 'Anne Klein',\n        handle: 'anne-klein',",
+          "value": "anne-klein",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Anne Klein",
+      "nativeBinding": "CollectionFilter(brand: Anne Klein)"
+    },
+    {
+      "id": "brand.guess",
+      "requestedByDesign": "Guess",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/guess-1",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Guess',\n        brand: 'Guess',\n        handle: 'guess-1',",
+          "value": "guess-1",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Guess",
+      "nativeBinding": "CollectionFilter(brand: Guess)",
+      "mustDifferFrom": [
+        "category.bags"
+      ],
+      "issues": [
+        "guess-1 es marca Guess. El clic nativo filtra brand: Guess."
+      ]
+    },
+    {
+      "id": "brand.steve-madden",
+      "requestedByDesign": "Steve Madden",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/steve-madden",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Steve Madden',\n        brand: 'Steve Madden',\n        handle: 'steve-madden',",
+          "value": "steve-madden",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Steve Madden",
+      "nativeBinding": "CollectionFilter(brand: Steve Madden)"
+    },
+    {
+      "id": "brand.tommy-hilfiger",
+      "requestedByDesign": "Tommy Hilfiger",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/tommy-hilfiger",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Tommy Hilfiger',\n        brand: 'Tommy Hilfiger',\n        handle: 'tommy-hilfiger',",
+          "value": "tommy-hilfiger",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Tommy Hilfiger",
+      "nativeBinding": "CollectionFilter(brand: Tommy Hilfiger)"
+    },
+    {
+      "id": "brand.olaplex",
+      "requestedByDesign": "Olaplex",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/olalplex",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Olaplex',\n        brand: 'Olaplex',\n        handle: 'olalplex',",
+          "value": "olalplex",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [
+        {
+          "value": "/collections/olaplex",
+          "equivalent": null,
+          "rewriteAllowed": false,
+          "reason": "Candidato ortográfico, sin prueba de equivalencia.",
+          "sources": [
+            {
+              "source": "lib/domain/home_content.dart",
+              "needle": "handle: 'olalplex'"
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Olaplex",
+      "nativeBinding": "CollectionFilter(brand: Olaplex)",
+      "issues": [
+        "El valor configurado es olalplex; no corregir sin comprobar la entidad."
+      ]
+    },
+    {
+      "id": "brand.dior",
+      "requestedByDesign": "Dior",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/christian-dior",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Dior',\n        brand: 'Christian Dior',\n        handle: 'christian-dior',",
+          "value": "christian-dior",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Christian Dior",
+      "nativeBinding": "CollectionFilter(brand: Christian Dior)",
+      "issues": [
+        "Dior es etiqueta visible; Christian Dior es clave de marca. No sustituir taxonomía por etiqueta."
+      ]
+    },
+    {
+      "id": "brand.the-ordinary",
+      "requestedByDesign": "The Ordinary",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/the-ordinary",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'The Ordinary',\n        brand: 'The Ordinary',\n        handle: 'the-ordinary',",
+          "value": "the-ordinary",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "The Ordinary",
+      "nativeBinding": "CollectionFilter(brand: The Ordinary)"
+    },
+    {
+      "id": "brand.summer-fridays",
+      "requestedByDesign": "Summer Fridays",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/summer-fridays",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Summer Fridays',\n        brand: 'Summer Fridays',\n        handle: 'summer-fridays',",
+          "value": "summer-fridays",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Summer Fridays",
+      "nativeBinding": "CollectionFilter(brand: Summer Fridays)"
+    },
+    {
+      "id": "brand.laneige",
+      "requestedByDesign": "Laneige",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/laneige",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Laneige',\n        brand: 'Laneige',\n        handle: 'laneige',",
+          "value": "laneige",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Laneige",
+      "nativeBinding": "CollectionFilter(brand: Laneige)"
+    },
+    {
+      "id": "brand.rhode",
+      "requestedByDesign": "Rhode",
+      "pdfPages": [
+        2,
+        3,
+        6,
+        9,
+        18,
+        19
+      ],
+      "type": "coleccion",
+      "existing": "/collections/rhode",
+      "representation": "literal",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "title: 'Rhode',\n        brand: 'Rhode',\n        handle: 'rhode',",
+          "value": "rhode",
+          "method": "collection_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "requiresEntityVerification": true,
+      "catalogBrandKey": "Rhode",
+      "nativeBinding": "CollectionFilter(brand: Rhode)"
+    },
+    {
+      "id": "brand.tory-burch",
+      "requestedByDesign": "Tory Burch",
+      "pdfPages": [
+        2,
+        3,
+        18
+      ],
+      "type": "coleccion",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Ilustrada en el PDF; surtido, handle y logo autorizado sin evidencia."
+      ]
+    },
+    {
+      "id": "brand.kate-spade",
+      "requestedByDesign": "Kate Spade",
+      "pdfPages": [
+        2,
+        3,
+        18
+      ],
+      "type": "coleccion",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Ilustrada en el PDF; surtido, handle y logo autorizado sin evidencia."
+      ]
+    },
+    {
+      "id": "brand.marc-jacobs",
+      "requestedByDesign": "Marc Jacobs",
+      "pdfPages": [
+        2,
+        3,
+        18
+      ],
+      "type": "coleccion",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Ilustrada en el PDF; surtido, handle y logo autorizado sin evidencia."
+      ]
+    },
+    {
+      "id": "brand.ch",
+      "requestedByDesign": "CH (identidad comercial por confirmar)",
+      "pdfPages": [
+        2,
+        3,
+        18
+      ],
+      "type": "coleccion",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Ilustrada en el PDF; surtido, handle y logo autorizado sin evidencia."
+      ]
+    },
+    {
+      "id": "search",
+      "requestedByDesign": "Búsqueda",
+      "pdfPages": [
+        5
+      ],
+      "type": "pagina_interna",
+      "existing": "routes.search_url",
+      "representation": "liquid",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/sections/monetta-header.liquid",
+          "needle": "href=\"{{ routes.search_url }}\"",
+          "value": "routes.search_url",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "nativeBinding": "openSearch",
+      "issues": [
+        "GET /search existe; la entrega del tema excluye predictive search."
+      ]
+    },
+    {
+      "id": "product.detail",
+      "requestedByDesign": "Ficha de producto real",
+      "pdfPages": [
+        7,
+        8,
+        17
+      ],
+      "type": "producto",
+      "existing": "product.url",
+      "representation": "liquid",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/snippets/monetta-card.liquid",
+          "needle": "product.url",
+          "value": "product.url",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "URL desde producto real de cada tienda. Ningún precio/producto ilustrativo se fija en el contrato."
+      ]
+    },
+    {
+      "id": "product.preview.native",
+      "requestedByDesign": "Preview del producto",
+      "pdfPages": [
+        7
+      ],
+      "type": "producto",
+      "existing": "showProductQuickView",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/product/quick_view.dart",
+          "needle": "Future<void> showProductQuickView(",
+          "value": "showProductQuickView",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Existe nativo; quick view Shopify pendiente. Sin cantidad nativa fiable para urgencia numérica."
+      ]
+    },
+    {
+      "id": "cart",
+      "requestedByDesign": "Carrito / bolsa",
+      "pdfPages": [
+        7,
+        8,
+        17
+      ],
+      "type": "pagina_interna",
+      "existing": "routes.cart_url",
+      "representation": "liquid",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/sections/monetta-header.liquid",
+          "needle": "href=\"{{ routes.cart_url }}\"",
+          "value": "routes.cart_url",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "nativeBinding": "openBag"
+    },
+    {
+      "id": "wholesale.web",
+      "requestedByDesign": "Mayoreo",
+      "pdfPages": [
+        4,
+        10,
+        11,
+        13
+      ],
+      "type": "pagina_interna",
+      "existing": "/pages/mayoreo",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/templates/page.contact.json",
+          "needle": "\"button_link\": \"shopify://pages/mayoreo\"",
+          "value": "mayoreo",
+          "method": "page_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Plantilla con layout Atelier; asignación y reglas comerciales pendientes por tienda."
+      ]
+    },
+    {
+      "id": "partner.web",
+      "requestedByDesign": "Vende con Monetta / compartir catálogos",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        19
+      ],
+      "type": "pagina_interna",
+      "existing": "/pages/como-vender",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/templates/page.mayoreo.json",
+          "needle": "\"button_link\": \"shopify://pages/como-vender\"",
+          "value": "como-vender",
+          "method": "page_handle"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "como-vender es página; vende-con-monetta es handle del metaobject. No implica atribución o comisiones."
+      ]
+    },
+    {
+      "id": "partner.native",
+      "requestedByDesign": "Hub de catálogos y cotización",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        19
+      ],
+      "type": "pagina_interna",
+      "existing": "PartnerHubScreen",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "builder: (_) => PartnerHubScreen(",
+          "value": "PartnerHubScreen",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Home abre PartnerHubScreen, sin abrir WholesaleScreen."
+      ]
+    },
+    {
+      "id": "wholesale.native",
+      "requestedByDesign": "Pantalla de mayoreo",
+      "pdfPages": [
+        10,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": "WholesaleScreen",
+      "representation": "flutter",
+      "status": "pendiente",
+      "sources": [
+        {
+          "source": "lib/features/wholesale/wholesale_screen.dart",
+          "needle": "class WholesaleScreen extends StatelessWidget",
+          "value": "WholesaleScreen",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Clase existente; sin invocación activa encontrada desde home/cuenta. Revisar unificación con PartnerHubScreen."
+      ]
+    },
+    {
+      "id": "contact.web",
+      "requestedByDesign": "Contacto",
+      "pdfPages": [
+        11,
+        16,
+        19
+      ],
+      "type": "pagina_interna",
+      "existing": "https://monetta.mx/pages/contact",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/contact/contact_screen.dart",
+          "needle": "Uri.parse('https://monetta.mx/pages/contact')",
+          "value": "https://monetta.mx/pages/contact",
+          "method": "literal"
+        }
+      ],
+      "aliases": [
+        {
+          "value": "/pages/contact",
+          "equivalent": null,
+          "rewriteAllowed": false,
+          "reason": "Candidato relativo para conservar tienda activa; nativo actual apunta a producción.",
+          "sources": [
+            {
+              "source": "storefront-theme/templates/page.como-vender.json",
+              "needle": "\"button_link\": \"shopify://pages/contact\""
+            }
+          ]
+        }
+      ],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Evitar salto a producción desde tema staging; contact usa Atelier."
+      ]
+    },
+    {
+      "id": "contact.native",
+      "requestedByDesign": "Contacto nativo",
+      "pdfPages": [
+        16,
+        19
+      ],
+      "type": "pagina_interna",
+      "existing": "openContact",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/contact/contact_screen.dart",
+          "needle": "Future<void> openContact(",
+          "value": "openContact",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Cuenta abre ContactScreen; menú home abre WhatsApp. Grupos residen en PartnerHubScreen."
+      ]
+    },
+    {
+      "id": "account.hosted",
+      "requestedByDesign": "Mi cuenta web",
+      "pdfPages": [
+        12,
+        13,
+        14
+      ],
+      "type": "cuenta_alojada",
+      "existing": "routes.account_url",
+      "representation": "liquid",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/sections/monetta-header.liquid",
+          "needle": "href=\"{{ routes.account_url }}\"",
+          "value": "routes.account_url",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Resolver con routes.account_url. Configuración de cuentas, capacidades y Rewards web no certificados."
+      ]
+    },
+    {
+      "id": "account.native",
+      "requestedByDesign": "Mi cuenta nativa",
+      "pdfPages": [
+        13
+      ],
+      "type": "pagina_interna",
+      "existing": "openAccount",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/home/home_screen.dart",
+          "needle": "openAccount(\n        context,",
+          "value": "openAccount",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      }
+    },
+    {
+      "id": "orders.native",
+      "requestedByDesign": "Mis pedidos",
+      "pdfPages": [
+        12,
+        17
+      ],
+      "type": "pagina_interna",
+      "existing": "openOrders",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/orders/orders_screen.dart",
+          "needle": "Future<void> openOrders(",
+          "value": "openOrders",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      }
+    },
+    {
+      "id": "orders.hosted",
+      "requestedByDesign": "Pedidos web",
+      "pdfPages": [
+        12,
+        13,
+        17
+      ],
+      "type": "cuenta_alojada",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Entrada account.hosted disponible; subdestino sin validar. No inventar subrutas de cuenta."
+      ]
+    },
+    {
+      "id": "addresses.hosted",
+      "requestedByDesign": "Direcciones",
+      "pdfPages": [
+        13
+      ],
+      "type": "cuenta_alojada",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Entrada account.hosted disponible; subdestino sin validar. No inventar subrutas de cuenta."
+      ]
+    },
+    {
+      "id": "payments.hosted",
+      "requestedByDesign": "Métodos de pago",
+      "pdfPages": [
+        13
+      ],
+      "type": "cuenta_alojada",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Entrada account.hosted disponible; subdestino sin validar. No inventar subrutas de cuenta."
+      ]
+    },
+    {
+      "id": "rewards.native",
+      "requestedByDesign": "Monetta Rewards en MXN",
+      "pdfPages": [
+        13,
+        14,
+        15
+      ],
+      "type": "pagina_interna",
+      "existing": "RewardsSection",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/rewards/rewards_section.dart",
+          "needle": "class RewardsSection extends StatefulWidget",
+          "value": "RewardsSection",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "Autoridad accounts_orders. Sin conversión a puntos/niveles ni premios por compartir."
+      ]
+    },
+    {
+      "id": "rewards.hosted",
+      "requestedByDesign": "Rewards web",
+      "pdfPages": [
+        13,
+        14
+      ],
+      "type": "cuenta_alojada",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Sin extensión/destino autenticado probado."
+      ]
+    },
+    {
+      "id": "favorites.native",
+      "requestedByDesign": "Favoritos",
+      "pdfPages": [
+        6,
+        7,
+        8,
+        13
+      ],
+      "type": "pagina_interna",
+      "existing": "openFavorites",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/favorites/favorites_screen.dart",
+          "needle": "Future<void> openFavorites(",
+          "value": "openFavorites",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      }
+    },
+    {
+      "id": "favorites.web",
+      "requestedByDesign": "Favoritos web",
+      "pdfPages": [
+        6,
+        7,
+        8,
+        13
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "propuesto",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "proposed": "/pages/favoritos",
+      "notes": [
+        "Propuesto por prototipo/handoff, pendiente en entrega del tema."
+      ]
+    },
+    {
+      "id": "notifications.native",
+      "requestedByDesign": "Notificaciones",
+      "pdfPages": [
+        13,
+        19
+      ],
+      "type": "pagina_interna",
+      "existing": "openAccountNotifications",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/account/account_screen.dart",
+          "needle": "onTap: openAccountNotifications",
+          "value": "openAccountNotifications",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      }
+    },
+    {
+      "id": "preferences.web",
+      "requestedByDesign": "Preferencias web",
+      "pdfPages": [
+        2,
+        13
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "propuesto",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      }
+    },
+    {
+      "id": "confirmation.native",
+      "requestedByDesign": "Confirmación real de compra",
+      "pdfPages": [
+        17
+      ],
+      "type": "pagina_interna",
+      "existing": "OrderConfirmationScreen",
+      "representation": "flutter",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/features/checkout/order_confirmation_screen.dart",
+          "needle": "class OrderConfirmationScreen extends StatelessWidget",
+          "value": "OrderConfirmationScreen",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "PDF 17 es confirmación, sin formulario de pago. Totales/número sólo desde pedido real."
+      ]
+    },
+    {
+      "id": "confirmation.hosted",
+      "requestedByDesign": "Gracias / estado del pedido web",
+      "pdfPages": [
+        17
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "capability",
+      "status": "pendiente",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "hosting": "shopify_checkout_order_status",
+      "notes": [
+        "Página alojada de Shopify/checkout fuera de Liquid; distinta de Customer Accounts. URL generada por pedido y capacidades sin verificar."
+      ]
+    },
+    {
+      "id": "footer.policies",
+      "requestedByDesign": "Políticas publicadas",
+      "pdfPages": [
+        4,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": "policy.url",
+      "representation": "liquid",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "storefront-theme/sections/monetta-footer.liquid",
+          "needle": "href=\"{{ policy.url }}\"",
+          "value": "policy.url",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "issues": [
+        "shop.policies dinámico; falta inventario de políticas publicadas por tienda."
+      ]
+    },
+    {
+      "id": "help.faq",
+      "requestedByDesign": "Preguntas frecuentes",
+      "pdfPages": [
+        4,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Pie del PDF, sin destino/publicación respaldados. Usar sólo menús/políticas efectivamente publicados."
+      ]
+    },
+    {
+      "id": "help.shipping",
+      "requestedByDesign": "Envíos",
+      "pdfPages": [
+        4,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Pie del PDF, sin destino/publicación respaldados. Usar sólo menús/políticas efectivamente publicados."
+      ]
+    },
+    {
+      "id": "help.returns",
+      "requestedByDesign": "Cambios y devoluciones",
+      "pdfPages": [
+        4,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Pie del PDF, sin destino/publicación respaldados. Usar sólo menús/políticas efectivamente publicados."
+      ]
+    },
+    {
+      "id": "help.privacy",
+      "requestedByDesign": "Aviso de privacidad",
+      "pdfPages": [
+        4,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Pie del PDF, sin destino/publicación respaldados. Usar sólo menús/políticas efectivamente publicados."
+      ]
+    },
+    {
+      "id": "help.terms",
+      "requestedByDesign": "Términos y condiciones",
+      "pdfPages": [
+        4,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Pie del PDF, sin destino/publicación respaldados. Usar sólo menús/políticas efectivamente publicados."
+      ]
+    },
+    {
+      "id": "help.purchase-policy",
+      "requestedByDesign": "Política de compra",
+      "pdfPages": [
+        4,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Pie del PDF, sin destino/publicación respaldados. Usar sólo menús/políticas efectivamente publicados."
+      ]
+    },
+    {
+      "id": "help.distribution",
+      "requestedByDesign": "Política de distribución",
+      "pdfPages": [
+        4,
+        11
+      ],
+      "type": "pagina_interna",
+      "existing": null,
+      "representation": "literal",
+      "status": "desconocido",
+      "sources": [],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "notes": [
+        "Pie del PDF, sin destino/publicación respaldados. Usar sólo menús/políticas efectivamente publicados."
+      ]
+    },
+    {
+      "id": "catalog.bags-wholesale",
+      "requestedByDesign": "Bolsas y carteras / wholesale",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://canva.link/6p829fs82kj22aw",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://canva.link/6p829fs82kj22aw",
+          "value": "https://canva.link/6p829fs82kj22aw",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://canva.link/6p829fs82kj22aw",
+          "value": "https://canva.link/6p829fs82kj22aw",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "wholesale",
+      "catalogCategory": "bags",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    },
+    {
+      "id": "catalog.bags-suggested",
+      "requestedByDesign": "Bolsas y carteras / suggested_prices",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://canva.link/nd89t2ygievrw3i",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://canva.link/nd89t2ygievrw3i",
+          "value": "https://canva.link/nd89t2ygievrw3i",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://canva.link/nd89t2ygievrw3i",
+          "value": "https://canva.link/nd89t2ygievrw3i",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "suggested_prices",
+      "catalogCategory": "bags",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    },
+    {
+      "id": "catalog.bags-no-prices",
+      "requestedByDesign": "Bolsas y carteras / no_prices",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://canva.link/7h67zcfs7vhesay",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://canva.link/7h67zcfs7vhesay",
+          "value": "https://canva.link/7h67zcfs7vhesay",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://canva.link/7h67zcfs7vhesay",
+          "value": "https://canva.link/7h67zcfs7vhesay",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "no_prices",
+      "catalogCategory": "bags",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    },
+    {
+      "id": "catalog.beauty-wholesale",
+      "requestedByDesign": "Skincare y makeup / wholesale",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://drive.google.com/file/d/1yt7krnpYVnXCYGYU7wrRkNkUfQxPd9mc/view?usp=sharing",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://drive.google.com/file/d/1yt7krnpYVnXCYGYU7wrRkNkUfQxPd9mc/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/1yt7krnpYVnXCYGYU7wrRkNkUfQxPd9mc/view?usp=sharing",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://drive.google.com/file/d/1yt7krnpYVnXCYGYU7wrRkNkUfQxPd9mc/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/1yt7krnpYVnXCYGYU7wrRkNkUfQxPd9mc/view?usp=sharing",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "wholesale",
+      "catalogCategory": "beauty",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    },
+    {
+      "id": "catalog.beauty-suggested",
+      "requestedByDesign": "Skincare y makeup / suggested_prices",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://drive.google.com/file/d/12w-QgoXQ_LNrRS0WiK7x1BVj60c52_u8/view?usp=sharing",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://drive.google.com/file/d/12w-QgoXQ_LNrRS0WiK7x1BVj60c52_u8/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/12w-QgoXQ_LNrRS0WiK7x1BVj60c52_u8/view?usp=sharing",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://drive.google.com/file/d/12w-QgoXQ_LNrRS0WiK7x1BVj60c52_u8/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/12w-QgoXQ_LNrRS0WiK7x1BVj60c52_u8/view?usp=sharing",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "suggested_prices",
+      "catalogCategory": "beauty",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    },
+    {
+      "id": "catalog.beauty-no-prices",
+      "requestedByDesign": "Skincare y makeup / no_prices",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://drive.google.com/file/d/1vMcO1obIrCsSk39XiowlhVwSYL3A_PK0/view?usp=sharing",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://drive.google.com/file/d/1vMcO1obIrCsSk39XiowlhVwSYL3A_PK0/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/1vMcO1obIrCsSk39XiowlhVwSYL3A_PK0/view?usp=sharing",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://drive.google.com/file/d/1vMcO1obIrCsSk39XiowlhVwSYL3A_PK0/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/1vMcO1obIrCsSk39XiowlhVwSYL3A_PK0/view?usp=sharing",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "no_prices",
+      "catalogCategory": "beauty",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    },
+    {
+      "id": "catalog.perfume-wholesale",
+      "requestedByDesign": "Perfumes / wholesale",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://drive.google.com/file/d/14VcCsOEVU0u-ueo7HHTV2MZL6itjyzSO/view?usp=sharing",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://drive.google.com/file/d/14VcCsOEVU0u-ueo7HHTV2MZL6itjyzSO/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/14VcCsOEVU0u-ueo7HHTV2MZL6itjyzSO/view?usp=sharing",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://drive.google.com/file/d/14VcCsOEVU0u-ueo7HHTV2MZL6itjyzSO/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/14VcCsOEVU0u-ueo7HHTV2MZL6itjyzSO/view?usp=sharing",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "wholesale",
+      "catalogCategory": "perfume",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    },
+    {
+      "id": "catalog.perfume-suggested",
+      "requestedByDesign": "Perfumes / suggested_prices",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://drive.google.com/file/d/15dFe_YlcJJkMyYJ0j_iXdioxboWCrJb8/view?usp=sharing",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://drive.google.com/file/d/15dFe_YlcJJkMyYJ0j_iXdioxboWCrJb8/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/15dFe_YlcJJkMyYJ0j_iXdioxboWCrJb8/view?usp=sharing",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://drive.google.com/file/d/15dFe_YlcJJkMyYJ0j_iXdioxboWCrJb8/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/15dFe_YlcJJkMyYJ0j_iXdioxboWCrJb8/view?usp=sharing",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "suggested_prices",
+      "catalogCategory": "perfume",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    },
+    {
+      "id": "catalog.perfume-no-prices",
+      "requestedByDesign": "Perfumes / no_prices",
+      "pdfPages": [
+        10,
+        11,
+        15,
+        18,
+        19
+      ],
+      "type": "catalogo_externo",
+      "existing": "https://drive.google.com/file/d/11L3ax87ndWNSSg2qkrgHGFIA6cvDUq9l/view?usp=sharing",
+      "representation": "literal",
+      "status": "verificado",
+      "sources": [
+        {
+          "source": "lib/domain/editorial_content.dart",
+          "needle": "https://drive.google.com/file/d/11L3ax87ndWNSSg2qkrgHGFIA6cvDUq9l/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/11L3ax87ndWNSSg2qkrgHGFIA6cvDUq9l/view?usp=sharing",
+          "method": "literal"
+        },
+        {
+          "source": "storefront-theme/templates/page.como-vender.json",
+          "needle": "https://drive.google.com/file/d/11L3ax87ndWNSSg2qkrgHGFIA6cvDUq9l/view?usp=sharing",
+          "value": "https://drive.google.com/file/d/11L3ax87ndWNSSg2qkrgHGFIA6cvDUq9l/view?usp=sharing",
+          "method": "literal"
+        }
+      ],
+      "aliases": [],
+      "verification": {
+        "scope": "local_reference_only",
+        "onlineIdentity": "unknown",
+        "onlineAccess": "not_checked"
+      },
+      "catalogMode": "no_prices",
+      "catalogCategory": "perfume",
+      "remoteContentReview": "unknown",
+      "notes": [
+        "URL coincide entre fallback nativo y tema heredado. Acceso, identidad y vigencia del documento remoto sin comprobar."
+      ]
+    }
+  ],
+  "supportLinks": [
+    {
+      "id": "whatsapp",
+      "label": "WhatsApp 826 106 6868",
+      "url": "https://wa.me/528261066868",
+      "kind": "whatsapp",
+      "sources": [
+        {
+          "source": "lib/app/shopper_copy.dart",
+          "needle": "const String kWhatsAppE164 = '528261066868';"
+        },
+        {
+          "source": "storefront-theme/sections/monetta-footer-group.json",
+          "needle": "\"whatsapp_number\": \"528261066868\""
+        }
+      ],
+      "uriConstruction": "conciergeWhatsAppUri: Uri.https(wa.me, /kWhatsAppE164, text)"
+    },
+    {
+      "id": "group-whatsapp-1",
+      "label": "Grupo 1",
+      "url": "https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec",
+      "kind": "group",
+      "sources": [
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec"
+        },
+        {
+          "source": "storefront-theme/templates/page.contact.json",
+          "needle": "https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec"
+        }
+      ],
+      "remoteMembership": "not_checked"
+    },
+    {
+      "id": "group-whatsapp-2",
+      "label": "Grupo 2",
+      "url": "https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC",
+      "kind": "group",
+      "sources": [
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC"
+        },
+        {
+          "source": "storefront-theme/templates/page.contact.json",
+          "needle": "https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC"
+        }
+      ],
+      "remoteMembership": "not_checked"
+    },
+    {
+      "id": "group-facebook",
+      "label": "Grupo de Facebook",
+      "url": "https://www.facebook.com/share/g/1937VZAXta/",
+      "kind": "group",
+      "sources": [
+        {
+          "source": "lib/features/partner/partner_hub_screen.dart",
+          "needle": "https://www.facebook.com/share/g/1937VZAXta/"
+        },
+        {
+          "source": "storefront-theme/templates/page.contact.json",
+          "needle": "https://www.facebook.com/share/g/1937VZAXta/"
+        }
+      ],
+      "remoteMembership": "not_checked"
+    },
+    {
+      "id": "instagram",
+      "label": "Instagram",
+      "url": "https://www.instagram.com/_monetta.mx",
+      "kind": "social",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "https://www.instagram.com/_monetta.mx"
+        },
+        {
+          "source": "storefront-theme/templates/page.contact.json",
+          "needle": "https://www.instagram.com/_monetta.mx"
+        }
+      ],
+      "notes": [
+        "Contact añade tracking. Mantener el query id de Facebook porque identifica el perfil."
+      ]
+    },
+    {
+      "id": "tiktok",
+      "label": "TikTok",
+      "url": "https://www.tiktok.com/@monetta.oficial",
+      "kind": "social",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "https://www.tiktok.com/@monetta.oficial"
+        },
+        {
+          "source": "storefront-theme/templates/page.contact.json",
+          "needle": "https://www.tiktok.com/@monetta.oficial"
+        }
+      ],
+      "notes": [
+        "Contact añade tracking. Mantener el query id de Facebook porque identifica el perfil."
+      ]
+    },
+    {
+      "id": "facebook",
+      "label": "Facebook",
+      "url": "https://www.facebook.com/profile.php?id=100091065527635",
+      "kind": "social",
+      "sources": [
+        {
+          "source": "lib/domain/home_content.dart",
+          "needle": "https://www.facebook.com/profile.php?id=100091065527635"
+        },
+        {
+          "source": "storefront-theme/templates/page.contact.json",
+          "needle": "https://www.facebook.com/profile.php?id=100091065527635"
+        }
+      ],
+      "notes": [
+        "Contact añade tracking. Mantener el query id de Facebook porque identifica el perfil."
+      ]
+    }
+  ]
+}

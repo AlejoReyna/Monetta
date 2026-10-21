@@ -1,0 +1,154 @@
+{
+  "schemaVersion": "1.0.0",
+  "source": {
+    "path": "/Users/alexis_reyna/Desktop/guideline.pdf",
+    "sha256": "7e7414def29c38c65c1ab5ce25dd5f250cc50d65db66a291d67536b45dbb97db",
+    "capturedAt": "2026-10-20T23:15:25.483Z"
+  },
+  "recordedAt": "2026-10-20T23:40:33.202703+00:00",
+  "pageCount": 19,
+  "pageSizePoints": [
+    600,
+    1500
+  ],
+  "reviewedPages": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17,
+    18,
+    19
+  ],
+  "method": "pdftoppm -scale-to 1100 -jpeg -jpegopt quality=82; full-page visual review in four contact sheets",
+  "purpose": "Read-only reference evidence, never production artwork",
+  "renders": [
+    {
+      "path": "guideline-01.jpg",
+      "size": 69292,
+      "sha256": "3aa77b213addc5e653e899be291dea153664194daa60000d5eef111b323504e1"
+    },
+    {
+      "path": "guideline-02.jpg",
+      "size": 55643,
+      "sha256": "ea475b2581da622db22007842638a84bb2111a9460c1abf8e943410696830e31"
+    },
+    {
+      "path": "guideline-03.jpg",
+      "size": 62010,
+      "sha256": "ee5abb41a1fd5ec8ff3754495f29baa2b0ec64f703f18b92003281d84ae46e4e"
+    },
+    {
+      "path": "guideline-04.jpg",
+      "size": 71424,
+      "sha256": "2b89f42b1bb3dc2289ac0fb8b5f0aa9e587570417d2e8fd793f8d59bbe06cce1"
+    },
+    {
+      "path": "guideline-05.jpg",
+      "size": 45352,
+      "sha256": "7bdc27ef2f94ba8fb2b1a3928679d03bc17d6798be5ea14751b60583fd023ab6"
+    },
+    {
+      "path": "guideline-06.jpg",
+      "size": 61734,
+      "sha256": "80e2f862e0800ba9cc75a2d116db1ea97c0091b84b60cc9ca092c155caae42a6"
+    },
+    {
+      "path": "guideline-07.jpg",
+      "size": 49228,
+      "sha256": "48d8b598cc69624ac4beef5ec27dcc826abf620e7bbb4e3935d565b88cd5b050"
+    },
+    {
+      "path": "guideline-08.jpg",
+      "size": 57248,
+      "sha256": "fd6fb95ad071e7ad4af125d1833a22dd980aa757240d25269d36a5ba5a21d744"
+    },
+    {
+      "path": "guideline-09.jpg",
+      "size": 61018,
+      "sha256": "b57cb252b78d4038649e4b9cd1bf6cb2c2410a5c3837e85e65327cddf58d0bba"
+    },
+    {
+      "path": "guideline-10.jpg",
+      "size": 71687,
+      "sha256": "a85b852e13ae9559a409ded2199bcdab02d9e0425b32b4241650082c29c4c8da"
+    },
+    {
+      "path": "guideline-11.jpg",
+      "size": 55036,
+      "sha256": "2a300878d7f4d124dade755d787c03ef632f8acd2d54669d9fda9245872c73f7"
+    },
+    {
+      "path": "guideline-12.jpg",
+      "size": 51229,
+      "sha256": "579812eaff9a77178da690b326aa1eecf3480fbe43cc97a68b731d3749a8ff0f"
+    },
+    {
+      "path": "guideline-13.jpg",
+      "size": 42766,
+      "sha256": "02c842e4381090b291e498674c4a0aeb68344cb34dd70f767ef47118b429c8e9"
+    },
+    {
+      "path": "guideline-14.jpg",
+      "size": 45816,
+      "sha256": "496fd73149c1147129f760ebb999b8c4bba72725f71611a42cb6a08dcd3ad157"
+    },
+    {
+      "path": "guideline-15.jpg",
+      "size": 59533,
+      "sha256": "690fa2c1a3253ea1f9f6bcc7c07a85e2f66318f2f88ec8aa4892e5240018e272"
+    },
+    {
+      "path": "guideline-16.jpg",
+      "size": 53795,
+      "sha256": "ed63535d05c0a1432d7bb9f62d1f5a2d929af1eda5aac99361e03aaceeb849ad"
+    },
+    {
+      "path": "guideline-17.jpg",
+      "size": 45078,
+      "sha256": "373316a9e9b64f9567e065e8e0c158da74225678a6fcc3eef778a3ea58b39520"
+    },
+    {
+      "path": "guideline-18.jpg",
+      "size": 40421,
+      "sha256": "ef832cb5fb1d4151bb4d231e0cf87c01e645a3ba8d68f183cf900726332a971c"
+    },
+    {
+      "path": "guideline-19.jpg",
+      "size": 42706,
+      "sha256": "084c442df65517045f4d97724418f3614bcc3f57bbcf45d20b8d4e8f3edc0a42"
+    },
+    {
+      "path": "pdf-review-01.jpg",
+      "size": 380078,
+      "sha256": "e34b700251ca97b31f7363b395de05a66fe83c0934b252e6b3b01f33f8c72630"
+    },
+    {
+      "path": "pdf-review-06.jpg",
+      "size": 376064,
+      "sha256": "6e94e8985dba5f6de64d906252b2b412c9c375d66814ea17da59d045c6f45274"
+    },
+    {
+      "path": "pdf-review-11.jpg",
+      "size": 323195,
+      "sha256": "5880e48f30d4f37c96adfd7c4e0f1a61a03414c7276586182bc83c0b62c7a331"
+    },
+    {
+      "path": "pdf-review-16.jpg",
+      "size": 234616,
+      "sha256": "e06608d418b16d66b4426ef5da1183134a5b9d5ec81ddd609206296664067fe1"
+    }
+  ]
+}

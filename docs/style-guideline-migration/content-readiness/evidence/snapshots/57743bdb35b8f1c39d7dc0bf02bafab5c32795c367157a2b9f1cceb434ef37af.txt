@@ -1,0 +1,1252 @@
+/*
+ * ------------------------------------------------------------
+ * IMPORTANT: The contents of this file are auto-generated.
+ *
+ * This file may be updated by the Shopify admin theme editor
+ * or related systems. Please exercise caution as any changes
+ * made to this file may be overwritten.
+ * ------------------------------------------------------------
+ */
+{
+  "sections": {
+    "main": {
+      "type": "main-page",
+      "blocks": {
+        "page-content": {
+          "type": "page-content",
+          "settings": {},
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "page-content"
+      ],
+      "disabled": true,
+      "settings": {
+        "content_direction": "column",
+        "gap": 32,
+        "color_scheme": "",
+        "padding-block-start": 40,
+        "padding-block-end": 30
+      }
+    },
+    "1776233843ad108aa0": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_71ec030_ViDnnB": {
+          "type": "ai_gen_block_71ec030",
+          "settings": {
+            "hero_image": "shopify://shop_images/53742EC5-8010-44CD-B078-8B51AD64B820.png",
+            "image_max_height": 100,
+            "image_max_height_mobile": 100,
+            "fade_duration": 1.5,
+            "background_color": "#ffffff",
+            "show_scroll_indicator": true,
+            "scroll_text": "DINÁMICA DE MAYOREO",
+            "indicator_font": "inknut_antiqua_n4",
+            "indicator_text_size": 24,
+            "letter_spacing": 2,
+            "arrow_size": 46,
+            "indicator_color": "#000000",
+            "indicator_bottom_spacing": -5,
+            "indicator_left_position": 100,
+            "indicator_bg_color": "#ffffff",
+            "animation_speed": 1
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_71ec030_ViDnnB"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 0,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "scheme-1",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 15
+      }
+    },
+    "section_N7HddB": {
+      "type": "section",
+      "blocks": {
+        "comparison_slider_qd4TeL": {
+          "type": "comparison-slider",
+          "name": "t:names.comparison_slider",
+          "settings": {
+            "before_image": "shopify://shop_images/77874FA7-5ED4-47FE-A439-DE78E8EB50FF_1ccc8801-8e20-4823-a7b0-a9bbd48f75e1.jpg",
+            "after_image": "shopify://shop_images/485EE41A-204A-4BE4-990F-B026BD0E044C_a73cb398-e971-4fc3-adc0-abe4b99be602.jpg",
+            "slider_style": "horizontal",
+            "show_text": false,
+            "before_text": "",
+            "after_text": "",
+            "text_preset": "",
+            "text_position_horizontal": "start",
+            "text_position_vertical": "start",
+            "text_background": false,
+            "text_background_color": "#ffffff",
+            "text_corner_radius": 50,
+            "image_ratio": "square",
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "comparison_slider_qd4TeL"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 44,
+        "padding-block-end": 53
+      }
+    },
+    "section_nUrnfq": {
+      "type": "section",
+      "blocks": {
+        "text_aBNf83": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2><strong>DESCUENTOS DE MAYOREO</strong></h2>",
+            "width": "100%",
+            "max_width": "narrow",
+            "alignment": "center",
+            "type_preset": "custom",
+            "font": "var(--font-heading--family)",
+            "font_size": "1.5rem",
+            "line_height": "tight",
+            "letter_spacing": "loose",
+            "case": "uppercase",
+            "wrap": "balance",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 14,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_7Aqqap": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p><em><strong>Añade a tu carrito</strong></em> todos los modelos que desees adquirir <em><strong>y</strong></em> <em><strong>el descuento de mayoreo se aplicará automáticamente</strong></em><strong> </strong>a cada producto antes de realizar el pago de tu pedido ✨</p>",
+            "width": "fit-content",
+            "max_width": "none",
+            "alignment": "left",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "line_height": "loose",
+            "letter_spacing": "loose",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 9,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_aBNf83",
+        "text_7Aqqap"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "center",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 0,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 21,
+        "padding-block-end": 0
+      }
+    },
+    "1777708062e8c347e5": {
+      "type": "_blocks",
+      "blocks": {
+        "ai_gen_block_80caf97_P4qyph": {
+          "type": "ai_gen_block_80caf97",
+          "settings": {
+            "image_1": "shopify://shop_images/A6522C89-DD1F-4E21-B66C-19BB92A99D96.png",
+            "link_1": "",
+            "link_2": "",
+            "link_3": "",
+            "border_radius": 40,
+            "card_gap": 68,
+            "card_gap_mobile": 32,
+            "shadow_color": "#000000",
+            "shadow_opacity": 15,
+            "shadow_offset_y": 2,
+            "shadow_blur": 8,
+            "track_padding_vertical": 48,
+            "track_padding_horizontal": 48,
+            "track_padding_vertical_mobile": 68,
+            "track_padding_horizontal_mobile": 40
+          },
+          "blocks": {}
+        },
+        "text_wGHNxp": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2><strong>PREGUNTAS FRECUENTES</strong></h2>",
+            "width": "fit-content",
+            "max_width": "normal",
+            "alignment": "left",
+            "type_preset": "custom",
+            "font": "var(--font-subheading--family)",
+            "font_size": "1.5rem",
+            "line_height": "normal",
+            "letter_spacing": "loose",
+            "case": "uppercase",
+            "wrap": "balance",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 13,
+            "padding-block-end": 24,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_84c8399_Uxzwe3": {
+          "type": "ai_gen_block_84c8399",
+          "settings": {
+            "button_text": "COMO VENDER POR CATALOGO",
+            "button_link": "shopify://pages/como-vender",
+            "alignment": "center",
+            "horizontal_padding": 35,
+            "vertical_padding": 16,
+            "button_background_color": "#aa7d44",
+            "button_text_color": "#ffffff",
+            "button_hover_color": "#aa7d44",
+            "button_hover_text_color": "#ffffff",
+            "font_size": 19,
+            "border_width": 0,
+            "border_color": "#f5f5f5",
+            "border_hover_color": "#dedede",
+            "shadow_horizontal": 1,
+            "shadow_vertical": 1,
+            "shadow_blur": 12,
+            "shadow_color": "#969696"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "ai_gen_block_80caf97_P4qyph",
+        "text_wGHNxp",
+        "ai_gen_block_84c8399_Uxzwe3"
+      ],
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 8,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 43,
+        "color_scheme": "scheme-1",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 13,
+        "padding-block-end": 64
+      }
+    },
+    "section_UAz6Lc": {
+      "type": "section",
+      "blocks": {
+        "accordion_jRFimw": {
+          "type": "accordion",
+          "name": "t:names.accordion",
+          "settings": {
+            "icon": "caret",
+            "dividers": true,
+            "type_preset": "h2",
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 22,
+            "padding-inline-end": 12
+          },
+          "blocks": {
+            "accordion_row_6PLeP8": {
+              "type": "_accordion-row",
+              "settings": {
+                "heading": "Sistema de apartado",
+                "open_by_default": false,
+                "icon": "box",
+                "width": 18
+              },
+              "blocks": {
+                "text_Ye7Yda": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>APARTA tus pedidos y liquida hasta en 20 DÍAS con un ANTICIPO:<br/>MAYOREO $800 mxn & MENUDEO $400 mxn</p><p>Para apartar tu pedido, contáctanos por WhatsApp al 826 106 6868</p>",
+                    "width": "100%",
+                    "max_width": "none",
+                    "alignment": "left",
+                    "type_preset": "custom",
+                    "font": "var(--font-subheading--family)",
+                    "font_size": "0.875rem",
+                    "line_height": "loose",
+                    "letter_spacing": "loose",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 20,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_Ye7Yda"
+              ]
+            },
+            "accordion_row_VPe9dM": {
+              "type": "_accordion-row",
+              "settings": {
+                "heading": "Productos originales",
+                "open_by_default": false,
+                "icon": "box",
+                "width": 18
+              },
+              "blocks": {
+                "text_Afztfp": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>Somos una boutique online especializada en productos originales y contamos con más de 3 años de experiencia, además de contar con verificación de empresa en Estados Unidos como Monetta Wholesale LLC.</p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "custom",
+                    "font": "var(--font-subheading--family)",
+                    "font_size": "0.875rem",
+                    "line_height": "loose",
+                    "letter_spacing": "loose",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 20,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_Afztfp"
+              ]
+            },
+            "accordion_row_KcbCyz": {
+              "type": "_accordion-row",
+              "settings": {
+                "heading": "Métodos de pago",
+                "open_by_default": false,
+                "icon": "box",
+                "width": 18
+              },
+              "blocks": {
+                "text_8MAjRV": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>Contamos con con una amplia variedad de métodos de pago como:</p><p><strong>●</strong> Transferencia bancaria.</p><p><strong>● </strong>Tarjeta de crédito/débito. </p><p><strong>● </strong>Depósito bancario.</p><p><strong>● </strong>Paypal y Apple Pay.</p><p><strong>● </strong>Mercado Pago.</p>",
+                    "width": "100%",
+                    "max_width": "none",
+                    "alignment": "left",
+                    "type_preset": "custom",
+                    "font": "var(--font-subheading--family)",
+                    "font_size": "0.875rem",
+                    "line_height": "loose",
+                    "letter_spacing": "loose",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 20,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_8MAjRV"
+              ]
+            },
+            "accordion_row_jdYrRg": {
+              "type": "_accordion-row",
+              "settings": {
+                "heading": "Información sobre envíos",
+                "open_by_default": false,
+                "icon": "box",
+                "width": 18
+              },
+              "blocks": {
+                "text_AaPr3b": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>Trabajaremos para enviar tu pedido lo antes posible a partir de la fecha de compra.</p><p>Enviamos por Fedex, Estafeta y DHL.</p><p>Cuando se envíe, recibirás un correo electrónico con todos los detalles. Los tiempos de entrega varían según tu ubicación (2 - 7 días hábiles).</p><p>Los modelos sobre pedido se envían una vez que recibamos los modelos del pedido cerrado.</p>",
+                    "width": "100%",
+                    "max_width": "none",
+                    "alignment": "left",
+                    "type_preset": "custom",
+                    "font": "var(--font-subheading--family)",
+                    "font_size": "0.875rem",
+                    "line_height": "loose",
+                    "letter_spacing": "loose",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 20,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_AaPr3b"
+              ]
+            },
+            "accordion_row_Ncj89X": {
+              "type": "_accordion-row",
+              "settings": {
+                "heading": "Políticas de devolución",
+                "open_by_default": false,
+                "icon": "box",
+                "width": 18
+              },
+              "blocks": {
+                "text_EbEHBK": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>48 horas a partir del día de entrega para aclaraciones, cambios o devoluciones.</p><p>72 horas para realizar modificaciones a tus apartados/cotizaciones.</p><p>En caso de cambios o devoluciones, el costo del envío será por cuenta del cliente o de Monetta dependiendo del motivo.</p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "custom",
+                    "font": "var(--font-body--family)",
+                    "font_size": "0.875rem",
+                    "line_height": "loose",
+                    "letter_spacing": "loose",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 20,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_EbEHBK"
+              ]
+            },
+            "accordion_row_PGCPqU": {
+              "type": "_accordion-row",
+              "settings": {
+                "heading": "Productos sobre pedido",
+                "open_by_default": false,
+                "icon": "box",
+                "width": 18
+              },
+              "blocks": {
+                "text_k4qDBF": {
+                  "type": "text",
+                  "settings": {
+                    "text": "<p>Todos los productos con insignia de SOBRE PEDIDO estarán disponibles para envío 5-7 días a partir de la fecha de cierre de pedido.</p><p>(REVISAR CALENDARIO DE COMPRAS)</p><p>Trabajaremos para enviar tu pedido lo antes posible. Cuando se envíe, recibirás un correo electrónico con más información. </p>",
+                    "width": "100%",
+                    "max_width": "normal",
+                    "alignment": "left",
+                    "type_preset": "custom",
+                    "font": "var(--font-subheading--family)",
+                    "font_size": "0.875rem",
+                    "line_height": "loose",
+                    "letter_spacing": "loose",
+                    "case": "none",
+                    "wrap": "pretty",
+                    "color": "var(--color-foreground)",
+                    "background": false,
+                    "background_color": "#00000026",
+                    "corner_radius": 0,
+                    "padding-block-start": 0,
+                    "padding-block-end": 0,
+                    "padding-inline-start": 20,
+                    "padding-inline-end": 0
+                  },
+                  "blocks": {}
+                }
+              },
+              "block_order": [
+                "text_k4qDBF"
+              ]
+            }
+          },
+          "block_order": [
+            "accordion_row_6PLeP8",
+            "accordion_row_VPe9dM",
+            "accordion_row_KcbCyz",
+            "accordion_row_jdYrRg",
+            "accordion_row_Ncj89X",
+            "accordion_row_PGCPqU"
+          ]
+        }
+      },
+      "block_order": [
+        "accordion_jRFimw"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 8,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 45
+      }
+    },
+    "section_9iLqPt": {
+      "type": "section",
+      "blocks": {
+        "text_HxzLTz": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h1><strong>CALENDARIO DE PEDIDOS</strong></h1>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "h2",
+            "font": "var(--font-subheading--family)",
+            "font_size": "1.5rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 23,
+            "padding-block-end": 24,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "image_dthLFN": {
+          "type": "image",
+          "name": "t:names.image",
+          "settings": {
+            "image": "shopify://shop_images/Pastel_Modern_2026_Content_Calendar_29c56c54-8ca0-4096-a750-f75e24d274c6.png",
+            "link": "",
+            "image_ratio": "adapt",
+            "width": "custom",
+            "custom_width": 100,
+            "width_mobile": "custom",
+            "custom_width_mobile": 100,
+            "height": "fill",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "text_AWxGGL": {
+          "type": "text",
+          "name": "t:names.text",
+          "settings": {
+            "text": "<p>Este calendario se actualiza cada mes y solo es aplicable para los productos con el sello <em><strong>\"SOBRE PEDIDO\"</strong></em></p>",
+            "width": "fit-content",
+            "max_width": "none",
+            "alignment": "center",
+            "type_preset": "custom",
+            "font": "var(--font-body--family)",
+            "font_size": "0.875rem",
+            "line_height": "loose",
+            "letter_spacing": "loose",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 16,
+            "padding-block-end": 55,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_HxzLTz",
+        "image_dthLFN",
+        "text_AWxGGL"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "section_F6GiRm": {
+      "type": "section",
+      "blocks": {
+        "text_U8kwYA": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2><strong>GRUPOS DE MONETTA</strong></h2>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "h2",
+            "font": "var(--font-body--family)",
+            "font_size": "1rem",
+            "line_height": "normal",
+            "letter_spacing": "normal",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground-heading)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_29503f8_DwtxDw": {
+          "type": "ai_gen_block_29503f8",
+          "settings": {
+            "section_background": "#ffffff",
+            "section_padding_top": 0,
+            "section_padding_bottom": 0,
+            "max_width": 1000,
+            "card_background": "#ffffff",
+            "card_border_radius": 40,
+            "card_border_width": 0,
+            "card_border_color": "rgba(0,0,0,0)",
+            "card_shadow": "0 8px 24px rgba(0,0,0,0.08)",
+            "card_padding": 20,
+            "card_gap": 30,
+            "card_width_desktop": 390,
+            "card_height_desktop": 500,
+            "icon_size": 60,
+            "icon_color": "#000000",
+            "icon_stroke_width": 2,
+            "icon_margin_bottom": 30,
+            "text_color": "#000000",
+            "text_size": 15,
+            "text_font": "sans-serif",
+            "text_margin_bottom": 30,
+            "button_padding_vertical": 12,
+            "button_padding_horizontal": 28,
+            "button_border_radius": 40,
+            "button_font_size": 18,
+            "button_gap": 12,
+            "primary_button_border_width": 1,
+            "primary_button_border_color": "#efefef",
+            "primary_button_bg": "#efefef",
+            "primary_button_text": "#000000",
+            "primary_button_hover_bg": "#aa7d44",
+            "primary_button_hover_text": "#ffffff",
+            "secondary_button_bg": "#efefef",
+            "secondary_button_text": "#000000",
+            "secondary_button_border": "#efefef",
+            "secondary_button_border_width": 1,
+            "secondary_button_hover_bg": "#aa7d44",
+            "secondary_button_hover_text": "#ffffff",
+            "secondary_button_hover_border": "#aa7d44",
+            "whatsapp_image": "shopify://shop_images/whatsapp-logo-icon-size_256.png",
+            "whatsapp_description": "<p><strong>Únete a nuestros</strong> <strong>grupos de WhatsApp</strong>, en <strong> </strong>donde puedes tener acceso a modelos y ofertas exclusivas. Ya somos más de 2,000 miembros que forman parte de esta bella comunidad 💖</p>",
+            "whatsapp_button_1_text": "GRUPO 1",
+            "whatsapp_button_1_link": "https://chat.whatsapp.com/CFdzcaBHZlsJqtETPHvtec",
+            "whatsapp_button_2_text": "GRUPO 2",
+            "whatsapp_button_2_link": "https://chat.whatsapp.com/Kob3rTxvWzO53KVtXxS9DC",
+            "facebook_image": "shopify://shop_images/90-902640_facebook-logo-circle-black-transparent-logo-fb-vector.png",
+            "facebook_description": "<p><strong>Únete al grupo más cool de Facebook con más de 21,000 miembros </strong>y accede a los mejores modelos originales y publicaciones exclusivas de Monetta 💫</p>",
+            "facebook_button_text": "IR AL GRUPO",
+            "facebook_button_link": "https://www.facebook.com/share/g/1937VZAXta/"
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_84c8399_JQfyYR": {
+          "type": "ai_gen_block_84c8399",
+          "settings": {
+            "button_text": "MÁS SOBRE MONETTA",
+            "button_link": "shopify://pages/contact",
+            "alignment": "center",
+            "horizontal_padding": 55,
+            "vertical_padding": 12,
+            "button_background_color": "#dedede",
+            "button_text_color": "#000000",
+            "button_hover_color": "#aa7d44",
+            "button_hover_text_color": "#ffffff",
+            "font_size": 22,
+            "border_width": 0,
+            "border_color": "#dedede",
+            "border_hover_color": "#dedede",
+            "shadow_horizontal": 1,
+            "shadow_vertical": 1,
+            "shadow_blur": 12,
+            "shadow_color": "#969696"
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_U8kwYA",
+        "ai_gen_block_29503f8_DwtxDw",
+        "ai_gen_block_84c8399_JQfyYR"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 0,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 79
+      }
+    },
+    "product_list_46UQ9W": {
+      "type": "product-list",
+      "blocks": {
+        "ai_gen_block_84c8399_DUjXzM": {
+          "type": "ai_gen_block_84c8399",
+          "settings": {
+            "button_text": "VER TODOS LOS PRODUCTOS",
+            "button_link": "shopify://collections/all",
+            "alignment": "center",
+            "horizontal_padding": 35,
+            "vertical_padding": 12,
+            "button_background_color": "#dedede",
+            "button_text_color": "#000000",
+            "button_hover_color": "#aa7d44",
+            "button_hover_text_color": "#ffffff",
+            "font_size": 22,
+            "border_width": 0,
+            "border_color": "#b7b7b7",
+            "border_hover_color": "#dedede",
+            "shadow_horizontal": 0,
+            "shadow_vertical": 1,
+            "shadow_blur": 10,
+            "shadow_color": "#969696"
+          },
+          "blocks": {}
+        },
+        "ai_gen_block_cead30a_VRNcrq": {
+          "type": "ai_gen_block_cead30a",
+          "settings": {
+            "collection_1": "totes",
+            "collection_2": "crossbodys",
+            "collection_3": "hombro",
+            "collection_4": "carteras",
+            "collection_5": "relojes-1",
+            "circle_size": 180,
+            "circle_size_mobile": 100,
+            "card_gap": 25,
+            "placeholder_bg_color": "rgba(0,0,0,0)",
+            "label_font_size": 25,
+            "label_font_size_mobile": 16,
+            "label_color": "#000000",
+            "label_font_weight": "600",
+            "label_text_transform": "none",
+            "label_letter_spacing": "0.05em",
+            "label_gap": 8,
+            "arrow_size": 26,
+            "arrow_color": "#000000",
+            "arrow_spacing": 10,
+            "drawer_top_padding": 60,
+            "drawer_bottom_padding": 24,
+            "section_padding": 25,
+            "desktop_width_percent": 100
+          },
+          "blocks": {}
+        },
+        "static-header": {
+          "type": "_product-list-content",
+          "name": "t:names.header",
+          "static": true,
+          "settings": {
+            "content_direction": "row",
+            "vertical_on_mobile": false,
+            "horizontal_alignment": "space-between",
+            "vertical_alignment": "flex-end",
+            "align_baseline": true,
+            "horizontal_alignment_flex_direction_column": "flex-start",
+            "vertical_alignment_flex_direction_column": "center",
+            "gap": 12,
+            "width": "fill",
+            "custom_width": 100,
+            "width_mobile": "fill",
+            "custom_width_mobile": 100,
+            "height": "fit",
+            "custom_height": 100,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "background_media": "none",
+            "video_position": "cover",
+            "background_image_position": "cover",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 0,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "product_list_text_FGWCYw": {
+              "type": "_product-list-text",
+              "name": "t:names.collection_title",
+              "settings": {
+                "text": "<h3>NUESTROS PRODUCTOS</h3>",
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "center",
+                "type_preset": "custom",
+                "font": "var(--font-heading--family)",
+                "font_size": "1.5rem",
+                "line_height": "loose",
+                "letter_spacing": "loose",
+                "case": "uppercase",
+                "wrap": "pretty",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "product_list_text_FGWCYw"
+          ]
+        },
+        "static-product-card": {
+          "type": "_product-card",
+          "name": "t:names.product_card",
+          "static": true,
+          "settings": {
+            "product_card_gap": 8,
+            "inherit_color_scheme": true,
+            "color_scheme": "",
+            "border": "none",
+            "border_width": 1,
+            "border_opacity": 100,
+            "border_radius": 0,
+            "padding-block-start": 0,
+            "padding-block-end": 20,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {
+            "product_card_gallery_bH6THN": {
+              "type": "_product-card-gallery",
+              "name": "t:names.product_card_media",
+              "settings": {
+                "image_ratio": "portrait",
+                "border": "none",
+                "border_width": 1,
+                "border_opacity": 100,
+                "border_radius": 0,
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "product_title_gfeeCc": {
+              "type": "product-title",
+              "name": "t:names.product_title",
+              "settings": {
+                "width": "100%",
+                "max_width": "normal",
+                "alignment": "center",
+                "type_preset": "custom",
+                "font": "var(--font-body--family)",
+                "font_size": "1rem",
+                "line_height": "loose",
+                "letter_spacing": "loose",
+                "case": "none",
+                "wrap": "balance",
+                "color": "var(--color-foreground)",
+                "background": false,
+                "background_color": "#00000026",
+                "corner_radius": 0,
+                "padding-block-start": 4,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            },
+            "price_jMqkXV": {
+              "type": "price",
+              "name": "t:names.product_price",
+              "settings": {
+                "show_sale_price_first": true,
+                "show_installments": false,
+                "show_tax_info": false,
+                "type_preset": "custom",
+                "width": "100%",
+                "alignment": "center",
+                "font": "var(--font-body--family)",
+                "font_size": "0.875rem",
+                "line_height": "normal",
+                "letter_spacing": "loose",
+                "case": "none",
+                "color": "var(--color-foreground)",
+                "padding-block-start": 0,
+                "padding-block-end": 0,
+                "padding-inline-start": 0,
+                "padding-inline-end": 0
+              },
+              "blocks": {}
+            }
+          },
+          "block_order": [
+            "product_card_gallery_bH6THN",
+            "product_title_gfeeCc",
+            "price_jMqkXV"
+          ]
+        }
+      },
+      "block_order": [
+        "ai_gen_block_84c8399_DUjXzM",
+        "ai_gen_block_cead30a_VRNcrq"
+      ],
+      "name": "t:names.products_grid",
+      "settings": {
+        "collection": "todos-los-productos-1",
+        "layout_type": "grid",
+        "carousel_on_mobile": true,
+        "max_products": 16,
+        "columns": 5,
+        "mobile_columns": "2",
+        "mobile_card_size": "60cqw",
+        "columns_gap": 45,
+        "rows_gap": 54,
+        "icons_style": "none",
+        "icons_shape": "none",
+        "section_width": "full-width",
+        "horizontal_alignment": "center",
+        "gap": 50,
+        "color_scheme": "scheme-1",
+        "padding-block-start": 26,
+        "padding-block-end": 23
+      }
+    },
+    "section_fWHQyG": {
+      "type": "section",
+      "blocks": {
+        "text_3QEmUc": {
+          "type": "text",
+          "name": "t:names.heading",
+          "settings": {
+            "text": "<h2>EXPERIENCIAS DE  CLIENTES</h2>",
+            "width": "100%",
+            "max_width": "normal",
+            "alignment": "center",
+            "type_preset": "custom",
+            "font": "var(--font-subheading--family)",
+            "font_size": "1.5rem",
+            "line_height": "loose",
+            "letter_spacing": "loose",
+            "case": "none",
+            "wrap": "pretty",
+            "color": "var(--color-foreground)",
+            "background": false,
+            "background_color": "#00000026",
+            "corner_radius": 0,
+            "padding-block-start": 13,
+            "padding-block-end": 35,
+            "padding-inline-start": 0,
+            "padding-inline-end": 0
+          },
+          "blocks": {}
+        }
+      },
+      "block_order": [
+        "text_3QEmUc"
+      ],
+      "name": "t:names.custom_section",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 12,
+        "section_width": "full-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 0
+      }
+    },
+    "blocks_MgWbMt": {
+      "type": "_blocks",
+      "settings": {
+        "content_direction": "column",
+        "vertical_on_mobile": true,
+        "horizontal_alignment": "flex-start",
+        "vertical_alignment": "center",
+        "align_baseline": false,
+        "horizontal_alignment_flex_direction_column": "center",
+        "vertical_alignment_flex_direction_column": "center",
+        "gap": 0,
+        "section_width": "page-width",
+        "section_height": "",
+        "section_height_custom": 50,
+        "color_scheme": "",
+        "background_media": "none",
+        "video_position": "cover",
+        "background_image_position": "cover",
+        "border": "none",
+        "border_width": 1,
+        "border_opacity": 100,
+        "border_radius": 0,
+        "toggle_overlay": false,
+        "overlay_color": "#00000026",
+        "overlay_style": "solid",
+        "gradient_direction": "to top",
+        "padding-block-start": 0,
+        "padding-block-end": 100
+      }
+    }
+  },
+  "order": [
+    "main",
+    "1776233843ad108aa0",
+    "section_N7HddB",
+    "section_nUrnfq",
+    "1777708062e8c347e5",
+    "section_UAz6Lc",
+    "section_9iLqPt",
+    "section_F6GiRm",
+    "product_list_46UQ9W",
+    "section_fWHQyG",
+    "blocks_MgWbMt"
+  ]
+}

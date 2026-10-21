@@ -15,8 +15,11 @@ import '../../support/product_screen_harness.dart';
 
 void _expectSans(TextStyle style, {required String reason}) {
   expect(style.fontFamily, kBoutiqueSansFamily, reason: '$reason: family');
-  expect(style.fontFamilyFallback, kBoutiqueSansFallback,
-      reason: '$reason: fallback chain');
+  expect(
+    style.fontFamilyFallback,
+    kBoutiqueSansFallback,
+    reason: '$reason: fallback chain',
+  );
   expect(style.fontWeight, FontWeight.w600, reason: '$reason: weight');
 }
 

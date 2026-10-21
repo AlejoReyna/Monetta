@@ -47,24 +47,30 @@ class RewardsBalanceCard extends StatelessWidget {
           Row(
             children: [
               ExcludeSemantics(
-                child: Icon(Icons.card_giftcard_outlined,
-                    size: 24, color: colors.accentContent),
+                child: Icon(
+                  Icons.card_giftcard_outlined,
+                  size: 24,
+                  color: colors.accentContent,
+                ),
               ),
               const SizedBox(width: 16),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('MONETTA REWARDS',
-                        style: boutiqueRowLabel(color: colors.contentPrimary)),
+                    Text(
+                      'MONETTA REWARDS',
+                      style: boutiqueRowLabel(color: colors.contentPrimary),
+                    ),
                     const SizedBox(height: 2),
                     Text(
                       'Tienes ${summary.availableLabel} disponibles',
                       key: const ValueKey('rewards-balance-available'),
                       style: boutiqueText(
-                          size: 16,
-                          weight: FontWeight.w600,
-                          color: colors.contentPrimary),
+                        size: 16,
+                        weight: FontWeight.w600,
+                        color: colors.contentPrimary,
+                      ),
                     ),
                   ],
                 ),

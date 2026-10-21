@@ -1,0 +1,10 @@
+{
+  "name": "monetta-predictive-search-checks",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "demo": "node demo.mjs",
+    "test": "node test.mjs",
+    "check:theme": "node check-theme.mjs"
+  }
+}

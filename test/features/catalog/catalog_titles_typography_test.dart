@@ -115,7 +115,10 @@ void main() {
       final title = _styleOf(tester, find.text('Productos'));
       _expectSerif(title, reason: 'Productos');
       expect(title.fontSize, MonettaTokens.screenTitle.compact);
-      _expectSans(_cardNameStyle(tester, items.first), reason: 'card name');
+      expect(
+        _cardNameStyle(tester, items.first).fontFamily,
+        kBoutiqueSansFamily,
+      );
     });
 
     testWidgets('TYPE-01b "Sin resultados" of the empty catalog is serif w400',

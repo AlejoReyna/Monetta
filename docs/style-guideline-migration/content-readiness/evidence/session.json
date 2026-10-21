@@ -1,0 +1,53 @@
+{
+  "recordedAt": "2026-10-20T23:15:25.061649+00:00",
+  "gitHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+  "workingTree": [
+    " M Makefile",
+    " M config/README.md",
+    " M lib/app/runtime_config.dart",
+    " M lib/app/shopify_checkout_coordinator.dart",
+    " M lib/data/shopify/storefront_config.dart",
+    " M lib/main.dart",
+    " M lib/tooling/dart_defines_validation.dart",
+    " M test/app/runtime_config_test.dart",
+    " M test/app/shopify_checkout_coordinator_test.dart",
+    " M test/tooling/dart_defines_validation_test.dart",
+    "?? artifacts/",
+    "?? design-prototype/",
+    "?? design-system/",
+    "?? docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+    "?? docs/MONETTA_WEB_DESIGN_CLAUDE_RUNBOOK.md",
+    "?? docs/MONETTA_WEB_REDESIGN_PLAN.md",
+    "?? docs/prompts/",
+    "?? docs/style-guideline-migration/",
+    "?? docs/web-redesign/",
+    "?? storefront-theme/",
+    "?? test/goldens/failures/",
+    "?? tools/style-guideline-content/"
+  ],
+  "instructions": {
+    "applicableAgentsFiles": [],
+    "checkedAncestors": [
+      "/",
+      "/Users",
+      "/Users/alexis_reyna",
+      "/Users/alexis_reyna/MyCode",
+      "/Users/alexis_reyna/MyCode/Monetta"
+    ],
+    "checkedDescendants": [
+      "tools",
+      "docs"
+    ],
+    "method": "ancestor file existence and rg --files --hidden --no-ignore, excluding node_modules and .git"
+  },
+  "remoteChecks": "none",
+  "node": "v24.21.0",
+  "workflowSkill": {
+    "path": "/Users/alexis_reyna/.codex/plugins/cache/openai-primary-runtime/pdf/26.1015.12040/skills/pdf/SKILL.md",
+    "recordedAt": "2026-10-20T23:42:57.323819+00:00",
+    "sha256": null,
+    "status": "unknown_at_final_fingerprint",
+    "reason": "Read successfully at the start; the distributed skill path was unavailable at final hash check. No commercial assertion depends on this file.",
+    "use": "Read-only PDF reference render/review; write locations overridden by user scope"
+  }
+}

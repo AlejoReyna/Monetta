@@ -1,0 +1,38 @@
+{%- comment -%}
+  API-only section: /{locale}/search/suggest?section_id=monetta-predictive-results.
+  No static IDs, assets, Atelier components or settings are needed in the response.
+  JavaScript copies only this list's items into the requesting instance's listbox.
+{%- endcomment -%}
+{%- if predictive_search.performed -%}
+  <div data-monetta-predictive-response data-count="{{ predictive_search.resources.products.size }}">
+    <ul data-monetta-predictive-products>
+      {%- for product in predictive_search.resources.products -%}
+        <li role="presentation">
+          <a class="monetta-predictive-search__option" href="{{ product.url | escape }}" role="option" aria-selected="false" tabindex="-1" data-monetta-predictive-option>
+            <span class="monetta-predictive-search__media" aria-hidden="true">
+              {%- assign predictive_image = product.featured_media.preview_image | default: product.featured_image -%}
+              {%- if predictive_image != blank -%}
+                {{ predictive_image | image_url: width: 144 | image_tag: widths: '72, 144', sizes: '72px', width: 72, height: 72, loading: 'lazy', alt: '' }}
+              {%- else -%}
+                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" focusable="false"><rect x="6" y="8" width="20" height="20" rx="3"/><path d="M11 9V7a5 5 0 0 1 10 0v2"/></svg>
+              {%- endif -%}
+            </span>
+            <span class="monetta-predictive-search__details">
+              <span class="monetta-predictive-search__title" lang="{{ request.locale.iso_code | escape }}">{{ product.title | escape }}</span>
+              <span class="monetta-predictive-search__price">
+                {%- if product.price_varies -%}<span lang="{% if request.locale.iso_code contains 'en' %}en{% else %}es{% endif %}">{% render 'monetta-predictive-copy', key: 'from' %} </span>{%- endif -%}
+                {{- product.price | money_with_currency -}}
+              </span>
+            </span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </div>
+{%- endif -%}
+{% schema %}
+{
+  "name": "Monetta · Sugerencias",
+  "settings": []
+}
+{% endschema %}

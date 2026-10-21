@@ -1,0 +1,43 @@
+{%- doc -%}
+  Compact interior header for phones (monettaPageHeader): a 76 px bar with a 48 px back arrow, the Playfair title, an
+  optional count line and the page's actions. Collections, search and the bag use it instead of the global header on
+  phones; from 768 px it is only the title row (back and actions are hidden by CSS). Its real height is measured
+  (assets/monetta-core.js) because a two-line title grows it.
+
+  @param {string} title - Page title.
+  @param {boolean} [heading] - false renders the title as plain text when the page's h1 lives elsewhere (search results).
+  @param {string} [back] - Parent screen, used when the visit began on this page.
+  @param {string} [sub] - Markup for the count line under the title.
+  @param {string} [trailing] - Markup placed after the titles (the bag's item count).
+  @param {string} [actions] - Markup of the action buttons at the right edge.
+  @param {boolean} [ruled] - Keep the hairline under the bar before the page scrolls (the bag).
+  @param {boolean} [phone_only] - Hide the whole bar from 768 px (search results, where the results heading is the h1).
+{%- enddoc -%}
+{%- liquid
+  assign classes = 'page-bar'
+  if trailing != blank
+    assign classes = classes | append: ' page-bar--trailing'
+  endif
+  if ruled
+    assign classes = classes | append: ' page-bar--ruled'
+  endif
+  if phone_only
+    assign classes = classes | append: ' page-bar--phone'
+  endif
+  assign parent = back | default: routes.root_url
+-%}
+<div class="{{ classes }}" data-page-bar>
+  <a class="icon-button page-bar__back" href="{{ parent }}" data-action="back" data-back-parent="{{ parent }}" aria-label="Volver">{% render 'monetta-icon', name: 'arrowBack', size: 20 %}</a>
+  <div class="page-bar__titles{% if actions != blank %} page-bar__titles--actions{% endif %}">
+    {%- if heading == false -%}
+      <p class="display display--page page-bar__title">{{ title | escape }}</p>
+    {%- else -%}
+      <h1 class="display display--page page-bar__title" tabindex="-1">{{ title | escape }}</h1>
+    {%- endif -%}
+    {{ sub }}
+  </div>
+  {{ trailing }}
+  {%- if actions != blank -%}
+    <div class="page-bar__actions">{{ actions }}</div>
+  {%- endif -%}
+</div>

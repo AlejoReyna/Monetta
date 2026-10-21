@@ -1,0 +1,220 @@
+TAP version 13
+# Subtest: small explicit fixture is ready and keeps bags and Guess separate
+ok 1 - small explicit fixture is ready and keeps bags and Guess separate
+  ---
+  duration_ms: 4.515792
+  type: 'test'
+  ...
+# Subtest: missing and blank required fields are reported
+ok 2 - missing and blank required fields are reported
+  ---
+  duration_ms: 21.304458
+  type: 'test'
+  ...
+# Subtest: incorrect collection group type is reported without crashing
+ok 3 - incorrect collection group type is reported without crashing
+  ---
+  duration_ms: 0.360167
+  type: 'test'
+  ...
+# Subtest: unsupported contract version is rejected
+ok 4 - unsupported contract version is rejected
+  ---
+  duration_ms: 0.305459
+  type: 'test'
+  ...
+# Subtest: a path cannot claim account type when it is a collection
+ok 5 - a path cannot claim account type when it is a collection
+  ---
+  duration_ms: 0.274375
+  type: 'test'
+  ...
+# Subtest: category hub design is distinct from the existing all-products link
+ok 6 - category hub design is distinct from the existing all-products link
+  ---
+  duration_ms: 0.212958
+  type: 'test'
+  ...
+# Subtest: an anchor elsewhere in a source does not back a different handle
+ok 7 - an anchor elsewhere in a source does not back a different handle
+  ---
+  duration_ms: 0.248
+  type: 'test'
+  ...
+# Subtest: missing evidence and tampered snapshots are detected
+ok 8 - missing evidence and tampered snapshots are detected
+  ---
+  duration_ms: 0.211542
+  type: 'test'
+  ...
+# Subtest: a missing frozen file is a finding, not an implicit live read
+ok 9 - a missing frozen file is a finding, not an implicit live read
+  ---
+  duration_ms: 0.189083
+  type: 'test'
+  ...
+# Subtest: bags and Guess cannot collapse even if route-local guards are removed
+ok 10 - bags and Guess cannot collapse even if route-local guards are removed
+  ---
+  duration_ms: 0.233708
+  type: 'test'
+  ...
+# Subtest: an alias cannot assert equivalence without independent support
+ok 11 - an alias cannot assert equivalence without independent support
+  ---
+  duration_ms: 0.167708
+  type: 'test'
+  ...
+# Subtest: proposed routes remain missing destinations
+ok 12 - proposed routes remain missing destinations
+  ---
+  duration_ms: 0.1795
+  type: 'test'
+  ...
+# Subtest: a referenced collection does not prove target-store membership
+ok 13 - a referenced collection does not prove target-store membership
+  ---
+  duration_ms: 0.142542
+  type: 'test'
+  ...
+# Subtest: wrong catalog URL is unsupported and exact host allowlist is enforced
+ok 14 - wrong catalog URL is unsupported and exact host allowlist is enforced
+  ---
+  duration_ms: 0.188125
+  type: 'test'
+  ...
+# Subtest: HTTP, credentials and executable URL schemes are refused
+ok 15 - HTTP, credentials and executable URL schemes are refused
+  ---
+  duration_ms: 2.024542
+  type: 'test'
+  ...
+# Subtest: HTTP 200 cannot certify the catalog identity or content
+ok 16 - HTTP 200 cannot certify the catalog identity or content
+  ---
+  duration_ms: 0.171792
+  type: 'test'
+  ...
+# Subtest: a catalog document can use the exact trusted Monetta host without becoming a page
+ok 17 - a catalog document can use the exact trusted Monetta host without becoming a page
+  ---
+  duration_ms: 0.2415
+  type: 'test'
+  ...
+# Subtest: restricted access leaves catalog content unknown; no broken-link assertion
+ok 18 - restricted access leaves catalog content unknown; no broken-link assertion
+  ---
+  duration_ms: 0.138041
+  type: 'test'
+  ...
+# Subtest: catalog slots cannot point to collections; wholesale catalogs cannot be default public shares
+ok 19 - catalog slots cannot point to collections; wholesale catalogs cannot be default public shares
+  ---
+  duration_ms: 0.14625
+  type: 'test'
+  ...
+# Subtest: unknown route and visual resources are detected
+ok 20 - unknown route and visual resources are detected
+  ---
+  duration_ms: 0.132083
+  type: 'test'
+  ...
+# Subtest: a brand logo does not fulfill the required listing campaign cover
+ok 21 - a brand logo does not fulfill the required listing campaign cover
+  ---
+  duration_ms: 0.172625
+  type: 'test'
+  ...
+# Subtest: privacy/policy routes and preference options resolve to typed known IDs
+ok 22 - privacy/policy routes and preference options resolve to typed known IDs
+  ---
+  duration_ms: 0.208584
+  type: 'test'
+  ...
+# Subtest: module content references and catalog file ID changes are detected
+ok 23 - module content references and catalog file ID changes are detected
+  ---
+  duration_ms: 0.190541
+  type: 'test'
+  ...
+# Subtest: real v1 media schema requires each size and normalized focal points
+ok 24 - real v1 media schema requires each size and normalized focal points
+  ---
+  duration_ms: 0.096334
+  type: 'test'
+  ...
+# Subtest: real v1 contract forbids invented price fields and changing the Rewards policy
+ok 25 - real v1 contract forbids invented price fields and changing the Rewards policy
+  ---
+  duration_ms: 0.082458
+  type: 'test'
+  ...
+# Subtest: editorial commerce values and points/tier conversion are rejected
+ok 26 - editorial commerce values and points/tier conversion are rejected
+  ---
+  duration_ms: 0.14025
+  type: 'test'
+  ...
+# Subtest: requirements expose missing brands and invalid selection ordering
+ok 27 - requirements expose missing brands and invalid selection ordering
+  ---
+  duration_ms: 0.1495
+  type: 'test'
+  ...
+# Subtest: Shopify leading block comment is accepted without damaging HTTPS URLs
+ok 28 - Shopify leading block comment is accepted without damaging HTTPS URLs
+  ---
+  duration_ms: 1.322833
+  type: 'test'
+  ...
+# Subtest: legacy template layout is a readiness gap
+ok 29 - legacy template layout is a readiness gap
+  ---
+  duration_ms: 0.162
+  type: 'test'
+  ...
+# Subtest: support URLs and ID references must agree with source inventory
+ok 30 - support URLs and ID references must agree with source inventory
+  ---
+  duration_ms: 0.720291
+  type: 'test'
+  ...
+# Subtest: missing PDF pages are caught and evidence includes capture hash/date/line
+ok 31 - missing PDF pages are caught and evidence includes capture hash/date/line
+  ---
+  duration_ms: 0.219917
+  type: 'test'
+  ...
+# Subtest: live comparison reports drift/missing files without changing frozen evidence
+ok 32 - live comparison reports drift/missing files without changing frozen evidence
+  ---
+  duration_ms: 12.149542
+  type: 'test'
+  ...
+# Subtest: destination inference distinguishes collection, product, account and external catalog
+ok 33 - destination inference distinguishes collection, product, account and external catalog
+  ---
+  duration_ms: 0.171166
+  type: 'test'
+  ...
+# Subtest: offline delivery reproduces exactly with network unavailable
+ok 34 - offline delivery reproduces exactly with network unavailable
+  ---
+  duration_ms: 46.197708
+  type: 'test'
+  ...
+# Subtest: CLI writes both reports; strict readiness exits 1; invalid option exits 2
+ok 35 - CLI writes both reports; strict readiness exits 1; invalid option exits 2
+  ---
+  duration_ms: 123.533291
+  type: 'test'
+  ...
+1..35
+# tests 35
+# suites 0
+# pass 35
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 287.799333

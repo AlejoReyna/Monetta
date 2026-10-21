@@ -1,0 +1,33 @@
+{%- doc -%}
+  BoutiqueSectionHeader: title (Playfair for Home's editorial sections, Inter 600 for product-page sections), optional gold
+  kicker, a "Ver todo" link and the rail's previous/next buttons (desktop). The rail buttons need the rail's id.
+
+  @param {string} id - Heading id (for aria-labelledby).
+  @param {string} title - Heading text.
+  @param {string} [kicker] - Gold eyebrow above the title.
+  @param {string} [link_url] - Destination of the "Ver todo" link.
+  @param {string} [link_label] - Text of that link.
+  @param {string} [rail_id] - Id of the rail the buttons scroll.
+  @param {string} [role] - 'product' for Inter 600 section titles; default is the editorial Playfair heading.
+{%- enddoc -%}
+<div class="section-header">
+  <div class="section-header__titles">
+    {%- if kicker != blank -%}<p class="eyebrow">{{ kicker | escape }}</p>{%- endif -%}
+    {%- if role == 'product' -%}
+      <h2 class="product-section-title" id="{{ id }}">{{ title | escape }}</h2>
+    {%- else -%}
+      <h2 class="display display--section" id="{{ id }}">{{ title | escape }}</h2>
+    {%- endif -%}
+  </div>
+  <div class="section-header__actions">
+    {%- if link_url != blank and link_label != blank -%}
+      <a class="link-action" href="{{ link_url }}">{{ link_label | escape }} {% render 'monetta-icon', name: 'chevronRight', size: 16 %}<span class="visually-hidden"> {{ title | escape }}</span></a>
+    {%- endif -%}
+    {%- if rail_id != blank -%}
+      <span class="rail-nav">
+        <button type="button" class="icon-button" data-rail-prev="{{ rail_id }}" aria-controls="{{ rail_id }}" aria-label="Anteriores: {{ title | escape }}">{% render 'monetta-icon', name: 'chevronLeft', size: 22 %}</button>
+        <button type="button" class="icon-button" data-rail-next="{{ rail_id }}" aria-controls="{{ rail_id }}" aria-label="Siguientes: {{ title | escape }}">{% render 'monetta-icon', name: 'chevronRight', size: 22 %}</button>
+      </span>
+    {%- endif -%}
+  </div>
+</div>

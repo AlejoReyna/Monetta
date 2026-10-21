@@ -1,0 +1,578 @@
+[
+  {
+    "path": "docs/EDITORIAL_CONTENT_METAOBJECTS.md",
+    "kind": "text"
+  },
+  {
+    "path": "docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md",
+    "kind": "text"
+  },
+  {
+    "path": "docs/web-redesign/shopify-staging/ENTREGA.md",
+    "kind": "text"
+  },
+  {
+    "path": "docs/web-redesign/shopify-staging/README.md",
+    "kind": "text"
+  },
+  {
+    "path": "docs/web-redesign/shopify-staging/RUNS.md",
+    "kind": "text"
+  },
+  {
+    "path": "docs/web-redesign/shopify-staging/audit-codex-2026-10-19/AUDITORIA.md",
+    "kind": "text"
+  },
+  {
+    "path": "docs/web-redesign/shopify-staging/correcciones-auditoria-codex-2026-10-19/despues/proxy-incidentes.md",
+    "kind": "text"
+  },
+  {
+    "path": "lib/app/editorial_content_controller.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/app/external_catalog_config.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/app/home_content_controller.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/app/shopper_copy.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/data/shopify/editorial_content_repository.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/data/shopify/featured_catalog_repository.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/data/shopify/home_content_repository.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/data/shopify/mappers.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/data/shopify/queries.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/domain/admin_control.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/domain/campaign.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/domain/collection.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/domain/editorial_content.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/domain/home_content.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/about/about_monetta_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/account/account_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/catalog/catalog_browse_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/catalog/collection_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/contact/contact_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/home/home_account_invitation.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/home/home_boutique_sections.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/home/home_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/navigation/monetta_bottom_navigation.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/navigation/monetta_side_menu.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/onboarding/onboarding_sheet.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/partner/partner_hub_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/rewards/rewards_api.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/rewards/rewards_models.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/welcome/welcome_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/wholesale/wholesale_content.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/wholesale/wholesale_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/main.dart",
+    "kind": "text"
+  },
+  {
+    "path": "pubspec.yaml",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/layout/monetta.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-cart-sheet.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-cart.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-collection-cards.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-collection.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-featured-grid.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-footer-group.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-footer.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-header-group.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-header.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-hero.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-product-rail.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-product-recommendations.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-product.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-quick-links.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/sections/monetta-search.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-card.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-cart-line.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-dock.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-filter-groups.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-fonts.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-hidden-filters.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-icon.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-image.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-listing-layout.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-logo.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-menu-icon.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-page-bar.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-results.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-section-header.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/snippets/monetta-store-lang.liquid",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/404.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/article.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/blog.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/cart.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/collection.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/index.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/list-collections.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/page.como-vender.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/page.contact.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/page.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/page.mayoreo.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/password.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/product.json",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/templates/search.json",
+    "kind": "text"
+  },
+  {
+    "path": "assets/images/.gitkeep",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/2.0x/logo_monetta.png",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/2.0x/monetta_favicon.png",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/3.0x/logo_monetta.png",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/3.0x/monetta_favicon.png",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/anne_klein.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/coach.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/dior.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/guess.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/laneige.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/michael_kors.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/olaplex.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/rhode.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/steve_madden.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/summer_fridays.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/the_ordinary.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/brands/tommy_hilfiger.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/campaign_coral.jpg",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/campaign_olive.jpg",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/campaign_terracotta.jpg",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/campaign_welcome.png",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/hero_poster.jpg",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_about.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_bag_crossbody.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_bag_shoulder.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_bag_tote.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_banner.jpg",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_collection_bags.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_collection_wallets.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_collection_watches.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_review_gaby.jpg",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_review_guadalupe.jpg",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_review_monse.jpg",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_social_facebook.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_social_instagram.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/home_social_tiktok.webp",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/logo_monetta.png",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/monetta_favicon.png",
+    "kind": "binary"
+  },
+  {
+    "path": "assets/images/monetta_logo.png",
+    "kind": "binary"
+  },
+  {
+    "path": "/Users/alexis_reyna/Desktop/guideline.pdf",
+    "kind": "binary"
+  },
+  {
+    "path": "docs/redesign/REWARDS_CONTRACT_V1.md",
+    "kind": "text"
+  },
+  {
+    "path": "services/accounts_orders/src/rewards/types.ts",
+    "kind": "text"
+  },
+  {
+    "path": "services/accounts_orders/src/admin/shopifyAdminClient.ts",
+    "kind": "text"
+  },
+  {
+    "path": "lib/data/customer_auth/customer_account_config.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/data/customer_auth/customer_auth_gateway.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/checkout/order_confirmation_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/product/quick_view.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/orders/orders_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/orders/order_detail_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/catalog/search_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/favorites/favorites_screen.dart",
+    "kind": "text"
+  },
+  {
+    "path": "storefront-theme/config/settings_data.json",
+    "kind": "text"
+  },
+  {
+    "path": "docs/web-redesign/IMPLEMENTATION_HANDOFF.md",
+    "kind": "text"
+  },
+  {
+    "path": "design-prototype/src/pages/simple-pages.js",
+    "kind": "text"
+  },
+  {
+    "path": "design-prototype/src/components/shell.js",
+    "kind": "text"
+  },
+  {
+    "path": "design-prototype/src/main.js",
+    "kind": "text"
+  },
+  {
+    "path": "design-prototype/src/pages/home.js",
+    "kind": "text"
+  },
+  {
+    "path": "design-prototype/src/data/content.js",
+    "kind": "text"
+  },
+  {
+    "path": "lib/features/rewards/rewards_section.dart",
+    "kind": "text"
+  }
+]

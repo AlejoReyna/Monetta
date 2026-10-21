@@ -8,7 +8,7 @@
 ///
 /// Product images need the network and never load in tests, so cards stay in
 /// their placeholder state, the same on every run. The tests carry the
-/// `golden` tag: Ubuntu excludes them and macOS runs them, with a pixel
+/// `golden` tag: Linux skips them and local macOS runs them, with a pixel
 /// tolerance of 0.5 % (see `tolerant_golden_comparator.dart`) because CoreText
 /// can vary between macOS releases.
 ///
@@ -18,6 +18,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -326,6 +327,7 @@ void main() {
           );
         },
         tags: ['golden'],
+        skip: !Platform.isMacOS,
       );
     }
   }

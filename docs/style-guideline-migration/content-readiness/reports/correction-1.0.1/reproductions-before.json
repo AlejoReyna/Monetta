@@ -1,0 +1,228 @@
+{
+  "recordedAt": "2026-10-20T23:56:27.314Z",
+  "auditorVersion": "1.0.0",
+  "baseline": {
+    "inputSha256": "c85b57c140872556d72f691b28c276ae39e0ee4e0c11874a4d4c28b056c5fe90",
+    "summary": {
+      "error": 47,
+      "warning": 196,
+      "info": 0,
+      "total": 243,
+      "byCode": {
+        "CAPABILITY_NOT_READY": 14,
+        "CATALOG_CONTENT_UNCONFIRMED": 9,
+        "COMMERCIAL_DECISION_REQUIRED": 9,
+        "CONTENT_CONTRACT_GAP": 15,
+        "CONTENT_DESTINATION_PENDING": 21,
+        "DESIGN_CONTENT_MISSING": 6,
+        "DESIGN_DESTINATION_TYPE_GAP": 1,
+        "DESTINATION_MISSING": 22,
+        "DESTINATION_NOT_READY": 23,
+        "ENTITY_UNCONFIRMED": 21,
+        "HOME_MODULE_MISSING": 10,
+        "KNOWN_ROUTE_INCONSISTENCY": 23,
+        "LISTING_COVER_MISSING": 1,
+        "PRODUCT_SELECTION_ORDER_MISMATCH": 1,
+        "REQUIRED_FIELD_MISSING": 23,
+        "RESPONSIVE_VISUAL_MISSING": 15,
+        "SCREEN_CONTENT_MISSING": 1,
+        "TEMPLATE_LAYOUT_PENDING": 5,
+        "VISUAL_APPROVAL_PENDING": 23
+      },
+      "routes": {
+        "total": 78,
+        "byStatus": {
+          "verificado": 33,
+          "propuesto": 2,
+          "desconocido": 19,
+          "pendiente": 24
+        }
+      },
+      "screens": {
+        "total": 19,
+        "pending": 19
+      }
+    }
+  },
+  "cases": [
+    {
+      "id": "catalog-mode-crossing",
+      "mutation": "bags-suggested -> catalog.bags-wholesale",
+      "summary": {
+        "error": 47,
+        "warning": 196,
+        "info": 0,
+        "total": 243,
+        "byCode": {
+          "CAPABILITY_NOT_READY": 14,
+          "CATALOG_CONTENT_UNCONFIRMED": 9,
+          "COMMERCIAL_DECISION_REQUIRED": 9,
+          "CONTENT_CONTRACT_GAP": 15,
+          "CONTENT_DESTINATION_PENDING": 21,
+          "DESIGN_CONTENT_MISSING": 6,
+          "DESIGN_DESTINATION_TYPE_GAP": 1,
+          "DESTINATION_MISSING": 22,
+          "DESTINATION_NOT_READY": 23,
+          "ENTITY_UNCONFIRMED": 21,
+          "HOME_MODULE_MISSING": 10,
+          "KNOWN_ROUTE_INCONSISTENCY": 23,
+          "LISTING_COVER_MISSING": 1,
+          "PRODUCT_SELECTION_ORDER_MISMATCH": 1,
+          "REQUIRED_FIELD_MISSING": 23,
+          "RESPONSIVE_VISUAL_MISSING": 15,
+          "SCREEN_CONTENT_MISSING": 1,
+          "TEMPLATE_LAYOUT_PENDING": 5,
+          "VISUAL_APPROVAL_PENDING": 23
+        },
+        "routes": {
+          "total": 78,
+          "byStatus": {
+            "verificado": 33,
+            "propuesto": 2,
+            "desconocido": 19,
+            "pendiente": 24
+          }
+        },
+        "screens": {
+          "total": 19,
+          "pending": 19
+        }
+      },
+      "newFindings": []
+    },
+    {
+      "id": "catalog-category-crossing",
+      "mutation": "bags-wholesale -> catalog.perfume-wholesale",
+      "summary": {
+        "error": 47,
+        "warning": 196,
+        "info": 0,
+        "total": 243,
+        "byCode": {
+          "CAPABILITY_NOT_READY": 14,
+          "CATALOG_CONTENT_UNCONFIRMED": 9,
+          "COMMERCIAL_DECISION_REQUIRED": 9,
+          "CONTENT_CONTRACT_GAP": 15,
+          "CONTENT_DESTINATION_PENDING": 21,
+          "DESIGN_CONTENT_MISSING": 6,
+          "DESIGN_DESTINATION_TYPE_GAP": 1,
+          "DESTINATION_MISSING": 22,
+          "DESTINATION_NOT_READY": 23,
+          "ENTITY_UNCONFIRMED": 21,
+          "HOME_MODULE_MISSING": 10,
+          "KNOWN_ROUTE_INCONSISTENCY": 23,
+          "LISTING_COVER_MISSING": 1,
+          "PRODUCT_SELECTION_ORDER_MISMATCH": 1,
+          "REQUIRED_FIELD_MISSING": 23,
+          "RESPONSIVE_VISUAL_MISSING": 15,
+          "SCREEN_CONTENT_MISSING": 1,
+          "TEMPLATE_LAYOUT_PENDING": 5,
+          "VISUAL_APPROVAL_PENDING": 23
+        },
+        "routes": {
+          "total": 78,
+          "byStatus": {
+            "verificado": 33,
+            "propuesto": 2,
+            "desconocido": 19,
+            "pendiente": 24
+          }
+        },
+        "screens": {
+          "total": 19,
+          "pending": 19
+        }
+      },
+      "newFindings": []
+    },
+    {
+      "id": "collection-without-route",
+      "mutation": "todays-picks: kind=collection, routeId omitted",
+      "summary": {
+        "error": 47,
+        "warning": 195,
+        "info": 0,
+        "total": 242,
+        "byCode": {
+          "CAPABILITY_NOT_READY": 14,
+          "CATALOG_CONTENT_UNCONFIRMED": 9,
+          "COMMERCIAL_DECISION_REQUIRED": 9,
+          "CONTENT_CONTRACT_GAP": 15,
+          "CONTENT_DESTINATION_PENDING": 20,
+          "DESIGN_CONTENT_MISSING": 6,
+          "DESIGN_DESTINATION_TYPE_GAP": 1,
+          "DESTINATION_MISSING": 22,
+          "DESTINATION_NOT_READY": 23,
+          "ENTITY_UNCONFIRMED": 21,
+          "HOME_MODULE_MISSING": 10,
+          "KNOWN_ROUTE_INCONSISTENCY": 23,
+          "LISTING_COVER_MISSING": 1,
+          "PRODUCT_SELECTION_ORDER_MISMATCH": 1,
+          "REQUIRED_FIELD_MISSING": 23,
+          "RESPONSIVE_VISUAL_MISSING": 15,
+          "SCREEN_CONTENT_MISSING": 1,
+          "TEMPLATE_LAYOUT_PENDING": 5,
+          "VISUAL_APPROVAL_PENDING": 23
+        },
+        "routes": {
+          "total": 78,
+          "byStatus": {
+            "verificado": 33,
+            "propuesto": 2,
+            "desconocido": 19,
+            "pendiente": 24
+          }
+        },
+        "screens": {
+          "total": 19,
+          "pending": 19
+        }
+      },
+      "newFindings": []
+    },
+    {
+      "id": "module-family-crossing",
+      "mutation": "newest product_selection -> rewards",
+      "summary": {
+        "error": 45,
+        "warning": 195,
+        "info": 0,
+        "total": 240,
+        "byCode": {
+          "CAPABILITY_NOT_READY": 14,
+          "CATALOG_CONTENT_UNCONFIRMED": 9,
+          "COMMERCIAL_DECISION_REQUIRED": 9,
+          "CONTENT_CONTRACT_GAP": 15,
+          "CONTENT_DESTINATION_PENDING": 21,
+          "DESIGN_CONTENT_MISSING": 6,
+          "DESIGN_DESTINATION_TYPE_GAP": 1,
+          "DESTINATION_MISSING": 22,
+          "DESTINATION_NOT_READY": 23,
+          "ENTITY_UNCONFIRMED": 21,
+          "HOME_MODULE_MISSING": 9,
+          "KNOWN_ROUTE_INCONSISTENCY": 23,
+          "LISTING_COVER_MISSING": 1,
+          "PRODUCT_SELECTION_ORDER_MISMATCH": 1,
+          "REQUIRED_FIELD_MISSING": 22,
+          "RESPONSIVE_VISUAL_MISSING": 15,
+          "TEMPLATE_LAYOUT_PENDING": 5,
+          "VISUAL_APPROVAL_PENDING": 23
+        },
+        "routes": {
+          "total": 78,
+          "byStatus": {
+            "verificado": 33,
+            "propuesto": 2,
+            "desconocido": 19,
+            "pendiente": 24
+          }
+        },
+        "screens": {
+          "total": 19,
+          "pending": 19
+        }
+      },
+      "newFindings": []
+    }
+  ]
+}
