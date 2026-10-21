@@ -377,7 +377,10 @@ class CatalogEditorialBanner extends StatelessWidget {
       Text(
         title,
         textAlign: align,
-        style: boutiqueScreenTitle(color: color),
+        style: boutiqueScreenTitle(
+          context: context,
+          color: color,
+        ),
       ),
       if (description case final text? when text.trim().isNotEmpty) ...[
         const SizedBox(height: BoutiqueSpace.sm),
@@ -497,7 +500,13 @@ class CatalogEmptyState extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          Text(title, style: boutiqueScreenTitle(color: palette.ink)),
+          Text(
+            title,
+            style: boutiqueScreenTitle(
+              context: context,
+              color: palette.ink,
+            ),
+          ),
           const SizedBox(height: BoutiqueSpace.sm),
           Text(
             body,

@@ -6,6 +6,7 @@ library;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import 'monetta_tokens.g.dart';
 import 'motion.dart';
 import 'shopper_copy.dart';
 
@@ -76,6 +77,14 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     required this.navigationSelection,
     required this.navigationForeground,
     required this.navigationForegroundMuted,
+    required this.surfaceWarm,
+    required this.surfaceTile,
+    required this.borderControl,
+    required this.actionPrimary,
+    required this.onActionPrimary,
+    required this.actionDark,
+    required this.onActionDark,
+    required this.saleSurface,
   });
 
   final Color canvas;
@@ -108,29 +117,60 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
   /// [navigationSurface].
   final Color navigationForegroundMuted;
 
+  /// Campaign and service panels, selected fills.
+  final Color surfaceWarm;
+
+  /// Product tiles, chips and category mosaics: a step under [surfaceWarm].
+  final Color surfaceTile;
+
+  /// Boundary of outlined controls and fields; at least 3:1 on [canvas].
+  final Color borderControl;
+
+  /// Purchase and principal conversion actions.
+  final Color actionPrimary;
+  final Color onActionPrimary;
+
+  /// Dark chocolate pill (share and secondary campaign actions).
+  final Color actionDark;
+  final Color onActionDark;
+
+  /// Discount and stock chips: [sale] text sits on it.
+  final Color saleSurface;
+
   static const light = MonettaColors(
-    canvas: Color(0xFFFFFFFF),
-    surface: Color(0xFFFFFFFF),
-    surfaceRaised: Color(0xFFFFFFFF),
-    surfaceMuted: Color(0xFFF5F5F5),
-    mediaPlaceholder: Color(0xFFF5F5F5),
-    contentPrimary: Color(0xFF111111),
-    contentMuted: Color(0xFF737373),
-    divider: Color(0x26111111),
-    inputFill: Color(0xFFF1F1F1),
-    inverseSurface: Color(0xFF111111),
-    onInverseSurface: Color(0xFFFFFFFF),
+    canvas: MonettaTokens.canvas,
+    surface: MonettaTokens.surface,
+    surfaceRaised: MonettaTokens.surface,
+    surfaceMuted: MonettaTokens.surfaceWarm,
+    mediaPlaceholder: MonettaTokens.surfaceTile,
+    contentPrimary: MonettaTokens.ink,
+    contentMuted: MonettaTokens.inkMuted,
+    divider: MonettaTokens.divider,
+    inputFill: MonettaTokens.surface,
+    inverseSurface: MonettaTokens.ink,
+    onInverseSurface: MonettaTokens.canvas,
+    // Legacy callers read [accent] as text (eyebrows, kickers) as well as marks, so it
+    // keeps the darker gold until they move to [accentContent]; the decorative
+    // gold of the guideline lives in BoutiquePalette.gold.
     accent: kGold,
-    accentContent: Color(0xFF8F6838),
-    sale: kSale,
-    success: Color(0xFF3B7B4A),
-    warningSurface: Color(0xFFF7F0E6),
-    successSurface: Color(0xFFEAF4EC),
-    scrim: Color(0x52000000),
-    navigationSurface: Color(0xFFF5F5F5),
-    navigationSelection: Color(0x24AA7D44),
-    navigationForeground: Color(0xFF222222),
-    navigationForegroundMuted: Color(0xFF6E6E6E),
+    accentContent: MonettaTokens.accentText,
+    sale: MonettaTokens.sale,
+    success: MonettaTokens.success,
+    warningSurface: MonettaTokens.surfaceWarm,
+    successSurface: MonettaTokens.successSurface,
+    scrim: MonettaTokens.scrim,
+    navigationSurface: MonettaTokens.bar,
+    navigationSelection: Color(0x29C5A052),
+    navigationForeground: MonettaTokens.navigationActive,
+    navigationForegroundMuted: MonettaTokens.navigationInactive,
+    surfaceWarm: MonettaTokens.surfaceWarm,
+    surfaceTile: MonettaTokens.surfaceTile,
+    borderControl: MonettaTokens.borderControl,
+    actionPrimary: MonettaTokens.actionPrimary,
+    onActionPrimary: MonettaTokens.onActionPrimary,
+    actionDark: MonettaTokens.actionDark,
+    onActionDark: MonettaTokens.onActionDark,
+    saleSurface: MonettaTokens.saleSurface,
   );
 
   static const dark = MonettaColors(
@@ -156,6 +196,14 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     navigationSelection: Color(0x3DC49A65),
     navigationForeground: Color(0xFFF5F2EC),
     navigationForegroundMuted: Color(0xFF8E8A85),
+    surfaceWarm: MonettaTokens.darkSurfaceWarm,
+    surfaceTile: MonettaTokens.darkSurfaceTile,
+    borderControl: MonettaTokens.darkBorderControl,
+    actionPrimary: MonettaTokens.darkActionPrimary,
+    onActionPrimary: MonettaTokens.darkOnActionPrimary,
+    actionDark: MonettaTokens.darkActionDark,
+    onActionDark: MonettaTokens.darkOnActionDark,
+    saleSurface: MonettaTokens.darkSaleSurface,
   );
 
   @override
@@ -182,6 +230,14 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
     Color? navigationSelection,
     Color? navigationForeground,
     Color? navigationForegroundMuted,
+    Color? surfaceWarm,
+    Color? surfaceTile,
+    Color? borderControl,
+    Color? actionPrimary,
+    Color? onActionPrimary,
+    Color? actionDark,
+    Color? onActionDark,
+    Color? saleSurface,
   }) {
     return MonettaColors(
       canvas: canvas ?? this.canvas,
@@ -207,6 +263,14 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
       navigationForeground: navigationForeground ?? this.navigationForeground,
       navigationForegroundMuted:
           navigationForegroundMuted ?? this.navigationForegroundMuted,
+      surfaceWarm: surfaceWarm ?? this.surfaceWarm,
+      surfaceTile: surfaceTile ?? this.surfaceTile,
+      borderControl: borderControl ?? this.borderControl,
+      actionPrimary: actionPrimary ?? this.actionPrimary,
+      onActionPrimary: onActionPrimary ?? this.onActionPrimary,
+      actionDark: actionDark ?? this.actionDark,
+      onActionDark: onActionDark ?? this.onActionDark,
+      saleSurface: saleSurface ?? this.saleSurface,
     );
   }
 
@@ -245,6 +309,14 @@ class MonettaColors extends ThemeExtension<MonettaColors> {
         other.navigationForegroundMuted,
         t,
       )!,
+      surfaceWarm: Color.lerp(surfaceWarm, other.surfaceWarm, t)!,
+      surfaceTile: Color.lerp(surfaceTile, other.surfaceTile, t)!,
+      borderControl: Color.lerp(borderControl, other.borderControl, t)!,
+      actionPrimary: Color.lerp(actionPrimary, other.actionPrimary, t)!,
+      onActionPrimary: Color.lerp(onActionPrimary, other.onActionPrimary, t)!,
+      actionDark: Color.lerp(actionDark, other.actionDark, t)!,
+      onActionDark: Color.lerp(onActionDark, other.onActionDark, t)!,
+      saleSurface: Color.lerp(saleSurface, other.saleSurface, t)!,
     );
   }
 }
@@ -694,8 +766,8 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
       brightness == Brightness.dark ? MonettaColors.dark : MonettaColors.light;
   final scheme = ColorScheme.fromSeed(
     seedColor: colors.accent,
-    primary: colors.contentPrimary,
-    onPrimary: colors.canvas,
+    primary: colors.actionPrimary,
+    onPrimary: colors.onActionPrimary,
     secondary: colors.accent,
     surface: colors.surface,
     onSurface: colors.contentPrimary,
@@ -764,49 +836,49 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
     ),
     iconTheme: IconThemeData(color: colors.contentPrimary),
     chipTheme: ChipThemeData(
-      backgroundColor: Colors.transparent,
-      selectedColor: colors.contentPrimary,
-      side: BorderSide(color: colors.divider, width: 0.5),
-      shape: const RoundedRectangleBorder(borderRadius: kSquare),
+      backgroundColor: colors.surfaceTile,
+      selectedColor: colors.actionPrimary,
+      side: BorderSide(color: colors.divider),
+      shape: const StadiumBorder(),
       labelStyle: TextStyle(
-        fontSize: 11,
+        fontSize: 13,
         color: colors.contentPrimary,
-        letterSpacing: 0.3,
+        letterSpacing: 0.1,
       ),
       secondaryLabelStyle: TextStyle(
-        fontSize: 11,
-        color: colors.canvas,
-        letterSpacing: 0.3,
+        fontSize: 13,
+        color: colors.onActionPrimary,
+        letterSpacing: 0.1,
       ),
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
     ),
-    // Ink, not gold. Dior's committing action is the darkest thing on screen;
-    // reserving gold for the apartado makes that CTA the one that stands out.
+    // Brown pill: the principal purchase action (style guideline §3). Dark mode
+    // keeps its own accent through [MonettaColors.dark.actionPrimary].
     filledButtonTheme: FilledButtonThemeData(
       style: FilledButton.styleFrom(
-        backgroundColor: colors.contentPrimary,
-        foregroundColor: colors.canvas,
+        backgroundColor: colors.actionPrimary,
+        foregroundColor: colors.onActionPrimary,
         disabledBackgroundColor: colors.surfaceMuted,
         disabledForegroundColor: colors.contentMuted,
-        shape: const RoundedRectangleBorder(borderRadius: kSquare),
-        minimumSize: const Size.fromHeight(52),
+        shape: const StadiumBorder(),
+        minimumSize: const Size.fromHeight(MonettaTokens.controlHeight),
         textStyle: const TextStyle(
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
-          letterSpacing: 1.4,
+          letterSpacing: 0.6,
         ),
       ),
     ),
     outlinedButtonTheme: OutlinedButtonThemeData(
       style: OutlinedButton.styleFrom(
-        foregroundColor: colors.accentContent,
-        side: BorderSide(color: colors.accent, width: 0.8),
-        shape: const RoundedRectangleBorder(borderRadius: kSquare),
-        minimumSize: const Size.fromHeight(52),
+        foregroundColor: colors.contentPrimary,
+        side: BorderSide(color: colors.borderControl),
+        shape: const StadiumBorder(),
+        minimumSize: const Size.fromHeight(MonettaTokens.controlHeight),
         textStyle: const TextStyle(
-          fontSize: 12,
+          fontSize: 14,
           fontWeight: FontWeight.w600,
-          letterSpacing: 1.2,
+          letterSpacing: 0.6,
         ),
       ),
     ),
@@ -821,11 +893,18 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
       surfaceTintColor: Colors.transparent,
       modalBackgroundColor: colors.surfaceRaised,
       modalBarrierColor: colors.scrim,
-      shape: const RoundedRectangleBorder(borderRadius: kSquare),
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(
+          top: Radius.circular(MonettaTokens.radiusSheet),
+        ),
+      ),
     ),
     dialogTheme: DialogThemeData(
       backgroundColor: colors.surfaceRaised,
       surfaceTintColor: Colors.transparent,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(MonettaTokens.radiusSheet),
+      ),
     ),
     inputDecorationTheme: InputDecorationTheme(
       filled: true,
@@ -833,7 +912,7 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
       labelStyle: sans(size: 12.5, color: colors.contentMuted),
       hintStyle: sans(size: 12.5, color: colors.contentMuted),
       enabledBorder: UnderlineInputBorder(
-        borderSide: BorderSide(color: colors.divider, width: 0.5),
+        borderSide: BorderSide(color: colors.borderControl),
       ),
       focusedBorder: UnderlineInputBorder(
         borderSide: BorderSide(color: colors.contentPrimary),

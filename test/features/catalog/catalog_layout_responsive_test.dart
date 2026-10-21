@@ -41,15 +41,21 @@ Widget _app(Widget home, double scale) => MaterialApp(
       home: home,
     );
 
-/// Both navigation variants stay within the view; the new one has a gap.
+/// Both navigation variants stay within the view; the storefront one is flat.
 void _expectContained(WidgetTester tester, {bool floating = true}) {
   expect(tester.takeException(), isNull);
 
   final surface = tester.getRect(find.byKey(const Key('bottom-nav-surface')));
   expect(surface.bottom, lessThanOrEqualTo(_height + 0.01));
   if (floating) {
-    expect(surface.bottom, lessThan(_height), reason: 'floating gap');
-    expect(surface.left, greaterThan(0), reason: 'floating side margin');
+    // The storefront bar is flat and full width: flush with the screen edge,
+    // with its items kept above the system inset.
+    expect(surface.bottom, closeTo(_height, 0.01), reason: 'flat bar');
+    expect(surface.left, 0, reason: 'full width');
+    for (final d in MonettaBottomDestination.values) {
+      final item = tester.getRect(find.byKey(Key('bottom-nav-${d.name}')));
+      expect(item.bottom, lessThanOrEqualTo(_height - _inset + 0.01));
+    }
   } else {
     expect(surface.bottom, closeTo(_height, 0.01), reason: 'legacy docked bar');
   }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
@@ -157,7 +158,7 @@ void main() {
     );
   });
 
-  testWidgets('the header is a solid white bar above the hero', (
+  testWidgets('the header is a solid page-ground bar above the hero', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -171,7 +172,7 @@ void main() {
 
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     expect(appBar.toolbarHeight, 60);
-    expect(appBar.backgroundColor, Colors.white);
+    expect(appBar.backgroundColor, MonettaTokens.canvas);
     expect(
       tester.widget<Scaffold>(find.byType(Scaffold)).extendBodyBehindAppBar,
       isFalse,
@@ -186,7 +187,7 @@ void main() {
       kAppBarWordmarkHeight,
     );
 
-    // It stays white once the hero scrolls away.
+    // It stays on the page ground once the hero scrolls away.
     await tester.drag(
       find.byKey(const ValueKey('home-discovery-header')),
       const Offset(0, -600),
@@ -194,7 +195,7 @@ void main() {
     await tester.pump();
     expect(
       tester.widget<AppBar>(find.byType(AppBar)).backgroundColor,
-      Colors.white,
+      MonettaTokens.canvas,
     );
   });
 

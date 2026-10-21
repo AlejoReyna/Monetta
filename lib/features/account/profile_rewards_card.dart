@@ -95,7 +95,6 @@ class _ProfileRewardsCardState extends State<ProfileRewardsCard> {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    const muted = Color(0xFFC0C1B8);
     return FutureBuilder<RewardsSummary>(
       future: _pending,
       builder: (context, snapshot) {
@@ -135,100 +134,103 @@ class _ProfileRewardsCardState extends State<ProfileRewardsCard> {
                         ? () => widget.controller.login()
                         : null
                     : () => setState(() => _pending = _reader?.summary());
+        // Compact entry (style guideline §2, page 13): the balance stays the
+        // server's number in MXN; nothing here invents points or tiers.
         return Material(
           key: const ValueKey('profile-rewards-card'),
-          color: const Color(0xFF191A18),
-          borderRadius: BorderRadius.circular(26),
+          color: palette.surfaceDeep,
+          borderRadius: BoutiqueRadius.card,
           clipBehavior: Clip.antiAlias,
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(24, 22, 24, 18),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              padding: const EdgeInsets.symmetric(
+                horizontal: BoutiqueSpace.lg,
+                vertical: BoutiqueSpace.md,
+              ),
+              child: Row(
                 children: [
-                  Text(
-                    'TU SALDO MONETTA',
-                    style: boutiqueEyebrow(
-                      size: 11,
-                      color: const Color(0xFFD3C5A7),
+                  ExcludeSemantics(
+                    child: Container(
+                      width: 44,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        color: palette.canvas,
+                      ),
+                      child: Icon(
+                        Icons.card_giftcard_outlined,
+                        size: 24,
+                        color: palette.goldText,
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: summary != null
-                            ? Wrap(
-                                crossAxisAlignment: WrapCrossAlignment.end,
-                                spacing: 8,
-                                children: [
-                                  Text(
-                                    '\$${(summary.availableCents / 100).toStringAsFixed(2)}',
-                                    key: const ValueKey(
-                                      'rewards-balance-available',
-                                    ),
-                                    style: boutiqueText(
-                                      size: 34,
-                                      height: 1.15,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                  Text(
-                                    'MXN',
-                                    style: boutiqueText(size: 11, color: muted),
-                                  ),
-                                ],
-                              )
-                            : Text(
-                                title,
-                                style: boutiqueTitle(
-                                  size: 17,
-                                  color: Colors.white,
+                  const SizedBox(width: BoutiqueSpace.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Monetta Rewards',
+                          style: boutiqueRowLabel(
+                            context: context,
+                            color: palette.ink,
+                          ),
+                        ),
+                        const SizedBox(height: 2),
+                        if (summary != null)
+                          Wrap(
+                            crossAxisAlignment: WrapCrossAlignment.end,
+                            spacing: 6,
+                            children: [
+                              Text(
+                                '\$${(summary.availableCents / 100).toStringAsFixed(2)}',
+                                key: const ValueKey(
+                                  'rewards-balance-available',
+                                ),
+                                style: boutiqueText(
+                                  size: 16,
+                                  weight: FontWeight.w600,
+                                  color: palette.ink,
                                 ),
                               ),
-                      ),
-                      const SizedBox(width: 12),
-                      ExcludeSemantics(
-                        child: Container(
-                          width: 52,
-                          height: 52,
-                          alignment: Alignment.center,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            border: Border.all(
-                              color: palette.gold.withValues(alpha: .6),
+                              Text(
+                                'MXN',
+                                style: boutiqueText(
+                                  size: 12,
+                                  color: palette.inkMuted,
+                                ),
+                              ),
+                            ],
+                          )
+                        else
+                          Text(
+                            title,
+                            style: boutiqueText(
+                              size: 14,
+                              weight: FontWeight.w500,
+                              color: palette.ink,
                             ),
                           ),
-                          child: Text(
-                            'M',
-                            style: boutiqueDisplay(32, color: palette.gold),
+                        const SizedBox(height: 2),
+                        Text(
+                          footer,
+                          style: boutiqueText(
+                            size: 12,
+                            color: palette.inkMuted,
                           ),
                         ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Divider(color: Color(0x26FFFFFF), height: 1),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          footer,
-                          style: boutiqueText(size: 12, color: muted),
-                        ),
-                      ),
-                      if (onTap != null) ...[
-                        const SizedBox(width: 8),
-                        Icon(
-                          Icons.arrow_forward,
-                          size: 18,
-                          color: palette.gold,
-                        ),
                       ],
-                    ],
+                    ),
                   ),
+                  if (onTap != null) ...[
+                    const SizedBox(width: BoutiqueSpace.sm),
+                    Icon(
+                      Icons.chevron_right_rounded,
+                      size: 22,
+                      color: palette.inkMuted,
+                    ),
+                  ],
                 ],
               ),
             ),

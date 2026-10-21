@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 
@@ -27,66 +28,64 @@ Future<BoutiquePalette> _paletteUnder(
   return palette;
 }
 
-bool _isNeutralGrey(Color color) {
-  final r = (color.r * 255).round();
-  final g = (color.g * 255).round();
-  final b = (color.b * 255).round();
-  return r == g && g == b;
-}
-
 String _hex(Color color) =>
     '0x${color.toARGB32().toRadixString(16).padLeft(8, '0').toUpperCase()}';
 
 void main() {
   group('boutique light palette', () {
     // One test per field so a red run names every colour that still has to
-    // change, not only the first one.
+    // change, not only the first one. Values are the style guideline's
+    // generated tokens (design-system/monetta.tokens.json).
     for (final target in <String, (Color, Color Function(BoutiquePalette))>{
-      'canvas': (const Color(0xFFFFFFFF), (p) => p.canvas),
-      'surface': (const Color(0xFFFAFAFA), (p) => p.surface),
-      'surfaceDeep': (const Color(0xFFF0F0F0), (p) => p.surfaceDeep),
-      'selectedFill': (const Color(0xFFF0F0F0), (p) => p.selectedFill),
+      'canvas': (MonettaTokens.canvas, (p) => p.canvas),
+      'surface (product tiles)': (MonettaTokens.surfaceTile, (p) => p.surface),
+      'surfaceDeep (warm panels)': (
+        MonettaTokens.surfaceWarm,
+        (p) => p.surfaceDeep,
+      ),
+      'selectedFill': (MonettaTokens.surfaceWarm, (p) => p.selectedFill),
+      'bar': (MonettaTokens.bar, (p) => p.bar),
+      'action (brown)': (MonettaTokens.actionPrimary, (p) => p.action),
+      'onAction': (MonettaTokens.onActionPrimary, (p) => p.onAction),
+      'actionDark': (MonettaTokens.actionDark, (p) => p.actionDark),
+      'borderControl': (MonettaTokens.borderControl, (p) => p.borderControl),
+      'saleSurface': (MonettaTokens.saleSurface, (p) => p.saleSurface),
     }.entries) {
       testWidgets(
-        'UI-THEME-01 (objetivo) ${target.key} is ${_hex(target.value.$1)} '
-        'and a neutral grey',
+        'STYLE-01 ${target.key} is ${_hex(target.value.$1)}',
         (tester) async {
           final palette = await _paletteUnder(tester, buildTheme());
-          final actual = target.value.$2(palette);
-
-          expect(_hex(actual), _hex(target.value.$1));
-          expect(
-            _isNeutralGrey(actual),
-            isTrue,
-            reason: '${target.key} ${_hex(actual)} must have r == g == b '
-                '(no warm tint)',
-          );
+          expect(_hex(target.value.$2(palette)), _hex(target.value.$1));
         },
       );
     }
 
-    test(
-      'UI-THEME-01 (objetivo) the navigation surface that the bars share is '
-      '0xFFF5F5F5',
-      () {
-        expect(
-          _hex(MonettaColors.light.navigationSurface),
-          _hex(const Color(0xFFF5F5F5)),
-        );
-      },
-    );
+    test('STYLE-01 the page ground is a warm ivory, never pure white', () {
+      expect(MonettaColors.light.canvas, isNot(const Color(0xFFFFFFFF)));
+      expect(
+        MonettaColors.light.canvas.r,
+        greaterThan(MonettaColors.light.canvas.b),
+      );
+    });
+
+    test('STYLE-01 the bars share one navigation surface', () {
+      expect(
+        _hex(MonettaColors.light.navigationSurface),
+        _hex(MonettaTokens.bar),
+      );
+    });
 
     testWidgets(
-      'UI-THEME-02 (caracterización) brand colours and the dark palette are '
-      'untouched',
+      'STYLE-02 (caracterización) ink, sale, hairline roles and the dark '
+      'palette',
       (tester) async {
         final light = await _paletteUnder(tester, buildTheme());
-        expect(light.ink, const Color(0xFF111111));
-        expect(light.inkMuted, const Color(0xFF6B6660));
+        expect(light.ink, MonettaTokens.ink);
+        expect(light.inkMuted, MonettaTokens.inkMuted);
         expect(light.gold, const Color(0xFFC5A052));
-        expect(light.goldText, const Color(0xFF8F6838));
-        expect(light.hairline, const Color(0x1F111111));
-        expect(light.selectedBorder, const Color(0xFF111111));
+        expect(light.goldText, MonettaTokens.accentText);
+        expect(light.hairline, MonettaTokens.divider);
+        expect(light.selectedBorder, MonettaTokens.actionPrimary);
         expect(light.sale, const Color(0xFFA3342B));
         expect(light.onDark, const Color(0xFFF8F5EE));
 
@@ -104,34 +103,32 @@ void main() {
         expect(dark.selectedBorder, shared.contentPrimary);
         expect(dark.sale, shared.sale);
         expect(dark.onDark, const Color(0xFFF8F5EE));
+        expect(dark.action, shared.actionPrimary);
 
-        // MonettaColors.light: every field except navigationSurface.
+        // MonettaColors.light: the semantic roles of the guideline.
         const l = MonettaColors.light;
-        expect(l.canvas, const Color(0xFFFFFFFF));
-        expect(l.surface, const Color(0xFFFFFFFF));
-        expect(l.surfaceRaised, const Color(0xFFFFFFFF));
-        expect(l.surfaceMuted, const Color(0xFFF5F5F5));
-        expect(l.mediaPlaceholder, const Color(0xFFF5F5F5));
-        expect(l.contentPrimary, const Color(0xFF111111));
-        expect(l.contentMuted, const Color(0xFF737373));
-        expect(l.divider, const Color(0x26111111));
-        expect(l.inputFill, const Color(0xFFF1F1F1));
-        expect(l.inverseSurface, const Color(0xFF111111));
-        expect(l.onInverseSurface, const Color(0xFFFFFFFF));
+        expect(l.canvas, MonettaTokens.canvas);
+        expect(l.surface, MonettaTokens.surface);
+        expect(l.surfaceRaised, MonettaTokens.surface);
+        expect(l.surfaceMuted, MonettaTokens.surfaceWarm);
+        expect(l.mediaPlaceholder, MonettaTokens.surfaceTile);
+        expect(l.contentPrimary, MonettaTokens.ink);
+        expect(l.contentMuted, MonettaTokens.inkMuted);
+        expect(l.divider, MonettaTokens.divider);
+        expect(l.inputFill, MonettaTokens.surface);
+        expect(l.inverseSurface, MonettaTokens.ink);
+        expect(l.onInverseSurface, MonettaTokens.canvas);
         expect(l.accent, kGold);
-        expect(l.accent, const Color(0xFFAA7D44));
-        expect(l.accentContent, const Color(0xFF8F6838));
+        expect(l.accentContent, MonettaTokens.accentText);
         expect(l.sale, kSale);
         expect(l.sale, const Color(0xFFA3342B));
         expect(l.success, const Color(0xFF3B7B4A));
-        expect(l.warningSurface, const Color(0xFFF7F0E6));
+        expect(l.warningSurface, MonettaTokens.surfaceWarm);
         expect(l.successSurface, const Color(0xFFEAF4EC));
-        expect(l.scrim, const Color(0x52000000));
-        expect(l.navigationSelection, const Color(0x24AA7D44));
-        expect(l.navigationForeground, const Color(0xFF222222));
-        expect(l.navigationForegroundMuted, const Color(0xFF6E6E6E));
+        expect(l.navigationForeground, MonettaTokens.navigationActive);
+        expect(l.navigationForegroundMuted, MonettaTokens.navigationInactive);
 
-        // MonettaColors.dark: every field.
+        // MonettaColors.dark: every pre-existing field, unchanged.
         const d = MonettaColors.dark;
         expect(d.canvas, const Color(0xFF11100F));
         expect(d.surface, const Color(0xFF171615));
@@ -161,11 +158,11 @@ void main() {
 
   group('shared theme app bar', () {
     test(
-      'UI-THEME-03 (objetivo) light appBarTheme paints the navigation grey',
+      'UI-THEME-03 (objetivo) light appBarTheme paints the shared bar surface',
       () {
         expect(
           _hex(buildTheme().appBarTheme.backgroundColor!),
-          _hex(const Color(0xFFF5F5F5)),
+          _hex(MonettaTokens.bar),
         );
       },
     );

@@ -1346,16 +1346,14 @@ class _AboutMonettaSection extends StatelessWidget {
                     FilledButton(
                       onPressed: onOpen,
                       style: FilledButton.styleFrom(
-                        backgroundColor: palette.ink,
-                        foregroundColor: palette.canvas,
+                        backgroundColor: palette.action,
+                        foregroundColor: palette.onAction,
+                        shape: const StadiumBorder(),
                         minimumSize:
                             const Size.fromHeight(BoutiqueSpace.control),
                         padding: const EdgeInsets.symmetric(
                           horizontal: BoutiqueSpace.lg,
                           vertical: BoutiqueSpace.md,
-                        ),
-                        shape: const RoundedRectangleBorder(
-                          borderRadius: BoutiqueRadius.control,
                         ),
                       ),
                       child: Row(

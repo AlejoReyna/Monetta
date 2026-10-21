@@ -323,7 +323,10 @@ class _ProductScreenState extends State<ProductScreen> {
                     ],
                     Text(
                       shopperProductName(product.title),
-                      style: boutiqueProductName(color: palette.ink),
+                      style: boutiqueProductName(
+                        context: context,
+                        color: palette.ink,
+                      ),
                     ),
                     const SizedBox(height: BoutiqueSpace.lg),
                     Wrap(
@@ -423,7 +426,10 @@ class _ProductScreenState extends State<ProductScreen> {
                     facets?.brand == null
                         ? 'Más piezas'
                         : 'Más de ${brandLabel(facets!.brand!.value)}',
-                    style: boutiqueSectionHeading(color: palette.ink),
+                    style: boutiqueSectionHeading(
+                      context: context,
+                      color: palette.ink,
+                    ),
                   ),
                 ),
                 _Rail(
@@ -442,7 +448,10 @@ class _ProductScreenState extends State<ProductScreen> {
                   ),
                   child: Text(
                     'Vistas hace un momento',
-                    style: boutiqueSectionHeading(color: palette.ink),
+                    style: boutiqueSectionHeading(
+                      context: context,
+                      color: palette.ink,
+                    ),
                   ),
                 ),
                 _Rail(
@@ -797,7 +806,10 @@ class _BoutiqueAccordion extends StatelessWidget {
                     Expanded(
                       child: Text(
                         label,
-                        style: boutiqueSectionHeading(color: palette.ink),
+                        style: boutiqueSectionHeading(
+                          context: context,
+                          color: palette.ink,
+                        ),
                       ),
                     ),
                     AnimatedRotation(
@@ -896,7 +908,10 @@ class _PurchaseSection extends StatelessWidget {
       children: [
         Text(
           'Otras formas de comprar',
-          style: boutiqueSectionHeading(color: palette.ink),
+          style: boutiqueSectionHeading(
+            context: context,
+            color: palette.ink,
+          ),
         ),
         const SizedBox(height: BoutiqueSpace.md),
         if (inStock) ...[
