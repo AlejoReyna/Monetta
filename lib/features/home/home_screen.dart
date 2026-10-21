@@ -17,7 +17,6 @@ import '../boutique/client_guide_sections.dart';
 import '../wholesale/wholesale_screen.dart';
 import '../contact/contact_screen.dart';
 import '../../app/mixed_feed.dart';
-import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
 import '../../data/media/media_url.dart';
@@ -249,10 +248,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         builder: (_) => const WholesaleScreen(),
       ),
     );
-  }
-
-  void _openWhatsApp(Uri uri) {
-    unawaited(launchUrl(uri, mode: LaunchMode.externalApplication));
   }
 
   void _openExternal(Uri uri) {
@@ -607,8 +602,13 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
       onToggleTheme: _toggleTheme,
       onAbout: _openAbout,
-      onPartner: _openPartner,
-      onSupport: () => _openWhatsApp(conciergeWhatsAppUri()),
+      onPartner: _openWholesale,
+      onSupport: () => unawaited(
+        openContact(
+          context,
+          socialLinks: HomeContentScope.maybeOf(context)?.content.socialLinks,
+        ),
+      ),
     );
   }
 
