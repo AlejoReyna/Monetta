@@ -31,15 +31,27 @@ List<String> productSearchTerms(CatalogStore store, Product product) {
   ].where((term) => term.trim().isNotEmpty).toList(growable: false);
 }
 
-/// True when any term contains [normalizedQuery] (already normalized).
+/// True when every word in [normalizedQuery] appears in at least one term.
+///
+/// Words may match different terms, so `coach bolsa` finds a Coach bag even
+/// though no single facet is labelled with both. Requiring every word keeps
+/// predictive search precise instead of treating a phrase as one substring.
 bool productMatchesNormalizedQuery(
   CatalogStore store,
   Product product,
   String normalizedQuery,
 ) {
   if (normalizedQuery.isEmpty) return true;
-  return productSearchTerms(store, product).any(
-    (term) => normalizeSearchText(term).contains(normalizedQuery),
+  final tokens = normalizedQuery
+      .split(' ')
+      .where((token) => token.isNotEmpty)
+      .toList(growable: false);
+  if (tokens.isEmpty) return true;
+  final terms = productSearchTerms(store, product)
+      .map(normalizeSearchText)
+      .toList(growable: false);
+  return tokens.every(
+    (token) => terms.any((term) => term.contains(token)),
   );
 }
 

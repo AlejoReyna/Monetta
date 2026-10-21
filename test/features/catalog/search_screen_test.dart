@@ -96,8 +96,15 @@ void main() {
     await _type(tester, 'steve');
 
     expect(find.byKey(const ValueKey('search-suggestions')), findsOneWidget);
-    expect(find.text('Steve Madden', findRichText: true), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('search-suggestions')),
+        matching: find.text('Steve Madden', findRichText: true),
+      ),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('search-result-grid')), findsNothing);
+    expect(find.byKey(const ValueKey('search-product-rail')), findsOneWidget);
 
     await tester.tap(
       find
@@ -307,6 +314,81 @@ void main() {
       find.text(expected == 1 ? '1 pieza' : '$expected piezas'),
       findsOneWidget,
     );
+  });
+
+  testWidgets('predictive products appear while typing and open Ver todo', (
+    tester,
+  ) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+    await tester.pumpWidget(_app(store));
+    await tester.pump();
+
+    await _type(tester, 'coach');
+    expect(find.byKey(const ValueKey('search-predictive')), findsOneWidget);
+    expect(find.byKey(const ValueKey('search-product-rail')), findsOneWidget);
+    expect(find.byKey(const ValueKey('search-result-grid')), findsNothing);
+
+    await tester.tap(
+      find.byKey(const ValueKey('search-predictive-see-all')),
+    );
+    await tester.pumpAndSettle();
+    expect(find.byType(CollectionScreen), findsOneWidget);
+    expect(find.text('coach'), findsWidgets);
+  });
+
+  testWidgets('a multi-word query matches words across different facets', (
+    tester,
+  ) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+    expect(searchProducts(store, 'coach bolsa'), isNotEmpty);
+    expect(searchProducts(store, 'bolsa coach'), isNotEmpty);
+
+    await tester.pumpWidget(_app(store));
+    await tester.pump();
+    await _type(tester, 'coach bolsa');
+    expect(find.byKey(const ValueKey('search-predictive')), findsOneWidget);
+    expect(find.byKey(const ValueKey('search-product-rail')), findsOneWidget);
+
+    await tester.testTextInput.receiveAction(TextInputAction.search);
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('search-result-grid')), findsOneWidget);
+  });
+
+  testWidgets('an empty predictive result offers real categories', (
+    tester,
+  ) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1.0;
+
+    final store = await _loadedStore();
+    addTearDown(store.dispose);
+    await tester.pumpWidget(_app(store));
+    await tester.pump();
+
+    await _type(tester, 'zzzzqq');
+    expect(
+      find.byKey(const ValueKey('search-predictive-empty')),
+      findsOneWidget,
+    );
+    expect(
+      find.byKey(const ValueKey('search-predictive-category-bolsa')),
+      findsOneWidget,
+    );
+
+    await tester.tap(find.text('Limpiar búsqueda'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const ValueKey('search-empty-state')), findsOneWidget);
   });
 
   testWidgets('a shopper sees results without a piece count', (tester) async {

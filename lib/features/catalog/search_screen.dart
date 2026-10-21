@@ -124,13 +124,17 @@ class _SearchScreenState extends State<SearchScreen> {
   List<_SearchSuggestion> _suggestions(String raw) {
     final query = normalizeSearchText(raw);
     if (query.isEmpty) return const [];
+    final tokens = query.split(' ').where((t) => t.isNotEmpty);
 
     final byLabel = <String, _SearchSuggestion>{};
 
     void add(String? label, int priority) {
       final cleanLabel = label?.trim() ?? '';
       final normalizedLabel = normalizeSearchText(cleanLabel);
-      if (cleanLabel.isEmpty || !normalizedLabel.contains(query)) return;
+      if (cleanLabel.isEmpty ||
+          !tokens.every((token) => normalizedLabel.contains(token))) {
+        return;
+      }
 
       final existing = byLabel[normalizedLabel];
       if (existing == null || priority < existing.priority) {
@@ -330,10 +334,19 @@ class _SearchScreenState extends State<SearchScreen> {
                               products: matches,
                               onSeeAll: () => _openAllResults(query.trim()),
                             )
-                      : _SearchSuggestions(
-                          query: query,
+                      : _PredictiveState(
+                          query: query.trim(),
+                          history: _history.queries,
                           suggestions: suggestions,
+                          products: matches,
+                          categories: _availableCategories(),
+                          onHistory: _runQuery,
+                          onForget: (value) =>
+                              unawaited(_history.forget(value)),
                           onSelected: _selectSuggestion,
+                          onSeeAll: () => _openAllResults(query.trim()),
+                          onClear: _clear,
+                          onCategory: _openCategory,
                         ),
             ),
           ],
@@ -771,8 +784,105 @@ class _SearchSuggestion {
   final int priority;
 }
 
-class _SearchSuggestions extends StatelessWidget {
-  const _SearchSuggestions({
+class _PredictiveState extends StatelessWidget {
+  const _PredictiveState({
+    required this.query,
+    required this.history,
+    required this.suggestions,
+    required this.products,
+    required this.categories,
+    required this.onHistory,
+    required this.onForget,
+    required this.onSelected,
+    required this.onSeeAll,
+    required this.onClear,
+    required this.onCategory,
+  });
+
+  final String query;
+  final List<String> history;
+  final List<_SearchSuggestion> suggestions;
+  final List<Product> products;
+  final List<String> categories;
+  final ValueChanged<String> onHistory;
+  final ValueChanged<String> onForget;
+  final ValueChanged<_SearchSuggestion> onSelected;
+  final VoidCallback onSeeAll;
+  final VoidCallback onClear;
+  final ValueChanged<String> onCategory;
+
+  @override
+  Widget build(BuildContext context) {
+    final shownHistory = history.take(3).toList(growable: false);
+    final shownProducts = products.take(4).toList(growable: false);
+    final hasMatches = suggestions.isNotEmpty || products.isNotEmpty;
+    return ListView(
+      key: const ValueKey('search-predictive'),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.only(bottom: BoutiqueSpace.xxl),
+      children: [
+        if (shownHistory.isNotEmpty) ...[
+          const _SectionTitle(title: 'Búsquedas recientes'),
+          for (final entry in shownHistory)
+            _HistoryRow(
+              key: ValueKey('search-predictive-history-$entry'),
+              query: entry,
+              onTap: () => onHistory(entry),
+              onForget: () => onForget(entry),
+            ),
+        ],
+        if (suggestions.isNotEmpty) ...[
+          const _SectionTitle(title: 'Sugerencias'),
+          _SuggestionRows(
+            query: query,
+            suggestions: suggestions,
+            onSelected: onSelected,
+          ),
+        ],
+        if (shownProducts.isNotEmpty) ...[
+          const _SectionTitle(title: 'Productos'),
+          _ProductRail(products: shownProducts),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              BoutiqueSpace.gutter,
+              BoutiqueSpace.md,
+              BoutiqueSpace.gutter,
+              0,
+            ),
+            child: BoutiqueButton(
+              key: const ValueKey('search-predictive-see-all'),
+              label: products.length > shownProducts.length
+                  ? 'Ver todo (${products.length})'
+                  : 'Ver todo',
+              onPressed: onSeeAll,
+              filled: false,
+            ),
+          ),
+        ],
+        if (!hasMatches)
+          CatalogEmptyState(
+            key: const ValueKey('search-predictive-empty'),
+            title: 'Sin resultados',
+            body: 'No encontramos piezas para “$query”. '
+                'Prueba con otra palabra o explora una categoría.',
+            actionLabel: 'Limpiar búsqueda',
+            onAction: onClear,
+            suggestions: [
+              for (final slug in categories.take(6))
+                MonettaCapsuleChip(
+                  key: ValueKey('search-predictive-category-$slug'),
+                  label: categoryPlural(slug),
+                  onTap: () => onCategory(slug),
+                ),
+            ],
+          ),
+      ],
+    );
+  }
+}
+
+class _SuggestionRows extends StatelessWidget {
+  const _SuggestionRows({
     required this.query,
     required this.suggestions,
     required this.onSelected,
@@ -784,57 +894,51 @@ class _SearchSuggestions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    if (suggestions.isEmpty) {
-      return const SizedBox(key: ValueKey('search-no-suggestions'));
-    }
-
-    return ListView.separated(
+    return Column(
       key: const ValueKey('search-suggestions'),
-      padding: EdgeInsets.zero,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-      itemCount: suggestions.length,
-      separatorBuilder: (context, _) => Divider(
-        height: .5,
-        indent: BoutiqueSpace.gutter,
-        color: context.boutique.hairline,
-      ),
-      itemBuilder: (context, index) {
-        final suggestion = suggestions[index];
-        return Semantics(
-          button: true,
-          label: 'Buscar ${suggestion.label}',
-          child: InkWell(
-            onTap: () => onSelected(suggestion),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 56,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: BoutiqueSpace.gutter,
-                  vertical: BoutiqueSpace.md,
-                ),
-                child: Row(
-                  children: [
-                    Icon(
-                      Icons.search_rounded,
-                      size: 19,
-                      color: context.boutique.inkMuted,
-                    ),
-                    const SizedBox(width: BoutiqueSpace.md),
-                    Expanded(
-                      child: _SuggestionLabel(
-                        label: suggestion.label,
-                        query: query,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var index = 0; index < suggestions.length; index++) ...[
+          if (index > 0)
+            Divider(
+              height: .5,
+              indent: BoutiqueSpace.gutter,
+              color: context.boutique.hairline,
+            ),
+          Semantics(
+            button: true,
+            label: 'Buscar ${suggestions[index].label}',
+            child: InkWell(
+              onTap: () => onSelected(suggestions[index]),
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 56),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: BoutiqueSpace.gutter,
+                    vertical: BoutiqueSpace.md,
+                  ),
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.search_rounded,
+                        size: 19,
+                        color: context.boutique.inkMuted,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: BoutiqueSpace.md),
+                      Expanded(
+                        child: _SuggestionLabel(
+                          label: suggestions[index].label,
+                          query: query,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ),
-        );
-      },
+        ],
+      ],
     );
   }
 }
