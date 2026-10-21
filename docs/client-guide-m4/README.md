@@ -88,7 +88,14 @@ Son evidencias de widgets a 390 y 834 px, con fuentes empaquetadas, modo claro y
 
 ## Comparación con main
 
-La corrida completa de `flutter analyze` y `flutter test` en esta rama y en `origin/main` (`c390964`) se anota aquí al terminar. Las pruebas de estas cuatro pantallas, más el cajón de Inicio, pasaron en local. No se regeneraron goldens en este cambio.
+| Control | `origin/main` (`c390964`) | M4 |
+|---|---|---|
+| `flutter analyze` | Sin incidencias | Sin incidencias |
+| `flutter test` | 1,262 correctas, 15 omitidas | 1,286 correctas, 15 omitidas |
+| Fallos nuevos pendientes | — | Ninguno |
+| Goldens modificados | — | Ninguno |
+
+Las 24 pruebas de más son las de Personalización, Búsqueda en vivo, Rewards y Menú, incluidas las capturas. Las 15 omitidas coinciden en número con main. No se regeneraron goldens: `git diff origin/main...HEAD -- test/goldens` está vacío y la suite pasó con las referencias actuales.
 
 `kCheckoutTokenCorrelationAvailable` sigue en `false`. No hay cambios en checkout, pagos, pedidos, modelos/API/backend de Rewards, servicios Shopify ni despliegues.
 
