@@ -543,6 +543,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   bool _didPrefillContact = false;
   int _returnGeneration = 0;
   CheckoutReturnPhase? _returnPhase;
+  String? _returnDetail;
   String? _selectedPayment;
   Timer? _pollTimer;
   Completer<void>? _pollDelay;
@@ -621,6 +622,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   }
 
   void _showBrowserFallback(CheckoutFailed failure) {
+    if (!failure.allowExternalBrowser) return;
     final fallback = widget.openExternalCheckout;
     if (fallback == null) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -700,6 +702,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
       setState(() {
         _openingSheet = true;
         _returnPhase = null;
+        _returnDetail = null;
       });
       try {
         final email = _email.text.trim();
@@ -755,9 +758,14 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             if (result is CheckoutFailed) _showBrowserFallback(result);
             final kind = classifyCheckoutResult(result);
             if (kind == CheckoutReturnKind.sheetDidNotOpen) {
-              setState(
-                () => _returnPhase = CheckoutReturnPhase.sheetDidNotOpen,
-              );
+              final detail =
+                  result is CheckoutFailed && !result.allowExternalBrowser
+                      ? result.userMessage
+                      : null;
+              setState(() {
+                _returnPhase = CheckoutReturnPhase.sheetDidNotOpen;
+                _returnDetail = detail;
+              });
               return;
             }
             final lookup = _lookup();
@@ -865,6 +873,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                           shipping: _shippingFor(store.bagSubtotal),
                           openingSheet: _openingSheet,
                           returnPhase: _returnPhase,
+                          returnDetail: _returnDetail,
                           payEnabled: !_retryBlocked,
                           showPayButton: !_orderFound,
                           paymentMethods: widget.availablePaymentMethods,
@@ -1676,6 +1685,7 @@ class _ReviewPanel extends StatelessWidget {
     required this.shipping,
     required this.openingSheet,
     required this.returnPhase,
+    this.returnDetail,
     required this.payEnabled,
     required this.showPayButton,
     required this.paymentMethods,
@@ -1692,6 +1702,7 @@ class _ReviewPanel extends StatelessWidget {
   final double shipping;
   final bool openingSheet;
   final CheckoutReturnPhase? returnPhase;
+  final String? returnDetail;
   final bool payEnabled;
   final bool showPayButton;
   final List<String> paymentMethods;
@@ -1741,6 +1752,7 @@ class _ReviewPanel extends StatelessWidget {
         if (returnPhase != null)
           CheckoutReturnBanner(
             phase: returnPhase!,
+            bodyOverride: returnDetail,
             onRetry: payEnabled ? onPay : null,
             onViewOrders: onViewOrders,
             onWhatsApp: onWhatsApp,

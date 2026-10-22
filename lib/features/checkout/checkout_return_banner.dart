@@ -14,6 +14,7 @@ import 'checkout_return.dart';
 class CheckoutReturnBanner extends StatelessWidget {
   const CheckoutReturnBanner({
     required this.phase,
+    this.bodyOverride,
     this.onRetry,
     this.onViewOrders,
     this.onWhatsApp,
@@ -21,6 +22,10 @@ class CheckoutReturnBanner extends StatelessWidget {
   });
 
   final CheckoutReturnPhase phase;
+
+  /// Replaces the generic sheet-did-not-open body when checkout was refused
+  /// before the sheet opened, for example the storefront password page.
+  final String? bodyOverride;
   final VoidCallback? onRetry;
   final VoidCallback? onViewOrders;
   final VoidCallback? onWhatsApp;
@@ -69,13 +74,16 @@ class CheckoutReturnBanner extends StatelessWidget {
         kCheckoutReturnSheetDidNotOpenTitle,
       CheckoutReturnPhase.reviewing => kCheckoutReturnReviewingTitle,
     };
-    final body = switch (phase) {
+    final fallbackBody = switch (phase) {
       CheckoutReturnPhase.confirming => '',
       CheckoutReturnPhase.paymentNotCompleted =>
         kCheckoutReturnPaymentNotCompletedBody,
       CheckoutReturnPhase.sheetDidNotOpen => kCheckoutReturnSheetDidNotOpenBody,
       CheckoutReturnPhase.reviewing => kCheckoutReturnReviewingBody,
     };
+    final override = bodyOverride?.trim();
+    final body =
+        override != null && override.isNotEmpty ? override : fallbackBody;
     return Semantics(
       key: bannerKey,
       container: true,
