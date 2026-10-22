@@ -289,21 +289,39 @@ class CatalogRepository {
     final metadata = await cache.metadata();
     final cursorShop = cursor.shopDomain;
     final metaShop = metadata?.shopDomain;
-    final mismatch = cursorShop != configured || metaShop != configured;
+    if (cursorShop == configured && metaShop == configured) return cursor;
 
-    if (!mismatch) {
-      return cursor;
+    bool foreign(String? stored) =>
+        stored != null && stored.isNotEmpty && stored != configured;
+
+    // A named shop that is not this one still quarantines catalog and bag.
+    if (foreign(cursorShop) || foreign(metaShop)) {
+      return _resetForeignShop(configured);
     }
 
-    // A genuinely fresh install may use the bundled offline preview. Any
-    // persisted commerce/session state without provenance requires migration.
-    if (metadata == null &&
-        cursor.lastUpdatedAt == null &&
+    // The bundled snapshot records no shop. That is this install, not a
+    // foreign catalog: stamp the configured host and keep the bag. Wiping
+    // here dropped a bag on the first restart after a process death,
+    // before any successful sync had written provenance.
+    if (metadata != null) {
+      await cache.saveMetadata(metadata.copyWith(shopDomain: configured));
+      final stamped = cursor.withShop(configured);
+      await cursorStore.save(stamped);
+      return stamped;
+    }
+
+    // No catalog row yet. A fresh install can keep the bundled preview.
+    // Commerce rows with no provenance are a legacy migration and are reset.
+    if (cursor.lastUpdatedAt == null &&
         cursor.lastFullSyncAt == null &&
         await cache.isEmpty() &&
         !await cache.hasShopSpecificState()) {
       return shopify.SyncCursor(shopDomain: configured);
     }
+    return _resetForeignShop(configured);
+  }
+
+  Future<shopify.SyncCursor> _resetForeignShop(String configured) async {
     await cache.resetShopState(configured);
     await _bagStore?.clearAllScopes();
     await _wishlistStore?.clearAllScopes();
