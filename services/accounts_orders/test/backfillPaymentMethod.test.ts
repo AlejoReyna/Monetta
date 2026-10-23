@@ -1,9 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import { TRANSFER_METHOD_ALIASES } from '../src/orders/paymentMethod.js';
+import {
+  TRANSFER_METHOD_ALIASES,
+  staleTransferAliasPaymentMethods,
+} from '../src/orders/paymentMethod.js';
 import {
   ORDER_PAYMENT_QUERY,
+  PENDING_PAYMENT_METHOD_CANDIDATES_SQL,
+  WRITE_PAYMENT_METHOD_SQL,
   backfillLine,
   backfillSummary,
+  backfillWouldWrite,
   parseBackfillArgs,
   readShopifyOrderPayments,
   runPaymentMethodBackfill,
@@ -22,16 +28,20 @@ class MemoryStore implements PaymentMethodBackfillStore {
   }>) {}
 
   async listPendingWithoutPaymentMethod(): Promise<readonly PendingPaymentOrder[]> {
+    const stale = new Set(staleTransferAliasPaymentMethods());
     return this.rows
-      .filter((row) => row.paymentMethod === null && row.financialStatus.toLowerCase() === 'pending')
-      .map((row) => ({ shopifyOrderId: row.shopifyOrderId }));
+      .filter((row) => row.financialStatus.toLowerCase() === 'pending'
+        && (row.paymentMethod === null || stale.has(row.paymentMethod)))
+      .map((row) => ({
+        shopifyOrderId: row.shopifyOrderId,
+        storedPaymentMethod: row.paymentMethod,
+      }));
   }
 
   async setPaymentMethodIfNull(shopifyOrderId: string, paymentMethod: string): Promise<boolean> {
     const row = this.rows.find((candidate) => candidate.shopifyOrderId === shopifyOrderId);
-    if (!row || row.paymentMethod !== null || row.financialStatus.toLowerCase() !== 'pending') {
-      return false;
-    }
+    if (!row || row.financialStatus.toLowerCase() !== 'pending') return false;
+    if (!backfillWouldWrite(row.paymentMethod, paymentMethod)) return false;
     row.paymentMethod = paymentMethod;
     this.writes.push({ shopifyOrderId, paymentMethod });
     return true;
@@ -328,5 +338,157 @@ describe('payment method backfill', () => {
     expect(lookups.get('555')).toEqual({ ok: false, error: 'shopify_http_401' });
     expect(JSON.stringify([...lookups.values()])).not.toContain('shopper@example.com');
     expect(JSON.stringify([...lookups.values()])).not.toContain(token);
+  });
+
+  it('rewrites only a stale transfer alias, and only to bank_deposit', () => {
+    expect(TRANSFER_METHOD_ALIASES.transferencia_bancaria).toBe('bank_deposit');
+    expect(staleTransferAliasPaymentMethods()).toEqual(['other:transferencia_bancaria']);
+    expect(backfillWouldWrite(null, 'card')).toBe(true);
+    expect(backfillWouldWrite(null, 'bank_deposit')).toBe(true);
+    expect(backfillWouldWrite('other:transferencia_bancaria', 'bank_deposit')).toBe(true);
+    expect(backfillWouldWrite('other:transferencia_bancaria', 'card')).toBe(false);
+    expect(backfillWouldWrite('other:transferencia_bancaria', 'other:transferencia_bancaria')).toBe(false);
+    expect(backfillWouldWrite('other:kueski_pay', 'bank_deposit')).toBe(false);
+    expect(backfillWouldWrite('bank_deposit', 'bank_deposit')).toBe(false);
+    expect(backfillWouldWrite('manual', 'bank_deposit')).toBe(false);
+    expect(backfillWouldWrite(null, 'Transferencia bancaria')).toBe(false);
+    expect(PENDING_PAYMENT_METHOD_CANDIDATES_SQL).toContain('payment_method IS NULL');
+    expect(PENDING_PAYMENT_METHOD_CANDIDATES_SQL).toContain('ANY($1::text[])');
+    expect(WRITE_PAYMENT_METHOD_SQL).toContain('payment_method IS NULL');
+    expect(WRITE_PAYMENT_METHOD_SQL).toContain("$1 = 'bank_deposit'");
+    expect(WRITE_PAYMENT_METHOD_SQL).toContain('ANY($3::text[])');
+    expect(WRITE_PAYMENT_METHOD_SQL).not.toMatch(/checkout_token|cart_token/);
+  });
+
+  it('reads Transferencia bancaria from the Admin API as bank_deposit', async () => {
+    const token = 'shpat_secretvalue';
+    const fetchFn = (async () => new Response(JSON.stringify({
+      data: {
+        nodes: [
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/910',
+            name: '#1910',
+            paymentGatewayNames: ['Transferencia bancaria'],
+            transactions: [{
+              kind: 'SALE',
+              gateway: 'Transferencia bancaria',
+              formattedGateway: 'Transferencia bancaria',
+            }],
+          },
+          {
+            __typename: 'Order',
+            id: 'gid://shopify/Order/911',
+            name: '#1911',
+            paymentGatewayNames: ['  TRANSFERENCIA   BANCARIA  '],
+            transactions: [],
+          },
+        ],
+      },
+    }), { status: 200 })) as typeof fetch;
+
+    const lookups = await readShopifyOrderPayments({
+      shopDomain: 'monetta-staging.myshopify.com',
+      apiVersion: '2026-07',
+      accessToken: token,
+      shopifyOrderIds: ['910', '911'],
+      fetchFn,
+    });
+
+    expect(lookups.get('910')).toMatchObject({ ok: true, paymentMethod: 'bank_deposit' });
+    expect(lookups.get('911')).toMatchObject({ ok: true, paymentMethod: 'bank_deposit' });
+    expect(JSON.stringify([...lookups.values()])).not.toContain(token);
+  });
+
+  it('dry-run proposes bank_deposit for other:transferencia_bancaria without writing', async () => {
+    const store = new MemoryStore([
+      { shopifyOrderId: '901', financialStatus: 'pending', paymentMethod: 'other:transferencia_bancaria' },
+    ]);
+    const reader: OrderPaymentReader = {
+      async read(ids) {
+        expect(ids).toEqual(['901']);
+        return new Map([
+          ['901', { ok: true, name: '#1901', paymentMethod: 'bank_deposit' }],
+        ]);
+      },
+    };
+
+    const report = await runPaymentMethodBackfill(store, reader, { apply: false });
+
+    expect(report.applied).toBe(false);
+    expect(report.mode).toBe('dry-run');
+    expect(report.entries).toEqual([
+      {
+        shopifyOrderId: '901',
+        name: '#1901',
+        paymentMethod: 'bank_deposit',
+        action: 'would_write',
+      },
+    ]);
+    expect(store.writes).toEqual([]);
+    expect(store.rows[0]?.paymentMethod).toBe('other:transferencia_bancaria');
+  });
+
+  it('apply rewrites pending other:transferencia_bancaria to bank_deposit', async () => {
+    const store = new MemoryStore([
+      { shopifyOrderId: '901', financialStatus: 'pending', paymentMethod: 'other:transferencia_bancaria' },
+      { shopifyOrderId: '902', financialStatus: 'paid', paymentMethod: 'other:transferencia_bancaria' },
+      { shopifyOrderId: '903', financialStatus: 'pending', paymentMethod: 'other:kueski_pay' },
+      { shopifyOrderId: '904', financialStatus: 'pending', paymentMethod: 'bank_deposit' },
+      { shopifyOrderId: '905', financialStatus: 'pending', paymentMethod: null },
+    ]);
+    const reader: OrderPaymentReader = {
+      async read(ids) {
+        expect(ids).toEqual(['901', '905']);
+        return new Map([
+          ['901', { ok: true, name: '#1901', paymentMethod: 'bank_deposit' }],
+          ['905', { ok: true, name: '#1905', paymentMethod: 'card' }],
+        ]);
+      },
+    };
+
+    const report = await runPaymentMethodBackfill(store, reader, { apply: true });
+
+    expect(report.applied).toBe(true);
+    expect(report.entries.map((entry) => entry.action)).toEqual(['written', 'written']);
+    expect(store.writes).toEqual([
+      { shopifyOrderId: '901', paymentMethod: 'bank_deposit' },
+      { shopifyOrderId: '905', paymentMethod: 'card' },
+    ]);
+    expect(store.rows.find((row) => row.shopifyOrderId === '901')?.paymentMethod).toBe('bank_deposit');
+    expect(store.rows.find((row) => row.shopifyOrderId === '902')?.paymentMethod).toBe('other:transferencia_bancaria');
+    expect(store.rows.find((row) => row.shopifyOrderId === '903')?.paymentMethod).toBe('other:kueski_pay');
+    expect(store.rows.find((row) => row.shopifyOrderId === '904')?.paymentMethod).toBe('bank_deposit');
+
+    const second = await runPaymentMethodBackfill(store, reader, { apply: true });
+    expect(second.candidates).toBe(0);
+    expect(second.entries).toEqual([]);
+    expect(store.writes).toHaveLength(2);
+  });
+
+  it('does not replace other:transferencia_bancaria with a non-transfer method', async () => {
+    const store = new MemoryStore([
+      { shopifyOrderId: '901', financialStatus: 'pending', paymentMethod: 'other:transferencia_bancaria' },
+    ]);
+    const reader: OrderPaymentReader = {
+      async read() {
+        return new Map([
+          ['901', { ok: true, name: '#1901', paymentMethod: 'card' }],
+        ]);
+      },
+    };
+
+    const report = await runPaymentMethodBackfill(store, reader, { apply: true });
+
+    expect(report.entries).toEqual([
+      {
+        shopifyOrderId: '901',
+        name: '#1901',
+        paymentMethod: 'card',
+        action: 'skipped_filled',
+      },
+    ]);
+    expect(store.writes).toEqual([]);
+    expect(store.rows[0]?.paymentMethod).toBe('other:transferencia_bancaria');
   });
 });
