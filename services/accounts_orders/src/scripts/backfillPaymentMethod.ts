@@ -1,11 +1,14 @@
 /**
  * One-time backfill of orders_mirror.payment_method for pending orders
- * whose webhook did not store a method.
+ * whose webhook did not store a method, and for pending orders still
+ * stored as a stale transfer alias such as `other:transferencia_bancaria`.
  *
  * Dry-run is the default and never writes. It prints shopify order id,
  * order name, and the proposed payment_method. Writes happen only with
  * an explicit --apply flag, and only for rows that are still pending and
- * still have a null payment_method.
+ * either still have a null payment_method, or still store a stale
+ * `other:<alias>` from [TRANSFER_METHOD_ALIASES] (for example
+ * `other:transferencia_bancaria`, rewritten only to `bank_deposit`).
  *
  *   npm run backfill:payment-method
  *   npm run backfill:payment-method -- --apply
@@ -21,9 +24,10 @@
  * production only after Alexis approves that dry-run list.
  *
  * Does not backfill checkout_token or cart_token. Those columns are filled
- * by orders/create and orders/updated. This script's candidate set is only
- * pending rows still missing a payment method, and its stdout prints every
- * looked-up field — printing the tokens would log them.
+ * by orders/create and orders/updated. This script's candidate set is
+ * pending rows still missing a payment method, plus pending rows whose
+ * method is a stale transfer alias. Its stdout prints every looked-up
+ * field — printing checkout or cart tokens would log them.
  */
 import { fileURLToPath } from 'node:url';
 import type pg from 'pg';
@@ -31,6 +35,7 @@ import { getPool, closePool } from '../db/pool.js';
 import {
   isNormalizedPaymentMethod,
   normalizePaymentMethod,
+  staleTransferAliasPaymentMethods,
 } from '../orders/paymentMethod.js';
 
 const ORDER_PAYMENT_QUERY = `
@@ -57,12 +62,51 @@ const BATCH_SIZE = 10;
 
 export interface PendingPaymentOrder {
   readonly shopifyOrderId: string;
+  readonly storedPaymentMethod: string | null;
 }
 
 export interface PaymentMethodBackfillStore {
+  /** Pending rows with a null method, or a stale `other:<transfer alias>`. */
   listPendingWithoutPaymentMethod(): Promise<readonly PendingPaymentOrder[]>;
+  /**
+   * Writes when the row is still pending and the method is null.
+   * Also replaces a stale `other:<transfer alias>` with `bank_deposit`.
+   */
   setPaymentMethodIfNull(shopifyOrderId: string, paymentMethod: string): Promise<boolean>;
 }
+
+/** True when the backfill may store [proposed] over [stored]. */
+export function backfillWouldWrite(stored: string | null, proposed: string): boolean {
+  if (!isNormalizedPaymentMethod(proposed)) return false;
+  if (stored === null) return true;
+  return staleTransferAliasPaymentMethods().includes(stored) && proposed === 'bank_deposit';
+}
+
+export const PENDING_PAYMENT_METHOD_CANDIDATES_SQL = `
+SELECT shopify_order_id, payment_method
+FROM orders_mirror
+WHERE shopify_order_id IS NOT NULL
+  AND lower(btrim(financial_status)) = 'pending'
+  AND (
+    payment_method IS NULL
+    OR payment_method = ANY($1::text[])
+  )
+ORDER BY id
+`.trim();
+
+export const WRITE_PAYMENT_METHOD_SQL = `
+UPDATE orders_mirror
+SET payment_method = $1, updated_at = now()
+WHERE shopify_order_id = $2
+  AND lower(btrim(coalesce(financial_status, ''))) = 'pending'
+  AND (
+    payment_method IS NULL
+    OR (
+      $1 = 'bank_deposit'
+      AND payment_method = ANY($3::text[])
+    )
+  )
+`.trim();
 
 export type OrderPaymentLookup =
   | { readonly ok: true; readonly name: string | null; readonly paymentMethod: string | null }
@@ -307,7 +351,7 @@ export async function runPaymentMethodBackfill(
       shopifyOrderId: order.shopifyOrderId,
       name: lookup.name,
       paymentMethod,
-      writable: paymentMethod !== null,
+      writable: paymentMethod !== null && backfillWouldWrite(order.storedPaymentMethod, paymentMethod),
     });
   }
 
@@ -325,7 +369,11 @@ export async function runPaymentMethodBackfill(
         paymentMethod: draft.paymentMethod,
         action: draft.error !== undefined
           ? 'error'
-          : draft.writable ? 'would_write' : 'skip_no_method',
+          : draft.writable
+            ? 'would_write'
+            : draft.paymentMethod !== null
+              ? 'skipped_filled'
+              : 'skip_no_method',
         ...(draft.error !== undefined ? { error: draft.error } : {}),
       })),
     };
@@ -337,8 +385,8 @@ export async function runPaymentMethodBackfill(
       entries.push({
         shopifyOrderId: draft.shopifyOrderId,
         name: draft.name,
-        paymentMethod: null,
-        action: 'skip_no_method',
+        paymentMethod: draft.paymentMethod,
+        action: draft.paymentMethod === null ? 'skip_no_method' : 'skipped_filled',
       });
       continue;
     }
@@ -364,26 +412,26 @@ export class PgPaymentMethodBackfillStore implements PaymentMethodBackfillStore 
   constructor(private readonly pool: pg.Pool) {}
 
   async listPendingWithoutPaymentMethod(): Promise<readonly PendingPaymentOrder[]> {
-    const result = await this.pool.query<{ shopify_order_id: string }>(
-      `SELECT shopify_order_id
-       FROM orders_mirror
-       WHERE payment_method IS NULL
-         AND shopify_order_id IS NOT NULL
-         AND lower(btrim(financial_status)) = 'pending'
-       ORDER BY id`,
+    const stale = [...staleTransferAliasPaymentMethods()];
+    const result = await this.pool.query<{
+      shopify_order_id: string;
+      payment_method: string | null;
+    }>(
+      PENDING_PAYMENT_METHOD_CANDIDATES_SQL,
+      [stale],
     );
-    return result.rows.map((row) => ({ shopifyOrderId: row.shopify_order_id }));
+    return result.rows.map((row) => ({
+      shopifyOrderId: row.shopify_order_id,
+      storedPaymentMethod: row.payment_method,
+    }));
   }
 
   async setPaymentMethodIfNull(shopifyOrderId: string, paymentMethod: string): Promise<boolean> {
     if (!isNormalizedPaymentMethod(paymentMethod)) return false;
+    const stale = [...staleTransferAliasPaymentMethods()];
     const result = await this.pool.query(
-      `UPDATE orders_mirror
-       SET payment_method = $1, updated_at = now()
-       WHERE shopify_order_id = $2
-         AND payment_method IS NULL
-         AND lower(btrim(coalesce(financial_status, ''))) = 'pending'`,
-      [paymentMethod, shopifyOrderId],
+      WRITE_PAYMENT_METHOD_SQL,
+      [paymentMethod, shopifyOrderId, stale],
     );
     return (result.rowCount ?? 0) > 0;
   }
@@ -392,6 +440,9 @@ export class PgPaymentMethodBackfillStore implements PaymentMethodBackfillStore 
 const HELP = `Backfill orders_mirror.payment_method for pending orders.
 
 Default is dry-run (no writes). Pass --apply to write.
+Candidates are pending rows with a null payment_method, plus pending
+rows still stored as other:<alias> for a name in TRANSFER_METHOD_ALIASES
+(for example other:transferencia_bancaria, rewritten to bank_deposit).
 The Admin token is read from SHOPIFY_ADMIN_ACCESS_TOKEN only.
 
 Runbook: dry-run, review the order id/name list, apply on staging,

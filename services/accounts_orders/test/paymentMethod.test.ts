@@ -40,9 +40,22 @@ describe('normalizePaymentMethod', () => {
   });
 
   it('recognizes the confirmed staging transfer name but leaves unlisted names distinct', () => {
-    expect(normalizePaymentMethod({
-      payment_gateway_names: ['Transferencia bancaria'],
-    })).toBe('bank_deposit');
+    for (const name of [
+      'Transferencia bancaria',
+      'TRANSFERENCIA BANCARIA',
+      '  TRANSFERENCIA   BANCARIA  ',
+      'transferencia-bancaria',
+      'Transferéncia bancária',
+    ]) {
+      expect({
+        name,
+        stored: normalizePaymentMethod({ payment_gateway_names: [name] }),
+      }).toEqual({ name, stored: 'bank_deposit' });
+      expect({
+        name,
+        unsanitized: normalizePaymentMethod({ payment_gateway_names: [name] }, {}),
+      }).toEqual({ name, unsanitized: 'other:transferencia_bancaria' });
+    }
     expect(normalizePaymentMethod({
       gateway: 'Depósito bancario',
     })).toBe('other:deposito_bancario');

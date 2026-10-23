@@ -22,7 +22,8 @@
  *
  * A confirmed manual-method display name becomes `bank_deposit` by adding
  * one snake_case key to [TRANSFER_METHOD_ALIASES]. The webhook and the
- * backfill both read that list.
+ * backfill both read that list. The backfill also rewrites a pending row
+ * still stored as `other:<key>` for a key in that list.
  */
 
 const NON_METHOD_TOKENS = new Set([
@@ -61,6 +62,21 @@ const NON_METHOD_TOKENS = new Set([
 export const TRANSFER_METHOD_ALIASES: Readonly<Record<string, 'bank_deposit'>> = {
   transferencia_bancaria: 'bank_deposit',
 };
+
+/**
+ * `other:` values written before the matching key was added here.
+ *
+ * "Transferencia bancaria" sanitizes to `transferencia_bancaria`, so a row
+ * stored earlier is `other:transferencia_bancaria`. The payment-method
+ * backfill rewrites a pending row that still holds one of these.
+ */
+export function staleTransferAliasPaymentMethods(
+  transferAliases: Readonly<Record<string, 'bank_deposit'>> = TRANSFER_METHOD_ALIASES,
+): readonly string[] {
+  return Object.keys(transferAliases)
+    .filter((key) => /^[a-z0-9_]{1,64}$/.test(key))
+    .map((key) => `other:${key}`);
+}
 
 /** Display labels that already have a Customer Account or gateway token. */
 const METHOD_ALIASES: Readonly<Record<string, string>> = {
