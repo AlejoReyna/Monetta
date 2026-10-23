@@ -10,6 +10,7 @@ import '../data/shopify/cart/cart_repository.dart';
 import '../data/shopify/cart/cart_write_coordinator.dart';
 import '../data/shopify/cart/checkout_launcher.dart';
 import '../data/shopify/cart/storefront_cart_api.dart';
+import '../data/shopify/cart/storefront_password_gate.dart';
 import '../data/shopify/cart_attribution.dart';
 import '../data/shopify/http_storefront_transport.dart';
 import '../data/shopify/storefront_client.dart';
@@ -54,6 +55,7 @@ final class ShopifyCartComposition {
         sessions: sessions,
         externalOpener:
             externalCheckoutOpener ?? const UrlLauncherExternalCheckoutOpener(),
+        passwordProbe: HttpStorefrontPasswordProbe(),
       ),
     );
   }

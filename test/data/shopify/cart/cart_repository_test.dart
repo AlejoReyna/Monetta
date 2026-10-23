@@ -400,6 +400,163 @@ void main() {
         ['TWO'],
       ]);
     });
+
+    test('login adopts the guest cart instead of creating a second one',
+        () async {
+      final api = _StatefulCartApi(initial: {firstVariant: 2})
+        .._discountCodes = const [
+          CartDiscountCode(code: 'GUEST', applicable: true),
+        ];
+      final sessions = _MemorySessions();
+      final guestId = SensitiveCartId(api.opaqueCartId);
+      await sessions.write(scope, guestId);
+      const account = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-a',
+      );
+
+      final result = await _repository(api, sessions).reconcile(
+        scope: account,
+        localIntent: [LocalCartIntent(variantId: firstVariant, quantity: 2)],
+        buyerIdentity: AuthenticatedCartBuyerIdentity(
+          accessToken: SensitiveCustomerAccessToken('customer-token'),
+        ),
+      );
+
+      expect(api.createCalls, 0);
+      expect(api.events, ['get', 'identity']);
+      expect(api.identityCalls, 1);
+      expect(api.lastIdentityCartId, guestId);
+      expect(result.status, CartReconciliationStatus.authoritative);
+      expect(result.cart?.id, api.opaqueCartId);
+      expect(result.cart?.lines.single.quantity, 2);
+      expect(result.cart?.discountCodes.single.code, 'GUEST');
+      expect(await sessions.read(account), guestId);
+      expect(await sessions.read(scope), isNull);
+    });
+
+    test('login without a customer token still keeps the guest cart id',
+        () async {
+      final api = _StatefulCartApi(initial: {firstVariant: 1});
+      final sessions = _MemorySessions();
+      final guestId = SensitiveCartId(api.opaqueCartId);
+      await sessions.write(scope, guestId);
+      const account = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-a',
+      );
+
+      final result = await _repository(api, sessions).reconcile(
+        scope: account,
+        localIntent: [LocalCartIntent(variantId: firstVariant, quantity: 1)],
+      );
+
+      expect(api.createCalls, 0);
+      expect(api.identityCalls, 0);
+      expect(api.events, ['get']);
+      expect(result.cart?.id, api.opaqueCartId);
+      expect(await sessions.read(account), guestId);
+      expect(await sessions.read(scope), isNull);
+    });
+
+    test('an expired guest cart is replaced from local lines', () async {
+      final api = _StatefulCartApi()..returnMissingOnce = true;
+      final sessions = _MemorySessions();
+      await sessions.write(scope, SensitiveCartId(api.opaqueCartId));
+      const account = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-a',
+      );
+
+      final result = await _repository(api, sessions).reconcile(
+        scope: account,
+        localIntent: [LocalCartIntent(variantId: firstVariant, quantity: 1)],
+      );
+
+      expect(api.events, ['get', 'create']);
+      expect(result.cart?.lines.single.quantity, 1);
+      expect(await sessions.read(scope), isNull);
+      expect(await sessions.read(account), isNotNull);
+    });
+
+    test('an existing account cart is not replaced by the guest cart',
+        () async {
+      final api = _StatefulCartApi(initial: {firstVariant: 1});
+      final sessions = _MemorySessions();
+      final accountId = SensitiveCartId(api.opaqueCartId);
+      const account = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-a',
+      );
+      await sessions.write(account, accountId);
+      await sessions.write(scope, SensitiveCartId(_opaque('guest-other')));
+
+      final result = await _repository(api, sessions).reconcile(
+        scope: account,
+        localIntent: [LocalCartIntent(variantId: firstVariant, quantity: 1)],
+        buyerIdentity: const GuestCartBuyerIdentity(email: 'a@example.com'),
+      );
+
+      expect(api.createCalls, 0);
+      expect(api.events, ['get', 'identity']);
+      expect(result.cart?.id, api.opaqueCartId);
+      expect(await sessions.read(scope), isNotNull);
+      expect(await sessions.read(account), accountId);
+    });
+
+    test('a failed buyer-identity update still keeps the adopted cart',
+        () async {
+      final api = _StatefulCartApi(initial: {firstVariant: 1})
+        ..returnNullIdentity = true;
+      final sessions = _MemorySessions();
+      final guestId = SensitiveCartId(api.opaqueCartId);
+      await sessions.write(scope, guestId);
+      const account = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-a',
+      );
+
+      final result = await _repository(api, sessions).reconcile(
+        scope: account,
+        localIntent: [LocalCartIntent(variantId: firstVariant, quantity: 1)],
+        buyerIdentity: AuthenticatedCartBuyerIdentity(
+          accessToken: SensitiveCustomerAccessToken('customer-token'),
+        ),
+      );
+
+      expect(api.createCalls, 0);
+      expect(result.cart?.id, api.opaqueCartId);
+      expect(await sessions.read(account), guestId);
+      expect(await sessions.read(scope), isNull);
+    });
+
+    test('ambiguous buyer-identity update recovers the same cart once',
+        () async {
+      final api = _StatefulCartApi(initial: {firstVariant: 1})
+        ..ambiguousIdentityOnce = true;
+      final sessions = _MemorySessions();
+      final guestId = SensitiveCartId(api.opaqueCartId);
+      await sessions.write(scope, guestId);
+      const account = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-a',
+      );
+
+      final result = await _repository(api, sessions).reconcile(
+        scope: account,
+        localIntent: [LocalCartIntent(variantId: firstVariant, quantity: 1)],
+        buyerIdentity: AuthenticatedCartBuyerIdentity(
+          accessToken: SensitiveCustomerAccessToken('customer-token'),
+        ),
+      );
+
+      expect(api.events, ['get', 'identity', 'get']);
+      expect(api.identityCalls, 1);
+      expect(api.createCalls, 0);
+      expect(result.cart?.lines.single.quantity, 1);
+      expect(await sessions.read(account), guestId);
+      expect(await sessions.read(scope), isNull);
+    });
   });
 
   group('secure sessions and serialization', () {
@@ -494,8 +651,12 @@ final class _StatefulCartApi implements CartApi {
   int updateCalls = 0;
   int removeCalls = 0;
   int discountCalls = 0;
+  int identityCalls = 0;
   int activeDiscounts = 0;
   int maximumActiveDiscounts = 0;
+  bool ambiguousIdentityOnce = false;
+  bool returnNullIdentity = false;
+  SensitiveCartId? lastIdentityCartId;
   List<CartDiscountCode> _discountCodes = const [];
   final List<List<String>> discountSets = [];
   final List<String> events = [];
@@ -600,10 +761,27 @@ final class _StatefulCartApi implements CartApi {
   Future<CartMutationResult> updateBuyerIdentity(
     SensitiveCartId cartId,
     CartBuyerIdentity identity,
-  ) async =>
-      CartMutationResult(
-        cart: _cart(opaqueCartId, _quantities, discountCodes: _discountCodes),
+  ) async {
+    identityCalls += 1;
+    events.add('identity');
+    lastIdentityCartId = cartId;
+    if (ambiguousIdentityOnce) {
+      ambiguousIdentityOnce = false;
+      throw const AmbiguousCartWriteException(
+        CartWriteOperation.updateBuyerIdentity,
       );
+    }
+    if (returnNullIdentity) {
+      return CartMutationResult(cart: null);
+    }
+    return CartMutationResult(
+      cart: _cart(
+        cartId.revealForStorefrontRequest(),
+        _quantities,
+        discountCodes: _discountCodes,
+      ),
+    );
+  }
 
   @override
   Future<CartMutationResult> replaceDiscountCodes(

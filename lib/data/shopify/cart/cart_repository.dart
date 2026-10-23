@@ -122,6 +122,21 @@ final class CartRepository implements CartReconciler {
 
           if (cart == null) {
             if (cartId != null) await _sessions.delete(scope);
+            cartId = null;
+            recoveryCartId = null;
+            // Login reconciles the account scope, which has no cart yet.
+            // Adopting the guest cart keeps its id, lines and discounts.
+            // Creating a second cart here is what forced the shopper to
+            // start checkout over.
+            final adopted = await _adoptGuestCart(scope);
+            if (adopted != null) {
+              cart = adopted;
+              cartId = SensitiveCartId(adopted.id);
+              recoveryCartId = cartId;
+            }
+          }
+
+          if (cart == null) {
             final created = await _api.create(
               lines: normalized.quantities.entries
                   .map(
@@ -284,6 +299,26 @@ final class CartRepository implements CartReconciler {
     } on CartApiException {
       return _unavailable(normalized);
     }
+  }
+
+  /// Moves this shop's guest cart onto [scope] when the account has none.
+  ///
+  /// Returns null when there is nothing to adopt. The caller then creates a
+  /// cart. A failed read leaves the guest session in place.
+  Future<Cart?> _adoptGuestCart(CartSessionScope scope) async {
+    if (!scope.isAuthenticated) return null;
+    final guestScope = CartSessionScope.guest(shopDomain: scope.shopDomain);
+    final guestId = await _sessions.read(guestScope);
+    if (guestId == null) return null;
+    final guestCart = await _api.get(guestId);
+    if (guestCart == null) {
+      await _sessions.delete(guestScope);
+      return null;
+    }
+    final adoptedId = SensitiveCartId(guestCart.id);
+    await _sessions.write(scope, adoptedId);
+    await _sessions.delete(guestScope);
+    return guestCart;
   }
 
   static _NormalizedIntent _normalize(Iterable<LocalCartIntent> values) {

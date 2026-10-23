@@ -9,6 +9,7 @@ import 'package:monetta_app/data/shopify/cart/cart_api.dart';
 import 'package:monetta_app/data/shopify/cart/cart_repository.dart';
 import 'package:monetta_app/data/shopify/cart/cart_session_store.dart';
 import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
+import 'package:monetta_app/data/shopify/cart/storefront_password_gate.dart';
 import 'package:monetta_app/data/shopify/shopify_gid.dart';
 import 'package:monetta_app/domain/cart.dart';
 
@@ -179,6 +180,93 @@ void main() {
     expect(cleanupCalls, 1);
   });
 
+  test('password-protected storefront never opens checkout or the browser',
+      () async {
+    final launcher = _RecordingLauncher(const CheckoutCancelled());
+    final opener = _RecordingExternalOpener();
+    final probe = _FixedPasswordProbe(StorefrontPasswordGate.passwordProtected);
+    final coordinator = ShopifyCheckoutCoordinator(
+      launcher: launcher,
+      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+      sessions: InMemoryCartSessionStore(),
+      externalOpener: opener,
+      passwordProbe: probe,
+    );
+
+    await coordinator.preload(_authoritativeCart());
+    final result = await coordinator.present(
+      controller: CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart()),
+      ),
+      scope: scope,
+      localIntent: localIntent,
+      onCompleted: (_) async => fail('Checkout was not opened'),
+    ) as CheckoutFailed;
+
+    expect(result.code, CheckoutFailureCode.configuration);
+    expect(result.userMessage, kStorefrontPasswordCheckoutMessage);
+    expect(result.allowExternalBrowser, isFalse);
+    expect(probe.hosts, ['checkout.invalid', 'checkout.invalid']);
+    expect(probe.hosts.every((host) => !host.contains('/')), isTrue);
+    expect(launcher.presentCalls, 0);
+    expect(launcher.preloadCalls, 0);
+    expect(launcher.invalidateCalls, 2);
+    expect(coordinator.canOpenExternalFallback, isFalse);
+    expect(await coordinator.openExternalFallback(), isFalse);
+    expect(opener.calls, 0);
+  });
+
+  test('an inconclusive password probe still presents checkout', () async {
+    final launcher = _RecordingLauncher(const CheckoutCancelled());
+    final coordinator = ShopifyCheckoutCoordinator(
+      launcher: launcher,
+      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+      sessions: InMemoryCartSessionStore(),
+      passwordProbe: _FixedPasswordProbe(StorefrontPasswordGate.unknown),
+    );
+
+    final result = await coordinator.present(
+      controller: CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart()),
+      ),
+      scope: scope,
+      localIntent: localIntent,
+      onCompleted: (_) async {},
+    );
+
+    expect(result, isA<CheckoutCancelled>());
+    expect(launcher.presentCalls, 1);
+  });
+
+  test('an empty authoritative cart never opens its checkout URL', () async {
+    final launcher = _RecordingLauncher(const CheckoutCancelled());
+    final opener = _RecordingExternalOpener();
+    final probe = _FixedPasswordProbe(StorefrontPasswordGate.open);
+    final coordinator = ShopifyCheckoutCoordinator(
+      launcher: launcher,
+      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+      sessions: InMemoryCartSessionStore(),
+      externalOpener: opener,
+      passwordProbe: probe,
+    );
+
+    final result = await coordinator.present(
+      controller: CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart(empty: true)),
+      ),
+      scope: scope,
+      localIntent: localIntent,
+      onCompleted: (_) async => fail('Checkout was not opened'),
+    ) as CheckoutFailed;
+
+    expect(result.code, CheckoutFailureCode.configuration);
+    expect(result.userMessage, kEmptyCartCheckoutMessage);
+    expect(result.allowExternalBrowser, isFalse);
+    expect(probe.hosts, isEmpty);
+    expect(launcher.presentCalls, 0);
+    expect(coordinator.canOpenExternalFallback, isFalse);
+  });
+
   test('invalid or non-authoritative checkout never reaches native', () async {
     final invalid = _authoritativeCart(checkoutUrl: 'not-a-checkout');
     final launcher = _RecordingLauncher(const CheckoutCancelled());
@@ -345,7 +433,10 @@ ShopifyCheckoutCoordinator _coordinator(
       sessions: sessions,
     );
 
-CartReconciliation _authoritativeCart({String? checkoutUrl}) {
+CartReconciliation _authoritativeCart({
+  String? checkoutUrl,
+  bool empty = false,
+}) {
   final timestamp = DateTime.utc(2026, 8, 27);
   const money = CartMoney(amount: '10.00', currencyCode: 'MXN');
   return CartReconciliation(
@@ -361,22 +452,24 @@ CartReconciliation _authoritativeCart({String? checkoutUrl}) {
           ).toString(),
       createdAt: timestamp,
       updatedAt: timestamp,
-      lines: [
-        CartLine(
-          id: _opaque('line'),
-          variantId: shopifyVariantGid(1),
-          productId: shopifyProductGid(1),
-          title: 'Producto',
-          variantTitle: 'Variante',
-          quantity: 1,
-          cost: const CartLineCost(
-            amountPerQuantity: money,
-            subtotal: money,
-            total: money,
-          ),
-        ),
-      ],
-      totalQuantity: 1,
+      lines: empty
+          ? const <CartLine>[]
+          : [
+              CartLine(
+                id: _opaque('line'),
+                variantId: shopifyVariantGid(1),
+                productId: shopifyProductGid(1),
+                title: 'Producto',
+                variantTitle: 'Variante',
+                quantity: 1,
+                cost: const CartLineCost(
+                  amountPerQuantity: money,
+                  subtotal: money,
+                  total: money,
+                ),
+              ),
+            ],
+      totalQuantity: empty ? 0 : 1,
       buyerIdentity: const CartBuyerSummary(
         countryCode: 'MX',
         isAuthenticated: false,
@@ -432,6 +525,19 @@ final class _RecordingLauncher implements CheckoutLauncher {
   @override
   Future<void> invalidate() async {
     invalidateCalls += 1;
+  }
+}
+
+final class _FixedPasswordProbe implements StorefrontPasswordProbe {
+  _FixedPasswordProbe(this.gate);
+
+  final StorefrontPasswordGate gate;
+  final List<String> hosts = [];
+
+  @override
+  Future<StorefrontPasswordGate> checkHost(String host) async {
+    hosts.add(host);
+    return gate;
   }
 }
 

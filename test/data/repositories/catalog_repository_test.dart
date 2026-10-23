@@ -4,9 +4,11 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/data/local/bag_store.dart';
 import 'package:monetta_app/data/local/catalog_cache_store.dart';
 import 'package:monetta_app/data/local/database.dart' hide SyncCursor;
 import 'package:monetta_app/data/local/sync_cursor_store.dart';
+import 'package:monetta_app/data/local/wishlist_store.dart';
 import 'package:monetta_app/data/normalize/rules.dart';
 import 'package:monetta_app/data/repositories/catalog_repository.dart';
 import 'package:monetta_app/data/shopify/catalog_sync.dart';
@@ -583,6 +585,72 @@ void main() {
       expect(products.single.id, 'gid://shopify/Product/302');
       expect((await cursorStore.load()).shopDomain, 'monetta.mx');
       expect((await cache.metadata())?.shopDomain, 'monetta.mx');
+    });
+
+    test('unstamped asset cache keeps the bag and records this shop', () async {
+      final cache = CatalogCacheStore(db);
+      final bags = BagStore(db);
+      await cache.saveMetadata(
+        CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.asset,
+          products: const [],
+          syncedAt: DateTime.utc(2026, 10, 7),
+          status: CatalogCacheStatus.fallback,
+        ),
+      );
+      await bags.upsert(productId: 'p', variantId: 'v', quantity: 2);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: SyncCursorStore(db),
+        rules: _emptyRules(),
+        shopDomain: 'monetta-staging.myshopify.com',
+        bagStore: bags,
+        wishlistStore: WishlistStore(db),
+      );
+
+      await repo.prepareConfiguredShop();
+
+      expect((await bags.all()).single.quantity, 2);
+      expect(
+        (await cache.metadata())?.shopDomain,
+        'monetta-staging.myshopify.com',
+      );
+      expect(
+        (await SyncCursorStore(db).load()).shopDomain,
+        'monetta-staging.myshopify.com',
+      );
+      await repo.prepareConfiguredShop();
+      expect((await bags.all()).single.quantity, 2);
+    });
+
+    test('a foreign shop still clears the bag', () async {
+      final cache = CatalogCacheStore(db);
+      final bags = BagStore(db);
+      await cache.saveMetadata(
+        CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.shopify,
+          products: const [],
+          syncedAt: DateTime.utc(2026, 10, 7),
+          status: CatalogCacheStatus.healthy,
+          shopDomain: 'old-shop.myshopify.com',
+        ),
+      );
+      await bags.upsert(productId: 'p', variantId: 'v', quantity: 2);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: SyncCursorStore(db),
+        rules: _emptyRules(),
+        shopDomain: 'monetta-staging.myshopify.com',
+        bagStore: bags,
+      );
+
+      await repo.prepareConfiguredShop();
+
+      expect(await bags.all(), isEmpty);
+      expect(
+        (await cache.metadata())?.shopDomain,
+        'monetta-staging.myshopify.com',
+      );
     });
   });
 }
