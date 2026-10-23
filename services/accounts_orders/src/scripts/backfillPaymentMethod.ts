@@ -1,14 +1,16 @@
 /**
  * One-time backfill of orders_mirror.payment_method for pending orders
  * whose webhook did not store a method, and for pending orders still
- * stored as a stale transfer alias such as `other:transferencia_bancaria`.
+ * stored as a stale transfer alias such as `other:transferencia_bancaria`
+ * or `other:deposito_bancario`.
  *
  * Dry-run is the default and never writes. It prints shopify order id,
  * order name, and the proposed payment_method. Writes happen only with
  * an explicit --apply flag, and only for rows that are still pending and
  * either still have a null payment_method, or still store a stale
  * `other:<alias>` from [TRANSFER_METHOD_ALIASES] (for example
- * `other:transferencia_bancaria`, rewritten only to `bank_deposit`).
+ * `other:transferencia_bancaria` or `other:deposito_bancario`, rewritten
+ * only to `bank_deposit`).
  *
  *   npm run backfill:payment-method
  *   npm run backfill:payment-method -- --apply
@@ -442,7 +444,8 @@ const HELP = `Backfill orders_mirror.payment_method for pending orders.
 Default is dry-run (no writes). Pass --apply to write.
 Candidates are pending rows with a null payment_method, plus pending
 rows still stored as other:<alias> for a name in TRANSFER_METHOD_ALIASES
-(for example other:transferencia_bancaria, rewritten to bank_deposit).
+(for example other:transferencia_bancaria or other:deposito_bancario,
+rewritten to bank_deposit). Paid rows are left as stored.
 The Admin token is read from SHOPIFY_ADMIN_ACCESS_TOKEN only.
 
 Runbook: dry-run, review the order id/name list, apply on staging,

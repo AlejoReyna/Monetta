@@ -57,18 +57,23 @@ const NON_METHOD_TOKENS = new Set([
  *
  * Add one key when a store display name is confirmed (for example from the
  * Shopify Payments screenshot). The app treats that stored value as a
- * transfer. "Transferencia bancaria" is confirmed on Monetta staging.
+ * transfer. "Transferencia bancaria" and "Depósito bancario" are confirmed
+ * on Monetta staging. Accents are stripped before the key is matched, so
+ * "Depósito bancario" is `deposito_bancario`.
  */
 export const TRANSFER_METHOD_ALIASES: Readonly<Record<string, 'bank_deposit'>> = {
   transferencia_bancaria: 'bank_deposit',
+  deposito_bancario: 'bank_deposit',
 };
 
 /**
  * `other:` values written before the matching key was added here.
  *
- * "Transferencia bancaria" sanitizes to `transferencia_bancaria`, so a row
- * stored earlier is `other:transferencia_bancaria`. The payment-method
- * backfill rewrites a pending row that still holds one of these.
+ * "Transferencia bancaria" sanitizes to `transferencia_bancaria` and
+ * "Depósito bancario" to `deposito_bancario`, so earlier rows are
+ * `other:transferencia_bancaria` and `other:deposito_bancario`. The
+ * payment-method backfill rewrites a pending row that still holds one
+ * of these.
  */
 export function staleTransferAliasPaymentMethods(
   transferAliases: Readonly<Record<string, 'bank_deposit'>> = TRANSFER_METHOD_ALIASES,
