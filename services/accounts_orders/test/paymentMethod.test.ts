@@ -56,9 +56,24 @@ describe('normalizePaymentMethod', () => {
         unsanitized: normalizePaymentMethod({ payment_gateway_names: [name] }, {}),
       }).toEqual({ name, unsanitized: 'other:transferencia_bancaria' });
     }
+    for (const name of [
+      'Depósito bancario',
+      'DEPÓSITO BANCARIO',
+      '  depósito   bancario  ',
+      'deposito-bancario',
+    ]) {
+      expect({
+        name,
+        stored: normalizePaymentMethod({ gateway: name }),
+      }).toEqual({ name, stored: 'bank_deposit' });
+      expect({
+        name,
+        unsanitized: normalizePaymentMethod({ gateway: name }, {}),
+      }).toEqual({ name, unsanitized: 'other:deposito_bancario' });
+    }
     expect(normalizePaymentMethod({
-      gateway: 'Depósito bancario',
-    })).toBe('other:deposito_bancario');
+      payment_gateway_names: ['Pago en tienda'],
+    })).toBe('other:pago_en_tienda');
   });
 
   it('collapses PayPal gateway spellings to paypal', () => {

@@ -342,12 +342,19 @@ describe('payment method backfill', () => {
 
   it('rewrites only a stale transfer alias, and only to bank_deposit', () => {
     expect(TRANSFER_METHOD_ALIASES.transferencia_bancaria).toBe('bank_deposit');
-    expect(staleTransferAliasPaymentMethods()).toEqual(['other:transferencia_bancaria']);
+    expect(TRANSFER_METHOD_ALIASES.deposito_bancario).toBe('bank_deposit');
+    expect(staleTransferAliasPaymentMethods()).toEqual([
+      'other:transferencia_bancaria',
+      'other:deposito_bancario',
+    ]);
     expect(backfillWouldWrite(null, 'card')).toBe(true);
     expect(backfillWouldWrite(null, 'bank_deposit')).toBe(true);
     expect(backfillWouldWrite('other:transferencia_bancaria', 'bank_deposit')).toBe(true);
+    expect(backfillWouldWrite('other:deposito_bancario', 'bank_deposit')).toBe(true);
     expect(backfillWouldWrite('other:transferencia_bancaria', 'card')).toBe(false);
+    expect(backfillWouldWrite('other:deposito_bancario', 'card')).toBe(false);
     expect(backfillWouldWrite('other:transferencia_bancaria', 'other:transferencia_bancaria')).toBe(false);
+    expect(backfillWouldWrite('other:paypal', 'bank_deposit')).toBe(false);
     expect(backfillWouldWrite('other:kueski_pay', 'bank_deposit')).toBe(false);
     expect(backfillWouldWrite('bank_deposit', 'bank_deposit')).toBe(false);
     expect(backfillWouldWrite('manual', 'bank_deposit')).toBe(false);
@@ -436,13 +443,17 @@ describe('payment method backfill', () => {
       { shopifyOrderId: '903', financialStatus: 'pending', paymentMethod: 'other:kueski_pay' },
       { shopifyOrderId: '904', financialStatus: 'pending', paymentMethod: 'bank_deposit' },
       { shopifyOrderId: '905', financialStatus: 'pending', paymentMethod: null },
+      { shopifyOrderId: '906', financialStatus: 'pending', paymentMethod: 'other:deposito_bancario' },
+      { shopifyOrderId: '907', financialStatus: 'paid', paymentMethod: 'other:deposito_bancario' },
+      { shopifyOrderId: '908', financialStatus: 'pending', paymentMethod: 'other:paypal' },
     ]);
     const reader: OrderPaymentReader = {
       async read(ids) {
-        expect(ids).toEqual(['901', '905']);
+        expect(ids).toEqual(['901', '905', '906']);
         return new Map([
           ['901', { ok: true, name: '#1901', paymentMethod: 'bank_deposit' }],
           ['905', { ok: true, name: '#1905', paymentMethod: 'card' }],
+          ['906', { ok: true, name: '#1906', paymentMethod: 'bank_deposit' }],
         ]);
       },
     };
@@ -450,20 +461,24 @@ describe('payment method backfill', () => {
     const report = await runPaymentMethodBackfill(store, reader, { apply: true });
 
     expect(report.applied).toBe(true);
-    expect(report.entries.map((entry) => entry.action)).toEqual(['written', 'written']);
+    expect(report.entries.map((entry) => entry.action)).toEqual(['written', 'written', 'written']);
     expect(store.writes).toEqual([
       { shopifyOrderId: '901', paymentMethod: 'bank_deposit' },
       { shopifyOrderId: '905', paymentMethod: 'card' },
+      { shopifyOrderId: '906', paymentMethod: 'bank_deposit' },
     ]);
     expect(store.rows.find((row) => row.shopifyOrderId === '901')?.paymentMethod).toBe('bank_deposit');
     expect(store.rows.find((row) => row.shopifyOrderId === '902')?.paymentMethod).toBe('other:transferencia_bancaria');
     expect(store.rows.find((row) => row.shopifyOrderId === '903')?.paymentMethod).toBe('other:kueski_pay');
     expect(store.rows.find((row) => row.shopifyOrderId === '904')?.paymentMethod).toBe('bank_deposit');
+    expect(store.rows.find((row) => row.shopifyOrderId === '906')?.paymentMethod).toBe('bank_deposit');
+    expect(store.rows.find((row) => row.shopifyOrderId === '907')?.paymentMethod).toBe('other:deposito_bancario');
+    expect(store.rows.find((row) => row.shopifyOrderId === '908')?.paymentMethod).toBe('other:paypal');
 
     const second = await runPaymentMethodBackfill(store, reader, { apply: true });
     expect(second.candidates).toBe(0);
     expect(second.entries).toEqual([]);
-    expect(store.writes).toHaveLength(2);
+    expect(store.writes).toHaveLength(3);
   });
 
   it('does not replace other:transferencia_bancaria with a non-transfer method', async () => {
