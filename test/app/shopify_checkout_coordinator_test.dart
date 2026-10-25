@@ -238,6 +238,112 @@ void main() {
     expect(launcher.presentCalls, 1);
   });
 
+  for (final gate in [
+    StorefrontPasswordGate.open,
+    StorefrontPasswordGate.unknown,
+  ]) {
+    test('T1-INV-09 account change during ${gate.name} probe cancels present',
+        () async {
+      const accountA = CartSessionScope.authenticated(
+        shopDomain: 'checkout.invalid',
+        localAccountId: 'A',
+      );
+      const accountB = CartSessionScope.authenticated(
+        shopDomain: 'checkout.invalid',
+        localAccountId: 'B',
+      );
+      final launcher = _RecordingLauncher(const CheckoutCancelled());
+      final opener = _RecordingExternalOpener();
+      final probe = _DelayedPasswordProbe();
+      final coordinator = ShopifyCheckoutCoordinator(
+        launcher: launcher,
+        urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+        sessions: InMemoryCartSessionStore(),
+        externalOpener: opener,
+        passwordProbe: probe,
+      );
+      final controller = CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart()),
+      );
+      addTearDown(controller.dispose);
+      final pending = coordinator.present(
+        controller: controller,
+        scope: accountA,
+        localIntent: localIntent,
+        onCompleted: (_) async =>
+            fail('The invalidated checkout must not open'),
+      );
+      await probe.entered.future;
+
+      await coordinator.invalidate();
+      await controller.reconcileLocalBag(
+        scope: accountB,
+        localIntent: localIntent,
+      );
+      expect(controller.currentScope, accountB);
+      probe.result.complete(gate);
+      await pending;
+
+      expect(
+        {
+          'preloadCalls': launcher.preloadCalls,
+          'presentCalls': launcher.presentCalls,
+          'canOpenExternalFallback': coordinator.canOpenExternalFallback,
+          'openedExternalFallback': await coordinator.openExternalFallback(),
+          'externalCalls': opener.calls,
+        },
+        {
+          'preloadCalls': 0,
+          'presentCalls': 0,
+          'canOpenExternalFallback': false,
+          'openedExternalFallback': false,
+          'externalCalls': 0,
+        },
+        reason:
+            'the late probe must not restore account A checkout after B logs in',
+      );
+    });
+
+    test('T1-INV-09 invalidation during ${gate.name} probe cancels preload',
+        () async {
+      final launcher = _RecordingLauncher(const CheckoutCancelled());
+      final opener = _RecordingExternalOpener();
+      final probe = _DelayedPasswordProbe();
+      final coordinator = ShopifyCheckoutCoordinator(
+        launcher: launcher,
+        urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+        sessions: InMemoryCartSessionStore(),
+        externalOpener: opener,
+        passwordProbe: probe,
+      );
+      final pending = coordinator.preload(_authoritativeCart());
+      await probe.entered.future;
+
+      await coordinator.invalidate();
+      expect(coordinator.canOpenExternalFallback, isFalse);
+      probe.result.complete(gate);
+      await pending;
+
+      expect(
+        {
+          'preloadCalls': launcher.preloadCalls,
+          'presentCalls': launcher.presentCalls,
+          'canOpenExternalFallback': coordinator.canOpenExternalFallback,
+          'openedExternalFallback': await coordinator.openExternalFallback(),
+          'externalCalls': opener.calls,
+        },
+        {
+          'preloadCalls': 0,
+          'presentCalls': 0,
+          'canOpenExternalFallback': false,
+          'openedExternalFallback': false,
+          'externalCalls': 0,
+        },
+        reason: 'invalidation must also discard the pending preload result',
+      );
+    });
+  }
+
   test('an empty authoritative cart never opens its checkout URL', () async {
     final launcher = _RecordingLauncher(const CheckoutCancelled());
     final opener = _RecordingExternalOpener();
@@ -538,6 +644,17 @@ final class _FixedPasswordProbe implements StorefrontPasswordProbe {
   Future<StorefrontPasswordGate> checkHost(String host) async {
     hosts.add(host);
     return gate;
+  }
+}
+
+final class _DelayedPasswordProbe implements StorefrontPasswordProbe {
+  final entered = Completer<void>();
+  final result = Completer<StorefrontPasswordGate>();
+
+  @override
+  Future<StorefrontPasswordGate> checkHost(String host) {
+    entered.complete();
+    return result.future;
   }
 }
 
