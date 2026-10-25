@@ -44,6 +44,7 @@ import '../data/shopify/catalog_sync.dart' as shopify;
 import '../domain/catalog_item.dart';
 import '../domain/bag_line.dart';
 import '../domain/product.dart';
+import '../domain/shopify_sample_filter.dart';
 import '../reco/events.dart';
 import '../reco/explainer.dart';
 import '../reco/profile.dart';
@@ -129,8 +130,33 @@ class CatalogStore extends ChangeNotifier {
   /// variantId -> productId for the current [_accountScope].
   final Map<String, String> _bagProductByVariant = {};
 
-  List<Product> products = const [];
-  Map<String, CanonicalFacets> facetsById = const {};
+  List<Product> _products = const [];
+  Map<String, CanonicalFacets> _rawFacetsById = const {};
+  Map<String, CanonicalFacets> _facetsById = const {};
+
+  /// Shopper-facing products only. Persistence keeps the complete snapshot.
+  List<Product> get products => _products;
+  set products(List<Product> value) {
+    _products = value
+        .where((product) => !isShopifySampleProduct(product))
+        .toList(growable: false);
+    _rebuildVisibleFacets();
+  }
+
+  /// Facets for visible products, shared by filters and recommendation ranking.
+  Map<String, CanonicalFacets> get facetsById => _facetsById;
+  set facetsById(Map<String, CanonicalFacets> value) {
+    _rawFacetsById = value;
+    _rebuildVisibleFacets();
+  }
+
+  void _rebuildVisibleFacets() {
+    _facetsById = {
+      for (final product in _products)
+        if (_rawFacetsById[product.id] case final facets?) product.id: facets,
+    };
+  }
+
   late NormalizationRules rules;
 
   TasteProfile profile = const TasteProfile.empty();

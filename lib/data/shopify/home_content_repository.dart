@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../../domain/collection.dart';
 import '../../domain/admin_control.dart';
 import '../../domain/home_content.dart';
+import '../../domain/shopify_sample_filter.dart';
 import 'mappers.dart';
 import 'queries.dart';
 import 'storefront_client.dart';
@@ -25,6 +26,7 @@ class HomeContentRepository {
         : const <Object?, Object?>{};
     final collections = edgeNodes(data['collections'])
         .map(collectionFromJson)
+        .where((item) => !isShopifySampleCollectionHandle(item.handle))
         .toList(growable: false);
     final allByHandle = <String, Collection>{
       for (final item in collections) item.handle.toLowerCase(): item,
