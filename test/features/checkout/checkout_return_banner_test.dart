@@ -244,6 +244,48 @@ void main() {
     expect(store.bagQuantity, 1);
   });
 
+  testWidgets('password redirect explains the store page and skips the browser',
+      (tester) async {
+    final store = await _loadedStore();
+    await store.addToBag(store.products.firstWhere((item) => item.isInStock));
+    var browserOpens = 0;
+    var lookups = 0;
+
+    await tester.pumpWidget(
+      _flow(
+        store,
+        CheckoutFlowScreen(
+          launchSecureCheckout: (_) async => const CheckoutFailed(
+            code: CheckoutFailureCode.configuration,
+            userMessage: kStorefrontPasswordCheckoutMessage,
+            allowExternalBrowser: false,
+          ),
+          openExternalCheckout: () async {
+            browserOpens += 1;
+            return true;
+          },
+          orderLookup: _ScriptedLookup((_) async {
+            lookups += 1;
+            return const CheckoutOrderMatch(orderId: 'should-not-run');
+          }),
+        ),
+      ),
+    );
+    await _openReview(tester);
+    await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
+    await tester.pumpAndSettle();
+
+    expect(lookups, 0);
+    expect(browserOpens, 0);
+    expect(find.text('ABRIR NAVEGADOR'), findsNothing);
+    expect(find.textContaining('no confirma el pago'), findsNothing);
+    expect(find.text('No pudimos abrir el pago'), findsOneWidget);
+    expect(find.text(kStorefrontPasswordCheckoutMessage), findsOneWidget);
+    expect(find.text(kCheckoutReturnSheetDidNotOpenBody), findsNothing);
+    expect(find.text('Intentar de nuevo'), findsOneWidget);
+    expect(store.bagQuantity, 1);
+  });
+
   testWidgets('a found order opens detail and does not show retry', (
     tester,
   ) async {

@@ -130,11 +130,37 @@ final class CheckoutCancelled extends CheckoutResult {
   const CheckoutCancelled();
 }
 
+/// Shown when the online store's password page would replace checkout.
+///
+/// Shopify answers `https://{shop}/`, `/cart`, `/checkout`, and `/cart/c/…`
+/// with a redirect to `/{shop}/password`. Opening `checkoutUrl` then shows
+/// the store page. No charge was attempted.
+const String kStorefrontPasswordCheckoutMessage =
+    'La tienda está protegida con contraseña, así que Shopify muestra la '
+    'página de la tienda en lugar del checkout. No se hizo ningún cargo y '
+    'tu bolsa se conserva.';
+
+/// Shown when the cart Shopify would hand to checkout has no merchandise.
+///
+/// An empty cart still has a `checkoutUrl`. Opening it sends the buyer to
+/// the store home instead of a payable checkout.
+const String kEmptyCartCheckoutMessage =
+    'Shopify no abre el checkout de una bolsa vacía: esa dirección vuelve '
+    'a la página de la tienda. No se hizo ningún cargo.';
+
 final class CheckoutFailed extends CheckoutResult {
-  const CheckoutFailed({required this.code, required this.userMessage});
+  const CheckoutFailed({
+    required this.code,
+    required this.userMessage,
+    this.allowExternalBrowser = true,
+  });
 
   final CheckoutFailureCode code;
   final String userMessage;
+
+  /// False when the system browser would hit the same storefront redirect
+  /// as the in-app sheet. The fallback must not be offered in that case.
+  final bool allowExternalBrowser;
 }
 
 /// Only lifecycle state crosses this boundary. Order/customer/payment details,
