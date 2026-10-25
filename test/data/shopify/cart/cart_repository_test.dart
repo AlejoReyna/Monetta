@@ -491,8 +491,11 @@ void main() {
       completeAdoption.complete(_cart(api.opaqueCartId, {firstVariant: 1}));
       final results = await Future.wait([resultA, resultB]);
 
-      expect(results.first, isNull,
-          reason: 'the late account A result is stale');
+      expect(
+        results.first,
+        isNull,
+        reason: 'the late account A result is stale',
+      );
       expect(controller.scopedSnapshot?.scope, accountB);
       final cartA = await sessions.read(accountA);
       final cartB = await sessions.read(accountB);
@@ -791,8 +794,11 @@ final class _StatefulCartApi implements CartApi {
       }
     }
     return CartMutationResult(
-      cart: _cart(createCartId ?? opaqueCartId, _quantities,
-          discountCodes: _discountCodes),
+      cart: _cart(
+        createCartId ?? opaqueCartId,
+        _quantities,
+        discountCodes: _discountCodes,
+      ),
       issues: rejectCreateAsOutOfStock
           ? [
               CartMutationIssue(

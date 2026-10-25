@@ -138,7 +138,8 @@ final class ShopifyCheckoutCoordinator {
           await _storefrontPasswordBlocks(validated, generation);
       if (generation != _generation || controller.currentScope != scope) {
         return _unavailable(
-            'Tu cuenta cambió. Revisa tu bolsa e intenta de nuevo.');
+          'Tu cuenta cambió. Revisa tu bolsa e intenta de nuevo.',
+        );
       }
       if (passwordBlocked) {
         return const CheckoutFailed(
@@ -159,7 +160,8 @@ final class ShopifyCheckoutCoordinator {
       if (generation != _generation || controller.currentScope != scope) {
         if (generation == _generation) _latestUrl = null;
         return _unavailable(
-            'Tu cuenta cambió. Revisa tu bolsa e intenta de nuevo.');
+          'Tu cuenta cambió. Revisa tu bolsa e intenta de nuevo.',
+        );
       }
       final result = await _launcher.present(validated);
       if (result is CheckoutCompleted) {

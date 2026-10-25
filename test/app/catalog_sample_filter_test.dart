@@ -29,7 +29,7 @@ void main() {
     for (final spelling in [
       vendor,
       vendor.toLowerCase(),
-      ' ${vendor.toUpperCase()} '
+      ' ${vendor.toUpperCase()} ',
     ]) {
       test('T2-SAMPLE products setter hides vendor "$spelling"', () {
         final store = CatalogStore(database: openTestDatabase());
@@ -51,8 +51,10 @@ void main() {
 
     store.products = real;
 
-    expect(store.products.map((product) => product.id),
-        real.map((product) => product.id));
+    expect(
+      store.products.map((product) => product.id),
+      real.map((product) => product.id),
+    );
     expect(store.products.last.title, 'Snowboard Gift Card');
     expect(store.products.last.productType, 'snowboard');
   });
@@ -101,7 +103,9 @@ void main() {
         'availableBrands' => store.availableBrands,
         'feed' => store.feed(limit: 100).map((entry) => entry.product.id),
         'mixedFeed' => store.mixedFeed(
-            external: const [], limit: 100).map((entry) => entry.product!.id),
+            external: const [],
+            limit: 100,
+          ).map((entry) => entry.product!.id),
         'recentlyViewed' =>
           store.recentlyViewed(limit: 100).map((product) => product.id),
         'catalogItems' => store.catalogItems.map((item) => item.sourceScopedId),
@@ -119,8 +123,10 @@ void main() {
       } else if (surface == 'searchProducts' || surface == 'moreFromBrand') {
         expect(visibleIds, isEmpty);
       } else if (surface == 'catalogItems') {
-        expect(store.catalogItems.map((item) => item.title),
-            isNot(contains('SampleProbe')));
+        expect(
+          store.catalogItems.map((item) => item.title),
+          isNot(contains('SampleProbe')),
+        );
         expect(store.catalogItems, hasLength(real.length));
       } else {
         expect(visibleIds.toSet().intersection(sampleIds), isEmpty);
@@ -154,10 +160,11 @@ void main() {
     await store.syncWithShopify();
 
     expect(
-        (await CatalogCacheStore(db).allProducts())
-            .map((product) => product.id)
-            .toSet(),
-        rows.map((product) => product.id).toSet());
+      (await CatalogCacheStore(db).allProducts())
+          .map((product) => product.id)
+          .toSet(),
+      rows.map((product) => product.id).toSet(),
+    );
     expect((await CatalogCacheStore(db).metadata())?.productCount, rows.length);
     expect(await db.select(db.bagLines).get(), hasLength(2));
     expect(await db.select(db.wishlistItems).get(), hasLength(2));
@@ -165,17 +172,21 @@ void main() {
       expect((await bags.all(accountId: accountId)).single.quantity, 2);
       expect(await wishlist.allProductIds(accountId: accountId), {sample.id});
     }
-    expect(store.products.map((product) => product.id),
-        isNot(contains(sample.id)));
+    expect(
+      store.products.map((product) => product.id),
+      isNot(contains(sample.id)),
+    );
   });
 
   test('T2-SAMPLE featured rail filters after caching the complete response',
       () async {
     final real = _product(1, vendor: 'Guess');
-    final sample = _product(2,
-        vendor: 'Snowboard Vendor',
-        title: 'Gift Card',
-        productType: 'giftcard');
+    final sample = _product(
+      2,
+      vendor: 'Snowboard Vendor',
+      title: 'Gift Card',
+      productType: 'giftcard',
+    );
     List<Product>? cached;
     final controller = FeaturedCatalogController(
       repository: _FeaturedRows([real, sample]),
@@ -228,7 +239,7 @@ void main() {
               for (final handle in [
                 'hydrogen',
                 'automated-collection',
-                'guess'
+                'guess',
               ])
                 {'node': _collectionNode(handle)},
             ],
@@ -265,10 +276,11 @@ Product _product(
       tags: const [],
       variants: [
         ProductVariant(
-            id: 'gid://shopify/ProductVariant/$id',
-            title: 'Default Title',
-            price: 100,
-            available: true)
+          id: 'gid://shopify/ProductVariant/$id',
+          title: 'Default Title',
+          price: 100,
+          available: true,
+        ),
       ],
       images: const ['https://cdn.shopify.com/product.jpg'],
       createdAt: DateTime.utc(2026, 10, 1),
@@ -281,23 +293,29 @@ List<Product> _realProducts() => [
       _product(1, vendor: 'Guess'),
       _product(2, vendor: 'Monetta'),
       _product(3, vendor: 'Monetta '),
-      _product(4,
-          vendor: 'Guess',
-          title: 'Snowboard Gift Card',
-          productType: 'snowboard'),
+      _product(
+        4,
+        vendor: 'Guess',
+        title: 'Snowboard Gift Card',
+        productType: 'snowboard',
+      ),
     ];
 
 List<Product> _sampleProducts() => [
       for (var index = 0; index < _sampleVendors.length; index++)
-        _product(100 + index,
-            vendor: _sampleVendors[index],
-            title: 'SampleProbe',
-            brandOverride: 'sample_brand'),
-      _product(104,
-          vendor: 'Snowboard Vendor',
-          title: 'SampleProbe Gift Card',
-          productType: 'giftcard',
-          brandOverride: 'sample_brand'),
+        _product(
+          100 + index,
+          vendor: _sampleVendors[index],
+          title: 'SampleProbe',
+          brandOverride: 'sample_brand',
+        ),
+      _product(
+        104,
+        vendor: 'Snowboard Vendor',
+        title: 'SampleProbe Gift Card',
+        productType: 'giftcard',
+        brandOverride: 'sample_brand',
+      ),
     ];
 
 Future<void> _cacheCatalog(AppDatabase db, List<Product> products) =>
@@ -313,7 +331,8 @@ Future<void> _cacheCatalog(AppDatabase db, List<Product> products) =>
     );
 
 Future<({CatalogStore store, AppDatabase db})> _loadedCatalog(
-    List<Product> products) async {
+  List<Product> products,
+) async {
   final db = openTestDatabase();
   await _cacheCatalog(db, products);
   final store = CatalogStore(database: db, shopDomain: _shop);
@@ -325,7 +344,9 @@ Future<({CatalogStore store, AppDatabase db})> _loadedCatalog(
 
 StorefrontClient _client(Map<String, dynamic> data) => StorefrontClient(
       config: const StorefrontConfig(
-          shopDomain: _shop, accessToken: 'public-test-token'),
+        shopDomain: _shop,
+        accessToken: 'public-test-token',
+      ),
       transport: (_, __, ___) async => {'data': data},
     );
 
@@ -338,8 +359,8 @@ Map<String, Object?> _collectionNode(String handle) => {
         'pageInfo': {'hasNextPage': false},
         'edges': [
           {
-            'node': {'id': 'gid://shopify/Product/1'}
-          }
+            'node': {'id': 'gid://shopify/Product/1'},
+          },
         ],
       },
     };
