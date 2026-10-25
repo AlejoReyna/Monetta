@@ -62,10 +62,12 @@ void main() {
 
     final heading = find.text('Sobre la marca');
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('brand-story')),
+      find.byKey(const ValueKey('brand-story')).hitTestable(),
       300,
       scrollable: find.byType(Scrollable).first,
+      maxScrolls: store.products.length + 10,
     );
+    await tester.pumpAndSettle();
     final style = _styleOf(tester, heading);
     _expectSerif(style, reason: 'Sobre la marca');
     expect(style.fontSize, kBoutiqueSectionHeadingSize);

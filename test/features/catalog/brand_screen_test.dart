@@ -138,10 +138,12 @@ void main() {
 
     await _pump(tester, store, slug, story: 'Texto de la dueña.');
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('brand-story')),
+      find.byKey(const ValueKey('brand-story')).hitTestable(),
       300,
       scrollable: find.byType(Scrollable).first,
+      maxScrolls: store.products.length + 10,
     );
+    await tester.pumpAndSettle();
     expect(find.text('Sobre la marca'), findsOneWidget);
   });
 
@@ -156,10 +158,12 @@ void main() {
 
     await _pump(tester, store, slug);
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('brand-see-all')),
+      find.byKey(const ValueKey('brand-see-all')).hitTestable(),
       300,
       scrollable: find.byType(Scrollable).first,
+      maxScrolls: store.products.length + 10,
     );
+    await tester.pumpAndSettle();
     await tester.tap(find.byKey(const ValueKey('brand-see-all')));
     await tester.pumpAndSettle();
 

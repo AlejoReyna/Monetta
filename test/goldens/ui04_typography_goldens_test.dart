@@ -48,6 +48,7 @@ import 'package:monetta_app/main.dart';
 import '../support/bundled_fonts.dart';
 import '../support/product_screen_harness.dart' show mockPathProvider;
 import '../support/tolerant_golden_comparator.dart';
+import '../support/ui_catalog_fixture.dart';
 
 /// Phones in logical pixels, at a device pixel ratio of 3.0.
 const List<Size> _phones = <Size>[Size(375, 812), Size(440, 956)];
@@ -294,7 +295,9 @@ void main() {
           addTearDown(tester.view.resetDevicePixelRatio);
           mockPathProvider();
 
-          final store = CatalogStore(database: openTestDatabase());
+          final database = openTestDatabase();
+          await seedUi04Catalog(database);
+          final store = CatalogStore(database: database);
           addTearDown(store.dispose);
           await store.loadFromAsset();
 
