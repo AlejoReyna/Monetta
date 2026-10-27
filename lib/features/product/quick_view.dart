@@ -168,8 +168,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     if (notifications == null || !notifications.available) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('Los avisos todavía no están disponibles en esta versión.'),
+          content: Text(
+            'Los avisos todavía no están disponibles en esta versión.',
+          ),
         ),
       );
       return;
@@ -200,7 +201,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       label = 'Avísame cuando vuelva';
       onPressed = () => _requestRestock(widget.product);
     } else {
-      label = _adding ? 'Agregando…' : 'Agregar al carrito';
+      label = _adding ? 'Agregando…' : 'Agregar a bolsa';
       onPressed = _addToBag;
     }
     return DecoratedBox(
@@ -328,8 +329,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                   onPageChanged: (i) =>
                                       setState(() => _page = i),
                                   itemBuilder: (_, i) => Padding(
-                                    padding:
-                                        const EdgeInsets.all(BoutiqueSpace.sm),
+                                    padding: const EdgeInsets.all(
+                                      BoutiqueSpace.sm,
+                                    ),
                                     child: MonettaImage(
                                       url: images[i],
                                       fit: BoxFit.contain,
@@ -373,8 +375,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children:
-                                          List.generate(images.length, (i) {
+                                      children: List.generate(images.length, (
+                                        i,
+                                      ) {
                                         final on = i == _page;
                                         return AnimatedContainer(
                                           duration: reduceMotion(context)
@@ -388,10 +391,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                           decoration: BoxDecoration(
                                             color: on
                                                 ? palette.ink
-                                                : palette.ink
-                                                    .withValues(alpha: 0.25),
-                                            borderRadius:
-                                                BorderRadius.circular(2),
+                                                : palette.ink.withValues(
+                                                    alpha: 0.25,
+                                                  ),
+                                            borderRadius: BorderRadius.circular(
+                                              2,
+                                            ),
                                           ),
                                         );
                                       }),

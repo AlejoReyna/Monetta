@@ -145,9 +145,9 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       await store.write(scope, value);
       if (!mounted || scope != _scope()) return;
       _seedRecommendations();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(kPersonalizationSaved)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(kPersonalizationSaved)));
     } on Object {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -354,12 +354,20 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                     backgroundColor: palette.actionDark,
                     foregroundColor: palette.onActionDark,
                     disabledBackgroundColor: palette.surfaceDeep,
-                    minimumSize:
-                        const Size.fromHeight(MonettaTokens.controlHeight),
+                    minimumSize: const Size.fromHeight(
+                      MonettaTokens.controlHeight,
+                    ),
                     shape: const StadiumBorder(),
                     textStyle: clientGuideStyle(context, MonettaTokens.control),
                   ),
-                  child: const Text('Guardar preferencias'),
+                  child: const Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text('Guardar preferencias'),
+                      SizedBox(width: 8),
+                      Icon(Icons.chevron_right),
+                    ],
+                  ),
                 ),
               ],
             ),
@@ -603,7 +611,14 @@ class _ChoiceMark extends StatelessWidget {
         ),
       ),
       child: selected
-          ? Icon(Icons.check, size: 14, color: palette.onAction)
+          ? Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: palette.onAction,
+              ),
+            )
           : null,
     );
   }

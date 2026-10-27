@@ -16,10 +16,7 @@ Future<CatalogStore> _loadedStore() async {
 Widget _app(CatalogStore store) {
   return MaterialApp(
     theme: buildLightTheme(),
-    home: StoreScope(
-      notifier: store,
-      child: const HomeScreen(),
-    ),
+    home: StoreScope(notifier: store, child: const HomeScreen()),
   );
 }
 
@@ -45,13 +42,14 @@ void main() {
     expect(find.text('¿Qué le gusta?'), findsNothing);
     expect(find.byKey(const ValueKey('home-search-bar')), findsOneWidget);
     expect(find.byKey(const ValueKey('home-compact-hero')), findsOneWidget);
-    expect(find.text('Novedades'), findsOneWidget);
+    expect(find.text('Nueva colección'), findsOneWidget);
     expect(find.text('Compra por estilo'), findsOneWidget);
     expect(find.byKey(const ValueKey('home-style-rail')), findsOneWidget);
   });
 
-  testWidgets('shopper home does not narrate the engine or the scrape',
-      (tester) async {
+  testWidgets('shopper home does not narrate the engine or the scrape', (
+    tester,
+  ) async {
     final store = await _loadedStore();
     addTearDown(store.dispose);
     await tester.pumpWidget(_app(store));
@@ -95,7 +93,7 @@ void main() {
     // Full bleed, as on figure 03 — the photograph runs rail to rail.
     expect(banner.left, 0);
     expect(banner.right, 390);
-    expect(find.text('Ver novedades'), findsOneWidget);
+    expect(find.text('COLECCIÓN'), findsOneWidget);
   });
 
   testWidgets('modules sit on a 24–32px rhythm, not a 64–72px one', (
@@ -113,15 +111,15 @@ void main() {
     final banner = tester.getRect(
       find.byKey(const ValueKey('home-compact-hero')),
     );
-    final newest = tester.getRect(
-      find.byKey(const ValueKey('home-section-new-products')),
-    );
     final style = tester.getRect(
       find.byKey(const ValueKey('home-section-bag-types')),
     );
+    final brands = tester.getRect(
+      find.byKey(const ValueKey('home-section-brands')),
+    );
 
-    expect(newest.top - banner.bottom, inInclusiveRange(24, 40));
-    expect(style.top - newest.bottom, inInclusiveRange(24, 40));
+    expect(style.top - banner.bottom, inInclusiveRange(24, 40));
+    expect(brands.top - style.bottom, inInclusiveRange(24, 40));
   });
 
   testWidgets('new arrivals are a rail of the shared product card', (

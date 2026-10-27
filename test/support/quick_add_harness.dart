@@ -32,7 +32,7 @@ const Key kQuickViewPrimaryKey = Key('quick-view-primary');
 const Key kQuickViewViewProductKey = Key('quick-view-view-product');
 const Key kQuickViewErrorKey = Key('quick-view-error');
 
-const String kAddLabel = 'Agregar al carrito';
+const String kAddLabel = 'Agregar a bolsa';
 const String kPendingLabel = 'Agregando…';
 const String kChooseLabel = 'Elige una opción';
 const String kRestockLabel = 'Avísame cuando vuelva';
@@ -94,11 +94,7 @@ Product singleNamedVariantProduct({
       id: id,
       title: title,
       variants: [
-        syntheticVariant(
-          id: 'v-negro-unica',
-          title: 'Negro',
-          price: 1850,
-        ),
+        syntheticVariant(id: 'v-negro-unica', title: 'Negro', price: 1850),
       ],
     );
 
@@ -248,11 +244,8 @@ Widget quickViewApp(
         body: Builder(
           builder: (context) => Center(
             child: ElevatedButton(
-              onPressed: () => openQuickView(
-                context,
-                product,
-                requireChoice: requireChoice,
-              ),
+              onPressed: () =>
+                  openQuickView(context, product, requireChoice: requireChoice),
               child: const Text('ABRIR'),
             ),
           ),

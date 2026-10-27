@@ -3,7 +3,7 @@
 /// Galería contenida (nunca recorta asas) con miniaturas, fav y compartir;
 /// marca + nombre + precio con `-X%` solo cuando `compare_at` lo respalda;
 /// swatches solo con mapeo fiable ([ProductOptionSelector]); envío y entrega
-/// estimadas; muelle inferior con «Agregar al carrito» y, al final de la
+/// estimadas; muelle inferior con «Agregar a bolsa» y, al final de la
 /// información, «Otras formas de comprar» (comprar ahora y apartar); confianza;
 /// acordeones Descripción–Detalles–Envíos; relacionados con la [ProductCard]
 /// compartida.
@@ -89,8 +89,9 @@ class _ProductScreenState extends State<ProductScreen> {
       productTitle: product.title,
       productHandle: product.handle,
       price: selectedVariant(product, _variantIndex)?.price ?? product.price,
-      attributionCode: const AttributionCodeGenerator()
-          .generate(DateTime.now().microsecondsSinceEpoch),
+      attributionCode: const AttributionCodeGenerator().generate(
+        DateTime.now().microsecondsSinceEpoch,
+      ),
     );
     final launched = await launchUrl(
       request.uri,
@@ -136,8 +137,9 @@ class _ProductScreenState extends State<ProductScreen> {
     if (notifications == null || !notifications.available) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('Los avisos todavía no están disponibles en esta versión.'),
+          content: Text(
+            'Los avisos todavía no están disponibles en esta versión.',
+          ),
         ),
       );
       return;
@@ -188,9 +190,9 @@ class _ProductScreenState extends State<ProductScreen> {
   }
 
   void _showMessage(String message) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   void _goToPage(int index) {
@@ -198,11 +200,7 @@ class _ProductScreenState extends State<ProductScreen> {
     if (reduceMotion(context)) {
       _gallery.jumpToPage(index);
     } else {
-      _gallery.animateToPage(
-        index,
-        duration: kSwap,
-        curve: kMotionCurve,
-      );
+      _gallery.animateToPage(index, duration: kSwap, curve: kMotionCurve);
     }
   }
 
@@ -237,10 +235,7 @@ class _ProductScreenState extends State<ProductScreen> {
     final recent = store.recentlyViewed(excluding: product.id);
     final related = facets?.brand?.value == null
         ? const <Product>[]
-        : store.moreFromBrand(
-            facets!.brand!.value,
-            excluding: product.id,
-          );
+        : store.moreFromBrand(facets!.brand!.value, excluding: product.id);
     final notifications = NotificationScope.maybeOf(context);
     final palette = context.boutique;
 
@@ -307,8 +302,10 @@ class _ProductScreenState extends State<ProductScreen> {
                     if (facets?.brand != null) ...[
                       Text(
                         brandLabel(facets!.brand!.value).toUpperCase(),
-                        style:
-                            boutiqueEyebrow(size: 11, color: palette.inkMuted),
+                        style: boutiqueEyebrow(
+                          size: 11,
+                          color: palette.inkMuted,
+                        ),
                       ),
                       const SizedBox(height: BoutiqueSpace.md),
                     ],
@@ -501,7 +498,7 @@ class _ProductScreenState extends State<ProductScreen> {
           child: inStock
               ? PurchaseDockButton(
                   key: const Key('purchase-dock-primary'),
-                  label: _adding ? 'Agregando…' : 'Agregar al carrito',
+                  label: _adding ? 'Agregando…' : 'Agregar a bolsa',
                   pending: _adding,
                   onPressed: _adding ? null : () => _add(product),
                 )
@@ -951,9 +948,7 @@ class _BoutiqueAccordion extends StatelessWidget {
     final palette = context.boutique;
     return Container(
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: palette.hairline, width: 1),
-        ),
+        border: Border(bottom: BorderSide(color: palette.hairline, width: 1)),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -966,8 +961,9 @@ class _BoutiqueAccordion extends StatelessWidget {
               onTap: onTap,
               behavior: HitTestBehavior.opaque,
               child: Container(
-                constraints:
-                    const BoxConstraints(minHeight: BoutiqueSpace.tapTarget),
+                constraints: const BoxConstraints(
+                  minHeight: BoutiqueSpace.tapTarget,
+                ),
                 padding: const EdgeInsets.symmetric(vertical: BoutiqueSpace.md),
                 child: Row(
                   children: [
@@ -983,8 +979,11 @@ class _BoutiqueAccordion extends StatelessWidget {
                     AnimatedRotation(
                       turns: open ? 0.5 : 0,
                       duration: reduceMotion(context) ? Duration.zero : kSnap,
-                      child:
-                          Icon(Icons.expand_more, size: 20, color: palette.ink),
+                      child: Icon(
+                        Icons.expand_more,
+                        size: 20,
+                        color: palette.ink,
+                      ),
                     ),
                   ],
                 ),
@@ -1076,10 +1075,7 @@ class _PurchaseSection extends StatelessWidget {
       children: [
         Text(
           'Otras formas de comprar',
-          style: boutiqueSectionHeading(
-            context: context,
-            color: palette.ink,
-          ),
+          style: boutiqueSectionHeading(context: context, color: palette.ink),
         ),
         const SizedBox(height: BoutiqueSpace.md),
         if (inStock) ...[
@@ -1124,10 +1120,7 @@ class _Details extends StatelessWidget {
       if (facets?.silhouette != null)
         ('Forma', silhouetteLabel(facets!.silhouette!.value)),
       if (facets != null && facets!.colors.isNotEmpty)
-        (
-          'Color',
-          facets!.colors.map((c) => colorLabel(c.value)).join(', '),
-        ),
+        ('Color', facets!.colors.map((c) => colorLabel(c.value)).join(', ')),
       if (facets != null && facets!.patterns.isNotEmpty)
         (
           'Motivo',

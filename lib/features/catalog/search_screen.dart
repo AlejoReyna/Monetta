@@ -12,10 +12,15 @@ import '../../app/product_telemetry.dart';
 import '../../app/shopper_copy.dart';
 import '../../data/normalize/facets.dart' show FacetValue;
 import '../../domain/product.dart';
+import '../../app/theme.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
+import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
+import '../checkout/checkout_screen.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import '../product/quick_view.dart';
+import 'categories_screen.dart';
 import 'catalog_controls.dart';
 import 'catalog_query.dart';
 import 'collection_screen.dart';
@@ -122,13 +127,12 @@ class _SearchScreenState extends State<SearchScreen> {
       searchProducts(StoreScope.of(context), raw);
 
   List<String> _matchingHistory(String raw) {
-    final tokens =
-        normalizeSearchText(raw).split(' ').where((token) => token.isNotEmpty);
+    final tokens = normalizeSearchText(
+      raw,
+    ).split(' ').where((token) => token.isNotEmpty);
     return <String>[
       for (final entry in _history.queries)
-        if (tokens.every(
-          (token) => normalizeSearchText(entry).contains(token),
-        ))
+        if (tokens.every((token) => normalizeSearchText(entry).contains(token)))
           entry,
     ];
   }
@@ -203,9 +207,9 @@ class _SearchScreenState extends State<SearchScreen> {
           value,
     }.toList()
       ..sort(
-        (a, b) => categoryPlural(a).toLowerCase().compareTo(
-              categoryPlural(b).toLowerCase(),
-            ),
+        (a, b) => categoryPlural(
+          a,
+        ).toLowerCase().compareTo(categoryPlural(b).toLowerCase()),
       );
     return slugs;
   }
@@ -241,10 +245,7 @@ class _SearchScreenState extends State<SearchScreen> {
     logProductEvent(
       context,
       ProductEvent.searchSubmitted,
-      parameters: {
-        'query_length': query.length,
-        'result_count': resultCount,
-      },
+      parameters: {'query_length': query.length, 'result_count': resultCount},
     );
   }
 
@@ -300,11 +301,19 @@ class _SearchScreenState extends State<SearchScreen> {
     final matches = _matches(query);
     final suggestions = _suggestions(query);
 
+    final store = StoreScope.of(context);
     return Scaffold(
       backgroundColor: palette.canvas,
       body: SafeArea(
         child: Column(
           children: [
+            SizedBox(
+              height: 48,
+              child: Stack(
+                alignment: Alignment.center,
+                children: const [MonettaWordmark(height: 18)],
+              ),
+            ),
             _SearchField(
               controller: _controller,
               focusNode: _focus,
@@ -360,6 +369,25 @@ class _SearchScreenState extends State<SearchScreen> {
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: MonettaBottomNavigation(
+        current: MonettaBottomDestination.home,
+        bagCount: store.bagQuantity,
+        onSelected: (destination) {
+          switch (destination) {
+            case MonettaBottomDestination.home:
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            case MonettaBottomDestination.catalog:
+              unawaited(openCategories(context));
+            case MonettaBottomDestination.bag:
+              unawaited(openBag(context));
+            case MonettaBottomDestination.account:
+              final account = AccountScope.maybeOf(context);
+              if (account != null) {
+                unawaited(openAccount(context, controller: account));
+              }
+          }
+        },
       ),
     );
   }
@@ -583,8 +611,10 @@ class _SectionTitle extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style:
-                  boutiqueSectionHeading(context: context, color: palette.ink),
+              style: boutiqueSectionHeading(
+                context: context,
+                color: palette.ink,
+              ),
             ),
           ),
           if (actionLabel case final label? when onAction != null)
@@ -634,11 +664,7 @@ class _HistoryRow extends StatelessWidget {
           padding: const EdgeInsets.only(left: BoutiqueSpace.gutter),
           child: Row(
             children: [
-              Icon(
-                Icons.history_rounded,
-                size: 20,
-                color: palette.inkMuted,
-              ),
+              Icon(Icons.history_rounded, size: 20, color: palette.inkMuted),
               const SizedBox(width: BoutiqueSpace.md),
               Expanded(
                 child: Padding(
@@ -751,9 +777,9 @@ class _ProductRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final cardWidth = (width * .40).clamp(140.0, 200.0);
-    final caption = MediaQuery.textScalerOf(context).scale(
-      ProductTileDensity.compact.captionHeight,
-    );
+    final caption = MediaQuery.textScalerOf(
+      context,
+    ).scale(ProductTileDensity.compact.captionHeight);
 
     return SizedBox(
       key: const ValueKey('search-product-rail'),
@@ -917,9 +943,7 @@ class _SearchSuggestions extends StatelessWidget {
           child: InkWell(
             onTap: () => onSelected(suggestion),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 56,
-              ),
+              constraints: const BoxConstraints(minHeight: 56),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: BoutiqueSpace.gutter,
@@ -1103,9 +1127,7 @@ class _NoResults extends StatelessWidget {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           child: Align(
             alignment: Alignment.centerLeft,
             child: TextButton(

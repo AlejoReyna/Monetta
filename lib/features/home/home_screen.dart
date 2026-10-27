@@ -15,6 +15,7 @@ import '../../app/home_content_controller.dart';
 import '../../app/motion.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_sections.dart';
+import '../boutique/guide_art.dart';
 import '../wholesale/wholesale_screen.dart';
 import '../contact/contact_screen.dart';
 import '../../app/mixed_feed.dart';
@@ -59,15 +60,20 @@ const double _kSearchFieldBlockHeight =
 /// editorial tail. Applied only when the storefront still carries the bundled
 /// default order — see `_resolveSectionOrder`.
 const List<HomeSectionId> _kBoutiqueSectionOrder = <HomeSectionId>[
-  HomeSectionId.newProducts,
   HomeSectionId.bagTypes,
-  HomeSectionId.collections,
-  HomeSectionId.todaysPicks,
   HomeSectionId.brands,
+  HomeSectionId.newProducts,
+  HomeSectionId.collections,
   HomeSectionId.about,
   HomeSectionId.social,
   HomeSectionId.testimonials,
 ];
+
+const Set<HomeSectionId> _kGuideOpeningSections = <HomeSectionId>{
+  HomeSectionId.bagTypes,
+  HomeSectionId.brands,
+  HomeSectionId.newProducts,
+};
 
 Duration _homeSectionDelay(int index) =>
     Duration(milliseconds: (index * 70).clamp(0, 350));
@@ -102,9 +108,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
       _featuredRefreshTimer = Timer.periodic(
         const Duration(seconds: 60),
-        (_) => unawaited(
-          FeaturedCatalogScope.maybeOf(context)?.refreshIfStale(),
-        ),
+        (_) =>
+            unawaited(FeaturedCatalogScope.maybeOf(context)?.refreshIfStale()),
       );
     });
   }
@@ -239,19 +244,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _openPartner() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PartnerHubScreen(
-          content: _editorialContent.partner,
-        ),
+        builder: (_) => PartnerHubScreen(content: _editorialContent.partner),
       ),
     );
   }
 
   void _openWholesale() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const WholesaleScreen(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const WholesaleScreen()));
   }
 
   void _openExternal(Uri uri) {
@@ -292,10 +293,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       context,
       CollectionScreen(
         title: title,
-        filter: CollectionFilter(
-          category: category,
-          queryTerms: queryTerms,
-        ),
+        filter: CollectionFilter(category: category, queryTerms: queryTerms),
       ),
     );
   }
@@ -365,6 +363,22 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onSelected: _handleBottomNavigation,
     );
     final sections = _resolveSectionOrder(homeContent, storefront);
+    final bundled = const ListEquality<HomeSectionId>().equals(
+      homeContent.sectionOrder,
+      HomeContent.fallback.sectionOrder,
+    );
+    final opening = bundled
+        ? <HomeSectionId>[
+            for (final section in sections)
+              if (_kGuideOpeningSections.contains(section)) section,
+          ]
+        : sections;
+    final tail = bundled
+        ? <HomeSectionId>[
+            for (final section in sections)
+              if (!_kGuideOpeningSections.contains(section)) section,
+          ]
+        : const <HomeSectionId>[];
     final body = LayoutBuilder(
       builder: (context, constraints) {
         _heroHeight = homeBannerHeight(context) + _kSearchFieldBlockHeight;
@@ -410,9 +424,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   ),
               ],
             ),
-            for (var index = 0; index < sections.length; index++)
+            for (var index = 0; index < opening.length; index++)
               _buildHomeSection(
-                sections[index],
+                opening[index],
                 index: index,
                 store: store,
                 content: homeContent,
@@ -421,15 +435,41 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 featuredProducts: featured?.products ?? const [],
                 reviewsStatus: reviewsStatus,
               ),
+            if (bundled) ...[
+              Padding(
+                padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
+                child: GuideHero(
+                  key: const ValueKey('home-followup-hero'),
+                  asset: kGuideFollowupHero,
+                  title: 'LO MÁS NUEVO DE\nTUS MODELOS\nFAVORITOS',
+                  action: ClientGuideButton(
+                    key: const ValueKey('home-followup-collection'),
+                    label: 'VER COLECCIÓN',
+                    chevron: true,
+                    onPressed: _openFullCatalog,
+                  ),
+                  onTap: _openFullCatalog,
+                ),
+              ),
+              if (fresh.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
+                  child: HomeNewArrivalsRail(
+                    products: fresh,
+                    title: 'Lo más buscado',
+                    sectionKey: const ValueKey('home-section-most-wanted'),
+                    railKey: const ValueKey('home-most-wanted-rail'),
+                    onOpenAll: _openFullCatalog,
+                  ),
+                ),
+            ],
             Padding(
               padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
               child: RevealOnScroll(
                 key: const ValueKey('home-reveal-offers'),
                 scrollController: _scroll,
                 offset: 0,
-                child: _HomeOffersSection(
-                  onOpenPartner: _openWholesale,
-                ),
+                child: _HomeOffersSection(onOpenPartner: _openWholesale),
               ),
             ),
             const ClientGuideServices(),
@@ -453,6 +493,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               onAbout: _openAbout,
             ),
+            for (var index = 0; index < tail.length; index++)
+              _buildHomeSection(
+                tail[index],
+                index: opening.length + index,
+                store: store,
+                content: homeContent,
+                editorial: editorial,
+                fresh: fresh,
+                featuredProducts: featured?.products ?? const [],
+                reviewsStatus: reviewsStatus,
+              ),
             // The home body extends beneath the persistent navigation. Keep
             // that trailing scroll clearance in the invitation's surface so
             // its background reaches the navigation divider instead of
@@ -565,6 +616,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
             ),
           HomeSectionId.brands => _BrandsSection(
               brands: content.brands,
+              onSeeAll: () => unawaited(openCategories(context)),
             ),
           HomeSectionId.about => _AboutMonettaSection(
               content: editorial.about,
@@ -613,12 +665,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onToggleTheme: _toggleTheme,
       onAbout: _openAbout,
       onPartner: _openWholesale,
-      onSupport: () => unawaited(
-        openContact(
-          context,
-          socialLinks: content?.socialLinks,
-        ),
-      ),
+      onSupport: () =>
+          unawaited(openContact(context, socialLinks: content?.socialLinks)),
       identityName: name,
       identityDetail:
           email != null && email.isNotEmpty && email != name ? email : null,
@@ -709,9 +757,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 }
 
 class _HomeOffersSection extends StatelessWidget {
-  const _HomeOffersSection({
-    required this.onOpenPartner,
-  });
+  const _HomeOffersSection({required this.onOpenPartner});
   final VoidCallback onOpenPartner;
 
   @override
@@ -719,7 +765,7 @@ class _HomeOffersSection extends StatelessWidget {
         key: const ValueKey('home-section-offers'),
         title: 'PRECIOS DE MAYOREO',
         subtitle: 'Precios y mínimo de piezas: pendientes de confirmación.',
-        imageAsset: 'assets/images/home_collection_bags.webp',
+        imageAsset: kGuideStudioBanner,
         action: ClientGuideButton(
           key: const ValueKey('home-wholesale-button'),
           label: 'CONOCE MÁS',
@@ -852,7 +898,7 @@ class _TodaysPicksSection extends StatelessWidget {
       children: [
         const BoutiqueSectionHeader(
           kicker: 'Selección Monetta',
-          title: 'Catálogo de hoy',
+          title: 'Lo más buscado',
         ),
         _CatalogGrid(products: products.take(4).toList()),
       ],
@@ -861,9 +907,10 @@ class _TodaysPicksSection extends StatelessWidget {
 }
 
 class _BrandsSection extends StatefulWidget {
-  const _BrandsSection({required this.brands});
+  const _BrandsSection({required this.brands, this.onSeeAll});
 
   final List<HomeBrandCard> brands;
+  final VoidCallback? onSeeAll;
 
   @override
   State<_BrandsSection> createState() => _BrandsSectionState();
@@ -933,10 +980,7 @@ class _BrandsSectionState extends State<_BrandsSection>
     final begin = (startMilliseconds / totalMilliseconds).clamp(0.0, 1.0);
     final end = (endMilliseconds / totalMilliseconds).clamp(begin, 1.0);
     final direction = index.isEven ? -1.2 : 1.2;
-    return Tween<Offset>(
-      begin: Offset(direction, 0),
-      end: Offset.zero,
-    ).animate(
+    return Tween<Offset>(begin: Offset(direction, 0), end: Offset.zero).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Interval(begin, end, curve: kMotionCurve),
@@ -957,12 +1001,14 @@ class _BrandsSectionState extends State<_BrandsSection>
     return Column(
       key: const ValueKey('home-section-brands'),
       children: [
-        const BoutiqueSectionHeader(title: 'Marcas'),
+        BoutiqueSectionHeader(
+          title: 'Tus marcas favoritas',
+          actionLabel: widget.onSeeAll == null ? null : 'Ver todas',
+          onAction: widget.onSeeAll,
+        ),
         GridView.builder(
           clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
@@ -1148,9 +1194,7 @@ class _SocialSection extends StatelessWidget {
       children: [
         const BoutiqueSectionHeader(title: 'Nuestras redes'),
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           child: Row(
             children: [
               for (var index = 0; index < links.length; index++) ...[
@@ -1290,9 +1334,7 @@ class _CatalogGrid extends StatelessWidget {
                 : 2;
         return GridView.builder(
           clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           // 0.50 reserves ~115pt for the caption under a 4:5 photo plus the

@@ -20,6 +20,7 @@ import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/guide_art.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import 'brand_screen.dart';
@@ -218,7 +219,9 @@ class _CollectionScreenState extends State<CollectionScreen> {
       }
       if (widget.filter.collectionHandle != null &&
           product.collectionHandles.isNotEmpty &&
-          !product.collectionHandles.contains(widget.filter.collectionHandle)) {
+          !product.collectionHandles.contains(
+            widget.filter.collectionHandle,
+          )) {
         return false;
       }
       // Same matcher the search screen counts with, so "Ver todo" lands on
@@ -283,12 +286,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
       case MonettaBottomDestination.bag:
         unawaited(openBag(context));
       case MonettaBottomDestination.account:
-        unawaited(
-          openAccount(
-            context,
-            controller: AccountScope.of(context),
-          ),
-        );
+        unawaited(openAccount(context, controller: AccountScope.of(context)));
     }
   }
 
@@ -302,26 +300,22 @@ class _CollectionScreenState extends State<CollectionScreen> {
         if (store.facetsFor(product.id)?.brand?.value case final value?) value,
     }.toList();
     brands.sort(
-      (a, b) => brandLabel(a).toLowerCase().compareTo(
-            brandLabel(b).toLowerCase(),
-          ),
+      (a, b) =>
+          brandLabel(a).toLowerCase().compareTo(brandLabel(b).toLowerCase()),
     );
     return brands;
   }
 
-  List<String> _silhouettesFor(
-    Iterable<Product> products,
-    CatalogStore store,
-  ) {
+  List<String> _silhouettesFor(Iterable<Product> products, CatalogStore store) {
     final silhouettes = <String>{
       for (final product in products)
         if (store.facetsFor(product.id)?.silhouette?.value case final value?)
           value,
     }.toList();
     silhouettes.sort(
-      (a, b) => silhouetteLabel(a).toLowerCase().compareTo(
-            silhouetteLabel(b).toLowerCase(),
-          ),
+      (a, b) => silhouetteLabel(
+        a,
+      ).toLowerCase().compareTo(silhouetteLabel(b).toLowerCase()),
     );
     return silhouettes;
   }
@@ -378,6 +372,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
               child: CatalogEditorialBanner(
                 title: widget.title,
                 description: widget.description,
+                imageAsset: kGuideStudioBanner,
               ),
             ),
           SliverToBoxAdapter(
@@ -508,10 +503,7 @@ class _CollectionAppBar extends StatelessWidget {
               ),
             ),
       title: showTitle
-          ? Text(
-              title,
-              style: boutiqueHeaderName(color: palette.ink),
-            )
+          ? Text(title, style: boutiqueHeaderName(color: palette.ink))
           : null,
       actions: [
         _CollectionFilterIconButton(
@@ -808,8 +800,9 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                     children: [
                       _CollectionFilterAccordion(
                         section: _CollectionFilterSection.sort,
-                        expanded:
-                            _expanded.contains(_CollectionFilterSection.sort),
+                        expanded: _expanded.contains(
+                          _CollectionFilterSection.sort,
+                        ),
                         onTap: () =>
                             _toggleExpanded(_CollectionFilterSection.sort),
                         child: Column(
@@ -834,8 +827,9 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                       if (widget.silhouettes.isNotEmpty)
                         _CollectionFilterAccordion(
                           section: _CollectionFilterSection.type,
-                          expanded:
-                              _expanded.contains(_CollectionFilterSection.type),
+                          expanded: _expanded.contains(
+                            _CollectionFilterSection.type,
+                          ),
                           onTap: () =>
                               _toggleExpanded(_CollectionFilterSection.type),
                           child: Column(
@@ -862,8 +856,9 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                       if (widget.brands.isNotEmpty)
                         _CollectionFilterAccordion(
                           section: _CollectionFilterSection.brand,
-                          expanded: _expanded
-                              .contains(_CollectionFilterSection.brand),
+                          expanded: _expanded.contains(
+                            _CollectionFilterSection.brand,
+                          ),
                           onTap: () =>
                               _toggleExpanded(_CollectionFilterSection.brand),
                           child: Column(
@@ -981,9 +976,7 @@ class _CollectionFilterAccordion extends StatelessWidget {
     final palette = context.boutique;
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: palette.hairline, width: 0.5),
-        ),
+        border: Border(bottom: BorderSide(color: palette.hairline, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -1081,10 +1074,7 @@ class _CollectionFilterChoiceRow extends StatelessWidget {
 }
 
 class _CollectionSelectionMark extends StatelessWidget {
-  const _CollectionSelectionMark({
-    required this.selected,
-    required this.radio,
-  });
+  const _CollectionSelectionMark({required this.selected, required this.radio});
 
   final bool selected;
   final bool radio;
@@ -1115,11 +1105,7 @@ class _CollectionSelectionMark extends StatelessWidget {
                   ),
                   child: const SizedBox(width: 9, height: 9),
                 )
-              : Icon(
-                  Icons.check_rounded,
-                  size: 17,
-                  color: palette.canvas,
-                )
+              : Icon(Icons.check_rounded, size: 17, color: palette.canvas)
           : null,
     );
   }
@@ -1127,9 +1113,7 @@ class _CollectionSelectionMark extends StatelessWidget {
 
 void openCollection(BuildContext context, CollectionScreen screen) {
   final store = StoreScope.of(context);
-  Navigator.of(context).push(
-    monettaFadeRoute(
-      StoreScope(notifier: store, child: screen),
-    ),
-  );
+  Navigator.of(
+    context,
+  ).push(monettaFadeRoute(StoreScope(notifier: store, child: screen)));
 }

@@ -8,11 +8,11 @@ library;
 import 'package:flutter/material.dart';
 
 import '../../app/card_lift.dart';
-import '../../app/media/monetta_video.dart';
 import '../../domain/campaign.dart';
 import '../../domain/home_content.dart';
 import '../../domain/product.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/guide_art.dart';
 import '../catalog/product_card.dart';
 import '../product/quick_view.dart';
 
@@ -115,110 +115,82 @@ class HomeEditorialBanner extends StatelessWidget {
     final palette = context.boutique;
     // Full bleed, square to the edges — figure 03 runs the photograph from
     // rail to rail under the header, not as an inset card.
-    return SizedBox(
-      key: const ValueKey('home-compact-hero'),
-      height: homeBannerHeight(context),
-      child: Stack(
-        fit: StackFit.expand,
-        children: [
-          MonettaVideo(campaign: kHomeBannerCampaign, playing: playing),
-          // Left-weighted scrim: the asset keeps its subject right of centre,
-          // so the copy column stays readable without dimming the piece.
-          const IgnorePointer(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.centerLeft,
-                  end: Alignment.centerRight,
-                  colors: <Color>[
-                    Color(0xC2000000),
-                    Color(0x70000000),
-                    Color(0x1A000000),
-                  ],
-                  stops: <double>[0, .52, 1],
+    return GestureDetector(
+      key: const ValueKey('home-banner-action'),
+      onTap: onOpenNew,
+      child: SizedBox(
+        key: const ValueKey('home-compact-hero'),
+        height: homeBannerHeight(context),
+        child: Stack(
+          fit: StackFit.expand,
+          children: [
+            const GuideArt(
+              asset: kGuideHomeHero,
+              alignment: Alignment.centerRight,
+            ),
+            if (!playing) const SizedBox.shrink(),
+            const IgnorePointer(
+              child: DecoratedBox(
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.centerLeft,
+                    end: Alignment.centerRight,
+                    colors: <Color>[
+                      Color(0xF2FBF6EE),
+                      Color(0xB3FBF6EE),
+                      Color(0x00FBF6EE),
+                    ],
+                    stops: <double>[0, .46, .82],
+                  ),
                 ),
               ),
             ),
-          ),
-          // Vertical padding is lg, not xl: copy (3-line 26pt headline) +
-          // action (48pt) + 2×24pt padding peaks near 205pt and overflowed
-          // the 200pt minimum banner on short viewports by 5pt.
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              BoutiqueSpace.gutter,
-              BoutiqueSpace.lg,
-              BoutiqueSpace.gutter,
-              BoutiqueSpace.lg,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: MediaQuery.sizeOf(context).width * .62,
+            Padding(
+              padding: const EdgeInsets.fromLTRB(
+                BoutiqueSpace.gutter,
+                BoutiqueSpace.lg,
+                BoutiqueSpace.gutter,
+                BoutiqueSpace.lg,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    'NUEVA',
+                    style: boutiqueEyebrow(size: 12, color: palette.ink),
                   ),
-                  child: Text(
-                    'Estilo que te acompaña en cada momento',
-                    maxLines: 3,
+                  const SizedBox(height: 2),
+                  Text(
+                    'COLECCIÓN',
+                    maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                     style: boutiqueDisplay(
-                      26,
-                      color: palette.onDark,
-                      height: 1.18,
+                      32,
+                      color: palette.ink,
+                      height: 1.05,
                     ),
                   ),
-                ),
-                const SizedBox(height: BoutiqueSpace.lg),
-                _BannerAction(
-                  key: const ValueKey('home-banner-action'),
-                  label: 'Ver novedades',
-                  onTap: onOpenNew,
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// A capsule — the brief's geometry for short editorial actions.
-class _BannerAction extends StatelessWidget {
-  const _BannerAction({required this.label, required this.onTap, super.key});
-
-  final String label;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Semantics(
-      button: true,
-      label: label,
-      excludeSemantics: true,
-      onTap: onTap,
-      child: Material(
-        color: palette.onDark,
-        borderRadius: BoutiqueRadius.capsule,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BoutiqueRadius.capsule,
-          child: Container(
-            height: BoutiqueSpace.tapTarget,
-            alignment: Alignment.center,
-            padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.xl),
-            child: Text(
-              label,
-              style: boutiqueText(
-                size: 14,
-                weight: FontWeight.w600,
-                color: const Color(0xFF111111),
-                height: 1.1,
+                  const SizedBox(height: BoutiqueSpace.sm),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(
+                      maxWidth: MediaQuery.sizeOf(context).width * .58,
+                    ),
+                    child: Text(
+                      'Un paraíso de marcas\npor descubrir.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: boutiqueText(
+                        size: 14,
+                        height: 1.3,
+                        color: palette.ink,
+                      ),
+                    ),
+                  ),
+                ],
               ),
             ),
-          ),
+          ],
         ),
       ),
     );
@@ -226,7 +198,7 @@ class _BannerAction extends StatelessWidget {
 }
 
 // ---------------------------------------------------------------------------
-// Novedades
+// Nueva colección
 // ---------------------------------------------------------------------------
 
 /// New arrivals as a horizontal rail.
@@ -240,13 +212,17 @@ class HomeNewArrivalsRail extends StatelessWidget {
   const HomeNewArrivalsRail({
     required this.products,
     required this.onOpenAll,
-    this.title = 'Novedades',
+    this.title = 'Nueva colección',
+    this.sectionKey = const ValueKey('home-section-new-products'),
+    this.railKey = const ValueKey('home-new-products-rail'),
     super.key,
   });
 
   final List<Product> products;
   final String title;
   final VoidCallback onOpenAll;
+  final Key sectionKey;
+  final Key railKey;
 
   static const ProductTileDensity _density = ProductTileDensity.compact;
 
@@ -260,7 +236,7 @@ class HomeNewArrivalsRail extends StatelessWidget {
         MediaQuery.textScalerOf(context).scale(_density.captionHeight);
 
     return Column(
-      key: const ValueKey('home-section-new-products'),
+      key: sectionKey,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BoutiqueSectionHeader(
@@ -271,7 +247,7 @@ class HomeNewArrivalsRail extends StatelessWidget {
         SizedBox(
           height: railHeight,
           child: ListView.separated(
-            key: const ValueKey('home-new-products-rail'),
+            key: railKey,
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(

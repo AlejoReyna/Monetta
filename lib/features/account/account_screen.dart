@@ -31,8 +31,10 @@ import '../orders/order_detail_screen.dart';
 import '../orders/order_status.dart';
 import '../orders/orders_screen.dart';
 import '../personalization/personalization_screen.dart';
+import '../boutique/guide_art.dart';
 import '../rewards/rewards_guide_screen.dart';
 import '../rewards/rewards_section.dart';
+import '../rewards/rewards_share_screen.dart';
 import 'account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import 'delete_account_screen.dart';
@@ -96,9 +98,9 @@ Future<void> openAccount(
 }
 
 void _showAccountMessage(BuildContext context, String message) {
-  ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-    SnackBar(content: Text(message)),
-  );
+  ScaffoldMessenger.maybeOf(
+    context,
+  )?.showSnackBar(SnackBar(content: Text(message)));
 }
 
 class AccountScreen extends StatelessWidget {
@@ -234,10 +236,7 @@ class _SignedIn extends StatelessWidget {
             onRelogin: controller.isLoading ? null : () => controller.login(),
           ),
           const SizedBox(height: BoutiqueSpace.lg),
-          AutoRewardsSection(
-            controller: controller,
-            reader: rewardsReader,
-          ),
+          AutoRewardsSection(controller: controller, reader: rewardsReader),
           if (onOpenInvite != null) ...[
             const SizedBox(height: BoutiqueSpace.md),
             ECard(
@@ -401,6 +400,40 @@ class _SignedIn extends StatelessWidget {
             onPrivacyPolicy: () => _openPrivacyPolicy(context),
           ),
           const SizedBox(height: BoutiqueSpace.sectionGapTight),
+          GuideShareBanner(
+            child: Padding(
+              padding: const EdgeInsets.all(16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Comparte el catálogo y gana',
+                    style: boutiqueScreenTitle(
+                      context: context,
+                      color: palette.ink,
+                    ),
+                  ),
+                  const SizedBox(height: 4),
+                  Text(
+                    'Únete al mundo de Monetta',
+                    style: boutiqueText(size: 13, color: palette.inkMuted),
+                  ),
+                  const SizedBox(height: 12),
+                  BoutiqueButton(
+                    key: const ValueKey('account-share-catalog'),
+                    label: 'Compartir catálogo',
+                    onPressed: () => Navigator.of(context).push(
+                      MaterialPageRoute<void>(
+                        builder: (_) =>
+                            RewardsShareScreen(accountController: controller),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: BoutiqueSpace.sectionGapTight),
           BoutiqueButton(
             key: const ValueKey('account-logout'),
             label: 'Cerrar sesión',
@@ -481,10 +514,7 @@ class _SignedIn extends StatelessWidget {
 }
 
 class _PrivacyLinks extends StatelessWidget {
-  const _PrivacyLinks({
-    required this.onDelete,
-    required this.onPrivacyPolicy,
-  });
+  const _PrivacyLinks({required this.onDelete, required this.onPrivacyPolicy});
 
   final VoidCallback onDelete;
   final VoidCallback onPrivacyPolicy;
@@ -542,10 +572,7 @@ class _PrivacyLinks extends StatelessWidget {
 final NotificationInbox sharedAccountNotificationInbox = NotificationInbox();
 
 class _IdentityCard extends StatelessWidget {
-  const _IdentityCard({
-    required this.controller,
-    required this.onRelogin,
-  });
+  const _IdentityCard({required this.controller, required this.onRelogin});
 
   final AccountController controller;
   final VoidCallback? onRelogin;
@@ -586,10 +613,7 @@ class _IdentityCard extends StatelessWidget {
                 children: [
                   Text(
                     'Sesión iniciada',
-                    style: boutiqueEyebrow(
-                      size: 11,
-                      color: palette.goldText,
-                    ),
+                    style: boutiqueEyebrow(size: 11, color: palette.goldText),
                   ),
                   const SizedBox(height: 2),
                   Text(
@@ -603,10 +627,7 @@ class _IdentityCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       account.email!,
-                      style: boutiqueText(
-                        size: 12,
-                        color: palette.inkMuted,
-                      ),
+                      style: boutiqueText(size: 12, color: palette.inkMuted),
                     ),
                   ],
                   const SizedBox(height: 4),
@@ -661,9 +682,7 @@ class _OrdersPreview extends StatelessWidget {
   Widget build(BuildContext context) {
     final muted = sans(size: 13, color: context.monettaColors.contentMuted);
     if (controller.ordersLoading && controller.orders.isEmpty) {
-      return ECard(
-        children: [Text('Cargando…', style: muted)],
-      );
+      return ECard(children: [Text('Cargando…', style: muted)]);
     }
 
     return ECard(
@@ -691,10 +710,7 @@ class _OrdersPreview extends StatelessWidget {
             ),
             TextButton(
               key: const ValueKey('account-view-all-orders'),
-              onPressed: () => openOrders(
-                context,
-                controller: controller,
-              ),
+              onPressed: () => openOrders(context, controller: controller),
               child: const Text('Ver todos'),
             ),
           ],

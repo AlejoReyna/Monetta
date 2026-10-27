@@ -34,8 +34,9 @@ Future<void> pumpClientGuide(
       theme:
           brightness == Brightness.dark ? buildDarkTheme() : buildLightTheme(),
       builder: (context, child) => MediaQuery(
-        data: MediaQuery.of(context)
-            .copyWith(textScaler: TextScaler.linear(textScale)),
+        data: MediaQuery.of(
+          context,
+        ).copyWith(textScaler: TextScaler.linear(textScale)),
         child: child!,
       ),
       home: RepaintBoundary(key: clientGuideCaptureKey, child: screen),
@@ -54,7 +55,8 @@ Future<void> pumpClientGuide(
 
 /// Optional review evidence, never updates or approves reference goldens.
 Future<void> captureClientGuide(WidgetTester tester, String name) async {
-  final directory = Platform.environment['MONETTA_M4_CAPTURE_DIR'] ??
+  final directory = Platform.environment['MONETTA_1TO1_CAPTURE_DIR'] ??
+      Platform.environment['MONETTA_M4_CAPTURE_DIR'] ??
       Platform.environment['MONETTA_M3_CAPTURE_DIR'] ??
       Platform.environment['MONETTA_M2_CAPTURE_DIR'];
   if (directory == null) return;
@@ -67,10 +69,16 @@ Future<void> captureClientGuide(WidgetTester tester, String name) async {
     }
   });
   await tester.pumpAndSettle();
-  final boundary = tester
-      .renderObject<RenderRepaintBoundary>(find.byKey(clientGuideCaptureKey));
+  // The home [RepaintBoundary] does not include modal routes. Paint the
+  // render view so a quick-view sheet is in the file.
+  final renderView = tester.binding.renderViews.first;
   await tester.runAsync(() async {
-    final image = await boundary.toImage();
+    final layer = renderView.debugLayer! as OffsetLayer;
+    final ratio = 1 / renderView.flutterView.devicePixelRatio;
+    final image = await layer.toImage(
+      renderView.paintBounds,
+      pixelRatio: ratio,
+    );
     final data = await image.toByteData(format: ui.ImageByteFormat.png);
     await Directory(directory).create(recursive: true);
     await File('$directory/$name.png').writeAsBytes(data!.buffer.asUint8List());

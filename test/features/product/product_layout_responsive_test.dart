@@ -128,33 +128,40 @@ void main() {
     }
 
     testWidgets(
-        'A11Y-01 back, heart, bag, dock button and secondary actions are '
-        'named 48 px buttons', (tester) async {
-      await withSemantics(tester, () async {
-        setPhoneView(tester);
-        final store = await loadedStore();
-        final product = _added(store, syntheticProduct());
-        await pumpFicha(tester, store, product.id);
-        await tester.pump();
+      'A11Y-01 back, heart, bag, dock button and secondary actions are '
+      'named 48 px buttons',
+      (tester) async {
+        await withSemantics(tester, () async {
+          setPhoneView(tester);
+          final store = await loadedStore();
+          final product = _added(store, syntheticProduct());
+          await pumpFicha(tester, store, product.id);
+          await tester.pump();
 
-        expectButton(tester, find.byKey(kHeaderBackKey), what: 'back');
-        expectButton(tester, find.byKey(kHeaderFavoriteKey), what: 'heart');
-        expectButton(tester, inAppBar(find.byType(BagAction)), what: 'bag');
-        expectButton(tester, find.byKey(kDockPrimaryKey), what: 'dock button');
-        expect(
-          accessibleName(tester.getSemantics(find.byKey(kDockPrimaryKey))),
-          contains('Agregar al carrito'),
-        );
+          expectButton(tester, find.byKey(kHeaderBackKey), what: 'back');
+          expectButton(tester, find.byKey(kHeaderFavoriteKey), what: 'heart');
+          expectButton(tester, inAppBar(find.byType(BagAction)), what: 'bag');
+          expectButton(
+            tester,
+            find.byKey(kDockPrimaryKey),
+            what: 'dock button',
+          );
+          expect(
+            accessibleName(tester.getSemantics(find.byKey(kDockPrimaryKey))),
+            contains('Agregar a bolsa'),
+          );
 
-        await scrollTo(tester, find.byKey(kBuyNowKey));
-        expectButton(tester, find.byKey(kBuyNowKey), what: 'Comprar ahora');
-        await scrollTo(tester, find.byKey(kApartarKey));
-        expectButton(tester, find.byKey(kApartarKey), what: 'Apartar');
-      });
-    });
+          await scrollTo(tester, find.byKey(kBuyNowKey));
+          expectButton(tester, find.byKey(kBuyNowKey), what: 'Comprar ahora');
+          await scrollTo(tester, find.byKey(kApartarKey));
+          expectButton(tester, find.byKey(kApartarKey), what: 'Apartar');
+        });
+      },
+    );
 
-    testWidgets('A11Y-01 the reading order is header, content, dock',
-        (tester) async {
+    testWidgets('A11Y-01 the reading order is header, content, dock', (
+      tester,
+    ) async {
       await withSemantics(tester, () async {
         setPhoneView(tester);
         final store = await loadedStore();
@@ -170,12 +177,10 @@ void main() {
         final content = tester.getSemantics(name);
         final dock = tester.getSemantics(find.byKey(kDockPrimaryKey));
 
-        final order = tester.semantics
-            .simulatedAccessibilityTraversal()
-            .map((node) => node.id);
-        final position = {
-          for (final (index, id) in order.indexed) id: index,
-        };
+        final order = tester.semantics.simulatedAccessibilityTraversal().map(
+              (node) => node.id,
+            );
+        final position = {for (final (index, id) in order.indexed) id: index};
         expect(position, contains(title.id), reason: 'header is traversable');
         expect(
           position,

@@ -99,6 +99,7 @@ flutter:
     - assets/rules/
     - assets/images/
     - assets/images/brands/
+    - assets/images/guide/
     - assets/catalog/
     - assets/fonts/inter/OFL.txt
     - assets/fonts/playfair_display/OFL.txt

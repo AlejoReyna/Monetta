@@ -47,8 +47,9 @@ void main() {
     );
   });
 
-  testWidgets('ficha Fig.07: galería contenida, precio y confianza',
-      (tester) async {
+  testWidgets('ficha Fig.07: galería contenida, precio y confianza', (
+    tester,
+  ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -82,7 +83,7 @@ void main() {
     expect(find.textContaining('Entrega estimada'), findsWidgets);
 
     // Purchase bar: same labels the catalog flow already honours.
-    expect(find.text('Agregar al carrito'), findsOneWidget);
+    expect(find.text('Agregar a bolsa'), findsOneWidget);
     // The secondary actions live in the purchase section, below the fold.
     await scrollTo(tester, find.text('Comprar ahora'));
     expect(find.text('Comprar ahora'), findsOneWidget);
@@ -115,16 +116,15 @@ void main() {
     expect(find.byKey(const ValueKey('discount-badge')), findsNothing);
   });
 
-  testWidgets('swatches con mapeo fiable, chips en caso contrario',
-      (tester) async {
+  testWidgets('swatches con mapeo fiable, chips en caso contrario', (
+    tester,
+  ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1400);
     tester.view.devicePixelRatio = 1.0;
 
     final store = await _loadedStore();
-    final reliable = store.products.firstWhere(
-      hasReliableColorOptions,
-    );
+    final reliable = store.products.firstWhere(hasReliableColorOptions);
     await _pumpFicha(tester, store, reliable.id);
     expect(find.text('COLOR'), findsOneWidget);
     expect(find.text('OPCIÓN'), findsNothing);
@@ -199,7 +199,7 @@ void main() {
     await tester.pump();
     expect(find.text('AGOTADO'), findsWidgets);
     expect(find.text('Avísame cuando vuelva'), findsOneWidget);
-    expect(find.text('Agregar al carrito'), findsNothing);
+    expect(find.text('Agregar a bolsa'), findsNothing);
   });
 
   testWidgets('ficha sin foto no rompe y permite comprar', (tester) async {
@@ -232,7 +232,7 @@ void main() {
     ];
     await _pumpFicha(tester, store, 'test-sin-foto');
     expect(find.text('Bolsa Test Sin Foto'), findsWidgets);
-    expect(find.text('Agregar al carrito'), findsOneWidget);
+    expect(find.text('Agregar a bolsa'), findsOneWidget);
   });
 
   testWidgets('quick-view Fig.06: ver, agregar y volver', (tester) async {
@@ -269,7 +269,7 @@ void main() {
 
     // Sheet: drag handle, close X, brand–name–price, no fake urgency.
     expect(find.byTooltip('Cerrar vista rápida'), findsOneWidget);
-    expect(find.text('Agregar al carrito'), findsOneWidget);
+    expect(find.text('Agregar a bolsa'), findsOneWidget);
     expect(find.text('Ver producto'), findsOneWidget);
     expect(find.textContaining('Últimas'), findsNothing);
 
@@ -344,7 +344,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('Agregar al carrito'), findsOneWidget);
+    expect(find.text('Agregar a bolsa'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }
