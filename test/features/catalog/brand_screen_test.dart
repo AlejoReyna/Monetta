@@ -18,6 +18,10 @@ Future<CatalogStore> _loadedStore() async {
 /// work for whichever brand that is, not for one hard-coded name.
 String _busiestBrand(CatalogStore store) => store.availableBrands.first;
 
+/// The story and "Ver todo" sit below the whole grid, and the busiest brand
+/// can hold about a hundred pieces: more than the default 50 drags reach.
+const _scrollsToPageEnd = 200;
+
 Future<void> _pump(
   WidgetTester tester,
   CatalogStore store,
@@ -141,6 +145,7 @@ void main() {
       find.byKey(const ValueKey('brand-story')),
       300,
       scrollable: find.byType(Scrollable).first,
+      maxScrolls: _scrollsToPageEnd,
     );
     expect(find.text('Sobre la marca'), findsOneWidget);
   });
@@ -159,7 +164,10 @@ void main() {
       find.byKey(const ValueKey('brand-see-all')),
       300,
       scrollable: find.byType(Scrollable).first,
+      maxScrolls: _scrollsToPageEnd,
     );
+    // The final ensureVisible jumps without a frame; lay out before tapping.
+    await tester.pump();
     await tester.tap(find.byKey(const ValueKey('brand-see-all')));
     await tester.pumpAndSettle();
 
