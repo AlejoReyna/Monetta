@@ -9,8 +9,6 @@ import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
-import 'package:monetta_app/reco/explainer.dart';
-
 import '../../support/product_screen_harness.dart';
 import '../../support/scripted_catalog_store.dart';
 
@@ -19,8 +17,9 @@ import '../../support/scripted_catalog_store.dart';
 // "Otras formas de comprar" section (BRIEF 2.5).
 
 const double _inset = 34;
-const String _addLabel = 'Agregar a bolsa';
-const String _pendingLabel = 'Agregando…';
+const String _addLabel = 'AGREGAR A BOLSA';
+const String _pendingLabel = 'AGREGANDO…';
+const Key _bottomNavKey = Key('bottom-nav-surface');
 const String _restockLabel = 'Avísame cuando vuelva';
 const String _failureMessage = 'No pudimos agregar la pieza. Intenta de nuevo.';
 
@@ -65,87 +64,56 @@ Future<(ScriptedCatalogStore, Product)> _mountScripted(
 void main() {
   setUpAll(mockPathProvider);
 
-  group('CART-01 the dock', () {
+  group('CART-01 the purchase actions', () {
     testWidgets(
-      'CART-01 without inset the dock is 64 high with a 48 button, there '
-      'from the first frame, and does not move',
+      'CART-01 the bottom nav is docked and the primary action is in the list',
       (tester) async {
         await _mountSingle(tester, settle: false);
 
-        expect(_dock(), findsOneWidget);
-        final before = tester.getRect(_dock());
-        expect(before.height, closeTo(64, 0.01));
-        expect(before.bottom, closeTo(kPhoneHeight, 0.01));
-        expect(before.left, closeTo(0, 0.01));
-        expect(before.width, closeTo(390, 0.01));
+        expect(find.byKey(_bottomNavKey), findsOneWidget);
+        final nav = tester.getRect(find.byKey(_bottomNavKey));
+        expect(nav.bottom, closeTo(kPhoneHeight, 0.01));
+        expect(nav.left, closeTo(0, 0.01));
+        expect(nav.width, closeTo(390, 0.01));
+        expect(_dock(), findsNothing);
         expect(_primary(), findsOneWidget);
-        expect(tester.getSize(_primary()).height, closeTo(48, 0.01));
+        expect(tester.getSize(_primary()).height, greaterThanOrEqualTo(48));
         expect(_inPrimary(find.text(_addLabel)), findsOneWidget);
+        expect(find.text('COMPRAR AHORA'), findsOneWidget);
 
+        final before = tester.getRect(find.byKey(_bottomNavKey));
         await scrollToEnd(tester);
-        expect(tester.getRect(_dock()), before);
+        expect(tester.getRect(find.byKey(_bottomNavKey)), before);
       },
     );
 
     testWidgets(
-      'CART-01 with a 34 inset the dock is 98 high, docked to the edge, '
-      'and the button ends 8 above the inset',
+      'CART-01 with a 34 inset the nav stays docked to the edge',
       (tester) async {
         await _mountSingle(tester, inset: _inset, settle: false);
 
-        expect(_dock(), findsOneWidget);
-        final dock = tester.getRect(_dock());
-        expect(dock.height, closeTo(64 + _inset, 0.01));
-        expect(dock.bottom, closeTo(kPhoneHeight, 0.01));
-        final button = tester.getRect(_primary());
-        expect(button.height, closeTo(48, 0.01));
-        expect(button.bottom, closeTo(kPhoneHeight - _inset - 8, 0.01));
-        expect(button.top, closeTo(dock.top + 8, 0.01));
-
-        await scrollToEnd(tester);
-        expect(tester.getRect(_dock()), dock);
+        final nav = tester.getRect(find.byKey(_bottomNavKey));
+        expect(nav.bottom, closeTo(kPhoneHeight, 0.01));
+        expect(nav.height, greaterThan(_inset));
+        expect(_primary(), findsOneWidget);
+        expect(tester.getSize(_primary()).height, greaterThanOrEqualTo(48));
       },
     );
 
-    testWidgets('CART-01 the dock paints the bar colour down to the edge', (
+    testWidgets('CART-01 the nav paints down to the edge', (
       tester,
     ) async {
       await _mountSingle(tester, inset: _inset);
 
-      expect(_dock(), findsOneWidget);
-      final bar = BoutiquePalette.of(tester.element(_dock())).bar;
-      final dock = tester.getRect(_dock());
-      final painted = <Rect>[];
-      final fills = find.descendant(
-        of: _dock(),
-        matching: find.byWidgetPredicate((widget) {
-          if (widget is ColoredBox) return widget.color == bar;
-          if (widget is DecoratedBox) {
-            final decoration = widget.decoration;
-            return decoration is BoxDecoration && decoration.color == bar;
-          }
-          return false;
-        }),
-        matchRoot: true,
-      );
-      for (final element in fills.evaluate()) {
-        final box = element.renderObject! as RenderBox;
-        painted.add(box.localToGlobal(Offset.zero) & box.size);
-      }
-      expect(
-        painted.any(
-          (rect) =>
-              (rect.bottom - dock.bottom).abs() < 0.01 &&
-              (rect.top - dock.top).abs() < 0.01,
-        ),
-        isTrue,
-        reason: 'one surface in the bar colour spans the whole dock, inset '
-            'included; painted: $painted',
-      );
+      final nav = tester.getRect(find.byKey(_bottomNavKey));
+      expect(nav.bottom, closeTo(kPhoneHeight, 0.01));
+      expect(nav.left, closeTo(0, 0.01));
+      expect(nav.right, closeTo(390, 0.01));
+      expect(nav.top, lessThan(kPhoneHeight - _inset));
     });
 
     testWidgets(
-      'CART-01b the dock holds no price or availability; the content does',
+      'CART-01b the nav holds no price or availability; the content does',
       (tester) async {
         setPhoneView(tester);
         final store = await loadedStore();
@@ -157,17 +125,20 @@ void main() {
         );
         await pumpFicha(tester, store, product.id);
 
-        expect(_dock(), findsOneWidget);
+        expect(find.byKey(_bottomNavKey), findsOneWidget);
         for (final text in [r'$', 'Disponible', 'Agotado']) {
           expect(
-            find.descendant(of: _dock(), matching: find.textContaining(text)),
+            find.descendant(
+              of: find.byKey(_bottomNavKey),
+              matching: find.textContaining(text),
+            ),
             findsNothing,
-            reason: 'the dock must not show "$text"',
+            reason: 'the nav must not show "$text"',
           );
         }
         expect(
           find.descendant(
-            of: _dock(),
+            of: find.byKey(_bottomNavKey),
             matching: find.byType(ProductOptionSelector),
           ),
           findsNothing,
@@ -184,23 +155,20 @@ void main() {
 
     for (final width in [320.0, 390.0]) {
       testWidgets(
-        'CART-01c at x2 and ${width.toInt()} wide the dock grows and the '
-        'label is not truncated',
+        'CART-01c at x2 and ${width.toInt()} wide the label is not truncated',
         (tester) async {
           await _mountSingle(tester, width: width, scale: 2.0, inset: _inset);
 
-          expect(_dock(), findsOneWidget);
+          expect(find.byKey(_bottomNavKey), findsOneWidget);
           expect(tester.takeException(), isNull);
-          expect(
-            tester.getSize(_dock()).height,
-            greaterThan(64 + _inset),
-            reason: 'the dock grows with the text scale',
-          );
           expect(tester.getSize(_primary()).height, greaterThanOrEqualTo(48));
           final label = _inPrimary(find.text(_addLabel));
           expect(label, findsOneWidget);
           expect(paragraphOf(tester, label).didExceedMaxLines, isFalse);
-          expect(tester.getRect(_dock()).bottom, closeTo(kPhoneHeight, 0.01));
+          expect(
+            tester.getRect(find.byKey(_bottomNavKey)).bottom,
+            closeTo(kPhoneHeight, 0.01),
+          );
         },
       );
     }
@@ -214,7 +182,6 @@ void main() {
         setPhoneView(tester);
         final store = await loadedStore();
         final (:product, other: _) = productWithBrandRail(store);
-        final brand = store.facetsFor(product.id)!.brand!.value;
         await pumpFicha(tester, store, product.id);
 
         final section = find.byKey(kPurchaseSectionKey);
@@ -224,13 +191,15 @@ void main() {
         );
         final lastAccordion = await contentOffsetOf(
           tester,
-          find.text('Envíos y cambios'),
+          find.text('Envíos y devoluciones'),
         );
         final sectionTop = await contentOffsetOf(tester, section);
         final related = await contentOffsetOf(
           tester,
-          find.text('Más de ${brandLabel(brand)}'),
+          find.text('Productos relacionados'),
         );
+        final buyNowTop = await contentOffsetOf(tester, find.byKey(kBuyNowKey));
+        expect(buyNowTop, lessThan(lastAccordion));
         expect(sectionTop, greaterThan(whatsapp));
         expect(sectionTop, greaterThan(lastAccordion));
         expect(sectionTop, lessThan(related));
@@ -246,40 +215,27 @@ void main() {
         expect(style.fontWeight, FontWeight.w400);
         expect(style.fontSize, kBoutiqueSectionHeadingSize);
 
-        final buyNow = find.descendant(
-          of: section,
-          matching: find.byKey(kBuyNowKey),
-        );
         final apartar = find.descendant(
           of: section,
           matching: find.byKey(kApartarKey),
         );
-        expect(buyNow, findsOneWidget);
         expect(apartar, findsOneWidget);
         expect(
-          find.descendant(of: buyNow, matching: find.text('Comprar ahora')),
+          find.descendant(
+            of: find.byKey(kBuyNowKey),
+            matching: find.text('COMPRAR AHORA'),
+          ),
           findsOneWidget,
         );
         expect(
           find.descendant(of: apartar, matching: find.text('Apartar')),
           findsOneWidget,
         );
-
-        expect(_dock(), findsOneWidget);
         expect(
-          find.descendant(of: _dock(), matching: find.byKey(kBuyNowKey)),
-          findsNothing,
-        );
-        expect(
-          find.descendant(of: _dock(), matching: find.byKey(kApartarKey)),
-          findsNothing,
-        );
-        expect(
-          find.descendant(of: _dock(), matching: find.text('Comprar ahora')),
-          findsNothing,
-        );
-        expect(
-          find.descendant(of: _dock(), matching: find.text('Apartar')),
+          find.descendant(
+            of: find.byKey(_bottomNavKey),
+            matching: find.byKey(kBuyNowKey),
+          ),
           findsNothing,
         );
       },
@@ -355,6 +311,7 @@ void main() {
         final hold = Completer<void>();
         store.hold = hold;
 
+        await scrollTo(tester, _primary());
         await tester.tap(_primary());
         await tester.pump();
         expect(store.addCalls, 1);
@@ -398,6 +355,7 @@ void main() {
         expect(_primary(), findsOneWidget);
 
         store.failWith = StateError('storage unavailable');
+        await scrollTo(tester, _primary());
         await tester.tap(_primary());
         await tester.pumpAndSettle();
         expect(find.text(_failureMessage), findsOneWidget);
@@ -445,12 +403,13 @@ void main() {
         expect(_inMainList(find.textContaining('Agotado')), findsWidgets);
         expect(
           find.descendant(
-            of: _dock(),
+            of: find.byKey(_bottomNavKey),
             matching: find.textContaining('Agotado'),
           ),
           findsNothing,
         );
 
+        await scrollTo(tester, _primary());
         await tester.tap(_primary());
         await tester.pump();
         expect(store.bagQuantity, 0);
@@ -462,7 +421,7 @@ void main() {
         await scrollTo(tester, find.byKey(kApartarKey));
         expect(find.byKey(kApartarKey), findsOneWidget);
         expect(find.byKey(kBuyNowKey), findsNothing);
-        expect(find.text('Comprar ahora'), findsNothing);
+        expect(find.text('COMPRAR AHORA'), findsNothing);
       },
     );
 

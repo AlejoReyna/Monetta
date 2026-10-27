@@ -74,19 +74,16 @@ void main() {
     expect(find.byTooltip('Compartir'), findsOneWidget);
 
     // Trust row from the reference strip.
-    expect(find.text('Original'), findsOneWidget);
-    expect(find.text('Importado de EE. UU.'), findsOneWidget);
-    expect(find.text('Pago seguro'), findsOneWidget);
+    expect(find.text('Envíos seguros'), findsOneWidget);
+    expect(find.text('Productos originales'), findsOneWidget);
+    expect(find.text('Pagos seguros'), findsOneWidget);
 
-    // Shipping facts, never lamina copy.
-    expect(find.textContaining('Envío gratis desde'), findsWidgets);
-    expect(find.textContaining('Entrega estimada'), findsWidgets);
+    // Shipping facts already in the app, never an invented threshold.
+    expect(find.textContaining('gratis desde'), findsWidgets);
 
-    // Purchase bar: same labels the catalog flow already honours.
-    expect(find.text('Agregar a bolsa'), findsOneWidget);
-    // The secondary actions live in the purchase section, below the fold.
-    await scrollTo(tester, find.text('Comprar ahora'));
-    expect(find.text('Comprar ahora'), findsOneWidget);
+    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+    await scrollTo(tester, find.text('COMPRAR AHORA'));
+    expect(find.text('COMPRAR AHORA'), findsOneWidget);
     await scrollTo(tester, find.text('Apartar'));
     expect(find.text('Apartar'), findsOneWidget);
   });
@@ -147,7 +144,7 @@ void main() {
     final product = store.products.firstWhere((item) => item.isInStock);
     await _pumpFicha(tester, store, product.id);
 
-    for (final label in ['Descripción', 'Detalles', 'Envíos y cambios']) {
+    for (final label in ['Descripción', 'Detalles', 'Envíos y devoluciones']) {
       expect(find.text(label), findsOneWidget);
       await tester.ensureVisible(find.text(label));
       await tester.pump();
@@ -199,7 +196,7 @@ void main() {
     await tester.pump();
     expect(find.text('AGOTADO'), findsWidgets);
     expect(find.text('Avísame cuando vuelva'), findsOneWidget);
-    expect(find.text('Agregar a bolsa'), findsNothing);
+    expect(find.text('AGREGAR A BOLSA'), findsNothing);
   });
 
   testWidgets('ficha sin foto no rompe y permite comprar', (tester) async {
@@ -232,7 +229,7 @@ void main() {
     ];
     await _pumpFicha(tester, store, 'test-sin-foto');
     expect(find.text('Bolsa Test Sin Foto'), findsWidgets);
-    expect(find.text('Agregar a bolsa'), findsOneWidget);
+    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
   });
 
   testWidgets('quick-view Fig.06: ver, agregar y volver', (tester) async {
@@ -269,8 +266,8 @@ void main() {
 
     // Sheet: drag handle, close X, brand–name–price, no fake urgency.
     expect(find.byTooltip('Cerrar vista rápida'), findsOneWidget);
-    expect(find.text('Agregar a bolsa'), findsOneWidget);
-    expect(find.text('Ver producto'), findsOneWidget);
+    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
+    expect(find.text('VER PRODUCTO'), findsOneWidget);
     expect(find.textContaining('Últimas'), findsNothing);
 
     // Same add-to-bag as the ficha: closes, then confirms with mini-cart.
@@ -281,7 +278,7 @@ void main() {
     expect(find.text('VER BOLSA'), findsOneWidget);
   });
 
-  testWidgets('quick-view Ver producto abre la ficha', (tester) async {
+  testWidgets('quick-view VER PRODUCTO abre la ficha', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -312,11 +309,11 @@ void main() {
     await tester.tap(find.text('ABRIR'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.text('Ver producto'));
+    await tester.tap(find.text('VER PRODUCTO'));
     await tester.pumpAndSettle();
     expect(find.byType(ProductScreen), findsOneWidget);
-    await scrollTo(tester, find.text('Comprar ahora'));
-    expect(find.text('Comprar ahora'), findsOneWidget);
+    await scrollTo(tester, find.text('COMPRAR AHORA'));
+    expect(find.text('COMPRAR AHORA'), findsOneWidget);
   });
 
   testWidgets('ficha aguanta texto ampliado y modo oscuro', (tester) async {
@@ -344,7 +341,7 @@ void main() {
       ),
     );
     await tester.pump();
-    expect(find.text('Agregar a bolsa'), findsOneWidget);
+    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
     expect(tester.takeException(), isNull);
   });
 }

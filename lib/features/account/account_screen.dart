@@ -13,16 +13,22 @@
 /// no se implementa: Miguel la sustituyó por saldo en pesos.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/account_controller.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../main.dart';
 import '../../data/accounts_orders/account_deletion_client.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
 import '../../data/repositories/order_history_repository.dart';
+import '../catalog/categories_screen.dart';
+import '../catalog/search_screen.dart';
+import '../checkout/checkout_screen.dart';
 import '../contact/contact_screen.dart';
 import '../favorites/favorites_screen.dart';
 import '../notifications/notification_inbox.dart';
@@ -32,6 +38,9 @@ import '../orders/order_status.dart';
 import '../orders/orders_screen.dart';
 import '../personalization/personalization_screen.dart';
 import '../boutique/guide_art.dart';
+import '../navigation/guide_chrome.dart';
+import '../navigation/guide_drawer.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import '../rewards/rewards_guide_screen.dart';
 import '../rewards/rewards_section.dart';
 import '../rewards/rewards_share_screen.dart';
@@ -148,21 +157,14 @@ class AccountScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    final store = StoreScope.maybeOf(context);
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: AppBar(
-        backgroundColor: palette.bar,
-        foregroundColor: palette.ink,
-        elevation: 0,
-        scrolledUnderElevation: 0,
-        title: Text(
-          'Mi cuenta',
-          style: boutiqueTitle(size: 15, color: palette.ink),
-        ),
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(.5),
-          child: Container(height: .5, color: palette.hairline),
-        ),
+      drawer: guideDrawer(context),
+      appBar: guideAppBar(
+        context,
+        searchEnabled: store != null,
+        onSearch: () => unawaited(openSearch(context)),
       ),
       body: SafeArea(
         child: ListenableBuilder(
@@ -182,6 +184,22 @@ class AccountScreen extends StatelessWidget {
                 )
               : const SizedBox.shrink(),
         ),
+      ),
+      bottomNavigationBar: MonettaBottomNavigation(
+        current: MonettaBottomDestination.account,
+        bagCount: store?.bagQuantity ?? 0,
+        onSelected: (destination) {
+          switch (destination) {
+            case MonettaBottomDestination.home:
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            case MonettaBottomDestination.catalog:
+              unawaited(openCategories(context));
+            case MonettaBottomDestination.bag:
+              if (store != null) unawaited(openBag(context));
+            case MonettaBottomDestination.account:
+              break;
+          }
+        },
       ),
     );
   }
@@ -231,29 +249,16 @@ class _SignedIn extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          Text(
+            'Mi cuenta',
+            style: boutiqueScreenTitle(context: context, color: palette.ink),
+          ),
+          const SizedBox(height: BoutiqueSpace.lg),
           _IdentityCard(
             controller: controller,
             onRelogin: controller.isLoading ? null : () => controller.login(),
           ),
-          const SizedBox(height: BoutiqueSpace.lg),
-          AutoRewardsSection(controller: controller, reader: rewardsReader),
-          if (onOpenInvite != null) ...[
-            const SizedBox(height: BoutiqueSpace.md),
-            ECard(
-              children: [
-                EAccessRow(
-                  key: const ValueKey('account-invite'),
-                  icon: Icons.card_giftcard_outlined,
-                  title: 'Invitar a Monetta',
-                  subtitle: 'Comparte tu enlace y gana saldo con referidos',
-                  onTap: onOpenInvite,
-                ),
-              ],
-            ),
-          ],
           const SizedBox(height: BoutiqueSpace.sectionGapTight),
-          const ESectionTitle(title: 'Mis accesos'),
-          const SizedBox(height: BoutiqueSpace.sm),
           ECard(
             padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
             children: [
@@ -295,6 +300,14 @@ class _SignedIn extends StatelessWidget {
                 subtitle: 'WhatsApp, sitio y redes',
                 onTap: () => openContact(context),
               ),
+            ],
+          ),
+          const SizedBox(height: BoutiqueSpace.sectionGapTight),
+          AutoRewardsSection(controller: controller, reader: rewardsReader),
+          const SizedBox(height: BoutiqueSpace.md),
+          ECard(
+            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+            children: [
               EAccessRow(
                 key: const ValueKey('account-open-personalization'),
                 icon: Icons.tune_outlined,
@@ -313,6 +326,14 @@ class _SignedIn extends StatelessWidget {
                   reader: rewardsReader,
                 ),
               ),
+              if (onOpenInvite != null)
+                EAccessRow(
+                  key: const ValueKey('account-invite'),
+                  icon: Icons.card_giftcard_outlined,
+                  title: 'Invitar a Monetta',
+                  subtitle: 'Comparte tu enlace y gana saldo con referidos',
+                  onTap: onOpenInvite,
+                ),
             ],
           ),
           const SizedBox(height: BoutiqueSpace.sectionGapTight),

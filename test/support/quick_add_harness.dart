@@ -32,11 +32,11 @@ const Key kQuickViewPrimaryKey = Key('quick-view-primary');
 const Key kQuickViewViewProductKey = Key('quick-view-view-product');
 const Key kQuickViewErrorKey = Key('quick-view-error');
 
-const String kAddLabel = 'Agregar a bolsa';
-const String kPendingLabel = 'Agregando…';
+const String kAddLabel = 'AGREGAR A BOLSA';
+const String kPendingLabel = 'AGREGANDO…';
 const String kChooseLabel = 'Elige una opción';
 const String kRestockLabel = 'Avísame cuando vuelva';
-const String kViewProductLabel = 'Ver producto';
+const String kViewProductLabel = 'VER PRODUCTO';
 const String kAddFailureMessage =
     'No pudimos agregar la pieza. Intenta de nuevo.';
 const String kQuickViewTooltip = 'Vista rápida';
@@ -323,8 +323,15 @@ Finder _swatch(String variantTitle) => find.byWidgetPredicate(
 /// The tappable option of [variant]: its swatch or its text chip.
 Finder optionOf(Product product, ProductVariant variant) =>
     hasReliableColorOptions(product)
-        ? _swatch(variant.title).first
+        ? _swatch(variant.title)
         : optionChip(variant.title);
+
+Finder _sheetVerticalScroll() => find.descendant(
+      of: quickViewSheet(),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+      ),
+    );
 
 /// Brings [target] into view inside the quick view's scrolling list. The list
 /// is lazy, so a far child may not exist yet: scroll until it is built.
@@ -333,9 +340,7 @@ Future<void> revealInSheet(WidgetTester tester, Finder target) async {
     await tester.scrollUntilVisible(
       target,
       120,
-      scrollable: find
-          .descendant(of: quickViewSheet(), matching: find.byType(Scrollable))
-          .first,
+      scrollable: _sheetVerticalScroll(),
     );
   }
   await tester.ensureVisible(target);

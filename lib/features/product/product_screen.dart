@@ -12,7 +12,10 @@
 /// solo guarda — jamás navega.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -27,11 +30,16 @@ import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/events.dart';
 import '../../reco/explainer.dart';
+import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
+import '../catalog/categories_screen.dart';
 import '../catalog/product_card.dart';
+import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../checkout/mini_cart.dart' show showMiniCart;
-import 'product_header.dart';
+import '../navigation/guide_chrome.dart';
+import '../navigation/guide_drawer.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import 'product_selection.dart';
 import 'purchase_dock.dart';
 import 'quick_view.dart';
@@ -246,30 +254,17 @@ class _ProductScreenState extends State<ProductScreen> {
       },
       child: Scaffold(
         backgroundColor: palette.canvas,
-        appBar: buildProductDetailAppBar(
+        drawer: guideDrawer(context),
+        appBar: guideAppBar(
           context,
-          title: shopperProductName(product.title),
-          onBack: _recordDwellAndPop,
-          actionSlots: 2,
-          actions: [
-            IconButton(
-              key: const Key('product-header-favorite'),
-              tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
-              icon: Icon(
-                wishlisted ? Icons.favorite : Icons.favorite_border,
-                size: 20,
-                color: wishlisted ? palette.goldText : palette.ink,
-              ),
-              onPressed: () => store.toggleWishlist(product.id),
-            ),
-            const BagAction(),
-          ],
+          onSearch: () => unawaited(openSearch(context)),
         ),
         body: SafeArea(
           top: false,
           bottom: false,
           child: ListView(
             padding: EdgeInsets.zero,
+            scrollCacheExtent: const ScrollCacheExtent.pixels(2000),
             children: [
               _Gallery(
                 product: product,
@@ -279,6 +274,13 @@ class _ProductScreenState extends State<ProductScreen> {
                 wishlisted: wishlisted,
                 inStock: inStock,
                 onPageChanged: (i) => setState(() => _page = i),
+                onPrevious: images.length < 2
+                    ? null
+                    : () =>
+                        _goToPage((_page - 1 + images.length) % images.length),
+                onNext: images.length < 2
+                    ? null
+                    : () => _goToPage((_page + 1) % images.length),
                 onToggleWishlist: () => store.toggleWishlist(product.id),
                 onShare: () => _share(product, price),
               ),
@@ -365,18 +367,6 @@ class _ProductScreenState extends State<ProductScreen> {
                         ],
                       ],
                     ),
-                    const SizedBox(height: BoutiqueSpace.md),
-                    if (inStock)
-                      Text(
-                        kApartadoSentence,
-                        style: boutiqueText(
-                          size: 13,
-                          color: palette.ink,
-                          height: 1.45,
-                        ),
-                      ),
-                    const SizedBox(height: BoutiqueSpace.sm),
-                    _AvailabilityLine(inStock: inStock),
                     if (selectable.isNotEmpty) ...[
                       const SizedBox(height: BoutiqueSpace.xl),
                       ProductOptionSelector(
@@ -386,10 +376,48 @@ class _ProductScreenState extends State<ProductScreen> {
                       ),
                     ],
                     const SizedBox(height: BoutiqueSpace.xl),
-                    _ShippingCard(),
-                    const SizedBox(height: BoutiqueSpace.xl),
                     const _TrustRow(),
+                    const SizedBox(height: BoutiqueSpace.lg),
+                    if (inStock) ...[
+                      PurchaseDockButton(
+                        key: const Key('purchase-dock-primary'),
+                        label: _adding ? 'AGREGANDO…' : 'AGREGAR A BOLSA',
+                        pending: _adding,
+                        onPressed: _adding ? null : () => _add(product),
+                      ),
+                      const SizedBox(height: BoutiqueSpace.sm),
+                      BoutiqueButton(
+                        key: const Key('purchase-buy-now'),
+                        label: 'COMPRAR AHORA',
+                        filled: false,
+                        onPressed: _adding ? null : () => _buyNow(product),
+                      ),
+                      const SizedBox(height: BoutiqueSpace.lg),
+                      Text(
+                        kApartadoSentence,
+                        style: boutiqueText(
+                          size: 13,
+                          color: palette.ink,
+                          height: 1.45,
+                        ),
+                      ),
+                    ],
                     const SizedBox(height: BoutiqueSpace.sm),
+                    _AvailabilityLine(inStock: inStock),
+                    if (!inStock)
+                      KeyedSubtree(
+                        key: const ValueKey('create-restock-alert'),
+                        child: PurchaseDockButton(
+                          key: const Key('purchase-dock-primary'),
+                          label: notifications?.saving == true
+                              ? 'Guardando…'
+                              : 'Avísame cuando vuelva',
+                          onPressed: notifications?.saving == true
+                              ? null
+                              : () => _createRestockAlert(product),
+                        ),
+                      ),
+                    const SizedBox(height: BoutiqueSpace.lg),
                     _BoutiqueAccordion(
                       label: 'Descripción',
                       open: _open.contains('descripcion'),
@@ -420,7 +448,7 @@ class _ProductScreenState extends State<ProductScreen> {
                       child: _Details(facets: facets),
                     ),
                     _BoutiqueAccordion(
-                      label: 'Envíos y cambios',
+                      label: 'Envíos y devoluciones',
                       open: _open.contains('envio'),
                       onTap: () => setState(() {
                         _open.contains('envio')
@@ -442,9 +470,6 @@ class _ProductScreenState extends State<ProductScreen> {
                     _WhatsAppLink(onTap: () => _openConcierge(product)),
                     const SizedBox(height: BoutiqueSpace.xl),
                     _PurchaseSection(
-                      inStock: inStock,
-                      adding: _adding,
-                      onBuyNow: () => _buyNow(product),
                       onApartado: () => _openApartado(product),
                     ),
                   ],
@@ -460,9 +485,7 @@ class _ProductScreenState extends State<ProductScreen> {
                     BoutiqueSpace.md,
                   ),
                   child: Text(
-                    facets?.brand == null
-                        ? 'Más piezas'
-                        : 'Más de ${brandLabel(facets!.brand!.value)}',
+                    'Productos relacionados',
                     style: boutiqueSectionHeading(
                       context: context,
                       color: palette.ink,
@@ -494,28 +517,24 @@ class _ProductScreenState extends State<ProductScreen> {
             ],
           ),
         ),
-        bottomNavigationBar: PurchaseDock(
-          child: inStock
-              ? PurchaseDockButton(
-                  key: const Key('purchase-dock-primary'),
-                  label: _adding ? 'Agregando…' : 'Agregar a bolsa',
-                  pending: _adding,
-                  onPressed: _adding ? null : () => _add(product),
-                )
-              // The restock alert keeps its historical key; the button keeps
-              // the dock key in every state.
-              : KeyedSubtree(
-                  key: const ValueKey('create-restock-alert'),
-                  child: PurchaseDockButton(
-                    key: const Key('purchase-dock-primary'),
-                    label: notifications?.saving == true
-                        ? 'Guardando…'
-                        : 'Avísame cuando vuelva',
-                    onPressed: notifications?.saving == true
-                        ? null
-                        : () => _createRestockAlert(product),
-                  ),
-                ),
+        bottomNavigationBar: MonettaBottomNavigation(
+          current: null,
+          bagCount: store.bagQuantity,
+          onSelected: (destination) {
+            switch (destination) {
+              case MonettaBottomDestination.home:
+                _recordDwellAndPop();
+              case MonettaBottomDestination.catalog:
+                unawaited(openCategories(context));
+              case MonettaBottomDestination.bag:
+                unawaited(openBag(context));
+              case MonettaBottomDestination.account:
+                final account = AccountScope.maybeOf(context);
+                if (account != null) {
+                  unawaited(openAccount(context, controller: account));
+                }
+            }
+          },
         ),
       ),
     );
@@ -535,6 +554,8 @@ class _Gallery extends StatelessWidget {
     required this.wishlisted,
     required this.inStock,
     required this.onPageChanged,
+    required this.onPrevious,
+    required this.onNext,
     required this.onToggleWishlist,
     required this.onShare,
   });
@@ -546,6 +567,8 @@ class _Gallery extends StatelessWidget {
   final bool wishlisted;
   final bool inStock;
   final ValueChanged<int> onPageChanged;
+  final VoidCallback? onPrevious;
+  final VoidCallback? onNext;
   final VoidCallback onToggleWishlist;
   final VoidCallback onShare;
 
@@ -605,7 +628,35 @@ class _Gallery extends StatelessWidget {
                   ),
                 ),
               ),
-            // Fav + share: 48pt targets over the photo. The heart only
+            if (onPrevious != null)
+              Positioned(
+                left: BoutiqueSpace.xs,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: _RoundPhotoButton(
+                    buttonKey: const Key('product-gallery-prev'),
+                    tooltip: 'Foto anterior',
+                    icon: Icons.chevron_left,
+                    onPressed: onPrevious!,
+                  ),
+                ),
+              ),
+            if (onNext != null)
+              Positioned(
+                right: BoutiqueSpace.xs,
+                top: 0,
+                bottom: 0,
+                child: Center(
+                  child: _RoundPhotoButton(
+                    buttonKey: const Key('product-gallery-next'),
+                    tooltip: 'Foto siguiente',
+                    icon: Icons.chevron_right,
+                    onPressed: onNext!,
+                  ),
+                ),
+              ),
+            // Fav, zoom and share sit over the photo. The heart only
             // toggles the wishlist — it never navigates.
             Positioned(
               top: BoutiqueSpace.sm,
@@ -613,10 +664,22 @@ class _Gallery extends StatelessWidget {
               child: Column(
                 children: [
                   _RoundPhotoButton(
+                    buttonKey: const Key('product-header-favorite'),
                     tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
                     icon: wishlisted ? Icons.favorite : Icons.favorite_border,
                     filled: wishlisted,
                     onPressed: onToggleWishlist,
+                  ),
+                  const SizedBox(height: BoutiqueSpace.sm),
+                  _RoundPhotoButton(
+                    buttonKey: const Key('product-gallery-zoom'),
+                    tooltip: 'Ampliar foto',
+                    icon: Icons.zoom_in,
+                    onPressed: () => _openZoom(
+                      context,
+                      images[page],
+                      shopperProductName(product.title),
+                    ),
                   ),
                   const SizedBox(height: BoutiqueSpace.sm),
                   _RoundPhotoButton(
@@ -641,17 +704,56 @@ class _Gallery extends StatelessWidget {
   }
 }
 
+void _openZoom(BuildContext context, String? url, String title) {
+  final palette = context.boutique;
+  showDialog<void>(
+    context: context,
+    builder: (context) => Dialog(
+      backgroundColor: palette.canvas,
+      insetPadding: const EdgeInsets.all(BoutiqueSpace.md),
+      child: AspectRatio(
+        aspectRatio: 1,
+        child: Stack(
+          children: [
+            InteractiveViewer(
+              minScale: 1,
+              maxScale: 4,
+              child: MonettaImage(
+                url: url,
+                fit: BoxFit.contain,
+                cacheWidth: MediaUrl.heroWidth,
+                fallbackLabel: title,
+              ),
+            ),
+            Positioned(
+              top: 0,
+              right: 0,
+              child: IconButton(
+                tooltip: 'Cerrar',
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.close),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
 class _RoundPhotoButton extends StatelessWidget {
   const _RoundPhotoButton({
     required this.tooltip,
     required this.icon,
     required this.onPressed,
+    this.buttonKey,
     this.filled = false,
   });
 
   final String tooltip;
   final IconData icon;
   final VoidCallback onPressed;
+  final Key? buttonKey;
   final bool filled;
 
   @override
@@ -662,6 +764,7 @@ class _RoundPhotoButton extends StatelessWidget {
       toggled: filled,
       label: tooltip,
       child: SizedBox(
+        key: buttonKey,
         width: BoutiqueSpace.tapTarget,
         height: BoutiqueSpace.tapTarget,
         child: Center(
@@ -716,49 +819,57 @@ class _Thumbnails extends StatelessWidget {
         BoutiqueSpace.gutter,
         BoutiqueSpace.md,
       ),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: Row(
-          children: [
-            for (var i = 0; i < images.length; i++)
-              Padding(
-                padding: EdgeInsets.only(
-                  right: i == images.length - 1 ? 0 : BoutiqueSpace.sm,
-                ),
-                child: Semantics(
-                  button: true,
-                  selected: i == active,
-                  label: 'Foto ${i + 1} de ${images.length}',
-                  child: GestureDetector(
-                    onTap: () => onSelect(i),
-                    behavior: HitTestBehavior.opaque,
-                    child: Container(
-                      key: ValueKey('thumb-$i'),
-                      width: 56,
-                      height: 68,
-                      decoration: BoxDecoration(
-                        color: palette.surface,
-                        borderRadius: BoutiqueRadius.tile,
-                        border: Border.all(
-                          color: i == active ? palette.ink : palette.hairline,
-                          width: i == active ? 1.5 : 1,
-                        ),
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BoutiqueRadius.tile,
-                        child: MonettaImage(
-                          url: images[i],
-                          fit: BoxFit.contain,
-                          cacheWidth: MediaUrl.thumbWidth,
-                          fallbackLabel: title,
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          const gap = BoutiqueSpace.sm;
+          // Four thumbs across, matching the guide strip. Extra photos scroll.
+          final thumb = (constraints.maxWidth - gap * 3) / 4;
+          return SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              children: [
+                for (var i = 0; i < images.length; i++)
+                  Padding(
+                    padding: EdgeInsets.only(
+                      right: i == images.length - 1 ? 0 : gap,
+                    ),
+                    child: Semantics(
+                      button: true,
+                      selected: i == active,
+                      label: 'Foto ${i + 1} de ${images.length}',
+                      child: GestureDetector(
+                        onTap: () => onSelect(i),
+                        behavior: HitTestBehavior.opaque,
+                        child: Container(
+                          key: ValueKey('thumb-$i'),
+                          width: thumb,
+                          height: thumb,
+                          decoration: BoxDecoration(
+                            color: palette.surface,
+                            borderRadius: BoutiqueRadius.tile,
+                            border: Border.all(
+                              color:
+                                  i == active ? palette.ink : palette.hairline,
+                              width: i == active ? 1.5 : 1,
+                            ),
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BoutiqueRadius.tile,
+                            child: MonettaImage(
+                              url: images[i],
+                              fit: BoxFit.contain,
+                              cacheWidth: MediaUrl.thumbWidth,
+                              fallbackLabel: title,
+                            ),
+                          ),
                         ),
                       ),
                     ),
                   ),
-                ),
-              ),
-          ],
-        ),
+              ],
+            ),
+          );
+        },
       ),
     );
   }
@@ -828,68 +939,26 @@ class _AvailabilityLine extends StatelessWidget {
   }
 }
 
-class _ShippingCard extends StatelessWidget {
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Container(
-      padding: const EdgeInsets.all(BoutiqueSpace.lg),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BoutiqueRadius.card,
-        border: Border.all(color: palette.hairline, width: 1),
-      ),
-      child: Column(
-        children: [
-          Row(
-            children: [
-              Icon(Icons.local_shipping_outlined, size: 20, color: palette.ink),
-              const SizedBox(width: BoutiqueSpace.md),
-              Expanded(
-                child: Text(
-                  'Envío gratis desde ${kMoney.format(kFreeShippingThreshold)}',
-                  style: boutiqueText(
-                    size: 13,
-                    weight: FontWeight.w600,
-                    color: palette.ink,
-                    height: 1.3,
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: BoutiqueSpace.sm),
-          Row(
-            children: [
-              const SizedBox(width: 32),
-              Expanded(
-                child: Text(
-                  'Entrega estimada: 3 a 5 días hábiles a todo México.',
-                  style: boutiqueText(
-                    size: 12,
-                    color: palette.inkMuted,
-                    height: 1.4,
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 class _TrustRow extends StatelessWidget {
   const _TrustRow();
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    const items = <(IconData, String)>[
-      (Icons.verified_outlined, 'Original'),
-      (Icons.flight_outlined, 'Importado de EE. UU.'),
-      (Icons.lock_outline, 'Pago seguro'),
+    // Titles match the guide. Subtitles are the cautious copy already used
+    // on the home service row — never a "Pendiente de contrato" line.
+    const items = <(IconData, String, String)>[
+      (
+        Icons.local_shipping_outlined,
+        'Envíos seguros',
+        'Costo y plazo por confirmar',
+      ),
+      (
+        Icons.verified_outlined,
+        'Productos originales',
+        'Garantía sujeta a cada pieza',
+      ),
+      (Icons.lock_outline, 'Pagos seguros', 'Compra con confianza'),
     ];
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -904,21 +973,34 @@ class _TrustRow extends StatelessWidget {
       ),
       child: Row(
         children: [
-          for (var i = 0; i < items.length; i++)
+          for (final item in items)
             Expanded(
               child: Column(
                 children: [
-                  Icon(items[i].$1, size: 20, color: palette.ink),
+                  Icon(item.$1, size: 20, color: palette.ink),
                   const SizedBox(height: BoutiqueSpace.sm),
                   Text(
-                    items[i].$2,
+                    item.$2,
                     textAlign: TextAlign.center,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                     style: boutiqueText(
                       size: 11,
+                      weight: FontWeight.w600,
+                      color: palette.ink,
+                      height: 1.25,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    item.$3,
+                    textAlign: TextAlign.center,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: boutiqueText(
+                      size: 10,
                       color: palette.inkMuted,
-                      height: 1.3,
+                      height: 1.25,
                     ),
                   ),
                 ],
@@ -1050,20 +1132,11 @@ class _WhatsAppLink extends StatelessWidget {
   }
 }
 
-/// "Otras formas de comprar": the secondary purchase actions, after the
-/// information and before the related rails. The primary action lives in the
-/// dock. A sold-out selection offers only "Apartar".
+/// Apartar stays available after the product information. The guide's two
+/// purchase buttons sit above the accordions.
 class _PurchaseSection extends StatelessWidget {
-  const _PurchaseSection({
-    required this.inStock,
-    required this.adding,
-    required this.onBuyNow,
-    required this.onApartado,
-  });
+  const _PurchaseSection({required this.onApartado});
 
-  final bool inStock;
-  final bool adding;
-  final VoidCallback onBuyNow;
   final VoidCallback onApartado;
 
   @override
@@ -1078,15 +1151,6 @@ class _PurchaseSection extends StatelessWidget {
           style: boutiqueSectionHeading(context: context, color: palette.ink),
         ),
         const SizedBox(height: BoutiqueSpace.md),
-        if (inStock) ...[
-          BoutiqueButton(
-            key: const Key('purchase-buy-now'),
-            label: 'Comprar ahora',
-            onPressed: adding ? null : onBuyNow,
-            filled: false,
-          ),
-          const SizedBox(height: BoutiqueSpace.sm),
-        ],
         Center(
           child: TextButton(
             key: const Key('purchase-apartar'),

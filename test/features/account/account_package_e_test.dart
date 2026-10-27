@@ -141,7 +141,7 @@ void main() {
         await tester.tap(row);
         await tester.pumpAndSettle();
         expect(find.byType(screen), findsOneWidget);
-        await tester.tap(find.byIcon(Icons.arrow_back).first);
+        tester.state<NavigatorState>(find.byType(Navigator)).pop();
         await tester.pumpAndSettle();
       }
 

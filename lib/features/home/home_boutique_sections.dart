@@ -187,12 +187,41 @@ class HomeEditorialBanner extends StatelessWidget {
                       ),
                     ),
                   ),
+                  const Spacer(),
+                  const Center(child: _HeroDots(count: 1, active: 0)),
                 ],
               ),
             ),
           ],
         ),
       ),
+    );
+  }
+}
+
+class _HeroDots extends StatelessWidget {
+  const _HeroDots({required this.count, required this.active});
+
+  final int count;
+  final int active;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < count; i++)
+          Container(
+            width: i == active ? 16 : 6,
+            height: 6,
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            decoration: BoxDecoration(
+              color: i == active ? palette.goldText : palette.hairline,
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+      ],
     );
   }
 }
@@ -215,6 +244,7 @@ class HomeNewArrivalsRail extends StatelessWidget {
     this.title = 'Nueva colección',
     this.sectionKey = const ValueKey('home-section-new-products'),
     this.railKey = const ValueKey('home-new-products-rail'),
+    this.asGrid = false,
     super.key,
   });
 
@@ -224,11 +254,54 @@ class HomeNewArrivalsRail extends StatelessWidget {
   final Key sectionKey;
   final Key railKey;
 
+  /// Guide page 3 lays “Nueva colección” as a two-column grid. The follow-up
+  /// rail and wholesale keep the horizontal strip.
+  final bool asGrid;
+
   static const ProductTileDensity _density = ProductTileDensity.compact;
 
   @override
   Widget build(BuildContext context) {
     if (products.isEmpty) return const SizedBox.shrink();
+    if (asGrid) {
+      final shown = products.length > 4 ? products.sublist(0, 4) : products;
+      return Column(
+        key: sectionKey,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BoutiqueSectionHeader(
+            title: title,
+            actionLabel: 'Ver todo',
+            onAction: onOpenAll,
+          ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return GridView.builder(
+                key: railKey,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BoutiqueSpace.gutter,
+                ),
+                gridDelegate: productGridDelegate(
+                  context,
+                  availableWidth:
+                      constraints.maxWidth - BoutiqueSpace.gutter * 2,
+                ),
+                itemCount: shown.length,
+                itemBuilder: (context, index) {
+                  final product = shown[index];
+                  return ProductCard(
+                    product: product,
+                    onQuickView: () => showProductQuickView(context, product),
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      );
+    }
     final width = MediaQuery.sizeOf(context).width;
     // Just under three cards across, so the rail reads as scrollable.
     final cardWidth = (width * .36).clamp(132.0, 190.0);

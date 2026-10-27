@@ -4,8 +4,11 @@
 /// still run without that directory.
 library;
 
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:monetta_app/app/media/monetta_image.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/features/account/account_screen.dart';
@@ -16,7 +19,6 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
 import 'package:monetta_app/domain/home_content.dart';
-import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/catalog/categories_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/search_history.dart';
@@ -99,6 +101,14 @@ void main() {
       const MethodChannel('plugins.flutter.io/path_provider'),
       (call) async => '/tmp',
     );
+    final fixture = File('test/support/fixture_product.jpg');
+    if (fixture.existsSync()) {
+      debugMonettaFixtureImage = MemoryImage(fixture.readAsBytesSync());
+    }
+  });
+
+  tearDown(() {
+    debugMonettaFixtureImage = null;
   });
 
   testWidgets('01 bienvenida', (tester) async {
@@ -137,28 +147,6 @@ void main() {
 
   testWidgets('04 seguimiento', (tester) async {
     final catalog = await _catalog();
-    // Product tiles use CachedNetworkImage. Scrolling them in leaves
-    // CacheStore's cleanup timer pending after the test. The hero itself
-    // is an asset, so the capture does not need the CDN photos.
-    catalog.products = [
-      for (final product in catalog.products)
-        Product(
-          id: product.id,
-          handle: product.handle,
-          title: product.title,
-          vendor: product.vendor,
-          productType: product.productType,
-          tags: product.tags,
-          variants: product.variants,
-          images: const [],
-          createdAt: product.createdAt,
-          updatedAt: product.updatedAt,
-          descriptionHtml: product.descriptionHtml,
-          collectionHandles: product.collectionHandles,
-          brandOverride: product.brandOverride,
-          categoryOverride: product.categoryOverride,
-        ),
-    ];
     await pumpClientGuide(
       tester,
       StoreScope(notifier: catalog, child: const HomeScreen()),
@@ -234,7 +222,7 @@ void main() {
     );
     await tester.tap(find.text('Abrir'));
     await tester.pumpAndSettle();
-    expect(find.text('Agregar a bolsa'), findsOneWidget);
+    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
     await captureClientGuide(tester, 'p-07-preview');
   });
 
@@ -249,7 +237,7 @@ void main() {
       ),
       size: _phone,
     );
-    expect(find.text('Agregar a bolsa'), findsOneWidget);
+    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
     await captureClientGuide(tester, 'p-08-producto');
   });
 

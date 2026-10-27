@@ -108,7 +108,6 @@ void main() {
   setUpAll(mockPathProvider);
 
   final subjects = <String, _Mount>{
-    'ficha Monetta': _mountMonetta,
     'ficha externa': _mountExternal,
   };
 
@@ -218,8 +217,17 @@ void main() {
   }
 
   group('HDR ficha Monetta actions', () {
-    testWidgets('HDR-03 the back button pops to the previous route',
+    testWidgets('HDR-01 the bar is the guide wordmark, not the product name',
         (tester) async {
+      final expected = await _mountMonetta(tester, 'Cartera');
+      expect(inAppBar(find.byType(MonettaWordmark)), findsOneWidget);
+      expect(headerTitle(), findsNothing);
+      expect(find.text(expected), findsOneWidget);
+      expect(find.byKey(const Key('home-menu-button')), findsOneWidget);
+      expect(find.byKey(const ValueKey('guide-search-button')), findsOneWidget);
+    });
+
+    testWidgets('HDR-03 inicio pops to the previous route', (tester) async {
       setPhoneView(tester);
       final store = await loadedStore();
       final product = syntheticProduct();
@@ -230,13 +238,7 @@ void main() {
       await tester.tap(find.text('ABRIR'));
       await tester.pumpAndSettle();
 
-      final back = find.byKey(kHeaderBackKey);
-      expect(back, findsOneWidget);
-      expect(inAppBar(find.byTooltip('Volver')), findsOneWidget);
-      expect(tester.getSize(back).width, greaterThanOrEqualTo(48));
-      expect(tester.getSize(back).height, greaterThanOrEqualTo(48));
-
-      await tester.tap(back);
+      await tester.tap(find.byKey(const Key('bottom-nav-home')));
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsNothing);
       expect(find.text('ABRIR'), findsOneWidget);
@@ -253,43 +255,26 @@ void main() {
       expect(heart, findsOneWidget);
       expect(tester.getSize(heart).width, greaterThanOrEqualTo(48));
       expect(tester.getSize(heart).height, greaterThanOrEqualTo(48));
-      expect(inAppBar(find.byTooltip('Guardar')), findsOneWidget);
+      expect(find.byTooltip('Guardar'), findsWidgets);
 
       await tester.tap(heart);
       await tester.pump();
       expect(store.wishlist.contains(product.id), isTrue);
-      expect(inAppBar(find.byTooltip('Quitar de guardados')), findsOneWidget);
-      expect(inAppBar(find.byTooltip('Guardar')), findsNothing);
+      expect(find.byTooltip('Quitar de guardados'), findsWidgets);
 
       await tester.tap(heart);
       await tester.pump();
       expect(store.wishlist.contains(product.id), isFalse);
-      expect(inAppBar(find.byTooltip('Guardar')), findsOneWidget);
+      expect(find.byTooltip('Guardar'), findsWidgets);
     });
 
-    testWidgets('HDR-03 the bag action opens the bag (kept as is)',
-        (tester) async {
+    testWidgets('HDR-03 the bag tab opens the bag', (tester) async {
       setPhoneView(tester);
       final store = await loadedStore();
       final product = singleVariantAssetProduct(store);
       await pumpFicha(tester, store, product.id);
 
-      final bag = inAppBar(find.byType(BagAction));
-      expect(bag, findsOneWidget);
-      expect(tester.getSize(bag).width, greaterThanOrEqualTo(48));
-      expect(tester.getSize(bag).height, greaterThanOrEqualTo(48));
-      expect(
-        inAppBar(
-          find.byWidgetPredicate(
-            (widget) =>
-                widget is Tooltip &&
-                (widget.message ?? '').startsWith('Mi bolsa'),
-          ),
-        ),
-        findsOneWidget,
-      );
-
-      await tester.tap(bag);
+      await tester.tap(find.byKey(const Key('bottom-nav-bag')));
       await tester.pumpAndSettle();
       expect(find.byType(BagScreen), findsOneWidget);
     });
@@ -308,8 +293,7 @@ void main() {
       await tester.tap(find.text('ABRIR'));
       await tester.pumpAndSettle();
 
-      expect(headerTitle(), findsOneWidget);
-      expect(tester.widget<Text>(headerTitle()).data, nameA);
+      expect(find.text(nameA), findsWidgets);
 
       final card = find.byWidgetPredicate(
         (widget) => widget is ProductCard && widget.product.id == other.id,
@@ -318,14 +302,11 @@ void main() {
       await tester.tap(card.first);
       await tester.pumpAndSettle();
 
-      expect(headerTitle(), findsOneWidget);
-      expect(tester.widget<Text>(headerTitle()).data, nameB);
-      expect(inAppBar(find.text(nameA)), findsNothing);
+      expect(find.text(nameB), findsWidgets);
 
-      await tester.tap(find.byKey(kHeaderBackKey));
+      await tester.tap(find.byKey(const Key('bottom-nav-home')));
       await tester.pumpAndSettle();
-      expect(headerTitle(), findsOneWidget);
-      expect(tester.widget<Text>(headerTitle()).data, nameA);
+      expect(find.text(nameA), findsWidgets);
     });
   });
 
@@ -390,7 +371,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(ProductScreen),
-          matching: find.byTooltip('Volver'),
+          matching: find.byKey(const Key('bottom-nav-home')),
         ),
       );
       await tester.pumpAndSettle();
@@ -421,7 +402,7 @@ void main() {
       await tester.tap(
         find.descendant(
           of: find.byType(ProductScreen),
-          matching: find.byTooltip('Volver'),
+          matching: find.byKey(const Key('bottom-nav-home')),
         ),
       );
       await tester.pumpAndSettle();

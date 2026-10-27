@@ -246,26 +246,6 @@ class MonettaSideMenu extends StatelessWidget {
                     label: 'Perfumes',
                     onTap: () => _select(context, onPerfumes),
                   ),
-                  _MenuLink(
-                    icon: Icons.brush_outlined,
-                    label: 'Maquillaje y skincare',
-                    onTap: () => _select(context, onBeauty),
-                  ),
-                  _MenuLink(
-                    icon: Icons.sell_outlined,
-                    label: 'Todas las marcas',
-                    onTap: () => _select(context, onCatalog),
-                  ),
-                  _MenuLink(
-                    icon: Icons.storefront_outlined,
-                    label: 'Mayoreo',
-                    onTap: () => _select(context, onPartner),
-                  ),
-                  _MenuLink(
-                    icon: Icons.chat_outlined,
-                    label: 'Contacto',
-                    onTap: () => _select(context, onSupport),
-                  ),
                   SizedBox(height: MonettaTokens.space[3]),
                   _ShareCard(
                     onShare: onShare == null
@@ -300,6 +280,28 @@ class MonettaSideMenu extends StatelessWidget {
                     ),
                   ],
                   SizedBox(height: MonettaTokens.space[3]),
+                  _MenuLink(
+                    icon: Icons.brush_outlined,
+                    label: 'Maquillaje y skincare',
+                    onTap: () => _select(context, onBeauty),
+                  ),
+                  _MenuLink(
+                    icon: Icons.sell_outlined,
+                    label: 'Todas las marcas',
+                    onTap: () => _select(context, onCatalog),
+                  ),
+                  _MenuLink(
+                    key: const Key('guide-menu-wholesale'),
+                    icon: Icons.storefront_outlined,
+                    label: 'Mayoreo',
+                    onTap: () => _select(context, onPartner),
+                  ),
+                  _MenuLink(
+                    key: const Key('guide-menu-contact'),
+                    icon: Icons.chat_outlined,
+                    label: 'Contacto',
+                    onTap: () => _select(context, onSupport),
+                  ),
                   _MenuLink(
                     icon: Icons.auto_stories_outlined,
                     label: 'Nuestra historia',
@@ -362,15 +364,6 @@ class _ShareCard extends StatelessWidget {
                   color: palette.inkMuted,
                 ),
               ),
-              SizedBox(height: MonettaTokens.space[1]),
-              Text(
-                'Enlace público: pendiente de contrato',
-                style: clientGuideStyle(
-                  context,
-                  MonettaTokens.navLabel,
-                  color: palette.goldText,
-                ),
-              ),
               SizedBox(height: MonettaTokens.space[2]),
               FilledButton(
                 key: const Key('side-menu-share-button'),
@@ -381,7 +374,7 @@ class _ShareCard extends StatelessWidget {
                   minimumSize: const Size.fromHeight(MonettaTokens.tapTarget),
                   shape: const StadiumBorder(),
                 ),
-                child: const Text('Compartir catálogo'),
+                child: const Text('COMPARTIR CATÁLOGO'),
               ),
             ],
           ),

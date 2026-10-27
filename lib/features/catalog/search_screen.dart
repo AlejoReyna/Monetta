@@ -12,12 +12,13 @@ import '../../app/product_telemetry.dart';
 import '../../app/shopper_copy.dart';
 import '../../data/normalize/facets.dart' show FacetValue;
 import '../../domain/product.dart';
-import '../../app/theme.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
+import '../navigation/guide_chrome.dart';
+import '../navigation/guide_drawer.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../product/quick_view.dart';
 import 'categories_screen.dart';
@@ -304,16 +305,15 @@ class _SearchScreenState extends State<SearchScreen> {
     final store = StoreScope.of(context);
     return Scaffold(
       backgroundColor: palette.canvas,
+      drawer: guideDrawer(context),
+      appBar: guideAppBar(
+        context,
+        onSearch: () => _focus.requestFocus(),
+      ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
-            SizedBox(
-              height: 48,
-              child: Stack(
-                alignment: Alignment.center,
-                children: const [MonettaWordmark(height: 18)],
-              ),
-            ),
             _SearchField(
               controller: _controller,
               focusNode: _focus,
@@ -322,7 +322,6 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: _onChanged,
               onSubmitted: (_) => _submit(),
               onClear: _clear,
-              onBack: () => Navigator.of(context).pop(),
             ),
             Divider(height: 0.5, color: palette.hairline),
             Expanded(
@@ -371,7 +370,7 @@ class _SearchScreenState extends State<SearchScreen> {
         ),
       ),
       bottomNavigationBar: MonettaBottomNavigation(
-        current: MonettaBottomDestination.home,
+        current: null,
         bagCount: store.bagQuantity,
         onSelected: (destination) {
           switch (destination) {
@@ -406,7 +405,6 @@ class _SearchField extends StatelessWidget {
     required this.onChanged,
     required this.onSubmitted,
     required this.onClear,
-    required this.onBack,
   });
 
   final TextEditingController controller;
@@ -416,7 +414,6 @@ class _SearchField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
   final VoidCallback onClear;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -428,28 +425,13 @@ class _SearchField extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        BoutiqueSpace.sm,
+        BoutiqueSpace.gutter,
         BoutiqueSpace.md,
-        BoutiqueSpace.lg,
+        BoutiqueSpace.gutter,
         BoutiqueSpace.md,
       ),
       child: Row(
         children: [
-          SizedBox(
-            width: BoutiqueSpace.tapTarget,
-            height: BoutiqueSpace.tapTarget,
-            child: IconButton(
-              key: const ValueKey('search-back-button'),
-              tooltip: 'Volver',
-              onPressed: onBack,
-              icon: Icon(
-                Icons.arrow_back_rounded,
-                size: 24,
-                color: palette.ink,
-              ),
-            ),
-          ),
-          const SizedBox(width: BoutiqueSpace.sm),
           Expanded(
             child: TextField(
               key: const ValueKey('search-query-field'),

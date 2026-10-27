@@ -22,7 +22,10 @@ import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/guide_art.dart';
 import '../checkout/checkout_screen.dart';
+import '../navigation/guide_chrome.dart';
+import '../navigation/guide_drawer.dart';
 import '../navigation/monetta_bottom_navigation.dart';
+import 'search_screen.dart';
 import 'brand_screen.dart';
 import 'catalog_browse_screen.dart';
 import 'categories_screen.dart';
@@ -152,7 +155,6 @@ class CollectionScreen extends StatefulWidget {
 class _CollectionScreenState extends State<CollectionScreen> {
   late _CollectionFilters _filters;
   final ScrollController _scroll = ScrollController();
-  bool _titleInBar = false;
 
   bool get _hasHero =>
       widget.heroImageUrl != null || widget.heroImageAsset != null;
@@ -166,23 +168,12 @@ class _CollectionScreenState extends State<CollectionScreen> {
   void initState() {
     super.initState();
     _filters = _initialFilters;
-    _scroll.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _scroll
-      ..removeListener(_onScroll)
-      ..dispose();
+    _scroll.dispose();
     super.dispose();
-  }
-
-  /// The destination's name belongs to the header. It only moves into the bar
-  /// once the header has scrolled away, so the title is never printed twice.
-  void _onScroll() {
-    if (!_scroll.hasClients) return;
-    final collapsed = _scroll.offset > 120;
-    if (collapsed != _titleInBar) setState(() => _titleInBar = collapsed);
   }
 
   void _scrollToGrid() {
@@ -352,29 +343,27 @@ class _CollectionScreenState extends State<CollectionScreen> {
 
     return Scaffold(
       backgroundColor: palette.canvas,
+      drawer: guideDrawer(context),
       body: CustomScrollView(
         controller: _scroll,
         slivers: [
           _CollectionAppBar(
-            title: widget.title,
-            showTitle: _titleInBar,
-            onPhoto: _hasHero,
             activeCount: activeCount,
             onFilters: _openFilterSheet,
-            heroImageUrl: widget.heroImageUrl,
-            heroImageAsset: widget.heroImageAsset,
-            description: widget.description,
-            ctaLabel: widget.ctaLabel ?? 'Ver la colección',
-            onCta: _scrollToGrid,
+            onSearch: () => unawaited(openSearch(context)),
           ),
-          if (!_hasHero)
-            SliverToBoxAdapter(
-              child: CatalogEditorialBanner(
-                title: widget.title,
-                description: widget.description,
-                imageAsset: kGuideStudioBanner,
-              ),
+          SliverToBoxAdapter(
+            child: CatalogEditorialBanner(
+              title: widget.title,
+              description: widget.description,
+              imageUrl: widget.heroImageUrl,
+              imageAsset: _hasHero
+                  ? widget.heroImageAsset
+                  : (widget.heroImageAsset ?? kGuideStudioBanner),
+              actionLabel: widget.ctaLabel ?? 'Ver la colección',
+              onAction: _scrollToGrid,
             ),
+          ),
           SliverToBoxAdapter(
             child: _CollectionToolbar(
               count: items.length,
@@ -449,69 +438,39 @@ class _ProductSliverGrid extends StatelessWidget {
 
 class _CollectionAppBar extends StatelessWidget {
   const _CollectionAppBar({
-    required this.title,
-    required this.showTitle,
-    required this.onPhoto,
     required this.activeCount,
     required this.onFilters,
-    required this.heroImageUrl,
-    required this.heroImageAsset,
-    required this.description,
-    required this.ctaLabel,
-    required this.onCta,
+    required this.onSearch,
   });
 
-  final String title;
-  final bool showTitle;
-  final bool onPhoto;
   final int activeCount;
   final VoidCallback onFilters;
-  final String? heroImageUrl;
-  final String? heroImageAsset;
-  final String? description;
-  final String ctaLabel;
-  final VoidCallback onCta;
+  final VoidCallback onSearch;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final foreground = onPhoto && !showTitle ? palette.onDark : palette.ink;
-    // The banner and the bar are sized from one number so the photograph can
-    // never be cropped by a taller bar than it was laid out for.
-    final bannerHeight = onPhoto ? catalogBannerHeight(context) : null;
-
+    final bar = guideAppBar(context, onSearch: onSearch);
     return SliverAppBar(
       pinned: true,
+      automaticallyImplyLeading: false,
       elevation: 0,
       scrolledUnderElevation: 0,
-      backgroundColor: onPhoto && !showTitle ? Colors.transparent : palette.bar,
+      backgroundColor: palette.bar,
       surfaceTintColor: Colors.transparent,
-      foregroundColor: foreground,
-      expandedHeight: bannerHeight,
-      flexibleSpace: bannerHeight == null
-          ? null
-          : FlexibleSpaceBar(
-              collapseMode: CollapseMode.pin,
-              background: CatalogEditorialBanner(
-                title: title,
-                description: description,
-                imageUrl: heroImageUrl,
-                imageAsset: heroImageAsset,
-                actionLabel: ctaLabel,
-                onAction: onCta,
-                height: bannerHeight,
-              ),
-            ),
-      title: showTitle
-          ? Text(title, style: boutiqueHeaderName(color: palette.ink))
-          : null,
+      foregroundColor: palette.ink,
+      centerTitle: true,
+      titleSpacing: 0,
+      leadingWidth: 56,
+      leading: bar.leading,
+      title: bar.title,
       actions: [
         _CollectionFilterIconButton(
           activeCount: activeCount,
           onPressed: onFilters,
-          color: foreground,
+          color: palette.ink,
         ),
-        const SizedBox(width: BoutiqueSpace.xs),
+        ...?bar.actions,
       ],
     );
   }

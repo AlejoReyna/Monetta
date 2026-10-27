@@ -51,11 +51,6 @@ import 'home_boutique_sections.dart';
 
 const int _kNewestCount = 8;
 
-/// Search field height plus the padding around it — used only to decide when
-/// the banner film has scrolled out of view.
-const double _kSearchFieldBlockHeight =
-    BoutiqueSpace.control + BoutiqueSpace.md + BoutiqueSpace.lg;
-
 /// The redesign's opening rhythm: what is new, then how to shop it, then the
 /// editorial tail. Applied only when the storefront still carries the bundled
 /// default order — see `_resolveSectionOrder`.
@@ -87,9 +82,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _scroll = ScrollController();
-  // Keep scroll-driven state out of the (image-heavy) home body. The app bar
-  // and hero playback each listen to only the value they need.
-  final ValueNotifier<double> _collapse = ValueNotifier<double>(0);
   final ValueNotifier<bool> _heroPlaying = ValueNotifier<bool>(true);
   Timer? _featuredRefreshTimer;
   double _heroHeight = double.infinity;
@@ -137,7 +129,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _collapse.dispose();
     _heroPlaying.dispose();
     _featuredRefreshTimer?.cancel();
     _scroll.dispose();
@@ -161,10 +152,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _onScroll() {
-    final next = (_scroll.offset / 120).clamp(0.0, 1.0);
-    if ((next - _collapse.value).abs() >= 0.01) {
-      _collapse.value = next;
-    }
     _syncHeroPlayback();
   }
 
@@ -381,7 +368,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         : const <HomeSectionId>[];
     final body = LayoutBuilder(
       builder: (context, constraints) {
-        _heroHeight = homeBannerHeight(context) + _kSearchFieldBlockHeight;
+        _heroHeight = homeBannerHeight(context);
         return ListView(
           controller: _scroll,
           padding: EdgeInsets.zero,
@@ -390,30 +377,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               key: const ValueKey('home-discovery-header'),
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ValueListenableBuilder<double>(
-                  valueListenable: _collapse,
-                  builder: (context, value, child) {
-                    final visibility = 1 -
-                        Curves.easeInCubic.transform(
-                          ((value - .08) / .78).clamp(0.0, 1.0),
-                        );
-                    return IgnorePointer(
-                      ignoring: visibility < .25,
-                      child: ExcludeSemantics(
-                        excluding: visibility < .25,
-                        child: Opacity(
-                          key: const ValueKey('home-search-bar-transition'),
-                          opacity: visibility,
-                          child: child,
-                        ),
-                      ),
-                    );
-                  },
-                  child: HomeSearchField(
-                    onTap: _openSearch,
-                    prompt: _searchPrompt,
-                  ),
-                ),
                 if (showHero)
                   ValueListenableBuilder<bool>(
                     valueListenable: _heroPlaying,
@@ -421,7 +384,9 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                       playing: playing,
                       onOpenNew: _openFullCatalog,
                     ),
-                  ),
+                  )
+                else
+                  const SizedBox(height: 1),
               ],
             ),
             for (var index = 0; index < opening.length; index++)
@@ -520,22 +485,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       },
     );
 
-    return ValueListenableBuilder<double>(
-      valueListenable: _collapse,
-      // This child is retained while the app bar collapses. A scroll tick
-      // therefore does not rebuild or relayout the full home content tree.
-      child: body,
-      builder: (context, collapse, child) {
-        return Scaffold(
-          extendBody: true,
-          backgroundColor: context.boutique.canvas,
-          drawer: drawer,
-          drawerScrimColor: context.monettaColors.scrim,
-          appBar: _buildAppBar(searchCollapse: showHero ? collapse : 1),
-          body: child,
-          bottomNavigationBar: bottomNavigation,
-        );
-      },
+    return Scaffold(
+      extendBody: true,
+      backgroundColor: context.boutique.canvas,
+      drawer: drawer,
+      drawerScrimColor: context.monettaColors.scrim,
+      appBar: _buildAppBar(),
+      body: body,
+      bottomNavigationBar: bottomNavigation,
     );
   }
 
@@ -607,6 +564,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           HomeSectionId.newProducts => HomeNewArrivalsRail(
               products: fresh,
               onOpenAll: _openFullCatalog,
+              asGrid: true,
             ),
           HomeSectionId.bagTypes => HomeShopByStyle(
               cards: content.bagTypes,
@@ -696,14 +654,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     unawaited(ThemeScope.of(context).setMode(nextMode));
   }
 
-  /// Compact header: menu, wordmark, and the search action that takes over
-  /// once the in-page field has scrolled away. Opaque from the first frame —
-  /// the banner is now an inset card, not a full-bleed hero to float over.
-  PreferredSizeWidget _buildAppBar({double searchCollapse = 1}) {
+  /// Compact header: menu, wordmark, and the search icon. The guide has no
+  /// in-page search field above the hero.
+  PreferredSizeWidget _buildAppBar() {
     final palette = context.boutique;
-    final searchProgress = Curves.easeOutCubic.transform(
-      ((searchCollapse - .34) / .66).clamp(0.0, 1.0),
-    );
     final dark = Theme.of(context).brightness == Brightness.dark;
     return AppBar(
       automaticallyImplyLeading: false,
@@ -730,21 +684,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
       title: const MonettaWordmark.appBar(),
       actions: [
-        IgnorePointer(
-          ignoring: searchProgress < .7,
-          child: ExcludeSemantics(
-            excluding: searchProgress < .7,
-            child: Opacity(
-              key: const ValueKey('home-appbar-search-transition'),
-              opacity: searchProgress,
-              child: IconButton(
-                key: const ValueKey('home-appbar-search-button'),
-                tooltip: 'Buscar',
-                onPressed: _openSearch,
-                icon: const Icon(Icons.search, size: 22),
-              ),
-            ),
-          ),
+        IconButton(
+          key: const ValueKey('home-appbar-search-button'),
+          tooltip: 'Buscar',
+          onPressed: _openSearch,
+          icon: const Icon(Icons.search, size: 22),
         ),
         const SizedBox(width: BoutiqueSpace.xs),
       ],
@@ -1011,11 +955,14 @@ class _BrandsSectionState extends State<_BrandsSection>
           padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
+          // Official wordmarks sit in the vertical middle of a square file.
+          // A wide cell plus fitWidth shows that band edge to edge instead of
+          // a speck of type inside an empty square.
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 2.45,
-            crossAxisSpacing: BoutiqueSpace.md,
-            mainAxisSpacing: BoutiqueSpace.md,
+            crossAxisCount: 4,
+            childAspectRatio: 3.6,
+            crossAxisSpacing: BoutiqueSpace.sm,
+            mainAxisSpacing: BoutiqueSpace.sm,
           ),
           itemCount: widget.brands.length,
           itemBuilder: (context, index) {
@@ -1050,16 +997,10 @@ class _BrandsSectionState extends State<_BrandsSection>
                           filter: CollectionFilter(brand: brand.brand),
                         ),
                       ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: BoutiqueSpace.lg,
-                          vertical: BoutiqueSpace.md,
-                        ),
-                        child: _HomeImage(
-                          imageUrl: brand.imageUrl,
-                          fallbackAsset: brand.fallbackAsset,
-                          fit: BoxFit.contain,
-                        ),
+                      child: _HomeImage(
+                        imageUrl: brand.imageUrl,
+                        fallbackAsset: brand.fallbackAsset,
+                        fit: BoxFit.fitWidth,
                       ),
                     ),
                   ),

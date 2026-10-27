@@ -389,8 +389,8 @@ void main() {
     );
 
     testWidgets(
-      'UI-THEME-04 (caracterización) Colección con foto: the bar stays '
-      'transparent over the photograph',
+      'UI-THEME-04 (objetivo) Colección con foto: the bar is solid '
+      '${_hex(_barGrey)} over the photograph',
       (tester) async {
         _phone(tester);
         final store = await _loadedStore();
@@ -407,7 +407,7 @@ void main() {
         );
         await _settle(tester);
 
-        expect(_topBarColor(tester), Colors.transparent);
+        expect(_topBarColor(tester), _barGrey);
       },
     );
   });

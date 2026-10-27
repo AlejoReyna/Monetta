@@ -14,6 +14,11 @@ import 'package:monetta_app/main.dart';
 import 'package:monetta_app/features/home/home_screen.dart';
 import '../../support/client_guide_capture.dart';
 
+Future<void> _pop(WidgetTester tester) async {
+  tester.state<NavigatorState>(find.byType(Navigator)).pop();
+  await tester.pumpAndSettle();
+}
+
 void main() {
   for (final (size, scale, brightness) in [
     (const Size(390, 1100), 1.0, Brightness.light),
@@ -58,8 +63,7 @@ void main() {
             tester.widget<CollectionScreen>(find.byType(CollectionScreen));
         expect(screen.title, category.title);
         expect(screen.filter, same(category.filter));
-        await tester.pageBack();
-        await tester.pumpAndSettle();
+        await _pop(tester);
         expect(tester.takeException(), isNull);
       }
       final all = find.byKey(const ValueKey('categories-all-brands'));
@@ -133,8 +137,7 @@ void main() {
     await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
     await tester.pumpAndSettle();
     expect(find.byType(CategoriesScreen), findsOneWidget);
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _pop(tester);
     for (final (label, screen) in [
       ('Categorías', CategoriesScreen),
       ('Mayoreo', WholesaleScreen),
@@ -150,8 +153,7 @@ void main() {
       await tester.tap(link);
       await tester.pumpAndSettle();
       expect(find.byType(screen), findsOneWidget);
-      await tester.pageBack();
-      await tester.pumpAndSettle();
+      await _pop(tester);
       expect(find.byType(HomeScreen), findsOneWidget);
     }
   });
@@ -184,25 +186,34 @@ void main() {
     await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
     await tester.pumpAndSettle();
     expect(find.byType(CategoriesScreen), findsOneWidget);
-    await tester.tap(find.byKey(const ValueKey('guide-nav-categories')));
+    await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
     await tester.pumpAndSettle();
-    await tester.pageBack();
-    await tester.pumpAndSettle();
+    await _pop(tester);
     expect(find.byType(CatalogBrowseScreen), findsOneWidget);
     // Open again and follow both service menu destinations, keeping the back stack.
     await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
     await tester.pumpAndSettle();
     for (final service in ['contact', 'wholesale']) {
-      await tester.tap(find.byIcon(Icons.menu));
+      await tester.tap(find.byKey(const Key('home-menu-button')));
       await tester.pumpAndSettle();
-      await tester.tap(find.byKey(ValueKey('guide-menu-$service')));
+      final item = find.byKey(ValueKey('guide-menu-$service'));
+      await tester.scrollUntilVisible(
+        item,
+        200,
+        scrollable: find
+            .descendant(
+              of: find.byType(Drawer),
+              matching: find.byType(Scrollable),
+            )
+            .first,
+      );
+      await tester.tap(item);
       await tester.pumpAndSettle();
       expect(
         find.byType(service == 'contact' ? ContactScreen : WholesaleScreen),
         findsOneWidget,
       );
-      await tester.pageBack();
-      await tester.pumpAndSettle();
+      await _pop(tester);
       expect(find.byType(CategoriesScreen), findsOneWidget);
     }
   });

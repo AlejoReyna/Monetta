@@ -87,7 +87,9 @@ void main() {
         await tester.tap(banner);
         await tester.pumpAndSettle();
         expect(find.byType(WholesaleScreen), findsOneWidget);
-        await tester.pageBack();
+        Navigator.of(
+          tester.element(find.byType(WholesaleScreen)),
+        ).pop();
         await tester.pumpAndSettle();
       }
       await tester.scrollUntilVisible(

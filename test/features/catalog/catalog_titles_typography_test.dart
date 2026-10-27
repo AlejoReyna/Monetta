@@ -250,17 +250,34 @@ void main() {
       expect(title.fontSize, MonettaTokens.screenTitle.compact);
     });
 
-    testWidgets('TYPE-01c the collapsed bar title is sans w600',
+    testWidgets(
+        'TYPE-01c the bar keeps the wordmark and the banner title stays serif',
         (tester) async {
       await pump(tester);
+      expect(
+        find.descendant(
+          of: find.byType(SliverAppBar),
+          matching: find.byType(MonettaWordmark),
+        ),
+        findsOneWidget,
+      );
       expect(
         find.descendant(
           of: find.byType(SliverAppBar),
           matching: find.text('Bolsas'),
         ),
         findsNothing,
-        reason: 'the bar shows no title until the header scrolls away',
       );
+      final title = _styleOf(
+        tester,
+        find.descendant(
+          of: find.byType(CatalogEditorialBanner),
+          matching: find.text('Bolsas'),
+        ),
+      );
+      _expectSerif(title, reason: 'banner title');
+      expect(title.fontSize, MonettaTokens.screenTitle.compact);
+      expect(stylesOfTitle(tester), hasLength(1));
 
       await tester.drag(
         find.byType(CustomScrollView),
@@ -268,23 +285,32 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      final barTitle = _styleOf(
-        tester,
+      expect(
         find.descendant(
           of: find.byType(SliverAppBar),
           matching: find.text('Bolsas'),
         ),
+        findsNothing,
+        reason: 'the guide bar keeps the wordmark after the banner scrolls',
       );
-      _expectSans(barTitle, reason: 'collapsed bar title');
-      expect(barTitle.fontSize, inInclusiveRange(18, 20), reason: 'bar title');
-      for (final style in stylesOfTitle(tester)) {
-        _expectSans(style, reason: 'every copy of the title');
-      }
     });
 
-    testWidgets('TYPE-01c the collapsed bar title over a photo is sans w600',
+    testWidgets('TYPE-01c a photo banner keeps its serif title out of the bar',
         (tester) async {
       await pump(tester, heroImageAsset: 'assets/images/campaign_olive.jpg');
+
+      final titles = stylesOfTitle(tester).toList();
+      expect(titles, hasLength(1));
+      _expectSerif(titles.single, reason: 'photo banner');
+      expect(titles.single.fontSize, MonettaTokens.screenTitle.compact);
+      expect(
+        find.descendant(
+          of: find.byType(SliverAppBar),
+          matching: find.text('Bolsas'),
+        ),
+        findsNothing,
+        reason: 'the collection name stays in the photograph',
+      );
 
       await tester.drag(
         find.byType(CustomScrollView),
@@ -292,35 +318,13 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // The banner (kept by the flexible space) and the bar title.
-      final titles = stylesOfTitle(tester).toList();
-      expect(titles.length, greaterThanOrEqualTo(2));
-      for (final style in titles) {
-        if (style.fontSize == MonettaTokens.screenTitle.compact) {
-          _expectSerif(style, reason: 'photo banner');
-        } else {
-          _expectSans(style, reason: 'compact bar title');
-        }
-      }
-
-      // The bar title is the copy that is not inside the banner.
-      final inBanner = tester
-          .widgetList<Text>(
-            find.descendant(
-              of: find.byType(CatalogEditorialBanner),
-              matching: find.text('Bolsas'),
-            ),
-          )
-          .toList();
-      final barTitles = tester
-          .widgetList<Text>(find.text('Bolsas'))
-          .where((text) => !inBanner.any((other) => identical(other, text)))
-          .toList();
-      expect(barTitles, hasLength(1), reason: 'one bar title over a photo');
       expect(
-        barTitles.single.style!.fontSize,
-        inInclusiveRange(18, 20),
-        reason: 'bar title over a photo',
+        find.descendant(
+          of: find.byType(SliverAppBar),
+          matching: find.text('Bolsas'),
+        ),
+        findsNothing,
+        reason: 'scrolling does not move the name into the wordmark bar',
       );
     });
   });
