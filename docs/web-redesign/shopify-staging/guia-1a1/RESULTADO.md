@@ -208,3 +208,49 @@ Vista previa del borrador de trabajo: <https://monetta-staging.myshopify.com/?pr
 - `monetta-menu-icon`, que quedó sin uso con el cajón nuevo y se elimina en F3.
 
 **Hojas comparativas:** `evidencia/sheets/f2/` (03 Inicio y 30 Menú) y `evidencia/sheets/f2-final/`.
+
+## F3. Colecciones, Categorías y Búsqueda — cerrada
+
+**Qué cambió**
+- **Colecciones** (láminas 06–20):
+  - en teléfono se ve el header de la guía, no la barra de página;
+  - la foto de la guía va a sangre completa. El título es el `h1`, en mayúsculas: rectas para marca, itálica ligera para silueta o categoría. La foto se elige como en `guideCollectionPhoto`: marca (lista de vendor), luego silueta (etiqueta), luego categoría (tipo de producto o colección propia);
+  - las pastillas: botón de filtros, Bolsas, Carteras, Accesorios, Relojes y Más, con la activa en café;
+  - «N productos» y «Ordenar por»;
+  - la rejilla con VER PRODUCTO.
+
+  En escritorio el hero baja a 3.4:1, con un máximo de 420 px, para que la primera fila de productos quede en la primera pantalla. Una lista sin foto de la guía conserva su título.
+- **Categorías** (lámina 29), sección `monetta-guia-categories`:
+  - título y línea de la app;
+  - «Colecciones» con los 7 iconos, en 3, 4 o 7 columnas según el ancho;
+  - «Marcas», sólo las que vende la tienda.
+
+  Se quitó de esa página la lista de colecciones del comerciante (en staging: «Automated Collection», «Home page», «Hydrogen»).
+- **Búsqueda** (lámina 05):
+  - «Búsquedas recientes»: las últimas 5, guardadas sólo en el navegador, cada una con botón para quitarla y anuncio del cambio;
+  - «Sugerencias»: Bolsas, Carteras, Relojes y Perfumes;
+  - los resultados de Shopify.
+- Se eliminó `monetta-menu-icon.liquid`, que quedó sin uso.
+
+**Comprobaciones**
+
+| Comprobación | Antes (árbol F2) | Después |
+|---|---|---|
+| `guia-checks` F3: hero, `h1` único, mayúsculas, recta o itálica, pastillas y la activa, botón de filtros de 48 px, conteo y orden, header en teléfono, título medido en Cormorant, Categorías, búsqueda y recientes (quitar uno lo borra del navegador) | 4/31, más 1 error | **F1–F3: 149/149** |
+| Validación completa | — | `checks.mjs` 315/315, teclado **150/150** (sin ningún defecto de foco), axe 18/18, regresiones 123/123, movimiento 4/4, navegación 31/31, journeys a 768, 1024 y 1440 completos, Theme Check sin hallazgos nuevos |
+| Layout | — | 223/223, tras adaptar el arnés (abajo) |
+| Journey 390 | — | 58/59: sólo la falla conocida de F4 |
+
+**Arnés adaptado al cambio de diseño**
+- `layout.mjs`: en una colección, la barra fija ahora es el header en todos los anchos. Las pruebas de la barra de página (76 px, y que crezca con un título largo) se movieron a la búsqueda, que la conserva.
+- `journey.mjs`: la flecha de la barra de página se prueba en la búsqueda. Se llega con un clic en un enlace, porque una URL escrita empieza la historia en 0.
+
+**Incidente:** `list-collections.json` se subió antes que su sección nueva, y el proxy mostró «Failed to Upload» en todas las rutas. Theme Check no puede verlo; se resolvió volviendo a guardar la plantilla.
+
+**Diferencias que quedan**
+- En teléfono, la búsqueda conserva su barra de página («← Buscar» con filtros) en lugar del header de la lámina: ahí vive el botón de filtros.
+- Los resultados van en 2 columnas, donde la lámina muestra una vista previa de 3.
+- Las pastillas navegan entre categorías. Para filtrar dentro de una marca hacen falta filtros por tipo o etiqueta en Search & Discovery (owner).
+- Tory Burch, Kate Spade y Marc Jacobs no tienen productos en staging: su página es la 404 de la tienda.
+
+**Hojas comparativas:** `evidencia/sheets/f3/` (05, 06–09, 14, 15, 17, 19, 20 y 29).

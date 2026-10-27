@@ -974,3 +974,303 @@ img.guia-menu__icon {
     grid-column: auto;
   }
 }
+
+/* ============================================================ F3 · Collection screens (slides 06–20): banner, pills, count and sort */
+.guia-collection-hero .guide-hero__title {
+  font-size: clamp(30px, 9vw, 64px);
+}
+
+@media (max-width: 767.98px) {
+  .guia-page-head .breadcrumbs {
+    display: none;
+  }
+
+  .listing--guia .guia-page-head {
+    padding-top: var(--space-2);
+  }
+}
+
+.guia-pills {
+  margin-top: var(--space-2);
+}
+
+.guia-pills__list {
+  display: flex;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.guia-pills__list::-webkit-scrollbar {
+  display: none;
+}
+
+/* A 40px pill inside a 48px target: the transparent border is part of the target, not of the pill. */
+.guia-pill {
+  position: relative;
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  padding: 0 16px;
+  border: 4px solid transparent;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-deep);
+  background-clip: padding-box;
+  color: var(--color-ink);
+  font-family: var(--font-guide-serif);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.guia-pill[aria-current='page'] {
+  background-color: var(--color-action-primary);
+  color: var(--color-on-action-primary);
+}
+
+.guia-pill--icon {
+  padding: 0;
+}
+
+.guia-pill__count {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  display: grid;
+  place-items: center;
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  border-radius: 9px;
+  background: var(--color-gold);
+  color: var(--color-dock-ink);
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.guia-pill:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: -2px;
+}
+
+.guia-listing-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
+.guia-listing-bar__count {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.guia-sort {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+
+.guia-sort__label {
+  font-size: 13px;
+  color: var(--color-ink);
+  white-space: nowrap;
+}
+
+.guia-sort__select {
+  min-width: 0;
+  max-width: 46vw;
+  min-height: var(--tap);
+  padding: 0 24px 0 6px;
+  border: 0;
+  border-radius: var(--radius-control);
+  background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16'%3E%3Cpath fill='%23211B16' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 4px center;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  appearance: none;
+  text-overflow: ellipsis;
+}
+
+.guia-sort__select:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 0;
+}
+
+@media (min-width: 768px) {
+  .guia-pills__list {
+    flex-wrap: wrap;
+    overflow: visible;
+  }
+
+  .guia-listing-bar__count,
+  .guia-sort__label,
+  .guia-sort__select {
+    font-size: 14px;
+  }
+
+  .guia-sort__select {
+    max-width: none;
+  }
+}
+
+/* ============================================================ F3 · «Categorías» (slide 29): icons three across, then the brands */
+.guia-categories {
+  padding-block: var(--space-4) var(--space-6);
+}
+
+.guia-categories__lede {
+  margin: var(--space-1) 0 0;
+  color: var(--color-ink-muted);
+}
+
+.guia-categories__block {
+  margin-top: var(--space-5);
+}
+
+.guia-categories__block > h2 {
+  margin: 0 0 var(--space-3);
+}
+
+.guia-categories__grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-category {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  aspect-ratio: 1.05;
+  border-radius: var(--radius-tile);
+  background: var(--color-surface-deep);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.guia-category__icon {
+  width: 56%;
+  height: auto;
+  max-height: 62%;
+  object-fit: contain;
+}
+
+.guia-category__label {
+  font-family: var(--font-guide-serif);
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.guia-category:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.guia-brands__grid--three {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+@media (min-width: 768px) {
+  .guia-categories__grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 880px;
+  }
+
+  .guia-brands__grid--three {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    max-width: 880px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .guia-categories__grid {
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    max-width: none;
+  }
+
+  .guia-brands__grid--three {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    max-width: none;
+  }
+}
+
+/* ============================================================ F3 · Search (slide 05): recent searches and suggestions */
+.guia-search {
+  display: grid;
+  gap: var(--space-4);
+  margin: var(--space-3) 0 var(--space-4);
+}
+
+.guia-search__title {
+  margin: 0 0 var(--space-1);
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+}
+
+.guia-search__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-search__recent {
+  display: flex;
+  align-items: center;
+}
+
+.guia-search__row {
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: var(--tap);
+  border-bottom: 0.5px solid var(--color-hairline);
+  color: var(--color-ink);
+  font-size: 15px;
+  text-decoration: none;
+}
+
+.guia-search__icon {
+  flex: none;
+  color: var(--color-ink-muted);
+}
+
+.guia-search__remove {
+  flex: none;
+}
+
+@media (min-width: 1024px) {
+  .guia-search {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+    max-width: 960px;
+  }
+}
+
+/* Desktop composition: a lower collection banner keeps the first row of products in the first screen. */
+@media (min-width: 1024px) {
+  .guia-collection-hero .guide-hero {
+    height: clamp(280px, calc(100vw / 3.4), 420px);
+  }
+}

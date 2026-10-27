@@ -352,10 +352,94 @@ async function f3() {
   }
 }
 
+/* ======================================================================== F4: vista rápida y producto */
+async function f4() {
+  for (const [w, h] of [[390, 844], [1440, 900]]) {
+    const { browser, page } = await launch({ width: w, height: h, injectCss });
+    try {
+      await open(page, '/products/bolso-coach-shoulder-negro-rectangular');
+      const product = await page.evaluate(() => ({
+        add: [...document.querySelectorAll('[data-add] [data-label]')].map((x) => x.textContent.trim()),
+        trust: [...document.querySelectorAll('.guia-trust li')].map((li) => li.textContent.replace(/\s+/g, ' ').trim()),
+      }));
+      run.check(`F4 ${w}: product buttons read «Agregar a bolsa» (the app's label)`, product.add.length > 0 && product.add.every((t) => t === 'Agregar a bolsa'), JSON.stringify(product.add));
+      run.check(`F4 ${w}: trust row Entrega estimada · Productos originales · Pago seguro`, product.trust.join('|') === 'Entrega estimada 3 a 5 días|Productos originales Garantía de autenticidad|Pago seguro Compra con confianza', JSON.stringify(product.trust));
+      if (w === 390) {
+        // The phone purchase dock's button gets the focus back when the bag sheet closes with Escape (defect found in F0).
+        await page.evaluate(async () => { await fetch('/cart/clear.js', { method: 'POST' }); });
+        await page.locator('[data-add]:visible').last().click();
+        await page.waitForSelector('#cart-sheet.is-open', { timeout: 15000 });
+        await page.waitForTimeout(400);
+        await page.keyboard.press('Escape');
+        await page.waitForFunction(() => !document.querySelector('#cart-sheet')?.open);
+        await page.waitForTimeout(400);
+        const focus = await page.evaluate(() => ({ add: !!document.activeElement?.matches('[data-add]'), visible: document.activeElement?.offsetParent !== null }));
+        run.check('F4 390: after adding from the purchase dock, Esc closes the bag and the focus returns to that button', focus.add && focus.visible, JSON.stringify(focus));
+      }
+
+      // Quick view from a card's «+» on a piece with several variants.
+      await open(page, '/collections/vendors?q=Coach');
+      const trigger = page.locator('[data-quick-view]').first();
+      run.check(`F4 ${w}: cards of pieces with several variants show the «+» that opens the quick view`, (await trigger.count()) === 1, `${await page.locator('[data-quick-view]').count()} triggers`);
+      const cardName = await trigger.evaluate((b) => b.closest('.card')?.querySelector('.card__name')?.textContent.trim());
+      await trigger.click();
+      await page.waitForSelector('#quick-view[open] [data-quick-view-root]', { timeout: 15000 });
+      await page.waitForTimeout(450);
+      const view = await page.evaluate(() => {
+        const d = document.getElementById('quick-view');
+        const panel = d.querySelector('.overlay__panel').getBoundingClientRect();
+        return {
+          name: d.querySelector('#quick-view-title')?.textContent.trim(),
+          addDisabled: d.querySelector('[data-quick-view-add]')?.disabled,
+          addLabel: d.querySelector('[data-quick-view-add]')?.textContent.trim(),
+          more: d.querySelector('a.btn')?.textContent.trim(),
+          photo: !!d.querySelector('[data-quick-view-photo]')?.naturalWidth,
+          groups: d.querySelectorAll('[data-quick-view-group]').length,
+          bottomGap: Math.round(window.innerHeight - panel.bottom),
+          centreGap: Math.round(Math.abs(panel.left + panel.width / 2 - window.innerWidth / 2)),
+        };
+      });
+      run.check(`F4 ${w}: quick view shows the piece (${cardName}) with its photo, «Agregar a bolsa» and «Ver producto»`, view.name === cardName && view.photo && view.addLabel === 'Agregar a bolsa' && view.more === 'Ver producto' && view.groups > 0, JSON.stringify(view));
+      run.check(`F4 ${w}: nothing can be added until a variant is chosen (the app's requireChoice)`, view.addDisabled === true, JSON.stringify({ addDisabled: view.addDisabled }));
+      run.check(`F4 ${w}: ${w < 768 ? 'a bottom sheet on phones' : 'a centred dialog on desktop'}`, w < 768 ? view.bottomGap <= 1 : view.centreGap <= 2 && view.bottomGap > 16, JSON.stringify({ bottomGap: view.bottomGap, centreGap: view.centreGap }));
+      await page.keyboard.press('Escape');
+      await page.waitForFunction(() => !document.getElementById('quick-view')?.open);
+      await page.waitForTimeout(400);
+      run.check(`F4 ${w}: Esc closes the quick view and returns the focus to its «+»`, await page.evaluate(() => !!document.activeElement?.matches('[data-quick-view]')));
+      // Choose the first available combination and add it.
+      await trigger.click();
+      await page.waitForSelector('#quick-view[open] [data-quick-view-root]', { timeout: 15000 });
+      const before = await page.evaluate(async () => (await (await fetch('/cart.js')).json()).item_count);
+      const picked = await page.evaluate(() => {
+        const root = document.querySelector('#quick-view [data-quick-view-root]');
+        const variants = JSON.parse(root.querySelector('[data-quick-view-variants]').textContent);
+        const v = variants.find((x) => x.available);
+        if (!v) return null;
+        root.querySelectorAll('[data-quick-view-group]').forEach((g, i) => {
+          const input = [...g.querySelectorAll('input')].find((x) => x.value === v.options[i]);
+          input.checked = true;
+          input.dispatchEvent(new Event('change', { bubbles: true }));
+        });
+        return { id: v.id, enabled: !root.querySelector('[data-quick-view-add]').disabled };
+      });
+      run.check(`F4 ${w}: choosing an available variant enables «Agregar a bolsa»`, picked?.enabled === true, JSON.stringify(picked));
+      if (picked?.enabled) {
+        await page.click('#quick-view [data-quick-view-add]');
+        await page.waitForSelector('#cart-sheet.is-open', { timeout: 15000 });
+        const after = await page.evaluate(async () => { const c = await (await fetch('/cart.js')).json(); return { count: c.item_count, ids: c.items.map((i) => i.variant_id) }; });
+        run.check(`F4 ${w}: the chosen variant reaches Shopify's cart and the bag opens`, after.count === before + 1 && after.ids.includes(picked.id), JSON.stringify({ before, after }));
+      }
+    } finally {
+      await browser.close();
+    }
+  }
+}
+
 try {
   if (phases.has('f1')) await f1();
   if (phases.has('f2')) await f2();
   if (phases.has('f3')) await f3();
+  if (phases.has('f4')) await f4();
   run.finish({ complete: true });
 } catch (error) {
   run.finish({ complete: false, error });

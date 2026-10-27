@@ -78,25 +78,30 @@ for (const [w, h] of viewports) {
     await page.waitForTimeout(250);
     let m = await measure(page);
     run.check(`${tag} collection: no horizontal overflow`, m.scrollWidth <= m.innerWidth, `${m.scrollWidth}/${m.innerWidth}`);
-    const topBar = phone ? m.pageBar : m.siteTop;
     if (short) {
       run.check(`${tag} collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)`, m.siteTop.position === 'static' && (!m.pageBar || m.pageBar.position === 'static') && m.pinnedTop === 0, `siteTop=${m.siteTop.position} pageBar=${m.pageBar?.position} pinnedTop=${m.pinnedTop}`);
       run.check(`${tag} collection: dock joins the page flow (static) and reserves nothing`, !m.dock || m.dock.display === 'none' || (m.dock.position === 'static' && m.pinnedBottom === 0), `dock=${m.dock?.position}/${m.dock?.display} pinnedBottom=${m.pinnedBottom}`);
       if (m.sidebar && m.sidebar.display !== 'none') run.check(`${tag} collection: filter sidebar is not sticky and not squeezed`, m.sidebar.position === 'static' && m.sidebar.height > 100, JSON.stringify(m.sidebar));
     } else {
-      const bar = phone ? m.pageBar : m.siteTop;
+      // Since the guide pass (F3) collections keep the global header at every width; the page bar lives on search and the bag.
+      const bar = m.siteTop;
       run.check(`${tag} collection: pinned chrome stays pinned above 480px of height (sticky/fixed)`, ['sticky', 'fixed'].includes(bar.position), `${bar.position}`);
       run.check(`${tag} collection: --pinned-top equals the real bottom edge of the pinned bar`, near(m.pinnedTop, bar.bottom, 1), `${m.pinnedTop} vs ${bar.bottom}`);
       run.check(`${tag} collection: scroll-padding-top = reserve + 16`, near(m.scrollPaddingTop, m.pinnedTop + 16, 0.5), `${m.scrollPaddingTop}`);
-      if (phone) {
-        run.check(`${tag} collection: phone page bar is 76px tall with a one-line title`, near(m.pageBar.height, 76, 0.75), `${m.pageBar.height}`);
-        run.check(`${tag} collection: phone global header is replaced by the page bar`, m.siteTop.height < 1 || (await page.locator('#site-header').isHidden()));
-      }
+      if (phone) run.check(`${tag} collection: phones keep the guide's global header, no page bar`, m.siteTop.height > 1 && !m.pageBar, `header ${m.siteTop.height} pageBar ${Boolean(m.pageBar)}`);
       if (phone && m.dock) run.check(`${tag} collection: floating dock is fixed and --pinned-bottom equals its measured height`, m.dock.position === 'fixed' && near(m.pinnedBottom, m.dock.height + 0, 1.5), `dock ${m.dock.height} reserve ${m.pinnedBottom}`);
     }
 
-    // The reserve is measured, not assumed: a title that wraps grows the bar and the reserve follows it.
+    // The reserve is measured, not assumed: a title that wraps grows the bar and the reserve follows it. Measured on search,
+    // which keeps the phone page bar.
     if (phone && !short) {
+      await page.goto(`${baseUrl}/search?q=bolso&type=product`, { waitUntil: 'load' });
+      await settle(page);
+      await page.evaluate(() => scrollTo(0, 800));
+      await page.waitForTimeout(250);
+      const ms = await measure(page);
+      run.check(`${tag} search: phone page bar is 76px tall with a one-line title`, !!ms.pageBar && near(ms.pageBar.height, 76, 0.75), `${ms.pageBar?.height}`);
+      run.check(`${tag} search: phone global header is replaced by the page bar`, ms.siteTop.height < 1 || (await page.locator('#site-header').isHidden()));
       const grown = await page.evaluate(async () => {
         const title = document.querySelector('[data-page-bar] .page-bar__title');
         const before = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pinned-top'));
@@ -105,7 +110,7 @@ for (const [w, h] of viewports) {
         const bar = document.querySelector('[data-page-bar]').getBoundingClientRect();
         return { before, after: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pinned-top')), bar: bar.bottom, height: bar.height };
       });
-      run.check(`${tag} collection: a two-line title grows the bar and the measured reserve follows (not a fixed 76)`, grown.height > 76.5 && near(grown.after, grown.bar, 1), JSON.stringify(grown));
+      run.check(`${tag} search: a two-line title grows the bar and the measured reserve follows (not a fixed 76)`, grown.height > 76.5 && near(grown.after, grown.bar, 1), JSON.stringify(grown));
     }
 
     /* ------------------------------------------------ product */

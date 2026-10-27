@@ -16,7 +16,8 @@
   assign has_page_bar = false
   assign dock_mode = 'nav'
   assign dock_active = ''
-  if t == 'collection' or t == 'search' or t == 'cart'
+  # The client guide keeps the global header on collections (slides 06–20); search and the bag keep their page bar.
+  if t == 'search' or t == 'cart'
     assign has_page_bar = true
   endif
   if t == 'product'
