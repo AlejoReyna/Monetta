@@ -74,7 +74,7 @@
     {%- endif -%}
 
     {%- capture results_html -%}
-      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.' %}
+      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', view_button: true %}
     {%- endcapture -%}
     {% render 'monetta-listing-layout',
       filters: collection.filters,

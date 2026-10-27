@@ -1,0 +1,320 @@
+/* The client guide «BORRADOR DE APP» (30 slides) on the web, as the app of PR #33 reads it. Loaded last, so a guide
+ * component wins over the earlier layers it reuses. One block per component, each naming the app widget it follows
+ * (lib/features/boutique/guide_art.dart, client_guide_sections.dart, catalog/product_tile.dart on that branch).
+ * Record: docs/web-redesign/shopify-staging/guia-1a1/RESULTADO.md. */
+
+/* ============================================================ Tokens (Shopify side only; the shared manifest is untouched) */
+:root {
+  /* kGuideSerifFamily: Cormorant Garamond (OFL) stands in for the guide's licensed Reglarik, for text on photographs and
+     banner buttons. Screen titles keep the app's own serif (Playfair Display). */
+  --font-guide-serif: 'Cormorant Garamond', Georgia, 'Times New Roman', serif;
+  /* kGuideScriptFamily: Mrs Saint Delafield (OFL) stands in for Above the Beyond Script («fácil», «mayoreo», «Comparte»). */
+  --font-guide-script: 'Mrs Saint Delafield', 'Snell Roundhand', 'Apple Chancery', cursive;
+  /* GuidePillButton.fill / .labelColor: light gold pill, dark brown label (9:1). */
+  --color-guide-pill: #cdb48d;
+  --color-guide-pill-ink: #2b2118;
+  /* GuideScrim: cream wash #FBF6EE on the text side of a photograph (0.9 → 0.6 → 0 at 0 / 42 % / 78 %). */
+  --guide-scrim: 251 246 238;
+  /* guideCollectionPhoto heroes: owner photographs about 2.4:1. Phone height = width / 1.6 (200–340), as the app. */
+  --guide-hero-min: 200px;
+  --guide-hero-max: 340px;
+}
+
+/* ============================================================ GuidePillButton («VER CATÁLOGO», «CONOCE MÁS», «REGISTRARME») */
+.guide-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: var(--tap);
+  min-height: var(--tap);
+  color: var(--color-guide-pill-ink);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.guide-pill__label {
+  display: inline-block;
+  padding: 0.45em 1.4em;
+  border-radius: var(--radius-pill);
+  background: var(--color-guide-pill);
+  font-family: var(--font-guide-serif);
+  font-size: clamp(12px, 3.3vw, 16px);
+  font-weight: 500;
+  line-height: 1.1;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: filter var(--dur-snap) var(--ease);
+}
+
+.guide-pill:hover .guide-pill__label {
+  filter: brightness(0.95);
+}
+
+.guide-pill:focus-visible {
+  outline: none;
+}
+
+.guide-pill:focus-visible .guide-pill__label {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* ============================================================ Guide type: serif on photographs and the script accent */
+.guide-serif {
+  font-family: var(--font-guide-serif);
+  font-weight: 400;
+}
+
+.guide-serif--italic {
+  font-style: italic;
+}
+
+/* guideAccentStyle: the script in gold text; --underlined draws the guide's gold stroke («mayoreo», «confianza.»). */
+.guide-script {
+  font-family: var(--font-guide-script);
+  font-weight: 400;
+  font-style: normal;
+  line-height: 1.05;
+  color: var(--color-accent-text);
+}
+
+.guide-script--underlined {
+  text-decoration: underline;
+  text-decoration-color: var(--color-gold);
+  text-decoration-thickness: 1.6px;
+  text-underline-offset: 0.12em;
+}
+
+/* ============================================================ GuideHero / GuideScrim (collection, brand, Mayoreo, Contacto) */
+.guide-hero {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: clamp(var(--guide-hero-min), calc(100vw / 1.6), var(--guide-hero-max));
+  overflow: hidden;
+  background: var(--color-surface-deep);
+}
+
+.guide-hero__photo {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: var(--hero-focus, 50% 50%);
+}
+
+.guide-hero__scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background: linear-gradient(to right, rgb(var(--guide-scrim) / 0.9) 0%, rgb(var(--guide-scrim) / 0.6) 42%, rgb(var(--guide-scrim) / 0) 78%);
+}
+
+.guide-hero--text-right .guide-hero__scrim {
+  background: linear-gradient(to left, rgb(var(--guide-scrim) / 0.9) 0%, rgb(var(--guide-scrim) / 0.6) 42%, rgb(var(--guide-scrim) / 0) 78%);
+}
+
+.guide-hero__copy {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-2);
+  width: min(58%, 560px);
+  padding-block: var(--space-4);
+  padding-inline: var(--edge-l) 0;
+  color: var(--color-ink);
+  text-align: start;
+}
+
+.guide-hero--text-right {
+  justify-content: flex-end;
+}
+
+.guide-hero--text-right .guide-hero__copy {
+  align-items: flex-end;
+  padding-inline: 0 var(--edge-r);
+  text-align: end;
+}
+
+.guide-hero__eyebrow {
+  margin: 0;
+  font-family: var(--font-guide-serif);
+  font-size: clamp(14px, 4vw, 20px);
+  letter-spacing: 0.12em;
+}
+
+/* The campaign type role (32 / 40 / 52) in the guide serif; brands upright, silhouettes and categories italic light. */
+.guide-hero__title {
+  margin: 0;
+  font-family: var(--font-guide-serif);
+  font-size: var(--type-campaign-size);
+  font-weight: 400;
+  line-height: 1.02;
+  letter-spacing: 0.02em;
+  overflow-wrap: anywhere;
+}
+
+.guide-hero__title--caps {
+  text-transform: uppercase;
+}
+
+.guide-hero__title--italic {
+  font-style: italic;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.guide-hero__accent {
+  margin: -0.15em 0 0;
+  font-size: calc(var(--type-campaign-size) * 1.45);
+}
+
+.guide-hero__body {
+  margin: 0;
+  max-width: 34ch;
+  font-family: var(--font-guide-serif);
+  font-size: clamp(14px, 4vw, 20px);
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.18;
+}
+
+.guide-hero__body .guide-hero__body-accent {
+  color: var(--color-accent-text);
+  text-decoration: underline;
+  text-decoration-color: var(--color-gold);
+  text-decoration-thickness: 1.4px;
+}
+
+/* A hero that is itself a link: the whole photograph is the target, the pill stays visual. */
+.guide-hero__link {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+}
+
+.guide-hero__link:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: -4px;
+}
+
+@media (min-width: 768px) {
+  .guide-hero {
+    height: clamp(280px, calc(100vw / 2.4), 560px);
+  }
+
+  .guide-hero__copy {
+    width: min(50%, 620px);
+    padding-block: var(--space-6);
+  }
+}
+
+/* ============================================================ ClientGuideServices (four services with the guide's icons) */
+.guide-services {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-3) var(--space-2);
+  margin: 0;
+  padding: var(--space-4) var(--space-2);
+  list-style: none;
+  background: var(--color-canvas);
+  text-align: center;
+}
+
+.guide-services__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  min-width: 0;
+}
+
+.guide-services__icon {
+  width: clamp(40px, 13vw, 72px);
+  height: clamp(40px, 13vw, 72px);
+  object-fit: contain;
+}
+
+.guide-services__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 12.5px;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--color-ink);
+}
+
+.guide-services__body {
+  margin: 0;
+  font-family: var(--font-sans);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.25;
+  color: var(--color-ink-muted);
+}
+
+@media (min-width: 768px) {
+  .guide-services {
+    max-width: var(--content-max);
+    margin-inline: auto;
+    padding: var(--space-6) var(--gutter);
+  }
+
+  .guide-services__icon {
+    width: 72px;
+    height: 72px;
+  }
+
+  .guide-services__title {
+    font-size: 17px;
+  }
+
+  .guide-services__body {
+    font-size: 13px;
+  }
+}
+
+/* At large text sizes two across, so the captions keep their words whole (the app's large-text rule). */
+@media (max-width: 359px) {
+  .guide-services {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+/* ============================================================ TileViewProductButton: «VER PRODUCTO» on collection cards */
+/* Visual only: the whole card is already the link, so the pill adds no second tab stop and no second name. */
+.card__view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 40px;
+  margin-top: var(--space-2);
+  border-radius: var(--radius-pill);
+  background: var(--color-action-primary);
+  color: var(--color-on-action-primary);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: background-color var(--dur-snap) var(--ease);
+}
+
+.card__link:hover .card__view {
+  background: var(--color-action-dark);
+}
+
+@media (min-width: 1024px) {
+  .card__view {
+    height: 44px;
+    font-size: 13px;
+  }
+}

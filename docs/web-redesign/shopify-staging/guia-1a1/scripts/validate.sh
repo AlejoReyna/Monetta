@@ -30,7 +30,7 @@ echo "# validate.sh $LABEL $(date -u +%FT%TZ) base=$B head=$(git rev-parse --sho
 step build-check node design-system/build.mjs --check
 step port-parity node tools/style-guideline-theme/port-css.mjs --check
 step theme-check-diff node $D/scripts/theme-check-diff.mjs --out=$OUT/theme-check
-[ -f $G/scripts/guia-checks.mjs ] && step guia-checks node $G/scripts/guia-checks.mjs --base-url=$B --name=$LABEL-guia-checks
+[ -f $G/scripts/guia-checks.mjs ] && step guia-checks node $G/scripts/guia-checks.mjs --base-url=$B --phases=${GUIA_PHASES:-f1,f2} --name=$LABEL-guia-checks
 step dl-checks node $D/scripts/checks.mjs --base-url=$B --flows --name=$LABEL-dl-checks
 for vp in 390x844 768x1024 1024x768 1440x900; do
   step journey-$vp node $E/journey.mjs --base-url=$B --w=${vp%x*} --h=${vp#*x}

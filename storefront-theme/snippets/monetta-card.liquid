@@ -9,6 +9,7 @@
   @param {boolean} [eager] - Eager-load the photo (first row only).
   @param {boolean} [quick_add] - Show the "+" for single-variant products that can be bought (default true).
   @param {string} [sizes] - The sizes attribute of the photo's slot.
+  @param {boolean} [view_button] - The collection grid's «VER PRODUCTO» pill (TileViewProductButton): visual only, inside the card's link.
 {%- enddoc -%}
 {%- liquid
   assign density = density | default: 'grid'
@@ -69,6 +70,7 @@
         {%- endif -%}
         {%- unless in_stock -%}<span class="visually-hidden">, agotado</span>{%- endunless -%}
       </p>
+      {%- if view_button -%}<span class="card__view" aria-hidden="true">Ver producto</span>{%- endif -%}
     </div>
   </a>
   <div class="card__actions">
