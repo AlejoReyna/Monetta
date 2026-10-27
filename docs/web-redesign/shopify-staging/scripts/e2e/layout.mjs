@@ -161,7 +161,8 @@ for (const [w, h] of viewports) {
       run.check(`${tag} recommendations: rail rendered`, rail.tiles >= 2, `${rail.tiles} tiles`);
       run.check(`${tag} recommendations: tiles have equal heights`, rail.equalHeights);
       if (phone) {
-        run.check(`${tag} recommendations (phone): heading Inter 17px/600`, rail.headingSize === '17px' && rail.headingWeight === '600' && /Inter/.test(rail.headingFamily), JSON.stringify([rail.headingSize, rail.headingWeight, rail.headingFamily]));
+        // Section-title role since 22 Oct (DESIGN_SPEC §3): Playfair 400, 23px on phones. It was Inter 17/600 before.
+        run.check(`${tag} recommendations (phone): heading is the section title, Playfair 23px/400`, rail.headingSize === '23px' && rail.headingWeight === '400' && /Playfair/.test(rail.headingFamily), JSON.stringify([rail.headingSize, rail.headingWeight, rail.headingFamily]));
         run.check(`${tag} recommendations (phone): tile width min(52vw, 260px)`, near(rail.tileWidth, Math.min(w * 0.52, 260), 1), `${rail.tileWidth} vs ${Math.min(w * 0.52, 260)}`);
         run.check(`${tag} recommendations (phone): 4:5 photo that fills the frame (no inset) and 12px gap`, near(rail.ratio, 0.8, 0.01) && rail.mediaMargin === '0px' && near(rail.gap, 12, 0.5), JSON.stringify({ ratio: rail.ratio, margin: rail.mediaMargin, gap: rail.gap }));
         run.check(`${tag} recommendations (phone): name clamps at two lines`, rail.clamp === '2' && rail.nameLines <= 2, JSON.stringify([rail.clamp, rail.nameLines]));

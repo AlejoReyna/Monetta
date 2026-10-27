@@ -313,9 +313,14 @@ try {
     const heldChange = new Promise((resolve) => {
       releaseChange = resolve;
     });
+    let continued;
+    const changeContinued = new Promise((resolve) => {
+      continued = resolve;
+    });
     const holdChange = async (route) => {
       await heldChange;
       await route.continue();
+      continued();
     };
     await page.route('**/cart/change.js', holdChange);
     await lineEl.locator('[data-step="1"]').click();
@@ -323,6 +328,8 @@ try {
     const lockedWhile = await page.evaluate(() => ({ locked: document.documentElement.hasAttribute('data-cart-locked'), buttons: [...document.querySelectorAll('[name="checkout"]')].map((b) => b.disabled) }));
     run.check('bag: while the + request is held every checkout button is disabled', lockedWhile.locked && lockedWhile.buttons.length >= 1 && lockedWhile.buttons.every(Boolean), JSON.stringify(lockedWhile));
     releaseChange();
+    // Unrouting while the held handler is still running marks its route handled, and its continue() then throws.
+    await changeContinued;
     await page.unroute('**/cart/change.js', holdChange);
     await page.waitForFunction((k) => document.querySelector(`[data-line="${k}"] .stepper__value`)?.textContent.trim() === '2', first.key);
     let c2 = await cartJson();

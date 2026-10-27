@@ -17,6 +17,7 @@ import path from 'node:path';
 import { Run, chromium, browserPath, parseArgs, settle, target } from './lib.mjs';
 import { proxyHealth } from './proxy-health.mjs';
 import { Intercept, gate, goto, money, previous, sleep, useOldAssets, esc } from './regress-lib.mjs';
+const SHOPIFY_DEFAULT_MENU_TITLE = /^(home|catalog|contact|search|shop all|about us|blog|news|products|collections)$/i;
 
 const args = parseArgs();
 const baseUrl = args['base-url'] || 'http://127.0.0.1:9292';
@@ -730,7 +731,9 @@ await step('p8', 'declared language of the ported pages', async () => {
       };
     });
     A('P8 [staging] the page\'s own text is Spanish (more Spanish than English function words outside fragments marked with another language)', facts.spanishWords > facts.englishWords * 3, JSON.stringify({ es: facts.spanishWords, en: facts.englishWords }));
-    A('P8 [staging] fragments Shopify writes in the store\'s language are marked with it: menu titles and the accelerated checkout', !facts.storeLang || /^es/i.test(facts.storeLang) || (facts.navLinks.length > 0 && facts.navLinks.every(([, lang]) => lang === facts.storeLang) && facts.pay === facts.storeLang), JSON.stringify({ storeLang: facts.storeLang, nav: facts.navLinks, pay: facts.pay, payText: facts.payText }));
+    // Since 22 Oct the theme writes Spanish for Shopify's untouched default menu titles (snippets/monetta-label.liquid), so a
+    // menu title only needs the store language when it is still one of those English defaults.
+    A('P8 [staging] fragments Shopify writes in the store\'s language are marked with it: menu titles and the accelerated checkout', !facts.storeLang || /^es/i.test(facts.storeLang) || (facts.navLinks.length > 0 && facts.navLinks.every(([text, lang]) => lang === facts.storeLang || !SHOPIFY_DEFAULT_MENU_TITLE.test(text)) && facts.pay === facts.storeLang), JSON.stringify({ storeLang: facts.storeLang, nav: facts.navLinks, pay: facts.pay, payText: facts.payText }));
   } finally {
     await context.close();
   }

@@ -1,5 +1,6 @@
 // Shared harness for the theme's browser checks. Every run identifies store, theme, code state, command, time and
-// result, and is written to its own folder under docs/web-redesign/shopify-staging/runs/ (never over an earlier run).
+// result, and is written to its own folder under docs/web-redesign/shopify-staging/runs/, or under $MONETTA_RUNS_DIR when set
+// (never over an earlier run).
 // A run that ends early is saved as result.partial.json with the checks it did reach, never as a complete result.
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
@@ -64,7 +65,7 @@ export class Run {
     this.name = name;
     this.startedAt = new Date();
     const stamp = this.startedAt.toISOString().replace(/[:.]/g, '-');
-    this.dir = path.join(staging, 'runs', `${stamp}-${name}`);
+    this.dir = path.join(process.env.MONETTA_RUNS_DIR || path.join(staging, 'runs'), `${stamp}-${name}`);
     mkdirSync(this.dir, { recursive: true });
     this.checks = [];
     this.notes = [];

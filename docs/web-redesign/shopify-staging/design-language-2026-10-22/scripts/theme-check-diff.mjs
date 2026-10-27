@@ -16,7 +16,8 @@ if (!out || !path.isAbsolute(out)) throw new Error('--out=<absolute folder> is r
 mkdirSync(out, { recursive: true });
 
 const parse = (text) => JSON.parse(text.split('\n').filter((l) => !/^<claude-code-hint\b/.test(l)).join('\n'));
-const flatten = (list) => list.flatMap((e) => e.offenses.map((o) => ({ file: path.relative(theme, e.path), check: o.check, severity: o.severity, message: o.message, row: o.start_row })));
+const flatten = (list) => list.flatMap((e) => e.offenses.map((o) => ({ file: e.path.replace(/^.*\/storefront-theme\//, ''), check: o.check, severity: o.severity, message: o.message, row: o.start_row })));
+// Keyed by the path inside storefront-theme/, so a baseline taken in another checkout still matches.
 const key = (o) => `${o.file}|${o.check}|${o.severity}|${o.message}`;
 const count = (items) => items.reduce((m, o) => m.set(key(o), (m.get(key(o)) || 0) + 1), new Map());
 
