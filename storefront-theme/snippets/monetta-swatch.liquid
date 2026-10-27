@@ -1,0 +1,2 @@
+{%- if swatch.image -%}<img class="option-swatch" src="{{ swatch.image | image_url: width: 64 }}" width="20" height="20" alt="" loading="lazy">
+{%- elsif swatch.color -%}<span class="option-swatch" style="--swatch-color:{{ swatch.color }}" aria-hidden="true"></span>{%- endif -%}

@@ -28,7 +28,7 @@
         <label for="sort-select">Ordenar</label>
         <select class="select" id="sort-select" name="sort_by" data-sort-select>
           {%- for option in sort_options -%}
-            <option value="{{ option.value }}"{% if option.value == sort_by %} selected{% endif %}>{{ option.name | escape }}</option>
+            <option value="{{ option.value }}"{% if option.value == sort_by %} selected{% endif %}>{% render 'monetta-label', kind: 'sort', option: option, text_only: true %}</option>
           {%- endfor -%}
         </select>
         <noscript><button type="submit" class="btn btn--quiet btn--sm">Ordenar</button></noscript>
@@ -47,7 +47,8 @@
             {%- endif -%}
           {%- else -%}
             {%- for value in filter.active_values -%}
-              <li><a class="chip chip--removable" href="{{ value.url_to_remove }}" aria-label="Quitar filtro: {{ value.label | escape }}">{{ value.label | escape }}{% render 'monetta-icon', name: 'close', size: 16 %}</a></li>
+              {%- capture chip_label -%}{% render 'monetta-label', kind: 'filter_value', filter: filter, value: value, text_only: true %}{%- endcapture -%}
+              <li><a class="chip chip--removable" href="{{ value.url_to_remove }}" aria-label="Quitar filtro: {{ chip_label | strip }}">{{ chip_label | strip }}{% render 'monetta-icon', name: 'close', size: 16 %}</a></li>
             {%- endfor -%}
           {%- endif -%}
         {%- endfor -%}
@@ -87,7 +88,7 @@
             {%- for option in sort_options -%}
               <label class="check">
                 <input type="radio" name="sort_by" value="{{ option.value }}"{% if option.value == sort_by %} checked{% endif %}>
-                <span>{{ option.name | escape }}</span>
+                <span>{% render 'monetta-label', kind: 'sort', option: option %}</span>
               </label>
             {%- endfor -%}
           </fieldset>

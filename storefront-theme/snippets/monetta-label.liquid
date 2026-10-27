@@ -1,0 +1,124 @@
+{%- doc -%}
+  Spanish wording for the labels Shopify generates or seeds in the store's language, which the theme presents but does not own.
+  Only Shopify's own untouched defaults are translated, by a stable key: menu links still titled as Shopify created them (Home,
+  Catalog, Contact, Search…), sort options by their value, the availability and price filters by their parameter, and the
+  published policies by their URL. Anything a merchant typed (a renamed menu link, a metafield filter label, a product option)
+  is printed as it is, marked with the store language so a screen reader pronounces it correctly.
+  The real fix for merchant-managed labels is in Shopify Admin (Navigation, Languages, Policies); see
+  docs/web-redesign/DESIGN_SPEC.md §1, "Language".
+
+  @param {string} kind - 'link', 'sort', 'filter', 'filter_value', 'policy' or 'option'.
+  @param {object} [link] - kind 'link': a link object.
+  @param {object} [option] - kind 'sort': a sort option ({ name, value }).
+  @param {object} [filter] - kind 'filter' and 'filter_value': the filter.
+  @param {object} [value] - kind 'filter_value': the filter value.
+  @param {object} [policy] - kind 'policy': a shop policy.
+  @param {string} [name] - kind 'option': a product option name.
+  @param {boolean} [text_only] - Print plain text without the language span (inside <option>, attributes, JSON).
+{%- enddoc -%}
+{%- liquid
+  assign label = ''
+  assign original = ''
+  case kind
+    when 'link'
+      assign original = link.title
+      assign key = link.title | strip | downcase
+      case key
+        when 'home', 'inicio'
+          assign label = 'Inicio'
+        when 'catalog', 'catalogue', 'all products', 'shop all'
+          assign label = 'Catálogo'
+        when 'contact', 'contact us'
+          assign label = 'Contacto'
+        when 'search'
+          assign label = 'Buscar'
+        when 'about', 'about us'
+          assign label = 'Nosotros'
+        when 'news', 'blog'
+          assign label = 'Noticias'
+        when 'faq', 'faqs'
+          assign label = 'Preguntas frecuentes'
+      endcase
+    when 'sort'
+      assign original = option.name
+      case option.value
+        when 'manual'
+          assign label = 'Destacados'
+        when 'best-selling'
+          assign label = 'Más vendidos'
+        when 'title-ascending'
+          assign label = 'Alfabético: A–Z'
+        when 'title-descending'
+          assign label = 'Alfabético: Z–A'
+        when 'price-ascending'
+          assign label = 'Precio: de menor a mayor'
+        when 'price-descending'
+          assign label = 'Precio: de mayor a menor'
+        when 'created-descending'
+          assign label = 'Más recientes'
+        when 'created-ascending'
+          assign label = 'Más antiguos'
+        when 'relevance'
+          assign label = 'Relevancia'
+      endcase
+    when 'filter'
+      assign original = filter.label
+      case filter.param_name
+        when 'filter.v.availability'
+          assign label = 'Disponibilidad'
+        when 'filter.v.price'
+          assign label = 'Precio'
+        when 'filter.p.vendor'
+          assign label = 'Marca'
+        when 'filter.p.product_type'
+          assign label = 'Tipo de producto'
+      endcase
+    when 'filter_value'
+      assign original = value.label
+      if filter.param_name == 'filter.v.availability'
+        if value.value == '1'
+          assign label = 'En existencia'
+        elsif value.value == '0'
+          assign label = 'Agotado'
+        endif
+      endif
+    when 'policy'
+      assign original = policy.title
+      case policy.url
+        when shop.privacy_policy.url
+          assign label = 'Aviso de privacidad'
+        when shop.refund_policy.url
+          assign label = 'Política de reembolso'
+        when shop.shipping_policy.url
+          assign label = 'Política de envíos'
+        when shop.terms_of_service.url
+          assign label = 'Términos del servicio'
+        when shop.subscription_policy.url
+          assign label = 'Política de suscripciones'
+      endcase
+    when 'option'
+      assign original = name
+      assign key = name | strip | downcase
+      if key contains 'color' or key contains 'colour'
+        assign label = 'Color'
+      else
+        case key
+          when 'size', 'talla'
+            assign label = 'Talla'
+          when 'material'
+            assign label = 'Material'
+          when 'style', 'estilo'
+            assign label = 'Estilo'
+          when 'denominations', 'denomination'
+            assign label = 'Monto'
+        endcase
+      endif
+  endcase
+-%}
+{%- if label != blank -%}
+  {{- label -}}
+{%- elsif text_only -%}
+  {{- original | escape -}}
+{%- else -%}
+  <span {% render 'monetta-store-lang' %}>{{ original | escape }}</span>
+{%- endif -%}

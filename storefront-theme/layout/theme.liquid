@@ -1,35 +1,29 @@
+{%- comment -%}
+  Monetta shell for the pages that are not built from Monetta sections: templates the merchant composed with Atelier sections
+  in the editor (page.contact, page.mayoreo, page.como-vender) and the pages Shopify renders without a template of their own
+  (policies), which always use this layout. Everything a shopper navigates with is the Monetta one, as in layout/monetta.liquid:
+  head (snippets/monetta-head.liquid), header and footer groups, phone dock, bag sheet, saved list and live regions. Atelier's
+  stylesheets and scripts are still loaded for the sections inside <main>, and snippets/monetta-atelier-bridge.liquid maps their
+  fonts, colour schemes and shapes to the Monetta tokens, so leaving the shopping pages never lands on a different-looking store.
+  Atelier's own header, footer and header-height script are no longer rendered here; its search dialog still is, for Atelier
+  blocks that open it.
+{%- endcomment -%}
+{%- liquid
+  assign t = template.name | default: request.page_type
+  assign is_policy = false
+  if request.page_type == 'policy'
+    assign is_policy = true
+  endif
+-%}
 <!doctype html>
-<html
-  {% if request.design_mode %}
-    class="shopify-design-mode"
-  {% endif %}
-  lang="{{ request.locale.iso_code }}"
->
+<html lang="es-MX"{% if request.design_mode %} class="shopify-design-mode"{% endif %}>
   <head>
-    {%- if settings.favicon != blank -%}
-      <link
-        rel="icon"
-        type="image/png"
-        href="{{ settings.favicon | image_url: width: 32, height: 32 }}"
-      >
-    {%- endif -%}
-
-    {% comment %} This a way to wait for main content to load when navigating to a new page so that the view transitions can work consistently {% endcomment %}
-    {% if settings.transition_to_main_product or settings.page_transition_enabled %}
-      <link
-        rel="expect"
-        href="#MainContent"
-        blocking="render"
-        id="view-transition-render-blocker"
-      >
-    {% endif %}
-
-    {%- render 'meta-tags' -%}
     {%- render 'stylesheets' -%}
-    {%- render 'fonts' -%}
     {%- render 'scripts' -%}
     {%- render 'theme-styles-variables' -%}
     {%- render 'color-schemes' -%}
+    {% render 'monetta-head' %}
+    {% render 'monetta-atelier-bridge' %}
 
     {% if request.design_mode %}
       {%- render 'theme-editor' -%}
@@ -38,99 +32,45 @@
     {{ content_for_header }}
   </head>
 
-  <body class="page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}">
-    {% render 'skip-to-content-link', href: '#MainContent', text: 'accessibility.skip_to_text' %}
-    <div id="header-group">
-      {% sections 'header-group' %}
+  <body class="mw mw-atelier has-dock page-width-{{ settings.page_width }} card-hover-effect-{{ settings.card_hover_effect }}" data-template="{{ t }}" data-dock-active="">
+    <a class="skip-link" href="#MainContent">Saltar al contenido</a>
+
+    <div id="page">
+      <div class="site-top" id="site-top" data-template="{{ t }}">
+        {%- sections 'monetta-header-group' -%}
+      </div>
+      <main
+        id="MainContent"
+        class="content-for-layout"
+        tabindex="-1"
+        data-page-transition-enabled="false"
+        data-product-transition="false"
+        data-template="{{ template }}"
+      >
+        {%- if is_policy -%}
+          {%- comment -%}The policy text is the store's, written in the store's language: it is marked as such.{%- endcomment -%}
+          <div class="container page-shell policy-shell"{% render 'monetta-store-lang' %}>
+            <div class="page-prose rte">{{ content_for_layout }}</div>
+          </div>
+        {%- else -%}
+          {{ content_for_layout }}
+        {%- endif -%}
+      </main>
+      <footer class="site-footer" id="site-footer">
+        {%- sections 'monetta-footer-group' -%}
+      </footer>
+      {%- render 'monetta-dock', dock_active: '' -%}
     </div>
 
-    <script>
-      // Inline header height and menu style calculations to prevent layout shift
-      // Note: Updates in calculateHeaderGroupHeight(), updateTransparentHeaderOffset() and setHeaderMenuStyle() utilities.js should be kept in sync with this function
-      (function setHeaderHeighCustomProperties() {
-        /*
-         * Header calculation functions for maintaining CSS variables
-         * Mimic calculateHeaderGroupHeight() in utilities.js
-         */
-        const header = document.querySelector('header-component');
-        const headerGroup = document.querySelector('#header-group');
-        const hasHeaderSection = headerGroup?.querySelector('.header-section');
-
-        if (!header || !headerGroup) return;
-
-        const headerTopRow = header.querySelector('.header__row--top');
-        const headerHeight = header.offsetHeight;
-
-        // Calculate the total height of the header group
-        let headerGroupHeight = 0;
-        const children = headerGroup.children;
-        for (let i = 0; i < children.length; i++) {
-          const element = children[i];
-          if (element === header || !(element instanceof HTMLElement)) continue;
-          headerGroupHeight += element.offsetHeight;
-        }
-
-        // Check for transparent header special case
-        if (header.hasAttribute('transparent') && header.parentElement?.nextElementSibling) {
-          headerGroupHeight += headerHeight;
-        }
-
-        // Set CSS variables
-        document.body.style.setProperty('--header-height', `${headerHeight}px`);
-        document.body.style.setProperty('--header-group-height', `${headerGroupHeight}px`);
-
-        if (headerTopRow) {
-          window.requestAnimationFrame(function () {
-            document.body.style.setProperty('--top-row-height', `${headerTopRow.offsetHeight}px`);
-          });
-        }
-
-        /**
-         * Updates CSS custom properties for transparent header offset calculation
-         * Mimic updateTransparentHeaderOffset() in utilities.js
-         */
-
-        if (!hasHeaderSection || !header?.hasAttribute('transparent')) {
-          document.body.style.setProperty('--transparent-header-offset-boolean', '0');
-          return;
-        }
-
-        const hasImmediateSection = hasHeaderSection.nextElementSibling?.classList.contains('shopify-section');
-
-        const shouldApplyOffset = !hasImmediateSection ? '1' : '0';
-        document.body.style.setProperty('--transparent-header-offset-boolean', shouldApplyOffset);
-      })();
-
-      (function setHeaderMenuStyle() {
-        const headerComponent = document.querySelector('#header-component');
-        if (headerComponent) {
-          const isTouchDevice = 'ontouchstart' in window && navigator.maxTouchPoints > 0;
-          const overflowList = headerComponent?.querySelector('overflow-list');
-          const hasReachedMinimum = overflowList && overflowList.hasAttribute('minimum-reached');
-          headerComponent.dataset.menuStyle = isTouchDevice || hasReachedMinimum ? 'drawer' : 'menu';
-        }
-      })();
-    </script>
-
-    <main
-      id="MainContent"
-      class="content-for-layout"
-      role="main"
-      data-page-transition-enabled="{{ settings.page_transition_enabled }}"
-      data-product-transition="{{ settings.transition_to_main_product }}"
-      data-template="{{ template }}"
-    >
-      {{ content_for_layout }}
-    </main>
-
-    <footer>
-      {% sections 'footer-group' %}
-    </footer>
-
+    {%- section 'monetta-cart-sheet' -%}
+    {% render 'monetta-saved-products' %}
+    {%- comment -%}Atelier's search dialog stays available to Atelier blocks on merchant-built pages that open it.{%- endcomment -%}
     {% render 'search-modal' %}
-
     {% if settings.quick_add or settings.mobile_quick_add %}
       {% render 'quick-add-modal' %}
     {% endif %}
+    <div id="toast-root"></div>
+    <div class="visually-hidden" id="status-live" role="status" aria-live="polite" aria-atomic="true"></div>
+    <div class="visually-hidden" id="alert-live" role="alert" aria-live="assertive" aria-atomic="true"></div>
   </body>
 </html>

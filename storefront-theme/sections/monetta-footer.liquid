@@ -21,7 +21,7 @@
           {%- if block.settings.heading != blank -%}<h2>{{ block.settings.heading | escape }}</h2>{%- endif -%}
           <ul role="list">
             {%- for link in linklists[block.settings.menu].links -%}
-              <li><a href="{{ link.url }}"{% render 'monetta-store-lang' %}>{{ link.title }}</a></li>
+              <li><a href="{{ link.url }}">{% render 'monetta-label', kind: 'link', link: link %}</a></li>
             {%- endfor -%}
           </ul>
         </div>
@@ -33,7 +33,7 @@
     <span>
       {%- for policy in shop.policies -%}
         {%- unless forloop.first %} · {% endunless -%}
-        <a href="{{ policy.url }}">{{ policy.title }}</a>
+        <a href="{{ policy.url }}">{% render 'monetta-label', kind: 'policy', policy: policy %}</a>
       {%- endfor -%}
     </span>
   </div>
