@@ -36,7 +36,7 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.text('Bolsas'), findsOneWidget);
+    expect(find.text('BOLSAS'), findsOneWidget);
     expect(find.textContaining('piezas ordenadas por'), findsNothing);
     expect(find.text('Más nuevas'), findsNothing);
     expect(find.text('extracted'), findsNothing);
@@ -179,7 +179,15 @@ void main() {
     await tester.tap(find.byKey(const Key('collection-filter-button')));
     await tester.pumpAndSettle();
     expect(find.text('Filtrar y ordenar'), findsOneWidget);
-    expect(find.text('Ordenar por'), findsOneWidget);
+    // «Ordenar por» also labels the toolbar link under the banner; the sheet's
+    // own section is the one inside `collection-filter-sort`.
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('collection-filter-sort')),
+        matching: find.text('Ordenar por'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Disponibilidad'), findsOneWidget);
     expect(find.byKey(const Key('collection-filter-sort')), findsOneWidget);
     expect(

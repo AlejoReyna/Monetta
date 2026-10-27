@@ -6,6 +6,7 @@ import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
@@ -215,14 +216,23 @@ void main() {
       return store;
     }
 
+    // «Bolsas» is also the label of a category pill under the banner; the
+    // title is the one inside the banner.
     Iterable<TextStyle> stylesOfTitle(WidgetTester tester) => tester
-        .widgetList<Text>(find.text('Bolsas'))
+        .widgetList<Text>(
+          find.descendant(
+            of: find.byType(CatalogEditorialBanner),
+            matching: find.text('Bolsas'),
+          ),
+        )
         .map((text) => text.style!)
         .toList();
 
     testWidgets('TYPE-01c typographic banner title is serif w400, 26',
         (tester) async {
-      await pump(tester);
+      // A bag collection now resolves to a guide photograph; the studio still
+      // is passed explicitly to keep exercising the plain banner title.
+      await pump(tester, heroImageAsset: kGuideStudioBanner);
 
       final title = _styleOf(
         tester,
@@ -253,7 +263,7 @@ void main() {
     testWidgets(
         'TYPE-01c the bar keeps the wordmark and the banner title stays serif',
         (tester) async {
-      await pump(tester);
+      await pump(tester, heroImageAsset: kGuideStudioBanner);
       expect(
         find.descendant(
           of: find.byType(SliverAppBar),

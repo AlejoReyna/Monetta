@@ -25,10 +25,14 @@ class ContactChannel {
     required this.title,
     required this.subtitle,
     required this.uri,
+    this.iconAsset,
   });
 
   final String key;
   final IconData icon;
+
+  /// Gold line icon of the guide. The Material [icon] is the fallback.
+  final String? iconAsset;
   final String title;
   final String subtitle;
   final Uri uri;
@@ -45,14 +49,17 @@ List<ContactChannel> monettaContactChannels({
     ContactChannel(
       key: 'whatsapp',
       icon: Icons.chat_outlined,
+      iconAsset: kGuideIconContactWhatsApp,
       title: 'WhatsApp',
-      subtitle: kWhatsAppNumberDisplay,
+      // The guide shows the number with its country code.
+      subtitle: '+52 $kWhatsAppNumberDisplay',
       uri: conciergeWhatsAppUri(),
     ),
     for (var i = 0; i < monettaWhatsAppGroups.length; i++)
       ContactChannel(
         key: 'grupo-${i + 1}',
         icon: Icons.groups_outlined,
+        iconAsset: kGuideIconContactGroup,
         title: 'Grupo ${i + 1}',
         subtitle: 'Únete a nuestro grupo de WhatsApp',
         uri: Uri.parse(monettaWhatsAppGroups[i]),
@@ -60,6 +67,7 @@ List<ContactChannel> monettaContactChannels({
     ContactChannel(
       key: 'facebook-group',
       icon: Icons.facebook,
+      iconAsset: kGuideIconContactGroup,
       title: 'Grupo de Facebook',
       subtitle: 'Únete a nuestra comunidad',
       uri: Uri.parse(monettaFacebookGroup),
@@ -83,12 +91,20 @@ List<ContactChannel> monettaContactChannels({
         ContactChannel(
           key: 'social-${link.id}',
           icon: _socialIcon(link.id),
+          iconAsset: _socialAsset(link.id),
           title: link.label,
           subtitle: 'Síguenos',
           uri: link.uri!,
         ),
   ];
 }
+
+String? _socialAsset(String id) => switch (id) {
+      'instagram' => kGuideIconInstagram,
+      'facebook' => kGuideIconFacebook,
+      'tiktok' => kGuideIconTikTok,
+      _ => null,
+    };
 
 IconData _socialIcon(String id) => switch (id) {
       'instagram' => Icons.camera_alt_outlined,
@@ -145,21 +161,38 @@ class ContactScreen extends StatelessWidget {
           c.key.startsWith('grupo-') ||
           c.key == 'facebook-group',
     );
-    final socials = channels.where((c) => c.key.startsWith('social-'));
-    final secondary = channels.where(
-      (c) => c.key == 'mayoreo' || c.key == 'sitio',
-    );
+    // The guide lists Instagram, Facebook and TikTok, in that order.
+    const socialOrder = ['instagram', 'facebook', 'tiktok'];
+    int socialRank(ContactChannel c) {
+      final index = socialOrder.indexOf(c.key.substring('social-'.length));
+      return index < 0 ? socialOrder.length : index;
+    }
+
+    final socials = channels.where((c) => c.key.startsWith('social-')).toList()
+      ..sort((a, b) => socialRank(a).compareTo(socialRank(b)));
     return ClientGuideScaffold(
       current: null,
       body: ListView(
         key: const ValueKey('contact-scroll'),
         padding: EdgeInsets.zero,
         children: [
-          const GuideHero(
-            asset: kGuideStudioBanner,
-            title: 'Tu boutique y proveedor de confianza.',
+          GuideHero(
+            asset: kGuideContactHero,
+            imageAlignment: const Alignment(0.25, 0),
+            textWidthFactor: 0.52,
+            height: guidePhotoHeroHeight(context),
+            titleSize: (MediaQuery.sizeOf(context).width * 0.075).clamp(
+              24.0,
+              40.0,
+            ),
+            subtitleSize: (MediaQuery.sizeOf(context).width * 0.032).clamp(
+              11.0,
+              16.0,
+            ),
+            title: 'Tu boutique y proveedor de',
+            titleAccent: 'confianza.',
             subtitle:
-                'Productos originales de marcas que amas, importados desde Estados Unidos y envíos a todo México.',
+                'Bienvenida a nuestro paraíso de modelos originales de marcas que amas, importados y con envíos garantizados a todo México.',
           ),
           Padding(
             padding: EdgeInsets.all(MonettaTokens.space[4]),
@@ -208,50 +241,15 @@ class ContactScreen extends StatelessWidget {
                     'Redes sociales: enlaces pendientes.',
                     style: clientGuideStyle(context, MonettaTokens.cardLabel),
                   ),
-                Wrap(
-                  alignment: WrapAlignment.center,
-                  spacing: MonettaTokens.space[2],
-                  runSpacing: MonettaTokens.space[2],
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     for (final channel in socials)
-                      TextButton.icon(
-                        key: ValueKey('contact-channel-${channel.key}'),
-                        onPressed: () => _open(context, channel.uri),
-                        icon: Icon(
-                          channel.icon,
-                          size: MonettaTokens.logoHeight,
-                        ),
-                        label: Text(
-                          channel.title,
-                          style: clientGuideStyle(
-                            context,
-                            MonettaTokens.cardLabel,
-                          ),
-                        ),
+                      _SocialIconButton(
+                        channel: channel,
+                        onTap: () => _open(context, channel.uri),
                       ),
                   ],
-                ),
-                SizedBox(height: MonettaTokens.space[4]),
-                Text(
-                  'Más ayuda',
-                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
-                ),
-                SizedBox(height: MonettaTokens.space[2]),
-                for (final channel in secondary) ...[
-                  _ChannelRow(
-                    channel: channel,
-                    onTap: () => _open(context, channel.uri),
-                  ),
-                  SizedBox(height: MonettaTokens.space[1]),
-                ],
-                SizedBox(height: MonettaTokens.space[3]),
-                Text(
-                  'Horario, correo y teléfono de voz: pendientes de confirmación.',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.cardLabel,
-                    color: palette.inkMuted,
-                  ),
                 ),
               ],
             ),
@@ -289,14 +287,10 @@ class _ChannelRow extends StatelessWidget {
             padding: EdgeInsets.all(MonettaTokens.space[2]),
             child: Row(
               children: [
-                CircleAvatar(
-                  radius: MonettaTokens.space[4],
-                  backgroundColor: palette.action,
-                  child: Icon(
-                    channel.icon,
-                    size: MonettaTokens.logoHeight,
-                    color: palette.onAction,
-                  ),
+                _ChannelIcon(
+                  asset: channel.iconAsset,
+                  fallback: channel.icon,
+                  size: 52,
                 ),
                 SizedBox(width: MonettaTokens.space[3]),
                 Expanded(
@@ -330,6 +324,73 @@ class _ChannelRow extends StatelessWidget {
                 ),
               ],
             ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Gold line icon of the guide. A channel without artwork keeps a Material
+/// glyph in the same gold.
+class _ChannelIcon extends StatelessWidget {
+  const _ChannelIcon({
+    required this.asset,
+    required this.fallback,
+    required this.size,
+  });
+
+  final String? asset;
+  final IconData fallback;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final glyph = Icon(
+      fallback,
+      size: size * 0.6,
+      color: context.boutique.goldText,
+    );
+    return SizedBox(
+      width: size,
+      height: size,
+      child: asset == null
+          ? Center(child: glyph)
+          : Image.asset(
+              asset!,
+              fit: BoxFit.contain,
+              excludeFromSemantics: true,
+              errorBuilder: (_, __, ___) => Center(child: glyph),
+            ),
+    );
+  }
+}
+
+/// A social network as a gold icon on its own, without text. The label is
+/// for assistive technology only.
+class _SocialIconButton extends StatelessWidget {
+  const _SocialIconButton({required this.channel, required this.onTap});
+
+  final ContactChannel channel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      label: channel.title,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: InkWell(
+        key: ValueKey('contact-channel-${channel.key}'),
+        customBorder: const CircleBorder(),
+        onTap: onTap,
+        child: Padding(
+          padding: EdgeInsets.all(MonettaTokens.space[1]),
+          child: _ChannelIcon(
+            asset: channel.iconAsset,
+            fallback: channel.icon,
+            size: 56,
           ),
         ),
       ),

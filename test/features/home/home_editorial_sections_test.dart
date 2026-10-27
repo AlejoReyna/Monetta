@@ -13,7 +13,8 @@ import 'package:monetta_app/features/partner/partner_hub_screen.dart';
 import 'package:monetta_app/main.dart';
 
 void main() {
-  testWidgets('all monetta.mx brands render with their logo artwork', (
+  testWidgets(
+      'the brands grid shows the catalog brands with their logo artwork', (
     tester,
   ) async {
     await tester.binding.setSurfaceSize(const Size(390, 900));
@@ -49,14 +50,25 @@ void main() {
     );
     await tester.pump();
 
-    expect(find.byKey(const ValueKey('home-brand-coach')), findsOneWidget);
-    expect(find.byKey(const ValueKey('home-brand-rhode')), findsOneWidget);
+    // The bundled catalog carries five brands, all with a bundled logo; the
+    // other configured brands (Rhode, Olaplex...) have no product behind them.
+    for (final handle in [
+      'coach',
+      'guess-1',
+      'michael-kors',
+      'steve-madden',
+      'tommy-hilfiger',
+    ]) {
+      expect(find.byKey(ValueKey('home-brand-$handle')), findsOneWidget);
+    }
+    expect(find.byKey(const ValueKey('home-brand-rhode')), findsNothing);
+    expect(find.byKey(const ValueKey('home-brand-olalplex')), findsNothing);
     expect(
       find.descendant(
         of: brandsSection,
         matching: find.byType(SlideTransition),
       ),
-      findsNWidgets(12),
+      findsNWidgets(5),
     );
     expect(
       find.byKey(const ValueKey('home-brand-entrance-coach')),
@@ -68,7 +80,7 @@ void main() {
     );
     expect(
       find.descendant(of: brandsSection, matching: find.byType(Image)),
-      findsNWidgets(12),
+      findsNWidgets(5),
     );
   });
 

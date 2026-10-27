@@ -27,10 +27,8 @@ void main() {
         textScale: scale,
         brightness: brightness,
       );
-      expect(
-        find.text('Tu boutique y proveedor de confianza.'),
-        findsOneWidget,
-      );
+      expect(find.text('Tu boutique y proveedor de'), findsOneWidget);
+      expect(find.text('confianza.'), findsOneWidget);
       if (scale == 1) {
         await captureClientGuide(
           tester,
@@ -49,10 +47,9 @@ void main() {
         ...monettaWhatsAppGroups.map(Uri.parse),
         Uri.parse(monettaFacebookGroup),
       ]);
-      await tester.scrollUntilVisible(
-        find.textContaining('Horario, correo'),
-        300,
-      );
+      // «Más ayuda» and the schedule note are not in the guide.
+      expect(find.text('Más ayuda'), findsNothing);
+      expect(find.textContaining('Horario, correo'), findsNothing);
       expect(tester.takeException(), isNull);
     });
   }

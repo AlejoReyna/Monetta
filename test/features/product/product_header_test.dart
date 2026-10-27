@@ -393,7 +393,7 @@ void main() {
         ),
       );
       await tester.pump();
-      expect(find.text('Bolsas'), findsOneWidget);
+      expect(find.text('BOLSAS'), findsOneWidget);
 
       await tester.tap(find.byType(ProductCard).first);
       await tester.pumpAndSettle();
@@ -407,7 +407,7 @@ void main() {
       );
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsNothing);
-      expect(find.text('Bolsas'), findsOneWidget);
+      expect(find.text('BOLSAS'), findsOneWidget);
     });
   });
 }

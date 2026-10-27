@@ -86,6 +86,10 @@ Future<void> captureClientGuide(WidgetTester tester, String name) async {
   await _precacheImages(tester);
   await tester.pump();
   await _expandToFullContent(tester);
+  // Expanding builds the rows that were below the fold; their stills have
+  // not been decoded yet and would be captured blank.
+  await _precacheImages(tester);
+  await tester.pump();
   // The home [RepaintBoundary] does not include modal routes. Paint the
   // render view so a quick-view sheet is in the file.
   final renderView = tester.binding.renderViews.first;

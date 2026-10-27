@@ -19,6 +19,7 @@ import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
 import 'package:monetta_app/domain/home_content.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/catalog/categories_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/search_history.dart';
@@ -141,7 +142,7 @@ void main() {
       StoreScope(notifier: catalog, child: const HomeScreen()),
       size: _phone,
     );
-    expect(find.text('COLECCIÓN'), findsOneWidget);
+    expect(find.text('desde México'), findsOneWidget);
     await captureClientGuide(tester, 'p-03-inicio');
   });
 
@@ -160,26 +161,41 @@ void main() {
         )
         .first;
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('home-followup-hero')),
+      find.byKey(const ValueKey('home-section-offers')),
       400,
       scrollable: scroll,
     );
     await tester.pumpAndSettle();
-    expect(find.textContaining('TUS MODELOS'), findsOneWidget);
+    // The guide no longer carries the «Lo más nuevo» hero.
+    expect(find.byKey(const ValueKey('home-followup-hero')), findsNothing);
+    expect(find.textContaining('TUS MODELOS'), findsNothing);
     await captureClientGuide(tester, 'p-04-seguimiento');
   });
 
   testWidgets('05 busqueda', (tester) async {
     final catalog = await _catalog();
+    // Recents of the shopper, then the field is typed into: the guide's
+    // state (recents with a clock, suggestions, three small products and a
+    // bordered «Ver todo»), not the submitted results page.
+    final history = SearchHistory();
+    await history.remember('Bolso coach mini');
+    await history.remember('Bolso coach beige');
+    await history.remember('Bolso coach negro');
     await pumpClientGuide(
       tester,
       StoreScope(
         notifier: catalog,
-        child: SearchScreen(initialQuery: 'Bolso', history: SearchHistory()),
+        child: SearchScreen(history: history),
       ),
       size: _phone,
     );
-    expect(find.text('Inicio'), findsWidgets);
+    await tester.enterText(
+      find.byKey(const ValueKey('search-query-field')),
+      'Bolso coach',
+    );
+    await tester.pumpAndSettle();
+    expect(find.text('Búsquedas recientes'), findsOneWidget);
+    expect(find.text('Sugerencias'), findsOneWidget);
     await captureClientGuide(tester, 'p-05-busqueda');
   });
 
@@ -254,7 +270,8 @@ void main() {
       ),
       size: _phone,
     );
-    expect(find.text('Bolsas'), findsWidgets);
+    // The guide photo banner sets the name in capitals.
+    expect(find.text('BOLSAS'), findsOneWidget);
     await captureClientGuide(tester, 'p-09-coleccion');
   });
 
@@ -288,6 +305,11 @@ void main() {
       400,
       scrollable: scroll,
     );
+    await tester.pumpAndSettle();
+    // Continuity: past the questions banner, down to the products and the
+    // «Regístrate» block.
+    final position = tester.state<ScrollableState>(scroll).position;
+    position.jumpTo(position.maxScrollExtent);
     await tester.pumpAndSettle();
     await captureClientGuide(tester, 'p-11-mayoreo-continuidad');
   });
@@ -338,7 +360,9 @@ void main() {
       StoreScope(notifier: catalog, child: const RewardsShareScreen()),
       size: _phone,
     );
-    expect(find.text('Comparte y gana'), findsOneWidget);
+    // The banner carries the title; the screen no longer repeats it.
+    expect(find.byType(GuideShareEarnBanner), findsOneWidget);
+    expect(find.text('Comparte y gana'), findsNothing);
     await captureClientGuide(tester, 'p-15-rewards-share');
   });
 
@@ -390,6 +414,11 @@ void main() {
         onSupport: () {},
         identityName: 'mapachesdev98',
         identityDetail: 'mapachesdev98@gmail.com',
+        onNotifications: () {},
+        onShare: () {},
+        onWhatsApp: () {},
+        socialLinks: HomeContent.fallback.socialLinks,
+        onOpenSocial: (_) {},
       ),
       size: _phone,
     );

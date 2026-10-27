@@ -98,7 +98,7 @@ void main() {
     // Full bleed, as on figure 03 — the photograph runs rail to rail.
     expect(banner.left, 0);
     expect(banner.right, 390);
-    expect(find.text('COLECCIÓN'), findsOneWidget);
+    expect(find.text('desde México'), findsOneWidget);
   });
 
   testWidgets('modules sit on a 24–32px rhythm, not a 64–72px one', (

@@ -38,10 +38,19 @@ void main() {
         brightness: brightness,
       );
       expect(find.text('¡Gracias por tu compra!'), findsOneWidget);
-      expect(find.text('#DEMO-1'), findsOneWidget);
+      // The number sits inside the sentence (guide v2) and the policy note
+      // that the guide does not carry is gone.
+      expect(
+        find.textContaining('Tu pedido #DEMO-1 ha sido confirmado.'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Te llegará un correo con los detalles de tu compra.'),
+        findsOneWidget,
+      );
       expect(
         find.textContaining('contenido pendiente de aprobación'),
-        findsOneWidget,
+        findsNothing,
       );
       expect(find.textContaining('3 a 5'), findsNothing);
       expect(tester.takeException(), isNull);

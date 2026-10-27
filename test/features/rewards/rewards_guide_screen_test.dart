@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChannels;
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
 import 'package:monetta_app/features/rewards/rewards_guide_screen.dart';
 import 'package:monetta_app/features/rewards/rewards_models.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
@@ -62,7 +63,8 @@ void main() {
 
     await tester.tap(find.byKey(const ValueKey('rewards-open-share')));
     await tester.pumpAndSettle();
-    expect(find.text('Comparte y gana'), findsWidgets);
+    // The share banner carries the title; the screen no longer repeats it.
+    expect(find.byType(GuideShareEarnBanner), findsOneWidget);
     expect(find.text('https://monetta.com/catalogo/bolsos'), findsNothing);
     expect(find.textContaining('Pendiente de contrato'), findsWidgets);
   });

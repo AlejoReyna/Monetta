@@ -71,10 +71,8 @@ void main() {
         alignment: .15,
       );
       await tester.pumpAndSettle();
-      expect(
-        find.textContaining('mínimo de piezas: pendientes'),
-        findsOneWidget,
-      );
+      expect(find.text('A partir de 3 piezas'), findsOneWidget);
+      expect(find.textContaining('pendientes de confirmación'), findsNothing);
       if (scale == 1) {
         await captureClientGuide(
           tester,

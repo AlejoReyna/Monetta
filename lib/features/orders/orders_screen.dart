@@ -243,57 +243,84 @@ class _FilterRow extends StatelessWidget {
   final Map<OrderFilter, int> counts;
   final ValueChanged<OrderFilter> onChanged;
 
+  /// «Todos», «En camino» and «Completos» are always there, as in the guide.
+  /// The apartado tab only appears when there is one (or it is selected).
+  static bool _alwaysShown(OrderFilter option) =>
+      option == OrderFilter.all ||
+      option == OrderFilter.inTransit ||
+      option == OrderFilter.delivered;
+
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final options = [
+      for (final option in OrderFilter.values)
+        if (_alwaysShown(option) ||
+            (counts[option] ?? 0) > 0 ||
+            filter == option)
+          option,
+    ];
     return Semantics(
       label: 'Filtrar pedidos',
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        child: Row(
-          children: [
-            for (final option in OrderFilter.values) ...[
-              if (option != OrderFilter.all &&
-                  (counts[option] ?? 0) == 0 &&
-                  filter != option)
-                const SizedBox.shrink()
-              else
-                Padding(
-                  padding: const EdgeInsets.only(right: BoutiqueSpace.sm),
-                  child: Semantics(
-                    label:
-                        '${orderFilterLabel(option)}: ${counts[option] ?? 0} pedidos',
-                    child: ChoiceChip(
-                      key: ValueKey('orders-filter-${option.name}'),
-                      label: Text(
-                        option == OrderFilter.delivered
-                            ? 'Completos'
-                            : orderFilterLabel(option),
+      child: Row(
+        children: [
+          for (var i = 0; i < options.length; i++) ...[
+            if (i > 0) SizedBox(width: MonettaTokens.space[1]),
+            Expanded(
+              child: Semantics(
+                label:
+                    '${orderFilterLabel(options[i])}: ${counts[options[i]] ?? 0} pedidos',
+                selected: filter == options[i],
+                button: true,
+                excludeSemantics: true,
+                onTap: () => onChanged(options[i]),
+                child: Material(
+                  key: ValueKey('orders-filter-${options[i].name}'),
+                  color: filter == options[i] ? palette.action : palette.canvas,
+                  shape: StadiumBorder(
+                    side: BorderSide(
+                      color: filter == options[i]
+                          ? palette.action
+                          : palette.hairline,
+                    ),
+                  ),
+                  child: InkWell(
+                    customBorder: const StadiumBorder(),
+                    onTap: () => onChanged(options[i]),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: MonettaTokens.tapTarget,
                       ),
-                      selected: filter == option,
-                      showCheckmark: false,
-                      onSelected: (_) => onChanged(option),
-                      selectedColor: context.boutique.action,
-                      backgroundColor: context.boutique.canvas,
-                      side: BorderSide(color: context.boutique.borderControl),
-                      shape: const StadiumBorder(),
-                      padding: EdgeInsets.symmetric(
-                        horizontal: MonettaTokens.space[3],
-                        vertical: MonettaTokens.space[2],
-                      ),
-                      labelStyle: clientGuideStyle(
-                        context,
-                        MonettaTokens.cardLabel,
-                        color: filter == option
-                            ? context.boutique.onAction
-                            : context.boutique.ink,
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: MonettaTokens.space[1],
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              options[i] == OrderFilter.delivered
+                                  ? 'Completos'
+                                  : orderFilterLabel(options[i]),
+                              maxLines: 1,
+                              style: clientGuideStyle(
+                                context,
+                                MonettaTokens.cardLabel,
+                                color: filter == options[i]
+                                    ? palette.onAction
+                                    : palette.ink,
+                              ),
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
                 ),
-            ],
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -334,12 +361,9 @@ class _OrdersList extends StatelessWidget {
         onAction: null,
       );
     }
-    final summary = summarizeOrders(visible);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SummaryLine(summary: summary, filter: filter),
-        const SizedBox(height: BoutiqueSpace.md),
         for (final order in visible) ...[
           _OrderCard(
             order: order,
@@ -354,56 +378,6 @@ class _OrdersList extends StatelessWidget {
           ),
           const SizedBox(height: BoutiqueSpace.md),
         ],
-        if (controller.account != null)
-          AutoRewardsSection(
-            controller: controller,
-            reader: rewardsReader,
-            showMovements: false,
-          ),
-        const SizedBox(height: BoutiqueSpace.md),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            key: const ValueKey('refresh-orders'),
-            onPressed:
-                controller.ordersLoading ? null : () => controller.loadOrders(),
-            child: Text(
-              controller.ordersLoading ? 'Actualizando…' : 'Actualizar pedidos',
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SummaryLine extends StatelessWidget {
-  const _SummaryLine({required this.summary, required this.filter});
-
-  final OrdersSummary summary;
-  final OrderFilter filter;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final scope = filter == OrderFilter.all
-        ? 'En total'
-        : 'En ${orderFilterLabel(filter).toLowerCase()}';
-    final total = '$scope: ${summary.count} '
-        '${summary.count == 1 ? 'pedido' : 'pedidos'} · '
-        '${kMoney.format(summary.totalMxn)} MXN';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          total,
-          style: boutiqueText(size: 13, color: palette.inkMuted),
-        ),
-        if (summary.otherCurrencyCount > 0)
-          Text(
-            '${summary.otherCurrencyCount} en otra moneda, sin convertir.',
-            style: boutiqueText(size: 12, color: palette.inkMuted),
-          ),
       ],
     );
   }
@@ -479,14 +453,27 @@ class _OrderCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  EStatusCapsule.forOrderKey(
-                    status.key,
-                    label: status.label,
-                    guideIcon: status.key == 'in_transit'
-                        ? Icons.local_shipping_outlined
-                        : status.key == 'delivered'
-                            ? Icons.check_circle_outline
-                            : Icons.receipt_long_outlined,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: EStatusCapsule.forOrderKey(
+                          status.key,
+                          label: status.label,
+                          guideIcon: status.key == 'in_transit'
+                              ? Icons.local_shipping_outlined
+                              : status.key == 'delivered'
+                                  ? Icons.check_circle_outline
+                                  : Icons.receipt_long_outlined,
+                        ),
+                      ),
+                      SizedBox(width: MonettaTokens.space[1]),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: palette.ink,
+                        size: 24,
+                      ),
+                    ],
                   ),
                 ],
               ),
@@ -502,20 +489,16 @@ class _OrderCard extends StatelessWidget {
               ],
               PaidCancelledRefundHelp(order: order),
               SizedBox(height: MonettaTokens.space[3]),
-              Container(
-                width: double.infinity,
-                padding: EdgeInsets.all(MonettaTokens.space[3]),
-                decoration: BoxDecoration(
-                  color: palette.surfaceDeep,
-                  borderRadius: BoutiqueRadius.tile,
-                ),
-                child: Text(
-                  'Las imágenes de este pedido aún no están disponibles.',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.cardLabel,
-                    color: palette.inkMuted,
-                  ),
+              // `OrderSummary` carries no order lines yet, so there is no
+              // product photograph to show: a discreet note stands in until
+              // the history brings lines (then up to three catalog photos).
+              Text(
+                'Las imágenes de este pedido aún no están disponibles.',
+                key: ValueKey('order-thumbs-placeholder-${order.id}'),
+                style: clientGuideStyle(
+                  context,
+                  MonettaTokens.navLabel,
+                  color: palette.inkMuted,
                 ),
               ),
               const SizedBox(height: BoutiqueSpace.md),
@@ -538,10 +521,13 @@ class _OrderCard extends StatelessWidget {
                   ),
                   if (showAction)
                     SizedBox(
-                      width: MonettaTokens.tapTarget * 4,
+                      // Narrow enough to sit beside the total at 390 px; a
+                      // larger text size flows it to its own line (Wrap).
+                      width: 136,
                       child: ClientGuideButton(
                         label: action,
                         chevron: true,
+                        compact: true,
                         onPressed: onTap,
                       ),
                     ),

@@ -1,15 +1,19 @@
-/// Presentation placeholders: the mockup does not authorize commercial terms.
+/// Wholesale copy, taken as it is from the owner's guide («MAYOREO»).
 library;
 
 import '../../app/shopper_copy.dart';
 
 abstract final class WholesalePresentation {
-  static const minimum = 'Mínimo de piezas: pendiente de confirmación.';
-  static const pricing = 'Precios de mayoreo: pendientes de confirmación.';
-  static const reservation =
-      'Anticipo y plazo de liquidación: pendientes de confirmación.';
-  static const shipping =
-      'Costo, cobertura y plazo de envío: pendientes de confirmación.';
+  /// Step 2 of «¿Cómo comprar?». The title is «Agrega mínimo 3 piezas».
+  static const minimum =
+      'a tu carrito o mándanos captura de los modelos de tu interés por '
+      'WhatsApp.';
+
+  /// Step 3 of «¿Cómo comprar?». The title is «Liquida o aparta».
+  static const reservation = 'Aparta por 20 días con \$800 pesos por pedido.';
+
+  /// Shipping line. The services row repeats it as «Envío gratis».
+  static const shipping = 'Envío gratis en compras mayores a \$1,999 MXN.';
 }
 
 /// Reuses the configured channel without pre-accepting any commercial terms.

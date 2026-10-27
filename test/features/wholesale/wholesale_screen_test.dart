@@ -63,7 +63,10 @@ void main() {
         scrollable: scroll,
       );
       expect(find.text(WholesalePresentation.minimum), findsOneWidget);
-      expect(find.textContaining(r'$800'), findsNothing);
+      // The guide's reservation line is shown as it is.
+      expect(find.textContaining(r'$800'), findsOneWidget);
+      expect(find.textContaining('pendiente de confirmación'), findsNothing);
+      expect(find.textContaining('pendientes de confirmación'), findsNothing);
       final catalog = find.byKey(const ValueKey('wholesale-catalog-perfume'));
       await tester.scrollUntilVisible(catalog, 300, scrollable: scroll);
       await tester.ensureVisible(catalog);

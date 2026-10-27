@@ -115,13 +115,12 @@ class RewardsShareScreen extends StatelessWidget {
           MonettaTokens.space[6],
         ),
         children: [
-          const GuidePhoneMockup(),
-          SizedBox(height: MonettaTokens.space[4]),
-          Text(
-            'Comparte y gana',
-            style: clientGuideStyle(context, MonettaTokens.screenTitle),
+          const GuideShareEarnBanner(
+            asset: kGuideShareRewards,
+            body:
+                'Explora nuestros catálogos, compártelos con el mundo y comienza a ganar desde tu primer pedido.',
           ),
-          SizedBox(height: MonettaTokens.space[2]),
+          SizedBox(height: MonettaTokens.space[4]),
           Text(
             'Comparte el catálogo de Monetta y gana puntos por cada persona '
             'que lo vea o compre.',
