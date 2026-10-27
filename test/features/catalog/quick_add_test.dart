@@ -212,15 +212,21 @@ void main() {
           'QUICK-01 a Monetta card has its "+" keyed by the Shopify id; '
           'sold-out and external pieces have none', (tester) async {
         await withSemantics(tester, () async {
-          final (store, items, single, several) = await mount(tester);
+          final (_, items, single, several) = await mount(tester);
           final soldOutId = items[1].shopifyProductId!;
 
           for (final product in [single, several]) {
             final plus = find.byKey(quickAddKey(product.id));
             expectQuickAddGeometry(tester, plus);
+            // This grid prints the catalog item's name, which has no colour
+            // suffix; the "+" must name the piece exactly as the card does.
+            final title = ProductTileData.fromCatalogItem(
+              items.firstWhere((item) => item.shopifyProductId == product.id),
+            ).title;
+            expect(find.text(title), findsOneWidget);
             expect(
               tester.getSemantics(plus).label,
-              addLabelFor(store, product),
+              'Agregar $title al carrito',
             );
           }
           expect(find.byKey(quickAddKey(soldOutId)), findsNothing);
