@@ -29,13 +29,17 @@
       assign cart_label = cart_label | append: 's'
     endif
   endif
+  assign is_home = false
+  if template.name == 'index'
+    assign is_home = true
+  endif
   assign search_hidden = false
-  if template.name == 'index' or template.name == 'search'
+  if template.name == 'search'
     assign search_hidden = true
   endif
 -%}
 <header
-  class="site-header{% if is_product %} site-header--product{% endif %}{% if no_dock %} site-header--no-dock{% endif %}"
+  class="site-header{% if is_home %} site-header--home{% endif %}{% if is_product %} site-header--product{% endif %}{% if no_dock %} site-header--no-dock{% endif %}"
   id="site-header"
 >
   <div class="site-header__bar">
@@ -47,6 +51,7 @@
       <a class="icon-button site-header__search-start" href="{{ routes.search_url }}" aria-label="Buscar productos">{% render 'monetta-icon', name: 'search', size: 22 %}</a>
     </div>
     <a class="wordmark" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}, ir al inicio">{% render 'monetta-logo', height: 24, logo: section.settings.logo %}</a>
+    {%- unless is_home -%}
     <form class="header-search" role="search" aria-label="Buscar en la tienda" action="{{ routes.search_url }}" method="get">
       <div class="search-field">
         {% render 'monetta-icon', name: 'search', size: 20 %}
@@ -65,6 +70,7 @@
         <button type="button" class="icon-button search-field__clear" data-search-clear aria-label="Borrar búsqueda" hidden>{% render 'monetta-icon', name: 'close', size: 20 %}</button>
       </div>
     </form>
+    {%- endunless -%}
     <div class="site-header__end">
       <a class="icon-button site-header__search-icon" href="{{ routes.search_url }}" aria-label="Buscar productos"{% if search_hidden %} hidden{% endif %}>{% render 'monetta-icon', name: 'search', size: 24 %}</a>
       <button type="button" class="icon-button header-utility header-utility--saved" data-open-dialog="saved-products" aria-label="Ver guardados" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 22 %}</button>
@@ -73,6 +79,26 @@
     </div>
   </div>
 
+{%- if is_home -%}
+  {%- comment -%}
+    Home category row, copied from monetta.mx (labels, emoji, order). Targets map to staging: staging has no category
+    collections or Mayoreo page yet, so Bolsas / Carteras / Relojes use product search and Mayoreo uses Contacto until
+    those exist. Perfumes and Maquillaje point to the same catalogue PDF as monetta.mx.
+  {%- endcomment -%}
+  <nav class="site-nav site-nav--home" aria-label="Categorías">
+    <ul class="site-nav__list" role="list">
+      <li><a class="site-nav__link" href="{{ routes.search_url }}?q=bolsa&type=product"><span aria-hidden="true">👜</span> Bolsas</a></li>
+      <li><a class="site-nav__link" href="{{ routes.search_url }}?q=cartera&type=product"><span aria-hidden="true">👝</span> Carteras</a></li>
+      <li><a class="site-nav__link" href="{{ routes.search_url }}?q=reloj&type=product"><span aria-hidden="true">⌚️</span> Relojes</a></li>
+      <li><a class="site-nav__link" href="https://drive.google.com/file/d/1C_bAGCxuAk0jid6QfMbkL0ilI4LLPCzF/view?usp=sharing" target="_blank" rel="noopener"><span aria-hidden="true">🌸</span> Perfumes</a></li>
+      <li><a class="site-nav__link" href="https://drive.google.com/file/d/1C_bAGCxuAk0jid6QfMbkL0ilI4LLPCzF/view?usp=sharing" target="_blank" rel="noopener"><span aria-hidden="true">💄</span> Maquillaje y Skincare</a></li>
+      <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}"><span aria-hidden="true">🛍️</span> Todas las Marcas</a></li>
+      <li><a class="site-nav__link" href="/pages/contact"><span aria-hidden="true">💰</span> Mayoreo</a></li>
+      <li><a class="site-nav__link" href="/pages/contact"><span aria-hidden="true">👩🏻‍💻</span> Contacto</a></li>
+    </ul>
+  </nav>
+{%- endif -%}
+{%- unless is_home -%}
   <nav class="site-nav" aria-label="Categorías">
     <ul class="site-nav__list" role="list">
       {%- for link in nav_menu.links -%}
@@ -83,6 +109,7 @@
       {%- endfor -%}
     </ul>
   </nav>
+  {%- endunless -%}
 
   <dialog class="overlay overlay--drawer-left" id="menu-drawer" aria-labelledby="menu-title">
     <div class="overlay__backdrop" data-overlay-close></div>

@@ -28,6 +28,9 @@
       {%- endif -%}
     {%- endfor -%}
   </div>
+  {%- if section.settings.payments_line != blank -%}
+    <p class="footer-payments">{{ section.settings.payments_line | escape }}</p>
+  {%- endif -%}
   <div class="footer-bottom">
     <span>© {{ 'now' | date: '%Y' }} {{ shop.name | escape }}</span>
     <span>
@@ -48,7 +51,8 @@
     { "type": "image_picker", "id": "logo", "label": "Logotipo", "info": "Opcional. Sin imagen se usa el logotipo original incluido en el tema." },
     { "type": "textarea", "id": "description", "label": "Texto de marca", "default": "Boutique mexicana de bolsas, carteras y relojes originales importados de Estados Unidos. Envíos a todo México." },
     { "type": "text", "id": "whatsapp_number", "label": "WhatsApp (número con lada)", "default": "528261066868", "info": "Solo dígitos, con 52 al inicio. Déjalo vacío para ocultar el botón." },
-    { "type": "text", "id": "whatsapp_label", "label": "Texto del botón de WhatsApp", "default": "WhatsApp 826 106 6868" }
+    { "type": "text", "id": "whatsapp_label", "label": "Texto del botón de WhatsApp", "default": "WhatsApp 826 106 6868" },
+    { "type": "text", "id": "payments_line", "label": "Línea de pagos", "default": "Pagos seguros con tarjeta de crédito o débito y transferencia bancaria.", "info": "Déjalo vacío para ocultar la línea." }
   ],
   "blocks": [
     {
