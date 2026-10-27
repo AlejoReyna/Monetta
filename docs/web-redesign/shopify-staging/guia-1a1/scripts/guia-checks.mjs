@@ -156,6 +156,9 @@ async function f2() {
     try {
       await open(page, '/');
       run.check(`F2 ${w}: no horizontal overflow on the home`, (await overflow(page)) <= 0, `${await overflow(page)}px`);
+      const tiles = await page.evaluate(() => [...document.querySelectorAll('.guia-brand')].map((a) => { const r = a.getBoundingClientRect(); return [r.left, r.right, r.top, r.height]; }));
+      const overlap = tiles.some((t, i) => i > 0 && Math.abs(t[2] - tiles[i - 1][2]) < 1 && t[0] < tiles[i - 1][1] - 0.5);
+      run.check(`F2 ${w}: brand tiles do not overlap and are at least 48px tall`, tiles.length > 0 && !overlap && tiles.every((t) => t[3] >= 47.5), JSON.stringify(tiles.map((t) => [Math.round(t[0]), Math.round(t[1]), Math.round(t[3])])));
       if (w !== 390 && w !== 1440) continue;
 
       // Module order of the guide and the app (home_screen.dart): carousel, styles, brands, two rails, offers, services, register, footer.
@@ -245,8 +248,9 @@ async function f2() {
       if (w === 1440) run.check('F2 1440: no bottom bar on desktop', !dock.shown, JSON.stringify(dock));
 
       // Footer.
-      const footer = await page.evaluate(() => ({ heads: [...document.querySelectorAll('.footer-grid--guia h2')].map((h) => h.textContent.trim()), social: document.querySelectorAll('.footer-col--social .guia-social__link').length, rights: /Todos los derechos reservados/.test(document.querySelector('.footer-bottom')?.textContent || '') }));
+      const footer = await page.evaluate(() => ({ heads: [...document.querySelectorAll('.footer-grid--guia h2')].map((h) => h.textContent.trim()), social: document.querySelectorAll('.footer-col--social .guia-social__link').length, rights: /Todos los derechos reservados/.test(document.querySelector('.footer-bottom')?.textContent || ''), boxes: [...document.querySelectorAll('.footer-col--social .guia-social__link')].map((a) => { const r = a.getBoundingClientRect(); return [Math.round(r.top), Math.round(r.width), Math.round(r.height)]; }) }));
       run.check(`F2 ${w}: footer as the guide: Ayuda, Información, Síguenos (3 networks) and the rights line`, footer.heads.join(',') === 'Ayuda,Información,Síguenos' && footer.social === 3 && footer.rights, JSON.stringify(footer));
+      run.check(`F2 ${w}: the footer's three networks sit in one row of 48px targets`, footer.boxes.length === 3 && footer.boxes.every((b) => b[0] === footer.boxes[0][0] && b[1] >= 48 && b[2] >= 48), JSON.stringify(footer.boxes));
 
       // Drawer.
       await page.click('.site-header__menu');
@@ -269,9 +273,89 @@ async function f2() {
   }
 }
 
+/* ======================================================================== F3: colecciones, Categorías y Búsqueda */
+const LISTINGS = [
+  { path: '/collections/vendors?q=Coach', photo: 'coleccion-coach', title: 'Coach', italic: false, pill: null },
+  { path: '/collections/all/tote', photo: 'coleccion-totes', title: 'Totes', italic: true, pill: 'Bolsas' },
+  { path: '/collections/types?q=Cartera', photo: 'coleccion-carteras', title: 'Carteras', italic: true, pill: 'Carteras' },
+  { path: '/collections/all/reloj', photo: 'coleccion-accesorios', title: 'Relojes', italic: true, pill: 'Relojes' },
+];
+
+async function f3() {
+  for (const [w, h] of WIDTHS) {
+    const { browser, page } = await launch({ width: w, height: h, injectCss });
+    try {
+      await open(page, LISTINGS[0].path);
+      run.check(`F3 ${w}: no horizontal overflow on a brand collection`, (await overflow(page)) <= 0, `${await overflow(page)}px`);
+      await open(page, '/collections');
+      run.check(`F3 ${w}: no horizontal overflow on Categorías`, (await overflow(page)) <= 0, `${await overflow(page)}px`);
+      if (w !== 390 && w !== 1440) continue;
+
+      for (const l of LISTINGS) {
+        await open(page, l.path);
+        const info = await page.evaluate(() => {
+          const hero = document.querySelector('.guia-collection-hero .guide-hero');
+          const title = hero?.querySelector('.guide-hero__title');
+          const cs = title && getComputedStyle(title);
+          const header = document.querySelector('.site-header');
+          return {
+            photo: hero?.querySelector('img')?.getAttribute('src') || '',
+            h1: [...document.querySelectorAll('h1')].map((x) => x.textContent.trim()),
+            tag: title?.tagName, transform: cs?.textTransform, style: cs?.fontStyle,
+            pills: [...document.querySelectorAll('.guia-pills .guia-pill:not(.guia-pill--icon)')].map((a) => a.textContent.trim()),
+            current: document.querySelector('.guia-pills [aria-current="page"]')?.textContent.trim() || null,
+            filterBtn: (() => { const b = document.querySelector('.guia-pills .guia-pill--icon'); if (!b) return null; const r = b.getBoundingClientRect(); return [Math.round(r.width), Math.round(r.height)]; })(),
+            count: document.querySelector('.guia-listing-bar__count')?.textContent.trim() || '',
+            sortLabel: document.querySelector('.guia-sort__label')?.textContent.trim() || '',
+            header: !!header && getComputedStyle(header).display !== 'none' && header.getBoundingClientRect().height > 0,
+          };
+        });
+        const tag = `F3 ${w} ${l.title}`;
+        run.check(`${tag}: the guide's banner photograph and the title as the page's only h1`, info.photo.includes(l.photo) && info.tag === 'H1' && info.h1.length === 1 && info.h1[0] === l.title, JSON.stringify({ photo: info.photo.split('/').pop()?.split('?')[0], h1: info.h1 }));
+        run.check(`${tag}: title in capitals, ${l.italic ? 'italic (silhouette or category)' : 'upright (brand)'}`, info.transform === 'uppercase' && (info.style === 'italic') === l.italic, JSON.stringify({ transform: info.transform, style: info.style }));
+        run.check(`${tag}: pills Bolsas, Carteras, Accesorios, Relojes, Más; current ${l.pill || 'none'}; 48px filters button`, info.pills.join(',') === 'Bolsas,Carteras,Accesorios,Relojes,Más' && info.current === l.pill && info.filterBtn && info.filterBtn[0] >= 48 && info.filterBtn[1] >= 48, JSON.stringify({ pills: info.pills, current: info.current, filterBtn: info.filterBtn }));
+        run.check(`${tag}: «N productos» and «Ordenar por»`, /^\d+ productos?$/.test(info.count) && info.sortLabel === 'Ordenar por', JSON.stringify({ count: info.count, sort: info.sortLabel }));
+        if (w === 390) run.check(`${tag}: phones keep the guide's header (no page bar) on the collection`, info.header, JSON.stringify({ header: info.header }));
+      }
+      const titleFont = await platformFonts(page, '.guia-collection-hero .guide-hero__title');
+      run.check(`F3 ${w}: collection banner title measured in Cormorant Garamond`, titleFont.length > 0 && titleFont.every((f) => /Cormorant/.test(f)), JSON.stringify(titleFont));
+
+      // Categorías.
+      await open(page, '/collections');
+      const cats = await page.evaluate(() => ({
+        h1: [...document.querySelectorAll('h1')].map((x) => x.textContent.trim()),
+        lede: document.querySelector('.guia-categories__lede')?.textContent.trim(),
+        h2: [...document.querySelectorAll('.guia-categories h2')].map((x) => x.textContent.trim()),
+        tiles: [...document.querySelectorAll('.guia-category')].map((a) => ({ label: a.textContent.trim(), icon: a.querySelector('img')?.getAttribute('src') || '', w: a.getBoundingClientRect().width })),
+        brands: document.querySelectorAll('.guia-categories .guia-brand').length,
+      }));
+      run.check(`F3 ${w}: Categorías with its line, «Colecciones» and «Marcas»`, cats.h1.join() === 'Categorías' && cats.lede === 'Descubre todas nuestras colecciones de tus marcas favoritas.' && cats.h2.join(',') === 'Colecciones,Marcas', JSON.stringify(cats.h1.concat(cats.h2)));
+      run.check(`F3 ${w}: the seven collections with the guide's icons`, cats.tiles.map((t) => t.label).join(',') === 'Crossbody,Tote,Shoulder,Handbags,Carteras,Perfumes,Accesorios' && cats.tiles.every((t) => /monetta-guia-icon-categoria-/.test(t.icon)), JSON.stringify(cats.tiles.map((t) => t.label)));
+      if (w === 390) run.check('F3 390: collection tiles three across', cats.tiles.length >= 3 && Math.abs(cats.tiles[0].w - cats.tiles[2].w) < 1 && cats.tiles[0].w < 130, JSON.stringify(cats.tiles.map((t) => Math.round(t.w))));
+      run.check(`F3 ${w}: brand tiles for the brands the store sells`, cats.brands >= 4, `${cats.brands}`);
+
+      // Búsqueda: suggestions, then recent searches kept in this browser and removable.
+      await open(page, '/search?q=bolso+coach&type=product');
+      const search = await page.evaluate(() => ({
+        suggest: [...document.querySelectorAll('#guia-suggest-heading ~ ul .guia-search__row')].map((a) => a.textContent.trim()),
+        recent: [...document.querySelectorAll('[data-guia-recent-list] .guia-search__row')].map((a) => a.textContent.trim()),
+        recentShown: !document.querySelector('[data-guia-recent-block]')?.hidden,
+      }));
+      run.check(`F3 ${w}: search shows «Sugerencias» Bolsas, Carteras, Relojes, Perfumes`, search.suggest.join(',') === 'Bolsas,Carteras,Relojes,Perfumes', JSON.stringify(search.suggest));
+      run.check(`F3 ${w}: «Búsquedas recientes» lists this search`, search.recentShown && search.recent[0] === 'bolso coach', JSON.stringify(search));
+      await page.click('[data-guia-recent-list] .guia-search__remove');
+      const after = await page.evaluate(() => ({ items: document.querySelectorAll('[data-guia-recent-list] li').length, hidden: document.querySelector('[data-guia-recent-block]')?.hidden, stored: localStorage.getItem('monetta:recent-searches') }));
+      run.check(`F3 ${w}: removing it empties the list, hides the block and the browser forgets it`, after.items === 0 && after.hidden === true && after.stored === '[]', JSON.stringify(after));
+    } finally {
+      await browser.close();
+    }
+  }
+}
+
 try {
   if (phases.has('f1')) await f1();
   if (phases.has('f2')) await f2();
+  if (phases.has('f3')) await f3();
   run.finish({ complete: true });
 } catch (error) {
   run.finish({ complete: false, error });

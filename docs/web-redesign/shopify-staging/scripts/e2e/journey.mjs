@@ -141,7 +141,8 @@ try {
     // Entered from the home: Novedades -> collection -> filter -> sort. Back (arrow) must leave the screen, not step through them.
     await page.goto(`${baseUrl}/`, { waitUntil: 'load' });
     await settle(page);
-    await page.locator('a.link-action', { hasText: 'Ver todo' }).first().click();
+    // The home's «Nueva colección» rail (the guide's home since 21 Oct; it was «Novedades» before) leads to the catalog.
+    await page.locator('section:has(h2:text-is("Nueva colección")) a.link-action', { hasText: 'Ver todo' }).first().click();
     await page.waitForURL(/\/collections\/all/);
     await settle(page);
     await page.locator('[data-open-dialog="filters-drawer"]:visible').first().click();

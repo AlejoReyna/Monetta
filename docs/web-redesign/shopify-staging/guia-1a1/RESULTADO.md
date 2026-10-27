@@ -158,3 +158,53 @@ Vista previa del borrador de trabajo: <https://monetta-staging.myshopify.com/?pr
 - La sesión del proxy caducó a los ~90 minutos (401). La persona la reinició.
 
 **Hoja comparativa:** `evidencia/sheets/f1/`. En 06 Coach y 14 Totes, VER PRODUCTO ya aparece como en la lámina y en la app, en ambos anchos. El hero, las pastillas y el conteo llegan en F3.
+
+## F2. Inicio, header, menú, barra inferior y pie — cerrada
+
+**Qué cambió**
+- **Inicio** (`templates/index.json`, sección `monetta-guia-home` con un módulo por sección, reordenables en el editor), en el orden de la app de #33:
+  1. carrusel de 3 fotos del owner: «Compra *fácil* desde México», «NUEVA COLECCIÓN · Un paraíso de marcas por descubrir.» y «PERFUMES · Descubre nuestra selección de fragancias originales». Desliza con snap, tiene puntos y, desde 1024 px, flechas; sin autoplay, como la app;
+  2. «Compra por estilo» con los 5 iconos de la guía;
+  3. «Tus marcas favoritas»: las 8 de la guía, en su orden, sólo las que la tienda vende. En staging salen Coach, Guess, Michael Kors y Steve Madden;
+  4. «Nueva colección» y 5. «Lo más buscado», con los rieles del tema;
+  6. «PRECIOS DE *mayoreo* · A partir de 3 piezas · CONOCE MÁS»;
+  7. los 4 servicios;
+  8. «REGÍSTRATE · Consulta tus pedidos y datos de compra · REGISTRARME AHORA · Pagos seguros con Shopify.».
+
+  Salen del inicio el hero del 22-oct, Colecciones, Más sobre Monetta, Nuestras redes y Experiencias. Siguen disponibles como secciones del tema.
+- **Header:**
+  - quité la fila con emoji del 22-oct;
+  - la navegación de tablet y escritorio es la de la guía: Bolsas, Carteras, Relojes, Perfumes, Marcas y Mayoreo;
+  - el botón de menú queda visible también en escritorio, y abre el mismo cajón;
+  - los menús de Shopify (en inglés) ya no alimentan el header.
+- **Cajón** (lámina 30):
+  - identidad: Invitado / Inicia sesión, o el nombre y el correo del cliente;
+  - Bolsas, Carteras, Relojes, Perfumes, Todas las marcas y Guardados. Guardados es propio de la web, porque la lista vive en el navegador;
+  - el banner «Comparte y gana · VER CATÁLOGO»;
+  - Contacto por WhatsApp y TikTok, Instagram y Facebook, con las URL de la app.
+- **Barra inferior:** Inicio · Categorías (→ `/collections`) · Carrito · Cuenta.
+- **Pie:** el logotipo, Ayuda (menú de la tienda), Información (sus políticas), Síguenos y «© 2026 Monetta Staging. Todos los derechos reservados.». El texto de marca y el botón de WhatsApp quedan como ajustes, pero no se muestran.
+- **`snippets/monetta-guia-url.liquid`:** un solo lugar decide cada destino. Si el owner crea la colección o la página, la usa; si no, recurre a la lista automática de Shopify.
+
+**Comprobaciones**
+
+| Comprobación | Antes (árbol F1) | Después |
+|---|---|---|
+| `guia-checks` F2: orden de módulos, textos de la app, fotos, fuentes medidas («fácil» y «mayoreo» en Mrs Saint Delafield), flechas, estilos, marcas, pastilla, servicios, regístrate, header, barra inferior, pie y cajón, a 390 y 1440 (sin desbordes de 320 a 1440) | 6/31, más 1 error al no encontrar las flechas | **F1 + F2: 88/88** |
+| Validación completa | — | `checks.mjs` 315/315, layout 219/219, regresiones 123/123, movimiento 4/4, navegación 31/31, journeys a 768, 1024 y 1440 completos |
+| axe | — | Falló en la primera corrida (ver abajo). Tras la corrección: 18/18. |
+| Teclado | En F0, «Totes» y «De hombro» fallaban a 320, 375 y 440 | Con la fila nueva ese defecto ya no existe. Una falla nueva a 320 (ver abajo); tras la corrección, el inicio a 320, 375 y 440 da 9/9. |
+| Journey 390 | 57/58 | 57/58: sólo la falla conocida de F4 |
+
+**Encontrado y corregido en la validación**
+1. **axe crítica** `aria-required-children`: el carrusel era una lista con hijos `role="group"`. Ahora usa `div`.
+2. **Teclado a 320:** una tarjeta de marca de 1.7 con `min-height: 48px` toma un ancho mínimo de 81.6 px a través de la proporción, y la tarjeta siguiente le tapaba el anillo. Ahora la altura sigue a la columna, con un mínimo de 48 px. La comprobación nueva («no se enciman y miden al menos 48 px») falla con el CSS anterior inyectado.
+3. **Iconos sociales del pie en columna:** la lista de `.footer-col` le ganaba a la fila. Corregido, con su comprobación y su control negativo.
+4. **«marcaspor»:** el `<br>` sin espacio unía las palabras en el texto accesible.
+5. **Arnés:** el journey hacía clic en el primer «Ver todo» del inicio, que ahora es el de «Compra por estilo». Apunta al de «Nueva colección».
+
+**Theme Check:** sin errores nuevos. Avisos `OrphanedSnippet`:
+- `monetta-guia-hero` (lo usa F3);
+- `monetta-menu-icon`, que quedó sin uso con el cajón nuevo y se elimina en F3.
+
+**Hojas comparativas:** `evidencia/sheets/f2/` (03 Inicio y 30 Menú) y `evidencia/sheets/f2-final/`.
