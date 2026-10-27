@@ -61,10 +61,13 @@ void main() {
     await tester.pump();
 
     final heading = find.text('Sobre la marca');
+    // The story sits below the brand's whole grid, which can hold about a
+    // hundred pieces: more than the default 50 drags reach.
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('brand-story')),
       300,
       scrollable: find.byType(Scrollable).first,
+      maxScrolls: 200,
     );
     final style = _styleOf(tester, heading);
     _expectSerif(style, reason: 'Sobre la marca');
