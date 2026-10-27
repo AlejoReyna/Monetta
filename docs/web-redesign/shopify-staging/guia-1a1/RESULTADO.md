@@ -122,3 +122,39 @@ Vista previa del borrador de trabajo: <https://monetta-staging.myshopify.com/?pr
 - Única captura fallida: el menú a 1440, porque el header de escritorio no tiene botón de menú. Lo pide F2.
 - `/collections/vendors?q=Tory Burch` responde 404.
 - Arreglo del capturador: la espera de imágenes tiene un tope de 8 s, porque las imágenes `lazy` de los rieles horizontales nunca cargan fuera de pantalla.
+
+## F1. Base visual — cerrada (`65e6fb0`)
+
+**Qué entra en el tema**
+- **Fuentes:** Cormorant Garamond (300, 300 itálica, 400, 400 itálica y 500) y Mrs Saint Delafield, en WOFF2 convertido con `wawoff2`, con sus avisos OFL. Salen de la rama de #33, nunca del PPTX.
+- **Tokens del lado de Shopify** en `monetta-guia.css`:
+  - `--font-guide-serif` y `--font-guide-script`;
+  - la pastilla dorada `#cdb48d` con texto `#2b2118`;
+  - el velo crema `#FBF6EE` de `GuideScrim`.
+
+  El manifiesto compartido no se tocó.
+- **Imágenes:**
+  - los 21 iconos en WebP con transparencia;
+  - las 23 fotos del owner en WebP a 768, 1280 y 1920 px, hechas con `cwebp` (ffmpeg no trae codificador WebP);
+  - 3 imágenes fijas de la app a su tamaño propio, sin ampliar.
+
+  Suman unos 3 MB. Las fotos derivadas sí van al tema y a git, como ya lo hizo la app en #33 (con JPEG de 1290 px). Los originales del owner se quedan fuera.
+- **Componentes:** `GuidePillButton`, `GuideHero` con su velo, `ClientGuideServices`, y VER PRODUCTO en la rejilla de colección, como pastilla visual dentro del único enlace de la tarjeta. Snippets: `monetta-guia-photo`, `-icon`, `-hero` y `-services`.
+
+**Comprobaciones**
+
+| Comprobación | Antes (árbol F0) | Después |
+|---|---|---|
+| `guia-checks` F1: tokens, 6 caras cargadas, fuentes medidas con CDP, 99 archivos servidos, VER PRODUCTO a 320, 390, 768, 1024 y 1440 | 7/34. Pasan sólo los resguardos: sin desbordes, sin VER PRODUCTO en rieles ni en búsqueda. | **34/34** |
+| `checks.mjs --flows`, axe, movimiento, navegación | — | 330/330, 18/18, 4/4, 31/31 |
+| Journeys | — | 768, 1024 y 1440 completos; 390 con 57/58, la falla conocida de F4 |
+| Layout, regresiones | — | 219/219, 123/123, en la corrida repetida tras reiniciar el proxy |
+| Teclado | — | 139/145, clasificado así:<br>• 2 fallas son el defecto conocido de «Totes» (se corrige en F2);<br>• 3 fallas a 375×812 (el enlace de salto medido fuera de pantalla) y 1 cierre del navegador a 812×375 no se repitieron al correr esos dos tamaños aislados. Se clasifican como inestabilidad del entorno. |
+| Theme Check | 187 errores y 64 avisos | Sin errores nuevos. Hay 4 avisos `OrphanedSnippet` por componentes que todavía no se usan; F2 y F3 los conectan. |
+
+**Incidentes**
+- Un error de sintaxis Liquid mío, en un archivo nuevo de F2 sin usar (filtro dentro de un `for`), hizo que `theme dev` sirviera «Failed to Upload Theme Files» en todas las rutas. Esa corrida se descartó.
+  - Desde entonces, `guia-1a1/scripts/preflight.mjs` corre Theme Check sobre una copia del tema antes de escribir en `storefront-theme/`. Probado: el archivo defectuoso da `exit 1`.
+- La sesión del proxy caducó a los ~90 minutos (401). La persona la reinició.
+
+**Hoja comparativa:** `evidencia/sheets/f1/`. En 06 Coach y 14 Totes, VER PRODUCTO ya aparece como en la lámina y en la app, en ambos anchos. El hero, las pastillas y el conteo llegan en F3.
