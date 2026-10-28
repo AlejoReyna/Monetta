@@ -64,11 +64,12 @@ void main() {
     // The story sits below the brand's whole grid, which can hold about a
     // hundred pieces: more than the default 50 drags reach.
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('brand-story')),
+      find.byKey(const ValueKey('brand-story')).hitTestable(),
       300,
       scrollable: find.byType(Scrollable).first,
       maxScrolls: 200,
     );
+    await tester.pumpAndSettle();
     final style = _styleOf(tester, heading);
     _expectSerif(style, reason: 'Sobre la marca');
     expect(style.fontSize, kBoutiqueSectionHeadingSize);

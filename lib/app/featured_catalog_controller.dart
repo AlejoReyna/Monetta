@@ -7,6 +7,7 @@ import 'package:flutter/foundation.dart';
 
 import '../data/shopify/featured_catalog_repository.dart';
 import '../domain/product.dart';
+import '../domain/shopify_sample_filter.dart';
 
 enum FeaturedCatalogStatus { idle, loading, live, empty, unavailable }
 
@@ -57,8 +58,10 @@ class FeaturedCatalogController extends ChangeNotifier {
       // Make returned Shopify rows available to the normal local catalog
       // before notifying the widget tree that the rail can render.
       await _cacheProducts?.call(next);
-      products = next;
-      status = next.isEmpty
+      products = next
+          .where((product) => !isShopifySampleProduct(product))
+          .toList(growable: false);
+      status = products.isEmpty
           ? FeaturedCatalogStatus.empty
           : FeaturedCatalogStatus.live;
       lastError = null;

@@ -308,17 +308,28 @@ final class CartRepository implements CartReconciler {
   Future<Cart?> _adoptGuestCart(CartSessionScope scope) async {
     if (!scope.isAuthenticated) return null;
     final guestScope = CartSessionScope.guest(shopDomain: scope.shopDomain);
-    final guestId = await _sessions.read(guestScope);
-    if (guestId == null) return null;
-    final guestCart = await _api.get(guestId);
-    if (guestCart == null) {
+    Future<Cart?> claimGuest() async {
+      final guestId = await _sessions.read(guestScope);
+      if (guestId == null) return null;
+      final guestCart = await _api.get(guestId);
+      if (guestCart == null) {
+        await _sessions.delete(guestScope);
+        return null;
+      }
+      final adoptedId = SensitiveCartId(guestCart.id);
+      await _sessions.write(scope, adoptedId);
       await _sessions.delete(guestScope);
-      return null;
+      return guestCart;
     }
-    final adoptedId = SensitiveCartId(guestCart.id);
-    await _sessions.write(scope, adoptedId);
-    await _sessions.delete(guestScope);
-    return guestCart;
+
+    // Account scopes have independent queues. Claim the shared guest session
+    // under its own queue so another account cannot adopt the same cart.
+    return _writes.run<Cart?>(
+      scope: guestScope,
+      write: claimGuest,
+      // This claim only reads Shopify; retrying never repeats a remote write.
+      recoverAfterAmbiguousFailure: claimGuest,
+    );
   }
 
   static _NormalizedIntent _normalize(Iterable<LocalCartIntent> values) {

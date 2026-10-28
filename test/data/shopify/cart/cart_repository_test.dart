@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/cart_controller.dart';
 import 'package:monetta_app/data/customer_auth/secure_token_store.dart';
@@ -435,6 +437,116 @@ void main() {
       expect(await sessions.read(scope), isNull);
     });
 
+    test('T1-INV-09 late guest adoption cannot share a cart across accounts',
+        () async {
+      final api = _StatefulCartApi(initial: {firstVariant: 1})
+        ..createCartId = _opaque('new-account-cart');
+      final sessions = _MemorySessions();
+      final guestId = SensitiveCartId(api.opaqueCartId);
+      await sessions.write(scope, guestId);
+      const accountA = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-a',
+      );
+      const accountB = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-b',
+      );
+      final adoptionStarted = Completer<void>();
+      final completeAdoption = Completer<Cart?>();
+      final accountBStarted = Completer<void>();
+      var blocked = false;
+      api.onGet = (cartId) async {
+        if (!blocked && cartId == guestId) {
+          blocked = true;
+          adoptionStarted.complete();
+          return completeAdoption.future;
+        }
+        return _cart(cartId.revealForStorefrontRequest(), {firstVariant: 1});
+      };
+      sessions.onRead = (readScope) {
+        if (readScope == accountB && !accountBStarted.isCompleted) {
+          accountBStarted.complete();
+        }
+      };
+      final controller = CartController(reconciler: _repository(api, sessions));
+      addTearDown(controller.dispose);
+      final resultA = controller.reconcileLocalBag(
+        scope: accountA,
+        localIntent: [LocalCartIntent(variantId: firstVariant, quantity: 1)],
+        buyerIdentity: AuthenticatedCartBuyerIdentity(
+          accessToken: SensitiveCustomerAccessToken('customer-a'),
+        ),
+      );
+      await adoptionStarted.future;
+
+      final resultB = controller.reconcileLocalBag(
+        scope: accountB,
+        localIntent: [LocalCartIntent(variantId: firstVariant, quantity: 1)],
+        buyerIdentity: AuthenticatedCartBuyerIdentity(
+          accessToken: SensitiveCustomerAccessToken('customer-b'),
+        ),
+      );
+      await accountBStarted.future;
+      completeAdoption.complete(_cart(api.opaqueCartId, {firstVariant: 1}));
+      final results = await Future.wait([resultA, resultB]);
+
+      expect(
+        results.first,
+        isNull,
+        reason: 'the late account A result is stale',
+      );
+      expect(controller.scopedSnapshot?.scope, accountB);
+      final cartA = await sessions.read(accountA);
+      final cartB = await sessions.read(accountB);
+      expect(cartB, isNotNull);
+      expect(
+        cartA == null || cartA != cartB,
+        isTrue,
+        reason: 'account B must never share the cart adopted by account A',
+      );
+      expect(
+        controller.snapshot?.cart?.id,
+        cartB?.revealForStorefrontRequest(),
+      );
+    });
+
+    test('T1-INV-11 creating and adopting a guest cart retains all attribution',
+        () async {
+      final api = _StatefulCartApi();
+      final sessions = _MemorySessions();
+      final repository = _repository(api, sessions);
+      final local = [LocalCartIntent(variantId: firstVariant, quantity: 1)];
+      final created =
+          await repository.reconcile(scope: scope, localIntent: local);
+      const expectedAttributes = {
+        '_channel': 'app',
+        '_platform': 'test',
+        '_device_id': 'device-local',
+        '_app_version': '0',
+        '_rec_source': 'direct',
+      };
+      expect(api.lastCreateAttributes, expectedAttributes);
+      const account = CartSessionScope.authenticated(
+        shopDomain: 'staging.invalid',
+        localAccountId: 'account-a',
+      );
+
+      final adopted = await repository.reconcile(
+        scope: account,
+        localIntent: local,
+        buyerIdentity: AuthenticatedCartBuyerIdentity(
+          accessToken: SensitiveCustomerAccessToken('customer-a'),
+        ),
+      );
+
+      expect(api.createCalls, 1, reason: 'adoption keeps the attributed cart');
+      expect(adopted.cart?.id, created.cart?.id);
+      expect(api.lastCreateAttributes, expectedAttributes);
+      expect(await sessions.read(scope), isNull);
+      expect(await sessions.read(account), SensitiveCartId(created.cart!.id));
+    });
+
     test('login without a customer token still keeps the guest cart id',
         () async {
       final api = _StatefulCartApi(initial: {firstVariant: 1});
@@ -662,6 +774,8 @@ final class _StatefulCartApi implements CartApi {
   final List<String> events = [];
   List<CartLineCreateInput> lastCreateLines = const [];
   Map<String, String> lastCreateAttributes = const {};
+  Future<Cart?> Function(SensitiveCartId)? onGet;
+  String? createCartId;
 
   @override
   Future<CartMutationResult> create({
@@ -680,7 +794,11 @@ final class _StatefulCartApi implements CartApi {
       }
     }
     return CartMutationResult(
-      cart: _cart(opaqueCartId, _quantities, discountCodes: _discountCodes),
+      cart: _cart(
+        createCartId ?? opaqueCartId,
+        _quantities,
+        discountCodes: _discountCodes,
+      ),
       issues: rejectCreateAsOutOfStock
           ? [
               CartMutationIssue(
@@ -697,6 +815,7 @@ final class _StatefulCartApi implements CartApi {
   Future<Cart?> get(SensitiveCartId cartId) async {
     getCalls += 1;
     events.add('get');
+    if (onGet case final callback?) return callback(cartId);
     if (returnMissingOnce) {
       returnMissingOnce = false;
       return null;
@@ -892,12 +1011,16 @@ Cart _cart(
 
 final class _MemorySessions implements CartSessionStore {
   final Map<CartSessionScope, SensitiveCartId> values = {};
+  void Function(CartSessionScope)? onRead;
 
   @override
   Future<void> delete(CartSessionScope scope) async => values.remove(scope);
 
   @override
-  Future<SensitiveCartId?> read(CartSessionScope scope) async => values[scope];
+  Future<SensitiveCartId?> read(CartSessionScope scope) async {
+    onRead?.call(scope);
+    return values[scope];
+  }
 
   @override
   Future<void> write(CartSessionScope scope, SensitiveCartId cartId) async {

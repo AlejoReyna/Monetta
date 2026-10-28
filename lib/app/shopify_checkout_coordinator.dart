@@ -51,6 +51,7 @@ final class ShopifyCheckoutCoordinator {
 
   bool _presenting = false;
   bool _openingFallback = false;
+  int _generation = 0;
   ValidatedCheckoutUrl? _latestUrl;
 
   bool get isPresenting => _presenting;
@@ -62,6 +63,7 @@ final class ShopifyCheckoutCoordinator {
 
   Future<void> preload(CartReconciliation reconciliation) async {
     if (_presenting) return;
+    final generation = ++_generation;
     _latestUrl = null;
     final cart = reconciliation.cart;
     if (cart == null ||
@@ -71,7 +73,8 @@ final class ShopifyCheckoutCoordinator {
     try {
       if (_cartCannotCheckout(cart)) return;
       final validated = _urlPolicy.validate(cart.checkoutUrl);
-      if (await _storefrontPasswordBlocks(validated)) return;
+      if (await _storefrontPasswordBlocks(validated, generation)) return;
+      if (generation != _generation) return;
       _latestUrl = validated;
       await _launcher.preload(validated);
     } on Exception {
@@ -91,6 +94,7 @@ final class ShopifyCheckoutCoordinator {
       return _unavailable('Ya hay un checkout abierto.');
     }
     _presenting = true;
+    final generation = ++_generation;
     _latestUrl = null;
     try {
       final pending = _pendingCompletion;
@@ -111,7 +115,9 @@ final class ShopifyCheckoutCoordinator {
         localIntent: List<LocalCartIntent>.unmodifiable(localIntent),
         buyerIdentity: buyerIdentity,
       );
-      if (refreshed == null ||
+      if (generation != _generation ||
+          controller.currentScope != scope ||
+          refreshed == null ||
           refreshed.status != CartReconciliationStatus.authoritative ||
           refreshed.cart == null) {
         return _unavailable(
@@ -128,7 +134,14 @@ final class ShopifyCheckoutCoordinator {
       }
 
       final validated = _urlPolicy.validate(cart.checkoutUrl);
-      if (await _storefrontPasswordBlocks(validated)) {
+      final passwordBlocked =
+          await _storefrontPasswordBlocks(validated, generation);
+      if (generation != _generation || controller.currentScope != scope) {
+        return _unavailable(
+          'Tu cuenta cambió. Revisa tu bolsa e intenta de nuevo.',
+        );
+      }
+      if (passwordBlocked) {
         return const CheckoutFailed(
           code: CheckoutFailureCode.configuration,
           userMessage: kStorefrontPasswordCheckoutMessage,
@@ -143,6 +156,12 @@ final class ShopifyCheckoutCoordinator {
         await _launcher.preload(validated);
       } on Exception {
         // The native SDK can still present the authoritative URL directly.
+      }
+      if (generation != _generation || controller.currentScope != scope) {
+        if (generation == _generation) _latestUrl = null;
+        return _unavailable(
+          'Tu cuenta cambió. Revisa tu bolsa e intenta de nuevo.',
+        );
       }
       final result = await _launcher.present(validated);
       if (result is CheckoutCompleted) {
@@ -217,6 +236,7 @@ final class ShopifyCheckoutCoordinator {
   }
 
   Future<void> invalidate() async {
+    _generation += 1;
     _latestUrl = null;
     try {
       await _launcher.invalidate();
@@ -235,11 +255,17 @@ final class ShopifyCheckoutCoordinator {
   ///
   /// Returns false when the probe is absent or inconclusive so a network
   /// blip cannot block a store that is not password protected.
-  Future<bool> _storefrontPasswordBlocks(ValidatedCheckoutUrl checkout) async {
+  Future<bool> _storefrontPasswordBlocks(
+    ValidatedCheckoutUrl checkout,
+    int generation,
+  ) async {
     final probe = _passwordProbe;
     if (probe == null) return false;
     final gate = await probe.checkHost(checkout.revealForNativeBridge().host);
-    if (gate != StorefrontPasswordGate.passwordProtected) return false;
+    if (generation != _generation ||
+        gate != StorefrontPasswordGate.passwordProtected) {
+      return false;
+    }
     try {
       await _launcher.invalidate();
     } on Exception {

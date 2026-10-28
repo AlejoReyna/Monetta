@@ -191,9 +191,9 @@ void main() {
         setPhoneView(tester, height: 1600);
         final store = await scriptedStore();
         final soldOut = soldOutProduct();
-        addProducts(store, [soldOut]);
-        final single = singleVariantAssetProduct(store);
-        final several = chipAssetProduct(store);
+        final single = singleNamedVariantProduct(title: 'Bolsa negra');
+        final several = chipProduct(title: 'Bolsa negra de tallas');
+        addProducts(store, [soldOut, single, several]);
         final all = store.catalogItems;
         CatalogItem of(Product product) =>
             all.firstWhere((item) => item.shopifyProductId == product.id);
