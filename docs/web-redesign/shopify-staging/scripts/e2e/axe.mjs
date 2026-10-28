@@ -41,6 +41,22 @@ for (const [w, h] of [[375, 812], [1440, 900]]) {
       await open(url);
       await scan(page, `${w}×${h} ${name}`);
     }
+    // Predictive listbox: results, empty fallback and individually removable recent searches.
+    await open(w < 768 ? '/search' : '/');
+    const searchInput = page.locator(w < 768 ? '#page-search-input' : '#header-search-input');
+    await searchInput.fill('co');
+    await page.waitForSelector('monetta-predictive-search[data-state="results"]');
+    await scan(page, `${w}×${h} predictive search with results`);
+    await searchInput.fill('zzqx');
+    await page.waitForSelector('monetta-predictive-search[data-state="empty"]');
+    await scan(page, `${w}×${h} predictive search without results`);
+    await page.evaluate(() => {
+      localStorage.setItem('monetta:recent-searches', JSON.stringify(['Coach', 'Guess']));
+      window.dispatchEvent(new Event('monetta:recent-searches-change'));
+    });
+    await searchInput.fill('');
+    await page.waitForSelector('monetta-predictive-search[data-state="recent"]');
+    await scan(page, `${w}×${h} predictive search with recent searches`);
     // Dialogs open.
     await open('/collections/all');
     // From 1200px the filters live in the sidebar and the drawer button is hidden by design.

@@ -71,6 +71,7 @@
 {{ 'monetta-theme.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-app-alignment.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-guia.css' | asset_url | stylesheet_tag }}
+{{ 'monetta-predictive-search.css' | asset_url | stylesheet_tag }}
 
 <script>
   document.documentElement.classList.add('js');
@@ -93,7 +94,9 @@
 <script src="{{ 'monetta-core.js' | asset_url }}" defer></script>
 <script src="{{ 'monetta-cart.js' | asset_url }}" defer></script>
 <script src="{{ 'monetta-merchandising.js' | asset_url }}" defer></script>
+<script src="{{ 'monetta-search-history.js' | asset_url }}" defer></script>
 <script src="{{ 'monetta-guia.js' | asset_url }}" defer></script>
+<script src="{{ 'monetta-predictive-search.js' | asset_url }}" defer></script>
 {%- if t == 'collection' or t == 'search' %}
   <script src="{{ 'monetta-listing.js' | asset_url }}" defer></script>
 {%- endif %}
