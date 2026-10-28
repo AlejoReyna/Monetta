@@ -71,6 +71,57 @@ void main() {
     );
   });
 
+  test('production rejects a different shop even with a working catalog', () {
+    const config = RuntimeConfig(
+      environment: AppEnvironment.production,
+      allowOfflineCatalog: false,
+    );
+
+    for (final shopDomain in [
+      'monetta-staging.myshopify.com',
+      'another-shop.myshopify.com',
+      'monetta.mx.attacker.test',
+    ]) {
+      expect(
+        config.catalogConfigurationError(
+          firestore: enabled,
+          hasFirebaseOptions: true,
+          hasShopify: true,
+          shopDomain: shopDomain,
+        ),
+        contains('tienda real'),
+        reason: shopDomain,
+      );
+    }
+  });
+
+  test('production requires live Storefront even when Firestore is available',
+      () {
+    const config = RuntimeConfig(
+      environment: AppEnvironment.production,
+      allowOfflineCatalog: false,
+    );
+
+    expect(
+      config.catalogConfigurationError(
+        firestore: enabled,
+        hasFirebaseOptions: true,
+        hasShopify: false,
+        shopDomain: 'monetta.mx',
+      ),
+      contains('token público'),
+    );
+    expect(
+      config.catalogConfigurationError(
+        firestore: disabled,
+        hasFirebaseOptions: false,
+        hasShopify: true,
+        shopDomain: 'monetta.mx',
+      ),
+      isNull,
+    );
+  });
+
   test('external catalog dart-define is rejected at runtime (F03 bypass guard)',
       () {
     const config = RuntimeConfig(

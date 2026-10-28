@@ -31,6 +31,46 @@ make run-staging
 | `dart_defines.staging.json.example` | `dart_defines.staging.json` | Staging device builds |
 | `dart_defines.production.json.example` | `dart_defines.production.json` | Production release builds |
 
+## Checkout opens Monetta Staging instead of Monetta
+
+`make run-staging` uses the shop in `dart_defines.staging.json`. A Shopify
+development shop is a separate store: its products, variant IDs, customers,
+carts and payment settings do not belong to the live `monetta.mx` shop.
+
+For the live checkout:
+
+1. Copy `dart_defines.production.json.example` to
+   `dart_defines.production.json`.
+2. Set `SHOPIFY_STORE_DOMAIN` to `monetta.mx` and
+   `SHOPIFY_STOREFRONT_ACCESS_TOKEN` to the **public Storefront token from the
+   live shop's Headless channel**. Publish the products to that storefront.
+   Changing the domain while keeping the development shop's token is invalid.
+3. Configure the live shop's Customer Account mobile client and the production
+   accounts/orders backend. Keep `SHOPIFY_CHECKOUT_RETURN_DOMAIN` empty unless
+   an actual live checkout/return host is required; never copy the staging host.
+4. Run `make validate-production`, then `make run-production`. Dart defines
+   are compiled in: hot reload does not switch stores. Stop the staging app
+   and start the production flavor with its own configuration.
+
+Production validation and startup reject a different shop even if its
+Storefront token works. The supported live hosts are `monetta.mx`,
+`www.monetta.mx` and `fakcei-n9.myshopify.com`.
+
+The handoff remains `cartCreate` / reconciliation with the selected **variant
+IDs and quantities**, followed by the **fresh `cart.checkoutUrl` returned by
+that same shop**, presented through Checkout Kit. Do not replace a staging
+checkout URL's hostname or send the buyer to `/`, `/collections` or a generic
+`/cart` URL. An empty confirmed cart is rejected before preload/presentation.
+Cancelling checkout preserves the bag; opening a browser never confirms payment.
+
+`Comprar ahora` currently adds the selected variant and opens Monetta's bag.
+The bag's `Continuar al checkout` opens Monetta's contact/review step; the final
+payment action opens Shopify Checkout. A different Shopify storefront asking
+the shopper to select products again is outside that intended flow.
+
+Shopify references: [cart and checkout URL](https://shopify.dev/docs/storefronts/headless/building-with-the-storefront-api/cart/manage#step-7-retrieve-a-checkout-url),
+[Headless Storefront configuration](https://shopify.dev/docs/storefronts/headless/building-with-the-storefront-api/getting-started).
+
 `LOOX_PUBLIC_STORE_ID` is the public Loox widget client id already published
 on the Shopify storefront. It is not a secret. The app reads
 `https://loox.io/widget/{id}/dynamic-carousel/reviews/` — the same JSON the

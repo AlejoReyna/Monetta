@@ -233,7 +233,7 @@ class AdminStorefrontSettings {
   });
 
   static const defaults = AdminStorefrontSettings(
-    announcement: r'ENVÍO GRATIS DESDE $1,499',
+    announcement: '',
     showHero: true,
     showNewest: true,
     showExternalPicks: false,

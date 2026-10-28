@@ -45,4 +45,46 @@ void main() {
     );
     expect(errors.join(' '), contains('ENABLE_EXTERNAL_CATALOG'));
   });
+
+  test('production cannot reuse staging or unrelated Storefront settings', () {
+    for (final shopDomain in [
+      'monetta-staging.myshopify.com',
+      'another-shop.myshopify.com',
+      'monetta.mx.attacker.test',
+    ]) {
+      final errors = validateDartDefines(
+        values: _productionValues(shopDomain),
+        expectedEnvironment: 'production',
+      );
+
+      expect(errors.join(' '), contains('tienda real'), reason: shopDomain);
+    }
+  });
+
+  test('production accepts domains belonging to the live Monetta shop', () {
+    for (final shopDomain in [
+      'monetta.mx',
+      'www.monetta.mx',
+      'fakcei-n9.myshopify.com',
+    ]) {
+      expect(
+        validateDartDefines(
+          values: _productionValues(shopDomain),
+          expectedEnvironment: 'production',
+        ),
+        isEmpty,
+        reason: shopDomain,
+      );
+    }
+  });
 }
+
+Map<String, Object?> _productionValues(String shopDomain) => {
+      'APP_ENV': 'production',
+      'ALLOW_OFFLINE_CATALOG': 'false',
+      'SHOPIFY_STORE_DOMAIN': shopDomain,
+      'SHOPIFY_STOREFRONT_ACCESS_TOKEN': 'live-public-token-fixture',
+      'CUSTOMER_ACCOUNT_SHOP_ID': '72391655575',
+      'CUSTOMER_ACCOUNT_CLIENT_ID': 'live-client-fixture',
+      'ACCOUNTS_ORDERS_BASE_URL': 'https://api.monetta.mx',
+    };

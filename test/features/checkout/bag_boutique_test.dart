@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
-import 'package:monetta_app/app/motion.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/catalog_store.dart';
@@ -24,18 +23,6 @@ Widget _app(CatalogStore store, Widget child) {
 }
 
 void main() {
-  test('free-shipping incentive covers empty, partial and complete', () {
-    expect(remainingForFreeShipping(0), kFreeShippingThreshold);
-    expect(
-      remainingForFreeShipping(kFreeShippingThreshold - 1),
-      1,
-    );
-    expect(remainingForFreeShipping(kFreeShippingThreshold), 0);
-    expect(remainingForFreeShipping(kFreeShippingThreshold + 500), 0);
-    expect(shippingFor(0), kStandardShippingFee);
-    expect(shippingFor(kFreeShippingThreshold), 0);
-  });
-
   testWidgets(
       'bag shows policy placeholder, save-for-later and recommendations',
       (tester) async {
@@ -48,14 +35,22 @@ void main() {
 
     expect(find.text('Mi bolsa'), findsOneWidget);
     expect(
-      find.byKey(const ValueKey('free-shipping-incentive')),
+      find.byKey(const ValueKey('purchase-policy-notice')),
       findsOneWidget,
+    );
+    // No shipping promise by amount: neither the old bar nor any "gratis".
+    expect(
+      find.byKey(const ValueKey('free-shipping-incentive')),
+      findsNothing,
+    );
+    expect(
+      find.textContaining(RegExp('gratis', caseSensitive: false)),
+      findsNothing,
     );
     expect(
       find.textContaining('contenido pendiente de aprobación'),
       findsWidgets,
     );
-    expect(find.textContaining('Tienes envío gratis'), findsNothing);
     // Guardar para después = favorito.
     expect(find.text('Guardar para después'), findsOneWidget);
     await tester.tap(find.text('Guardar para después'));

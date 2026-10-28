@@ -4,6 +4,7 @@ library;
 import 'package:flutter/foundation.dart';
 
 import '../data/firestore/firestore_catalog_config.dart';
+import '../data/shopify/storefront_config.dart';
 import 'external_catalog_config.dart';
 
 enum AppEnvironment { local, staging, production }
@@ -48,6 +49,7 @@ class RuntimeConfig {
     required FirestoreCatalogConfig firestore,
     required bool hasFirebaseOptions,
     required bool hasShopify,
+    String shopDomain = '',
   }) {
     if (environment == null) {
       return 'APP_ENV no está definido. Inicia la app con el archivo de '
@@ -57,6 +59,13 @@ class RuntimeConfig {
       return 'El catálogo externo está retirado (WP-02). Quita '
           'ENABLE_EXTERNAL_CATALOG del build; Monetta solo vende productos '
           'propios de Shopify.';
+    }
+    if (environment == AppEnvironment.production &&
+        (!hasShopify || !StorefrontConfig.isProductionShopDomain(shopDomain))) {
+      return 'Producción requiere Shopify Storefront de la tienda real '
+          'monetta.mx y su token público. Revisa SHOPIFY_STORE_DOMAIN y '
+          'SHOPIFY_STOREFRONT_ACCESS_TOKEN; una tienda de staging tiene '
+          'catálogo y pagos separados.';
     }
     if (allowOfflineCatalog && environment == AppEnvironment.local) return null;
     if (firestore.enabled && !hasFirebaseOptions) {
