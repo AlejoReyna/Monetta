@@ -46,6 +46,7 @@
       <a class="icon-button site-header__search-start" href="{{ routes.search_url }}" aria-label="Buscar productos">{% render 'monetta-icon', name: 'search', size: 22 %}</a>
     </div>
     <a class="wordmark" href="{{ routes.root_url }}" aria-label="{{ shop.name | escape }}, ir al inicio">{% render 'monetta-logo', height: 24, logo: section.settings.logo %}</a>
+    <monetta-predictive-search class="monetta-predictive-search" data-predictive-url="{{ routes.predictive_search_url | escape }}">
     <form class="header-search" role="search" aria-label="Buscar en la tienda" action="{{ routes.search_url }}" method="get">
       <div class="search-field">
         {% render 'monetta-icon', name: 'search', size: 20 %}
@@ -64,6 +65,8 @@
         <button type="button" class="icon-button search-field__clear" data-search-clear aria-label="Borrar búsqueda" hidden>{% render 'monetta-icon', name: 'close', size: 20 %}</button>
       </div>
     </form>
+      {% render 'monetta-predictive-panel' %}
+    </monetta-predictive-search>
     <div class="site-header__end">
       <a class="icon-button site-header__search-icon" href="{{ routes.search_url }}" aria-label="Buscar productos"{% if search_hidden %} hidden{% endif %}>{% render 'monetta-icon', name: 'search', size: 24 %}</a>
       <button type="button" class="icon-button header-utility header-utility--saved" data-open-dialog="saved-products" aria-label="Ver guardados" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 22 %}</button>

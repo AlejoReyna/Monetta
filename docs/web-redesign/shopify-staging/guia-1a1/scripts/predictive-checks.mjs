@@ -25,6 +25,8 @@ export async function predictiveChecks({ run, open, overflow, platformFonts, inp
       await input.fill('co');
       await ready('results');
       check('two characters open suggestions, up to six products and view all', await panel.isVisible() && await root.locator('[data-predictive-kind="query"]').count() > 0 && await root.locator('[data-predictive-kind="product"]').count() > 0 && await root.locator('[data-predictive-kind="product"]').count() <= 6 && await root.locator('[data-predictive-kind="all"]').count() === 1);
+      const collectionURLs = await root.locator('[data-predictive-kind="collection"]').evaluateAll((links) => links.map((link) => link.getAttribute('href')));
+      check('matching Shopify collections appear with their destinations', collectionURLs.length > 0 && collectionURLs.every((url) => url.startsWith('/collections/')), collectionURLs);
       check('API requests query, product and collection with six results each', requests.some((url) => url.searchParams.get('resources[type]') === 'query,product,collection' && url.searchParams.get('resources[limit]') === '6' && url.searchParams.get('resources[limit_scope]') === 'each' && url.searchParams.get('resources[options][unavailable_products]') === 'last' && url.searchParams.get('section_id') === 'monetta-predictive-results'));
       const highlights = await root.locator('[data-predictive-kind="query"] mark').allTextContents();
       check('the written part is highlighted in query suggestions', highlights.length > 0 && highlights.every((t) => t.toLowerCase() === 'co'), highlights);
@@ -53,9 +55,11 @@ export async function predictiveChecks({ run, open, overflow, platformFonts, inp
       const queryURL = new URL(await options.first().getAttribute('href'), page.url());
       await Promise.all([page.waitForURL((url) => url.pathname === queryURL.pathname && url.searchParams.get('q') === queryURL.searchParams.get('q')), input.press('Enter')]);
       check('Enter navigates the active query to product search', new URL(page.url()).searchParams.get('type') === 'product');
+      const beforeNavigationCache = requests.length;
       await open(page, w < 768 ? '/search' : '/');
       await input.fill('co');
       await ready('results');
+      check('session cache survives a document navigation', requests.length === beforeNavigationCache);
       await input.press('Escape');
       check('first Escape closes the panel and keeps the query', !(await panel.isVisible()) && await input.inputValue() === 'co' && !(await input.getAttribute('aria-activedescendant')));
       await input.press('Escape');
@@ -72,11 +76,14 @@ export async function predictiveChecks({ run, open, overflow, platformFonts, inp
       check('Tab closes the panel and leaves the input', !(await panel.isVisible()) && !(await input.evaluate((node) => document.activeElement === node)));
       await input.focus();
       await ready('results');
-      await page.locator('h1').first().click();
+      await page.mouse.click(1, h - 2);
       check('click outside closes the panel', !(await panel.isVisible()));
       await input.fill('zzqx');
       await ready('empty');
       check('empty state names the query, offers four real categories and announces no results', (await panel.textContent()).includes('No encontramos resultados para «zzqx»') && (await root.locator('[data-predictive-kind="category"]').allTextContents()).join('|') === 'Bolsas|Carteras|Relojes|Perfumes' && await live.textContent() === 'Sin resultados');
+      const categoryLinks = await root.locator('[data-predictive-kind="category"]').evaluateAll((links) => links.map((link) => ({ text: link.textContent, url: link.getAttribute('href') })));
+      const navigationLinks = await page.locator('.site-nav__link').evaluateAll((links) => links.map((link) => ({ text: link.textContent, url: link.getAttribute('href') })));
+      check('empty-state categories use the same destinations as guide navigation', categoryLinks.every((link) => navigationLinks.some((nav) => nav.text === link.text && nav.url === link.url)), categoryLinks);
       if (w === 390 || w === 1440) await page.screenshot({ path: run.file(`f9-${w}-empty.png`) });
       await page.evaluate(() => { localStorage.setItem('monetta:recent-searches', JSON.stringify(['Coach', 'Guess'])); window.dispatchEvent(new Event('monetta:recent-searches-change')); });
       await input.fill('');
@@ -88,6 +95,7 @@ export async function predictiveChecks({ run, open, overflow, platformFonts, inp
       check('removing a recent updates the one shared key', history.join('|') === 'Guess' && await root.locator('[data-predictive-kind="recent"]').count() === 1, history);
       await open(page, '/search');
       check('the search page reads the same updated history', (await page.locator('[data-guia-recent-list] a span').allTextContents()).join('|') === 'Guess');
+      await page.locator('#page-search-input').press('Escape');
       await page.locator('.guia-search__remove').click();
       await page.locator('#page-search-input').focus();
       check('removing from the page also empties the predictive history', await page.evaluate(() => localStorage.getItem('monetta:recent-searches')) === '[]' && !(await page.locator('monetta-predictive-search:has(#page-search-input) [data-monetta-predictive-panel]').isVisible()));
@@ -124,7 +132,7 @@ export async function predictiveChecks({ run, open, overflow, platformFonts, inp
       await ready('results');
       const product = root.locator('[data-predictive-kind="product"]').first();
       const destination = new URL(await product.getAttribute('href'), page.url());
-      await Promise.all([page.waitForURL((url) => url.pathname === destination.pathname), product.click()]);
+      await Promise.all([page.waitForURL((url) => url.pathname === destination.pathname), w === 390 ? product.tap() : product.click()]);
       check('click or touch on a product reaches its URL', new URL(page.url()).pathname === destination.pathname);
 
       const native = await context.newPage();
@@ -139,7 +147,8 @@ export async function predictiveChecks({ run, open, overflow, platformFonts, inp
         await open(page, width < 768 ? '/search' : '/');
         await page.locator(width < 768 ? '#page-search-input' : '#header-search-input').fill('co');
         await page.waitForSelector('monetta-predictive-search[data-state="results"]');
-        check(`open panel has no overflow at ${width}px`, await overflow(page) <= 1);
+        const bounds = await page.locator('monetta-predictive-search[data-state="results"] [data-monetta-predictive-panel]').boundingBox();
+        check(`open panel has no overflow at ${width}px`, await overflow(page) <= 1 && bounds?.x >= -1 && bounds.x + bounds.width <= width + 1, bounds);
       }
     } catch (error) {
       check('checks complete without an unexpected error', false, String(error.stack || error));

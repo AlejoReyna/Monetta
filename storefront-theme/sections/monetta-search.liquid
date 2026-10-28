@@ -45,6 +45,7 @@
       {% render 'monetta-page-bar', title: 'Buscar', back: routes.root_url, actions: bar_actions %}
     {% endif %}
 
+    <monetta-predictive-search class="monetta-predictive-search" data-predictive-url="{{ routes.predictive_search_url | escape }}">
     <form class="search-page__field" role="search" aria-label="Editar búsqueda" action="{{ routes.search_url }}" method="get">
       <div class="search-field">
         {% render 'monetta-icon', name: 'search', size: 20 %}
@@ -54,6 +55,8 @@
         <button type="button" class="icon-button search-field__clear" data-search-clear aria-label="Borrar búsqueda"{% unless performed %} hidden{% endunless %}>{% render 'monetta-icon', name: 'close', size: 20 %}</button>
       </div>
     </form>
+      {% render 'monetta-predictive-panel' %}
+    </monetta-predictive-search>
 
     {%- assign suggestion_entries = 'bolsas:Bolsas:bag,carteras:Carteras:wallet,relojes:Relojes:watch,perfumes:Perfumes:perfume' | split: ',' -%}
     <div class="guia-search" data-guia-recent data-current="{{ search.terms | escape }}">
