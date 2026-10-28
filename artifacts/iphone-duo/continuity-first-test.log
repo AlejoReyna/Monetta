@@ -1,0 +1,91 @@
+00:00 +0: loading /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart
+00:00 +0: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart: active regions exclude controls; inactive division does not reserve space
+00:00 +1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart: native listener delivers current snapshots and cancels on disposal
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: SystemBarEdge:<SystemBarEdge.right>
+  Actual: SystemBarEdge:<SystemBarEdge.none>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart:93:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart line 93
+The test description was:
+  native listener delivers current snapshots and cancels on disposal
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:01 +1 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart: native listener delivers current snapshots and cancels on disposal [E]
+  Test failed. See exception logs above.
+  The test description was: native listener delivers current snapshots and cancels on disposal
+  
+00:02 +1 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: (setUpAll)
+00:02 +1 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: same product/variant/gallery/sections survive repeated reflow
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following StateError was thrown running a test:
+Bad state: No element
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:694:25)
+#1      WidgetController.widget (package:flutter_test/src/controller.dart:828:30)
+#2      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart:94:12)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+The test description was:
+  same product/variant/gallery/sections survive repeated reflow
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:06 +1 -2: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: same product/variant/gallery/sections survive repeated reflow [E]
+  Test failed. See exception logs above.
+  The test description was: same product/variant/gallery/sections survive repeated reflow
+  
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+00:06 +1 -2: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: resizing an in-flight add issues exactly one exact-variant mutation
+00:07 +2 -2: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: browse expands, collapses and Back restores the source selection
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: at least one matching candidate
+  Actual: _TypeWidgetFinder:<Found 0 widgets with type "ProductCard": []>
+   Which: means none were found but some were expected
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart:154:5)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart line 154
+The test description was:
+  browse expands, collapses and Back restores the source selection
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:08 +2 -3: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: browse expands, collapses and Back restores the source selection [E]
+  Test failed. See exception logs above.
+  The test description was: browse expands, collapses and Back restores the source selection
+  
+00:08 +2 -3: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: (tearDownAll)
+00:08 +2 -3: Some tests failed.
+
+Failing tests:
+  /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: browse expands, collapses and Back restores the source selection
+  /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: same product/variant/gallery/sections survive repeated reflow
+  /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart: native listener delivers current snapshots and cancels on disposal

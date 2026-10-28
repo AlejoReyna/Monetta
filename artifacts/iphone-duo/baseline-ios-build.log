@@ -1,0 +1,8 @@
+Building mx.monetta.monettaApp.staging for simulator (ios)...
+The following plugins do not support Swift Package Manager for ios:
+  - flutter_secure_storage
+This will become an error in a future version of Flutter. Please contact the plugin maintainers to request Swift Package Manager adoption.
+Running pod install...                                             53.1s
+Running Xcode build...                                          
+Xcode build done.                                           623.3s
+✓ Built build/ios/iphonesimulator/Runner.app
