@@ -182,7 +182,10 @@ void main() {
     expect(logo.phase, WelcomeLogoPhase.playing);
 
     await pumpAt(
-        tester, harness(size: const Size(951, 669)), const Size(951, 669));
+      tester,
+      harness(size: const Size(951, 669)),
+      const Size(951, 669),
+    );
     expect(_shownProgress(tester), 1, reason: 'first frame with new geometry');
     await tester.pump();
     expect(logo.phase, WelcomeLogoPhase.done);
