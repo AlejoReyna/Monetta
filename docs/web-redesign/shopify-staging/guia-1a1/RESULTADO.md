@@ -465,3 +465,60 @@ La persona pidió publicar el tema en staging para que lo vea el owner.
 - **Para el owner:** en <https://monetta-staging.myshopify.com> escribe la contraseña de la tienda en la página genérica de Shopify (la de las tiendas de desarrollo) y entra al tema nuevo. Ya no hace falta `?preview_theme_id`.
 - **Nombre:** el tema todavía se llama «Monetta guía 1a1 borrador sin publicar 2026-10-27». Renombrarlo es otra escritura en la tienda; queda para cuando la persona lo pida.
 - **Para seguir trabajando:** duplicar el tema publicado y apuntar `THEME.env` al duplicado. `theme-push.sh` y `start-theme-dev.command` se niegan a escribir en un tema publicado.
+
+## F9. Buscador predictivo — implementación en borrador; validación de navegador pendiente
+
+**Autorización y destino**
+- La persona indicó: «cuando termines, subelo directo a la pagina de staging». Se autorizó preparar el duplicado y desplegarlo en staging después de validar. Esta indicación posterior sustituye la prohibición inicial de publicar, exclusivamente para la entrega en staging.
+- Se duplicó `192558366754` sin modificar sus archivos. Nuevo tema: **`192576585762`**, rol **`unpublished`**. Shopify devolvió el nombre truncado «Monetta buscador predictivo borrador sin public...», que se usa literalmente en `THEME.env` para la comprobación de destino.
+- `THEME_DIR` apunta a `storefront-theme/` del worktree nuevo `.claude/worktrees/web-buscador-predictivo`; rama local `feat/web-buscador-predictivo`, desde `11ff5db`.
+- No se escribió en el tema publicado, en el admin de productos/colecciones/ajustes ni en la app. No hubo push a GitHub ni PR.
+
+**Qué cambió**
+- Se conectó `<monetta-predictive-search>` a los formularios existentes del header y de `/search`. Se conservaron los IDs, el GET, `type=product`, `.search-field`, `[data-search-clear]`, `watchSearchClear` y `watchTyping`.
+- Con dos caracteres y 200 ms de espera, consulta `query,product,collection`, con límite de seis por recurso, indisponibles al final y `section_id=monetta-predictive-results`.
+- La sección devuelve sugerencias con el resaltado de Shopify (`styled_text`), productos con imagen/marca/nombre/precio y precio anterior cuando corresponde (misma selección de variante y formato monetario que las tarjetas), y colecciones. «Ver todos los resultados para «…»» es la última opción seleccionable.
+- Estado vacío en español con Bolsas, Carteras, Relojes y Perfumes; los enlaces se resuelven con `monetta-guia-url`.
+- Historial único `monetta:recent-searches`, máximo cinco, compartido con la página y sincronizado entre los componentes. Cada reciente se puede quitar; Suprimir también quita la opción reciente seleccionada con las flechas. Los botones están fuera del listbox para evitar controles interactivos anidados en opciones.
+- Flechas con `aria-activedescendant`, Enter nativo o activación de la opción, Escape para cerrar y luego borrar, Tab/clic fuera para cerrar; región `aria-live="polite"`.
+- Cancelación con `AbortController` y generación de consulta para descartar respuestas antiguas incluso después de cambiar el texto. Caché de hasta 50 respuestas durante la sesión (`sessionStorage`, con respaldo en memoria). Ante error, se cierra el panel y queda disponible el GET normal.
+- Panel fijo bajo el campo, vidrio translúcido, Playfair Display, borde de control, filo interior y sombra corta. Ancho de pantalla en teléfono, opciones y botones de 48 px o más; indicador sin desplazamiento del documento y sin animación con movimiento reducido.
+- El componente independiente reutiliza el mismo formulario/panel e historial. Sus límites se acotan a seis resultados y cinco recientes.
+
+**Pruebas primero y comprobaciones**
+
+| Comprobación | Antes | Después / estado real |
+|---|---|---|
+| F9 a 390, 768, 1024 y 1440 | **0/4**: falla en los cuatro tamaños porque el campo existente no está conectado a un componente. Corrida realizada antes de copiar los cambios al tema. | **Pendiente** contra el proxy del duplicado. No se declara aprobada. |
+| Preflight Liquid con overlay | — | **10 archivos, 0 errores**; repetido tras ajustar los parámetros y el precio de variante. |
+| Theme Check contra línea base | 187 errores y 64 avisos | Primera corrida: 187/66, con dos avisos nuevos por parámetros del snippet. Se corrigieron; segunda: **187/64, 0 hallazgos introducidos**. |
+| `node design-system/build.mjs --check` | — | Pasa; 22 pares de contraste. |
+| `node tools/style-guideline-theme/port-css.mjs --check` | — | Pasa. |
+| `./bin/check_no_secrets.sh` | — | Pasa. |
+| `node --check` de los tres JS modificados/nuevos y del arnés F9; `git diff --check` | — | Pasan. |
+| Subida protegida al duplicado | — | Dos subidas terminadas con éxito; `theme-push.sh` verificó `unpublished` y el nombre antes de cada una. |
+| Comparación remota después de subir | — | **779 archivos de cada lado, 0 diferencias de contenido**; 765 idénticos byte a byte y 14 JSON equivalentes tras el formato de Shopify. |
+| Suite completa, axe abierto y revisión de capturas | — | **Pendientes**; no se ejecutaron sobre el cambio. |
+
+**Arnés F9** (`guia-checks.mjs` → `predictive-checks.mjs`): cubre umbral, consulta API, sugerencias/resaltado/productos/colecciones/Ver todos, teclado, navegación por enlace y toque, ARIA, recientes compartidos y eliminación desde ambos lugares, caché entre documentos, respuesta anterior que llega tarde incluso tras el aborto, fallo API con GET funcional, scripts bloqueados, fuentes medidas por CDP y límites del panel entre 320 y 1440. Generará seis capturas de resultados/vacío/recientes a 390 y 1440. `axe.mjs` agrega los tres estados del panel a sus dos tamaños habituales. Estas comprobaciones están escritas, pero su resultado posterior todavía no existe.
+
+**Comandos y evidencia** (todo bajo `guia-1a1/evidencia/`, fuera de git)
+- `node guia-checks.mjs --phases=f9 --name=f9-before` con `MONETTA_RUNS_DIR`: exit 1 esperado; `runs/2026-10-28T03-27-02-418Z-f9-before/result.json`, cuatro fallas de conexión. El proxy sirvió el árbol anterior, tema `192558366754`.
+- `node .../preflight.mjs --overlay=/private/tmp/monetta-f9-overlay`: exit 0, 10 archivos y 0 errores.
+- `node .../theme-check-diff.mjs --out=<ruta absoluta>`: primera salida exit 1 (`validation/f9-local/theme-check`); corregida exit 0 (`validation/f9-local-fixed/theme-check`).
+- Build, paridad y secretos: exit 0; salidas en `validation/f9-local-fixed/{build-check,port-parity,secrets}.out`.
+- `shopify theme duplicate --store monetta-staging.myshopify.com --theme 192558366754 --name ... --force`: éxito. La primera invocación sin `--force` fue rechazada por la CLI antes de crear el tema; la segunda creó únicamente el duplicado autorizado.
+- `shopify theme list --store monetta-staging.myshopify.com --id 192576585762 --json --no-color`: `unpublished`.
+- `scripts/theme-push.sh` y, tras ajustes, `scripts/theme-push.sh --only assets/monetta-predictive-search.js --only assets/monetta-predictive-search.css --only snippets/monetta-predictive-search.liquid --only sections/monetta-predictive-results.liquid`: exit 0.
+- `node scripts/compare-remote.mjs --out=<ruta absoluta a evidencia/f9/remote-after-upload>`: exit 0; `equivalent: true`, rol `unpublished`, 779 archivos en ambos lados y cero diferencias de contenido. Descarga de sólo lectura, 28-oct 03:40 UTC.
+- Sondeo de sólo lectura desde el navegador de la API JSON real: `co` devuelve tres consultas, dos productos y una colección; `bol` seis consultas y seis productos; `guess` seis consultas y seis productos; `zzqx` cero de los tres recursos. Este sondeo comprueba los datos de prueba, **no valida la sección ni el componente nuevo**.
+
+**Pendiente para completar y publicar**
+1. La persona debe cerrar el proxy anterior y arrancar `docs/web-redesign/shopify-staging/scripts/start-theme-dev.command` **del worktree nuevo**; la contraseña se escribe sólo en su Terminal, como exige el encargo §4.3. El proxy observado seguía sirviendo `192558366754` y cero componentes predictivos; no se puede usar para aprobar el cambio.
+2. Ejecutar F9 sobre el duplicado, investigar y corregir las fallas; revisar sus seis capturas.
+3. Ejecutar `GUIA_PHASES=f1,f2,f3,f4,f5,f7,f8,f9 docs/web-redesign/shopify-staging/guia-1a1/scripts/validate.sh f9`, investigar cualquier falla y registrar la evidencia y clasificación. La publicación queda pendiente de esta validación.
+4. Comparar el remoto con el worktree final; detener el proxy antes de publicar el duplicado en staging, según la indicación posterior de la persona. Confirmar el rol y la tienda publicados.
+
+**Commits locales hasta aquí:** `5acda91` (pruebas previas), `65b20c1` (implementación y destino protegido).
+
+**Vista previa del duplicado:** <https://monetta-staging.myshopify.com/?preview_theme_id=192576585762>. **Todavía no se publicó.**
