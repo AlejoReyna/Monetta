@@ -1,0 +1,208 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="1680" height="2460" viewBox="0 0 1680 2460">
+  <title>Monetta iPhone Duo postures  -  concept</title>
+  <desc>Concept board. Not a simulator capture. Not verified on hardware. Not an App Store screenshot.</desc>
+  <style>
+    text { font-family: Georgia, "Times New Roman", serif; fill: #211B16; }
+    .sans { font-family: Inter, Helvetica, Arial, sans-serif; }
+    .label { font-size: 13px; letter-spacing: 0.08em; }
+    .small { font-size: 12px; }
+    .tiny { font-size: 11px; }
+  </style>
+  <rect width="1680" height="2460" fill="#FBF8F2"/>
+  <text x="64" y="64" font-size="32">Monetta · posturas de iPhone Duo</text>
+  <text class="sans" x="64" y="96" font-size="16" fill="#745237">concept</text>
+  <text class="sans" x="160" y="96" font-size="14" fill="#73665D">No es una captura del simulador. No está verificado en hardware. No es una imagen del App Store.</text>
+
+  <text class="sans" x="64" y="146" font-size="14" fill="#73665D">Welcome · P1, P3 y P4. El logo se escribe una vez por instalación (decisión de Alexis, 28 oct 2026).</text>
+
+  <!-- P1 welcome -->
+  <g transform="translate(64,170)">
+    <rect width="280" height="460" rx="28" fill="#F7F3EC" stroke="#E7DCCE"/>
+    <rect x="248" y="24" width="20" height="412" rx="8" fill="#F3EADF"/>
+    <text class="sans tiny" x="16" y="28" fill="#745237">concept · P1</text>
+    <text class="sans small" x="16" y="48">Cerrado · exterior vertical</text>
+    <rect x="70" y="120" width="150" height="44" rx="4" fill="none" stroke="#C5A052"/>
+    <text class="sans small" x="88" y="146">MONETTA</text>
+    <text class="small" x="78" y="190" text-anchor="middle" transform="translate(70,0)">Un paraíso de marcas</text>
+    <text class="sans tiny" x="16" y="360" fill="#73665D">Logo fuera de la cámara. Caja final.</text>
+    <rect x="40" y="390" width="180" height="44" rx="22" fill="#745237"/>
+    <text class="sans" x="78" y="417" fill="#FFFFFF" font-size="14">COMENZAR</text>
+  </g>
+
+  <!-- P3 welcome -->
+  <g transform="translate(380,170)">
+    <rect width="620" height="460" rx="28" fill="#F7F3EC" stroke="#E7DCCE"/>
+    <rect x="576" y="24" width="28" height="412" rx="8" fill="#F3EADF"/>
+    <rect x="290" y="70" width="16" height="300" fill="#E7DCCE" opacity="0.7"/>
+    <text class="sans tiny" x="16" y="28" fill="#745237">concept · P3</text>
+    <text class="sans small" x="16" y="48">Abierto plano · interior horizontal · banda inactiva, no es un muro</text>
+    <rect x="40" y="140" width="180" height="48" rx="4" fill="none" stroke="#C5A052"/>
+    <text class="sans small" x="70" y="170">MONETTA</text>
+    <text class="small" x="40" y="220">Texto de bienvenida en este lado</text>
+    <rect x="40" y="380" width="180" height="44" rx="22" fill="#745237"/>
+    <text class="sans" x="78" y="407" fill="#FFFFFF" font-size="14">COMENZAR</text>
+    <text class="sans tiny" x="330" y="200" fill="#73665D">El botón no cruza la banda,</text>
+    <text class="sans tiny" x="330" y="218" fill="#73665D">aunque todavía esté inactiva.</text>
+  </g>
+
+  <!-- P4 welcome -->
+  <g transform="translate(1040,170)">
+    <rect width="360" height="460" rx="28" fill="#F7F3EC" stroke="#E7DCCE"/>
+    <rect x="40" y="210" width="280" height="12" fill="#E7DCCE"/>
+    <text class="sans tiny" x="16" y="28" fill="#745237">concept · P4</text>
+    <text class="sans small" x="16" y="48">Abierto plano · interior vertical</text>
+    <rect x="90" y="90" width="180" height="48" rx="4" fill="none" stroke="#C5A052"/>
+    <text class="sans small" x="124" y="120">MONETTA</text>
+    <text class="sans tiny" x="16" y="200" fill="#73665D">Logo por encima de la banda inactiva</text>
+    <text class="sans tiny" x="16" y="250" fill="#73665D">Sin destinos todavía. El botón queda bajo la banda.</text>
+    <rect x="70" y="300" width="220" height="44" rx="22" fill="#745237"/>
+    <text class="sans" x="118" y="327" fill="#FFFFFF" font-size="14">COMENZAR</text>
+  </g>
+
+  <text x="64" y="690" font-size="22">Tarea firma · concept</text>
+  <text class="sans" x="360" y="690" font-size="14" fill="#73665D">Encontrar una crossbody, verla, elegir variante, agregarla una vez.</text>
+
+  <!-- signature row -->
+  <g transform="translate(64,720)">
+    <rect width="250" height="420" rx="24" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <rect x="214" y="16" width="22" height="388" rx="8" fill="#F3EADF"/>
+    <text class="sans tiny" x="12" y="24" fill="#745237">concept · P1</text>
+    <rect x="20" y="48" width="170" height="140" rx="8" fill="#F4EEE5" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="48" y="120" fill="#73665D">fotografía contenida</text>
+    <text class="small" x="20" y="214">Crossbody</text>
+    <text class="sans small" x="20" y="236">Precio</text>
+    <rect x="20" y="260" width="170" height="40" rx="20" fill="#745237"/>
+    <text class="sans tiny" x="48" y="284" fill="#FFFFFF">AGREGAR A BOLSA</text>
+    <text class="sans tiny" x="20" y="330" fill="#73665D">Una columna. Riel en el</text>
+    <text class="sans tiny" x="20" y="346" fill="#73665D">borde que reporte el host.</text>
+  </g>
+
+  <g transform="translate(334,720)">
+    <rect width="420" height="250" rx="24" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <rect x="12" y="16" width="22" height="218" rx="8" fill="#F3EADF"/>
+    <text class="sans tiny" x="44" y="28" fill="#745237">concept · P2</text>
+    <text class="sans tiny" x="44" y="48" fill="#73665D">Alto corto. El riel puede ir a la izquierda.</text>
+    <rect x="48" y="70" width="120" height="90" rx="8" fill="#F4EEE5" stroke="#E7DCCE"/>
+    <text class="small" x="180" y="100">Crossbody</text>
+    <text class="sans small" x="180" y="122">Precio</text>
+    <rect x="180" y="150" width="210" height="36" rx="18" fill="#745237"/>
+    <text class="sans tiny" x="214" y="172" fill="#FFFFFF">AGREGAR A BOLSA</text>
+    <text class="sans tiny" x="48" y="230" fill="#73665D">La acción queda en zona alcanzable, no bajo el riel.</text>
+  </g>
+
+  <g transform="translate(774,720)">
+    <rect width="520" height="420" rx="24" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <rect x="484" y="16" width="22" height="388" rx="8" fill="#F3EADF"/>
+    <rect x="230" y="40" width="12" height="300" fill="#E7DCCE" opacity="0.65"/>
+    <text class="sans tiny" x="12" y="24" fill="#745237">concept · P3</text>
+    <text class="sans tiny" x="12" y="48">Crossbody · filtro</text>
+    <rect x="16" y="64" width="90" height="90" rx="8" fill="#F4EEE5" stroke="#211B16" stroke-width="2"/>
+    <rect x="116" y="64" width="90" height="90" rx="8" fill="#F4EEE5" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="28" y="170" fill="#73665D">pieza elegida</text>
+    <rect x="270" y="64" width="190" height="160" rx="8" fill="#F4EEE5" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="300" y="148" fill="#73665D">fotografía contenida</text>
+    <text class="small" x="270" y="252">Nombre de la pieza</text>
+    <text class="sans small" x="270" y="274">Precio</text>
+    <rect x="270" y="292" width="190" height="36" rx="18" fill="#745237"/>
+    <text class="sans tiny" x="300" y="314" fill="#FFFFFF">AGREGAR A BOLSA</text>
+    <text class="sans tiny" x="12" y="400" fill="#73665D">Banda inactiva = guía. La colección sigue montada.</text>
+  </g>
+
+  <g transform="translate(64,1170)">
+    <rect width="300" height="460" rx="24" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <rect x="24" y="200" width="252" height="10" fill="#E7DCCE"/>
+    <text class="sans tiny" x="12" y="24" fill="#745237">concept · P4</text>
+    <rect x="50" y="40" width="200" height="140" rx="8" fill="#F4EEE5" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="86" y="114" fill="#73665D">fotografía contenida</text>
+    <text class="small" x="24" y="250">Nombre de la pieza</text>
+    <text class="sans small" x="24" y="274">Precio · variante</text>
+    <rect x="24" y="300" width="252" height="40" rx="20" fill="#745237"/>
+    <text class="sans tiny" x="78" y="324" fill="#FFFFFF">AGREGAR A BOLSA</text>
+    <text class="sans tiny" x="16" y="430">Inicio</text>
+    <text class="sans tiny" x="80" y="430">Catálogo</text>
+    <text class="sans tiny" x="160" y="430">Carrito</text>
+    <text class="sans tiny" x="230" y="430">Cuenta</text>
+  </g>
+
+  <g transform="translate(390,1170)">
+    <rect width="520" height="460" rx="24" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <rect x="484" y="16" width="22" height="428" rx="8" fill="#F3EADF"/>
+    <rect x="230" y="36" width="18" height="360" fill="#C5A052" opacity="0.35"/>
+    <text class="sans tiny" x="12" y="24" fill="#745237">concept · P5</text>
+    <rect x="20" y="48" width="190" height="240" rx="8" fill="#F4EEE5" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="48" y="170" fill="#73665D">galería, lado leading</text>
+    <text class="small" x="270" y="80">Nombre</text>
+    <text class="sans small" x="270" y="104">Precio</text>
+    <text class="sans small" x="270" y="128">Variante</text>
+    <rect x="270" y="156" width="190" height="40" rx="20" fill="#745237"/>
+    <text class="sans tiny" x="292" y="180" fill="#FFFFFF">AGREGAR A BOLSA</text>
+    <text class="sans tiny" x="20" y="420" fill="#73665D">División activa. Ningún control la cruza.</text>
+    <text class="sans tiny" x="20" y="438" fill="#73665D">Oro del corte: solo marca el concepto.</text>
+  </g>
+
+  <g transform="translate(940,1170)">
+    <rect width="360" height="460" rx="24" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <rect x="24" y="210" width="312" height="14" fill="#C5A052" opacity="0.35"/>
+    <text class="sans tiny" x="12" y="24" fill="#745237">concept · P6 provisional</text>
+    <rect x="40" y="48" width="280" height="140" rx="8" fill="#F4EEE5" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="100" y="122" fill="#73665D">contenido arriba</text>
+    <text class="sans small" x="40" y="260">Variante</text>
+    <rect x="40" y="284" width="280" height="40" rx="20" fill="#745237"/>
+    <text class="sans tiny" x="108" y="308" fill="#FFFFFF">AGREGAR A BOLSA</text>
+    <text class="sans tiny" x="16" y="360" fill="#73665D">Solo si el host reporta una división</text>
+    <text class="sans tiny" x="16" y="376" fill="#73665D">horizontal activa. Aún no capturado.</text>
+    <text class="sans tiny" x="16" y="400" fill="#73665D">COMENZAR, si hubiera Welcome,</text>
+    <text class="sans tiny" x="16" y="416" fill="#73665D">iría entero debajo del corte.</text>
+  </g>
+
+  <text x="64" y="1690" font-size="22">P7, P8, P9 y el tránsito · concept</text>
+
+  <g transform="translate(64,1720)">
+    <rect width="380" height="220" rx="16" fill="#F7F3EC" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="16" y="28" fill="#745237">concept · P7</text>
+    <text class="sans small" x="16" y="60">De canto. Sin layout propio.</text>
+    <text class="sans small" x="16" y="88">Sirve la postura que coincida</text>
+    <text class="sans small" x="16" y="112">con el snapshot. La compra</text>
+    <text class="sans small" x="16" y="136">también cabe en el exterior.</text>
+    <text class="sans tiny" x="16" y="180" fill="#73665D">Apple no dice qué pantalla queda de frente.</text>
+  </g>
+
+  <g transform="translate(464,1720)">
+    <rect width="520" height="220" rx="16" fill="#F7F3EC" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="16" y="28" fill="#745237">concept · P8</text>
+    <rect x="20" y="48" width="200" height="140" rx="8" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <rect x="28" y="60" width="16" height="116" rx="4" fill="#F3EADF"/>
+    <text class="sans tiny" x="56" y="120">App izquierda</text>
+    <text class="sans tiny" x="56" y="138" fill="#73665D">riel a la izquierda</text>
+    <rect x="250" y="48" width="240" height="140" rx="8" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <rect x="460" y="60" width="16" height="116" rx="4" fill="#F3EADF"/>
+    <text class="sans tiny" x="270" y="120">App derecha</text>
+    <text class="sans tiny" x="270" y="138" fill="#73665D">riel a la derecha</text>
+    <text class="sans tiny" x="16" y="206" fill="#73665D">Nunca asumir el riel derecho por el ancho. Slide Over: sin evidencia.</text>
+  </g>
+
+  <g transform="translate(1004,1720)">
+    <rect width="612" height="220" rx="16" fill="#F7F3EC" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="16" y="28" fill="#745237">concept · P9 diferido</text>
+    <text class="sans small" x="16" y="68">Una escena. Una bolsa. Un «Comenzar».</text>
+    <text class="sans small" x="16" y="96">No hay tienda en las dos pantallas.</text>
+    <text class="sans small" x="16" y="132">Apple documenta un accessory de cámara.</text>
+    <text class="sans small" x="16" y="160">Monetta no lo usa en este lanzamiento.</text>
+  </g>
+
+  <g transform="translate(64,1970)">
+    <rect width="1552" height="200" rx="16" fill="#FFFFFF" stroke="#E7DCCE"/>
+    <text class="sans tiny" x="20" y="32" fill="#745237">concept · P10</text>
+    <text class="sans small" x="20" y="68">Abrir, cerrar, rotar o plegar a mitad de la tarea no reinicia el logo, no suma otra línea y no abre otra hoja.</text>
+    <text class="sans small" x="20" y="100">El sistema anima el pliegue. Crossfade de 180 ms solo si cambia la pieza del panel o si la persona abre o cierra ese panel.</text>
+    <text class="sans small" x="20" y="132">AGREGANDO... y la hoja de Shopify siguen siendo una sola operacion. Pendiente de revision del tester de pagos.</text>
+    <text class="sans small" x="20" y="164">Si la caja del logo cambia de tamaño, la escritura salta al frame final. Si solo cambia la división y la caja no, la escritura termina.</text>
+  </g>
+
+  <text class="sans" x="64" y="2220" font-size="13" fill="#73665D">Marfil #FBF8F2 · acción #745237 · tinta #211B16 · oro #C5A052 solo para marcar el concepto del pliegue, no como texto.</text>
+  <text class="sans" x="64" y="2248" font-size="13" fill="#73665D">Los rectángulos no son medidas del aparato. 466, 951 y 40 pt viven en POSTURES.md como observaciones del simulador, no como este dibujo.</text>
+  <text class="sans" x="64" y="2288" font-size="18" fill="#745237">concept</text>
+  <text class="sans" x="64" y="2320" font-size="13" fill="#73665D">Tablero de concepto para la tarea firma y para Welcome en P1, P3 y P4. P6 está dibujado como provisional.</text>
+  <text class="sans" x="64" y="2360" font-size="13" fill="#211B16">No verificado en hardware. No es una captura. No es material de App Store.</text>
+</svg>
