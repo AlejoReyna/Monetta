@@ -5,8 +5,6 @@
     "header": {
       "type": "monetta-header",
       "settings": {
-        "menu": "main-menu",
-        "secondary_menu": "footer",
         "search_placeholder": "Buscar bolsas, carteras y relojes"
       }
     }

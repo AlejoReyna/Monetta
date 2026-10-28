@@ -1,0 +1,19 @@
+{%- capture codes_string -%}
+  {%- for discount in cart.cart_level_discount_applications -%}{% if discount.type == 'discount_code' %}{{ discount.title }}§{% endif %}{%- endfor -%}
+  {%- for item in cart.items -%}{%- for allocation in item.line_level_discount_allocations -%}{% if allocation.discount_application.type == 'discount_code' %}{{ allocation.discount_application.title }}§{% endif %}{%- endfor -%}{%- endfor -%}
+{%- endcapture -%}
+{%- assign codes = codes_string | split: '§' | uniq -%}
+<form class="discount-form" action="{{ routes.cart_url }}" method="post" data-discount-form>
+  <label for="cart-discount">Código de descuento</label>
+  <div class="discount-form__row">
+    <input type="text" id="cart-discount" name="discount" value="{{ codes | join: ', ' | escape }}" placeholder="Escribe tu código" autocomplete="off" autocapitalize="characters" spellcheck="false" maxlength="200" aria-describedby="discount-help discount-message">
+    <button type="submit" class="btn btn--outline">Aplicar código</button>
+  </div>
+  <p class="discount-help" id="discount-help">Puedes separar varios códigos con comas. Su aplicación depende de las condiciones de cada promoción.</p>
+  {%- if codes.size > 0 -%}
+    <ul class="applied-codes" role="list" aria-label="Códigos aplicados">{% for code in codes %}{% if code != blank %}<li class="badge" data-applied-code="{{ code | escape }}">{{ code | escape }}</li>{% endif %}{% endfor %}</ul>
+  {%- endif -%}
+  {%- comment -%}Shown when the bag holds a code: an applied one (above) or one Shopify keeps without applying it, which only cart.js reports (assets/monetta-cart.js).{%- endcomment -%}
+  <button type="button" class="btn btn--text" data-discount-remove{% if codes.size == 0 %} hidden{% endif %}>Quitar códigos</button>
+  <p class="discount-message" id="discount-message" data-discount-message role="status" tabindex="-1"></p>
+</form>

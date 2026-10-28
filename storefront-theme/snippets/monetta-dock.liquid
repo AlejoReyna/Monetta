@@ -1,5 +1,6 @@
 {%- doc -%}
-  Floating dock for phones (lib/features/navigation/monetta_floating_bottom_navigation.dart). The layout's body class
+  Floating dock for phones (lib/features/navigation/monetta_floating_bottom_navigation.dart): Inicio · Categorías · Carrito ·
+  Cuenta, as the client guide. The layout's body class
   decides whether it shows: browsing pages yes, the product page and a non-empty bag use their own bottom bar.
 
   @param {string} [dock_active] - 'home', 'catalog' or 'cart': the item marked aria-current="page".
@@ -18,8 +19,8 @@
     <a class="dock__item" href="{{ routes.root_url }}" data-dock="home"{% if dock_active == 'home' %} aria-current="page"{% endif %}>
       <span class="dock__icon">{% render 'monetta-icon', name: 'home', size: 22 %}</span>Inicio
     </a>
-    <a class="dock__item" href="{{ routes.all_products_collection_url }}" data-dock="catalog"{% if dock_active == 'catalog' %} aria-current="page"{% endif %}>
-      <span class="dock__icon">{% render 'monetta-icon', name: 'grid', size: 22 %}</span>Catálogo
+    <a class="dock__item" href="{{ routes.collections_url }}" data-dock="catalog"{% if dock_active == 'catalog' %} aria-current="page"{% endif %}>
+      <span class="dock__icon">{% render 'monetta-icon', name: 'grid', size: 22 %}</span>Categorías
     </a>
     <a class="dock__item" href="{{ routes.cart_url }}" data-dock="cart" aria-label="{{ cart_label }}"{% if dock_active == 'cart' %} aria-current="page"{% endif %}>
       <span class="dock__icon">{% render 'monetta-icon', name: 'bag', size: 22 %}<span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></span>Carrito

@@ -1,0 +1,66 @@
+{%- comment -%}
+  Collections index (/collections) inside the Monetta shell: the screen title and one editorial card per collection (cover
+  photograph, legibility scrim, serif title; _CollectionEditorialCard), with its real product count. Collections, titles and
+  images are the store's; a collection without an image shows its first product's photograph, or the warm ground alone.
+{%- endcomment -%}
+<div class="container listing listing--collections" {{ section.shopify_attributes }}>
+  <div class="page-head">
+    <div class="page-head__row">
+      <h1 class="display display--page" tabindex="-1">{{ section.settings.heading | escape }}</h1>
+      <p class="page-head__count">{{ collections.size }} {% if collections.size == 1 %}colección{% else %}colecciones{% endif %}</p>
+    </div>
+  </div>
+  {%- paginate collections by section.settings.per_page -%}
+    {%- if collections.size > 0 -%}
+      <ul class="collection-grid" role="list">
+        {%- for collection in collections -%}
+          {%- liquid
+            assign art = collection.image | default: collection.featured_image
+            assign count_text = collection.all_products_count | append: ' piezas'
+            if collection.all_products_count == 1
+              assign count_text = '1 pieza'
+            endif
+          -%}
+          <li>
+            <a class="collection-card" href="{{ collection.url }}">
+              {%- if art -%}
+                {% render 'monetta-image', image: art, widths: '360,540,720,960', sizes: '(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 50vw', alt: '' %}
+              {%- endif -%}
+              <span class="collection-card__label">
+                <span>
+                  <span class="collection-card__title">{{ collection.title | escape }}</span>
+                  <span class="collection-card__count">{{ count_text }}</span>
+                </span>
+                {% render 'monetta-icon', name: 'arrowForward', size: 22 %}
+              </span>
+            </a>
+          </li>
+        {%- endfor -%}
+      </ul>
+      {%- if paginate.pages > 1 -%}
+        <nav class="pagination" aria-label="Páginas">
+          {%- if paginate.previous -%}<a class="btn btn--outline" href="{{ paginate.previous.url }}">Anterior</a>{%- endif -%}
+          <span class="pagination__status">Página {{ paginate.current_page }} de {{ paginate.pages }}</span>
+          {%- if paginate.next -%}<a class="btn btn--outline" href="{{ paginate.next.url }}">Siguiente</a>{%- endif -%}
+        </nav>
+      {%- endif -%}
+    {%- else -%}
+      <div class="empty">
+        <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'grid', size: 28 %}</span>
+        <h2 class="empty__title">Aún no hay colecciones</h2>
+        <p class="body-copy">Mientras tanto, todas las piezas están en el catálogo.</p>
+        <div class="empty__actions"><a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">Ver catálogo</a></div>
+      </div>
+    {%- endif -%}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Monetta · Colecciones",
+  "settings": [
+    { "type": "text", "id": "heading", "label": "Título", "default": "Colecciones" },
+    { "type": "range", "id": "per_page", "label": "Colecciones por página", "min": 8, "max": 48, "step": 4, "default": 24 }
+  ]
+}
+{% endschema %}

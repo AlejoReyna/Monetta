@@ -1,6 +1,7 @@
 {%- comment -%}
   Monetta header: phone (menu, centred wordmark, search), product header (back + search, wordmark, account + bag),
-  tablet and desktop (wordmark, search field, account / bag with labels, category row) and the phone menu drawer.
+  tablet and desktop (menu, wordmark, search field, account / bag with labels, the guide's category row) and the menu
+  drawer of the client guide (slide 30; monetta_side_menu.dart in PR #33), the same drawer at every width.
   Anatomy and measurements: docs/web-redesign/DESIGN_SPEC.md sections 3, 5 and 7; prototype src/components/shell.js.
   Collections, search and the bag draw their own page bar on phones (snippets/monetta-page-bar.liquid) and hide this
   header there by CSS (body.has-page-bar).
@@ -16,8 +17,6 @@
   elsif template.name == 'cart' and cart.item_count > 0
     assign no_dock = true
   endif
-  assign nav_menu = linklists[section.settings.menu]
-  assign drawer_menu = linklists[section.settings.secondary_menu]
   assign back_url = routes.all_products_collection_url
   if template.name == 'product' and product.collections.size > 0
     assign back_url = product.collections.first.url
@@ -30,7 +29,7 @@
     endif
   endif
   assign search_hidden = false
-  if template.name == 'index' or template.name == 'search'
+  if template.name == 'search'
     assign search_hidden = true
   endif
 -%}
@@ -67,18 +66,21 @@
     </form>
     <div class="site-header__end">
       <a class="icon-button site-header__search-icon" href="{{ routes.search_url }}" aria-label="Buscar productos"{% if search_hidden %} hidden{% endif %}>{% render 'monetta-icon', name: 'search', size: 24 %}</a>
+      <button type="button" class="icon-button header-utility header-utility--saved" data-open-dialog="saved-products" aria-label="Ver guardados" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 22 %}</button>
       <a class="icon-button header-utility header-utility--account" href="{{ routes.account_url }}" aria-label="Cuenta">{% render 'monetta-icon', name: 'person', size: 24 %}<span class="header-utility__label" aria-hidden="true">Cuenta</span></a>
       <a class="icon-button header-utility header-utility--cart" href="{{ routes.cart_url }}" aria-label="{{ cart_label }}" data-cart-link>{% render 'monetta-icon', name: 'bag', size: 23 %}<span class="header-utility__label" aria-hidden="true">Carrito</span><span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></a>
     </div>
   </div>
 
+  {%- comment -%}The guide's categories (Bolsas, Carteras, Relojes, Perfumes, Marcas, Mayoreo); snippets/monetta-guia-url.liquid resolves each.{%- endcomment -%}
   <nav class="site-nav" aria-label="Categorías">
     <ul class="site-nav__list" role="list">
-      {%- for link in nav_menu.links -%}
-        <li><a class="site-nav__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}{% render 'monetta-store-lang' %}>{{ link.title }}</a></li>
-      {%- else -%}
-        <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">Novedades</a></li>
-        <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}">Catálogo</a></li>
+      {%- assign nav_entries = 'bolsas:Bolsas,carteras:Carteras,relojes:Relojes,perfumes:Perfumes,categorias:Marcas,mayoreo:Mayoreo' | split: ',' -%}
+      {%- for entry in nav_entries -%}
+        {%- assign key = entry | split: ':' | first -%}
+        {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
+        {%- assign url = url | strip -%}
+        <li><a class="site-nav__link" href="{{ url }}"{% if request.path == url %} aria-current="page"{% endif %}>{{ entry | split: ':' | last }}</a></li>
       {%- endfor -%}
     </ul>
   </nav>
@@ -92,28 +94,40 @@
           {% render 'monetta-logo', height: 21, logo: section.settings.logo %}
           <button type="button" class="icon-button" data-overlay-close aria-label="Cerrar menú">{% render 'monetta-icon', name: 'close', size: 22 %}</button>
         </div>
-        <div class="menu__account">
+        <div class="menu__identity">
           {%- if customer -%}
-            <a class="btn btn--quiet" href="{{ routes.account_url }}">{% render 'monetta-icon', name: 'user', size: 20 %} Mi cuenta</a>
+            <a class="guia-identity" href="{{ routes.account_url }}">
+              <span class="guia-identity__avatar" aria-hidden="true">{{ customer.first_name | default: customer.email | slice: 0 | upcase }}</span>
+              <span class="guia-identity__text"><span class="guia-identity__name">{{ customer.name | default: customer.email | escape }}</span><span class="guia-identity__email">{{ customer.email | escape }}</span></span>
+            </a>
           {%- else -%}
-            <a class="btn btn--quiet" href="{{ routes.account_login_url }}">{% render 'monetta-icon', name: 'login', size: 20 %} Inicia sesión</a>
+            <a class="guia-identity" href="{{ routes.account_login_url }}">
+              <span class="guia-identity__avatar" aria-hidden="true">{% render 'monetta-icon', name: 'person', size: 24 %}</span>
+              <span class="guia-identity__text"><span class="guia-identity__name">Invitado</span><span class="guia-identity__email">Inicia sesión o crea tu cuenta</span></span>
+            </a>
           {%- endif -%}
         </div>
-        <div class="menu__links">
-          {%- for link in nav_menu.links -%}
-            {%- capture icon_name -%}{% render 'monetta-menu-icon', handle: link.handle %}{%- endcapture -%}
-            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span {% render 'monetta-store-lang' %}>{{ link.title }}</span></a>
-          {%- else -%}
-            <a class="menu-link" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">{% render 'monetta-icon', name: 'sparkle', size: 22 %}<span>Novedades</span></a>
-            <a class="menu-link" href="{{ routes.all_products_collection_url }}">{% render 'monetta-icon', name: 'store', size: 22 %}<span>Catálogo</span></a>
+        <ul class="guia-menu" role="list">
+          {%- assign drawer_entries = 'bolsas:Bolsas:bag,carteras:Carteras:wallet,relojes:Relojes:watch,perfumes:Perfumes:perfume,categorias:Todas las marcas:store' | split: ',' -%}
+          {%- for entry in drawer_entries -%}
+            {%- assign parts = entry | split: ':' -%}
+            {%- assign key = parts[0] -%}
+            {%- assign icon = parts[2] -%}
+            {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
+            <li><a class="guia-menu__row" href="{{ url | strip }}">{% render 'monetta-icon', name: icon, size: 24, class: 'guia-menu__icon' %}<span>{{ parts[1] }}</span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-menu__chevron' %}</a></li>
           {%- endfor -%}
-        </div>
-        <div class="menu__footer">
-          {%- for link in drawer_menu.links limit: 4 -%}
-            {%- capture icon_name -%}{% render 'monetta-menu-icon', handle: link.handle %}{%- endcapture -%}
-            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span {% render 'monetta-store-lang' %}>{{ link.title }}</span></a>
-          {%- endfor -%}
-        </div>
+          <li><button type="button" class="guia-menu__row" data-open-dialog="saved-products" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 24, class: 'guia-menu__icon' %}<span>Guardados</span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-menu__chevron' %}</button></li>
+        </ul>
+        {%- comment -%}As the app's account banner (account_screen.dart): «VER CATÁLOGO» opens Comparte y gana, where the catalog links are copied.{%- endcomment -%}
+        {%- capture share_url -%}{% render 'monetta-guia-url', key: 'rewards' %}{%- endcapture -%}
+        <a class="guia-share" href="{{ share_url | strip }}#comparte-y-gana" aria-label="Comparte y gana: ver catálogo">
+          {% render 'monetta-guia-photo', name: 'comparte-gana-catalogo', class: 'guia-share__photo', sizes: '360px' %}
+          <span class="guia-share__copy" aria-hidden="true"><span class="guia-share__script">Comparte</span><span class="guia-share__italic">y gana</span><span class="guide-pill__label">Ver catálogo</span></span>
+        </a>
+        <ul class="guia-menu guia-menu--contact" role="list">
+          <li><a class="guia-menu__row" href="https://wa.me/528261066868" target="_blank" rel="noopener">{% render 'monetta-guia-icon', name: 'contacto-whatsapp', size: 28, class: 'guia-menu__icon' %}<span>Contacto por WhatsApp</span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-menu__chevron' %}<span class="visually-hidden"> (se abre en otra pestaña)</span></a></li>
+        </ul>
+        {% render 'monetta-guia-social', class: 'guia-social--drawer' %}
       </nav>
     </div>
   </dialog>
@@ -133,24 +147,6 @@
       "id": "logo",
       "label": "Logotipo",
       "info": "Opcional. Sin imagen se usa el logotipo original de Monetta incluido en el tema (24 px de alto en teléfono y tablet, 32 px en escritorio)."
-    },
-    {
-      "type": "header",
-      "content": "Navegación"
-    },
-    {
-      "type": "link_list",
-      "id": "menu",
-      "label": "Menú de categorías",
-      "default": "main-menu",
-      "info": "Fila de categorías (tablet y escritorio) y enlaces principales del menú del teléfono. Se administra en Navegación."
-    },
-    {
-      "type": "link_list",
-      "id": "secondary_menu",
-      "label": "Menú secundario del teléfono",
-      "default": "footer",
-      "info": "Hasta 4 enlaces al pie del menú del teléfono (contacto, historia)."
     },
     {
       "type": "text",
