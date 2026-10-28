@@ -10,6 +10,8 @@ El usuario pidió escritura letra por letra. La justificación es expresión de 
 
 **Referencia B:** [Path drawing, Motion](https://motion.dev/examples/react-path-drawing). Observado: contornos que se completan. Adaptación: un recorrido central usado como máscara para revelar cada letra, conservando el relleno/serifas. Un contorno animado no equivale automáticamente a escritura caligráfica.
 
+**Referencia comercial (28 oct):** ninguna de las ocho apps revisadas escribe su logo letra por letra; FARFETCH y Moda Operandi lo muestran estático. [Shop](evidence/shop-intro.jpg) es el único precedente de B: funde el splash a blanco, dibuja la «o» con un trazo y lo resuelve en ≈1,2 s, con el botón principal visible antes de terminar. A no tiene precedente comercial observado; se sostiene por la preferencia de marca. Detalle en [REFERENCIAS_COMERCIALES.md](REFERENCIAS_COMERCIALES.md).
+
 **A es la primera candidata.** B se conserva como alternativa si los trazos pueden hacerse fieles, sin importar otra fuente ni deformar la M. El control estático C es obligatorio.
 
 ### Especificación
@@ -21,6 +23,7 @@ El usuario pidió escritura letra por letra. La justificación es expresión de 
 - B: máximo inicial de 1200 ms; rutas editables y máscara sobre el activo. Sin bucle, cursor, destello, rebote, sonido ni animación de salida.
 - Una reproducción en primera bienvenida. Encabezados interiores estáticos. Cambiar de pestaña, volver del checkout o reconstruir no reinicia el logo.
 - Comenzar funciona desde el primer frame y cancela la animación. No se sumará la escritura al bloqueo de 1100 ms de `StartupReveal`; hay que retirar/sustituir la espera decorativa cuando se integre.
+- Splash nativo sin el logotipo completo (solo fondo), o con un fundido como el de Shop, para no mostrar el logo entero y luego «borrarlo» al empezar a escribirlo. Es una inferencia de las grabaciones, no una regla de plataforma.
 - Reducir movimiento: logo completo inmediatamente; una sola etiqueta accesible «Monetta». Cambio de preferencia en caliente termina la decoración. Segundo plano/desmontaje cancela y libera recursos.
 
 ### Comparación que debe decidir la variante

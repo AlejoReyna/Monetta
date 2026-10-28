@@ -2,7 +2,7 @@
 
 Leer [INVESTIGACION_V2.md](INVESTIGACION_V2.md) y usar [LOGO_Y_ENTREGA.md](LOGO_Y_ENTREGA.md) para encargar el prototipo. Esta entrega sustituye las recomendaciones del informe anterior; no implementa cambios en la app.
 
-[REFERENCIAS_COMERCIALES.md](REFERENCIAS_COMERCIALES.md) reúne las referencias comerciales que faltan por candidato. Están localizadas pero sin verificar; incluye `evidence/frames.py` para generar las hojas de fotogramas.
+[REFERENCIAS_COMERCIALES.md](REFERENCIAS_COMERCIALES.md) reúne las referencias comerciales verificadas en grabaciones de ocho apps (FARFETCH, Moda Operandi, Zara, HBX, Lyst, ASOS, Zalando y Shop), con 30 hojas de fotogramas. `evidence/frames.py` regenera cualquier hoja.
 
 ## Ver referencias
 

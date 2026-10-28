@@ -12,6 +12,8 @@ Se descargaron para análisis clips públicos enlazados por sus autores, se extr
 
 **Esto es inspección de demostraciones grabadas, no una auditoría de las aplicaciones nativas actuales.** Los casos comerciales son sitios de comercio electrónico y los demos de Motion son ejemplos técnicos. No se deducen curvas exactas, accesibilidad, latencia real o rendimiento de una grabación promocional. Los tiempos recomendados abajo son decisiones para Monetta, no mediciones de los competidores.
 
+El 28 de octubre se añadieron grabaciones completas de ocho apps comerciales, revisadas cuadro por cuadro; cada candidato incluye ahora su **Referencia comercial**, y el detalle está en [REFERENCIAS_COMERCIALES.md](REFERENCIAS_COMERCIALES.md).
+
 Se preserva la investigación anterior como historial. Se revisaron nuevamente `lib/app/motion.dart` y el estado del repositorio; no se modificó código de producto. Los hallazgos previos de bienvenida, logo y reseñas se usan como contexto de implementación, no como evidencia externa.
 
 ## Casos comerciales: observación frente a inferencia
@@ -56,7 +58,7 @@ Adaptación propuesta: selección identificable, fotografía protagonista y acci
 3. **Atención proporcional:** un efecto local para una acción local. No arrastrar la mirada hasta una esquina para confirmar un toque. Considerar propósito, frecuencia y disparador antes de animar. [NN/g, atención y comprensión](https://www.nngroup.com/articles/animation-usability/).
 4. **Orientación:** un panel temporal puede entrar desde un borde; el catálogo de debajo permanece reconocible. No cambiar toda la pantalla para señalar una selección. [NN/g, propósito de la animación](https://www.nngroup.com/articles/animation-purpose-ux/).
 5. **Control:** interrumpible, sin espera artificial, respetando reducir movimiento. WCAG 2.3.3 es AAA; se adopta como criterio de diseño, sin confundirlo con una certificación de conformidad. [W3C](https://www.w3.org/WAI/WCAG22/Understanding/animation-from-interactions.html).
-6. **Reposo real:** cero animaciones decorativas cuando no hay interacción. Galerías/reseñas manuales. La alternativa estática puede evitar problemas de carruseles y es más sencilla de implementar correctamente. [Baymard](https://baymard.com/research-articles/homepage-carousel).
+6. **Reposo real:** cero animaciones decorativas cuando no hay interacción. Galerías/reseñas manuales. La alternativa estática puede evitar problemas de carruseles y es más sencilla de implementar correctamente. [Baymard](https://baymard.com/research-articles/homepage-carousel). Lyst y Shop sí mueven sus bienvenidas en reposo; FARFETCH y Moda Operandi no.
 7. **Verdad transaccional:** completar animación no significa completar compra. Estados y mensajes dependen de la operación real; una simulación se etiqueta como tal.
 
 ## Veinte candidatos y su justificación
@@ -66,6 +68,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 01 · Confirmación local al agregar — R
 
 **Referencia visible:** [Multi state badge](https://motion.dev/examples/vue-multi-state-badge), clip 0–1.97 s: Processing → Done → error → Start; [Copy Button](https://motion.dev/examples/vue-copy-button), 0–1.12 s, conserva la confirmación dentro del control. Demos técnicas, no tiendas.
+
+**Referencia comercial:** HBX y Moda Operandi muestran la espera dentro del botón y confirman sin salir de la ficha; HBX cambia el botón a «Checkout» ([hbx-agregar](evidence/hbx-agregar.jpg), [moda-operandi-agregar](evidence/moda-operandi-agregar.jpg)). Ambas añaden una franja superior: Monetta elige una sola respuesta.
 
 **Problema / diseño:** después de tocar Agregar, la persona necesita saber si se recibió y confirmó la acción. Mantener la respuesta en el mismo lugar conserva proximidad y jerarquía.
 
@@ -77,6 +81,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** J1, especialmente 17–20 s. [Fotogramas detallados](evidence/jo-loves-cart-detail.jpg).
 
+**Referencia comercial:** FARFETCH, Zara y Zalando confirman con una hoja inferior ([farfetch-agregar-bolsa](evidence/farfetch-agregar-bolsa.jpg), [zara-agregar-rapido](evidence/zara-agregar-rapido.jpg)).
+
 **Problema / diseño:** consultar la bolsa sin perder el producto. La capa temporal y el fondo atenuado explican la relación espacial.
 
 **Minimalismo / alternativa:** conservar una página de bolsa si ya resuelve mejor la tarea. Si se usa panel: 280 ms de entrada y salida, un único scrim, sin mover ni reducir la pantalla de fondo.
@@ -86,6 +92,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 03 · Filtros en panel reversible — R
 
 **Referencia visible:** J2, 35–48 s.
+
+**Referencia comercial:** FARFETCH filtra en una pantalla propia con contador «Show N Results» y bloquea ≈1 s al recalcular ([farfetch-filtro-color](evidence/farfetch-filtro-color.jpg)). No adoptar ese bloqueo.
 
 **Problema / diseño:** editar criterios sin confundir filtros con otra página. El listado visible detrás conserva contexto; aplicar explícitamente permite revisar varias opciones.
 
@@ -97,6 +105,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** [Carousel: Thumbnail gallery](https://motion.dev/examples/vue-carousel-thumbnail-gallery), 0.09–1.55 s del clip propio; las imágenes y miniaturas cambian coordinadamente.
 
+**Referencia comercial:** FARFETCH y Moda Operandi usan segmentos o puntos, no miniaturas ([farfetch-galeria](evidence/farfetch-galeria.jpg)). Baymard: solo el 24 % de los sitios móviles usa miniaturas. Comparar miniaturas con segmentos.
+
 **Problema / diseño:** explorar ángulos de una bolsa y saber qué fotografía se está viendo. Deslizamiento horizontal coherente con el gesto.
 
 **Minimalismo / alternativa:** la foto estática más miniaturas también es válida. En toque de miniatura, transición de hasta 280 ms; arrastre sigue al dedo. No autoplay, parallax, inclinación 3D ni rebote.
@@ -106,6 +116,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 05 · Ampliación de fotografía — R
 
 **Referencia visible:** [Carousel: Lightbox](https://motion.dev/examples/vue-carousel-lightbox), 0–1.2 s, foto ampliada y regreso; P1, tramo final, acercamiento al detalle.
+
+**Referencia comercial:** No observada en las grabaciones revisadas.
 
 **Problema / diseño:** inspeccionar textura, costuras y herrajes. La continuidad de la misma imagen explica que es una ampliación, no otro producto.
 
@@ -117,6 +129,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** P1, aproximadamente 4–9 s, variantes visuales junto a la ficha y cambio de imagen.
 
+**Referencia comercial:** FARFETCH abre otra ficha con esqueleto al cambiar de color ([farfetch-variante-color](evidence/farfetch-variante-color.jpg)). El cambio en el sitio es una decisión de Monetta, no una práctica observada.
+
 **Problema / diseño:** saber qué color/modelo se comprará. Selección, nombre, foto y disponibilidad deben corresponder; el movimiento es secundario.
 
 **Minimalismo / alternativa:** check/borde inmediato en el selector; fundido opcional de 180 ms solo en la foto nueva. Precio se actualiza legiblemente, sin contar números ni animar la ficha entera.
@@ -126,6 +140,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 07 · Presión breve en el botón — C
 
 **Referencia visible:** [Svelte: Press](https://motion.dev/examples/svelte-press), 0.07–0.49 s, contracción y recuperación del cuadrado.
+
+**Referencia comercial:** No verificable: el indicador de toque de las grabaciones tapa los controles.
 
 **Problema / diseño:** confirmar contacto antes de la respuesta de red. La deformación pequeña puede dar sensación de control directo.
 
@@ -137,6 +153,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** [Base UI: Checkbox](https://motion.dev/examples/react-base-checkbox), 0.03–0.47 s, trazo que completa la marca.
 
+**Referencia comercial:** FARFETCH marca la fila con un borde, sin check animado ([farfetch-filtro-color](evidence/farfetch-filtro-color.jpg)).
+
 **Problema / diseño:** distinguir selección sin depender solo del color. El check tiene significado aprendido y ocupa el mismo espacio.
 
 **Minimalismo / alternativa:** check estático es la base. Probar dibujo de 180 ms solo si no retrasa selecciones consecutivas; no cambiar también escala, fondo y contenedor.
@@ -146,6 +164,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 09 · Logo Monetta escrito por letras — C, prioridad de marca
 
 **Referencia visible:** [Split text](https://motion.dev/examples/vue-split-text), 0.12–2.19 s, revelado escalonado de texto; [Path drawing](https://motion.dev/examples/react-path-drawing), 0.14–2.49 s, trazos que se completan. Son mecanismos observados, **no un logo de lujo idéntico ni escritura manual verificada en una tienda**.
+
+**Referencia comercial:** Ninguna de las ocho apps revisadas escribe su logo letra por letra; FARFETCH y Moda Operandi lo muestran estático. Shop dibuja la «o» con un trazo en ≈1,2 s, con el botón visible antes de terminar ([shop-intro](evidence/shop-intro.jpg)); ASOS usa una intro de ≈5,6 s durante la carga ([asos-intro](evidence/asos-intro.jpg)). Detalle en [REFERENCIAS_COMERCIALES.md](REFERENCIAS_COMERCIALES.md).
 
 **Problema / diseño:** expresar identidad en la primera bienvenida; no resuelve una carencia de compra. Su justificación es de marca y preferencia explícita del usuario.
 
@@ -157,6 +177,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** [Radix: Accordion](https://motion.dev/examples/vue-radix-accordion), 0.09–1.55 s, apertura, cierre y cambio de contenido.
 
+**Referencia comercial:** FARFETCH anima la altura ≈0,2 s en secciones cortas ([farfetch-plegable](evidence/farfetch-plegable.jpg)). Ajuste: altura de hasta 200 ms solo en secciones cortas; los textos largos aparecen sin animación.
+
 **Problema / diseño:** indicar relación entre encabezado y detalles secundarios. Agrupar información puede reducir longitud, pero no debe ocultar lo necesario para comprar.
 
 **Minimalismo / alternativa:** cuerpo inmediato y chevron de 180 ms; evitar la animación de altura de toda la descripción. El aprendizaje del caso Paul Smith favorece exponer talla/ajuste y datos críticos.
@@ -166,6 +188,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 11 · Indicador local de pestaña activa — C
 
 **Referencia visible:** [Smooth tabs](https://motion.dev/examples/vue-smooth-tabs), 0.11–1.95 s, indicador entre Activity y Home; el demo también mueve/desenfoca contenido.
+
+**Referencia comercial:** FARFETCH no tiene un indicador que se desplace ([farfetch-pestana-inicio](evidence/farfetch-pestana-inicio.jpg)).
 
 **Problema / diseño:** reforzar ubicación con continuidad local.
 
@@ -177,6 +201,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** J1, cambios de contenido en 20–29 s. El clip muestra actualización de la bolsa; no demuestra por sí solo persistencia, reversión ni todas las causas de cada cambio.
 
+**Referencia comercial:** Zara ofrece deshacer en una barra inferior tras eliminar ([zara-borrar-deshacer](evidence/zara-borrar-deshacer.jpg)); FARFETCH muestra la espera en la fila y no ofrece deshacer ([farfetch-quitar-bolsa](evidence/farfetch-quitar-bolsa.jpg)).
+
 **Problema / diseño:** que la persona entienda qué desapareció y pueda recuperarlo.
 
 **Minimalismo / alternativa:** eliminación inmediata con mensaje y Deshacer es la base. Si hace falta continuidad, opacidad de fila durante 180 ms y reflujo final; sin vuelo, encogimiento dramático ni expulsión lateral.
@@ -186,6 +212,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 13 · Indicador local de operación pendiente — C
 
 **Referencia visible:** Multi state badge de #01, segmento Processing al inicio.
+
+**Referencia comercial:** Espera local en HBX y Moda Operandi (dentro del botón); espera que bloquea en FARFETCH (≈3 s al agregar) y en Zara. Moda Operandi y ASOS usan indicadores de marca en cargas de pantalla ([asos-carga-marca](evidence/asos-carga-marca.jpg)).
 
 **Problema / diseño:** una espera real puede confundirse con un toque perdido. El indicador informa actividad; no inventa porcentaje.
 
@@ -197,6 +225,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** Multi state badge, alrededor de 1.21 s, estado de error.
 
+**Referencia comercial:** Moda Operandi muestra el error de stock junto a la fila, de forma persistente ([moda-operandi-error-stock](evidence/moda-operandi-error-stock.jpg)); HBX lo pone en una franja superior. Baymard: el 31 % de los sitios no valida en línea.
+
 **Problema / diseño:** distinguir fallo de una operación en curso y saber cómo reintentar.
 
 **Minimalismo / alternativa:** priorizar mensaje persistente junto al control. Opacidad de hasta 180 ms es opcional; no copiar la expansión de ancho del demo si mueve botones.
@@ -206,6 +236,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 15 · Confirmación al copiar número de pedido — C
 
 **Referencia visible:** Copy Button, 0–1.12 s: icono y texto pasan entre confirmación y acción.
+
+**Referencia comercial:** FARFETCH cambia el botón a «Code Copied» con un fundido de ≈0,25 s, sin aviso ([farfetch-copiar-codigo](evidence/farfetch-copiar-codigo.jpg)).
 
 **Problema / diseño:** el portapapeles es invisible. Confirmar localmente comunica el resultado sin abrir un diálogo.
 
@@ -227,6 +259,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** Checkbox de #08 aporta un cambio local de selección; no es evidencia directa de un corazón de una app de moda.
 
+**Referencia comercial:** Zalando rellena con rebote (≈0,3 s) y añade una hoja ([zalando-corazon](evidence/zalando-corazon.jpg)); FARFETCH rellena sin rebote ([farfetch-favorito-ficha](evidence/farfetch-favorito-ficha.jpg)). El precedente no demuestra necesidad: se mantiene sin rebote.
+
 **Problema / diseño:** confirmar guardado y distinguir guardado/no guardado mediante forma además de color.
 
 **Minimalismo / alternativa:** corazón relleno inmediato. Solo probar fundido de 180 ms. Se retira el rebote propuesto en la investigación anterior: no hay necesidad demostrada que lo justifique.
@@ -236,6 +270,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 18 · Revelado escalonado de textos editoriales — X por defecto
 
 **Referencia visible:** Split text de #09, texto que se vuelve visible progresivamente.
+
+**Referencia comercial:** Lyst y Shop rotan el lema de su bienvenida cada ≈2 s sin interacción ([lyst-bienvenida-reposo](evidence/lyst-bienvenida-reposo.jpg)); no se observó en el recorrido de compra.
 
 **Problema / diseño:** podría señalar jerarquía en una campaña, pero también obliga a esperar para leer.
 
@@ -247,6 +283,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 
 **Referencia visible:** [Swipe actions](https://motion.dev/examples/vue-swipe-actions), 0.18–3.21 s, opciones laterales y expansión de la acción.
 
+**Referencia comercial:** Zara permite deslizar hasta «DELETE», conserva una ✕ visible y ofrece deshacer ([zara-borrar-deshacer](evidence/zara-borrar-deshacer.jpg)). Si se adopta más adelante, seguir ese esquema.
+
 **Problema / diseño:** ahorra espacio, pero reduce descubribilidad y puede competir con gestos de galería/navegación.
 
 **Minimalismo / alternativa:** botón Eliminar visible y Deshacer. Ocultar una acción no garantiza una interfaz más usable.
@@ -256,6 +294,8 @@ R = recomendado para primera comparación con versión estática. C = condiciona
 ### 20 · Producto que vuela al carrito — X
 
 **Referencia visible:** [Add to basket](https://motion.dev/examples/js-add-to-basket), demo con recorrido curvo, impacto y halo en destino. El clip inspeccionado de 1.4 s recoge sobre todo el final/recuperación; la página ofrece la demo completa y código.
+
+**Referencia comercial:** No observada en seis momentos de agregar en cinco apps; la descripción de ScreensDesign sobre FARFETCH era incorrecta ([farfetch-icono-central](evidence/farfetch-icono-central.jpg)).
 
 **Problema / diseño:** intenta relacionar producto y bolsa, pero mueve un objeto grande, aleja la atención y añade varios acentos a una acción frecuente.
 

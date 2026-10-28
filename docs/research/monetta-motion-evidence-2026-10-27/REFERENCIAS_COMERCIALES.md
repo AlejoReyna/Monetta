@@ -1,83 +1,77 @@
-# Referencias comerciales: cola de verificación
+# Referencias comerciales verificadas
 
-28 de octubre de 2026 · Complementa [INVESTIGACION_V2.md](INVESTIGACION_V2.md); todavía no modifica ninguna de sus decisiones.
+28 de octubre de 2026 · Complementa [INVESTIGACION_V2.md](INVESTIGACION_V2.md), que ya incorpora estas referencias candidato por candidato.
 
-**Estado: fuentes localizadas, ninguna verificada visualmente.** La sesión que preparó este documento solo tenía búsqueda web: títulos, URL y resúmenes. No pudo abrir las páginas ni reproducir videos porque la red del entorno los bloqueaba. Las descripciones de abajo provienen de esos resúmenes y valen como pistas, no como observación. Una referencia entra en la investigación solo cuando hay una hoja de fotogramas que muestre el mecanismo en la app real.
+Se revisaron grabaciones completas de **ocho apps iOS reales**: FARFETCH y Moda Operandi (lujo), Zara, HBX, Lyst, ASOS, Zalando y Shop, la app de compras de Shopify. De ellas se extrajeron **30 hojas de fotogramas** con tiempos, que están en `evidence/` y registradas en [sources.json](evidence/sources.json). Cada afirmación de este documento se comprobó en esas hojas, a veces cuadro por cuadro (30 fps).
 
-## Qué falta por candidato
+## Correcciones a la versión anterior de este documento
 
-La V2 ya tiene evidencia comercial observada para #02 (J1), #03 (J2), #06 (P1) y #16 (J4). #05 y #12 están cubiertas a medias. El resto se apoya solo en demos técnicas de Motion.
+- **FARFETCH no hace «vuelo al carrito».** ScreensDesign describe en 03:48 un botón que «se transforma en un icono de bolsa que viaja hacia arriba». En la grabación, el icono aparece en el centro de la pantalla con un anillo de progreso, se encoge en su sitio y da paso a una hoja de confirmación ([farfetch-icono-central](evidence/farfetch-icono-central.jpg)). Esa descripción de terceros era incorrecta.
+- **Baymard, pestañas horizontales.** El artículo confirma que las personas pasaban por alto el contenido oculto tras pestañas, pero no contiene la cifra de «27 %» que traía el resumen de búsqueda; se retira. Las otras dos cifras sí están en las fuentes: solo el 24 % de los sitios móviles usa miniaturas en la galería ([Baymard](https://baymard.com/blog/always-use-thumbnails-additional-images)) y el 31 % no valida en línea ([Baymard](https://baymard.com/blog/inline-form-validation)).
 
-| # | Candidato · decisión V2 | Qué debe verse para contar | Dónde buscar primero |
-|---|---|---|---|
-| 01 | Confirmación local al agregar · R | Tras «Agregar», el botón o una franja junto a él confirma sin sacar a la persona de la ficha. | Moda Operandi: banner de confirmación tras agregar (resumen). FARFETCH 03:48. Ejemplos de confirmación de Baymard (estáticos). |
-| 04 | Galería con miniaturas · R | Ficha móvil con indicador de posición, miniaturas o puntos, y cambio de foto por gesto. | Fichas de Zara y FARFETCH. Baymard: solo 24 % de los sitios móviles usa miniaturas; los puntos solos hacen que se pasen por alto imágenes (estudio, estático). |
-| 05 | Ampliación de fotografía · R (P1 es de escritorio) | Toque en la foto, visor a pantalla completa y regreso a la misma foto, en una app móvil. | Fichas de FARFETCH y Zara. Visor de H&M en los ejemplos de Baymard (estático). |
-| 07 | Presión breve · C | Respuesta visual al tocar un botón principal, antes de la respuesta de red. | Grabaciones a velocidad reducida. Puede no distinguirse a 30 fps; si no se ve, no hay precedente comercial y se mantiene el feedback nativo. |
-| 08 | Check de filtro · C | Marca de selección en los filtros de una app de moda. | Flujo de búsqueda y filtros de Zalando; filtros de FARFETCH. |
-| 09 | Logo escrito por letras · C (marca) | Arranque de una app de moda o lujo con el logotipo animado. | Splash y onboarding en las grabaciones de Zara, FARFETCH y Moda Operandi. Videos de vista previa de App Store. Caso NET-A-PORTER de One Darnley Road (intro de app; la búsqueda no lo confirmó). |
-| 10 | Acordeón · C | Secciones plegables en la ficha móvil (envío, materiales, medidas). | Fichas de FARFETCH y Zara. Baymard: 27 % pasó por alto contenido tras pestañas horizontales (estudio). |
-| 11 | Indicador de pestaña · C | Barra inferior que cambia de sección; observar si el indicador se desplaza o solo cambia de estado. | Cualquiera de las cinco grabaciones. |
-| 12 | Retirada de la bolsa · C (J1 no muestra deshacer) | Eliminar un artículo con opción de deshacer o de moverlo a guardados. | Moda Operandi: «Save for Later» en la bolsa (resumen). |
-| 13 | Operación pendiente · C | Estado «agregando» en el botón mientras responde la red. | Grabaciones; con red rápida puede no aparecer. |
-| 14 | Error en contexto · C | Mensaje de error junto al control que lo causó. | Moda Operandi: error de stock que pide una cantidad menor (resumen). Baymard: 31 % de los sitios no valida en línea (estudio). |
-| 15 | Copiar número de pedido · C | Copia con confirmación en la pantalla del pedido. | Sin pista. Requiere un pedido real; probablemente no está en las grabaciones. |
-| 17 | Favorito · C | Corazón que cambia de estado al guardar en una app de moda. | FARFETCH, agregar desde la lista de deseos (09:54). Crítica de ASOS de Pratt: al guardar, nada indica adónde fue el artículo (texto). |
-| 18 | Texto escalonado · X | Campaña con texto que aparece por partes. | Inicio y contenido editorial de Zara. |
-| 19 | Deslizar para acciones · X | Deslizar una fila de la bolsa o de favoritos para eliminarla. | Bolsas de ASOS y Zalando. |
-| 20 | Producto que vuela al carrito · X | Producto o icono que viaja hacia la bolsa. | **FARFETCH 03:48**: según el resumen, el botón «Add to Bag» se transforma en un icono de bolsa que sube hacia la parte superior. |
+## Resultados por candidato
 
-### Lo que cambiaría si se confirma
+| # · V2 | Evidencia comercial observada | Consecuencia para Monetta |
+|---|---|---|
+| 01 · R | **HBX:** indicador de carga dentro del botón (≈0,7 s), el botón pasa a «Checkout», insignia en la pestaña Bolsa y franja superior «✓ Item Added» ([hbx-agregar](evidence/hbx-agregar.jpg)). **Moda Operandi:** tres puntos dentro del botón (≈0,8 s) y franja verde superior ([moda-operandi-agregar](evidence/moda-operandi-agregar.jpg)). | Respaldada: dos apps confirman en el propio control. Ambas añaden además una franja; Monetta debe elegir una sola respuesta dominante, como ya pide la V2. |
+| 02 · R | **FARFETCH**, **Zara** y **Zalando** confirman con una hoja inferior: producto y «Go to bag», o sugerencias ([farfetch-agregar-bolsa](evidence/farfetch-agregar-bolsa.jpg), [zara-agregar-rapido](evidence/zara-agregar-rapido.jpg), [zalando-corazon](evidence/zalando-corazon.jpg)). | La variante B (panel de confirmación) tiene precedente comercial directo. Se mantiene la comparación A/B. |
+| 04 · R | **FARFETCH:** galería por deslizamiento con indicador de segmentos y una última tarjeta «Explore More»; sin miniaturas ([farfetch-galeria](evidence/farfetch-galeria.jpg)). **Moda Operandi:** puntos. | Las apps revisadas no usan miniaturas. Si Monetta las usa, se apoya en Baymard, no en la práctica del sector: hay que comparar con segmentos. |
+| 05 · R | No observado: en los tramos revisados nadie amplió una foto. | Sigue sin precedente comercial móvil; se apoya en P1 (escritorio) y en la tarea de inspeccionar detalles. |
+| 06 · R | **FARFETCH:** al cambiar de color abre otra ficha con esqueleto de carga (≈2 s) ([farfetch-variante-color](evidence/farfetch-variante-color.jpg)). | Contraejemplo: el cambio en el sitio que propone la V2 no es lo que hace FARFETCH. Se mantiene porque conserva el contexto, sin presentarlo como práctica del sector. |
+| 07 · C | No verificable: el indicador de toque de las grabaciones tapa los controles. | Sin cambio. |
+| 08 · C | **FARFETCH:** borde en la fila seleccionada, sin check animado. La pantalla se bloquea ≈1 s mientras recalcula «Show N Results» ([farfetch-filtro-color](evidence/farfetch-filtro-color.jpg)). | Respalda el check estático. El bloqueo es justo lo que la V2 evita. |
+| 09 · C | Ver la sección del logo. | — |
+| 10 · C | **FARFETCH:** la altura se anima ≈0,2 s y el chevron se invierte ([farfetch-plegable](evidence/farfetch-plegable.jpg)). | Ajuste: animar la altura (≤200 ms) solo en secciones cortas como envío o medidas. Los textos largos aparecen sin animación. |
+| 11 · C | **FARFETCH:** sin indicador que se desplace; al tocar Inicio vuelve arriba con esqueleto ([farfetch-pestana-inicio](evidence/farfetch-pestana-inicio.jpg)). | Sin precedente; mantener estático. |
+| 12 · C | **Zara:** tras eliminar, barra inferior con acción de deshacer ([zara-borrar-deshacer](evidence/zara-borrar-deshacer.jpg)). **FARFETCH:** espera local en la fila y retirada sin deshacer ([farfetch-quitar-bolsa](evidence/farfetch-quitar-bolsa.jpg), [farfetch-quitar-deseos](evidence/farfetch-quitar-deseos.jpg)). | Deshacer tiene precedente comercial. Reacomodo de la lista en ≈0,2 s, coherente con la V2. |
+| 13 · C | **Espera local:** HBX y Moda Operandi (dentro del botón), FARFETCH (fila oscurecida). **Espera que bloquea:** FARFETCH al agregar (≈3 s) y al filtrar, Zara al borrar. **Indicador de marca:** Moda Operandi (formas del logo) y ASOS (monograma) ([moda-operandi-carga-marca](evidence/moda-operandi-carga-marca.jpg), [asos-carga-marca](evidence/asos-carga-marca.jpg)). | Existen las dos variantes; la V2 elige la local. Un indicador de marca sirve para cargas de pantalla, no dentro de un botón. |
+| 14 · C | **Moda Operandi:** mensaje persistente junto a la fila ([moda-operandi-error-stock](evidence/moda-operandi-error-stock.jpg)). **HBX:** franja roja arriba, lejos del control ([hbx-error-stock](evidence/hbx-error-stock.jpg)). | Respalda la versión junto al control (Moda Operandi). |
+| 15 · C | **FARFETCH:** «Code Copied» en el mismo botón con un fundido de ≈0,25 s, sin aviso flotante ([farfetch-copiar-codigo](evidence/farfetch-copiar-codigo.jpg)). | Precedente directo del mecanismo. Sigue condicionado a que Monetta tenga algo útil que copiar. |
+| 17 · C | **Zalando:** relleno con rebote (≈0,3 s) y además una hoja de confirmación ([zalando-corazon](evidence/zalando-corazon.jpg)). **FARFETCH:** relleno sin rebote, ≈0,5–0,9 s después del toque ([farfetch-favorito-ficha](evidence/farfetch-favorito-ficha.jpg), [farfetch-favorito-marca](evidence/farfetch-favorito-marca.jpg)). | Hay precedente del rebote que la V2 retiró, pero no de que haga falta. Se mantiene el relleno sin rebote. Si se prueba un rebote, que dure como mucho lo de Zalando y sin respuesta adicional. |
+| 18 · X | **Lyst** y **Shop** rotan su lema cada ≈2 s en la bienvenida ([lyst-bienvenida-reposo](evidence/lyst-bienvenida-reposo.jpg), [shop-bienvenida-reposo](evidence/shop-bienvenida-reposo.jpg)). | Aparece en bienvenidas, nunca en el recorrido de compra revisado. Mantener X. |
+| 19 · X | **Zara:** deslizar revela «DELETE»; la fila conserva una ✕ visible y hay deshacer ([zara-borrar-deshacer](evidence/zara-borrar-deshacer.jpg)). | Hay precedente comercial. Se mantiene X en la primera versión; si se agrega después, que sea como en Zara: un atajo junto a la ✕ visible y con deshacer. |
+| 20 · X | No observado en seis momentos de agregar a la bolsa o a deseos en cinco apps. La descripción sobre FARFETCH era incorrecta. | Refuerza X. |
 
-- **#20, FARFETCH.** Sería un precedente de lujo del patrón descartado. La decisión X no cae por eso: la V2 la justifica por costo de atención en una acción frecuente, no por falta de precedentes. Aun así, la investigación debe citarlo y explicar por qué Monetta no lo sigue.
-- **#09, logo.** La búsqueda no encontró ninguna app de lujo con un logotipo escrito letra por letra. Una fuente secundaria afirma que la tipografía animada es poco común en el lujo, con Chanel como excepción; no está verificado. Si las grabaciones tampoco lo muestran, el logo sigue justificado solo por preferencia de marca, como ya dice la V2. No hay que presentarlo como práctica del sector.
-- **#07, #13 y #15.** Si no aparecen en apps reales, refuerzan la decisión condicionada: usar primero el comportamiento nativo y no agregar movimiento.
+#03 y #16 ya tenían evidencia comercial (Jo Loves). FARFETCH filtra en una pantalla propia con contador de resultados, lo que no cambia #03.
 
-## Fuentes localizadas
+## El logo: qué muestran las grabaciones
 
-**Grabaciones completas de apps iOS reales (ScreensDesign).** Es la fuente más útil, porque muestra el movimiento en la app comercial. Es una biblioteca de terceros: hay que anotar la fecha o la versión de cada grabación. Varias capturas están detrás de un plan Pro; no se pagó ni se inició sesión.
+| App | Arranque observado |
+|---|---|
+| FARFETCH, Moda Operandi | Logotipo estático durante la carga ([farfetch-arranque](evidence/farfetch-arranque.jpg), [moda-operandi-arranque](evidence/moda-operandi-arranque.jpg)). |
+| Zara, HBX | Logotipo estático y corte ([zara-arranque](evidence/zara-arranque.jpg), [hbx-arranque](evidence/hbx-arranque.jpg)). |
+| Zalando | Logo estático que se difumina en un indicador de carga en ≈0,35 s ([zalando-arranque](evidence/zalando-arranque.jpg)). |
+| ASOS | Intro de ≈5,6 s durante la carga: monograma, zoom, disolución en bloques y once logos de submarcas en cortes ([asos-intro](evidence/asos-intro.jpg)). |
+| Shop | Fundido a blanco; un trazo dibuja la «o» del logotipo, que estalla en el logotipo con productos. ≈1,2 s, con «Get Started» visible antes de terminar ([shop-intro](evidence/shop-intro.jpg)). |
 
-- FARFETCH: [showcase](https://screensdesign.com/showcase/farfetch-shop-luxury-fashion) · [pantallas](https://screensdesign.com/apps/farfetch-shop-luxury-fashion/). 118 pantallas. «Add to Bag» en 03:48 y agregar desde la lista de deseos en 09:54.
-- Moda Operandi: [showcase](https://screensdesign.com/showcase/moda-operandi-luxury-fashion). Confirmación tras agregar, «Save for Later» y error de stock.
-- Zara: [pantallas](https://screensdesign.com/apps/zara/). Unos 19 minutos y 165 pantallas.
-- ASOS: [pantallas](https://screensdesign.com/apps/asos-discover-fashion-online/). 136 pantallas; muchas Pro.
-- Zalando: [pantallas](https://screensdesign.com/apps/zalando-online-fashion/) · [flujo de búsqueda](https://screensdesign.com/explore/flows/finding-products/).
+Conclusiones:
 
-**Fichas oficiales de App Store.** Hay que comprobar si incluyen video de vista previa; la búsqueda no lo confirmó. Son material de la propia marca, pero pensado como promoción, así que un corte de edición no cuenta como transición.
+1. **Ninguna app escribe su logotipo letra por letra.** Las dos de lujo lo muestran estático. La animación del logo de Monetta sigue justificada por preferencia de marca, no por la práctica del sector.
+2. **Shop es el único precedente comercial de escritura por trazo**, es decir, de la variante B. Solo dibuja un glifo y lo resuelve en ≈1,2 s. La variante A (máscaras por letra) no tiene precedente comercial observado.
+3. **Los 1000 ms de la V2 están en el rango de Shop** y muy lejos de los ≈5,6 s de ASOS. Shop muestra el botón principal antes de terminar la intro, que es lo que la V2 exige con «Comenzar».
+4. **Todas las apps parten de un logotipo estático** y la animación empieza después. Shop no la encadena directamente: funde a blanco y luego dibuja. *Inferencia para Monetta:* el splash nativo no debería mostrar el logotipo completo si la bienvenida va a escribirlo desde cero. Conviene un splash solo de fondo, o un fundido como el de Shop, para no «borrar» el logo antes de escribirlo.
 
-- [FARFETCH](https://apps.apple.com/us/app/-/id906698760) · [NET-A-PORTER](https://apps.apple.com/app/id318597939) · [Mytheresa](https://apps.apple.com/us/app/-/id484615570) · [SSENSE](https://apps.apple.com/us/app/-/id1418754101) · [MR PORTER](https://apps.apple.com/app/id481673241)
+## Movimiento en reposo
 
-**Estudios de usabilidad con sitios reales (Baymard).** Las capturas son estáticas. Sirven para justificar el problema de diseño, no el movimiento.
+Lyst y Shop mantienen sus bienvenidas en movimiento continuo sin interacción; FARFETCH y Moda Operandi no. El principio de reposo de la V2 coincide con lo que hacen las dos de lujo, pero no es universal.
 
-- [Miniaturas en galerías](https://baymard.com/blog/always-use-thumbnails-additional-images) · [Pestañas horizontales](https://baymard.com/blog/avoid-horizontal-tabs) · [Validación en línea](https://baymard.com/blog/inline-form-validation) · [Ejemplos de confirmación al agregar](https://www.baymard.com/ecommerce-design-examples/added-to-cart-confirmation) · [Visor de galería de H&M](https://baymard.com/ecommerce-design-examples/42-image-gallery-overlay/26642-hm)
+## Límites
 
-**Contexto, sin evidencia de movimiento.**
+- **Grabaciones de terceros.** Son de ScreensDesign; la página no indica la fecha ni la versión de la app, así que se registra la fecha de consulta. Los videos tienen 592×1280 a 30 fps.
+- **Duraciones aproximadas.** Incluyen la latencia de red de la grabación: describen lo observado, no especificaciones de las marcas.
+- **Indicador de toque.** El círculo azul de la grabación tapa a veces el control; donde impidió ver el efecto, se dice.
+- **Apps sin revisar.** NET-A-PORTER, Mytheresa y SSENSE no están en el catálogo de ScreensDesign. Tampoco se revisaron los videos de vista previa de App Store ni la crítica de ASOS de Pratt. El caso NET-A-PORTER de One Darnley Road sigue sin verificar.
+- **Uso del material.** Las hojas son extractos de análisis con atribución; los videos no se conservan ni se redistribuyen. Las imágenes y marcas pertenecen a sus dueños.
 
-- [Crítica de ASOS iOS, Pratt IxD](https://ixd.prattsi.org/2023/02/design-critiques-asos-ios-app/): el feedback al guardar favoritos es débil.
-- [YNAP, 2019](https://www.ynap.com/?p=90669): NET-A-PORTER y MR PORTER comparten lenguaje de diseño y código.
+## Cómo reproducir una hoja
 
-## Cómo verificar cada referencia
-
-1. Abrir la página y anotar la fecha o la versión de la grabación, si aparece.
-2. Obtener la URL del video (inspector de red, o `yt-dlp` para YouTube o Vimeo) y generar la hoja con una ventana de unos ±5 s alrededor del momento indicado:
+1. Abrir la página de la app en ScreensDesign (`https://screensdesign.com/apps/<app>/`). El video completo es un enlace firmado y temporal `play_720p.mp4` en el HTML de esa página.
+2. Descargarlo y ejecutar, con la ventana y la frecuencia registradas en `sources.json`:
 
    ```sh
    python3 docs/research/monetta-motion-evidence-2026-10-27/evidence/frames.py \
-     --source URL_DEL_VIDEO --page URL_DE_LA_PAGINA \
-     --id farfetch-add-to-bag --start 223 --end 233
+     --source video.mp4 --page https://screensdesign.com/apps/farfetch-shop-luxury-fashion/ \
+     --id farfetch-icono-central --start 230.6 --end 231.9 --fps 15 --width 90 --columns 20
    ```
 
-3. Inspeccionar la hoja y agregar el registro impreso a `evidence/sources.json`, cambiando `verification` por lo que se vio realmente: «se observa…», «no se observa en esta ventana» o «no accesible (Pro)».
-4. Solo entonces actualizar la «Referencia visible» del candidato en la V2 y agregar la hoja al visor `index.html`.
-
-**Cuenta como evidencia** el mecanismo visible en la app real. **No cuentan** un corte de edición, una captura estática (Baymard justifica el problema, no la animación) ni la descripción de un tercero.
-
-## Acceso necesario para completar
-
-Desde una sesión en la nube, estos dominios deben estar permitidos en la configuración de red del entorno:
-
-- `screensdesign.com` y el servidor de video que use la página (se sabrá al abrirla).
-- `apps.apple.com` y el CDN de medios de Apple.
-- `baymard.com` e `ixd.prattsi.org`.
-
-Para volver a revisar las referencias de la V2 también hacen falta `limesharp.net`, `player.vimeo.com`, `vimeocdn.com` y `motion.dev`. Desde la Mac no hay que configurar nada: basta con ffmpeg, Pillow y, opcionalmente, yt-dlp.
+   `--crop ancho:alto:x:y` recorta antes de escalar; se usó para el corazón de Zalando (`200:300:392:704`).

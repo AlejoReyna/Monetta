@@ -36,9 +36,10 @@ def resolve(source):
     return out[0]
 
 
-def extract(media, start, end, fps, width, workdir):
-    subprocess.run(["ffmpeg", "-loglevel", "error", "-ss", str(start), "-to", str(end), "-i", media,
-                    "-vf", f"fps={fps},scale={width}:-2", str(workdir / "%04d.png")], check=True)
+def extract(media, start, end, fps, width, crop, workdir):
+    vf = f"fps={fps},{'crop=' + crop + ',' if crop else ''}scale={width}:-2"
+    subprocess.run(["ffmpeg", "-nostdin", "-loglevel", "error", "-ss", str(start), "-to", str(end), "-i", media,
+                    "-vf", vf, str(workdir / "%04d.png")], check=True)
     return sorted(workdir.glob("*.png"))
 
 
@@ -68,13 +69,14 @@ def main():
     p.add_argument("--fps", type=float, default=4, help="fotogramas por segundo muestreados")
     p.add_argument("--width", type=int, default=240, help="ancho de cada fotograma")
     p.add_argument("--columns", type=int, default=8)
+    p.add_argument("--crop", help="recorte previo con la sintaxis de ffmpeg, ancho:alto:x:y")
     a = p.parse_args()
     if a.end <= a.start:
         sys.exit("--end debe ser mayor que --start")
 
     media = resolve(a.source)
     with tempfile.TemporaryDirectory() as tmp:
-        frames = extract(media, a.start, a.end, a.fps, a.width, Path(tmp))
+        frames = extract(media, a.start, a.end, a.fps, a.width, a.crop, Path(tmp))
         if not frames:
             sys.exit("ffmpeg no devolvió fotogramas en esa ventana")
         out = EVIDENCE / f"{a.id}.jpg"

@@ -269,5 +269,365 @@
     "note": "Muestra de hasta 30 segundos; observar el reproductor del autor para el original.",
     "consulted": "2026-10-27",
     "verification": "Fotogramas temporales del clip inspeccionados; no sesión de uso en la aplicación original."
+  },
+  {
+    "id": "farfetch-arranque",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      0.0,
+      6.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Monograma FF estático de 0 a 3,6 s y corte a la bienvenida (3,8 s). Sin animación de logo."
+  },
+  {
+    "id": "farfetch-agregar-bolsa",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      226.8,
+      233.6
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Tras «Add To Bag» en la hoja de talla: la hoja baja, el fondo se oscurece con un icono de bolsa y un anillo de progreso centrados durante ≈3 s (227,8–230,9 s) y sube la hoja «Added to Bag» con producto, talla, precio y «Go to bag» (231,6–231,8 s). El icono no sale del botón ni viaja: la descripción de ScreensDesign («morphing into a bag icon that travels towards the top») no coincide con la grabación. El mismo patrón se repite en 335–339 s."
+  },
+  {
+    "id": "farfetch-icono-central",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      230.6,
+      231.9
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Cuadro a cuadro: el icono se encoge en su sitio (230,7–231,0 s); el oscurecido se retira y vuelve con la hoja de confirmación (231,5–231,9 s). No hay desplazamiento hacia la bolsa."
+  },
+  {
+    "id": "farfetch-filtro-color",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      99.6,
+      101.4
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Al tocar un color, la fila queda con borde y la pantalla se oscurece con un indicador central ≈1 s mientras se recalcula «Show N Results». No hay animación de check."
+  },
+  {
+    "id": "farfetch-plegable",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      246.1,
+      246.6
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. «Size & Fit»: el contenido se expande empujando lo de abajo en ≈0,2 s (246,27–246,47 s) y el chevron se invierte."
+  },
+  {
+    "id": "farfetch-galeria",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      182.6,
+      185.6
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Al entrar a la ficha, la foto aparece con un fundido de ≈0,35 s (183,43–183,77 s); después la galería se desliza horizontalmente con un indicador de segmentos bajo la foto. Sin miniaturas."
+  },
+  {
+    "id": "farfetch-variante-color",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      238.0,
+      242.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Al tocar otro color en «Also available in» se abre otra ficha con esqueleto de carga (≈2 s); la foto no cambia en el sitio."
+  },
+  {
+    "id": "farfetch-favorito-marca",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      478.6,
+      479.6
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. El corazón de la marca se rellena sin cambio de escala visible; ≈0,5 s después aparece «Favorited» bajo el nombre."
+  },
+  {
+    "id": "farfetch-favorito-ficha",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      192.8,
+      194.1
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. El indicador de toque de la grabación tapa el icono; el corazón aparece relleno a 193,9 s, ≈0,9 s después del toque, sin rebote visible."
+  },
+  {
+    "id": "farfetch-quitar-bolsa",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      625.2,
+      627.6
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. ✕ en la fila: la fila se oscurece localmente ≈1,3 s, luego se retira y la lista se reacomoda; el contador pasa de 6 a 5. Sin deshacer."
+  },
+  {
+    "id": "farfetch-quitar-deseos",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      607.9,
+      608.3
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. ✕ en la lista de deseos: el contador pasa de 12 a 11 y la tarjeta siguiente ocupa el hueco en ≈0,2 s. Sin deshacer."
+  },
+  {
+    "id": "farfetch-copiar-codigo",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      676.5,
+      676.9
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Código de recompensa: el texto se desvanece y aparece «Code Copied» en el mismo botón (≈0,25 s, 676,6–676,8 s). Sin aviso flotante."
+  },
+  {
+    "id": "farfetch-pestana-inicio",
+    "page": "https://screensdesign.com/apps/farfetch/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      466.5,
+      468.2
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Al tocar Inicio vuelve arriba con esqueleto ≈0,8 s y fundido de imágenes. La barra inferior no tiene un indicador que se desplace."
+  },
+  {
+    "id": "moda-operandi-arranque",
+    "page": "https://screensdesign.com/apps/moda-operandi-luxury-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      0.0,
+      8.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Logotipo de texto estático sobre fondo lila durante los 8 s de carga."
+  },
+  {
+    "id": "moda-operandi-carga-marca",
+    "page": "https://screensdesign.com/apps/moda-operandi-luxury-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      21.0,
+      24.5
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Indicador de carga con las cuatro formas geométricas del logo, que cambian de color mientras carga «Shop»."
+  },
+  {
+    "id": "moda-operandi-agregar",
+    "page": "https://screensdesign.com/apps/moda-operandi-luxury-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      109.4,
+      111.6
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Tras elegir talla, «Add to Bag» muestra tres puntos dentro del botón ≈0,8 s; luego baja una franja verde superior («This item has been added to your bag») que persiste varios segundos."
+  },
+  {
+    "id": "moda-operandi-error-stock",
+    "page": "https://screensdesign.com/apps/moda-operandi-luxury-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      543.0,
+      549.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. En la bolsa, mensaje rosa persistente junto a la fila del producto que pide una cantidad menor; sin sacudidas."
+  },
+  {
+    "id": "zara-arranque",
+    "page": "https://screensdesign.com/apps/zara/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      0.0,
+      8.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Logotipo estático de 0 a 7 s y corte a la bienvenida negra con «ENTER»."
+  },
+  {
+    "id": "zara-agregar-rapido",
+    "page": "https://screensdesign.com/apps/zara/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      213.0,
+      219.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. «+» en el listado abre la hoja de tallas; al elegir, sube un panel de confirmación con miniatura y sugerencias."
+  },
+  {
+    "id": "zara-borrar-deshacer",
+    "page": "https://screensdesign.com/apps/zara/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      914.6,
+      919.4
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Deslizar la fila revela «DELETE» en rojo; al tocarlo, la pantalla queda bloqueada con «Loading» ≈0,6 s, la fila se retira y aparece una barra negra inferior con el mensaje de eliminación y una acción a la derecha («UNDO», apenas legible a esta resolución). Cada fila tiene además una ✕ visible."
+  },
+  {
+    "id": "hbx-arranque",
+    "page": "https://screensdesign.com/apps/hbx-globally-curated-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      0.0,
+      4.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Logotipo estático y corte al aviso de privacidad."
+  },
+  {
+    "id": "hbx-agregar",
+    "page": "https://screensdesign.com/apps/hbx-globally-curated-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      139.0,
+      140.8
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. «Add to Bag»: indicador de carga dentro del botón ≈0,7 s; aparece una insignia en la pestaña Bolsa, el botón pasa a «Checkout» y baja una franja superior «✓ Item Added» con miniatura."
+  },
+  {
+    "id": "hbx-error-stock",
+    "page": "https://screensdesign.com/apps/hbx-globally-curated-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      650.0,
+      654.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Tras cambiar la cantidad, franja roja superior de stock insuficiente que persiste; no aparece junto al control."
+  },
+  {
+    "id": "lyst-bienvenida-reposo",
+    "page": "https://screensdesign.com/apps/lyst-shop-fashion-brands/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      6.0,
+      21.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Bienvenida en movimiento continuo sin interacción: el collage se desplaza y el lema rota cada ≈2 s durante al menos 15 s."
+  },
+  {
+    "id": "asos-intro",
+    "page": "https://screensdesign.com/apps/asos-discover-fashion-online/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      1.8,
+      7.7
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Tras el logotipo estático: monograma «a» en círculo, zoom que llena la pantalla (≈0,5 s), disolución en bloques (≈1 s) y once logos de submarcas en cortes de ≈0,4 s, con un indicador de carga bajo cada uno. ≈5,6 s en total."
+  },
+  {
+    "id": "asos-carga-marca",
+    "page": "https://screensdesign.com/apps/asos-discover-fashion-online/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      450.5,
+      453.5
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. El monograma «a» gira como indicador de carga entre pantallas."
+  },
+  {
+    "id": "zalando-arranque",
+    "page": "https://screensdesign.com/apps/zalando-online-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      3.2,
+      3.8
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. El logo estático se difumina en un resplandor con indicador de carga (≈0,35 s) antes del selector de país."
+  },
+  {
+    "id": "zalando-corazon",
+    "page": "https://screensdesign.com/apps/zalando-online-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      314.7,
+      315.2
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Recorte de la zona del corazón. Al soltar, se rellena de naranja, crece por encima de su tamaño y vuelve (≈0,3 s, 314,77–315,07 s); ≈0,8 s después sube una hoja de confirmación con artículos combinables."
+  },
+  {
+    "id": "shop-intro",
+    "page": "https://screensdesign.com/apps/shop-all-your-favorite-brands/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      1.9,
+      3.3
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. El splash se funde a blanco (≈0,25 s); un trazo dibuja la «o» del logotipo (2,50–2,83 s), se encoge y estalla en el logotipo «shop» rodeado de productos (3,03–3,10 s). «Get Started» es visible desde 2,63–2,70 s, antes de terminar. ≈1,2 s."
+  },
+  {
+    "id": "shop-bienvenida-reposo",
+    "page": "https://screensdesign.com/apps/shop-all-your-favorite-brands/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      3.0,
+      13.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. Sin interacción, los productos se reacomodan y el lema rota cada ≈2 s."
   }
 ]
