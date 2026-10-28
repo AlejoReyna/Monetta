@@ -79,12 +79,6 @@
     </div>
     {%- if performed -%}
       <div class="page-head">
-        <nav class="breadcrumbs" aria-label="Ruta de navegación">
-          <ol>
-            <li><a href="{{ routes.root_url }}">Inicio</a></li>
-            <li><span aria-current="page">Buscar</span></li>
-          </ol>
-        </nav>
         <div class="page-head__row">
           <h1 class="display display--page" tabindex="-1">Resultados para “{{ search.terms | escape }}”</h1>
           <p class="page-head__count" data-count aria-live="polite">{{ count_text }}</p>

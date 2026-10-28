@@ -73,15 +73,6 @@
   data-selected-index="{{ selected_index }}"
   {{ section.shopify_attributes }}
 >
-  <div class="container product-breadcrumbs">
-    <nav class="breadcrumbs" aria-label="Ruta de navegación">
-      <ol>
-        <li><a href="{{ routes.root_url }}">Inicio</a></li>
-        <li><a href="{{ routes.all_products_collection_url }}">Catálogo</a></li>
-        <li><span aria-current="page">{{ product.title | escape }}</span></li>
-      </ol>
-    </nav>
-  </div>
 
   <div class="product-layout">
     <section class="gallery{% if images.size <= 1 %} gallery--single{% endif %}" aria-label="Fotos de {{ product.title | escape }}">

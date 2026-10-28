@@ -109,12 +109,6 @@
   {%- endif -%}
   <div class="container listing listing--collection listing--guia" data-listing {{ section.shopify_attributes }}>
     <div class="page-head guia-page-head">
-      <nav class="breadcrumbs" aria-label="Ruta de navegación">
-        <ol>
-          <li><a href="{{ routes.root_url }}">Inicio</a></li>
-          <li><span aria-current="page">{{ guide_title | escape }}</span></li>
-        </ol>
-      </nav>
       {%- unless guide_photo != blank and paginate.current_page == 1 -%}
         <h1 class="display display--page">{{ guide_title | escape }}</h1>
       {%- endunless -%}
