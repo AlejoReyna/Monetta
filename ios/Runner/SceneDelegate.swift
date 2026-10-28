@@ -85,6 +85,10 @@ private final class SystemLayoutBridge: NSObject, FlutterStreamHandler {
       "verticalSizeClass": host.traitCollection.verticalSizeClass.rawValue,
       "barEdge": "none", "divisions": [], "occlusions": [],
     ]
+    // UIView.ReservedRegion and verticalBarEdge exist only in the iOS 27.1
+    // SDK (Xcode 27, Swift 6.4). An older Xcode builds without the bridge and
+    // reports "supported": false, which Dart treats as an unsupported host.
+    #if compiler(>=6.4)
     if #available(iOS 27.1, *) {
       snapshot["supported"] = true
       switch host.traitCollection.verticalBarEdge {
@@ -110,6 +114,7 @@ private final class SystemLayoutBridge: NSObject, FlutterStreamHandler {
       snapshot["divisions"] = encode(probe.divisions)
       snapshot["occlusions"] = encode(probe.occlusions)
     }
+    #endif
     let value = snapshot as NSDictionary
     guard value != lastSnapshot else { return }
     lastSnapshot = value
@@ -126,29 +131,35 @@ private final class SystemLayoutProbe: UIView {
   var onChange: ((SystemLayoutProbe) -> Void)?
   private var queued = false
   private var registration: Any?
+  #if compiler(>=6.4)
   @available(iOS 27.1, *) var divisions: [UIView.ReservedRegion] {
     reservedRegions(kind: .division, options: .includeInactive)
   }
   @available(iOS 27.1, *) var occlusions: [UIView.ReservedRegion] {
     reservedRegions(kind: .occlusion)
   }
+  #endif
 
   override init(frame: CGRect) {
     super.init(frame: frame)
+    #if compiler(>=6.4)
     if #available(iOS 27.1, *) {
       registration = registerForTraitChanges(UITraitCollection.systemTraitsAffectingVerticalBarEdge) {
         (probe: SystemLayoutProbe, _: UITraitCollection) in probe.schedule()
       }
     }
+    #endif
   }
 
   required init?(coder: NSCoder) { fatalError("init(coder:) is not used") }
 
   override func updateConstraints() {
+    #if compiler(>=6.4)
     if #available(iOS 27.1, *) {
       _ = divisions
       _ = occlusions
     }
+    #endif
     super.updateConstraints()
     schedule()
   }
