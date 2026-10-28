@@ -1,0 +1,315 @@
+/* Home v2–v4 of 22 October (hero with the search field, home header, monetta.mx-style category row, scroll-in reveal) and
+ * the footer payments line: written on the draft theme after the 22 Oct pass and appended by hand to the generated
+ * monetta-pages.css (recovered from the remote backup of 27 October). Moved here unchanged so the ported sheets stay a
+ * pure port (tools/style-guideline-theme/port-css.mjs --check); loaded right after monetta-pages.css, as on the draft. */
+/* ===================================== Home hero v2 (2026-10-22, Alexis): full-bleed banner, search inside it */
+.home-hero__form {
+  margin: 0;
+}
+
+.search-field--hero {
+  height: var(--control);
+  padding-right: 2px;
+  border-color: var(--color-hairline);
+  background: var(--color-surface);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+}
+
+.search-field--hero input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 100%;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 16px;
+  color: var(--color-ink);
+  outline: none;
+}
+
+.search-field--hero:focus-within {
+  border-color: var(--color-ink);
+}
+
+.search-field__submit {
+  flex: none;
+  width: var(--tap);
+  height: var(--tap);
+}
+
+@media (min-width: 768px) {
+  .home-hero {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, min(520px, 52%)) 1fr;
+    grid-template-rows: auto auto;
+    align-content: center;
+    gap: 0;
+    max-width: none;
+    min-height: clamp(420px, 46vw, 600px);
+    margin: 0;
+    padding: 40px var(--edge-r) 40px var(--edge-l);
+    overflow: hidden;
+    background: var(--color-surface-deep);
+  }
+
+  .home-hero__photo {
+    position: absolute;
+    inset: 0;
+    height: auto;
+    border-radius: 0;
+  }
+
+  .home-hero__photo img {
+    object-position: 50% 64%;
+  }
+
+  .home-hero__panel,
+  .home-hero__search {
+    position: relative;
+    grid-column: 1;
+    background: color-mix(in srgb, var(--color-surface-warm) 94%, transparent);
+  }
+
+  .home-hero__panel {
+    grid-row: 1;
+    border-radius: var(--radius-card) var(--radius-card) 0 0;
+    padding-bottom: 20px;
+  }
+
+  .home-hero__search {
+    display: block;
+    grid-row: 2;
+    inset: auto;
+    padding: 0 32px 32px;
+    border-radius: 0 0 var(--radius-card) var(--radius-card);
+  }
+}
+
+@media (min-width: 768px) and (max-width: 1023.98px) {
+  .home-hero__search {
+    padding: 0 24px 28px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .home-hero {
+    padding-left: max(var(--edge-l), calc((100vw - var(--content-max)) / 2 + var(--edge-l)));
+  }
+
+  .home-hero__search {
+    padding: 0 48px 48px;
+  }
+}
+
+/* Home header: Inicio · Catálogo · Contacto take the search field's place, in the title serif. */
+.site-nav--inline {
+  display: none;
+}
+
+.site-nav__link {
+  font-family: var(--type-section-title-font);
+}
+
+@media (min-width: 768px) {
+  .site-header--home .site-nav--inline {
+    display: block;
+    min-width: 0;
+    justify-self: center;
+    border-top: 0;
+  }
+
+  .site-header--home .site-nav--inline .site-nav__list {
+    width: auto;
+    max-width: 100%;
+    padding: 0;
+    -webkit-mask-image: none;
+    mask-image: none;
+  }
+
+  .site-header--home .site-nav__link {
+    font-size: 17px;
+    font-weight: 500;
+  }
+}
+
+/* ============ Home v3 (2026-10-22, Alexis): monetta.mx structure — white page, centred logo, emoji category row,
+   full-bleed banner with "Ver productos" and the search field. */
+.mw:has(.site-header--home) {
+  --color-canvas: var(--color-surface);
+  background: var(--color-surface);
+}
+
+.site-header--home {
+  background: var(--color-surface);
+}
+
+.home-hero__panel[hidden] {
+  display: none !important;
+}
+
+.home-hero__cta {
+  position: absolute;
+  right: var(--edge-r);
+  top: 50%;
+  transform: translateY(-50%);
+  min-height: var(--tap);
+  background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+  font-family: var(--type-section-title-font);
+}
+
+.site-nav--home {
+  display: none;
+}
+
+@media (max-width: 767.98px) {
+  .home-hero__cta {
+    top: 16px;
+    transform: none;
+  }
+}
+
+@media (min-width: 768px) {
+  .site-header--home .site-header__bar {
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  }
+
+  .site-header--home .site-header__start {
+    display: flex;
+  }
+
+  .site-header--home .site-header__menu {
+    display: none;
+  }
+
+  .site-header--home .wordmark {
+    justify-self: center;
+  }
+
+  .site-header--home .site-header__search-icon:not([hidden]) {
+    display: inline-grid;
+  }
+
+  .site-header--home .header-utility__label {
+    display: none;
+  }
+
+  .site-header--home .header-utility {
+    padding: 0;
+    width: var(--tap);
+    justify-content: center;
+  }
+
+  .site-header--home .header-utility .count-badge {
+    position: absolute;
+  }
+
+  .site-nav--home {
+    display: block;
+  }
+
+  .site-nav--home .site-nav__list {
+    width: fit-content;
+    max-width: 100%;
+    margin: 0 auto;
+  }
+
+  .site-nav--home .site-nav__link {
+    font-size: 16px;
+    font-weight: 400;
+    gap: 6px;
+  }
+
+  .home-hero:has(.home-hero__panel[hidden]) {
+    display: block;
+    min-height: 0;
+    height: clamp(320px, 31vw, 460px);
+    padding: 0;
+  }
+
+  .home-hero:has(.home-hero__panel[hidden]) .home-hero__photo img {
+    object-position: 50% 50%;
+  }
+
+  .home-hero:has(.home-hero__panel[hidden]) .home-hero__search {
+    position: absolute;
+    top: calc(50% + 40px);
+    right: var(--edge-r);
+    left: auto;
+    bottom: auto;
+    width: min(420px, 40vw);
+    padding: 0;
+    background: none;
+  }
+
+  .home-hero:has(.home-hero__panel[hidden]) .home-hero__cta {
+    width: min(420px, 40vw);
+    top: calc(50% - 40px);
+    justify-content: center;
+  }
+}
+
+/* ============ Home v4 (2026-10-22): banner -10 %, centred section titles, scroll-in reveal */
+.home-hero {
+  height: calc(clamp(220px, 30vh, 280px) * 0.9);
+}
+
+@media (min-width: 768px) {
+  .home-hero:has(.home-hero__panel[hidden]) {
+    height: calc(clamp(320px, 31vw, 460px) * 0.9);
+  }
+}
+
+.mw:has(.site-header--home) main .section-header {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+}
+
+.mw:has(.site-header--home) main .section-header::before {
+  content: '';
+}
+
+.mw:has(.site-header--home) main .section-header__titles {
+  text-align: center;
+}
+
+.mw:has(.site-header--home) main .section-header__actions {
+  justify-self: end;
+}
+
+/* Hidden only once JS has armed it (.reveal); without JS or with reduced motion nothing is hidden. */
+.section.reveal {
+  opacity: 0;
+  transform: translateY(16px);
+}
+
+.section.reveal.is-revealed {
+  opacity: 1;
+  transform: none;
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .section.reveal {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Footer payments line, built from shop.enabled_payment_types */
+.footer-payments {
+  margin: 16px 0 0;
+  font-family: var(--font-sans);
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--color-ink-muted);
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 768px) {
+  .footer-payments {
+    text-align: left;
+  }
+}

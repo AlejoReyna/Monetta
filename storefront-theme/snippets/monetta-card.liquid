@@ -1,13 +1,16 @@
 {%- doc -%}
-  The shared product card (MonettaProductTile): white card, 12px radius, 4:5 photo on #FAFAFA, brand, two-line name and
-  price. Everything shown is read from the product at render time (price, compare-at, availability); nothing is cached.
+  The shared product card (MonettaProductTile): canvas card with a hairline, 12px radius, 4:5 photo inset on the warm tile
+  ground, then brand, two-line name and price in Inter (the card-label role; DESIGN_SPEC §3). Everything shown is read from the
+  product at render time (price, compare-at, availability); nothing is cached.
 
   @param {object} product - Shopify product.
   @param {string} [density] - 'grid' (default; 4:5 photo, two-line name) or 'compact' (square photo, one line) for Home rails.
   @param {boolean} [flush] - Photo fills the frame on white (product-page recommendation rails).
   @param {boolean} [eager] - Eager-load the photo (first row only).
-  @param {boolean} [quick_add] - Show the "+" for single-variant products that can be bought (default true).
+  @param {boolean} [quick_add] - Show the "+" (default true): it adds a single-variant piece, and opens the quick view to
+    choose a variant when there are several.
   @param {string} [sizes] - The sizes attribute of the photo's slot.
+  @param {boolean} [view_button] - The collection grid's «VER PRODUCTO» pill (TileViewProductButton): visual only, inside the card's link.
 {%- enddoc -%}
 {%- liquid
   assign density = density | default: 'grid'
@@ -18,7 +21,10 @@
   if in_stock and variant.compare_at_price > variant.price
     assign pct = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
   endif
-  assign brand = product.metafields.custom.marca.value | default: product.vendor
+  capture brand
+    render 'monetta-facet', product: product, kind: 'brands'
+  endcapture
+  assign brand = brand | strip
   assign eyebrow = ''
   if in_stock
     assign delivery = product.metafields.custom.entrega.value
@@ -32,6 +38,13 @@
   if quick_add != false and in_stock and product.has_only_default_variant
     assign can_quick_add = true
   endif
+  assign now_seconds = 'now' | date: '%s' | plus: 0
+  assign created_seconds = product.created_at | date: '%s' | plus: 0
+  assign age_days = now_seconds | minus: created_seconds | divided_by: 86400
+  assign is_new = false
+  if age_days >= 0 and age_days <= 30
+    assign is_new = true
+  endif
   assign image = product.featured_image
 -%}
 <article class="card card--{{ density }}{% if flush %} card--flush{% endif %}" data-product-handle="{{ product.handle }}">
@@ -42,7 +55,7 @@
       {%- else -%}
         {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
       {%- endif -%}
-      {%- if pct > 0 -%}<span class="badge badge--sale card__badge">-{{ pct }}%</span>{%- endif -%}
+      {%- if pct > 0 -%}<span class="badge badge--sale card__badge">-{{ pct }}%</span>{%- elsif is_new and in_stock -%}<span class="badge card__badge badge--fresh">Nuevo</span>{%- endif -%}
       {%- unless in_stock -%}<span class="card__soldout"><span class="badge badge--seal">Agotado</span></span>{%- endunless -%}
     </div>
     <div class="card__body">
@@ -58,15 +71,21 @@
         {%- endif -%}
         {%- unless in_stock -%}<span class="visually-hidden">, agotado</span>{%- endunless -%}
       </p>
+      {%- if view_button -%}<span class="card__view" aria-hidden="true">Ver producto</span>{%- endif -%}
     </div>
   </a>
-  {%- if can_quick_add -%}
-    <div class="card__actions">
+  <div class="card__actions">
+    {%- comment -%}The favourite is browser-local (assets/monetta-merchandising.js shows it once it can read the list).{%- endcomment -%}
+    <button type="button" class="card__fav" data-save-product="{{ product.handle }}" data-product-title="{{ product.title | escape }}" aria-pressed="false" aria-label="Guardar {{ product.title | escape }}" hidden>{% render 'monetta-icon', name: 'heart', size: 20, class: 'save-icon--off' %}{% render 'monetta-icon', name: 'heartFilled', size: 20, class: 'save-icon--on' %}</button>
+    {%- if can_quick_add -%}
       <form action="{{ routes.cart_add_url }}" method="post" data-quick-add>
         <input type="hidden" name="id" value="{{ variant.id }}">
         <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="card__quick" aria-label="Agregar {{ product.title | escape }} al carrito"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
+        <button type="submit" class="card__quick" aria-label="Agregar {{ product.title | escape }} a la bolsa"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
       </form>
-    </div>
-  {%- endif -%}
+    {%- elsif quick_add != false and in_stock -%}
+      {%- comment -%}Several variants: the «+» opens the quick view to choose one, as in the app (quick_add_button.dart).{%- endcomment -%}
+      <button type="button" class="card__quick" data-quick-view="{{ product.handle }}" data-product-url="{{ product.url }}" aria-haspopup="dialog" aria-controls="quick-view" aria-label="Elegir opciones de {{ product.title | escape }}"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
+    {%- endif -%}
+  </div>
 </article>

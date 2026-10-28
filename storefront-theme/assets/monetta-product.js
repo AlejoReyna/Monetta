@@ -177,6 +177,7 @@
     if (!next || next.dataset.sectionId !== root.dataset.sectionId || !dynamic || !dock || !variant || !$('[data-product-form]', dynamic) || !$('[data-add]', dock)) {
       throw new Error('invalid-section');
     }
+    if ($('[data-variant-details]', root) && !$('[data-variant-details]', next)) throw new Error('missing-variant-details');
     const rendered = $$('[data-options] fieldset', dynamic).map((group) => $('input:checked', group)?.value);
     if (!rendered.every((value, index) => value === variant.options[index])) throw new Error('incoherent-section');
     return { next, variant };
@@ -223,6 +224,8 @@
     const { next, variant } = section;
     $('[data-product-dynamic]', root).replaceChildren(...$('[data-product-dynamic]', next).childNodes);
     $('[data-purchase-dock]', root).replaceChildren(...$('[data-purchase-dock]', next).childNodes);
+    const details = $('[data-variant-details]', root);
+    if (details) details.replaceChildren(...$('[data-variant-details]', next).childNodes);
     const seal = $('[data-seal]', root);
     const nextSeal = $('[data-seal]', next);
     if (seal && nextSeal) seal.hidden = nextSeal.hidden;
@@ -376,7 +379,9 @@
     const quantity = Number($('[data-qty-input]', form)?.value) || 1;
     const name = $('.product-panel__name', root)?.textContent?.trim() || '';
     const option = $$('[data-options] [data-option-value]', root).map((el) => el.textContent.trim()).filter(Boolean).join(' / ');
-    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: $('[data-add]', form) });
+    // The pressed button gets the focus back when the bag closes. On phones that is the purchase dock's, outside the form.
+    const pressed = event.submitter?.matches?.('[data-add]') ? event.submitter : buttons.find((button) => button.offsetParent !== null);
+    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form) });
     buttons.forEach((button) => Monetta.setPending(button, false));
     adding = false;
     if (root.dataset.selection === 'valid') lockPurchase(root, false);
@@ -466,4 +471,9 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
+  // The theme editor replaces a section's DOM when its settings change: bind the new gallery and rail. The old nodes, and
+  // the listeners on them, are gone with it; document-level listeners above are shared and never re-added.
+  document.addEventListener('shopify:section:load', (event) => {
+    if (event.target.querySelector?.('[data-product-page], [data-recommendations]')) start();
+  });
 })();

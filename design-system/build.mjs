@@ -193,6 +193,9 @@ const dartRoleLines = roleNames.map((name) => {
   const r = tokens.type.role[name];
   return `  static const MonettaTypeRole ${name} = MonettaTypeRole(\n    serif: ${r.family === 'serif'},\n    weight: ${r.weight},\n    lineHeight: ${r.lineHeight},\n    tracking: ${r.tracking},\n    compact: ${r.size.compact},\n    medium: ${r.size.medium},\n    expanded: ${r.size.expanded},\n  );`;
 });
+// The app's SDK floor (>=3.5) puts `dart format` in its short style, which ignores the `// dart format off`
+// marker below and wraps any line over 80 columns. The template is therefore written in the formatter's own
+// layout (the 64-hex manifest hash goes on its own line), so --check stays byte-for-byte after `dart format`.
 const dartColors = Object.entries(light).map(([k, v]) => `  static const Color ${k} = ${dartColor(v)};`);
 const dartDark = Object.entries(tokens.color.darkRolesOnly)
   .filter(([k]) => !k.startsWith('$'))

@@ -1,0 +1,16 @@
+{%- comment -%}Rendered in search context. Every card must match the normalized brand, excluding the current product in JS.{%- endcomment -%}
+{%- assign wanted = search.terms | strip -%}
+{%- assign count = 0 -%}
+<ul data-brand-results>
+{% paginate search.results by 50 %}
+  {% for candidate in search.results %}
+    {% if candidate.object_type == 'product' %}
+      {% capture brand %}{% render 'monetta-facet', product: candidate, kind: 'brands' %}{% endcapture %}
+      {% assign brand = brand | strip %}
+      {% if brand == wanted %}<li>{% render 'monetta-card', product: candidate, density: 'compact' %}</li>{% assign count = count | plus: 1 %}{% endif %}
+      {% if count >= 9 %}{% break %}{% endif %}
+    {% endif %}
+  {% endfor %}
+{% endpaginate %}
+</ul>
+{% schema %}{"name":"Monetta · Misma marca","settings":[]}{% endschema %}

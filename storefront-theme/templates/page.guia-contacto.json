@@ -1,0 +1,10 @@
+{
+  "layout": "monetta",
+  "sections": {
+    "main": {
+      "type": "monetta-guia-page",
+      "settings": { "mode": "contacto" }
+    }
+  },
+  "order": ["main"]
+}

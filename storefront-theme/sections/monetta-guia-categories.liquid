@@ -1,0 +1,60 @@
+{%- comment -%}
+  «Categorías» of the client guide (slide 29; categories_screen.dart in PR #33): the screen title and its line, the seven
+  collections with the guide's icons three across, then the brands the store sells as gold wordmark tiles. Destinations
+  come from snippets/monetta-guia-url.liquid, so real collections the owner creates take over without a code change.
+{%- endcomment -%}
+{%- assign heading_id = section.id | append: '-heading' -%}
+{%- assign category_entries = 'crossbody:Crossbody:categoria-crossbody,tote:Tote:categoria-tote,shoulder:Shoulder:categoria-shoulder,satchel:Handbags:categoria-handbags,carteras:Carteras:categoria-carteras,perfumes:Perfumes:categoria-perfumes,accesorios:Accesorios:categoria-accesorios' | split: ',' -%}
+{%- assign brand_entries = 'Coach:coach,Michael Kors:michael_kors,Anne Klein:anne_klein,Guess:guess,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Tory Burch:,Kate Spade:,Marc Jacobs:,Olaplex:olaplex,Dior:dior,The Ordinary:the_ordinary,Laneige:laneige,Rhode:rhode,Summer Fridays:summer_fridays' | split: ',' -%}
+<div class="container guia-categories" {{ section.shopify_attributes }}>
+  <header class="guia-categories__head">
+    <h1 class="display display--page">Categorías</h1>
+    <p class="guia-categories__lede">Descubre todas nuestras colecciones de tus marcas favoritas.</p>
+  </header>
+  <section class="guia-categories__block" aria-labelledby="{{ heading_id }}-collections">
+    <h2 class="display display--section" id="{{ heading_id }}-collections">Colecciones</h2>
+    <ul class="guia-categories__grid" role="list">
+      {%- for entry in category_entries -%}
+        {%- assign parts = entry | split: ':' -%}
+        {%- assign key = parts[0] -%}
+        {%- assign icon = parts[2] -%}
+        {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
+        <li>
+          <a class="guia-category" href="{{ url | strip }}">
+            {% render 'monetta-guia-icon', name: icon, size: 72, class: 'guia-category__icon' %}
+            <span class="guia-category__label">{{ parts[1] }}</span>
+          </a>
+        </li>
+      {%- endfor -%}
+    </ul>
+  </section>
+  <section class="guia-categories__block" aria-labelledby="{{ heading_id }}-brands">
+    <h2 class="display display--section" id="{{ heading_id }}-brands">Marcas</h2>
+    <ul class="guia-brands__grid guia-brands__grid--three" role="list">
+      {%- for entry in brand_entries -%}
+        {%- assign name = entry | split: ':' | first -%}
+        {%- assign art = entry | split: ':' | last -%}
+        {%- if art == name -%}{%- assign art = '' -%}{%- endif -%}
+        {%- if shop.vendors contains name -%}
+          {%- capture url -%}{% render 'monetta-guia-url', key: 'brand', brand: name %}{%- endcapture -%}
+          <li>
+            <a class="guia-brand" href="{{ url | strip }}" aria-label="Ver {{ name }}">
+              {%- if art != blank -%}
+                <img src="{{ 'monetta-app-brand-' | append: art | append: '.webp' | asset_url }}" width="600" height="600" alt="" loading="lazy" decoding="async">
+              {%- else -%}
+                <span class="guia-brand__name">{{ name }}</span>
+              {%- endif -%}
+            </a>
+          </li>
+        {%- endif -%}
+      {%- endfor -%}
+    </ul>
+  </section>
+</div>
+
+{% schema %}
+{
+  "name": "Monetta · Categorías",
+  "settings": []
+}
+{% endschema %}

@@ -11,6 +11,7 @@
   @param {string} [empty_title] - Empty-state title when nothing matches and no filter is active.
   @param {string} [empty_body] - Its body.
   @param {string} [search_url] - On the search page, the URL of an empty search (adds "Limpiar búsqueda").
+  @param {boolean} [view_button] - Cards carry the «VER PRODUCTO» pill (collections, as the app's grid; not search).
 {%- enddoc -%}
 {%- if total == 0 -%}
   <div class="empty">
@@ -40,7 +41,7 @@
       {%- if product.object_type != blank and product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
       {%- assign eager = false -%}
       {%- if forloop.index <= 4 %}{% assign eager = true %}{% endif -%}
-      <li>{% render 'monetta-card', product: product, eager: eager %}</li>
+      <li>{% render 'monetta-card', product: product, eager: eager, view_button: view_button %}</li>
     {%- endfor -%}
   </ul>
   {%- liquid

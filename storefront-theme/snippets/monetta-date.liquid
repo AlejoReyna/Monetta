@@ -1,0 +1,13 @@
+{%- doc -%}
+  A date in Spanish (Mexico), "22 de octubre de 2026", independent of the store's language (Liquid's localized date formats
+  follow the store locale, which is English on staging). Prints a <time> element with the ISO date.
+
+  @param {string} date - Any Liquid date (an article's published_at, for example).
+{%- enddoc -%}
+{%- liquid
+  assign months = 'enero,febrero,marzo,abril,mayo,junio,julio,agosto,septiembre,octubre,noviembre,diciembre' | split: ','
+  assign month_index = date | date: '%m' | plus: 0 | minus: 1
+  assign day = date | date: '%d' | plus: 0
+  assign year = date | date: '%Y'
+-%}
+<time datetime="{{ date | date: '%Y-%m-%d' }}">{{ day }} de {{ months[month_index] }} de {{ year }}</time>
