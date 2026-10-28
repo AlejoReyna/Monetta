@@ -598,6 +598,45 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
 
   bool get _retryBlocked => _openingSheet || _checkingOrder || _orderFound;
 
+  /// Estado del carrito de Shopify. Sin [CartScope] (tests con lanzador
+  /// inyectado) no hay carrito remoto que esperar.
+  CartControllerStatus? _cartStatus(BuildContext context) =>
+      CartScope.maybeOf(context)?.notifier?.status;
+
+  /// Pagar solo se habilita con un carrito que Shopify ya confirmó: nunca
+  /// mientras sincroniza, con error o parcialmente confirmado.
+  bool _cartReady(BuildContext context) {
+    final status = _cartStatus(context);
+    return status == null || status == CartControllerStatus.ready;
+  }
+
+  void _retryCartSync() {
+    final cartScope = CartScope.maybeOf(context);
+    final controller = cartScope?.notifier;
+    if (cartScope == null || controller == null) return;
+    if (controller.status == CartControllerStatus.syncing) return;
+    final account = AccountScope.maybeOf(context)?.account;
+    final scope = account == null
+        ? CartSessionScope.guest(shopDomain: cartScope.shopDomain)
+        : CartSessionScope.authenticated(
+            shopDomain: cartScope.shopDomain,
+            localAccountId: account.localAccountId,
+          );
+    final store = StoreScope.of(context);
+    unawaited(
+      controller.reconcileLocalBag(
+        scope: scope,
+        localIntent: [
+          for (final line in store.bagLines)
+            LocalCartIntent(
+              variantId: line.variant.id,
+              quantity: line.quantity,
+            ),
+        ],
+      ),
+    );
+  }
+
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -740,7 +779,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   }
 
   Future<void> _pay() async {
-    if (_retryBlocked) return;
+    if (_retryBlocked || !_cartReady(context)) return;
     final store = StoreScope.of(context);
     final lines = store.bagLines;
     if (widget.launchSecureCheckout case final launcher?) {
@@ -914,7 +953,12 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                           shipping: _shippingFor(store.bagSubtotal),
                           openingSheet: _openingSheet,
                           returnPhase: _returnPhase,
-                          payEnabled: !_retryBlocked,
+                          payEnabled: !_retryBlocked && _cartReady(context),
+                          cartStatus: _cartStatus(context),
+                          cartErrorMessage: CartScope.maybeOf(context)
+                              ?.notifier
+                              ?.errorMessage,
+                          onRetryCartSync: _retryCartSync,
                           showPayButton: !_orderFound,
                           paymentMethods: widget.availablePaymentMethods,
                           selectedPayment: _selectedPayment,
@@ -936,6 +980,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                   final summary = _CheckoutSummary(
                     lines: store.bagLines,
                     subtotal: store.bagSubtotal,
+                    confirmed: _cartReady(context),
                   );
 
                   if (!wide) {
@@ -1764,6 +1809,9 @@ class _ReviewPanel extends StatelessWidget {
     required this.openingSheet,
     required this.returnPhase,
     required this.payEnabled,
+    required this.cartStatus,
+    required this.cartErrorMessage,
+    required this.onRetryCartSync,
     required this.showPayButton,
     required this.paymentMethods,
     required this.selectedPayment,
@@ -1780,6 +1828,9 @@ class _ReviewPanel extends StatelessWidget {
   final bool openingSheet;
   final CheckoutReturnPhase? returnPhase;
   final bool payEnabled;
+  final CartControllerStatus? cartStatus;
+  final String? cartErrorMessage;
+  final VoidCallback onRetryCartSync;
   final bool showPayButton;
   final List<String> paymentMethods;
   final String? selectedPayment;
@@ -1857,10 +1908,44 @@ class _ReviewPanel extends StatelessWidget {
               ),
             ),
           ),
+        if (showPayButton &&
+            _showsCheckoutPayButton(returnPhase) &&
+            !openingSheet &&
+            cartStatus != null &&
+            cartStatus != CartControllerStatus.ready &&
+            cartStatus != CartControllerStatus.syncing)
+          Padding(
+            key: const ValueKey('checkout-cart-sync-error'),
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Semantics(
+              liveRegion: true,
+              child: Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      cartErrorMessage ??
+                          'Shopify debe confirmar tu bolsa antes de abrir el checkout.',
+                      style: boutiqueText(size: 12, color: palette.inkMuted),
+                    ),
+                  ),
+                  TextButton(
+                    key: const ValueKey('checkout-cart-sync-retry'),
+                    onPressed: onRetryCartSync,
+                    child: const Text('REINTENTAR'),
+                  ),
+                ],
+              ),
+            ),
+          ),
         if (showPayButton && _showsCheckoutPayButton(returnPhase))
           BoutiqueButton(
             key: const ValueKey('checkout-pay-button'),
             label: 'CONTINUAR AL PAGO SEGURO',
+            busy: cartStatus == CartControllerStatus.syncing && !openingSheet,
+            semanticsLabel:
+                cartStatus == CartControllerStatus.syncing && !openingSheet
+                    ? 'Confirmando tu bolsa con Shopify'
+                    : null,
             onPressed: payEnabled ? onPay : null,
           ),
         const SizedBox(height: 14),
@@ -2077,10 +2162,18 @@ class _ReviewBlock extends StatelessWidget {
 }
 
 class _CheckoutSummary extends StatelessWidget {
-  const _CheckoutSummary({required this.lines, required this.subtotal});
+  const _CheckoutSummary({
+    required this.lines,
+    required this.subtotal,
+    this.confirmed = true,
+  });
 
   final List<BagLine> lines;
   final double subtotal;
+
+  /// Falso mientras Shopify no confirma el carrito: el total no se presenta
+  /// como definitivo.
+  final bool confirmed;
 
   @override
   Widget build(BuildContext context) {
@@ -2170,6 +2263,15 @@ class _CheckoutSummary extends StatelessWidget {
             value: kMoney.format(subtotal + shipping),
             prominent: true,
           ),
+          if (!confirmed)
+            Align(
+              alignment: Alignment.centerRight,
+              child: Text(
+                'No confirmado',
+                key: const ValueKey('checkout-total-unconfirmed'),
+                style: boutiqueText(size: 11, color: palette.inkMuted),
+              ),
+            ),
         ],
       ),
     );

@@ -385,6 +385,8 @@ class BoutiqueButton extends StatelessWidget {
     required this.onPressed,
     this.filled = true,
     this.onPhoto = false,
+    this.busy = false,
+    this.semanticsLabel,
     super.key,
   });
 
@@ -395,12 +397,20 @@ class BoutiqueButton extends StatelessWidget {
     required this.onPressed,
     super.key,
   })  : filled = true,
-        onPhoto = true;
+        onPhoto = true,
+        busy = false,
+        semanticsLabel = null;
 
   final String label;
   final VoidCallback? onPressed;
   final bool filled;
   final bool onPhoto;
+
+  /// Muestra un indicador de progreso dentro del botón (sin moverlo).
+  final bool busy;
+
+  /// Etiqueta accesible alternativa, p. ej. mientras [busy].
+  final String? semanticsLabel;
 
   @override
   Widget build(BuildContext context) {
@@ -420,7 +430,8 @@ class BoutiqueButton extends StatelessWidget {
 
     return Semantics(
       button: true,
-      label: label,
+      label: semanticsLabel ?? label,
+      excludeSemantics: semanticsLabel != null,
       child: Material(
         color: background,
         shape: const StadiumBorder(),
@@ -443,17 +454,36 @@ class BoutiqueButton extends StatelessWidget {
                         : BorderSide(color: palette.borderControl),
               ),
             ),
-            child: Text(
-              label,
-              maxLines: 2,
-              textAlign: TextAlign.center,
-              overflow: TextOverflow.ellipsis,
-              style: boutiqueText(
-                size: 14,
-                weight: FontWeight.w600,
-                color: foreground,
-                height: 1.15,
-              ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (busy) ...[
+                  SizedBox(
+                    width: 14,
+                    height: 14,
+                    child: CircularProgressIndicator(
+                      key: const ValueKey('boutique-button-busy'),
+                      strokeWidth: 2,
+                      color: foreground,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                ],
+                Flexible(
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    textAlign: TextAlign.center,
+                    overflow: TextOverflow.ellipsis,
+                    style: boutiqueText(
+                      size: 14,
+                      weight: FontWeight.w600,
+                      color: foreground,
+                      height: 1.15,
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ),
