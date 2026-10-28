@@ -95,6 +95,7 @@ Future<void> main() async {
     firestore: firestoreCatalogConfig,
     hasFirebaseOptions: notifications.hasFirebaseOptions,
     hasShopify: storefrontConfig.isUsable,
+    shopDomain: storefrontConfig.shopDomain,
   );
   if (configurationError != null) {
     runApp(_ConfigurationErrorApp(message: configurationError));

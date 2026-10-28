@@ -1,4 +1,4 @@
-.PHONY: help setup gen gen-watch test test-core test-services test-all analyze format fix schema clean run-dev run-staging validate-staging validate-production build-staging-android build-production-android refresh-catalog verify-catalog verify-catalog-remote doctor
+.PHONY: help setup gen gen-watch test test-core test-services test-all analyze format fix schema clean run-dev run-staging run-production validate-staging validate-production build-staging-android build-production-android refresh-catalog verify-catalog verify-catalog-remote doctor
 
 FLUTTER ?= flutter
 DART    ?= dart
@@ -69,6 +69,9 @@ validate-production: ## Validate the local production dart-defines
 
 run-staging: validate-staging ## Run against the authoritative staging catalog
 	$(FLUTTER) run --flavor staging --dart-define-from-file=config/dart_defines.staging.json
+
+run-production: validate-production ## Run against the real Monetta store and checkout
+	$(FLUTTER) run --flavor production --dart-define-from-file=config/dart_defines.production.json
 
 run-dev: run-staging ## Alias for the canonical staging launch
 
