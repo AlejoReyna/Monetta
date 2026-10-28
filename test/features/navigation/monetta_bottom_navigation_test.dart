@@ -614,7 +614,8 @@ void main() {
         await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
         await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
         await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        // Text contrast: monetta_bottom_navigation_contrast_test.dart, which
+        // renders without the bundled fonts loaded in this file.
       } finally {
         handle.dispose();
       }

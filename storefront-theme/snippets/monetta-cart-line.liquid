@@ -9,6 +9,10 @@
 {%- enddoc -%}
 {%- liquid
   assign variant = item.variant
+  capture brand
+    render 'monetta-facet', product: item.product, kind: 'brands'
+  endcapture
+  assign brand = brand | strip
   assign max_qty = 99
   if variant.inventory_management == 'shopify' and variant.inventory_policy == 'deny'
     assign max_qty = variant.inventory_quantity
@@ -36,7 +40,7 @@
     {%- endif -%}
   </a>
   <div class="cart-line__info">
-    {%- if item.product.vendor != blank -%}<p class="eyebrow eyebrow--muted">{{ item.product.vendor | escape }}</p>{%- endif -%}
+    {%- if brand != blank -%}<p class="eyebrow eyebrow--muted">{{ brand | escape }}</p>{%- endif -%}
     <a class="cart-line__name" href="{{ item.url }}">{{ item.product.title | escape }}</a>
     {%- unless item.product.has_only_default_variant -%}
       <p class="cart-line__variant">{{ variant.title | escape }}</p>

@@ -1,0 +1,75 @@
+{%- comment -%}
+  Article (/blogs/*/*) inside the Monetta shell: the title in the screen-title role, a Spanish date and author,
+  the article's photograph and its rich text at a readable width. When the blog accepts comments, the published ones are listed
+  and Shopify's own comment form is offered (moderation stays Shopify's).
+{%- endcomment -%}
+{%- liquid
+  assign blog_title = blog.title
+  assign blog_key = blog.title | strip | downcase
+  if blog.handle == 'news' and blog_key == 'news'
+    assign blog_title = 'Noticias'
+  endif
+-%}
+<article class="container page-shell article" {{ section.shopify_attributes }}>
+  <div class="page-head">
+    <h1 class="display display--page" tabindex="-1">{{ article.title | escape }}</h1>
+    <p class="article__meta">{% render 'monetta-date', date: article.published_at %}{% if article.author != blank %} · {{ article.author | escape }}{% endif %}</p>
+  </div>
+  {%- if article.image -%}
+    {%- assign article_alt = article.image.alt | default: '' -%}
+    <figure class="article__media">
+      {% render 'monetta-image', image: article.image, widths: '600,900,1200,1600', sizes: '(min-width: 1024px) 960px, 100vw', alt: article_alt, eager: true %}
+    </figure>
+  {%- endif -%}
+  <div class="page-prose rte">{{ article.content }}</div>
+  <p class="article__back"><a class="btn btn--text" href="{{ blog.url }}">{% render 'monetta-icon', name: 'arrowBack', size: 18 %} Volver a {{ blog_title | escape }}</a></p>
+
+  {%- if blog.comments_enabled? -%}
+    <section class="article__comments" aria-labelledby="comments-title">
+      <h2 class="display display--section" id="comments-title">Comentarios ({{ article.comments_count }})</h2>
+      {%- paginate article.comments by 20 -%}
+        {%- if article.comments.size > 0 -%}
+          <ol class="comment-list" role="list">
+            {%- for comment in article.comments -%}
+              <li class="comment">
+                <p class="comment__meta"><strong>{{ comment.author | escape }}</strong> · {% render 'monetta-date', date: comment.created_at %}</p>
+                <div class="rte">{{ comment.content }}</div>
+              </li>
+            {%- endfor -%}
+          </ol>
+        {%- endif -%}
+      {%- endpaginate -%}
+      {%- form 'new_comment', article, class: 'comment-form' -%}
+        {%- if form.posted_successfully? -%}
+          <p class="form-note" role="status">{% if blog.moderated? %}Gracias. Tu comentario se publicará cuando lo revisemos.{% else %}Gracias. Tu comentario ya está publicado.{% endif %}</p>
+        {%- endif -%}
+        {%- if form.errors -%}
+          <p class="form-error" role="alert">{% render 'monetta-icon', name: 'error', size: 18 %}<span>Revisa {% for field in form.errors %}{% case field %}{% when 'author' %}tu nombre{% when 'email' %}tu correo electrónico{% when 'body' %}el comentario{% else %}el campo «{{ field | escape }}»{% endcase %}{% unless forloop.last %}, {% endunless %}{% endfor %}.</span></p>
+        {%- endif -%}
+        <div class="form-grid">
+          <label class="field">
+            <span class="field__label">Nombre</span>
+            <input class="input" type="text" name="comment[author]" value="{{ form.author | escape }}" autocomplete="name" required>
+          </label>
+          <label class="field">
+            <span class="field__label">Correo electrónico</span>
+            <input class="input" type="email" name="comment[email]" value="{{ form.email | escape }}" autocomplete="email" required>
+          </label>
+        </div>
+        <label class="field">
+          <span class="field__label">Comentario</span>
+          <textarea class="input" name="comment[body]" rows="5" required>{{ form.body | escape }}</textarea>
+        </label>
+        {%- if blog.moderated? -%}<p class="small text-muted">Los comentarios se revisan antes de publicarse.</p>{%- endif -%}
+        <button type="submit" class="btn btn--primary">Publicar comentario</button>
+      {%- endform -%}
+    </section>
+  {%- endif -%}
+</article>
+
+{% schema %}
+{
+  "name": "Monetta · Artículo",
+  "settings": []
+}
+{% endschema %}

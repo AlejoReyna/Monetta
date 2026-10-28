@@ -1,0 +1,11 @@
+{%- capture shape -%}{% render 'monetta-facet', product: product, kind: 'silhouettes' %}{%- endcapture -%}
+{%- capture colors -%}{% render 'monetta-facet', product: product, kind: 'colors' %}{%- endcapture -%}
+{%- capture patterns -%}{% render 'monetta-facet', product: product, kind: 'patterns' %}{%- endcapture -%}
+{%- for option in product.options_with_values -%}
+  {%- assign option_name = option.name | downcase -%}
+  {%- if option_name contains 'color' or option_name contains 'colour' -%}{%- assign colors = option.selected_value -%}{%- break -%}{%- endif -%}
+{%- endfor -%}
+{% if category != blank %}<div><dt>Tipo</dt><dd>{{ category | escape }}</dd></div>{% elsif product.type != blank %}<div><dt>Tipo</dt><dd>{{ product.type | escape }}</dd></div>{% endif %}
+{% if category == 'Bolsa' and shape != blank %}<div><dt>Forma</dt><dd>{{ shape | escape }}</dd></div>{% endif %}
+{% if colors != blank %}<div><dt>Color</dt><dd>{{ colors | escape }}</dd></div>{% endif %}
+{% if patterns != blank %}<div><dt>Motivo</dt><dd>{{ patterns | escape }}</dd></div>{% endif %}

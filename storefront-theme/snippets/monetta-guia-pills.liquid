@@ -1,0 +1,27 @@
+{%- doc -%}
+  The pills row of the guide's collection screens: the round filters button, then Bolsas, Carteras, Accesorios, Relojes
+  and Más (all the categories). Each pill is a link to that listing (snippets/monetta-guia-url.liquid); the current one
+  is the brown pill and carries aria-current.
+
+  @param {string} [active] - Key of the current category: bolsas, carteras, accesorios or relojes.
+  @param {boolean} [filters_button] - Show the button that opens «Filtrar y ordenar» (only where that drawer exists).
+  @param {number} [active_count] - Active filters, shown on the button.
+{%- enddoc -%}
+{%- assign pill_entries = 'bolsas:Bolsas,carteras:Carteras,accesorios:Accesorios,relojes:Relojes,categorias:Más' | split: ',' -%}
+<nav class="guia-pills" aria-label="Categorías">
+  <ul class="guia-pills__list" role="list">
+    {%- if filters_button -%}
+      <li>
+        <button type="button" class="guia-pill guia-pill--icon" data-open-dialog="filters-drawer" aria-haspopup="dialog" aria-controls="filters-drawer" aria-label="Filtrar y ordenar{% if active_count > 0 %}, {{ active_count }} activos{% endif %}">
+          {%- render 'monetta-icon', name: 'tune', size: 20 -%}
+          {%- if active_count > 0 -%}<span class="guia-pill__count" aria-hidden="true">{{ active_count }}</span>{%- endif -%}
+        </button>
+      </li>
+    {%- endif -%}
+    {%- for entry in pill_entries -%}
+      {%- assign key = entry | split: ':' | first -%}
+      {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
+      <li><a class="guia-pill" href="{{ url | strip }}"{% if key == active %} aria-current="page"{% endif %}>{{ entry | split: ':' | last }}</a></li>
+    {%- endfor -%}
+  </ul>
+</nav>

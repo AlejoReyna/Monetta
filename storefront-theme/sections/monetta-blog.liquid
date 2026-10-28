@@ -1,0 +1,65 @@
+{%- comment -%}
+  Blog (/blogs/*) inside the Monetta shell: the screen title, then one card per article (photograph, Spanish date, serif title,
+  excerpt) and plain pagination. Articles, dates and images are the store's. A blog without articles shows an empty state
+  instead of a blank page.
+{%- endcomment -%}
+{%- liquid
+  assign blog_title = blog.title
+  assign blog_key = blog.title | strip | downcase
+  if blog.handle == 'news' and blog_key == 'news'
+    assign blog_title = 'Noticias'
+  endif
+-%}
+<div class="container listing listing--blog" {{ section.shopify_attributes }}>
+  <div class="page-head">
+    <h1 class="display display--page" tabindex="-1">{{ blog_title | escape }}</h1>
+  </div>
+  {%- paginate blog.articles by section.settings.per_page -%}
+    {%- if blog.articles.size > 0 -%}
+      <ul class="article-grid" role="list">
+        {%- for article in blog.articles -%}
+          <li>
+            <article class="article-card">
+              <a class="article-card__link" href="{{ article.url }}">
+                <span class="article-card__media">
+                  {%- if article.image -%}
+                    {% render 'monetta-image', image: article.image, widths: '360,540,720,960', sizes: '(min-width: 1024px) 33vw, (min-width: 768px) 50vw, 100vw', alt: '' %}
+                  {%- endif -%}
+                </span>
+                <span class="article-card__body">
+                  <span class="article-card__date">{% render 'monetta-date', date: article.published_at %}</span>
+                  <span class="article-card__title">{{ article.title | escape }}</span>
+                  {%- assign excerpt = article.excerpt_or_content | strip_html | truncatewords: 24 -%}
+                  {%- if excerpt != blank -%}<span class="article-card__excerpt">{{ excerpt }}</span>{%- endif -%}
+                </span>
+              </a>
+            </article>
+          </li>
+        {%- endfor -%}
+      </ul>
+      {%- if paginate.pages > 1 -%}
+        <nav class="pagination" aria-label="Páginas">
+          {%- if paginate.previous -%}<a class="btn btn--outline" href="{{ paginate.previous.url }}">Anterior</a>{%- endif -%}
+          <span class="pagination__status">Página {{ paginate.current_page }} de {{ paginate.pages }}</span>
+          {%- if paginate.next -%}<a class="btn btn--outline" href="{{ paginate.next.url }}">Siguiente</a>{%- endif -%}
+        </nav>
+      {%- endif -%}
+    {%- else -%}
+      <div class="empty">
+        <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'book', size: 28 %}</span>
+        <h2 class="empty__title">Aún no hay publicaciones</h2>
+        <p class="body-copy">Cuando publiquemos novedades de Monetta aparecerán aquí.</p>
+        <div class="empty__actions"><a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">Ver catálogo</a></div>
+      </div>
+    {%- endif -%}
+  {%- endpaginate -%}
+</div>
+
+{% schema %}
+{
+  "name": "Monetta · Blog",
+  "settings": [
+    { "type": "range", "id": "per_page", "label": "Publicaciones por página", "min": 3, "max": 24, "step": 3, "default": 9 }
+  ]
+}
+{% endschema %}
