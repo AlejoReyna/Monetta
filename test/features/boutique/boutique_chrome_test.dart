@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
 import 'package:monetta_app/data/local/account_store.dart';
@@ -29,8 +30,8 @@ import 'package:monetta_app/main.dart';
 import '../../support/catalog_browse_fixtures.dart';
 
 /// The grey the owner asked for on both bars, light mode.
-const Color _barGrey = Color(0xFFF5F5F5);
-const Color _white = Color(0xFFFFFFFF);
+const Color _barGrey = MonettaTokens.bar;
+const Color _white = MonettaTokens.canvas;
 
 /// Chrome (top bar, bottom bar) is read from what is painted,
 /// not from palette getters: the colour a shopper sees is the contract.
@@ -314,7 +315,7 @@ void main() {
   final light = buildTheme();
   final dark = buildDarkTheme();
 
-  group('UI-THEME-04 light: white page and screen header', () {
+  group('UI-THEME-04 light: page ground and screen header', () {
     for (final screen in _screens) {
       final topBarColor = _white;
       testWidgets(
@@ -454,25 +455,25 @@ void main() {
     );
   });
 
-  group('UI-THEME-05 light: floating navigation', () {
+  group('UI-THEME-05 light: flat full-width navigation', () {
     for (final screen in <_Screen>[
       const _Screen('Catálogo', _mountCatalog),
       const _Screen('Colección', _mountCollection),
     ]) {
-      testWidgets('${screen.name}: light floating bar with a white page header',
+      testWidgets('${screen.name}: flat light bar under the page-ground header',
           (tester) async {
         await screen.mount(tester, light);
-        expect(_bottomBarColor(tester), _white);
+        expect(_bottomBarColor(tester), _barGrey);
         expect(_topBarColor(tester), _white);
       });
     }
-    testWidgets('Home: floating bar stays light while the hero scrolls away',
+    testWidgets('Home: flat bar stays light while the hero scrolls away',
         (tester) async {
       await _mountHome(tester, light);
-      expect(_bottomBarColor(tester), _white);
+      expect(_bottomBarColor(tester), _barGrey);
       expect(_topBarColor(tester), _white);
       await _scrollHomePastHero(tester);
-      expect(_bottomBarColor(tester), _white);
+      expect(_bottomBarColor(tester), _barGrey);
       expect(_topBarColor(tester), _white);
     });
   });

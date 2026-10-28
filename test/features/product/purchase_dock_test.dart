@@ -232,9 +232,9 @@ void main() {
       );
       expect(heading, findsOneWidget);
       final style = styleOf(tester, heading);
-      expect(style.fontFamily, kBoutiqueSansFamily);
-      expect(style.fontWeight, FontWeight.w600);
-      expect(style.fontSize, inInclusiveRange(16, 18));
+      expect(style.fontFamily, kBoutiqueSerifFamily);
+      expect(style.fontWeight, FontWeight.w400);
+      expect(style.fontSize, kBoutiqueSectionHeadingSize);
 
       final buyNow =
           find.descendant(of: section, matching: find.byKey(kBuyNowKey));

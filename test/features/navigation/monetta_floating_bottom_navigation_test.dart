@@ -3,10 +3,10 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/motion.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/navigation/monetta_floating_bottom_navigation.dart';
 import 'package:monetta_app/main.dart';
 
@@ -116,40 +116,57 @@ void main() {
     );
   }
 
-  testWidgets('light mode paints the dock in the page color and keeps gold', (
+  testWidgets(
+      'light mode paints the flat bar in the shared bar color; the selection is '
+      'accent color, weight and a rule', (
     tester,
   ) async {
     await tester.pumpWidget(dock(buildLightTheme()));
 
+    final surface = find.byKey(const Key('bottom-nav-surface'));
+    expect(tester.widget<Material>(surface).color, MonettaTokens.bar);
+    // Full width and flat: it spans the screen and has no rounded corners.
     expect(
-      tester
-          .widget<Material>(find.byKey(const Key('bottom-nav-surface')))
-          .color,
-      const Color(0xFFFFFFFF),
+      tester.getSize(surface).width,
+      tester.view.physicalSize.width / tester.view.devicePixelRatio,
     );
-    final context =
-        tester.element(find.byType(MonettaFloatingBottomNavigation));
-    final selected = tester.widget<Container>(
-      find
-          .descendant(
-            of: find.byKey(const Key('bottom-nav-home')),
-            matching: find.byType(Container),
-          )
-          .first,
+    expect(tester.widget<Material>(surface).shape, isNot(isA<StadiumBorder>()));
+
+    final rule = tester.widget<Container>(
+      find.byKey(const Key('bottom-nav-home-rule')),
     );
     expect(
-      (selected.decoration! as BoxDecoration).color,
-      BoutiquePalette.of(context).gold,
+      (rule.decoration! as BoxDecoration).color,
+      MonettaTokens.navigationActive,
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('bottom-nav-home-rule'))),
+      const Size(28, 2),
+    );
+    expect(find.byKey(const Key('bottom-nav-catalog-rule')), findsNothing);
+    expect(
+      tester.widget<Icon>(find.byKey(const Key('bottom-nav-home-icon'))).color,
+      MonettaTokens.navigationActive,
     );
     expect(
       tester
           .widget<Icon>(find.byKey(const Key('bottom-nav-catalog-icon')))
           .color,
-      BoutiquePalette.of(context).inkMuted,
+      MonettaTokens.navigationInactive,
+    );
+    final label =
+        tester.widget<Text>(find.byKey(const Key('bottom-nav-home-label')));
+    expect(label.style!.fontWeight, FontWeight.w600);
+    expect(
+      tester
+          .widget<Text>(find.byKey(const Key('bottom-nav-catalog-label')))
+          .style!
+          .fontWeight,
+      FontWeight.w500,
     );
   });
 
-  testWidgets('dark mode keeps the dark dock and the gold selection', (
+  testWidgets('dark mode keeps the dark bar and selects with the gold accent', (
     tester,
   ) async {
     await tester.pumpWidget(dock(buildDarkTheme()));
@@ -160,19 +177,9 @@ void main() {
           .color,
       const Color(0xFF191A18),
     );
-    final context =
-        tester.element(find.byType(MonettaFloatingBottomNavigation));
-    final selected = tester.widget<Container>(
-      find
-          .descendant(
-            of: find.byKey(const Key('bottom-nav-home')),
-            matching: find.byType(Container),
-          )
-          .first,
-    );
     expect(
-      (selected.decoration! as BoxDecoration).color,
-      BoutiquePalette.of(context).gold,
+      tester.widget<Icon>(find.byKey(const Key('bottom-nav-home-icon'))).color,
+      MonettaColors.dark.accent,
     );
     expect(
       tester

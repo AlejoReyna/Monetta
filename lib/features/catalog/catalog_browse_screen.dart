@@ -1002,7 +1002,10 @@ class _EmptyCatalogState extends StatelessWidget {
           const SizedBox(height: 18),
           Text(
             'Sin resultados',
-            style: boutiqueScreenTitle(color: context.boutique.ink),
+            style: boutiqueScreenTitle(
+              context: context,
+              color: context.boutique.ink,
+            ),
           ),
           const SizedBox(height: 8),
           Text(

@@ -31,18 +31,18 @@ TextStyle _styleOf(WidgetTester tester, Finder finder) {
   return style!;
 }
 
-void _expectSans(TextStyle style, {required String reason}) {
-  expect(style.fontFamily, kBoutiqueSansFamily, reason: '$reason: family');
+void _expectSerif(TextStyle style, {required String reason}) {
+  expect(style.fontFamily, kBoutiqueSerifFamily, reason: '$reason: family');
   expect(
     style.fontFamilyFallback,
-    kBoutiqueSansFallback,
+    kBoutiqueSerifFallback,
     reason: '$reason: fallback chain',
   );
-  expect(style.fontWeight, FontWeight.w600, reason: '$reason: weight');
+  expect(style.fontWeight, FontWeight.w400, reason: '$reason: weight');
 }
 
 void main() {
-  testWidgets('TYPE-01d the brand story heading is sans w600', (tester) async {
+  testWidgets('TYPE-01d the brand story heading is serif w400', (tester) async {
     _view(tester);
     final store = await _loadedStore();
     addTearDown(store.dispose);
@@ -67,11 +67,11 @@ void main() {
       scrollable: find.byType(Scrollable).first,
     );
     final style = _styleOf(tester, heading);
-    _expectSans(style, reason: 'Sobre la marca');
+    _expectSerif(style, reason: 'Sobre la marca');
     expect(style.fontSize, kBoutiqueSectionHeadingSize);
   });
 
-  testWidgets('TYPE-01d the search section titles are sans w600',
+  testWidgets('TYPE-01d the search section titles are serif w400',
       (tester) async {
     _view(tester);
     final store = await _loadedStore();
@@ -88,11 +88,12 @@ void main() {
     await tester.pump();
 
     final style = _styleOf(tester, find.text('Sugerencias'));
-    _expectSans(style, reason: 'Sugerencias');
+    _expectSerif(style, reason: 'Sugerencias');
     expect(style.fontSize, kBoutiqueSectionHeadingSize);
   });
 
-  testWidgets('TYPE-01d the search results title is sans w600', (tester) async {
+  testWidgets('TYPE-01d the search results title is serif w400',
+      (tester) async {
     _view(tester);
     final store = await _loadedStore();
     addTearDown(store.dispose);
@@ -111,7 +112,7 @@ void main() {
     await tester.pump();
 
     final style = _styleOf(tester, find.text('“bolsa”'));
-    _expectSans(style, reason: 'results title');
+    _expectSerif(style, reason: 'results title');
     expect(style.fontSize, 22);
   });
 }

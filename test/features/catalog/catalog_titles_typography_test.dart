@@ -54,6 +54,16 @@ TextStyle _cardNameStyle(WidgetTester tester, BrowseEntry item) {
   );
 }
 
+void _expectSerif(TextStyle style, {required String reason}) {
+  expect(style.fontFamily, kBoutiqueSerifFamily, reason: '$reason: family');
+  expect(
+    style.fontFamilyFallback,
+    kBoutiqueSerifFallback,
+    reason: '$reason: fallback chain',
+  );
+  expect(style.fontWeight, FontWeight.w400, reason: '$reason: weight');
+}
+
 void _expectSans(TextStyle style, {required String reason}) {
   expect(style.fontFamily, kBoutiqueSansFamily, reason: '$reason: family');
   expect(
@@ -94,19 +104,19 @@ void main() {
       expect(title.fontSize, 28);
     });
 
-    testWidgets('TYPE-01b "Sin resultados" of the empty catalog is sans w600',
+    testWidgets('TYPE-01b "Sin resultados" of the empty catalog is serif w400',
         (tester) async {
       _view(tester);
       await tester.pumpWidget(_app(browseScreen(const [])));
       await tester.pump();
 
-      _expectSans(
+      _expectSerif(
         _styleOf(tester, find.text('Sin resultados')),
         reason: 'catalog empty state',
       );
     });
 
-    testWidgets('TYPE-01b "Sin resultados" of CatalogEmptyState is sans w600',
+    testWidgets('TYPE-01b "Sin resultados" of CatalogEmptyState is serif w400',
         (tester) async {
       _view(tester);
       await tester.pumpWidget(
@@ -118,7 +128,7 @@ void main() {
       );
       await tester.pump();
 
-      _expectSans(
+      _expectSerif(
         _styleOf(tester, find.text('Sin resultados')),
         reason: 'CatalogEmptyState',
       );

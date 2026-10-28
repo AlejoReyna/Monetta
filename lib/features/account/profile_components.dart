@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
+import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 import '../../data/local/database.dart' show OrderSummary;
 import '../../domain/product.dart';
@@ -56,11 +57,8 @@ class ProfileQuickAccess extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     return Material(
-      color: palette.canvas,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(24),
-        side: BorderSide(color: palette.hairline),
-      ),
+      color: palette.surface,
+      shape: const RoundedRectangleBorder(borderRadius: BoutiqueRadius.card),
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: onTap,
@@ -80,7 +78,7 @@ class ProfileQuickAccess extends StatelessWidget {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: palette.surface,
+                      color: palette.canvas,
                       shape: BoxShape.circle,
                     ),
                     child: Icon(icon, size: 19, color: palette.ink),
@@ -138,7 +136,7 @@ class ProfileLatestOrder extends StatelessWidget {
       key: const ValueKey('profile-latest-order'),
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: dark ? palette.surfaceDeep : const Color(0xFFF1E9DB),
+        color: dark ? palette.surfaceDeep : MonettaTokens.surfaceWarm,
         borderRadius: BorderRadius.circular(26),
       ),
       child: LayoutBuilder(
@@ -224,7 +222,7 @@ class ProfileFavoritesFeature extends StatelessWidget {
       key: const ValueKey('profile-favorites-feature'),
       padding: const EdgeInsets.all(22),
       decoration: BoxDecoration(
-        color: dark ? palette.surfaceDeep : const Color(0xFFEAF0E4),
+        color: dark ? palette.surfaceDeep : MonettaTokens.surfaceWarm,
         borderRadius: BorderRadius.circular(26),
       ),
       child: LayoutBuilder(
@@ -288,7 +286,7 @@ class ProfileFavoritesFeature extends StatelessWidget {
                             fallbackLabel: product!.title,
                             backgroundColor: dark
                                 ? palette.surfaceDeep
-                                : const Color(0xFFEAF0E4),
+                                : MonettaTokens.surfaceWarm,
                           ),
                         )
                       : ExcludeSemantics(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
 
@@ -20,8 +21,8 @@ const _labels = {
   MonettaBottomDestination.account: 'Cuenta',
 };
 
-const _lightActive = Color(0xFF222222);
-const _lightInactive = Color(0xFF6E6E6E);
+const _lightActive = MonettaTokens.navigationActive;
+const _lightInactive = MonettaTokens.navigationInactive;
 const _darkActive = Color(0xFFF5F2EC);
 const _darkInactive = Color(0xFF8E8A85);
 
@@ -399,7 +400,7 @@ void main() {
         final decoration = _surfaceDecoration(tester);
         expect(
           decoration.color,
-          dark ? MonettaColors.dark.surface : const Color(0xFFF5F5F5),
+          dark ? MonettaColors.dark.surface : MonettaTokens.bar,
         );
         expect(decoration.boxShadow ?? const <BoxShadow>[], isEmpty);
         final border = decoration.border;

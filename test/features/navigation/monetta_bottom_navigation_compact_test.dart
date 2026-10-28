@@ -452,7 +452,8 @@ void main() {
       );
     });
 
-    testWidgets('NAV-04b the catalog bar floats above the bottom inset of 34',
+    testWidgets(
+        'NAV-04b the catalog bar is flush with the edge and keeps its items above the inset of 34',
         (tester) async {
       _view(tester, inset: 34);
       await tester.pumpWidget(
@@ -463,14 +464,18 @@ void main() {
       );
       await tester.pump();
 
+      // Flat bar: flush with the screen edge, full width, and its items stay
+      // above the 34 px system inset.
       final surface = tester.getRect(_surface);
-      expect(surface.height, greaterThanOrEqualTo(68));
-      expect(surface.bottom, lessThan(_viewHeight));
-      expect(surface.left, greaterThan(0));
+      expect(surface.height, greaterThanOrEqualTo(64 + 34));
+      expect(surface.bottom, _viewHeight);
+      expect(surface.left, 0);
+      final item = tester.getRect(find.byKey(const Key('bottom-nav-home')));
+      expect(item.bottom, lessThanOrEqualTo(_viewHeight - 34));
     });
 
     testWidgets(
-        'NAV-04b the collection bar floats above the bottom inset of 34',
+        'NAV-04b the collection bar is flush with the edge and keeps its items above the inset of 34',
         (tester) async {
       _view(tester, inset: 34);
       final store = await _loadedStore();
@@ -489,10 +494,14 @@ void main() {
       );
       await tester.pump();
 
+      // Flat bar: flush with the screen edge, full width, and its items stay
+      // above the 34 px system inset.
       final surface = tester.getRect(_surface);
-      expect(surface.height, greaterThanOrEqualTo(68));
-      expect(surface.bottom, lessThan(_viewHeight));
-      expect(surface.left, greaterThan(0));
+      expect(surface.height, greaterThanOrEqualTo(64 + 34));
+      expect(surface.bottom, _viewHeight);
+      expect(surface.left, 0);
+      final item = tester.getRect(find.byKey(const Key('bottom-nav-home')));
+      expect(item.bottom, lessThanOrEqualTo(_viewHeight - 34));
     });
   });
 }

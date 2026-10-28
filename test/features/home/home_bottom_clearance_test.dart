@@ -70,9 +70,9 @@ void main() {
     expect(tester.getSize(bleed).height, bar);
     expect(
       bar,
-      greaterThan(tester.getSize(surface).height),
-      reason: 'clearance includes the floating gap',
+      tester.getSize(surface).height,
+      reason: 'the flat bar has no floating gap: clearance is the bar itself',
     );
-    expect(tester.getRect(surface).bottom, lessThan(844));
+    expect(tester.getRect(surface).bottom, 844);
   });
 }
