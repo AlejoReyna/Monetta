@@ -24,8 +24,12 @@ android {
     buildFeatures {
         resValues = true
     }
-    // Checkout Sheet Kit 3.6.1 requires compileSdk 35+ and minSdk 23.
-    // Existing AndroidX/plugins in this app require compileSdk 36+.
+    // .fvmrc pins Flutter 3.44.8. That SDK's FlutterExtension sets
+    // compileSdkVersion and targetSdkVersion to 36 (minSdkVersion 24), so
+    // API 36 does not require a Flutter upgrade. Checkout Sheet Kit 3.6.1
+    // still requires compileSdk 35+ and minSdk 23.
+    // Pin both SDK levels: Google Play requires targetSdk 36 for new apps,
+    // and a later Flutter default must not lower them.
     compileSdk = 36
     ndkVersion = flutter.ndkVersion
 
@@ -42,7 +46,10 @@ android {
         // flutter_appauth already requires API 24; this still exceeds Checkout
         // Sheet Kit's API 23 minimum.
         minSdk = 24
-        targetSdk = flutter.targetSdkVersion
+        targetSdk = 36
+        // pubspec.yaml `version: x.y.z+build` — the Flutter tool writes
+        // flutter.versionCode / flutter.versionName into local.properties
+        // before Gradle runs. Do not hard-code a Play version here.
         versionCode = flutter.versionCode
         versionName = flutter.versionName
 
@@ -59,6 +66,12 @@ android {
         }
         create("production") {
             dimension = "environment"
+            // Customer Account API callback scheme. Must stay lowercase and
+            // match CustomerAccountConfig.redirectUri
+            // (shop.{CUSTOMER_ACCOUNT_SHOP_ID}.oauth://callback) plus the
+            // Partner dashboard mobile client. Production shop id is
+            // 72391655575. Single-key assignment so Flutter's other
+            // manifest placeholders are not replaced.
             manifestPlaceholders["appAuthRedirectScheme"] = "shop.72391655575.oauth"
             resValue("string", "app_name", "Monetta")
         }
@@ -75,10 +88,21 @@ android {
         }
     }
 
+    val releaseProguardDefaults =
+        getDefaultProguardFile("proguard-android-optimize.txt")
+
     buildTypes {
         release {
-            // Never fall back to the debug keystore.
+            // Never fall back to the debug keystore. Null until key.properties
+            // is present; the task-graph check below fails the release build.
             signingConfig = signingConfigs.findByName("release")
+            // Flutter 3.44 also enables these for release unless -Pshrink=false.
+            // Set them here so the Play bundle does not depend on that default.
+            // Keep rules live in proguard-rules.pro. The Flutter Gradle plugin
+            // also appends its own flutter_proguard_rules.pro.
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(releaseProguardDefaults, "proguard-rules.pro")
         }
     }
 }
