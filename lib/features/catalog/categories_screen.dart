@@ -11,6 +11,8 @@ import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_scaffold.dart';
+import '../boutique/guide_art.dart';
+import '../boutique/guide_brand_tile.dart';
 import 'brand_screen.dart';
 import 'collection_screen.dart';
 
@@ -110,6 +112,24 @@ const clientGuideCategories = [
   ),
 ];
 
+/// Gold line icon of a collection tile in Categorías. Relojes has none: the
+/// guide folds watches into «Accesorios» (its icon is a watch).
+const Map<String, String> kGuideCategoryIcons = <String, String>{
+  'crossbody': kGuideIconCategoryCrossbody,
+  'tote': kGuideIconCategoryTote,
+  'shoulder': kGuideIconCategoryShoulder,
+  'handbags': kGuideIconCategoryHandbags,
+  'wallets': kGuideIconCategoryWallets,
+  'perfumes': kGuideIconCategoryPerfumes,
+  'accessories': kGuideIconCategoryAccessories,
+};
+
+/// The seven collections of the guide's Categorías, in its order.
+List<GuideCategory> get guideDirectoryCategories => [
+      for (final category in clientGuideCategories)
+        if (kGuideCategoryIcons.containsKey(category.id)) category,
+    ];
+
 /// Editorial cards may carry a display name; navigation needs a canonical facet.
 String guideBrandSlug(HomeBrandCard brand, CatalogStore? store) {
   final value = fold(brand.brand);
@@ -171,13 +191,13 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ),
           SizedBox(height: MonettaTokens.space[2]),
           _DirectoryGrid(
+            columns: MonettaTokens.categoryColumnsCompact,
             children: [
-              for (final category in clientGuideCategories)
-                _DirectoryTile(
-                  id: 'category-${category.id}',
+              for (final category in guideDirectoryCategories)
+                _CollectionTile(
+                  key: ValueKey('categories-category-${category.id}'),
                   label: category.title,
-                  asset: category.asset,
-                  icon: category.icon,
+                  iconAsset: kGuideCategoryIcons[category.id]!,
                   onTap: store == null
                       ? null
                       : () => openCollection(
@@ -207,12 +227,22 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
                 TextButton(
                   key: const ValueKey('categories-all-brands'),
                   onPressed: () => setState(() => _allBrands = !_allBrands),
-                  child: Text(
-                    _allBrands ? 'Ver menos' : 'Ver todo',
-                    style: clientGuideStyle(
-                      context,
-                      MonettaTokens.cardLabel,
-                    ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Text(
+                        _allBrands ? 'Ver menos' : 'Ver todo',
+                        style: clientGuideStyle(
+                          context,
+                          MonettaTokens.cardLabel,
+                        ),
+                      ),
+                      Icon(
+                        _allBrands ? Icons.expand_less : Icons.chevron_right,
+                        size: 18,
+                        color: palette.ink,
+                      ),
+                    ],
                   ),
                 ),
             ],
@@ -224,13 +254,15 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
               style: clientGuideStyle(context, MonettaTokens.body),
             ),
           _DirectoryGrid(
+            columns: MonettaTokens.categoryColumnsCompact,
             children: [
               for (final brand in shownBrands)
-                _DirectoryTile(
-                  id: 'brand-${guideBrandSlug(brand, store)}',
-                  label: brand.title,
+                GuideBrandTile(
+                  key: ValueKey(
+                    'categories-brand-${guideBrandSlug(brand, store)}',
+                  ),
                   asset: brand.fallbackAsset,
-                  brand: true,
+                  label: brand.title,
                   onTap: store == null
                       ? null
                       : () => unawaited(
@@ -251,19 +283,23 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 }
 
 class _DirectoryGrid extends StatelessWidget {
-  const _DirectoryGrid({required this.children});
+  const _DirectoryGrid({required this.children, this.columns});
   final List<Widget> children;
+
+  /// Fixed column count; null follows the breakpoints.
+  final int? columns;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) {
           final width = MediaQuery.sizeOf(context).width;
-          final columns = MediaQuery.textScalerOf(context).scale(1) > 1.3
-              ? MonettaTokens.productColumnsNarrow
-              : width >= MonettaTokens.breakpointExpanded
-                  ? MonettaTokens.categoryColumnsExpanded
-                  : width >= MonettaTokens.breakpointMedium
-                      ? MonettaTokens.categoryColumnsMedium
-                      : MonettaTokens.categoryColumnsCompact;
+          final columns = this.columns ??
+              (MediaQuery.textScalerOf(context).scale(1) > 1.3
+                  ? MonettaTokens.productColumnsNarrow
+                  : width >= MonettaTokens.breakpointExpanded
+                      ? MonettaTokens.categoryColumnsExpanded
+                      : width >= MonettaTokens.breakpointMedium
+                          ? MonettaTokens.categoryColumnsMedium
+                          : MonettaTokens.categoryColumnsCompact);
           final gap = MonettaTokens.space[1];
           return Wrap(
             spacing: gap,
@@ -280,74 +316,70 @@ class _DirectoryGrid extends StatelessWidget {
       );
 }
 
-class _DirectoryTile extends StatelessWidget {
-  const _DirectoryTile({
-    required this.id,
+/// Tile of a collection: gold line icon on the tinted tile, label below.
+class _CollectionTile extends StatelessWidget {
+  const _CollectionTile({
     required this.label,
-    this.asset,
-    this.icon,
-    this.brand = false,
+    required this.iconAsset,
     required this.onTap,
+    super.key,
   });
-  final String id;
+
   final String label;
-  final String? asset;
-  final IconData? icon;
-  final bool brand;
+  final String iconAsset;
   final VoidCallback? onTap;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    Widget fallback() => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null)
-              Icon(icon, size: MonettaTokens.space[5], color: palette.goldText),
-            if (!brand)
-              Text(
-                'Imagen pendiente',
-                textAlign: TextAlign.center,
-                style: clientGuideStyle(
-                  context,
-                  MonettaTokens.navLabel,
-                  color: palette.inkMuted,
-                ),
-              ),
-          ],
-        );
-    return Material(
-      color: palette.surfaceDeep,
-      clipBehavior: Clip.antiAlias,
-      borderRadius: BorderRadius.circular(MonettaTokens.radiusTile),
-      child: InkWell(
-        key: ValueKey('categories-$id'),
-        onTap: onTap,
-        child: Padding(
-          padding: EdgeInsets.all(MonettaTokens.space[1]),
-          child: Column(
-            children: [
-              AspectRatio(
-                aspectRatio: brand ? 3 : 1.5,
-                child: asset == null
-                    ? fallback()
-                    : Image.asset(
-                        asset!,
+    return Semantics(
+      button: true,
+      label: label,
+      excludeSemantics: true,
+      onTap: onTap,
+      child: Material(
+        color: palette.surfaceDeep,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(MonettaTokens.radiusTile),
+        child: InkWell(
+          onTap: onTap,
+          child: AspectRatio(
+            aspectRatio: 1.12,
+            child: Padding(
+              padding: EdgeInsets.all(MonettaTokens.space[1]),
+              child: Column(
+                children: [
+                  Expanded(
+                    child: Padding(
+                      padding: EdgeInsets.only(top: MonettaTokens.space[1]),
+                      child: Image.asset(
+                        iconAsset,
                         fit: BoxFit.contain,
                         excludeFromSemantics: true,
-                        errorBuilder: (_, __, ___) => fallback(),
+                        errorBuilder: (_, __, ___) => Icon(
+                          Icons.shopping_bag_outlined,
+                          size: MonettaTokens.space[5],
+                          color: palette.goldText,
+                        ),
                       ),
+                    ),
+                  ),
+                  SizedBox(height: MonettaTokens.space[0]),
+                  Text(
+                    label,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textAlign: TextAlign.center,
+                    style: guideSerifStyle(
+                      context,
+                      size: 14,
+                      color: palette.ink,
+                      weight: FontWeight.w500,
+                    ),
+                  ),
+                ],
               ),
-              SizedBox(height: MonettaTokens.space[0]),
-              Text(
-                label,
-                textAlign: TextAlign.center,
-                style: clientGuideStyle(
-                  context,
-                  brand ? MonettaTokens.navLabel : MonettaTokens.cardLabel,
-                  color: brand ? palette.goldText : palette.ink,
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),

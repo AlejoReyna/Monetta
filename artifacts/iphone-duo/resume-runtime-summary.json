@@ -1,0 +1,255 @@
+{
+  "outcome": "passed",
+  "log": "artifacts/iphone-duo/resume-runtime-shopping-task.log",
+  "geometry": [
+    {
+      "stage": "outer",
+      "size": [
+        466.0,
+        678.0
+      ],
+      "barEdge": "right",
+      "divisions": []
+    },
+    {
+      "stage": "open-landscape",
+      "size": [
+        951.0,
+        669.0
+      ],
+      "barEdge": "right",
+      "divisions": [
+        {
+          "active": false,
+          "frame": [
+            455.5,
+            0.0,
+            40.0,
+            669.0
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "partial-fold",
+      "size": [
+        951.0,
+        669.0
+      ],
+      "barEdge": "right",
+      "divisions": [
+        {
+          "active": true,
+          "frame": [
+            455.5,
+            0.0,
+            40.0,
+            669.0
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "open-flat",
+      "size": [
+        951.0,
+        669.0
+      ],
+      "barEdge": "right",
+      "divisions": [
+        {
+          "active": false,
+          "frame": [
+            455.5,
+            0.0,
+            40.0,
+            669.0
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "inner-portrait",
+      "size": [
+        669.0,
+        951.0
+      ],
+      "barEdge": "none",
+      "divisions": [
+        {
+          "active": false,
+          "frame": [
+            0.0,
+            455.5,
+            669.0,
+            40.0
+          ]
+        }
+      ]
+    },
+    {
+      "stage": "closed-again",
+      "size": [
+        678.0,
+        466.0
+      ],
+      "barEdge": "right",
+      "divisions": []
+    }
+  ],
+  "captures": [
+    {
+      "name": "01-actual-duo-outer-inicio",
+      "size": [
+        466.0,
+        678.0
+      ],
+      "barEdge": "right",
+      "safeInsets": [
+        0.0,
+        0.0,
+        84.0,
+        34.0
+      ],
+      "scaled16": 16.0,
+      "file": "artifacts/iphone-duo/runtime-captures/01-actual-duo-outer-inicio-fixture-photos.png",
+      "sha256": "000c8a86a264587d2bf2c0ef52c171372ae4e8183593f216abe12db4dfe1ca67"
+    },
+    {
+      "name": "02-actual-duo-outer-product",
+      "size": [
+        466.0,
+        678.0
+      ],
+      "barEdge": "right",
+      "safeInsets": [
+        0.0,
+        0.0,
+        84.0,
+        34.0
+      ],
+      "scaled16": 16.0,
+      "file": "artifacts/iphone-duo/runtime-captures/02-actual-duo-outer-product-fixture-photos.png",
+      "sha256": "44d4c9ef17deb620689e7fd9fa3e6b4d18215b5d07a0dccffcf898a691910397"
+    },
+    {
+      "name": "03-actual-duo-landscape-browse-detail",
+      "size": [
+        951.0,
+        669.0
+      ],
+      "barEdge": "right",
+      "safeInsets": [
+        0.0,
+        0.0,
+        84.0,
+        34.0
+      ],
+      "scaled16": 16.0,
+      "file": "artifacts/iphone-duo/runtime-captures/03-actual-duo-landscape-browse-detail-fixture-photos.png",
+      "sha256": "ca98d02dc3f94701a5ec848461eecccf78cb6acc3be6624a3c089c322ca44278"
+    },
+    {
+      "name": "04-actual-duo-landscape-direct-product",
+      "size": [
+        951.0,
+        669.0
+      ],
+      "barEdge": "right",
+      "safeInsets": [
+        0.0,
+        0.0,
+        84.0,
+        34.0
+      ],
+      "scaled16": 16.0,
+      "file": "artifacts/iphone-duo/runtime-captures/04-actual-duo-landscape-direct-product-fixture-photos.png",
+      "sha256": "490747c401bd849edd1b30a49525a9910cbb35f8ec5215dcb7b4688b45974ad0"
+    },
+    {
+      "name": "05-actual-duo-partial-fold-product",
+      "size": [
+        951.0,
+        669.0
+      ],
+      "barEdge": "right",
+      "safeInsets": [
+        0.0,
+        0.0,
+        84.0,
+        34.0
+      ],
+      "scaled16": 16.0,
+      "file": "artifacts/iphone-duo/runtime-captures/05-actual-duo-partial-fold-product-fixture-photos.png",
+      "sha256": "271dbbf813f982bc9dffc1bba7c770a2bd9701515492470f15562faff289bf22"
+    },
+    {
+      "name": "06-actual-duo-inner-portrait-product",
+      "size": [
+        669.0,
+        951.0
+      ],
+      "barEdge": "none",
+      "safeInsets": [
+        0.0,
+        82.0,
+        0.0,
+        34.0
+      ],
+      "scaled16": 16.0,
+      "file": "artifacts/iphone-duo/runtime-captures/06-actual-duo-inner-portrait-product-fixture-photos.png",
+      "sha256": "5f39756e86238621a04b97fc7b57c8c1021fce8d9e500bd72dd51fde192f5ce3"
+    },
+    {
+      "name": "07-actual-duo-outer-cart",
+      "size": [
+        678.0,
+        466.0
+      ],
+      "barEdge": "left",
+      "safeInsets": [
+        84.0,
+        0.0,
+        0.0,
+        34.0
+      ],
+      "scaled16": 16.0,
+      "file": "artifacts/iphone-duo/runtime-captures/07-actual-duo-outer-cart-fixture-photos.png",
+      "sha256": "4c6e0464bbb7001d32ce401f51c95d112c4e989281c777c239b4241fd3517f6f"
+    },
+    {
+      "name": "08a-actual-duo-accessibility-cart-heading",
+      "size": [
+        678.0,
+        466.0
+      ],
+      "barEdge": "left",
+      "safeInsets": [
+        84.0,
+        0.0,
+        0.0,
+        34.0
+      ],
+      "scaled16": 49.88235294117647,
+      "file": "artifacts/iphone-duo/runtime-captures/08a-actual-duo-accessibility-cart-heading-fixture-photos.png",
+      "sha256": "f3eb2784047bdc63217a412a3a72c6d87efe0f14e729aa1cfc813b52dc255072"
+    },
+    {
+      "name": "08-actual-duo-accessibility-cart",
+      "size": [
+        678.0,
+        466.0
+      ],
+      "barEdge": "left",
+      "safeInsets": [
+        84.0,
+        0.0,
+        0.0,
+        34.0
+      ],
+      "scaled16": 49.88235294117647,
+      "file": "artifacts/iphone-duo/runtime-captures/08-actual-duo-accessibility-cart-fixture-photos.png",
+      "sha256": "d62f74e0bc1b1d0227c2d7e409cb31c2a86935f7e62c02ed78e36719728b04a9"
+    }
+  ]
+}

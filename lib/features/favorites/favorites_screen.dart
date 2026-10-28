@@ -5,6 +5,9 @@
 /// es lo guardado en este dispositivo para la cuenta activa.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/storefront_destination_navigation.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/catalog_store.dart';
@@ -13,10 +16,13 @@ import '../../main.dart' show StoreScope;
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
+import '../catalog/browse_detail_layout.dart';
 
 Future<void> openFavorites(BuildContext context) {
   return Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const FavoritesScreen()),
+    MaterialPageRoute<void>(
+      builder: (_) => const BrowseDetailLayout(child: FavoritesScreen()),
+    ),
   );
 }
 
@@ -26,8 +32,13 @@ class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       backgroundColor: palette.canvas,
+      bottomNavigationBar: storefrontNavigation(
+        context,
+        current: MonettaBottomDestination.account,
+      ),
       appBar: AppBar(
         backgroundColor: palette.bar,
         foregroundColor: palette.ink,

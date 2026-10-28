@@ -63,7 +63,10 @@ void main() {
         scrollable: scroll,
       );
       expect(find.text(WholesalePresentation.minimum), findsOneWidget);
-      expect(find.textContaining(r'$800'), findsNothing);
+      // The guide's reservation line is shown as it is.
+      expect(find.textContaining(r'$800'), findsOneWidget);
+      expect(find.textContaining('pendiente de confirmación'), findsNothing);
+      expect(find.textContaining('pendientes de confirmación'), findsNothing);
       final catalog = find.byKey(const ValueKey('wholesale-catalog-perfume'));
       await tester.scrollUntilVisible(catalog, 300, scrollable: scroll);
       await tester.ensureVisible(catalog);
@@ -74,7 +77,9 @@ void main() {
       final collection =
           tester.widget<CollectionScreen>(find.byType(CollectionScreen));
       expect(collection.filter.category, 'perfume');
-      await tester.pageBack();
+      Navigator.of(
+        tester.element(find.byType(CollectionScreen)),
+      ).pop();
       await tester.pumpAndSettle();
       final quote = find.byKey(const ValueKey('wholesale-quote-bottom'));
       await tester.scrollUntilVisible(quote, 300, scrollable: scroll);

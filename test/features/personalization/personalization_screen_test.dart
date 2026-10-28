@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/features/boutique/guide_brand_tile.dart';
 import 'package:monetta_app/features/catalog/categories_screen.dart';
 import 'package:monetta_app/features/personalization/personalization_screen.dart';
 import 'package:monetta_app/features/personalization/shopper_preferences.dart';
@@ -10,6 +11,7 @@ import 'package:monetta_app/main.dart';
 import '../../support/client_guide_capture.dart';
 
 void main() {
+  _guideTests();
   test('preferences round-trip and stay on their account', () async {
     final store = MemoryShopperPreferenceStore();
     const first = ShopperPreferences(
@@ -188,6 +190,95 @@ void main() {
       expect(find.text('Guardar preferencias'), findsOneWidget);
     });
   }
+}
+
+void _guideTests() {
+  testWidgets(
+      'PERS-GUIDE brand tiles in three columns with radios, a dark save '
+      'button with chevron, and the same save logic', (tester) async {
+    final db = openTestDatabase();
+    final catalog = CatalogStore(database: db);
+    addTearDown(() async {
+      catalog.dispose();
+      await db.close();
+    });
+    await catalog.loadFromAsset();
+    final preferences = MemoryShopperPreferenceStore();
+    await pumpClientGuide(
+      tester,
+      StoreScope(
+        notifier: catalog,
+        child: PersonalizationScreen(store: preferences, scopeKey: 'guide'),
+      ),
+      size: const Size(390, 2400),
+    );
+
+    final brands = catalog.availableBrands.toList();
+    expect(brands.length, greaterThanOrEqualTo(4));
+    Offset at(String slug) => tester.getTopLeft(
+          find.byKey(ValueKey('personalization-brand-$slug')),
+        );
+    for (final slug in brands) {
+      expect(
+        tester.widget(find.byKey(ValueKey('personalization-brand-$slug'))),
+        isA<GuideBrandTile>(),
+        reason: slug,
+      );
+    }
+    expect(at(brands[0]).dy, at(brands[1]).dy);
+    expect(at(brands[1]).dy, at(brands[2]).dy);
+    expect(at(brands[3]).dy, greaterThan(at(brands[0]).dy));
+    expect(at(brands[3]).dx, at(brands[0]).dx);
+
+    // Categories keep photographs, also three across.
+    Offset style(String id) => tester.getTopLeft(
+          find.byKey(ValueKey('personalization-style-$id')),
+        );
+    expect(style('crossbody').dy, style('tote').dy);
+    expect(style('tote').dy, style('shoulder').dy);
+    expect(style('handbags').dy, greaterThan(style('crossbody').dy));
+
+    // A radio on every choice: brands, 8 categories and 2 purchase types.
+    expect(
+      find.byType(GuideRadioMark),
+      findsNWidgets(brands.length + clientGuideCategories.length + 2),
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const ValueKey('personalization-purchase-menudeo')),
+        matching: find.text('Una a dos piezas'),
+      ),
+      findsOneWidget,
+    );
+
+    // Selecting a brand fills its radio.
+    await tester
+        .tap(find.byKey(ValueKey('personalization-brand-${brands[0]}')));
+    await tester.pump();
+    expect(
+      tester
+          .widget<GuideBrandTile>(
+            find.byKey(ValueKey('personalization-brand-${brands[0]}')),
+          )
+          .selected,
+      isTrue,
+    );
+
+    final save = find.byKey(const ValueKey('personalization-save'));
+    expect(tester.widget(save), isA<FilledButton>());
+    expect(
+      find.descendant(of: save, matching: find.text('Guardar preferencias')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: save, matching: find.byIcon(Icons.chevron_right)),
+      findsOneWidget,
+    );
+    await tester.ensureVisible(save);
+    await tester.tap(save);
+    await tester.pumpAndSettle();
+    expect((await preferences.read('guide')).brands, {brands[0]});
+  });
 }
 
 class _EmptyStore implements ShopperPreferenceStore {

@@ -27,6 +27,7 @@ import '../../main.dart';
 import '../../reco/events.dart';
 import '../product/product_screen.dart';
 import 'product_tile.dart';
+import 'browse_detail_layout.dart';
 import 'quick_add_button.dart';
 
 export 'product_tile.dart'
@@ -35,6 +36,7 @@ export 'product_tile.dart'
         ProductTileData,
         ProductTileDensity,
         ProductTileMetrics,
+        kTileFooterExtent,
         ProductTileVariant,
         ProductTileVariantMetrics,
         productGridColumns,
@@ -48,6 +50,7 @@ class ProductCard extends StatelessWidget {
     this.density = ProductTileDensity.grid,
     this.showWishlist = true,
     this.showQuickAdd = true,
+    this.showViewProduct = false,
     this.onQuickView,
     this.onTap,
     super.key,
@@ -75,6 +78,10 @@ class ProductCard extends StatelessWidget {
   /// off for its own recommendations.
   final bool showQuickAdd;
 
+  /// Draws the brown «VER PRODUCTO» pill under the price (collection grid).
+  /// The grid that sets it reserves [kTileFooterExtent] per row.
+  final bool showViewProduct;
+
   /// Reserved for package C. When given, a long press opens the quick view;
   /// no button is added and tapping still opens the full product page.
   final VoidCallback? onQuickView;
@@ -92,22 +99,31 @@ class ProductCard extends StatelessWidget {
     // the eye (when the surface wires it).
     final canQuickAdd = showQuickAdd && product.isInStock;
 
-    return MonettaProductTile(
-      data: data,
-      density: density,
-      eyebrow: urgency,
-      wishlisted: wishlisted,
-      onToggleWishlist:
-          showWishlist ? () => store.toggleWishlist(product.id) : null,
-      onQuickView: onQuickView,
-      quickAction: canQuickAdd
-          ? ProductQuickAddButton(
-              key: Key('quick-add-${product.id}'),
-              product: product,
-              productName: data.title,
-            )
-          : null,
-      onTap: onTap ?? () => openProduct(context, product),
+    return ProductResultAnchor(
+      productId: product.id,
+      child: MonettaProductTile(
+        data: data,
+        density: density,
+        eyebrow: urgency,
+        wishlisted: wishlisted,
+        onToggleWishlist:
+            showWishlist ? () => store.toggleWishlist(product.id) : null,
+        onQuickView: onQuickView,
+        quickAction: canQuickAdd
+            ? ProductQuickAddButton(
+                key: Key('quick-add-${product.id}'),
+                product: product,
+                productName: data.title,
+              )
+            : null,
+        footer: showViewProduct
+            ? TileViewProductButton(
+                key: Key('view-product-${product.id}'),
+                onPressed: onTap ?? () => openProduct(context, product),
+              )
+            : null,
+        onTap: onTap ?? () => openProduct(context, product),
+      ),
     );
   }
 }
@@ -117,6 +133,12 @@ void openProduct(
   Product product, {
   int initialVariantIndex = 0,
 }) {
+  final browse = BrowseDetailScope.maybeOf(context);
+  if (browse != null &&
+      context.findAncestorWidgetOfExactType<ProductScreen>() == null) {
+    browse.select(product, initialVariantIndex);
+    return;
+  }
   final store = StoreScope.of(context);
   store.record(EventType.productView, productId: product.id);
   Navigator.of(context).push(

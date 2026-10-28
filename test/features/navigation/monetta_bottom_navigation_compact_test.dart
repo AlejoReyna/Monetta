@@ -1,3 +1,4 @@
+import '../../support/bundled_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -16,8 +17,8 @@ import 'package:monetta_app/main.dart';
 // surface painted under the inset. Destinations stay >= 48x48 and the bar
 // grows (never clips) with large text.
 //
-// Text note: FlutterTest renders every glyph one em wide, so the bar's
-// fit-to-column logic is active even at scale 1.0 on phone-width columns.
+// Compact brand geometry uses the bundled fonts. Uncapped fallback-font
+// reflow and short-window overflow are covered in duo_navigation_test.dart.
 
 const _destinations = MonettaBottomDestination.values;
 const _viewHeight = 844.0;
@@ -139,6 +140,7 @@ double _lowestBottom(WidgetTester tester, Finder finder) {
 }
 
 void main() {
+  setUpAll(loadBundledFonts);
   testWidgets('NAV-01 at scale 1.0 the surface and every destination are 56 px',
       (tester) async {
     await _pumpBar(tester);
@@ -246,9 +248,9 @@ void main() {
         );
 
         expect(
-          find.semantics.byLabel('Categorías').evaluate().single,
+          find.semantics.byLabel('Catálogo').evaluate().single,
           isSemantics(
-            label: 'Categorías',
+            label: 'Catálogo',
             isButton: true,
             hasTapAction: true,
             isSelected: true,

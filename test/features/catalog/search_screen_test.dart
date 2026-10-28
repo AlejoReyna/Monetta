@@ -85,6 +85,9 @@ void main() {
 
   testWidgets('typing offers catalog suggestions and submitting shows results',
       (tester) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 1600);
+    tester.view.devicePixelRatio = 1.0;
     final store = await _loadedStore();
     addTearDown(store.dispose);
     await tester.pumpWidget(_app(store));
@@ -423,7 +426,7 @@ void main() {
         find.byKey(const ValueKey('search-query-field')),
         'guess negro',
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
       await captureClientGuide(
         tester,
         'search-${size.width.toInt()}-${brightness.name}',

@@ -475,18 +475,25 @@ void main() {
     });
 
     testWidgets(
-        'FLT-01c with no brand link, no active filter and no owner count '
-        'there is no empty band under the banner', (tester) async {
+        'FLT-01c (guide v2) under the banner there is one toolbar: filter '
+        'button, category pills, count and «Ordenar por»; no brand link and '
+        'no clear action while nothing is filtered', (tester) async {
       _view(tester, height: 844);
       final store = await _loadedStore();
       addTearDown(store.dispose);
       await _pumpCollection(tester, store);
 
       expect(find.byKey(const Key('collection-open-brand')), findsNothing);
+      expect(find.text('Ver Coach'), findsNothing);
       expect(find.byKey(const Key('collection-clear-inline')), findsNothing);
+      expect(find.byKey(const Key('collection-count')), findsOneWidget);
+      expect(find.byKey(const Key('collection-sort-button')), findsOneWidget);
       final banner = tester.getRect(find.byType(CatalogEditorialBanner));
+      final toolbar =
+          tester.getRect(find.byKey(const Key('collection-pill-bolsa')));
       final firstCard = tester.getRect(find.byType(ProductCard).first);
-      expect(firstCard.top - banner.bottom, inInclusiveRange(8, 16));
+      expect(toolbar.top - banner.bottom, inInclusiveRange(8, 24));
+      expect(firstCard.top, greaterThan(toolbar.bottom));
     });
   });
 

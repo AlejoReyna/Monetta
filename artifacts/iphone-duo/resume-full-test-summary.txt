@@ -1,0 +1,11 @@
+Full test gate: exit 1; 1376 passed, 5 existing skips, 8 golden failures.
+Expected goldens unchanged. Failing golden case names match the baseline.
+
+Golden "ui04/inicio_375x812.png": Pixel test failed, 60.04%, 1645406px diff detected.
+Golden "ui04/inicio_440x956.png": Pixel test failed, 65.59%, 2483174px diff detected.
+Golden "ui04/coleccion_375x812.png": Pixel test failed, 55.47%, 1520139px diff detected.
+Golden "ui04/coleccion_440x956.png": Pixel test failed, 72.19%, 2732961px diff detected.
+Golden "ui04/ficha_375x812.png": Pixel test failed, 55.28%, 1514958px diff detected.
+Golden "ui04/ficha_440x956.png": Pixel test failed, 47.48%, 1797507px diff detected.
+Golden "ui04/cuenta_375x812.png": Pixel test failed, 45.94%, 1258854px diff detected.
+Golden "ui04/cuenta_440x956.png": Pixel test failed, 46.77%, 1770774px diff detected.

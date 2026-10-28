@@ -383,25 +383,46 @@ void main() {
 
           expect(errors.takeUnexpected(), isEmpty);
 
-          final tiles = find.byType(MonettaProductTile);
-          expect(tiles, findsAtLeastNWidgets(4));
-          final photo = [
-            for (var i = 0; i < 4; i++) _rect(tester, _photoOf(tiles.at(i))),
-          ];
-          expect(photo[1].top, closeTo(photo[0].top, 0.01));
-          expect(photo[3].top, closeTo(photo[2].top, 0.01));
-          expect(photo[2].top, greaterThan(photo[0].top));
-
-          final prices = find.text(_priceLabel);
-          expect(prices, findsAtLeastNWidgets(4));
-          for (var i = 0; i < prices.evaluate().length; i++) {
-            expect(
-              tester
-                  .renderObject<RenderParagraph>(prices.at(i))
-                  .didExceedMaxLines,
-              isFalse,
-              reason: 'the price of tile $i must shrink, not end in "..."',
+          final items = _items(4, title: _longName, price: _price);
+          final scrollable = find
+              .descendant(
+                of: find.byType(CustomScrollView).first,
+                matching: find.byType(Scrollable),
+              )
+              .first;
+          final tops = <double>[];
+          final widths = <double>[];
+          for (final item in items) {
+            final tile = find.byKey(ValueKey(item.sourceScopedId));
+            await tester.scrollUntilVisible(tile, 200, scrollable: scrollable);
+            await tester.pumpAndSettle();
+            final photo = _rect(tester, _photoOf(tile));
+            tops.add(
+              photo.top +
+                  tester.state<ScrollableState>(scrollable).position.pixels,
             );
+            widths.add(photo.width);
+            final price =
+                find.descendant(of: tile, matching: find.text(_priceLabel));
+            expect(price, findsOneWidget);
+            await tester.ensureVisible(price);
+            await tester.pump();
+            expect(
+              tester.renderObject<RenderParagraph>(price).didExceedMaxLines,
+              isFalse,
+              reason: 'every full price remains readable after reflow',
+            );
+            expect(errors.takeUnexpected(), isEmpty);
+          }
+          if (label == 'x1.0' || label == 'x1.3') {
+            expect(tops[1], closeTo(tops[0], .01));
+            expect(tops[3], closeTo(tops[2], .01));
+            expect(widths, everyElement(closeTo(193, .01)));
+          } else {
+            expect(widths, everyElement(closeTo(390, .01)));
+            for (var i = 1; i < tops.length; i++) {
+              expect(tops[i], greaterThan(tops[i - 1]));
+            }
           }
         },
       );

@@ -16,6 +16,8 @@ import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_scaffold.dart';
+import '../boutique/guide_art.dart';
+import '../boutique/guide_brand_tile.dart';
 import '../catalog/categories_screen.dart';
 import 'shopper_preferences.dart';
 
@@ -145,9 +147,9 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       await store.write(scope, value);
       if (!mounted || scope != _scope()) return;
       _seedRecommendations();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(kPersonalizationSaved)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(kPersonalizationSaved)));
     } on Object {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -259,10 +261,13 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                 else
                   _ChoiceGrid(
                     columns: _columns(width),
+                    aspectRatio: 1.5,
                     children: [
                       for (final slug in brands)
-                        _BrandChoice(
-                          slug: slug,
+                        GuideBrandTile(
+                          key: ValueKey('personalization-brand-$slug'),
+                          asset: _brandLogoAssets[slug],
+                          label: brandLabel(slug),
                           selected: _brands.contains(slug),
                           onTap: () => _toggle(_brands, slug),
                         ),
@@ -329,7 +334,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                         id: 'mayoreo',
                         title: 'Mayoreo',
                         subtitle: 'Más de tres piezas',
-                        icon: Icons.storefront_outlined,
+                        icon: Icons.inventory_2_outlined,
                         selected: _purchaseType == ShopperPurchaseType.mayoreo,
                         onTap: () =>
                             _selectPurchase(ShopperPurchaseType.mayoreo),
@@ -347,20 +352,7 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                   ),
                 ),
                 SizedBox(height: MonettaTokens.space[4]),
-                FilledButton(
-                  key: const ValueKey('personalization-save'),
-                  onPressed: _saving ? null : _save,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: palette.actionDark,
-                    foregroundColor: palette.onActionDark,
-                    disabledBackgroundColor: palette.surfaceDeep,
-                    minimumSize:
-                        const Size.fromHeight(MonettaTokens.controlHeight),
-                    shape: const StadiumBorder(),
-                    textStyle: clientGuideStyle(context, MonettaTokens.control),
-                  ),
-                  child: const Text('Guardar preferencias'),
-                ),
+                _SaveButton(onPressed: _saving ? null : _save),
               ],
             ),
     );
@@ -375,10 +367,15 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
 }
 
 class _ChoiceGrid extends StatelessWidget {
-  const _ChoiceGrid({required this.columns, required this.children});
+  const _ChoiceGrid({
+    required this.columns,
+    required this.children,
+    this.aspectRatio = 0.92,
+  });
 
   final int columns;
   final List<Widget> children;
+  final double aspectRatio;
 
   @override
   Widget build(BuildContext context) {
@@ -388,40 +385,8 @@ class _ChoiceGrid extends StatelessWidget {
       physics: const NeverScrollableScrollPhysics(),
       mainAxisSpacing: MonettaTokens.space[2],
       crossAxisSpacing: MonettaTokens.space[2],
-      childAspectRatio: 0.92,
+      childAspectRatio: aspectRatio,
       children: children,
-    );
-  }
-}
-
-class _BrandChoice extends StatelessWidget {
-  const _BrandChoice({
-    required this.slug,
-    required this.selected,
-    required this.onTap,
-  });
-
-  final String slug;
-  final bool selected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final asset = _brandLogoAssets[slug];
-    return _ChoiceCard(
-      id: 'personalization-brand-$slug',
-      selected: selected,
-      onTap: onTap,
-      label: brandLabel(slug),
-      child: asset == null
-          ? Icon(Icons.sell_outlined, color: palette.inkMuted, size: 28)
-          : Image.asset(
-              asset,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) =>
-                  Icon(Icons.sell_outlined, color: palette.inkMuted, size: 28),
-            ),
     );
   }
 }
@@ -483,23 +448,29 @@ class _PurchaseChoice extends StatelessWidget {
       selected: selected,
       onTap: onTap,
       label: title,
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
+      inline: true,
+      child: Row(
         children: [
-          Icon(icon, color: palette.goldText),
-          SizedBox(height: MonettaTokens.space[1]),
-          Text(
-            title,
-            textAlign: TextAlign.center,
-            style: clientGuideStyle(context, MonettaTokens.cardLabel),
-          ),
-          Text(
-            subtitle,
-            textAlign: TextAlign.center,
-            style: clientGuideStyle(
-              context,
-              MonettaTokens.navLabel,
-              color: palette.inkMuted,
+          Icon(icon, color: palette.goldText, size: 30),
+          SizedBox(width: MonettaTokens.space[2]),
+          Expanded(
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: clientGuideStyle(context, MonettaTokens.cardLabel),
+                ),
+                Text(
+                  subtitle,
+                  style: clientGuideStyle(
+                    context,
+                    MonettaTokens.navLabel,
+                    color: palette.inkMuted,
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -515,6 +486,7 @@ class _ChoiceCard extends StatelessWidget {
     required this.onTap,
     required this.label,
     required this.child,
+    this.inline = false,
   });
 
   final String id;
@@ -522,6 +494,10 @@ class _ChoiceCard extends StatelessWidget {
   final VoidCallback onTap;
   final String label;
   final Widget child;
+
+  /// An inline card carries its own label in [child]; a picture card gets the
+  /// label under the picture.
+  final bool inline;
 
   @override
   Widget build(BuildContext context) {
@@ -531,47 +507,58 @@ class _ChoiceCard extends StatelessWidget {
       selected: selected,
       label: label,
       child: Material(
-        color: palette.surface,
-        borderRadius: BoutiqueRadius.card,
+        color: palette.surfaceDeep,
+        borderRadius: BorderRadius.circular(MonettaTokens.radiusTile),
         child: InkWell(
           key: ValueKey(id),
           onTap: onTap,
-          borderRadius: BoutiqueRadius.card,
+          borderRadius: BorderRadius.circular(MonettaTokens.radiusTile),
           child: Ink(
             decoration: BoxDecoration(
-              borderRadius: BoutiqueRadius.card,
+              borderRadius: BorderRadius.circular(MonettaTokens.radiusTile),
               border: Border.all(
-                color: selected ? palette.selectedBorder : palette.hairline,
-                width: selected ? 1.4 : 1,
+                color: selected ? palette.selectedBorder : Colors.transparent,
+                width: 1.4,
               ),
             ),
             child: Stack(
               children: [
                 Padding(
-                  padding: EdgeInsets.fromLTRB(
-                    MonettaTokens.space[2],
-                    MonettaTokens.space[4],
-                    MonettaTokens.space[2],
-                    MonettaTokens.space[2],
-                  ),
+                  padding: inline
+                      ? EdgeInsets.fromLTRB(
+                          MonettaTokens.space[2],
+                          MonettaTokens.space[2],
+                          MonettaTokens.space[2],
+                          MonettaTokens.space[2],
+                        )
+                      : EdgeInsets.fromLTRB(
+                          MonettaTokens.space[1],
+                          MonettaTokens.space[1],
+                          MonettaTokens.space[1],
+                          MonettaTokens.space[4],
+                        ),
                   child: Center(child: child),
                 ),
                 Positioned(
-                  top: MonettaTokens.space[1],
-                  right: MonettaTokens.space[1],
-                  child: _ChoiceMark(selected: selected),
+                  top: MonettaTokens.space[0],
+                  right: MonettaTokens.space[0],
+                  child: GuideRadioMark(selected: selected),
                 ),
-                if (label.isNotEmpty && child is! Column)
+                if (label.isNotEmpty && !inline)
                   Positioned(
                     left: MonettaTokens.space[1],
                     right: MonettaTokens.space[1],
-                    bottom: MonettaTokens.space[1],
+                    bottom: MonettaTokens.space[0],
                     child: Text(
                       label,
                       textAlign: TextAlign.center,
-                      maxLines: 2,
+                      maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: clientGuideStyle(context, MonettaTokens.navLabel),
+                      style: guideSerifStyle(
+                        context,
+                        size: 13,
+                        weight: FontWeight.w500,
+                      ),
                     ),
                   ),
               ],
@@ -583,28 +570,35 @@ class _ChoiceCard extends StatelessWidget {
   }
 }
 
-class _ChoiceMark extends StatelessWidget {
-  const _ChoiceMark({required this.selected});
+/// «Guardar preferencias»: the guide's dark, full-width pill with a chevron.
+class _SaveButton extends StatelessWidget {
+  const _SaveButton({required this.onPressed});
 
-  final bool selected;
+  final VoidCallback? onPressed;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Container(
-      width: 22,
-      height: 22,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: selected ? palette.action : palette.surface,
-        border: Border.all(
-          color: selected ? palette.action : palette.borderControl,
-        ),
+    return FilledButton(
+      key: const ValueKey('personalization-save'),
+      onPressed: onPressed,
+      style: FilledButton.styleFrom(
+        backgroundColor: palette.actionDark,
+        foregroundColor: palette.onActionDark,
+        minimumSize: const Size(double.infinity, MonettaTokens.controlHeight),
+        shape: const StadiumBorder(),
+        textStyle: clientGuideStyle(context, MonettaTokens.control),
       ),
-      child: selected
-          ? Icon(Icons.check, size: 14, color: palette.onAction)
-          : null,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Flexible(
+            child: Text('Guardar preferencias', textAlign: TextAlign.center),
+          ),
+          SizedBox(width: MonettaTokens.space[1]),
+          const Icon(Icons.chevron_right, size: MonettaTokens.logoHeight),
+        ],
+      ),
     );
   }
 }

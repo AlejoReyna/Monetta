@@ -89,16 +89,18 @@ void main() {
       await tester.pumpWidget(_host(controller));
       await tester.pumpAndSettle();
 
-      expect(find.text('Sesión iniciada'), findsOneWidget);
+      // Guide v2 identity: avatar with the initial, name and e-mail.
+      expect(find.byKey(const ValueKey('account-identity')), findsOneWidget);
+      expect(find.text('A'), findsOneWidget);
       expect(find.text('Ana García'), findsOneWidget);
       expect(find.text('ana@example.com'), findsOneWidget);
-      expect(find.text('Cuenta Shopify verificada'), findsOneWidget);
+      expect(find.textContaining('pts'), findsNothing);
       expect(find.textContaining('puntos'), findsNothing);
       expect(find.textContaining('Nivel'), findsNothing);
       expect(find.textContaining('320'), findsNothing);
     });
 
-    testWidgets('rewards unavailable is honest without backend', (
+    testWidgets('rewards row says «Ver saldo» without a backend, never pts', (
       tester,
     ) async {
       final db = openTestDatabase();
@@ -110,10 +112,34 @@ void main() {
       await tester.pumpWidget(_host(controller));
       await tester.pumpAndSettle();
 
+      expect(find.text('Monetta Rewards'), findsOneWidget);
+      expect(find.text('Ver saldo'), findsOneWidget);
+      expect(find.textContaining('pts'), findsNothing);
+      // The duplicated Rewards card is gone from Cuenta.
+      expect(find.byKey(const ValueKey('rewards-section')), findsNothing);
       expect(
         find.text('Monetta Rewards aún no está disponible'),
-        findsOneWidget,
+        findsNothing,
       );
+    });
+
+    testWidgets('rewards row shows the balance the contract reports',
+        (tester) async {
+      final db = openTestDatabase();
+      addTearDown(db.close);
+      final controller = _controller(db)
+        ..account = _account()
+        ..ordersStatus = OrderHistoryStatus.empty;
+
+      await tester.pumpWidget(_host(controller, rewards: FakeRewardsReader()));
+      await tester.pumpAndSettle();
+
+      final balance = tester.widget<Text>(
+        find.byKey(const ValueKey('account-rewards-balance')),
+      );
+      expect(balance.data, isNot('Ver saldo'));
+      expect(balance.data, contains('Monetta'));
+      expect(balance.data, isNot(contains('pts')));
     });
 
     testWidgets('access rows navigate to the real E destinations',
@@ -141,7 +167,7 @@ void main() {
         await tester.tap(row);
         await tester.pumpAndSettle();
         expect(find.byType(screen), findsOneWidget);
-        await tester.tap(find.byIcon(Icons.arrow_back).first);
+        tester.state<NavigatorState>(find.byType(Navigator)).pop();
         await tester.pumpAndSettle();
       }
 
@@ -210,15 +236,15 @@ void main() {
       );
       await tester.tap(find.text('OPEN'));
       await tester.pumpAndSettle();
-      expect(find.text('Mi cuenta'), findsOneWidget);
+      expect(find.byType(AccountScreen), findsOneWidget);
 
-      final logout = find.text('CERRAR SESIÓN');
+      final logout = find.byKey(const ValueKey('account-logout'));
       await tester.scrollUntilVisible(logout, 400);
       await tester.pumpAndSettle();
       await tester.tap(logout);
       await tester.pumpAndSettle();
 
-      expect(find.text('Mi cuenta'), findsNothing);
+      expect(find.byType(AccountScreen), findsNothing);
       expect(find.text('OPEN'), findsOneWidget);
       expect(controller.isSignedIn, isFalse);
       expect(controller.orders, isEmpty);

@@ -99,9 +99,13 @@ flutter:
     - assets/rules/
     - assets/images/
     - assets/images/brands/
+    - assets/images/guide/
+    - assets/images/guide/icons/
     - assets/catalog/
     - assets/fonts/inter/OFL.txt
     - assets/fonts/playfair_display/OFL.txt
+    - assets/fonts/cormorant_garamond/OFL.txt
+    - assets/fonts/mrs_saint_delafield/OFL.txt
   fonts:
     - family: Inter
       fonts:
@@ -121,3 +125,23 @@ flutter:
           weight: 400
         - asset: assets/fonts/playfair_display/PlayfairDisplay-Bold.ttf
           weight: 700
+    # Open stand-ins for the guide's licensed faces: Reglarik (serif) and
+    # Above the Beyond Script. Both are SIL OFL 1.1.
+    - family: Cormorant Garamond
+      fonts:
+        - asset: assets/fonts/cormorant_garamond/CormorantGaramond-Light.ttf
+          weight: 300
+        - asset: assets/fonts/cormorant_garamond/CormorantGaramond-LightItalic.ttf
+          weight: 300
+          style: italic
+        - asset: assets/fonts/cormorant_garamond/CormorantGaramond-Regular.ttf
+          weight: 400
+        - asset: assets/fonts/cormorant_garamond/CormorantGaramond-Italic.ttf
+          weight: 400
+          style: italic
+        - asset: assets/fonts/cormorant_garamond/CormorantGaramond-Medium.ttf
+          weight: 500
+    - family: Mrs Saint Delafield
+      fonts:
+        - asset: assets/fonts/mrs_saint_delafield/MrsSaintDelafield-Regular.ttf
+          weight: 400

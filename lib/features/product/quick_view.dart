@@ -18,6 +18,7 @@
 /// ```
 library;
 
+import '../../platform/system_layout_context.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
@@ -48,6 +49,8 @@ Future<void> showProductQuickView(
   store.record(EventType.galleryInteraction, productId: product.id);
   return showModalBottomSheet<void>(
     context: context,
+    anchorPoint: presentationAnchor(context),
+    useSafeArea: true,
     useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -168,8 +171,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     if (notifications == null || !notifications.available) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('Los avisos todavía no están disponibles en esta versión.'),
+          content: Text(
+            'Los avisos todavía no están disponibles en esta versión.',
+          ),
         ),
       );
       return;
@@ -200,7 +204,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       label = 'Avísame cuando vuelva';
       onPressed = () => _requestRestock(widget.product);
     } else {
-      label = _adding ? 'Agregando…' : 'Agregar al carrito';
+      label = _adding ? 'AGREGANDO…' : 'AGREGAR A BOLSA';
       onPressed = _addToBag;
     }
     return DecoratedBox(
@@ -238,6 +242,13 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                 label: label,
                 pending: _adding,
                 onPressed: onPressed,
+              ),
+              const SizedBox(height: BoutiqueSpace.sm),
+              BoutiqueButton(
+                key: const Key('quick-view-view-product'),
+                label: 'VER PRODUCTO',
+                onPressed: _viewFullProduct,
+                filled: false,
               ),
             ],
           ),
@@ -328,8 +339,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                   onPageChanged: (i) =>
                                       setState(() => _page = i),
                                   itemBuilder: (_, i) => Padding(
-                                    padding:
-                                        const EdgeInsets.all(BoutiqueSpace.sm),
+                                    padding: const EdgeInsets.all(
+                                      BoutiqueSpace.sm,
+                                    ),
                                     child: MonettaImage(
                                       url: images[i],
                                       fit: BoxFit.contain,
@@ -373,8 +385,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children:
-                                          List.generate(images.length, (i) {
+                                      children: List.generate(images.length, (
+                                        i,
+                                      ) {
                                         final on = i == _page;
                                         return AnimatedContainer(
                                           duration: reduceMotion(context)
@@ -388,10 +401,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                           decoration: BoxDecoration(
                                             color: on
                                                 ? palette.ink
-                                                : palette.ink
-                                                    .withValues(alpha: 0.25),
-                                            borderRadius:
-                                                BorderRadius.circular(2),
+                                                : palette.ink.withValues(
+                                                    alpha: 0.25,
+                                                  ),
+                                            borderRadius: BorderRadius.circular(
+                                              2,
+                                            ),
                                           ),
                                         );
                                       }),
@@ -457,10 +472,11 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       const SizedBox(height: BoutiqueSpace.lg),
                       if (facets?.brand != null)
                         Text(
-                          brandLabel(facets!.brand!.value).toUpperCase(),
-                          style: boutiqueEyebrow(
-                            size: 11,
-                            color: palette.inkMuted,
+                          brandLabel(facets!.brand!.value),
+                          key: const Key('quick-view-brand'),
+                          style: boutiqueDisplay(
+                            22,
+                            color: palette.ink,
                           ),
                         ),
                       if (facets?.brand != null)
@@ -506,14 +522,14 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                   vertical: 5,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: palette.sale,
+                                  color: palette.saleSurface,
                                   borderRadius: BoutiqueRadius.capsule,
                                 ),
                                 child: Text(
                                   '-$discount%',
                                   style: boutiqueEyebrow(
                                     size: 11,
-                                    color: const Color(0xFFFFFFFF),
+                                    color: palette.sale,
                                   ),
                                 ),
                               ),
@@ -550,20 +566,14 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         ProductOptionSelector(
                           product: product,
                           selectedIndex: chosen,
+                          colorHeading: 'COLORES',
                           onSelect: (i) => setState(() {
                             _variantIndex = i;
                             _error = null;
                           }),
                         ),
                       ],
-                      const SizedBox(height: BoutiqueSpace.xl),
-                      BoutiqueButton(
-                        key: const Key('quick-view-view-product'),
-                        label: 'Ver producto',
-                        onPressed: _viewFullProduct,
-                        filled: false,
-                      ),
-                      const SizedBox(height: BoutiqueSpace.sm),
+                      const SizedBox(height: BoutiqueSpace.lg),
                     ],
                   ),
                 ),

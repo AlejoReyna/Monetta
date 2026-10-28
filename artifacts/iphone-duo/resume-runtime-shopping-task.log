@@ -1,0 +1,58 @@
+The following plugins do not support Swift Package Manager for ios:
+  - flutter_secure_storage
+This will become an error in a future version of Flutter. Please contact the plugin maintainers to request Swift Package Manager adoption.
+Running Xcode build...                                          
+Xcode build done.                                           30.6s
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:50298/JKwsBKVXc8Q=/
+VMServiceFlutterDriver: Isolate found with number: 5542120987965275
+VMServiceFlutterDriver: Isolate 5542120987965275 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+Indexing for request: <WFToolKitIndexingRequest: 0x103c500c0>, changeset: .partial(updatedCount: 1 removedCount: 0 updated: ["mx.monetta.monettaApp.staging"], removed: [], provenance: [VoiceShortcutClient.ToolKitIndexingReason.Changeset.Provenance.launchServicesSnapshot(<LaunchServicesSnapshot uuid=81A643B3-E0B3-450F-B002-2C990769DB8A, v=668)> ["com.apple.mobilemail.MailSettingsIntentsExtension", "com.apple.AXRemoteViewService", "com.apple.Preferences", "com.apple.SafariViewService", "com.apple.Home.HomeWidgetIntentsExtension", "com.apple.GeneralSettingsIntents", "com.apple.SupportFlow", "com.apple.GameTrampoline", "com.apple.DocumentManager.DockFolderViewService", "com.apple.DocumentsApp.DocumentAppIntents", "mx.monetta.monettaApp.staging", "com.apple.chrono.WidgetRenderer-Snapshots", "com.apple.FontServices.FontIntents", "com.apple.HomeCaptiveViewService", "com.apple.siri.SiriGeo.SiriGeoAppIntentExtension", "com.apple.DefaultAppsSettingsIntents", "com.apple.Batteries", "com.apple.ProximityReaderUIService", "com.apple.PridePos<…>, priority: <decode: missing data>
+flutter: 00:00 +0: offline shopping continues through actual Duo runtime poses
+VMServiceFlutterDriver: Connected to Flutter application.
+Type indexing (params + content items) took 0.000102s
+Action indexing took 0.001446s
+Indexed: 0
+Errored: 0
+Skipped: [:]
+Bundle cache: 0 hits, 0 misses
+Finished in 1.485550s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: DUO_STAGE:outer
+flutter: DUO_GEOMETRY:{"stage":"outer","size":[466.0,678.0],"barEdge":"right","divisions":[]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"01-actual-duo-outer-inicio","size":[466.0,678.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:01-actual-duo-outer-inicio
+flutter: DUO_CAPTURE_CONTEXT:{"name":"02-actual-duo-outer-product","size":[466.0,678.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:02-actual-duo-outer-product
+flutter: DUO_STAGE:open-landscape
+flutter: DUO_GEOMETRY:{"stage":"open-landscape","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":false,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"03-actual-duo-landscape-browse-detail","size":[951.0,669.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:03-actual-duo-landscape-browse-detail
+flutter: DUO_CAPTURE_CONTEXT:{"name":"04-actual-duo-landscape-direct-product","size":[951.0,669.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:04-actual-duo-landscape-direct-product
+flutter: DUO_STAGE:partial-fold
+flutter: DUO_GEOMETRY:{"stage":"partial-fold","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":true,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"05-actual-duo-partial-fold-product","size":[951.0,669.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:05-actual-duo-partial-fold-product
+flutter: DUO_STAGE:open-flat
+flutter: DUO_GEOMETRY:{"stage":"open-flat","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":false,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: DUO_STAGE:inner-portrait
+flutter: DUO_GEOMETRY:{"stage":"inner-portrait","size":[669.0,951.0],"barEdge":"none","divisions":[{"active":false,"frame":[0.0,455.5,669.0,40.0]}]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"06-actual-duo-inner-portrait-product","size":[669.0,951.0],"barEdge":"none","safeInsets":[0.0,82.0,0.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:06-actual-duo-inner-portrait-product
+flutter: DUO_STAGE:closed-again
+flutter: DUO_GEOMETRY:{"stage":"closed-again","size":[678.0,466.0],"barEdge":"right","divisions":[]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"07-actual-duo-outer-cart","size":[678.0,466.0],"barEdge":"left","safeInsets":[84.0,0.0,0.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:07-actual-duo-outer-cart
+flutter: DUO_STAGE:accessibility-text
+flutter: DUO_CAPTURE_CONTEXT:{"name":"08a-actual-duo-accessibility-cart-heading","size":[678.0,466.0],"barEdge":"left","safeInsets":[84.0,0.0,0.0,34.0],"scaled16":49.88235294117647}
+flutter: DUO_CAPTURE:08a-actual-duo-accessibility-cart-heading
+flutter: DUO_CAPTURE_CONTEXT:{"name":"08-actual-duo-accessibility-cart","size":[678.0,466.0],"barEdge":"left","safeInsets":[84.0,0.0,0.0,34.0],"scaled16":49.88235294117647}
+flutter: DUO_CAPTURE:08-actual-duo-accessibility-cart
+flutter: 02:14 +1: (tearDownAll)
+flutter: 02:15 +2: All tests passed!
+All tests passed.

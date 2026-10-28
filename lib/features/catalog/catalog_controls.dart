@@ -9,6 +9,7 @@ import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
 import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/guide_art.dart';
 
 /// Capsule control from the reference's component strip.
 ///
@@ -283,6 +284,7 @@ class CatalogEditorialBanner extends StatelessWidget {
     this.heightFactor = 0.30,
     this.centerTitle = false,
     this.height,
+    this.guidePhoto,
     super.key,
   });
 
@@ -305,10 +307,18 @@ class CatalogEditorialBanner extends StatelessWidget {
   /// Explicit height, when the banner shares a box with a collapsing app bar.
   final double? height;
 
+  /// Owner photograph from the client guide. When set it replaces every other
+  /// artwork: the banner shows only the title, in large serif capitals, on
+  /// the photograph's empty side — no description, no action.
+  final GuidePhoto? guidePhoto;
+
   bool get _hasArtwork => imageUrl != null || imageAsset != null;
 
   @override
   Widget build(BuildContext context) {
+    if (guidePhoto case final photo?) {
+      return _GuidePhotoBanner(title: title, photo: photo, height: height);
+    }
     if (!_hasArtwork) return _TypographicHeader(banner: this);
 
     final resolved =
@@ -338,12 +348,27 @@ class CatalogEditorialBanner extends StatelessWidget {
                 BoutiqueSpace.gutter,
                 BoutiqueSpace.xl,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: centerTitle
-                    ? CrossAxisAlignment.center
-                    : CrossAxisAlignment.start,
-                children: _content(context, onPhoto: true),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: centerTitle
+                        ? Alignment.bottomCenter
+                        : Alignment.bottomLeft,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: centerTitle
+                            ? CrossAxisAlignment.center
+                            : CrossAxisAlignment.start,
+                        children: _content(context, onPhoto: true),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),
@@ -407,6 +432,76 @@ class CatalogEditorialBanner extends StatelessWidget {
         ),
       ],
     ];
+  }
+}
+
+/// The guide's collection hero: the photograph, and the name on the free side.
+class _GuidePhotoBanner extends StatelessWidget {
+  const _GuidePhotoBanner({
+    required this.title,
+    required this.photo,
+    this.height,
+  });
+
+  final String title;
+  final GuidePhoto photo;
+  final double? height;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final width = MediaQuery.sizeOf(context).width;
+    final onRight = photo.textSide == GuideTextSide.right;
+    final size = (width * 0.13).clamp(34.0, 64.0);
+    final upright = guidePhotoIsBrand(photo);
+    final titleStyle = upright
+        ? guideSerifStyle(
+            context,
+            size: size,
+            color: palette.ink,
+            height: 1.05,
+            letterSpacing: size * 0.04,
+          )
+        : guideSerifItalicStyle(
+            context,
+            size: size,
+            color: palette.ink,
+            height: 1.05,
+            letterSpacing: size * 0.04,
+          );
+    return SizedBox(
+      key: const ValueKey('catalog-guide-banner'),
+      height: height ?? (width / 2.15).clamp(150.0, 340.0),
+      width: double.infinity,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          ColoredBox(color: palette.surfaceDeep),
+          GuideArt(
+            asset: photo.asset,
+            alignment: onRight ? Alignment.centerLeft : Alignment.centerRight,
+          ),
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.lg),
+            child: Align(
+              alignment: onRight ? Alignment.centerRight : Alignment.centerLeft,
+              child: FractionallySizedBox(
+                widthFactor: 0.46,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  alignment: Alignment.center,
+                  child: Text(
+                    title.toUpperCase(),
+                    maxLines: 1,
+                    style: titleStyle,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 

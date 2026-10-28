@@ -9,6 +9,7 @@
 /// identidad ya correlacionada y la muestra tal cual.
 library;
 
+import '../../platform/system_layout_context.dart';
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
@@ -130,218 +131,221 @@ class OrderDetailScreen extends StatelessWidget {
           child: Container(height: .5, color: palette.hairline),
         ),
       ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: EdgeInsets.all(
-            MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              AccountPageHeader(
-                kicker: status.label,
-                title: label,
-                subtitle: 'Realizado el ${orderDateLabel(order.placedAt)}.',
-              ),
-              const SizedBox(height: BoutiqueSpace.lg),
-              ECard(
-                children: [
-                  const ESectionTitle(title: 'Estado'),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  EStatusCapsule.forOrderKey(
-                    status.key,
-                    label: status.label,
-                    guideIcon: status.key == 'in_transit'
-                        ? Icons.local_shipping_outlined
-                        : status.key == 'delivered'
-                            ? Icons.check_circle_outline
-                            : Icons.receipt_long_outlined,
-                  ),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  Text(
-                    status.detail,
-                    style: boutiqueText(
-                      size: 13,
-                      color: palette.inkMuted,
+      body: SystemUsableSurface(
+        child: SafeArea(
+          child: SingleChildScrollView(
+            padding: EdgeInsets.all(
+              MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AccountPageHeader(
+                  kicker: status.label,
+                  title: label,
+                  subtitle: 'Realizado el ${orderDateLabel(order.placedAt)}.',
+                ),
+                const SizedBox(height: BoutiqueSpace.lg),
+                ECard(
+                  children: [
+                    const ESectionTitle(title: 'Estado'),
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    EStatusCapsule.forOrderKey(
+                      status.key,
+                      label: status.label,
+                      guideIcon: status.key == 'in_transit'
+                          ? Icons.local_shipping_outlined
+                          : status.key == 'delivered'
+                              ? Icons.check_circle_outline
+                              : Icons.receipt_long_outlined,
                     ),
-                  ),
-                  if (status.secondaryLabel != null) ...[
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(
-                      status.secondaryLabel!,
+                      status.detail,
+                      style: boutiqueText(
+                        size: 13,
+                        color: palette.inkMuted,
+                      ),
+                    ),
+                    if (status.secondaryLabel != null) ...[
+                      const SizedBox(height: BoutiqueSpace.sm),
+                      Text(
+                        status.secondaryLabel!,
+                        style: boutiqueText(
+                          size: 13,
+                          color: palette.inkMuted,
+                        ),
+                      ),
+                    ],
+                    PaidCancelledRefundHelp(
+                      order: order,
+                      onOpen: (uri) => _open(context, uri),
+                    ),
+                    if (status.key == 'awaiting_transfer') ...[
+                      const SizedBox(height: BoutiqueSpace.sm),
+                      _PaymentHelpLink(
+                        linkKey: const ValueKey('order-payment-details'),
+                        label: transferPaymentDetailsLabel,
+                        uri: missingPaymentWhatsAppUri(label),
+                        icon: Icons.chat_outlined,
+                        onOpen: (uri) => _open(context, uri),
+                      ),
+                    ],
+                    if (showMissingPaymentWhatsApp(order)) ...[
+                      const SizedBox(height: BoutiqueSpace.sm),
+                      _PaymentHelpLink(
+                        linkKey: const ValueKey('missing-payment-whatsapp'),
+                        label: missingPaymentWhatsAppLabel,
+                        uri: missingPaymentWhatsAppUri(label),
+                        onOpen: (uri) => _open(context, uri),
+                      ),
+                    ],
+                    if (showPaymentQuestionWhatsApp(order)) ...[
+                      const SizedBox(height: BoutiqueSpace.sm),
+                      _PaymentHelpLink(
+                        linkKey: const ValueKey('payment-question-whatsapp'),
+                        label: paymentQuestionWhatsAppLabel,
+                        uri: paymentQuestionWhatsAppUri(label),
+                        onOpen: (uri) => _open(context, uri),
+                      ),
+                    ],
+                    if (status.key == 'in_transit') ...[
+                      const SizedBox(height: BoutiqueSpace.sm),
+                      Text(
+                        'Enviado no significa entregado: la entrega se marca '
+                        'solo con confirmación del transportista.',
+                        style: boutiqueText(
+                          size: 12,
+                          color: palette.inkMuted,
+                        ),
+                      ),
+                    ],
+                  ],
+                ),
+                const SizedBox(height: BoutiqueSpace.lg),
+                ECard(
+                  children: [
+                    const ESectionTitle(title: 'Identidad del pedido'),
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _FactRow(
+                      label: order.source == 'whatsapp_apartado'
+                          ? 'Código de apartado'
+                          : 'Número de pedido',
+                      value: label,
+                    ),
+                    _FactRow(
+                      label: 'Origen',
+                      value: order.source == 'whatsapp_apartado'
+                          ? 'Apartado por WhatsApp'
+                          : 'Compra en Shopify',
+                    ),
+                    if (order.attributionCode != null &&
+                        order.attributionCode!.isNotEmpty)
+                      _FactRow(
+                        label: 'Atribución',
+                        value: order.attributionCode!,
+                      ),
+                    _FactRow(
+                      label: 'Fecha',
+                      value: orderDateLabel(order.placedAt),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: BoutiqueSpace.lg),
+                ECard(
+                  children: [
+                    const ESectionTitle(title: 'Importe'),
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    _FactRow(
+                      label: 'Total cobrado',
+                      value: '${kMoney.format(order.totalAmount)} '
+                          '${order.currencyCode}',
+                      strong: true,
+                    ),
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    Text(
+                      'El desglose de envío, impuestos y descuentos está en tu '
+                      'correo de confirmación de Shopify. Aquí mostramos el '
+                      'total registrado, sin estimaciones.',
+                      style: boutiqueText(
+                        size: 12,
+                        color: palette.inkMuted,
+                      ),
+                    ),
+                    AutoOrderRewardsLine(
+                      shopifyOrderId: order.shopifyOrderId,
+                      reader: rewardsReader,
+                      controller: rewardsController,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: BoutiqueSpace.lg),
+                ECard(
+                  children: [
+                    const ESectionTitle(title: 'Piezas'),
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    Text(
+                      'El detalle por pieza aún no está disponible en esta '
+                      'versión de la app. Consulta las piezas en tu correo de '
+                      'confirmación de Shopify.',
                       style: boutiqueText(
                         size: 13,
                         color: palette.inkMuted,
                       ),
                     ),
                   ],
-                  PaidCancelledRefundHelp(
-                    order: order,
-                    onOpen: (uri) => _open(context, uri),
-                  ),
-                  if (status.key == 'awaiting_transfer') ...[
+                ),
+                const SizedBox(height: BoutiqueSpace.lg),
+                ECard(
+                  children: [
+                    const ESectionTitle(title: 'Seguimiento'),
                     const SizedBox(height: BoutiqueSpace.sm),
-                    _PaymentHelpLink(
-                      linkKey: const ValueKey('order-payment-details'),
-                      label: transferPaymentDetailsLabel,
-                      uri: missingPaymentWhatsAppUri(label),
-                      icon: Icons.chat_outlined,
-                      onOpen: (uri) => _open(context, uri),
-                    ),
-                  ],
-                  if (showMissingPaymentWhatsApp(order)) ...[
-                    const SizedBox(height: BoutiqueSpace.sm),
-                    _PaymentHelpLink(
-                      linkKey: const ValueKey('missing-payment-whatsapp'),
-                      label: missingPaymentWhatsAppLabel,
-                      uri: missingPaymentWhatsAppUri(label),
-                      onOpen: (uri) => _open(context, uri),
-                    ),
-                  ],
-                  if (showPaymentQuestionWhatsApp(order)) ...[
-                    const SizedBox(height: BoutiqueSpace.sm),
-                    _PaymentHelpLink(
-                      linkKey: const ValueKey('payment-question-whatsapp'),
-                      label: paymentQuestionWhatsAppLabel,
-                      uri: paymentQuestionWhatsAppUri(label),
-                      onOpen: (uri) => _open(context, uri),
-                    ),
-                  ],
-                  if (status.key == 'in_transit') ...[
+                    ..._timeline(context),
                     const SizedBox(height: BoutiqueSpace.sm),
                     Text(
-                      'Enviado no significa entregado: la entrega se marca '
-                      'solo con confirmación del transportista.',
+                      'Sin número de guía no mostramos fechas estimadas. '
+                      'Envíos: contenido pendiente de aprobación. '
+                      'Devoluciones y garantía: contenido pendiente de aprobación.',
                       style: boutiqueText(
                         size: 12,
                         color: palette.inkMuted,
                       ),
                     ),
                   ],
-                ],
-              ),
-              const SizedBox(height: BoutiqueSpace.lg),
-              ECard(
-                children: [
-                  const ESectionTitle(title: 'Identidad del pedido'),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  _FactRow(
-                    label: order.source == 'whatsapp_apartado'
-                        ? 'Código de apartado'
-                        : 'Número de pedido',
-                    value: label,
-                  ),
-                  _FactRow(
-                    label: 'Origen',
-                    value: order.source == 'whatsapp_apartado'
-                        ? 'Apartado por WhatsApp'
-                        : 'Compra en Shopify',
-                  ),
-                  if (order.attributionCode != null &&
-                      order.attributionCode!.isNotEmpty)
-                    _FactRow(
-                      label: 'Atribución',
-                      value: order.attributionCode!,
-                    ),
-                  _FactRow(
-                    label: 'Fecha',
-                    value: orderDateLabel(order.placedAt),
-                  ),
-                ],
-              ),
-              const SizedBox(height: BoutiqueSpace.lg),
-              ECard(
-                children: [
-                  const ESectionTitle(title: 'Importe'),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  _FactRow(
-                    label: 'Total cobrado',
-                    value: '${kMoney.format(order.totalAmount)} '
-                        '${order.currencyCode}',
-                    strong: true,
-                  ),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  Text(
-                    'El desglose de envío, impuestos y descuentos está en tu '
-                    'correo de confirmación de Shopify. Aquí mostramos el '
-                    'total registrado, sin estimaciones.',
-                    style: boutiqueText(
-                      size: 12,
-                      color: palette.inkMuted,
-                    ),
-                  ),
-                  AutoOrderRewardsLine(
-                    shopifyOrderId: order.shopifyOrderId,
-                    reader: rewardsReader,
-                    controller: rewardsController,
-                  ),
-                ],
-              ),
-              const SizedBox(height: BoutiqueSpace.lg),
-              ECard(
-                children: [
-                  const ESectionTitle(title: 'Piezas'),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  Text(
-                    'El detalle por pieza aún no está disponible en esta '
-                    'versión de la app. Consulta las piezas en tu correo de '
-                    'confirmación de Shopify.',
-                    style: boutiqueText(
-                      size: 13,
-                      color: palette.inkMuted,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: BoutiqueSpace.lg),
-              ECard(
-                children: [
-                  const ESectionTitle(title: 'Seguimiento'),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  ..._timeline(context),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  Text(
-                    'Sin número de guía no mostramos fechas estimadas. '
-                    'Envíos: contenido pendiente de aprobación. '
-                    'Devoluciones y garantía: contenido pendiente de aprobación.',
-                    style: boutiqueText(
-                      size: 12,
-                      color: palette.inkMuted,
-                    ),
-                  ),
-                ],
-              ),
-              if (order.source == 'whatsapp_apartado') ...[
-                const SizedBox(height: BoutiqueSpace.lg),
-                ENotice(
-                  message: 'Este apartado se sigue por WhatsApp con tu código '
-                      '${order.attributionCode ?? label}.',
-                  actionLabel: 'Escribir por WhatsApp',
-                  onAction: () => _open(
-                    context,
-                    conciergeWhatsAppUri(
-                      productTitle:
-                          'mi apartado ${order.attributionCode ?? label}',
-                    ),
-                  ),
-                  icon: Icons.chat_outlined,
                 ),
-              ] else ...[
-                const SizedBox(height: BoutiqueSpace.lg),
-                ENotice(
-                  message: '¿Dudas con este pedido? Escríbenos por WhatsApp '
-                      'con tu número $label a la mano.',
-                  actionLabel: 'Escribir por WhatsApp',
-                  onAction: () => _open(
-                    context,
-                    conciergeWhatsAppUri(
-                      productTitle: 'mi pedido $label',
+                if (order.source == 'whatsapp_apartado') ...[
+                  const SizedBox(height: BoutiqueSpace.lg),
+                  ENotice(
+                    message:
+                        'Este apartado se sigue por WhatsApp con tu código '
+                        '${order.attributionCode ?? label}.',
+                    actionLabel: 'Escribir por WhatsApp',
+                    onAction: () => _open(
+                      context,
+                      conciergeWhatsAppUri(
+                        productTitle:
+                            'mi apartado ${order.attributionCode ?? label}',
+                      ),
                     ),
+                    icon: Icons.chat_outlined,
                   ),
-                  icon: Icons.chat_outlined,
-                ),
+                ] else ...[
+                  const SizedBox(height: BoutiqueSpace.lg),
+                  ENotice(
+                    message: '¿Dudas con este pedido? Escríbenos por WhatsApp '
+                        'con tu número $label a la mano.',
+                    actionLabel: 'Escribir por WhatsApp',
+                    onAction: () => _open(
+                      context,
+                      conciergeWhatsAppUri(
+                        productTitle: 'mi pedido $label',
+                      ),
+                    ),
+                    icon: Icons.chat_outlined,
+                  ),
+                ],
               ],
-            ],
+            ),
           ),
         ),
       ),

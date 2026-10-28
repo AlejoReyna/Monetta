@@ -16,7 +16,7 @@ import '../../app/motion.dart';
 import '../../app/monetta_tokens.g.dart';
 import '../boutique/client_guide_scaffold.dart';
 import '../boutique/client_guide_components.dart';
-import 'purchase_notices.dart';
+import '../boutique/guide_check.dart';
 import '../boutique/boutique_tokens.dart';
 
 /// Política comercial de entrega. Se conserva el parámetro [now] para
@@ -60,6 +60,7 @@ class OrderConfirmationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final label = orderLabel?.trim();
+    final hasLabel = label != null && label.isNotEmpty;
 
     return ClientGuideScaffold(
       current: ClientGuideDestination.bag,
@@ -76,18 +77,9 @@ class OrderConfirmationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: MonettaTokens.tapTarget * 2,
-                    height: MonettaTokens.tapTarget * 2,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: palette.gold, width: 1),
-                    ),
-                    child: Icon(
-                      Icons.check,
-                      size: MonettaTokens.tapTarget,
-                      color: palette.goldText,
-                    ),
+                  const GuideSuccessMark(
+                    key: ValueKey('purchase-success-mark'),
+                    size: 96,
                   ),
                   SizedBox(height: MonettaTokens.space[4]),
                   Text(
@@ -96,12 +88,41 @@ class OrderConfirmationScreen extends StatelessWidget {
                     style: clientGuideStyle(context, MonettaTokens.screenTitle),
                   ),
                   SizedBox(height: MonettaTokens.space[1]),
-                  Text(
-                    'Tu pedido ha sido confirmado.',
+                  // With evidence the real number sits inside the sentence;
+                  // without it the sentence stays as it was.
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: hasLabel
+                              ? 'Tu pedido '
+                              : 'Tu pedido ha sido confirmado.',
+                        ),
+                        if (hasLabel) ...[
+                          TextSpan(
+                            text: label,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          const TextSpan(text: ' ha sido confirmado.'),
+                        ],
+                      ],
+                    ),
+                    key: const ValueKey('purchase-confirmed-sentence'),
                     textAlign: TextAlign.center,
                     style: clientGuideStyle(
                       context,
                       MonettaTokens.body,
+                      color: palette.inkMuted,
+                    ),
+                  ),
+                  SizedBox(height: MonettaTokens.space[1]),
+                  Text(
+                    'Te llegará un correo con los detalles de tu compra.',
+                    key: const ValueKey('purchase-email-sentence'),
+                    textAlign: TextAlign.center,
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.cardLabel,
                       color: palette.inkMuted,
                     ),
                   ),
@@ -137,13 +158,8 @@ class OrderConfirmationScreen extends StatelessWidget {
                       ],
                     ),
                   ),
-                  SizedBox(height: MonettaTokens.space[4]),
-                  if (label != null && label.isNotEmpty)
-                    Text(
-                      label,
-                      style: clientGuideStyle(context, MonettaTokens.price),
-                    )
-                  else ...[
+                  if (!hasLabel) ...[
+                    SizedBox(height: MonettaTokens.space[4]),
                     Text(
                       'Confirmado en Shopify',
                       style: clientGuideStyle(context, MonettaTokens.price),
@@ -151,20 +167,6 @@ class OrderConfirmationScreen extends StatelessWidget {
                     SizedBox(height: MonettaTokens.space[0]),
                     Text(
                       'El número aparecerá en Mis pedidos en cuanto termine de sincronizarse.',
-                      textAlign: TextAlign.center,
-                      style: clientGuideStyle(
-                        context,
-                        MonettaTokens.cardLabel,
-                        color: palette.inkMuted,
-                      ),
-                    ),
-                  ],
-                  SizedBox(height: MonettaTokens.space[4]),
-                  const PurchasePolicyNotice(),
-                  if (email != null && email!.trim().isNotEmpty) ...[
-                    SizedBox(height: MonettaTokens.space[2]),
-                    Text(
-                      'Te llegará un correo con los detalles de tu compra.',
                       textAlign: TextAlign.center,
                       style: clientGuideStyle(
                         context,

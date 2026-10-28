@@ -1,0 +1,89 @@
+The following plugins do not support Swift Package Manager for ios:
+  - flutter_secure_storage
+This will become an error in a future version of Flutter. Please contact the plugin maintainers to request Swift Package Manager adoption.
+Running Xcode build...                                          
+Xcode build done.                                           130.0s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:8189/EzySvVzkuM4=/
+VMServiceFlutterDriver: Isolate found with number: 5779629312707399
+VMServiceFlutterDriver: Isolate 5779629312707399 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: offline shopping continues through actual Duo runtime poses
+VMServiceFlutterDriver: Connected to Flutter application.
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with key [<'welcome-start-button'>]: [
+flutter:   ClientGuideButton-[<'welcome-start-button'>](dependencies: [InheritedCupertinoTheme, MediaQuery, _InheritedTheme, _LocalizationsScope-[GlobalKey#c949a]]),
+flutter: ]" derived an Offset (Offset(191.0, 582.0)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: The finder corresponds to this RenderBox: RenderSemanticsAnnotations#4cec9 relayoutBoundary=up2
+flutter: The hit test result at that offset is: HitTestResult(RenderStack#5ce94@Offset(191.0, 582.0), _RenderColoredBox#01fd6@Offset(191.0, 582.0), RenderAnnotatedRegion<SystemUiOverlayStyle>#be634@Offset(191.0, 582.0), RenderSemanticsAnnotations#2eb25@Offset(191.0, 582.0), RenderSemanticsAnnotations#b97f5@Offset(191.0, 582.0), RenderSemanticsAnnotations#e23fe@Offset(191.0, 582.0), RenderTapRegionSurface#8c577@Offset(191.0, 582.0), RenderSemanticsAnnotations#0555e@Offset(191.0, 582.0), RenderSemanticsAnnotations#27657@Offset(191.0, 582.0), RenderSemanticsAnnotations#a5db0@Offset(191.0, 582.0), HitTestEntry<HitTestTarget>#e81cd(_ReusableRenderView#198a0), HitTestEntry<HitTestTarget>#1c5bb(<IntegrationTestWidgetsFlutterBinding>))
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:31:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following assertion was thrown running a test:
+flutter: The finder "Found 0 widgets with key [<'onboarding-skip'>]: []" (used in a call to "tap()") could
+flutter: not find any matching widgets.
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2095:7)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:33:22)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: The test description was:
+flutter:   offline shopping continues through actual Duo runtime poses
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 00:11 +0: offline shopping continues through actual Duo runtime poses [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: offline shopping continues through actual Duo runtime poses
+flutter:
+flutter: 00:11 +0 -1: (tearDownAll)
+flutter: 00:11 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: offline shopping continues through actual Duo runtime poses
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following assertion was thrown running a test:
+The finder "Found 0 widgets with key [<'onboarding-skip'>]: []"
+(used in a call to "tap()") could not find any matching widgets.
+
+When the exception was thrown, this was the stack:
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2095:7)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+#3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:33:22)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+<asynchronous suspension>
+
+The test description was:
+  offline shopping continues through actual Duo runtime poses
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+

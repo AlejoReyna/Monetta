@@ -6,6 +6,10 @@
 /// scoping is the only thing this screen adds.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
+import 'browse_detail_layout.dart';
+import '../../platform/system_layout_context.dart';
+import '../navigation/storefront_pane_scope.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -20,9 +24,12 @@ import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/guide_art.dart';
 import '../checkout/checkout_screen.dart';
+import '../navigation/guide_chrome.dart';
+import '../navigation/guide_drawer.dart';
 import '../navigation/monetta_bottom_navigation.dart';
-import 'brand_screen.dart';
+import 'search_screen.dart';
 import 'catalog_browse_screen.dart';
 import 'categories_screen.dart';
 import 'catalog_controls.dart';
@@ -67,6 +74,7 @@ class _CollectionFilters {
     this.inStockOnly = false,
     this.brand,
     this.silhouette,
+    this.category,
   });
 
   final _Sort sort;
@@ -74,11 +82,15 @@ class _CollectionFilters {
   final String? brand;
   final String? silhouette;
 
+  /// Category facet chosen with the pills under the banner. Null = all.
+  final String? category;
+
   _CollectionFilters copyWith({
     _Sort? sort,
     bool? inStockOnly,
     Object? brand = _unchanged,
     Object? silhouette = _unchanged,
+    Object? category = _unchanged,
   }) {
     return _CollectionFilters(
       sort: sort ?? this.sort,
@@ -87,6 +99,8 @@ class _CollectionFilters {
       silhouette: identical(silhouette, _unchanged)
           ? this.silhouette
           : silhouette as String?,
+      category:
+          identical(category, _unchanged) ? this.category : category as String?,
     );
   }
 
@@ -95,7 +109,8 @@ class _CollectionFilters {
   int activeCountComparedTo(_CollectionFilters baseline) =>
       (inStockOnly ? 1 : 0) +
       (brand != baseline.brand ? 1 : 0) +
-      (silhouette != baseline.silhouette ? 1 : 0);
+      (silhouette != baseline.silhouette ? 1 : 0) +
+      (category != baseline.category ? 1 : 0);
 }
 
 const Object _unchanged = Object();
@@ -151,37 +166,37 @@ class CollectionScreen extends StatefulWidget {
 class _CollectionScreenState extends State<CollectionScreen> {
   late _CollectionFilters _filters;
   final ScrollController _scroll = ScrollController();
-  bool _titleInBar = false;
 
   bool get _hasHero =>
       widget.heroImageUrl != null || widget.heroImageAsset != null;
 
+  /// The owner's guide photograph for this destination. A caller that passes
+  /// its own hero keeps it; so does a destination with no photograph, which
+  /// falls back to the studio still.
+  GuidePhoto? get _guidePhoto => _hasHero
+      ? null
+      : guideCollectionPhoto(
+          brand: widget.filter.brand,
+          silhouette: widget.filter.silhouette,
+          category: widget.filter.category,
+        );
+
   _CollectionFilters get _initialFilters => _CollectionFilters(
         brand: widget.filter.brand,
         silhouette: widget.filter.silhouette,
+        category: widget.filter.category,
       );
 
   @override
   void initState() {
     super.initState();
     _filters = _initialFilters;
-    _scroll.addListener(_onScroll);
   }
 
   @override
   void dispose() {
-    _scroll
-      ..removeListener(_onScroll)
-      ..dispose();
+    _scroll.dispose();
     super.dispose();
-  }
-
-  /// The destination's name belongs to the header. It only moves into the bar
-  /// once the header has scrolled away, so the title is never printed twice.
-  void _onScroll() {
-    if (!_scroll.hasClients) return;
-    final collapsed = _scroll.offset > 120;
-    if (collapsed != _titleInBar) setState(() => _titleInBar = collapsed);
   }
 
   void _scrollToGrid() {
@@ -203,7 +218,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   /// Everything the destination contains, before the sheet's own choices.
-  List<Product> _scopedItems() {
+  List<Product> _scopedItems(String? category) {
     final store = StoreScope.of(context);
     final query = normalizeSearchText(widget.filter.query ?? '');
     final queryTerms = <String>[
@@ -212,13 +227,14 @@ class _CollectionScreenState extends State<CollectionScreen> {
     ];
     return store.products.where((product) {
       final facets = store.facetsFor(product.id);
-      if (widget.filter.category != null &&
-          facets?.category?.value != widget.filter.category) {
+      if (category != null && facets?.category?.value != category) {
         return false;
       }
       if (widget.filter.collectionHandle != null &&
           product.collectionHandles.isNotEmpty &&
-          !product.collectionHandles.contains(widget.filter.collectionHandle)) {
+          !product.collectionHandles.contains(
+            widget.filter.collectionHandle,
+          )) {
         return false;
       }
       // Same matcher the search screen counts with, so "Ver todo" lands on
@@ -238,7 +254,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   List<Product> _items([_CollectionFilters? filters]) {
     final selection = filters ?? _filters;
     final store = StoreScope.of(context);
-    final items = _scopedItems().where((product) {
+    final items = _scopedItems(selection.category).where((product) {
       final facets = store.facetsFor(product.id);
       if (selection.brand != null && facets?.brand?.value != selection.brand) {
         return false;
@@ -283,12 +299,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
       case MonettaBottomDestination.bag:
         unawaited(openBag(context));
       case MonettaBottomDestination.account:
-        unawaited(
-          openAccount(
-            context,
-            controller: AccountScope.of(context),
-          ),
-        );
+        unawaited(openAccount(context, controller: AccountScope.of(context)));
     }
   }
 
@@ -302,35 +313,33 @@ class _CollectionScreenState extends State<CollectionScreen> {
         if (store.facetsFor(product.id)?.brand?.value case final value?) value,
     }.toList();
     brands.sort(
-      (a, b) => brandLabel(a).toLowerCase().compareTo(
-            brandLabel(b).toLowerCase(),
-          ),
+      (a, b) =>
+          brandLabel(a).toLowerCase().compareTo(brandLabel(b).toLowerCase()),
     );
     return brands;
   }
 
-  List<String> _silhouettesFor(
-    Iterable<Product> products,
-    CatalogStore store,
-  ) {
+  List<String> _silhouettesFor(Iterable<Product> products, CatalogStore store) {
     final silhouettes = <String>{
       for (final product in products)
         if (store.facetsFor(product.id)?.silhouette?.value case final value?)
           value,
     }.toList();
     silhouettes.sort(
-      (a, b) => silhouetteLabel(a).toLowerCase().compareTo(
-            silhouetteLabel(b).toLowerCase(),
-          ),
+      (a, b) => silhouetteLabel(
+        a,
+      ).toLowerCase().compareTo(silhouetteLabel(b).toLowerCase()),
     );
     return silhouettes;
   }
 
   Future<void> _openFilterSheet() async {
     final store = StoreScope.of(context);
-    final scopedItems = _scopedItems();
+    final scopedItems = _scopedItems(_filters.category);
     final result = await showModalBottomSheet<_CollectionFilters>(
       context: context,
+      anchorPoint: presentationAnchor(context),
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: context.monettaColors.scrim,
@@ -356,43 +365,44 @@ class _CollectionScreenState extends State<CollectionScreen> {
     final items = _items();
     final activeCount = _filters.activeCountComparedTo(_initialFilters);
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
+      onSearch: () => unawaited(openSearch(context)),
       backgroundColor: palette.canvas,
+      drawer: guideDrawer(context),
       body: CustomScrollView(
         controller: _scroll,
         slivers: [
-          _CollectionAppBar(
-            title: widget.title,
-            showTitle: _titleInBar,
-            onPhoto: _hasHero,
-            activeCount: activeCount,
-            onFilters: _openFilterSheet,
-            heroImageUrl: widget.heroImageUrl,
-            heroImageAsset: widget.heroImageAsset,
-            description: widget.description,
-            ctaLabel: widget.ctaLabel ?? 'Ver la colección',
-            onCta: _scrollToGrid,
-          ),
-          if (!_hasHero)
-            SliverToBoxAdapter(
-              child: CatalogEditorialBanner(
-                title: widget.title,
-                description: widget.description,
-              ),
+          if (SystemLayoutScope.of(context).barEdge == SystemBarEdge.none ||
+              !StorefrontPaneScope.ownsNavigationOf(context))
+            _CollectionAppBar(onSearch: () => unawaited(openSearch(context))),
+          SliverToBoxAdapter(
+            child: CatalogEditorialBanner(
+              title: widget.title,
+              description: widget.description,
+              imageUrl: widget.heroImageUrl,
+              guidePhoto: _guidePhoto,
+              imageAsset: _hasHero
+                  ? widget.heroImageAsset
+                  : (widget.heroImageAsset ?? kGuideStudioBanner),
+              actionLabel: widget.ctaLabel ?? 'Ver la colección',
+              onAction: _scrollToGrid,
             ),
+          ),
           SliverToBoxAdapter(
             child: _CollectionToolbar(
               count: items.length,
               activeCount: activeCount,
+              category: _filters.category,
               onClear: activeCount == 0 ? null : _clearFilters,
-              // Only when the destination really is one brand; a mixed
-              // collection has no single marca to open.
-              brandSlug: _filters.brand,
-              onOpenBrand: _filters.brand == null
-                  ? null
-                  : () => unawaited(
-                        openBrand(context, brandSlug: _filters.brand!),
-                      ),
+              onFilters: _openFilterSheet,
+              onCategory: (value) => setState(
+                () => _filters = _filters.copyWith(
+                  category: _filters.category == value ? null : value,
+                  // A silhouette only exists inside bags.
+                  silhouette: value == 'bolsa' ? _filters.silhouette : null,
+                ),
+              ),
             ),
           ),
           if (items.isEmpty)
@@ -434,189 +444,259 @@ class _ProductSliverGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2;
-    return SliverGrid(
-      gridDelegate: productGridDelegate(context, availableWidth: width),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final product = products[index];
-          return ProductCard(
-            key: ValueKey('product-card-${product.id}'),
-            product: product,
-            onQuickView: () => showProductQuickView(context, product),
-          );
-        },
-        childCount: products.length,
+    return SliverLayoutBuilder(
+      builder: (context, constraints) => SliverGrid(
+        gridDelegate: productGridDelegate(
+          context,
+          availableWidth: constraints.crossAxisExtent,
+          footerExtent: kTileFooterExtent,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final product = products[index];
+            return ProductCard(
+              key: ValueKey('product-card-${product.id}'),
+              product: product,
+              showViewProduct: true,
+              onQuickView: () => showProductQuickView(context, product),
+            );
+          },
+          childCount: products.length,
+        ),
       ),
     );
   }
 }
 
 class _CollectionAppBar extends StatelessWidget {
-  const _CollectionAppBar({
-    required this.title,
-    required this.showTitle,
-    required this.onPhoto,
-    required this.activeCount,
-    required this.onFilters,
-    required this.heroImageUrl,
-    required this.heroImageAsset,
-    required this.description,
-    required this.ctaLabel,
-    required this.onCta,
-  });
+  const _CollectionAppBar({required this.onSearch});
 
-  final String title;
-  final bool showTitle;
-  final bool onPhoto;
-  final int activeCount;
-  final VoidCallback onFilters;
-  final String? heroImageUrl;
-  final String? heroImageAsset;
-  final String? description;
-  final String ctaLabel;
-  final VoidCallback onCta;
+  final VoidCallback onSearch;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final foreground = onPhoto && !showTitle ? palette.onDark : palette.ink;
-    // The banner and the bar are sized from one number so the photograph can
-    // never be cropped by a taller bar than it was laid out for.
-    final bannerHeight = onPhoto ? catalogBannerHeight(context) : null;
-
+    final bar = guideAppBar(context, onSearch: onSearch);
     return SliverAppBar(
       pinned: true,
+      automaticallyImplyLeading: false,
       elevation: 0,
       scrolledUnderElevation: 0,
-      backgroundColor: onPhoto && !showTitle ? Colors.transparent : palette.bar,
+      backgroundColor: palette.bar,
       surfaceTintColor: Colors.transparent,
-      foregroundColor: foreground,
-      expandedHeight: bannerHeight,
-      flexibleSpace: bannerHeight == null
-          ? null
-          : FlexibleSpaceBar(
-              collapseMode: CollapseMode.pin,
-              background: CatalogEditorialBanner(
-                title: title,
-                description: description,
-                imageUrl: heroImageUrl,
-                imageAsset: heroImageAsset,
-                actionLabel: ctaLabel,
-                onAction: onCta,
-                height: bannerHeight,
-              ),
-            ),
-      title: showTitle
-          ? Text(
-              title,
-              style: boutiqueHeaderName(color: palette.ink),
-            )
-          : null,
-      actions: [
-        _CollectionFilterIconButton(
-          activeCount: activeCount,
-          onPressed: onFilters,
-          color: foreground,
-        ),
-        const SizedBox(width: BoutiqueSpace.xs),
-      ],
+      foregroundColor: palette.ink,
+      centerTitle: true,
+      titleSpacing: 0,
+      leadingWidth: 56,
+      leading: bar.leading,
+      title: bar.title,
+      actions: bar.actions,
     );
   }
 }
 
-/// Count, brand link and the way back to the unfiltered destination. It takes
-/// no space at all when there is nothing to show: the filter button in the
-/// bar is the only entry to ordering and filtering.
+/// Categories of the guide's pill row, in its order. «Más» is not a category:
+/// it opens the filter sheet.
+const List<(String, String)> _kCollectionPills = <(String, String)>[
+  ('bolsa', 'Bolsas'),
+  ('cartera', 'Carteras'),
+  ('accesorio', 'Accesorios'),
+  ('reloj', 'Relojes'),
+];
+
+/// The row under the banner: round filter button, category pills, then the
+/// product count and the way into ordering. Both controls open the existing
+/// filter sheet; nothing here changes how a piece is filtered or sorted.
 class _CollectionToolbar extends StatelessWidget {
   const _CollectionToolbar({
     required this.count,
     required this.activeCount,
+    required this.category,
     required this.onClear,
-    required this.brandSlug,
-    required this.onOpenBrand,
+    required this.onFilters,
+    required this.onCategory,
   });
 
   final int count;
   final int activeCount;
+  final String? category;
   final VoidCallback? onClear;
-  final String? brandSlug;
-  final VoidCallback? onOpenBrand;
+  final VoidCallback onFilters;
+  final ValueChanged<String> onCategory;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final showCount = CatalogResultCount.visibleFor(context);
-    final brand = brandSlug;
-    final showBrand = brand != null && onOpenBrand != null;
-    if (!showCount && !showBrand && onClear == null) {
-      return const SizedBox.shrink();
-    }
+    final countLabel = '$count ${count == 1 ? 'producto' : 'productos'}';
     return Padding(
       padding: const EdgeInsets.fromLTRB(
         BoutiqueSpace.gutter,
-        BoutiqueSpace.lg,
+        BoutiqueSpace.md,
         BoutiqueSpace.gutter,
         0,
       ),
-      // Wrap instead of Row+Spacer: on a narrow phone the count, the brand
-      // link and the clear action can exceed 350pt together. Wrapping flows
-      // the actions below instead of overflowing the row.
-      child: Wrap(
-        spacing: BoutiqueSpace.md,
-        runSpacing: BoutiqueSpace.sm,
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (showCount || showBrand)
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                if (showCount) CatalogResultCount(count: count),
-                if (showCount && showBrand)
-                  const SizedBox(width: BoutiqueSpace.md),
-                if (showBrand)
+          SizedBox(
+            height: BoutiqueSpace.tapTarget,
+            child: SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: [
+                  _CollectionFilterIconButton(
+                    activeCount: activeCount,
+                    onPressed: onFilters,
+                  ),
+                  for (final (value, label) in _kCollectionPills)
+                    _CategoryPill(
+                      key: Key('collection-pill-$value'),
+                      label: label,
+                      selected: category == value,
+                      onTap: () => onCategory(value),
+                    ),
+                  _CategoryPill(
+                    key: const Key('collection-pill-more'),
+                    label: 'Más',
+                    selected: false,
+                    onTap: onFilters,
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(height: BoutiqueSpace.sm),
+          // Wrap, not Row: the count, the clear action and «Ordenar por» can
+          // exceed the width on a narrow phone or with large text.
+          Wrap(
+            alignment: WrapAlignment.spaceBetween,
+            crossAxisAlignment: WrapCrossAlignment.center,
+            children: [
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
                   Flexible(
-                    child: TextButton(
-                      key: const Key('collection-open-brand'),
-                      onPressed: onOpenBrand,
-                      style: TextButton.styleFrom(
-                        minimumSize: const Size(0, BoutiqueSpace.tapTarget),
-                        padding: EdgeInsets.zero,
-                        foregroundColor: palette.goldText,
-                      ),
-                      child: Text(
-                        'Ver ${brandLabel(brand)}',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: boutiqueText(
-                          size: 13,
-                          weight: FontWeight.w600,
-                          color: palette.goldText,
-                        ),
+                    child: Text(
+                      countLabel,
+                      key: const Key('collection-count'),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: boutiqueText(
+                        size: 14,
+                        color: palette.inkMuted,
+                        height: 1.2,
                       ),
                     ),
                   ),
-              ],
-            ),
-          if (onClear != null)
-            TextButton(
-              key: const Key('collection-clear-inline'),
-              onPressed: onClear,
-              style: TextButton.styleFrom(
-                minimumSize: const Size(0, BoutiqueSpace.tapTarget),
-                foregroundColor: palette.inkMuted,
+                  if (onClear != null) ...[
+                    const SizedBox(width: BoutiqueSpace.sm),
+                    TextButton(
+                      key: const Key('collection-clear-inline'),
+                      onPressed: onClear,
+                      style: TextButton.styleFrom(
+                        minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+                        foregroundColor: palette.inkMuted,
+                      ),
+                      child: Text(
+                        'Limpiar ($activeCount)',
+                        style: boutiqueText(
+                          size: 13,
+                          weight: FontWeight.w600,
+                          color: palette.inkMuted,
+                        ),
+                      ),
+                    ),
+                  ],
+                ],
               ),
-              child: Text(
-                'Limpiar ($activeCount)',
-                style: boutiqueText(
-                  size: 13,
-                  weight: FontWeight.w600,
-                  color: palette.inkMuted,
+              TextButton(
+                key: const Key('collection-sort-button'),
+                onPressed: onFilters,
+                style: TextButton.styleFrom(
+                  minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+                  foregroundColor: palette.ink,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Flexible(
+                      child: Text(
+                        'Ordenar por',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: boutiqueText(size: 14, color: palette.ink),
+                      ),
+                    ),
+                    const SizedBox(width: BoutiqueSpace.xs),
+                    Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      size: 20,
+                      color: palette.ink,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryPill extends StatelessWidget {
+  const _CategoryPill({
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    super.key,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Padding(
+      padding: const EdgeInsets.only(left: BoutiqueSpace.sm),
+      child: Center(
+        child: Semantics(
+          button: true,
+          selected: selected,
+          label: label,
+          excludeSemantics: true,
+          onTap: onTap,
+          child: Material(
+            color: selected ? palette.action : palette.surfaceDeep,
+            shape: const StadiumBorder(),
+            child: InkWell(
+              customBorder: const StadiumBorder(),
+              onTap: onTap,
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(minHeight: 40),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: BoutiqueSpace.lg,
+                  ),
+                  child: Center(
+                    widthFactor: 1,
+                    child: Text(
+                      label,
+                      maxLines: 1,
+                      style: boutiqueText(
+                        size: 14,
+                        weight: selected ? FontWeight.w600 : FontWeight.w400,
+                        color: selected ? palette.onAction : palette.ink,
+                      ),
+                    ),
+                  ),
                 ),
               ),
             ),
-        ],
+          ),
+        ),
       ),
     );
   }
@@ -651,49 +731,69 @@ class _CollectionFilterIconButton extends StatelessWidget {
   const _CollectionFilterIconButton({
     required this.activeCount,
     required this.onPressed,
-    required this.color,
   });
 
   final int activeCount;
   final VoidCallback onPressed;
-  final Color color;
 
   @override
   Widget build(BuildContext context) {
-    return Stack(
-      clipBehavior: Clip.none,
-      children: [
-        IconButton(
-          key: const Key('collection-filter-button'),
-          tooltip: 'Filtrar y ordenar',
-          onPressed: onPressed,
-          icon: Icon(Icons.tune_rounded, size: 24, color: color),
-        ),
-        if (activeCount > 0)
-          Positioned(
-            right: 3,
-            top: 5,
-            child: IgnorePointer(
-              child: Container(
-                key: const Key('collection-filter-count'),
-                constraints: const BoxConstraints(minWidth: 17, minHeight: 17),
-                alignment: Alignment.center,
-                padding: const EdgeInsets.symmetric(horizontal: 4),
-                decoration: BoxDecoration(
-                  color: context.boutique.ink,
-                  shape: BoxShape.circle,
-                ),
-                child: Text(
-                  '$activeCount',
-                  style: boutiqueEyebrow(
-                    size: 9,
-                    color: context.boutique.canvas,
+    final palette = context.boutique;
+    return Center(
+      child: Stack(
+        clipBehavior: Clip.none,
+        children: [
+          Semantics(
+            button: true,
+            label: 'Filtrar y ordenar',
+            excludeSemantics: true,
+            onTap: onPressed,
+            child: Material(
+              color: palette.surfaceDeep,
+              shape: const CircleBorder(),
+              child: InkWell(
+                key: const Key('collection-filter-button'),
+                customBorder: const CircleBorder(),
+                onTap: onPressed,
+                child: Tooltip(
+                  message: 'Filtrar y ordenar',
+                  child: SizedBox(
+                    width: 44,
+                    height: 44,
+                    child: Center(
+                      child: AdjustmentsIcon(size: 22, color: palette.ink),
+                    ),
                   ),
                 ),
               ),
             ),
           ),
-      ],
+          if (activeCount > 0)
+            Positioned(
+              right: -2,
+              top: -2,
+              child: IgnorePointer(
+                child: Container(
+                  key: const Key('collection-filter-count'),
+                  constraints: const BoxConstraints(
+                    minWidth: 17,
+                    minHeight: 17,
+                  ),
+                  alignment: Alignment.center,
+                  padding: const EdgeInsets.symmetric(horizontal: 4),
+                  decoration: BoxDecoration(
+                    color: palette.ink,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Text(
+                    '$activeCount',
+                    style: boutiqueEyebrow(size: 9, color: palette.canvas),
+                  ),
+                ),
+              ),
+            ),
+        ],
+      ),
     );
   }
 }
@@ -808,8 +908,9 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                     children: [
                       _CollectionFilterAccordion(
                         section: _CollectionFilterSection.sort,
-                        expanded:
-                            _expanded.contains(_CollectionFilterSection.sort),
+                        expanded: _expanded.contains(
+                          _CollectionFilterSection.sort,
+                        ),
                         onTap: () =>
                             _toggleExpanded(_CollectionFilterSection.sort),
                         child: Column(
@@ -834,8 +935,9 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                       if (widget.silhouettes.isNotEmpty)
                         _CollectionFilterAccordion(
                           section: _CollectionFilterSection.type,
-                          expanded:
-                              _expanded.contains(_CollectionFilterSection.type),
+                          expanded: _expanded.contains(
+                            _CollectionFilterSection.type,
+                          ),
                           onTap: () =>
                               _toggleExpanded(_CollectionFilterSection.type),
                           child: Column(
@@ -862,8 +964,9 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                       if (widget.brands.isNotEmpty)
                         _CollectionFilterAccordion(
                           section: _CollectionFilterSection.brand,
-                          expanded: _expanded
-                              .contains(_CollectionFilterSection.brand),
+                          expanded: _expanded.contains(
+                            _CollectionFilterSection.brand,
+                          ),
                           onTap: () =>
                               _toggleExpanded(_CollectionFilterSection.brand),
                           child: Column(
@@ -981,9 +1084,7 @@ class _CollectionFilterAccordion extends StatelessWidget {
     final palette = context.boutique;
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: palette.hairline, width: 0.5),
-        ),
+        border: Border(bottom: BorderSide(color: palette.hairline, width: 0.5)),
       ),
       child: Column(
         children: [
@@ -1056,8 +1157,8 @@ class _CollectionFilterChoiceRow extends StatelessWidget {
       selected: selected,
       child: InkWell(
         onTap: onTap,
-        child: SizedBox(
-          height: BoutiqueSpace.tapTarget,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BoutiqueSpace.tapTarget),
           child: Row(
             children: [
               _CollectionSelectionMark(selected: selected, radio: radio),
@@ -1081,10 +1182,7 @@ class _CollectionFilterChoiceRow extends StatelessWidget {
 }
 
 class _CollectionSelectionMark extends StatelessWidget {
-  const _CollectionSelectionMark({
-    required this.selected,
-    required this.radio,
-  });
+  const _CollectionSelectionMark({required this.selected, required this.radio});
 
   final bool selected;
   final bool radio;
@@ -1115,11 +1213,7 @@ class _CollectionSelectionMark extends StatelessWidget {
                   ),
                   child: const SizedBox(width: 9, height: 9),
                 )
-              : Icon(
-                  Icons.check_rounded,
-                  size: 17,
-                  color: palette.canvas,
-                )
+              : Icon(Icons.check_rounded, size: 17, color: palette.canvas)
           : null,
     );
   }
@@ -1127,9 +1221,11 @@ class _CollectionSelectionMark extends StatelessWidget {
 
 void openCollection(BuildContext context, CollectionScreen screen) {
   final store = StoreScope.of(context);
-  Navigator.of(context).push(
+  Navigator.of(
+    context,
+  ).push(
     monettaFadeRoute(
-      StoreScope(notifier: store, child: screen),
+      StoreScope(notifier: store, child: BrowseDetailLayout(child: screen)),
     ),
   );
 }

@@ -1,0 +1,11 @@
+Waiting for another flutter command to release the startup lock...
+00:00 +0: loading /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_geometry_smoke_test.dart
+The following plugins do not support Swift Package Manager for ios:
+  - flutter_secure_storage
+This will become an error in a future version of Flutter. Please contact the plugin maintainers to request Swift Package Manager adoption.
+Running Xcode build...                                          
+Xcode build done.                                           168.2s
+00:00 +0: Duo host delivers coherent view-relative geometry
+{"size":[466.0,678.0],"safeInsets":[0.0,0.0,84.0,34.0],"barEdge":"right","divisions":[],"occlusions":[{"frame":[399.6666666666667,29.333333333333332,37.0,37.0],"active":true},{"frame":[382.0,0.0,84.0,170.0],"active":true}]}
+00:11 +1: (tearDownAll)
+00:14 +1: All tests passed!

@@ -1,0 +1,4 @@
+00:00 +0: loading /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart
+00:00 +0: active regions exclude controls; inactive division does not reserve space
+00:00 +1: native listener delivers current snapshots and cancels on disposal (variant: TargetPlatform.iOS)
+00:00 +2: All tests passed!

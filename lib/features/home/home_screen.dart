@@ -1,6 +1,7 @@
 /// Monetta's shopper storefront. Desire first, then a way to buy.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
 import 'dart:async';
 
 import 'package:collection/collection.dart' show ListEquality;
@@ -13,8 +14,9 @@ import '../../app/card_lift.dart';
 import '../../app/catalog_store.dart';
 import '../../app/home_content_controller.dart';
 import '../../app/motion.dart';
-import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_sections.dart';
+import '../boutique/guide_art.dart';
+import '../boutique/guide_brand_tile.dart';
 import '../wholesale/wholesale_screen.dart';
 import '../contact/contact_screen.dart';
 import '../../app/mixed_feed.dart';
@@ -50,24 +52,24 @@ import 'home_boutique_sections.dart';
 
 const int _kNewestCount = 8;
 
-/// Search field height plus the padding around it — used only to decide when
-/// the banner film has scrolled out of view.
-const double _kSearchFieldBlockHeight =
-    BoutiqueSpace.control + BoutiqueSpace.md + BoutiqueSpace.lg;
-
 /// The redesign's opening rhythm: what is new, then how to shop it, then the
 /// editorial tail. Applied only when the storefront still carries the bundled
 /// default order — see `_resolveSectionOrder`.
 const List<HomeSectionId> _kBoutiqueSectionOrder = <HomeSectionId>[
-  HomeSectionId.newProducts,
   HomeSectionId.bagTypes,
-  HomeSectionId.collections,
-  HomeSectionId.todaysPicks,
   HomeSectionId.brands,
+  HomeSectionId.newProducts,
+  HomeSectionId.collections,
   HomeSectionId.about,
   HomeSectionId.social,
   HomeSectionId.testimonials,
 ];
+
+const Set<HomeSectionId> _kGuideOpeningSections = <HomeSectionId>{
+  HomeSectionId.bagTypes,
+  HomeSectionId.brands,
+  HomeSectionId.newProducts,
+};
 
 Duration _homeSectionDelay(int index) =>
     Duration(milliseconds: (index * 70).clamp(0, 350));
@@ -81,9 +83,6 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   final _scroll = ScrollController();
-  // Keep scroll-driven state out of the (image-heavy) home body. The app bar
-  // and hero playback each listen to only the value they need.
-  final ValueNotifier<double> _collapse = ValueNotifier<double>(0);
   final ValueNotifier<bool> _heroPlaying = ValueNotifier<bool>(true);
   Timer? _featuredRefreshTimer;
   double _heroHeight = double.infinity;
@@ -102,9 +101,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       unawaited(FeaturedCatalogScope.maybeOf(context)?.refresh());
       _featuredRefreshTimer = Timer.periodic(
         const Duration(seconds: 60),
-        (_) => unawaited(
-          FeaturedCatalogScope.maybeOf(context)?.refreshIfStale(),
-        ),
+        (_) =>
+            unawaited(FeaturedCatalogScope.maybeOf(context)?.refreshIfStale()),
       );
     });
   }
@@ -132,7 +130,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   @override
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
-    _collapse.dispose();
     _heroPlaying.dispose();
     _featuredRefreshTimer?.cancel();
     _scroll.dispose();
@@ -156,10 +153,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void _onScroll() {
-    final next = (_scroll.offset / 120).clamp(0.0, 1.0);
-    if ((next - _collapse.value).abs() >= 0.01) {
-      _collapse.value = next;
-    }
     _syncHeroPlayback();
   }
 
@@ -239,19 +232,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   void _openPartner() {
     Navigator.of(context).push(
       MaterialPageRoute<void>(
-        builder: (_) => PartnerHubScreen(
-          content: _editorialContent.partner,
-        ),
+        builder: (_) => PartnerHubScreen(content: _editorialContent.partner),
       ),
     );
   }
 
   void _openWholesale() {
-    Navigator.of(context).push(
-      MaterialPageRoute<void>(
-        builder: (_) => const WholesaleScreen(),
-      ),
-    );
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute<void>(builder: (_) => const WholesaleScreen()));
   }
 
   void _openExternal(Uri uri) {
@@ -292,9 +281,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       context,
       CollectionScreen(
         title: title,
+        filter: CollectionFilter(category: category, queryTerms: queryTerms),
+      ),
+    );
+  }
+
+  /// A «Compra por estilo» entry opens its silhouette (or the perfumes
+  /// category) through the same collection route as the other home links.
+  void _openStyle(HomeStyleEntry entry) {
+    openCollection(
+      context,
+      CollectionScreen(
+        title: entry.collectionTitle,
         filter: CollectionFilter(
-          category: category,
-          queryTerms: queryTerms,
+          category: entry.category,
+          silhouette: entry.silhouette,
         ),
       ),
     );
@@ -340,7 +341,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final showHero = storefront.showHero;
 
     if (feed.isEmpty) {
-      return Scaffold(
+      return AdaptiveStorefrontScaffold(
+        avoidReservedRegions: true,
         extendBody: true,
         backgroundColor: context.boutique.canvas,
         drawer: _buildSideMenu(store),
@@ -365,9 +367,25 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onSelected: _handleBottomNavigation,
     );
     final sections = _resolveSectionOrder(homeContent, storefront);
+    final bundled = const ListEquality<HomeSectionId>().equals(
+      homeContent.sectionOrder,
+      HomeContent.fallback.sectionOrder,
+    );
+    final opening = bundled
+        ? <HomeSectionId>[
+            for (final section in sections)
+              if (_kGuideOpeningSections.contains(section)) section,
+          ]
+        : sections;
+    final tail = bundled
+        ? <HomeSectionId>[
+            for (final section in sections)
+              if (!_kGuideOpeningSections.contains(section)) section,
+          ]
+        : const <HomeSectionId>[];
     final body = LayoutBuilder(
       builder: (context, constraints) {
-        _heroHeight = homeBannerHeight(context) + _kSearchFieldBlockHeight;
+        _heroHeight = homeBannerHeight(context);
         return ListView(
           controller: _scroll,
           padding: EdgeInsets.zero,
@@ -376,43 +394,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               key: const ValueKey('home-discovery-header'),
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                ValueListenableBuilder<double>(
-                  valueListenable: _collapse,
-                  builder: (context, value, child) {
-                    final visibility = 1 -
-                        Curves.easeInCubic.transform(
-                          ((value - .08) / .78).clamp(0.0, 1.0),
-                        );
-                    return IgnorePointer(
-                      ignoring: visibility < .25,
-                      child: ExcludeSemantics(
-                        excluding: visibility < .25,
-                        child: Opacity(
-                          key: const ValueKey('home-search-bar-transition'),
-                          opacity: visibility,
-                          child: child,
-                        ),
-                      ),
-                    );
-                  },
-                  child: HomeSearchField(
-                    onTap: _openSearch,
-                    prompt: _searchPrompt,
-                  ),
-                ),
                 if (showHero)
                   ValueListenableBuilder<bool>(
                     valueListenable: _heroPlaying,
                     builder: (context, playing, _) => HomeEditorialBanner(
                       playing: playing,
                       onOpenNew: _openFullCatalog,
+                      onOpenCatalog: _openFullCatalog,
+                      onOpenPerfumes: () => _openCatalogSection(
+                        title: 'Perfumes',
+                        category: 'perfume',
+                      ),
                     ),
-                  ),
+                  )
+                else
+                  const SizedBox(height: 1),
               ],
             ),
-            for (var index = 0; index < sections.length; index++)
+            for (var index = 0; index < opening.length; index++)
               _buildHomeSection(
-                sections[index],
+                opening[index],
                 index: index,
                 store: store,
                 content: homeContent,
@@ -421,15 +422,26 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 featuredProducts: featured?.products ?? const [],
                 reviewsStatus: reviewsStatus,
               ),
+            if (bundled) ...[
+              if (fresh.isNotEmpty)
+                Padding(
+                  padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
+                  child: HomeNewArrivalsRail(
+                    products: fresh,
+                    title: 'Lo más buscado',
+                    sectionKey: const ValueKey('home-section-most-wanted'),
+                    railKey: const ValueKey('home-most-wanted-rail'),
+                    onOpenAll: _openFullCatalog,
+                  ),
+                ),
+            ],
             Padding(
               padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
               child: RevealOnScroll(
                 key: const ValueKey('home-reveal-offers'),
                 scrollController: _scroll,
                 offset: 0,
-                child: _HomeOffersSection(
-                  onOpenPartner: _openWholesale,
-                ),
+                child: _HomeOffersSection(onOpenPartner: _openWholesale),
               ),
             ),
             const ClientGuideServices(),
@@ -453,6 +465,17 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               ),
               onAbout: _openAbout,
             ),
+            for (var index = 0; index < tail.length; index++)
+              _buildHomeSection(
+                tail[index],
+                index: opening.length + index,
+                store: store,
+                content: homeContent,
+                editorial: editorial,
+                fresh: fresh,
+                featuredProducts: featured?.products ?? const [],
+                reviewsStatus: reviewsStatus,
+              ),
             // The home body extends beneath the persistent navigation. Keep
             // that trailing scroll clearance in the invitation's surface so
             // its background reaches the navigation divider instead of
@@ -469,22 +492,15 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       },
     );
 
-    return ValueListenableBuilder<double>(
-      valueListenable: _collapse,
-      // This child is retained while the app bar collapses. A scroll tick
-      // therefore does not rebuild or relayout the full home content tree.
-      child: body,
-      builder: (context, collapse, child) {
-        return Scaffold(
-          extendBody: true,
-          backgroundColor: context.boutique.canvas,
-          drawer: drawer,
-          drawerScrimColor: context.monettaColors.scrim,
-          appBar: _buildAppBar(searchCollapse: showHero ? collapse : 1),
-          body: child,
-          bottomNavigationBar: bottomNavigation,
-        );
-      },
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
+      extendBody: true,
+      backgroundColor: context.boutique.canvas,
+      drawer: drawer,
+      drawerScrimColor: context.monettaColors.scrim,
+      appBar: _buildAppBar(),
+      body: body,
+      bottomNavigationBar: bottomNavigation,
     );
   }
 
@@ -556,15 +572,16 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
           HomeSectionId.newProducts => HomeNewArrivalsRail(
               products: fresh,
               onOpenAll: _openFullCatalog,
+              asGrid: true,
             ),
           HomeSectionId.bagTypes => HomeShopByStyle(
-              cards: content.bagTypes,
-              onOpen: (card) => _openHomeCollection(context, card),
+              onOpen: _openStyle,
               onSeeAll: () =>
                   _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
             ),
           HomeSectionId.brands => _BrandsSection(
-              brands: content.brands,
+              brands: guideBrandsFor(content.brands, store.availableBrands),
+              onSeeAll: () => unawaited(openCategories(context)),
             ),
           HomeSectionId.about => _AboutMonettaSection(
               content: editorial.about,
@@ -613,12 +630,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       onToggleTheme: _toggleTheme,
       onAbout: _openAbout,
       onPartner: _openWholesale,
-      onSupport: () => unawaited(
-        openContact(
-          context,
-          socialLinks: content?.socialLinks,
-        ),
-      ),
+      onSupport: () =>
+          unawaited(openContact(context, socialLinks: content?.socialLinks)),
       identityName: name,
       identityDetail:
           email != null && email.isNotEmpty && email != name ? email : null,
@@ -648,14 +661,10 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     unawaited(ThemeScope.of(context).setMode(nextMode));
   }
 
-  /// Compact header: menu, wordmark, and the search action that takes over
-  /// once the in-page field has scrolled away. Opaque from the first frame —
-  /// the banner is now an inset card, not a full-bleed hero to float over.
-  PreferredSizeWidget _buildAppBar({double searchCollapse = 1}) {
+  /// Compact header: menu, wordmark, and the search icon. The guide has no
+  /// in-page search field above the hero.
+  PreferredSizeWidget _buildAppBar() {
     final palette = context.boutique;
-    final searchProgress = Curves.easeOutCubic.transform(
-      ((searchCollapse - .34) / .66).clamp(0.0, 1.0),
-    );
     final dark = Theme.of(context).brightness == Brightness.dark;
     return AppBar(
       automaticallyImplyLeading: false,
@@ -682,21 +691,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       ),
       title: const MonettaWordmark.appBar(),
       actions: [
-        IgnorePointer(
-          ignoring: searchProgress < .7,
-          child: ExcludeSemantics(
-            excluding: searchProgress < .7,
-            child: Opacity(
-              key: const ValueKey('home-appbar-search-transition'),
-              opacity: searchProgress,
-              child: IconButton(
-                key: const ValueKey('home-appbar-search-button'),
-                tooltip: 'Buscar',
-                onPressed: _openSearch,
-                icon: const Icon(Icons.search, size: 22),
-              ),
-            ),
-          ),
+        IconButton(
+          key: const ValueKey('home-appbar-search-button'),
+          tooltip: 'Buscar',
+          onPressed: _openSearch,
+          icon: const Icon(Icons.search, size: 22),
         ),
         const SizedBox(width: BoutiqueSpace.xs),
       ],
@@ -709,22 +708,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
 }
 
 class _HomeOffersSection extends StatelessWidget {
-  const _HomeOffersSection({
-    required this.onOpenPartner,
-  });
+  const _HomeOffersSection({required this.onOpenPartner});
   final VoidCallback onOpenPartner;
 
   @override
   Widget build(BuildContext context) => ClientGuideEditorial(
         key: const ValueKey('home-section-offers'),
-        title: 'PRECIOS DE MAYOREO',
-        subtitle: 'Precios y mínimo de piezas: pendientes de confirmación.',
-        imageAsset: 'assets/images/home_collection_bags.webp',
-        action: ClientGuideButton(
+        title: 'PRECIOS DE',
+        titleAccent: 'mayoreo',
+        subtitle: 'A partir de 3 piezas',
+        imageAsset: kGuideHomeWholesale,
+        overlaySide: GuideTextSide.right,
+        action: GuidePillButton(
           key: const ValueKey('home-wholesale-button'),
           label: 'CONOCE MÁS',
           onPressed: onOpenPartner,
-          chevron: true,
         ),
       );
 }
@@ -852,7 +850,7 @@ class _TodaysPicksSection extends StatelessWidget {
       children: [
         const BoutiqueSectionHeader(
           kicker: 'Selección Monetta',
-          title: 'Catálogo de hoy',
+          title: 'Lo más buscado',
         ),
         _CatalogGrid(products: products.take(4).toList()),
       ],
@@ -861,16 +859,63 @@ class _TodaysPicksSection extends StatelessWidget {
 }
 
 class _BrandsSection extends StatefulWidget {
-  const _BrandsSection({required this.brands});
+  const _BrandsSection({required this.brands, this.onSeeAll});
 
   final List<HomeBrandCard> brands;
+  final VoidCallback? onSeeAll;
 
   @override
   State<_BrandsSection> createState() => _BrandsSectionState();
 }
 
+/// Brands of the guide's 4 x 2 grid, in the guide's own order.
+const List<String> _kGuideBrandOrder = <String>[
+  'coach',
+  'guess',
+  'michael_kors',
+  'steve_madden',
+  'tommy_hilfiger',
+];
+
+String _brandSlug(String brand) =>
+    brand.trim().toLowerCase().replaceAll(RegExp(r'[\s\-]+'), '_');
+
+/// The brands the grid shows: only those the catalog really carries (they all
+/// come with bundled artwork), the guide's own five first, at most eight.
+///
+/// When the catalog reports no brand at all (a cold start), the configured
+/// list is shown as it is so the section never disappears.
+@visibleForTesting
+List<HomeBrandCard> guideBrandsFor(
+  List<HomeBrandCard> configured,
+  List<String> catalogBrands,
+) {
+  final carried = <String>{...catalogBrands};
+  final eligible = carried.isEmpty
+      ? configured
+      : [
+          for (final brand in configured)
+            if (carried.contains(_brandSlug(brand.brand))) brand,
+        ];
+  int rank(HomeBrandCard brand) {
+    final index = _kGuideBrandOrder.indexOf(_brandSlug(brand.brand));
+    return index < 0 ? _kGuideBrandOrder.length : index;
+  }
+
+  final ordered = [...eligible];
+  // List.sort is not stable: tie-break on the configured position.
+  final position = <HomeBrandCard, int>{
+    for (var i = 0; i < ordered.length; i++) ordered[i]: i,
+  };
+  ordered.sort((a, b) {
+    final byRank = rank(a).compareTo(rank(b));
+    return byRank != 0 ? byRank : position[a]!.compareTo(position[b]!);
+  });
+  return ordered.take(8).toList();
+}
+
 Duration _brandEntranceDuration(int brandCount) {
-  final lastRow = brandCount <= 1 ? 0 : (brandCount - 1) ~/ 2;
+  final lastRow = brandCount <= 1 ? 0 : (brandCount - 1) ~/ 4;
   return kEnter + Duration(milliseconds: lastRow * 70);
 }
 
@@ -928,15 +973,12 @@ class _BrandsSectionState extends State<_BrandsSection>
 
   Animation<Offset> _entranceFor(int index) {
     final totalMilliseconds = _controller.duration!.inMilliseconds;
-    final startMilliseconds = (index ~/ 2) * 70;
+    final startMilliseconds = (index ~/ 4) * 70;
     final endMilliseconds = startMilliseconds + kEnter.inMilliseconds;
     final begin = (startMilliseconds / totalMilliseconds).clamp(0.0, 1.0);
     final end = (endMilliseconds / totalMilliseconds).clamp(begin, 1.0);
     final direction = index.isEven ? -1.2 : 1.2;
-    return Tween<Offset>(
-      begin: Offset(direction, 0),
-      end: Offset.zero,
-    ).animate(
+    return Tween<Offset>(begin: Offset(direction, 0), end: Offset.zero).animate(
       CurvedAnimation(
         parent: _controller,
         curve: Interval(begin, end, curve: kMotionCurve),
@@ -957,19 +999,24 @@ class _BrandsSectionState extends State<_BrandsSection>
     return Column(
       key: const ValueKey('home-section-brands'),
       children: [
-        const BoutiqueSectionHeader(title: 'Marcas'),
+        BoutiqueSectionHeader(
+          title: 'Tus marcas favoritas',
+          actionLabel: widget.onSeeAll == null ? null : 'Ver todas',
+          onAction: widget.onSeeAll,
+        ),
         GridView.builder(
           clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
+          // Four tiles across, as in the guide. Official wordmarks sit in the
+          // vertical middle of a square file: a wide cell plus fitWidth shows
+          // that band edge to edge instead of a speck inside an empty square.
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            childAspectRatio: 2.45,
-            crossAxisSpacing: BoutiqueSpace.md,
-            mainAxisSpacing: BoutiqueSpace.md,
+            crossAxisCount: 4,
+            childAspectRatio: 1.7,
+            crossAxisSpacing: BoutiqueSpace.sm,
+            mainAxisSpacing: BoutiqueSpace.sm,
           ),
           itemCount: widget.brands.length,
           itemBuilder: (context, index) {
@@ -981,39 +1028,20 @@ class _BrandsSectionState extends State<_BrandsSection>
                 button: true,
                 label: 'Ver ${brand.title}',
                 child: MonettaCardLift(
-                  borderRadius: BoutiqueRadius.card,
-                  child: Material(
+                  borderRadius: BoutiqueRadius.tile,
+                  // The shared guide tile: the wordmark large on a tinted
+                  // rectangle, no hairline and no drop shadow.
+                  child: GuideBrandTile(
                     key: ValueKey('home-brand-${brand.handle}'),
-                    color: context.boutique.surface,
-                    // A logo is artwork, not photography: contain it inside a
-                    // hairline card instead of cropping it to fill, and drop
-                    // the drop shadow the brief rules out.
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BoutiqueRadius.card,
-                      side: BorderSide(
-                        color: context.boutique.hairline,
-                        width: 1,
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => openCollection(
-                        context,
-                        CollectionScreen(
-                          title: brand.title,
-                          filter: CollectionFilter(brand: brand.brand),
-                        ),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: BoutiqueSpace.lg,
-                          vertical: BoutiqueSpace.md,
-                        ),
-                        child: _HomeImage(
-                          imageUrl: brand.imageUrl,
-                          fallbackAsset: brand.fallbackAsset,
-                          fit: BoxFit.contain,
-                        ),
+                    asset: brand.fallbackAsset,
+                    imageUrl: brand.imageUrl,
+                    label: brand.title,
+                    aspectRatio: 1.7,
+                    onTap: () => openCollection(
+                      context,
+                      CollectionScreen(
+                        title: brand.title,
+                        filter: CollectionFilter(brand: brand.brand),
                       ),
                     ),
                   ),
@@ -1148,9 +1176,7 @@ class _SocialSection extends StatelessWidget {
       children: [
         const BoutiqueSectionHeader(title: 'Nuestras redes'),
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           child: Row(
             children: [
               for (var index = 0; index < links.length; index++) ...[
@@ -1290,9 +1316,7 @@ class _CatalogGrid extends StatelessWidget {
                 : 2;
         return GridView.builder(
           clipBehavior: Clip.none,
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
           // 0.50 reserves ~115pt for the caption under a 4:5 photo plus the
