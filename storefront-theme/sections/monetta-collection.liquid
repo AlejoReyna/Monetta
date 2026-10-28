@@ -1,11 +1,12 @@
 {%- comment -%}
-  Collection / brand / category page. Phones: the pinned 76 px page bar (back, Playfair title, count, search and filters) in
-  place of the global header; tablet and desktop: breadcrumbs, title row, toolbar and, from 1200 px, a sticky filter sidebar.
+  Collection / brand / category page as the client guide draws it (slides 06–20; collection_screen.dart and
+  guideCollectionPhoto in PR #33): the global header, the guide's photo banner for a brand, silhouette or category, the
+  category pills with the filters button, «N productos» and «Ordenar por», then the grid with VER PRODUCTO. A listing the
+  guide has no photograph for keeps its screen title. From 1200 px the filter sidebar stays.
   Products, prices, availability, filters, sort options and pagination are Shopify's (storefront filtering + paginate).
   Merchants only choose how many products per page and which menu feeds the shortcut chips.
 {%- endcomment -%}
 {%- liquid
-  assign shortcuts = linklists[section.settings.shortcuts_menu]
   assign active_count = 0
   for filter in collection.filters
     if filter.type == 'price_range'
@@ -21,45 +22,109 @@
   if sort_by != collection.default_sort_by
     assign clear_url = collection.url | append: '?sort_by=' | append: sort_by
   endif
-  assign count_text = collection.products_count | append: ' piezas'
+  # Shopify's automatic all-products collection keeps the title it was seeded with in the store language ("Products"); the
+  # theme calls it what the app calls it. A collection the merchant created and titled is shown as titled.
+  assign collection_title = collection.title
+  if collection.handle == 'all'
+    assign seeded_title = collection.title | strip | downcase
+    if seeded_title == 'products' or seeded_title == 'all products' or seeded_title == 'all' or seeded_title == 'productos' or seeded_title == 'todos los productos'
+      assign collection_title = 'Catálogo'
+    endif
+  endif
+  assign count_text = collection.products_count | append: ' productos'
   if collection.products_count == 1
-    assign count_text = '1 pieza'
+    assign count_text = '1 producto'
+  endif
+  # The guide's banner (guideCollectionPhoto): brand first, then silhouette, then category. Brand pages are Shopify's vendor
+  # listing, silhouettes its tag filter, carteras and relojes its product types, until the owner creates real collections.
+  assign guide_key = collection.handle
+  if collection.handle == 'vendors' or collection.handle == 'types'
+    assign guide_key = collection.title | handleize
+  elsif current_tags.size > 0
+    assign guide_key = current_tags.first | handleize
+  endif
+  assign guide_photo = ''
+  assign guide_title = collection_title
+  assign guide_side = 'left'
+  assign guide_brand = false
+  assign guide_pill = ''
+  case guide_key
+    when 'coach', 'michael-kors', 'steve-madden', 'tory-burch', 'kate-spade'
+      assign guide_photo = 'coleccion-' | append: guide_key
+      assign guide_side = 'right'
+      assign guide_brand = true
+    when 'marc-jacobs'
+      assign guide_photo = 'coleccion-marc-jacobs'
+      assign guide_brand = true
+    when 'tote', 'totes', 'bolsa-tote'
+      assign guide_photo = 'coleccion-totes'
+      assign guide_title = 'Totes'
+      assign guide_pill = 'bolsas'
+    when 'shoulder', 'bolsa-shoulder', 'shoulder-bag'
+      assign guide_photo = 'coleccion-shoulder'
+      assign guide_title = 'Shoulder'
+      assign guide_pill = 'bolsas'
+    when 'crossbody', 'bolsa-crossbody'
+      assign guide_photo = 'coleccion-crossbody'
+      assign guide_title = 'Crossbody'
+      assign guide_pill = 'bolsas'
+    when 'satchel', 'bolsa-satchel', 'bolsos-de-mano', 'bolso-de-mano', 'handbag', 'handbags'
+      assign guide_photo = 'coleccion-bolsos-de-mano'
+      assign guide_title = 'Bolsos de mano'
+      assign guide_pill = 'bolsas'
+    when 'cartera', 'carteras'
+      assign guide_photo = 'coleccion-carteras'
+      assign guide_title = 'Carteras'
+      assign guide_pill = 'carteras'
+    when 'perfume', 'perfumes'
+      assign guide_photo = 'coleccion-perfumes'
+      assign guide_title = 'Perfumes'
+    when 'accesorio', 'accesorios', 'accessory', 'accessories'
+      assign guide_photo = 'coleccion-accesorios'
+      assign guide_title = 'Accesorios'
+      assign guide_pill = 'accesorios'
+    when 'reloj', 'relojes'
+      assign guide_photo = 'coleccion-accesorios'
+      assign guide_title = 'Relojes'
+      assign guide_pill = 'relojes'
+    when 'bolsa', 'bolsas'
+      assign guide_photo = 'mayoreo-bolsos-carteras'
+      assign guide_title = 'Bolsas'
+      assign guide_pill = 'bolsas'
+  endcase
+  assign guide_italic = true
+  if guide_brand
+    assign guide_italic = false
+  endif
+  assign has_controls = false
+  if collection.all_products_count > 0 or active_count > 0
+    assign has_controls = true
   endif
 -%}
 {% paginate collection.products by section.settings.products_per_page %}
-  <div class="container listing listing--collection" data-listing {{ section.shopify_attributes }}>
-    <div class="page-head page-head--bar">
-      <nav class="breadcrumbs" aria-label="Ruta de navegación">
-        <ol>
-          <li><a href="{{ routes.root_url }}">Inicio</a></li>
-          <li><span aria-current="page">{{ collection.title | escape }}</span></li>
-        </ol>
-      </nav>
-      {%- capture bar_sub -%}<p class="page-bar__sub" data-count aria-live="polite">{{ count_text }}</p>{%- endcapture -%}
-      {%- capture bar_actions -%}
-        <a class="icon-button page-bar__action" href="{{ routes.search_url }}" aria-label="Buscar productos" title="Buscar">{% render 'monetta-icon', name: 'search', size: 22 %}</a>
-        {%- if collection.filters.size > 0 or collection.sort_options.size > 1 -%}
-          <button type="button" class="icon-button page-bar__action" data-open-dialog="filters-drawer" aria-haspopup="dialog" aria-controls="filters-drawer" aria-label="Filtrar y ordenar{% if active_count > 0 %}, {{ active_count }} activos{% endif %}" title="Filtrar y ordenar">{% render 'monetta-icon', name: 'tune', size: 24 %}{% if active_count > 0 %}<span class="page-bar__badge" aria-hidden="true">{{ active_count }}</span>{% endif %}</button>
-        {%- endif -%}
-      {%- endcapture -%}
-      {% render 'monetta-page-bar', title: collection.title, back: routes.root_url, sub: bar_sub, actions: bar_actions %}
+  {%- if guide_photo != blank and paginate.current_page == 1 -%}
+    <div class="guia-collection-hero">
+      {% render 'monetta-guia-hero', photo: guide_photo, title: guide_title, side: guide_side, caps: true, italic: guide_italic, eager: true %}
+    </div>
+  {%- endif -%}
+  <div class="container listing listing--collection listing--guia" data-listing {{ section.shopify_attributes }}>
+    <div class="page-head guia-page-head">
+      {%- unless guide_photo != blank and paginate.current_page == 1 -%}
+        <h1 class="display display--page">{{ guide_title | escape }}</h1>
+      {%- endunless -%}
       {%- if collection.description != blank and paginate.current_page == 1 -%}
         <div class="body-copy page-intro">{{ collection.description }}</div>
       {%- endif -%}
     </div>
-
-    {%- if shortcuts.links.size > 0 -%}
-      <nav class="collection-shortcuts" aria-label="Atajos">
-        <ul class="chips chips--scroll" role="list">
-          {%- for link in shortcuts.links -%}
-            <li><a class="chip" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
-          {%- endfor -%}
-        </ul>
-      </nav>
+    {%- if guide_photo == blank and collection.image != blank and paginate.current_page == 1 -%}
+      <div class="collection-editorial">
+        {% render 'monetta-image', image: collection.image, widths: '600,900,1400', sizes: '(min-width: 1200px) 1200px, 100vw', alt: collection.title, eager: true %}
+      </div>
     {%- endif -%}
+    {% render 'monetta-guia-pills', active: guide_pill, filters_button: has_controls, active_count: active_count %}
 
     {%- capture results_html -%}
-      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.' %}
+      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', view_button: true %}
     {%- endcapture -%}
     {% render 'monetta-listing-layout',
       filters: collection.filters,
@@ -70,7 +135,9 @@
       clear_url: clear_url,
       results_html: results_html,
       active_count: active_count,
-      has_products: collection.all_products_count
+      has_products: collection.all_products_count,
+      guide: true,
+      count_text: count_text
     %}
   </div>
 {% endpaginate %}
@@ -79,8 +146,7 @@
 {
   "name": "Monetta · Colección",
   "settings": [
-    { "type": "range", "id": "products_per_page", "label": "Productos por página", "min": 12, "max": 48, "step": 4, "default": 24 },
-    { "type": "link_list", "id": "shortcuts_menu", "label": "Menú de atajos", "info": "Opcional. Sus enlaces aparecen como botones bajo el título (por ejemplo estilos de bolsa)." }
+    { "type": "range", "id": "products_per_page", "label": "Productos por página", "min": 12, "max": 48, "step": 4, "default": 24 }
   ]
 }
 {% endschema %}

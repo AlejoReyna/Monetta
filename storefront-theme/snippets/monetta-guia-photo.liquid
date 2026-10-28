@@ -1,0 +1,17 @@
+{%- doc -%}
+  One of the guide's photographs: the owner's originals as theme assets in WebP at 768, 1280 and 1920 px
+  (monetta-guia-<name>-<width>.webp, about 2.4:1). Decorative unless an alt text is given.
+
+  @param {string} name - Base name, e.g. 'coleccion-coach', 'home-banner-compra-facil'.
+  @param {string} [alt] - Alternative text; empty for a decorative photograph.
+  @param {string} [sizes] - The sizes attribute (default 100vw: the guide's photographs run full bleed).
+  @param {boolean} [eager] - First viewport only: high priority instead of lazy.
+  @param {string} [class] - Class of the img.
+{%- enddoc -%}
+{%- liquid
+  assign base = 'monetta-guia-' | append: name
+  assign small = base | append: '-768.webp' | asset_url
+  assign medium = base | append: '-1280.webp' | asset_url
+  assign large = base | append: '-1920.webp' | asset_url
+-%}
+<img class="{{ class }}" src="{{ medium }}" srcset="{{ small }} 768w, {{ medium }} 1280w, {{ large }} 1920w" sizes="{{ sizes | default: '100vw' }}" width="1920" height="800" alt="{{ alt | escape }}" decoding="async"{% if eager %} fetchpriority="high"{% else %} loading="lazy"{% endif %}>

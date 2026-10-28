@@ -16,10 +16,13 @@
     link_label: section.settings.link_label,
     rail_id: rail_id
   %}
-  {%- if source.products.size > 0 -%}
+  {% paginate source.products by 250 %}
+  {%- assign rail_products = source.products -%}
+  {%- if section.settings.newest_first -%}{%- assign rail_products = rail_products | sort: 'created_at' | reverse -%}{%- endif -%}
+  {%- if rail_products.size > 0 -%}
     <div class="rail">
       <ul class="rail__track" id="{{ rail_id }}" role="list" aria-label="{{ section.settings.heading | escape }}">
-        {%- for product in source.products limit: section.settings.products_to_show -%}
+        {%- for product in rail_products limit: section.settings.products_to_show -%}
           <li>{% render 'monetta-card', product: product, density: 'compact', eager: forloop.first, sizes: '(min-width: 1024px) 25vw, 36vw' %}</li>
         {%- endfor -%}
       </ul>
@@ -27,12 +30,14 @@
   {%- else -%}
     <p class="body-copy">{% if request.design_mode %}Elige una colección con productos en la configuración de esta sección.{% else %}Pronto habrá piezas nuevas aquí.{% endif %}</p>
   {%- endif -%}
+  {% endpaginate %}
 </section>
 
 {% schema %}
 {
   "name": "Monetta · Carrusel",
   "settings": [
+    { "type": "checkbox", "id": "newest_first", "label": "Mostrar las más recientes primero", "default": false },
     { "type": "text", "id": "heading", "label": "Título", "default": "Novedades" },
     { "type": "collection", "id": "collection", "label": "Colección", "info": "Sin colección se usa todo el catálogo. El orden es el de la colección." },
     { "type": "range", "id": "products_to_show", "label": "Productos", "min": 4, "max": 12, "step": 1, "default": 8 },

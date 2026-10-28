@@ -1,0 +1,15 @@
+<dialog class="overlay overlay--drawer-right" id="saved-products" aria-labelledby="saved-title">
+  <div class="overlay__backdrop" data-overlay-close></div>
+  <div class="overlay__panel">
+    <div class="overlay__header"><h2 class="overlay__title" id="saved-title">Guardados</h2><button type="button" class="icon-button" data-overlay-close aria-label="Cerrar guardados">{% render 'monetta-icon', name: 'close', size: 22 %}</button></div>
+    <div class="overlay__body">
+      <p class="saved-note">Se guardan solo en este navegador: no se sincronizan con tu cuenta ni con la app. Precio y disponibilidad se consultan a la tienda cada vez que abres esta lista.</p>
+      <p class="small" data-saved-status role="status">Aún no has guardado piezas.</p>
+      <div class="saved-empty" data-saved-empty>
+        <p class="body-copy">Toca el corazón de una pieza para tenerla a mano aquí.</p>
+        <a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver catálogo</a>
+      </div>
+      <div class="saved-grid" data-saved-grid></div>
+    </div>
+  </div>
+</dialog>

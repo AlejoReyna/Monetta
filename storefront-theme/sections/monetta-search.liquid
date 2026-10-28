@@ -2,7 +2,8 @@
   Search results (search_screen.dart). Phones: the 76 px page bar ("Buscar"), the field under it and, when there is something to
   filter, the filters icon. The page always has exactly one h1: the bar's "Buscar" when there is no query, the results
   heading ("Resultados para “q”") once a search ran. Results, counts, filters and sort are Shopify's.
-  Predictive suggestions (/search/suggest) are the next block; the field is a real GET form, so Enter always works.
+  Under the field, the client guide's search screen (slide 05): «Búsquedas recientes» (kept in this browser only, each one
+  removable) and «Sugerencias» (the guide's categories). The field is a real GET form, so Enter always works.
 {%- endcomment -%}
 {%- liquid
   assign performed = search.performed
@@ -54,14 +55,27 @@
       </div>
     </form>
 
+    {%- assign suggestion_entries = 'bolsas:Bolsas:bag,carteras:Carteras:wallet,relojes:Relojes:watch,perfumes:Perfumes:perfume' | split: ',' -%}
+    <div class="guia-search" data-guia-recent data-current="{{ search.terms | escape }}">
+      <section class="guia-search__block" data-guia-recent-block aria-labelledby="guia-recent-heading" hidden>
+        <h2 class="guia-search__title" id="guia-recent-heading">Búsquedas recientes</h2>
+        <ul class="guia-search__list" role="list" data-guia-recent-list></ul>
+      </section>
+      <section class="guia-search__block" aria-labelledby="guia-suggest-heading">
+        <h2 class="guia-search__title" id="guia-suggest-heading">Sugerencias</h2>
+        <ul class="guia-search__list" role="list">
+          {%- for entry in suggestion_entries -%}
+            {%- assign parts = entry | split: ':' -%}
+            {%- assign key = parts[0] -%}
+            {%- assign icon = parts[2] -%}
+            {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
+            <li><a class="guia-search__row" href="{{ url | strip }}">{% render 'monetta-icon', name: icon, size: 22, class: 'guia-search__icon' %}<span>{{ parts[1] }}</span></a></li>
+          {%- endfor -%}
+        </ul>
+      </section>
+    </div>
     {%- if performed -%}
       <div class="page-head">
-        <nav class="breadcrumbs" aria-label="Ruta de navegación">
-          <ol>
-            <li><a href="{{ routes.root_url }}">Inicio</a></li>
-            <li><span aria-current="page">Buscar</span></li>
-          </ol>
-        </nav>
         <div class="page-head__row">
           <h1 class="display display--page" tabindex="-1">Resultados para “{{ search.terms | escape }}”</h1>
           <p class="page-head__count" data-count aria-live="polite">{{ count_text }}</p>

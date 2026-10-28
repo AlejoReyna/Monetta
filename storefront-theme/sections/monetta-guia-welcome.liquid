@@ -1,0 +1,149 @@
+{%- comment -%}
+  Bienvenida of the client guide (slide 01; welcome_screen.dart in PR #33) on the store's password page: the owner's
+  photograph, the wordmark, «Un paraíso de marcas por descubrir», «BOUTIQUE ONLINE DE PRODUCTOS ORIGINALES» and
+  «COMENZAR», which opens Shopify's password dialog (layout/password.liquid). The photograph is portrait (718 × 1280), so
+  from 1024 px it takes one side and the copy the other instead of being stretched across the screen. The password
+  layout does not load the Monetta stylesheets, so this section carries its own.
+{%- endcomment -%}
+<div class="guia-welcome" {{ section.shopify_attributes }}>
+  <img class="guia-welcome__photo" src="{{ 'monetta-guia-bienvenida-fondo-full.webp' | asset_url }}" width="718" height="1280" alt="" decoding="async" fetchpriority="high">
+  <div class="guia-welcome__panel">
+    <div class="guia-welcome__copy">
+      <h1 class="guia-welcome__brand">{% render 'monetta-logo', height: 52 %}</h1>
+      <p class="guia-welcome__tagline">Un paraíso de marcas<br> por descubrir</p>
+      <span class="guia-welcome__rule" aria-hidden="true"></span>
+      <p class="guia-welcome__eyebrow">Boutique online de<br> productos originales</p>
+    </div>
+    <button type="button" class="guia-welcome__start" on:click="#password-form/showDialog" aria-haspopup="dialog">
+      <span>Comenzar</span>
+      <svg aria-hidden="true" focusable="false" width="20" height="20" viewBox="0 0 24 24"><path fill="currentColor" d="M8.59 16.59 13.17 12 8.59 7.41 10 6l6 6-6 6z"/></svg>
+    </button>
+  </div>
+</div>
+
+{% stylesheet %}
+  .guia-welcome {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    flex: 1;
+    min-height: 100svh;
+    background: var(--color-canvas, #fbf8f2);
+    color: var(--color-ink, #211b16);
+  }
+
+  .guia-welcome__photo {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: 50% 40%;
+  }
+
+  .guia-welcome__panel {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 32px;
+    padding: max(56px, 9svh) 16px max(32px, env(safe-area-inset-bottom));
+    text-align: center;
+  }
+
+  .guia-welcome__copy {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .guia-welcome__brand {
+    margin: 0 0 12px;
+    line-height: 0;
+  }
+
+  .guia-welcome__tagline {
+    margin: 0;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: clamp(26px, 7.4vw, 34px);
+    font-weight: 400;
+    line-height: 1.15;
+  }
+
+  .guia-welcome__rule {
+    width: 64px;
+    height: 1px;
+    margin: 18px 0 14px;
+    background: rgb(197 160 82 / 0.7);
+  }
+
+  .guia-welcome__eyebrow {
+    margin: 0;
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 1.6;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+  }
+
+  .guia-welcome__start {
+    display: inline-flex;
+    gap: 8px;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    max-width: 420px;
+    min-height: 56px;
+    padding: 0 24px;
+    border: 0;
+    border-radius: 999px;
+    background: var(--color-action-primary, #745237);
+    color: var(--color-on-action-primary, #ffffff);
+    font-family: 'Inter', system-ui, sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    cursor: pointer;
+  }
+
+  .guia-welcome__start:hover {
+    background: var(--color-action-dark, #2d1e14);
+  }
+
+  .guia-welcome__start:focus-visible {
+    outline: 2px solid var(--color-ink, #211b16);
+    outline-offset: 3px;
+  }
+
+  @media (min-width: 1024px) {
+    .guia-welcome {
+      flex-direction: row-reverse;
+    }
+
+    .guia-welcome__photo {
+      position: sticky;
+      top: 0;
+      flex: 0 0 50%;
+      width: 50%;
+      height: 100svh;
+    }
+
+    .guia-welcome__panel {
+      justify-content: center;
+      gap: 48px;
+      padding: 64px 48px;
+    }
+  }
+{% endstylesheet %}
+
+{% schema %}
+{
+  "name": "Monetta · Bienvenida",
+  "settings": [],
+  "presets": [{ "name": "Monetta · Bienvenida" }]
+}
+{% endschema %}
