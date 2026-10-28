@@ -18,6 +18,7 @@
 /// [ProductTileData.fromProduct] and [ProductTileData.fromCatalogItem].
 library;
 
+import '../../app/storefront_layout.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/card_lift.dart';
@@ -775,12 +776,8 @@ class _QuickViewButton extends StatelessWidget {
 ///
 /// Columns drop rather than squeeze: below ~150pt a two-column tile can no
 /// longer show a bag and a readable price at the same time.
-int productGridColumns(double width) {
-  if (width >= 1060) return 4;
-  if (width >= 720) return 3;
-  if (width < 340) return 1;
-  return 2;
-}
+int productGridColumns(double width) =>
+    StorefrontLayout.columns(width, TextScaler.noScaling);
 
 /// A grid delegate sized from the real tile width and the shopper's own text
 /// scale, so large type produces taller rows instead of clipped captions.
@@ -795,7 +792,10 @@ SliverGridDelegate productGridDelegate(
   double? rowSpacing,
   double footerExtent = 0,
 }) {
-  final columns = productGridColumns(availableWidth);
+  final columns = StorefrontLayout.columns(
+    availableWidth,
+    MediaQuery.textScalerOf(context),
+  );
   final columnSpacing = spacing ?? variant.columnSpacing;
   final tileWidth = (availableWidth - columnSpacing * (columns - 1)) / columns;
   return SliverGridDelegateWithFixedCrossAxisCount(

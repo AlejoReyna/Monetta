@@ -3,6 +3,8 @@
 /// results once submitted.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
+import 'browse_detail_layout.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -60,7 +62,9 @@ Future<void> openSearch(
     monettaFadeRoute(
       StoreScope(
         notifier: store,
-        child: SearchScreen(initialQuery: initialQuery, prompt: prompt),
+        child: BrowseDetailLayout(
+          child: SearchScreen(initialQuery: initialQuery, prompt: prompt),
+        ),
       ),
     ),
   );
@@ -305,7 +309,8 @@ class _SearchScreenState extends State<SearchScreen> {
     final suggestions = _suggestions(query);
 
     final store = StoreScope.of(context);
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       backgroundColor: palette.canvas,
       drawer: guideDrawer(context),
       appBar: guideAppBar(

@@ -6,6 +6,7 @@
 /// caché, sesión caducada) tiene presentación propia.
 library;
 
+import '../../platform/system_layout_context.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/account_controller.dart';
@@ -62,14 +63,17 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return ClientGuideScaffold(
       current: ClientGuideDestination.account,
       accountController: widget.controller,
-      body: SafeArea(
-        child: Center(
-          child: ConstrainedBox(
-            constraints:
-                const BoxConstraints(maxWidth: MonettaTokens.breakpointMedium),
-            child: ListenableBuilder(
-              listenable: widget.controller,
-              builder: (context, _) => _buildBody(context),
+      body: SystemUsableSurface(
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: MonettaTokens.breakpointMedium,
+              ),
+              child: ListenableBuilder(
+                listenable: widget.controller,
+                builder: (context, _) => _buildBody(context),
+              ),
             ),
           ),
         ),

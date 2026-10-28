@@ -114,8 +114,8 @@ void main() {
         availableWidth: 350,
         textScaler: const TextScaler.linear(2),
       );
-      expect(delegate.crossAxisCount, 2);
-      expect(delegate.mainAxisExtent, closeTo(169 * 1.25 + 224, 0.01));
+      expect(delegate.crossAxisCount, 1);
+      expect(delegate.mainAxisExtent, closeTo(350 * 1.25 + 224, 0.01));
     },
   );
 

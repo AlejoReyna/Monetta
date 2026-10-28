@@ -1,3 +1,4 @@
+import '../../support/bundled_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
@@ -48,6 +49,7 @@ Future<void> _scrollToBleed(WidgetTester tester, Finder bleed) async {
 }
 
 void main() {
+  setUpAll(loadBundledFonts);
   final bleed =
       find.byKey(const ValueKey('home-account-invitation-bottom-bleed'));
   final surface = find.byKey(const Key('bottom-nav-surface'));

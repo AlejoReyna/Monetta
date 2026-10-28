@@ -1,6 +1,7 @@
 /// Confirmación de añadido: sheet, no toast, no ruta nueva.
 library;
 
+import '../../platform/system_layout_context.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
@@ -17,6 +18,8 @@ Future<void> showMiniCart(BuildContext context) {
   final store = StoreScope.of(context);
   return showModalBottomSheet<void>(
     context: context,
+    anchorPoint: presentationAnchor(context),
+    useSafeArea: true,
     useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,

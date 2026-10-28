@@ -15,6 +15,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'platform/system_layout_context.dart';
 import 'app/account_controller.dart';
 import 'app/admin_config.dart';
 import 'app/admin_controller.dart';
@@ -73,6 +74,7 @@ import 'data/shopify/http_storefront_transport.dart';
 import 'data/shopify/storefront_client.dart';
 import 'data/shopify/storefront_config.dart';
 import 'features/catalog/collection_screen.dart';
+import 'features/catalog/browse_detail_layout.dart';
 import 'features/catalog/search_history.dart';
 import 'features/catalog/search_history_persistence.dart';
 import 'features/checkout/reviewing_checkout.dart';
@@ -818,9 +820,11 @@ class _MonettaAppState extends State<MonettaApp> {
       // Using category here opened the wrong (or empty) result set (F28).
       navigator.push(
         MaterialPageRoute<void>(
-          builder: (_) => CollectionScreen(
-            title: handle,
-            filter: CollectionFilter(collectionHandle: handle),
+          builder: (_) => BrowseDetailLayout(
+            child: CollectionScreen(
+              title: handle,
+              filter: CollectionFilter(collectionHandle: handle),
+            ),
           ),
         ),
       );
@@ -875,32 +879,34 @@ class _MonettaAppState extends State<MonettaApp> {
               final overlay =
                   Theme.of(context).appBarTheme.systemOverlayStyle ??
                       SystemUiOverlayStyle.light;
-              return AnnotatedRegion<SystemUiOverlayStyle>(
-                value: overlay,
-                child: FutureBuilder<void>(
-                  future: _loading,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return _ErrorScreen(error: '${snapshot.error}');
-                    }
-                    final ready =
-                        snapshot.connectionState == ConnectionState.done;
-                    return StartupReveal(
-                      ready: ready,
-                      child: ready
-                          ? AppRouteScopes(
-                              accountController: _account,
-                              cartController: _shopifyCart?.controller,
-                              checkoutCoordinator: _shopifyCart?.checkout,
-                              catalogStore: _store,
-                              notificationController: _notifications,
-                              shopDomain:
-                                  StorefrontConfig.fromEnvironment().shopDomain,
-                              child: navigator!,
-                            )
-                          : const SizedBox.expand(),
-                    );
-                  },
+              return SystemLayoutHost(
+                child: AnnotatedRegion<SystemUiOverlayStyle>(
+                  value: overlay,
+                  child: FutureBuilder<void>(
+                    future: _loading,
+                    builder: (context, snapshot) {
+                      if (snapshot.hasError) {
+                        return _ErrorScreen(error: '${snapshot.error}');
+                      }
+                      final ready =
+                          snapshot.connectionState == ConnectionState.done;
+                      return StartupReveal(
+                        ready: ready,
+                        child: ready
+                            ? AppRouteScopes(
+                                accountController: _account,
+                                cartController: _shopifyCart?.controller,
+                                checkoutCoordinator: _shopifyCart?.checkout,
+                                catalogStore: _store,
+                                notificationController: _notifications,
+                                shopDomain: StorefrontConfig.fromEnvironment()
+                                    .shopDomain,
+                                child: navigator!,
+                              )
+                            : const SizedBox.expand(),
+                      );
+                    },
+                  ),
                 ),
               );
             },
