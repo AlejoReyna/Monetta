@@ -7,6 +7,8 @@
 /// [WelcomeGate] for the persistence rule.
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
@@ -52,82 +54,94 @@ class WelcomeScreen extends StatelessWidget {
               ),
             ),
           ),
+          // Center on the full screen: mirror the larger side inset (e.g. the
+          // iPhone Duo right bar edge) instead of shifting content left.
           SafeArea(
-            child: LayoutBuilder(
-              builder: (context, bounds) {
-                return SingleChildScrollView(
-                  child: ConstrainedBox(
-                    constraints: BoxConstraints(minHeight: bounds.maxHeight),
-                    child: IntrinsicHeight(
-                      child: Padding(
-                        padding: EdgeInsets.all(
-                          MonettaTokens.gutterFor(bounds.maxWidth),
-                        ),
-                        child: Column(
-                          children: [
-                            SizedBox(height: MonettaTokens.space[5]),
-                            _Entrance(
-                              child: ConstrainedBox(
+            left: false,
+            right: false,
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: math.max(
+                  MediaQuery.paddingOf(context).left,
+                  MediaQuery.paddingOf(context).right,
+                ),
+              ),
+              child: LayoutBuilder(
+                builder: (context, bounds) {
+                  return SingleChildScrollView(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(minHeight: bounds.maxHeight),
+                      child: IntrinsicHeight(
+                        child: Padding(
+                          padding: EdgeInsets.all(
+                            MonettaTokens.gutterFor(bounds.maxWidth),
+                          ),
+                          child: Column(
+                            children: [
+                              SizedBox(height: MonettaTokens.space[5]),
+                              _Entrance(
+                                child: ConstrainedBox(
+                                  constraints: const BoxConstraints(
+                                    maxWidth: MonettaTokens.breakpointMedium,
+                                  ),
+                                  child: Column(
+                                    children: [
+                                      const MonettaWordmark(
+                                        height: MonettaTokens.logoHeight * 2,
+                                      ),
+                                      SizedBox(height: MonettaTokens.space[3]),
+                                      Text(
+                                        'Un paraíso de marcas\npor descubrir',
+                                        textAlign: TextAlign.center,
+                                        style: clientGuideStyle(
+                                          context,
+                                          MonettaTokens.screenTitle,
+                                          color: MonettaTokens.ink,
+                                        ),
+                                      ),
+                                      SizedBox(height: MonettaTokens.space[3]),
+                                      SizedBox(
+                                        width: MonettaTokens.space[7],
+                                        child: const Divider(
+                                          color: MonettaTokens.gold,
+                                        ),
+                                      ),
+                                      SizedBox(height: MonettaTokens.space[2]),
+                                      Text(
+                                        'BOUTIQUE ONLINE DE\nPRODUCTOS ORIGINALES',
+                                        textAlign: TextAlign.center,
+                                        style: clientGuideStyle(
+                                          context,
+                                          MonettaTokens.eyebrow,
+                                          color: MonettaTokens.ink,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: MonettaTokens.space[7]),
+                              const Spacer(),
+                              ConstrainedBox(
                                 constraints: const BoxConstraints(
                                   maxWidth: MonettaTokens.breakpointMedium,
                                 ),
-                                child: Column(
-                                  children: [
-                                    const MonettaWordmark(
-                                      height: MonettaTokens.logoHeight * 2,
-                                    ),
-                                    SizedBox(height: MonettaTokens.space[3]),
-                                    Text(
-                                      'Un paraíso de marcas\npor descubrir',
-                                      textAlign: TextAlign.center,
-                                      style: clientGuideStyle(
-                                        context,
-                                        MonettaTokens.screenTitle,
-                                        color: MonettaTokens.ink,
-                                      ),
-                                    ),
-                                    SizedBox(height: MonettaTokens.space[3]),
-                                    SizedBox(
-                                      width: MonettaTokens.space[7],
-                                      child: const Divider(
-                                        color: MonettaTokens.gold,
-                                      ),
-                                    ),
-                                    SizedBox(height: MonettaTokens.space[2]),
-                                    Text(
-                                      'BOUTIQUE ONLINE DE\nPRODUCTOS ORIGINALES',
-                                      textAlign: TextAlign.center,
-                                      style: clientGuideStyle(
-                                        context,
-                                        MonettaTokens.eyebrow,
-                                        color: MonettaTokens.ink,
-                                      ),
-                                    ),
-                                  ],
+                                child: ClientGuideButton(
+                                  key: const ValueKey('welcome-start-button'),
+                                  label: 'COMENZAR',
+                                  chevron: true,
+                                  onPressed: onStart,
                                 ),
                               ),
-                            ),
-                            SizedBox(height: MonettaTokens.space[7]),
-                            const Spacer(),
-                            ConstrainedBox(
-                              constraints: const BoxConstraints(
-                                maxWidth: MonettaTokens.breakpointMedium,
-                              ),
-                              child: ClientGuideButton(
-                                key: const ValueKey('welcome-start-button'),
-                                label: 'COMENZAR',
-                                chevron: true,
-                                onPressed: onStart,
-                              ),
-                            ),
-                            SizedBox(height: MonettaTokens.space[3]),
-                          ],
+                              SizedBox(height: MonettaTokens.space[3]),
+                            ],
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
           ),
         ],
