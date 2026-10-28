@@ -59,6 +59,8 @@ final class ShopifyCheckoutCoordinator {
     _latestUrl = null;
     final cart = reconciliation.cart;
     if (cart == null ||
+        cart.isEmpty ||
+        cart.totalQuantity <= 0 ||
         reconciliation.status != CartReconciliationStatus.authoritative) {
       return;
     }
@@ -111,6 +113,13 @@ final class ShopifyCheckoutCoordinator {
         );
       }
       final cart = refreshed.cart!;
+      if (cart.isEmpty || cart.totalQuantity <= 0) {
+        return const CheckoutFailed(
+          code: CheckoutFailureCode.invalidCart,
+          userMessage:
+              'Tu bolsa está vacía. Agrega un producto antes de continuar al pago.',
+        );
+      }
 
       final validated = _urlPolicy.validate(cart.checkoutUrl);
       _latestUrl = validated;

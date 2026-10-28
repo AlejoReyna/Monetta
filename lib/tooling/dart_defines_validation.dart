@@ -1,6 +1,8 @@
 /// Shared dart-defines validation for Makefile scripts and unit tests.
 library;
 
+import '../data/shopify/storefront_config.dart';
+
 /// Validates catalog / release dart-defines for [expectedEnvironment].
 List<String> validateDartDefines({
   required Map<String, Object?> values,
@@ -49,6 +51,14 @@ List<String> validateDartDefines({
       errors.add('Producción no permite ALLOW_OFFLINE_CATALOG=true.');
     }
     _requireHost(values, 'SHOPIFY_STORE_DOMAIN', errors);
+    final shopDomain = _text(values, 'SHOPIFY_STORE_DOMAIN');
+    if (_isConfigured(shopDomain) &&
+        !StorefrontConfig.isProductionShopDomain(shopDomain)) {
+      errors.add(
+        'SHOPIFY_STORE_DOMAIN de producción debe pertenecer a la tienda real '
+        'monetta.mx; una tienda de staging tiene catálogo y pagos separados.',
+      );
+    }
     for (final key in const [
       'SHOPIFY_STOREFRONT_ACCESS_TOKEN',
       'CUSTOMER_ACCOUNT_SHOP_ID',

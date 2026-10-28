@@ -196,6 +196,62 @@ void main() {
     expect(launcher.presentCalls, 0);
   });
 
+  test('an empty authoritative cart cannot open checkout or browser fallback',
+      () async {
+    final launcher = _RecordingLauncher(const CheckoutCompleted());
+    final sessions = InMemoryCartSessionStore();
+    final opener = _RecordingExternalOpener();
+    await sessions.write(scope, SensitiveCartId(_opaque('cart-session')));
+    final coordinator = ShopifyCheckoutCoordinator(
+      launcher: launcher,
+      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+      sessions: sessions,
+      externalOpener: opener,
+    );
+    await coordinator.preload(_authoritativeCart());
+    expect(coordinator.canOpenExternalFallback, isTrue);
+    final preloadCalls = launcher.preloadCalls;
+    var cleanupCalls = 0;
+
+    final result = await coordinator.present(
+      controller: CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart(empty: true)),
+      ),
+      scope: scope,
+      localIntent: const [],
+      onCompleted: (_) async => cleanupCalls += 1,
+    ) as CheckoutFailed;
+
+    expect(result.code, CheckoutFailureCode.invalidCart);
+    expect(result.userMessage, contains('bolsa está vacía'));
+    expect(launcher.preloadCalls, preloadCalls);
+    expect(launcher.presentCalls, 0);
+    expect(cleanupCalls, 0);
+    expect(await sessions.read(scope), isNotNull);
+    expect(coordinator.canOpenExternalFallback, isFalse);
+    expect(await coordinator.openExternalFallback(), isFalse);
+    expect(opener.calls, 0);
+  });
+
+  test('an empty cart clears preload and cannot leave a stale fallback',
+      () async {
+    final launcher = _RecordingLauncher(const CheckoutCancelled());
+    final opener = _RecordingExternalOpener();
+    final coordinator = ShopifyCheckoutCoordinator(
+      launcher: launcher,
+      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+      sessions: InMemoryCartSessionStore(),
+      externalOpener: opener,
+    );
+    await coordinator.preload(_authoritativeCart());
+    await coordinator.preload(_authoritativeCart(empty: true));
+
+    expect(launcher.preloadCalls, 1);
+    expect(coordinator.canOpenExternalFallback, isFalse);
+    expect(await coordinator.openExternalFallback(), isFalse);
+    expect(opener.calls, 0);
+  });
+
   test('external fallback is explicit and never marks completion', () async {
     final launcher = _RecordingLauncher(
       const CheckoutFailed(
@@ -345,7 +401,10 @@ ShopifyCheckoutCoordinator _coordinator(
       sessions: sessions,
     );
 
-CartReconciliation _authoritativeCart({String? checkoutUrl}) {
+CartReconciliation _authoritativeCart({
+  String? checkoutUrl,
+  bool empty = false,
+}) {
   final timestamp = DateTime.utc(2026, 8, 27);
   const money = CartMoney(amount: '10.00', currencyCode: 'MXN');
   return CartReconciliation(
@@ -362,21 +421,22 @@ CartReconciliation _authoritativeCart({String? checkoutUrl}) {
       createdAt: timestamp,
       updatedAt: timestamp,
       lines: [
-        CartLine(
-          id: _opaque('line'),
-          variantId: shopifyVariantGid(1),
-          productId: shopifyProductGid(1),
-          title: 'Producto',
-          variantTitle: 'Variante',
-          quantity: 1,
-          cost: const CartLineCost(
-            amountPerQuantity: money,
-            subtotal: money,
-            total: money,
+        if (!empty)
+          CartLine(
+            id: _opaque('line'),
+            variantId: shopifyVariantGid(1),
+            productId: shopifyProductGid(1),
+            title: 'Producto',
+            variantTitle: 'Variante',
+            quantity: 1,
+            cost: const CartLineCost(
+              amountPerQuantity: money,
+              subtotal: money,
+              total: money,
+            ),
           ),
-        ),
       ],
-      totalQuantity: 1,
+      totalQuantity: empty ? 0 : 1,
       buyerIdentity: const CartBuyerSummary(
         countryCode: 'MX',
         isAuthenticated: false,

@@ -1,17 +1,15 @@
 /// Compatibility name for the storefront's bottom navigation.
 ///
 /// The floating pill is gone: this widget now draws the flat full-width
-/// [MonettaNavigationBar]. Callers move to the new name screen by screen and
+/// [MonettaBottomNavigation]. Callers move to the new name screen by screen and
 /// this wrapper is deleted when the last one has moved.
 library;
 
 import 'package:flutter/material.dart';
 
 import 'monetta_bottom_navigation.dart';
-import 'monetta_navigation_bar.dart';
 
 export 'monetta_bottom_navigation.dart' show MonettaBottomDestination;
-export 'monetta_navigation_bar.dart' show kMonettaNavigationBarHeight;
 
 class MonettaFloatingBottomNavigation extends StatelessWidget {
   const MonettaFloatingBottomNavigation({
@@ -26,7 +24,7 @@ class MonettaFloatingBottomNavigation extends StatelessWidget {
   final ValueChanged<MonettaBottomDestination> onSelected;
 
   @override
-  Widget build(BuildContext context) => MonettaNavigationBar(
+  Widget build(BuildContext context) => MonettaBottomNavigation(
         current: current,
         bagCount: bagCount,
         onSelected: onSelected,

@@ -43,6 +43,17 @@ class StorefrontConfig {
   static const String defaultCountry = 'MX';
   static const String defaultLanguage = 'ES';
 
+  /// Hosts belonging to the live Monetta shop. A development shop has its own
+  /// catalog, cart IDs and payments, even when APP_ENV says production.
+  static const productionShopDomains = {
+    'monetta.mx',
+    'www.monetta.mx',
+    'fakcei-n9.myshopify.com',
+  };
+
+  static bool isProductionShopDomain(String value) =>
+      productionShopDomains.contains(value.trim().toLowerCase());
+
   Uri get endpoint => Uri.https(shopDomain, '/api/$apiVersion/graphql.json');
 
   Map<String, String> get headers => <String, String>{
