@@ -465,3 +465,23 @@ La persona pidió publicar el tema en staging para que lo vea el owner.
 - **Para el owner:** en <https://monetta-staging.myshopify.com> escribe la contraseña de la tienda en la página genérica de Shopify (la de las tiendas de desarrollo) y entra al tema nuevo. Ya no hace falta `?preview_theme_id`.
 - **Nombre:** el tema todavía se llama «Monetta guía 1a1 borrador sin publicar 2026-10-27». Renombrarlo es otra escritura en la tienda; queda para cuando la persona lo pida.
 - **Para seguir trabajando:** duplicar el tema publicado y apuntar `THEME.env` al duplicado. `theme-push.sh` y `start-theme-dev.command` se niegan a escribir en un tema publicado.
+
+## Sin migas de pan (28-oct, pedido de la persona)
+
+**Pedido:** quitar «Inicio / Sección» (las migas) de todas las secciones.
+
+**Qué cambió:** se quitó `<nav class="breadcrumbs">` de las 7 secciones que lo tenían: `monetta-collection`, `monetta-collection-list`, `monetta-search`, `monetta-product`, `monetta-page`, `monetta-blog` y `monetta-article`.
+- En producto también se quitó su contenedor `.product-breadcrumbs`.
+- Las reglas CSS que quedan sin uso viven en hojas generadas (`monetta-pages.css`, paridad de `port-css`) o escritas a mano. No afectan nada y no se tocaron.
+
+**Cómo se subió:** directo al tema publicado `192558366754`, por decisión de la persona, en lugar de pasar por un duplicado.
+- Preflight de los 7 archivos: 0 errores.
+- Theme Check del tema: 187 errores y 64 avisos, 0 introducidos.
+- `shopify theme push --allow-live --only` con esos 7 archivos (28-oct a las 03:22 UTC). El proxy de la persona seguía conectado al tema publicado y también los sincronizó.
+
+**Verificación**
+- Con `shopify theme pull --only` (sólo lectura), los 7 archivos del tema publicado son idénticos byte a byte al worktree, y ninguno contiene `class="breadcrumbs"`.
+- Responden 200, sin migas, sin «Failed to Upload» y con su `h1`: colección (Bolsas y Coach), producto, búsqueda, Categorías y blog. `/pages/contact` usa la plantilla del owner, sin cambios.
+- Capturas a 1440 de Totes y producto (`evidencia/captures/sin-migas/`): no queda hueco.
+- `compare-remote.mjs` ya no corre contra este tema, porque se niega con temas publicados (es su resguardo).
+- La suite completa no se volvió a correr. Ninguna prueba depende de las migas: sólo `checks.mjs` las exime de la regla de 48 px.
