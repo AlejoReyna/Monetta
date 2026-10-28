@@ -446,7 +446,22 @@ El resto de la suite no visita `/password` y F7 no cambia ninguna otra página. 
 | `guia-checks` F8 a 768, 1024 y 1440: Cuenta y Carrito con la familia, tamaño y peso de la fila; placeholder y texto escrito con su familia, a 16 px; Cuenta, placeholder y texto escrito medidos en Playfair con CDP (el texto del input se mide dentro de su shadow DOM de agente de usuario); vidrio (desenfoque, degradado, filo interior); contorno ≥ 3:1; anillo de tinta al enfocar | 6/18 (pasan sólo el contorno y el anillo, que son resguardos) | **18/18** |
 | Validación completa (`validation/f8/`) | — | guía F1–F5 + F7 + F8 264/264, `checks.mjs` 315/315, journeys 61/61, 55/55, 55/55 y 54/54, axe 30/30, movimiento 4/4, layout 223/223, regresiones 123/123, Theme Check sin hallazgos nuevos |
 | Navegación | — | 29/31 con la primera sombra; **31/31** con la sombra corta |
-| Teclado | — | 150/150 con la primera sombra; repetido con la sombra corta (abajo) |
+| Teclado | — | 150/150 con la primera sombra. Con la sombra corta, la repetición **se interrumpió** al publicar, para que la persona cerrara el proxy: 89 pasaron y 1 falló, «Saltar al contenido» medido fuera de pantalla a 375×812. Es la inestabilidad del entorno ya clasificada en F1; a 375 px el buscador del header no se muestra. Las 150 no se completaron con la sombra final. |
 | `build.mjs --check`, `port-css --check`, `check_no_secrets.sh` | — | Pasan |
 
 **Arnés:** `start-theme-dev.command` ahora se niega a arrancar si el tema de `THEME.env` no está sin publicar. Con un tema publicado, `theme dev` escribiría cada archivo guardado en la tienda pública.
+
+## Publicación en staging (28-oct, pedido de la persona)
+
+La persona pidió publicar el tema en staging para que lo vea el owner.
+
+| Paso | Resultado |
+|---|---|
+| Antes (`shopify theme list`) | `192558366754` sin publicar; `192125304866` publicado |
+| Borrador contra worktree (`0514d9f`, `evidencia/f8/remote-before-publish/`) | 777 archivos de cada lado, 0 diferencias de contenido, `equivalent: true` |
+| `shopify theme publish --theme 192558366754` | 28-oct a las 03:05 UTC: «is now live at https://monetta-staging.myshopify.com» |
+| Después (`shopify theme list`) | **`192558366754` publicado**. `192125304866` quedó sin publicar y se puede volver a publicar. Los demás temas no cambiaron. |
+
+- **Para el owner:** en <https://monetta-staging.myshopify.com> escribe la contraseña de la tienda en la página genérica de Shopify (la de las tiendas de desarrollo) y entra al tema nuevo. Ya no hace falta `?preview_theme_id`.
+- **Nombre:** el tema todavía se llama «Monetta guía 1a1 borrador sin publicar 2026-10-27». Renombrarlo es otra escritura en la tienda; queda para cuando la persona lo pida.
+- **Para seguir trabajando:** duplicar el tema publicado y apuntar `THEME.env` al duplicado. `theme-push.sh` y `start-theme-dev.command` se niegan a escribir en un tema publicado.
