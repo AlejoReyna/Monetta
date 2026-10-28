@@ -629,5 +629,17 @@
     ],
     "consulted": "2026-10-28",
     "verification": "Fotogramas inspeccionados. Sin interacción, los productos se reacomodan y el lema rota cada ≈2 s."
+  },
+  {
+    "id": "zalando-hoja-deseos",
+    "page": "https://screensdesign.com/apps/zalando-online-fashion/",
+    "type": "grabación de app comercial (ScreensDesign)",
+    "video": "Video publicado en la página; URL firmada y temporal, no se conserva ni se redistribuye.",
+    "window": [
+      314.6,
+      317.0
+    ],
+    "consulted": "2026-10-28",
+    "verification": "Fotogramas inspeccionados. El corazón aparece relleno a 315,27 s y a 315,93 s sube una hoja inferior «agregado a la lista de deseos» con «Matching items · Make it a set»."
   }
 ]
