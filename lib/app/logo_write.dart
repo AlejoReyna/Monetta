@@ -82,6 +82,9 @@ class WelcomeLogoController extends ChangeNotifier {
     // Same pixels as notStarted (empty clip), so no listener needs a rebuild;
     // this also keeps start() safe to call during build.
     _phase = WelcomeLogoPhase.playing;
+    // Persist on entering playing (spec §12): a cold start after this point
+    // never replays, even if the app dies mid-write.
+    _store.markWritten().catchError((Object _) {});
   }
 
   void advance(double progress) {
@@ -96,7 +99,7 @@ class WelcomeLogoController extends ChangeNotifier {
 
   /// Jumps to the final frame (tap, geometry change, background, reduce
   /// motion, unmount, or natural end). Idempotent.
-  void finish() => _setDone(persist: true);
+  void finish() => _setDone(persist: _phase == WelcomeLogoPhase.notStarted);
 
   void _setDone({required bool persist}) {
     if (_phase == WelcomeLogoPhase.done) return;

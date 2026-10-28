@@ -8,6 +8,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show DisplayFeatureType;
 
 import 'package:flutter/material.dart';
 
@@ -56,103 +57,143 @@ class WelcomeScreen extends StatelessWidget {
           ),
           // Center on the full screen: mirror the larger side inset (e.g. the
           // iPhone Duo right bar edge) instead of shifting content left.
-          SafeArea(
-            left: false,
-            right: false,
-            child: Padding(
-              padding: EdgeInsets.symmetric(
-                horizontal: math.max(
-                  MediaQuery.paddingOf(context).left,
-                  MediaQuery.paddingOf(context).right,
+          // With an active vertical division (book posture, P5) the content
+          // sits wholly in the leading pane; an inactive one is only a guide.
+          _LeadingPane(
+            child: SafeArea(
+              left: false,
+              right: false,
+              child: Padding(
+                padding: EdgeInsets.symmetric(
+                  horizontal: math.max(
+                    MediaQuery.paddingOf(context).left,
+                    MediaQuery.paddingOf(context).right,
+                  ),
                 ),
-              ),
-              child: LayoutBuilder(
-                builder: (context, bounds) {
-                  return SingleChildScrollView(
-                    child: ConstrainedBox(
-                      constraints: BoxConstraints(minHeight: bounds.maxHeight),
-                      child: IntrinsicHeight(
-                        child: Padding(
-                          padding: EdgeInsets.all(
-                            MonettaTokens.gutterFor(bounds.maxWidth),
-                          ),
-                          child: Column(
-                            children: [
-                              SizedBox(height: MonettaTokens.space[5]),
-                              // The logo writes itself (no fade on top of
-                              // it); the copy below keeps its entrance.
-                              const WelcomeLogo(
-                                key: ValueKey('welcome-logo'),
-                                height: MonettaTokens.logoHeight * 2,
-                              ),
-                              SizedBox(height: MonettaTokens.space[3]),
-                              _Entrance(
-                                child: ConstrainedBox(
+                child: LayoutBuilder(
+                  builder: (context, bounds) {
+                    return SingleChildScrollView(
+                      child: ConstrainedBox(
+                        constraints:
+                            BoxConstraints(minHeight: bounds.maxHeight),
+                        child: IntrinsicHeight(
+                          child: Padding(
+                            padding: EdgeInsets.all(
+                              MonettaTokens.gutterFor(bounds.maxWidth),
+                            ),
+                            child: Column(
+                              children: [
+                                SizedBox(height: MonettaTokens.space[5]),
+                                // The logo writes itself (no fade on top of
+                                // it); the copy below keeps its entrance.
+                                const WelcomeLogo(
+                                  key: ValueKey('welcome-logo'),
+                                  height: MonettaTokens.logoHeight * 2,
+                                ),
+                                SizedBox(height: MonettaTokens.space[3]),
+                                _Entrance(
+                                  child: ConstrainedBox(
+                                    constraints: const BoxConstraints(
+                                      maxWidth: MonettaTokens.breakpointMedium,
+                                    ),
+                                    child: Column(
+                                      children: [
+                                        Text(
+                                          'Un paraíso de marcas\npor descubrir',
+                                          textAlign: TextAlign.center,
+                                          style: clientGuideStyle(
+                                            context,
+                                            MonettaTokens.screenTitle,
+                                            color: MonettaTokens.ink,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: MonettaTokens.space[3],
+                                        ),
+                                        SizedBox(
+                                          width: MonettaTokens.space[7],
+                                          child: const Divider(
+                                            color: MonettaTokens.gold,
+                                          ),
+                                        ),
+                                        SizedBox(
+                                          height: MonettaTokens.space[2],
+                                        ),
+                                        Text(
+                                          'BOUTIQUE ONLINE DE\nPRODUCTOS ORIGINALES',
+                                          textAlign: TextAlign.center,
+                                          style: clientGuideStyle(
+                                            context,
+                                            MonettaTokens.eyebrow,
+                                            color: MonettaTokens.ink,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                                SizedBox(height: MonettaTokens.space[7]),
+                                const Spacer(),
+                                ConstrainedBox(
                                   constraints: const BoxConstraints(
                                     maxWidth: MonettaTokens.breakpointMedium,
                                   ),
-                                  child: Column(
-                                    children: [
-                                      Text(
-                                        'Un paraíso de marcas\npor descubrir',
-                                        textAlign: TextAlign.center,
-                                        style: clientGuideStyle(
-                                          context,
-                                          MonettaTokens.screenTitle,
-                                          color: MonettaTokens.ink,
-                                        ),
-                                      ),
-                                      SizedBox(height: MonettaTokens.space[3]),
-                                      SizedBox(
-                                        width: MonettaTokens.space[7],
-                                        child: const Divider(
-                                          color: MonettaTokens.gold,
-                                        ),
-                                      ),
-                                      SizedBox(height: MonettaTokens.space[2]),
-                                      Text(
-                                        'BOUTIQUE ONLINE DE\nPRODUCTOS ORIGINALES',
-                                        textAlign: TextAlign.center,
-                                        style: clientGuideStyle(
-                                          context,
-                                          MonettaTokens.eyebrow,
-                                          color: MonettaTokens.ink,
-                                        ),
-                                      ),
-                                    ],
+                                  child: ClientGuideButton(
+                                    key: const ValueKey('welcome-start-button'),
+                                    label: 'COMENZAR',
+                                    chevron: true,
+                                    onPressed: () {
+                                      // Tap during the write: jump to the
+                                      // final frame and go on without waiting.
+                                      WelcomeLogoScope.maybeOf(context)
+                                          ?.finish();
+                                      onStart();
+                                    },
                                   ),
                                 ),
-                              ),
-                              SizedBox(height: MonettaTokens.space[7]),
-                              const Spacer(),
-                              ConstrainedBox(
-                                constraints: const BoxConstraints(
-                                  maxWidth: MonettaTokens.breakpointMedium,
-                                ),
-                                child: ClientGuideButton(
-                                  key: const ValueKey('welcome-start-button'),
-                                  label: 'COMENZAR',
-                                  chevron: true,
-                                  onPressed: () {
-                                    // Tap during the write: jump to the
-                                    // final frame and go on without waiting.
-                                    WelcomeLogoScope.maybeOf(context)?.finish();
-                                    onStart();
-                                  },
-                                ),
-                              ),
-                              SizedBox(height: MonettaTokens.space[3]),
-                            ],
+                                SizedBox(height: MonettaTokens.space[3]),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  );
-                },
+                    );
+                  },
+                ),
               ),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+class _LeadingPane extends StatelessWidget {
+  const _LeadingPane({required this.child});
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final height = MediaQuery.sizeOf(context).height;
+    final folds = MediaQuery.displayFeaturesOf(context).where(
+      (f) =>
+          f.type != DisplayFeatureType.cutout &&
+          f.bounds.left > 0 &&
+          f.bounds.height >= height / 2,
+    );
+    if (folds.isEmpty) return child;
+    final left =
+        folds.map((f) => f.bounds.left).reduce((a, b) => math.min(a, b));
+    return Align(
+      alignment: Alignment.centerLeft,
+      child: SizedBox(
+        width: left,
+        child: MediaQuery.removePadding(
+          context: context,
+          removeRight: true,
+          child: child,
+        ),
       ),
     );
   }
