@@ -1,0 +1,143 @@
+{%- comment -%}Home content mirrors Flutter HomeContent and editorial fallbacks. Only existing collections/vendors are linked; search is the fallback for category/style entries. Testimonials require real app blocks, never the app's sample fallback ratings.{%- endcomment -%}
+{%- liquid
+  assign mode = section.settings.mode
+  assign heading_id = section.id | append: '-heading'
+  assign about = metaobjects.app_about.monetta
+-%}
+{%- unless mode == 'reviews' and section.blocks.size == 0 -%}
+<section class="section container app-home app-home--{{ mode }}" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+  {%- if mode != 'story' -%}{% render 'monetta-section-header', id: heading_id, title: section.settings.heading %}{%- endif -%}
+  {%- case mode -%}
+    {%- when 'styles' -%}
+      {%- assign handles = shop.metafields.app.home_bag_types.value | default: 'totes,crossbodys,hombro,satchel,hobo' -%}
+      {%- if handles contains ',' -%}{%- assign handles = handles | split: ',' -%}{%- endif -%}
+      <ul class="app-style-list" role="list">
+        {%- for handle in handles limit: 8 -%}
+          {%- liquid
+            assign target = collections[handle]
+            assign label = target.title
+            assign art = 'monetta-app-home_bag_tote.webp'
+            assign term = handle | replace: '-', ' '
+            case handle
+              when 'totes', 'tote'
+                assign label = 'Totes'
+                assign term = 'Tote'
+              when 'crossbodys', 'crossbody'
+                assign label = 'Crossbodys'
+                assign term = 'Crossbody'
+                assign art = 'monetta-app-home_bag_crossbody.webp'
+              when 'hombro', 'shoulder'
+                assign label = 'De hombro'
+                assign term = 'Hombro'
+                assign art = 'monetta-app-home_bag_shoulder.webp'
+              when 'satchel'
+                assign label = 'Satchel'
+              when 'hobo'
+                assign label = 'Hobo'
+                assign art = 'monetta-app-home_bag_shoulder.webp'
+            endcase
+            assign label = label | default: term
+            assign term = term | url_encode
+            assign href = routes.search_url | append: '?type=product&q=' | append: term
+            if target.all_products_count > 0
+              assign href = target.url
+            endif
+          -%}
+          <li><a href="{{ href }}"><img src="{{ art | asset_url }}" width="480" height="480" alt="" loading="lazy"><span>{{ label | escape }}</span></a></li>
+        {%- endfor -%}
+      </ul>
+    {%- when 'collections' -%}
+      {%- assign handles = shop.metafields.app.home_collections.value | default: 'bolsas,carteras-1,relojes' -%}
+      {%- if handles contains ',' -%}{%- assign handles = handles | split: ',' -%}{%- endif -%}
+      <div class="app-tiles">
+        {%- for handle in handles limit: 6 -%}
+          {%- liquid
+            assign target = collections[handle]
+            assign label = target.title
+            assign term = handle | replace: '-', ' '
+            assign art = 'monetta-app-home_collection_bags.webp'
+            case handle
+              when 'bolsas', 'guess'
+                assign label = 'Bolsas'
+                assign term = 'Bolsa'
+              when 'carteras', 'carteras-1'
+                assign label = 'Carteras'
+                assign term = 'Cartera'
+                assign art = 'monetta-app-home_collection_wallets.webp'
+              when 'relojes'
+                assign label = 'Relojes'
+                assign term = 'Reloj'
+                assign art = 'monetta-app-home_collection_watches.webp'
+            endcase
+            assign label = label | default: term
+            assign term = term | url_encode
+            assign href = routes.search_url | append: '?type=product&q=' | append: term
+            if target.all_products_count > 0
+              assign href = target.url
+            endif
+          -%}
+          <a class="app-collection" href="{{ href }}">
+            {%- if target.image != blank -%}{% render 'monetta-image', image: target.image, widths: '360,600,900', sizes: '33vw', alt: '' %}
+            {%- else -%}<img src="{{ art | asset_url }}" width="600" height="750" alt="" loading="lazy">{%- endif -%}
+            <span>{{ label | escape }}</span>
+          </a>
+        {%- endfor -%}
+      </div>
+    {%- when 'brands' -%}
+      <ul class="app-brands" role="list">
+        {%- for vendor in shop.vendors -%}
+          {%- liquid
+            assign vendor_key = vendor | handleize
+            assign art = ''
+            case vendor_key
+              when 'coach', 'guess', 'olaplex', 'laneige', 'rhode'
+                assign art = vendor_key
+              when 'michael-kors'
+                assign art = 'michael_kors'
+              when 'steve-madden'
+                assign art = 'steve_madden'
+              when 'tommy-hilfiger'
+                assign art = 'tommy_hilfiger'
+              when 'anne-klein'
+                assign art = 'anne_klein'
+              when 'christian-dior', 'dior'
+                assign art = 'dior'
+              when 'the-ordinary'
+                assign art = 'the_ordinary'
+              when 'summer-fridays'
+                assign art = 'summer_fridays'
+            endcase
+          -%}
+          {%- if art != blank -%}
+            <li><a href="{{ vendor | url_for_vendor }}" aria-label="Ver {{ vendor | escape }}">{% if art != blank %}{% assign asset = 'monetta-app-brand-' | append: art | append: '.webp' %}<img src="{{ asset | asset_url }}" width="240" height="90" alt="{{ vendor | escape }}" loading="lazy">{% else %}{{ vendor | escape }}{% endif %}</a></li>
+          {%- endif -%}
+        {%- endfor -%}
+      </ul>
+    {%- when 'story' -%}
+      <div class="app-story">
+        {%- assign about_image = shop.metafields.app.about_image_url.value -%}
+        {%- if about_image != blank -%}<img src="{{ about_image | escape }}" alt="" width="900" height="1100" loading="lazy">
+        {%- else -%}<img src="{{ 'monetta-app-campaign_terracotta.jpg' | asset_url }}" alt="" width="900" height="1100" loading="lazy">{%- endif -%}
+        <div class="app-story__copy">
+          <p class="eyebrow">{{ about.eyebrow.value | default: 'Más sobre Monetta' | escape }}</p>
+          <h2 class="display app-story__title" id="{{ heading_id }}">{{ about.headline.value | default: 'Tu boutique y proveedor de confianza.' | escape }}</h2>
+          <p class="body-copy">{{ about.body.value | default: 'Somos una boutique mexicana especializada en productos originales de tus marcas favoritas. Elegimos piezas importadas de Estados Unidos y las acercamos a todo México, tanto para consentirte como para ayudarte a crecer tu negocio.' | escape | newline_to_br }}</p>
+          <a class="btn btn--outline" href="https://wa.me/528261066868" target="_blank" rel="noopener">Conversemos por WhatsApp<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+        </div>
+      </div>
+    {%- when 'social' -%}
+      {%- assign social = shop.metafields.app.social_links.value -%}
+      <p class="body-copy">Nuevas piezas, inspiración y lo que pasa en Monetta.</p>
+      <div class="app-social">
+        <a class="btn btn--outline" href="{{ social.instagram | default: 'https://www.instagram.com/_monetta.mx' | escape }}" target="_blank" rel="noopener">Instagram<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+        <a class="btn btn--outline" href="{{ social.tiktok | default: 'https://www.tiktok.com/@monetta.oficial' | escape }}" target="_blank" rel="noopener">TikTok<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+        <a class="btn btn--outline" href="{{ social.facebook | default: 'https://www.facebook.com/profile.php?id=100091065527635' | escape }}" target="_blank" rel="noopener">Facebook<span class="visually-hidden"> (se abre en otra pestaña)</span></a>
+      </div>
+    {%- when 'reviews' -%}
+      {%- for block in section.blocks -%}{% render block %}{%- endfor -%}
+  {%- endcase -%}
+</section>
+{%- endunless -%}
+{% schema %}
+{"name":"Monetta · Contenido app","settings":[{"type":"select","id":"mode","label":"Contenido","options":[{"value":"styles","label":"Estilos"},{"value":"collections","label":"Colecciones"},{"value":"brands","label":"Marcas"},{"value":"story","label":"Historia"},{"value":"social","label":"Redes"},{"value":"reviews","label":"Experiencias (app de reseñas)"}],"default":"collections"},{"type":"text","id":"heading","label":"Título","default":"Colecciones"}],"blocks":[{"type":"@app"}],"presets":[{"name":"Monetta · Contenido app"}]}
+{% endschema %}

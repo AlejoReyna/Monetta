@@ -4,12 +4,50 @@
     "main": {
       "type": "monetta-product",
       "blocks": {
-        "shipping": { "type": "service", "settings": { "icon": "truck", "text": "Envíos a todo México." } },
-        "original": { "type": "service", "settings": { "icon": "check", "text": "Producto original importado de Estados Unidos." } },
-        "description": { "type": "description", "settings": { "title": "Descripción", "open": true } },
-        "details": { "type": "details", "settings": { "title": "Detalles", "open": false } }
+        "shipping": {
+          "type": "service",
+          "settings": {
+            "icon": "truck",
+            "text": "Envíos a todo México."
+          }
+        },
+        "original": {
+          "type": "service",
+          "settings": {
+            "icon": "check",
+            "text": "Producto original importado de Estados Unidos."
+          }
+        },
+        "description": {
+          "type": "description",
+          "settings": {
+            "title": "Descripción",
+            "open": true
+          }
+        },
+        "details": {
+          "type": "details",
+          "settings": {
+            "title": "Detalles",
+            "open": true
+          }
+        },
+        "shipping_details": {
+          "type": "custom",
+          "settings": {
+            "title": "Envíos y cambios",
+            "content": "<p>Consulta las condiciones de envío y cambios con nuestro equipo por WhatsApp.</p>",
+            "open": true
+          }
+        }
       },
-      "block_order": ["shipping", "original", "description", "details"],
+      "block_order": [
+        "shipping",
+        "original",
+        "description",
+        "details",
+        "shipping_details"
+      ],
       "settings": {
         "show_dynamic_checkout": true,
         "show_apartado": true,
@@ -20,8 +58,20 @@
     },
     "recommendations": {
       "type": "monetta-product-recommendations",
-      "settings": { "heading": "También te puede gustar", "products_to_show": 8, "show_vendor_link": true }
+      "settings": {
+        "heading": "También te puede gustar",
+        "products_to_show": 8,
+        "show_vendor_link": true
+      }
+    },
+    "discovery": {
+      "type": "monetta-product-discovery",
+      "settings": {}
     }
   },
-  "order": ["main", "recommendations"]
+  "order": [
+    "main",
+    "discovery",
+    "recommendations"
+  ]
 }

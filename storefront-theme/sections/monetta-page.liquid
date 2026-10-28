@@ -1,0 +1,37 @@
+{%- comment -%}
+  Generic page (/pages/* without a template of its own) inside the Monetta shell: breadcrumbs, the page title in the screen-title
+  role and the page's rich text at a readable width. The text is the merchant's (Online Store > Pages); the theme only frames it.
+{%- endcomment -%}
+<div class="container page-shell" {{ section.shopify_attributes }}>
+  <div class="page-head">
+    <nav class="breadcrumbs" aria-label="Ruta de navegación">
+      <ol>
+        <li><a href="{{ routes.root_url }}">Inicio</a></li>
+        <li><span aria-current="page">{{ page.title | escape }}</span></li>
+      </ol>
+    </nav>
+    <h1 class="display display--page" tabindex="-1">{{ page.title | escape }}</h1>
+  </div>
+  {%- if page.content != blank -%}
+    <div class="page-prose rte">{{ page.content }}</div>
+  {%- endif -%}
+  {%- if section.settings.show_contact -%}
+    <div class="page-actions">
+      {%- assign whatsapp = section.settings.whatsapp_number | replace: '+', '' | replace: ' ', '' | replace: '-', '' -%}
+      {%- if whatsapp != blank -%}
+        <a class="btn btn--primary" href="https://wa.me/{{ whatsapp }}" target="_blank" rel="noopener">{% render 'monetta-icon', name: 'chat', size: 20 %} Escríbenos por WhatsApp<span class="visually-hidden"> (se abre en una pestaña nueva)</span></a>
+      {%- endif -%}
+      <a class="btn btn--outline" href="{{ routes.all_products_collection_url }}">Ver catálogo</a>
+    </div>
+  {%- endif -%}
+</div>
+
+{% schema %}
+{
+  "name": "Monetta · Página",
+  "settings": [
+    { "type": "checkbox", "id": "show_contact", "label": "Mostrar acciones al final (WhatsApp y catálogo)", "default": false },
+    { "type": "text", "id": "whatsapp_number", "label": "WhatsApp (número con lada)", "default": "528261066868", "info": "Solo dígitos, con 52 al inicio." }
+  ]
+}
+{% endschema %}
