@@ -1,0 +1,4554 @@
+{
+  "capturedAt": "2026-10-18T22:07:17.503Z",
+  "browser": "155.0.8059.40",
+  "captures": [
+    {
+      "file": "inicio_375x812.jpg",
+      "route": "/",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 375,
+          "height": 61
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 20,
+          "y": 424.59,
+          "width": 135,
+          "height": 207.69
+        },
+        "pageTitle": {
+          "text": "Monetta: bolsas, carteras y relojes originales",
+          "rect": {
+            "x": -1,
+            "y": 88,
+            "width": 1,
+            "height": 1
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "32px",
+          "weight": "700",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": {
+          "text": "Novedades",
+          "rect": {
+            "x": 20,
+            "y": 375.16,
+            "width": 113.28,
+            "height": 26.88
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "24px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Calvin Klein",
+          "rect": {
+            "x": 33,
+            "y": 562.59,
+            "width": 109,
+            "height": 15
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "12px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Calvin Klein Negra Texturizada",
+          "rect": {
+            "x": 33,
+            "y": 579.59,
+            "width": 109,
+            "height": 16.89
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,049.00",
+          "rect": {
+            "x": 33,
+            "y": 600.48,
+            "width": 109,
+            "height": 16.8
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Abrir menú",
+            "rect": {
+              "x": 8,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 145.81,
+              "y": 46,
+              "width": 83.36,
+              "height": 24
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 135,
+          "photoRatio": 1,
+          "nameLines": 1
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "coleccion_375x812.jpg",
+      "route": "/collections/guess",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 28
+        },
+        "header": null,
+        "pageBar": {
+          "x": 0,
+          "y": 28,
+          "width": 375,
+          "height": 76
+        },
+        "firstCard": {
+          "x": 0,
+          "y": 168.8,
+          "width": 181.5,
+          "height": 318.19
+        },
+        "pageTitle": {
+          "text": "Bolsas",
+          "rect": {
+            "x": 48,
+            "y": 41.02,
+            "width": 227,
+            "height": 31.36
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "28px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 13,
+            "y": 394.17,
+            "width": 155.5,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 13,
+            "y": 412.42,
+            "width": 155.5,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 13,
+            "y": 452.8,
+            "width": 155.5,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [],
+        "barControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 0,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 279,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Filtrar y ordenar",
+            "rect": {
+              "x": 327,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "ficha_375x812.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 375,
+          "height": 61
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 20,
+          "y": 2594.69,
+          "width": 195,
+          "height": 367.33
+        },
+        "pageTitle": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": 696.05,
+            "width": 335,
+            "height": 120
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": {
+          "text": "Más de Michael Kors",
+          "rect": {
+            "x": 20,
+            "y": 2548.06,
+            "width": 168.78,
+            "height": 21.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": 696.05,
+            "width": 335,
+            "height": 120
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardBrand": {
+          "text": "Michael Kors",
+          "rect": {
+            "x": 33,
+            "y": 2848.94,
+            "width": 169,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Michael Kors Slim Billfold Taupe",
+          "rect": {
+            "x": 33,
+            "y": 2867.19,
+            "width": 169,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,099.00",
+          "rect": {
+            "x": 33,
+            "y": 2907.56,
+            "width": 169,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 4,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 52,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 145.81,
+              "y": 46,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 275,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 323,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 195,
+          "photoRatio": 0.8,
+          "nameLines": 2
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "ficha_recomendaciones_375x812.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa#product-more",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 2248
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 375,
+          "height": 61
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 20,
+          "y": 346.69,
+          "width": 195,
+          "height": 367.33
+        },
+        "pageTitle": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": -1551.95,
+            "width": 335,
+            "height": 120
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": {
+          "text": "Más de Michael Kors",
+          "rect": {
+            "x": 20,
+            "y": 300.06,
+            "width": 168.78,
+            "height": 21.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": -1551.95,
+            "width": 335,
+            "height": 120
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardBrand": {
+          "text": "Michael Kors",
+          "rect": {
+            "x": 33,
+            "y": 600.94,
+            "width": 169,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Michael Kors Slim Billfold Taupe",
+          "rect": {
+            "x": 33,
+            "y": 619.19,
+            "width": 169,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,099.00",
+          "rect": {
+            "x": 33,
+            "y": 659.56,
+            "width": 169,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 4,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 52,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 145.81,
+              "y": 46,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 275,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 323,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 195,
+          "photoRatio": 0.8,
+          "nameLines": 2
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "busqueda_375x812.jpg",
+      "route": "/search?q=bolsa&type=product",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 28
+        },
+        "header": null,
+        "pageBar": {
+          "x": 0,
+          "y": 28,
+          "width": 375,
+          "height": 76
+        },
+        "firstCard": {
+          "x": 0,
+          "y": 234,
+          "width": 181.5,
+          "height": 318.19
+        },
+        "pageTitle": {
+          "text": "Resultados para “bolsa”",
+          "rect": {
+            "x": 20,
+            "y": 197,
+            "width": 230.45,
+            "height": 25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "20px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 13,
+            "y": 459.38,
+            "width": 155.5,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 13,
+            "y": 477.63,
+            "width": 155.5,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 13,
+            "y": 518,
+            "width": 155.5,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [],
+        "barControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 0,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Filtrar y ordenar",
+            "rect": {
+              "x": 327,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "bolsa_375x812.jpg",
+      "route": "/cart",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 28
+        },
+        "header": null,
+        "pageBar": {
+          "x": 0,
+          "y": 28,
+          "width": 375,
+          "height": 76
+        },
+        "firstCard": null,
+        "pageTitle": {
+          "text": "Mi bolsa",
+          "rect": {
+            "x": 48,
+            "y": 49.81,
+            "width": 231.55,
+            "height": 31.36
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "28px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": {
+          "text": "Resumen de compra",
+          "rect": {
+            "x": 45,
+            "y": 621.53,
+            "width": 285,
+            "height": 26.34
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "productName": null,
+        "cardBrand": null,
+        "cardName": null,
+        "cardPrice": null,
+        "headerControls": [],
+        "barControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 0,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "ficha_vistas_375x812.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 2774
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 375,
+          "height": 61
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 20,
+          "y": -179.31,
+          "width": 195,
+          "height": 367.33
+        },
+        "pageTitle": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": -2077.95,
+            "width": 335,
+            "height": 120
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": {
+          "text": "Más de Michael Kors",
+          "rect": {
+            "x": 20,
+            "y": -225.94,
+            "width": 168.78,
+            "height": 21.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recentHeading": {
+          "text": "Vistas hace un momento",
+          "rect": {
+            "x": 20,
+            "y": 220.02,
+            "width": 200.5,
+            "height": 21.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "summaryHeading": null,
+        "productName": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": -2077.95,
+            "width": 335,
+            "height": 120
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardBrand": {
+          "text": "Michael Kors",
+          "rect": {
+            "x": 33,
+            "y": 74.94,
+            "width": 169,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Michael Kors Slim Billfold Taupe",
+          "rect": {
+            "x": 33,
+            "y": 93.19,
+            "width": 169,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,099.00",
+          "rect": {
+            "x": 33,
+            "y": 133.56,
+            "width": 169,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 4,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 52,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 145.81,
+              "y": 46,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 275,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 323,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 195,
+          "photoRatio": 0.8,
+          "nameLines": 2
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "coleccion_desplazada_375x812.jpg",
+      "route": "/collections/guess",
+      "viewport": {
+        "width": 375,
+        "height": 812
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 1170
+        },
+        "width": 375,
+        "scrollWidth": 375,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 375,
+          "height": 28
+        },
+        "header": null,
+        "pageBar": {
+          "x": 0,
+          "y": 28,
+          "width": 375,
+          "height": 76
+        },
+        "firstCard": {
+          "x": 0,
+          "y": -1001.2,
+          "width": 181.5,
+          "height": 318.19
+        },
+        "pageTitle": {
+          "text": "Bolsas",
+          "rect": {
+            "x": 48,
+            "y": 41.02,
+            "width": 227,
+            "height": 31.36
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "28px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 13,
+            "y": -775.83,
+            "width": 155.5,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 13,
+            "y": -757.58,
+            "width": 155.5,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 13,
+            "y": -717.2,
+            "width": 155.5,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [],
+        "barControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 0,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 279,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Filtrar y ordenar",
+            "rect": {
+              "x": 327,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "inicio_440x956.jpg",
+      "route": "/",
+      "viewport": {
+        "width": 440,
+        "height": 956
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 440,
+        "scrollWidth": 440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 440,
+          "height": 61
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 20,
+          "y": 461,
+          "width": 158.39,
+          "height": 231.08
+        },
+        "pageTitle": {
+          "text": "Monetta: bolsas, carteras y relojes originales",
+          "rect": {
+            "x": -1,
+            "y": 88,
+            "width": 1,
+            "height": 1
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "32px",
+          "weight": "700",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": {
+          "text": "Novedades",
+          "rect": {
+            "x": 20,
+            "y": 411.56,
+            "width": 113.28,
+            "height": 26.88
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "24px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Calvin Klein",
+          "rect": {
+            "x": 33,
+            "y": 622.39,
+            "width": 132.39,
+            "height": 15
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "12px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Calvin Klein Negra Texturizada",
+          "rect": {
+            "x": 33,
+            "y": 639.39,
+            "width": 132.39,
+            "height": 16.89
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,049.00",
+          "rect": {
+            "x": 33,
+            "y": 660.28,
+            "width": 132.39,
+            "height": 16.8
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Abrir menú",
+            "rect": {
+              "x": 8,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 178.31,
+              "y": 46,
+              "width": 83.36,
+              "height": 24
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 158.39,
+          "photoRatio": 1,
+          "nameLines": 1
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "coleccion_440x956.jpg",
+      "route": "/collections/guess",
+      "viewport": {
+        "width": 440,
+        "height": 956
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 440,
+        "scrollWidth": 440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28
+        },
+        "header": null,
+        "pageBar": {
+          "x": 0,
+          "y": 28,
+          "width": 440,
+          "height": 76
+        },
+        "firstCard": {
+          "x": 0,
+          "y": 168.8,
+          "width": 214,
+          "height": 358.81
+        },
+        "pageTitle": {
+          "text": "Bolsas",
+          "rect": {
+            "x": 48,
+            "y": 41.02,
+            "width": 292,
+            "height": 31.36
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "28px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 13,
+            "y": 434.8,
+            "width": 188,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 13,
+            "y": 453.05,
+            "width": 188,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 13,
+            "y": 493.42,
+            "width": 188,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [],
+        "barControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 0,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 344,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Filtrar y ordenar",
+            "rect": {
+              "x": 392,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "ficha_440x956.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "viewport": {
+        "width": 440,
+        "height": 956
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 440,
+        "scrollWidth": 440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 440,
+          "height": 61
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 20,
+          "y": 2548.05,
+          "width": 228.8,
+          "height": 409.56
+        },
+        "pageTitle": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": 777.3,
+            "width": 400,
+            "height": 90
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": {
+          "text": "Más de Michael Kors",
+          "rect": {
+            "x": 20,
+            "y": 2501.42,
+            "width": 168.78,
+            "height": 21.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": 777.3,
+            "width": 400,
+            "height": 90
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardBrand": {
+          "text": "Michael Kors",
+          "rect": {
+            "x": 33,
+            "y": 2844.53,
+            "width": 202.8,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Michael Kors Slim Billfold Taupe",
+          "rect": {
+            "x": 33,
+            "y": 2862.78,
+            "width": 202.8,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,099.00",
+          "rect": {
+            "x": 33,
+            "y": 2903.16,
+            "width": 202.8,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 4,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 52,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 178.31,
+              "y": 46,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 340,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 388,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 228.8,
+          "photoRatio": 0.8,
+          "nameLines": 2
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "ficha_recomendaciones_440x956.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa#product-more",
+      "viewport": {
+        "width": 440,
+        "height": 956
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 2201
+        },
+        "width": 440,
+        "scrollWidth": 440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 440,
+          "height": 61
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 20,
+          "y": 347.05,
+          "width": 228.8,
+          "height": 409.56
+        },
+        "pageTitle": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": -1423.7,
+            "width": 400,
+            "height": 90
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": {
+          "text": "Más de Michael Kors",
+          "rect": {
+            "x": 20,
+            "y": 300.42,
+            "width": 168.78,
+            "height": 21.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": -1423.7,
+            "width": 400,
+            "height": 90
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardBrand": {
+          "text": "Michael Kors",
+          "rect": {
+            "x": 33,
+            "y": 643.53,
+            "width": 202.8,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Michael Kors Slim Billfold Taupe",
+          "rect": {
+            "x": 33,
+            "y": 661.78,
+            "width": 202.8,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,099.00",
+          "rect": {
+            "x": 33,
+            "y": 702.16,
+            "width": 202.8,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 4,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 52,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 178.31,
+              "y": 46,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 340,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 388,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 228.8,
+          "photoRatio": 0.8,
+          "nameLines": 2
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "busqueda_440x956.jpg",
+      "route": "/search?q=bolsa&type=product",
+      "viewport": {
+        "width": 440,
+        "height": 956
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 440,
+        "scrollWidth": 440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28
+        },
+        "header": null,
+        "pageBar": {
+          "x": 0,
+          "y": 28,
+          "width": 440,
+          "height": 76
+        },
+        "firstCard": {
+          "x": 0,
+          "y": 234,
+          "width": 214,
+          "height": 358.81
+        },
+        "pageTitle": {
+          "text": "Resultados para “bolsa”",
+          "rect": {
+            "x": 20,
+            "y": 197,
+            "width": 230.45,
+            "height": 25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "20px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 13,
+            "y": 500,
+            "width": 188,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 13,
+            "y": 518.25,
+            "width": 188,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 13,
+            "y": 558.63,
+            "width": 188,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [],
+        "barControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 0,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Filtrar y ordenar",
+            "rect": {
+              "x": 392,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "bolsa_440x956.jpg",
+      "route": "/cart",
+      "viewport": {
+        "width": 440,
+        "height": 956
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 440,
+        "scrollWidth": 440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28
+        },
+        "header": null,
+        "pageBar": {
+          "x": 0,
+          "y": 28,
+          "width": 440,
+          "height": 76
+        },
+        "firstCard": null,
+        "pageTitle": {
+          "text": "Mi bolsa",
+          "rect": {
+            "x": 48,
+            "y": 49.81,
+            "width": 296.55,
+            "height": 31.36
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "28px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": {
+          "text": "Resumen de compra",
+          "rect": {
+            "x": 45,
+            "y": 602.03,
+            "width": 350,
+            "height": 26.34
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "productName": null,
+        "cardBrand": null,
+        "cardName": null,
+        "cardPrice": null,
+        "headerControls": [],
+        "barControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 0,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "ficha_vistas_440x956.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "viewport": {
+        "width": 440,
+        "height": 956
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 2770
+        },
+        "width": 440,
+        "scrollWidth": 440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 440,
+          "height": 61
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 20,
+          "y": -221.95,
+          "width": 228.8,
+          "height": 409.56
+        },
+        "pageTitle": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": -1992.7,
+            "width": 400,
+            "height": 90
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": {
+          "text": "Más de Michael Kors",
+          "rect": {
+            "x": 20,
+            "y": -268.58,
+            "width": 168.78,
+            "height": 21.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recentHeading": {
+          "text": "Vistas hace un momento",
+          "rect": {
+            "x": 20,
+            "y": 219.61,
+            "width": 200.5,
+            "height": 21.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "summaryHeading": null,
+        "productName": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 20,
+            "y": -1992.7,
+            "width": 400,
+            "height": 90
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "24px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardBrand": {
+          "text": "Michael Kors",
+          "rect": {
+            "x": 33,
+            "y": 74.53,
+            "width": 202.8,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Michael Kors Slim Billfold Taupe",
+          "rect": {
+            "x": 33,
+            "y": 92.78,
+            "width": 202.8,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,099.00",
+          "rect": {
+            "x": 33,
+            "y": 133.16,
+            "width": 202.8,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 4,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 52,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 178.31,
+              "y": 46,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 340,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 388,
+              "y": 34,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 228.8,
+          "photoRatio": 0.8,
+          "nameLines": 2
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "coleccion_desplazada_440x956.jpg",
+      "route": "/collections/guess",
+      "viewport": {
+        "width": 440,
+        "height": 956
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 1332
+        },
+        "width": 440,
+        "scrollWidth": 440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 440,
+          "height": 28
+        },
+        "header": null,
+        "pageBar": {
+          "x": 0,
+          "y": 28,
+          "width": 440,
+          "height": 76
+        },
+        "firstCard": {
+          "x": 0,
+          "y": -1163.2,
+          "width": 214,
+          "height": 358.81
+        },
+        "pageTitle": {
+          "text": "Bolsas",
+          "rect": {
+            "x": 48,
+            "y": 41.02,
+            "width": 292,
+            "height": 31.36
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "28px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 13,
+            "y": -897.2,
+            "width": 188,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 13,
+            "y": -878.95,
+            "width": 188,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 13,
+            "y": -838.58,
+            "width": 188,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [],
+        "barControls": [
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 0,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Buscar productos",
+            "rect": {
+              "x": 344,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Filtrar y ordenar",
+            "rect": {
+              "x": 392,
+              "y": 41.5,
+              "width": 48,
+              "height": 48
+            }
+          }
+        ],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "inicio_768x1024.jpg",
+      "route": "/",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 768,
+        "scrollWidth": 768,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 768,
+          "height": 110
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 32,
+          "y": 744.31,
+          "width": 190,
+          "height": 262.69
+        },
+        "pageTitle": {
+          "text": "Monetta: bolsas, carteras y relojes originales",
+          "rect": {
+            "x": -1,
+            "y": 153,
+            "width": 1,
+            "height": 1
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "32px",
+          "weight": "700",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": {
+          "text": "Novedades",
+          "rect": {
+            "x": 32,
+            "y": 691.52,
+            "width": 141.61,
+            "height": 33.59
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "30px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Calvin Klein",
+          "rect": {
+            "x": 45,
+            "y": 937.31,
+            "width": 164,
+            "height": 15
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "12px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Calvin Klein Negra Texturizada",
+          "rect": {
+            "x": 45,
+            "y": 954.31,
+            "width": 164,
+            "height": 16.89
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,049.00",
+          "rect": {
+            "x": 45,
+            "y": 975.2,
+            "width": 164,
+            "height": 16.8
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 20,
+              "y": 93,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Abrir menú",
+            "rect": {
+              "x": 24,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 84,
+              "y": 48,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 123.81,
+              "y": 93,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 196.03,
+              "y": 93,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 281.61,
+              "y": 93,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 358,
+              "y": 93,
+              "width": 77.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 439.59,
+              "y": 93,
+              "width": 92.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 536.3,
+              "y": 93,
+              "width": 168.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 600,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 648,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 696,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 708.77,
+              "y": 93,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 867.27,
+              "y": 93,
+              "width": 130.16,
+              "height": 44
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 190,
+          "photoRatio": 1,
+          "nameLines": 1
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "coleccion_768x1024.jpg",
+      "route": "/collections/guess",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 768,
+        "scrollWidth": 768,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 768,
+          "height": 110
+        },
+        "pageBar": {
+          "x": 32,
+          "y": 192.14,
+          "width": 704,
+          "height": 40.69
+        },
+        "firstCard": {
+          "x": 32,
+          "y": 407.63,
+          "width": 224,
+          "height": 371.31
+        },
+        "pageTitle": {
+          "text": "Bolsas",
+          "rect": {
+            "x": 32,
+            "y": 192.14,
+            "width": 99.63,
+            "height": 40.31
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "36px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 45,
+            "y": 686.13,
+            "width": 198,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 45,
+            "y": 704.38,
+            "width": 198,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 45,
+            "y": 744.75,
+            "width": 198,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 20,
+              "y": 93,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Abrir menú",
+            "rect": {
+              "x": 24,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 84,
+              "y": 48,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 123.81,
+              "y": 93,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 196.03,
+              "y": 93,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 281.61,
+              "y": 93,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 358,
+              "y": 93,
+              "width": 77.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 439.59,
+              "y": 93,
+              "width": 92.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 536.3,
+              "y": 93,
+              "width": 168.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 600,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 648,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 696,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 708.77,
+              "y": 93,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 867.27,
+              "y": 93,
+              "width": 130.16,
+              "height": 44
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "ficha_768x1024.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 768,
+        "scrollWidth": 768,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 768,
+          "height": 110
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 32,
+          "y": 2164.13,
+          "width": 190,
+          "height": 361.08
+        },
+        "pageTitle": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 412.92,
+            "y": 224.44,
+            "width": 323.08,
+            "height": 130
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "26px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": {
+          "text": "Más de Michael Kors",
+          "rect": {
+            "x": 32,
+            "y": 2115.63,
+            "width": 198.56,
+            "height": 25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "20px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 412.92,
+            "y": 224.44,
+            "width": 323.08,
+            "height": 130
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "26px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardBrand": {
+          "text": "Michael Kors",
+          "rect": {
+            "x": 45,
+            "y": 2412.13,
+            "width": 164,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Michael Kors Slim Billfold Taupe",
+          "rect": {
+            "x": 45,
+            "y": 2430.38,
+            "width": 164,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,099.00",
+          "rect": {
+            "x": 45,
+            "y": 2470.75,
+            "width": 164,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 20,
+              "y": 93,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Volver",
+            "rect": {
+              "x": 24,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Abrir menú",
+            "rect": {
+              "x": 72,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 123.81,
+              "y": 93,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 132,
+              "y": 48,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 196.03,
+              "y": 93,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 281.61,
+              "y": 93,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 358,
+              "y": 93,
+              "width": 77.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 439.59,
+              "y": 93,
+              "width": 92.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 536.3,
+              "y": 93,
+              "width": 168.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 600,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 648,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 696,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 708.77,
+              "y": 93,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 867.27,
+              "y": 93,
+              "width": 130.16,
+              "height": 44
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 190,
+          "photoRatio": 0.8,
+          "nameLines": 2
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "busqueda_768x1024.jpg",
+      "route": "/search?q=bolsa&type=product",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 768,
+        "scrollWidth": 768,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 768,
+          "height": 110
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 32,
+          "y": 402.83,
+          "width": 224,
+          "height": 371.31
+        },
+        "pageTitle": {
+          "text": "Resultados para “bolsa”",
+          "rect": {
+            "x": 32,
+            "y": 256.14,
+            "width": 369.66,
+            "height": 40.31
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "36px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 45,
+            "y": 681.33,
+            "width": 198,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 45,
+            "y": 699.58,
+            "width": 198,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 45,
+            "y": 739.95,
+            "width": 198,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 20,
+              "y": 93,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Abrir menú",
+            "rect": {
+              "x": 24,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 84,
+              "y": 48,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 123.81,
+              "y": 93,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 196.03,
+              "y": 93,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 281.61,
+              "y": 93,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 358,
+              "y": 93,
+              "width": 77.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 439.59,
+              "y": 93,
+              "width": 92.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 536.3,
+              "y": 93,
+              "width": 168.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 600,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 648,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 696,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 708.77,
+              "y": 93,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 867.27,
+              "y": 93,
+              "width": 130.16,
+              "height": 44
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "bolsa_768x1024.jpg",
+      "route": "/cart",
+      "viewport": {
+        "width": 768,
+        "height": 1024
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 768,
+        "scrollWidth": 768,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 768,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 768,
+          "height": 110
+        },
+        "pageBar": {
+          "x": 32,
+          "y": 154,
+          "width": 704,
+          "height": 40.69
+        },
+        "firstCard": null,
+        "pageTitle": {
+          "text": "Mi bolsa",
+          "rect": {
+            "x": 32,
+            "y": 154,
+            "width": 131.38,
+            "height": 40.31
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "36px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": {
+          "text": "Resumen de compra",
+          "rect": {
+            "x": 57,
+            "y": 661.47,
+            "width": 654,
+            "height": 26.34
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "productName": null,
+        "cardBrand": null,
+        "cardName": null,
+        "cardPrice": null,
+        "headerControls": [
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 20,
+              "y": 93,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Abrir menú",
+            "rect": {
+              "x": 24,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 84,
+              "y": 48,
+              "width": 83.36,
+              "height": 24
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 123.81,
+              "y": 93,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 196.03,
+              "y": 93,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 281.61,
+              "y": 93,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 358,
+              "y": 93,
+              "width": 77.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 439.59,
+              "y": 93,
+              "width": 92.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 536.3,
+              "y": 93,
+              "width": 168.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 600,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 648,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, 3 artículos",
+            "rect": {
+              "x": 696,
+              "y": 36,
+              "width": 48,
+              "height": 48
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 708.77,
+              "y": 93,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 867.27,
+              "y": 93,
+              "width": 130.16,
+              "height": 44
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "inicio_1440x900.jpg",
+      "route": "/",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 1440,
+        "scrollWidth": 1440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 1440,
+          "height": 118
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 48,
+          "y": 762,
+          "width": 324,
+          "height": 396.69
+        },
+        "pageTitle": {
+          "text": "Monetta: bolsas, carteras y relojes originales",
+          "rect": {
+            "x": -1,
+            "y": 169,
+            "width": 1,
+            "height": 1
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "32px",
+          "weight": "700",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": {
+          "text": "Novedades",
+          "rect": {
+            "x": 48,
+            "y": 698.95,
+            "width": 160.48,
+            "height": 38.08
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "34px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Calvin Klein",
+          "rect": {
+            "x": 61,
+            "y": 1089,
+            "width": 298,
+            "height": 15
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "12px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Calvin Klein Negra Texturizada",
+          "rect": {
+            "x": 61,
+            "y": 1106,
+            "width": 298,
+            "height": 16.89
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,049.00",
+          "rect": {
+            "x": 61,
+            "y": 1126.89,
+            "width": 298,
+            "height": 16.8
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 48,
+              "y": 48,
+              "width": 111.16,
+              "height": 32
+            }
+          },
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 208.28,
+              "y": 101,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 312.09,
+              "y": 101,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 384.31,
+              "y": 101,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 469.89,
+              "y": 101,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 546.28,
+              "y": 101,
+              "width": 95.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 645.88,
+              "y": 101,
+              "width": 106.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 756.58,
+              "y": 101,
+              "width": 182.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 943.05,
+              "y": 101,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 1071.33,
+              "y": 40,
+              "width": 104.13,
+              "height": 48
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 1101.55,
+              "y": 101,
+              "width": 130.16,
+              "height": 44
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 1175.45,
+              "y": 40,
+              "width": 115.59,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 1291.05,
+              "y": 40,
+              "width": 100.95,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 324,
+          "photoRatio": 1,
+          "nameLines": 1
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "coleccion_1440x900.jpg",
+      "route": "/collections/guess",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 1440,
+        "scrollWidth": 1440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 1440,
+          "height": 118
+        },
+        "pageBar": {
+          "x": 48,
+          "y": 208.14,
+          "width": 1344,
+          "height": 44.8
+        },
+        "firstCard": {
+          "x": 328,
+          "y": 423.73,
+          "width": 254,
+          "height": 390.63
+        },
+        "pageTitle": {
+          "text": "Bolsas",
+          "rect": {
+            "x": 48,
+            "y": 208.14,
+            "width": 110.69,
+            "height": 44.8
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "40px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 341,
+            "y": 739.73,
+            "width": 228,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 341,
+            "y": 757.98,
+            "width": 228,
+            "height": 18.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 341,
+            "y": 780.17,
+            "width": 228,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 48,
+              "y": 48,
+              "width": 111.16,
+              "height": 32
+            }
+          },
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 208.28,
+              "y": 101,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 312.09,
+              "y": 101,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 384.31,
+              "y": 101,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 469.89,
+              "y": 101,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 546.28,
+              "y": 101,
+              "width": 95.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 645.88,
+              "y": 101,
+              "width": 106.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 756.58,
+              "y": 101,
+              "width": 182.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 943.05,
+              "y": 101,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 1071.33,
+              "y": 40,
+              "width": 104.13,
+              "height": 48
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 1101.55,
+              "y": 101,
+              "width": 130.16,
+              "height": 44
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 1175.45,
+              "y": 40,
+              "width": 115.59,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 1291.05,
+              "y": 40,
+              "width": 100.95,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "ficha_1440x900.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 1440,
+        "scrollWidth": 1440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 1440,
+          "height": 118
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 48,
+          "y": 1898.8,
+          "width": 256,
+          "height": 443.58
+        },
+        "pageTitle": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 847.67,
+            "y": 232.44,
+            "width": 544.33,
+            "height": 112.5
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "30px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": {
+          "text": "Más de Michael Kors",
+          "rect": {
+            "x": 48,
+            "y": 1841.05,
+            "width": 218.42,
+            "height": 27.5
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "22px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": {
+          "text": "Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody",
+          "rect": {
+            "x": 847.67,
+            "y": 232.44,
+            "width": 544.33,
+            "height": 112.5
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "30px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardBrand": {
+          "text": "Michael Kors",
+          "rect": {
+            "x": 61,
+            "y": 2229.3,
+            "width": 230,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Cartera Michael Kors Slim Billfold Taupe",
+          "rect": {
+            "x": 61,
+            "y": 2247.55,
+            "width": 230,
+            "height": 36.38
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,099.00",
+          "rect": {
+            "x": 61,
+            "y": 2287.92,
+            "width": 230,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 48,
+              "y": 48,
+              "width": 111.16,
+              "height": 32
+            }
+          },
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 208.28,
+              "y": 101,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 312.09,
+              "y": 101,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 384.31,
+              "y": 101,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 469.89,
+              "y": 101,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 546.28,
+              "y": 101,
+              "width": 95.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 645.88,
+              "y": 101,
+              "width": 106.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 756.58,
+              "y": 101,
+              "width": 182.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 943.05,
+              "y": 101,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 1071.33,
+              "y": 40,
+              "width": 104.13,
+              "height": 48
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 1101.55,
+              "y": 101,
+              "width": 130.16,
+              "height": 44
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 1175.45,
+              "y": 40,
+              "width": 115.59,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 1291.05,
+              "y": 40,
+              "width": 100.95,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": {
+          "width": 256,
+          "photoRatio": 0.8,
+          "nameLines": 2
+        }
+      },
+      "problems": []
+    },
+    {
+      "file": "busqueda_1440x900.jpg",
+      "route": "/search?q=bolsa&type=product",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 1440,
+        "scrollWidth": 1440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 1440,
+          "height": 118
+        },
+        "pageBar": null,
+        "firstCard": {
+          "x": 328,
+          "y": 418.94,
+          "width": 254,
+          "height": 390.63
+        },
+        "pageTitle": {
+          "text": "Resultados para “bolsa”",
+          "rect": {
+            "x": 48,
+            "y": 272.14,
+            "width": 410.73,
+            "height": 44.8
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "40px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": null,
+        "productName": null,
+        "cardBrand": {
+          "text": "Juicy Couture",
+          "rect": {
+            "x": 341,
+            "y": 734.94,
+            "width": 228,
+            "height": 16.25
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "13px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "cardName": {
+          "text": "Bolsa Juicy Couture Hobo Rosa",
+          "rect": {
+            "x": 341,
+            "y": 753.19,
+            "width": 228,
+            "height": 18.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "14px",
+          "weight": "400",
+          "color": "rgb(107, 102, 96)",
+          "display": "flow-root"
+        },
+        "cardPrice": {
+          "text": "$1,299.00",
+          "rect": {
+            "x": 341,
+            "y": 775.38,
+            "width": 228,
+            "height": 19.19
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "16px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "flex"
+        },
+        "headerControls": [
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 48,
+              "y": 48,
+              "width": 111.16,
+              "height": 32
+            }
+          },
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 208.28,
+              "y": 101,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 312.09,
+              "y": 101,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 384.31,
+              "y": 101,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 469.89,
+              "y": 101,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 546.28,
+              "y": 101,
+              "width": 95.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 645.88,
+              "y": 101,
+              "width": 106.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 756.58,
+              "y": 101,
+              "width": 182.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 943.05,
+              "y": 101,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 1071.33,
+              "y": 40,
+              "width": 104.13,
+              "height": 48
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 1101.55,
+              "y": 101,
+              "width": 130.16,
+              "height": 44
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 1175.45,
+              "y": 40,
+              "width": 115.59,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, vacío",
+            "rect": {
+              "x": 1291.05,
+              "y": 40,
+              "width": 100.95,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": null
+      },
+      "problems": []
+    },
+    {
+      "file": "bolsa_1440x900.jpg",
+      "route": "/cart",
+      "viewport": {
+        "width": 1440,
+        "height": 900
+      },
+      "metrics": {
+        "scroll": {
+          "x": 0,
+          "y": 0
+        },
+        "width": 1440,
+        "scrollWidth": 1440,
+        "prototypeStrip": {
+          "x": 0,
+          "y": 0,
+          "width": 1440,
+          "height": 28
+        },
+        "header": {
+          "x": 0,
+          "y": 28,
+          "width": 1440,
+          "height": 118
+        },
+        "pageBar": {
+          "x": 48,
+          "y": 170,
+          "width": 1344,
+          "height": 44.8
+        },
+        "firstCard": null,
+        "pageTitle": {
+          "text": "Mi bolsa",
+          "rect": {
+            "x": 48,
+            "y": 170,
+            "width": 145.97,
+            "height": 44.8
+          },
+          "family": "\"Playfair Display\", Georgia, \"Times New Roman\", serif",
+          "size": "40px",
+          "weight": "400",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "homeHeading": null,
+        "recommendationHeading": null,
+        "recentHeading": null,
+        "summaryHeading": {
+          "text": "Resumen de compra",
+          "rect": {
+            "x": 945.72,
+            "y": 255.8,
+            "width": 421.28,
+            "height": 26.34
+          },
+          "family": "Inter, system-ui, -apple-system, \"Segoe UI\", Roboto, Helvetica, Arial, sans-serif",
+          "size": "17px",
+          "weight": "600",
+          "color": "rgb(17, 17, 17)",
+          "display": "block"
+        },
+        "productName": null,
+        "cardBrand": null,
+        "cardName": null,
+        "cardPrice": null,
+        "headerControls": [
+          {
+            "label": "Monetta, ir al inicio",
+            "rect": {
+              "x": 48,
+              "y": 48,
+              "width": 111.16,
+              "height": 32
+            }
+          },
+          {
+            "label": "Novedades",
+            "rect": {
+              "x": 208.28,
+              "y": 101,
+              "width": 99.81,
+              "height": 44
+            }
+          },
+          {
+            "label": "Bolsas",
+            "rect": {
+              "x": 312.09,
+              "y": 101,
+              "width": 68.22,
+              "height": 44
+            }
+          },
+          {
+            "label": "Carteras",
+            "rect": {
+              "x": 384.31,
+              "y": 101,
+              "width": 81.58,
+              "height": 44
+            }
+          },
+          {
+            "label": "Relojes",
+            "rect": {
+              "x": 469.89,
+              "y": 101,
+              "width": 72.39,
+              "height": 44
+            }
+          },
+          {
+            "label": "Marcas",
+            "rect": {
+              "x": 546.28,
+              "y": 101,
+              "width": 95.59,
+              "height": 44
+            }
+          },
+          {
+            "label": "Perfumes",
+            "rect": {
+              "x": 645.88,
+              "y": 101,
+              "width": 106.7,
+              "height": 44
+            }
+          },
+          {
+            "label": "Maquillaje y skincare",
+            "rect": {
+              "x": 756.58,
+              "y": 101,
+              "width": 182.47,
+              "height": 44
+            }
+          },
+          {
+            "label": "Vende con Monetta",
+            "rect": {
+              "x": 943.05,
+              "y": 101,
+              "width": 154.5,
+              "height": 44
+            }
+          },
+          {
+            "label": "Cuenta",
+            "rect": {
+              "x": 1045.33,
+              "y": 40,
+              "width": 104.13,
+              "height": 48
+            }
+          },
+          {
+            "label": "Nuestra historia",
+            "rect": {
+              "x": 1101.55,
+              "y": 101,
+              "width": 130.16,
+              "height": 44
+            }
+          },
+          {
+            "label": "Favoritos",
+            "rect": {
+              "x": 1149.45,
+              "y": 40,
+              "width": 115.59,
+              "height": 48
+            }
+          },
+          {
+            "label": "Carrito, 3 artículos",
+            "rect": {
+              "x": 1265.05,
+              "y": 40,
+              "width": 126.95,
+              "height": 48
+            }
+          }
+        ],
+        "barControls": [],
+        "recommendationCard": null
+      },
+      "problems": []
+    }
+  ]
+}

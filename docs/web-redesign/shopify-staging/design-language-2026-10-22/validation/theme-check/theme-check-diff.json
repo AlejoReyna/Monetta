@@ -1,0 +1,14 @@
+{
+  "ranAt": "2026-10-22T22:56:38.996Z",
+  "theme": "/Users/alexis_reyna/MyCode/Monetta/storefront-theme",
+  "before": {
+    "errors": 187,
+    "warnings": 64
+  },
+  "after": {
+    "errors": 187,
+    "warnings": 64
+  },
+  "introduced": [],
+  "resolvedOrRemoved": []
+}

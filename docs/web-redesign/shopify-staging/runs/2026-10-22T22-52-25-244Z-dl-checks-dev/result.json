@@ -1,0 +1,618 @@
+{
+  "run": "dl-checks-dev",
+  "command": "node docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/checks.mjs --base-url=http://127.0.0.1:9292 --viewports=390x844,1440x900 --name=dl-checks-dev",
+  "startedAt": "2026-10-22T22:52:25.244Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 657,
+      "sha256": "0ec94cbfd1247f07593220248fb928a7ee2688be8b2e33248c3c43a5dcb9daa0"
+    },
+    "repoHead": "6833c20d56ffac653e9cbb3bab3b121456e6c71a",
+    "repoBranch": "feat/client-guide-oct20"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      390,
+      844
+    ],
+    [
+      1440,
+      900
+    ]
+  ],
+  "injectCss": null,
+  "flows": false,
+  "finishedAt": "2026-10-22T22:53:00.149Z",
+  "status": "complete-with-failures",
+  "error": null,
+  "summary": {
+    "checks": 114,
+    "passed": 98,
+    "failed": 16
+  },
+  "checks": [
+    {
+      "name": "390×844 home: document language es-MX",
+      "pass": true,
+      "detail": "es-MX"
+    },
+    {
+      "name": "390×844 home: section title is Playfair 23px (sectionTitle role)",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":23,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":108.984375,\"height\":26.4375,\"left\":20,\"right\":128.984375,\"top\":356.96875,\"bottom\":383.40625,\"text\":\"Novedades\"}"
+    },
+    {
+      "name": "390×844 home: collection tile on the card radius (12px)",
+      "pass": true,
+      "detail": "12"
+    },
+    {
+      "name": "390×844 home: brand cell on the card radius (12px)",
+      "pass": true,
+      "detail": "12"
+    },
+    {
+      "name": "390×844 home: style silhouette has no box radius (straight on the canvas)",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "390×844 home: header icon buttons are at least 48 x 48",
+      "pass": true,
+      "detail": "[{\"label\":\"Abrir menú\",\"w\":48,\"h\":48}]"
+    },
+    {
+      "name": "390×844 home: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 83x24\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 home: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 home: header, menu and footer labels carry no untranslated Shopify defaults",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 footer: column labels are the Inter eyebrow, not the serif",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":12,\"weight\":\"600\",\"transform\":\"uppercase\",\"radius\":0,\"width\":350,\"height\":18.59375,\"left\":20,\"right\":370,\"top\":4009.390625,\"bottom\":4027.984375,\"text\":\"Comprar\"}"
+    },
+    {
+      "name": "390×844 collection: product-card name is Inter (card-label role, the documented exception)",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":14,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":165,\"height\":36.375,\"left\":12,\"right\":177,\"top\":343.75,\"bottom\":380.125,\"text\":\"Bolsa Guess Beige y Blanca Hobo Hombro y Crossbody\"}"
+    },
+    {
+      "name": "390×844 collection: product-card brand is Inter 600",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":14,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":165,\"height\":17.5,\"left\":12,\"right\":177,\"top\":324.25,\"bottom\":341.75,\"text\":\"Guess\"}"
+    },
+    {
+      "name": "390×844 collection: card radius 12, photo mat radius 10",
+      "pass": true,
+      "detail": "{\"card\":12,\"media\":10}"
+    },
+    {
+      "name": "390×844 collection: favourite target is 48 x 48",
+      "pass": true,
+      "detail": "{\"w\":48,\"h\":48}"
+    },
+    {
+      "name": "390×844 collection: quick-add target is 48 x 48",
+      "pass": true,
+      "detail": "{\"w\":48,\"h\":48}"
+    },
+    {
+      "name": "390×844 collection: 2 product column(s)",
+      "pass": true,
+      "detail": "2"
+    },
+    {
+      "name": "390×844 collection: Shopify's all-products collection is titled \"Catálogo\"",
+      "pass": true,
+      "detail": "Catálogo"
+    },
+    {
+      "name": "390×844 collection: sort options and filter labels are Spanish",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 collection: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 product: name is Playfair 25px (productName role)",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":25,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":350,\"height\":28.75,\"left\":20,\"right\":370,\"top\":686.796875,\"bottom\":715.546875,\"text\":\"Reloj Coach Talia Saddle\"}"
+    },
+    {
+      "name": "390×844 product: accordion titles are Playfair",
+      "pass": true,
+      "detail": "Playfair Display"
+    },
+    {
+      "name": "390×844 product: \"Otras formas de comprar\" is the Inter panel title",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":17,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":350,\"height\":26.34375,\"left\":20,\"right\":370,\"top\":1212.8125,\"bottom\":1239.15625,\"text\":\"Otras formas de comprar\"}"
+    },
+    {
+      "name": "390×844 product: purchase button at least 48px tall",
+      "pass": true,
+      "detail": "{\"h\":48,\"text\":\"Agregar al carrito\"}"
+    },
+    {
+      "name": "390×844 product: option legends use the app's labels (Color), not the raw \"Band color\"",
+      "pass": true,
+      "detail": "[\"Color\"]"
+    },
+    {
+      "name": "390×844 product: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 83x24\",\"a.eyebrow.eyebrow--muted.product-panel__brand \\\"Coach\\\" 350x14\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"PÁGINA DE PREGUNTAS FRECUENTES\\\" 279x19\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 product: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 product (one photo): the viewer keeps a real width",
+      "pass": true,
+      "detail": "{\"width\":390}"
+    },
+    {
+      "name": "390×844 bag: \"Resumen de compra\" is the Inter panel title (boutiqueTitle)",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":17,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":300,\"height\":26.34375,\"left\":45,\"right\":345,\"top\":541.28125,\"bottom\":567.625,\"text\":\"Resumen de compra\"}"
+    },
+    {
+      "name": "390×844 bag: discount field on the control radius (12px), at least 48px tall",
+      "pass": true,
+      "detail": "{\"r\":12,\"h\":52}"
+    },
+    {
+      "name": "390×844 bag: \"Quitar códigos\" hidden while the bag holds no code",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "390×844 bag: summary under the lines below 1024",
+      "pass": true,
+      "detail": "{\"linesBottom\":428.28125,\"summaryTop\":516.28125}"
+    },
+    {
+      "name": "390×844 bag: the total amount stays on one line",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "390×844 bag: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.cart-line__name \\\"Bolso Steve Madden Shoulder Negro\\\" 246x39\",\"a.cart-line__name \\\"Reloj Coach Talia Saddle\\\" 246x20\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 search: results heading is the serif screen title at 22px (search_screen.dart)",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":22,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":227.140625,\"height\":24.625,\"left\":20,\"right\":247.140625,\"top\":161,\"bottom\":185.625,\"text\":\"Resultados para “bolso”\"}"
+    },
+    {
+      "name": "390×844 search (no results): empty-state title is Playfair",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":26,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":165.15625,\"height\":29.890625,\"left\":112.421875,\"right\":277.578125,\"top\":315.140625,\"bottom\":345.03125,\"text\":\"Sin resultados\"}"
+    },
+    {
+      "name": "390×844 contact: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 contact: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 contact: the page never scrolls sideways (the shell clips merchant blocks wider than the viewport)",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390,\"scrollX\":0,\"bodyOverflowX\":\"clip\"}"
+    },
+    {
+      "name": "390×844 policy: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 policy: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[\"Privacy policy\"]"
+    },
+    {
+      "name": "390×844 policy: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 83x24\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Shopify Consumer Privacy Policy\\\" 235x19\",\"a. \\\"Shopify Privacy Portal Link\\\" 190x19\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 policy: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 blog: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 blog: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 blog: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 83x24\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 blog: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 collections index: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 collections index: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 collections index: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 83x24\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 collections index: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 404: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 404: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 404: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 83x24\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 404: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844: no errors from Monetta scripts",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 home: document language es-MX",
+      "pass": true,
+      "detail": "es-MX"
+    },
+    {
+      "name": "1440×900 home: section title is Playfair 30px (sectionTitle role)",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":30,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":142.140625,\"height\":34.5,\"left\":48,\"right\":190.140625,\"top\":672.75,\"bottom\":707.25,\"text\":\"Novedades\"}"
+    },
+    {
+      "name": "1440×900 home: collection tile on the card radius (12px)",
+      "pass": true,
+      "detail": "12"
+    },
+    {
+      "name": "1440×900 home: brand cell on the card radius (12px)",
+      "pass": true,
+      "detail": "12"
+    },
+    {
+      "name": "1440×900 home: style silhouette has no box radius (straight on the canvas)",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "1440×900 home: header icon buttons are at least 48 x 48",
+      "pass": true,
+      "detail": "[{\"label\":\"Ver guardados\",\"w\":48,\"h\":48},{\"label\":\"Cuenta\",\"w\":104,\"h\":48},{\"label\":\"Carrito, vacío\",\"w\":101,\"h\":48}]"
+    },
+    {
+      "name": "1440×900 home: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"button.icon-button \\\"Anteriores: Novedades\\\" 44x44\",\"button.icon-button \\\"Siguientes: Novedades\\\" 44x44\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "1440×900 home: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440}"
+    },
+    {
+      "name": "1440×900 home: header, menu and footer labels carry no untranslated Shopify defaults",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 footer: column labels are the Inter eyebrow, not the serif",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":12,\"weight\":\"600\",\"transform\":\"uppercase\",\"radius\":0,\"width\":272.71875,\"height\":18.59375,\"left\":477.8125,\"right\":750.53125,\"top\":4583.609375,\"bottom\":4602.203125,\"text\":\"Comprar\"}"
+    },
+    {
+      "name": "1440×900 collection: product-card name is Inter (card-label role, the documented exception)",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":16,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":230,\"height\":41.59375,\"left\":340,\"right\":570,\"top\":662.328125,\"bottom\":703.921875,\"text\":\"Bolsa Guess Beige y Blanca Hobo Hombro y Crossbody\"}"
+    },
+    {
+      "name": "1440×900 collection: product-card brand is Inter 600",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":16,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":230,\"height\":20,\"left\":340,\"right\":570,\"top\":640.328125,\"bottom\":660.328125,\"text\":\"Guess\"}"
+    },
+    {
+      "name": "1440×900 collection: card radius 12, photo mat radius 10",
+      "pass": true,
+      "detail": "{\"card\":12,\"media\":10}"
+    },
+    {
+      "name": "1440×900 collection: favourite target is 48 x 48",
+      "pass": true,
+      "detail": "{\"w\":48,\"h\":48}"
+    },
+    {
+      "name": "1440×900 collection: quick-add target is 48 x 48",
+      "pass": true,
+      "detail": "{\"w\":48,\"h\":48}"
+    },
+    {
+      "name": "1440×900 collection: 4 product column(s)",
+      "pass": true,
+      "detail": "4"
+    },
+    {
+      "name": "1440×900 collection: Shopify's all-products collection is titled \"Catálogo\"",
+      "pass": true,
+      "detail": "Catálogo"
+    },
+    {
+      "name": "1440×900 collection: sort options and filter labels are Spanish",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 collection: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"select.select \\\"DestacadosMost relevantMás vendidosAlfab\\\" 226x44\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Inicio\\\" 33x32\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "1440×900 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440}"
+    },
+    {
+      "name": "1440×900 product: name is Playfair 32px (productName role)",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":32,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":544.328125,\"height\":36.796875,\"left\":847.671875,\"right\":1392,\"top\":205.734375,\"bottom\":242.53125,\"text\":\"Reloj Coach Talia Saddle\"}"
+    },
+    {
+      "name": "1440×900 product: accordion titles are Playfair",
+      "pass": true,
+      "detail": "Playfair Display"
+    },
+    {
+      "name": "1440×900 product: \"Otras formas de comprar\" is the Inter panel title",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":17,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":544.328125,\"height\":26.34375,\"left\":847.671875,\"right\":1392,\"top\":689.984375,\"bottom\":716.328125,\"text\":\"Otras formas de comprar\"}"
+    },
+    {
+      "name": "1440×900 product: purchase button at least 52px tall",
+      "pass": true,
+      "detail": "{\"h\":52,\"text\":\"Agregar al carrito\"}"
+    },
+    {
+      "name": "1440×900 product: two columns from 1024 (panel beside the gallery)",
+      "pass": true,
+      "detail": "{\"galleryRight\":745.03125,\"panelLeft\":847.671875}"
+    },
+    {
+      "name": "1440×900 product: option legends use the app's labels (Color), not the raw \"Band color\"",
+      "pass": true,
+      "detail": "[\"Color\"]"
+    },
+    {
+      "name": "1440×900 product: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"a.eyebrow.eyebrow--muted.product-panel__brand \\\"Coach\\\" 544x16\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Inicio\\\" 33x32\",\"a. \\\"Catálogo\\\" 55x32\",\"a. \\\"PÁGINA DE PREGUNTAS FRECUENTES\\\" 279x19\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "1440×900 product: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440}"
+    },
+    {
+      "name": "1440×900 product (one photo): the viewer keeps a real width",
+      "pass": true,
+      "detail": "{\"width\":554.390625}"
+    },
+    {
+      "name": "1440×900 bag: \"Resumen de compra\" is the Inter panel title (boutiqueTitle)",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":17,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":421.28125,\"height\":26.34375,\"left\":945.71875,\"right\":1367,\"top\":223.6875,\"bottom\":250.03125,\"text\":\"Resumen de compra\"}"
+    },
+    {
+      "name": "1440×900 bag: discount field on the control radius (12px), at least 48px tall",
+      "pass": true,
+      "detail": "{\"r\":12,\"h\":52}"
+    },
+    {
+      "name": "1440×900 bag: \"Quitar códigos\" hidden while the bag holds no code",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "1440×900 bag: summary beside the lines from 1024",
+      "pass": true,
+      "detail": "{\"linesRight\":872.71875,\"summaryLeft\":920.71875}"
+    },
+    {
+      "name": "1440×900 bag: the total amount stays on one line",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "1440×900 bag: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"a.cart-line__name \\\"Bolso Steve Madden Shoulder Negro\\\" 693x20\",\"a.cart-line__name \\\"Reloj Coach Talia Saddle\\\" 693x20\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "1440×900 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440}"
+    },
+    {
+      "name": "1440×900 search (no results): empty-state title is Playfair",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":26,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":165.15625,\"height\":29.890625,\"left\":637.421875,\"right\":802.578125,\"top\":404.828125,\"bottom\":434.71875,\"text\":\"Sin resultados\"}"
+    },
+    {
+      "name": "1440×900 contact: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "1440×900 contact: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 contact: the page never scrolls sideways (the shell clips merchant blocks wider than the viewport)",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440,\"scrollX\":0,\"bodyOverflowX\":\"clip\"}"
+    },
+    {
+      "name": "1440×900 policy: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "1440×900 policy: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[\"Privacy policy\"]"
+    },
+    {
+      "name": "1440×900 policy: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Shopify Consumer Privacy Policy\\\" 266x20\",\"a. \\\"Shopify Privacy Portal Link\\\" 684x46\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "1440×900 policy: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440}"
+    },
+    {
+      "name": "1440×900 blog: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "1440×900 blog: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 blog: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Inicio\\\" 33x32\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "1440×900 blog: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440}"
+    },
+    {
+      "name": "1440×900 collections index: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "1440×900 collections index: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 collections index: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Inicio\\\" 33x32\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "1440×900 collections index: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440}"
+    },
+    {
+      "name": "1440×900 404: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "1440×900 404: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 404: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": false,
+      "detail": "{\"small\":[\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"button.icon-button \\\"Anteriores: Te puede interesar\\\" 44x44\",\"button.icon-button \\\"Siguientes: Te puede interesar\\\" 44x44\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "1440×900 404: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":1440,\"clientWidth\":1440}"
+    },
+    {
+      "name": "1440×900: no errors from Monetta scripts",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": [
+    "390×844 contact (merchant blocks): targets under 48px: [\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 83x24\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"]",
+    "390×844 contact: merchant blocks fit; body overflow-x clip",
+    "1440×900 contact (merchant blocks): targets under 48px: [\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 111x32\",\"input. \\\"\\\" 506x46\",\"a.site-nav__link \\\"Inicio\\\" 60x44\",\"a.site-nav__link \\\"Catálogo\\\" 84x44\",\"a.site-nav__link \\\"Contacto\\\" 85x44\",\"a.wordmark \\\"Monetta Staging, ir al inicio\\\" 90x26\",\"a. \\\"Inicio\\\" 38x40\",\"a. \\\"Catálogo\\\" 64x40\",\"a. \\\"Contacto\\\" 65x40\",\"a. \\\"Buscar\\\" 49x40\"]",
+    "1440×900 contact: merchant blocks fit; body overflow-x clip"
+  ]
+}

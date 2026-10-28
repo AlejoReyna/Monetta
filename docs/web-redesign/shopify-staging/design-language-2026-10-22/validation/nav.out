@@ -1,0 +1,36 @@
+run dir: /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-03-00-088Z-nav
+PASS  768×1024: row overflows after adding links (the layout under test is active)
+PASS  768×1024: Tab reached all 12 row links in order  — 12/12
+PASS  768×1024: focus ring painted on all four sides for every link  — []
+PASS  768×1024: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)  — []
+PASS  768×1024: every focused link keeps ink-dark text (not faded)  — []
+PASS  768×1024: the last link ends before the 88% fade start  — 671 <= 676
+PASS  768×1024: Shift+Tab walks the same links in reverse  — 12/12
+PASS  812×375: row overflows after adding links (the layout under test is active)
+PASS  812×375: Tab reached all 12 row links in order  — 12/12
+PASS  812×375: focus ring painted on all four sides for every link  — []
+PASS  812×375: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)  — []
+PASS  812×375: every focused link keeps ink-dark text (not faded)  — []
+PASS  812×375: the last link ends before the 88% fade start  — 706 <= 715
+PASS  812×375: Shift+Tab walks the same links in reverse  — 12/12
+PASS  1023×768: row overflows after adding links (the layout under test is active)
+PASS  1023×768: Tab reached all 12 row links in order  — 12/12
+PASS  1023×768: focus ring painted on all four sides for every link  — []
+PASS  1023×768: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)  — []
+PASS  1023×768: every focused link keeps ink-dark text (not faded)  — []
+PASS  1023×768: the last link ends before the 88% fade start  — 892 <= 900
+PASS  1023×768: Shift+Tab walks the same links in reverse  — 12/12
+note  1024×768: row overflows with 12 links (desktop: fit-content, no fade)
+PASS  1024×768: Tab reached all 12 row links in order  — 12/12
+PASS  1024×768: focus ring painted on all four sides for every link  — []
+PASS  1024×768: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)  — []
+PASS  1024×768: every focused link keeps ink-dark text (not faded)  — []
+PASS  1024×768: Shift+Tab walks the same links in reverse  — 12/12
+note  1440×900: row fits with 12 links (desktop: fit-content, no fade)
+PASS  1440×900: Tab reached all 12 row links in order  — 12/12
+PASS  1440×900: focus ring painted on all four sides for every link  — []
+PASS  1440×900: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)  — []
+PASS  1440×900: every focused link keeps ink-dark text (not faded)  — []
+PASS  1440×900: Shift+Tab walks the same links in reverse  — 12/12
+
+complete-pass: 31/31 checks · /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-03-00-088Z-nav/result.json

@@ -1,0 +1,313 @@
+{
+  "run": "regressions-1440x900-dev",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/regressions.mjs --base-url=http://127.0.0.1:9292 --w=1440 --h=900 --only=p3,p4,p5,p6,p8 --label=dev",
+  "startedAt": "2026-10-19T22:18:17.923Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 611,
+      "sha256": "3bc7b18d54861884fba1bdcc1264514eadcd3bd1bef22a209a24c95f49359eec"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "incidents": [],
+  "proxyHealthAfter": {
+    "checkedAt": "2026-10-19T22:18:45.729Z",
+    "baseUrl": "http://127.0.0.1:9292",
+    "store": "monetta-staging.myshopify.com",
+    "expectedTheme": {
+      "id": "192125304866",
+      "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+    },
+    "timeoutMs": 20000,
+    "checks": [
+      {
+        "name": "exactly one healthy theme dev proxy exists, it serves the authorised draft theme and it is the one under test",
+        "pass": true,
+        "detail": "[[9292,\"192125304866\",\"healthy\"]]"
+      },
+      {
+        "name": "the probe page answers 200 within the time limit",
+        "pass": true,
+        "detail": "306 ms"
+      },
+      {
+        "name": "the document is the expected theme (Shopify.theme id, role unpublished, name)",
+        "pass": true,
+        "detail": "{\"name\":\"Monetta Web F1 borrador sin publicar 2026-10-19\",\"id\":192125304866,\"schema_name\":\"Atelier\",\"schema_version\":\"3.5.0\",\"theme_store_id\":null,\"role\":\"unpublished\"}"
+      },
+      {
+        "name": "the document uses the Monetta layout (body.mw)",
+        "pass": true,
+        "detail": ""
+      },
+      {
+        "name": "served monetta-product.js equals the local file",
+        "pass": true,
+        "detail": "served 4d3a8395e4a3 · local 4d3a8395e4a3"
+      },
+      {
+        "name": "served monetta-cart.js equals the local file",
+        "pass": true,
+        "detail": "served 332f3e54df41 · local 332f3e54df41"
+      },
+      {
+        "name": "served monetta-core.js equals the local file",
+        "pass": true,
+        "detail": "served 9e0cd64e6b81 · local 9e0cd64e6b81"
+      }
+    ],
+    "incidents": [],
+    "processes": [
+      "96196 15:37:42 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off"
+    ],
+    "proxies": [
+      {
+        "port": 9292,
+        "theme": "192125304866",
+        "state": "healthy",
+        "process": "96196 15:37:42 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --pat"
+      }
+    ],
+    "ok": true
+  },
+  "finishedAt": "2026-10-19T22:18:46.512Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 43,
+    "passed": 42,
+    "failed": 1
+  },
+  "checks": [
+    {
+      "name": "P3 [staging] without JavaScript, the initial variant is what the form sends",
+      "pass": true,
+      "detail": "form id 68551021592610 vs 68551021592610"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, no radio chip is shown (nothing that looks selectable but sends nothing); the option links are",
+      "pass": true,
+      "detail": "{\"radiosShown\":0,\"linksShown\":8,\"current\":[\"Rosa Blush\"],\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":false,\"seal\":false}"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, choosing another available variant makes the form send exactly that variant",
+      "pass": true,
+      "detail": "form id 68551021625378 vs 68551021625378; [\"Café\"]"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, the price on the page is that variant's price",
+      "pass": true,
+      "detail": "$ 3,647.00 MXN vs 3647"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, a native form submission adds exactly the chosen variant to the anonymous cart",
+      "pass": true,
+      "detail": "[[68551021625378,1]]"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, a sold-out variant is reachable, is marked, and its add button is disabled",
+      "pass": true,
+      "detail": "{\"radiosShown\":0,\"linksShown\":2,\"current\":[\"Negro\"],\"price\":\"$ 1,445.00 MXN\",\"addDisabled\":true,\"seal\":true}"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, the sold-out variant's form carries that variant (never an available one)",
+      "pass": true,
+      "detail": "form id 68550844121122 vs 68550844121122"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: one valid JSON-LD block is rendered (the legacy markup had none)",
+      "pass": true,
+      "detail": "{\"count\":1,\"errors\":[],\"type\":\"ProductGroup\"}"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: its type is native (ProductGroup) and it names the product",
+      "pass": true,
+      "detail": "{\"type\":\"ProductGroup\",\"name\":\"Reloj Coach Talia Saddle\",\"title\":\"Reloj Coach Talia Saddle\"}"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: it lists every variant Shopify has (8), by id",
+      "pass": true,
+      "detail": "8 offered of 8"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: each offer's price and availability equal Shopify's for that variant",
+      "pass": true,
+      "detail": "[[\"3647.00\",\"http://schema.org/InStock\"],[\"3647.00\",\"http://schema.org/InStock\"],[\"3647.00\",\"http://schema.org/InStock\"],[\"3647.00\",\"http://schema.org/InStock\"]]"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: canonical and page metadata are kept",
+      "pass": true,
+      "detail": "{\"canonical\":\"https://monetta-staging.myshopify.com/products/reloj-coach-talia-saddle\",\"og\":\"Reloj Coach Talia Saddle\",\"microdata\":0}"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: one valid JSON-LD block is rendered (the legacy markup had none)",
+      "pass": true,
+      "detail": "{\"count\":1,\"errors\":[],\"type\":\"ProductGroup\"}"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: its type is native (ProductGroup) and it names the product",
+      "pass": true,
+      "detail": "{\"type\":\"ProductGroup\",\"name\":\"Bolso Steve Madden Crossbody\",\"title\":\"Bolso Steve Madden Crossbody\"}"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: it lists every variant Shopify has (2), by id",
+      "pass": true,
+      "detail": "2 offered of 2"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: each offer's price and availability equal Shopify's for that variant",
+      "pass": true,
+      "detail": "[[\"1445.00\",\"http://schema.org/InStock\"],[\"1445.00\",\"http://schema.org/OutOfStock\"]]"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: canonical and page metadata are kept",
+      "pass": true,
+      "detail": "{\"canonical\":\"https://monetta-staging.myshopify.com/products/bolso-steve-madden-crossbody-3\",\"og\":\"Bolso Steve Madden Crossbody\",\"microdata\":0}"
+    },
+    {
+      "name": "P4 [source] the markup is produced by the native structured_data filter; the section has no literal price, availability or id in it",
+      "pass": true,
+      "detail": "{{ product | structured_data }}"
+    },
+    {
+      "name": "P5 [staging] \"Ver más piezas\" is a link that keeps the filters and the sort in its address",
+      "pass": true,
+      "detail": "/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] after a 503 nothing is appended and the address does not change",
+      "pass": true,
+      "detail": "24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] the failure box offers a retry button and, separately, a link that is no longer intercepted (still filtered and sorted)",
+      "pass": true,
+      "detail": "{\"retry\":true,\"native\":\"/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending\",\"interceptable\":false,\"alert\":\"alert\",\"focus\":true}"
+    },
+    {
+      "name": "P5 [staging] retrying while Shopify still fails sends one more fetch, adds nothing and leaves the box in place",
+      "pass": true,
+      "detail": "fetches 2"
+    },
+    {
+      "name": "P5 [staging] the native link performs a real navigation to page 2, keeping filter and sort",
+      "pass": false,
+      "detail": "2 navigation(s); http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] recovery: the retry appends page 2, updates the address and keeps filter and sort",
+      "pass": true,
+      "detail": "48 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] HTTP 200 with a body that is not a listing: nothing is added and the address is untouched",
+      "pass": true,
+      "detail": "24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] HTTP 200 with a listing page with an empty grid: nothing is added and the address is untouched",
+      "pass": true,
+      "detail": "24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] HTTP 200 with a password wall: nothing is added and the address is untouched",
+      "pass": true,
+      "detail": "24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "P6 [staging] phone 375×812, mouse: the focus lands on a search field that is visible and on screen, with its text selected",
+      "pass": true,
+      "detail": "{\"id\":\"page-search-input\",\"visible\":true,\"inView\":true,\"selected\":true,\"value\":\"zzcorreccionesnoexiste987\"}"
+    },
+    {
+      "name": "P6 [staging] phone 375×812, mouse: the link's own href (without JavaScript) points at a visible field",
+      "pass": true,
+      "detail": "#page-search-input"
+    },
+    {
+      "name": "P6 [staging] phone 375×812, keyboard: the focus lands on a search field that is visible and on screen, with its text selected",
+      "pass": true,
+      "detail": "{\"id\":\"page-search-input\",\"visible\":true,\"inView\":true,\"selected\":true,\"value\":\"zzcorreccionesnoexiste987\"}"
+    },
+    {
+      "name": "P6 [staging] phone 375×812, keyboard: the link's own href (without JavaScript) points at a visible field",
+      "pass": true,
+      "detail": "#page-search-input"
+    },
+    {
+      "name": "P6 [staging] desktop 1440×900, mouse: the focus lands on a search field that is visible and on screen, with its text selected",
+      "pass": true,
+      "detail": "{\"id\":\"page-search-input\",\"visible\":true,\"inView\":true,\"selected\":true,\"value\":\"zzcorreccionesnoexiste987\"}"
+    },
+    {
+      "name": "P6 [staging] desktop 1440×900, mouse: the link's own href (without JavaScript) points at a visible field",
+      "pass": true,
+      "detail": "#page-search-input"
+    },
+    {
+      "name": "P6 [staging] desktop 1440×900, keyboard: the focus lands on a search field that is visible and on screen, with its text selected",
+      "pass": true,
+      "detail": "{\"id\":\"page-search-input\",\"visible\":true,\"inView\":true,\"selected\":true,\"value\":\"zzcorreccionesnoexiste987\"}"
+    },
+    {
+      "name": "P6 [staging] desktop 1440×900, keyboard: the link's own href (without JavaScript) points at a visible field",
+      "pass": true,
+      "detail": "#page-search-input"
+    },
+    {
+      "name": "P8 [staging] home: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] collection: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] product: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] cart: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] search: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] the page's own text is Spanish (more Spanish than English function words outside fragments marked with another language)",
+      "pass": true,
+      "detail": "{\"es\":30,\"en\":0}"
+    },
+    {
+      "name": "P8 [staging] fragments Shopify writes in the store's language are marked with it: menu titles and the accelerated checkout",
+      "pass": true,
+      "detail": "{\"storeLang\":\"en\",\"nav\":[[\"Home\",\"en\"],[\"Catalog\",\"en\"],[\"Contact\",\"en\"]],\"pay\":\"en\",\"payText\":\"Buy it now\"}"
+    },
+    {
+      "name": "proxy: after the run it still serves the expected theme with the local scripts (checked with bounded waits)",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "proxy incidents during the run: 0"
+  ]
+}

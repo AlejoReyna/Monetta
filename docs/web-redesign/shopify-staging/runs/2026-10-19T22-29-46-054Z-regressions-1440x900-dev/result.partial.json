@@ -1,0 +1,309 @@
+{
+  "run": "regressions-1440x900-dev",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/regressions.mjs --base-url=http://127.0.0.1:9292 --w=1440 --h=900 --only=p1 --label=dev",
+  "startedAt": "2026-10-19T22:29:46.054Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 611,
+      "sha256": "7f509763105897cdd4cc0518532a788586c63139ab339965e9e283a8099ce449"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "incidents": [],
+  "proxyHealthAfter": {
+    "checkedAt": "2026-10-19T22:30:11.638Z",
+    "baseUrl": "http://127.0.0.1:9292",
+    "store": "monetta-staging.myshopify.com",
+    "expectedTheme": {
+      "id": "192125304866",
+      "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+    },
+    "timeoutMs": 20000,
+    "checks": [
+      {
+        "name": "exactly one healthy theme dev proxy exists, it serves the authorised draft theme and it is the one under test",
+        "pass": true,
+        "detail": "[[9292,\"192125304866\",\"healthy\"]]"
+      },
+      {
+        "name": "the probe page answers 200 within the time limit",
+        "pass": true,
+        "detail": "301 ms"
+      },
+      {
+        "name": "the document is the expected theme (Shopify.theme id, role unpublished, name)",
+        "pass": true,
+        "detail": "{\"name\":\"Monetta Web F1 borrador sin publicar 2026-10-19\",\"id\":192125304866,\"schema_name\":\"Atelier\",\"schema_version\":\"3.5.0\",\"theme_store_id\":null,\"role\":\"unpublished\"}"
+      },
+      {
+        "name": "the document uses the Monetta layout (body.mw)",
+        "pass": true,
+        "detail": ""
+      },
+      {
+        "name": "served monetta-product.js equals the local file",
+        "pass": true,
+        "detail": "served 4d3a8395e4a3 · local 4d3a8395e4a3"
+      },
+      {
+        "name": "served monetta-cart.js equals the local file",
+        "pass": true,
+        "detail": "served 332f3e54df41 · local 332f3e54df41"
+      },
+      {
+        "name": "served monetta-core.js equals the local file",
+        "pass": true,
+        "detail": "served 9e0cd64e6b81 · local 9e0cd64e6b81"
+      }
+    ],
+    "incidents": [],
+    "processes": [
+      "96196 15:49:08 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off"
+    ],
+    "proxies": [
+      {
+        "port": 9292,
+        "theme": "192125304866",
+        "state": "healthy",
+        "process": "96196 15:49:08 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --pat"
+      }
+    ],
+    "ok": true
+  },
+  "finishedAt": "2026-10-19T22:30:12.456Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 42,
+    "passed": 42,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "P1 [staging] control: after Shopify answers, id, chip, header, address and price are the chosen variant's",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021625378,\"chosen\":[\"Café\"],\"header\":[\"Café\"],\"url\":\"68551021625378\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] control: the page is confirmed (selection=valid) and not busy",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null}"
+    },
+    {
+      "name": "P1 [staging] control: adding after confirmation sends the chosen variant, once",
+      "pass": true,
+      "detail": "[{\"id\":68551021625378,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"}]"
+    },
+    {
+      "name": "P1 [staging] slow answer: the page reports the choice as pending (selection=pending, aria-busy, status text)",
+      "pass": true,
+      "detail": "{\"selection\":\"pending\",\"busy\":\"true\",\"status\":\"Confirmando disponibilidad de Café…\"}"
+    },
+    {
+      "name": "P1 [staging] slow answer: the chip and the value beside the option name agree on the chosen option",
+      "pass": true,
+      "detail": "{\"chosen\":[\"Café\"],\"header\":[\"Café\"]}"
+    },
+    {
+      "name": "P1 [staging] slow answer: every add button is really disabled (not only dimmed)",
+      "pass": true,
+      "detail": "[true,true]"
+    },
+    {
+      "name": "P1 [staging] slow answer: the accelerated-checkout / WhatsApp area is inert",
+      "pass": true,
+      "detail": "[true]"
+    },
+    {
+      "name": "P1 [staging] slow answer: pressing every add button (2) by mouse, click() and dispatch, and Enter in the quantity field, sends no add request",
+      "pass": true,
+      "detail": "enter=true adds=0 []"
+    },
+    {
+      "name": "P1 [staging] slow answer: the accelerated-checkout button (Buy it now) starts nothing: no cartCreate request",
+      "pass": true,
+      "detail": "payment buttons=1 cartCreate=0"
+    },
+    {
+      "name": "P1 [staging] slow answer: when it arrives, id, chip, header, address and price are B's together and buying is open again",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021625378,\"chosen\":[\"Café\"],\"header\":[\"Café\"],\"url\":\"68551021625378\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] slow answer: adding afterwards sends exactly B, with the page showing B at that instant",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021625378,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021625378,\"chosen\":[\"Café\"],\"t\":4820.0999999940395}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 503: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] HTTP 503: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] HTTP 503: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":7138.5999999940395}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 503: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] dropped connection: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] dropped connection: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] dropped connection: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":9549.59999999404}]"
+    },
+    {
+      "name": "P1 [staging] dropped connection: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a document that is not the product section: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a document that is not the product section: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a document that is not the product section: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":11870.29999999702}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a document that is not the product section: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section that has no product form: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section that has no product form: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section that has no product form: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":14502.59999999404}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section that has no product form: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section whose chips disagree with its variant: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section whose chips disagree with its variant: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section whose chips disagree with its variant: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":17138.20000000298}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section whose chips disagree with its variant: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] another variant rendered than asked: the page adopts what Shopify rendered and shows it everywhere",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021658146,\"chosen\":[\"Negro/Plateado\"],\"header\":[\"Negro/Plateado\"],\"url\":\"68551021658146\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] another variant rendered than asked: the shopper is told (alert toast)",
+      "pass": true,
+      "detail": "Esa combinación ya no está disponible. Mostramos Negro/Plateado."
+    },
+    {
+      "name": "P1 [staging] A→B→C, B answers after C: the page ends on C (id, chip, header, address, price) and B's late answer changed nothing",
+      "pass": true,
+      "detail": "ask B · ask C | {\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021658146,\"chosen\":[\"Negro/Plateado\"],\"header\":[\"Negro/Plateado\"],\"url\":\"68551021658146\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] A→B→C out of order: adding sends C",
+      "pass": true,
+      "detail": "[{\"id\":68551021658146,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"}]"
+    },
+    {
+      "name": "P1 [staging] A→B→C, B answers while C is pending: nothing of B is applied and buying stays closed",
+      "pass": true,
+      "detail": "{\"selection\":\"pending\",\"busy\":\"true\",\"hidden\":68551021592610,\"chosen\":[\"Negro/Plateado\"],\"header\":[\"Negro/Plateado\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[true,true],\"payInert\":[true],\"status\":\"Confirmando disponibilidad de Negro/Plateado…\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] A→B→C, C then fails: the page ends on A everywhere (id, chip, header, address, price)",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Negro/Plateado». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [controlled] two options: choosing B with x checked requests exactly the variant A/x→B/x (R3) and shows B / x",
+      "pass": true,
+      "detail": "{\"asked\":[68551021658146],\"seen\":{\"chosen\":[\"B\",\"x\"],\"header\":[\"B\",\"x\"]}}"
+    },
+    {
+      "name": "P1 [controlled] two options: B/y does not exist, so the nearest variant that keeps B (R3 = B/x) is requested and the chips show B / x at once",
+      "pass": true,
+      "detail": "{\"asked\":[68551021658146,68551021625378,68551021658146],\"seen\":{\"chosen\":[\"B\",\"x\"],\"header\":[\"B\",\"x\"]}}"
+    },
+    {
+      "name": "P1 [staging] over all 8 adds of this run, the id sent equalled the variant shown, the chips and a confirmed selection at that instant",
+      "pass": true,
+      "detail": "[[68551021625378,68551021625378,\"valid\",\"Café\"],[68551021625378,68551021625378,\"valid\",\"Café\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021658146,68551021658146,\"valid\",\"Negro/Plateado\"]]"
+    },
+    {
+      "name": "P1 [staging] no console or page errors from the theme during the scenarios",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "proxy: after the run it still serves the expected theme with the local scripts (checked with bounded waits)",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "P1 page: reloj-coach-talia-saddle; initial variant 68551021592610 \"Rosa Blush\", B 68551021625378 \"Café\", C 68551021658146 \"Negro/Plateado\"",
+    "proxy incidents during the run: 0"
+  ]
+}

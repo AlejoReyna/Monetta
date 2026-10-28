@@ -1,0 +1,7 @@
+run dir: /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-02-54-795Z-motion
+PASS  reduced: every transition collapses to ~0 (buttons, cards, drawer panel and backdrop)  — {"btn":"1e-05s","card":"1e-05s","panel":"1e-05s","backdrop":"1e-05s","scroll":"auto"}
+PASS  reduced: smooth scrolling is off  — auto
+PASS  reduced: the menu drawer is in place at once (no slide to wait for)  — none 120 ms after opening
+PASS  no preference: the design's motion is present (panel 280 ms, buttons 180 ms)  — {"btn":"0.18s, 0.18s, 0.18s, 0.18s","card":"0.18s, 0.18s","panel":"0.28s, 0.28s","backdrop":"0.28s","scroll":"auto"}
+
+complete-pass: 4/4 checks · /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-02-54-795Z-motion/result.json

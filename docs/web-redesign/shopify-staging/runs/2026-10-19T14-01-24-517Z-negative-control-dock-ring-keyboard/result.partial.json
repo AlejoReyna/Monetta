@@ -1,0 +1,57 @@
+{
+  "run": "negative-control-dock-ring-keyboard",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/keyboard.mjs --base-url=http://127.0.0.1:9292 --viewports=375x812 --pages=collection --label=dock-ring --inject-css=.dock__item:focus-visible{z-index:auto !important}",
+  "startedAt": "2026-10-19T14:01:24.517Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      375,
+      812
+    ]
+  ],
+  "pages": [
+    "collection"
+  ],
+  "insetPx": 0,
+  "injectCss": ".dock__item:focus-visible{z-index:auto !important}",
+  "finishedAt": "2026-10-19T14:01:40.975Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 3,
+    "passed": 2,
+    "failed": 1
+  },
+  "checks": [
+    {
+      "name": "375×812 collection: 64 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": false,
+      "detail": "[\"a.dock__item \\\"Inicio\\\": focus ring right side not painted (0% of 1 samples dark)\"]"
+    },
+    {
+      "name": "375×812 collection: Shift+Tab visits the same 64 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "375×812 collection: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    }
+  ],
+  "notes": []
+}

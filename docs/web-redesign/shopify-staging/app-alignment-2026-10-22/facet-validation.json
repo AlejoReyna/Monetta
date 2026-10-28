@@ -1,0 +1,6 @@
+{
+  "cases": 16,
+  "result": "PASS",
+  "engine": "LiquidJS",
+  "scope": "Vocabulario Liquid generado vs prioridades y etiquetas de Flutter; no emula el API comercial de Shopify."
+}

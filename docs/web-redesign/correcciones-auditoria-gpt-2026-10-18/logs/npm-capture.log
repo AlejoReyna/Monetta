@@ -1,0 +1,63 @@
+
+> monetta-web-design-prototype@0.1.0 capture
+> node verify/capture.mjs --out=../docs/web-redesign/correcciones-auditoria-gpt-2026-10-18/capturas-estandar
+
+✓ home__phone-390__top.jpg
+✓ home__phone-390__full.jpg
+✓ home__tablet-768__full.jpg
+✓ home__desktop-1440__top.jpg
+✓ home__desktop-1440__full.jpg
+✓ collection__phone-390__top.jpg
+✓ collection__phone-390__full.jpg
+✓ collection__tablet-768__full.jpg
+✓ collection__laptop-1024__top.jpg
+✓ collection__wide-1280__top.jpg
+✓ collection__desktop-1440__full.jpg
+✓ collection__desktop-1440__filtered.jpg
+✓ collection__phone-390__filter-drawer.jpg
+✓ collection__phone-390__empty-filtered.jpg
+✓ collection__phone-390__scrolled.jpg
+✓ brand__desktop-1440__coach.jpg
+✓ product__phone-390__top.jpg
+✓ product__phone-390__options.jpg
+✓ product__phone-375__purchase.jpg
+✓ product__phone-390__full.jpg
+✓ product__tablet-768__full.jpg
+✓ product__desktop-1440__top.jpg
+✓ product__desktop-1440__full.jpg
+✓ product__desktop-1440__sale.jpg
+✓ product__desktop-1440__envio-inmediato.jpg
+✓ product__phone-390__sold-out.jpg
+✓ product__phone-390__recommendations.jpg
+✓ product__desktop-1440__quick-view.jpg
+✓ product__desktop-1440__apartado.jpg
+✓ product__phone-390__added-sheet.jpg
+✓ product__desktop-1440__add-error.jpg
+✓ search__phone-390__suggestions.jpg
+✓ search__phone-390__predictive.jpg
+✓ search__phone-390__results.jpg
+✓ search__tablet-768__full.jpg
+✓ search__desktop-1440__predictive.jpg
+✓ search__desktop-1440__results.jpg
+✓ search__desktop-1440__no-results.jpg
+✓ search__desktop-1440__suggestion-error.jpg
+✓ search__desktop-1440__results-error.jpg
+✓ cart__phone-390__top.jpg
+✓ cart__phone-375__summary.jpg
+✓ cart__tablet-768__full.jpg
+✓ cart__desktop-1440__full.jpg
+✓ cart__desktop-1440__drawer.jpg
+✓ cart__desktop-1440__checkout-handoff.jpg
+✓ cart__phone-390__empty.jpg
+✓ menu__phone-390__open.jpg
+✓ favorites__desktop-1440__items.jpg
+✓ favorites__phone-390__empty.jpg
+✓ mayoreo__phone-390__top.jpg
+✓ mayoreo__desktop-1440__full.jpg
+✓ story__desktop-1440__full.jpg
+✓ contact__phone-390__full.jpg
+✓ account__desktop-1440__entry.jpg
+✓ account__desktop-1440__handoff.jpg
+✓ prototype-panel__desktop-1440.jpg
+✓ not-found__tablet-768.jpg
+58 captures → ../docs/web-redesign/correcciones-auditoria-gpt-2026-10-18/capturas-estandar

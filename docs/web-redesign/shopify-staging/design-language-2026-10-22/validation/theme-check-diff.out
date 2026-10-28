@@ -1,0 +1,12 @@
+{
+ "before": {
+  "errors": 187,
+  "warnings": 64
+ },
+ "after": {
+  "errors": 187,
+  "warnings": 64
+ },
+ "introduced": 0,
+ "resolvedOrRemoved": 0
+}

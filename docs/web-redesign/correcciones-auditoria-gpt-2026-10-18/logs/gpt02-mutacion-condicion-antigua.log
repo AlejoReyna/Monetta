@@ -1,0 +1,95 @@
+✔ a visit that began on this screen has nothing to go back to (0.855208ms)
+✔ opening another screen makes one step back leave it (0.373708ms)
+✔ filter and sort entries stay inside the screen they belong to (0.063833ms)
+✔ the next screen starts its own run after filters (0.055084ms)
+✔ filters applied on the first screen of a visit still have nowhere to go back to (0.065209ms)
+✔ replacing the entry (retry, variant) never moves the counters (0.061542ms)
+✖ Forward right after the arrow is not undone by the arrow's fallback (1.072334ms)
+✖ a link opened after the arrow wins even when it lands on the address the arrow left (0.315125ms)
+✖ a changed address or a restore from the cache after the arrow also retires the fallback (0.226083ms)
+✔ when the earlier entries are gone the arrow still reaches its parent (0.177875ms)
+✔ a visit that began on the screen goes to the parent without touching the history (0.109291ms)
+✔ the arrow skips the filter entries of its screen in one step; the fallback stays quiet (0.106167ms)
+ℹ tests 12
+ℹ suites 0
+ℹ pass 9
+ℹ fail 3
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 62.537042
+
+✖ failing tests:
+
+test at tests/unit/navigation.test.mjs:130:1
+✖ Forward right after the arrow is not undone by the arrow's fallback (1.072334ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + '/collections/carteras-1'
+  - '/products/cartera'
+  
+      at TestContext.<anonymous> (file:///private/tmp/claude-501/-Users-alexis-reyna-MyCode-Monetta/0cdcd5cb-8baf-487d-8fe5-4285cbbadf7a/scratchpad/mutation/tests/unit/navigation.test.mjs:140:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: '/collections/carteras-1',
+    expected: '/products/cartera',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at tests/unit/navigation.test.mjs:147:1
+✖ a link opened after the arrow wins even when it lands on the address the arrow left (0.315125ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+    [
+      '/products/cartera',
+  +   '/collections/carteras-1'
+    ]
+  
+      at TestContext.<anonymous> (file:///private/tmp/claude-501/-Users-alexis-reyna-MyCode-Monetta/0cdcd5cb-8baf-487d-8fe5-4285cbbadf7a/scratchpad/mutation/tests/unit/navigation.test.mjs:155:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ '/products/cartera', '/collections/carteras-1' ],
+    expected: [ '/products/cartera' ],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }
+
+test at tests/unit/navigation.test.mjs:162:1
+✖ a changed address or a restore from the cache after the arrow also retires the fallback (0.226083ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly deep-equal:
+  + actual - expected
+  
+  + [
+  +   '/collections/carteras-1'
+  + ]
+  - []
+  
+      at TestContext.<anonymous> (file:///private/tmp/claude-501/-Users-alexis-reyna-MyCode-Monetta/0cdcd5cb-8baf-487d-8fe5-4285cbbadf7a/scratchpad/mutation/tests/unit/navigation.test.mjs:174:12)
+      at Test.runInAsyncScope (node:async_hooks:227:14)
+      at Test.run (node:internal/test_runner/test:1402:25)
+      at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+      at Test.postRun (node:internal/test_runner/test:1542:19)
+      at Test.run (node:internal/test_runner/test:1467:12)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: [ '/collections/carteras-1' ],
+    expected: [],
+    operator: 'deepStrictEqual',
+    diff: 'simple'
+  }

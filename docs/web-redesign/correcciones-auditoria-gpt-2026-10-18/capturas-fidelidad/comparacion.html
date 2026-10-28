@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monetta · Fidelidad móvil, antes y después</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color: #111; background: #f5f5f5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1280px; margin: 0 auto; padding: 28px 24px 48px; }
+    h1 { font-size: 27px; line-height: 1.2; margin: 0 0 12px; }
+    p { line-height: 1.55; margin: 8px 0; }
+    a { color: #785724; text-underline-offset: 3px; }
+    .intro { max-width: 90ch; color: #555; }
+    .controls { display: flex; gap: 20px; flex-wrap: wrap; margin: 24px 0 16px; }
+    label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+    select { min-height: 44px; padding: 9px 36px 9px 12px; font: inherit; border: 1px solid #bbb; border-radius: 8px; background: white; }
+    :focus-visible { outline: 3px solid #8f6838; outline-offset: 3px; }
+    .finding { padding: 16px 20px; border: 1px solid #d6c59f; border-radius: 10px; background: #fff; margin-bottom: 22px; }
+    .trio { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; align-items: start; }
+    figure { margin: 0; min-width: 0; }
+    figcaption { font-size: 16px; font-weight: 600; margin: 0 auto 10px; max-width: var(--phone-width, 375px); }
+    figcaption span { display: block; font-size: 12px; font-weight: 400; color: #666; margin-top: 4px; }
+    .screen { width: 100%; max-width: var(--phone-width, 375px); margin: 0 auto; background: white; border: 1px solid #ddd; box-shadow: 0 6px 20px #0000000b; }
+    img { display: block; width: 100%; height: auto; }
+    .note { margin-top: 20px; color: #555; font-size: 13px; max-width: 100ch; }
+    @media (max-width: 1000px) { .trio { grid-template-columns: 1fr; gap: 28px; } main { padding: 24px 16px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Monetta · App móvil, prototipo del 17 de octubre y prototipo corregido</h1>
+    <p class="intro">Resultado de la revisión de fidelidad del 18 de octubre de 2026 (H01–H03). Izquierda: widgets Flutter actuales (carpeta de la auditoría, sin tocar). Centro: el prototipo antes de los cambios (auditoría). Derecha: el prototipo corregido. Las tres se muestran a la misma escala lógica.</p>
+    <p><a href="../RESULTADO.md">Leer el resultado por hallazgo</a> · <a href="../../audit-2026-10-18/REVISION_FIDELIDAD_MOBILE.md">Revisión original</a> · <a href="../../audit-2026-10-18/comparacion.html">Comparador original (app y antes)</a></p>
+    <div class="controls">
+      <label for="page">Pantalla
+        <select id="page"><option value="inicio">Inicio</option><option value="coleccion">Colección · Bolsas</option><option value="ficha">Ficha de producto</option><option value="ficha_recomendaciones">Ficha · Más de la marca</option><option value="ficha_vistas">Ficha · Vistas hace un momento</option><option value="busqueda">Búsqueda</option><option value="bolsa">Mi bolsa</option></select>
+      </label>
+      <label for="viewport">Viewport lógico
+        <select id="viewport"><option value="375x812">375 × 812</option><option value="440x956">440 × 956</option></select>
+      </label>
+    </div>
+    <p class="finding" id="finding" role="status"></p>
+    <div class="trio">
+      <figure><figcaption>App móvil actual<span>Widgets Flutter · DPR 3 · fotos de producto como marcador</span></figcaption><div class="screen"><img id="app" alt=""></div></figure>
+      <figure><figcaption>Prototipo del 17 de octubre<span>Brave · DPR 1 · estado previo (auditoría)</span></figcaption><div class="screen"><img id="before" alt=""></div></figure>
+      <figure><figcaption>Prototipo corregido<span>Brave · DPR 1 · build actual</span></figcaption><div class="screen"><img id="after" alt=""></div></figure>
+    </div>
+    <p class="note">Las capturas web incluyen 28 px del aviso de prototipo: se descuentan al comparar posiciones. Las fotos de producto no cargan en el arnés Flutter y quedan como marcadores; los productos y estados de bolsa difieren entre los dos snapshots. «Ficha · Vistas hace un momento» no tiene captura de la app: usa la misma sección que «Más de la marca». Las cifras de cada hallazgo salen de <code>web/metrics.json</code> y de las mediciones Flutter de la auditoría.</p>
+  </main>
+  <script>
+    const texts = {"inicio_375x812":"Sin cambios: Inicio conserva su composición, el encabezado Playfair de Novedades y las tarjetas compactas.","coleccion_375x812":"H01 · primera tarjeta a 140.8 px bajo el aviso (antes 323.6 px; app 88 px). Una barra fijada con Volver · Buscar productos · Filtrar y ordenar sustituye barra global, migas y fila de filtros; queda la fila de atajos de estilo.","ficha_375x812":"H02 · encabezado: Volver · Buscar productos · Monetta, ir al inicio · Cuenta · Carrito. Antes: Volver · Abrir menú · Monetta, ir al inicio · Buscar productos · Carrito. App: volver · buscar · logo · cuenta · bolsa.","ficha_recomendaciones_375x812":"H03 · «Más de Michael Kors» en Inter 17px/600 (antes Playfair Display 24px/400; app Inter 17/600). Tarjeta de 195 px (antes 135 px), foto 0.8 (4:5 = 0.8; antes cuadrada), nombre de 2 líneas (antes una).","ficha_vistas_375x812":"H03 · «Más de Michael Kors» en Inter 17px/600 (antes Playfair Display 24px/400; app Inter 17/600). Tarjeta de 195 px (antes 135 px), foto 0.8 (4:5 = 0.8; antes cuadrada), nombre de 2 líneas (antes una).","busqueda_375x812":"H01 · primera tarjeta a 206 px bajo el aviso (antes 344.4 px; app 221.5 px). Barra «Buscar» con Volver · Filtrar y ordenar, campo y encabezado de resultados en Inter 20px/600.","bolsa_375x812":"H01 · una barra (Volver) con el título «Mi bolsa» de 28px y el contador al borde derecho, como en la app. Antes: barra global (Abrir menú · Monetta, ir al inicio · Buscar productos · Carrito) y título debajo.","inicio_440x956":"Sin cambios: Inicio conserva su composición, el encabezado Playfair de Novedades y las tarjetas compactas.","coleccion_440x956":"H01 · primera tarjeta a 140.8 px bajo el aviso (antes 323.6 px; app 88 px). Una barra fijada con Volver · Buscar productos · Filtrar y ordenar sustituye barra global, migas y fila de filtros; queda la fila de atajos de estilo.","ficha_440x956":"H02 · encabezado: Volver · Buscar productos · Monetta, ir al inicio · Cuenta · Carrito. Antes: Volver · Abrir menú · Monetta, ir al inicio · Buscar productos · Carrito. App: volver · buscar · logo · cuenta · bolsa.","ficha_recomendaciones_440x956":"H03 · «Más de Michael Kors» en Inter 17px/600 (antes Playfair Display 24px/400; app Inter 17/600). Tarjeta de 228.8 px (antes 158.4 px), foto 0.8 (4:5 = 0.8; antes cuadrada), nombre de 2 líneas (antes una).","ficha_vistas_440x956":"H03 · «Más de Michael Kors» en Inter 17px/600 (antes Playfair Display 24px/400; app Inter 17/600). Tarjeta de 228.8 px (antes 158.4 px), foto 0.8 (4:5 = 0.8; antes cuadrada), nombre de 2 líneas (antes una).","busqueda_440x956":"H01 · primera tarjeta a 206 px bajo el aviso (antes 318.8 px; app 221.5 px). Barra «Buscar» con Volver · Filtrar y ordenar, campo y encabezado de resultados en Inter 20px/600.","bolsa_440x956":"H01 · una barra (Volver) con el título «Mi bolsa» de 28px y el contador al borde derecho, como en la app. Antes: barra global (Abrir menú · Monetta, ir al inicio · Buscar productos · Carrito) y título debajo."};
+    const names = {"inicio":"Inicio","coleccion":"Colección · Bolsas","ficha":"Ficha de producto","ficha_recomendaciones":"Ficha · Más de la marca","ficha_vistas":"Ficha · Vistas hace un momento","busqueda":"Búsqueda","bolsa":"Mi bolsa"};
+    const page = document.getElementById('page');
+    const viewport = document.getElementById('viewport');
+    function update() {
+      const key = page.value;
+      const size = viewport.value;
+      document.documentElement.style.setProperty('--phone-width', size.split('x')[0] + 'px');
+      const appKey = key === 'ficha_vistas' ? 'ficha_recomendaciones' : key;
+      const beforeKey = key === 'ficha_vistas' ? 'ficha_recomendaciones' : key;
+      document.getElementById('app').src = '../../audit-2026-10-18/mobile/' + appKey + '_' + size + '.png';
+      document.getElementById('before').src = '../../audit-2026-10-18/web/' + beforeKey + '_' + size + '.jpg';
+      document.getElementById('after').src = 'web/' + key + '_' + size + '.jpg';
+      for (const [id, label] of [['app', 'app actual'], ['before', 'prototipo antes'], ['after', 'prototipo corregido']]) {
+        document.getElementById(id).alt = names[key] + ' en ' + label + ', ' + size;
+      }
+      document.getElementById('finding').textContent = texts[key + '_' + size];
+    }
+    page.addEventListener('change', update);
+    viewport.addEventListener('change', update);
+    update();
+  </script>
+</body>
+</html>

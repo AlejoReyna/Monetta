@@ -1,0 +1,509 @@
+{
+  "capturedAt": "2026-10-18T04:30:48.963Z",
+  "captures": [
+    {
+      "file": "home__phone-390__top.jpg",
+      "route": "/",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "home__phone-390__full.jpg",
+      "route": "/",
+      "viewport": "390×844",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "home__tablet-768__full.jpg",
+      "route": "/",
+      "viewport": "768×1024",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "home__desktop-1440__top.jpg",
+      "route": "/",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "home__desktop-1440__full.jpg",
+      "route": "/",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__phone-390__top.jpg",
+      "route": "/collections/guess",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__phone-390__full.jpg",
+      "route": "/collections/guess",
+      "viewport": "390×844",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__tablet-768__full.jpg",
+      "route": "/collections/guess",
+      "viewport": "768×1024",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__laptop-1024__top.jpg",
+      "route": "/collections/guess",
+      "viewport": "1024×768",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__wide-1280__top.jpg",
+      "route": "/collections/guess",
+      "viewport": "1280×800",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__desktop-1440__full.jpg",
+      "route": "/collections/guess",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__desktop-1440__filtered.jpg",
+      "route": "/collections/guess?filter.p.m.custom.estilo=Satchel&filter.p.m.custom.marca=Guess&filter.p.m.custom.marca=Steve+Madden&sort_by=price-ascending",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__phone-390__filter-drawer.jpg",
+      "route": "/collections/guess",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "collection__phone-390__empty-filtered.jpg",
+      "route": "/collections/relojes?filter.v.availability=0",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "brand__desktop-1440__coach.jpg",
+      "route": "/collections/coach",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__phone-390__top.jpg",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__phone-390__options.jpg",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__phone-375__purchase.jpg",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "viewport": "375×812",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__phone-390__full.jpg",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "viewport": "390×844",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__tablet-768__full.jpg",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "viewport": "768×1024",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__desktop-1440__top.jpg",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__desktop-1440__full.jpg",
+      "route": "/products/bolso-coach-shoulder-negro-rectangular",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__desktop-1440__sale.jpg",
+      "route": "/products/bolso-guess-crossbody-negro-1",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__desktop-1440__envio-inmediato.jpg",
+      "route": "/products/bolsa-guess-crossbody-camera-camel",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__phone-390__sold-out.jpg",
+      "route": "/products/bolsa-guess-shoulder-vino-brillante",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__desktop-1440__quick-view.jpg",
+      "route": "/collections/coach",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__desktop-1440__apartado.jpg",
+      "route": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__phone-390__added-sheet.jpg",
+      "route": "/products/bolsa-juicy-couture-hobo-rosa",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "product__desktop-1440__add-error.jpg",
+      "route": "/products/bolso-guess-crossbody-negro-1",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__phone-390__suggestions.jpg",
+      "route": "/search",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__phone-390__predictive.jpg",
+      "route": "/search",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__phone-390__results.jpg",
+      "route": "/search?q=bolsa&type=product",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__tablet-768__full.jpg",
+      "route": "/search?q=bolsa&type=product",
+      "viewport": "768×1024",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__desktop-1440__predictive.jpg",
+      "route": "/",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__desktop-1440__results.jpg",
+      "route": "/search?q=bolsa&type=product",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__desktop-1440__no-results.jpg",
+      "route": "/search?q=perfume+dior&type=product",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__desktop-1440__suggestion-error.jpg",
+      "route": "/",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "search__desktop-1440__results-error.jpg",
+      "route": "/search?q=bolsa&type=product",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "cart__phone-390__top.jpg",
+      "route": "/cart",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "cart__phone-375__summary.jpg",
+      "route": "/cart",
+      "viewport": "375×812",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "cart__tablet-768__full.jpg",
+      "route": "/cart",
+      "viewport": "768×1024",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "cart__desktop-1440__full.jpg",
+      "route": "/cart",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "cart__desktop-1440__drawer.jpg",
+      "route": "/collections/guess",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "cart__desktop-1440__checkout-handoff.jpg",
+      "route": "/cart",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "cart__phone-390__empty.jpg",
+      "route": "/cart",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "menu__phone-390__open.jpg",
+      "route": "/",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "favorites__desktop-1440__items.jpg",
+      "route": "/collections/coach",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "favorites__phone-390__empty.jpg",
+      "route": "/pages/favoritos",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "mayoreo__phone-390__top.jpg",
+      "route": "/pages/mayoreo",
+      "viewport": "390×844",
+      "dpr": 2,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "mayoreo__desktop-1440__full.jpg",
+      "route": "/pages/mayoreo",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "story__desktop-1440__full.jpg",
+      "route": "/pages/nuestra-historia",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "contact__phone-390__full.jpg",
+      "route": "/pages/contact",
+      "viewport": "390×844",
+      "dpr": 1,
+      "full": true,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "account__desktop-1440__entry.jpg",
+      "route": "/account",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "account__desktop-1440__handoff.jpg",
+      "route": "/account",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "prototype-panel__desktop-1440.jpg",
+      "route": "/",
+      "viewport": "1440×900",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    },
+    {
+      "file": "not-found__tablet-768.jpg",
+      "route": "/collections/no-existe",
+      "viewport": "768×1024",
+      "dpr": 1,
+      "full": false,
+      "horizontalOverflow": false,
+      "problems": []
+    }
+  ]
+}

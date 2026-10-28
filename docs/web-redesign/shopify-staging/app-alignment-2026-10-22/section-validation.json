@@ -1,0 +1,34 @@
+[
+  {
+    "endpoint": "/?section_id=monetta-app-home",
+    "status": 200,
+    "liquid_errors": 0
+  },
+  {
+    "asset": "monetta-app-home_collection_bags.webp",
+    "status": 200,
+    "type": "image/webp"
+  },
+  {
+    "asset": "monetta-app-home_collection_wallets.webp",
+    "status": 200,
+    "type": "image/webp"
+  },
+  {
+    "asset": "monetta-app-home_collection_watches.webp",
+    "status": 200,
+    "type": "image/webp"
+  },
+  {
+    "endpoint": "/products/bolsa-guess-beige-y-blanca-hobo?section_id=monetta-product-card",
+    "status": 200,
+    "liquid_errors": 0,
+    "fresh_price_present": true
+  },
+  {
+    "endpoint": "/search?type=product&q=Guess&section_id=monetta-brand-products",
+    "status": 200,
+    "liquid_errors": 0,
+    "cards": 9
+  }
+]

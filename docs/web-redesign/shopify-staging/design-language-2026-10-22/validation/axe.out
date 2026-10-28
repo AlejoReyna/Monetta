@@ -1,0 +1,21 @@
+run dir: /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-02-19-335Z-axe
+PASS  375×812 home: no serious or critical axe violations  — []
+PASS  375×812 collection: no serious or critical axe violations  — []
+PASS  375×812 product: no serious or critical axe violations  — []
+PASS  375×812 search results: no serious or critical axe violations  — []
+PASS  375×812 search empty: no serious or critical axe violations  — []
+PASS  375×812 bag empty: no serious or critical axe violations  — []
+PASS  375×812 collection with the filters drawer open: no serious or critical axe violations  — []
+PASS  375×812 home with the menu drawer open: no serious or critical axe violations  — []
+PASS  375×812 product with the "En tu bolsa" sheet open: no serious or critical axe violations  — []
+PASS  375×812 bag with one line: no serious or critical axe violations  — []
+PASS  1440×900 home: no serious or critical axe violations  — []
+PASS  1440×900 collection: no serious or critical axe violations  — []
+PASS  1440×900 product: no serious or critical axe violations  — []
+PASS  1440×900 search results: no serious or critical axe violations  — []
+PASS  1440×900 search empty: no serious or critical axe violations  — []
+PASS  1440×900 bag empty: no serious or critical axe violations  — []
+PASS  1440×900 product with the "En tu bolsa" sheet open: no serious or critical axe violations  — []
+PASS  1440×900 bag with one line: no serious or critical axe violations  — []
+
+complete-pass: 18/18 checks · /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-02-19-335Z-axe/result.json

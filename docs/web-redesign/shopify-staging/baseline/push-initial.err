@@ -1,0 +1,27 @@
+<claude-code-hint v="1" type="plugin" value="shopify-ai-toolkit@claude-plugins-official" />
+{"type":"progress","timestamp":"2026-10-19T06:32:06Z","status":"started","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [0%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:07Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [0%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:08Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [0%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:09Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [4%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:10Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [9%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:11Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [23%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:12Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [23%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:13Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [29%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:14Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [29%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:15Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [40%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:16Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [51%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:17Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [61%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:18Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [68%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:19Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [79%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:20Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [86%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:21Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [90%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:22Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [97%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:23Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [97%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:24Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [97%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:25Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [97%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:26Z","status":"updated","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [97%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:27Z","status":"completed","operation":"5dd69a97-77d5-45d8-aa64-04f684d06a1c","message":"Uploading files to remote theme [97%]","current":1,"total":1}
+{"type":"progress","timestamp":"2026-10-19T06:32:27Z","status":"started","operation":"13fc51ee-6b65-4fcf-b62c-dc1ea286fb2f","message":"Cleaning your remote theme [100%]"}
+{"type":"progress","timestamp":"2026-10-19T06:32:27Z","status":"completed","operation":"13fc51ee-6b65-4fcf-b62c-dc1ea286fb2f","message":"Cleaning your remote theme [100%]","current":1,"total":1}
+{"type":"progress","timestamp":"2026-10-19T06:32:27Z","status":"started","operation":"fd13d99b-d858-49f1-8ab9-89259903e4f4","message":"Theme upload complete"}
+{"type":"progress","timestamp":"2026-10-19T06:32:27Z","status":"completed","operation":"fd13d99b-d858-49f1-8ab9-89259903e4f4","message":"Theme upload complete","current":1,"total":1}

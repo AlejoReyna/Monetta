@@ -1,0 +1,91 @@
+ M Makefile
+ M config/README.md
+ M lib/app/runtime_config.dart
+ M lib/app/shopify_checkout_coordinator.dart
+ M lib/data/shopify/storefront_config.dart
+ M lib/features/navigation/monetta_floating_bottom_navigation.dart
+ M lib/main.dart
+ M lib/tooling/dart_defines_validation.dart
+ M storefront-theme/assets/monetta-cart.js
+ M storefront-theme/assets/monetta-product.js
+ M storefront-theme/layout/monetta.liquid
+ M storefront-theme/layout/password.liquid
+ M storefront-theme/layout/theme.liquid
+ M storefront-theme/sections/monetta-cart.liquid
+ M storefront-theme/sections/monetta-collection.liquid
+ M storefront-theme/sections/monetta-header.liquid
+ M storefront-theme/sections/monetta-product-rail.liquid
+ M storefront-theme/sections/monetta-product.liquid
+ M storefront-theme/snippets/monetta-card.liquid
+ M storefront-theme/snippets/monetta-cart-line.liquid
+ M storefront-theme/snippets/monetta-section-header.liquid
+ M storefront-theme/templates/index.json
+ M storefront-theme/templates/product.json
+ M test/app/runtime_config_test.dart
+ M test/app/shopify_checkout_coordinator_test.dart
+ M test/tooling/dart_defines_validation_test.dart
+?? artifacts/
+?? docs/web-redesign/APP_TO_SHOPIFY_ALIGNMENT_PLAN_2026-10-22.md
+?? docs/web-redesign/audit-2026-10-18/
+?? docs/web-redesign/audit-gpt-2026-10-18/
+?? docs/web-redesign/correcciones-auditoria-gpt-2026-10-18/
+?? docs/web-redesign/correcciones-reaudit-gpt-2026-10-18/
+?? docs/web-redesign/evidence/
+?? docs/web-redesign/fidelity-2026-10-18/
+?? docs/web-redesign/reaudit-gpt-2026-10-18/
+?? docs/web-redesign/reaudit2-gpt-2026-10-18/
+?? docs/web-redesign/screenshots/
+?? docs/web-redesign/shopify-staging/ENTREGA.md
+?? docs/web-redesign/shopify-staging/README.md
+?? docs/web-redesign/shopify-staging/RUNS.md
+?? docs/web-redesign/shopify-staging/THEME.env
+?? docs/web-redesign/shopify-staging/app-alignment-2026-10-22/
+?? docs/web-redesign/shopify-staging/audit-codex-2026-10-19/
+?? docs/web-redesign/shopify-staging/baseline/
+?? docs/web-redesign/shopify-staging/branding-signin-2026-10-22/
+?? docs/web-redesign/shopify-staging/correcciones-auditoria-codex-2026-10-19/
+?? docs/web-redesign/shopify-staging/design-language-2026-10-22/
+?? docs/web-redesign/shopify-staging/runs-summary.json
+?? docs/web-redesign/shopify-staging/runs/
+?? docs/web-redesign/shopify-staging/scripts/compare-remote.mjs
+?? docs/web-redesign/shopify-staging/scripts/e2e/
+?? docs/web-redesign/shopify-staging/scripts/normalize-themes-before.mjs
+?? docs/web-redesign/shopify-staging/scripts/port-icons.mjs
+?? docs/web-redesign/shopify-staging/scripts/runs-index.mjs
+?? docs/web-redesign/shopify-staging/scripts/shot.mjs
+?? docs/web-redesign/shopify-staging/scripts/start-theme-dev.command
+?? docs/web-redesign/shopify-staging/scripts/theme-check-compare.mjs
+?? docs/web-redesign/shopify-staging/scripts/theme-push.sh
+?? storefront-theme/assets/monetta-app-alignment.css
+?? storefront-theme/assets/monetta-app-brand-anne_klein.webp
+?? storefront-theme/assets/monetta-app-brand-coach.webp
+?? storefront-theme/assets/monetta-app-brand-dior.webp
+?? storefront-theme/assets/monetta-app-brand-guess.webp
+?? storefront-theme/assets/monetta-app-brand-laneige.webp
+?? storefront-theme/assets/monetta-app-brand-michael_kors.webp
+?? storefront-theme/assets/monetta-app-brand-olaplex.webp
+?? storefront-theme/assets/monetta-app-brand-rhode.webp
+?? storefront-theme/assets/monetta-app-brand-steve_madden.webp
+?? storefront-theme/assets/monetta-app-brand-summer_fridays.webp
+?? storefront-theme/assets/monetta-app-brand-the_ordinary.webp
+?? storefront-theme/assets/monetta-app-brand-tommy_hilfiger.webp
+?? storefront-theme/assets/monetta-app-campaign_terracotta.jpg
+?? storefront-theme/assets/monetta-app-home_bag_crossbody.webp
+?? storefront-theme/assets/monetta-app-home_bag_shoulder.webp
+?? storefront-theme/assets/monetta-app-home_bag_tote.webp
+?? storefront-theme/assets/monetta-app-home_collection_bags.webp
+?? storefront-theme/assets/monetta-app-home_collection_wallets.webp
+?? storefront-theme/assets/monetta-app-home_collection_watches.webp
+?? storefront-theme/assets/monetta-merchandising.js
+?? storefront-theme/sections/monetta-app-home.liquid
+?? storefront-theme/sections/monetta-brand-products.liquid
+?? storefront-theme/sections/monetta-product-card.liquid
+?? storefront-theme/sections/monetta-product-discovery.liquid
+?? storefront-theme/snippets/monetta-cart-discount.liquid
+?? storefront-theme/snippets/monetta-facet.liquid
+?? storefront-theme/snippets/monetta-fold.liquid
+?? storefront-theme/snippets/monetta-product-facts.liquid
+?? storefront-theme/snippets/monetta-saved-products.liquid
+?? storefront-theme/snippets/monetta-secondary-headings.liquid
+?? storefront-theme/snippets/monetta-swatch.liquid
+?? test/goldens/failures/

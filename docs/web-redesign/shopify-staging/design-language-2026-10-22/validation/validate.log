@@ -1,0 +1,21 @@
+# validate.sh 2026-10-22T22:56:32Z base=http://127.0.0.1:9292 head=6833c20
+2026-10-22T22:56:33Z  exit=0  build-check  ::  node design-system/build.mjs --check
+2026-10-22T22:56:33Z  exit=0  port-parity  ::  node docs/web-redesign/shopify-staging/scripts/port-css.mjs --check
+2026-10-22T22:56:33Z  exit=0  theme-check-diff  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/theme-check-diff.mjs --out=/Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/design-language-2026-10-22/validation/theme-check
+2026-10-22T22:56:39Z  exit=0  dl-checks  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/checks.mjs --base-url=http://127.0.0.1:9292 --flows --name=dl-checks
+2026-10-22T22:59:07Z  exit=1  nc-blanket-serif  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/checks.mjs --base-url=http://127.0.0.1:9292 --viewports=390x844 --name=negative-control-dl-blanket-serif --inject-css=.mw :is(h1,h2,h3,h4,h5,h6){font-family:var(--font-serif) !important}
+2026-10-22T22:59:26Z  exit=1  nc-single-gallery  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/checks.mjs --base-url=http://127.0.0.1:9292 --viewports=1440x900 --name=negative-control-dl-single-gallery --inject-css=@media (min-width:1024px){.gallery--single{display:grid !important}}
+2026-10-22T22:59:48Z  exit=1  nc-discount-overflow  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/checks.mjs --base-url=http://127.0.0.1:9292 --viewports=320x640 --name=negative-control-dl-discount-overflow --inject-css=.discount-form input{width:auto !important}.discount-form__row{display:flex !important}
+2026-10-22T23:00:06Z  exit=1  nc-fav-target  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/checks.mjs --base-url=http://127.0.0.1:9292 --viewports=390x844 --name=negative-control-dl-fav-40 --inject-css=.mw .card__fav{width:40px !important;height:40px !important}
+2026-10-22T23:00:24Z  exit=1  journey-390x844  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/journey.mjs --base-url=http://127.0.0.1:9292 --w=390 --h=844
+2026-10-22T23:01:01Z  exit=1  journey-768x1024  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/journey.mjs --base-url=http://127.0.0.1:9292 --w=768 --h=1024
+2026-10-22T23:01:30Z  exit=1  journey-1024x768  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/journey.mjs --base-url=http://127.0.0.1:9292 --w=1024 --h=768
+2026-10-22T23:01:56Z  exit=1  journey-1440x900  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/journey.mjs --base-url=http://127.0.0.1:9292 --w=1440 --h=900
+2026-10-22T23:02:18Z  exit=0  axe  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/axe.mjs --base-url=http://127.0.0.1:9292
+2026-10-22T23:02:54Z  exit=0  motion  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/motion.mjs --base-url=http://127.0.0.1:9292
+2026-10-22T23:02:59Z  exit=0  nav  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/nav.mjs --base-url=http://127.0.0.1:9292
+2026-10-22T23:03:34Z  exit=1  keyboard  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/keyboard.mjs --base-url=http://127.0.0.1:9292
+2026-10-22T23:19:18Z  exit=1  layout  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/layout.mjs --base-url=http://127.0.0.1:9292
+2026-10-22T23:21:55Z  exit=1  regressions  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/e2e/regressions.mjs --base-url=http://127.0.0.1:9292
+2026-10-22T23:23:47Z  exit=0  runs-index  ::  node /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/scripts/runs-index.mjs
+# done 2026-10-22T23:23:47Z

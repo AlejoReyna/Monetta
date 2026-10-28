@@ -1,0 +1,429 @@
+{
+  "comparedAt": "2026-10-19T00:47:52.374Z",
+  "browser": "155.0.8059.40",
+  "a": "http://127.0.0.1:4401",
+  "b": "http://127.0.0.1:4401",
+  "captures": 48,
+  "identical": 41,
+  "different": 7,
+  "viewports": [
+    "320×568",
+    "360×800",
+    "375×812",
+    "390×844",
+    "440×956",
+    "768×1024",
+    "1024×768",
+    "1440×900"
+  ],
+  "routes": [
+    "cart-empty",
+    "not-found"
+  ],
+  "positions": [
+    "top",
+    "middle",
+    "end"
+  ],
+  "rows": [
+    {
+      "label": "cart-empty @ 320×568 top",
+      "width": 320,
+      "height": 568,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 320×568 middle",
+      "width": 320,
+      "height": 568,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 320×568 end",
+      "width": 320,
+      "height": 568,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 360×800 top",
+      "width": 360,
+      "height": 800,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 360×800 middle",
+      "width": 360,
+      "height": 800,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 360×800 end",
+      "width": 360,
+      "height": 800,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 390×844 top",
+      "width": 390,
+      "height": 844,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 390×844 middle",
+      "width": 390,
+      "height": 844,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 390×844 end",
+      "width": 390,
+      "height": 844,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 2,
+      "box": [
+        53,
+        622,
+        59,
+        705
+      ],
+      "files": [
+        "diff-cart-empty-1440x900-middle-a.png",
+        "diff-cart-empty-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 2,
+      "box": [
+        53,
+        306,
+        59,
+        389
+      ],
+      "files": [
+        "diff-cart-empty-1440x900-end-a.png",
+        "diff-cart-empty-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 320×568 top",
+      "width": 320,
+      "height": 568,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 320×568 middle",
+      "width": 320,
+      "height": 568,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 320×568 end",
+      "width": 320,
+      "height": 568,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 360×800 top",
+      "width": 360,
+      "height": 800,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 360×800 middle",
+      "width": 360,
+      "height": 800,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 360×800 end",
+      "width": 360,
+      "height": 800,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 390×844 top",
+      "width": 390,
+      "height": 844,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 390×844 middle",
+      "width": 390,
+      "height": 844,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 390×844 end",
+      "width": 390,
+      "height": 844,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 4,
+      "box": [
+        25,
+        475,
+        32,
+        694
+      ],
+      "files": [
+        "diff-not-found-440x956-top-a.png",
+        "diff-not-found-440x956-top-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 1,
+      "box": [
+        25,
+        206,
+        25,
+        206
+      ],
+      "files": [
+        "diff-not-found-440x956-middle-a.png",
+        "diff-not-found-440x956-middle-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 1,
+      "box": [
+        59,
+        891,
+        59,
+        891
+      ],
+      "files": [
+        "diff-not-found-1440x900-top-a.png",
+        "diff-not-found-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 2,
+      "box": [
+        53,
+        598,
+        59,
+        681
+      ],
+      "files": [
+        "diff-not-found-1440x900-middle-a.png",
+        "diff-not-found-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 2,
+      "box": [
+        53,
+        306,
+        59,
+        389
+      ],
+      "files": [
+        "diff-not-found-1440x900-end-a.png",
+        "diff-not-found-1440x900-end-b.png"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,13 @@
+{
+  "screen": "ficha",
+  "width": 375.0,
+  "height": 812.0,
+  "firstCard": null,
+  "textRoles": [],
+  "recommendationHeading": {
+    "text": "Más de Michael Kors",
+    "fontFamily": "Inter",
+    "fontSize": 17.0,
+    "fontWeight": 600
+  }
+}
