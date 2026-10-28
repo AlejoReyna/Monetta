@@ -404,7 +404,9 @@ El mapa de láminas (§5 del plan) incluía dos láminas que ninguna fase de §6
   - el pie dice «Esta tienda funciona con», «Entrar con contraseña» y «¿Eres la dueña o el dueño de la tienda? Inicia sesión aquí».
 
   Antes salía en inglés («Opening soon», «Enter using password»), porque el idioma de la tienda en staging es inglés y Atelier usa sus traducciones.
-- **Alcance:** esta página sólo se ve en la vista previa del borrador. Lo que ve una visita de staging es la página de contraseña del tema **publicado**.
+- **Alcance:** esta página sólo se ve en la vista previa del borrador.
+  - **Corrección del 28-oct:** la puerta pública de staging no la pinta ningún tema. `curl https://monetta-staging.myshopify.com/password` devuelve la página genérica de Shopify («This store is password protected… Enter store password»), propia de las tiendas de desarrollo.
+  - Por eso la bienvenida no se ve en la puerta de staging ni con el tema publicado. Se verá en una tienda con plan cuyo tema pinte su propia página de contraseña.
 
 **Comprobaciones**
 
@@ -418,3 +420,33 @@ El mapa de láminas (§5 del plan) incluía dos láminas que ninguna fase de §6
 El resto de la suite no visita `/password` y F7 no cambia ninguna otra página. Su última corrida completa es la de F6 (todo en verde).
 
 **Hojas:** `evidencia/sheets/f7/` (01 y 04).
+
+## F8. Header: buscador «liquid glass» y fuentes (pedido del 28-oct) — cerrada
+
+**Pedido de la persona:** la barra de búsqueda del header, más tipo *liquid glass*; «Cuenta», «Carrito» y el texto del buscador con la fuente de Bolsas · Carteras · Perfumes · Marcas · Mayoreo.
+
+**Qué cambió** (`assets/monetta-guia.css`, sólo el buscador del header; los de la página de búsqueda y la 404 siguen igual):
+- **Buscador «liquid glass»:**
+  - relleno blanco translúcido en degradado, con `backdrop-filter: blur(24px) saturate(180%)`;
+  - doble filo: el contorno exterior sigue en `--color-border-control` (4.03:1 sobre el header, WCAG 1.4.11, como pide DESIGN_SPEC), con un filo claro por dentro;
+  - brillos especulares en las esquinas superior izquierda e inferior derecha, un reflejo cálido dorado abajo y una sombra corta.
+  - Enfocado conserva el anillo de tinta.
+- **Fuentes:** «Cuenta», «Carrito», el placeholder y el texto escrito usan la fuente de la fila de categorías: Playfair Display, peso 500, como `--type-section-title-font`. Las etiquetas van a 14 px, como la fila. El campo se queda en 16 px para que iOS no haga zoom al enfocarlo.
+
+**Encontrado en la validación**
+- `nav.mjs`, a 768×1024 y 812×375: «ningún enlace queda bajo el desvanecido de la fila» falló en «Carteras» y «Relojes».
+- **Causa:** la sombra exterior del buscador bajaba ~25 px, y entre el campo y la fila de categorías sólo hay 9. Así oscurecía el texto bajo el desvanecido.
+- **Aislado con `--inject-css`** (opción nueva de `nav.mjs`): sin `backdrop-filter` sigue fallando; sin la sombra, pasa.
+- **Corrección:** la sombra ahora termina dentro de esos 9 px. Después, navegación 31/31.
+
+**Comprobaciones**
+
+| Comprobación | Antes | Después |
+|---|---|---|
+| `guia-checks` F8 a 768, 1024 y 1440: Cuenta y Carrito con la familia, tamaño y peso de la fila; placeholder y texto escrito con su familia, a 16 px; Cuenta, placeholder y texto escrito medidos en Playfair con CDP (el texto del input se mide dentro de su shadow DOM de agente de usuario); vidrio (desenfoque, degradado, filo interior); contorno ≥ 3:1; anillo de tinta al enfocar | 6/18 (pasan sólo el contorno y el anillo, que son resguardos) | **18/18** |
+| Validación completa (`validation/f8/`) | — | guía F1–F5 + F7 + F8 264/264, `checks.mjs` 315/315, journeys 61/61, 55/55, 55/55 y 54/54, axe 30/30, movimiento 4/4, layout 223/223, regresiones 123/123, Theme Check sin hallazgos nuevos |
+| Navegación | — | 29/31 con la primera sombra; **31/31** con la sombra corta |
+| Teclado | — | 150/150 con la primera sombra; repetido con la sombra corta (abajo) |
+| `build.mjs --check`, `port-css --check`, `check_no_secrets.sh` | — | Pasan |
+
+**Arnés:** `start-theme-dev.command` ahora se niega a arrancar si el tema de `THEME.env` no está sin publicar. Con un tema publicado, `theme dev` escribiría cada archivo guardado en la tienda pública.

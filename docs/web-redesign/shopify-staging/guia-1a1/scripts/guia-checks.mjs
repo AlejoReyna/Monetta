@@ -41,6 +41,27 @@ async function platformFonts(page, selector) {
   return fonts.map((f) => f.familyName);
 }
 
+// The rendered font of an input's text. It lives in the input's user-agent shadow root, which DOM.querySelector does not
+// reach, so the document is read with pierce: 'placeholder' measures the placeholder's box (field empty), 'typed' the
+// inner editor (field filled).
+async function inputPlatformFonts(page, selector, which) {
+  const cdp = await page.context().newCDPSession(page);
+  await cdp.send('DOM.enable');
+  await cdp.send('CSS.enable');
+  const { root } = await cdp.send('DOM.getDocument', { depth: -1, pierce: true });
+  const { nodeId } = await cdp.send('DOM.querySelector', { nodeId: root.nodeId, selector });
+  const walk = (n) => (n.nodeId === nodeId ? n : [...(n.children || []), ...(n.shadowRoots || [])].map(walk).find(Boolean));
+  const shadow = walk(root)?.shadowRoots?.[0];
+  const divs = (shadow?.children || []).filter((c) => c.nodeName === 'DIV');
+  const hasText = (d) => (d.children || []).some((c) => c.nodeType === 3);
+  const deepest = (n) => { const kids = (n.children || []).filter((c) => c.nodeType === 1); return kids.length ? deepest(kids[0]) : n; };
+  const editor = divs.find((d) => !hasText(d));
+  const target = which === 'placeholder' ? divs.find(hasText) : editor && deepest(editor);
+  const fonts = target ? (await cdp.send('CSS.getPlatformFontsForNode', { nodeId: target.nodeId })).fonts : [];
+  await cdp.detach();
+  return fonts.map((f) => f.familyName);
+}
+
 const overflow = (page) => page.evaluate(() => document.documentElement.scrollWidth - window.innerWidth);
 
 /* ======================================================================== F1: base visual */
@@ -435,6 +456,53 @@ async function f4() {
   }
 }
 
+/* ======================================================================== F8: header search and labels (28 Oct request) */
+// Liquid-glass search field (translucent, blurred, specular top edge, shadow) whose rim keeps ≥ 3:1; Cuenta, Carrito and the
+// search text in the category row's serif. The header field shows from 768 px.
+async function f8() {
+  for (const [w, h] of [[768, 1024], [1024, 768], [1440, 900]]) {
+    const { browser, page } = await launch({ width: w, height: h, injectCss });
+    try {
+      await open(page, '/');
+      const v = await page.evaluate(() => {
+        const cs = (sel, pseudo) => { const el = document.querySelector(sel); return el ? getComputedStyle(el, pseudo) : null; };
+        const font = (s) => s && { family: s.fontFamily, size: s.fontSize, weight: s.fontWeight };
+        const rgb = (c) => (c.match(/[\d.]+/g) || []).slice(0, 3).map(Number);
+        const lum = (c) => { const [r, g, b] = rgb(c).map((x) => { x /= 255; return x <= 0.03928 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4; }); return 0.2126 * r + 0.7152 * g + 0.0722 * b; };
+        const ratio = (a, b) => { const [x, y] = [lum(a), lum(b)].sort((m, n) => n - m); return (x + 0.05) / (y + 0.05); };
+        const field = cs('.header-search .search-field');
+        const header = cs('.site-header');
+        return {
+          nav: font(cs('.site-nav__link')),
+          // Below 1024 px the labels are hidden (icons only); their type is checked all the same.
+          labels: [...document.querySelectorAll('.header-utility__label')].map((el) => ({ text: el.textContent.trim(), visible: el.getClientRects().length > 0, ...font(getComputedStyle(el)) })),
+          input: font(cs('#header-search-input')), placeholder: font(cs('#header-search-input', '::placeholder')),
+          glass: field && { backdrop: field.backdropFilter || field.webkitBackdropFilter, image: field.backgroundImage, shadow: field.boxShadow },
+          rim: field && header ? Math.round(ratio(field.borderTopColor, header.backgroundColor) * 100) / 100 : 0,
+        };
+      });
+      const same = (a) => a && v.nav && a.family === v.nav.family && a.weight === v.nav.weight;
+      run.check(`F8 ${w}: «Cuenta» and «Carrito» use the category row's font (family, size and weight)`, v.labels.length === 2 && v.labels.map((l) => l.text).join('|') === 'Cuenta|Carrito' && v.labels.every((l) => same(l) && l.size === v.nav.size), JSON.stringify({ nav: v.nav, labels: v.labels }));
+      run.check(`F8 ${w}: the search text and its placeholder use the category row's font (16px, no zoom on iOS)`, same(v.input) && v.placeholder?.family === v.nav?.family && v.input.size === '16px', JSON.stringify({ nav: v.nav, input: v.input, placeholder: v.placeholder }));
+      const label = w >= 1024 ? await platformFonts(page, '.header-utility--account .header-utility__label') : ['(hidden below 1024 px)'];
+      const placeholder = await inputPlatformFonts(page, '#header-search-input', 'placeholder');
+      await page.fill('#header-search-input', 'bolso');
+      const typed = await inputPlatformFonts(page, '#header-search-input', 'typed');
+      await page.fill('#header-search-input', '');
+      const playfair = (fonts) => fonts.length > 0 && fonts.every((f) => /Playfair/.test(f));
+      run.check(`F8 ${w}: ${w >= 1024 ? '«Cuenta», ' : ''}the placeholder and the typed search measured in Playfair Display`, (w < 1024 || playfair(label)) && playfair(placeholder) && playfair(typed), JSON.stringify({ label, placeholder, typed }));
+      run.check(`F8 ${w}: the search field is liquid glass (backdrop blur, translucent gradient fill, specular inset edge and shadow)`, /blur\(/.test(v.glass?.backdrop || '') && /gradient/.test(v.glass?.image || '') && /inset/.test(v.glass?.shadow || ''), JSON.stringify(v.glass));
+      run.check(`F8 ${w}: the search field's rim keeps ≥ 3:1 on the header (WCAG 1.4.11)`, v.rim >= 3, String(v.rim));
+      await page.focus('#header-search-input');
+      await page.waitForTimeout(400);
+      const focused = await page.evaluate(() => { const s = getComputedStyle(document.querySelector('.header-search .search-field')); return { border: s.borderTopColor, shadow: s.boxShadow }; });
+      run.check(`F8 ${w}: focused, the field shows the ink ring`, focused.border === 'rgb(33, 27, 22)' && /rgb\(33, 27, 22\) 0px 0px 0px 1px/.test(focused.shadow), JSON.stringify(focused));
+    } finally {
+      await browser.close();
+    }
+  }
+}
+
 /* ======================================================================== F7: Bienvenida (slide 01) on the password page */
 // The page every visitor of a closed store sees. Checked through the proxy's /password; the password itself is never typed.
 async function f7() {
@@ -624,6 +692,7 @@ try {
   if (phases.has('f4')) await f4();
   if (phases.has('f5')) await f5();
   if (phases.has('f7')) await f7();
+  if (phases.has('f8')) await f8();
   run.finish({ complete: true });
 } catch (error) {
   run.finish({ complete: false, error });
