@@ -375,10 +375,46 @@ Vista previa del borrador de trabajo: <https://monetta-staging.myshopify.com/?pr
 **Vista previa:** <https://monetta-staging.myshopify.com/?preview_theme_id=192558366754>. La contraseña de la tienda la escribe la persona.
 
 **Pendiente**
-- **Láminas sin fase.** El mapa (§5) incluye 01 Bienvenida (página de contraseña) y 04 «Rastrea tu pedido», pero ninguna fase de §6 las asignó. Van en F7.
+- ~~**Láminas sin fase.** El mapa (§5) incluye 01 Bienvenida (página de contraseña) y 04 «Rastrea tu pedido», pero ninguna fase de §6 las asignó. Van en F7.~~ Resuelto en F7 (abajo).
 - **Para el owner:**
   - crear y asignar las páginas de la guía (ver F5);
   - las 13 colecciones de marca y categoría (D3);
   - filtros por tipo o etiqueta en Search & Discovery (F3).
 - **Fuera del tema:** checkout, página de gracias, cuentas de cliente (Mis pedidos, Mi cuenta) y menús del admin.
 - **Push a GitHub:** sólo cuando la persona lo pida (D6). Rama local `feat/web-guia-1a1`.
+
+## F7. Láminas 01 y 04 — cerrada
+
+El mapa de láminas (§5 del plan) incluía dos láminas que ninguna fase de §6 tenía asignadas.
+
+**04 «Página principal (seguimiento)»: el plan la leyó mal.**
+- La lámina no es «Rastrea tu pedido». «Seguimiento» quiere decir la continuación del inicio al hacer scroll: Lo más buscado, Precios de mayoreo, servicios, Regístrate y pie.
+- F2 ya lo cubre todo, así que no hay nada que construir. Se agregó su captura (`guia-capture.mjs`, lámina 04, el inicio desde «Lo más buscado») y su hoja `evidencia/sheets/f7/sheet-04.png`.
+- La web no tiene rastreo de pedidos: los pedidos viven en las cuentas de Shopify.
+
+**01 Bienvenida, en la página de contraseña** (`welcome_screen.dart`)
+- **Sección nueva `monetta-guia-welcome`**, que `templates/password.json` usa en lugar de la sección `password` de Atelier. Esa sección se queda en el tema, sin usarse.
+  - La foto del owner (`bienvenida-fondo`, sin bolso, como la app), el wordmark, «Un paraíso de marcas por descubrir», «BOUTIQUE ONLINE DE PRODUCTOS ORIGINALES» y «COMENZAR».
+  - «COMENZAR» abre el diálogo de contraseña de Shopify con el mismo disparador que usa el pie de Atelier (`on:click="#password-form/showDialog"`).
+  - Teléfono: la foto ocupa toda la pantalla, como la app. Desde 1024 px, la foto (vertical, 718 × 1280) va a la derecha y el texto a la izquierda, para no estirarla.
+  - El layout de contraseña no carga las hojas de Monetta, así que la sección trae su propio CSS (`{% stylesheet %}`).
+- **Página en español:**
+  - `lang="es-MX"`;
+  - el diálogo dice «Entra con la contraseña de la tienda», «Contraseña» y «Entrar», y en el error, «La contraseña no es correcta.»;
+  - el pie dice «Esta tienda funciona con», «Entrar con contraseña» y «¿Eres la dueña o el dueño de la tienda? Inicia sesión aquí».
+
+  Antes salía en inglés («Opening soon», «Enter using password»), porque el idioma de la tienda en staging es inglés y Atelier usa sus traducciones.
+- **Alcance:** esta página sólo se ve en la vista previa del borrador. Lo que ve una visita de staging es la página de contraseña del tema **publicado**.
+
+**Comprobaciones**
+
+| Comprobación | Antes (árbol F6) | Después |
+|---|---|---|
+| `guia-checks` F7: sin desbordes de 320 a 1440; a 390 y 1440, textos de la app, foto, composición (pantalla completa en teléfono, mitades en escritorio), «COMENZAR» de 48 px en la primera pantalla, español sin restos en inglés, frase medida en Playfair, «COMENZAR» abre el diálogo en español, Esc lo cierra y devuelve el foco | 2/8: sólo pasan los desbordes; luego error (no existe el botón) | **21/21** |
+| `guia-checks` F1–F5 + F7 | — | **246/246** |
+| axe (ahora también `/password`) | — | 30/30 |
+| Theme Check, `build.mjs --check`, `port-css --check`, `check_no_secrets.sh` | — | 0 hallazgos nuevos (187 errores y 64 avisos); los demás gates pasan |
+
+El resto de la suite no visita `/password` y F7 no cambia ninguna otra página. Su última corrida completa es la de F6 (todo en verde).
+
+**Hojas:** `evidencia/sheets/f7/` (01 y 04).

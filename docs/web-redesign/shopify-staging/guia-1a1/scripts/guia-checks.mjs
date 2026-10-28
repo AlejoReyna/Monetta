@@ -435,6 +435,55 @@ async function f4() {
   }
 }
 
+/* ======================================================================== F7: Bienvenida (slide 01) on the password page */
+// The page every visitor of a closed store sees. Checked through the proxy's /password; the password itself is never typed.
+async function f7() {
+  for (const [w, h] of WIDTHS) {
+    const { browser, page } = await launch({ width: w, height: h, injectCss });
+    try {
+      await open(page, '/password');
+      run.check(`F7 ${w}: no horizontal overflow on the password page`, (await overflow(page)) <= 0, `${await overflow(page)}px`);
+      if (w !== 390 && w !== 1440) continue;
+      const v = await page.evaluate(() => {
+        const t = (sel) => document.querySelector(sel)?.textContent.replace(/\s+/g, ' ').trim();
+        const photo = document.querySelector('.guia-welcome__photo');
+        const box = (el) => (el ? (({ left, top, width, height }) => ({ left, top, width, height }))(el.getBoundingClientRect()) : null);
+        return {
+          lang: document.documentElement.lang, brand: document.querySelector('.guia-welcome__brand img')?.alt || null,
+          tagline: t('.guia-welcome__tagline'), eyebrow: t('.guia-welcome__eyebrow'), start: t('.guia-welcome__start'),
+          startBox: box(document.querySelector('.guia-welcome__start')), photo: photo?.currentSrc?.split('/').pop() || '', loaded: photo?.naturalWidth || 0,
+          photoBox: box(photo), copyBox: box(document.querySelector('.guia-welcome__copy')),
+          footer: t('.password-footer'), english: /Enter using password|Opening soon|powered by/i.test(document.body.innerText),
+        };
+      });
+      run.check(`F7 ${w}: «Un paraíso de marcas por descubrir · BOUTIQUE ONLINE DE PRODUCTOS ORIGINALES · COMENZAR», as the app`, Boolean(v.brand) && v.tagline === 'Un paraíso de marcas por descubrir' && v.eyebrow === 'Boutique online de productos originales' && v.start === 'Comenzar', JSON.stringify({ brand: v.brand, tagline: v.tagline, eyebrow: v.eyebrow, start: v.start }));
+      run.check(`F7 ${w}: the owner's welcome photograph loads`, /monetta-guia-bienvenida-fondo/.test(v.photo) && v.loaded > 0, JSON.stringify({ photo: v.photo, loaded: v.loaded }));
+      const layoutOk = w < 1024
+        ? v.photoBox && v.photoBox.left <= 0 && Math.round(v.photoBox.width) >= w - 1 && v.copyBox && v.copyBox.top < h / 2
+        : v.photoBox && Math.round(v.photoBox.left) >= Math.round(w / 2) - 1 && v.copyBox && v.copyBox.left + v.copyBox.width <= w / 2 + 1;
+      run.check(`F7 ${w}: ${w < 1024 ? 'photo behind the whole screen, copy in the upper half' : 'photo on the right half, copy on the left'}`, Boolean(layoutOk), JSON.stringify({ photo: v.photoBox, copy: v.copyBox }));
+      run.check(`F7 ${w}: «COMENZAR» is a 48px target inside the first screen`, v.startBox && v.startBox.height >= 48 && v.startBox.top + v.startBox.height <= h, JSON.stringify(v.startBox));
+      run.check(`F7 ${w}: the page is Spanish (es-MX, footer «Entrar con contraseña», no English left)`, v.lang === 'es-MX' && /Entrar con contraseña/.test(v.footer || '') && !v.english, JSON.stringify({ lang: v.lang, footer: v.footer, english: v.english }));
+      const tagline = await platformFonts(page, '.guia-welcome__tagline');
+      run.check(`F7 ${w}: tagline measured in Playfair Display`, tagline.length > 0 && tagline.every((f) => /Playfair/.test(f)), JSON.stringify(tagline));
+      // COMENZAR opens Shopify's password dialog, in Spanish; Esc closes it and returns the focus. Nothing is typed or sent.
+      if (await page.locator('.guia-welcome__start').count()) await page.locator('.guia-welcome__start').click();
+      await page.waitForSelector('#password-form dialog[open]', { timeout: 5000 }).catch(() => {});
+      const d = await page.evaluate(() => {
+        const dialog = document.querySelector('#password-form dialog[open]');
+        return dialog ? { title: dialog.querySelector('h2')?.textContent.trim(), label: dialog.querySelector('label[for="Password"]')?.textContent.trim(), type: dialog.querySelector('#Password')?.type, submit: dialog.querySelector('button[type="submit"]')?.textContent.trim() } : null;
+      });
+      run.check(`F7 ${w}: «COMENZAR» opens the password dialog in Spanish`, d?.title === 'Entra con la contraseña de la tienda' && d.label === 'Contraseña' && d.type === 'password' && d.submit === 'Entrar', JSON.stringify(d));
+      await page.keyboard.press('Escape');
+      await page.waitForTimeout(400);
+      const after = await page.evaluate(() => ({ open: Boolean(document.querySelector('#password-form dialog[open]')), focus: document.activeElement?.className || '' }));
+      run.check(`F7 ${w}: Esc closes the dialog and the focus returns to «COMENZAR»`, !after.open && /guia-welcome__start/.test(after.focus), JSON.stringify(after));
+    } finally {
+      await browser.close();
+    }
+  }
+}
+
 /* ======================================================================== F5: Mayoreo, Contacto, Comparte y gana y Cuenta */
 async function f5() {
   for (const [w, h] of WIDTHS) {
@@ -574,6 +623,7 @@ try {
   if (phases.has('f3')) await f3();
   if (phases.has('f4')) await f4();
   if (phases.has('f5')) await f5();
+  if (phases.has('f7')) await f7();
   run.finish({ complete: true });
 } catch (error) {
   run.finish({ complete: false, error });

@@ -37,7 +37,7 @@ for (const [w, h] of [[375, 812], [1440, 900]]) {
     await settle(page);
   };
   try {
-    for (const [name, url] of [['home', '/'], ['collection', '/collections/all'], ['product', PRODUCT], ['search results', '/search?q=bolsa&type=product'], ['search empty', '/search'], ['bag empty', '/cart'], ['Categorías', '/collections'], ['Mayoreo', '/pages/contact?view=guia-mayoreo'], ['Contacto', '/pages/contact?view=guia-contacto'], ['Rewards', '/pages/contact?view=guia-rewards']]) {
+    for (const [name, url] of [['home', '/'], ['collection', '/collections/all'], ['product', PRODUCT], ['search results', '/search?q=bolsa&type=product'], ['search empty', '/search'], ['bag empty', '/cart'], ['Categorías', '/collections'], ['Mayoreo', '/pages/contact?view=guia-mayoreo'], ['Contacto', '/pages/contact?view=guia-contacto'], ['Rewards', '/pages/contact?view=guia-rewards'], ['Bienvenida (password)', '/password']]) {
       await open(url);
       await scan(page, `${w}×${h} ${name}`);
     }

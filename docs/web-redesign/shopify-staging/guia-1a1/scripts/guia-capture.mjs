@@ -50,6 +50,8 @@ const scrollTo = (selector) => async (page) => {
 const SLIDES = [
   { slide: '01', name: 'bienvenida', url: '/password' },
   { slide: '03', name: 'inicio', url: '/' },
+  // «Página principal (seguimiento)»: the home further down (Lo más buscado, Precios de mayoreo, servicios, Regístrate).
+  { slide: '04', name: 'inicio-seguimiento', url: '/', prepare: scrollTo('h2:has-text("Lo más buscado")') },
   { slide: '05', name: 'busqueda', url: '/search?q=bolso+coach&type=product' },
   { slide: '05b', name: 'busqueda-predictiva', url: '/', prepare: openSearch },
   { slide: '06', name: 'coleccion-coach', url: '/collections/vendors?q=Coach' },
