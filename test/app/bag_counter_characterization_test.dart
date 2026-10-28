@@ -1,10 +1,11 @@
-/// CHAR-05: characterization of the bag counter.
+/// CHAR-05: objective behaviour of the bag counter (RF-53, E4).
 ///
-/// `CatalogStore.bagQuantity` sums every quantity loaded from the database,
-/// including lines whose product or exact variant is not in the catalog, while
-/// `bagLines` and `bagSubtotal` only see the visible ones. So the badge can
-/// promise more items than the bag screen lists. RF-50 (E4: count only visible
-/// lines) has to change these tests explicitly.
+/// `CatalogStore.bagQuantity` counts only the units of visible lines; lines
+/// whose product or exact variant is not in the catalog are hidden from the
+/// counter (and were already hidden from `bagLines` and `bagSubtotal`). The
+/// bag screen announces the hidden lines with the E4 notice and offers their
+/// explicit removal; a listed but sold-out line keeps counting and is marked
+/// `Agotado` (a separate notice from the unavailable one, per E4 details).
 library;
 
 import 'package:flutter/material.dart';
@@ -24,8 +25,11 @@ const _missingVariantId = 'gid://shopify/ProductVariant/missing';
 const _visibleQuantity = 2;
 const _ghostQuantity = 4;
 const _missingVariantQuantity = 5;
-const _totalQuantity =
-    _visibleQuantity + _ghostQuantity + _missingVariantQuantity;
+
+const _notice =
+    'Algunos artículos ya no están disponibles y no se incluyeron en tu bolsa';
+const _removeUnavailable = 'Retirar no disponibles';
+const _soldOut = 'Agotado';
 
 class _Fixture {
   _Fixture(this.db, this.store, this.visible, this.withMissingVariant);
@@ -85,13 +89,56 @@ Future<_Fixture> _startWithThreeLines() async {
   return _Fixture(db, store, visible, withMissingVariant);
 }
 
+/// The visible product with its first variant marked sold out.
+Product _soldOutCopy(Product visible) {
+  final variant = visible.variants.first;
+  return Product(
+    id: visible.id,
+    handle: visible.handle,
+    title: visible.title,
+    vendor: visible.vendor,
+    productType: visible.productType,
+    tags: visible.tags,
+    variants: [
+      ProductVariant(
+        id: variant.id,
+        title: variant.title,
+        price: variant.price,
+        available: false,
+        compareAtPrice: variant.compareAtPrice,
+        sku: variant.sku,
+      ),
+      ...visible.variants.skip(1),
+    ],
+    images: visible.images,
+    createdAt: visible.createdAt,
+    updatedAt: visible.updatedAt,
+    descriptionHtml: visible.descriptionHtml,
+    collectionHandles: visible.collectionHandles,
+    brandOverride: visible.brandOverride,
+    categoryOverride: visible.categoryOverride,
+  );
+}
+
+Future<void> _pumpBagScreen(WidgetTester tester, CatalogStore store) async {
+  await tester.pumpWidget(
+    MaterialApp(
+      theme: buildTheme(),
+      home: StoreScope(
+        notifier: store,
+        child: const Scaffold(body: BagScreen()),
+      ),
+    ),
+  );
+  await tester.pumpAndSettle();
+}
+
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
   test(
-      'CHAR-05 (vigente, cambia según E4) bagQuantity suma también las '
-      'líneas invisibles; bagLines y bagSubtotal sólo ven la visible',
-      () async {
+      'CHAR-05 (RF-53, E4) bagQuantity counts only the visible line; '
+      'bagLines and bagSubtotal are unchanged', () async {
     final fixture = await _startWithThreeLines();
     final store = fixture.store;
 
@@ -107,7 +154,7 @@ void main() {
     expect(line.variant.id, fixture.visibleVariant.id);
     expect(line.quantity, _visibleQuantity);
 
-    expect(store.bagQuantity, _totalQuantity);
+    expect(store.bagQuantity, _visibleQuantity);
     expect(
       store.bagSubtotal,
       fixture.visibleVariant.price * _visibleQuantity,
@@ -118,9 +165,8 @@ void main() {
     store.dispose();
   });
 
-  testWidgets(
-      'CHAR-05 (vigente, cambia según E4) BagAction anuncia la suma de las '
-      'tres líneas aunque sólo una sea visible', (tester) async {
+  testWidgets('CHAR-05 (RF-53, E4) BagAction announces only the visible units',
+      (tester) async {
     final fixture = await _startWithThreeLines();
     final store = fixture.store;
     addTearDown(store.dispose);
@@ -138,18 +184,17 @@ void main() {
     );
 
     expect(
-      find.byTooltip('Mi bolsa, $_totalQuantity artículos'),
+      find.byTooltip('Mi bolsa, $_visibleQuantity artículos'),
       findsOneWidget,
     );
     expect(find.byTooltip('Mi bolsa'), findsNothing);
     expect(store.bagLines, hasLength(1));
-    // The badge caps its label at nine.
-    expect(find.text('9+'), findsOneWidget);
+    expect(find.text('$_visibleQuantity'), findsOneWidget);
   });
 
   test(
-      'CHAR-05 (vigente, cambia según E4) si el producto sale del catálogo '
-      'su línea deja de verse pero sigue contando en bagQuantity', () async {
+      'CHAR-05 (RF-53, E4) when the product leaves the catalog its line '
+      'leaves the counter too', () async {
     final fixture = await _startWithThreeLines();
     final store = fixture.store;
     expect(store.bagLines, hasLength(1));
@@ -161,9 +206,75 @@ void main() {
 
     expect(store.bagLines, isEmpty);
     expect(store.bagSubtotal, 0);
-    expect(store.bagQuantity, _totalQuantity);
+    expect(store.bagQuantity, 0);
 
     await pumpEventQueue();
     store.dispose();
+  });
+
+  testWidgets(
+      'CHAR-05 (RF-53, E4) the bag screen announces the hidden lines and '
+      'their removal clears them', (tester) async {
+    final fixture = await _startWithThreeLines();
+    final store = fixture.store;
+    addTearDown(store.dispose);
+    // The counter itself is pinned by the cases above; here the red reason
+    // must be the missing notice, so no counter precondition.
+
+    await _pumpBagScreen(tester, store);
+
+    expect(find.text(_notice), findsOneWidget);
+    expect(find.text(_removeUnavailable), findsOneWidget);
+
+    await tester.tap(find.text(_removeUnavailable));
+    await tester.pumpAndSettle();
+
+    expect(find.text(_notice), findsNothing);
+    expect(
+      (await BagStore(fixture.db).all()).map((row) => row.variantId),
+      [fixture.visibleVariant.id],
+      reason: 'only the hidden lines are removed',
+    );
+    expect(store.bagQuantity, _visibleQuantity);
+  });
+
+  testWidgets(
+      'CHAR-05 (RF-53, E4) a listed but sold-out line still counts and is '
+      'marked Agotado', (tester) async {
+    // Minimal bag with a single line and nothing hidden, so no notice shows.
+    final probe = CatalogStore(database: openTestDatabase());
+    await probe.loadFromAsset();
+    final visible =
+        probe.products.firstWhere((product) => product.variants.isNotEmpty);
+    await probe.syncWithShopify();
+    probe.dispose();
+
+    final db = openTestDatabase();
+    await BagStore(db).upsert(
+      productId: visible.id,
+      variantId: visible.variants.first.id,
+      quantity: _visibleQuantity,
+    );
+    final store = CatalogStore(database: db);
+    await store.loadFromAsset();
+    await store.syncWithShopify();
+    addTearDown(store.dispose);
+
+    store.products = [
+      for (final product in store.products)
+        if (product.id == visible.id) _soldOutCopy(product) else product,
+    ];
+    await tester.pump();
+    expect(store.bagLines, hasLength(1));
+    expect(
+      store.bagQuantity,
+      _visibleQuantity,
+      reason: 'a listed line counts even without stock',
+    );
+
+    await _pumpBagScreen(tester, store);
+
+    expect(find.text(_soldOut), findsOneWidget);
+    expect(find.text(_notice), findsNothing);
   });
 }

@@ -1,9 +1,11 @@
 /// Persists the shopper's pre-checkout bag, so it survives an app restart —
 /// replacing `CatalogStore`'s previous in-memory-only bag map.
-/// Device-scoped (empty [accountId]) until sign-in, same merge contract as
-/// [WishlistStore]. Lines are keyed by variant so two variants of one product
+/// Device-scoped (empty [accountId]) until sign-in, when quantities merge into
+/// the account bag. Lines are keyed by variant so two variants of one product
 /// can coexist.
 library;
+
+import 'dart:math' show min;
 
 import 'package:drift/drift.dart';
 
@@ -69,6 +71,19 @@ class BagStore {
         .go();
   }
 
+  /// Removes the selected variants atomically within one account scope.
+  Future<void> removeVariants(
+    Iterable<String> variantIds, {
+    String? accountId,
+  }) {
+    final scope = scopeKey(accountId);
+    return (_db.delete(_db.bagLines)
+          ..where(
+            (t) => t.variantId.isIn(variantIds) & t.accountId.equals(scope),
+          ))
+        .go();
+  }
+
   Future<void> clear({String? accountId}) {
     final scope = scopeKey(accountId);
     return (_db.delete(_db.bagLines)..where((t) => t.accountId.equals(scope)))
@@ -114,29 +129,31 @@ class BagStore {
             );
       });
 
-  /// Guest rows (`accountId == ''`) become [accountId]. Rows already belonging
-  /// to a different account are left untouched.
+  /// Sums guest and account quantities, capped at 10, keeping the guest product
+  /// on a variant conflict. Other accounts are left untouched.
   Future<void> mergeDeviceItemsIntoAccount(String accountId) async {
-    final guestRows = await (_db.select(_db.bagLines)
-          ..where((t) => t.accountId.equals('')))
-        .get();
+    if (accountId.isEmpty) return;
     await _db.transaction(() async {
+      // Both snapshots belong to this transaction, so concurrent merges cannot
+      // consume the same guest quantities twice.
+      final guestRows = await all();
+      if (guestRows.isEmpty) return;
+      final accountQuantities = {
+        for (final row in await all(accountId: accountId))
+          row.variantId: row.quantity,
+      };
       for (final row in guestRows) {
-        await (_db.delete(_db.bagLines)
-              ..where(
-                (t) =>
-                    t.variantId.equals(row.variantId) & t.accountId.equals(''),
-              ))
-            .go();
-        await _db.into(_db.bagLines).insertOnConflictUpdate(
-              BagLinesCompanion.insert(
-                productId: row.productId,
-                variantId: row.variantId,
-                quantity: row.quantity,
-                accountId: Value(accountId),
-              ),
-            );
+        await upsert(
+          productId: row.productId,
+          variantId: row.variantId,
+          quantity: min(
+            row.quantity + (accountQuantities[row.variantId] ?? 0),
+            10,
+          ),
+          accountId: accountId,
+        );
       }
+      await clear();
     });
   }
 }
