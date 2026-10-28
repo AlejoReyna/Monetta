@@ -6,6 +6,10 @@
 /// scoping is the only thing this screen adds.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
+import 'browse_detail_layout.dart';
+import '../../platform/system_layout_context.dart';
+import '../navigation/storefront_pane_scope.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -334,6 +338,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
     final scopedItems = _scopedItems(_filters.category);
     final result = await showModalBottomSheet<_CollectionFilters>(
       context: context,
+      anchorPoint: presentationAnchor(context),
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: context.monettaColors.scrim,
@@ -359,15 +365,17 @@ class _CollectionScreenState extends State<CollectionScreen> {
     final items = _items();
     final activeCount = _filters.activeCountComparedTo(_initialFilters);
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
+      onSearch: () => unawaited(openSearch(context)),
       backgroundColor: palette.canvas,
       drawer: guideDrawer(context),
       body: CustomScrollView(
         controller: _scroll,
         slivers: [
-          _CollectionAppBar(
-            onSearch: () => unawaited(openSearch(context)),
-          ),
+          if (SystemLayoutScope.of(context).barEdge == SystemBarEdge.none ||
+              !StorefrontPaneScope.ownsNavigationOf(context))
+            _CollectionAppBar(onSearch: () => unawaited(openSearch(context))),
           SliverToBoxAdapter(
             child: CatalogEditorialBanner(
               title: widget.title,
@@ -436,24 +444,25 @@ class _ProductSliverGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2;
-    return SliverGrid(
-      gridDelegate: productGridDelegate(
-        context,
-        availableWidth: width,
-        footerExtent: kTileFooterExtent,
-      ),
-      delegate: SliverChildBuilderDelegate(
-        (context, index) {
-          final product = products[index];
-          return ProductCard(
-            key: ValueKey('product-card-${product.id}'),
-            product: product,
-            showViewProduct: true,
-            onQuickView: () => showProductQuickView(context, product),
-          );
-        },
-        childCount: products.length,
+    return SliverLayoutBuilder(
+      builder: (context, constraints) => SliverGrid(
+        gridDelegate: productGridDelegate(
+          context,
+          availableWidth: constraints.crossAxisExtent,
+          footerExtent: kTileFooterExtent,
+        ),
+        delegate: SliverChildBuilderDelegate(
+          (context, index) {
+            final product = products[index];
+            return ProductCard(
+              key: ValueKey('product-card-${product.id}'),
+              product: product,
+              showViewProduct: true,
+              onQuickView: () => showProductQuickView(context, product),
+            );
+          },
+          childCount: products.length,
+        ),
       ),
     );
   }
@@ -1148,8 +1157,8 @@ class _CollectionFilterChoiceRow extends StatelessWidget {
       selected: selected,
       child: InkWell(
         onTap: onTap,
-        child: SizedBox(
-          height: BoutiqueSpace.tapTarget,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BoutiqueSpace.tapTarget),
           child: Row(
             children: [
               _CollectionSelectionMark(selected: selected, radio: radio),
@@ -1214,5 +1223,9 @@ void openCollection(BuildContext context, CollectionScreen screen) {
   final store = StoreScope.of(context);
   Navigator.of(
     context,
-  ).push(monettaFadeRoute(StoreScope(notifier: store, child: screen)));
+  ).push(
+    monettaFadeRoute(
+      StoreScope(notifier: store, child: BrowseDetailLayout(child: screen)),
+    ),
+  );
 }

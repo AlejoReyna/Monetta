@@ -304,7 +304,7 @@ void main() {
 
       expect(find.text(nameB), findsWidgets);
 
-      await tester.tap(find.byKey(const Key('bottom-nav-home')));
+      await tester.tap(find.byTooltip('Volver').first);
       await tester.pumpAndSettle();
       expect(find.text(nameA), findsWidgets);
     });

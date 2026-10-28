@@ -5,6 +5,9 @@
 /// the only entry to it.
 library;
 
+import '../../platform/system_layout_context.dart';
+import '../navigation/adaptive_storefront_scaffold.dart';
+import 'browse_detail_layout.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -21,11 +24,10 @@ import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
-import '../product/product_screen.dart';
+import 'product_card.dart';
 import 'catalog_controls.dart';
 import 'categories_screen.dart';
 import 'extracted_badge.dart';
-import 'product_tile.dart';
 import 'quick_add_button.dart';
 import 'search_screen.dart';
 
@@ -252,6 +254,8 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     final result = await showModalBottomSheet<_CatalogFilters>(
       context: context,
+      anchorPoint: presentationAnchor(context),
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: context.monettaColors.scrim,
@@ -269,7 +273,8 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   Widget build(BuildContext context) {
     final visibleItems = _visibleItems();
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       // Never `extendBody`: the last row of products must not sit under the
       // navigation bar, and this screen has no floating bar competing with it.
       extendBody: false,
@@ -404,7 +409,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       ),
       bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.catalog,
-        bagCount: widget.bagCount,
+        bagCount: StoreScope.maybeOf(context)?.bagQuantity ?? widget.bagCount,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
@@ -436,9 +441,11 @@ void openCatalogBrowse(
     monettaFadeRoute(
       StoreScope(
         notifier: store,
-        child: CatalogBrowseScreen(
-          items: items,
-          bagCount: store.bagQuantity,
+        child: BrowseDetailLayout(
+          child: CatalogBrowseScreen(
+            items: items,
+            bagCount: store.bagQuantity,
+          ),
         ),
       ),
     ),
@@ -943,8 +950,8 @@ class _FilterChoiceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: SizedBox(
-        height: 52,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 52),
         child: Row(
           children: [
             _SelectionMark(selected: selected, radio: radio),
@@ -1100,16 +1107,9 @@ class _BrowseTile extends StatelessWidget {
     if (!item.isExternal) {
       final productId = item.shopifyProductId;
       if (productId == null) return;
-      unawaited(
-        Navigator.of(context).push(
-          MaterialPageRoute<void>(
-            builder: (_) => StoreScope(
-              notifier: StoreScope.of(context),
-              child: ProductScreen(productId: productId),
-            ),
-          ),
-        ),
-      );
+      final store = StoreScope.of(context);
+      final matches = store.products.where((p) => p.id == productId);
+      if (matches.isNotEmpty) openProduct(context, matches.first);
       return;
     }
 
@@ -1146,20 +1146,23 @@ class _BrowseTile extends StatelessWidget {
     // would be lost — only its view data is adapted.
     final data = ProductTileData.fromCatalogItem(item);
     final product = _buyableProduct(context);
-    return MonettaProductTile(
-      data: data,
-      onTap: () => _tap(context),
-      variant: ProductTileVariant.edgeToEdge,
-      quickAction: product == null
-          ? null
-          : ProductQuickAddButton(
-              key: Key('quick-add-${product.id}'),
-              product: product,
-              productName: data.title,
-            ),
-      // No favourite here: an external listing has no Monetta product id to
-      // save, and this screen renders without a wishlist-bearing store.
-      imageOverlay: item.isExternal ? const ExtractedBadge() : null,
+    return ProductResultAnchor(
+      productId: item.shopifyProductId ?? item.sourceScopedId,
+      child: MonettaProductTile(
+        data: data,
+        onTap: () => _tap(context),
+        variant: ProductTileVariant.edgeToEdge,
+        quickAction: product == null
+            ? null
+            : ProductQuickAddButton(
+                key: Key('quick-add-${product.id}'),
+                product: product,
+                productName: data.title,
+              ),
+        // No favourite here: an external listing has no Monetta product id to
+        // save, and this screen renders without a wishlist-bearing store.
+        imageOverlay: item.isExternal ? const ExtractedBadge() : null,
+      ),
     );
   }
 }

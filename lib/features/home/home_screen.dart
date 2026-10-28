@@ -1,6 +1,7 @@
 /// Monetta's shopper storefront. Desire first, then a way to buy.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
 import 'dart:async';
 
 import 'package:collection/collection.dart' show ListEquality;
@@ -340,7 +341,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final showHero = storefront.showHero;
 
     if (feed.isEmpty) {
-      return Scaffold(
+      return AdaptiveStorefrontScaffold(
+        avoidReservedRegions: true,
         extendBody: true,
         backgroundColor: context.boutique.canvas,
         drawer: _buildSideMenu(store),
@@ -490,7 +492,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       },
     );
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       extendBody: true,
       backgroundColor: context.boutique.canvas,
       drawer: drawer,

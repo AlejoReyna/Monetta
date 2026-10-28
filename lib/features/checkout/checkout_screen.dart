@@ -10,12 +10,18 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/cart_controller.dart';
+import '../../app/storefront_layout.dart';
+import '../../platform/system_layout_context.dart';
+import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/monetta_bottom_navigation.dart';
+import '../catalog/categories_screen.dart';
 import '../../app/checkout_buyer_identity.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
@@ -187,7 +193,7 @@ class _BagScreenState extends State<BagScreen> {
       );
     }
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
       backgroundColor: palette.canvas,
       appBar: _BoutiqueBar(
         leading: IconButton(
@@ -198,17 +204,40 @@ class _BagScreenState extends State<BagScreen> {
       ),
       body: SafeArea(
         bottom: true,
-        child: lines.isEmpty
-            ? const _EmptyBag()
-            : _BagContents(
-                lines: lines,
-                launchSecureCheckout: widget.launchSecureCheckout,
-                cartController: cartScope?.notifier,
-                checkoutCoordinator: cartScope?.checkoutCoordinator,
-                cartScope: sessionScope,
-                localIntent: localIntent,
-              ),
+        child: SystemUsableSurface(
+          child: lines.isEmpty
+              ? const _EmptyBag()
+              : _BagContents(
+                  lines: lines,
+                  launchSecureCheckout: widget.launchSecureCheckout,
+                  cartController: cartScope?.notifier,
+                  checkoutCoordinator: cartScope?.checkoutCoordinator,
+                  cartScope: sessionScope,
+                  localIntent: localIntent,
+                ),
+        ),
       ),
+      bottomNavigationBar: !SystemLayoutScope.of(context).supported
+          ? null
+          : MonettaBottomNavigation(
+              current: MonettaBottomDestination.bag,
+              bagCount: store.bagQuantity,
+              onSelected: (destination) {
+                switch (destination) {
+                  case MonettaBottomDestination.home:
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  case MonettaBottomDestination.catalog:
+                    unawaited(openCategories(context));
+                  case MonettaBottomDestination.bag:
+                    break;
+                  case MonettaBottomDestination.account:
+                    final controller = AccountScope.maybeOf(context);
+                    if (controller != null) {
+                      unawaited(openAccount(context, controller: controller));
+                    }
+                }
+              },
+            ),
     );
   }
 
@@ -346,30 +375,50 @@ class _BagContents extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 860;
+        final wide = constraints.maxWidth >= StorefrontLayout.cartSplitWidth &&
+            StorefrontLayout.canSplit(
+              constraints.biggest,
+              MediaQuery.textScalerOf(context),
+            );
         final heading = Padding(
           padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
-          child: Row(
-            key: const ValueKey('bag-heading-row'),
-            crossAxisAlignment: CrossAxisAlignment.baseline,
-            textBaseline: TextBaseline.alphabetic,
-            children: [
-              Expanded(
-                child: Text(
-                  'Mi bolsa',
-                  style: boutiqueDisplay(wide ? 32 : 28),
+          child: StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
+              ? Column(
+                  key: const ValueKey('bag-heading-stacked'),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Mi bolsa', style: boutiqueDisplay(wide ? 32 : 28)),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$count ${count == 1 ? 'artículo' : 'artículos'}',
+                      style: boutiqueText(
+                        size: 12,
+                        color: context.boutique.inkMuted,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  key: const ValueKey('bag-heading-row'),
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Mi bolsa',
+                        style: boutiqueDisplay(wide ? 32 : 28),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      '$count ${count == 1 ? 'artículo' : 'artículos'}',
+                      style: boutiqueText(
+                        size: 12,
+                        color: context.boutique.inkMuted,
+                      ),
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(width: 16),
-              Text(
-                '$count ${count == 1 ? 'artículo' : 'artículos'}',
-                style: boutiqueText(
-                  size: 12,
-                  color: context.boutique.inkMuted,
-                ),
-              ),
-            ],
-          ),
         );
 
         final lineTiles = Column(
@@ -996,6 +1045,21 @@ class _CheckoutProgress extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     const labels = ['Bolsa', 'Entrega', 'Pago', 'Confirmación'];
+    if (StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))) {
+      return Semantics(
+        value: labels.join(', '),
+        child: Container(
+          key: const ValueKey('checkout-progress-enlarged'),
+          width: double.infinity,
+          color: palette.surfaceDeep,
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'Paso ${activeIndex + 1} de ${labels.length} · ${labels[activeIndex]}',
+            style: boutiqueText(size: 12, weight: FontWeight.w600),
+          ),
+        ),
+      );
+    }
     return Container(
       color: palette.surfaceDeep,
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
@@ -1143,8 +1207,16 @@ class _BagLineTile extends StatelessWidget {
                 ],
                 Text(
                   line.product.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: StorefrontLayout.enlargedText(
+                    MediaQuery.textScalerOf(context),
+                  )
+                      ? null
+                      : 2,
+                  overflow: StorefrontLayout.enlargedText(
+                    MediaQuery.textScalerOf(context),
+                  )
+                      ? TextOverflow.visible
+                      : TextOverflow.ellipsis,
                   style: boutiqueText(
                     size: 14,
                     weight: FontWeight.w500,
@@ -1249,7 +1321,12 @@ class _QuantityStepper extends StatelessWidget {
     return Semantics(
       label: 'Cantidad $quantity',
       child: Container(
-        height: 40,
+        height: StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
+            ? math.max(
+                48,
+                MediaQuery.textScalerOf(context).scale(13) * 1.4 + 12,
+              )
+            : 40,
         decoration: BoxDecoration(
           border: Border.all(color: palette.hairline),
           borderRadius: BoutiqueRadius.tile,
@@ -1300,7 +1377,17 @@ class _StepperButton extends StatelessWidget {
       tooltip: tooltip,
       onPressed: onPressed,
       icon: Icon(icon, size: 15),
-      constraints: const BoxConstraints.tightFor(width: 40, height: 40),
+      constraints: BoxConstraints.tightFor(
+        width: StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
+            ? 48
+            : 40,
+        height: StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
+            ? math.max(
+                48,
+                MediaQuery.textScalerOf(context).scale(13) * 1.4 + 12,
+              )
+            : 40,
+      ),
       padding: EdgeInsets.zero,
     );
   }

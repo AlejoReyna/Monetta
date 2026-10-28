@@ -10,14 +10,13 @@ import '../../support/bundled_fonts.dart';
 // the Home clearance test lives in home_bottom_clearance_test.dart). NAV-01 is
 // the characterization of the destinations that must keep working.
 //
-// Text note: FlutterTest renders every glyph one em wide, so "Catálogo" at
-// 13 px is 104 px wide. On phone-width columns the fit-to-column logic is
-// therefore already active at text scale 1.0.
+// Compact brand geometry uses the bundled fonts. Uncapped fallback-font
+// reflow and short-window overflow are covered in duo_navigation_test.dart.
 
 const _destinations = MonettaBottomDestination.values;
 const _labels = {
   MonettaBottomDestination.home: 'Inicio',
-  MonettaBottomDestination.catalog: 'Categorías',
+  MonettaBottomDestination.catalog: 'Catálogo',
   MonettaBottomDestination.bag: 'Carrito',
   MonettaBottomDestination.account: 'Cuenta',
 };
@@ -28,6 +27,7 @@ const _darkActive = Color(0xFFF5F2EC);
 const _darkInactive = Color(0xFF8E8A85);
 
 void main() {
+  setUpAll(loadBundledFonts);
   testWidgets(
       'NAV-01 premium navigation keeps all four destinations actionable',
       (tester) async {
@@ -309,7 +309,7 @@ void main() {
       ]);
       expect(
         [for (final d in byX) _labelText(tester, d)],
-        ['Inicio', 'Categorías', 'Carrito', 'Cuenta'],
+        ['Inicio', 'Catálogo', 'Carrito', 'Cuenta'],
       );
     });
   });
@@ -614,7 +614,8 @@ void main() {
         await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
         await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
         await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        // Text contrast: monetta_bottom_navigation_contrast_test.dart, which
+        // renders without the bundled fonts loaded in this file.
       } finally {
         handle.dispose();
       }
@@ -670,7 +671,7 @@ void main() {
             );
             expect(
               paragraph.textScaler.scale(13) / 13,
-              lessThanOrEqualTo(scale + 1e-9),
+              closeTo(scale, 1e-9),
               reason: '${d.name} label grows past the requested scale',
             );
 

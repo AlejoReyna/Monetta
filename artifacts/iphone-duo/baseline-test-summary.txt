@@ -1,0 +1,11 @@
+fvm flutter test --no-pub: exit 1
+1361 passed; 5 skipped by existing suite; 8 golden failures.
+
+Golden "ui04/inicio_375x812.png": Pixel test failed, 59.89%, 1641239px diff detected.
+Golden "ui04/inicio_440x956.png": Pixel test failed, 65.48%, 2478992px diff detected.
+Golden "ui04/coleccion_375x812.png": Pixel test failed, 55.30%, 1515376px diff detected.
+Golden "ui04/coleccion_440x956.png": Pixel test failed, 72.07%, 2728221px diff detected.
+Golden "ui04/ficha_375x812.png": Pixel test failed, 15.59%, 427160px diff detected.
+Golden "ui04/ficha_440x956.png": Pixel test failed, 18.34%, 694490px diff detected.
+Golden "ui04/cuenta_375x812.png": Pixel test failed, 45.94%, 1258854px diff detected.
+Golden "ui04/cuenta_440x956.png": Pixel test failed, 46.77%, 1770785px diff detected.

@@ -13,6 +13,8 @@
 /// no se implementa: Miguel la sustituyó por saldo en pesos.
 library;
 
+import '../../platform/system_layout_context.dart';
+import '../navigation/adaptive_storefront_scaffold.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -159,7 +161,7 @@ class AccountScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final store = StoreScope.maybeOf(context);
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
       backgroundColor: palette.canvas,
       drawer: guideDrawer(context),
       appBar: guideAppBar(
@@ -167,23 +169,25 @@ class AccountScreen extends StatelessWidget {
         searchEnabled: store != null,
         onSearch: () => unawaited(openSearch(context)),
       ),
-      body: SafeArea(
-        child: ListenableBuilder(
-          listenable: controller,
-          builder: (context, _) => controller.isSignedIn
-              ? _SignedIn(
-                  controller: controller,
-                  showAdmin: canOpenAdmin?.call() == true,
-                  onOpenAdmin: onOpenAdmin,
-                  onOpenPartner: onOpenPartner,
-                  rewardsReader: rewardsReader,
-                  notificationInbox: notificationInbox,
-                  onOpenInvite: onOpenInvite,
-                  deletionClient: deletionClient,
-                  privacyPolicy: privacyPolicy,
-                  openExternalUri: openExternalUri,
-                )
-              : const SizedBox.shrink(),
+      body: SystemUsableSurface(
+        child: SafeArea(
+          child: ListenableBuilder(
+            listenable: controller,
+            builder: (context, _) => controller.isSignedIn
+                ? _SignedIn(
+                    controller: controller,
+                    showAdmin: canOpenAdmin?.call() == true,
+                    onOpenAdmin: onOpenAdmin,
+                    onOpenPartner: onOpenPartner,
+                    rewardsReader: rewardsReader,
+                    notificationInbox: notificationInbox,
+                    onOpenInvite: onOpenInvite,
+                    deletionClient: deletionClient,
+                    privacyPolicy: privacyPolicy,
+                    openExternalUri: openExternalUri,
+                  )
+                : const SizedBox.shrink(),
+          ),
         ),
       ),
       bottomNavigationBar: MonettaBottomNavigation(

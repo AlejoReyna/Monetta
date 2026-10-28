@@ -307,11 +307,13 @@ void main() {
         variant: ProductTileVariant.edgeToEdge,
         textScaler: const _StepTextScaler(),
       );
-      // brand 13 -> 26, name 14 -> 28, price 16 -> 32 (small type doubles).
+      // One full-width column at this text size; every caption role still
+      // follows its own nonlinear system scale.
+      expect(delegate.crossAxisCount, 1);
       expect(
         delegate.mainAxisExtent,
         closeTo(
-          241.25 + 10 + 2 + 4 + 28 + 26 * 1.25 + 28 * 1.3 * 2 + 32 * 1.2,
+          487.5 + 10 + 2 + 4 + 28 + 26 * 1.25 + 28 * 1.3 * 2 + 32 * 1.2,
           0.001,
         ),
       );

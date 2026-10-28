@@ -12,6 +12,10 @@
 /// has no sales ranking to sort by.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/storefront_destination_navigation.dart';
+import '../navigation/monetta_bottom_navigation.dart';
+import 'browse_detail_layout.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/catalog_store.dart';
@@ -48,13 +52,15 @@ Future<void> openBrand(
     monettaFadeRoute(
       StoreScope(
         notifier: store,
-        child: BrandScreen(
-          brandSlug: brandSlug,
-          title: title,
-          tagline: tagline,
-          story: story,
-          heroImageUrl: heroImageUrl,
-          heroImageAsset: heroImageAsset,
+        child: BrowseDetailLayout(
+          child: BrandScreen(
+            brandSlug: brandSlug,
+            title: title,
+            tagline: tagline,
+            story: story,
+            heroImageUrl: heroImageUrl,
+            heroImageAsset: heroImageAsset,
+          ),
         ),
       ),
     ),
@@ -164,10 +170,14 @@ class _BrandScreenState extends State<BrandScreen> {
     final categories = _categories(store, products);
     final visible = _visible(store, products);
     final story = widget.story?.trim() ?? '';
-    final width = MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2;
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       backgroundColor: palette.canvas,
+      bottomNavigationBar: storefrontNavigation(
+        context,
+        current: MonettaBottomDestination.catalog,
+      ),
       appBar: AppBar(
         backgroundColor: palette.bar,
         foregroundColor: palette.ink,
@@ -237,22 +247,25 @@ class _BrandScreenState extends State<BrandScreen> {
                 BoutiqueSpace.gutter,
                 BoutiqueSpace.lg,
               ),
-              sliver: SliverGrid(
-                key: const ValueKey('brand-product-grid'),
-                gridDelegate: productGridDelegate(
-                  context,
-                  availableWidth: width,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final product = visible[index];
-                    return ProductCard(
-                      key: ValueKey('product-card-${product.id}'),
-                      product: product,
-                      onQuickView: () => showProductQuickView(context, product),
-                    );
-                  },
-                  childCount: visible.length,
+              sliver: SliverLayoutBuilder(
+                builder: (context, constraints) => SliverGrid(
+                  key: const ValueKey('brand-product-grid'),
+                  gridDelegate: productGridDelegate(
+                    context,
+                    availableWidth: constraints.crossAxisExtent,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final product = visible[index];
+                      return ProductCard(
+                        key: ValueKey('product-card-${product.id}'),
+                        product: product,
+                        onQuickView: () =>
+                            showProductQuickView(context, product),
+                      );
+                    },
+                    childCount: visible.length,
+                  ),
                 ),
               ),
             ),

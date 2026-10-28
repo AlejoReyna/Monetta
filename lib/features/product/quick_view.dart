@@ -18,6 +18,7 @@
 /// ```
 library;
 
+import '../../platform/system_layout_context.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
@@ -48,6 +49,8 @@ Future<void> showProductQuickView(
   store.record(EventType.galleryInteraction, productId: product.id);
   return showModalBottomSheet<void>(
     context: context,
+    anchorPoint: presentationAnchor(context),
+    useSafeArea: true,
     useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,

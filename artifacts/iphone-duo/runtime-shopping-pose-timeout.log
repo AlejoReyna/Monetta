@@ -1,0 +1,76 @@
+The following plugins do not support Swift Package Manager for ios:
+  - flutter_secure_storage
+This will become an error in a future version of Flutter. Please contact the plugin maintainers to request Swift Package Manager adoption.
+Running Xcode build...                                          
+Xcode build done.                                           114.9s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:8189/2PoCCCi2ybg=/
+VMServiceFlutterDriver: Isolate found with number: 104443661914183
+VMServiceFlutterDriver: Waiting for isolate 104443661914183 to be runnable.
+VMServiceFlutterDriver: Waiting for isolate 104443661914183 to be runnable.
+VMServiceFlutterDriver: Waiting for isolate 104443661914183 to be runnable.
+VMServiceFlutterDriver: Waiting for isolate 104443661914183 to be runnable.
+VMServiceFlutterDriver: Waiting for isolate 104443661914183 to be runnable.
+VMServiceFlutterDriver: Isolate 104443661914183 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: offline shopping continues through actual Duo runtime poses
+VMServiceFlutterDriver: Connected to Flutter application.
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: DUO_STAGE:outer
+flutter: DUO_GEOMETRY:{"stage":"outer","size":[466.0,678.0],"barEdge":"right","divisions":[]}
+flutter: DUO_CAPTURE:01-actual-duo-outer-inicio
+flutter: DUO_CAPTURE:02-actual-duo-outer-product
+flutter: DUO_STAGE:open-landscape
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Dedicated simulator did not reach pose open-landscape
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      fail (package:matcher/src/expect/expect.dart:187:31)
+flutter: #1      main.<anonymous closure>.waitPose (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:79:9)
+flutter: <asynchronous suspension>
+flutter: #2      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:155:7)
+flutter: <asynchronous suspension>
+flutter: #3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: The test description was:
+flutter:   offline shopping continues through actual Duo runtime poses
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 04:35 +0: offline shopping continues through actual Duo runtime poses [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: offline shopping continues through actual Duo runtime poses
+flutter:
+flutter: 04:35 +0 -1: (tearDownAll)
+flutter: 04:35 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: offline shopping continues through actual Duo runtime poses
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Dedicated simulator did not reach pose open-landscape
+
+When the exception was thrown, this was the stack:
+#0      fail (package:matcher/src/expect/expect.dart:187:31)
+#1      main.<anonymous closure>.waitPose (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:79:9)
+<asynchronous suspension>
+#2      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:155:7)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+<asynchronous suspension>
+
+The test description was:
+  offline shopping continues through actual Duo runtime poses
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+

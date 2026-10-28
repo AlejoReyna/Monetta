@@ -1,6 +1,7 @@
 /// Client-guide chrome over the app's existing shopping destinations.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../app/account_controller.dart';
@@ -63,7 +64,8 @@ class ClientGuideScaffold extends StatelessWidget {
         selected = null;
     }
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       backgroundColor: palette.canvas,
       appBar: guideAppBar(
         context,

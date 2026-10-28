@@ -1,0 +1,180 @@
+The following plugins do not support Swift Package Manager for ios:
+  - flutter_secure_storage
+This will become an error in a future version of Flutter. Please contact the plugin maintainers to request Swift Package Manager adoption.
+Running Xcode build...                                          
+Xcode build done.                                           159.5s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:50022/1Tou0D5ni34=/
+VMServiceFlutterDriver: Isolate found with number: 207595826954411
+VMServiceFlutterDriver: Isolate 207595826954411 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: offline shopping continues through actual Duo runtime poses
+VMServiceFlutterDriver: Connected to Flutter application.
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+Failed to index parameter type: <WFLinkDynamicOptionsEnumerationParameter: 0x10a3c7180> in com.apple.siri.SiriVideoAppIntents.CrossDevicePlaceholderIntent: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem for locale: en
+Skipping: <WFUnionParameter: 0x10a8ec700> in com.apple.siri.messages.SiriMessagesAppIntentsExtension.SiriKitSendMessageIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a930f00> in com.apple.mobilesafari.CreateNewTabGroup because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a8ecf00> in com.apple.siri.SiriVideoAppIntents.InternalPlayContentIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a8ee600> in com.apple.calls.PhoneAppIntentsExtension.StartTelephonyCallIntent because union values themselves are not treated as a type
+Failed to index parameter type: <WFLinkDynamicOptionsEnumerationParameter: 0x10a90c780> in com.apple.gms.GenerativePartnerPrototypeExtension.GenerativePartnerPrototypeIntentChatGPT: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem for locale: en
+Failed to index parameter type: <WFLinkDynamicOptionsEnumerationParameter: 0x10a90c900> in com.apple.gms.GenerativePartnerPrototypeExtension.GenerativePartnerPrototypeIntentChatGPT: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem for locale: en
+Skipping: <WFUnionParameter: 0x105d3cb00> in com.apple.siri.SiriVideoAppIntents.InternalFindVideoIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x105d3cd00> in com.apple.calls.PhoneAppIntentsExtension.StartFaceTimeCallIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a931c00> in com.apple.siri.AudioAppIntentsExtension.SiriKitAddAudioToPlaylistIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a933200> in com.apple.calls.PhoneAppIntentsExtension.CreateConferenceCallIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a9a4100> in com.apple.siri.AudioAppIntentsExtension.SiriKitPlayAudioIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a9a4e00> in com.apple.siri.SiriPhoneAppIntentsExtension.SiriKitStartCallIntent because union values themselves are not treated as a type
+Failed to index parameter type: <WFLinkDynamicOptionsEnumerationParameter: 0x10a9b8f00> in com.apple.siri.AudioAppIntentsExtension.WholeHouseAudioPlaceholderIntent: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem for locale: en
+Skipping: <WFUnionParameter: 0x10a9a5c00> in com.apple.siri.AudioAppIntentsExtension.SiriKitUpdateAudioAffinityIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a9a7000> in com.apple.siri.SiriGeo.SiriGeoAppIntentExtension.ThirdPartyStartNavigationIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a9a7100> in com.apple.siri.SiriGeo.SiriGeoAppIntentExtension.ThirdPartyStartNavigationIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10a9a5500> in com.apple.siri.AudioAppIntentsExtension.SiriKitAddAudioToLibraryIntent because union values themselves are not treated as a type
+Type indexing (params + content items) took 9.663448s
+Failed to index action parameter: <WFLinkDynamicOptionsEnumerationParameter: 0x10a3c7180> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem
+Failed to index action parameter: <WFLinkDynamicOptionsEnumerationParameter: 0x10a90c780> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem
+Failed to index action parameter: <WFLinkDynamicOptionsEnumerationParameter: 0x10a90c900> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem
+Failed to index action parameter: <WFLinkDynamicOptionsEnumerationParameter: 0x10a9b8f00> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem
+Action indexing took 0.689208s
+Indexed: 347
+Errored: 0
+Skipped: [:]
+Bundle cache: 6149 hits, 79 misses
+Finished in 21.217496s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+flutter: DUO_STAGE:outer
+flutter: DUO_GEOMETRY:{"stage":"outer","size":[466.0,678.0],"barEdge":"right","divisions":[]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"01-actual-duo-outer-inicio","size":[466.0,678.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:01-actual-duo-outer-inicio
+flutter: DUO_CAPTURE_CONTEXT:{"name":"02-actual-duo-outer-product","size":[466.0,678.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:02-actual-duo-outer-product
+flutter: DUO_STAGE:open-landscape
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+Indexing for request: <WFToolKitIndexingRequest: 0x1020500c0>, changeset: .partial(updatedCount: 38 removedCount: 0 updated: ["com.apple.SharingUIService", "com.apple.AppStoreSettingsAppIntents", "com.apple.TransparencySettingsIntents", "com.apple.Maps.MapsSettingsAppIntents", "com.apple.calls.PhoneAppIntentsExtension", "com.apple.ClassKit.ClassKitAppIntents", "com.apple.gms.GenerativePartnerPrototypeExtension", "com.apple.siri.SiriGeo.SiriGeoAppIntentExtension", "com.apple.SensitiveContentAnalysis.SensitiveContentAnalysisConfigurationExtension", "com.apple.ShortcutsActions", "com.apple.intelligenceflow.IntelligenceFlowAppIntentsExtension", "com.apple.PeopleViewService", "com.apple.siri", "com.apple.mobilesafari", "com.apple.BarcodeScanner", "com.apple.siri.SiriNotebookAppIntentsExtension", "com.apple.MediaRemoteAppIntentsExtension", "com.apple.springboard", "com.apple.siri.messages.SiriMessagesAppIntentsExtension", "com.apple.siri.SiriPhoneAppIntentsExtension", "com.apple.siri.SiriVideoAppIntents", "com.apple.omniSearch.Search<…>, priority: <decode: missing data>
+indexing: the changeset is expensive, filling Link provider in full
+Skipping: <WFUnionParameter: 0x10213c300> in com.apple.siri.SiriPhoneAppIntentsExtension.SiriKitStartCallIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10213d400> in com.apple.siri.AudioAppIntentsExtension.SiriKitAddAudioToLibraryIntent because union values themselves are not treated as a type
+Failed to index parameter type: <WFLinkDynamicOptionsEnumerationParameter: 0x106ab5f80> in com.apple.siri.SiriVideoAppIntents.CrossDevicePlaceholderIntent: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem for locale: en
+Skipping: <WFUnionParameter: 0x10213ec00> in com.apple.siri.AudioAppIntentsExtension.SiriKitAddAudioToPlaylistIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10213ef00> in com.apple.siri.SiriGeo.SiriGeoAppIntentExtension.ThirdPartyStartNavigationIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x10213f000> in com.apple.siri.SiriGeo.SiriGeoAppIntentExtension.ThirdPartyStartNavigationIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x107100c00> in com.apple.siri.AudioAppIntentsExtension.SiriKitPlayAudioIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x107102c00> in com.apple.mobilesafari.CreateNewTabGroup because union values themselves are not treated as a type
+Failed to index parameter type: <WFLinkDynamicOptionsEnumerationParameter: 0x107128600> in com.apple.gms.GenerativePartnerPrototypeExtension.GenerativePartnerPrototypeIntentChatGPT: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem for locale: en
+Failed to index parameter type: <WFLinkDynamicOptionsEnumerationParameter: 0x107128480> in com.apple.gms.GenerativePartnerPrototypeExtension.GenerativePartnerPrototypeIntentChatGPT: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem for locale: en
+Skipping: <WFUnionParameter: 0x107154c00> in com.apple.siri.SiriVideoAppIntents.InternalPlayContentIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x107155a00> in com.apple.siri.messages.SiriMessagesAppIntentsExtension.SiriKitSendMessageIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x107157e00> in com.apple.siri.AudioAppIntentsExtension.SiriKitUpdateAudioAffinityIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x107157f00> in com.apple.siri.SiriVideoAppIntents.InternalFindVideoIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x107103f00> in com.apple.calls.PhoneAppIntentsExtension.CreateConferenceCallIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x1071a0100> in com.apple.calls.PhoneAppIntentsExtension.StartTelephonyCallIntent because union values themselves are not treated as a type
+Skipping: <WFUnionParameter: 0x1071a3b00> in com.apple.calls.PhoneAppIntentsExtension.StartFaceTimeCallIntent because union values themselves are not treated as a type
+Failed to index parameter type: <WFLinkDynamicOptionsEnumerationParameter: 0x1071f0d80> in com.apple.siri.AudioAppIntentsExtension.WholeHouseAudioPlaceholderIntent: (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem for locale: en
+Type indexing (params + content items) took 4.924336s
+Failed to index action parameter: <WFLinkDynamicOptionsEnumerationParameter: 0x106ab5f80> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem
+Failed to index action parameter: <WFLinkDynamicOptionsEnumerationParameter: 0x107128600> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem
+Failed to index action parameter: <WFLinkDynamicOptionsEnumerationParameter: 0x107128480> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem
+Failed to index action parameter: <WFLinkDynamicOptionsEnumerationParameter: 0x1071f0d80> due to (extension in ActionKit):__C.WFParameter.ToolKitConversionError.missingLinkParameterContentItem
+Action indexing took 0.904781s
+Indexed: 347
+Errored: 0
+Skipped: [:]
+Bundle cache: 6149 hits, 79 misses
+Finished in 9.584467s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+-[WFIsolatedShortcutRunner init] Taking sandbox extensions for execution
+-[WFIsolatedShortcutRunner init]_block_invoke Sandbox extensions acquired
+Indexing for request: <WFToolKitIndexingRequest: 0x1068500c0>, changeset: .none, priority: 31
+Finished in 0.235531s
+-[WFIsolatedShortcutRunner unaliveProcess] Releasing sandbox extensions
+flutter: DUO_GEOMETRY:{"stage":"open-landscape","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":false,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"03-actual-duo-landscape-browse-detail","size":[951.0,669.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:03-actual-duo-landscape-browse-detail
+flutter: DUO_CAPTURE_CONTEXT:{"name":"04-actual-duo-landscape-direct-product","size":[951.0,669.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:04-actual-duo-landscape-direct-product
+flutter: DUO_STAGE:partial-fold
+flutter: DUO_GEOMETRY:{"stage":"partial-fold","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":true,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"05-actual-duo-partial-fold-product","size":[951.0,669.0],"barEdge":"right","safeInsets":[0.0,0.0,84.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:05-actual-duo-partial-fold-product
+flutter: DUO_STAGE:open-flat
+flutter: DUO_GEOMETRY:{"stage":"open-flat","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":false,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: DUO_STAGE:inner-portrait
+flutter: DUO_GEOMETRY:{"stage":"inner-portrait","size":[669.0,951.0],"barEdge":"none","divisions":[{"active":false,"frame":[0.0,455.5,669.0,40.0]}]}
+flutter: DUO_CAPTURE_CONTEXT:{"name":"06-actual-duo-inner-portrait-product","size":[669.0,951.0],"barEdge":"none","safeInsets":[0.0,82.0,0.0,34.0],"scaled16":16.0}
+flutter: DUO_CAPTURE:06-actual-duo-inner-portrait-product
+flutter: DUO_STAGE:closed-again
+flutter: DUO_GEOMETRY:{"stage":"closed-again","size":[678.0,466.0],"barEdge":"left","divisions":[]}
+flutter:
+flutter: Warning: A call to tap() with finder "Found 1 widget with key [<'purchase-dock-primary'>]: [
+flutter:   PurchaseDockButton-[<'purchase-dock-primary'>](dependencies: [InheritedCupertinoTheme, _InheritedTheme, _LocalizationsScope-[GlobalKey#90934], _ScrollableScope]),
+flutter: ]" derived an Offset (Offset(297.0, 45.6)) that would not hit test on the specified widget.
+flutter: Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+flutter: The finder corresponds to this RenderBox: RenderSemanticsAnnotations#2451d relayoutBoundary=up10
+flutter: The hit test result at that offset is: HitTestResult(_RenderInkFeatures#dbf35@Offset(297.0, 45.6), RenderPhysicalModel#38f0b@Offset(297.0, 45.6), RenderStack#587c7@Offset(297.0, 45.6), RenderIgnorePointer#8ddf4@Offset(297.0, 45.6), _RenderLayoutBuilder#bc7d8@Offset(297.0, 45.6), RenderRepaintBoundary#04f06@Offset(297.0, 45.6), RenderIgnorePointer#fba1e@Offset(297.0, 45.6), RenderRepaintBoundary#9abfc@Offset(297.0, 45.6), RenderSemanticsAnnotations#be8a3@Offset(297.0, 45.6), RenderOffstage#21037@Offset(297.0, 45.6), RenderSemanticsAnnotations#6d974@Offset(297.0, 45.6), _RenderTheater#1bdde@Offset(297.0, 45.6), RenderAbsorbPointer#9f504@Offset(297.0, 45.6), RenderPointerListener#29279@Offset(297.0, 45.6), RenderSemanticsAnnotations#0af6f@Offset(297.0, 45.6), RenderExcludeSemantics#40c5c@Offset(297.0, 45.6), RenderStack#e905f@Offset(297.0, 45.6), _RenderColoredBox#9a95b@Offset(297.0, 45.6), RenderAnnotatedRegion<SystemUiOverlayStyle>#e65d9@Offset(297.0, 45.6), RenderSemanticsAnnotations#5ed77@O<…>
+flutter: #0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+flutter: #1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+flutter: #2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+flutter: #3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:260:20)
+flutter: <asynchronous suspension>
+flutter: #4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+flutter: <asynchronous suspension>
+flutter: To silence this warning, pass "warnIfMissed: false" to "tap()".
+flutter: To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+flutter:
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following TestFailure was thrown running a test:
+flutter: Expected: <1>
+flutter:   Actual: <0>
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #4      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:266:7)
+flutter: <asynchronous suspension>
+flutter: #5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+flutter: <asynchronous suspension>
+flutter: #7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: This was caught by the test expectation on the following line:
+flutter:   file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart line 266
+flutter: The test description was:
+flutter:   offline shopping continues through actual Duo runtime poses
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 02:17 +0: offline shopping continues through actual Duo runtime poses [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: offline shopping continues through actual Duo runtime poses
+flutter:
+flutter: 02:17 +0 -1: (tearDownAll)
+flutter: 02:18 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: offline shopping continues through actual Duo runtime poses
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following TestFailure was thrown running a test:
+Expected: <1>
+  Actual: <0>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:266:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#7      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+<asynchronous suspension>
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart line 266
+The test description was:
+  offline shopping continues through actual Duo runtime poses
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+

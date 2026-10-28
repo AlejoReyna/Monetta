@@ -1,3 +1,4 @@
+import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'dart:io';
 
 import 'package:flutter/material.dart';
@@ -124,7 +125,13 @@ void main() {
       const CollectionScreen(title: 'Catálogo'),
     );
     expect(findAssetImage(kGuideStudioBanner), findsOneWidget);
-    expect(find.text('Catálogo'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.byType(CatalogEditorialBanner),
+        matching: find.text('Catálogo'),
+      ),
+      findsOneWidget,
+    );
     expect(find.text('Ver la colección'), findsOneWidget);
     expect(find.byKey(const ValueKey('catalog-guide-banner')), findsNothing);
   });
