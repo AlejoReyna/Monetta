@@ -235,7 +235,19 @@ class _ProductScreenState extends State<ProductScreen> {
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
-    final product = store.products.firstWhere((p) => p.id == widget.productId);
+    // The live catalog (realtime listener / Shopify delta sync) can replace
+    // `store.products` while this screen is open, e.g. right after "Agregar"
+    // on a slow network. A product that is unpublished or removed must not
+    // crash the detail screen with `StateError: No element`.
+    Product? found;
+    for (final candidate in store.products) {
+      if (candidate.id == widget.productId) {
+        found = candidate;
+        break;
+      }
+    }
+    if (found == null) return const _ProductUnavailable();
+    final product = found;
     final facets = store.facetsFor(product.id);
     final wishlisted = store.wishlist.contains(product.id);
     final selectable = selectableVariants(product);
@@ -1317,6 +1329,52 @@ class _Rail extends StatelessWidget {
             ),
           );
         },
+      ),
+    );
+  }
+}
+
+
+/// Shown when the product is no longer in the live catalog (removed or
+/// unpublished in Shopify while the shopper was viewing it).
+class _ProductUnavailable extends StatelessWidget {
+  const _ProductUnavailable();
+
+  @override
+  Widget build(BuildContext context) {
+    final navigator = Navigator.of(context);
+    return Scaffold(
+      key: const Key('product-unavailable'),
+      appBar: AppBar(),
+      body: SafeArea(
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  'Este producto ya no está disponible.',
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Lo que ya agregaste a tu bolsa se conserva.',
+                  textAlign: TextAlign.center,
+                ),
+                if (navigator.canPop()) ...[
+                  const SizedBox(height: 16),
+                  TextButton(
+                    key: const Key('product-unavailable-back'),
+                    onPressed: () => navigator.maybePop(),
+                    child: const Text('Volver'),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }
