@@ -14,8 +14,14 @@ import '../../data/normalize/facets.dart' show FacetValue;
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
+import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
+import '../checkout/checkout_screen.dart';
+import '../navigation/guide_chrome.dart';
+import '../navigation/guide_drawer.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import '../product/quick_view.dart';
+import 'categories_screen.dart';
 import 'catalog_controls.dart';
 import 'catalog_query.dart';
 import 'collection_screen.dart';
@@ -122,13 +128,12 @@ class _SearchScreenState extends State<SearchScreen> {
       searchProducts(StoreScope.of(context), raw);
 
   List<String> _matchingHistory(String raw) {
-    final tokens =
-        normalizeSearchText(raw).split(' ').where((token) => token.isNotEmpty);
+    final tokens = normalizeSearchText(
+      raw,
+    ).split(' ').where((token) => token.isNotEmpty);
     return <String>[
       for (final entry in _history.queries)
-        if (tokens.every(
-          (token) => normalizeSearchText(entry).contains(token),
-        ))
+        if (tokens.every((token) => normalizeSearchText(entry).contains(token)))
           entry,
     ];
   }
@@ -203,9 +208,9 @@ class _SearchScreenState extends State<SearchScreen> {
           value,
     }.toList()
       ..sort(
-        (a, b) => categoryPlural(a).toLowerCase().compareTo(
-              categoryPlural(b).toLowerCase(),
-            ),
+        (a, b) => categoryPlural(
+          a,
+        ).toLowerCase().compareTo(categoryPlural(b).toLowerCase()),
       );
     return slugs;
   }
@@ -241,10 +246,7 @@ class _SearchScreenState extends State<SearchScreen> {
     logProductEvent(
       context,
       ProductEvent.searchSubmitted,
-      parameters: {
-        'query_length': query.length,
-        'result_count': resultCount,
-      },
+      parameters: {'query_length': query.length, 'result_count': resultCount},
     );
   }
 
@@ -300,9 +302,16 @@ class _SearchScreenState extends State<SearchScreen> {
     final matches = _matches(query);
     final suggestions = _suggestions(query);
 
+    final store = StoreScope.of(context);
     return Scaffold(
       backgroundColor: palette.canvas,
+      drawer: guideDrawer(context),
+      appBar: guideAppBar(
+        context,
+        onSearch: () => _focus.requestFocus(),
+      ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             _SearchField(
@@ -313,7 +322,6 @@ class _SearchScreenState extends State<SearchScreen> {
               onChanged: _onChanged,
               onSubmitted: (_) => _submit(),
               onClear: _clear,
-              onBack: () => Navigator.of(context).pop(),
             ),
             Divider(height: 0.5, color: palette.hairline),
             Expanded(
@@ -361,6 +369,25 @@ class _SearchScreenState extends State<SearchScreen> {
           ],
         ),
       ),
+      bottomNavigationBar: MonettaBottomNavigation(
+        current: null,
+        bagCount: store.bagQuantity,
+        onSelected: (destination) {
+          switch (destination) {
+            case MonettaBottomDestination.home:
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            case MonettaBottomDestination.catalog:
+              unawaited(openCategories(context));
+            case MonettaBottomDestination.bag:
+              unawaited(openBag(context));
+            case MonettaBottomDestination.account:
+              final account = AccountScope.maybeOf(context);
+              if (account != null) {
+                unawaited(openAccount(context, controller: account));
+              }
+          }
+        },
+      ),
     );
   }
 }
@@ -378,7 +405,6 @@ class _SearchField extends StatelessWidget {
     required this.onChanged,
     required this.onSubmitted,
     required this.onClear,
-    required this.onBack,
   });
 
   final TextEditingController controller;
@@ -388,7 +414,6 @@ class _SearchField extends StatelessWidget {
   final ValueChanged<String> onChanged;
   final ValueChanged<String> onSubmitted;
   final VoidCallback onClear;
-  final VoidCallback onBack;
 
   @override
   Widget build(BuildContext context) {
@@ -400,28 +425,13 @@ class _SearchField extends StatelessWidget {
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
-        BoutiqueSpace.sm,
+        BoutiqueSpace.gutter,
         BoutiqueSpace.md,
-        BoutiqueSpace.lg,
+        BoutiqueSpace.gutter,
         BoutiqueSpace.md,
       ),
       child: Row(
         children: [
-          SizedBox(
-            width: BoutiqueSpace.tapTarget,
-            height: BoutiqueSpace.tapTarget,
-            child: IconButton(
-              key: const ValueKey('search-back-button'),
-              tooltip: 'Volver',
-              onPressed: onBack,
-              icon: Icon(
-                Icons.arrow_back_rounded,
-                size: 24,
-                color: palette.ink,
-              ),
-            ),
-          ),
-          const SizedBox(width: BoutiqueSpace.sm),
           Expanded(
             child: TextField(
               key: const ValueKey('search-query-field'),
@@ -583,8 +593,10 @@ class _SectionTitle extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style:
-                  boutiqueSectionHeading(context: context, color: palette.ink),
+              style: boutiqueSectionHeading(
+                context: context,
+                color: palette.ink,
+              ),
             ),
           ),
           if (actionLabel case final label? when onAction != null)
@@ -634,11 +646,7 @@ class _HistoryRow extends StatelessWidget {
           padding: const EdgeInsets.only(left: BoutiqueSpace.gutter),
           child: Row(
             children: [
-              Icon(
-                Icons.history_rounded,
-                size: 20,
-                color: palette.inkMuted,
-              ),
+              Icon(Icons.history_rounded, size: 20, color: palette.inkMuted),
               const SizedBox(width: BoutiqueSpace.md),
               Expanded(
                 child: Padding(
@@ -751,9 +759,9 @@ class _ProductRail extends StatelessWidget {
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width;
     final cardWidth = (width * .40).clamp(140.0, 200.0);
-    final caption = MediaQuery.textScalerOf(context).scale(
-      ProductTileDensity.compact.captionHeight,
-    );
+    final caption = MediaQuery.textScalerOf(
+      context,
+    ).scale(ProductTileDensity.compact.captionHeight);
 
     return SizedBox(
       key: const ValueKey('search-product-rail'),
@@ -917,9 +925,7 @@ class _SearchSuggestions extends StatelessWidget {
           child: InkWell(
             onTap: () => onSelected(suggestion),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 56,
-              ),
+              constraints: const BoxConstraints(minHeight: 56),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: BoutiqueSpace.gutter,
@@ -1103,9 +1109,7 @@ class _NoResults extends StatelessWidget {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           child: Align(
             alignment: Alignment.centerLeft,
             child: TextButton(

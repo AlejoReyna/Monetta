@@ -145,9 +145,9 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
       await store.write(scope, value);
       if (!mounted || scope != _scope()) return;
       _seedRecommendations();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text(kPersonalizationSaved)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text(kPersonalizationSaved)));
     } on Object {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -347,19 +347,12 @@ class _PersonalizationScreenState extends State<PersonalizationScreen> {
                   ),
                 ),
                 SizedBox(height: MonettaTokens.space[4]),
-                FilledButton(
+                ClientGuideButton(
                   key: const ValueKey('personalization-save'),
+                  label: 'GUARDAR PREFERENCIAS',
+                  outlined: true,
+                  chevron: true,
                   onPressed: _saving ? null : _save,
-                  style: FilledButton.styleFrom(
-                    backgroundColor: palette.actionDark,
-                    foregroundColor: palette.onActionDark,
-                    disabledBackgroundColor: palette.surfaceDeep,
-                    minimumSize:
-                        const Size.fromHeight(MonettaTokens.controlHeight),
-                    shape: const StadiumBorder(),
-                    textStyle: clientGuideStyle(context, MonettaTokens.control),
-                  ),
-                  child: const Text('Guardar preferencias'),
                 ),
               ],
             ),
@@ -603,7 +596,14 @@ class _ChoiceMark extends StatelessWidget {
         ),
       ),
       child: selected
-          ? Icon(Icons.check, size: 14, color: palette.onAction)
+          ? Container(
+              width: 8,
+              height: 8,
+              decoration: BoxDecoration(
+                shape: BoxShape.circle,
+                color: palette.onAction,
+              ),
+            )
           : null,
     );
   }

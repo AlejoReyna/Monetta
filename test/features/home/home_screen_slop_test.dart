@@ -16,10 +16,7 @@ Future<CatalogStore> _loadedStore() async {
 Widget _app(CatalogStore store) {
   return MaterialApp(
     theme: buildLightTheme(),
-    home: StoreScope(
-      notifier: store,
-      child: const HomeScreen(),
-    ),
+    home: StoreScope(notifier: store, child: const HomeScreen()),
   );
 }
 
@@ -43,15 +40,20 @@ void main() {
 
     expect(find.text('Personaliza tu experiencia'), findsNothing);
     expect(find.text('¿Qué le gusta?'), findsNothing);
-    expect(find.byKey(const ValueKey('home-search-bar')), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-search-bar')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('home-appbar-search-button')),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('home-compact-hero')), findsOneWidget);
-    expect(find.text('Novedades'), findsOneWidget);
+    expect(find.text('Nueva colección'), findsOneWidget);
     expect(find.text('Compra por estilo'), findsOneWidget);
     expect(find.byKey(const ValueKey('home-style-rail')), findsOneWidget);
   });
 
-  testWidgets('shopper home does not narrate the engine or the scrape',
-      (tester) async {
+  testWidgets('shopper home does not narrate the engine or the scrape', (
+    tester,
+  ) async {
     final store = await _loadedStore();
     addTearDown(store.dispose);
     await tester.pumpWidget(_app(store));
@@ -68,7 +70,7 @@ void main() {
     expect(find.text('ORDENAR'), findsNothing);
   });
 
-  testWidgets('search sits above a banner that leaves room to shop', (
+  testWidgets('the hero sits under the header and leaves room to shop', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -82,20 +84,21 @@ void main() {
     await tester.pump();
 
     final search = tester.getRect(
-      find.byKey(const ValueKey('home-search-bar')),
+      find.byKey(const ValueKey('home-appbar-search-button')),
     );
     final banner = tester.getRect(
       find.byKey(const ValueKey('home-compact-hero')),
     );
 
     expect(search.bottom, lessThanOrEqualTo(banner.top));
+    expect(find.byKey(const ValueKey('home-search-bar')), findsNothing);
     // The brief's 25–32% of the viewport, never the whole first fold.
     expect(banner.height / 844, greaterThanOrEqualTo(0.25));
     expect(banner.height / 844, lessThanOrEqualTo(0.32));
     // Full bleed, as on figure 03 — the photograph runs rail to rail.
     expect(banner.left, 0);
     expect(banner.right, 390);
-    expect(find.text('Ver novedades'), findsOneWidget);
+    expect(find.text('COLECCIÓN'), findsOneWidget);
   });
 
   testWidgets('modules sit on a 24–32px rhythm, not a 64–72px one', (
@@ -113,15 +116,15 @@ void main() {
     final banner = tester.getRect(
       find.byKey(const ValueKey('home-compact-hero')),
     );
-    final newest = tester.getRect(
-      find.byKey(const ValueKey('home-section-new-products')),
-    );
     final style = tester.getRect(
       find.byKey(const ValueKey('home-section-bag-types')),
     );
+    final brands = tester.getRect(
+      find.byKey(const ValueKey('home-section-brands')),
+    );
 
-    expect(newest.top - banner.bottom, inInclusiveRange(24, 40));
-    expect(style.top - newest.bottom, inInclusiveRange(24, 40));
+    expect(style.top - banner.bottom, inInclusiveRange(24, 40));
+    expect(brands.top - style.bottom, inInclusiveRange(24, 40));
   });
 
   testWidgets('new arrivals are a rail of the shared product card', (
@@ -181,7 +184,7 @@ void main() {
     );
   });
 
-  testWidgets('the in-page search field hands over to the app-bar icon', (
+  testWidgets('the header search icon is visible and opens search', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -193,62 +196,7 @@ void main() {
     await tester.pumpWidget(_app(store));
     await tester.pump();
 
-    expect(
-      tester
-          .widget<Opacity>(
-            find.byKey(const ValueKey('home-search-bar-transition')),
-          )
-          .opacity,
-      closeTo(1, .00001),
-    );
-    expect(
-      tester
-          .widget<Opacity>(
-            find.byKey(const ValueKey('home-appbar-search-transition')),
-          )
-          .opacity,
-      0,
-    );
-
-    await tester.drag(
-      find.byKey(const ValueKey('home-discovery-header')),
-      const Offset(0, -180),
-    );
-    await tester.pump();
-
-    expect(
-      tester
-          .widget<Opacity>(
-            find.byKey(const ValueKey('home-search-bar-transition')),
-          )
-          .opacity,
-      0,
-    );
-    expect(
-      tester
-          .widget<Opacity>(
-            find.byKey(const ValueKey('home-appbar-search-transition')),
-          )
-          .opacity,
-      closeTo(1, .00001),
-    );
-    expect(
-      find.byKey(const ValueKey('home-appbar-search-button')).hitTestable(),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('home search field opens the product search', (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 2000);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    addTearDown(store.dispose);
-    await tester.pumpWidget(_app(store));
-    await tester.pump();
-
-    await tester.tap(find.byKey(const ValueKey('home-search-bar')));
+    await tester.tap(find.byKey(const ValueKey('home-appbar-search-button')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('search-query-field')), findsOneWidget);

@@ -15,6 +15,7 @@ import '../../app/monetta_tokens.g.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_scaffold.dart';
+import '../boutique/guide_art.dart';
 
 const String kRewardsContractPlaceholder = 'Pendiente de contrato';
 
@@ -93,8 +94,9 @@ class RewardsShareScreen extends StatelessWidget {
   }
 
   void _notify(BuildContext context, String message) {
-    ScaffoldMessenger.of(context)
-        .showSnackBar(SnackBar(content: Text(message)));
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -113,6 +115,8 @@ class RewardsShareScreen extends StatelessWidget {
           MonettaTokens.space[6],
         ),
         children: [
+          const GuidePhoneMockup(),
+          SizedBox(height: MonettaTokens.space[4]),
           Text(
             'Comparte y gana',
             style: clientGuideStyle(context, MonettaTokens.screenTitle),
@@ -207,8 +211,10 @@ class _CatalogCard extends StatelessWidget {
                     children: [
                       Text(
                         link.title,
-                        style:
-                            clientGuideStyle(context, MonettaTokens.cardLabel),
+                        style: clientGuideStyle(
+                          context,
+                          MonettaTokens.cardLabel,
+                        ),
                       ),
                       Text(
                         'Comparte esta colección.',

@@ -171,6 +171,7 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
           ),
           SizedBox(height: MonettaTokens.space[2]),
           _DirectoryGrid(
+            columns: 2,
             children: [
               for (final category in clientGuideCategories)
                 _DirectoryTile(
@@ -251,19 +252,24 @@ class _CategoriesScreenState extends State<CategoriesScreen> {
 }
 
 class _DirectoryGrid extends StatelessWidget {
-  const _DirectoryGrid({required this.children});
+  const _DirectoryGrid({required this.children, this.columns});
   final List<Widget> children;
+
+  /// Phone collections are two-up, matching the guide. Null keeps the
+  /// breakpoint columns used by the brand row.
+  final int? columns;
   @override
   Widget build(BuildContext context) => LayoutBuilder(
         builder: (context, constraints) {
           final width = MediaQuery.sizeOf(context).width;
-          final columns = MediaQuery.textScalerOf(context).scale(1) > 1.3
-              ? MonettaTokens.productColumnsNarrow
-              : width >= MonettaTokens.breakpointExpanded
-                  ? MonettaTokens.categoryColumnsExpanded
-                  : width >= MonettaTokens.breakpointMedium
-                      ? MonettaTokens.categoryColumnsMedium
-                      : MonettaTokens.categoryColumnsCompact;
+          final columns = this.columns ??
+              (MediaQuery.textScalerOf(context).scale(1) > 1.3
+                  ? MonettaTokens.productColumnsNarrow
+                  : width >= MonettaTokens.breakpointExpanded
+                      ? MonettaTokens.categoryColumnsExpanded
+                      : width >= MonettaTokens.breakpointMedium
+                          ? MonettaTokens.categoryColumnsMedium
+                          : MonettaTokens.categoryColumnsCompact);
           final gap = MonettaTokens.space[1];
           return Wrap(
             spacing: gap,
@@ -298,23 +304,66 @@ class _DirectoryTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    Widget fallback() => Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            if (icon != null)
-              Icon(icon, size: MonettaTokens.space[5], color: palette.goldText),
-            if (!brand)
-              Text(
-                'Imagen pendiente',
-                textAlign: TextAlign.center,
-                style: clientGuideStyle(
-                  context,
-                  MonettaTokens.navLabel,
-                  color: palette.inkMuted,
+    Widget fallback() => Center(
+          child: icon == null
+              ? const SizedBox.shrink()
+              : Icon(
+                  icon,
+                  size: MonettaTokens.space[5],
+                  color: palette.goldText,
                 ),
-              ),
-          ],
         );
+    if (!brand) {
+      return Material(
+        color: palette.surfaceDeep,
+        clipBehavior: Clip.antiAlias,
+        borderRadius: BorderRadius.circular(MonettaTokens.radiusTile),
+        child: InkWell(
+          key: ValueKey('categories-$id'),
+          onTap: onTap,
+          child: AspectRatio(
+            aspectRatio: 0.86,
+            child: Stack(
+              fit: StackFit.expand,
+              children: [
+                asset == null
+                    ? fallback()
+                    : Image.asset(
+                        asset!,
+                        fit: BoxFit.cover,
+                        excludeFromSemantics: true,
+                        errorBuilder: (_, __, ___) => fallback(),
+                      ),
+                const DecoratedBox(
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.center,
+                      end: Alignment.bottomCenter,
+                      colors: <Color>[Color(0x00000000), Color(0xB3000000)],
+                    ),
+                  ),
+                ),
+                Positioned(
+                  left: MonettaTokens.space[2],
+                  right: MonettaTokens.space[2],
+                  bottom: MonettaTokens.space[2],
+                  child: Text(
+                    label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.cardLabel,
+                      color: const Color(0xFFFFFFFF),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
     return Material(
       color: palette.surfaceDeep,
       clipBehavior: Clip.antiAlias,
@@ -327,12 +376,12 @@ class _DirectoryTile extends StatelessWidget {
           child: Column(
             children: [
               AspectRatio(
-                aspectRatio: brand ? 3 : 1.5,
+                aspectRatio: 2.4,
                 child: asset == null
                     ? fallback()
                     : Image.asset(
                         asset!,
-                        fit: BoxFit.contain,
+                        fit: BoxFit.fitWidth,
                         excludeFromSemantics: true,
                         errorBuilder: (_, __, ___) => fallback(),
                       ),

@@ -74,7 +74,9 @@ void main() {
       final collection =
           tester.widget<CollectionScreen>(find.byType(CollectionScreen));
       expect(collection.filter.category, 'perfume');
-      await tester.pageBack();
+      Navigator.of(
+        tester.element(find.byType(CollectionScreen)),
+      ).pop();
       await tester.pumpAndSettle();
       final quote = find.byKey(const ValueKey('wholesale-quote-bottom'));
       await tester.scrollUntilVisible(quote, 300, scrollable: scroll);

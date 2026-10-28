@@ -109,6 +109,8 @@ void main() {
         );
         final seeProduct = tester.getSemantics(viewProduct);
         final bar = tester.getSemantics(primaryButton());
+        final buyNow =
+            tester.getSemantics(find.byKey(const Key('quick-view-buy-now')));
 
         final order = tester.semantics
             .simulatedAccessibilityTraversal()
@@ -122,8 +124,9 @@ void main() {
           'name': name,
           'price': price,
           'options': options,
-          'Ver producto': seeProduct,
           'bar': bar,
+          'Comprar ahora': buyNow,
+          'Ver producto': seeProduct,
         };
         for (final entry in chain.entries) {
           expect(

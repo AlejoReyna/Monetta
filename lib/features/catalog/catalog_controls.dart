@@ -338,12 +338,27 @@ class CatalogEditorialBanner extends StatelessWidget {
                 BoutiqueSpace.gutter,
                 BoutiqueSpace.xl,
               ),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.end,
-                crossAxisAlignment: centerTitle
-                    ? CrossAxisAlignment.center
-                    : CrossAxisAlignment.start,
-                children: _content(context, onPhoto: true),
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  return FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: centerTitle
+                        ? Alignment.bottomCenter
+                        : Alignment.bottomLeft,
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: constraints.maxWidth,
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        crossAxisAlignment: centerTitle
+                            ? CrossAxisAlignment.center
+                            : CrossAxisAlignment.start,
+                        children: _content(context, onPhoto: true),
+                      ),
+                    ),
+                  );
+                },
               ),
             ),
           ),

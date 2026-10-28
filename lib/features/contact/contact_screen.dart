@@ -9,13 +9,14 @@ import '../../main.dart';
 import '../../app/monetta_tokens.g.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_scaffold.dart';
-import '../boutique/client_guide_sections.dart';
+import '../boutique/guide_art.dart';
 import 'contact_links.dart';
 import '../boutique/boutique_tokens.dart';
 
 /// Contacto web verificado (partner hub lo usa como "contacto").
-final Uri kMonettaContactPageUri =
-    Uri.parse('https://monetta.mx/pages/contact');
+final Uri kMonettaContactPageUri = Uri.parse(
+  'https://monetta.mx/pages/contact',
+);
 
 class ContactChannel {
   const ContactChannel({
@@ -103,20 +104,13 @@ Future<void> openContact(
 }) {
   return Navigator.of(context).push(
     MaterialPageRoute<void>(
-      builder: (_) => ContactScreen(
-        socialLinks: socialLinks,
-        openUri: openUri,
-      ),
+      builder: (_) => ContactScreen(socialLinks: socialLinks, openUri: openUri),
     ),
   );
 }
 
 class ContactScreen extends StatelessWidget {
-  const ContactScreen({
-    this.socialLinks,
-    this.openUri,
-    super.key,
-  });
+  const ContactScreen({this.socialLinks, this.openUri, super.key});
 
   final List<HomeSocialLink>? socialLinks;
 
@@ -152,19 +146,20 @@ class ContactScreen extends StatelessWidget {
           c.key == 'facebook-group',
     );
     final socials = channels.where((c) => c.key.startsWith('social-'));
-    final secondary =
-        channels.where((c) => c.key == 'mayoreo' || c.key == 'sitio');
+    final secondary = channels.where(
+      (c) => c.key == 'mayoreo' || c.key == 'sitio',
+    );
     return ClientGuideScaffold(
       current: null,
       body: ListView(
         key: const ValueKey('contact-scroll'),
         padding: EdgeInsets.zero,
         children: [
-          const ClientGuideEditorial(
+          const GuideHero(
+            asset: kGuideStudioBanner,
             title: 'Tu boutique y proveedor de confianza.',
             subtitle:
-                'Descubre nuestras marcas favoritas. Estamos para ayudarte.',
-            imageAsset: 'assets/images/home_bag_shoulder.webp',
+                'Productos originales de marcas que amas, importados desde Estados Unidos y envíos a todo México.',
           ),
           Padding(
             padding: EdgeInsets.all(MonettaTokens.space[4]),
@@ -173,10 +168,7 @@ class ContactScreen extends StatelessWidget {
               children: [
                 Text(
                   'Contáctanos',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.screenTitle,
-                  ),
+                  style: clientGuideStyle(context, MonettaTokens.screenTitle),
                 ),
                 SizedBox(height: MonettaTokens.space[1]),
                 Text(
@@ -199,10 +191,7 @@ class ContactScreen extends StatelessWidget {
                 Divider(color: palette.hairline),
                 Text(
                   'Síguenos en redes',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.sectionTitle,
-                  ),
+                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
                 ),
                 SizedBox(height: MonettaTokens.space[1]),
                 Text(
@@ -217,10 +206,7 @@ class ContactScreen extends StatelessWidget {
                 if (socials.isEmpty)
                   Text(
                     'Redes sociales: enlaces pendientes.',
-                    style: clientGuideStyle(
-                      context,
-                      MonettaTokens.cardLabel,
-                    ),
+                    style: clientGuideStyle(context, MonettaTokens.cardLabel),
                   ),
                 Wrap(
                   alignment: WrapAlignment.center,
@@ -229,9 +215,7 @@ class ContactScreen extends StatelessWidget {
                   children: [
                     for (final channel in socials)
                       TextButton.icon(
-                        key: ValueKey(
-                          'contact-channel-${channel.key}',
-                        ),
+                        key: ValueKey('contact-channel-${channel.key}'),
                         onPressed: () => _open(context, channel.uri),
                         icon: Icon(
                           channel.icon,
@@ -250,10 +234,7 @@ class ContactScreen extends StatelessWidget {
                 SizedBox(height: MonettaTokens.space[4]),
                 Text(
                   'Más ayuda',
-                  style: clientGuideStyle(
-                    context,
-                    MonettaTokens.sectionTitle,
-                  ),
+                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
                 ),
                 SizedBox(height: MonettaTokens.space[2]),
                 for (final channel in secondary) ...[
@@ -301,8 +282,9 @@ class _ChannelRow extends StatelessWidget {
         borderRadius: BorderRadius.circular(MonettaTokens.radiusCard),
         onTap: onTap,
         child: ConstrainedBox(
-          constraints:
-              const BoxConstraints(minHeight: MonettaTokens.controlHeight),
+          constraints: const BoxConstraints(
+            minHeight: MonettaTokens.controlHeight,
+          ),
           child: Padding(
             padding: EdgeInsets.all(MonettaTokens.space[2]),
             child: Row(

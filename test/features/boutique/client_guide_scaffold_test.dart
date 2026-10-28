@@ -31,7 +31,7 @@ void main() {
       ),
     );
     final navigator = tester.state<NavigatorState>(find.byType(Navigator));
-    await tester.tap(find.byKey(const ValueKey('guide-nav-categories')));
+    await tester.tap(find.byKey(const Key('bottom-nav-catalog')));
     await tester.pumpAndSettle();
     expect(find.byType(CategoriesScreen), findsOneWidget);
     navigator.pop();
@@ -41,7 +41,7 @@ void main() {
     expect(find.byType(SearchScreen), findsOneWidget);
     navigator.pop();
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('guide-nav-bag')));
+    await tester.tap(find.byKey(const Key('bottom-nav-bag')));
     await tester.pumpAndSettle();
     expect(find.byType(BagScreen), findsOneWidget);
     expect(find.text('Tu bolsa está vacía'), findsOneWidget);
@@ -70,9 +70,7 @@ void main() {
     );
     await tester.tap(find.text('Fixture home'));
     await tester.pumpAndSettle();
-    await tester.tap(find.byIcon(Icons.menu));
-    await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const ValueKey('guide-menu-home')));
+    await tester.tap(find.byKey(const Key('bottom-nav-home')));
     await tester.pumpAndSettle();
     expect(find.byType(ClientGuideScaffold), findsNothing);
     expect(find.text('Fixture home'), findsOneWidget);

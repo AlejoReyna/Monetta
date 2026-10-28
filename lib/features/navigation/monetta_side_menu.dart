@@ -8,6 +8,7 @@ import '../../app/theme.dart';
 import '../../domain/home_content.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
+import '../boutique/guide_art.dart';
 
 class MonettaSideMenu extends StatelessWidget {
   const MonettaSideMenu({
@@ -245,26 +246,6 @@ class MonettaSideMenu extends StatelessWidget {
                     label: 'Perfumes',
                     onTap: () => _select(context, onPerfumes),
                   ),
-                  _MenuLink(
-                    icon: Icons.brush_outlined,
-                    label: 'Maquillaje y skincare',
-                    onTap: () => _select(context, onBeauty),
-                  ),
-                  _MenuLink(
-                    icon: Icons.sell_outlined,
-                    label: 'Todas las marcas',
-                    onTap: () => _select(context, onCatalog),
-                  ),
-                  _MenuLink(
-                    icon: Icons.storefront_outlined,
-                    label: 'Mayoreo',
-                    onTap: () => _select(context, onPartner),
-                  ),
-                  _MenuLink(
-                    icon: Icons.chat_outlined,
-                    label: 'Contacto',
-                    onTap: () => _select(context, onSupport),
-                  ),
                   SizedBox(height: MonettaTokens.space[3]),
                   _ShareCard(
                     onShare: onShare == null
@@ -299,6 +280,28 @@ class MonettaSideMenu extends StatelessWidget {
                     ),
                   ],
                   SizedBox(height: MonettaTokens.space[3]),
+                  _MenuLink(
+                    icon: Icons.brush_outlined,
+                    label: 'Maquillaje y skincare',
+                    onTap: () => _select(context, onBeauty),
+                  ),
+                  _MenuLink(
+                    icon: Icons.sell_outlined,
+                    label: 'Todas las marcas',
+                    onTap: () => _select(context, onCatalog),
+                  ),
+                  _MenuLink(
+                    key: const Key('guide-menu-wholesale'),
+                    icon: Icons.storefront_outlined,
+                    label: 'Mayoreo',
+                    onTap: () => _select(context, onPartner),
+                  ),
+                  _MenuLink(
+                    key: const Key('guide-menu-contact'),
+                    icon: Icons.chat_outlined,
+                    label: 'Contacto',
+                    onTap: () => _select(context, onSupport),
+                  ),
                   _MenuLink(
                     icon: Icons.auto_stories_outlined,
                     label: 'Nuestra historia',
@@ -337,6 +340,11 @@ class _ShareCard extends StatelessWidget {
           color: palette.surface,
           borderRadius: BoutiqueRadius.card,
           border: Border.all(color: palette.hairline),
+          image: const DecorationImage(
+            image: AssetImage(kGuideShareBanner),
+            fit: BoxFit.cover,
+            alignment: Alignment.centerRight,
+          ),
         ),
         child: Padding(
           padding: EdgeInsets.all(MonettaTokens.space[3]),
@@ -356,15 +364,6 @@ class _ShareCard extends StatelessWidget {
                   color: palette.inkMuted,
                 ),
               ),
-              SizedBox(height: MonettaTokens.space[1]),
-              Text(
-                'Enlace público: pendiente de contrato',
-                style: clientGuideStyle(
-                  context,
-                  MonettaTokens.navLabel,
-                  color: palette.goldText,
-                ),
-              ),
               SizedBox(height: MonettaTokens.space[2]),
               FilledButton(
                 key: const Key('side-menu-share-button'),
@@ -375,7 +374,7 @@ class _ShareCard extends StatelessWidget {
                   minimumSize: const Size.fromHeight(MonettaTokens.tapTarget),
                   shape: const StadiumBorder(),
                 ),
-                child: const Text('Compartir catálogo'),
+                child: const Text('COMPARTIR CATÁLOGO'),
               ),
             ],
           ),
@@ -402,9 +401,7 @@ class _MenuLink extends StatelessWidget {
     final palette = context.boutique;
     return DecoratedBox(
       decoration: BoxDecoration(
-        border: Border(
-          bottom: BorderSide(color: palette.hairline, width: .5),
-        ),
+        border: Border(bottom: BorderSide(color: palette.hairline, width: .5)),
       ),
       child: Material(
         color: Colors.transparent,
@@ -412,8 +409,9 @@ class _MenuLink extends StatelessWidget {
           onTap: onTap,
           borderRadius: BorderRadius.circular(MonettaTokens.radiusCard),
           child: ConstrainedBox(
-            constraints:
-                const BoxConstraints(minHeight: MonettaTokens.tapTarget),
+            constraints: const BoxConstraints(
+              minHeight: MonettaTokens.tapTarget,
+            ),
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: MonettaTokens.space[1],
@@ -434,11 +432,7 @@ class _MenuLink extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(
-                    Icons.chevron_right,
-                    size: 18,
-                    color: palette.inkMuted,
-                  ),
+                  Icon(Icons.chevron_right, size: 18, color: palette.inkMuted),
                 ],
               ),
             ),

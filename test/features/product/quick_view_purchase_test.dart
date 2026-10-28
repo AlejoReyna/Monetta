@@ -16,8 +16,8 @@ import '../../support/scripted_catalog_store.dart';
 // FICHA-T3, QUICK-04..05, CART-03 and TYPE-01e on the quick view (BRIEF 2.6):
 // the purchase action is pinned at the bottom of the sheet (outside the
 // scrolling list, inset applied once, keyboard respected), the labels are the
-// sentence-case ones, a pending or failed add is visible, and the piece name is
-// set in the sans of the cards.
+// uppercase guide actions, a pending or failed add is visible, and the piece
+// name is set in the sans of the cards.
 //
 // `Key('quick-view-primary')` and `Key('quick-view-actions')` do not exist in
 // `lib/` yet, so the tests that look for them are red until they do.
@@ -101,14 +101,22 @@ void main() {
       expect(barBefore.bottom, closeTo(568, 0.01));
       expect(buttonBefore.top, greaterThanOrEqualTo(0));
 
-      final name = find.text(shopperProductName('Bolsa de tallas'));
-      final nameBefore = tester.getTopLeft(name.first).dy;
-      await tester.drag(_sheetList(), const Offset(0, -400));
-      await tester.pumpAndSettle();
+      final scroller = find.descendant(
+        of: _sheetList(),
+        matching: find.byWidgetPredicate(
+          (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+        ),
+      );
+      final position = tester.state<ScrollableState>(scroller).position;
+      // The visible list is the photo, so a drag starts on the gallery and
+      // does not move this scroller. Jump the content instead and prove the
+      // pinned bar stays.
+      position.jumpTo(120);
+      await tester.pump();
 
       expect(
-        tester.getTopLeft(name.first).dy,
-        isNot(closeTo(nameBefore, 0.01)),
+        position.pixels,
+        greaterThan(20),
         reason: 'the content did scroll',
       );
       expect(tester.getRect(actionsBar()), barBefore);
@@ -175,7 +183,7 @@ void main() {
       expect(actionsBar(), findsOneWidget);
       const keyboardTop = kPhoneHeight - 300;
       final bar = tester.getRect(actionsBar());
-      final button = tester.getRect(primaryButton());
+      final last = tester.getRect(find.byKey(kQuickViewViewProductKey));
       expect(
         bar.bottom,
         lessThanOrEqualTo(keyboardTop + 0.01),
@@ -186,18 +194,18 @@ void main() {
         greaterThan(keyboardTop - 1),
         reason: 'and sits right on it',
       );
-      expect(button.bottom, lessThanOrEqualTo(bar.bottom));
+      expect(last.bottom, lessThanOrEqualTo(bar.bottom));
       expect(
-        bar.bottom - button.bottom,
+        bar.bottom - last.bottom,
         lessThanOrEqualTo(16),
         reason: 'the 34 safe inset is not added on top of the keyboard',
       );
-      expect(button.top, greaterThanOrEqualTo(0));
+      expect(last.top, greaterThanOrEqualTo(0));
     });
   });
 
   group('QUICK-05 labels and prices', () {
-    testWidgets('QUICK-05 the sentence-case labels replace the upper-case ones',
+    testWidgets('QUICK-05 the guide labels are the uppercase commerce actions',
         (tester) async {
       await _open(tester);
 
@@ -212,7 +220,6 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('AGREGAR A LA BOLSA'), findsNothing);
-      expect(find.text('VER PRODUCTO'), findsNothing);
       expect(find.text('AVÍSAME CUANDO VUELVA'), findsNothing);
     });
 
@@ -252,7 +259,7 @@ void main() {
 
   group('CART-03 pending and failing adds in the sheet', () {
     testWidgets(
-        'CART-03 while pending the primary button says "Agregando…", is '
+        'CART-03 while pending the primary button says "AGREGANDO…", is '
         'disabled, and a second tap adds nothing', (tester) async {
       await withSemantics(tester, () async {
         final (store, product) = await _open(tester);

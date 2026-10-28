@@ -185,7 +185,7 @@ void main() {
         tester,
         'personalization-${size.width.toInt()}-${brightness.name}',
       );
-      expect(find.text('Guardar preferencias'), findsOneWidget);
+      expect(find.text('GUARDAR PREFERENCIAS'), findsOneWidget);
     });
   }
 }

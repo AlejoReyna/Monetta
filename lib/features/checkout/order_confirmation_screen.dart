@@ -16,6 +16,7 @@ import '../../app/motion.dart';
 import '../../app/monetta_tokens.g.dart';
 import '../boutique/client_guide_scaffold.dart';
 import '../boutique/client_guide_components.dart';
+import '../boutique/guide_check.dart';
 import 'purchase_notices.dart';
 import '../boutique/boutique_tokens.dart';
 
@@ -76,18 +77,9 @@ class OrderConfirmationScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: MonettaTokens.tapTarget * 2,
-                    height: MonettaTokens.tapTarget * 2,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: palette.gold, width: 1),
-                    ),
-                    child: Icon(
-                      Icons.check,
-                      size: MonettaTokens.tapTarget,
-                      color: palette.goldText,
-                    ),
+                  const GuideSuccessMark(
+                    key: ValueKey('purchase-success-mark'),
+                    size: 96,
                   ),
                   SizedBox(height: MonettaTokens.space[4]),
                   Text(

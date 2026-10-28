@@ -13,6 +13,7 @@ import '../boutique/boutique_tokens.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_scaffold.dart';
 import '../boutique/client_guide_sections.dart';
+import '../boutique/guide_art.dart';
 import '../catalog/collection_screen.dart';
 import '../contact/contact_screen.dart';
 import '../home/home_account_invitation.dart';
@@ -26,10 +27,9 @@ class WholesaleScreen extends StatelessWidget {
   Future<void> _quote(BuildContext context) async {
     try {
       final ok = await (openUri ??
-          ((uri) => launchUrl(
-                uri,
-                mode: LaunchMode.externalApplication,
-              )))(wholesaleQuoteUri());
+          ((uri) => launchUrl(uri, mode: LaunchMode.externalApplication)))(
+        wholesaleQuoteUri(),
+      );
       if (ok || !context.mounted) return;
     } on Exception {
       if (!context.mounted) return;
@@ -70,11 +70,12 @@ class WholesaleScreen extends StatelessWidget {
         key: const ValueKey('wholesale-scroll'),
         padding: EdgeInsets.zero,
         children: [
-          const ClientGuideEditorial(
-            title: 'MAYOREO',
+          const GuideHero(
+            asset: kGuideStudioBanner,
+            eyebrow: 'MAYOREO',
+            title: 'Obtén precios especiales',
             subtitle:
-                'Descubre productos de tus marcas favoritas para tu negocio.',
-            imageAsset: 'assets/images/home_collection_bags.webp',
+                'En productos originales importados de tus marcas favoritas. Mínimos, anticipo y envío: pendientes de confirmación.',
           ),
           Padding(
             padding: EdgeInsets.all(MonettaTokens.space[4]),
@@ -95,17 +96,17 @@ class WholesaleScreen extends StatelessWidget {
                       (
                         Icons.shopping_bag_outlined,
                         'Elige tus productos',
-                        'Explora bolsas, carteras y perfumes.'
+                        'Explora bolsas, carteras y perfumes.',
                       ),
                       (
                         Icons.shopping_cart_outlined,
                         'Consulta el mínimo',
-                        WholesalePresentation.minimum
+                        WholesalePresentation.minimum,
                       ),
                       (
                         Icons.credit_card_outlined,
                         'Liquida o aparta',
-                        WholesalePresentation.reservation
+                        WholesalePresentation.reservation,
                       ),
                     ];
                     return Wrap(
@@ -189,9 +190,7 @@ class WholesaleScreen extends StatelessWidget {
                 subtitle: category == 'bolsa'
                     ? 'Explora nuestro catálogo.'
                     : 'Descubre nuestra selección de fragancias.',
-                imageAsset: category == 'bolsa'
-                    ? 'assets/images/home_bag_crossbody.webp'
-                    : null,
+                imageAsset: kGuideStudioBanner,
                 action: ClientGuideButton(
                   key: ValueKey('wholesale-catalog-$category'),
                   label: 'VER CATÁLOGO',
@@ -217,15 +216,37 @@ class WholesaleScreen extends StatelessWidget {
           ),
           Padding(
             padding: EdgeInsets.all(MonettaTokens.space[3]),
-            child: ClientGuideEditorial(
-              title: '¿Tienes dudas?',
-              subtitle: 'Escríbenos por WhatsApp',
-              imageAsset: 'assets/images/home_bag_shoulder.webp',
-              action: ClientGuideButton(
-                key: const ValueKey('wholesale-quote-bottom'),
-                label: 'ESCRÍBENOS',
-                chevron: true,
-                onPressed: () => unawaited(_quote(context)),
+            child: GuideShareBanner(
+              child: Padding(
+                padding: EdgeInsets.all(MonettaTokens.space[4]),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '¿Tienes dudas?',
+                      style: clientGuideStyle(
+                        context,
+                        MonettaTokens.sectionTitle,
+                      ),
+                    ),
+                    SizedBox(height: MonettaTokens.space[1]),
+                    Text(
+                      'Escríbenos por WhatsApp',
+                      style: clientGuideStyle(
+                        context,
+                        MonettaTokens.body,
+                        color: palette.inkMuted,
+                      ),
+                    ),
+                    SizedBox(height: MonettaTokens.space[3]),
+                    ClientGuideButton(
+                      key: const ValueKey('wholesale-quote-bottom'),
+                      label: 'ESCRÍBENOS',
+                      chevron: true,
+                      onPressed: () => unawaited(_quote(context)),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
