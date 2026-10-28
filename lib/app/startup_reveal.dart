@@ -4,9 +4,18 @@ import 'theme.dart';
 
 /// Keeps an opaque launch surface above the first frame of the ready app.
 class StartupReveal extends StatefulWidget {
-  const StartupReveal({required this.ready, required this.child, super.key});
+  const StartupReveal({
+    required this.ready,
+    required this.child,
+    this.skip = false,
+    super.key,
+  });
 
   final bool ready;
+
+  /// Show [child] at once with no overlay (first visit, where the Welcome
+  /// writes the logo itself and must accept input from its first frame).
+  final bool skip;
   final Widget child;
 
   @override
@@ -38,6 +47,10 @@ class _StartupRevealState extends State<StartupReveal>
   void _revealWhenReady() {
     if (!widget.ready || _scheduled) return;
     _scheduled = true;
+    if (widget.skip) {
+      _controller.value = 1;
+      return;
+    }
     // The navigator and home screen paint under the opaque splash first.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!mounted) return;

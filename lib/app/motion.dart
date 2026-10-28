@@ -29,8 +29,13 @@ double remainingForFreeShipping(double subtotal) {
 bool get inWidgetTest =>
     WidgetsBinding.instance.runtimeType.toString().contains('Test');
 
+/// Test seam: widget tests run with motion off. A test that must exercise an
+/// animated path sets this to true so [reduceMotion] reads MediaQuery only.
+@visibleForTesting
+bool debugMotionInWidgetTests = false;
+
 bool reduceMotion(BuildContext context) {
-  if (inWidgetTest) return true;
+  if (inWidgetTest && !debugMotionInWidgetTests) return true;
   final media = MediaQuery.maybeOf(context);
   if (media == null) return false;
   return media.disableAnimations || media.accessibleNavigation;

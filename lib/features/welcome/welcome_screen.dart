@@ -11,9 +11,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../app/logo_write.dart';
 import '../../app/motion.dart';
 import '../../app/monetta_tokens.g.dart';
-import '../../app/theme.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/guide_art.dart';
 
@@ -79,6 +79,13 @@ class WelcomeScreen extends StatelessWidget {
                           child: Column(
                             children: [
                               SizedBox(height: MonettaTokens.space[5]),
+                              // The logo writes itself (no fade on top of
+                              // it); the copy below keeps its entrance.
+                              const WelcomeLogo(
+                                key: ValueKey('welcome-logo'),
+                                height: MonettaTokens.logoHeight * 2,
+                              ),
+                              SizedBox(height: MonettaTokens.space[3]),
                               _Entrance(
                                 child: ConstrainedBox(
                                   constraints: const BoxConstraints(
@@ -86,10 +93,6 @@ class WelcomeScreen extends StatelessWidget {
                                   ),
                                   child: Column(
                                     children: [
-                                      const MonettaWordmark(
-                                        height: MonettaTokens.logoHeight * 2,
-                                      ),
-                                      SizedBox(height: MonettaTokens.space[3]),
                                       Text(
                                         'Un paraíso de marcas\npor descubrir',
                                         textAlign: TextAlign.center,
@@ -130,7 +133,12 @@ class WelcomeScreen extends StatelessWidget {
                                   key: const ValueKey('welcome-start-button'),
                                   label: 'COMENZAR',
                                   chevron: true,
-                                  onPressed: onStart,
+                                  onPressed: () {
+                                    // Tap during the write: jump to the
+                                    // final frame and go on without waiting.
+                                    WelcomeLogoScope.maybeOf(context)?.finish();
+                                    onStart();
+                                  },
                                 ),
                               ),
                               SizedBox(height: MonettaTokens.space[3]),

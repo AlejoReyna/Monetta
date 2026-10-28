@@ -32,6 +32,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../app/logo_write.dart';
 import '../../app/onboarding_controller.dart';
 import '../../app/product_telemetry.dart';
 import '../../main.dart';
@@ -119,6 +120,7 @@ class _WelcomeGateState extends State<WelcomeGate> {
 
   void _dismiss() {
     if (!mounted || _showWelcome == false) return;
+    WelcomeLogoScope.maybeOf(context)?.finish();
     setState(() => _showWelcome = false);
   }
 

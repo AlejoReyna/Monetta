@@ -26,6 +26,7 @@ import 'app/cart_controller.dart';
 import 'app/editorial_content_controller.dart';
 import 'app/featured_catalog_controller.dart';
 import 'app/home_content_controller.dart';
+import 'app/logo_write.dart';
 import 'app/notification_controller.dart';
 import 'app/onboarding_controller.dart';
 import 'app/product_telemetry.dart';
@@ -504,6 +505,7 @@ class _MonettaAppState extends State<MonettaApp> {
   late final OnboardingController _onboarding = OnboardingController(
     store: OnboardingPreferenceStore(_database),
   );
+  final WelcomeLogoController _welcomeLogo = WelcomeLogoController();
 
   /// Null when no usable public Storefront credentials were compiled in.
   final HttpStorefrontTransport? _storefrontTransport =
@@ -612,7 +614,11 @@ class _MonettaAppState extends State<MonettaApp> {
   }
 
   Future<void> _load() async {
-    await Future.wait([_theme.restore(), _onboarding.restore()]);
+    await Future.wait<void>([
+      _theme.restore(),
+      _onboarding.restore(),
+      _welcomeLogo.restore(),
+    ]);
     // Recent searches survive a restart via a file adapter (no Drift schema
     // bump). Best-effort: search still works session-scoped if this fails.
     try {
@@ -856,6 +862,7 @@ class _MonettaAppState extends State<MonettaApp> {
     _homeContent.dispose();
     _featuredCatalog.dispose();
     _onboarding.dispose();
+    _welcomeLogo.dispose();
     _theme.dispose();
     super.dispose();
   }
@@ -892,6 +899,10 @@ class _MonettaAppState extends State<MonettaApp> {
                           snapshot.connectionState == ConnectionState.done;
                       return StartupReveal(
                         ready: ready,
+                        // First visit: the Welcome logo write is the brand
+                        // moment and «Comenzar» must work from frame 0, so the
+                        // input-blocking splash reveal is not stacked on it.
+                        skip: ready && _onboarding.shouldShow,
                         child: ready
                             ? AppRouteScopes(
                                 accountController: _account,
@@ -933,8 +944,11 @@ class _MonettaAppState extends State<MonettaApp> {
                             // it. See features/welcome/welcome_gate.dart.
                             child: OnboardingScope(
                               notifier: _onboarding,
-                              child: const WelcomeGate(
-                                child: HomeScreen(),
+                              child: WelcomeLogoScope(
+                                notifier: _welcomeLogo,
+                                child: const WelcomeGate(
+                                  child: HomeScreen(),
+                                ),
                               ),
                             ),
                           ),
