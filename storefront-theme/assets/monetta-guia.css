@@ -1467,3 +1467,499 @@ img.guia-menu__icon {
     max-height: 60dvh;
   }
 }
+
+
+/* ============================================================ F5 · Mayoreo (slides 21–22): steps, banners, «¿Tienes dudas?» */
+.guia-page {
+  padding-bottom: var(--space-6);
+}
+
+.guia-steps {
+  padding-top: var(--space-5);
+}
+
+.guia-steps > h2 {
+  margin: 0 0 var(--space-3);
+}
+
+.guia-steps__list {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+  padding: var(--space-3) var(--space-1);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-deep);
+  text-align: center;
+}
+
+.guia-step__n {
+  display: grid;
+  place-items: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: var(--color-action-primary);
+  color: var(--color-on-action-primary);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.guia-step__icon {
+  color: var(--color-accent-text);
+}
+
+.guia-step__title {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.2;
+}
+
+.guia-step__body {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--color-ink-muted);
+}
+
+.guia-page__banners {
+  display: grid;
+  margin-top: var(--space-5);
+}
+
+.guia-doubts {
+  position: relative;
+  isolation: isolate;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 88px;
+  margin-top: var(--space-4);
+  padding: var(--space-3);
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.guia-doubts__photo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: right center;
+}
+
+.guia-doubts::after {
+  /* _WholesaleQuoteBanner: cream wash 0.95 → 0.9 → 0 at 0 / 50 % / 82 %, so the copy reads over the bags photograph. */
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(90deg, rgb(var(--guide-scrim) / 0.95) 0%, rgb(var(--guide-scrim) / 0.9) 50%, rgb(var(--guide-scrim) / 0) 82%);
+  content: '';
+}
+
+.guia-doubts__copy {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  padding-left: var(--space-3);
+  border-left: 1px solid rgb(197 160 82 / 0.6);
+}
+
+.guia-doubts__chevron {
+  flex: none;
+  box-sizing: content-box;
+  padding: 4px;
+  border-radius: 50%;
+  background: rgb(251 248 242 / 0.85);
+}
+
+.guia-doubts__title {
+  font-family: var(--font-guide-serif);
+  font-size: 24px;
+  font-style: italic;
+  line-height: 1.1;
+}
+
+.guia-doubts__body {
+  font-size: 14px;
+}
+
+.guia-doubts:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.guia-page__note {
+  margin: var(--space-2) 0 0;
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+@media (min-width: 768px) {
+  .guia-steps__list {
+    max-width: 880px;
+  }
+
+  .guia-step__title {
+    font-size: 18px;
+  }
+
+  .guia-step__body {
+    font-size: 14px;
+  }
+
+  .guia-page__banners {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .guia-page__banners .guide-hero {
+    height: clamp(260px, calc(50vw / 1.6), 420px);
+  }
+}
+
+/* ============================================================ F5 · Contacto (slide 27) */
+.guia-contact {
+  display: grid;
+  gap: var(--space-5);
+  padding-top: var(--space-5);
+}
+
+.guia-contact h2 {
+  margin: 0;
+}
+
+.guia-contact__lede {
+  margin: var(--space-1) 0 var(--space-3);
+  color: var(--color-ink-muted);
+}
+
+.guia-contact__list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-contact__row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 64px;
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-deep);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.guia-contact__row:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.guia-contact__icon {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  color: var(--color-accent-text);
+}
+
+.guia-contact__icon--line {
+  width: 28px;
+  height: 28px;
+  margin-inline: 6px;
+}
+
+.guia-contact__text {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+}
+
+.guia-contact__title {
+  font-family: var(--font-serif);
+  font-size: 18px;
+}
+
+.guia-contact__sub {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.guia-contact__chevron {
+  flex: none;
+  color: var(--color-accent-text);
+}
+
+.guia-social--contact .guia-social__link img {
+  width: 40px;
+  height: 40px;
+}
+
+@media (min-width: 1024px) {
+  .guia-contact {
+    grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
+    align-items: start;
+  }
+}
+
+/* Contacto: the store's contact form under the channels (web only). */
+.guia-contact__form {
+  max-width: 720px;
+}
+
+.guia-form {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.guia-form .btn {
+  width: 100%;
+}
+
+@media (min-width: 768px) {
+  .guia-contact__form {
+    grid-column: 1 / -1;
+  }
+
+  .guia-form .btn {
+    justify-self: start;
+    width: auto;
+    min-width: 240px;
+  }
+}
+
+/* ============================================================ F5 · Monetta Rewards y Comparte y gana (slides 25–26) */
+.guia-page--rewards {
+  padding-top: var(--space-4);
+}
+
+.guia-rewards__notice {
+  display: flex;
+  gap: var(--space-2);
+  align-items: flex-start;
+  max-width: 720px;
+  margin: var(--space-3) 0 var(--space-4);
+  padding: var(--space-3);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-deep);
+}
+
+.guia-rewards__notice p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+
+.guia-rewards__notice strong {
+  display: block;
+  margin-bottom: 2px;
+  font-size: 15px;
+  color: var(--color-ink);
+}
+
+.guia-rewards__notice-icon {
+  flex: none;
+  color: var(--color-gold-text);
+}
+
+.guia-rewards__groups {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.guia-rewards__rows {
+  margin: var(--space-2) 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-rewards__row {
+  display: flex;
+  gap: var(--space-3);
+  align-items: center;
+  min-height: var(--tap);
+  padding: var(--space-2) 0;
+  border-bottom: 0.5px solid var(--color-hairline);
+}
+
+.guia-rewards__icon {
+  flex: none;
+  color: var(--color-gold-text);
+}
+
+.guia-rewards__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.guia-rewards__title {
+  font-size: 15px;
+}
+
+.guia-rewards__sub {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.guia-rewards__cta {
+  width: 100%;
+  max-width: 420px;
+  margin-top: var(--space-4);
+  border-radius: 999px;
+}
+
+.guia-rewards__share {
+  margin-top: var(--space-6);
+  scroll-margin-top: calc(var(--header-h, 64px) + var(--space-3));
+}
+
+.guia-rewards__share:focus {
+  outline: none;
+}
+
+.guia-rewards__pending {
+  margin: 0 0 var(--space-3);
+  font-size: 13px;
+  color: var(--color-gold-text);
+}
+
+.guia-share--page {
+  min-height: 200px;
+  margin-top: var(--space-3);
+}
+
+.guia-share--page .guia-share__copy {
+  min-height: 200px;
+}
+
+.guia-share__body {
+  margin-top: var(--space-1);
+  font-family: var(--font-guide-serif);
+  font-size: 15px;
+  font-style: italic;
+  font-weight: 500;
+  line-height: 1.2;
+}
+
+.guia-rewards__lede {
+  margin: var(--space-3) 0;
+}
+
+.guia-rewards__list {
+  display: grid;
+  gap: var(--space-3);
+  max-width: 720px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.guia-copy {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr) auto;
+  gap: var(--space-2) var(--space-3);
+  align-items: center;
+  padding: var(--space-3);
+  border-radius: var(--radius-card);
+  background: var(--color-surface-deep);
+}
+
+.guia-copy__photo {
+  width: 72px;
+  height: 72px;
+  border-radius: var(--radius-tile);
+  object-fit: cover;
+}
+
+.guia-copy__text {
+  display: flex;
+  flex-direction: column;
+}
+
+.guia-copy__share {
+  color: var(--color-gold-text);
+}
+
+.guia-copy__share[hidden] {
+  display: none;
+}
+
+.guia-copy__title {
+  font-family: var(--font-serif);
+  font-size: 17px;
+}
+
+.guia-copy__sub {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.guia-copy__field {
+  display: flex;
+  grid-column: 1 / -1;
+  align-items: center;
+  gap: var(--space-1);
+  padding-left: var(--space-2);
+  border-radius: var(--radius-control);
+  background: var(--color-surface);
+}
+
+.guia-copy__field input {
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: var(--tap);
+  border: 0;
+  background: transparent;
+  color: var(--color-ink);
+  font: inherit;
+  font-size: 14px;
+}
+
+@media (min-width: 768px) {
+  .guia-rewards__groups {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-6);
+  }
+}
+
+@media (min-width: 1024px) {
+  .guia-share--page {
+    max-width: 900px;
+    min-height: 320px;
+  }
+
+  .guia-share--page .guia-share__copy {
+    min-height: 320px;
+  }
+
+  .guia-share--page .guia-share__script {
+    font-size: 84px;
+  }
+
+  .guia-share--page .guia-share__italic {
+    font-size: 40px;
+  }
+}
+
+/* Contacto: the long hero title breaks into even lines («Tu boutique y / proveedor de») instead of leaving «de» alone. */
+.guia-page--contacto .guide-hero__title {
+  text-wrap: balance;
+}

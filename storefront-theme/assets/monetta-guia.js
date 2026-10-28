@@ -95,19 +95,33 @@
     render();
   }
 
-  // «Comparte y gana»: copy a catalog link; without the clipboard API the field is selected for the visitor to copy.
+  // «Comparte y gana»: copy a catalog link; without the clipboard API the field is selected for the visitor to copy. Where the
+  // browser has a share sheet (navigator.share), «Compartir enlace» opens it with the link, as the app's Share.share.
   function initCopy(root) {
     if (root.dataset.guiaReady) return;
     root.dataset.guiaReady = 'true';
     const input = root.querySelector('input');
+    const notify = (message) => {
+      window.Monetta?.announce?.(message);
+      window.Monetta?.toast?.(message);
+    };
     root.querySelector('[data-guia-copy-button]')?.addEventListener('click', async () => {
       try {
         await navigator.clipboard.writeText(input.value);
-        window.Monetta?.announce?.('Enlace copiado.');
-        window.Monetta?.toast?.('Enlace copiado.');
+        notify('Enlace copiado');
       } catch {
         input.focus();
         input.select();
+      }
+    });
+    const share = root.querySelector('[data-guia-share-button]');
+    if (!share || typeof navigator.share !== 'function') return;
+    share.hidden = false;
+    share.addEventListener('click', async () => {
+      try {
+        await navigator.share({ url: input.value });
+      } catch (error) {
+        if (error?.name !== 'AbortError') notify('No se pudo compartir el catálogo');
       }
     });
   }

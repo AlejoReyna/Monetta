@@ -118,8 +118,9 @@
           {%- endfor -%}
           <li><button type="button" class="guia-menu__row" data-open-dialog="saved-products" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 24, class: 'guia-menu__icon' %}<span>Guardados</span>{% render 'monetta-icon', name: 'chevronRight', size: 20, class: 'guia-menu__chevron' %}</button></li>
         </ul>
-        {%- capture share_url -%}{% render 'monetta-guia-url', key: 'catalogo' %}{%- endcapture -%}
-        <a class="guia-share" href="{{ share_url | strip }}" aria-label="Comparte y gana: ver catálogo">
+        {%- comment -%}As the app's account banner (account_screen.dart): «VER CATÁLOGO» opens Comparte y gana, where the catalog links are copied.{%- endcomment -%}
+        {%- capture share_url -%}{% render 'monetta-guia-url', key: 'rewards' %}{%- endcapture -%}
+        <a class="guia-share" href="{{ share_url | strip }}#comparte-y-gana" aria-label="Comparte y gana: ver catálogo">
           {% render 'monetta-guia-photo', name: 'comparte-gana-catalogo', class: 'guia-share__photo', sizes: '360px' %}
           <span class="guia-share__copy" aria-hidden="true"><span class="guia-share__script">Comparte</span><span class="guia-share__italic">y gana</span><span class="guide-pill__label">Ver catálogo</span></span>
         </a>

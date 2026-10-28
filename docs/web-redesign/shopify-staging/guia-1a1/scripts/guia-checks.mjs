@@ -480,6 +480,39 @@ async function f5() {
       run.check(`F5 ${w}: Contacto hero «Tu boutique y proveedor de confianza.»`, c.h1.join() === 'Tu boutique y proveedor de confianza.', JSON.stringify(c.h1));
       run.check(`F5 ${w}: Contáctanos rows as the app: WhatsApp, Grupo 1, Grupo 2, Grupo de Facebook, Mayoreo por WhatsApp`, c.rows.map((r) => r.title).join('|') === 'WhatsApp|Grupo 1|Grupo 2|Grupo de Facebook|Mayoreo por WhatsApp' && c.rows[0].sub === '+52 826 106 6868' && /chat\.whatsapp\.com/.test(c.rows[1].href) && /facebook\.com\/share\/g\//.test(c.rows[3].href), JSON.stringify(c.rows.map((r) => [r.title, r.sub])));
       run.check(`F5 ${w}: contact rows are 48px targets; «Síguenos en redes» has the three networks`, c.heights.every((x) => x >= 48) && c.social === 3, JSON.stringify({ heights: c.heights.map(Math.round), social: c.social }));
+      // The hero title's own text, line by line (the visually hidden «confianza.» is a separate node and stays out).
+      const titleLines = await page.evaluate(() => {
+        const node = document.querySelector('.guia-page--contacto .guide-hero__title')?.firstChild;
+        if (!node || node.nodeType !== Node.TEXT_NODE) return [];
+        const lines = new Map();
+        const re = /\S+/g;
+        let m;
+        while ((m = re.exec(node.textContent))) {
+          const range = document.createRange();
+          range.setStart(node, m.index);
+          range.setEnd(node, m.index + m[0].length);
+          const top = Math.round(range.getClientRects()[0].top);
+          lines.set(top, [...(lines.get(top) || []), m[0]]);
+        }
+        return [...lines.values()].map((words) => words.join(' '));
+      });
+      run.check(`F5 ${w}: the Contacto title leaves no word alone on a line`, titleLines.length > 0 && titleLines.every((line) => line.split(' ').length >= 2), JSON.stringify(titleLines));
+      // The store's contact form (plan §5, slide 27; web only). Checked, never sent: a submission would email the store.
+      const form = await page.evaluate(() => {
+        const f = document.querySelector('.guia-page--contacto form[action^="/contact"]');
+        if (!f) return null;
+        const field = (name) => f.querySelector(`[name="contact[${name}]"]`);
+        return {
+          heading: document.querySelector('.guia-contact__form h2')?.textContent.trim(),
+          labels: [...f.querySelectorAll('.field__label')].map((x) => x.textContent.trim()),
+          required: ['name', 'email', 'phone', 'body'].map((n) => Boolean(field(n)?.required)),
+          types: [field('email')?.type, field('phone')?.type],
+          heights: [...f.querySelectorAll('.input, button[type="submit"]')].map((x) => Math.round(x.getBoundingClientRect().height)),
+          button: f.querySelector('button[type="submit"]')?.textContent.trim(),
+          formType: f.querySelector('input[name="form_type"]')?.value,
+        };
+      });
+      run.check(`F5 ${w}: «Escríbenos»: the store's contact form in Spanish (email and message required), 48px targets`, form?.heading === 'Escríbenos' && form.labels.join('|') === 'Nombre|Correo electrónico|Teléfono (opcional)|Mensaje' && form.required.join() === 'false,true,false,true' && form.types.join() === 'email,tel' && form.heights.every((x) => x >= 48) && form.button === 'Enviar mensaje' && form.formType === 'contact', JSON.stringify(form));
       const accent = await platformFonts(page, '.guia-page--contacto .guide-hero__accent');
       run.check(`F5 ${w}: «confianza.» measured in Mrs Saint Delafield`, accent.length > 0 && accent.every((f) => /Saint Delafield/.test(f)), JSON.stringify(accent));
 
@@ -503,7 +536,26 @@ async function f5() {
       await page.click('.guia-copy [data-guia-copy-button]');
       await page.waitForTimeout(400);
       const copied = await page.evaluate(async () => { try { return await navigator.clipboard.readText(); } catch { return null; } });
-      run.check(`F5 ${w}: «Copiar» puts the bags catalog link on the clipboard`, copied === r.links[0], JSON.stringify({ copied, want: r.links[0] }));
+      const said = await page.evaluate(() => document.getElementById('status-live')?.textContent.trim());
+      run.check(`F5 ${w}: «Copiar» puts the bags catalog link on the clipboard and says «Enlace copiado», as the app`, copied === r.links[0] && said === 'Enlace copiado', JSON.stringify({ copied, want: r.links[0], said }));
+      // «Compartir enlace» (the app's Share.share): hidden where the browser has no share sheet; otherwise it shares the link.
+      for (const shareSheet of [false, true]) {
+        const other = await page.context().newPage();
+        await other.addInitScript((has) => {
+          if (has) Navigator.prototype.share = async (data) => { window.__shared = data; };
+          else delete Navigator.prototype.share;
+        }, shareSheet);
+        await open(other, '/pages/contact?view=guia-rewards');
+        const buttons = await other.evaluate(() => [...document.querySelectorAll('[data-guia-share-button]')].map((b) => ({ visible: b.getClientRects().length > 0, label: b.getAttribute('aria-label') })));
+        if (!shareSheet) {
+          run.check(`F5 ${w}: without a share sheet «Compartir enlace» stays hidden`, buttons.length === 2 && buttons.every((b) => !b.visible), JSON.stringify(buttons));
+        } else {
+          if (buttons[0]?.visible) await other.locator('[data-guia-share-button]').first().click();
+          const shared = await other.evaluate(() => window.__shared);
+          run.check(`F5 ${w}: with a share sheet «Compartir enlace de catálogo de bolsos» shares the bags link`, buttons.length === 2 && buttons.every((b) => b.visible) && buttons[0]?.label === 'Compartir enlace de catálogo de bolsos' && shared?.url === r.links[0], JSON.stringify({ buttons, shared }));
+        }
+        await other.close();
+      }
 
       // Navigation reaches these pages and the account.
       await open(page, '/');

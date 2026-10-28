@@ -50,9 +50,21 @@
   {%- case key -%}
     {%- when 'categorias' -%}{{ routes.collections_url }}
     {%- when 'catalogo' -%}{{ routes.all_products_collection_url }}
-    {%- when 'mayoreo', 'rewards' -%}
-      {%- if pages[key].id != blank -%}{{ pages[key].url }}{%- elsif pages['contact'].id != blank -%}{{ pages['contact'].url }}?view={{ key }}{%- else -%}{{ routes.root_url }}{%- endif -%}
-    {%- when 'contacto' -%}
-      {%- if pages['contact'].id != blank -%}{{ pages['contact'].url }}{%- else -%}{{ routes.root_url }}{%- endif -%}
+    {%- comment -%}
+      Guide pages use the new templates page.guia-mayoreo, -contacto and -rewards; the owner's own templates stay. Until a
+      page is assigned its guide template in the admin, the link asks for it with ?view= on the page that exists.
+    {%- endcomment -%}
+    {%- when 'mayoreo', 'rewards', 'contacto' -%}
+      {%- liquid
+        assign suffix = 'guia-' | append: key
+        assign target = pages[key]
+        if key == 'contacto'
+          assign target = pages['contact']
+        endif
+        if target.id == blank
+          assign target = pages['contact']
+        endif
+      -%}
+      {%- if target.id == blank -%}{{ routes.root_url }}{%- elsif target.template_suffix == suffix -%}{{ target.url }}{%- else -%}{{ target.url }}?view={{ suffix }}{%- endif -%}
   {%- endcase -%}
 {%- endif -%}

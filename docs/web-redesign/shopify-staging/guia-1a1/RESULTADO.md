@@ -294,3 +294,54 @@ Vista previa del borrador de trabajo: <https://monetta-staging.myshopify.com/?pr
 | `build.mjs --check`, `port-css --check`, `check_no_secrets.sh` | — | Pasan |
 
 **Hojas comparativas:** `evidencia/sheets/f4/` (12 y 13) y `evidencia/sheets/f4-28/` (28).
+
+## F5. Mayoreo, Contacto, Monetta Rewards y Comparte y gana, y Cuenta — cerrada
+
+**Qué cambió**
+- **Plantillas nuevas** `page.guia-mayoreo`, `page.guia-contacto` y `page.guia-rewards`, todas sobre la sección `monetta-guia-page`. Las plantillas del owner (`page.contact`, `page.mayoreo`, `page.como-vender`) no se tocaron.
+- **Mayoreo** (láminas 21–22, `wholesale_screen.dart`):
+  - hero «MAYOREO · Obtén precios especiales … *marcas favoritas*»;
+  - «¿Cómo comprar?» en los 3 pasos de la app (mínimo 3 piezas; apartado de $800 por 20 días);
+  - banners «BOLSOS Y CARTERAS» y «PERFUMES» con VER CATÁLOGO;
+  - los servicios de mayoreo, que abren con «Envío gratis · En compras mayores a $1,999 MXN»;
+  - «¿Tienes dudas? Escríbenos por WhatsApp» sobre la foto de bolsos de mayoreo, con el velo crema y la línea dorada de la app y su mensaje de WhatsApp;
+  - la nota «Precios del catálogo de menudeo; cotización de mayoreo pendiente.» y un riel de productos.
+- **Contacto** (lámina 27, `contact_screen.dart`):
+  - hero «Tu boutique y proveedor de *confianza.*», con el título en renglones parejos (`text-wrap: balance`);
+  - Contáctanos: WhatsApp, Grupo 1, Grupo 2, Grupo de Facebook y Mayoreo por WhatsApp, con las URL de la app;
+  - Síguenos en redes;
+  - **«Escríbenos»**, el formulario de contacto de Shopify, como pide el plan (§5). Es propio de la web, porque la app no lo tiene, y su texto («Déjanos tu mensaje y te responderemos por correo.») no viene de la app. Las pruebas lo revisan pero nunca lo envían, porque un envío le llegaría por correo a la tienda.
+- **Monetta Rewards y Comparte y gana** (láminas 25–26, `rewards_guide_screen.dart` y `rewards_share_screen.dart`), en una sola página:
+  - «Monetta Rewards · Tus compras, acumulas puntos.» y el estado de la app sin contrato: «Monetta Rewards aún no está disponible». No hay saldo, puntaje ni nivel, porque no hay backend;
+  - «Cómo ganar puntos» y «Canjear puntos» con las filas de la app;
+  - el botón «Comparte y gana», que baja a su sección. En la app abre otra pantalla;
+  - el banner, la línea de la app y «Puntos por compartir: Pendiente de contrato.»;
+  - «Copiar enlace de catálogo de bolsos / de perfumes» con los listados reales de la tienda y el aviso «Enlace copiado», como la app;
+  - «Compartir enlace» abre el menú de compartir del sistema (`navigator.share`, el `Share.share` de la app) y sólo aparece donde el navegador lo tiene.
+- **Cajón:** el banner «Comparte y gana · VER CATÁLOGO» lleva a Comparte y gana, como el banner de la cuenta en la app (`account_screen.dart`). Antes llevaba al catálogo completo.
+- **Cuenta:** la barra inferior y el header llevan a `/account` de Shopify; las pantallas de Mis pedidos y Mi cuenta (láminas 23–24) son de Shopify y quedan fuera del tema.
+- **Destinos** (`monetta-guia-url`): si el owner crea la página y le asigna la plantilla de la guía, el enlace va directo; mientras tanto, usa `?view=guia-*` sobre `/pages/contact`, la única página que existe.
+
+**Comprobaciones**
+
+| Comprobación | Antes | Después |
+|---|---|---|
+| `guia-checks` F5 a 320, 390, 768, 1024 y 1440 (sin desbordes) y a 390 y 1440 (contenido): textos de la app, foto y velo de «¿Tienes dudas?», servicios, pasos, banners, filas de contacto de 48 px, «confianza.» medida en Mrs Saint Delafield, Rewards sin saldo inventado, enlaces reales, copiar al portapapeles, compartir, cajón y Cuenta | Árbol F4: 14 de contenido fallan y 6 de desbordes pasan | **57/57** |
+| Ajustes tras las hojas (título de Contacto, «Enlace copiado», compartir, formulario) | Con los archivos previos: 7 fallas y luego 2 del formulario. A 390, el título ya se partía bien. | Pasan |
+| `guia-checks` F1–F5 completo | — | 223/223 (antes del formulario) y F5 57/57 después |
+| Validación completa (`validation/f5/`) | — | `checks.mjs` 315/315, journeys 61/61, 55/55, 55/55 y 54/54, movimiento 4/4, navegación 31/31, teclado 150/150, regresiones 123/123, Theme Check sin hallazgos nuevos (187 errores y 64 avisos) |
+| axe | — | **28/28**. Ahora también revisa Categorías, Mayoreo, Contacto (con el formulario), Rewards y la vista rápida abierta, a 375 y 1440. |
+| Layout | — | 221/222: «1024×768: el riel de recomendaciones de Shopify no apareció». Repetido sólo a 1024×768 dos veces: 10/10 con el riel de 8 tarjetas. Se clasifica como demora de la API de recomendaciones de Shopify. F5 no toca la página de producto. |
+| `build.mjs --check`, `port-css --check`, `check_no_secrets.sh` | — | Pasan |
+
+**Diferencias que quedan**
+- Paso 2 de «¿Cómo comprar?»: la app usa un carrito; la web usa «+», porque el juego de iconos del tema no tiene carrito.
+- Rewards: la lámina dibuja un saldo («320 puntos», «Nivel Plata»). La web, igual que la app sin contrato, no lo inventa.
+- En la lámina, «Rewards» va en letra manuscrita; la app y la web lo escriben recto.
+
+**Para el owner (sin escribir en el admin, como decidió D3):**
+1. Crear las páginas Mayoreo (`/pages/mayoreo`) y Rewards (`/pages/rewards`) y asignarles las plantillas `guia-mayoreo` y `guia-rewards`.
+2. Asignar `guia-contacto` a la página Contacto que ya existe.
+3. Con eso los enlaces del tema van directo, sin `?view=`.
+
+**Hojas comparativas:** `evidencia/sheets/f5/` (21, 22, 25, 26, 27 y 30), `evidencia/sheets/f5-final/` (25–27 tras los ajustes) y `evidencia/sheets/f5-form/` (27 con el formulario).

@@ -1,5 +1,5 @@
-// Accessibility scan with axe-core (already a dependency of the prototype; nothing is installed) on every page of the first delivery,
-// in its closed state and with each dialog open, at a phone and a desktop width. Serious and critical findings fail the run.
+// Accessibility scan with axe-core (already a dependency of the prototype; nothing is installed) on every page of the first delivery
+// and the guide 1:1 pages, in its closed state and with each dialog open, at a phone and a desktop width. Serious and critical findings fail the run.
 //
 //   node axe.mjs --base-url=http://127.0.0.1:9292
 import { createRequire } from 'node:module';
@@ -37,7 +37,7 @@ for (const [w, h] of [[375, 812], [1440, 900]]) {
     await settle(page);
   };
   try {
-    for (const [name, url] of [['home', '/'], ['collection', '/collections/all'], ['product', PRODUCT], ['search results', '/search?q=bolsa&type=product'], ['search empty', '/search'], ['bag empty', '/cart']]) {
+    for (const [name, url] of [['home', '/'], ['collection', '/collections/all'], ['product', PRODUCT], ['search results', '/search?q=bolsa&type=product'], ['search empty', '/search'], ['bag empty', '/cart'], ['Categorías', '/collections'], ['Mayoreo', '/pages/contact?view=guia-mayoreo'], ['Contacto', '/pages/contact?view=guia-contacto'], ['Rewards', '/pages/contact?view=guia-rewards']]) {
       await open(url);
       await scan(page, `${w}×${h} ${name}`);
     }
@@ -57,6 +57,14 @@ for (const [w, h] of [[375, 812], [1440, 900]]) {
       await page.waitForTimeout(450);
       await scan(page, `${w}×${h} home with the menu drawer open`);
     }
+    // The guide's quick view (slide 12): a sheet on phones, a dialog on desktop.
+    await open('/collections/vendors?q=Coach');
+    await page.locator('[data-quick-view]').first().click();
+    await page.waitForSelector('#quick-view[open] [data-quick-view-root]');
+    await page.waitForTimeout(450);
+    await scan(page, `${w}×${h} collection with the quick view open`);
+    await page.keyboard.press('Escape');
+    await page.waitForTimeout(450);
     await open(PRODUCT);
     await page.locator(w < 768 ? '.purchase-dock [data-add]' : '.product-panel [data-add]').first().click();
     await page.waitForSelector('#cart-sheet.is-open');
