@@ -7,7 +7,8 @@
   @param {string} [density] - 'grid' (default; 4:5 photo, two-line name) or 'compact' (square photo, one line) for Home rails.
   @param {boolean} [flush] - Photo fills the frame on white (product-page recommendation rails).
   @param {boolean} [eager] - Eager-load the photo (first row only).
-  @param {boolean} [quick_add] - Show the "+" for single-variant products that can be bought (default true).
+  @param {boolean} [quick_add] - Show the "+" (default true): it adds a single-variant piece, and opens the quick view to
+    choose a variant when there are several.
   @param {string} [sizes] - The sizes attribute of the photo's slot.
   @param {boolean} [view_button] - The collection grid's «VER PRODUCTO» pill (TileViewProductButton): visual only, inside the card's link.
 {%- enddoc -%}
@@ -80,8 +81,11 @@
       <form action="{{ routes.cart_add_url }}" method="post" data-quick-add>
         <input type="hidden" name="id" value="{{ variant.id }}">
         <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="card__quick" aria-label="Agregar {{ product.title | escape }} al carrito"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
+        <button type="submit" class="card__quick" aria-label="Agregar {{ product.title | escape }} a la bolsa"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
       </form>
+    {%- elsif quick_add != false and in_stock -%}
+      {%- comment -%}Several variants: the «+» opens the quick view to choose one, as in the app (quick_add_button.dart).{%- endcomment -%}
+      <button type="button" class="card__quick" data-quick-view="{{ product.handle }}" data-product-url="{{ product.url }}" aria-haspopup="dialog" aria-controls="quick-view" aria-label="Elegir opciones de {{ product.title | escape }}"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
     {%- endif -%}
   </div>
 </article>

@@ -64,6 +64,11 @@
 
     {%- section 'monetta-cart-sheet' -%}
     {% render 'monetta-saved-products' %}
+    {%- comment -%}Quick view of the client guide (sections/monetta-quick-view.liquid, filled by assets/monetta-guia.js).{%- endcomment -%}
+    <dialog class="overlay overlay--sheet" id="quick-view" aria-labelledby="quick-view-title">
+      <div class="overlay__backdrop" data-overlay-close></div>
+      <div class="overlay__panel" data-quick-view-panel></div>
+    </dialog>
     <div id="toast-root"></div>
     <div class="visually-hidden" id="status-live" role="status" aria-live="polite" aria-atomic="true"></div>
     <div class="visually-hidden" id="alert-live" role="alert" aria-live="assertive" aria-atomic="true"></div>

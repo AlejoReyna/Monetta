@@ -33,12 +33,17 @@ const openSearch = async (page) => {
   }
 };
 const openQuickView = async (page) => {
-  const trigger = page.locator('[data-quick-view]:visible').first();
+  const trigger = page.locator('[data-quick-view]').first();
   if (await trigger.count()) {
     await trigger.click();
     await page.waitForSelector('dialog[open]');
     await page.waitForTimeout(600);
   }
+};
+
+const scrollTo = (selector) => async (page) => {
+  await page.locator(selector).first().evaluate((el) => el.scrollIntoView({ block: 'start' }));
+  await page.waitForTimeout(400);
 };
 
 // slide → route. A slide without a web page here is listed in RESULTADO.md with the reason.
@@ -58,9 +63,11 @@ const SLIDES = [
   { slide: '17', name: 'coleccion-carteras', url: '/collections/all/carteras' },
   { slide: '19', name: 'coleccion-accesorios', url: '/collections/all/reloj' },
   { slide: '20', name: 'coleccion-crossbody', url: '/collections/all/crossbody' },
-  { slide: '21', name: 'mayoreo', url: '/pages/contact?view=mayoreo' },
-  { slide: '25', name: 'rewards', url: '/pages/contact?view=rewards' },
-  { slide: '27', name: 'contacto', url: '/pages/contact' },
+  { slide: '21', name: 'mayoreo', url: '/pages/contact?view=guia-mayoreo' },
+  { slide: '22', name: 'mayoreo-banners', url: '/pages/contact?view=guia-mayoreo', prepare: scrollTo('.guia-page__banners') },
+  { slide: '25', name: 'rewards', url: '/pages/contact?view=guia-rewards' },
+  { slide: '26', name: 'comparte-y-gana', url: '/pages/contact?view=guia-rewards', prepare: scrollTo('#comparte-y-gana') },
+  { slide: '27', name: 'contacto', url: '/pages/contact?view=guia-contacto' },
   { slide: '28', name: 'carrito', url: '/cart', bag: true },
   { slide: '29', name: 'categorias', url: '/collections' },
   { slide: '30', name: 'menu', url: '/', prepare: openDrawer },

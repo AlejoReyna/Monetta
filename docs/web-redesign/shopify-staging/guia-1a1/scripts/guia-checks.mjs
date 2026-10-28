@@ -435,11 +435,93 @@ async function f4() {
   }
 }
 
+/* ======================================================================== F5: Mayoreo, Contacto, Comparte y gana y Cuenta */
+async function f5() {
+  for (const [w, h] of WIDTHS) {
+    const { browser, page } = await launch({ width: w, height: h, injectCss });
+    try {
+      for (const view of ['guia-mayoreo', 'guia-contacto', 'guia-rewards']) {
+        await open(page, `/pages/contact?view=${view}`);
+        run.check(`F5 ${w}: no horizontal overflow on ${view}`, (await overflow(page)) <= 0, `${await overflow(page)}px`);
+      }
+      if (w !== 390 && w !== 1440) continue;
+
+      // Mayoreo (slides 21–22), with the app's copy.
+      await open(page, '/pages/contact?view=guia-mayoreo');
+      const m = await page.evaluate(() => {
+        const t = (sel) => [...document.querySelectorAll(sel)].map((x) => x.textContent.replace(/\s+/g, ' ').trim());
+        const hero = document.querySelector('.guia-page--mayoreo > .guide-hero');
+        return {
+          h1: t('h1'), photo: hero?.querySelector('img')?.getAttribute('src') || '', heroBody: hero?.querySelector('.guide-hero__body')?.textContent.replace(/\s+/g, ' ').trim(),
+          steps: t('.guia-step__title'), stepBodies: t('.guia-step__body'),
+          banners: [...document.querySelectorAll('.guia-page__banners .guide-hero')].map((b) => ({ title: b.querySelector('h2')?.textContent.trim(), pill: b.querySelector('.guide-pill__label')?.textContent.trim(), href: b.querySelector('.guide-pill')?.getAttribute('href') })),
+          service: t('.guide-services__item:first-child p'),
+          doubts: document.querySelector('.guia-doubts')?.getAttribute('href') || '', doubtsText: t('.guia-doubts__copy').join(),
+          doubtsPhoto: document.querySelector('.guia-doubts__photo')?.currentSrc || '', doubtsLoaded: document.querySelector('.guia-doubts__photo')?.naturalWidth || 0,
+          note: t('.guia-page__note').join(), rail: t('.guia-page--mayoreo h2').includes('Productos que te pueden interesar'),
+          cards: document.querySelectorAll('.guia-page--mayoreo .rail .card').length,
+        };
+      });
+      run.check(`F5 ${w}: Mayoreo hero (owner photo) «MAYOREO · Obtén precios especiales … marcas favoritas»`, m.h1.join() === 'Mayoreo' && m.photo.includes('mayoreo-hero') && m.heroBody === 'Obtén precios especiales en productos originales importados de tus marcas favoritas', JSON.stringify({ h1: m.h1, body: m.heroBody }));
+      run.check(`F5 ${w}: «¿Cómo comprar?» in the app's three steps`, m.steps.join('|') === 'Elige tus productos|Agrega mínimo 3 piezas|Liquida o aparta' && m.stepBodies[2] === 'Aparta por 20 días con $800 pesos por pedido.', JSON.stringify({ steps: m.steps, bodies: m.stepBodies }));
+      run.check(`F5 ${w}: banners «BOLSOS Y CARTERAS» and «PERFUMES» with «VER CATÁLOGO»`, m.banners.map((b) => b.title).join('|') === 'Bolsos y carteras|Perfumes' && m.banners.every((b) => b.pill === 'Ver catálogo' && /\/collections\//.test(b.href || '')), JSON.stringify(m.banners));
+      run.check(`F5 ${w}: wholesale services open with «Envío gratis · En compras mayores a $1,999 MXN»`, m.service.join('|') === 'Envío gratis|En compras mayores a $1,999 MXN', JSON.stringify(m.service));
+      run.check(`F5 ${w}: «¿Tienes dudas?» sits on the wholesale bags photograph, as the app, and the photograph loads`, /mayoreo-bolsos-carteras-\d+\.webp/.test(m.doubtsPhoto) && m.doubtsLoaded > 0, JSON.stringify({ photo: m.doubtsPhoto.split('/').pop(), loaded: m.doubtsLoaded }));
+      run.check(`F5 ${w}: «¿Tienes dudas? Escríbenos por WhatsApp» opens WhatsApp with the app's message; the app's price note; a product rail`, /^https:\/\/wa\.me\/528261066868\?text=Hola/.test(m.doubts) && /¿Tienes dudas\?.*Escríbenos por WhatsApp/.test(m.doubtsText) && m.note === 'Precios del catálogo de menudeo; cotización de mayoreo pendiente.' && m.rail && m.cards > 0, JSON.stringify({ doubts: m.doubts.slice(0, 60), note: m.note, cards: m.cards }));
+
+      // Contacto (slide 27).
+      await open(page, '/pages/contact?view=guia-contacto');
+      const c = await page.evaluate(() => ({
+        h1: [...document.querySelectorAll('h1')].map((x) => x.textContent.replace(/\s+/g, ' ').trim()),
+        rows: [...document.querySelectorAll('.guia-contact__row')].map((a) => ({ title: a.querySelector('.guia-contact__title')?.textContent.trim(), sub: a.querySelector('.guia-contact__sub')?.textContent.trim(), href: a.getAttribute('href') })),
+        social: document.querySelectorAll('.guia-contact .guia-social__link').length,
+        heights: [...document.querySelectorAll('.guia-contact__row')].map((a) => a.getBoundingClientRect().height),
+      }));
+      run.check(`F5 ${w}: Contacto hero «Tu boutique y proveedor de confianza.»`, c.h1.join() === 'Tu boutique y proveedor de confianza.', JSON.stringify(c.h1));
+      run.check(`F5 ${w}: Contáctanos rows as the app: WhatsApp, Grupo 1, Grupo 2, Grupo de Facebook, Mayoreo por WhatsApp`, c.rows.map((r) => r.title).join('|') === 'WhatsApp|Grupo 1|Grupo 2|Grupo de Facebook|Mayoreo por WhatsApp' && c.rows[0].sub === '+52 826 106 6868' && /chat\.whatsapp\.com/.test(c.rows[1].href) && /facebook\.com\/share\/g\//.test(c.rows[3].href), JSON.stringify(c.rows.map((r) => [r.title, r.sub])));
+      run.check(`F5 ${w}: contact rows are 48px targets; «Síguenos en redes» has the three networks`, c.heights.every((x) => x >= 48) && c.social === 3, JSON.stringify({ heights: c.heights.map(Math.round), social: c.social }));
+      const accent = await platformFonts(page, '.guia-page--contacto .guide-hero__accent');
+      run.check(`F5 ${w}: «confianza.» measured in Mrs Saint Delafield`, accent.length > 0 && accent.every((f) => /Saint Delafield/.test(f)), JSON.stringify(accent));
+
+      // Monetta Rewards (slide 25) with the app's copy and no invented balance; Comparte y gana (26): the catalog links
+      // are the store's real listings and can be copied.
+      await page.context().grantPermissions(['clipboard-read', 'clipboard-write'], { origin: baseUrl });
+      await open(page, '/pages/contact?view=guia-rewards');
+      const r = await page.evaluate(() => {
+        const t = (sel) => [...document.querySelectorAll(sel)].map((x) => x.textContent.replace(/\s+/g, ' ').trim());
+        return {
+          h1: t('h1'), h2: t('.guia-page--rewards h2'), lede: t('.guia-rewards__lede'), notice: t('.guia-rewards__notice').join(),
+          rows: t('.guia-rewards__title'), subs: t('.guia-rewards__sub'), pending: t('.guia-rewards__pending').join(),
+          cta: document.querySelector('.guia-rewards__cta')?.getAttribute('href'), target: !!document.getElementById('comparte-y-gana'),
+          links: [...document.querySelectorAll('.guia-copy input')].map((i) => i.value), titles: t('.guia-copy__title'),
+        };
+      });
+      run.check(`F5 ${w}: «Monetta Rewards · Tus compras, acumulas puntos.» says it is not available yet, as the app without a contract`, r.h1.join() === 'Monetta Rewards' && r.lede[0] === 'Tus compras, acumulas puntos.' && r.notice === 'Monetta Rewards aún no está disponible No hay un saldo que mostrar. No se inventa un puntaje ni un nivel.', JSON.stringify({ h1: r.h1, lede: r.lede[0], notice: r.notice }));
+      run.check(`F5 ${w}: «Cómo ganar puntos» and «Canjear puntos» rows as the app`, r.h2.slice(0, 2).join('|') === 'Cómo ganar puntos|Canjear puntos' && r.rows.join('|') === 'Por cada compra|Compartir catálogo en redes|Comprar a mayoreo|Descuentos|Envío gratis|Acceso anticipado' && r.subs.join('|') === 'Usa tus puntos en tus compras|Canjea puntos por envíos|Sé la primera en nuevas colecciones', JSON.stringify({ h2: r.h2, rows: r.rows, subs: r.subs }));
+      run.check(`F5 ${w}: «Comparte y gana» button leads to its section`, r.cta === '#comparte-y-gana' && r.target && r.h2.includes('Comparte y gana'), JSON.stringify({ cta: r.cta, target: r.target }));
+      run.check(`F5 ${w}: «Comparte y gana» with the bags and perfumes catalog links and «Puntos por compartir: Pendiente de contrato.»`, r.titles.join('|') === 'Copiar enlace de catálogo de bolsos|Copiar enlace de catálogo de perfumes' && r.links.length === 2 && r.links.every((l) => /^https?:\/\/[^/]+\/collections\//.test(l)) && r.pending === 'Puntos por compartir: Pendiente de contrato.', JSON.stringify({ titles: r.titles, links: r.links, pending: r.pending }));
+      await page.click('.guia-copy [data-guia-copy-button]');
+      await page.waitForTimeout(400);
+      const copied = await page.evaluate(async () => { try { return await navigator.clipboard.readText(); } catch { return null; } });
+      run.check(`F5 ${w}: «Copiar» puts the bags catalog link on the clipboard`, copied === r.links[0], JSON.stringify({ copied, want: r.links[0] }));
+
+      // Navigation reaches these pages and the account.
+      await open(page, '/');
+      const nav = await page.evaluate(() => ({ share: document.querySelector('#menu-drawer .guia-share')?.getAttribute('href'), mayoreo: [...document.querySelectorAll('.site-nav__link')].find((a) => a.textContent.trim() === 'Mayoreo')?.getAttribute('href'), offer: document.querySelector('.guia-offer .guide-pill')?.getAttribute('href'), account: document.querySelector('.header-utility--account')?.getAttribute('href'), dockAccount: document.querySelector('#dock [data-dock="account"]')?.getAttribute('href') }));
+      run.check(`F5 ${w}: the drawer's «Comparte y gana · VER CATÁLOGO» leads to Comparte y gana, as the app's account banner`, /view=guia-rewards#comparte-y-gana|\/pages\/rewards#comparte-y-gana/.test(nav.share || ''), JSON.stringify({ share: nav.share }));
+      run.check(`F5 ${w}: «Mayoreo» (header) and «CONOCE MÁS» lead to the Mayoreo page; «Cuenta» to Shopify's account`, /view=guia-mayoreo|\/pages\/mayoreo/.test(nav.offer || '') && (w < 768 || /view=guia-mayoreo|\/pages\/mayoreo/.test(nav.mayoreo || '')) && /\/account/.test(w < 768 ? nav.dockAccount : nav.account), JSON.stringify(nav));
+    } finally {
+      await browser.close();
+    }
+  }
+}
+
 try {
   if (phases.has('f1')) await f1();
   if (phases.has('f2')) await f2();
   if (phases.has('f3')) await f3();
   if (phases.has('f4')) await f4();
+  if (phases.has('f5')) await f5();
   run.finish({ complete: true });
 } catch (error) {
   run.finish({ complete: false, error });

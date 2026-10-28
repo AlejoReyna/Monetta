@@ -206,6 +206,12 @@
             </div>
           {%- endunless -%}
 
+          {%- comment -%}The guide's trust row (slide 13; product_screen.dart in PR #33), above the purchase button.{%- endcomment -%}
+          <ul class="guia-trust" role="list">
+            <li>{% render 'monetta-icon', name: 'truck', size: 22, class: 'guia-trust__icon' %}<span><strong>Entrega estimada</strong> 3 a 5 días</span></li>
+            <li>{% render 'monetta-icon', name: 'check', size: 22, class: 'guia-trust__icon' %}<span><strong>Productos originales</strong> Garantía de autenticidad</span></li>
+            <li>{% render 'monetta-icon', name: 'lock', size: 22, class: 'guia-trust__icon' %}<span><strong>Pago seguro</strong> Compra con confianza</span></li>
+          </ul>
           <div class="product-panel__buy">
             {%- if current.available -%}
               <div class="buy-row">
@@ -218,7 +224,7 @@
                   </div>
                 </div>
                 <div class="buy-inline" style="flex:1;align-self:end">
-                  <button type="submit" name="add" class="btn btn--primary btn--block" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar al carrito</span></button>
+                  <button type="submit" name="add" class="btn btn--primary btn--block" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar a bolsa</span></button>
                 </div>
               </div>
             {%- else -%}
@@ -312,7 +318,7 @@
 
   <div class="purchase-dock" data-purchase-dock>
     {%- if current.available -%}
-      <button type="submit" form="{{ form_id }}" name="add" class="btn btn--primary" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar al carrito</span></button>
+      <button type="submit" form="{{ form_id }}" name="add" class="btn btn--primary" data-add><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agregar a bolsa</span></button>
     {%- else -%}
       <button type="submit" form="{{ form_id }}" name="add" class="btn btn--primary" data-add disabled><span class="spinner" data-spinner hidden aria-hidden="true"></span><span data-label>Agotado</span></button>
     {%- endif -%}

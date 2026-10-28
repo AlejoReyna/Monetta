@@ -254,3 +254,43 @@ Vista previa del borrador de trabajo: <https://monetta-staging.myshopify.com/?pr
 - Tory Burch, Kate Spade y Marc Jacobs no tienen productos en staging: su página es la 404 de la tienda.
 
 **Hojas comparativas:** `evidencia/sheets/f3/` (05, 06–09, 14, 15, 17, 19, 20 y 29).
+
+## F4. Vista rápida, Producto y Carrito — cerrada
+
+**Qué cambió**
+- **Vista rápida** (lámina 12), sección `monetta-quick-view` servida por la Section Rendering API (`/products/<handle>?section_id=monetta-quick-view`):
+  - se abre con el «+» de una tarjeta cuando la pieza tiene varias variantes, como `quick_add_button.dart` de la app. Con una sola variante, el «+» sigue agregando directo;
+  - hoja inferior en teléfono, diálogo centrado desde 768 px;
+  - foto con hasta 4 miniaturas, marca, nombre, precio («Desde» si varía), opciones como pastillas, «Agregar a bolsa» y «Ver producto»;
+  - nada se agrega hasta elegir una variante disponible (el `requireChoice` de la app). Un aviso dice por qué el botón está apagado;
+  - si la sección no responde, el «+» lleva a la página del producto.
+- **Producto** (lámina 13):
+  - la fila de confianza de la app: Entrega estimada · 3 a 5 días, Productos originales · Garantía de autenticidad, Pago seguro · Compra con confianza;
+  - «Agregar a bolsa» en el formulario y en la barra de compra, como la app (antes «Agregar al carrito»).
+- **Defecto anterior corregido** (F0, «Esc cierra la bolsa y devuelve el foco»): en teléfono el foco vuelve al botón que se pulsó, el de la barra de compra, y no al del formulario, que está oculto.
+- **Carrito:** sin cambios de diseño. La lámina 28 es la confirmación «¡Gracias por tu compra!», que es la página de gracias de Shopify (fuera del tema). «Mi bolsa» ya sigue el estilo de la app desde el 22-oct (hoja `evidencia/sheets/f4-28/`).
+- `monetta-guia.js` ya trae el «Copiar enlace» de «Comparte y gana», y `guia-checks.mjs` las comprobaciones de F5. Ninguno de los dos actúa hasta F5.
+
+**Defecto anterior: la flecha de regreso y Forward** (la falla del journey a 390 que el 22-oct quedó sin clasificar)
+- **Causa** (diagnóstico con CDP en `evidencia/runs/`, script en el scratchpad de la sesión):
+  - la flecha de la barra de página llama a `history.go(-pasos)` y deja un respaldo: si a los 500 ms la página no cambió, asigna la URL padre;
+  - en el navegador de pruebas no hay bfcache (`BackForwardCacheDisabledByCommandLine`) y Shopify manda `Cache-Control: no-store`, así que volver al inicio siempre va a la red. Esa navegación tardó ~450 ms;
+  - cuando tarda más de 500 ms, el respaldo asigna «/» a media navegación. Esa entrada nueva borra la historia hacia adelante y Forward se queda en el inicio. A una clienta con datos móviles lentos le pasa lo mismo.
+  - Por eso fallaba a veces (22-oct) y dos de dos veces en F4, con el proxy recién reiniciado y más lento.
+- **Prueba** (`scripts/e2e/journey.mjs`): el inicio responde 1.2 s después de pulsar la flecha. Comprobación nueva: «en red lenta la flecha regresa sin crear una entrada nueva».
+  - Árbol anterior: falla (`historyBefore 10`, `historyAfter 11`, 2 peticiones al inicio) y Forward termina en `/`.
+- **Corrección** (`monetta-core.js`): al empezar la navegación hacia atrás, el navegador dispara `beforeunload` (a los ~46 ms en el diagnóstico); ese evento retira el respaldo. El listener sólo existe mientras el respaldo está armado, así que no afecta la bfcache.
+  - Después: historial 10 → 10, una sola petición y Forward vuelve a la búsqueda.
+- **Resguardo:** otra comprobación nueva confirma que el respaldo sigue funcionando cuando `history.go` no tiene adónde ir (un estado que nombra más entradas de las que tiene la pestaña). Pasa en ambos árboles; existe para que la corrección no lo apague.
+
+**Comprobaciones**
+
+| Comprobación | Antes (árbol F3) | Después |
+|---|---|---|
+| `guia-checks` F4 a 390 y 1440: «Agregar a bolsa», fila de confianza, foco tras la barra de compra, «+» de varias variantes, vista rápida (contenido, hoja o diálogo, nada sin elegir, la variante elegida llega al carrito de Shopify, Esc devuelve el foco al «+») | 0/4 y error: no existe `[data-quick-view]` | **F1–F4: 168/168** |
+| Validación completa (`validation/f4/`) | — | `checks.mjs` 315/315, axe 18/18, movimiento 4/4, navegación 31/31, journeys a 768, 1024 y 1440 completos, Theme Check sin hallazgos nuevos (187 errores y 64 avisos) |
+| Teclado, layout, regresiones | — | 150/150, 223/223, 123/123 (tras reiniciar el proxy, que caducó a media corrida) |
+| Journey 390 | 57/58 (foco) | Antes de la corrección: 58/59, sólo la flecha. Después: **61/61**, con las 2 comprobaciones nuevas |
+| `build.mjs --check`, `port-css --check`, `check_no_secrets.sh` | — | Pasan |
+
+**Hojas comparativas:** `evidencia/sheets/f4/` (12 y 13) y `evidencia/sheets/f4-28/` (28).

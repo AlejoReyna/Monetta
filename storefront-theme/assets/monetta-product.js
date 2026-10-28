@@ -379,7 +379,9 @@
     const quantity = Number($('[data-qty-input]', form)?.value) || 1;
     const name = $('.product-panel__name', root)?.textContent?.trim() || '';
     const option = $$('[data-options] [data-option-value]', root).map((el) => el.textContent.trim()).filter(Boolean).join(' / ');
-    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: $('[data-add]', form) });
+    // The pressed button gets the focus back when the bag closes. On phones that is the purchase dock's, outside the form.
+    const pressed = event.submitter?.matches?.('[data-add]') ? event.submitter : buttons.find((button) => button.offsetParent !== null);
+    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form) });
     buttons.forEach((button) => Monetta.setPending(button, false));
     adding = false;
     if (root.dataset.selection === 'valid') lockPurchase(root, false);

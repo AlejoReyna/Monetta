@@ -1,7 +1,9 @@
 // Guide components that need a script. The home carousel (HomeEditorialBanner in PR #33): swipe through scroll snap,
 // indicator dots that follow the visible slide, previous/next buttons from 1024 px, no autoplay and no timers, as in
 // the app. A slide reached with Tab is brought fully into view. The search screen's «Búsquedas recientes» (slide 05):
-// the last five searches, kept in this browser only, each one removable. Rebinds when the theme editor reloads a section.
+// the last five searches, kept in this browser only, each one removable. The quick view (slide 12): a card's «+» on a piece
+// with several variants loads sections/monetta-quick-view.liquid and nothing is added until a variant is chosen. Rebinds when
+// the theme editor reloads a section.
 (() => {
   const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -93,9 +95,116 @@
     render();
   }
 
+  // «Comparte y gana»: copy a catalog link; without the clipboard API the field is selected for the visitor to copy.
+  function initCopy(root) {
+    if (root.dataset.guiaReady) return;
+    root.dataset.guiaReady = 'true';
+    const input = root.querySelector('input');
+    root.querySelector('[data-guia-copy-button]')?.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(input.value);
+        window.Monetta?.announce?.('Enlace copiado.');
+        window.Monetta?.toast?.('Enlace copiado.');
+      } catch {
+        input.focus();
+        input.select();
+      }
+    });
+  }
+
+  function renderPrice(target, variant) {
+    const price = document.createElement('span');
+    price.className = 'price';
+    price.textContent = variant.price;
+    const parts = [price];
+    if (variant.compare) {
+      const compare = document.createElement('s');
+      compare.className = 'price-compare';
+      compare.textContent = variant.compare;
+      const badge = document.createElement('span');
+      badge.className = 'badge badge--sale';
+      badge.textContent = `-${variant.pct}%`;
+      parts.push(compare, badge);
+    }
+    target.replaceChildren(...parts);
+  }
+
+  function bindQuickView(root, dialog, trigger) {
+    const variants = JSON.parse(root.querySelector('[data-quick-view-variants]')?.textContent || '[]');
+    const groups = [...root.querySelectorAll('[data-quick-view-group]')];
+    const add = root.querySelector('[data-quick-view-add]');
+    const hint = root.querySelector('[data-quick-view-hint]');
+    const price = root.querySelector('[data-quick-view-price]');
+    const photo = root.querySelector('[data-quick-view-photo]');
+    let chosen = null;
+    const update = () => {
+      const picked = groups.map((group) => group.querySelector('input:checked')?.value ?? null);
+      const complete = picked.every((value) => value !== null);
+      chosen = groups.length === 0 ? variants[0] : complete ? variants.find((v) => v.options.every((o, i) => o === picked[i])) || null : null;
+      if (chosen) {
+        renderPrice(price, chosen);
+        if (chosen.image && photo) photo.src = chosen.image;
+      }
+      const ready = Boolean(chosen?.available);
+      add.disabled = !ready;
+      hint.textContent = ready ? '' : !complete ? 'Elige una opción para agregarla a tu bolsa.' : !chosen ? 'Esa combinación no está disponible.' : 'Esta opción está agotada.';
+      hint.hidden = ready;
+    };
+    root.addEventListener('change', update);
+    root.querySelectorAll('[data-quick-view-thumb]').forEach((thumb) => {
+      thumb.addEventListener('click', () => {
+        if (photo) photo.src = thumb.dataset.quickViewThumb;
+        root.querySelectorAll('[data-quick-view-thumb]').forEach((t) => t.removeAttribute('aria-current'));
+        thumb.setAttribute('aria-current', 'true');
+      });
+    });
+    add.addEventListener('click', async () => {
+      if (!chosen?.available || add.dataset.pending) return;
+      add.dataset.pending = 'true';
+      window.Monetta.closeDialog(dialog, { restoreFocus: false });
+      const option = groups.length ? ` (${chosen.options.join(' / ')})` : '';
+      await window.Monetta.cart.add({ id: chosen.id, quantity: 1, name: `${root.dataset.productTitle || ''}${option}`, trigger });
+      delete add.dataset.pending;
+    });
+    update();
+  }
+
+  async function openQuickView(button) {
+    const dialog = document.getElementById('quick-view');
+    const panel = dialog?.querySelector('[data-quick-view-panel]');
+    if (!dialog || !panel || !window.Monetta?.openDialog || button.dataset.pending) return;
+    button.dataset.pending = 'true';
+    button.setAttribute('aria-busy', 'true');
+    try {
+      const root = window.Shopify?.routes?.root || '/';
+      const response = await fetch(`${root}products/${encodeURIComponent(button.dataset.quickView)}?section_id=monetta-quick-view`, { credentials: 'same-origin' });
+      const view = response.ok ? new DOMParser().parseFromString(await response.text(), 'text/html').querySelector('[data-quick-view-root]') : null;
+      if (!view) {
+        window.location.assign(button.dataset.productUrl);
+        return;
+      }
+      panel.replaceChildren(view);
+      bindQuickView(view, dialog, button);
+      window.Monetta.openDialog(dialog, button);
+    } catch {
+      window.location.assign(button.dataset.productUrl);
+    } finally {
+      delete button.dataset.pending;
+      button.removeAttribute('aria-busy');
+    }
+  }
+
+  document.addEventListener('click', (event) => {
+    const button = event.target.closest?.('[data-quick-view]');
+    if (!button) return;
+    event.preventDefault();
+    openQuickView(button);
+  });
+
   const bind = (scope = document) => {
     scope.querySelectorAll('[data-guia-carousel]').forEach(initCarousel);
     scope.querySelectorAll('[data-guia-recent]').forEach(initRecent);
+    scope.querySelectorAll('[data-guia-copy]').forEach(initCopy);
   };
   bind();
   document.addEventListener('shopify:section:load', (event) => bind(event.target));

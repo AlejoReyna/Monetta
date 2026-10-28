@@ -168,9 +168,32 @@ try {
     await settle(page);
     const state = await page.evaluate(() => history.state);
     run.check('backarrow: entry/idx recorded for the screen (idx 2 steps past its start)', state?.idx - state?.entry === 2 && state?.entry > 0, JSON.stringify(state));
+    // A slow network: the home answers 1.2 s after the arrow's traversal starts, past its 500 ms fallback (a phone on mobile
+    // data; headless Chromium has no bfcache and Shopify sends no-store, so the traversal always fetches). On 22 Oct and in
+    // F4, with the proxy slower than 500 ms, the fallback assigned the parent mid-traversal; that new entry dropped the
+    // forward history and Forward stayed on the home.
+    const historyBefore = await page.evaluate(() => history.length);
+    const slowed = [];
+    const slowHome = (route) => {
+      const handled = (async () => {
+        if (route.request().isNavigationRequest()) await new Promise((r) => setTimeout(r, 1200));
+        await route.continue().catch(() => {});
+      })();
+      slowed.push(handled);
+      return handled;
+    };
+    const isHome = (u) => u.origin === new URL(baseUrl).origin && u.pathname === '/';
+    await page.route(isHome, slowHome);
     await page.locator('.page-bar__back').click();
     await page.waitForURL((u) => u.pathname === '/', { timeout: 15000 });
+    // Leave time for a stale fallback to fire, then let every held request finish before the route goes.
+    await page.waitForTimeout(700);
+    await Promise.all(slowed);
+    await page.waitForLoadState('load');
+    await page.unroute(isHome, slowHome);
+    const historyAfter = await page.evaluate(() => history.length);
     run.check('backarrow: the arrow skips filter and sort and returns to the previous screen (home)', new URL(page.url()).pathname === '/', page.url());
+    run.check('backarrow: on a slow network the arrow still travels back, no new entry (the fallback stays out of the way)', slowed.length > 0 && historyAfter === historyBefore, JSON.stringify({ slowedRequests: slowed.length, historyBefore, historyAfter }));
     // Forward after the arrow restores the screen where it was, and the fallback timer must not undo it.
     await page.goForward({ waitUntil: 'load' });
     await page.waitForTimeout(900);
@@ -183,6 +206,13 @@ try {
     await second.locator('.page-bar__back').click();
     await second.waitForURL((u) => u.pathname === '/', { timeout: 15000 });
     run.check('backarrow: a visit that began on the search results leaves to the parent URL (/)', new URL(second.url()).pathname === '/', second.url());
+    // State that names more entries than this tab has (sessionStorage is copied into a tab opened from the site): history.go
+    // does nothing, no traversal starts, and the fallback must still take the visitor to the parent.
+    await second.goto(`${baseUrl}/search?q=bolso&type=product`, { waitUntil: 'load' });
+    await second.evaluate(() => history.replaceState({ idx: 40, entry: 2 }, '', location.href));
+    await second.locator('.page-bar__back').click();
+    await second.waitForURL((u) => u.pathname === '/', { timeout: 15000 }).catch(() => {});
+    run.check('backarrow: when history.go has nowhere to go, the fallback still leaves to the parent URL (/)', new URL(second.url()).pathname === '/', second.url());
     await second.close();
   });
 
