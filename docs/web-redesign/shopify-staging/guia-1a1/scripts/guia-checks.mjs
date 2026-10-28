@@ -6,6 +6,7 @@
 //
 // Results go to $MONETTA_RUNS_DIR (or shopify-staging/runs/) through the shared harness (scripts/e2e/lib.mjs).
 import { launch, parseArgs, Run, settle } from '../../scripts/e2e/lib.mjs';
+import { predictiveChecks } from './predictive-checks.mjs';
 
 const args = parseArgs();
 const baseUrl = args['base-url'] || 'http://127.0.0.1:9292';
@@ -693,6 +694,7 @@ try {
   if (phases.has('f5')) await f5();
   if (phases.has('f7')) await f7();
   if (phases.has('f8')) await f8();
+  if (phases.has('f9')) await predictiveChecks({ run, open, overflow, platformFonts, inputPlatformFonts, baseUrl });
   run.finish({ complete: true });
 } catch (error) {
   run.finish({ complete: false, error });

@@ -1,65 +1,36 @@
-/*
- * Shopify section-response predictive search. No Atelier imports or global Monetta
- * handlers. Normal form submission and all destination links stay browser-native.
- */
+/* Native search forms enhanced with Shopify's rendered predictive section. */
 (() => {
   'use strict';
   const tag = 'monetta-predictive-search';
   if (!window.customElements || customElements.get(tag) || !window.fetch || !window.AbortController) return;
-
-  const memory = new Map();
-  let serial = 0;
-  const clean = (value) => typeof value === 'string' ? value.trim().replace(/\s+/g, ' ').slice(0, 200) : '';
-  const bounded = (value, fallback, max) => {
-    const parsed = Number.parseInt(value, 10);
-    return Number.isFinite(parsed) ? Math.max(0, Math.min(max, parsed)) : fallback;
-  };
-  const uniqueTerms = (terms) => {
-    const seen = new Set();
-    return terms.map(clean).filter((term) => {
-      const key = term.toLocaleLowerCase();
-      if (!term || seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    }).slice(0, 10);
-  };
-  function recentTerms(key) {
-    if (!memory.has(key)) {
-      let terms = [];
-      try {
-        const stored = JSON.parse(window.localStorage.getItem(key) || '[]');
-        if (Array.isArray(stored)) terms = uniqueTerms(stored);
-      } catch { /* Disabled storage, invalid JSON, or a security policy: use memory. */ }
-      memory.set(key, terms);
+  const cacheKey = 'monetta:predictive:responses:v1';
+  const cache = new Map();
+  try {
+    const stored = JSON.parse(sessionStorage.getItem(cacheKey) || '[]');
+    if (Array.isArray(stored)) {
+      for (const entry of stored.slice(-50)) {
+        if (Array.isArray(entry) && entry.length === 2 && entry.every((value) => typeof value === 'string')) cache.set(...entry);
+      }
     }
-    return memory.get(key);
-  }
-  function storeTerms(key, terms) {
-    memory.set(key, uniqueTerms(terms));
-    try { window.localStorage.setItem(key, JSON.stringify(memory.get(key))); }
-    catch { /* Keep usable history for this document when persistence is blocked. */ }
-  }
+  } catch { /* The in-memory cache also works when session storage is unavailable. */ }
+  let serial = 0;
 
   class MonettaPredictiveSearch extends HTMLElement {
     connectedCallback() {
       if (this.events) return;
-      const find = (part) => this.querySelector('[data-monetta-predictive-' + part + ']');
-      this.form = find('form');
-      this.input = find('input');
+      const find = (name) => this.querySelector('[data-monetta-predictive-' + name + ']');
+      this.form = this.querySelector('form');
+      this.input = this.form?.querySelector('input[type="search"]');
+      this.anchor = this.form?.querySelector('.search-field');
       this.panel = find('panel');
       this.list = find('list');
-      this.clearButton = find('clear');
       this.heading = find('heading');
-      this.recentHeading = find('recent-heading');
       this.message = find('message');
-      this.all = find('all');
-      this.forget = find('forget');
+      this.removals = find('removals');
       this.live = find('live');
-      this.anchor = find('anchor');
       this.help = find('help');
-      if (![this.form, this.input, this.panel, this.list, this.clearButton, this.heading,
-        this.recentHeading, this.message, this.all, this.forget, this.live, this.anchor, this.help].every(Boolean)) return;
-
+      this.categories = find('categories');
+      if (![this.input, this.anchor, this.panel, this.list, this.heading, this.message, this.removals, this.live, this.help, this.categories].every(Boolean)) return;
       this.uid = 'monetta-predictive-' + (++serial);
       this.list.id = this.uid + '-listbox';
       this.help.id = this.uid + '-help';
@@ -69,39 +40,36 @@
       this.input.setAttribute('aria-controls', this.list.id);
       this.input.setAttribute('aria-describedby', this.help.id);
       this.input.setAttribute('aria-expanded', 'false');
-      this.recentLimit = bounded(this.dataset.recentLimit, 5, 10);
-      this.limit = Math.max(1, bounded(this.dataset.limit, 6, 10));
-      this.historyKey = 'monetta:predictive:recent:v1:' + this.form.action + ':' + this.dataset.historyScope;
-      // Keep generations monotonic across detach/reconnect; an old body read can
-      // settle after reconnection even if its fetch was already aborted.
       this.epoch = this.epoch || 0;
-      this.composing = false;
       this.options = [];
       this.active = -1;
+      this.limit = Math.min(6, Math.max(1, Number(this.dataset.limit) || 6));
+      this.recentLimit = this.hasAttribute('data-recent-limit') ? Math.min(5, Math.max(0, Number(this.dataset.recentLimit) || 0)) : 5;
+      this.composing = false;
       this.events = new AbortController();
-      const on = (element, event, handler, options = {}) => {
-        element.addEventListener(event, handler, { ...options, signal: this.events.signal });
-      };
-
-      on(this.input, 'input', (event) => {
-        if (!event.isComposing && !this.composing) this.schedule();
-      });
-      on(this.input, 'focus', () => { if (!this.restoringFocus) this.schedule(); });
+      const on = (node, type, handler, options = {}) => node.addEventListener(type, handler, { ...options, signal: this.events.signal });
+      on(this.input, 'input', (event) => { if (!event.isComposing && !this.composing) this.schedule(); });
+      on(this.input, 'focus', () => this.schedule());
       on(this.input, 'compositionstart', () => { this.composing = true; this.close(); });
       on(this.input, 'compositionend', () => { this.composing = false; this.schedule(); });
-      on(this, 'keydown', (event) => this.onKey(event));
-      on(this, 'click', (event) => this.onClick(event));
-      on(this.form, 'submit', () => { this.remember(); this.close(); });
-      on(this.form, 'reset', () => window.setTimeout(() => { if (this.isConnected) this.schedule(); }, 0));
-      on(document, 'pointerdown', (event) => {
-        if (!this.contains(event.target)) this.close();
+      on(this.input, 'keydown', (event) => this.onKey(event));
+      on(this.form, 'submit', () => { window.MonettaSearchHistory?.remember(this.query); this.close(); });
+      on(this, 'click', (event) => {
+        // watchSearchClear has already cleared the native input by the time the click bubbles here.
+        if (event.target.closest('[data-search-clear]')) this.schedule();
+        const remove = event.target.closest('[data-predictive-remove]');
+        if (remove) {
+          window.MonettaSearchHistory?.remove(remove.dataset.predictiveRemove);
+          this.input.focus({ preventScroll: true });
+        }
+        const option = event.target.closest('[data-monetta-predictive-option]');
+        if (option) window.MonettaSearchHistory?.remember(option.dataset.monettaPredictiveTerm || this.query);
       });
-      on(document, 'focusin', (event) => {
-        if (!this.contains(event.target)) this.close();
-      });
-      on(window, 'storage', (event) => {
-        if (event.key !== null && event.key !== this.historyKey) return;
-        memory.delete(this.historyKey);
+      // Keep pointer interaction in the popup from blurring the combobox before a link is activated.
+      on(this.panel, 'pointerdown', (event) => { if (event.target.closest('a, button')) event.preventDefault(); });
+      on(document, 'pointerdown', (event) => { if (!this.contains(event.target)) this.close(); });
+      on(document, 'focusin', (event) => { if (!this.contains(event.target)) this.close(); });
+      on(window, 'monetta:recent-searches-change', () => {
         if (document.activeElement === this.input && !this.query) this.showRecent();
       });
       on(window, 'resize', () => this.queuePosition(), { passive: true });
@@ -110,17 +78,10 @@
         on(window.visualViewport, 'resize', () => this.queuePosition(), { passive: true });
         on(window.visualViewport, 'scroll', () => this.queuePosition(), { passive: true });
       }
-      const dialog = this.closest('dialog');
-      if (dialog) {
-        on(dialog, 'monetta:dialog-close', () => this.close());
-        on(dialog, 'close', () => this.close());
-      }
       if (window.ResizeObserver) {
         this.observer = new ResizeObserver(() => this.queuePosition());
         this.observer.observe(this.anchor);
       }
-      this.syncClear();
-      // monetta-listing.js may have focused the server-rendered input before this module loaded.
       if (document.activeElement === this.input) this.schedule();
     }
 
@@ -136,73 +97,64 @@
     get query() { return this.input.value.trim(); }
 
     invalidate() {
-      this.epoch = (this.epoch || 0) + 1;
+      this.epoch += 1;
       clearTimeout(this.timer);
       clearTimeout(this.timeout);
       this.request?.abort();
       this.request = null;
     }
 
-    syncClear() { this.clearButton.hidden = this.input.value.length === 0; }
-
     schedule() {
-      this.invalidate(); // Invalidate immediately, including during the debounce interval.
-      this.syncClear();
-      this.select(-1);
+      this.invalidate(); // Older responses are stale even during the debounce interval.
+      if (document.activeElement !== this.input || this.composing) { this.close(); return; }
       if (!this.query) { this.showRecent(); return; }
+      if ([...this.query].length < 2) { this.close(); return; }
       const term = this.query;
       const epoch = this.epoch;
-      this.setView('loading', this.dataset.loadingMessage);
+      this.render('loading', [], 'Buscando…');
       this.list.setAttribute('aria-busy', 'true');
-      this.timer = window.setTimeout(() => this.search(term, epoch), 220);
+      this.timer = setTimeout(() => this.search(term, epoch), 200);
     }
 
-    current(epoch, term) {
-      return this.isConnected && this.epoch === epoch && this.query === term;
-    }
+    current(epoch, term) { return this.isConnected && this.epoch === epoch && this.query === term && document.activeElement === this.input; }
 
     async search(term, epoch) {
       if (!this.current(epoch, term)) return;
       const controller = new AbortController();
       this.request = controller;
-      // A stalled endpoint still leaves the native search available.
-      this.timeout = window.setTimeout(() => {
-        if (!this.current(epoch, term)) return;
-        this.invalidate();
-        this.setView('error', this.dataset.errorMessage);
-      }, 8000);
+      this.timeout = setTimeout(() => { if (this.current(epoch, term)) this.close(); }, 8000);
       try {
         const url = new URL(this.dataset.predictiveUrl, location.origin);
         if (url.origin !== location.origin) throw new Error('Predictive endpoint must be same-origin');
         url.searchParams.set('q', term);
-        url.searchParams.set('resources[type]', 'product');
+        url.searchParams.set('resources[type]', 'query,product,collection');
         url.searchParams.set('resources[limit]', String(this.limit));
         url.searchParams.set('resources[limit_scope]', 'each');
         url.searchParams.set('resources[options][unavailable_products]', 'last');
         url.searchParams.set('section_id', 'monetta-predictive-results');
-        const response = await fetch(url, {
-          signal: controller.signal,
-          credentials: 'same-origin',
-          headers: { Accept: 'text/html' },
-        });
-        if (!response.ok) throw new Error('Predictive response ' + response.status);
-        const markup = await response.text();
+        const key = (window.MonettaConfig?.currency || '') + ':' + url.href.toLocaleLowerCase();
+        let markup = cache.get(key);
+        if (!markup) {
+          const response = await fetch(url, { signal: controller.signal, credentials: 'same-origin', headers: { Accept: 'text/html' } });
+          if (!response.ok) throw new Error('Predictive response ' + response.status);
+          markup = await response.text();
+        }
         if (!this.current(epoch, term)) return;
         const parsed = new DOMParser().parseFromString(markup, 'text/html');
         const result = parsed.querySelector('[data-monetta-predictive-response]');
-        const products = result?.querySelector('[data-monetta-predictive-products]');
+        const items = result?.querySelector('[data-monetta-predictive-items]');
         const count = Number(result?.dataset.count);
-        const links = products?.querySelectorAll('[data-monetta-predictive-option]');
-        if (!products || !Number.isInteger(count) || count < 0 || count > this.limit || links.length !== count) {
-          throw new Error('Invalid predictive section');
-        }
-        // The fragment is rendered by our Liquid section on this store. Never inject
-        // a full response (password page, error document, or an unrelated section).
-        const nodes = [...products.children].map((node) => document.importNode(node, true));
-        this.setView(count ? 'results' : 'empty', count ? '' : this.dataset.emptyMessage, nodes);
-        if (count) this.announce(this.dataset.countMessage.replace('{count}', String(count)));
+        if (!items || !Number.isInteger(count) || count < 0 || count > 18 || items.querySelectorAll('[data-monetta-predictive-option]').length !== count) throw new Error('Invalid predictive section');
+        cache.set(key, markup);
+        if (cache.size > 50) cache.delete(cache.keys().next().value);
+        try { sessionStorage.setItem(cacheKey, JSON.stringify([...cache])); }
+        catch { /* Keep the in-memory cache if the session quota is full. */ }
+        const nodes = count ? [...items.children].map((node) => document.importNode(node, true)) : [...this.categories.content.cloneNode(true).children];
+        nodes.push(this.item('Ver todos los resultados para «' + term + '»', this.searchURL(term), 'all'));
+        this.render(count ? 'results' : 'empty', nodes, count ? '' : 'No encontramos resultados para «' + term + '»');
+        this.live.textContent = count ? count + ' resultados' : 'Sin resultados';
       } catch (error) {
-        if (this.current(epoch, term) && !controller.signal.aborted) this.setView('error', this.dataset.errorMessage);
+        if (this.current(epoch, term) && !controller.signal.aborted) this.close();
       } finally {
         if (this.current(epoch, term)) {
           clearTimeout(this.timeout);
@@ -212,70 +164,68 @@
       }
     }
 
-    setView(state, message = '', nodes = []) {
-      this.dataset.state = state;
-      this.list.replaceChildren(...nodes);
-      this.options = [...this.list.querySelectorAll('[data-monetta-predictive-option]')];
-      this.options.forEach((option, index) => {
-        option.id = this.uid + '-option-' + index;
-        option.setAttribute('aria-selected', 'false');
-      });
-      this.select(-1);
-      this.list.setAttribute('aria-busy', 'false');
-      this.list.hidden = this.options.length === 0;
-      this.message.textContent = message;
-      this.message.hidden = !message;
-      const recent = state === 'recent';
-      this.heading.hidden = recent;
-      this.recentHeading.hidden = !recent;
-      this.forget.hidden = !recent;
-      this.all.hidden = !this.query;
-      if (this.query) this.all.href = this.searchURL(this.query);
-      this.panel.hidden = false;
-      this.panel.scrollTop = 0;
-      this.input.setAttribute('aria-expanded', 'true');
-      if (message) this.announce(message);
-      this.position();
-    }
-
-    announce(message) {
-      if (this.live.textContent !== message) this.live.textContent = message;
-    }
-
     searchURL(term) {
       const url = new URL(this.form.action);
-      for (const [key, value] of new FormData(this.form)) url.searchParams.set(key, value);
+      url.search = '';
       url.searchParams.set('q', term);
+      url.searchParams.set('type', 'product');
       return url.href;
     }
 
+    item(text, href, kind) {
+      const item = document.createElement('li');
+      item.setAttribute('role', 'presentation');
+      const link = document.createElement('a');
+      link.className = 'monetta-predictive-search__option';
+      link.setAttribute('role', 'option');
+      link.tabIndex = -1;
+      link.href = href;
+      link.textContent = text;
+      link.dataset.monettaPredictiveOption = '';
+      link.dataset.predictiveKind = kind;
+      if (kind === 'recent') link.dataset.monettaPredictiveTerm = text;
+      item.append(link);
+      return item;
+    }
+
     showRecent() {
-      const terms = this.recentLimit ? recentTerms(this.historyKey).slice(0, this.recentLimit) : [];
+      this.invalidate();
+      const terms = (window.MonettaSearchHistory?.read() || []).slice(0, this.recentLimit);
       if (!terms.length) { this.close(); return; }
-      const nodes = terms.map((term) => {
-        const item = document.createElement('li');
-        item.setAttribute('role', 'presentation');
-        const link = document.createElement('a');
-        link.className = 'monetta-predictive-search__option monetta-predictive-search__option--recent';
-        link.setAttribute('role', 'option');
-        link.tabIndex = -1;
-        link.href = this.searchURL(term);
-        link.textContent = term;
-        link.dataset.monettaPredictiveOption = '';
-        link.dataset.monettaPredictiveTerm = term;
-        item.append(link);
-        return item;
-      });
-      this.setView('recent', '', nodes);
-      this.announce(this.dataset.recentCountMessage.replace('{count}', String(terms.length)));
+      this.render('recent', terms.map((term) => this.item(term, this.searchURL(term), 'recent')));
+      // Buttons are siblings of the listbox, so options never contain nested interactive controls.
+      for (const term of terms) {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.tabIndex = -1;
+        button.className = 'monetta-predictive-search__remove';
+        button.dataset.predictiveRemove = term;
+        button.setAttribute('aria-label', 'Quitar «' + term + '» de las búsquedas recientes');
+        button.textContent = '×';
+        this.removals.append(button);
+      }
+      this.live.textContent = terms.length + ' búsquedas recientes';
     }
 
-    remember(term = this.query) {
-      if (!this.recentLimit || !clean(term)) return;
-      storeTerms(this.historyKey, [term, ...recentTerms(this.historyKey)].slice(0, 11));
+    render(state, nodes, message = '') {
+      this.dataset.state = state;
+      this.list.replaceChildren(...nodes);
+      this.removals.replaceChildren();
+      this.options = [...this.list.querySelectorAll('[data-monetta-predictive-option]')];
+      this.options.forEach((option, index) => { option.id = this.uid + '-option-' + index; });
+      this.select(-1);
+      this.heading.hidden = state !== 'recent';
+      this.message.textContent = message;
+      this.message.hidden = !message;
+      this.list.hidden = !this.options.length;
+      this.list.setAttribute('aria-busy', String(state === 'loading'));
+      this.panel.hidden = false;
+      this.panel.scrollTop = 0;
+      this.input.setAttribute('aria-expanded', 'true');
+      this.position();
     }
 
-    close(restoreFocus = false) {
+    close() {
       this.invalidate();
       if (!this.panel || !this.input || !this.list) return;
       this.panel.hidden = true;
@@ -284,23 +234,14 @@
       this.list.setAttribute('aria-busy', 'false');
       this.select(-1);
       this.live.textContent = '';
-      if (restoreFocus) {
-        // Focusing the input must not reopen the just-dismissed suggestions.
-        this.restoringFocus = true;
-        this.input.focus({ preventScroll: true });
-        this.restoringFocus = false;
-      }
     }
 
     select(index) {
       this.active = index;
-      this.options?.forEach((option, position) => {
-        option.setAttribute('aria-selected', String(position === index));
-      });
+      this.options?.forEach((option, position) => option.setAttribute('aria-selected', String(position === index)));
       const option = this.options?.[index];
       if (!option) { this.input?.removeAttribute('aria-activedescendant'); return; }
       this.input.setAttribute('aria-activedescendant', option.id);
-      // Scroll this panel only; scrollIntoView can move the shared pinned shell.
       const outer = this.panel.getBoundingClientRect();
       const inner = option.getBoundingClientRect();
       if (inner.top < outer.top + 4) this.panel.scrollTop -= outer.top + 4 - inner.top;
@@ -308,62 +249,31 @@
     }
 
     onKey(event) {
-      if (event.isComposing || this.composing || event.defaultPrevented) return;
+      if (event.isComposing || this.composing || event.defaultPrevented || event.altKey || event.ctrlKey || event.metaKey) return;
       if (event.key === 'Escape') {
-        if (!this.panel.hidden) {
-          event.preventDefault();
-          event.stopPropagation();
-          this.close(true);
-        } else {
-          // A search input can consume native Escape before a dialog's cancel event.
-          // Request the standard cancellation so monetta-core keeps its transition,
-          // scroll lock and focus restoration, with exactly one cancel event.
-          const dialog = this.closest('dialog[open]');
-          if (dialog) {
-            event.preventDefault();
-            event.stopPropagation();
-            if (typeof dialog.requestClose === 'function') dialog.requestClose();
-            else if (dialog.dispatchEvent(new Event('cancel', { cancelable: true }))) dialog.close();
-          }
+        event.preventDefault();
+        event.stopPropagation();
+        if (!this.panel.hidden) this.close();
+        else {
+          this.input.value = '';
+          this.input.dispatchEvent(new Event('input', { bubbles: true }));
+          this.close();
         }
-        return;
-      }
-      if (event.target !== this.input || event.altKey || event.ctrlKey || event.metaKey) return;
-      if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+      } else if (event.key === 'Tab') this.close();
+      else if (event.key === 'ArrowDown' || event.key === 'ArrowUp') {
+        event.preventDefault();
         if (this.panel.hidden) { this.schedule(); return; }
         if (!this.options.length) return;
-        event.preventDefault();
         const step = event.key === 'ArrowDown' ? 1 : -1;
-        const next = this.active < 0 ? (step > 0 ? 0 : this.options.length - 1)
-          : (this.active + step + this.options.length) % this.options.length;
-        this.select(next);
+        this.select(this.active < 0 ? (step > 0 ? 0 : this.options.length - 1) : (this.active + step + this.options.length) % this.options.length);
       } else if (event.key === 'Enter' && !this.panel.hidden && this.active >= 0) {
         event.preventDefault();
         this.options[this.active].click();
-      } else if (event.key === 'Tab') {
-        this.select(-1); // Preserve the browser's Tab order; never trap focus.
+      } else if (event.key === 'Delete' && !this.panel.hidden && this.options[this.active]?.dataset.predictiveKind === 'recent') {
+        event.preventDefault();
+        window.MonettaSearchHistory?.remove(this.options[this.active].dataset.monettaPredictiveTerm);
       }
     }
-
-    onClick(event) {
-      const target = event.target.closest('button, a');
-      if (!target || !this.contains(target)) return;
-      if (target.hasAttribute('data-monetta-predictive-clear')) {
-        this.input.value = '';
-        this.input.focus({ preventScroll: true });
-        this.input.dispatchEvent(new Event('input', { bubbles: true }));
-      } else if (target.hasAttribute('data-monetta-predictive-close')) {
-        this.close(true);
-      } else if (target.hasAttribute('data-monetta-predictive-forget')) {
-        storeTerms(this.historyKey, []);
-        this.close(true);
-        this.announce(this.dataset.forgottenMessage);
-      } else if (target.hasAttribute('data-monetta-predictive-option') || target === this.all) {
-        this.remember(target.dataset.monettaPredictiveTerm || this.query);
-        // Let native links handle Enter, modifiers, open in new tab, and destinations.
-      }
-    }
-
     queuePosition() {
       if (!this.panel || this.panel.hidden || this.frame) return;
       this.frame = requestAnimationFrame(() => { this.frame = null; this.position(); });
@@ -386,18 +296,16 @@
       const marginRight = Math.max(margin, Number.parseFloat(style.getPropertyValue('--safe-right')) || 0);
       const marginBottom = Math.max(margin, Number.parseFloat(style.getPropertyValue('--safe-bottom')) || 0);
       const availableWidth = Math.max(0, width - marginLeft - marginRight);
-      const panelWidth = width < 768 ? availableWidth : Math.min(availableWidth, Math.max(rect.width, 360), 560);
+      const panelWidth = width < 768 ? width : Math.min(availableWidth, Math.max(rect.width, 360), 560);
       const start = style.direction === 'rtl' ? rect.right - panelWidth : rect.left;
-      const panelLeft = width < 768 ? left + marginLeft
+      const panelLeft = width < 768 ? left
         : Math.max(left + marginLeft, Math.min(start, left + width - marginRight - panelWidth));
       const below = Math.max(0, top + height - marginBottom - rect.bottom - gap);
-      const above = Math.max(0, rect.top - top - margin - gap);
-      const useBelow = below >= Math.min(240, height * 0.4) || below >= above;
       this.panel.style.left = panelLeft + 'px';
       this.panel.style.width = panelWidth + 'px';
-      this.panel.style.maxHeight = (useBelow ? below : above) + 'px';
-      this.panel.style.top = useBelow ? Math.max(top + margin, rect.bottom + gap) + 'px' : 'auto';
-      this.panel.style.bottom = useBelow ? 'auto' : Math.max(0, window.innerHeight - rect.top + gap) + 'px';
+      this.panel.style.maxHeight = below + 'px';
+      this.panel.style.top = Math.max(top + margin, rect.bottom + gap) + 'px';
+      this.panel.style.bottom = 'auto';
     }
   }
   customElements.define(tag, MonettaPredictiveSearch);

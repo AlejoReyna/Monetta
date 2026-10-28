@@ -32,23 +32,7 @@
     });
   }
 
-  const RECENT_KEY = 'monetta:recent-searches';
-  const readRecent = () => {
-    try {
-      const list = JSON.parse(window.localStorage.getItem(RECENT_KEY) || '[]');
-      return Array.isArray(list) ? list.filter((t) => typeof t === 'string' && t.trim()) : [];
-    } catch {
-      return [];
-    }
-  };
-  const writeRecent = (list) => {
-    try {
-      window.localStorage.setItem(RECENT_KEY, JSON.stringify(list.slice(0, 5)));
-      return true;
-    } catch {
-      return false;
-    }
-  };
+  const readRecent = () => window.MonettaSearchHistory?.read() || [];
 
   function initRecent(root) {
     if (root.dataset.guiaReady) return;
@@ -57,12 +41,9 @@
     const list = root.querySelector('[data-guia-recent-list]');
     if (!block || !list) return;
     const current = (root.dataset.current || '').trim();
-    let terms = readRecent();
-    if (current) {
-      terms = [current, ...terms.filter((t) => t.toLowerCase() !== current.toLowerCase())].slice(0, 5);
-      if (!writeRecent(terms)) return;
-    }
+    if (current) window.MonettaSearchHistory?.remember(current);
     const render = () => {
+      const terms = readRecent();
       list.replaceChildren(...terms.map((term) => {
         const item = document.createElement('li');
         item.className = 'guia-search__recent';
@@ -80,9 +61,7 @@
         remove.innerHTML = '<svg class="icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 6.4 17.6 5 12 10.6 6.4 5 5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12z"/></svg>';
         remove.addEventListener('click', () => {
           const index = terms.indexOf(term);
-          terms = terms.filter((t) => t !== term);
-          writeRecent(terms);
-          render();
+          window.MonettaSearchHistory?.remove(term);
           const buttons = list.querySelectorAll('.guia-search__remove');
           (buttons[Math.min(index, buttons.length - 1)] || root.querySelector('.guia-search__row'))?.focus();
           window.Monetta?.announce?.(`Se quitó «${term}» de las búsquedas recientes.`);
@@ -92,6 +71,7 @@
       }));
       block.hidden = terms.length === 0;
     };
+    window.addEventListener('monetta:recent-searches-change', () => { if (root.isConnected) render(); });
     render();
   }
 
