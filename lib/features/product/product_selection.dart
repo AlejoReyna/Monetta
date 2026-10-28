@@ -296,6 +296,9 @@ Future<void> addToBagAndShowMiniCart(
   await showMiniCart(context);
 }
 
+/// Opens the bag on a context that outlives a preview sheet.
+Future<void> openShoppingBag(BuildContext context) => openBag(context);
+
 /// "Comprar ahora": add + open the bag. The bag opens only after a real add.
 Future<void> buyNowOpenBag(
   BuildContext context,

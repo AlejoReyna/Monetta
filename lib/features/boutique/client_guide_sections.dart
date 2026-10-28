@@ -29,8 +29,9 @@ class ClientGuideEditorial extends StatelessWidget {
         builder: (context, constraints) {
           final compact = constraints.maxWidth < MonettaTokens.breakpointMedium;
           final copy = Padding(
-            padding:
-                EdgeInsets.all(MonettaTokens.gutterFor(constraints.maxWidth)),
+            padding: EdgeInsets.all(
+              MonettaTokens.gutterFor(constraints.maxWidth),
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -84,7 +85,10 @@ class ClientGuideEditorial extends StatelessWidget {
           if (compact && MediaQuery.textScalerOf(context).scale(1) > 1.3) {
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [copy, AspectRatio(aspectRatio: 2, child: photo)],
+              children: [
+                copy,
+                AspectRatio(aspectRatio: 2, child: photo),
+              ],
             );
           }
           return IntrinsicHeight(
@@ -108,13 +112,21 @@ class ClientGuideServices extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     const services = [
-      (Icons.local_shipping_outlined, 'Envíos', 'Costo y plazo por confirmar'),
+      (
+        Icons.local_shipping_outlined,
+        'Envíos seguros',
+        'Costo y plazo por confirmar',
+      ),
       (Icons.lock_outline, 'Pagos seguros', 'Compra con confianza'),
-      (Icons.verified_outlined, 'Productos originales', 'Conoce cada pieza'),
+      (
+        Icons.verified_outlined,
+        'Productos originales',
+        'Garantía sujeta a cada pieza',
+      ),
       (
         Icons.headset_mic_outlined,
         'Atención personalizada',
-        'Estamos para ayudarte'
+        'Estamos para ayudarte',
       ),
     ];
     return LayoutBuilder(

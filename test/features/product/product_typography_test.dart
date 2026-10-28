@@ -4,7 +4,6 @@ import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/reco/events.dart';
-import 'package:monetta_app/reco/explainer.dart';
 
 import '../../support/product_screen_harness.dart';
 
@@ -82,7 +81,11 @@ void main() {
         (tester) async {
       await mount(tester);
 
-      for (final label in ['Descripción', 'Detalles', 'Envíos y cambios']) {
+      for (final label in [
+        'Descripción',
+        'Detalles',
+        'Envíos y devoluciones',
+      ]) {
         await _expectSectionHeading(
           tester,
           find.text(label),
@@ -93,11 +96,11 @@ void main() {
 
     testWidgets('TYPE-01d the rail headings are section headings',
         (tester) async {
-      final ficha = await mount(tester);
+      await mount(tester);
 
       await _expectSectionHeading(
         tester,
-        find.text('Más de ${brandLabel(ficha.brand)}'),
+        find.text('Productos relacionados'),
         reason: 'related rail',
       );
       await _expectSectionHeading(

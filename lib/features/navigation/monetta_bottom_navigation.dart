@@ -49,7 +49,7 @@ class MonettaBottomNavigation extends StatelessWidget {
     super.key,
   });
 
-  final MonettaBottomDestination current;
+  final MonettaBottomDestination? current;
   final int bagCount;
   final ValueChanged<MonettaBottomDestination> onSelected;
 

@@ -16,8 +16,9 @@ Future<CatalogStore> _loadedStore() async {
 }
 
 void main() {
-  testWidgets('product hero covers the complete detail viewport',
-      (tester) async {
+  testWidgets('product hero covers the complete detail viewport', (
+    tester,
+  ) async {
     final store = await _loadedStore();
     final product = store.products.firstWhere(
       (item) => item.isInStock && item.images.isNotEmpty,
@@ -43,8 +44,9 @@ void main() {
     expect(tester.widget<MonettaImage>(heroImage).fit, BoxFit.contain);
   });
 
-  testWidgets('product page sells with facts, not internal facets',
-      (tester) async {
+  testWidgets('product page sells with facts, not internal facets', (
+    tester,
+  ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -64,7 +66,7 @@ void main() {
     await tester.pump();
 
     expect(find.text(product.title), findsWidgets);
-    expect(find.text('Agregar al carrito'), findsOneWidget);
+    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
     // "Apartar" lives in the secondary purchase section, below the fold.
     await scrollTo(tester, find.text('Apartar'));
     expect(find.text('Apartar'), findsOneWidget);
@@ -80,8 +82,9 @@ void main() {
     expect(find.textContaining('Popular ahora'), findsNothing);
   });
 
-  testWidgets('add to bag opens the mini-cart instead of a toast',
-      (tester) async {
+  testWidgets('add to bag opens the mini-cart instead of a toast', (
+    tester,
+  ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -100,7 +103,9 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('Agregar al carrito'));
+    await tester.ensureVisible(find.text('AGREGAR A BOLSA'));
+    await tester.pump();
+    await tester.tap(find.text('AGREGAR A BOLSA'));
     await tester.pumpAndSettle();
 
     expect(store.bagQuantity, 1);

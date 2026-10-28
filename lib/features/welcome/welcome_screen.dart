@@ -13,9 +13,12 @@ import '../../app/motion.dart';
 import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 import '../boutique/client_guide_components.dart';
+import '../boutique/guide_art.dart';
 
-/// The bundled campaign remains until the original portrait artwork is supplied.
-const String kWelcomePhotoAsset = 'assets/images/campaign_terracotta.jpg';
+/// Sunset and curtains supplied for the welcome screen. The official wordmark
+/// is drawn on top; a catalog bag is not composited because Shopify photos
+/// are opaque packshots, not cutouts.
+const String kWelcomePhotoAsset = kGuideWelcomeBackground;
 
 class WelcomeScreen extends StatelessWidget {
   const WelcomeScreen({required this.onStart, super.key});
@@ -28,33 +31,23 @@ class WelcomeScreen extends StatelessWidget {
       body: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            kWelcomePhotoAsset,
-            key: const ValueKey('welcome-photo'),
-            fit: BoxFit.cover,
-            errorBuilder: (_, __, ___) => const ColoredBox(
-              key: ValueKey('welcome-photo-fallback'),
-              color: MonettaTokens.surfaceWarm,
-            ),
+          const GuideArt(
+            key: ValueKey('welcome-photo'),
+            asset: kWelcomePhotoAsset,
           ),
-          IgnorePointer(
+          const IgnorePointer(
             child: DecoratedBox(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
                   colors: [
-                    MonettaTokens.canvas,
-                    MonettaTokens.canvas.withValues(alpha: .94),
-                    MonettaTokens.canvas.withValues(alpha: 0),
-                    MonettaTokens.scrim,
+                    Color(0xCCFBF6EE),
+                    Color(0x55FBF6EE),
+                    Color(0x00FBF6EE),
+                    Color(0x66000000),
                   ],
-                  stops: const [
-                    0,
-                    .34,
-                    .62,
-                    1,
-                  ],
+                  stops: [0, 0.28, 0.55, 1],
                 ),
               ),
             ),

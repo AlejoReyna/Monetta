@@ -66,7 +66,7 @@ void main() {
 
     expect(find.byType(SearchScreen), findsNothing);
 
-    await tester.tap(find.byKey(const ValueKey('home-search-bar')));
+    await tester.tap(find.byKey(const ValueKey('home-appbar-search-button')));
     await tester.pumpAndSettle();
 
     expect(find.byType(SearchScreen), findsOneWidget);
@@ -216,13 +216,12 @@ void main() {
 
     await tester.pumpWidget(_app(store, admin: admin));
     await tester.pump();
+    expect(tester.takeException(), isNull);
+    expect(find.text('Sin resultados'), findsNothing);
 
     expect(find.text('ENVÍO GRATIS ESTE FIN DE SEMANA'), findsNothing);
     expect(find.text('Novedades'), findsNothing);
-    // showHero:false hides the marketing banner, not the search entry: the
-    // discovery header (and its in-page search field, also used as the
-    // collapse-transition drag handle) stays so navigation never loses
-    // search; only the hero goes away.
+    // showHero:false hides the marketing banner. Search stays in the header.
     expect(
       find.byKey(const ValueKey('home-discovery-header')),
       findsOneWidget,

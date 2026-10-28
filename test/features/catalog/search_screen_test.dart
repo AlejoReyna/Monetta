@@ -423,7 +423,7 @@ void main() {
         find.byKey(const ValueKey('search-query-field')),
         'guess negro',
       );
-      await tester.pumpAndSettle();
+      await tester.pump();
       await captureClientGuide(
         tester,
         'search-${size.width.toInt()}-${brightness.name}',

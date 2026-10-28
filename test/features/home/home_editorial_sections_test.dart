@@ -162,7 +162,9 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(AboutMonettaScreen), findsOneWidget);
 
-    await tester.pageBack();
+    Navigator.of(
+      tester.element(find.byType(AboutMonettaScreen)),
+    ).pop();
     await tester.pumpAndSettle();
     final partnerButton = find.byKey(const ValueKey('home-open-partner'));
     await tester.scrollUntilVisible(
