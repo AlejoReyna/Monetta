@@ -345,3 +345,40 @@ Vista previa del borrador de trabajo: <https://monetta-staging.myshopify.com/?pr
 3. Con eso los enlaces del tema van directo, sin `?view=`.
 
 **Hojas comparativas:** `evidencia/sheets/f5/` (21, 22, 25, 26, 27 y 30), `evidencia/sheets/f5-final/` (25–27 tras los ajustes) y `evidencia/sheets/f5-form/` (27 con el formulario).
+
+## F6. Verificación completa, comparación remota y entrega — cerrada
+
+**Verificación final** (`validation/f6/`, `validate.sh f6` sobre `aadcd4a`, árbol limpio) — todo en verde, por primera vez en esta pasada sin ninguna falla:
+
+| Paso | Resultado |
+|---|---|
+| `build.mjs --check`, `port-css --check` | Pasan |
+| Theme Check | 187 errores y 64 avisos, 0 introducidos |
+| `guia-checks` F1–F5 | **225/225** |
+| `checks.mjs --flows` (22-oct) | 315/315 |
+| Journeys 390, 768, 1024 y 1440 | 61/61, 55/55, 55/55 y 54/54 |
+| axe (con las páginas de la guía y la vista rápida) | 28/28 |
+| Movimiento, navegación, teclado | 4/4, 31/31, 150/150 |
+| Layout, regresiones | 223/223, 123/123 |
+| Capturas finales | 46 capturas (23 láminas × 390 y 1440). Sin imágenes rotas. Única respuesta no 200: Tory Burch, 404 conocida (no tiene productos en staging). |
+
+**Comparación remota** (`evidencia/f6/remote-before-push/`, sólo lectura, 28-oct 01:31 UTC):
+- `192558366754` tiene rol `unpublished` y el nombre esperado;
+- remoto y worktree tienen 776 archivos cada uno, 762 idénticos byte a byte y 0 diferencias de contenido. Los otros 14 son JSON que Shopify reformatea (`equivalent: true`).
+
+**Subida protegida: no hizo falta.** `theme dev` ya había subido cada archivo al borrador. Un `theme-push.sh` no cambiaría contenido; sólo volvería a formatear esos 14 JSON. Se omitió para no escribir en la tienda sin necesidad.
+
+**Roles** (`shopify theme list`, 28-oct 01:32 UTC): `192558366754` sigue `unpublished`. `192125304866` sigue `live`, igual que al empezar, y esta sesión no lo tocó. Los demás temas no cambiaron.
+
+**Hojas comparativas finales:** `evidencia/sheets/f6/` (lámina | 390 | 1440 | app, 23 láminas).
+
+**Vista previa:** <https://monetta-staging.myshopify.com/?preview_theme_id=192558366754>. La contraseña de la tienda la escribe la persona.
+
+**Pendiente**
+- **Láminas sin fase.** El mapa (§5) incluye 01 Bienvenida (página de contraseña) y 04 «Rastrea tu pedido», pero ninguna fase de §6 las asignó. Van en F7.
+- **Para el owner:**
+  - crear y asignar las páginas de la guía (ver F5);
+  - las 13 colecciones de marca y categoría (D3);
+  - filtros por tipo o etiqueta en Search & Discovery (F3).
+- **Fuera del tema:** checkout, página de gracias, cuentas de cliente (Mis pedidos, Mi cuenta) y menús del admin.
+- **Push a GitHub:** sólo cuando la persona lo pida (D6). Rama local `feat/web-guia-1a1`.
