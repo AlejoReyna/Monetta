@@ -35,6 +35,7 @@ export 'product_tile.dart'
         ProductTileData,
         ProductTileDensity,
         ProductTileMetrics,
+        kTileFooterExtent,
         ProductTileVariant,
         ProductTileVariantMetrics,
         productGridColumns,
@@ -48,6 +49,7 @@ class ProductCard extends StatelessWidget {
     this.density = ProductTileDensity.grid,
     this.showWishlist = true,
     this.showQuickAdd = true,
+    this.showViewProduct = false,
     this.onQuickView,
     this.onTap,
     super.key,
@@ -74,6 +76,10 @@ class ProductCard extends StatelessWidget {
   /// Whether a buyable card draws the "+" quick-add control. The bag turns it
   /// off for its own recommendations.
   final bool showQuickAdd;
+
+  /// Draws the brown «VER PRODUCTO» pill under the price (collection grid).
+  /// The grid that sets it reserves [kTileFooterExtent] per row.
+  final bool showViewProduct;
 
   /// Reserved for package C. When given, a long press opens the quick view;
   /// no button is added and tapping still opens the full product page.
@@ -105,6 +111,12 @@ class ProductCard extends StatelessWidget {
               key: Key('quick-add-${product.id}'),
               product: product,
               productName: data.title,
+            )
+          : null,
+      footer: showViewProduct
+          ? TileViewProductButton(
+              key: Key('view-product-${product.id}'),
+              onPressed: onTap ?? () => openProduct(context, product),
             )
           : null,
       onTap: onTap ?? () => openProduct(context, product),

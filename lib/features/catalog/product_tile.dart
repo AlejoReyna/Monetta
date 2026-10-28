@@ -89,6 +89,10 @@ const double _nameLineHeight = 1.3;
 const double _priceLineHeight = 1.2;
 const double _brandGap = 2;
 const double _priceGap = BoutiqueSpace.xs;
+const double _footerGap = BoutiqueSpace.sm;
+
+/// Height a grid reserves under a tile that carries a footer control.
+const double kTileFooterExtent = _footerGap + 40;
 
 extension ProductTileVariantMetrics on ProductTileVariant {
   bool get _edge => this == ProductTileVariant.edgeToEdge;
@@ -253,6 +257,51 @@ String _catalogBrandLabel(CatalogItem item) {
   return humanizeCatalogValue(brand.isEmpty ? item.merchant.trim() : brand);
 }
 
+/// The brown «VER PRODUCTO» pill of the collection grid.
+class TileViewProductButton extends StatelessWidget {
+  const TileViewProductButton({required this.onPressed, super.key});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Semantics(
+      button: true,
+      label: 'Ver producto',
+      excludeSemantics: true,
+      onTap: onPressed,
+      child: SizedBox(
+        height: 40,
+        width: double.infinity,
+        child: Material(
+          color: palette.action,
+          shape: const StadiumBorder(),
+          child: InkWell(
+            customBorder: const StadiumBorder(),
+            onTap: onPressed,
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'VER PRODUCTO',
+                  maxLines: 1,
+                  style: boutiqueText(
+                    size: 12,
+                    weight: FontWeight.w600,
+                    color: palette.onAction,
+                    height: 1.1,
+                  ).copyWith(letterSpacing: 0.6),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 /// The shared card.
 ///
 /// It owns no navigation and reads no store: every screen passes what it
@@ -270,6 +319,7 @@ class MonettaProductTile extends StatelessWidget {
     this.quickAction,
     this.imageOverlay,
     this.eyebrow,
+    this.footer,
     super.key,
   });
 
@@ -302,6 +352,11 @@ class MonettaProductTile extends StatelessWidget {
   /// Optional short line above the brand — a real restock or discount reason,
   /// never a recommender sentence.
   final String? eyebrow;
+
+  /// A full-width control under the price (the collection grid's «VER
+  /// PRODUCTO»). A grid that shows it reserves [kTileFooterExtent] more
+  /// height per row through [productGridDelegate].
+  final Widget? footer;
 
   @override
   Widget build(BuildContext context) {
@@ -369,6 +424,10 @@ class MonettaProductTile extends StatelessWidget {
                 ),
                 const SizedBox(height: _priceGap),
                 _PriceLine(data: data, density: density, variant: variant),
+                if (footer case final control?) ...[
+                  const SizedBox(height: _footerGap),
+                  control,
+                ],
               ],
             ),
           ),
@@ -734,6 +793,7 @@ SliverGridDelegate productGridDelegate(
   ProductTileVariant variant = ProductTileVariant.card,
   double? spacing,
   double? rowSpacing,
+  double footerExtent = 0,
 }) {
   final columns = productGridColumns(availableWidth);
   final columnSpacing = spacing ?? variant.columnSpacing;
@@ -743,6 +803,7 @@ SliverGridDelegate productGridDelegate(
     crossAxisSpacing: columnSpacing,
     mainAxisSpacing: rowSpacing ?? variant.rowSpacing,
     mainAxisExtent: tileWidth * density.imageHeightFactor +
-        variant.captionExtent(density, MediaQuery.textScalerOf(context)),
+        variant.captionExtent(density, MediaQuery.textScalerOf(context)) +
+        footerExtent,
   );
 }

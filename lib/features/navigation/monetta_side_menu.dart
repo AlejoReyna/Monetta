@@ -34,6 +34,10 @@ class MonettaSideMenu extends StatelessWidget {
     super.key,
   });
 
+  // The guide's menu no longer lists search, Categorías, Maquillaje y
+  // skincare, Mayoreo, Contacto or Nuestra historia. Those callbacks stay in
+  // the constructor so call sites keep compiling; Mayoreo and Contacto are
+  // reached from Cuenta.
   final VoidCallback onSearch;
   final VoidCallback onCatalog;
   final VoidCallback? onCategories;
@@ -72,6 +76,8 @@ class MonettaSideMenu extends StatelessWidget {
     final detail = identityDetail?.trim();
     final shownName = (name == null || name.isEmpty) ? 'Invitado' : name;
     final initial = shownName.substring(0, 1).toUpperCase();
+    final gutter = MonettaTokens.space[3];
+    final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Drawer(
       key: const Key('monetta-side-menu'),
@@ -90,8 +96,8 @@ class MonettaSideMenu extends StatelessWidget {
           children: [
             Padding(
               padding: EdgeInsets.fromLTRB(
-                MonettaTokens.space[3],
-                MonettaTokens.space[3],
+                gutter,
+                gutter,
                 MonettaTokens.space[1],
                 0,
               ),
@@ -99,49 +105,51 @@ class MonettaSideMenu extends StatelessWidget {
                 children: [
                   const MonettaWordmark(height: MonettaTokens.logoHeight),
                   const Spacer(),
+                  // Appearance stays reachable: this menu is the only place
+                  // that switches the light and dark storefront themes.
+                  IconButton(
+                    key: const Key('side-menu-appearance'),
+                    tooltip:
+                        dark ? 'Activar modo claro' : 'Activar modo oscuro',
+                    onPressed: onToggleTheme,
+                    icon: Icon(
+                      dark
+                          ? Icons.dark_mode_outlined
+                          : Icons.light_mode_outlined,
+                      size: 21,
+                      color: palette.goldText,
+                    ),
+                  ),
                   if (onNotifications != null)
                     IconButton(
                       key: const Key('side-menu-notifications'),
                       tooltip: 'Notificaciones',
                       onPressed: () => _select(context, onNotifications!),
-                      icon: const Icon(Icons.notifications_none_rounded),
+                      icon: Icon(
+                        Icons.notifications_none_rounded,
+                        color: palette.goldText,
+                      ),
                     ),
-                  IconButton(
-                    key: const Key('side-menu-appearance'),
-                    tooltip: Theme.of(context).brightness == Brightness.dark
-                        ? 'Activar modo claro'
-                        : 'Activar modo oscuro',
-                    onPressed: onToggleTheme,
-                    icon: Icon(
-                      Theme.of(context).brightness == Brightness.dark
-                          ? Icons.dark_mode_outlined
-                          : Icons.light_mode_outlined,
-                      size: 21,
-                    ),
-                  ),
-                  IconButton(
-                    key: const Key('close-side-menu'),
-                    tooltip: 'Cerrar menú',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(Icons.close_rounded, size: 22),
-                  ),
                 ],
               ),
             ),
             Padding(
               key: const Key('side-menu-identity'),
-              padding: EdgeInsets.fromLTRB(
-                MonettaTokens.space[3],
-                MonettaTokens.space[3],
-                MonettaTokens.space[3],
-                0,
-              ),
+              padding: EdgeInsets.fromLTRB(gutter, gutter, gutter, gutter),
               child: Row(
                 children: [
                   CircleAvatar(
-                    backgroundColor: palette.actionDark,
-                    foregroundColor: palette.onActionDark,
-                    child: Text(initial),
+                    radius: 28,
+                    backgroundColor: palette.action,
+                    foregroundColor: palette.onAction,
+                    child: Text(
+                      initial,
+                      style: clientGuideStyle(
+                        context,
+                        MonettaTokens.screenTitle,
+                        color: palette.onAction,
+                      ),
+                    ),
                   ),
                   SizedBox(width: MonettaTokens.space[2]),
                   Expanded(
@@ -154,7 +162,7 @@ class MonettaSideMenu extends StatelessWidget {
                           overflow: TextOverflow.ellipsis,
                           style: clientGuideStyle(
                             context,
-                            MonettaTokens.cardLabel,
+                            MonettaTokens.accountRow,
                           ),
                         ),
                         if (detail != null && detail.isNotEmpty)
@@ -174,57 +182,16 @@ class MonettaSideMenu extends StatelessWidget {
                 ],
               ),
             ),
-            SizedBox(height: MonettaTokens.space[3]),
-            Padding(
-              padding: EdgeInsets.symmetric(horizontal: MonettaTokens.space[3]),
-              child: Material(
-                color: palette.surfaceDeep,
-                borderRadius: BoutiqueRadius.control,
-                child: InkWell(
-                  key: const Key('side-menu-search'),
-                  onTap: () => _select(context, onSearch),
-                  borderRadius: BoutiqueRadius.control,
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: MonettaTokens.space[3],
-                      vertical: MonettaTokens.space[2],
-                    ),
-                    child: Row(
-                      children: [
-                        const Icon(Icons.search_rounded, size: 20),
-                        SizedBox(width: MonettaTokens.space[2]),
-                        Text(
-                          'Buscar una pieza',
-                          style: clientGuideStyle(
-                            context,
-                            MonettaTokens.navLabel,
-                          ),
-                        ),
-                        const Spacer(),
-                        const Icon(Icons.arrow_forward_rounded, size: 17),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-            ),
-            SizedBox(height: MonettaTokens.space[3]),
             Expanded(
               child: ListView(
                 padding: EdgeInsets.fromLTRB(
-                  MonettaTokens.space[3],
+                  gutter,
                   0,
-                  MonettaTokens.space[3],
+                  gutter,
                   MonettaTokens.space[4],
                 ),
                 children: [
-                  if (onCategories != null)
-                    _MenuLink(
-                      key: const Key('side-menu-categories'),
-                      icon: Icons.grid_view_outlined,
-                      label: 'Categorías',
-                      onTap: () => _select(context, onCategories!),
-                    ),
+                  Divider(height: 1, thickness: .5, color: palette.hairline),
                   _MenuLink(
                     key: const Key('side-menu-bags'),
                     icon: Icons.shopping_bag_outlined,
@@ -232,19 +199,28 @@ class MonettaSideMenu extends StatelessWidget {
                     onTap: () => _select(context, onBags),
                   ),
                   _MenuLink(
+                    key: const Key('side-menu-wallets'),
                     icon: Icons.account_balance_wallet_outlined,
                     label: 'Carteras',
                     onTap: () => _select(context, onWallets),
                   ),
                   _MenuLink(
+                    key: const Key('side-menu-watches'),
                     icon: Icons.watch_outlined,
                     label: 'Relojes',
                     onTap: () => _select(context, onWatches),
                   ),
                   _MenuLink(
-                    icon: Icons.water_drop_outlined,
+                    key: const Key('side-menu-perfumes'),
+                    icon: Icons.spa_outlined,
                     label: 'Perfumes',
                     onTap: () => _select(context, onPerfumes),
+                  ),
+                  _MenuLink(
+                    key: const Key('side-menu-brands'),
+                    icon: Icons.storefront_outlined,
+                    label: 'Todas las marcas',
+                    onTap: () => _select(context, onCatalog),
                   ),
                   SizedBox(height: MonettaTokens.space[3]),
                   _ShareCard(
@@ -255,17 +231,18 @@ class MonettaSideMenu extends StatelessWidget {
                   if (onWhatsApp != null)
                     _MenuLink(
                       key: const Key('side-menu-whatsapp'),
-                      icon: Icons.chat_outlined,
+                      assetIcon: kGuideIconContactWhatsApp,
                       label: 'Contacto por WhatsApp',
                       onTap: () => _select(context, onWhatsApp!),
                     ),
-                  if (socialLinks.isNotEmpty) ...[
+                  if (_orderedSocial().isNotEmpty) ...[
                     SizedBox(height: MonettaTokens.space[2]),
                     Row(
+                      key: const Key('side-menu-social'),
                       children: [
-                        for (final link in socialLinks)
-                          if (link.uri != null)
-                            IconButton(
+                        for (final link in _orderedSocial())
+                          Expanded(
+                            child: IconButton(
                               key: Key('side-menu-social-${link.id}'),
                               tooltip: link.label,
                               onPressed: onOpenSocial == null
@@ -274,39 +251,12 @@ class MonettaSideMenu extends StatelessWidget {
                                         context,
                                         () => onOpenSocial!(link.uri!),
                                       ),
-                              icon: Icon(_socialIcon(link.id)),
+                              icon: _socialIcon(link.id, palette.goldText),
                             ),
+                          ),
                       ],
                     ),
                   ],
-                  SizedBox(height: MonettaTokens.space[3]),
-                  _MenuLink(
-                    icon: Icons.brush_outlined,
-                    label: 'Maquillaje y skincare',
-                    onTap: () => _select(context, onBeauty),
-                  ),
-                  _MenuLink(
-                    icon: Icons.sell_outlined,
-                    label: 'Todas las marcas',
-                    onTap: () => _select(context, onCatalog),
-                  ),
-                  _MenuLink(
-                    key: const Key('guide-menu-wholesale'),
-                    icon: Icons.storefront_outlined,
-                    label: 'Mayoreo',
-                    onTap: () => _select(context, onPartner),
-                  ),
-                  _MenuLink(
-                    key: const Key('guide-menu-contact'),
-                    icon: Icons.chat_outlined,
-                    label: 'Contacto',
-                    onTap: () => _select(context, onSupport),
-                  ),
-                  _MenuLink(
-                    icon: Icons.auto_stories_outlined,
-                    label: 'Nuestra historia',
-                    onTap: () => _select(context, onAbout),
-                  ),
                 ],
               ),
             ),
@@ -315,14 +265,54 @@ class MonettaSideMenu extends StatelessWidget {
       ),
     );
   }
+
+  /// The guide's order (TikTok, Instagram, Facebook), then any other network
+  /// the owner configured. Links without a URL are not shown.
+  List<HomeSocialLink> _orderedSocial() {
+    const order = <String>['tiktok', 'instagram', 'facebook'];
+    int rank(HomeSocialLink link) {
+      final index = order.indexOf(link.id);
+      return index < 0 ? order.length : index;
+    }
+
+    final links = <HomeSocialLink>[
+      for (final link in socialLinks)
+        if (link.uri != null) link,
+    ];
+    final position = <HomeSocialLink, int>{
+      for (var i = 0; i < links.length; i++) links[i]: i,
+    };
+    links.sort((a, b) {
+      final byRank = rank(a).compareTo(rank(b));
+      return byRank != 0 ? byRank : position[a]!.compareTo(position[b]!);
+    });
+    return links;
+  }
 }
 
-IconData _socialIcon(String id) => switch (id) {
-      'instagram' => Icons.camera_alt_outlined,
-      'facebook' => Icons.facebook,
-      'tiktok' => Icons.music_note,
-      _ => Icons.open_in_new,
-    };
+Widget _socialIcon(String id, Color fallbackColor) {
+  final asset = switch (id) {
+    'instagram' => kGuideIconInstagram,
+    'facebook' => kGuideIconFacebook,
+    'tiktok' => kGuideIconTikTok,
+    _ => null,
+  };
+  if (asset == null) {
+    return Icon(Icons.open_in_new, color: fallbackColor);
+  }
+  // The three networks are drawn with different stroke weights; tinting them
+  // with one solid colour makes them read with the same intensity.
+  return Image.asset(
+    asset,
+    width: 30,
+    height: 30,
+    fit: BoxFit.contain,
+    color: fallbackColor,
+    colorBlendMode: BlendMode.srcIn,
+    excludeFromSemantics: true,
+    errorBuilder: (_, __, ___) => Icon(Icons.open_in_new, color: fallbackColor),
+  );
+}
 
 class _ShareCard extends StatelessWidget {
   const _ShareCard({required this.onShare});
@@ -331,52 +321,21 @@ class _ShareCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.boutique;
     return Padding(
       padding: EdgeInsets.only(bottom: MonettaTokens.space[3]),
-      child: DecoratedBox(
+      child: KeyedSubtree(
         key: const Key('side-menu-share'),
-        decoration: BoxDecoration(
-          color: palette.surface,
-          borderRadius: BoutiqueRadius.card,
-          border: Border.all(color: palette.hairline),
-          image: const DecorationImage(
-            image: AssetImage(kGuideShareBanner),
-            fit: BoxFit.cover,
-            alignment: Alignment.centerRight,
-          ),
-        ),
-        child: Padding(
-          padding: EdgeInsets.all(MonettaTokens.space[3]),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                'Comparte el catálogo y gana',
-                style: clientGuideStyle(context, MonettaTokens.cardLabel),
-              ),
-              SizedBox(height: MonettaTokens.space[1]),
-              Text(
-                'Únete al mundo de Monetta',
-                style: clientGuideStyle(
-                  context,
-                  MonettaTokens.navLabel,
-                  color: palette.inkMuted,
-                ),
-              ),
-              SizedBox(height: MonettaTokens.space[2]),
-              FilledButton(
-                key: const Key('side-menu-share-button'),
-                onPressed: onShare,
-                style: FilledButton.styleFrom(
-                  backgroundColor: palette.actionDark,
-                  foregroundColor: palette.onActionDark,
-                  minimumSize: const Size.fromHeight(MonettaTokens.tapTarget),
-                  shape: const StadiumBorder(),
-                ),
-                child: const Text('COMPARTIR CATÁLOGO'),
-              ),
-            ],
+        // The callback opens the system share sheet directly with the same
+        // action as before; only the button is the guide's small pill.
+        child: GuideShareEarnBanner(
+          asset: kGuideShareCatalog,
+          action: Align(
+            alignment: Alignment.centerLeft,
+            child: GuidePillButton(
+              key: const Key('side-menu-share-button'),
+              label: 'VER CATÁLOGO',
+              onPressed: onShare,
+            ),
           ),
         ),
       ),
@@ -389,12 +348,16 @@ class _MenuLink extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.icon,
+    this.assetIcon,
     super.key,
   });
 
   final String label;
   final VoidCallback onTap;
   final IconData? icon;
+
+  /// Gold line icon drawn for the guide; wins over [icon].
+  final String? assetIcon;
 
   @override
   Widget build(BuildContext context) {
@@ -419,10 +382,20 @@ class _MenuLink extends StatelessWidget {
               ),
               child: Row(
                 children: [
-                  if (icon != null) ...[
-                    Icon(icon, size: 20, color: palette.goldText),
-                    SizedBox(width: MonettaTokens.space[2]),
-                  ],
+                  SizedBox(
+                    width: 28,
+                    child: assetIcon != null
+                        ? Image.asset(
+                            assetIcon!,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            excludeFromSemantics: true,
+                            errorBuilder: (_, __, ___) => const SizedBox(),
+                          )
+                        : Icon(icon, size: 24, color: palette.goldText),
+                  ),
+                  SizedBox(width: MonettaTokens.space[3]),
                   Expanded(
                     child: Text(
                       label,
@@ -432,7 +405,7 @@ class _MenuLink extends StatelessWidget {
                       ),
                     ),
                   ),
-                  Icon(Icons.chevron_right, size: 18, color: palette.inkMuted),
+                  Icon(Icons.chevron_right, size: 20, color: palette.goldText),
                 ],
               ),
             ),

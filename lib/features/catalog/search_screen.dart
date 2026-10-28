@@ -16,6 +16,8 @@ import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/client_guide_components.dart';
+import '../boutique/guide_art.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/guide_chrome.dart';
 import '../navigation/guide_drawer.dart';
@@ -646,11 +648,17 @@ class _HistoryRow extends StatelessWidget {
           padding: const EdgeInsets.only(left: BoutiqueSpace.gutter),
           child: Row(
             children: [
-              Icon(Icons.history_rounded, size: 20, color: palette.inkMuted),
+              _MarkChip(
+                child: Icon(
+                  Icons.schedule_rounded,
+                  size: 19,
+                  color: palette.goldText,
+                ),
+              ),
               const SizedBox(width: BoutiqueSpace.md),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     query,
                     maxLines: 1,
@@ -680,14 +688,48 @@ class _HistoryRow extends StatelessWidget {
   }
 }
 
-/// Category row with the drawn mark the reference uses for each family.
-class _CategoryRow extends StatelessWidget {
-  const _CategoryRow({required this.slug, required this.onTap, super.key});
+/// Round chip that carries the leading mark of a search row.
+class _MarkChip extends StatelessWidget {
+  const _MarkChip({required this.child});
 
-  final String slug;
-  final VoidCallback onTap;
+  final Widget child;
 
-  static const Map<String, IconData> _marks = <String, IconData>{
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.boutique.surfaceDeep,
+        shape: BoxShape.circle,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// The mark of a category family in search rows. Perfumes and accessories use
+/// the guide's gold line icons; the rest keep their Material marks.
+Widget _categoryMark(BuildContext context, String? slug) {
+  final palette = context.boutique;
+  final asset = switch (slug) {
+    'perfume' => kGuideIconCategoryPerfumes,
+    'accesorio' => kGuideIconCategoryAccessories,
+    _ => null,
+  };
+  if (asset != null) {
+    return Image.asset(
+      asset,
+      width: 20,
+      height: 20,
+      fit: BoxFit.contain,
+      excludeFromSemantics: true,
+      errorBuilder: (_, __, ___) =>
+          Icon(Icons.style_outlined, size: 19, color: palette.goldText),
+    );
+  }
+  const marks = <String, IconData>{
     'bolsa': Icons.shopping_bag_outlined,
     'cartera': Icons.account_balance_wallet_outlined,
     'monedero': Icons.savings_outlined,
@@ -695,9 +737,20 @@ class _CategoryRow extends StatelessWidget {
     'reloj': Icons.watch_outlined,
     'cosmetiquera': Icons.brush_outlined,
     'set': Icons.category_outlined,
-    'accesorio': Icons.auto_awesome_outlined,
-    'perfume': Icons.local_florist_outlined,
   };
+  return Icon(
+    slug == null ? Icons.search_rounded : (marks[slug] ?? Icons.style_outlined),
+    size: 19,
+    color: palette.goldText,
+  );
+}
+
+/// Category row with the drawn mark the reference uses for each family.
+class _CategoryRow extends StatelessWidget {
+  const _CategoryRow({required this.slug, required this.onTap, super.key});
+
+  final String slug;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -710,24 +763,11 @@ class _CategoryRow extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: BoutiqueSpace.gutter,
-            vertical: 12,
+            vertical: 8,
           ),
           child: Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: palette.surfaceDeep,
-                  borderRadius: BoutiqueRadius.tile,
-                ),
-                child: Icon(
-                  _marks[slug] ?? Icons.style_outlined,
-                  size: 19,
-                  color: palette.ink,
-                ),
-              ),
+              _MarkChip(child: _categoryMark(context, slug)),
               const SizedBox(width: BoutiqueSpace.md),
               Expanded(
                 child: Text(
@@ -737,11 +777,6 @@ class _CategoryRow extends StatelessWidget {
                   style: boutiqueText(size: 15, color: palette.ink),
                 ),
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: palette.inkMuted,
-              ),
             ],
           ),
         ),
@@ -750,6 +785,8 @@ class _CategoryRow extends StatelessWidget {
   }
 }
 
+/// «Productos» of the guide: the first three pieces in three small columns.
+/// The key keeps the name of the rail it replaces.
 class _ProductRail extends StatelessWidget {
   const _ProductRail({required this.products, super.key});
 
@@ -757,35 +794,34 @@ class _ProductRail extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final cardWidth = (width * .40).clamp(140.0, 200.0);
+    final width = MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2;
+    const gap = BoutiqueSpace.sm;
+    final columns = width >= 600 ? 4 : 3;
+    final tileWidth = (width - gap * (columns - 1)) / columns;
     final caption = MediaQuery.textScalerOf(
       context,
     ).scale(ProductTileDensity.compact.captionHeight);
-
-    return SizedBox(
+    return GridView.builder(
       key: const ValueKey('search-product-rail'),
-      height: cardWidth * ProductTileDensity.compact.imageHeightFactor +
-          caption +
-          BoutiqueSpace.md,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(width: BoutiqueSpace.md),
-        itemBuilder: (context, index) {
-          final product = products[index];
-          return SizedBox(
-            width: cardWidth,
-            child: ProductCard(
-              product: product,
-              density: ProductTileDensity.compact,
-              onQuickView: () => showProductQuickView(context, product),
-            ),
-          );
-        },
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        crossAxisSpacing: gap,
+        mainAxisSpacing: BoutiqueSpace.md,
+        mainAxisExtent:
+            tileWidth * ProductTileDensity.compact.imageHeightFactor + caption,
       ),
+      itemCount: products.length < columns ? products.length : columns,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return ProductCard(
+          product: product,
+          density: ProductTileDensity.compact,
+          onQuickView: () => showProductQuickView(context, product),
+        );
+      },
     );
   }
 }
@@ -841,12 +877,14 @@ class _LiveQuery extends StatelessWidget {
               onForget: () => onForget(entry),
             ),
         ],
-        if (suggestions.isNotEmpty)
+        if (suggestions.isNotEmpty) ...[
+          const _SectionTitle(title: 'Sugerencias'),
           _SearchSuggestions(
             query: query,
             suggestions: suggestions,
             onSelected: onSuggestion,
           ),
+        ],
         if (preview.isEmpty)
           _NoResults(
             query: query,
@@ -869,17 +907,40 @@ class _LiveQuery extends StatelessWidget {
               BoutiqueSpace.gutter,
               BoutiqueSpace.md,
             ),
-            child: BoutiqueButton(
+            child: ClientGuideButton(
               key: const ValueKey('search-see-all'),
               label: 'Ver todo',
               onPressed: onSeeAll,
-              filled: false,
+              outlined: true,
+              chevron: true,
             ),
           ),
         ],
       ],
     );
   }
+}
+
+/// The category a suggestion names («Bolsas», «Relojes»...), if it names one.
+String? _categorySlugForLabel(String label) {
+  final folded = normalizeSearchText(label);
+  const slugs = <String>[
+    'bolsa',
+    'cartera',
+    'monedero',
+    'tarjetero',
+    'reloj',
+    'cosmetiquera',
+    'set',
+    'accesorio',
+    'perfume',
+  ];
+  for (final slug in slugs) {
+    if (folded == slug || folded == normalizeSearchText(categoryPlural(slug))) {
+      return slug;
+    }
+  }
+  return null;
 }
 
 class _SearchSuggestion {
@@ -933,10 +994,11 @@ class _SearchSuggestions extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.search_rounded,
-                      size: 19,
-                      color: context.boutique.inkMuted,
+                    _MarkChip(
+                      child: _categoryMark(
+                        context,
+                        _categorySlugForLabel(suggestion.label),
+                      ),
                     ),
                     const SizedBox(width: BoutiqueSpace.md),
                     Expanded(
@@ -1055,11 +1117,12 @@ class _Results extends StatelessWidget {
               BoutiqueSpace.gutter,
               BoutiqueSpace.md,
             ),
-            child: BoutiqueButton(
+            child: ClientGuideButton(
               key: const ValueKey('search-see-all'),
               label: 'Ver todo',
               onPressed: onSeeAll,
-              filled: false,
+              outlined: true,
+              chevron: true,
             ),
           ),
         ),

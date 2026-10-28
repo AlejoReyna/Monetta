@@ -95,15 +95,20 @@ void main() {
     final menu = find.byKey(const Key('monetta-side-menu'));
     Finder menuText(String text) =>
         find.descendant(of: menu, matching: find.text(text));
-    expect(menuText('Buscar una pieza'), findsOneWidget);
+    // Guide v2: the menu lists exactly these links. Search, Categorías,
+    // Maquillaje y skincare, Mayoreo, Contacto and Nuestra historia left it.
     expect(menuText('Bolsas'), findsOneWidget);
     expect(menuText('Carteras'), findsOneWidget);
     expect(menuText('Relojes'), findsOneWidget);
     expect(menuText('Perfumes'), findsOneWidget);
-    expect(menuText('Maquillaje y skincare'), findsOneWidget);
     expect(menuText('Todas las marcas'), findsOneWidget);
-    expect(menuText('Mayoreo'), findsOneWidget);
-    expect(menuText('Contacto'), findsOneWidget);
+    expect(menuText('Contacto por WhatsApp'), findsOneWidget);
+    expect(menuText('Buscar una pieza'), findsNothing);
+    expect(menuText('Categorías'), findsNothing);
+    expect(menuText('Maquillaje y skincare'), findsNothing);
+    expect(menuText('Mayoreo'), findsNothing);
+    expect(menuText('Contacto'), findsNothing);
+    expect(menuText('Nuestra historia'), findsNothing);
     expect(menuText('TIENDA'), findsNothing);
     expect(menuText('MÁS DE MONETTA'), findsNothing);
     expect(menuText('Mis notificaciones'), findsNothing);
@@ -113,7 +118,6 @@ void main() {
     expect(find.text('Explorar catálogo'), findsNothing);
     expect(find.text('Mi bolsa'), findsNothing);
     expect(find.text('Mi cuenta'), findsNothing);
-    expect(menuText('Nuestra historia'), findsOneWidget);
     expect(
       tester.widget<Text>(menuText('Bolsas')).style?.fontFamily,
       kEditorialFontFamily,
@@ -168,11 +172,10 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.byType(CollectionScreen), findsOneWidget);
-    expect(find.text('Bolsas'), findsOneWidget);
+    expect(find.text('BOLSAS'), findsOneWidget);
   });
 
-  testWidgets('side-menu search shortcut opens the search experience',
-      (tester) async {
+  testWidgets('side menu no longer carries a search field', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1600);
     tester.view.devicePixelRatio = 1.0;
@@ -183,10 +186,8 @@ void main() {
 
     await tester.tap(find.byKey(const Key('home-menu-button')));
     await tester.pumpAndSettle();
-    await tester.tap(find.byKey(const Key('side-menu-search')));
-    await tester.pumpAndSettle();
-
-    expect(find.byType(SearchScreen), findsOneWidget);
+    expect(find.byKey(const Key('side-menu-search')), findsNothing);
+    expect(find.byKey(const Key('side-menu-categories')), findsNothing);
   });
 
   testWidgets('owner storefront settings are reflected in the app home', (

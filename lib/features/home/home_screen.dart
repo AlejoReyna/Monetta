@@ -13,9 +13,9 @@ import '../../app/card_lift.dart';
 import '../../app/catalog_store.dart';
 import '../../app/home_content_controller.dart';
 import '../../app/motion.dart';
-import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_sections.dart';
 import '../boutique/guide_art.dart';
+import '../boutique/guide_brand_tile.dart';
 import '../wholesale/wholesale_screen.dart';
 import '../contact/contact_screen.dart';
 import '../../app/mixed_feed.dart';
@@ -285,6 +285,21 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     );
   }
 
+  /// A «Compra por estilo» entry opens its silhouette (or the perfumes
+  /// category) through the same collection route as the other home links.
+  void _openStyle(HomeStyleEntry entry) {
+    openCollection(
+      context,
+      CollectionScreen(
+        title: entry.collectionTitle,
+        filter: CollectionFilter(
+          category: entry.category,
+          silhouette: entry.silhouette,
+        ),
+      ),
+    );
+  }
+
   void _handleBottomNavigation(MonettaBottomDestination destination) {
     switch (destination) {
       case MonettaBottomDestination.home:
@@ -383,6 +398,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     builder: (context, playing, _) => HomeEditorialBanner(
                       playing: playing,
                       onOpenNew: _openFullCatalog,
+                      onOpenCatalog: _openFullCatalog,
+                      onOpenPerfumes: () => _openCatalogSection(
+                        title: 'Perfumes',
+                        category: 'perfume',
+                      ),
                     ),
                   )
                 else
@@ -401,21 +421,6 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                 reviewsStatus: reviewsStatus,
               ),
             if (bundled) ...[
-              Padding(
-                padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
-                child: GuideHero(
-                  key: const ValueKey('home-followup-hero'),
-                  asset: kGuideFollowupHero,
-                  title: 'LO MÁS NUEVO DE\nTUS MODELOS\nFAVORITOS',
-                  action: ClientGuideButton(
-                    key: const ValueKey('home-followup-collection'),
-                    label: 'VER COLECCIÓN',
-                    chevron: true,
-                    onPressed: _openFullCatalog,
-                  ),
-                  onTap: _openFullCatalog,
-                ),
-              ),
               if (fresh.isNotEmpty)
                 Padding(
                   padding: const EdgeInsets.only(top: BoutiqueSpace.xxl),
@@ -567,13 +572,12 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               asGrid: true,
             ),
           HomeSectionId.bagTypes => HomeShopByStyle(
-              cards: content.bagTypes,
-              onOpen: (card) => _openHomeCollection(context, card),
+              onOpen: _openStyle,
               onSeeAll: () =>
                   _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
             ),
           HomeSectionId.brands => _BrandsSection(
-              brands: content.brands,
+              brands: guideBrandsFor(content.brands, store.availableBrands),
               onSeeAll: () => unawaited(openCategories(context)),
             ),
           HomeSectionId.about => _AboutMonettaSection(
@@ -707,14 +711,15 @@ class _HomeOffersSection extends StatelessWidget {
   @override
   Widget build(BuildContext context) => ClientGuideEditorial(
         key: const ValueKey('home-section-offers'),
-        title: 'PRECIOS DE MAYOREO',
-        subtitle: 'Precios y mínimo de piezas: pendientes de confirmación.',
-        imageAsset: kGuideStudioBanner,
-        action: ClientGuideButton(
+        title: 'PRECIOS DE',
+        titleAccent: 'mayoreo',
+        subtitle: 'A partir de 3 piezas',
+        imageAsset: kGuideHomeWholesale,
+        overlaySide: GuideTextSide.right,
+        action: GuidePillButton(
           key: const ValueKey('home-wholesale-button'),
           label: 'CONOCE MÁS',
           onPressed: onOpenPartner,
-          chevron: true,
         ),
       );
 }
@@ -860,8 +865,54 @@ class _BrandsSection extends StatefulWidget {
   State<_BrandsSection> createState() => _BrandsSectionState();
 }
 
+/// Brands of the guide's 4 x 2 grid, in the guide's own order.
+const List<String> _kGuideBrandOrder = <String>[
+  'coach',
+  'guess',
+  'michael_kors',
+  'steve_madden',
+  'tommy_hilfiger',
+];
+
+String _brandSlug(String brand) =>
+    brand.trim().toLowerCase().replaceAll(RegExp(r'[\s\-]+'), '_');
+
+/// The brands the grid shows: only those the catalog really carries (they all
+/// come with bundled artwork), the guide's own five first, at most eight.
+///
+/// When the catalog reports no brand at all (a cold start), the configured
+/// list is shown as it is so the section never disappears.
+@visibleForTesting
+List<HomeBrandCard> guideBrandsFor(
+  List<HomeBrandCard> configured,
+  List<String> catalogBrands,
+) {
+  final carried = <String>{...catalogBrands};
+  final eligible = carried.isEmpty
+      ? configured
+      : [
+          for (final brand in configured)
+            if (carried.contains(_brandSlug(brand.brand))) brand,
+        ];
+  int rank(HomeBrandCard brand) {
+    final index = _kGuideBrandOrder.indexOf(_brandSlug(brand.brand));
+    return index < 0 ? _kGuideBrandOrder.length : index;
+  }
+
+  final ordered = [...eligible];
+  // List.sort is not stable: tie-break on the configured position.
+  final position = <HomeBrandCard, int>{
+    for (var i = 0; i < ordered.length; i++) ordered[i]: i,
+  };
+  ordered.sort((a, b) {
+    final byRank = rank(a).compareTo(rank(b));
+    return byRank != 0 ? byRank : position[a]!.compareTo(position[b]!);
+  });
+  return ordered.take(8).toList();
+}
+
 Duration _brandEntranceDuration(int brandCount) {
-  final lastRow = brandCount <= 1 ? 0 : (brandCount - 1) ~/ 2;
+  final lastRow = brandCount <= 1 ? 0 : (brandCount - 1) ~/ 4;
   return kEnter + Duration(milliseconds: lastRow * 70);
 }
 
@@ -919,7 +970,7 @@ class _BrandsSectionState extends State<_BrandsSection>
 
   Animation<Offset> _entranceFor(int index) {
     final totalMilliseconds = _controller.duration!.inMilliseconds;
-    final startMilliseconds = (index ~/ 2) * 70;
+    final startMilliseconds = (index ~/ 4) * 70;
     final endMilliseconds = startMilliseconds + kEnter.inMilliseconds;
     final begin = (startMilliseconds / totalMilliseconds).clamp(0.0, 1.0);
     final end = (endMilliseconds / totalMilliseconds).clamp(begin, 1.0);
@@ -955,12 +1006,12 @@ class _BrandsSectionState extends State<_BrandsSection>
           padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          // Official wordmarks sit in the vertical middle of a square file.
-          // A wide cell plus fitWidth shows that band edge to edge instead of
-          // a speck of type inside an empty square.
+          // Four tiles across, as in the guide. Official wordmarks sit in the
+          // vertical middle of a square file: a wide cell plus fitWidth shows
+          // that band edge to edge instead of a speck inside an empty square.
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
-            childAspectRatio: 3.6,
+            childAspectRatio: 1.7,
             crossAxisSpacing: BoutiqueSpace.sm,
             mainAxisSpacing: BoutiqueSpace.sm,
           ),
@@ -974,33 +1025,20 @@ class _BrandsSectionState extends State<_BrandsSection>
                 button: true,
                 label: 'Ver ${brand.title}',
                 child: MonettaCardLift(
-                  borderRadius: BoutiqueRadius.card,
-                  child: Material(
+                  borderRadius: BoutiqueRadius.tile,
+                  // The shared guide tile: the wordmark large on a tinted
+                  // rectangle, no hairline and no drop shadow.
+                  child: GuideBrandTile(
                     key: ValueKey('home-brand-${brand.handle}'),
-                    color: context.boutique.surface,
-                    // A logo is artwork, not photography: contain it inside a
-                    // hairline card instead of cropping it to fill, and drop
-                    // the drop shadow the brief rules out.
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BoutiqueRadius.card,
-                      side: BorderSide(
-                        color: context.boutique.hairline,
-                        width: 1,
-                      ),
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: InkWell(
-                      onTap: () => openCollection(
-                        context,
-                        CollectionScreen(
-                          title: brand.title,
-                          filter: CollectionFilter(brand: brand.brand),
-                        ),
-                      ),
-                      child: _HomeImage(
-                        imageUrl: brand.imageUrl,
-                        fallbackAsset: brand.fallbackAsset,
-                        fit: BoxFit.fitWidth,
+                    asset: brand.fallbackAsset,
+                    imageUrl: brand.imageUrl,
+                    label: brand.title,
+                    aspectRatio: 1.7,
+                    onTap: () => openCollection(
+                      context,
+                      CollectionScreen(
+                        title: brand.title,
+                        filter: CollectionFilter(brand: brand.brand),
                       ),
                     ),
                   ),

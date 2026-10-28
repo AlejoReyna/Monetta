@@ -74,9 +74,13 @@ void main() {
     expect(find.byTooltip('Compartir'), findsOneWidget);
 
     // Trust row from the reference strip.
-    expect(find.text('Envíos seguros'), findsOneWidget);
+    // Guide v2 guarantees: delivery, originals, secure payment.
+    expect(find.text('Entrega estimada'), findsOneWidget);
+    expect(find.text('3 a 5 días'), findsOneWidget);
     expect(find.text('Productos originales'), findsOneWidget);
-    expect(find.text('Pagos seguros'), findsOneWidget);
+    expect(find.text('Garantía de autenticidad'), findsOneWidget);
+    expect(find.text('Pago seguro'), findsOneWidget);
+    expect(find.text('Compra con confianza'), findsOneWidget);
 
     // Shipping facts already in the app, never an invented threshold.
     expect(find.textContaining('gratis desde'), findsWidgets);

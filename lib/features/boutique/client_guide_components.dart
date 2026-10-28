@@ -29,12 +29,17 @@ class ClientGuideButton extends StatelessWidget {
     required this.onPressed,
     this.outlined = false,
     this.chevron = false,
+    this.compact = false,
     super.key,
   });
   final String label;
   final VoidCallback? onPressed;
   final bool outlined;
   final bool chevron;
+
+  /// Tighter side padding and a smaller chevron, for a button that shares a
+  /// row with other content (the order card's «Ver detalles»).
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -47,7 +52,7 @@ class ClientGuideButton extends StatelessWidget {
         foregroundColor: foreground,
         minimumSize: const Size(double.infinity, MonettaTokens.controlHeight),
         padding: EdgeInsets.symmetric(
-          horizontal: MonettaTokens.space[4],
+          horizontal: compact ? MonettaTokens.space[1] : MonettaTokens.space[4],
           vertical: MonettaTokens.space[2],
         ),
         side: BorderSide(
@@ -61,8 +66,11 @@ class ClientGuideButton extends StatelessWidget {
         children: [
           Flexible(child: Text(label, textAlign: TextAlign.center)),
           if (chevron) ...[
-            SizedBox(width: MonettaTokens.space[2]),
-            Icon(Icons.chevron_right, size: MonettaTokens.logoHeight),
+            SizedBox(width: compact ? 0 : MonettaTokens.space[2]),
+            Icon(
+              Icons.chevron_right,
+              size: compact ? 20 : MonettaTokens.logoHeight,
+            ),
           ],
         ],
       ),

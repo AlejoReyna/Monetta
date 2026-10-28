@@ -109,8 +109,9 @@ void main() {
         );
         final seeProduct = tester.getSemantics(viewProduct);
         final bar = tester.getSemantics(primaryButton());
-        final buyNow =
-            tester.getSemantics(find.byKey(const Key('quick-view-buy-now')));
+        // Guide v2: the quick view has no «COMPRAR AHORA».
+        expect(find.byKey(const Key('quick-view-buy-now')), findsNothing);
+        expect(find.text('COMPRAR AHORA'), findsNothing);
 
         final order = tester.semantics
             .simulatedAccessibilityTraversal()
@@ -125,7 +126,6 @@ void main() {
           'price': price,
           'options': options,
           'bar': bar,
-          'Comprar ahora': buyNow,
           'Ver producto': seeProduct,
         };
         for (final entry in chain.entries) {

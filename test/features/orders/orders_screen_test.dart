@@ -167,9 +167,16 @@ void main() {
       expect(find.text('#1000'), findsOneWidget);
       expect(find.text('En camino'), findsWidgets);
       expect(find.text('Entregado'), findsWidgets);
-      // Resumen honesto de la lista visible.
-      expect(find.textContaining('2 pedidos'), findsOneWidget);
-      expect(find.byKey(const ValueKey('refresh-orders')), findsOneWidget);
+      // Guide v2: the three tabs, no summary line, no «Actualizar pedidos»
+      // link (pull-to-refresh stays) and no Rewards card on this screen.
+      for (final tab in ['all', 'inTransit', 'delivered']) {
+        expect(find.byKey(ValueKey('orders-filter-$tab')), findsOneWidget);
+      }
+      expect(find.textContaining('2 pedidos'), findsNothing);
+      expect(find.byKey(const ValueKey('refresh-orders')), findsNothing);
+      expect(find.text('Actualizar pedidos'), findsNothing);
+      expect(find.byType(RefreshIndicator), findsOneWidget);
+      expect(find.byKey(const ValueKey('rewards-section')), findsNothing);
     });
 
     testWidgets('filters narrow to verified subsets', (tester) async {
@@ -306,7 +313,13 @@ void main() {
         find.text('¿Dudas con tu pago? Escríbenos por WhatsApp.'),
         findsNothing,
       );
-      expect(find.text('En camino'), findsNothing);
+      expect(
+        find.descendant(
+          of: find.byType(EStatusCapsule),
+          matching: find.text('En camino'),
+        ),
+        findsNothing,
+      );
       expect(find.text('Con ajuste'), findsNothing);
       expect(
         find.byKey(const ValueKey('order-card-gid://shopify/Order/pending')),
@@ -348,7 +361,13 @@ void main() {
           ),
           findsNothing,
         );
-        expect(find.text('En camino'), findsNothing);
+        expect(
+          find.descendant(
+            of: find.byType(EStatusCapsule),
+            matching: find.text('En camino'),
+          ),
+          findsNothing,
+        );
         expect(find.text('Cancelado'), findsOneWidget);
         expect(find.text(paidCancelledRefundHelp), findsOneWidget);
         final secondary = tester.widget<Text>(find.text('Cancelado'));
@@ -423,7 +442,8 @@ void main() {
       expect(find.textContaining('Tu sesión terminó'), findsOneWidget);
     });
 
-    testWidgets('rewards failure never hides the orders', (tester) async {
+    testWidgets('no Rewards card on the orders list; orders stay',
+        (tester) async {
       final db = openTestDatabase();
       addTearDown(db.close);
       final controller = _controller(db)
@@ -439,10 +459,10 @@ void main() {
       );
       await tester.pumpAndSettle();
 
-      // Sin backend: estado honesto de Rewards, pedidos intactos.
+      // Guide v2: Rewards lives in Cuenta, not here.
       expect(
         find.text('Monetta Rewards aún no está disponible'),
-        findsOneWidget,
+        findsNothing,
       );
       expect(find.text('#1001'), findsOneWidget);
       expect(

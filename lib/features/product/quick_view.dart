@@ -153,33 +153,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     }
   }
 
-  Future<void> _buyNow() async {
-    final index = _variantIndex;
-    if (index == null || _adding) return;
-    final parent = widget.parentContext;
-    setState(() {
-      _adding = true;
-      _error = null;
-    });
-    final result = await tryAddSelectionToBag(context, widget.product, index);
-    if (!mounted) return;
-    if (result.status != BagAddStatus.added) {
-      setState(() {
-        _adding = false;
-        _error = switch (result.status) {
-          BagAddStatus.soldOut => 'Esta opción está agotada.',
-          BagAddStatus.unavailable =>
-            'Esta pieza no está disponible por ahora.',
-          _ => 'No pudimos agregar la pieza. Intenta de nuevo.',
-        };
-      });
-      return;
-    }
-    NotificationScope.maybeOf(context)?.recordPushOutcome('add_to_cart');
-    Navigator.of(context).pop();
-    if (parent.mounted) await openShoppingBag(parent);
-  }
-
   void _viewFullProduct() {
     final product = widget.product;
     final parent = widget.parentContext;
@@ -267,15 +240,6 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                 pending: _adding,
                 onPressed: onPressed,
               ),
-              if (inStock && chosen != null) ...[
-                const SizedBox(height: BoutiqueSpace.sm),
-                BoutiqueButton(
-                  key: const Key('quick-view-buy-now'),
-                  label: 'COMPRAR AHORA',
-                  filled: false,
-                  onPressed: _adding ? null : _buyNow,
-                ),
-              ],
               const SizedBox(height: BoutiqueSpace.sm),
               BoutiqueButton(
                 key: const Key('quick-view-view-product'),
@@ -505,10 +469,11 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       const SizedBox(height: BoutiqueSpace.lg),
                       if (facets?.brand != null)
                         Text(
-                          brandLabel(facets!.brand!.value).toUpperCase(),
-                          style: boutiqueEyebrow(
-                            size: 11,
-                            color: palette.inkMuted,
+                          brandLabel(facets!.brand!.value),
+                          key: const Key('quick-view-brand'),
+                          style: boutiqueDisplay(
+                            22,
+                            color: palette.ink,
                           ),
                         ),
                       if (facets?.brand != null)
@@ -554,14 +519,14 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                   vertical: 5,
                                 ),
                                 decoration: BoxDecoration(
-                                  color: palette.sale,
+                                  color: palette.saleSurface,
                                   borderRadius: BoutiqueRadius.capsule,
                                 ),
                                 child: Text(
                                   '-$discount%',
                                   style: boutiqueEyebrow(
                                     size: 11,
-                                    color: const Color(0xFFFFFFFF),
+                                    color: palette.sale,
                                   ),
                                 ),
                               ),
@@ -598,6 +563,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         ProductOptionSelector(
                           product: product,
                           selectedIndex: chosen,
+                          colorHeading: 'COLORES',
                           onSelect: (i) => setState(() {
                             _variantIndex = i;
                             _error = null;

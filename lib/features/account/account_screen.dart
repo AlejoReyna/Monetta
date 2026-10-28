@@ -23,9 +23,11 @@ import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../main.dart';
 import '../../data/accounts_orders/account_deletion_client.dart';
+import '../../data/accounts_orders/accounts_orders_config.dart';
+import '../rewards/rewards_api.dart';
+import '../wholesale/wholesale_screen.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
-import '../../data/repositories/order_history_repository.dart';
 import '../catalog/categories_screen.dart';
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
@@ -34,7 +36,6 @@ import '../favorites/favorites_screen.dart';
 import '../notifications/notification_inbox.dart';
 import '../notifications/notifications_screen.dart';
 import '../orders/order_detail_screen.dart';
-import '../orders/order_status.dart';
 import '../orders/orders_screen.dart';
 import '../personalization/personalization_screen.dart';
 import '../boutique/guide_art.dart';
@@ -245,28 +246,24 @@ class _SignedIn extends StatelessWidget {
     // administración y partner hub deben existir en el árbol aunque queden
     // bajo el primer pantallazo, igual que antes del rediseño.
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Mi cuenta',
-            style: boutiqueScreenTitle(context: context, color: palette.ink),
-          ),
-          const SizedBox(height: BoutiqueSpace.lg),
           _IdentityCard(
             controller: controller,
             onRelogin: controller.isLoading ? null : () => controller.login(),
           ),
-          const SizedBox(height: BoutiqueSpace.sectionGapTight),
+          const SizedBox(height: BoutiqueSpace.lg),
+          _RewardsRow(controller: controller, reader: rewardsReader),
+          const SizedBox(height: BoutiqueSpace.md),
           ECard(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 0),
             children: [
               EAccessRow(
                 key: const ValueKey('account-open-orders'),
-                icon: Icons.shopping_bag_outlined,
+                icon: Icons.inventory_2_outlined,
                 title: 'Mis pedidos',
-                subtitle: _ordersSubtitle(),
                 onTap: () => openOrders(
                   context,
                   controller: controller,
@@ -277,14 +274,12 @@ class _SignedIn extends StatelessWidget {
                 key: const ValueKey('account-open-favorites'),
                 icon: Icons.favorite_border_rounded,
                 title: 'Favoritos',
-                subtitle: 'Tus piezas guardadas',
                 onTap: () => openFavorites(context),
               ),
               EAccessRow(
                 key: const ValueKey('account-open-notifications'),
                 icon: Icons.notifications_none_rounded,
                 title: 'Notificaciones',
-                subtitle: 'Avisos de pedidos y saldo',
                 onTap: () => openNotifications(
                   context,
                   inbox: notificationInbox ?? sharedAccountNotificationInbox,
@@ -294,37 +289,47 @@ class _SignedIn extends StatelessWidget {
                 ),
               ),
               EAccessRow(
-                key: const ValueKey('account-open-contact'),
-                icon: Icons.chat_outlined,
-                title: 'Contacto y ayuda',
-                subtitle: 'WhatsApp, sitio y redes',
-                onTap: () => openContact(context),
+                key: const ValueKey('account-open-addresses'),
+                icon: Icons.location_on_outlined,
+                title: 'Direcciones',
+                onTap: () => _showInfoSheet(
+                  context,
+                  title: 'Direcciones',
+                  message: kAccountAddressesInfo,
+                ),
               ),
-            ],
-          ),
-          const SizedBox(height: BoutiqueSpace.sectionGapTight),
-          AutoRewardsSection(controller: controller, reader: rewardsReader),
-          const SizedBox(height: BoutiqueSpace.md),
-          ECard(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 8),
-            children: [
+              EAccessRow(
+                key: const ValueKey('account-open-payments'),
+                icon: Icons.credit_card_outlined,
+                title: 'Métodos de pago',
+                onTap: () => _showInfoSheet(
+                  context,
+                  title: 'Métodos de pago',
+                  message: kAccountPaymentsInfo,
+                ),
+              ),
               EAccessRow(
                 key: const ValueKey('account-open-personalization'),
-                icon: Icons.tune_outlined,
-                title: 'Personalización',
-                subtitle: 'Marcas, categorías y tipo de compra',
+                icon: Icons.settings_outlined,
+                title: 'Preferencias',
                 onTap: () => openPersonalization(context),
               ),
               EAccessRow(
-                key: const ValueKey('account-open-rewards-guide'),
-                icon: Icons.workspace_premium_outlined,
-                title: 'Monetta Rewards',
-                subtitle: 'Saldo del contrato y catálogos',
-                onTap: () => openRewardsGuide(
-                  context,
-                  controller: controller,
-                  reader: rewardsReader,
+                key: const ValueKey('account-open-wholesale'),
+                icon: Icons.shopping_bag_outlined,
+                title: 'Modo Mayoreo',
+                subtitle: 'Desde 3 piezas',
+                onTap: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => const WholesaleScreen(),
+                  ),
                 ),
+              ),
+              EAccessRow(
+                key: const ValueKey('account-open-contact'),
+                icon: Icons.help_outline_rounded,
+                title: 'Ayuda y contacto',
+                onTap: () => openContact(context),
               ),
               if (onOpenInvite != null)
                 EAccessRow(
@@ -336,10 +341,23 @@ class _SignedIn extends StatelessWidget {
                 ),
             ],
           ),
-          const SizedBox(height: BoutiqueSpace.sectionGapTight),
-          const ESectionTitle(title: 'Mis pedidos recientes'),
-          const SizedBox(height: BoutiqueSpace.sm),
-          _OrdersPreview(controller: controller),
+          const SizedBox(height: BoutiqueSpace.lg),
+          GuideShareEarnBanner(
+            asset: kGuideShareCatalog,
+            action: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 190),
+              child: GuidePillButton(
+                key: const ValueKey('account-share-catalog'),
+                label: 'VER CATÁLOGO',
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) =>
+                        RewardsShareScreen(accountController: controller),
+                  ),
+                ),
+              ),
+            ),
+          ),
           if (showAdmin && onOpenAdmin != null) ...[
             const SizedBox(height: BoutiqueSpace.sectionGapTight),
             InkWell(
@@ -401,60 +419,6 @@ class _SignedIn extends StatelessWidget {
             _PartnerAccountLink(onTap: onOpenPartner!),
           ],
           const SizedBox(height: BoutiqueSpace.sectionGapTight),
-          const ESectionTitle(title: 'Privacidad y datos'),
-          const SizedBox(height: BoutiqueSpace.sm),
-          _PrivacyLinks(
-            onDelete: () => openDeleteAccount(
-              context,
-              client: deletionClient,
-              accessToken: controller.accessTokenForBackend,
-              reauthenticate: controller.reauthenticateForDeletion,
-              signInForDeletion: controller.account?.authProvider == 'monetta'
-                  ? () => controller.signInForAccountDeletion(deletionClient)
-                  : null,
-              abandonUnmatchedLogin: controller.abandonUnmatchedDeletionLogin,
-              signOutToHome: controller.completeAccountDeletion,
-              supportUri: accountDeletionSupportUri(),
-              openUri: openExternalUri,
-              onViewOrder: (ref) => _openBlockingOrder(context, ref),
-            ),
-            onPrivacyPolicy: () => _openPrivacyPolicy(context),
-          ),
-          const SizedBox(height: BoutiqueSpace.sectionGapTight),
-          GuideShareBanner(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Comparte el catálogo y gana',
-                    style: boutiqueScreenTitle(
-                      context: context,
-                      color: palette.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Únete al mundo de Monetta',
-                    style: boutiqueText(size: 13, color: palette.inkMuted),
-                  ),
-                  const SizedBox(height: 12),
-                  BoutiqueButton(
-                    key: const ValueKey('account-share-catalog'),
-                    label: 'Compartir catálogo',
-                    onPressed: () => Navigator.of(context).push(
-                      MaterialPageRoute<void>(
-                        builder: (_) =>
-                            RewardsShareScreen(accountController: controller),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: BoutiqueSpace.sectionGapTight),
           BoutiqueButton(
             key: const ValueKey('account-logout'),
             label: 'Cerrar sesión',
@@ -474,14 +438,24 @@ class _SignedIn extends StatelessWidget {
               ),
             ),
           ],
+          // Legal links are required by the App Store: they stay, compact.
           const SizedBox(height: BoutiqueSpace.sm),
-          Center(
-            child: TextButton(
-              onPressed: controller.isLoading ? null : () => _logout(context),
-              child: controller.isLoading
-                  ? const Text('Cerrando…')
-                  : const Text('CERRAR SESIÓN'),
+          _PrivacyLinks(
+            onDelete: () => openDeleteAccount(
+              context,
+              client: deletionClient,
+              accessToken: controller.accessTokenForBackend,
+              reauthenticate: controller.reauthenticateForDeletion,
+              signInForDeletion: controller.account?.authProvider == 'monetta'
+                  ? () => controller.signInForAccountDeletion(deletionClient)
+                  : null,
+              abandonUnmatchedLogin: controller.abandonUnmatchedDeletionLogin,
+              signOutToHome: controller.completeAccountDeletion,
+              supportUri: accountDeletionSupportUri(),
+              openUri: openExternalUri,
+              onViewOrder: (ref) => _openBlockingOrder(context, ref),
             ),
+            onPrivacyPolicy: () => _openPrivacyPolicy(context),
           ),
         ],
       ),
@@ -525,13 +499,6 @@ class _SignedIn extends StatelessWidget {
       );
     }
   }
-
-  String? _ordersSubtitle() {
-    final count = controller.orders.length;
-    if (controller.ordersLoading && count == 0) return 'Cargando…';
-    if (count == 0) return 'Tu historial aparecerá aquí';
-    return count == 1 ? '1 pedido' : '$count pedidos';
-  }
 }
 
 class _PrivacyLinks extends StatelessWidget {
@@ -543,49 +510,97 @@ class _PrivacyLinks extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return ECard(
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      spacing: BoutiqueSpace.lg,
       children: [
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            key: const ValueKey('account-privacy-policy'),
-            onPressed: onPrivacyPolicy,
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(0, BoutiqueSpace.tapTarget),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              foregroundColor: palette.ink,
-            ),
-            child: Text(
-              'Política de privacidad',
-              style: boutiqueText(
-                size: 14,
-                color: palette.ink,
-                decoration: TextDecoration.underline,
-              ),
+        TextButton(
+          key: const ValueKey('account-privacy-policy'),
+          onPressed: onPrivacyPolicy,
+          style: TextButton.styleFrom(
+            minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: palette.ink,
+          ),
+          child: Text(
+            'Política de privacidad',
+            style: boutiqueText(
+              size: 13,
+              color: palette.ink,
+              decoration: TextDecoration.underline,
             ),
           ),
         ),
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            key: const ValueKey('account-delete'),
-            onPressed: onDelete,
-            style: TextButton.styleFrom(
-              padding: EdgeInsets.zero,
-              minimumSize: const Size(0, BoutiqueSpace.tapTarget),
-              tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              foregroundColor: palette.sale,
-            ),
-            child: Text(
-              'Eliminar mi cuenta',
-              style: boutiqueText(size: 14, color: palette.sale),
-            ),
+        TextButton(
+          key: const ValueKey('account-delete'),
+          onPressed: onDelete,
+          style: TextButton.styleFrom(
+            minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            foregroundColor: palette.sale,
+          ),
+          child: Text(
+            'Eliminar mi cuenta',
+            style: boutiqueText(size: 13, color: palette.sale),
           ),
         ),
       ],
     );
   }
+}
+
+/// Texto informativo de «Direcciones»: la app no guarda direcciones.
+const String kAccountAddressesInfo =
+    'Tus direcciones se capturan en el checkout seguro de Shopify al pagar.';
+
+/// Texto informativo de «Métodos de pago»: sólo informa, no guarda tarjetas.
+const String kAccountPaymentsInfo =
+    'Aceptamos tarjeta de crédito o débito y transferencia bancaria.';
+
+void _showInfoSheet(
+  BuildContext context, {
+  required String title,
+  required String message,
+}) {
+  final palette = context.boutique;
+  unawaited(
+    showModalBottomSheet<void>(
+      context: context,
+      backgroundColor: palette.canvas,
+      showDragHandle: true,
+      builder: (sheetContext) => SafeArea(
+        child: Padding(
+          key: const ValueKey('account-info-sheet'),
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                title,
+                style: boutiqueScreenTitle(
+                  context: sheetContext,
+                  color: palette.ink,
+                ),
+              ),
+              const SizedBox(height: BoutiqueSpace.sm),
+              Text(
+                message,
+                style: boutiqueText(size: 15, color: palette.inkMuted),
+              ),
+              const SizedBox(height: BoutiqueSpace.lg),
+              BoutiqueButton(
+                key: const ValueKey('account-info-sheet-close'),
+                label: 'Entendido',
+                onPressed: () => Navigator.of(sheetContext).pop(),
+              ),
+            ],
+          ),
+        ),
+      ),
+    ),
+  );
 }
 
 /// Bandeja compartida de respaldo hasta que la integración global alimente
@@ -605,18 +620,17 @@ class _IdentityCard extends StatelessWidget {
     final name = account.displayName ?? account.email ?? 'Tu cuenta';
     final initial =
         name.trim().isEmpty ? 'M' : name.trim().substring(0, 1).toUpperCase();
-    final provider = account.authProvider == 'monetta'
-        ? 'Cuenta Monetta verificada'
-        : 'Cuenta Shopify verificada';
     final sessionExpired =
         controller.lastError?.kind == CustomerAuthErrorKind.sessionExpired;
-    return ECard(
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
+          key: const ValueKey('account-identity'),
           children: [
             Container(
-              width: 56,
-              height: 56,
+              width: 64,
+              height: 64,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: palette.action,
@@ -624,7 +638,7 @@ class _IdentityCard extends StatelessWidget {
               alignment: Alignment.center,
               child: Text(
                 initial,
-                style: boutiqueDisplay(24, color: palette.onAction),
+                style: boutiqueDisplay(26, color: palette.onAction),
               ),
             ),
             const SizedBox(width: BoutiqueSpace.lg),
@@ -633,12 +647,9 @@ class _IdentityCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Sesión iniciada',
-                    style: boutiqueEyebrow(size: 11, color: palette.goldText),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
                     name,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: boutiqueScreenTitle(
                       context: context,
                       color: palette.ink,
@@ -648,29 +659,11 @@ class _IdentityCard extends StatelessWidget {
                     const SizedBox(height: 2),
                     Text(
                       account.email!,
-                      style: boutiqueText(size: 12, color: palette.inkMuted),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: boutiqueText(size: 13, color: palette.inkMuted),
                     ),
                   ],
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.verified_outlined,
-                        size: 14,
-                        color: palette.goldText,
-                      ),
-                      const SizedBox(width: 4),
-                      Flexible(
-                        child: Text(
-                          provider,
-                          style: boutiqueText(
-                            size: 12,
-                            color: palette.inkMuted,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
                 ],
               ),
             ),
@@ -691,108 +684,176 @@ class _IdentityCard extends StatelessWidget {
   }
 }
 
-/// Vista previa del historial dentro de Cuenta. Conserva los mensajes y la
-/// acción de actualización existentes; el historial completo vive en
-/// [OrdersScreen].
-class _OrdersPreview extends StatelessWidget {
-  const _OrdersPreview({required this.controller});
+/// «Monetta Rewards» row with the balance the server reports on the right.
+///
+/// The amount is read from the Rewards contract and shown as the server
+/// returns it; without a reader, while loading or on any failure the row says
+/// «Ver saldo». A late answer for another account is discarded.
+class _RewardsRow extends StatefulWidget {
+  const _RewardsRow({required this.controller, required this.reader});
 
   final AccountController controller;
+  final RewardsReader? reader;
 
   @override
-  Widget build(BuildContext context) {
-    final muted = sans(size: 13, color: context.monettaColors.contentMuted);
-    if (controller.ordersLoading && controller.orders.isEmpty) {
-      return ECard(children: [Text('Cargando…', style: muted)]);
-    }
+  State<_RewardsRow> createState() => _RewardsRowState();
+}
 
-    return ECard(
-      children: [
-        if (_statusMessage(controller) case final message?)
-          Padding(
-            padding: const EdgeInsets.only(bottom: 12),
-            child: Text(message, style: muted),
-          ),
-        for (final order in controller.orders.take(3)) _OrderRow(order: order),
-        Row(
-          children: [
-            Expanded(
-              child: TextButton(
-                key: const ValueKey('refresh-orders'),
-                onPressed: controller.ordersLoading
-                    ? null
-                    : () => controller.loadOrders(),
-                child: Text(
-                  controller.ordersLoading
-                      ? 'Actualizando…'
-                      : 'Actualizar pedidos',
-                ),
-              ),
-            ),
-            TextButton(
-              key: const ValueKey('account-view-all-orders'),
-              onPressed: () => openOrders(context, controller: controller),
-              child: const Text('Ver todos'),
-            ),
-          ],
-        ),
-      ],
+class _RewardsRowState extends State<_RewardsRow> {
+  RewardsApi? _api;
+  RewardsReader? _effective;
+  String? _balance;
+  var _generation = 0;
+
+  /// Account the shown balance (or the request in flight) belongs to.
+  String? _trackedAccount;
+
+  @override
+  void initState() {
+    super.initState();
+    _trackedAccount = widget.controller.account?.localAccountId;
+    widget.controller.addListener(_onAccountChanged);
+    _resolveReader();
+    _request();
+  }
+
+  @override
+  void didUpdateWidget(covariant _RewardsRow oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller.removeListener(_onAccountChanged);
+      widget.controller.addListener(_onAccountChanged);
+      _trackedAccount = widget.controller.account?.localAccountId;
+    }
+    if (oldWidget.reader != widget.reader ||
+        oldWidget.controller != widget.controller) {
+      _resolveReader();
+      _request();
+    }
+  }
+
+  /// Login, logout or a switch inside the same controller: the previous
+  /// account's balance goes away at once and the new account asks for its own.
+  void _onAccountChanged() {
+    final current = widget.controller.account?.localAccountId;
+    if (current == _trackedAccount || !mounted) return;
+    _trackedAccount = current;
+    setState(() => _balance = null);
+    _request();
+  }
+
+  void _resolveReader() {
+    _api?.close();
+    _api = null;
+    final fixed = widget.reader;
+    if (fixed != null) {
+      _effective = fixed;
+      return;
+    }
+    _api = resolveRewardsApi(
+      config: AccountsOrdersConfig.fromEnvironment(),
+      tokenProvider: widget.controller.accessTokenForBackend,
+    );
+    final api = _api;
+    _effective = api == null ? null : ApiRewardsReader(api);
+  }
+
+  void _request() {
+    // Any answer still in flight belongs to the previous account or reader.
+    final generation = ++_generation;
+    _balance = null;
+    final reader = _effective;
+    final accountId = _trackedAccount;
+    if (reader == null || accountId == null) return;
+    unawaited(
+      reader.summary().then<void>(
+        (summary) {
+          if (!mounted ||
+              generation != _generation ||
+              accountId != widget.controller.account?.localAccountId) {
+            return;
+          }
+          setState(() => _balance = summary.availableLabel);
+        },
+        onError: (Object _) {},
+      ),
     );
   }
 
-  String? _statusMessage(AccountController controller) {
-    switch (controller.ordersStatus) {
-      case OrderHistoryStatus.empty:
-        return controller.orders.isEmpty ? 'Aún no tienes pedidos.' : null;
-      case OrderHistoryStatus.populated:
-        return null;
-      case OrderHistoryStatus.unavailable:
-        return 'El historial de pedidos no está disponible en esta versión.';
-      case OrderHistoryStatus.failed:
-        return 'No pudimos cargar tus pedidos. Intenta actualizar.';
-      case OrderHistoryStatus.staleCache:
-        return 'Mostrando pedidos guardados. No pudimos actualizar ahora.';
-    }
+  @override
+  void dispose() {
+    widget.controller.removeListener(_onAccountChanged);
+    _generation++;
+    _api?.close();
+    super.dispose();
   }
-}
-
-class _OrderRow extends StatelessWidget {
-  const _OrderRow({required this.order});
-
-  final OrderSummary order;
 
   @override
   Widget build(BuildContext context) {
-    final status = orderDisplayStatus(order);
-    // Wrap, no Row con total fijo: a texto ampliado el importe baja a su
-    // propia línea en vez de comprimir la identidad del pedido.
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
-      child: Wrap(
-        alignment: WrapAlignment.spaceBetween,
-        crossAxisAlignment: WrapCrossAlignment.center,
-        spacing: BoutiqueSpace.sm,
-        runSpacing: 2,
-        children: [
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                orderLabelOf(order),
-                style: sans(size: 13, weight: FontWeight.w600),
-              ),
-              const SizedBox(height: 2),
-              Text(
-                '${orderDateLabel(order.placedAt)} · ${status.label}',
-                style: sans(
-                  size: 11,
-                  color: context.monettaColors.contentMuted,
-                ),
-              ),
-            ],
+    final palette = context.boutique;
+    return Semantics(
+      button: true,
+      label: 'Monetta Rewards. ${_balance ?? 'Ver saldo'}',
+      excludeSemantics: true,
+      child: Material(
+        color: palette.surface,
+        shape: RoundedRectangleBorder(
+          borderRadius: BoutiqueRadius.card,
+          side: BorderSide(color: palette.hairline),
+        ),
+        child: InkWell(
+          key: const ValueKey('account-open-rewards-guide'),
+          borderRadius: BoutiqueRadius.card,
+          onTap: () => openRewardsGuide(
+            context,
+            controller: widget.controller,
+            reader: widget.reader,
           ),
-          Text(kMoney.format(order.totalAmount), style: sans(size: 13)),
-        ],
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: BoutiqueSpace.md,
+              vertical: BoutiqueSpace.md,
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.card_giftcard_outlined, color: palette.goldText),
+                const SizedBox(width: BoutiqueSpace.md),
+                Expanded(
+                  child: Text(
+                    'Monetta Rewards',
+                    style:
+                        boutiqueRowLabel(context: context, color: palette.ink),
+                  ),
+                ),
+                const SizedBox(width: BoutiqueSpace.sm),
+                Icon(
+                  Icons.workspace_premium_outlined,
+                  size: 20,
+                  color: palette.goldText,
+                ),
+                const SizedBox(width: BoutiqueSpace.xs),
+                Flexible(
+                  child: Text(
+                    _balance ?? 'Ver saldo',
+                    key: const ValueKey('account-rewards-balance'),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: boutiqueText(
+                      size: 14,
+                      weight: FontWeight.w600,
+                      color: palette.ink,
+                    ),
+                  ),
+                ),
+                Icon(
+                  Icons.chevron_right_rounded,
+                  size: 22,
+                  color: palette.inkMuted,
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

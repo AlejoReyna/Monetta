@@ -303,13 +303,11 @@ class _ProductScreenState extends State<ProductScreen> {
                   children: [
                     if (facets?.brand != null) ...[
                       Text(
-                        brandLabel(facets!.brand!.value).toUpperCase(),
-                        style: boutiqueEyebrow(
-                          size: 11,
-                          color: palette.inkMuted,
-                        ),
+                        brandLabel(facets!.brand!.value),
+                        key: const Key('product-brand'),
+                        style: boutiqueDisplay(22, color: palette.ink),
                       ),
-                      const SizedBox(height: BoutiqueSpace.md),
+                      const SizedBox(height: BoutiqueSpace.xs),
                     ],
                     Text(
                       shopperProductName(product.title),
@@ -353,14 +351,14 @@ class _ProductScreenState extends State<ProductScreen> {
                                 vertical: 5,
                               ),
                               decoration: BoxDecoration(
-                                color: palette.sale,
+                                color: palette.saleSurface,
                                 borderRadius: BoutiqueRadius.capsule,
                               ),
                               child: Text(
                                 '-$discount%',
                                 style: boutiqueEyebrow(
                                   size: 11,
-                                  color: const Color(0xFFFFFFFF),
+                                  color: palette.sale,
                                 ),
                               ),
                             ),
@@ -945,68 +943,78 @@ class _TrustRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    // Titles match the guide. Subtitles are the cautious copy already used
-    // on the home service row — never a "Pendiente de contrato" line.
+    // Three guarantees of the guide. The delivery days are the ones the
+    // availability line below already states (3 a 5 días).
     const items = <(IconData, String, String)>[
+      (Icons.inventory_2_outlined, 'Entrega estimada', '3 a 5 días'),
       (
-        Icons.local_shipping_outlined,
-        'Envíos seguros',
-        'Costo y plazo por confirmar',
-      ),
-      (
-        Icons.verified_outlined,
+        Icons.verified_user_outlined,
         'Productos originales',
-        'Garantía sujeta a cada pieza',
+        'Garantía de autenticidad',
       ),
-      (Icons.lock_outline, 'Pagos seguros', 'Compra con confianza'),
+      (Icons.credit_card_outlined, 'Pago seguro', 'Compra con confianza'),
     ];
     return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: BoutiqueSpace.lg,
-        horizontal: BoutiqueSpace.sm,
-      ),
+      key: const Key('product-trust-row'),
+      padding: const EdgeInsets.symmetric(vertical: BoutiqueSpace.md),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: palette.hairline, width: 1),
           bottom: BorderSide(color: palette.hairline, width: 1),
         ),
       ),
-      child: Row(
-        children: [
-          for (final item in items)
-            Expanded(
-              child: Column(
-                children: [
-                  Icon(item.$1, size: 20, color: palette.ink),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  Text(
-                    item.$2,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: boutiqueText(
-                      size: 11,
-                      weight: FontWeight.w600,
-                      color: palette.ink,
-                      height: 1.25,
-                    ),
+      child: IntrinsicHeight(
+        child: Row(
+          children: [
+            for (var i = 0; i < items.length; i++) ...[
+              if (i > 0) Container(width: 1, color: palette.hairline),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: BoutiqueSpace.xs,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.$3,
-                    textAlign: TextAlign.center,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: boutiqueText(
-                      size: 10,
-                      color: palette.inkMuted,
-                      height: 1.25,
-                    ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Icon(items[i].$1, size: 22, color: palette.ink),
+                      const SizedBox(width: BoutiqueSpace.xs),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              items[i].$2,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: boutiqueText(
+                                size: 11,
+                                weight: FontWeight.w600,
+                                color: palette.ink,
+                                height: 1.25,
+                              ),
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              items[i].$3,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                              style: boutiqueText(
+                                size: 10,
+                                color: palette.inkMuted,
+                                height: 1.25,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
                   ),
-                ],
+                ),
               ),
-            ),
-        ],
+            ],
+          ],
+        ),
       ),
     );
   }

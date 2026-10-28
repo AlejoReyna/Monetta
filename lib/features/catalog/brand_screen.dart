@@ -21,6 +21,7 @@ import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/guide_art.dart';
 import '../product/quick_view.dart';
 import 'catalog_controls.dart';
 import 'collection_screen.dart';
@@ -308,6 +309,12 @@ class _BrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasPhoto = heroImageUrl != null || heroImageAsset != null;
+    // Only this brand's own guide photograph: the lookup is by brand alone, so
+    // a brand without one keeps the typographic header.
+    final guide = hasPhoto ? null : guideCollectionPhoto(brand: slug);
+    if (guide != null) {
+      return CatalogEditorialBanner(title: title, guidePhoto: guide);
+    }
     if (hasPhoto) {
       return CatalogEditorialBanner(
         title: title,
