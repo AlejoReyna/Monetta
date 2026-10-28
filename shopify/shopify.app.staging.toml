@@ -16,7 +16,7 @@ embedded = false
 handle = "monetta-staging"
 
 [access_scopes]
-scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects,write_customer_data_erasure"
+scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects,write_customer_data_erasure,read_fulfillments"
 
 # App-owned singleton for the native admin control plane. The $app type keeps
 # the schema under this app's ownership while allowing the merchant to update
@@ -66,6 +66,21 @@ uri = "https://monetta-accounts-staging.fly.dev/webhooks/orders/create"
 [[webhooks.subscriptions]]
 topics = ["orders/updated"]
 uri = "https://monetta-accounts-staging.fly.dev/webhooks/orders/updated"
+
+# Rewards: cancellations and refunds reverse pending earn; a delivery event
+# releases it (src/rewards/webhookBridge.ts). Without these a pending lot never
+# becomes available.
+[[webhooks.subscriptions]]
+topics = ["orders/cancelled"]
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/orders/cancelled"
+
+[[webhooks.subscriptions]]
+topics = ["refunds/create"]
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/refunds/create"
+
+[[webhooks.subscriptions]]
+topics = ["fulfillment_events/create"]
+uri = "https://monetta-accounts-staging.fly.dev/webhooks/fulfillment_events/create"
 
 [[webhooks.subscriptions]]
 topics = ["products/create"]

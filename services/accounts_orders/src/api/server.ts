@@ -316,6 +316,14 @@ async function bridgePaidIfApplicable(
         tags: payload.tags,
         customer: payload.customer,
         currency: payload.currency,
+        discount_codes: payload.discount_codes?.map((d) => ({ code: d.code ?? undefined })),
+        line_items: payload.line_items?.map((l) => ({
+          variant_id: l.variant_id,
+          product_id: l.product_id,
+          quantity: l.quantity ?? undefined,
+          price: l.price,
+          total_discount: l.total_discount,
+        })),
         note_attributes: payload.note_attributes
           ? [...payload.note_attributes]
           : undefined,

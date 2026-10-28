@@ -31,6 +31,16 @@ export interface ShopifyOrderWebhookPayload {
   }> | null;
   readonly current_total_price?: string | null;
   readonly currency?: string | null;
+  /** Merchandise lines. Rewards earns on these, never on shipping or tips. */
+  readonly line_items?: ReadonlyArray<{
+    readonly variant_id?: number | null;
+    readonly product_id?: number | null;
+    readonly quantity?: number | null;
+    readonly price?: string | null;
+    readonly total_discount?: string | null;
+  }> | null;
+  /** Codes only: one of the wholesale signals Rewards checks. */
+  readonly discount_codes?: ReadonlyArray<{ readonly code?: string | null }> | null;
   /**
    * REST order fields that tie this order to the checkout attempt that
    * created it. Bearer-like: parse them, persist them, never log them.
