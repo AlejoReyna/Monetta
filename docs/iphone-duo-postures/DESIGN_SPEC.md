@@ -56,7 +56,7 @@ Con Reduce Motion el crossfade es instantáneo. El panel nuevo recibe toques des
 
 ## Welcome · logo
 
-El comportamiento del logo de Welcome lo revisa el Director de Movimiento. Esta sección pega su spec y la completa con el inventario de `POSTURES.md`. La evidencia de movimiento está en `docs/research/monetta-motion-evidence-2026-10-27/` del commit `fbeac82` (`LOGO_Y_ENTREGA.md`, `INVESTIGACION_V2.md`, `REFERENCIAS_COMERCIALES.md`). Ese commit no está en esta rama; se cita, no se copia el árbol.
+El comportamiento del logo de Welcome lo revisa el Director de Movimiento. Esta sección sigue su spec y la completa con el inventario de `POSTURES.md`. La investigación de movimiento está en `docs/research/monetta-motion-evidence-2026-10-27/` del commit `fbeac82` (`LOGO_Y_ENTREGA.md`, `INVESTIGACION_V2.md`, `REFERENCIAS_COMERCIALES.md`). Ese commit no es la spec vigente: los límites de las letras son los de la **spec corregida 28-oct-2026**. Ese commit no está en esta rama; se cita, no se copia el árbol.
 
 ### Decisión del owner
 
@@ -66,7 +66,28 @@ El flag propuesto se llama `logoWritten`. No se reutiliza `app_preferences.onboa
 
 ### Spec del Director (pegada)
 
-Variante A de `LOGO_Y_ENTREGA.md` @ `fbeac82`: se revela el PNG original con siete máscaras, M‑O‑N‑E‑T‑T‑A, en 1000 ms. Curva `kMotionCurve` dentro de cada letra, sin rebote. Los tiempos son parámetros de prueba propios (N6); ninguna fuente los prescribe. Ninguna de las ocho apps revisadas escribe el logo letra por letra (N1, `REFERENCIAS_COMERCIALES.md` @ `fbeac82`). FARFETCH y Moda Operandi lo muestran estático. Shop dibuja la «o» en ≈1,2 s con el botón visible antes de terminar (N1, citado según el registro; el Director no reabrió la hoja). La escritura es petición de marca, no una mejora de uso ni de conversión.
+Spec corregida 28-oct-2026, no el texto de `fbeac82` como última versión. Variante A: se revela el PNG original con siete máscaras, M‑O‑N‑E‑T‑T‑A, en 1000 ms. Curva `kMotionCurve` dentro de cada letra, sin rebote. Los tiempos son parámetros de prueba propios (N6); ninguna fuente los prescribe. Ninguna de las ocho apps revisadas escribe el logo letra por letra (N1, `REFERENCIAS_COMERCIALES.md` en `fbeac82`). FARFETCH y Moda Operandi lo muestran estático. Shop dibuja la «o» en ≈1,2 s con el botón visible antes de terminar (N1, citado según el registro; el Director no reabrió la hoja). La escritura es petición de marca, no una mejora de uso ni de conversión.
+
+Límites de tinta de la spec corregida, sección 3, en sus palabras:
+
+| Activo | Tamaño | Columnas |
+|---|---|---|
+| `logo_monetta.png` (1x) | 132 x 38 px | 0-49 / 51-67 / 69-85 / 87-131 |
+| `3.0x/logo_monetta.png` | 396 x 113 px | M+O 0-147 (M con la gota, tocando la O; corte en col. 91) / N 154-208 / E 209-262 / T+T+A 263-395 (cortes en 303/304 y 330/331; el travesano de la 2.a T toca la A). Corregido el 28-oct-2026. |
+
+Cortes por letra, confirmados por el Director el 28 oct 2026 (alfa > 20; md5 del 3x en este repo: `0d0d3c93b5cffb27822aba476b9c8ca5`):
+
+| Letra | 3x | 1x, aproximado (~1/3) |
+|---|---|---|
+| M | 0–91 | 0–30 |
+| O | 92–153 | 31–50 |
+| N | 154–208 | 51–68 |
+| E | 209–262 | 69–86 |
+| T | 263–303 | 87–101 |
+| T | 304–330 | 102–110 |
+| A | 331–395 | 111–131 |
+
+0-49 en 1x es M+O; la M termina en ~30. Una frase anterior de la spec de movimiento que asignaba sola la corrida 0–49 a la M queda retirada: contradice esta tabla. El corte 30/132 de `StartupReveal` coincide con la M y no se cambia.
 
 «Comenzar» funciona desde el primer frame. Al tocarlo, el logo salta al frame final y se navega. El control estático C sigue siendo obligatorio para comparar; esta spec define A.
 
@@ -97,14 +118,9 @@ Reduce Motion (`disableAnimations` o `accessibleNavigation`): logo completo en e
 
 Cuando `ready` pasa a verdadero, el hijo de `StartupReveal` es el navigator, y el home es `WelcomeGate` → `WelcomeScreen` (`lib/main.dart:891-936`, `lib/features/welcome/welcome_gate.dart:142-146`). «Comenzar» está en `welcome_screen.dart:116-121`. El botón **no** tiene su propio `AbsorbPointer`. Durante los 1100 ms el velo de arriba se come los toques y el foco, así que «Comenzar» no se puede usar mientras `StartupReveal` anima. La afirmación del Director queda confirmada con esa precisión: el bloqueo es el overlay ancestro, no un absorbedor en el botón.
 
-Medición propia del PNG, 28 oct 2026, alfa > 16, Pillow:
+El corte 30/132 de `startup_reveal.dart:96-98` está **confirmado**. 0-49 en 1x es M+O; la M termina en ~30. En 1x el asta de la M ocupa el alto completo en las columnas 24–27 y la tinta baja a 3 px en la columna 30, antes de la O (pico en 33). En 3x el asta está en 73–82 y hay un valle de 5 px en la columna 91. En la hoja de contacto del render solo se ve la M a los 220 ms, y la O ya aparece a los 350 ms. E se separa de la T en 262/263. Los cortes T/T/A caen en valles de tinta (303/304 y 330/331), no en columnas vacías, y el extremo del travesaño de la segunda T aparece con la A. La gota pertenece a la M. El valor exacto no queda pendiente: no hay ticket para mover el 30/132.
 
-| Activo | Tamaño | Columnas de tinta, inclusive |
-|---|---|---|
-| `assets/images/logo_monetta.png` | 132 × 38 | 0–49 · 51–67 · 69–85 · 87–131 |
-| `assets/images/3.0x/logo_monetta.png` | 396 × 113 | 0–147 · 154–201 · 209–256 · 263–395 |
-
-La primera corrida de tinta del 1x termina en la columna 49, no en la 30. El 30/132 de `StartupReveal` no es el borde de la M. En 3x, E+T+T+A siguen en una sola corrida (263–395): sus cortes internos no están medidos. La gota cae dentro de la M (0–147 en 3x). `StartupReveal` no se reutiliza para la escritura. No se suma su espera de 1100 ms. Hay que quitar ese `AbsorbPointer` del camino de «Comenzar».
+`StartupReveal` no se reutiliza como animación de Welcome: no se suma su espera de 1100 ms y hay que quitar ese `AbsorbPointer` del camino de «Comenzar». El número 30/132, como borde de la M, se conserva.
 
 `WelcomeScreen._Entrance` (`welcome_screen.dart:139-177`) funde el wordmark y el titular en `kEnter` (720 ms) y no escribe letras. El botón queda fuera de ese fundido. No hay `logoWritten`.
 

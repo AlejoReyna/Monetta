@@ -22,7 +22,7 @@ Los 84 pt y los 40 pt son de esa corrida. No son constantes.
 
 - Cada postura × cada pantalla de la tienda, más la regla de Rewards, Notificaciones, Ajustes, Mayoreo, Contacto, About y Admin.
 - La tarea firma en todas, incluido el tránsito (P10).
-- El logo se escribe una vez por instalación, en la primera bienvenida, y queda guardado en el aparato. Lo decidió Alexis el 28 oct 2026. No vuelve a animarse al recargar ni en un arranque en frío. Spec del Director en el commit `fbeac82`.
+- El logo se escribe una vez por instalación, en la primera bienvenida, y queda guardado en el aparato. Lo decidió Alexis el 28 oct 2026. No vuelve a animarse al recargar ni en un arranque en frío. La investigación está en `fbeac82`; los cortes de letra son los de la spec corregida 28-oct-2026. El 30/132 de la M está confirmado.
 - «Comenzar» desde el primer frame, fuera de oclusiones y de divisiones activas. En P6 va abajo del corte si ese corte existe; en P7 sigue a la geometría que reporte el host; en P8 sigue el borde de **esa** ventana; en P9 no hay un segundo botón.
 - Crossfade de 180 ms solo al cambiar la pieza del panel o al mostrar y ocultar ese panel por una acción. El pliegue lo anima el sistema.
 - El pago y la bolsa viven en el coordinador, el controlador y el store. El layout no dispara agregado, checkout ni login. **Pendiente de revisión del tester de pagos.** El pago no está listo.
@@ -34,7 +34,7 @@ Los 84 pt y los 40 pt son de esa corrida. No son constantes.
 - **P7.** Apple dice «de canto». No dice qué pantalla mira a la persona. Sin modo propio.
 - **Slide Over.** La frase no está en las páginas consultadas. Sin diseño hasta ver si Device Hub lo tiene.
 - VoiceOver, alcance real, hoja de Shopify al plegar y la memoria al plegar muchas veces: hardware, guion sin ejecutar.
-- Los cortes entre E, T, T y A del logo no están medidos.
+- Los cortes internos del logo en 3x ya están medidos: E se separa de la T en 262/263; T/T/A en 303/304 y 330/331. Esos dos últimos caen en valles de tinta. La segunda T y la A se tocan: el corte es el de menor masa de alfa, y el extremo del travesaño de esa T aparece con la A.
 
 ## Archivos
 
