@@ -346,7 +346,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       backgroundColor: context.boutique.canvas,
       appBar: AppBar(
         toolbarHeight: 76,
-        backgroundColor: context.boutique.canvas,
+        backgroundColor: context.boutique.bar,
         foregroundColor: context.boutique.ink,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
@@ -407,7 +407,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
           preferredSize: const Size.fromHeight(60),
           child: Container(
             key: const Key('catalog-category-rail'),
-            color: context.boutique.canvas,
+            color: context.boutique.bar,
             height: 60,
             child: ListView(
               scrollDirection: Axis.horizontal,

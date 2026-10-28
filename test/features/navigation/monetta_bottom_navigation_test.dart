@@ -96,7 +96,7 @@ void main() {
     final surfaceDecoration =
         tester.widget<DecoratedBox>(surface).decoration as BoxDecoration;
     expect(surfaceDecoration.color, MonettaColors.light.navigationSurface);
-    expect(surfaceDecoration.color, const Color(0xFFF7F7F7));
+    expect(surfaceDecoration.color, const Color(0xFFF5F5F5));
     expect(surfaceDecoration.border, isNotNull);
 
     final homeCenter = tester.getCenter(

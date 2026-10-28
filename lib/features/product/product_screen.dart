@@ -205,7 +205,7 @@ class _ProductScreenState extends State<ProductScreen> {
       child: Scaffold(
         backgroundColor: palette.canvas,
         appBar: AppBar(
-          backgroundColor: palette.canvas,
+          backgroundColor: palette.bar,
           foregroundColor: palette.ink,
           leading: IconButton(
             icon: const Icon(Icons.arrow_back, size: 20),

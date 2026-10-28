@@ -505,8 +505,7 @@ class _CollectionAppBar extends StatelessWidget {
       pinned: true,
       elevation: 0,
       scrolledUnderElevation: 0,
-      backgroundColor:
-          onPhoto && !showTitle ? Colors.transparent : palette.canvas,
+      backgroundColor: onPhoto && !showTitle ? Colors.transparent : palette.bar,
       surfaceTintColor: Colors.transparent,
       foregroundColor: foreground,
       expandedHeight: bannerHeight,

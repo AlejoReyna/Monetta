@@ -60,7 +60,7 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return Scaffold(
       backgroundColor: palette.canvas,
       appBar: AppBar(
-        backgroundColor: palette.canvas,
+        backgroundColor: palette.bar,
         foregroundColor: palette.ink,
         elevation: 0,
         scrolledUnderElevation: 0,
