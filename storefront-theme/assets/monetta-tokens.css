@@ -231,22 +231,20 @@
 
 /* Header search pill (variant 4 «Carbón», Alexis 29 Oct): cool neutrals, no cream. The theme is light-only (color-scheme:
    light, no Atelier dark scheme in use), so the dark version follows the visitor's OS through prefers-color-scheme and
-   only these search roles change; no other token moves. Contrast: placeholder 5.1:1 on #FFFFFF and 6.0:1 on #262626; focus ring 13.9:1 against the dark fill;
-   rim ≥ 3:1 on the header ground / #1A1A1A (WCAG 1.4.11). */
+   only these search roles change; no other token moves. Contrast: placeholder 5.1:1 on #FFFFFF and 6.0:1 on #262626; edge 18.9:1 on the light fill and
+   13.9:1 on the dark fill (WCAG 1.4.11). */
 :root {
   --color-search-fill: #ffffff;
-  --color-search-rim: #7d8085;
   --color-search-text: #111111;
   --color-search-placeholder: #6b6e72;
-  --color-search-focus: #111111;
+  --color-search-edge: #111111;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
     --color-search-fill: #262626;
-    --color-search-rim: #6b6b6b;
     --color-search-text: #f5f5f5;
     --color-search-placeholder: #a3a3a3;
-    --color-search-focus: #f5f5f5;
+    --color-search-edge: #f5f5f5;
   }
 }

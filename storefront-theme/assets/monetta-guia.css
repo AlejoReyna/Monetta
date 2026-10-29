@@ -1965,23 +1965,21 @@ img.guia-menu__icon {
 }
 
 /* ============================================================ Header search: variant 4 «Carbón» pill (Alexis, 29 Oct). Replaces
-   the 28 Oct liquid-glass pill (cream gradient, gold inner shadow). Flat fill, thin cool rim, Playfair text; a 1 px ring in
-   --color-search-focus marks focus. Light/dark come from the --color-search-* tokens (monetta-tokens.css). Only the
-   header's field: the search page and the 404 keep theirs. */
-.header-search .search-field {
-  border-color: var(--color-search-rim);
+   the 28 Oct liquid-glass pill (cream gradient, gold inner shadow). Flat fill and Playfair text. The pill always wears its
+   focused look («dejalo con foco»): a --color-search-edge border plus a 1 px ring, focused or not. Keyboard focus adds an
+   outline 2 px outside the ring so it stays visible (WCAG 2.4.7). Light/dark come from the --color-search-* tokens
+   (monetta-tokens.css). Only the header's field: the search page and the 404 keep theirs. */
+.header-search .search-field,
+.header-search .search-field:focus-within {
+  border-color: var(--color-search-edge);
   background: var(--color-search-fill);
   color: var(--color-search-text);
-  box-shadow: none;
-  transition:
-    border-color var(--dur-snap) var(--ease),
-    box-shadow var(--dur-snap) var(--ease);
+  box-shadow: 0 0 0 1px var(--color-search-edge);
 }
 
-.header-search .search-field:focus-within {
-  border-color: var(--color-search-focus);
-  background: var(--color-search-fill);
-  box-shadow: 0 0 0 1px var(--color-search-focus);
+.header-search .search-field:has(input:focus-visible) {
+  outline: 1px solid var(--color-search-edge);
+  outline-offset: 2px;
 }
 
 .header-search .search-field > .icon,
