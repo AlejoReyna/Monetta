@@ -15,6 +15,8 @@ import {
 } from './support/inMemoryRepositories.js';
 
 const internalSecret = 'internal-catalog-test-secret-at-least-32';
+// The app sends product keys in GID form; Shopify webhooks carry numeric ids.
+const gidKey = 'shopify:gid://shopify/Product/123';
 
 class FakeMessagingProvider implements MessagingProvider {
   readonly sent: Array<{ registrationId: string; message: OutboundMessage }> = [];
@@ -139,7 +141,15 @@ describe('engagement API', () => {
       body: JSON.stringify({ productKey: 'shopify:123', kind: 'restock' }),
     });
     expect(alert.status).toBe(201);
-    expect([...repository.alerts.values()][0]).toMatchObject({ productKey: 'shopify:123', active: true });
+    expect(await alert.json()).toMatchObject({ alert: { productKey: gidKey, kind: 'restock' } });
+    expect([...repository.alerts.values()][0]).toMatchObject({ productKey: gidKey, active: true });
+
+    const notAProduct = await fetch(`${baseUrl}/v1/product-alerts`, {
+      method: 'POST',
+      headers: authorization,
+      body: JSON.stringify({ productKey: 'shopify:bolsa-coach', kind: 'restock' }),
+    });
+    expect(notAProduct.status).toBe(400);
   });
 
   it('lets only the owner create, preview, schedule, and dispatch a campaign', async () => {
@@ -168,6 +178,7 @@ describe('engagement API', () => {
     expect(created.status).toBe(201);
     const createdBody = await created.json() as { campaign: { id: string } };
     const id = createdBody.campaign.id;
+    expect(repository.campaigns.get(id)?.route).toEqual({ type: 'product', productKey: gidKey });
 
     const preview = await fetch(`${baseUrl}/admin/notification-campaigns/${id}/preview`, {
       method: 'POST',
@@ -248,6 +259,52 @@ describe('engagement API', () => {
     expect([...repository.campaigns.values()].filter((item) => item.kind === 'restock')).toHaveLength(1);
   });
 
+  it('notifies a GID-form alert from a numeric-id restock event and routes to the GID key', async () => {
+    repository.rules.set('restock', { enabled: true, configuration: {} });
+    await configuredDevice();
+    expect([...repository.alerts.values()][0]).toMatchObject({ productKey: gidKey, active: true });
+
+    const response = await postCatalogEvent({
+      eventId: 'shopify:webhook-1:catalog.product.restocked',
+      eventType: 'catalog.product.restocked',
+      source: 'shopify_webhook',
+      productKey: 'shopify:123',
+      occurredAt: '2026-08-25T12:00:00Z',
+      before: { available: false },
+      after: { available: true, title: 'Bolsa Coach' },
+    });
+    expect(response.status).toBe(202);
+    const { campaignId } = await response.json() as { campaignId: string };
+    const campaign = repository.campaigns.get(campaignId)!;
+    expect(campaign.route).toEqual({ type: 'product', productKey: gidKey });
+    expect(campaign.segment).toEqual({ kind: 'product_alert', value: gidKey, alertKind: 'restock' });
+    expect(await repository.previewAudience(campaign.segment, campaign.purpose, new Date('2026-08-25T12:00:00Z')))
+      .toBe(1);
+
+    expect(await service.dispatchOnce()).toEqual({ materialized: 1, processed: 1 });
+    expect(messaging.sent).toHaveLength(1);
+    expect(messaging.sent[0]!.message.route).toEqual({ type: 'product', productKey: gidKey });
+  });
+
+  function postCatalogEvent(event: Record<string, unknown>) {
+    const payload = JSON.stringify(event);
+    const timestamp = '2026-08-25T12:00:00.000Z';
+    const signature = createHmac('sha256', internalSecret)
+      .update(timestamp)
+      .update('.')
+      .update(payload)
+      .digest('hex');
+    return fetch(`${baseUrl}/internal/catalog-events`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Monetta-Timestamp': timestamp,
+        'X-Monetta-Signature': signature,
+      },
+      body: payload,
+    });
+  }
+
   function registerDevice(appCheck: string | null, credential?: string) {
     return fetch(`${baseUrl}/v1/device-installations`, {
       method: 'POST',
@@ -308,7 +365,7 @@ describe('engagement API', () => {
     await fetch(`${baseUrl}/v1/product-alerts`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ productKey: 'shopify:123', kind: 'restock' }),
+      body: JSON.stringify({ productKey: gidKey, kind: 'restock' }),
     });
     return credential;
   }

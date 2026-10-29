@@ -1,6 +1,7 @@
 import type pg from 'pg';
 import type { ShopifyProductWebhookPayload } from '../../webhooks/payloads.js';
 import { EngagementService } from '../application/engagementService.js';
+import { canonicalShopifyProductKey } from '../domain/productKey.js';
 import type { CatalogEventInput } from '../domain/types.js';
 
 interface SnapshotRow {
@@ -25,7 +26,10 @@ export class PgShopifyCatalogEventProcessor {
     webhookId: string,
     payload: ShopifyProductWebhookPayload,
   ): Promise<void> {
-    const next = snapshot(payload);
+    // Webhooks carry the numeric REST id; key it the way the app keys alerts.
+    const productKey = canonicalShopifyProductKey(`shopify:${payload.id}`);
+    if (productKey === null) return;
+    const next = snapshot(productKey, payload);
     const client = await this.pool.connect();
     let previous: SnapshotRow | null = null;
     try {
@@ -83,13 +87,13 @@ interface NextSnapshot {
   readonly occurredAt: Date;
 }
 
-function snapshot(payload: ShopifyProductWebhookPayload): NextSnapshot {
+function snapshot(productKey: string, payload: ShopifyProductWebhookPayload): NextSnapshot {
   const variants = payload.variants ?? [];
   const prices = variants
     .map((variant) => Number(variant.price))
     .filter((price) => Number.isFinite(price) && price >= 0);
   return {
-    productKey: `shopify:${payload.id}`,
+    productKey,
     title: nonEmpty(payload.title) ?? 'Producto Monetta',
     brand: slugOrNull(payload.vendor),
     category: slugOrNull(payload.product_type),

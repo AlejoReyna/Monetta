@@ -80,6 +80,13 @@ El ingreso `/internal/catalog-events` **rechaza** fuentes/product keys
 `external:*` (catálogo externo retirado, F03/F28). No configurar
 `NOTIFICATION_EVENTS_URL` en `catalog_monitor`; ese camino ya no es producto.
 
+Los product keys se guardan en forma canónica
+`shopify:gid://shopify/Product/<id>`, la que envían la app y el panel. Los
+webhooks de Shopify traen el id numérico; el backend acepta `shopify:<id>` y lo
+reescribe, así que alertas, eventos y campañas usan la misma llave. La
+migración `016_canonical_shopify_product_keys.sql` reescribe las llaves
+numéricas ya guardadas.
+
 ## 5. Activación gradual
 
 1. Mantener todas las reglas automáticas apagadas.

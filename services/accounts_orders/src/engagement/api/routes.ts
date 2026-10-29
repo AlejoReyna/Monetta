@@ -3,6 +3,7 @@ import { randomUUID } from 'node:crypto';
 import { EngagementService, parsePermissionState } from '../application/engagementService.js';
 import type { AppCheckVerifier, OwnerAuthorizer } from '../domain/ports.js';
 import type { AdminAuthorizer } from '../../admin/authorizer.js';
+import { canonicalShopifyProductKey } from '../domain/productKey.js';
 import type {
   CampaignKind,
   ConsentPurpose,
@@ -435,9 +436,10 @@ function bucketValue(value: unknown): SignalCountBucket | null {
 }
 function productKeyValue(value: unknown): string | null {
   const key = shortString(value, 300);
-  // External-catalog product keys are retired (F03/F28). Only Shopify keys
-  // may drive alerts, campaigns, or deep links.
-  return key !== null && /^shopify:/.test(key) ? key : null;
+  // External-catalog product keys are retired (F03/F28). Only Shopify product
+  // keys may drive alerts, campaigns, or deep links, stored in canonical form
+  // so alerts match the catalog events built from numeric webhook ids.
+  return key === null ? null : canonicalShopifyProductKey(key);
 }
 
 function productAlertKind(value: unknown): ProductAlertKind | null {

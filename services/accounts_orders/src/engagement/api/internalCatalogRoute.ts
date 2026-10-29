@@ -1,6 +1,7 @@
 import { createHmac, timingSafeEqual } from 'node:crypto';
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import type { EngagementService } from '../application/engagementService.js';
+import { canonicalShopifyProductKey } from '../domain/productKey.js';
 import type { CatalogEventInput } from '../domain/types.js';
 
 const replayWindowMs = 5 * 60 * 1000;
@@ -90,10 +91,11 @@ function parseCatalogEvent(value: unknown): CatalogEventInput | null {
   if (source === 'external' || source.startsWith('external') || productKey.startsWith('external:')) {
     return null;
   }
-  if (!productKey.startsWith('shopify:')) {
+  const canonicalKey = canonicalShopifyProductKey(productKey);
+  if (canonicalKey === null) {
     return null;
   }
-  return { eventId, eventType, source, productKey, occurredAt, before, after };
+  return { eventId, eventType, source, productKey: canonicalKey, occurredAt, before, after };
 }
 
 function stringValue(value: unknown, max: number): string | null {

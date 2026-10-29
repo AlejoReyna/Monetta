@@ -71,6 +71,7 @@ import 'data/shopify/editorial_content_repository.dart';
 import 'data/shopify/featured_catalog_repository.dart';
 import 'data/shopify/home_content_repository.dart';
 import 'data/shopify/http_storefront_transport.dart';
+import 'data/shopify/shopify_gid.dart';
 import 'data/shopify/storefront_client.dart';
 import 'data/shopify/storefront_config.dart';
 import 'features/catalog/collection_screen.dart';
@@ -803,13 +804,13 @@ class _MonettaAppState extends State<MonettaApp> {
         navigator.popUntil((candidate) => candidate.isFirst);
         return;
       }
-      final rawId =
-          key.startsWith('shopify:') ? key.substring('shopify:'.length) : key;
-      final exists = _store.products.any((product) => product.id == rawId);
-      if (exists) {
+      // Product ids are GIDs; the key may carry a GID or a numeric REST id.
+      final productId = shopifyProductGidFromKey(key);
+      if (productId != null &&
+          _store.products.any((product) => product.id == productId)) {
         navigator.push(
           MaterialPageRoute<void>(
-            builder: (_) => ProductScreen(productId: rawId),
+            builder: (_) => ProductScreen(productId: productId),
           ),
         );
         return;

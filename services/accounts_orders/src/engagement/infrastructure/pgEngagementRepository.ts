@@ -836,7 +836,7 @@ function eligibilityQuery(
   const values: unknown[] = [purpose, now];
   const conditions = [
     `e.status = 'active'`,
-    `e.token_updated_at > $2 - interval '60 days'`,
+    `e.token_updated_at > $2::timestamptz - interval '60 days'`,
     `e.permission_state IN ('granted', 'provisional')`,
     `i.disabled_at IS NULL`,
     `c.granted = TRUE`,
@@ -913,7 +913,7 @@ function eligibilityQuery(
                  WHERE recent.push_endpoint_id = e.id
                    AND recent.status = 'accepted'
                    AND recent_campaign.purpose <> 'product_alerts'
-                   AND recent.accepted_at > $2 - interval '24 hours'
+                   AND recent.accepted_at > $2::timestamptz - interval '24 hours'
               ))
             ${order}`,
     values,
