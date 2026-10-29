@@ -1964,45 +1964,40 @@ img.guia-menu__icon {
   text-wrap: balance;
 }
 
-/* ============================================================ Header: liquid-glass search; Cuenta, Carrito and the search text
-   in the category row's serif (the person's request, 28 Oct). The search field is a translucent, blurred pill with a specular
-   top edge and a soft shadow; the rim stays --color-border-control (≥ 3:1 on the header, WCAG 1.4.11, DESIGN_SPEC §2). Only
-   the header's field: the search page and the 404 keep theirs. The drop shadow ends within the 9 px above the category row
-   (a longer one darkened the links under the row's fade; nav.mjs). */
+/* ============================================================ Header search: variant 4 «Carbón» pill (Alexis, 29 Oct). Replaces
+   the 28 Oct liquid-glass pill (cream gradient, gold inner shadow). Flat fill, thin cool rim, Playfair text; a 1 px ring in
+   --color-search-focus marks focus. Light/dark come from the --color-search-* tokens (monetta-tokens.css). Only the
+   header's field: the search page and the 404 keep theirs. */
 .header-search .search-field {
-  border-color: var(--color-border-control);
-  background:
-    radial-gradient(90% 160% at 12% -30%, rgb(255 255 255 / 1) 0%, rgb(255 255 255 / 0) 55%),
-    radial-gradient(70% 140% at 92% 135%, rgb(255 255 255 / 0.75) 0%, rgb(255 255 255 / 0) 60%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.78) 0%, rgb(255 255 255 / 0.4) 100%);
-  -webkit-backdrop-filter: blur(24px) saturate(180%);
-  backdrop-filter: blur(24px) saturate(180%);
-  box-shadow:
-    inset 0 0 0 1px rgb(255 255 255 / 0.7),
-    inset 2px 2px 1px -1px rgb(255 255 255 / 1),
-    inset -2px -2px 1px -1px rgb(255 255 255 / 0.8),
-    inset 0 -10px 18px -10px rgb(197 160 82 / 0.18),
-    0 1px 2px rgb(33 27 22 / 0.08),
-    0 3px 8px -4px rgb(33 27 22 / 0.18);
+  border-color: var(--color-search-rim);
+  background: var(--color-search-fill);
+  color: var(--color-search-text);
+  box-shadow: none;
   transition:
     border-color var(--dur-snap) var(--ease),
-    box-shadow var(--dur-snap) var(--ease),
-    background-color var(--dur-snap) var(--ease);
+    box-shadow var(--dur-snap) var(--ease);
 }
 
 .header-search .search-field:focus-within {
-  border-color: var(--color-ink);
-  background:
-    radial-gradient(120% 180% at 20% -40%, rgb(255 255 255 / 1) 0%, rgb(255 255 255 / 0) 60%),
-    linear-gradient(180deg, rgb(255 255 255 / 0.92) 0%, rgb(255 255 255 / 0.66) 100%);
-  box-shadow:
-    0 0 0 1px var(--color-ink),
-    inset 0 0 0 1px rgb(255 255 255 / 0.7),
-    inset 2px 2px 1px -1px rgb(255 255 255 / 1),
-    0 3px 8px -4px rgb(33 27 22 / 0.22);
+  border-color: var(--color-search-focus);
+  background: var(--color-search-fill);
+  box-shadow: 0 0 0 1px var(--color-search-focus);
 }
 
-.header-search .search-field input,
+.header-search .search-field > .icon,
+.header-search .search-field input {
+  color: var(--color-search-text);
+}
+
+.header-search .search-field input::placeholder {
+  color: var(--color-search-placeholder);
+}
+
+.header-search .search-field input {
+  font-family: var(--font-serif);
+  font-weight: 400;
+}
+
 .header-utility__label {
   font-family: var(--type-section-title-font);
   font-weight: 500;

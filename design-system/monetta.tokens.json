@@ -28,7 +28,12 @@
       "success": "#3B7B4A",
       "successSurface": "#EAF4EC",
       "scrim": "#211B1673",
-      "onPhoto": "#F8F5EE"
+      "onPhoto": "#F8F5EE",
+      "searchFill": "#FFFFFF",
+      "searchRim": "#7D8085",
+      "searchText": "#111111",
+      "searchPlaceholder": "#6B6E72",
+      "searchFocus": "#111111"
     },
     "darkRolesOnly": {
       "$comment": "Dark mode keeps MonettaColors.dark. Only roles that did not exist before are defined here, so a dark build never reads an undefined value.",
@@ -39,7 +44,12 @@
       "actionDark": "#F5F2EC",
       "onActionDark": "#171615",
       "borderControl": "#8E8A85",
-      "saleSurface": "#3A1F1B"
+      "saleSurface": "#3A1F1B",
+      "searchFill": "#262626",
+      "searchRim": "#6B6B6B",
+      "searchText": "#F5F5F5",
+      "searchPlaceholder": "#A3A3A3",
+      "searchFocus": "#F5F5F5"
     }
   },
   "contrast": [
