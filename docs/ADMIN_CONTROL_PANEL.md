@@ -55,9 +55,11 @@ Hay dos capas deliberadamente separadas:
 1. Flutter muestra la entrada sólo a una sesión iniciada cuyo correo esté en
    `OWNER_ADMIN_EMAILS`, o en un build de preview. Esta lista es comodidad de
    interfaz, no una frontera de seguridad.
-2. El servidor resuelve el bearer token como `app_account` o
-   `shopify_customer`, busca un registro activo en `admin_principals` y exige
-   el rol `owner` en cada endpoint protegido.
+2. El servidor resuelve el bearer token como `app_account`,
+   `shopify_customer` o `shopify_staff`, busca un registro activo en
+   `admin_principals` y exige el rol `owner` en cada endpoint protegido. Las
+   rutas de avisos exigen la capacidad `manageNotifications`, que también tiene
+   el panel de Shopify Admin (ver abajo).
 
 `GET /admin/me` devuelve las capacidades efectivas. Un correo o rol enviado
 por Flutter nunca concede acceso. No se enlazan identidades sólo porque sus
@@ -115,8 +117,96 @@ está disponible.
 | `GET /admin/sync/jobs/:jobId` | Consulta el resultado del sync. |
 
 Las campañas y automatizaciones usan las rutas `/admin/notifications/*`,
-`/admin/notification-campaigns/*` y `/admin/notification-rules`; comparten la
-misma autorización de propietario.
+`/admin/notification-campaigns/*` y `/admin/notification-rules`. Exigen la
+capacidad `manageNotifications`: la tiene cualquier propietario y también un
+`shopify_staff` activo desde el panel de Shopify Admin.
+
+## Panel de avisos en Shopify Admin
+
+Además de la pestaña **Avisos** de la app, la tienda de staging tiene un panel
+embebido para enviar notificaciones push desde Shopify Admin
+(**Apps → monetta-staging**). Lo sirve el mismo `accounts_orders`; no hay otra
+app ni otro despliegue.
+
+```text
+Shopify Admin (iframe) → GET /shopify/app            HTML + App Bridge
+                       → /admin/notification-* con  Authorization: Bearer <session token>
+accounts_orders        → verifica el token HS256 con SHOPIFY_APP_CLIENT_SECRET
+                       → admin_principals (shopify_staff, sub del token)
+                       → capacidades: sólo manageNotifications
+```
+
+**Identidad.** App Bridge entrega un session token firmado por Shopify con el
+client secret de la app. El servidor
+(`services/accounts_orders/src/admin/shopifySessionToken.ts`) fija `HS256`,
+verifica la firma, `aud` = `SHOPIFY_APP_CLIENT_ID`, `dest`/`iss` =
+`SHOPIFY_STORE_DOMAIN` y la vigencia (`exp`/`nbf`, con 10 s de tolerancia). El
+`sub` del token es el ID del usuario de staff de Shopify. Sin esas tres
+variables, la ruta `/shopify/app` no existe y los session tokens no se aceptan.
+
+**Autorización.** Abrir la app en Shopify no da acceso. Se necesita un
+principal activo `shopify_staff` con ese ID, creado de una de dos formas:
+
+- `OWNER_SHOPIFY_STAFF_IDS=<id>,<id>` en el servidor; el primer acceso crea el
+  principal (`created_by = bootstrap:server-config`).
+- Alta manual, auditable:
+
+  ```sql
+  INSERT INTO admin_principals (id, subject_type, subject_id, role, active, created_by)
+  VALUES (gen_random_uuid(), 'shopify_staff', '<ID de staff>', 'owner', TRUE, 'operator:<referencia>');
+  ```
+
+Cuando alguien sin acceso abre el panel, éste muestra su ID de staff para
+poder darlo de alta. Revocar es igual que para los demás principals
+(`active = FALSE`, `revoked_at = now()`), y el bootstrap nunca reactiva un
+principal revocado.
+
+**Alcance.** Un `shopify_staff` recibe sólo `manageNotifications`
+(`openAdmin = false`). `GET /admin/me` lo reporta así, y las rutas de producto,
+portada, Catálogo de hoy, sync y auditoría responden `403` a su token. La
+capacidad cubre todas las rutas de avisos, incluidas `/admin/notification-rules`,
+aunque el panel no muestra las reglas automáticas.
+
+**Prueba en un teléfono.** **Enviar prueba** necesita el `device_id` de la
+instalación. En staging se obtiene de la base:
+
+```sql
+SELECT device_id, platform, app_version, last_seen_at
+  FROM device_installations
+ WHERE disabled_at IS NULL
+ ORDER BY last_seen_at DESC
+ LIMIT 5;
+```
+
+**Encuadre.** `/shopify/app` responde con
+`Content-Security-Policy: frame-ancestors https://<tienda>.myshopify.com https://admin.shopify.com`,
+así que ningún otro sitio puede embeber el panel.
+
+**Activación en staging.**
+
+1. Desplegar `accounts_orders` (la migración `016_admin_shopify_staff.sql`
+   corre en el `release_command`).
+2. Confirmar que existen `SHOPIFY_APP_CLIENT_ID`, `SHOPIFY_APP_CLIENT_SECRET` y
+   `SHOPIFY_STORE_DOMAIN=monetta-staging.myshopify.com` en Fly.
+3. Dar de alta el staff: `fly secrets set OWNER_SHOPIFY_STAFF_IDS=<id>
+   --app monetta-accounts-staging`, o el `INSERT` de arriba.
+4. Publicar la configuración de la app (ya tiene `embedded = true` y
+   `application_url = …/shopify/app`):
+
+   ```bash
+   cd shopify
+   npx shopify app deploy --config staging
+   ```
+
+5. Abrir **Apps → monetta-staging** en Shopify Admin.
+
+Para que un aviso llegue a un teléfono también deben estar activos
+`NOTIFICATIONS_ENABLED`, Firebase y el worker
+([`PUSH_NOTIFICATIONS_RUNBOOK.md`](PUSH_NOTIFICATIONS_RUNBOOK.md)). Si no lo
+están, el panel carga y avisa que las notificaciones están apagadas.
+
+Producción no cambia: `shopify.app.production.toml` sigue con
+`embedded = false`, y un token de staging no valida con el secreto de otra app.
 
 ## Secuencia de una escritura
 

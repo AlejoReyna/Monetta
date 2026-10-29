@@ -39,6 +39,11 @@ export interface AccountsOrdersConfig {
   readonly ownerEmails: ReadonlySet<string>;
   /** Verified Shopify Customer ids allowed to bootstrap an owner principal. */
   readonly ownerShopifyCustomerIds: ReadonlySet<string>;
+  /**
+   * Shopify Admin staff ids (session-token `sub`) allowed to bootstrap a
+   * principal for the embedded notifications panel.
+   */
+  readonly ownerShopifyStaffIds: ReadonlySet<string>;
   readonly adminEnvironment: 'staging' | 'production';
   /**
    * When false, POST /accounts/register is closed. Existing legacy accounts
@@ -148,6 +153,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     internalCatalogEventSecret: env.INTERNAL_CATALOG_EVENT_SECRET ?? '',
     ownerEmails: csv(env.OWNER_ADMIN_EMAILS),
     ownerShopifyCustomerIds: csv(env.OWNER_SHOPIFY_CUSTOMER_IDS),
+    ownerShopifyStaffIds: csv(env.OWNER_SHOPIFY_STAFF_IDS),
     adminEnvironment,
     // Default on so existing local/staging clients keep working; production
     // should set LEGACY_ACCOUNT_REGISTRATION_ENABLED=false once Shopify-only.

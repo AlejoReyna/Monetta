@@ -8,6 +8,7 @@ import pg from 'pg';
 import { createApp, type ServerDeps } from '../src/api/server.js';
 import { ServerAdminAuthorizer } from '../src/admin/authorizer.js';
 import { PgAdminPrincipalsRepository } from '../src/admin/pgAdminPrincipalsRepository.js';
+import { ShopifySessionTokenVerifier } from '../src/admin/shopifySessionToken.js';
 import { PgAppAccountsRepository } from '../src/db/pgAppAccountsRepository.js';
 import {
   InMemoryCustomersRepository,
@@ -16,6 +17,12 @@ import {
   InMemoryWebhookEventsRepository,
 } from './support/inMemoryRepositories.js';
 import type { CustomerTokenVerifier } from '../src/auth/customerTokenVerifier.js';
+import {
+  signSessionToken,
+  testClientId,
+  testClientSecret,
+  testShop,
+} from './support/shopifySessionTokens.js';
 
 const adminUser = process.env.PGUSER ?? process.env.USER ?? 'alexis';
 const adminUrl = process.env.WP01_PG_ADMIN_URL
@@ -82,6 +89,12 @@ describe.skipIf(!pgAvailable)('WP-01 PostgreSQL persistence (F01/F02)', () => {
       customerTokenVerifier,
       principals,
       ownerShopifyCustomerIds: new Set(),
+      shopifySessionTokens: new ShopifySessionTokenVerifier({
+        clientId: testClientId,
+        clientSecret: testClientSecret,
+        shopDomain: testShop,
+      }),
+      ownerShopifyStaffIds: new Set(['74218901']),
     });
     const deps: ServerDeps = {
       appAccounts,
@@ -228,5 +241,37 @@ describe.skipIf(!pgAvailable)('WP-01 PostgreSQL persistence (F01/F02)', () => {
     // Ensure bootstrap config cannot revive via email — no ownerEmails path exists.
     const hash = createHash('sha256').update('x').digest('hex');
     expect(hash.length).toBe(64);
+  });
+
+  it('stores Shopify Admin staff principals scoped to notifications', async () => {
+    const bootstrapped = await fetch(`${baseUrl}/admin/me`, {
+      headers: { Authorization: `Bearer ${signSessionToken({ sub: '74218901' })}` },
+    });
+    expect(await bootstrapped.json()).toMatchObject({
+      roles: ['owner'],
+      capabilities: { openAdmin: false, manageNotifications: true },
+    });
+    const stored = await pool.query<{ subject_type: string; created_by: string }>(
+      `SELECT subject_type, created_by FROM admin_principals WHERE subject_id = '74218901'`,
+    );
+    expect(stored.rows).toEqual([
+      { subject_type: 'shopify_staff', created_by: 'bootstrap:server-config' },
+    ]);
+
+    await principals.createIfAbsent({
+      id: randomUUID(),
+      subject: { type: 'shopify_staff', id: '555' },
+      role: 'owner',
+      createdBy: 'test:pg-provision',
+    });
+    expect(await (await fetch(`${baseUrl}/admin/me`, {
+      headers: { Authorization: `Bearer ${signSessionToken({ sub: '555' })}` },
+    })).json()).toMatchObject({ capabilities: { manageNotifications: true } });
+
+    await expect(pool.query(
+      `INSERT INTO admin_principals (id, subject_type, subject_id, role, created_by)
+       VALUES ($1, 'shopify_partner', '1', 'owner', 'test')`,
+      [randomUUID()],
+    )).rejects.toThrow(/admin_principals_subject_type_check/);
   });
 });

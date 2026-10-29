@@ -23,7 +23,7 @@ void main() {
     await tester.pumpWidget(app(ready: false));
     expect(find.byType(MonettaWordmark), findsOneWidget);
     final initialWidth = tester.getSize(find.byType(ClipRect).last).width;
-    expect(initialWidth, closeTo(30 / 38 * 48, 0.1));
+    expect(initialWidth, closeTo(39 / 38 * 48, 0.1));
     expect(find.text('Catalog ready'), findsNothing);
 
     await tester.pumpWidget(app(ready: true));

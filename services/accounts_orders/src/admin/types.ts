@@ -1,4 +1,9 @@
-export type AdminPrincipalSubjectType = 'app_account' | 'shopify_customer';
+/**
+ * `shopify_staff` is a Shopify Admin user, identified by the session token of
+ * the embedded panel. That channel is scoped to notifications (see
+ * `authorizer.ts`), so such a principal never reaches the full control plane.
+ */
+export type AdminPrincipalSubjectType = 'app_account' | 'shopify_customer' | 'shopify_staff';
 
 export interface AdminPrincipalSubject {
   readonly type: AdminPrincipalSubjectType;
@@ -14,7 +19,7 @@ export interface AdminPrincipalRecord extends AdminPrincipalSubject {
   readonly revokedAt: Date | null;
 }
 
-export type AdminProvider = 'monetta' | 'shopify';
+export type AdminProvider = 'monetta' | 'shopify' | 'shopify_admin';
 
 export interface AdminActor {
   readonly id: string;
