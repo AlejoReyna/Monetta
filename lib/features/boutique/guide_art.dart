@@ -47,6 +47,19 @@ const String kGuideIconStyleSatchel =
     'assets/images/guide/icons/estilo_satchel.png';
 const String kGuideIconStylePerfumes =
     'assets/images/guide/icons/estilo_perfumes.png';
+
+/// «Compra por estilo» studio photos: one bag on the tile cream, no text or
+/// marks. Resolution variants live in `2.0x/` and `3.0x/`.
+const String kGuidePhotoStyleCrossbody =
+    'assets/images/guide/estilos/estilo_crossbody.webp';
+const String kGuidePhotoStyleTote =
+    'assets/images/guide/estilos/estilo_tote.webp';
+const String kGuidePhotoStyleShoulder =
+    'assets/images/guide/estilos/estilo_shoulder.webp';
+const String kGuidePhotoStyleSatchel =
+    'assets/images/guide/estilos/estilo_satchel.webp';
+const String kGuidePhotoStyleHobo =
+    'assets/images/guide/estilos/estilo_hobo.webp';
 const String kGuideIconServiceShipping =
     'assets/images/guide/icons/servicio_envios.png';
 const String kGuideIconServicePayments =

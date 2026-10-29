@@ -57,15 +57,24 @@
     <section class="section container guia-styles" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       {% render 'monetta-section-header', id: heading_id, title: 'Compra por estilo', link_url: all_url, link_label: 'Ver todo' %}
       <ul class="guia-styles__list" role="list">
-        {%- assign style_entries = 'crossbody:Crossbody,tote:Tote,shoulder:Shoulder,satchel:Satchel,perfumes:Perfumes' | split: ',' -%}
+        {%- assign style_entries = 'crossbody:Crossbody,tote:Tote,shoulder:Shoulder,satchel:Satchel,hobo:Hobo' | split: ',' -%}
         {%- for entry in style_entries -%}
           {%- assign key = entry | split: ':' | first -%}
           {%- assign label = entry | split: ':' | last -%}
-          {%- assign icon = 'estilo-' | append: key -%}
+          {%- assign photo = 'monetta-guia-estilo-' | append: key -%}
           {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
           <li>
             <a class="guia-styles__tile" href="{{ url | strip }}" aria-label="Ver {{ label }}">
-              {% render 'monetta-guia-icon', name: icon, size: 64, class: 'guia-styles__icon' %}
+              <img
+                class="guia-styles__photo"
+                src="{{ photo | append: '-720.webp' | asset_url }}"
+                srcset="{{ photo | append: '-360.webp' | asset_url }} 360w, {{ photo | append: '-720.webp' | asset_url }} 720w"
+                sizes="(min-width: 768px) 152px, 20vw"
+                width="720"
+                height="720"
+                alt=""
+                loading="lazy"
+              >
               <span class="guia-styles__label">{{ label }}</span>
             </a>
           </li>

@@ -39,6 +39,9 @@
     when 'satchel', 'bolsos-de-mano'
       assign handle = 'bolsos-de-mano'
       assign fallback = routes.all_products_collection_url | append: '/satchel'
+    when 'hobo'
+      assign handle = 'hobo'
+      assign fallback = routes.all_products_collection_url | append: '/hobo'
     when 'brand'
       assign handle = brand | handleize
       assign fallback = brand | url_for_vendor

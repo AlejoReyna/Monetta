@@ -498,7 +498,7 @@
   }
 }
 
-/* ============================================================ F2 · HomeShopByStyle: «Compra por estilo» with the guide icons */
+/* ============================================================ F2 · HomeShopByStyle: «Compra por estilo», static cream photo cards */
 .guia-styles__list {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -511,45 +511,47 @@
 .guia-styles__tile {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
+  align-items: stretch;
   min-height: var(--tap);
-  padding: var(--space-1) 0;
-  border-radius: var(--radius-control);
+  overflow: hidden;
+  border-radius: var(--radius-tile);
+  background: var(--color-surface-tile);
   color: var(--color-ink);
   text-decoration: none;
 }
 
 .guia-styles__tile:focus-visible {
   outline: 2px solid var(--color-ink);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
-.guia-styles__icon {
-  width: clamp(44px, 13vw, 64px);
-  height: clamp(44px, 13vw, 64px);
-  object-fit: contain;
+.guia-styles__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
 }
 
 .guia-styles__label {
-  font-family: var(--font-sans);
+  padding: 0 var(--space-1) var(--space-2);
+  font-family: var(--font-serif);
   font-size: 12px;
   line-height: 1.2;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {
   .guia-styles__list {
     gap: var(--space-4);
-    max-width: 760px;
-  }
-
-  .guia-styles__icon {
-    width: 80px;
-    height: 80px;
+    max-width: 840px;
   }
 
   .guia-styles__label {
-    font-size: 14px;
+    font-size: 15px;
   }
 }
 

@@ -101,6 +101,7 @@ flutter:
     - assets/images/brands/
     - assets/images/guide/
     - assets/images/guide/icons/
+    - assets/images/guide/estilos/
     - assets/catalog/
     - assets/fonts/inter/OFL.txt
     - assets/fonts/playfair_display/OFL.txt

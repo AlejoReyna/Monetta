@@ -9,7 +9,9 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
+import '../../app/card_lift.dart';
 import '../../app/monetta_tokens.g.dart';
+import '../../app/theme.dart';
 import '../../domain/campaign.dart';
 import '../../domain/product.dart';
 import '../boutique/boutique_tokens.dart';
@@ -534,7 +536,7 @@ class HomeNewArrivalsRail extends StatelessWidget {
 // Compra por estilo
 // ---------------------------------------------------------------------------
 
-/// One entry of «Compra por estilo»: a line icon, its label and the catalog
+/// One entry of «Compra por estilo»: a studio photo, its label and the catalog
 /// destination it opens.
 @immutable
 class HomeStyleEntry {
@@ -558,14 +560,14 @@ class HomeStyleEntry {
   final String? silhouette;
 }
 
-/// The guide's five styles, in order. Silhouettes are the catalog's own
-/// facet values; perfumes are a category.
+/// The guide's five bag styles, in order. Silhouettes are the catalog's own
+/// facet values.
 const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
   HomeStyleEntry(
     id: 'crossbody',
     label: 'Crossbody',
     collectionTitle: 'Crossbody',
-    iconAsset: kGuideIconStyleCrossbody,
+    iconAsset: kGuidePhotoStyleCrossbody,
     category: 'bolsa',
     silhouette: 'crossbody',
   ),
@@ -573,7 +575,7 @@ const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
     id: 'tote',
     label: 'Tote',
     collectionTitle: 'Totes',
-    iconAsset: kGuideIconStyleTote,
+    iconAsset: kGuidePhotoStyleTote,
     category: 'bolsa',
     silhouette: 'tote',
   ),
@@ -581,7 +583,7 @@ const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
     id: 'shoulder',
     label: 'Shoulder',
     collectionTitle: 'Shoulder',
-    iconAsset: kGuideIconStyleShoulder,
+    iconAsset: kGuidePhotoStyleShoulder,
     category: 'bolsa',
     silhouette: 'shoulder',
   ),
@@ -589,20 +591,22 @@ const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
     id: 'satchel',
     label: 'Satchel',
     collectionTitle: 'Satchel',
-    iconAsset: kGuideIconStyleSatchel,
+    iconAsset: kGuidePhotoStyleSatchel,
     category: 'bolsa',
     silhouette: 'satchel',
   ),
   HomeStyleEntry(
-    id: 'perfumes',
-    label: 'Perfumes',
-    collectionTitle: 'Perfumes',
-    iconAsset: kGuideIconStylePerfumes,
-    category: 'perfume',
+    id: 'hobo',
+    label: 'Hobo',
+    collectionTitle: 'Hobo',
+    iconAsset: kGuidePhotoStyleHobo,
+    category: 'bolsa',
+    silhouette: 'hobo',
   ),
 ];
 
-/// «Compra por estilo»: five line icons across, label underneath, no card.
+/// «Compra por estilo»: five static cream cards across, photo over a serif
+/// label. The only motion is the shared [MonettaCardLift].
 class HomeShopByStyle extends StatelessWidget {
   const HomeShopByStyle({
     required this.onOpen,
@@ -681,38 +685,53 @@ class _StyleTile extends StatelessWidget {
       label: 'Ver ${entry.label}',
       excludeSemantics: true,
       onTap: onTap,
-      child: GestureDetector(
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.xs,
-            vertical: BoutiqueSpace.xs,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Every icon sits in the same box so the five labels share a
-              // baseline whatever the artwork's own proportions.
-              SizedBox(
-                height: 64,
-                child: Image.asset(
-                  entry.iconAsset,
-                  fit: BoxFit.contain,
-                  excludeFromSemantics: true,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+      child: Padding(
+        padding: const EdgeInsets.all(BoutiqueSpace.xs / 2),
+        child: MonettaCardLift(
+          borderRadius: BoutiqueRadius.tile,
+          child: GestureDetector(
+            onTap: onTap,
+            behavior: HitTestBehavior.opaque,
+            child: ClipRRect(
+              borderRadius: BoutiqueRadius.tile,
+              child: ColoredBox(
+                color: context.monettaColors.surfaceTile,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Square photo: the five labels share a baseline.
+                    AspectRatio(
+                      aspectRatio: 1,
+                      child: Image.asset(
+                        entry.iconAsset,
+                        fit: BoxFit.cover,
+                        excludeFromSemantics: true,
+                        filterQuality: FilterQuality.medium,
+                        errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                      ),
+                    ),
+                    Padding(
+                      padding: const EdgeInsets.fromLTRB(
+                        BoutiqueSpace.xs,
+                        0,
+                        BoutiqueSpace.xs,
+                        BoutiqueSpace.sm,
+                      ),
+                      child: Text(
+                        entry.label,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: boutiqueProductName(
+                          size: 13,
+                          color: palette.ink,
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
-              const SizedBox(height: BoutiqueSpace.sm),
-              Text(
-                entry.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style:
-                    boutiqueText(size: 12.5, height: 1.2, color: palette.ink),
-              ),
-            ],
+            ),
           ),
         ),
       ),

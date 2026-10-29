@@ -60,7 +60,7 @@ void main() {
   }
 
   group('Compra por estilo', () {
-    testWidgets('five entries in order, each with its icon and label', (
+    testWidgets('five entries in order, each with its photo and label', (
       tester,
     ) async {
       final opened = <String>[];
@@ -72,14 +72,14 @@ void main() {
           ),
         ),
       );
-      const ids = ['crossbody', 'tote', 'shoulder', 'satchel', 'perfumes'];
-      const labels = ['Crossbody', 'Tote', 'Shoulder', 'Satchel', 'Perfumes'];
+      const ids = ['crossbody', 'tote', 'shoulder', 'satchel', 'hobo'];
+      const labels = ['Crossbody', 'Tote', 'Shoulder', 'Satchel', 'Hobo'];
       const icons = [
-        kGuideIconStyleCrossbody,
-        kGuideIconStyleTote,
-        kGuideIconStyleShoulder,
-        kGuideIconStyleSatchel,
-        kGuideIconStylePerfumes,
+        kGuidePhotoStyleCrossbody,
+        kGuidePhotoStyleTote,
+        kGuidePhotoStyleShoulder,
+        kGuidePhotoStyleSatchel,
+        kGuidePhotoStyleHobo,
       ];
       var previousX = -1.0;
       for (var i = 0; i < ids.length; i++) {
@@ -105,7 +105,7 @@ void main() {
       expect(opened, ids);
     });
 
-    testWidgets('each entry opens its silhouette, perfumes its category', (
+    testWidgets('each entry opens its bag silhouette', (
       tester,
     ) async {
       final catalog = await store();
@@ -118,7 +118,7 @@ void main() {
         'tote': ('bolsa', 'tote'),
         'shoulder': ('bolsa', 'shoulder'),
         'satchel': ('bolsa', 'satchel'),
-        'perfumes': ('perfume', null),
+        'hobo': ('bolsa', 'hobo'),
       };
       for (final entry in expected.entries) {
         final tile = find.byKey(ValueKey('home-style-${entry.key}'));
