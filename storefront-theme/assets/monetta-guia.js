@@ -1,6 +1,7 @@
 // Guide components that need a script. The home carousel (HomeEditorialBanner in PR #33): swipe through scroll snap,
 // indicator dots that follow the visible slide, previous/next buttons from 1024 px, no autoplay and no timers, as in
-// the app. A slide reached with Tab is brought fully into view. The search screen's «Búsquedas recientes» (slide 05):
+// the app. A slide reached with Tab is brought fully into view. «Colecciones» on phones opens on its middle card. The search
+// screen's «Búsquedas recientes» (slide 05):
 // the last five searches, kept in this browser only, each one removable. The quick view (slide 12): a card's «+» on a piece
 // with several variants loads sections/monetta-quick-view.liquid and nothing is added until a variant is chosen. Rebinds when
 // the theme editor reloads a section.
@@ -30,6 +31,18 @@
       const index = slides.findIndex((slide) => slide.contains(event.target));
       if (index >= 0 && index !== current()) show(index);
     });
+  }
+
+  // «Colecciones» on phones opens on its middle card, as monetta.mx's earlier home did. Only the scroller moves, never the page.
+  function initCollections(track) {
+    if (track.dataset.guiaReady) return;
+    track.dataset.guiaReady = 'true';
+    const items = track.children;
+    if (items.length < 3 || track.scrollWidth <= track.clientWidth) return;
+    const middle = items[Math.floor(items.length / 2)];
+    const card = middle.getBoundingClientRect();
+    const box = track.getBoundingClientRect();
+    track.scrollLeft += card.left + card.width / 2 - (box.left + box.width / 2);
   }
 
   const readRecent = () => window.MonettaSearchHistory?.read() || [];
@@ -197,6 +210,7 @@
 
   const bind = (scope = document) => {
     scope.querySelectorAll('[data-guia-carousel]').forEach(initCarousel);
+    scope.querySelectorAll('[data-guia-collections]').forEach(initCollections);
     scope.querySelectorAll('[data-guia-recent]').forEach(initRecent);
     scope.querySelectorAll('[data-guia-copy]').forEach(initCopy);
   };

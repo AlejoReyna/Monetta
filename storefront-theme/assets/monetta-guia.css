@@ -564,6 +564,7 @@
 }
 
 .guia-brand {
+  position: relative;
   display: grid;
   place-items: center;
   aspect-ratio: 1.7;
@@ -583,7 +584,11 @@
   }
 }
 
+/* Laid over the whole tile: in the grid cell the square artwork kept its own height and hung from the tile's top edge, so
+   the wordmark at its centre sat low. Pinned to the tile, cover crops it evenly and the wordmark is centred. */
 .guia-brand img {
+  position: absolute;
+  inset: 0;
   width: 100%;
   height: 100%;
   object-fit: cover;
@@ -614,6 +619,157 @@
 @media (min-width: 1024px) {
   .guia-brands__grid {
     grid-template-columns: repeat(8, minmax(0, 1fr));
+  }
+}
+
+/* ============================================================ F2 · «Colecciones»: the three photo cards of monetta.mx's earlier home */
+.guia-collections__track {
+  --card-w: min(62vw, 300px);
+  display: flex;
+  gap: var(--space-3);
+  /* A scroller clips what overflows it: the block padding keeps the cards' shadow whole and the negative margins keep the
+     section's rhythm. The inline padding lets the first and last cards reach the centre of the scroller. */
+  margin: calc(-1 * var(--space-4)) 0 calc(-1 * var(--space-5));
+  padding: var(--space-5) calc((100% - var(--card-w)) / 2) var(--space-7);
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  list-style: none;
+}
+
+.guia-collections__track::-webkit-scrollbar {
+  display: none;
+}
+
+.guia-collections__item {
+  flex: 0 0 var(--card-w);
+  scroll-snap-align: center;
+}
+
+/* The card in the middle of the scroller is drawn full size, its neighbours smaller, as in the earlier home. */
+@supports (animation-timeline: view()) {
+  @media (prefers-reduced-motion: no-preference) and (max-width: 767.98px) {
+    .guia-collections__item {
+      animation: guia-collection-focus linear both;
+      animation-timeline: view(inline);
+    }
+  }
+}
+
+@keyframes guia-collection-focus {
+  0%,
+  100% {
+    transform: scale(0.9);
+  }
+
+  50% {
+    transform: scale(1);
+  }
+}
+
+.guia-collection-card {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
+  height: 100%;
+  padding-bottom: var(--space-5);
+  overflow: hidden;
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  box-shadow: var(--shadow-card);
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.guia-collection-card__photo {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 800 / 930;
+  object-fit: cover;
+}
+
+.guia-collection-card__title {
+  font-family: var(--font-guide-serif);
+  font-size: 28px;
+  line-height: 1.1;
+}
+
+.guia-collection-card__button {
+  display: inline-grid;
+  place-items: center;
+  min-height: 40px;
+  padding: 0 var(--space-5);
+  border-radius: 999px;
+  background: #ececec;
+  color: var(--color-ink);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.guia-collection-card:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+@media (min-width: 768px) {
+  .guia-collections__track {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--space-5);
+    max-width: 960px;
+    margin: 0 auto;
+    padding: var(--space-2) var(--gutter) var(--space-5);
+    overflow: visible;
+  }
+}
+
+/* ============================================================ Launch reveal (snippets/monetta-intro.liquid, StartupReveal in the app) */
+.monetta-intro {
+  display: none;
+}
+
+.has-intro .monetta-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  display: grid;
+  place-items: center;
+  background: var(--color-canvas);
+  animation: monetta-intro-fade 1100ms linear forwards;
+}
+
+.monetta-intro__clip {
+  display: block;
+  overflow: hidden;
+  /* The first 30px of the 132px wordmark are its «M»: the same image opens from it, so the letter never swaps. */
+  width: calc(48px * 30 / 38);
+  animation: monetta-intro-open 605ms cubic-bezier(0.65, 0, 0.35, 1) forwards;
+}
+
+.monetta-intro__clip img {
+  display: block;
+  max-width: none;
+}
+
+/* Interval(0.75, 1) of the app's 1100ms: opaque until 825ms, then a 275ms fade; hidden for good once it ends. */
+@keyframes monetta-intro-fade {
+  0%,
+  75% {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  100% {
+    opacity: 0;
+    visibility: hidden;
+  }
+}
+
+@keyframes monetta-intro-open {
+  to {
+    width: calc(48px * 132 / 38);
   }
 }
 
