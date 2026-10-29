@@ -16,6 +16,7 @@ COPY package.json package-lock.json ./
 RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=build /app/dist ./dist
 COPY src/db/migrations ./dist/db/migrations
+COPY src/shopifyAdmin/assets ./dist/shopifyAdmin/assets
 
 ENV PORT=8082
 

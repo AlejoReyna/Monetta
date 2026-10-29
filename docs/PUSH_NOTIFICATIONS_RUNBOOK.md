@@ -85,7 +85,9 @@ El ingreso `/internal/catalog-events` **rechaza** fuentes/product keys
 1. Mantener todas las reglas automáticas apagadas.
 2. Completar el onboarding en un dispositivo staging y aceptar el permiso
    nativo de notificaciones.
-3. En el panel `Avisos`, crear un borrador, revisar el conteo y enviar una prueba.
+3. En el panel `Avisos` (en la app, o en Shopify Admin → Apps → monetta-staging;
+   ver [`ADMIN_CONTROL_PANEL.md`](ADMIN_CONTROL_PANEL.md)), crear un borrador,
+   revisar el conteo y enviar una prueba.
 4. Confirmar ruta al producto, horario silencioso, apertura y token inválido.
 5. Activar primero `restock`; simular agotado → disponible en Shopify.
 6. Activar baja de precio y nueva llegada después de revisar audiencias.

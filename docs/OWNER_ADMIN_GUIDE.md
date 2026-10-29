@@ -136,6 +136,20 @@ aceptado por los servicios push.
 Los interruptores de **Automatizaciones** cambian reglas futuras. No los uses
 como una forma de reenviar una campaña manual.
 
+### Desde Shopify Admin (staging)
+
+En la tienda de staging también puedes enviar avisos sin abrir la app: en
+Shopify Admin ve a **Apps → monetta-staging**. El panel sigue los mismos pasos
+(escribir, **Calcular audiencia**, revisar, **Enviar ahora** y confirmar) y
+además permite **Programar** un envío o cancelarlo desde **Envíos recientes**.
+
+- Para **Enviar prueba** pega el Device ID de tu teléfono; el panel lo recuerda
+  en ese navegador.
+- Si ves **Sin acceso a avisos**, comparte el número que aparece con quien opera
+  el servidor para que lo habilite. Ese número no es secreto.
+- Este panel sólo envía avisos. Productos, portada y Catálogo de hoy siguen
+  en la app.
+
 ## Si aparece un error
 
 - **Sesión inválida o vencida**: vuelve a iniciar sesión.
