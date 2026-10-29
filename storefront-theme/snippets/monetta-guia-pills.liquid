@@ -1,13 +1,15 @@
 {%- doc -%}
-  The pills row of the guide's collection screens: the round filters button, then Bolsas, Carteras, Accesorios, Relojes
-  and Más (all the categories). Each pill is a link to that listing (snippets/monetta-guia-url.liquid); the current one
-  is the brown pill and carries aria-current.
+  The pills row of the guide's collection screens: the round filters button, then Bolsas, Carteras, Accesorios, Relojes,
+  Perfumes, Marcas (all the collections) and Mayoreo. A collection hides the header's category row, so these pills carry
+  every link of that row. Each pill is a link (snippets/monetta-guia-url.liquid); the current one is the brown pill and
+  carries aria-current.
 
-  @param {string} [active] - Key of the current category: bolsas, carteras, accesorios or relojes.
+  @param {string} [active] - Key of the current category: bolsas, carteras, accesorios, relojes, perfumes or categorias
+    (a brand).
   @param {boolean} [filters_button] - Show the button that opens «Filtrar y ordenar» (only where that drawer exists).
   @param {number} [active_count] - Active filters, shown on the button.
 {%- enddoc -%}
-{%- assign pill_entries = 'bolsas:Bolsas,carteras:Carteras,accesorios:Accesorios,relojes:Relojes,categorias:Más' | split: ',' -%}
+{%- assign pill_entries = 'bolsas:Bolsas,carteras:Carteras,accesorios:Accesorios,relojes:Relojes,perfumes:Perfumes,categorias:Marcas,mayoreo:Mayoreo' | split: ',' -%}
 <nav class="guia-pills" aria-label="Categorías">
   <ul class="guia-pills__list" role="list">
     {%- if filters_button -%}

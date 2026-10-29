@@ -143,6 +143,15 @@
   display: none;
 }
 
+/* A collection has no category row under the header (its pills repeat it), so the ported 45px for that row is not
+   counted: the sidebar sticks under the measured pinned chrome. Windows up to 480px tall keep the ported static sidebar. */
+@media (min-width: 1200px) and (min-height: 480.02px) {
+  .listing--collection .filter-sidebar {
+    top: calc(var(--pinned-top) + 16px);
+    max-height: calc(100vh - var(--pinned-top) - 32px);
+  }
+}
+
 @media (min-width: 1280px) {
   .mw .listing--collection {
     max-width: 1680px;
@@ -156,8 +165,6 @@
 
   .listing--collection .filter-sidebar {
     margin-inline: 0;
-    top: calc(var(--pinned-top) + 16px);
-    max-height: calc(100vh - var(--pinned-top) - 32px);
   }
 
   .mw .listing--collection .product-grid {

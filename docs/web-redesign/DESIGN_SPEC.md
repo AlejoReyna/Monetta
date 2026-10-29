@@ -184,7 +184,9 @@ policy pages, which cannot choose a layout) share `snippets/monetta-head.liquid`
 dock, the bag sheet, the saved list and the live regions. A shopper never lands on Atelier's header, footer or fonts.
 
 - **Header.** Bar ground, hairline once scrolled; 48 px icon targets; category row from 768 with a 2 px gold rule on the
-  current item. Menu labels pass through the language snippet (Inicio · Catálogo · Contacto on staging).
+  current item. Menu labels pass through the language snippet (Inicio · Catálogo · Contacto on staging). Collections leave
+  the category row out: their pills (Bolsas, Carteras, Accesorios, Relojes, Perfumes, Marcas, Mayoreo) carry the same links,
+  and arriving on one never focuses the header search, so its predictive panel stays closed.
 - **Menu drawer.** Wordmark, close, “Inicia sesión” / “Mi cuenta”, Guardados (when the browser can store it), the main menu
   and the footer menu as Playfair 17 rows with light icons.
 - **Dock (phones).** Flat full-width bar: Inicio, Catálogo, Carrito (count), Cuenta; active item in `navigation-active` with
