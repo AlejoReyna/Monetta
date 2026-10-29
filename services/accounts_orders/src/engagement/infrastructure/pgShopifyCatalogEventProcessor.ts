@@ -89,7 +89,7 @@ function snapshot(payload: ShopifyProductWebhookPayload): NextSnapshot {
     .map((variant) => Number(variant.price))
     .filter((price) => Number.isFinite(price) && price >= 0);
   return {
-    productKey: `shopify:${payload.id}`,
+    productKey: `shopify:gid://shopify/Product/${payload.id}`,
     title: nonEmpty(payload.title) ?? 'Producto Monetta',
     brand: slugOrNull(payload.vendor),
     category: slugOrNull(payload.product_type),

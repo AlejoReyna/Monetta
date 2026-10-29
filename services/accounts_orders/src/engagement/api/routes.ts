@@ -2,6 +2,7 @@ import type { Express, NextFunction, Request, Response } from 'express';
 import { randomUUID } from 'node:crypto';
 import { EngagementService, parsePermissionState } from '../application/engagementService.js';
 import type { AppCheckVerifier, OwnerAuthorizer } from '../domain/ports.js';
+import { canonicalShopifyProductKey } from '../domain/productKey.js';
 import type { AdminAuthorizer } from '../../admin/authorizer.js';
 import type {
   CampaignKind,
@@ -156,7 +157,7 @@ export function registerEngagementRoutes(app: Express, deps: EngagementRouteDeps
 
   app.post('/v1/product-alerts', deviceRoute(deps, async (req, res, deviceId) => {
     const body = objectBody(req);
-    const productKey = productKeyValue(body.productKey);
+    const productKey = canonicalShopifyProductKey(body.productKey);
     const kind = productAlertKind(body.kind);
     if (productKey === null || kind === null) {
       res.status(400).json({ error: 'invalid_request' });
@@ -439,13 +440,6 @@ function bucketValue(value: unknown): SignalCountBucket | null {
     ? value
     : null;
 }
-function productKeyValue(value: unknown): string | null {
-  const key = shortString(value, 300);
-  // External-catalog product keys are retired (F03/F28). Only Shopify keys
-  // may drive alerts, campaigns, or deep links.
-  return key !== null && /^shopify:/.test(key) ? key : null;
-}
-
 function productAlertKind(value: unknown): ProductAlertKind | null {
   return value === 'restock' || value === 'price_drop' ? value : null;
 }
@@ -501,7 +495,7 @@ function notificationRoute(value: unknown): NotificationRoute | null {
     return handle === null ? null : { type: 'collection', handle };
   }
   if (route.type === 'product') {
-    const productKey = productKeyValue(route.productKey);
+    const productKey = canonicalShopifyProductKey(route.productKey);
     return productKey === null ? null : { type: 'product', productKey };
   }
   return null;

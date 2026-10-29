@@ -2,6 +2,7 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import express, { type Express, type NextFunction, type Request, type Response } from 'express';
 import type { EngagementService } from '../application/engagementService.js';
 import type { CatalogEventInput } from '../domain/types.js';
+import { canonicalShopifyProductKey } from '../domain/productKey.js';
 
 const replayWindowMs = 5 * 60 * 1000;
 
@@ -72,7 +73,7 @@ function parseCatalogEvent(value: unknown): CatalogEventInput | null {
   const eventId = stringValue(record.eventId, 200);
   const eventType = record.eventType;
   const source = stringValue(record.source, 120);
-  const productKey = stringValue(record.productKey, 300);
+  const productKey = canonicalShopifyProductKey(record.productKey);
   const occurredAt = typeof record.occurredAt === 'string' ? new Date(record.occurredAt) : null;
   const after = plainObject(record.after);
   const before = record.before === null ? null : plainObject(record.before);
@@ -87,10 +88,7 @@ function parseCatalogEvent(value: unknown): CatalogEventInput | null {
     return null;
   }
   // F28: do not accept retired external-catalog event sources or keys.
-  if (source === 'external' || source.startsWith('external') || productKey.startsWith('external:')) {
-    return null;
-  }
-  if (!productKey.startsWith('shopify:')) {
+  if (source.startsWith('external')) {
     return null;
   }
   return { eventId, eventType, source, productKey, occurredAt, before, after };

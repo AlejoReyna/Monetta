@@ -76,6 +76,14 @@ Shopify. Después de desplegar las configuraciones de `shopify/`, reinstalar o
 actualizar la app de Shopify para aceptar `read_products` y registrar las nuevas
 suscripciones.
 
+Las suscripciones, eventos y rutas push usan
+`shopify:gid://shopify/Product/<id>`, el mismo ID que abre la app. Las APIs
+aceptan también `shopify:<id>` de clientes anteriores y lo normalizan antes de
+guardar. La migración `017_notification_product_keys.sql` repara los registros
+anteriores, incluidas las rutas de campañas en cola, conserva el estado de
+suscripción más reciente y no genera envíos nuevos. Los snapshots conservan
+el precio y stock más recientes para detectar la siguiente transición.
+
 El ingreso `/internal/catalog-events` **rechaza** fuentes/product keys
 `external:*` (catálogo externo retirado, F03/F28). No configurar
 `NOTIFICATION_EVENTS_URL` en `catalog_monitor`; ese camino ya no es producto.

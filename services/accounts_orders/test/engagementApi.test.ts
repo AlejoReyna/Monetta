@@ -139,8 +139,34 @@ describe('engagement API', () => {
       body: JSON.stringify({ productKey: 'shopify:123', kind: 'restock' }),
     });
     expect(alert.status).toBe(201);
-    expect([...repository.alerts.values()][0]).toMatchObject({ productKey: 'shopify:123', active: true });
+    expect(await alert.json()).toMatchObject({ alert: { productKey: 'shopify:gid://shopify/Product/123' } });
+    expect([...repository.alerts.values()][0]).toMatchObject({
+      productKey: 'shopify:gid://shopify/Product/123', active: true,
+    });
   });
+
+  it.each(['shopify:', 'shopify:garbage', 'shopify:gid://shopify/ProductVariant/123', 'external:123'])(
+    'rejects invalid product key %s for alerts and campaign links', async (productKey) => {
+      const credential = await deviceCredential();
+      const alert = await fetch(`${baseUrl}/v1/product-alerts`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: `Device ${credential}` },
+        body: JSON.stringify({ productKey, kind: 'restock' }),
+      });
+      expect(alert.status).toBe(400);
+      const campaign = await fetch(`${baseUrl}/admin/notification-campaigns`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', Authorization: 'Bearer owner-token' },
+        body: JSON.stringify({
+          kind: 'manual', purpose: 'announcements', title: 'Aviso', body: 'Producto',
+          route: { type: 'product', productKey }, segment: { kind: 'all' },
+        }),
+      });
+      expect(campaign.status).toBe(400);
+      expect(repository.alerts.size).toBe(0);
+      expect(repository.campaigns.size).toBe(0);
+    },
+  );
 
   it('lets only the owner create, preview, schedule, and dispatch a campaign', async () => {
     const credential = await configuredDevice();
@@ -183,7 +209,10 @@ describe('engagement API', () => {
 
     expect(await service.dispatchOnce()).toEqual({ materialized: 1, processed: 1 });
     expect(messaging.sent).toHaveLength(1);
-    expect(messaging.sent[0]).toMatchObject({ registrationId: 'fcm-token-1' });
+    expect(messaging.sent[0]).toMatchObject({
+      registrationId: 'fcm-token-1',
+      message: { route: { type: 'product', productKey: 'shopify:gid://shopify/Product/123' } },
+    });
   });
 
 
@@ -246,6 +275,11 @@ describe('engagement API', () => {
     expect((await send()).status).toBe(202);
     expect((await send()).status).toBe(200);
     expect([...repository.campaigns.values()].filter((item) => item.kind === 'restock')).toHaveLength(1);
+    expect(await service.dispatchOnce()).toEqual({ materialized: 1, processed: 1 });
+    expect(messaging.sent).toHaveLength(1);
+    expect(messaging.sent[0]?.message.route).toEqual({
+      type: 'product', productKey: 'shopify:gid://shopify/Product/123',
+    });
   });
 
   function registerDevice(appCheck: string | null, credential?: string) {
@@ -308,7 +342,7 @@ describe('engagement API', () => {
     await fetch(`${baseUrl}/v1/product-alerts`, {
       method: 'POST',
       headers,
-      body: JSON.stringify({ productKey: 'shopify:123', kind: 'restock' }),
+      body: JSON.stringify({ productKey: 'shopify:gid://shopify/Product/123', kind: 'restock' }),
     });
     return credential;
   }

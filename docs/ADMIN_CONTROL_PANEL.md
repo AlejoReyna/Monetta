@@ -184,8 +184,8 @@ así que ningún otro sitio puede embeber el panel.
 
 **Activación en staging.**
 
-1. Desplegar `accounts_orders` (la migración `016_admin_shopify_staff.sql`
-   corre en el `release_command`).
+1. Desplegar `accounts_orders` (las migraciones `016_admin_shopify_staff.sql`
+   y `017_notification_product_keys.sql` corren en el `release_command`).
 2. Confirmar que existen `SHOPIFY_APP_CLIENT_ID`, `SHOPIFY_APP_CLIENT_SECRET` y
    `SHOPIFY_STORE_DOMAIN=monetta-staging.myshopify.com` en Fly.
 3. Dar de alta el staff: `fly secrets set OWNER_SHOPIFY_STAFF_IDS=<id>
