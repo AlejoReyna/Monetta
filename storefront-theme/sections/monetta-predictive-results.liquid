@@ -1,4 +1,7 @@
-{%- comment -%}API-only fragment. The client accepts only this response's items, never an entire HTML document.{%- endcomment -%}
+{%- comment -%}
+  API-only fragment. The client accepts only this response's items, never an entire HTML document. Pieces come first: they
+  are what the dropdown under the search field is for.
+{%- endcomment -%}
 {%- if predictive_search.performed -%}
   {%- liquid
     assign queries = predictive_search.resources.queries
@@ -8,16 +11,6 @@
   -%}
   <div data-monetta-predictive-response data-count="{{ result_count }}">
     <ul data-monetta-predictive-items>
-      {%- if queries.size > 0 -%}
-        <li role="group" aria-label="Sugerencias de búsqueda">
-          <p class="monetta-predictive-search__group-title" aria-hidden="true">Sugerencias de búsqueda</p>
-          <ul role="presentation">
-            {%- for query in queries -%}
-              <li role="presentation"><a class="monetta-predictive-search__option" href="{{ routes.search_url }}?q={{ query.text | url_encode }}&amp;type=product" role="option" tabindex="-1" data-monetta-predictive-option data-predictive-kind="query" data-monetta-predictive-term="{{ query.text | escape }}"><span>{{ query.styled_text }}</span></a></li>
-            {%- endfor -%}
-          </ul>
-        </li>
-      {%- endif -%}
       {%- if products.size > 0 -%}
         <li role="group" aria-label="Productos">
           <p class="monetta-predictive-search__group-title" aria-hidden="true">Productos</p>
@@ -29,7 +22,7 @@
                   <span class="monetta-predictive-search__media" aria-hidden="true">
                     {%- assign predictive_image = product.featured_media.preview_image | default: product.featured_image -%}
                     {%- if predictive_image != blank -%}
-                      {{ predictive_image | image_url: width: 112 | image_tag: widths: '56, 112', sizes: '56px', width: 56, height: 56, loading: 'eager', alt: '' }}
+                      {{ predictive_image | image_url: width: 128 | image_tag: widths: '64, 128', sizes: '64px', width: 64, height: 64, loading: 'eager', alt: '' }}
                     {%- else -%}
                       {% render 'monetta-icon', name: 'bag', size: 28 %}
                     {%- endif -%}
@@ -47,6 +40,16 @@
                   </span>
                 </a>
               </li>
+            {%- endfor -%}
+          </ul>
+        </li>
+      {%- endif -%}
+      {%- if queries.size > 0 -%}
+        <li role="group" aria-label="Sugerencias de búsqueda">
+          <p class="monetta-predictive-search__group-title" aria-hidden="true">Sugerencias de búsqueda</p>
+          <ul role="presentation">
+            {%- for query in queries -%}
+              <li role="presentation"><a class="monetta-predictive-search__option" href="{{ routes.search_url }}?q={{ query.text | url_encode }}&amp;type=product" role="option" tabindex="-1" data-monetta-predictive-option data-predictive-kind="query" data-monetta-predictive-term="{{ query.text | escape }}"><span>{{ query.styled_text }}</span></a></li>
             {%- endfor -%}
           </ul>
         </li>

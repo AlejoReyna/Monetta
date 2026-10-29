@@ -1371,6 +1371,13 @@ img.guia-menu__icon {
 }
 
 /* ============================================================ F3 · Search (slide 05): recent searches and suggestions */
+/* From 768 px the header shows its own search field: a second one on the search page repeated the query. */
+@media (min-width: 768px) {
+  .search-page__field {
+    display: none;
+  }
+}
+
 .guia-search {
   display: grid;
   gap: var(--space-4);

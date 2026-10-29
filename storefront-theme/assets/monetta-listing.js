@@ -156,6 +156,7 @@
   });
 
   // Search opened empty from another screen focuses its field (the router of the prototype does the same).
-  const searchInput = $('[data-search-autofocus]');
+  // The search page's own field on phones, the header's from 768 px, where the page's is hidden.
+  const searchInput = [$('[data-search-autofocus]'), document.getElementById('header-search-input')].find(isShown);
   if (searchInput && !searchInput.value) searchInput.focus({ preventScroll: true });
 })();
