@@ -290,6 +290,43 @@ offers it (otherwise a classic serif) and Inter for body.
 | Spanish labels for Shopify's untouched English defaults | Spanish app strings | The store language is English on staging; merchant-renamed labels are printed as typed |
 | Merchant-built contact page keeps its block colours | No equivalent screen | Merchant content; the shell, fonts, schemes and shapes are aligned |
 
+## 9a. XL storefront exceptions (29 October 2026)
+
+Review implementation on unpublished staging draft **192576585762**, “Monetta buscador predictivo borrador sin public...”.
+These theme-owned exceptions start at **1280px**; the generated tokens, Flutter app, search grid, compact rails and smaller
+screen layouts keep their previous sizing. Implementation evidence and measurements:
+[`../../artifacts/xl-storefront-2026-10-29/README.md`](../../artifacts/xl-storefront-2026-10-29/README.md).
+
+- Collection listings use a fluid **1680px outer cap including 48px side padding**, a **232px** filter sidebar and **32px**
+  separation. Product gaps are **20px horizontal / 30px vertical**. With filters: **3 columns at 1280–1439**, **4 from 1440**;
+  without filters: **4 throughout XL**. Sticky filters use the shell's measured `--pinned-top` plus 16px.
+- Collection guide banners are **260px** tall at XL; an empty page-head reserves 12px. Homepage carousel and other guide
+  banners retain their composition. Measured first-row advance is **128.47px at 1280** and **172px from 1440**.
+- Collection card bodies use **16px padding**, **17px Inter names** with two lines reserved, and **19px prices**. Empty
+  delivery/brand slots reserve their line without visible or accessible invented text. Cards stretch within the row;
+  prices can wrap and the view pill consumes remaining space above it, aligning bottoms without a fixed card height.
+- **4:5 media retained for Carteras, Bolsas and Relojes**, always `contain`. Comparing Carteras at identical 315px card
+  width showed that square frames reduce height but also reduce the portrait source images, giving up most of the visible
+  wallet size increase. First-page sources include 1054×1492 and 1122×1402 images; chains and keyrings stay complete in
+  both versions. Source whitespace remains; no zoom, crop or replacement was introduced.
+- Collection image `sizes` describe the **inset media slot**, including sidebar presence and the 3/4-column breakpoints.
+  An XL-only `<picture>` source supplies candidates through **900px** for high density screens. The shared `<img>` defaults
+  and existing compact-rail call-site overrides retain their **600px** ceiling, including mobile collection cards.
+- Home collections have **1168px usable row width**, **28px gaps** and approximately **371px cards**. The heading container
+  is 1264px including gutters; the row has no duplicate inline padding. Home styles share this container, with a left-aligned
+  **960px** row, **104px icons**, **16px labels**, and **34px** section titles for these two modules. The mobile collection
+  carousel and style layout retain their existing rules.
+
+The required interaction checks exposed a pre-existing automatic type/vendor collection bug: sorting rebuilt the query
+string without its `q`. The collection section now supplies that identity to the existing sort/filter forms, preserving
+the category through sorting, filter application/removal and pagination. Sorted clear-all URLs use the correct query
+separator when `q` is present. These behavior corrections apply at every width.
+
+Home registration follow-up (29 October): when the registration section is last, it meets the footer with no outer gap
+at every viewport. On arrival it reveals its title, copy and button once with a 600ms fade/rise and 80ms stagger.
+Content remains visible without JavaScript or with reduced motion; keyboard focus cancels the entrance immediately.
+Evidence: [`../../artifacts/register-footer-2026-10-29/`](../../artifacts/register-footer-2026-10-29/).
+
 ## 10. History
 
 | Date | Change | Record |

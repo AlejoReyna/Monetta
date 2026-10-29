@@ -10,6 +10,8 @@
   @param {boolean} [quick_add] - Show the "+" (default true): it adds a single-variant piece, and opens the quick view to
     choose a variant when there are several.
   @param {string} [sizes] - The sizes attribute of the photo's slot.
+  @param {string} [xl_widths] - Additional image candidates from 1280px only; mobile cards and compact rails keep 600px.
+  @param {boolean} [listing_card] - Reserve empty metadata slots for XL collection row alignment.
   @param {boolean} [view_button] - The collection grid's «VER PRODUCTO» pill (TileViewProductButton): visual only, inside the card's link.
 {%- enddoc -%}
 {%- liquid
@@ -51,7 +53,18 @@
   <a class="card__link" href="{{ product.url }}">
     <div class="card__media">
       {%- if image -%}
+        {%- if xl_widths != blank -%}
+          <picture>
+            <source media="(min-width: 1280px)" sizes="{{ sizes }}" srcset="
+              {%- assign width_list = xl_widths | split: ',' -%}
+              {%- for w in width_list -%}
+                {%- assign wn = w | plus: 0 -%}
+                {%- if wn <= image.width -%}{{ image | image_url: width: wn }} {{ wn }}w{% unless forloop.last %}, {% endunless %}{%- endif -%}
+              {%- endfor -%}
+            ">
+        {%- endif -%}
         {% render 'monetta-image', image: image, widths: '240,360,480,600', sizes: sizes, alt: '', eager: eager %}
+        {%- if xl_widths != blank -%}</picture>{%- endif -%}
       {%- else -%}
         {{ 'product-1' | placeholder_svg_tag: 'placeholder-svg' }}
       {%- endif -%}
@@ -59,8 +72,8 @@
       {%- unless in_stock -%}<span class="card__soldout"><span class="badge badge--seal">Agotado</span></span>{%- endunless -%}
     </div>
     <div class="card__body">
-      {%- if eyebrow != blank -%}<p class="card__eyebrow">{{ eyebrow | escape }}</p>{%- endif -%}
-      {%- if brand != blank -%}<p class="card__brand">{{ brand | escape }}</p>{%- endif -%}
+      {%- if eyebrow != blank -%}<p class="card__eyebrow">{{ eyebrow | escape }}</p>{%- elsif listing_card -%}<p class="card__eyebrow card__slot-empty" aria-hidden="true"></p>{%- endif -%}
+      {%- if brand != blank -%}<p class="card__brand">{{ brand | escape }}</p>{%- elsif listing_card -%}<p class="card__brand card__slot-empty" aria-hidden="true"></p>{%- endif -%}
       <h3 class="card__name">{{ product.title | escape }}</h3>
       <p class="card__price">
         <span class="price">

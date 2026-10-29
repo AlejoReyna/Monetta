@@ -138,6 +138,92 @@
   grid-template-columns: repeat(var(--cols-product), minmax(0, 1fr));
 }
 
+/* XL storefront exception (DESIGN_SPEC §9a): collections alone grow; shared tokens, search and rails keep their geometry. */
+.card__slot-empty {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  .mw .listing--collection {
+    max-width: 1680px;
+    padding-inline: 48px;
+  }
+
+  .listing--collection .collection-layout--filters {
+    grid-template-columns: 232px minmax(0, 1fr);
+    gap: 32px;
+  }
+
+  .listing--collection .filter-sidebar {
+    margin-inline: 0;
+    top: calc(var(--pinned-top) + 16px);
+    max-height: calc(100vh - var(--pinned-top) - 32px);
+  }
+
+  .mw .listing--collection .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 30px 20px;
+  }
+
+  .mw .listing--collection .collection-layout--filters .product-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .listing--collection .product-grid > li {
+    display: flex;
+    min-width: 0;
+  }
+
+  .listing--collection .card {
+    flex: 1;
+  }
+
+  .listing--collection .card__body {
+    flex: 1;
+    padding: 16px;
+  }
+
+  /* Empty paragraphs contain no visible or accessible invented delivery claim. Below XL they take no space. */
+  .listing--collection .card__slot-empty {
+    display: block;
+  }
+
+  .listing--collection .card__eyebrow {
+    min-height: 1.5em;
+    line-height: 1.5;
+  }
+
+  .listing--collection .card__brand {
+    min-height: 1.25em;
+  }
+
+  .listing--collection .card__name {
+    min-height: 2.6em;
+    font-size: 17px;
+  }
+
+  .listing--collection .card__price {
+    margin-bottom: 12px;
+    font-size: 19px;
+  }
+
+  .listing--collection .card__price .price {
+    font-size: inherit;
+  }
+
+  /* The row stretches each card; additional price lines grow the row and this remaining space keeps buttons aligned. */
+  .listing--collection .card__view {
+    flex-shrink: 0;
+    margin-top: auto;
+  }
+}
+
+@media (min-width: 1440px) {
+  .mw .listing--collection .collection-layout--filters .product-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
 /* ============================================================ Controls */
 /* Every tap target reaches the manifest's 48px (size.tap): shortcut and filter chips (the app's catalog chips are 48), variant
    option chips (the app draws them at 44; the web follows the token) and the filter checkbox rows. */

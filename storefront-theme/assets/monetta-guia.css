@@ -725,6 +725,38 @@
   }
 }
 
+/* XL home groups: 1168 usable pixels = three ~371px cards + two 28px gaps. Heading and cards share one left edge. */
+@media (min-width: 1280px) {
+  .guia-styles,
+  .guia-collections > .container {
+    max-width: 1264px;
+  }
+
+  .guia-styles__list {
+    max-width: 960px;
+    gap: 24px;
+  }
+
+  .guia-styles__icon {
+    width: 104px;
+    height: 104px;
+  }
+
+  .guia-styles__label {
+    font-size: 16px;
+  }
+
+  .guia-collections__track {
+    max-width: 1168px;
+    gap: 28px;
+    padding-inline: 0;
+  }
+
+  .mw :is(.guia-styles, .guia-collections) .display--section {
+    font-size: 34px;
+  }
+}
+
 /* ============================================================ Launch reveal (snippets/monetta-intro.liquid, StartupReveal in the app) */
 .monetta-intro {
   display: none;
@@ -857,6 +889,11 @@
 .guia-register {
   border-top: 1px solid var(--color-hairline);
   background: var(--color-surface-deep);
+}
+
+/* The final Home invitation meets the footer; other pages and reordered Home sections keep their usual spacing. */
+.mw[data-template='index'] #MainContent:has(> .shopify-section:last-child > .guia-register) + .site-footer {
+  margin-top: 0;
 }
 
 .guia-register__inner {
@@ -1435,6 +1472,17 @@ img.guia-menu__icon {
 @media (min-width: 1024px) {
   .guia-collection-hero .guide-hero {
     height: clamp(280px, calc(100vw / 3.4), 420px);
+  }
+}
+
+/* XL listing banners only. The empty page-head needs less reserve so even 1280px gains at least 120px of discovery. */
+@media (min-width: 1280px) {
+  .guia-collection-hero .guide-hero {
+    height: 260px;
+  }
+
+  .listing--collection .guia-page-head:empty {
+    padding-top: 12px;
   }
 }
 

@@ -20,7 +20,11 @@
   assign sort_by = collection.sort_by | default: collection.default_sort_by
   assign clear_url = collection.url
   if sort_by != collection.default_sort_by
-    assign clear_url = collection.url | append: '?sort_by=' | append: sort_by
+    assign separator = '?'
+    if clear_url contains '?'
+      assign separator = '&'
+    endif
+    assign clear_url = clear_url | append: separator | append: 'sort_by=' | append: sort_by
   endif
   # Shopify's automatic all-products collection keeps the title it was seeded with in the store language ("Products"); the
   # theme calls it what the app calls it. A collection the merchant created and titled is shown as titled.
@@ -38,8 +42,11 @@
   # The guide's banner (guideCollectionPhoto): brand first, then silhouette, then category. Brand pages are Shopify's vendor
   # listing, silhouettes its tag filter, carteras and relojes its product types, until the owner creates real collections.
   assign guide_key = collection.handle
+  assign listing_query = ''
   if collection.handle == 'vendors' or collection.handle == 'types'
     assign guide_key = collection.title | handleize
+    # The GET form handler rebuilds the query string. Keep Shopify's automatic type/vendor identity in each form.
+    assign listing_query = collection.title
   elsif current_tags.size > 0
     assign guide_key = current_tags.first | handleize
   endif
@@ -100,6 +107,11 @@
   if collection.all_products_count > 0 or active_count > 0
     assign has_controls = true
   endif
+  # Match the actual inset image slot: 1680 outer cap, 48 gutters, 232 sidebar + 32 gap, 20 column gaps, 8 image inset.
+  assign card_sizes = '(min-width: 1680px) 365px, (min-width: 1280px) calc((100vw - 220px) / 4), (min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw'
+  if collection.filters.size > 0
+    assign card_sizes = '(min-width: 1680px) 299px, (min-width: 1440px) calc((100vw - 484px) / 4), (min-width: 1280px) calc((100vw - 448px) / 3), (min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw'
+  endif
 -%}
 {% paginate collection.products by section.settings.products_per_page %}
   {%- if guide_photo != blank and paginate.current_page == 1 -%}
@@ -107,7 +119,7 @@
       {% render 'monetta-guia-hero', photo: guide_photo, title: guide_title, side: guide_side, caps: true, italic: guide_italic, eager: true %}
     </div>
   {%- endif -%}
-  <div class="container listing listing--collection listing--guia" data-listing {{ section.shopify_attributes }}>
+  <div class="container listing listing--collection listing--guia" data-listing data-collection-key="{{ guide_key | escape }}" {{ section.shopify_attributes }}>
     <div class="page-head guia-page-head">
       {%- unless guide_photo != blank and paginate.current_page == 1 -%}
         <h1 class="display display--page">{{ guide_title | escape }}</h1>
@@ -124,7 +136,7 @@
     {% render 'monetta-guia-pills', active: guide_pill, filters_button: has_controls, active_count: active_count %}
 
     {%- capture results_html -%}
-      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', view_button: true %}
+      {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', view_button: true, listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
     {%- endcapture -%}
     {% render 'monetta-listing-layout',
       filters: collection.filters,
@@ -137,7 +149,8 @@
       active_count: active_count,
       has_products: collection.all_products_count,
       guide: true,
-      count_text: count_text
+      count_text: count_text,
+      query: listing_query
     %}
   </div>
 {% endpaginate %}

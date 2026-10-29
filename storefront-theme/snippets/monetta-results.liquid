@@ -12,6 +12,9 @@
   @param {string} [empty_body] - Its body.
   @param {string} [search_url] - On the search page, the URL of an empty search (adds "Limpiar búsqueda").
   @param {boolean} [view_button] - Cards carry the «VER PRODUCTO» pill (collections, as the app's grid; not search).
+  @param {boolean} [listing_card] - Collection cards reserve optional metadata slots at XL.
+  @param {string} [sizes] - Image slot override for this listing context.
+  @param {string} [xl_widths] - Image width candidates from 1280px for this listing context.
 {%- enddoc -%}
 {%- if total == 0 -%}
   <div class="empty">
@@ -41,7 +44,7 @@
       {%- if product.object_type != blank and product.object_type != 'product' -%}{%- continue -%}{%- endif -%}
       {%- assign eager = false -%}
       {%- if forloop.index <= 4 %}{% assign eager = true %}{% endif -%}
-      <li>{% render 'monetta-card', product: product, eager: eager, view_button: view_button %}</li>
+      <li>{% render 'monetta-card', product: product, eager: eager, view_button: view_button, listing_card: listing_card, sizes: sizes, xl_widths: xl_widths %}</li>
     {%- endfor -%}
   </ul>
   {%- liquid

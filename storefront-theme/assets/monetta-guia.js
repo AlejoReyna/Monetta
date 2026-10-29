@@ -45,6 +45,34 @@
     track.scrollLeft += card.left + card.width / 2 - (box.left + box.width / 2);
   }
 
+  // Reveal the Home invitation once on arrival. Content stays visible without JS/animation support or with reduced motion.
+  function initRegister(root) {
+    if (root.dataset.guiaReady) return;
+    root.dataset.guiaReady = 'true';
+    if (reduceMotion() || !('IntersectionObserver' in window) || typeof root.animate !== 'function') return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      if (reduceMotion() || root.contains(document.activeElement)) return;
+      const elements = [...root.querySelectorAll('.guia-register__inner > *')];
+      const animations = elements.map((element, index) => element.animate(
+        [{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 600, delay: index * 80, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' },
+      ));
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const reveal = () => animations.forEach((animation) => animation.cancel());
+      const onMotionChange = () => { if (motion.matches) reveal(); };
+      // A keyboard user can always focus the button immediately, even during the staggered entrance.
+      root.addEventListener('focusin', reveal);
+      motion.addEventListener('change', onMotionChange);
+      Promise.all(animations.map((animation) => animation.finished.catch(() => {}))).then(() => {
+        root.removeEventListener('focusin', reveal);
+        motion.removeEventListener('change', onMotionChange);
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -48px 0px' });
+    observer.observe(root);
+  }
+
   const readRecent = () => window.MonettaSearchHistory?.read() || [];
 
   function initRecent(root) {
@@ -211,6 +239,7 @@
   const bind = (scope = document) => {
     scope.querySelectorAll('[data-guia-carousel]').forEach(initCarousel);
     scope.querySelectorAll('[data-guia-collections]').forEach(initCollections);
+    scope.querySelectorAll('.guia-register').forEach(initRegister);
     scope.querySelectorAll('[data-guia-recent]').forEach(initRecent);
     scope.querySelectorAll('[data-guia-copy]').forEach(initCopy);
   };
