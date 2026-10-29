@@ -513,13 +513,15 @@ class UnderlineLink extends StatelessWidget {
   }
 }
 
-/// The real wordmark, taken from the storefront's own asset
-/// (`monetta.mx/cdn/shop/files/FINAL_12.png`), trimmed of its transparent
-/// margin and emitted at 1x/2x/3x into `assets/images/`.
+/// The real wordmark, generated from the brand master
+/// (`docs/design/brand/monetta-wordmark.webp`) by
+/// `bin/generate_brand_assets.py`: lifted off its white background and fitted
+/// into a 132:38 canvas at 1x/2x/3x in `assets/images/`.
 ///
-/// It is a gold-gradient didone with a teardrop accent on the M — high stroke
-/// contrast, which is the same class of face Dior sets its own logotype in. So
-/// the mark was already speaking this language; the app just wasn't.
+/// It is a polished-gold didone whose M carries a teardrop and a swash under
+/// the O — high stroke contrast, which is the same class of face Dior sets its
+/// own logotype in. So the mark was already speaking this language; the app
+/// just wasn't.
 ///
 /// This supersedes [wordmark] as the app's identity. That text style stays for
 /// the two places a bitmap will not do: anywhere the mark must be a single
