@@ -28,6 +28,7 @@ import { ServerAdminAuthorizer, hashAdminBearerToken } from '../admin/authorizer
 import { registerAdminRoutes } from '../admin/routes.js';
 import { resumeInterruptedSyncJobs } from '../admin/routes.js';
 import { PgAdminPrincipalsRepository } from '../admin/pgAdminPrincipalsRepository.js';
+import { canonicalShopDomain, ShopifySessionTokenVerifier } from '../admin/shopifySessionToken.js';
 import type { AdminAuthorizer } from '../admin/authorizer.js';
 import { ShopifyAdminClient } from '../admin/shopifyAdminClient.js';
 import type { ShopifyAdminWriteClient } from '../admin/shopifyAdminClient.js';
@@ -83,6 +84,7 @@ import { PgCustomerDataEraser } from '../privacy/pgCustomerErasure.js';
 import { registerAccountDeletionRoutes } from '../privacy/routes.js';
 import { CustomerAccountOrderLookup } from '../privacy/shopifyOrderCheck.js';
 import { ShopifyCustomerDataErasureClient } from '../privacy/shopifyErasure.js';
+import { registerShopifyAdminPanel } from '../shopifyAdmin/routes.js';
 
 export interface ServerDeps extends HandlerDeps {
   readonly webhookSecret: string;
@@ -114,6 +116,8 @@ export interface ServerDeps extends HandlerDeps {
   readonly rewards?: { readonly service: RewardsService };
   /** In-app account deletion. Absent in tests that do not exercise the route. */
   readonly accountDeletion?: AccountDeletionService;
+  /** Embedded Shopify Admin notifications page. Absent until the Shopify app is configured. */
+  readonly shopifyAdminPanel?: { readonly clientId: string; readonly shopDomain: string };
 }
 
 const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
@@ -557,6 +561,10 @@ export function createApp(deps: ServerDeps): Express {
     registerEngagementRoutes(app, deps.engagement);
   }
 
+  if (deps.shopifyAdminPanel !== undefined) {
+    registerShopifyAdminPanel(app, deps.shopifyAdminPanel);
+  }
+
   if (deps.rewards !== undefined) {
     registerRewardsRoutes(app, {
       service: deps.rewards.service,
@@ -833,11 +841,26 @@ if (isMain) {
   const customerTokenVerifier = new ShopifyCustomerTokenVerifier({
     shopDomain: config.shopDomain,
   });
+  // The embedded Shopify Admin panel needs the same three values Shopify uses
+  // to sign its session tokens; without them that login path stays closed.
+  const shopifyEmbeddedAdminReady = canonicalShopDomain(config.shopDomain) !== ''
+    && config.shopifyAppClientId !== ''
+    && config.webhookSecret !== '';
   const adminAuthorizer = new ServerAdminAuthorizer({
     appAccounts,
     customerTokenVerifier,
     principals: adminPrincipals,
     ownerShopifyCustomerIds: config.ownerShopifyCustomerIds,
+    ...(shopifyEmbeddedAdminReady
+      ? {
+          shopifySessionTokens: new ShopifySessionTokenVerifier({
+            clientId: config.shopifyAppClientId,
+            clientSecret: config.webhookSecret,
+            shopDomain: config.shopDomain,
+          }),
+          ownerShopifyStaffIds: config.ownerShopifyStaffIds,
+        }
+      : {}),
   });
   const authRateLimiter = new SlidingWindowAdminRateLimiter(20, 60_000);
   let shopifyAdmin: ShopifyAdminClient | undefined;
@@ -988,6 +1011,14 @@ if (isMain) {
       ? new PgEngagementPrivacyRepository(pool)
       : undefined,
     accountDeletion,
+    ...(shopifyEmbeddedAdminReady
+      ? {
+          shopifyAdminPanel: {
+            clientId: config.shopifyAppClientId,
+            shopDomain: config.shopDomain,
+          },
+        }
+      : {}),
   });
   const server = app.listen(config.port, () => {
     logger.info('accounts & orders API listening', { port: config.port });
