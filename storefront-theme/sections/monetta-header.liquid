@@ -75,7 +75,11 @@
     </div>
   </div>
 
-  {%- comment -%}The guide's categories (Bolsas, Carteras, Relojes, Perfumes, Marcas, Mayoreo); snippets/monetta-guia-url.liquid resolves each.{%- endcomment -%}
+  {%- comment -%}
+    The guide's categories (Bolsas, Carteras, Relojes, Perfumes, Marcas, Mayoreo); snippets/monetta-guia-url.liquid resolves
+    each. Not on a collection: its own category pills (snippets/monetta-guia-pills.liquid) sit right below and replace them.
+  {%- endcomment -%}
+  {%- unless template.name == 'collection' -%}
   <nav class="site-nav" aria-label="Categorías">
     <ul class="site-nav__list" role="list">
       {%- assign nav_entries = 'bolsas:Bolsas,carteras:Carteras,relojes:Relojes,perfumes:Perfumes,categorias:Marcas,mayoreo:Mayoreo' | split: ',' -%}
@@ -87,6 +91,7 @@
       {%- endfor -%}
     </ul>
   </nav>
+  {%- endunless -%}
 
   <dialog class="overlay overlay--drawer-left" id="menu-drawer" aria-labelledby="menu-title">
     <div class="overlay__backdrop" data-overlay-close></div>

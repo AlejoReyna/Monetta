@@ -196,14 +196,15 @@
     display: none;
   }
 
-  /* Tablet: the row scrolls; a soft edge says there is more. A focused link stops short of it
-     (scroll-padding), and the last one can: scroll-padding makes no scrollable room at the end, so the
-     row has real end padding as wide as the fade (plus the ring), enough to take the final link out of it. */
+  /* Centred under the search field when the links fit (the six do from 768px): the row is as wide as its links and its
+     own auto margin centres it. If they ever overflow (a side inset, larger text) the row is as wide as the window,
+     starts at its padding and scrolls; justify-content: center would split the overflow between both sides, and the
+     start side could be neither scrolled to nor kept out from under the inset. */
   .site-nav__list {
-    -webkit-mask-image: linear-gradient(90deg, #000 88%, transparent);
-    mask-image: linear-gradient(90deg, #000 88%, transparent);
-    scroll-padding-inline: 12px 12%;
-    padding-right: max(calc(var(--gutter) - 12px), var(--safe-right), calc(12% + 8px));
+    width: fit-content;
+    max-width: min(100%, var(--content-max));
+    padding: 0 var(--edge-r) 0 var(--edge-l);
+    scroll-padding-inline: 12px;
   }
 
   /* The row clips whatever falls outside its 44px box (it scrolls), which took the top and bottom edges of
@@ -289,18 +290,6 @@
     position: static;
   }
 
-  /* Centred when the links fit: the row is as wide as its links and its own auto margin centres it. When
-     they overflow a little (1024–1059px, or with a side inset) the row is as wide as the window, starts at its
-     padding and scrolls; justify-content: center would split the overflow between both sides, and the start
-     side can be neither scrolled to nor kept out from under the inset. */
-  .site-nav__list {
-    width: fit-content;
-    max-width: min(100%, var(--content-max));
-    padding: 0 var(--edge-r) 0 var(--edge-l);
-    -webkit-mask-image: none;
-    mask-image: none;
-    scroll-padding-inline: 12px;
-  }
 }
 
 /* ------------------------------------------------------- Header search */

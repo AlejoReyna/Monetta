@@ -507,6 +507,12 @@
     padding-right: 4px;
   }
 
+  /* A collection's header has no category row (its pills replace it): nothing to clear under the header. */
+  [data-template='collection'] .collection-layout--filters .filter-sidebar {
+    top: calc(var(--strip-h) + var(--header-h) + 16px);
+    max-height: calc(100vh - var(--strip-h) - var(--header-h) - 32px);
+  }
+
   [data-listing] .filters-button {
     display: none;
   }

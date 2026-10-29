@@ -541,6 +541,7 @@
   .guia-styles__list {
     gap: var(--space-4);
     max-width: 760px;
+    margin-inline: auto;
   }
 
   .guia-styles__icon {
