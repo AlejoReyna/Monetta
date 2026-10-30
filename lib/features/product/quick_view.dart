@@ -38,6 +38,7 @@ import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../catalog/product_tile.dart' show PackshotBlend;
 import '../checkout/mini_cart.dart';
+import '../navigation/duo_workspace.dart';
 import 'product_selection.dart';
 import 'purchase_dock.dart';
 
@@ -60,6 +61,26 @@ Future<void> showProductQuickView(
 }) {
   final store = StoreScope.of(context);
   store.record(EventType.galleryInteraction, productId: product.id);
+  // A two-sided window shows the card on its right side, beside the catalog,
+  // with no veil: touching another piece replaces it.
+  final shownBeside = DuoWorkspace.showPane(
+    context,
+    DuoPanePage(
+      kind: DuoPaneKind.preview,
+      productId: product.id,
+      builder: (paneContext) => StoreScope(
+        notifier: store,
+        child: _QuickViewSheet(
+          product: product,
+          initialVariantIndex: initialVariantIndex,
+          requireChoice: requireChoice,
+          parentContext: paneContext,
+          embedded: true,
+        ),
+      ),
+    ),
+  );
+  if (shownBeside) return Future<void>.value();
   return showGeneralDialog<void>(
     context: context,
     anchorPoint: presentationAnchor(context),
@@ -90,11 +111,16 @@ class _QuickViewSheet extends StatefulWidget {
     required this.parentContext,
     this.initialVariantIndex = 0,
     this.requireChoice = false,
+    this.embedded = false,
   });
 
   final Product product;
   final BuildContext parentContext;
   final int initialVariantIndex;
+
+  /// The card as a page of a two-sided window's right side rather than a
+  /// dialog: it stays after an add, and «×» returns that side to the bag.
+  final bool embedded;
 
   /// Open with no option chosen so the shopper picks one explicitly (the "+"
   /// of a card with several variants).
@@ -167,6 +193,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       return;
     }
     NotificationScope.maybeOf(context)?.recordPushOutcome('add_to_cart');
+    if (widget.embedded) {
+      // Beside the bag the card stays; the add is confirmed on that side.
+      setState(() => _adding = false);
+      await showMiniCart(context);
+      return;
+    }
     Navigator.of(context).pop();
     // Same confirmation as the ficha — one modal at a time.
     if (parent.mounted) {
@@ -178,6 +210,11 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     final product = widget.product;
     final parent = widget.parentContext;
     final variantIndex = _variantIndex ?? 0;
+    if (widget.embedded) {
+      // The product replaces this card on the same side.
+      openProduct(context, product, initialVariantIndex: variantIndex);
+      return;
+    }
     Navigator.of(context).pop();
     if (parent.mounted) {
       openProduct(parent, product, initialVariantIndex: variantIndex);
@@ -268,13 +305,14 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     required IconData icon,
     required double size,
     required BoutiquePalette palette,
+    VoidCallback? onPressed,
   }) {
     final dark = Theme.of(context).brightness == Brightness.dark;
     final glyph = Icon(icon, size: size, color: palette.ink);
     return IconButton(
       key: key,
       tooltip: tooltip,
-      onPressed: () => Navigator.of(context).pop(),
+      onPressed: onPressed ?? () => Navigator.of(context).pop(),
       constraints: const BoxConstraints.tightFor(
         width: BoutiqueSpace.tapTarget,
         height: BoutiqueSpace.tapTarget,
@@ -360,6 +398,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                 icon: Icons.close,
                 size: 24,
                 palette: palette,
+                onPressed: widget.embedded
+                    ? () => DuoWorkspace.showBag(context)
+                    : null,
               ),
             ),
           ],
@@ -534,34 +575,43 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
 
     final media = MediaQuery.of(context);
     final screen = media.size;
-    final cardWidth = math.max(
-      0.0,
-      math.min(
-        math.min(screen.width * _kCardWidthFactor, _kCardMaxWidth),
-        screen.width - 2 * _kCardSideMargin,
-      ),
-    );
+    // On a two-sided window's right side the card takes that side's width.
+    final cardWidth = widget.embedded
+        ? math.max(0.0, screen.width - 2 * BoutiqueSpace.lg)
+        : math.max(
+            0.0,
+            math.min(
+              math.min(screen.width * _kCardWidthFactor, _kCardMaxWidth),
+              screen.width - 2 * _kCardSideMargin,
+            ),
+          );
     // The card never leaves the safe area nor the keyboard: whatever does not
     // fit scrolls inside it. A phone with the keyboard up reports no bottom
     // padding, so the larger of the two is the bottom edge.
     final bottomEdge = math.max(media.padding.bottom, media.viewInsets.bottom);
 
-    return Padding(
+    final card = Padding(
       padding: EdgeInsets.fromLTRB(
         0,
         media.padding.top + BoutiqueSpace.lg,
         0,
         bottomEdge + BoutiqueSpace.lg,
       ),
-      child: Center(
+      child: Align(
+        alignment: widget.embedded ? Alignment.topCenter : Alignment.center,
         child: SizedBox(
           width: cardWidth,
           child: Material(
             key: const Key('quick-view-card'),
             color: palette.canvas,
             clipBehavior: Clip.antiAlias,
-            shape: const RoundedRectangleBorder(
-              borderRadius: BorderRadius.all(Radius.circular(_kCardRadius)),
+            shape: RoundedRectangleBorder(
+              borderRadius:
+                  const BorderRadius.all(Radius.circular(_kCardRadius)),
+              // On the canvas of the right side the card needs an edge.
+              side: widget.embedded
+                  ? BorderSide(color: palette.hairline)
+                  : BorderSide.none,
             ),
             child: SingleChildScrollView(
               child: Column(
@@ -654,6 +704,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
           ),
         ),
       ),
+    );
+    if (!widget.embedded) return card;
+    return Scaffold(
+      key: const Key('duo-preview'),
+      backgroundColor: palette.canvas,
+      body: card,
     );
   }
 }

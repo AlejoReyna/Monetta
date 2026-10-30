@@ -21,7 +21,9 @@
 /// ([showProductQuickView]); the brown «VER PRODUCTO» pill opens the product
 /// page ([openProduct]). Inside a tablet detail pane ([BrowseDetailScope]) a
 /// tap selects the product in that pane instead. The card has no "+": adding
-/// to the bag happens in the quick view.
+/// to the bag happens in the quick view. On a two-sided window
+/// ([DuoWorkspace]) both open on the right side, and a long press lifts the
+/// card so it can be dropped on the bag there.
 ///
 /// Every parameter except [product] is optional.
 library;
@@ -30,11 +32,17 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../data/media/media_url.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/events.dart';
+import '../boutique/boutique_tokens.dart';
+import '../checkout/mini_cart.dart';
+import '../navigation/duo_workspace.dart';
 import '../product/product_screen.dart';
+import '../product/product_selection.dart';
 import '../product/quick_view.dart';
 import 'product_tile.dart';
 import 'browse_detail_layout.dart';
@@ -135,25 +143,104 @@ class ProductCard extends StatelessWidget {
     final facets = store.facetsFor(product.id);
     final wishlisted = store.wishlist.contains(product.id);
     final data = ProductTileData.fromProduct(product, facets: facets);
+    // Beside the bag a long press lifts the card instead of opening the card.
+    final lifts = DuoWorkspace.isDual(context, listen: true) &&
+        DuoWorkspace.regionOf(context) == DuoRegion.browse;
 
-    return ProductResultAnchor(
-      productId: product.id,
-      child: MonettaProductTile(
-        data: data,
-        density: density,
-        eyebrow: urgency,
-        wishlisted: wishlisted,
-        onToggleWishlist:
-            showWishlist ? () => store.toggleWishlist(product.id) : null,
-        onQuickView: () => _longPress(context),
-        footer: showViewProduct
-            ? TileViewProductButton(
-                key: Key('view-product-${product.id}'),
-                onPressed: () => openProduct(context, product),
-              )
-            : null,
-        semanticHint: 'Abre la vista previa',
-        onTap: () => _tap(context),
+    return DuoBagDragSource(
+      drag: productBagDrag(product),
+      child: ProductResultAnchor(
+        productId: product.id,
+        child: MonettaProductTile(
+          data: data,
+          density: density,
+          eyebrow: urgency,
+          wishlisted: wishlisted,
+          onToggleWishlist:
+              showWishlist ? () => store.toggleWishlist(product.id) : null,
+          onQuickView: lifts ? null : () => _longPress(context),
+          footer: showViewProduct
+              ? TileViewProductButton(
+                  key: Key('view-product-${product.id}'),
+                  onPressed: () => openProduct(context, product),
+                )
+              : null,
+          semanticHint: 'Abre la vista previa',
+          onTap: () => _tap(context),
+        ),
+      ),
+    );
+  }
+}
+
+/// How a card for [product] is dragged to a two-sided window's bag.
+DuoBagDrag productBagDrag(Product product) => DuoBagDrag(
+      feedback: _BagDragFeedback(product: product),
+      onDrop: (paneContext) => _dropInBag(paneContext, product),
+    );
+
+/// Dropped on the bag: one buyable variant goes in and is confirmed there;
+/// several open the card on that side to choose one, so a variant is never
+/// picked on the shopper's behalf. The same rule as the card's "+".
+Future<void> _dropInBag(BuildContext paneContext, Product product) async {
+  if (selectableVariants(product).length > 1) {
+    DuoWorkspace.showBag(paneContext);
+    await showProductQuickView(paneContext, product, requireChoice: true);
+    return;
+  }
+  final result = await tryAddSelectionToBag(paneContext, product, 0);
+  if (!paneContext.mounted) return;
+  final message = switch (result.status) {
+    BagAddStatus.added => null,
+    BagAddStatus.soldOut => 'Esta opción está agotada.',
+    BagAddStatus.unavailable => 'Esta pieza no está disponible por ahora.',
+    BagAddStatus.failed => 'No pudimos agregar la pieza. Intenta de nuevo.',
+  };
+  if (message != null) {
+    ScaffoldMessenger.maybeOf(paneContext)?.showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+    return;
+  }
+  NotificationScope.maybeOf(paneContext)?.recordPushOutcome('add_to_cart');
+  DuoWorkspace.showBag(paneContext);
+  await showMiniCart(paneContext);
+}
+
+/// The photograph that follows the finger while a card is dragged to the bag.
+class _BagDragFeedback extends StatelessWidget {
+  const _BagDragFeedback({required this.product});
+
+  final Product product;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Material(
+      key: const Key('duo-drag-feedback'),
+      color: palette.canvas,
+      elevation: 4,
+      shadowColor: const Color(0x29000000),
+      clipBehavior: Clip.antiAlias,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+        side: BorderSide(color: palette.hairline),
+      ),
+      child: SizedBox(
+        width: 96,
+        height: 112,
+        child: Padding(
+          padding: const EdgeInsets.all(BoutiqueSpace.sm),
+          child: PackshotBlend(
+            ground: palette.canvas,
+            child: MonettaImage(
+              url: product.primaryImage,
+              fit: BoxFit.contain,
+              cacheWidth: MediaUrl.thumbWidth,
+              fallbackLabel: product.title,
+            ),
+          ),
+        ),
       ),
     );
   }
@@ -164,22 +251,41 @@ void openProduct(
   Product product, {
   int initialVariantIndex = 0,
 }) {
+  final store = StoreScope.of(context);
+  // One key wherever the page is drawn: a window that opens moves it to its
+  // right side with its state.
+  final key = GlobalKey(debugLabel: 'product ${product.id}');
+  Widget page(BuildContext _) => StoreScope(
+        notifier: store,
+        child: ProductScreen(
+          key: key,
+          productId: product.id,
+          initialVariantIndex: initialVariantIndex,
+        ),
+      );
+  final beside = DuoPanePage(
+    kind: DuoPaneKind.product,
+    productId: product.id,
+    builder: page,
+  );
+  // A two-sided window opens the product on its right side, beside the list.
+  if (DuoWorkspace.showPane(context, beside)) {
+    store.record(EventType.productView, productId: product.id);
+    return;
+  }
   final browse = BrowseDetailScope.maybeOf(context);
   if (browse != null &&
       context.findAncestorWidgetOfExactType<ProductScreen>() == null) {
     browse.select(product, initialVariantIndex);
     return;
   }
-  final store = StoreScope.of(context);
   store.record(EventType.productView, productId: product.id);
   Navigator.of(context).push(
     monettaFadeRoute(
-      StoreScope(
-        notifier: store,
-        child: ProductScreen(
-          productId: product.id,
-          initialVariantIndex: initialVariantIndex,
-        ),
+      Builder(builder: page),
+      settings: RouteSettings(
+        name: DuoWorkspace.productRoute,
+        arguments: beside,
       ),
     ),
   );

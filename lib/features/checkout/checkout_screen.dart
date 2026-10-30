@@ -20,6 +20,7 @@ import '../../app/cart_controller.dart';
 import '../../app/storefront_layout.dart';
 import '../../platform/system_layout_context.dart';
 import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/duo_workspace.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../catalog/categories_screen.dart';
 import '../../app/checkout_buyer_identity.dart';
@@ -93,13 +94,16 @@ Future<void> openBag(
   BuildContext context, {
   SecureCheckoutLauncher? launchSecureCheckout,
 }) {
+  // A two-sided window keeps the bag on its right side.
+  if (DuoWorkspace.showBag(context)) return Future<void>.value();
   final store = StoreScope.of(context);
-  return Navigator.of(context).push(
+  return DuoWorkspace.navigatorFor(context).push(
     monettaFadeRoute(
       StoreScope(
         notifier: store,
         child: BagScreen(launchSecureCheckout: launchSecureCheckout),
       ),
+      settings: const RouteSettings(name: DuoWorkspace.bagRoute),
     ),
   );
 }
@@ -152,9 +156,18 @@ class BagAction extends StatelessWidget {
 }
 
 class BagScreen extends StatefulWidget {
-  const BagScreen({this.launchSecureCheckout, super.key});
+  const BagScreen({
+    this.launchSecureCheckout,
+    this.embedded = false,
+    super.key,
+  });
 
   final SecureCheckoutLauncher? launchSecureCheckout;
+
+  /// The bag as the first page of a two-sided window's right side: no header
+  /// or way back (the catalog stays on the left), no recommendations, and an
+  /// empty state that only says what will appear here.
+  final bool embedded;
 
   @override
   State<BagScreen> createState() => _BagScreenState();
@@ -183,7 +196,12 @@ class _BagScreenState extends State<BagScreen> {
       for (final line in lines)
         LocalCartIntent(variantId: line.variant.id, quantity: line.quantity),
     ];
-    if (cartScope != null && sessionScope != null && lines.isNotEmpty) {
+    // The right side keeps the bag mounted; it reconciles only while shown.
+    final shown = !widget.embedded || TickerMode.valuesOf(context).enabled;
+    if (cartScope != null &&
+        sessionScope != null &&
+        lines.isNotEmpty &&
+        shown) {
       _scheduleReconciliation(
         cartScope.notifier!,
         cartScope.checkoutCoordinator,
@@ -194,18 +212,20 @@ class _BagScreenState extends State<BagScreen> {
 
     return AdaptiveStorefrontScaffold(
       backgroundColor: palette.canvas,
-      appBar: _BoutiqueBar(
-        leading: IconButton(
-          tooltip: 'Volver',
-          onPressed: () => Navigator.of(context).pop(),
-          icon: const Icon(Icons.arrow_back, size: 20),
-        ),
-      ),
+      appBar: widget.embedded
+          ? null
+          : _BoutiqueBar(
+              leading: IconButton(
+                tooltip: 'Volver',
+                onPressed: () => Navigator.of(context).pop(),
+                icon: const Icon(Icons.arrow_back, size: 20),
+              ),
+            ),
       body: SafeArea(
         bottom: true,
         child: SystemUsableSurface(
           child: lines.isEmpty
-              ? const _EmptyBag()
+              ? _EmptyBag(embedded: widget.embedded)
               : _BagContents(
                   lines: lines,
                   launchSecureCheckout: widget.launchSecureCheckout,
@@ -213,6 +233,7 @@ class _BagScreenState extends State<BagScreen> {
                   checkoutCoordinator: cartScope?.checkoutCoordinator,
                   cartScope: sessionScope,
                   localIntent: localIntent,
+                  embedded: widget.embedded,
                 ),
         ),
       ),
@@ -224,7 +245,8 @@ class _BagScreenState extends State<BagScreen> {
               onSelected: (destination) {
                 switch (destination) {
                   case MonettaBottomDestination.home:
-                    Navigator.of(context).popUntil((route) => route.isFirst);
+                    DuoWorkspace.navigatorFor(context)
+                        .popUntil((route) => route.isFirst);
                   case MonettaBottomDestination.catalog:
                     unawaited(openCategories(context));
                   case MonettaBottomDestination.bag:
@@ -274,6 +296,7 @@ class _BagContents extends StatelessWidget {
     required this.checkoutCoordinator,
     required this.cartScope,
     required this.localIntent,
+    this.embedded = false,
   });
 
   final List<BagLine> lines;
@@ -282,6 +305,10 @@ class _BagContents extends StatelessWidget {
   final ShopifyCheckoutCoordinator? checkoutCoordinator;
   final CartSessionScope? cartScope;
   final List<LocalCartIntent> localIntent;
+
+  /// On a two-sided window's right side the catalog beside it is the place to
+  /// discover more, so the bag carries no recommendations.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
@@ -355,7 +382,8 @@ class _BagContents extends StatelessWidget {
         return;
       }
       unawaited(
-        Navigator.of(context).push(
+        // With two sides, checkout spans both: form left, summary right.
+        DuoWorkspace.taskNavigatorFor(context).push(
           monettaFadeRoute(
             StoreScope(
               notifier: store,
@@ -456,7 +484,9 @@ class _BagContents extends StatelessWidget {
               );
 
         final bagIds = {for (final line in lines) line.product.id};
-        final recommendations = _BagRecommendations(excludeIds: bagIds);
+        final recommendations = embedded
+            ? const SizedBox.shrink()
+            : _BagRecommendations(excludeIds: bagIds);
 
         if (wide) {
           return SingleChildScrollView(
@@ -903,83 +933,152 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
       ),
       body: SafeArea(
         bottom: true,
-        child: SingleChildScrollView(
-          controller: _scrollController,
-          padding: const EdgeInsets.only(bottom: 40),
-          child: Column(
-            children: [
-              _CheckoutProgress(activeIndex: _reviewing ? 2 : 1),
-              LayoutBuilder(
-                builder: (context, constraints) {
-                  final wide = constraints.maxWidth >= 900;
-                  final form = _reviewing
-                      ? _ReviewPanel(
-                          email: _email.text,
-                          phone: _phone.text,
-                          openingSheet: _openingSheet,
-                          returnPhase: _returnPhase,
-                          returnDetail: _returnDetail,
-                          payEnabled: !_retryBlocked,
-                          showPayButton: !_orderFound,
-                          paymentMethods: widget.availablePaymentMethods,
-                          selectedPayment: _selectedPayment,
-                          onSelectPayment: (value) =>
-                              setState(() => _selectedPayment = value),
-                          onEdit: () => setState(() => _reviewing = false),
-                          onPay: () => unawaited(_pay()),
-                          onViewOrders: _viewOrders,
-                          onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
-                        )
-                      : _ContactForm(
-                          formKey: _formKey,
-                          email: _email,
-                          phone: _phone,
-                          onContinue: _review,
-                        );
-
-                  final summary = _CheckoutSummary(
-                    lines: store.bagLines,
-                    subtotal: store.bagSubtotal,
+        child: ViewRelativeLayout(
+          builder: (context, box, origin) {
+            final form = _reviewing
+                ? _ReviewPanel(
+                    email: _email.text,
+                    phone: _phone.text,
+                    openingSheet: _openingSheet,
+                    returnPhase: _returnPhase,
+                    returnDetail: _returnDetail,
+                    payEnabled: !_retryBlocked,
+                    showPayButton: !_orderFound,
+                    paymentMethods: widget.availablePaymentMethods,
+                    selectedPayment: _selectedPayment,
+                    onSelectPayment: (value) =>
+                        setState(() => _selectedPayment = value),
+                    onEdit: () => setState(() => _reviewing = false),
+                    onPay: () => unawaited(_pay()),
+                    onViewOrders: _viewOrders,
+                    onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
+                  )
+                : _ContactForm(
+                    formKey: _formKey,
+                    email: _email,
+                    phone: _phone,
+                    onContinue: _review,
                   );
 
-                  if (!wide) {
-                    return Column(
-                      children: [
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                          child: form,
-                        ),
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                          child: summary,
-                        ),
-                      ],
-                    );
-                  }
-                  return Center(
-                    child: ConstrainedBox(
-                      constraints: const BoxConstraints(maxWidth: 1120),
-                      child: Padding(
-                        padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
-                        child: Row(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Expanded(flex: 6, child: form),
-                            const SizedBox(width: 56),
-                            Expanded(flex: 4, child: summary),
-                          ],
-                        ),
+            final summary = _CheckoutSummary(
+              lines: store.bagLines,
+              subtotal: store.bagSubtotal,
+            );
+            final progress = _CheckoutProgress(activeIndex: _reviewing ? 2 : 1);
+
+            // A two-sided window: the form on the left of the crease and the
+            // order summary held on the right, each scrolling on its own.
+            final crease = _creaseWithin(context, origin & box.biggest);
+            if (crease != null) {
+              return Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  SizedBox(
+                    width: crease.left,
+                    child: SingleChildScrollView(
+                      key: const Key('checkout-duo-form'),
+                      controller: _scrollController,
+                      padding: const EdgeInsets.only(bottom: 40),
+                      child: Column(
+                        children: [
+                          progress,
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                            child: form,
+                          ),
+                        ],
                       ),
                     ),
-                  );
-                },
+                  ),
+                  SizedBox(
+                    width: crease.width,
+                    child: Center(
+                      child: SizedBox(
+                        width: .5,
+                        child: ColoredBox(color: palette.hairline),
+                      ),
+                    ),
+                  ),
+                  Expanded(
+                    child: SingleChildScrollView(
+                      key: const Key('checkout-duo-summary'),
+                      padding: const EdgeInsets.fromLTRB(20, 28, 20, 40),
+                      child: summary,
+                    ),
+                  ),
+                ],
+              );
+            }
+
+            return SingleChildScrollView(
+              controller: _scrollController,
+              padding: const EdgeInsets.only(bottom: 40),
+              child: Column(
+                children: [
+                  progress,
+                  LayoutBuilder(
+                    builder: (context, constraints) {
+                      final wide = constraints.maxWidth >= 900;
+                      if (!wide) {
+                        return Column(
+                          children: [
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
+                              child: form,
+                            ),
+                            Padding(
+                              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                              child: summary,
+                            ),
+                          ],
+                        );
+                      }
+                      return Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(maxWidth: 1120),
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
+                            child: Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(flex: 6, child: form),
+                                const SizedBox(width: 56),
+                                Expanded(flex: 4, child: summary),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
   }
+}
+
+/// The vertical division a full-width checkout spans on a two-sided window,
+/// in the body's own coordinates. Null unless the form keeps the browsing
+/// side's minimum width and the summary a usable column.
+Rect? _creaseWithin(BuildContext context, Rect body) {
+  if (StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))) {
+    return null;
+  }
+  for (final division in SystemLayoutScope.of(context).divisions) {
+    final bounds = division.bounds;
+    if (bounds.isEmpty || bounds.height < body.height * .5) continue;
+    final left = bounds.left - body.left;
+    final right = body.right - bounds.right;
+    if (left >= StorefrontLayout.browseMinimum &&
+        right >= StorefrontLayout.regionMinimumWidth) {
+      return Rect.fromLTRB(left, 0, bounds.right - body.left, body.height);
+    }
+  }
+  return null;
 }
 
 class _BoutiqueBar extends StatelessWidget implements PreferredSizeWidget {
@@ -2203,11 +2302,58 @@ class _ProductImage extends StatelessWidget {
 }
 
 class _EmptyBag extends StatelessWidget {
-  const _EmptyBag();
+  const _EmptyBag({this.embedded = false});
+
+  /// Beside the catalog there is no store to go back to.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    if (embedded) {
+      return Center(
+        key: const Key('duo-empty-bag'),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(32),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: palette.surfaceDeep,
+                  border: Border.all(color: palette.hairline, width: .5),
+                ),
+                child: Icon(
+                  Icons.shopping_bag_outlined,
+                  size: 30,
+                  color: palette.ink,
+                ),
+              ),
+              const SizedBox(height: 22),
+              Text(
+                'Tu bolsa está vacía',
+                textAlign: TextAlign.center,
+                style: boutiqueDisplay(26),
+              ),
+              const SizedBox(height: 9),
+              Text(
+                'Lo que agregues aparecerá aquí. También puedes mantener '
+                'presionada una pieza del catálogo y arrastrarla a este lado.',
+                textAlign: TextAlign.center,
+                style: boutiqueText(
+                  size: 13,
+                  color: palette.inkMuted,
+                  height: 1.45,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
     return Center(
       child: Padding(
         padding: const EdgeInsets.all(32),

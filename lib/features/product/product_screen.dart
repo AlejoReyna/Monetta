@@ -45,6 +45,7 @@ import '../navigation/monetta_bottom_navigation.dart';
 import 'product_selection.dart';
 import 'product_adaptive_body.dart';
 import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/duo_workspace.dart';
 import '../../platform/system_layout_context.dart';
 import '../../data/shopify/storefront_config.dart';
 import 'purchase_dock.dart';
@@ -585,7 +586,8 @@ class _ProductScreenState extends State<ProductScreen> {
           onSelected: (destination) {
             switch (destination) {
               case MonettaBottomDestination.home:
-                Navigator.of(context).popUntil((route) => route.isFirst);
+                DuoWorkspace.navigatorFor(context)
+                    .popUntil((route) => route.isFirst);
               case MonettaBottomDestination.catalog:
                 if (widget.onClose != null) {
                   _recordDwellAndPop();
@@ -987,6 +989,9 @@ class _AvailabilityLine extends StatelessWidget {
   }
 }
 
+/// Narrowest width that still holds the three guarantees side by side.
+const double _kTrustRowMin = 340;
+
 class _TrustRow extends StatelessWidget {
   const _TrustRow();
 
@@ -1039,25 +1044,40 @@ class _TrustRow extends StatelessWidget {
           ],
         );
 
+    final stacked = Column(
+      key: const Key('product-trust-row'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        for (var i = 0; i < items.length; i++) ...[
+          if (i > 0) const SizedBox(height: BoutiqueSpace.md),
+          item(i),
+        ],
+      ],
+    );
     // With enlarged text three columns would truncate the copy: stack them.
     if (StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))) {
-      return Column(
-        key: const Key('product-trust-row'),
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          for (var i = 0; i < items.length; i++) ...[
-            if (i > 0) const SizedBox(height: BoutiqueSpace.md),
-            item(i),
-          ],
-        ],
-      );
+      return stacked;
     }
+    // So would a narrow column, such as a two-sided window's right side,
+    // where «autenticidad» no longer fits a third of the width.
+    return LayoutBuilder(
+      builder: (context, constraints) => constraints.maxWidth < _kTrustRowMin
+          ? stacked
+          : _trustColumns(palette, items.length, item),
+    );
+  }
+
+  Widget _trustColumns(
+    BoutiquePalette palette,
+    int count,
+    Widget Function(int) item,
+  ) {
     return IntrinsicHeight(
       key: const Key('product-trust-row'),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          for (var i = 0; i < items.length; i++) ...[
+          for (var i = 0; i < count; i++) ...[
             if (i > 0)
               Padding(
                 padding: const EdgeInsets.symmetric(

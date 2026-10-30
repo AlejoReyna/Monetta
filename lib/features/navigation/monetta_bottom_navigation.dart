@@ -71,6 +71,7 @@ class MonettaBottomNavigation extends StatelessWidget {
     required this.current,
     required this.bagCount,
     required this.onSelected,
+    this.secondary,
     this.vertical = false,
     super.key,
   });
@@ -79,12 +80,17 @@ class MonettaBottomNavigation extends StatelessWidget {
 
   MonettaBottomNavigation asRail() => MonettaBottomNavigation(
         current: current,
+        secondary: secondary,
         bagCount: bagCount,
         onSelected: onSelected,
         vertical: true,
       );
 
   final MonettaBottomDestination? current;
+
+  /// What the second side of a two-sided window shows (the bag or the
+  /// account). Only the vertical rail marks it, the same way as [current].
+  final MonettaBottomDestination? secondary;
   final int bagCount;
   final ValueChanged<MonettaBottomDestination> onSelected;
 
@@ -100,7 +106,7 @@ class MonettaBottomNavigation extends StatelessWidget {
         children: [
           for (final destination in MonettaBottomDestination.values)
             Semantics(
-              selected: destination == current,
+              selected: destination == current || destination == secondary,
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 4),
                 child: IconButton(
@@ -111,12 +117,13 @@ class MonettaBottomNavigation extends StatelessWidget {
                       : _labelOf(destination),
                   style: IconButton.styleFrom(
                     minimumSize: const Size(48, 48),
-                    side: destination == current
+                    side: destination == current || destination == secondary
                         ? BorderSide(color: colors.navigationForeground)
                         : null,
-                    backgroundColor: destination == current
-                        ? colors.navigationForeground.withValues(alpha: .08)
-                        : null,
+                    backgroundColor:
+                        destination == current || destination == secondary
+                            ? colors.navigationForeground.withValues(alpha: .08)
+                            : null,
                   ),
                   onPressed: () => onSelected(destination),
                   icon: destination == MonettaBottomDestination.bag &&

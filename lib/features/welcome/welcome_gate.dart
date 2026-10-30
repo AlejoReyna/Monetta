@@ -35,6 +35,7 @@ import 'package:flutter/material.dart';
 import '../../app/onboarding_controller.dart';
 import '../../app/product_telemetry.dart';
 import '../../main.dart';
+import '../navigation/duo_workspace.dart';
 import '../onboarding/onboarding_sheet.dart';
 import 'welcome_screen.dart';
 
@@ -73,11 +74,19 @@ class _WelcomeGateState extends State<WelcomeGate> {
   /// shopper who is already browsing.
   bool? _showWelcome;
   bool _presenting = false;
+  DuoWorkspaceState? _workspace;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _showWelcome ??= OnboardingScope.maybeOf(context)?.shouldShow ?? false;
+    _workspace = DuoWorkspace.stateOf(context);
+  }
+
+  @override
+  void dispose() {
+    _workspace?.holdOneSide(this, hold: false);
+    super.dispose();
   }
 
   Future<void> _handleStart() async {
@@ -125,6 +134,8 @@ class _WelcomeGateState extends State<WelcomeGate> {
   @override
   Widget build(BuildContext context) {
     final visible = _showWelcome ?? false;
+    // The welcome is a whole-window moment: a two-sided window waits for it.
+    _workspace?.holdOneSide(this, hold: visible);
     return WelcomeScope(
       visible: visible,
       child: Stack(

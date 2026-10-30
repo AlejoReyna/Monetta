@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:integration_test/integration_test.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
-import 'package:monetta_app/features/catalog/browse_detail_layout.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
 import 'package:monetta_app/app/storefront_layout.dart';
 import 'package:monetta_app/features/checkout/mini_cart.dart';
@@ -137,7 +136,7 @@ void main() {
       await tester.pump(const Duration(seconds: 1));
       expect(find.byType(ProductScreen), findsOneWidget);
       final selected = tester.widget<ProductScreen>(find.byType(ProductScreen));
-      final state = tester.state(find.byType(ProductScreen));
+      var state = tester.state(find.byType(ProductScreen));
       final element = tester.element(find.byType(ProductScreen));
       final store = app.StoreScope.of(element);
       expect(
@@ -180,8 +179,15 @@ void main() {
             g.viewSize.width > g.viewSize.height &&
             g.divisions.every((r) => !r.active),
       );
+      // The piece chosen on the outer display moves to the right side with
+      // its state; the results fill the left side again.
       expect(tester.state(find.byType(ProductScreen)), same(state));
-      expect(find.byType(ProductCard), findsWidgets);
+      final crease = geometry().divisions.first.bounds;
+      expect(
+        tester.getRect(find.byType(ProductScreen)).left,
+        greaterThanOrEqualTo(crease.right - 1),
+      );
+      expect(find.byType(ProductCard).hitTestable(), findsWidgets);
       if (product.images.length > 1) {
         expect(
           tester
@@ -194,29 +200,41 @@ void main() {
       }
       await capture('03-actual-duo-landscape-browse-detail');
 
-      // A direct route retains the previous browsing session underneath and
-      // does not manufacture its own source collection.
-      expect(
-        BrowseDetailScope.maybeOf(tester.element(find.byType(ProductScreen))),
-        isNull,
-      );
-      openProduct(
-        tester.element(find.byType(ProductScreen)),
-        product,
-        initialVariantIndex: 0,
-      );
+      // Another piece previews on the right side, beside the results.
+      final cards = find.byType(ProductCard).hitTestable();
+      Finder? other;
+      for (var i = 0; i < cards.evaluate().length; i++) {
+        final candidate = cards.at(i);
+        if (tester.widget<ProductCard>(candidate).product.id != product.id &&
+            tester.getRect(candidate).right <= crease.left) {
+          other = candidate;
+          break;
+        }
+      }
+      expect(other, isNotNull, reason: 'a second piece on the left side');
+      await tester.tap(other!);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const Key('duo-preview')), findsOneWidget);
+      expect(find.byType(ProductCard).hitTestable(), findsWidgets);
+      await capture('04-actual-duo-landscape-preview');
+
+      // «VER PRODUCTO» opens the first piece on the right side again.
+      final viewFirst = find.byKey(Key('view-product-${product.id}')).first;
+      await tester.ensureVisible(viewFirst);
       await tester.pumpAndSettle();
-      expect(
-        tester.widget<ProductScreen>(find.byType(ProductScreen)).onClose,
-        isNull,
-      );
-      final directState = tester.state(find.byType(ProductScreen));
-      await capture('04-actual-duo-landscape-direct-product');
+      await tester.tap(viewFirst);
+      await tester.pump(const Duration(seconds: 1));
+      expect(find.byKey(const Key('duo-preview')), findsNothing);
+      state = tester.state(find.byType(ProductScreen));
+      if (selectableVariants(product).length > 1) {
+        tester.widget<ProductOptionSelector>(selector).onSelect(1);
+        await tester.pump();
+      }
       await waitPose(
         'partial-fold',
         (g) => g.divisions.any((r) => r.active && !r.bounds.isEmpty),
       );
-      expect(tester.state(find.byType(ProductScreen)), same(directState));
+      expect(tester.state(find.byType(ProductScreen)), same(state));
       final primary = find.byKey(const Key('purchase-dock-primary'));
       await tester.ensureVisible(primary);
       await tester.pump(const Duration(seconds: 1));
@@ -227,8 +245,6 @@ void main() {
       }
       await capture('05-actual-duo-partial-fold-product');
       await waitPose('open-flat', (g) => g.divisions.every((r) => !r.active));
-      await tester.binding.handlePopRoute();
-      await tester.pumpAndSettle();
       expect(tester.state(find.byType(ProductScreen)), same(state));
       await waitPose(
         'inner-portrait',

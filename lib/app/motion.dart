@@ -27,8 +27,12 @@ bool reduceMotion(BuildContext context) {
 
 /// Fade plus a 8 px rise. Used for shopper routes. Checkout should call this
 /// too so money screens do not slide like a list tile.
-Route<T> monettaFadeRoute<T extends Object?>(Widget page) {
+Route<T> monettaFadeRoute<T extends Object?>(
+  Widget page, {
+  RouteSettings? settings,
+}) {
   return PageRouteBuilder<T>(
+    settings: settings,
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionDuration: kEnter,
     reverseTransitionDuration: kSettle,
