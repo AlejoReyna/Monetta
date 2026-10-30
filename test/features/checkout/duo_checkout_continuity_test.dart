@@ -11,8 +11,7 @@ import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/main.dart';
 
 void main() {
-  testWidgets(
-      'cart reflows progress, heading, full name and quantity at largest text',
+  testWidgets('cart reflows heading, full name and quantity at largest text',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(390, 844);
@@ -44,10 +43,10 @@ void main() {
     scale.value = 3.2;
     await tester.pumpAndSettle();
     expect(tester.state(find.byType(BagScreen)), same(original));
-    final progress = find.text('Paso 1 de 4 · Bolsa');
-    expect(progress, findsOneWidget);
+    final heading = find.text('Mi bolsa');
+    expect(heading, findsOneWidget);
     expect(
-      tester.renderObject<RenderParagraph>(progress).textScaler.scale(12),
+      tester.renderObject<RenderParagraph>(heading).textScaler.scale(12),
       12 * 3.2,
     );
     expect(find.byKey(const ValueKey('bag-heading-stacked')), findsOneWidget);
@@ -73,8 +72,7 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets(
-      'contact draft and one fake checkout launch survive resizing and cancellation',
+  testWidgets('one fake checkout launch survives resizing and cancellation',
       (tester) async {
     tester.view.devicePixelRatio = 1;
     tester.view.physicalSize = const Size(390, 844);
@@ -101,22 +99,15 @@ void main() {
     );
     await tester.pump();
     final state = tester.state(find.byType(CheckoutFlowScreen));
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'buyer@example.invalid');
-    await tester.enterText(fields.at(1), '8112345678');
+    // Nothing to fill in: the pay control is there at every size.
+    expect(find.byType(EditableText), findsNothing);
     tester.view.physicalSize = const Size(1024, 768);
     await tester.pumpAndSettle();
-    final edits = tester
-        .widgetList<EditableText>(find.byType(EditableText))
-        .map((field) => field.controller.text)
-        .toList();
-    expect(edits, containsAll(['buyer@example.invalid', '8112345678']));
     expect(tester.state(find.byType(CheckoutFlowScreen)), same(state));
-    await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-    await tester.tap(find.text('REVISAR PEDIDO'));
+    final pay = find.byKey(const ValueKey('checkout-pay-button'));
+    await tester.ensureVisible(pay);
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('CONTINUAR AL PAGO SEGURO'));
-    await tester.tap(find.text('CONTINUAR AL PAGO SEGURO'));
+    await tester.tap(pay);
     await tester.pump();
     expect(drafts, hasLength(1));
     for (final size in [
@@ -129,7 +120,8 @@ void main() {
       expect(tester.state(find.byType(CheckoutFlowScreen)), same(state));
       expect(drafts, hasLength(1));
     }
-    expect(drafts.single.email, 'buyer@example.invalid');
+    // A guest: Shopify's checkout asks for the contact details.
+    expect(drafts.single.email, isEmpty);
     expect(
       drafts.single.lines.single.variant.id,
       store.bagLines.single.variant.id,

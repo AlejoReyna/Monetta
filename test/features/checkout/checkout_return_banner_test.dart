@@ -117,7 +117,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pump();
 
@@ -179,7 +179,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pumpAndSettle();
 
@@ -225,7 +225,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pumpAndSettle();
 
@@ -271,7 +271,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pumpAndSettle();
 
@@ -311,7 +311,7 @@ void main() {
         ),
       ),
     );
-    await _openReview(tester);
+    await _revealPay(tester);
     await tester.tap(find.byKey(const ValueKey('checkout-pay-button')));
     await tester.pumpAndSettle();
 
@@ -363,15 +363,11 @@ Future<CatalogStore> _loadedStore() async {
   return store;
 }
 
-Future<void> _openReview(WidgetTester tester) async {
+/// Checkout asks for nothing: the pay control is there from the start.
+Future<void> _revealPay(WidgetTester tester) async {
   await tester.pump();
-  final fields = find.byType(TextFormField);
-  await tester.enterText(fields.at(0), 'buyer@example.invalid');
-  await tester.enterText(fields.at(1), '8112345678');
-  await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-  await tester.tap(find.text('REVISAR PEDIDO'));
-  await tester.pumpAndSettle();
   await tester.ensureVisible(find.byKey(const ValueKey('checkout-pay-button')));
+  await tester.pumpAndSettle();
 }
 
 final class _ScriptedLookup implements CheckoutOrderLookup {

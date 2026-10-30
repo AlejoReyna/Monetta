@@ -1,12 +1,14 @@
 /// Monetta's pre-checkout experience — paquete D (Fig.13 bolsa, Fig.14
 /// checkout, Fig.15 confirmación).
 ///
-/// El flujo se detiene antes de tarjeta: producto, entrega y revisión son de
-/// Monetta; el pago vive en la URL alojada de Shopify para que los datos de
-/// tarjeta nunca entren a la app. Nunca se inventan métodos (Oxxo/Meses/
-/// PayPal): el panel de pago solo lista opciones reales recibidas por config;
-/// sin config muestra el aviso alojado. Los totales finales son de Shopify;
-/// los locales van marcados como estimación.
+/// La app muestra la bolsa y un checkout de un solo paso: el pedido, quién
+/// paga y «IR A PAGAR». No pide contacto: quien está conectado con Shopify es
+/// reconocido allá por su cuenta, y a un invitado el checkout alojado de
+/// Shopify le pide lo necesario si la tienda permite comprar sin cuenta.
+/// Dirección, envío y pago viven en esa URL alojada, así que los datos de
+/// tarjeta nunca entran a la app. Nunca se inventan métodos (Oxxo/Meses/
+/// PayPal): solo se nombran opciones reales recibidas por config. Los totales
+/// finales son de Shopify; los locales van marcados como estimación.
 library;
 
 import 'dart:async';
@@ -16,6 +18,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
+import '../../app/account_controller.dart';
 import '../../app/cart_controller.dart';
 import '../../app/storefront_layout.dart';
 import '../../platform/system_layout_context.dart';
@@ -32,7 +35,7 @@ import 'purchase_notices.dart';
 import '../../app/shopify_checkout_coordinator.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
-import '../../data/local/database.dart' show OrderSummary;
+import '../../data/local/database.dart' show Account, OrderSummary;
 import '../../data/media/media_url.dart';
 import '../../data/shopify/cart/cart_repository.dart';
 import '../../data/shopify/cart/cart_session_store.dart';
@@ -56,7 +59,9 @@ import 'shopify_cart_summary.dart';
 /// precargar buyer identity antes de abrir `cart.checkoutUrl`.
 ///
 /// Nunca se persiste desde esta feature. Solo se envía directo a Shopify para
-/// no pedir la dirección dos veces. No guarda tarjeta.
+/// no pedir la dirección dos veces. No guarda tarjeta. El correo es el de la
+/// cuenta conectada; vacío para un invitado, a quien Shopify se lo pide en su
+/// propio checkout.
 class CheckoutDraft {
   const CheckoutDraft({
     required this.lines,
@@ -72,6 +77,16 @@ class CheckoutDraft {
 typedef SecureCheckoutLauncher = Future<CheckoutResult> Function(
   CheckoutDraft draft,
 );
+
+/// The cart session of the shopper as they are now: their account's once
+/// they are signed in, this installation's guest cart before.
+CartSessionScope _sessionScopeFor(String shopDomain, Account? account) =>
+    account == null
+        ? CartSessionScope.guest(shopDomain: shopDomain)
+        : CartSessionScope.authenticated(
+            shopDomain: shopDomain,
+            localAccountId: account.localAccountId,
+          );
 typedef ExternalCheckoutFallback = Future<bool> Function();
 
 void openCheckoutOrders(BuildContext context) {
@@ -186,12 +201,7 @@ class _BagScreenState extends State<BagScreen> {
     final account = AccountScope.maybeOf(context)?.account;
     final sessionScope = cartScope == null
         ? null
-        : account == null
-            ? CartSessionScope.guest(shopDomain: cartScope.shopDomain)
-            : CartSessionScope.authenticated(
-                shopDomain: cartScope.shopDomain,
-                localAccountId: account.localAccountId,
-              );
+        : _sessionScopeFor(cartScope.shopDomain, account);
     final localIntent = [
       for (final line in lines)
         LocalCartIntent(variantId: line.variant.id, quantity: line.quantity),
@@ -359,7 +369,12 @@ class _BagContents extends StatelessWidget {
                   );
                   return checkout.present(
                     controller: controller,
-                    scope: scope,
+                    // Signing in on the checkout screen moves the guest cart
+                    // to the account; the scope follows the shopper as now.
+                    scope: _sessionScopeFor(
+                      scope.shopDomain,
+                      accountController?.account,
+                    ),
                     localIntent: currentIntent,
                     buyerIdentity: buyerIdentity,
                     onCompleted: (purchase) async {
@@ -497,8 +512,6 @@ class _BagContents extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const _CheckoutProgress(activeIndex: 0),
-                    const SizedBox(height: 8),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -539,7 +552,6 @@ class _BagContents extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.only(bottom: 32),
           children: [
-            const _CheckoutProgress(activeIndex: 0),
             heading,
             lineTiles,
             incentive,
@@ -608,43 +620,23 @@ class CheckoutFlowScreen extends StatefulWidget {
 }
 
 class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
-  final _formKey = GlobalKey<FormState>();
   final _scrollController = ScrollController();
-  final _email = TextEditingController();
-  final _phone = TextEditingController();
-  bool _reviewing = false;
   bool _openingSheet = false;
   bool _checkingOrder = false;
   bool _orderFound = false;
-  bool _didPrefillContact = false;
   int _returnGeneration = 0;
   CheckoutReturnPhase? _returnPhase;
   String? _returnDetail;
-  String? _selectedPayment;
   Timer? _pollTimer;
   Completer<void>? _pollDelay;
 
   bool get _retryBlocked => _openingSheet || _checkingOrder || _orderFound;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_didPrefillContact) return;
-    _didPrefillContact = true;
-    final account = AccountScope.maybeOf(context)?.account;
-    final email = account?.email?.trim();
-    if (email != null && email.isNotEmpty && _email.text.isEmpty) {
-      _email.text = email;
-    }
-  }
-
-  @override
   void dispose() {
     _returnGeneration += 1;
     _finishPollDelay();
     _scrollController.dispose();
-    _email.dispose();
-    _phone.dispose();
     super.dispose();
   }
 
@@ -666,17 +658,6 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     final completer = _pollDelay;
     _pollDelay = null;
     if (completer != null && !completer.isCompleted) completer.complete();
-  }
-
-  void _review() {
-    FocusScope.of(context).unfocus();
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    setState(() => _reviewing = true);
-    _scrollController.animateTo(
-      0,
-      duration: const Duration(milliseconds: 260),
-      curve: Curves.easeOut,
-    );
   }
 
   CheckoutOrderLookup? _lookup() {
@@ -781,13 +762,13 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
         _returnDetail = null;
       });
       try {
-        final email = _email.text.trim();
+        // Nothing is asked here: a connected shopper is recognized by Shopify
+        // through their account, and Shopify's own checkout asks a guest for
+        // contact details when the store allows buying without an account.
+        final email =
+            AccountScope.maybeOf(context)?.account?.email?.trim() ?? '';
         final result = await launcher(
-          CheckoutDraft(
-            lines: lines,
-            email: email,
-            phone: _phone.text.trim(),
-          ),
+          CheckoutDraft(lines: lines, email: email, phone: ''),
         );
         if (!mounted || generation != _returnGeneration) return;
         setState(() => _openingSheet = false);
@@ -924,9 +905,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
       appBar: _BoutiqueBar(
         leading: IconButton(
           tooltip: 'Volver',
-          onPressed: _reviewing
-              ? () => setState(() => _reviewing = false)
-              : () => Navigator.of(context).pop(),
+          onPressed: () => Navigator.of(context).pop(),
           icon: const Icon(Icons.arrow_back, size: 20),
         ),
         title: 'Checkout',
@@ -935,39 +914,31 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
         bottom: true,
         child: ViewRelativeLayout(
           builder: (context, box, origin) {
-            final form = _reviewing
-                ? _ReviewPanel(
-                    email: _email.text,
-                    phone: _phone.text,
-                    openingSheet: _openingSheet,
-                    returnPhase: _returnPhase,
-                    returnDetail: _returnDetail,
-                    payEnabled: !_retryBlocked,
-                    showPayButton: !_orderFound,
-                    paymentMethods: widget.availablePaymentMethods,
-                    selectedPayment: _selectedPayment,
-                    onSelectPayment: (value) =>
-                        setState(() => _selectedPayment = value),
-                    onEdit: () => setState(() => _reviewing = false),
-                    onPay: () => unawaited(_pay()),
-                    onViewOrders: _viewOrders,
-                    onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
-                  )
-                : _ContactForm(
-                    formKey: _formKey,
-                    email: _email,
-                    phone: _phone,
-                    onContinue: _review,
-                  );
-
             final summary = _CheckoutSummary(
               lines: store.bagLines,
               subtotal: store.bagSubtotal,
             );
-            final progress = _CheckoutProgress(activeIndex: _reviewing ? 2 : 1);
+            final pay = Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                const _CheckoutIdentity(),
+                _CheckoutPayPanel(
+                  openingSheet: _openingSheet,
+                  returnPhase: _returnPhase,
+                  returnDetail: _returnDetail,
+                  payEnabled: !_retryBlocked,
+                  showPayButton: !_orderFound,
+                  paymentMethods: widget.availablePaymentMethods,
+                  onPay: () => unawaited(_pay()),
+                  onViewOrders: _viewOrders,
+                  onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
+                ),
+              ],
+            );
 
-            // A two-sided window: the form on the left of the crease and the
-            // order summary held on the right, each scrolling on its own.
+            // A two-sided window: the order on the left of the crease and the
+            // way to pay on the right, where the bag was, each scrolling on
+            // its own.
             final crease = _creaseWithin(context, origin & box.biggest);
             if (crease != null) {
               return Row(
@@ -976,18 +947,9 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                   SizedBox(
                     width: crease.left,
                     child: SingleChildScrollView(
-                      key: const Key('checkout-duo-form'),
-                      controller: _scrollController,
-                      padding: const EdgeInsets.only(bottom: 40),
-                      child: Column(
-                        children: [
-                          progress,
-                          Padding(
-                            padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                            child: form,
-                          ),
-                        ],
-                      ),
+                      key: const Key('checkout-duo-summary'),
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                      child: summary,
                     ),
                   ),
                   SizedBox(
@@ -1001,9 +963,10 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                   ),
                   Expanded(
                     child: SingleChildScrollView(
-                      key: const Key('checkout-duo-summary'),
-                      padding: const EdgeInsets.fromLTRB(20, 28, 20, 40),
-                      child: summary,
+                      key: const Key('checkout-duo-pay'),
+                      controller: _scrollController,
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 40),
+                      child: pay,
                     ),
                   ),
                 ],
@@ -1013,45 +976,39 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             return SingleChildScrollView(
               controller: _scrollController,
               padding: const EdgeInsets.only(bottom: 40),
-              child: Column(
-                children: [
-                  progress,
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final wide = constraints.maxWidth >= 900;
-                      if (!wide) {
-                        return Column(
+              child: LayoutBuilder(
+                builder: (context, constraints) {
+                  final wide = constraints.maxWidth >= 900;
+                  if (!wide) {
+                    return Padding(
+                      padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
+                        children: [
+                          summary,
+                          const SizedBox(height: 24),
+                          pay,
+                        ],
+                      ),
+                    );
+                  }
+                  return Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 1120),
+                      child: Padding(
+                        padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 28, 20, 0),
-                              child: form,
-                            ),
-                            Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 24, 20, 0),
-                              child: summary,
-                            ),
+                            Expanded(flex: 6, child: summary),
+                            const SizedBox(width: 56),
+                            Expanded(flex: 4, child: pay),
                           ],
-                        );
-                      }
-                      return Center(
-                        child: ConstrainedBox(
-                          constraints: const BoxConstraints(maxWidth: 1120),
-                          child: Padding(
-                            padding: const EdgeInsets.fromLTRB(32, 40, 32, 0),
-                            child: Row(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Expanded(flex: 6, child: form),
-                                const SizedBox(width: 56),
-                                Expanded(flex: 4, child: summary),
-                              ],
-                            ),
-                          ),
                         ),
-                      );
-                    },
-                  ),
-                ],
+                      ),
+                    ),
+                  );
+                },
               ),
             );
           },
@@ -1125,128 +1082,6 @@ class _BoutiqueBar extends StatelessWidget implements PreferredSizeWidget {
       bottom: PreferredSize(
         preferredSize: const Size.fromHeight(.5),
         child: Container(height: .5, color: palette.hairline),
-      ),
-    );
-  }
-}
-
-class _CheckoutProgress extends StatelessWidget {
-  const _CheckoutProgress({required this.activeIndex});
-
-  final int activeIndex;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    const labels = ['Bolsa', 'Entrega', 'Pago', 'Confirmación'];
-    if (StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))) {
-      return Semantics(
-        value: labels.join(', '),
-        child: Container(
-          key: const ValueKey('checkout-progress-enlarged'),
-          width: double.infinity,
-          color: palette.surfaceDeep,
-          padding: const EdgeInsets.all(16),
-          child: Text(
-            'Paso ${activeIndex + 1} de ${labels.length} · ${labels[activeIndex]}',
-            style: boutiqueText(size: 12, weight: FontWeight.w600),
-          ),
-        ),
-      );
-    }
-    return Container(
-      color: palette.surfaceDeep,
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 560),
-          child: Row(
-            children: [
-              for (var index = 0; index < labels.length; index++) ...[
-                if (index > 0)
-                  Expanded(
-                    child: Container(
-                      height: 1,
-                      color:
-                          index <= activeIndex ? palette.ink : palette.hairline,
-                    ),
-                  ),
-                _ProgressStep(
-                  label: labels[index],
-                  number: index + 1,
-                  active: index == activeIndex,
-                  complete: index < activeIndex,
-                ),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _ProgressStep extends StatelessWidget {
-  const _ProgressStep({
-    required this.label,
-    required this.number,
-    required this.active,
-    required this.complete,
-  });
-
-  final String label;
-  final int number;
-  final bool active;
-  final bool complete;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Semantics(
-      label:
-          '$label, ${active ? 'paso actual' : complete ? 'completado' : 'pendiente'}',
-      child: Column(
-        children: [
-          Container(
-            width: 26,
-            height: 26,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: active || complete ? palette.ink : palette.surface,
-              border: Border.all(
-                color: active || complete ? palette.ink : palette.hairline,
-              ),
-            ),
-            child: complete
-                ? Icon(Icons.check, size: 13, color: palette.canvas)
-                : Text(
-                    '$number',
-                    style: boutiqueText(
-                      size: 11,
-                      color: active ? palette.canvas : palette.inkMuted,
-                      weight: FontWeight.w600,
-                      height: 1,
-                    ),
-                  ),
-          ),
-          const SizedBox(height: 5),
-          ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 88),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                label.toUpperCase(),
-                maxLines: 1,
-                softWrap: false,
-                style: boutiqueEyebrow(
-                  size: 8,
-                  color: active || complete ? palette.ink : palette.inkMuted,
-                ).copyWith(letterSpacing: 1.0),
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -1675,222 +1510,33 @@ class _SummaryRow extends StatelessWidget {
   }
 }
 
-class _ContactForm extends StatelessWidget {
-  const _ContactForm({
-    required this.formKey,
-    required this.email,
-    required this.phone,
-    required this.onContinue,
-  });
-
-  final GlobalKey<FormState> formKey;
-  final TextEditingController email;
-  final TextEditingController phone;
-  final VoidCallback onContinue;
-
-  String? _required(String? value) =>
-      value == null || value.trim().isEmpty ? 'Completa este campo' : null;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Form(
-      key: formKey,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('¿Cómo te contactamos?', style: boutiqueDisplay(28)),
-          const SizedBox(height: 8),
-          Text(
-            'La dirección y el envío se capturan en el checkout seguro de '
-            'Shopify para no pedirlos dos veces. Totales finales también '
-            'vienen de Shopify.',
-            style: boutiqueText(size: 13, color: palette.inkMuted),
-          ),
-          const SizedBox(height: 28),
-          Text(
-            'Contacto'.toUpperCase(),
-            style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
-          ),
-          const SizedBox(height: 12),
-          _CheckoutField(
-            controller: email,
-            label: 'Correo electrónico',
-            keyboardType: TextInputType.emailAddress,
-            autofillHints: const [AutofillHints.email],
-            validator: (value) {
-              final required = _required(value);
-              if (required != null) return required;
-              return value!.contains('@') ? null : 'Ingresa un correo válido';
-            },
-          ),
-          const SizedBox(height: 12),
-          _CheckoutField(
-            controller: phone,
-            label: 'Teléfono',
-            keyboardType: TextInputType.phone,
-            autofillHints: const [AutofillHints.telephoneNumber],
-            validator: _required,
-          ),
-          const SizedBox(height: 24),
-          const _DeliveryOption(),
-          const SizedBox(height: 24),
-          BoutiqueButton(label: 'REVISAR PEDIDO', onPressed: onContinue),
-        ],
-      ),
-    );
-  }
-}
-
-class _CheckoutField extends StatelessWidget {
-  const _CheckoutField({
-    required this.controller,
-    required this.label,
-    required this.validator,
-    this.keyboardType,
-    this.autofillHints,
-  }) : inputFormatters = null;
-
-  final TextEditingController controller;
-  final String label;
-  final FormFieldValidator<String> validator;
-  final TextInputType? keyboardType;
-  final List<TextInputFormatter>? inputFormatters;
-  final Iterable<String>? autofillHints;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return TextFormField(
-      controller: controller,
-      validator: validator,
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      autofillHints: autofillHints,
-      style: boutiqueText(size: 14, color: palette.ink),
-      decoration: InputDecoration(
-        labelText: label,
-        labelStyle: boutiqueText(size: 13, color: palette.inkMuted),
-        floatingLabelStyle: boutiqueText(size: 11, color: palette.ink),
-        filled: true,
-        fillColor: palette.surfaceDeep,
-        contentPadding: const EdgeInsets.fromLTRB(15, 17, 15, 14),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BoutiqueRadius.control,
-          borderSide: BorderSide(color: palette.hairline, width: 0.5),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BoutiqueRadius.control,
-          borderSide: BorderSide(color: palette.ink, width: 1),
-        ),
-        errorBorder: OutlineInputBorder(
-          borderRadius: BoutiqueRadius.control,
-          borderSide: BorderSide(color: palette.sale, width: .8),
-        ),
-        focusedErrorBorder: OutlineInputBorder(
-          borderRadius: BoutiqueRadius.control,
-          borderSide: BorderSide(color: palette.sale, width: 1),
-        ),
-      ),
-    );
-  }
-}
-
-class _DeliveryOption extends StatelessWidget {
-  const _DeliveryOption();
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: palette.surface,
-        borderRadius: BoutiqueRadius.card,
-        border: Border.all(color: palette.ink, width: .8),
-      ),
-      child: Row(
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            padding: const EdgeInsets.all(3),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(color: palette.ink),
-            ),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: palette.ink,
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Envío estándar',
-                  style: boutiqueText(
-                    size: 13,
-                    weight: FontWeight.w500,
-                    color: palette.ink,
-                  ),
-                ),
-                Text(
-                  'Envíos: contenido pendiente de aprobación.',
-                  style: boutiqueText(size: 11, color: palette.inkMuted),
-                ),
-              ],
-            ),
-          ),
-          Text(
-            'SE CALCULA EN SHOPIFY',
-            style: boutiqueEyebrow(size: 9, color: palette.ink),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
 /// The first pay control stays up, disabled, while we confirm. Settled
 /// banners own their own actions, and banner 3 has no retry.
 bool _showsCheckoutPayButton(CheckoutReturnPhase? phase) {
   return phase == null || phase == CheckoutReturnPhase.confirming;
 }
 
-class _ReviewPanel extends StatelessWidget {
-  const _ReviewPanel({
-    required this.email,
-    required this.phone,
+/// The one step left in the app: going to Shopify's checkout, where the
+/// address, shipping and payment method are chosen.
+class _CheckoutPayPanel extends StatelessWidget {
+  const _CheckoutPayPanel({
     required this.openingSheet,
     required this.returnPhase,
     this.returnDetail,
     required this.payEnabled,
     required this.showPayButton,
     required this.paymentMethods,
-    required this.selectedPayment,
-    required this.onSelectPayment,
-    required this.onEdit,
     required this.onPay,
     required this.onViewOrders,
     required this.onWhatsApp,
   });
 
-  final String email;
-  final String phone;
   final bool openingSheet;
   final CheckoutReturnPhase? returnPhase;
   final String? returnDetail;
   final bool payEnabled;
   final bool showPayButton;
   final List<String> paymentMethods;
-  final String? selectedPayment;
-  final ValueChanged<String> onSelectPayment;
-  final VoidCallback onEdit;
   final VoidCallback onPay;
   final VoidCallback onViewOrders;
   final VoidCallback onWhatsApp;
@@ -1899,38 +1545,8 @@ class _ReviewPanel extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
-        Text('Todo listo', style: boutiqueDisplay(28)),
-        const SizedBox(height: 8),
-        Text(
-          'Revisa tu contacto. Dirección, envío e impuestos finales se '
-          'confirman en Shopify.',
-          style: boutiqueText(size: 13, color: palette.inkMuted),
-        ),
-        const SizedBox(height: 28),
-        _ReviewBlock(
-          title: 'Contacto',
-          value: '$email\n$phone',
-          onEdit: onEdit,
-          editLabel: 'Cambiar',
-        ),
-        _ReviewBlock(
-          title: 'Dirección de envío',
-          value: 'Se captura en Shopify Checkout\n'
-              'No la pedimos aquí para no duplicarla.',
-        ),
-        _ReviewBlock(
-          title: 'Método de envío',
-          value: 'Envíos: contenido pendiente de aprobación.\n'
-              'Se calcula en Shopify',
-        ),
-        _PaymentBlock(
-          methods: paymentMethods,
-          selected: selectedPayment,
-          onSelect: onSelectPayment,
-        ),
-        const SizedBox(height: 24),
         if (returnPhase != null)
           CheckoutReturnBanner(
             phase: returnPhase!,
@@ -1967,217 +1583,150 @@ class _ReviewPanel extends StatelessWidget {
         if (showPayButton && _showsCheckoutPayButton(returnPhase))
           BoutiqueButton(
             key: const ValueKey('checkout-pay-button'),
-            label: 'CONTINUAR AL PAGO SEGURO',
+            label: 'IR A PAGAR',
             onPressed: payEnabled ? onPay : null,
           ),
-        const SizedBox(height: 14),
-        Text(
-          'Shopify procesa el pago. Monetta nunca ve los datos de tu tarjeta.',
-          style: boutiqueText(size: 12, color: palette.inkMuted),
-        ),
+        const SizedBox(height: 12),
+        SecurePaymentLine(methods: paymentMethods),
       ],
     );
   }
 }
 
-/// Pago Fig.14 sin inventar: solo dibuja radios cuando hay opciones reales
-/// configuradas. Sin config muestra el aviso alojado.
-class _PaymentBlock extends StatelessWidget {
-  const _PaymentBlock({
-    required this.methods,
-    required this.selected,
-    required this.onSelect,
-  });
+/// Who pays. A shopper connected with Shopify is recognized there through
+/// their account, so nothing is asked. A guest pays as a guest, or connects
+/// first; Shopify's checkout then applies the store's own rule for buying
+/// without an account.
+class _CheckoutIdentity extends StatelessWidget {
+  const _CheckoutIdentity();
 
-  final List<String> methods;
-  final String? selected;
-  final ValueChanged<String> onSelect;
+  Future<void> _connect(
+    BuildContext context,
+    AccountController controller,
+  ) async {
+    await controller.login();
+    if (!context.mounted || controller.isSignedIn) return;
+    final error = controller.lastError;
+    if (error == null || error.isSilent) return;
+    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
+      const SnackBar(
+        content: Text('No pudimos iniciar sesión. Puedes pagar como invitado.'),
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    if (methods.isEmpty) {
-      return Container(
-        key: const ValueKey('payment-hosted-notice'),
-        width: double.infinity,
-        margin: const EdgeInsets.only(top: 4),
-        padding: const EdgeInsets.all(16),
+    final controller = AccountScope.maybeOf(context);
+    if (controller == null) return const SizedBox.shrink();
+    final account = controller.account;
+    final Widget content;
+    if (account != null) {
+      final email = account.email?.trim();
+      content = Row(
+        children: [
+          _IdentityMark(photo: controller.profilePhotoBytes),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  email == null || email.isEmpty ? 'Tu cuenta' : email,
+                  key: const Key('checkout-identity-email'),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: boutiqueText(
+                    size: 14,
+                    weight: FontWeight.w600,
+                    color: palette.ink,
+                  ),
+                ),
+                if (account.authProvider == 'shopify')
+                  Text(
+                    'Conectado con Shopify',
+                    style: boutiqueText(size: 12, color: palette.inkMuted),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
+    } else if (controller.canLogin) {
+      content = Row(
+        children: [
+          const _IdentityMark(),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Comprando como invitado',
+              style: boutiqueText(size: 14, color: palette.ink),
+            ),
+          ),
+          TextButton(
+            key: const Key('checkout-connect'),
+            onPressed: controller.isLoading
+                ? null
+                : () => unawaited(_connect(context, controller)),
+            style: TextButton.styleFrom(
+              foregroundColor: palette.ink,
+              minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+            ),
+            child: Text(
+              controller.isLoading ? 'Conectando…' : 'Iniciar sesión',
+              style: boutiqueText(
+                size: 13,
+                weight: FontWeight.w600,
+                decoration: TextDecoration.underline,
+              ),
+            ),
+          ),
+        ],
+      );
+    } else {
+      // Without sign-in in this build, Shopify's checkout handles the guest.
+      return const SizedBox.shrink();
+    }
+    return Padding(
+      padding: const EdgeInsets.only(bottom: BoutiqueSpace.lg),
+      child: Container(
+        key: const Key('checkout-identity'),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: palette.surface,
           borderRadius: BoutiqueRadius.card,
           border: Border.all(color: palette.hairline, width: .5),
         ),
-        child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Icon(Icons.lock_outline, size: 18, color: palette.ink),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Método de pago',
-                    style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Pagos seguros con Shopify.',
-                    style: boutiqueText(
-                      size: 13,
-                      weight: FontWeight.w600,
-                      color: palette.ink,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Elige tu método de pago en el checkout alojado. Monetta nunca ve los datos de tu tarjeta y no guarda métodos.',
-                    style: boutiqueText(size: 12, color: palette.inkMuted),
-                  ),
-                ],
-              ),
-            ),
-          ],
-        ),
-      );
-    }
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(top: 4),
-      padding: const EdgeInsets.symmetric(vertical: 8),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: palette.hairline, width: 0.5),
-        ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(vertical: 10),
-            child: Text(
-              'MÉTODO DE PAGO',
-              style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
-            ),
-          ),
-          for (final method in methods)
-            _RealPaymentOption(
-              label: method,
-              selected: (selected ?? methods.first) == method,
-              onTap: () => onSelect(method),
-            ),
-          SizedBox(height: MonettaTokens.space[3]),
-          SecurePaymentLine(methods: methods),
-        ],
+        child: content,
       ),
     );
   }
 }
 
-class _RealPaymentOption extends StatelessWidget {
-  const _RealPaymentOption({
-    required this.label,
-    required this.selected,
-    required this.onTap,
-  });
+/// The shopper's photo, or the account glyph.
+class _IdentityMark extends StatelessWidget {
+  const _IdentityMark({this.photo});
 
-  final String label;
-  final bool selected;
-  final VoidCallback onTap;
+  final Uint8List? photo;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Semantics(
-      button: true,
-      selected: selected,
-      label: 'Método de pago $label',
-      child: Material(
-        type: MaterialType.transparency,
-        borderRadius: BoutiqueRadius.tile,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: BoutiqueRadius.tile,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(vertical: 12),
-            child: Row(
-              children: [
-                Container(
-                  width: 20,
-                  height: 20,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    border: Border.all(color: palette.ink, width: 1.2),
-                  ),
-                  child: selected
-                      ? Center(
-                          child: Container(
-                            width: 10,
-                            height: 10,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: palette.ink,
-                            ),
-                          ),
-                        )
-                      : null,
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Text(
-                    label,
-                    style: boutiqueText(size: 13, color: palette.ink),
-                  ),
-                ),
-              ],
-            ),
-          ),
+    final image = photo;
+    return ExcludeSemantics(
+      child: Container(
+        width: 36,
+        height: 36,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: palette.surfaceDeep,
+          border: Border.all(color: palette.hairline, width: .5),
         ),
-      ),
-    );
-  }
-}
-
-class _ReviewBlock extends StatelessWidget {
-  const _ReviewBlock({
-    required this.title,
-    required this.value,
-    this.onEdit,
-    this.editLabel = 'Editar',
-  });
-
-  final String title;
-  final String value;
-  final VoidCallback? onEdit;
-  final String editLabel;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: palette.hairline, width: 0.5),
-        ),
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          SizedBox(
-            width: 108,
-            child: Text(
-              title.toUpperCase(),
-              style: boutiqueEyebrow(size: 9, color: palette.inkMuted),
-            ),
-          ),
-          Expanded(
-            child:
-                Text(value, style: boutiqueText(size: 13, color: palette.ink)),
-          ),
-          if (onEdit != null) _BagTextAction(label: editLabel, onTap: onEdit!),
-        ],
+        clipBehavior: Clip.antiAlias,
+        child: image == null
+            ? Icon(Icons.person_outline, size: 20, color: palette.ink)
+            : Image.memory(image, fit: BoxFit.cover, gaplessPlayback: true),
       ),
     );
   }
