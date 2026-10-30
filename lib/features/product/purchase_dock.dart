@@ -12,6 +12,9 @@ import '../boutique/boutique_tokens.dart';
 /// Minimum height of a dock action.
 const double kPurchaseDockButtonHeight = 48;
 
+/// Height of the full-width page buttons (the preview and the product page).
+const double kPurchaseButtonHeight = 52;
+
 /// Air above and below the action.
 const double _kDockVerticalPadding = 8;
 
@@ -64,12 +67,17 @@ class PurchaseDockButton extends StatelessWidget {
     required this.label,
     required this.onPressed,
     this.pending = false,
+    this.large = false,
     super.key,
   });
 
   final String label;
   final VoidCallback? onPressed;
   final bool pending;
+
+  /// The page button of the preview and the product page: 52pt tall, Inter
+  /// regular 15 with a tracked label. The dock keeps its 48pt / 600 / 14.
+  final bool large;
 
   @override
   Widget build(BuildContext context) {
@@ -94,13 +102,14 @@ class PurchaseDockButton extends StatelessWidget {
           onTap: enabled ? onPressed : null,
           customBorder: const StadiumBorder(),
           child: ConstrainedBox(
-            constraints: const BoxConstraints(
-              minHeight: kPurchaseDockButtonHeight,
+            constraints: BoxConstraints(
+              minHeight:
+                  large ? kPurchaseButtonHeight : kPurchaseDockButtonHeight,
             ),
             child: Padding(
-              padding: const EdgeInsets.symmetric(
+              padding: EdgeInsets.symmetric(
                 horizontal: BoutiqueSpace.xl,
-                vertical: BoutiqueSpace.md,
+                vertical: large ? BoutiqueSpace.sm : BoutiqueSpace.md,
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -122,15 +131,79 @@ class PurchaseDockButton extends StatelessWidget {
                     child: Text(
                       label,
                       textAlign: TextAlign.center,
-                      style: boutiqueText(
-                        size: 14,
-                        weight: FontWeight.w600,
-                        color: palette.onAction,
-                        height: 1.2,
-                      ),
+                      style: large
+                          ? boutiqueText(
+                              size: 15,
+                              color: palette.onAction,
+                              height: 1.2,
+                            ).copyWith(letterSpacing: 0.9)
+                          : boutiqueText(
+                              size: 14,
+                              weight: FontWeight.w600,
+                              color: palette.onAction,
+                              height: 1.2,
+                            ),
                     ),
                   ),
                 ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// The outlined companion of the large [PurchaseDockButton]: a 52pt pill with
+/// a [BoutiquePalette.borderControl] outline and a tracked label in
+/// [textColor]. «VER PRODUCTO» and «COMPRAR AHORA» are drawn with it.
+class PurchaseOutlineButton extends StatelessWidget {
+  const PurchaseOutlineButton({
+    required this.label,
+    required this.onPressed,
+    required this.textColor,
+    super.key,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final Color textColor;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final enabled = onPressed != null;
+    return Semantics(
+      button: true,
+      enabled: enabled,
+      label: label,
+      excludeSemantics: true,
+      onTap: onPressed,
+      child: Material(
+        color: Colors.transparent,
+        shape: StadiumBorder(side: BorderSide(color: palette.borderControl)),
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const StadiumBorder(),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: kPurchaseButtonHeight),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: BoutiqueSpace.xl,
+                vertical: BoutiqueSpace.sm,
+              ),
+              child: Center(
+                child: Text(
+                  label,
+                  textAlign: TextAlign.center,
+                  style: boutiqueText(
+                    size: 15,
+                    color:
+                        enabled ? textColor : textColor.withValues(alpha: 0.45),
+                    height: 1.2,
+                  ).copyWith(letterSpacing: 0.9),
+                ),
               ),
             ),
           ),

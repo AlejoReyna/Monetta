@@ -131,16 +131,17 @@ void main() {
     final store = await _loadedStore();
     final reliable = store.products.firstWhere(hasReliableColorOptions);
     await _pumpFicha(tester, store, reliable.id);
-    expect(find.text('COLOR'), findsOneWidget);
-    expect(find.text('OPCIÓN'), findsNothing);
+    // «Color: Negro»: the label carries the chosen colour.
+    expect(find.textContaining('Color: '), findsOneWidget);
+    expect(find.text('Opción'), findsNothing);
 
     final composed = store.products.firstWhere(
       (item) =>
           selectableVariants(item).isNotEmpty && !hasReliableColorOptions(item),
     );
     await _pumpFicha(tester, store, composed.id);
-    expect(find.text('OPCIÓN'), findsOneWidget);
-    expect(find.text('COLOR'), findsNothing);
+    expect(find.text('Opción'), findsOneWidget);
+    expect(find.textContaining('Color: '), findsNothing);
   });
 
   testWidgets('acordeones Descripción, Detalles y Envíos', (tester) async {
@@ -272,8 +273,11 @@ void main() {
     await tester.tap(find.text('ABRIR'));
     await tester.pumpAndSettle();
 
-    // Sheet: drag handle, close X, brand–name–price, no fake urgency.
-    expect(find.byTooltip('Cerrar vista rápida'), findsOneWidget);
+    // Centred card: back and close over the photo, brand–name–price, no fake
+    // urgency.
+    expect(find.byKey(const Key('quick-view-card')), findsOneWidget);
+    expect(find.byTooltip('Cerrar vista previa'), findsOneWidget);
+    expect(find.byTooltip('Regresar'), findsOneWidget);
     expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
     expect(find.text('VER PRODUCTO'), findsOneWidget);
     expect(find.textContaining('Últimas'), findsNothing);

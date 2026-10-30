@@ -16,7 +16,7 @@ import '../../support/bundled_fonts.dart';
 const _destinations = MonettaBottomDestination.values;
 const _labels = {
   MonettaBottomDestination.home: 'Inicio',
-  MonettaBottomDestination.catalog: 'Catálogo',
+  MonettaBottomDestination.catalog: 'Categorías',
   MonettaBottomDestination.bag: 'Carrito',
   MonettaBottomDestination.account: 'Cuenta',
 };
@@ -289,7 +289,7 @@ void main() {
       });
     }
 
-    testWidgets('NAV-05 order is Home, Catálogo, Carrito, Cuenta',
+    testWidgets('NAV-05 order is Home, Categorías, Carrito, Cuenta',
         (tester) async {
       _phone(tester);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
@@ -309,7 +309,7 @@ void main() {
       ]);
       expect(
         [for (final d in byX) _labelText(tester, d)],
-        ['Inicio', 'Catálogo', 'Carrito', 'Cuenta'],
+        ['Inicio', 'Categorías', 'Carrito', 'Cuenta'],
       );
     });
   });

@@ -133,6 +133,7 @@ class _FavoritesBody extends StatelessWidget {
               context,
               availableWidth:
                   MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2,
+              priceLines: tilePriceLinesFor(saved),
             ),
             delegate: SliverChildBuilderDelegate(
               (context, index) => ProductCard(

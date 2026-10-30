@@ -24,11 +24,11 @@ import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import '../product/external_product_screen.dart';
+import '../product/quick_view.dart';
 import 'product_card.dart';
 import 'catalog_controls.dart';
 import 'categories_screen.dart';
 import 'extracted_badge.dart';
-import 'quick_add_button.dart';
 import 'search_screen.dart';
 
 enum _CatalogSort { featured, newest, priceAsc, priceDesc }
@@ -376,11 +376,14 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                 )
               else
                 SliverPadding(
-                  padding: const EdgeInsets.only(top: BoutiqueSpace.md),
-                  // Photos run to the screen edges, so there is no horizontal
-                  // or bottom padding (each tile carries its own trailing
-                  // air). The safe area still applies sideways, for a notch
-                  // in landscape.
+                  padding: const EdgeInsets.fromLTRB(
+                    BoutiqueSpace.gutter,
+                    BoutiqueSpace.md,
+                    BoutiqueSpace.gutter,
+                    BoutiqueSpace.xl,
+                  ),
+                  // The same card as every other grid. The safe area still
+                  // applies sideways, for a notch in landscape.
                   sliver: SliverSafeArea(
                     top: false,
                     bottom: false,
@@ -389,7 +392,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                         gridDelegate: productGridDelegate(
                           context,
                           availableWidth: constraints.crossAxisExtent,
-                          variant: ProductTileVariant.edgeToEdge,
                         ),
                         delegate: SliverChildBuilderDelegate(
                           (context, index) => _BrowseTile(
@@ -1122,19 +1124,19 @@ class _BrowseTile extends StatelessWidget {
     );
   }
 
-  /// The Monetta product behind this tile when it can be bought from here.
+  /// The Monetta product behind this tile, sold out or not.
   ///
   /// Reads the store without subscribing to it and degrades to null when the
-  /// screen is mounted without a [StoreScope]; external, unknown and sold-out
-  /// pieces have nothing to add.
-  Product? _buyableProduct(BuildContext context) {
+  /// screen is mounted without a [StoreScope]; external and unknown pieces
+  /// have no Monetta product to open.
+  Product? _monettaProduct(BuildContext context) {
     if (item.isExternal) return null;
     final productId = item.shopifyProductId;
     if (productId == null) return null;
     final store = context.getInheritedWidgetOfExactType<StoreScope>()?.notifier;
     if (store == null) return null;
     for (final product in store.products) {
-      if (product.id == productId) return product.isInStock ? product : null;
+      if (product.id == productId) return product;
     }
     return null;
   }
@@ -1145,20 +1147,35 @@ class _BrowseTile extends StatelessWidget {
     // turned into a [Product] — currency, origin and purchase destination
     // would be lost — only its view data is adapted.
     final data = ProductTileData.fromCatalogItem(item);
-    final product = _buyableProduct(context);
+    final product = _monettaProduct(context);
+
+    // A Monetta piece opens the quick view (or is selected in a tablet detail
+    // pane); «VER PRODUCTO» opens its page. Anything else keeps its own tap.
+    void onTap() {
+      if (product == null) {
+        _tap(context);
+      } else if (BrowseDetailScope.maybeOf(context) != null) {
+        openProduct(context, product);
+      } else {
+        unawaited(showProductQuickView(context, product));
+      }
+    }
+
     return ProductResultAnchor(
       productId: item.shopifyProductId ?? item.sourceScopedId,
       child: MonettaProductTile(
         data: data,
-        onTap: () => _tap(context),
-        variant: ProductTileVariant.edgeToEdge,
-        quickAction: product == null
+        onTap: onTap,
+        onQuickView: product == null
             ? null
-            : ProductQuickAddButton(
-                key: Key('quick-add-${product.id}'),
-                product: product,
-                productName: data.title,
+            : () => unawaited(showProductQuickView(context, product)),
+        footer: product == null
+            ? null
+            : TileViewProductButton(
+                key: Key('view-product-${product.id}'),
+                onPressed: () => openProduct(context, product),
               ),
+        semanticHint: product == null ? null : 'Abre la vista previa',
         // No favourite here: an external listing has no Monetta product id to
         // save, and this screen renders without a wishlist-bearing store.
         imageOverlay: item.isExternal ? const ExtractedBadge() : null,

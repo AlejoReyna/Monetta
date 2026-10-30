@@ -15,7 +15,6 @@ import '../../domain/product.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/guide_art.dart';
 import '../catalog/product_card.dart';
-import '../product/quick_view.dart';
 
 /// The home banner's film, with a real editorial poster frame.
 ///
@@ -470,14 +469,12 @@ class HomeNewArrivalsRail extends StatelessWidget {
                   context,
                   availableWidth:
                       constraints.maxWidth - BoutiqueSpace.gutter * 2,
+                  priceLines: tilePriceLinesFor(shown),
                 ),
                 itemCount: shown.length,
                 itemBuilder: (context, index) {
                   final product = shown[index];
-                  return ProductCard(
-                    product: product,
-                    onQuickView: () => showProductQuickView(context, product),
-                  );
+                  return ProductCard(product: product);
                 },
               );
             },
@@ -488,8 +485,12 @@ class HomeNewArrivalsRail extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     // Just under three cards across, so the rail reads as scrollable.
     final cardWidth = (width * .36).clamp(132.0, 190.0);
-    final railHeight = cardWidth * _density.imageHeightFactor +
-        MediaQuery.textScalerOf(context).scale(_density.captionHeight);
+    final railHeight = productTileExtent(
+      tileWidth: cardWidth,
+      textScaler: MediaQuery.textScalerOf(context),
+      density: _density,
+      priceLines: tilePriceLinesFor(products),
+    );
 
     return Column(
       key: sectionKey,
@@ -519,7 +520,6 @@ class HomeNewArrivalsRail extends StatelessWidget {
                 child: ProductCard(
                   product: product,
                   density: _density,
-                  onQuickView: () => showProductQuickView(context, product),
                 ),
               );
             },

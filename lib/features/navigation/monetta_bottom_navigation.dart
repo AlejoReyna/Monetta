@@ -17,7 +17,9 @@ enum MonettaBottomDestination { home, catalog, bag, account }
 const double _kBarMinHeight = 56;
 const double _kBarSidePadding = 10;
 const double _kBarMaxContentWidth = 480;
-const double _kItemHorizontalPadding = 4;
+// 2 (was 4) so that «Categorías» (about 69 pt in Inter 600 at 13) still fits
+// a quarter of a 320 pt bar: 75 - 2 * 2 = 71 pt available per column.
+const double _kItemHorizontalPadding = 2;
 const double _kItemVerticalPadding = 6;
 const double _kIconBox = 24;
 const double _kIconStroke = 1.7;
@@ -28,7 +30,7 @@ const double _kPressedOpacity = 0.55;
 
 String _labelOf(MonettaBottomDestination destination) => switch (destination) {
       MonettaBottomDestination.home => 'Inicio',
-      MonettaBottomDestination.catalog => 'Catálogo',
+      MonettaBottomDestination.catalog => 'Categorías',
       MonettaBottomDestination.bag => 'Carrito',
       MonettaBottomDestination.account => 'Cuenta',
     };
@@ -41,8 +43,9 @@ TextStyle _labelStyle({required FontWeight weight, Color? color}) => sans(
     );
 
 /// Flat bar docked to the bottom edge on the theme's navigation surface. The
-/// selected destination has semantic, weight and underline/border cues. Labels
-/// retain the requested system text scale and reflow when space is limited.
+/// selected destination has semantic, weight and colour cues (the rail also a
+/// border). Labels retain the requested system text scale and reflow when
+/// space is limited.
 class MonettaBottomNavigation extends StatelessWidget {
   const MonettaBottomNavigation({
     required this.current,
@@ -347,9 +350,6 @@ class _NavItemState extends State<_NavItem> {
                             weight:
                                 selected ? FontWeight.w600 : FontWeight.w400,
                             color: color,
-                          ).copyWith(
-                            decoration:
-                                selected ? TextDecoration.underline : null,
                           ),
                         ),
                       ],
@@ -412,7 +412,7 @@ class _NavGlyphPainter extends CustomPainter {
       ..strokeJoin = StrokeJoin.round;
 
     switch (destination) {
-      // One continuous outline with a centred arched door.
+      // One continuous outline with a centred rectangular door.
       case MonettaBottomDestination.home:
         canvas.drawPath(
           Path()
@@ -423,13 +423,8 @@ class _NavGlyphPainter extends CustomPainter {
             ..lineTo(21, 10.34)
             ..lineTo(21, 20.92)
             ..lineTo(14.84, 20.92)
-            ..lineTo(14.84, 16.45)
-            ..arcTo(
-              Rect.fromCircle(center: const Offset(12, 16.45), radius: 2.84),
-              0,
-              -math.pi,
-              false,
-            )
+            ..lineTo(14.84, 14.4)
+            ..lineTo(9.16, 14.4)
             ..close(),
           paint,
         );
@@ -449,33 +444,23 @@ class _NavGlyphPainter extends CustomPainter {
             );
           }
         }
-      // Body narrowing towards the base, curved handle.
+      // Shopping cart: handle, basket with its rim and two wheels.
       case MonettaBottomDestination.bag:
         canvas
           ..drawPath(
             Path()
-              ..moveTo(3.95, 7.58)
-              ..lineTo(20.05, 7.58)
-              ..lineTo(18.80, 19.41)
-              ..quadraticBezierTo(18.63, 21, 17.03, 21)
-              ..lineTo(6.97, 21)
-              ..quadraticBezierTo(5.37, 21, 5.20, 19.41)
-              ..close(),
+              ..moveTo(2.4, 3.2)
+              ..lineTo(4.6, 3.2)
+              ..lineTo(7.1, 14.6)
+              ..quadraticBezierTo(7.4, 16, 8.9, 16)
+              ..lineTo(18.6, 16)
+              ..quadraticBezierTo(20.1, 16, 20.4, 14.6)
+              ..lineTo(21.9, 7.4)
+              ..lineTo(5.6, 7.4),
             paint,
           )
-          ..drawPath(
-            Path()
-              ..moveTo(7.82, 9.32)
-              ..lineTo(7.82, 7.18)
-              ..arcTo(
-                Rect.fromCircle(center: const Offset(12, 7.18), radius: 4.18),
-                math.pi,
-                math.pi,
-                false,
-              )
-              ..lineTo(16.18, 9.32),
-            paint,
-          );
+          ..drawCircle(const Offset(9.4, 20.1), 1.15, paint)
+          ..drawCircle(const Offset(18, 20.1), 1.15, paint);
       // Round head over curved shoulders.
       case MonettaBottomDestination.account:
         canvas

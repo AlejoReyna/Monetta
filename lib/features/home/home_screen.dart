@@ -38,7 +38,6 @@ import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
-import '../product/quick_view.dart';
 import '../boutique/boutique_tokens.dart';
 import '../notifications/notifications_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
@@ -1356,32 +1355,20 @@ class _CatalogGrid extends StatelessWidget {
     if (products.isEmpty) return const SizedBox.shrink();
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 1060
-            ? 4
-            : constraints.maxWidth >= 720
-                ? 3
-                : 2;
         return GridView.builder(
           clipBehavior: Clip.none,
           padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          // 0.50 reserves ~115pt for the caption under a 4:5 photo plus the
-          // 12pt gap, matching the grid delegate's 112pt contract. 0.52
-          // overflowed by 5-8pt on two-line names.
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            childAspectRatio: 0.50,
-            crossAxisSpacing: BoutiqueSpace.md,
-            mainAxisSpacing: BoutiqueSpace.xxl,
+          gridDelegate: productGridDelegate(
+            context,
+            availableWidth: constraints.maxWidth - BoutiqueSpace.gutter * 2,
+            priceLines: tilePriceLinesFor(products),
           ),
           itemCount: products.length,
           itemBuilder: (context, index) {
             final product = products[index];
-            return ProductCard(
-              product: product,
-              onQuickView: () => showProductQuickView(context, product),
-            );
+            return ProductCard(product: product);
           },
         );
       },

@@ -341,6 +341,22 @@ final NumberFormat kMoney = NumberFormat.currency(
   decimalDigits: 2,
 );
 
+final NumberFormat _shopperWholeFormat = NumberFormat('#,##0', 'es_MX');
+final NumberFormat _shopperCentsFormat = NumberFormat('#,##0.00', 'es_MX');
+
+/// How a card, the quick view and the product page print a price: `$6,299
+/// MXN`, with cents only when there are any (`$1,299.50 MXN`).
+///
+/// Presentation only. No total is ever computed from this string; the bag and
+/// the checkout keep [kMoney] and the cart's own decimal strings.
+String formatShopperPrice(num amount) {
+  final cents = (amount * 100).round();
+  final label = cents % 100 == 0
+      ? _shopperWholeFormat.format(cents ~/ 100)
+      : _shopperCentsFormat.format(cents / 100);
+  return '\$$label MXN';
+}
+
 /// The neutral label shown in place of a price line when [Money] is `null` —
 /// an unknown price is never rendered as `$0`, which would read as "free."
 const String kUnknownPriceLabel = 'Consultar precio';

@@ -4,9 +4,11 @@
 /// draw the same anatomy: a complete photograph on a neutral ground, an
 /// optional data-backed badge, an optional favourite, then brand, name and
 /// price. The screens differ in *what they scope*, never in how a piece looks.
-/// The one deliberate exception is the full catalog, which uses the
-/// [ProductTileVariant.edgeToEdge] variant: the same data in a continuous
-/// photographic grid.
+///
+/// Every surface draws [ProductTileVariant.card]: ONE rounded warm card that
+/// holds the photograph, the favourite, brand, name, price and the brown
+/// «VER PRODUCTO» pill. [ProductTileVariant.edgeToEdge] stays in the API for
+/// the continuous photographic grid, but no screen uses it any more.
 ///
 /// ## Why a presentation widget and not one model
 ///
@@ -32,54 +34,93 @@ import '../../domain/product.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
 
-/// How much room a tile has. Only the image proportion and the type scale
+/// How much room a tile has. Only the type scale and the inner padding
 /// change — the anatomy is identical, so a shopper recognises the same card
 /// in a Home rail and in a two-column grid.
 enum ProductTileDensity {
   /// Two-column grids: search results, the product list, collections, brand.
-  /// Image is 4:5, matching the proportion shipped before this redesign, so
-  /// existing rail height arithmetic keeps working.
   grid,
 
-  /// Home rails and any narrow carousel. Square image, one-line name.
+  /// Home rails and any narrow carousel. Tighter padding, one-line name.
   compact,
+
+  /// Four across a phone (the related pieces of the product page): a square
+  /// photograph, a 40pt heart, one-line brand and name, a 12pt price and no
+  /// «VER PRODUCTO» pill. Tapping it opens the preview like any other card.
+  mini,
 }
 
 extension ProductTileMetrics on ProductTileDensity {
-  /// width / height of the image area.
-  double get imageAspectRatio => this == ProductTileDensity.compact ? 1 : 4 / 5;
+  /// width / height of the photo area of the edge-to-edge variant. The card
+  /// variant always draws a square photograph (see
+  /// [ProductTileVariantMetrics.photoAspectRatio]).
+  double get imageAspectRatio => this == ProductTileDensity.grid ? 4 / 5 : 1;
 
-  /// height / width — what a grid delegate needs to reserve.
+  /// height / width of the edge-to-edge photo area.
   double get imageHeightFactor => 1 / imageAspectRatio;
 
-  int get nameMaxLines => this == ProductTileDensity.compact ? 1 : 2;
+  int get nameMaxLines => this == ProductTileDensity.grid ? 2 : 1;
 
-  double get brandSize => this == ProductTileDensity.compact ? 12 : 13;
-  double get nameSize => this == ProductTileDensity.compact ? 13 : 14;
-  double get priceSize => this == ProductTileDensity.compact ? 14 : 16;
+  /// Type sizes of the edge-to-edge variant (sans).
+  double get brandSize => switch (this) {
+        ProductTileDensity.grid => 13,
+        ProductTileDensity.compact => 12,
+        ProductTileDensity.mini => 11,
+      };
+  double get nameSize => switch (this) {
+        ProductTileDensity.grid => 14,
+        ProductTileDensity.compact => 13,
+        ProductTileDensity.mini => 11,
+      };
+  double get priceSize => switch (this) {
+        ProductTileDensity.grid => 16,
+        ProductTileDensity.compact => 14,
+        ProductTileDensity.mini => 12,
+      };
 
-  /// Unscaled height of the caption under the image, used to size grid rows
-  /// and rails without pinning the text itself to a fixed box. Includes the
-  /// 12pt gap between photo and caption plus brand, name and price.
-  ///
-  /// Measured against bundled catalog data (fallback type, scale 1): a grid
-  /// caption peaks near 100pt with a wrapped compare-at price (was 98pt and
-  /// overflowed by 9pt); a compact caption peaks near 82pt when the price
-  /// wraps under a narrow card (was 74pt and overflowed by up to 25pt).
-  double get captionHeight => this == ProductTileDensity.compact ? 88 : 112;
+  /// Type sizes of the card (serif). None goes below 12 before the shopper's
+  /// own text scale.
+  double get cardBrandSize => switch (this) {
+        ProductTileDensity.grid => 15,
+        ProductTileDensity.compact => 13,
+        ProductTileDensity.mini => 12,
+      };
+  double get cardNameSize => switch (this) {
+        ProductTileDensity.grid => 14,
+        ProductTileDensity.compact => 13,
+        ProductTileDensity.mini => 12,
+      };
+  double get cardPriceSize => switch (this) {
+        ProductTileDensity.grid => 15,
+        ProductTileDensity.compact => 14,
+        ProductTileDensity.mini => 12,
+      };
+
+  /// Air between the card edge and its content.
+  double get cardPadding => switch (this) {
+        ProductTileDensity.grid => 12,
+        ProductTileDensity.compact => 8,
+        ProductTileDensity.mini => 6,
+      };
+
+  /// Unscaled height of the caption under the photograph of a card (gap,
+  /// brand, name and one price line; no footer, no padding). The grid and the
+  /// rails reserve the exact scaled value through [productTileExtent].
+  double get captionHeight =>
+      _cardCaptionExtent(this, TextScaler.noScaling, priceLines: 1);
 }
 
 /// Which presentation a [MonettaProductTile] takes. The data and the anatomy
 /// (photo, brand, name, price) are the same; only the framing differs.
 enum ProductTileVariant {
-  /// A standalone card: the photo is inset on a tinted, rounded ground and the
-  /// whole tile lifts when pressed. Used by Home, search, collections and
-  /// favourites, and the default.
+  /// A standalone card: one rounded warm ground holds the photograph, the
+  /// caption and the «VER PRODUCTO» pill, and the whole tile lifts when
+  /// pressed. Used by every product surface, and the default.
   card,
 
-  /// The full catalog's continuous photographic grid. Photos run to the edges
-  /// and meet 4pt apart, with no frame, radius, inset or lift; only the
-  /// caption is inset.
+  /// A continuous photographic grid. Photos run to the edges and meet 4pt
+  /// apart, with no frame, radius, inset or lift; only the caption is inset.
+  /// No screen uses it at present.
   edgeToEdge,
 }
 
@@ -91,31 +132,74 @@ const double _priceLineHeight = 1.2;
 const double _brandGap = 2;
 const double _priceGap = BoutiqueSpace.xs;
 const double _footerGap = BoutiqueSpace.sm;
+const double _priceRunGap = 2;
+
+/// Spare points added to the caption reserve of a card. Whatever is spare
+/// ends up between the price and the pill, so it is kept to half a point
+/// (the proportional allowance below does the real protecting).
+const double _cardRoundingAllowance = 0.5;
+
+/// Gap between the photograph and the caption of a card.
+const double _cardPhotoGap = BoutiqueSpace.sm;
+
+/// Corner radius of the card.
+const BorderRadius kProductCardRadius = BorderRadius.all(Radius.circular(6));
 
 /// Height a grid reserves under a tile that carries a footer control.
 const double kTileFooterExtent = _footerGap + 40;
+
+/// Unscaled-or-scaled height of the caption block of a card: the gap under the
+/// photograph, brand, name and [priceLines] lines of price. Each font size is
+/// scaled on its own, so a non-linear scaler (Android 14+) grows the reserve
+/// exactly as it grows the text.
+double _cardCaptionExtent(
+  ProductTileDensity density,
+  TextScaler textScaler, {
+  required int priceLines,
+}) {
+  final text = textScaler.scale(density.cardBrandSize) * _brandLineHeight +
+      textScaler.scale(density.cardNameSize) *
+          _nameLineHeight *
+          density.nameMaxLines +
+      textScaler.scale(density.cardPriceSize) * _priceLineHeight * priceLines;
+  // The engine rounds each line box, which can add a fraction of a pixel per
+  // line (up to about 1% at large sizes). A small proportional allowance plus
+  // half a point keeps the reserve from ever being a hair short; it is
+  // absorbed by the gap above the pill.
+  return _cardPhotoGap +
+      _brandGap +
+      _priceGap +
+      (priceLines - 1) * _priceRunGap +
+      text * 1.015 +
+      _cardRoundingAllowance;
+}
 
 extension ProductTileVariantMetrics on ProductTileVariant {
   bool get _edge => this == ProductTileVariant.edgeToEdge;
 
   /// Horizontal gap between grid columns.
-  double get columnSpacing => _edge ? 4 : BoutiqueSpace.md;
+  double get columnSpacing => _edge ? 4 : BoutiqueSpace.sm;
 
   /// Vertical gap between grid rows. The edge-to-edge tile carries its own
   /// trailing air instead.
-  double get rowSpacing => _edge ? 0 : BoutiqueSpace.xl;
+  double get rowSpacing => _edge ? 0 : BoutiqueSpace.sm;
 
-  /// Space between the tile edge and the photograph.
-  double get photoInset => _edge ? 0 : BoutiqueSpace.sm;
+  /// Space between the tile edge and the photograph (the compact card uses
+  /// 8, see [ProductTileMetrics.cardPadding]).
+  double get photoInset => _edge ? 0 : BoutiqueSpace.md;
 
   BorderRadius get photoRadius =>
-      _edge ? BorderRadius.zero : BoutiqueRadius.tile;
+      _edge ? BorderRadius.zero : kProductCardRadius;
+
+  /// width / height of the photograph. A card is always square.
+  double photoAspectRatio(ProductTileDensity density) =>
+      _edge ? density.imageAspectRatio : 1;
 
   /// Horizontal inset of the caption text.
   double get captionInset => _edge ? BoutiqueSpace.sm : 0;
 
   /// Gap between the photograph and the caption.
-  double get captionGap => _edge ? 10 : BoutiqueSpace.md;
+  double get captionGap => _edge ? 10 : _cardPhotoGap;
 
   /// Air inside the tile, under the caption (there is no row spacing).
   double get captionTrailing => _edge ? BoutiqueSpace.xl + BoutiqueSpace.xs : 0;
@@ -123,14 +207,20 @@ extension ProductTileVariantMetrics on ProductTileVariant {
   /// Whether the tile rises when pressed.
   bool get lifts => !_edge;
 
-  /// Height the grid reserves under the photograph.
+  /// Height of the caption under the photograph.
   ///
-  /// [ProductTileVariant.card] keeps the measured allowance. The edge-to-edge
-  /// tile reserves exactly brand, a two-line name and one price line. Each
-  /// font size is scaled on its own, so a non-linear scaler (Android 14+)
-  /// grows the reserve exactly as it grows the text.
-  double captionExtent(ProductTileDensity density, TextScaler textScaler) {
-    if (!_edge) return textScaler.scale(density.captionHeight);
+  /// The edge-to-edge tile reserves exactly brand, a two-line name and one
+  /// price line. The card reserves the same block in its serif type, with
+  /// [priceLines] lines of price (two when a compare-at price may wrap under
+  /// the price); its padding and footer are added by [productTileExtent].
+  double captionExtent(
+    ProductTileDensity density,
+    TextScaler textScaler, {
+    int priceLines = 1,
+  }) {
+    if (!_edge) {
+      return _cardCaptionExtent(density, textScaler, priceLines: priceLines);
+    }
     return captionGap +
         textScaler.scale(density.brandSize) * _brandLineHeight +
         _brandGap +
@@ -142,6 +232,40 @@ extension ProductTileVariantMetrics on ProductTileVariant {
         captionTrailing;
   }
 }
+
+/// Total height of one tile [tileWidth] wide.
+///
+/// A card is its padding, a square photograph, the caption and (when
+/// [footerExtent] is not zero) the «VER PRODUCTO» pill. Grids and rails use
+/// this instead of repeating the arithmetic.
+double productTileExtent({
+  required double tileWidth,
+  required TextScaler textScaler,
+  ProductTileDensity density = ProductTileDensity.grid,
+  ProductTileVariant variant = ProductTileVariant.card,
+  int priceLines = 1,
+  double? footerExtent,
+}) {
+  final footer = footerExtent ??
+      (variant == ProductTileVariant.card ? kTileFooterExtent : 0);
+  if (variant == ProductTileVariant.edgeToEdge) {
+    return tileWidth * density.imageHeightFactor +
+        variant.captionExtent(density, textScaler) +
+        footer;
+  }
+  final padding = density.cardPadding;
+  return padding +
+      (tileWidth - 2 * padding) +
+      variant.captionExtent(density, textScaler, priceLines: priceLines) +
+      footer +
+      padding;
+}
+
+/// How many price lines a tile for [products] can need. Always one: the price
+/// and the struck-through compare-at price share ONE line and shrink to fit it
+/// (see [_PriceLine]), so a sale piece never makes the whole grid reserve a
+/// second line. Kept so existing grids keep compiling.
+int tilePriceLinesFor(Iterable<Product> products) => 1;
 
 /// Why a badge is showing. Never decorative: each tone has one data source.
 enum ProductBadgeTone {
@@ -225,9 +349,9 @@ class ProductTileData {
             ? null
             : facets.colors.first.value,
       ),
-      priceLabel: kMoney.format(product.price),
+      priceLabel: formatShopperPrice(product.price),
       compareAtLabel:
-          product.isOnSale ? kMoney.format(product.compareAtPrice) : null,
+          product.isOnSale ? formatShopperPrice(product.compareAtPrice!) : null,
       badge: badge,
       imageUrls: product.images,
       inStock: product.isInStock,
@@ -258,7 +382,7 @@ String _catalogBrandLabel(CatalogItem item) {
   return humanizeCatalogValue(brand.isEmpty ? item.merchant.trim() : brand);
 }
 
-/// The brown «VER PRODUCTO» pill of the collection grid.
+/// The brown «VER PRODUCTO» pill at the foot of every card.
 class TileViewProductButton extends StatelessWidget {
   const TileViewProductButton({required this.onPressed, super.key});
 
@@ -288,17 +412,69 @@ class TileViewProductButton extends StatelessWidget {
                   'VER PRODUCTO',
                   maxLines: 1,
                   style: boutiqueText(
-                    size: 12,
-                    weight: FontWeight.w600,
+                    size: 13,
+                    weight: FontWeight.w400,
                     color: palette.onAction,
                     height: 1.1,
-                  ).copyWith(letterSpacing: 0.6),
+                  ).copyWith(letterSpacing: 0.5),
                 ),
               ),
             ),
           ),
         ),
       ),
+    );
+  }
+}
+
+// Serif caption of the card. The family is bundled; the fallback list keeps a
+// platform serif until it is registered.
+TextStyle _tileSerif({
+  required double size,
+  required FontWeight weight,
+  required Color color,
+  required double height,
+  TextDecoration? decoration,
+}) =>
+    TextStyle(
+      fontFamily: kBoutiqueSerifFamily,
+      fontFamilyFallback: kBoutiqueSerifFallback,
+      fontSize: size,
+      fontWeight: weight,
+      height: height,
+      color: color,
+      decoration: decoration,
+    );
+
+/// Brightens a photograph 3 % so the #F9F9F9 ground the store's real photos
+/// carry becomes pure white before it is multiplied onto a surface.
+const ColorFilter kPackshotLiftFilter = ColorFilter.matrix(<double>[
+  1.03, 0, 0, 0, 0, //
+  0, 1.03, 0, 0, 0, //
+  0, 0, 1.03, 0, 0, //
+  0, 0, 0, 1, 0, //
+]);
+
+/// Lets a catalog photograph rest directly on the surface [ground] behind it.
+///
+/// The photo is lifted 3 % (so its near-white ground is exactly white and no
+/// slightly darker box remains) and then multiplied with [ground]: white
+/// becomes the surface, the piece keeps its own colours. Light theme only; in
+/// the dark theme the photograph stays as shot. The card, the preview, the
+/// thumbnails and the product gallery all use it.
+class PackshotBlend extends StatelessWidget {
+  const PackshotBlend({required this.ground, required this.child, super.key});
+
+  /// The colour behind the photograph (the surface it should rest on).
+  final Color ground;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    if (Theme.of(context).brightness != Brightness.light) return child;
+    return ColorFiltered(
+      colorFilter: ColorFilter.mode(ground, BlendMode.multiply),
+      child: ColorFiltered(colorFilter: kPackshotLiftFilter, child: child),
     );
   }
 }
@@ -321,6 +497,7 @@ class MonettaProductTile extends StatelessWidget {
     this.imageOverlay,
     this.eyebrow,
     this.footer,
+    this.semanticHint,
     super.key,
   });
 
@@ -336,34 +513,186 @@ class MonettaProductTile extends StatelessWidget {
   final bool wishlisted;
   final VoidCallback? onToggleWishlist;
 
-  /// Package C's quick view. When provided, a long press opens it and a
-  /// visible "Vista rápida" action appears on the photo for accessibility;
-  /// nothing changes when it is null.
+  /// Package C's quick view. When provided, a long press opens it. The
+  /// edge-to-edge variant also draws a visible "Vista rápida" action on the
+  /// photo; the card does not, because tapping the card is the way in.
   final VoidCallback? onQuickView;
 
-  /// Purchase control pinned to the lower right corner of the photograph (the
-  /// "+"). It takes the slot of the "Vista rápida" eye: a tile never draws
-  /// both. A long press still opens the quick view through [onQuickView].
+  /// Purchase control pinned to the lower right corner of the photograph.
+  /// No Monetta card passes one any more (the quick view carries «AGREGAR A
+  /// BOLSA»); the slot stays for callers outside the catalog.
   final Widget? quickAction;
 
-  /// Extra marker pinned to the top-left of the photograph, e.g. the
-  /// external-source badge. Drawn under the discount badge's slot.
+  /// Extra marker pinned to the bottom-left of the photograph, e.g. the
+  /// external-source badge.
   final Widget? imageOverlay;
 
   /// Optional short line above the brand — a real restock or discount reason,
   /// never a recommender sentence.
   final String? eyebrow;
 
-  /// A full-width control under the price (the collection grid's «VER
-  /// PRODUCTO»). A grid that shows it reserves [kTileFooterExtent] more
-  /// height per row through [productGridDelegate].
+  /// A full-width control under the price (the «VER PRODUCTO» pill). A grid
+  /// that shows it reserves [kTileFooterExtent] more height per row through
+  /// [productGridDelegate], which does so by default for the card.
   final Widget? footer;
+
+  /// Screen-reader hint for the tap, e.g. «Abre la vista previa».
+  final String? semanticHint;
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.boutique;
+    final edge = variant == ProductTileVariant.edgeToEdge;
+    final body = edge ? _buildEdge(context) : _buildCard(context);
+    return Semantics(
+      button: true,
+      label: data.semanticLabel,
+      hint: semanticHint,
+      child: variant.lifts
+          ? MonettaCardLift(borderRadius: kProductCardRadius, child: body)
+          : body,
+    );
+  }
 
-    final tile = GestureDetector(
+  Widget _caption(BuildContext context) {
+    final palette = context.boutique;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        if (eyebrow case final line? when line.trim().isNotEmpty) ...[
+          Text(
+            line.toUpperCase(),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: boutiqueEyebrow(size: 11, color: palette.sale),
+          ),
+          const SizedBox(height: BoutiqueSpace.xs),
+        ],
+        if (data.brand case final brand?) ...[
+          Text(
+            brand,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: variant == ProductTileVariant.edgeToEdge
+                ? boutiqueText(
+                    size: density.brandSize,
+                    weight: FontWeight.w600,
+                    color: palette.ink,
+                    height: _brandLineHeight,
+                  )
+                : _tileSerif(
+                    size: density.cardBrandSize,
+                    weight: FontWeight.w700,
+                    color: palette.ink,
+                    height: _brandLineHeight,
+                  ),
+          ),
+          const SizedBox(height: _brandGap),
+        ],
+        Text(
+          data.title,
+          maxLines: density.nameMaxLines,
+          overflow: TextOverflow.ellipsis,
+          style: variant == ProductTileVariant.edgeToEdge
+              ? boutiqueText(
+                  size: density.nameSize,
+                  color: palette.inkMuted,
+                  height: _nameLineHeight,
+                )
+              : _tileSerif(
+                  size: density.cardNameSize,
+                  weight: FontWeight.w400,
+                  color: palette.ink,
+                  height: _nameLineHeight,
+                ),
+        ),
+        const SizedBox(height: _priceGap),
+        _PriceLine(data: data, density: density, variant: variant),
+      ],
+    );
+  }
+
+  /// The card: one rounded warm ground with the photograph, the favourite,
+  /// the caption and the pill inside it.
+  Widget _buildCard(BuildContext context) {
+    final palette = context.boutique;
+    final padding = density.cardPadding;
+    final badge = data.badge;
+
+    final card = DecoratedBox(
+      decoration: BoxDecoration(
+        color: palette.surfaceDeep,
+        borderRadius: kProductCardRadius,
+      ),
+      child: Stack(
+        // Pass the grid's tight height down to the layout below.
+        fit: StackFit.passthrough,
+        children: [
+          Padding(
+            padding: EdgeInsets.all(padding),
+            child: LayoutBuilder(
+              builder: (context, constraints) {
+                // Inside a grid or a rail the cell height is fixed: the pill
+                // is pinned to the foot so every card of a row lines up. On
+                // its own the card is as tall as its content.
+                final fill = constraints.hasTightHeight;
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: fill ? MainAxisSize.max : MainAxisSize.min,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: variant.photoAspectRatio(density),
+                      child: _TileImage(
+                        data: data,
+                        variant: variant,
+                        quickAction: quickAction,
+                        overlay: imageOverlay,
+                      ),
+                    ),
+                    SizedBox(height: variant.captionGap),
+                    _caption(context),
+                    if (footer case final control?) ...[
+                      const SizedBox(height: _footerGap),
+                      if (fill) const Spacer(),
+                      control,
+                    ],
+                  ],
+                );
+              },
+            ),
+          ),
+          if (badge != null && density != ProductTileDensity.mini)
+            Positioned(
+              top: padding,
+              left: padding,
+              child: _Badge(badge: badge),
+            ),
+          if (onToggleWishlist case final toggle?)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: _WishlistButton(
+                wishlisted: wishlisted,
+                onPressed: toggle,
+                cornerIcon: true,
+                mini: density == ProductTileDensity.mini,
+              ),
+            ),
+        ],
+      ),
+    );
+
+    return GestureDetector(
+      onTap: onTap,
+      onLongPress: onQuickView,
+      behavior: HitTestBehavior.opaque,
+      child: card,
+    );
+  }
+
+  /// The continuous photographic tile (no screen uses it at present).
+  Widget _buildEdge(BuildContext context) {
+    return GestureDetector(
       onTap: onTap,
       onLongPress: onQuickView,
       behavior: HitTestBehavior.opaque,
@@ -372,7 +701,7 @@ class MonettaProductTile extends StatelessWidget {
         mainAxisSize: MainAxisSize.min,
         children: [
           AspectRatio(
-            aspectRatio: density.imageAspectRatio,
+            aspectRatio: variant.photoAspectRatio(density),
             child: _TileImage(
               data: data,
               variant: variant,
@@ -390,41 +719,7 @@ class MonettaProductTile extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
               children: [
-                if (eyebrow case final line? when line.trim().isNotEmpty) ...[
-                  Text(
-                    line.toUpperCase(),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: boutiqueEyebrow(size: 11, color: palette.sale),
-                  ),
-                  const SizedBox(height: BoutiqueSpace.xs),
-                ],
-                if (data.brand case final brand?) ...[
-                  Text(
-                    brand,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: boutiqueText(
-                      size: density.brandSize,
-                      weight: FontWeight.w600,
-                      color: palette.ink,
-                      height: _brandLineHeight,
-                    ),
-                  ),
-                  const SizedBox(height: _brandGap),
-                ],
-                Text(
-                  data.title,
-                  maxLines: density.nameMaxLines,
-                  overflow: TextOverflow.ellipsis,
-                  style: boutiqueText(
-                    size: density.nameSize,
-                    color: palette.inkMuted,
-                    height: _nameLineHeight,
-                  ),
-                ),
-                const SizedBox(height: _priceGap),
-                _PriceLine(data: data, density: density, variant: variant),
+                _caption(context),
                 if (footer case final control?) ...[
                   const SizedBox(height: _footerGap),
                   control,
@@ -434,14 +729,6 @@ class MonettaProductTile extends StatelessWidget {
           ),
         ],
       ),
-    );
-
-    return Semantics(
-      button: true,
-      label: data.semanticLabel,
-      child: variant.lifts
-          ? MonettaCardLift(borderRadius: BoutiqueRadius.tile, child: tile)
-          : tile,
     );
   }
 }
@@ -457,70 +744,80 @@ class _PriceLine extends StatelessWidget {
   final ProductTileDensity density;
   final ProductTileVariant variant;
 
-  /// On the edge-to-edge tile a price shrinks to fit its column rather than
-  /// ending in an ellipsis; a cut-off price is never acceptable.
-  Widget _fit(Widget text) => variant == ProductTileVariant.edgeToEdge
-      ? FittedBox(
-          fit: BoxFit.scaleDown,
-          alignment: AlignmentDirectional.centerStart,
-          child: text,
-        )
-      : text;
-
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    // Prices wrap as whole units: `softWrap: false` stops "$ 1,299.00" from
-    // breaking after the currency mark into a third run on narrow cards. The
-    // Wrap still moves the compare-at price to its own run when the pair does
-    // not fit — that two-run peak is what `captionHeight` reserves.
-    return Wrap(
-      spacing: BoutiqueSpace.sm,
-      runSpacing: 2,
-      crossAxisAlignment: WrapCrossAlignment.center,
-      children: [
-        _fit(
+    final card = variant == ProductTileVariant.card;
+    final mini = density == ProductTileDensity.mini;
+    // The price and the struck-through compare-at price share ONE line and
+    // shrink together to fit the column: a cut-off price is never acceptable,
+    // and a second line would leave a gap above the pill on every card of a
+    // grid that holds a sale piece. The mini card has no room for the
+    // compare-at price at all.
+    return FittedBox(
+      fit: BoxFit.scaleDown,
+      alignment: AlignmentDirectional.centerStart,
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
           Text(
             data.priceLabel,
             maxLines: 1,
             softWrap: false,
-            overflow: TextOverflow.ellipsis,
-            style: boutiqueText(
-              size: density.priceSize,
-              weight: FontWeight.w700,
-              color: palette.ink,
-              height: _priceLineHeight,
-            ),
+            style: card
+                ? _tileSerif(
+                    size: density.cardPriceSize,
+                    weight: FontWeight.w700,
+                    color: palette.ink,
+                    height: _priceLineHeight,
+                  )
+                : boutiqueText(
+                    size: density.priceSize,
+                    weight: FontWeight.w700,
+                    color: palette.ink,
+                    height: _priceLineHeight,
+                  ),
           ),
-        ),
-        if (data.compareAtLabel case final before?)
-          _fit(
-            Text(
-              before,
-              maxLines: 1,
-              softWrap: false,
-              overflow: TextOverflow.ellipsis,
-              style: boutiqueText(
-                size: density.priceSize - 3,
-                color: palette.inkMuted,
-                height: _priceLineHeight,
-                decoration: TextDecoration.lineThrough,
+          if (!mini)
+            if (data.compareAtLabel case final before?) ...[
+              const SizedBox(width: BoutiqueSpace.sm),
+              Text(
+                before,
+                maxLines: 1,
+                softWrap: false,
+                style: card
+                    ? _tileSerif(
+                        size: density.cardPriceSize - 2,
+                        weight: FontWeight.w400,
+                        color: palette.inkMuted,
+                        height: _priceLineHeight,
+                        decoration: TextDecoration.lineThrough,
+                      )
+                    : boutiqueText(
+                        size: density.priceSize - 3,
+                        color: palette.inkMuted,
+                        height: _priceLineHeight,
+                        decoration: TextDecoration.lineThrough,
+                      ),
               ),
-            ),
-          ),
-      ],
+            ],
+        ],
+      ),
     );
   }
 }
 
-/// The photograph: neutral ground, product shown whole, badge, favourite.
+/// The photograph: product shown whole, sold-out stamp and, on the
+/// edge-to-edge variant, badge, favourite and quick-view eye (the card draws
+/// those itself, on its own ground).
 class _TileImage extends StatefulWidget {
   const _TileImage({
     required this.data,
     required this.variant,
-    required this.wishlisted,
-    required this.onToggleWishlist,
     required this.overlay,
+    this.wishlisted = false,
+    this.onToggleWishlist,
     this.onQuickView,
     this.quickAction,
   });
@@ -565,31 +862,29 @@ class _TileImageState extends State<_TileImage> {
 
     final edge = widget.variant == ProductTileVariant.edgeToEdge;
 
-    final photo = MonettaImage(
+    Widget photo = MonettaImage(
       key: ValueKey(url ?? 'fallback'),
       url: url,
       fit: BoxFit.contain,
-      // Edge to edge: the widget inset is gone, but the white margin the file
-      // already carries stays. `cover` is chosen only when it crops less than
-      // that margin; otherwise the photo is contained whole.
-      maxCoverTrim: edge ? kPackshotMaxCoverTrim : null,
+      // The photo's own white margin stays. `cover` is chosen only when it
+      // crops less than that margin; otherwise the photo is contained whole,
+      // so handles and straps are never cut.
+      maxCoverTrim: kPackshotMaxCoverTrim,
       cacheWidth: widget.data.imageCacheWidth,
       fallbackLabel: widget.data.fallbackLabel,
       onFailed: _advance,
     );
+    if (!edge) {
+      // The catalog photographs sit on (near) white. Blending them into the
+      // card's own colour makes that white become the card, so the bag
+      // appears to rest directly on it.
+      photo = PackshotBlend(ground: palette.surfaceDeep, child: photo);
+    }
 
     final stack = Stack(
       fit: StackFit.expand,
       children: [
-        // Card: `contain` with a small inset. A handbag's handle and straps
-        // are the part a shopper recognises, and `cover` crops exactly those.
-        if (edge)
-          photo
-        else
-          Padding(
-            padding: EdgeInsets.all(widget.variant.photoInset),
-            child: photo,
-          ),
+        photo,
         if (!widget.data.inStock)
           IgnorePointer(
             child: ColoredBox(
@@ -615,7 +910,7 @@ class _TileImageState extends State<_TileImage> {
               ),
             ),
           ),
-        if (badge != null)
+        if (edge && badge != null)
           Positioned(
             top: BoutiqueSpace.sm,
             left: BoutiqueSpace.sm,
@@ -627,34 +922,36 @@ class _TileImageState extends State<_TileImage> {
             left: BoutiqueSpace.sm,
             child: overlay,
           ),
-        if (widget.onToggleWishlist case final toggle?)
-          Positioned(
-            top: 0,
-            right: 0,
-            child: _WishlistButton(
-              wishlisted: widget.wishlisted,
-              onPressed: toggle,
+        if (edge)
+          if (widget.onToggleWishlist case final toggle?)
+            Positioned(
+              top: 0,
+              right: 0,
+              child: _WishlistButton(
+                wishlisted: widget.wishlisted,
+                onPressed: toggle,
+              ),
             ),
-          ),
         if (widget.quickAction case final action?)
           Positioned(
             bottom: BoutiqueSpace.xs,
             right: BoutiqueSpace.xs,
             child: action,
           )
-        else if (widget.onQuickView case final quickView?)
-          Positioned(
-            bottom: BoutiqueSpace.xs,
-            right: BoutiqueSpace.xs,
-            child: _QuickViewButton(onPressed: quickView),
-          ),
+        else if (edge)
+          if (widget.onQuickView case final quickView?)
+            Positioned(
+              bottom: BoutiqueSpace.xs,
+              right: BoutiqueSpace.xs,
+              child: _QuickViewButton(onPressed: quickView),
+            ),
       ],
     );
 
     if (edge) return stack;
     return ClipRRect(
-      borderRadius: widget.variant.photoRadius,
-      child: ColoredBox(color: palette.surfaceDeep, child: stack),
+      borderRadius: const BorderRadius.all(Radius.circular(4)),
+      child: stack,
     );
   }
 }
@@ -692,12 +989,47 @@ class _Badge extends StatelessWidget {
 }
 
 /// 48×48 hit area over an 18px heart, so tapping the favourite can never be
-/// mistaken for tapping the card.
+/// mistaken for tapping the card. On the card ([cornerIcon]) the outline heart
+/// sits tucked in the top right corner, as drawn in the design; the touch zone
+/// still covers 48×48 inside the card.
 class _WishlistButton extends StatelessWidget {
-  const _WishlistButton({required this.wishlisted, required this.onPressed});
+  const _WishlistButton({
+    required this.wishlisted,
+    required this.onPressed,
+    this.cornerIcon = false,
+    this.mini = false,
+  });
 
   final bool wishlisted;
   final VoidCallback onPressed;
+  final bool cornerIcon;
+
+  /// The mini card: a 40pt zone over a 16pt heart.
+  final bool mini;
+
+  Widget _heartIcon(BuildContext context, BoutiquePalette palette) {
+    final icon = Icon(
+      wishlisted ? Icons.favorite : Icons.favorite_border,
+      size: mini
+          ? 16
+          : cornerIcon
+              ? 20
+              : 19,
+      color: wishlisted ? palette.goldText : palette.ink,
+    );
+    // In the dark theme the photograph keeps its white ground, so the light
+    // outline heart sits on a card-coloured disc to stay visible.
+    if (!cornerIcon || Theme.of(context).brightness != Brightness.dark) {
+      return icon;
+    }
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        color: palette.surfaceDeep.withValues(alpha: 0.9),
+        shape: BoxShape.circle,
+      ),
+      child: Padding(padding: const EdgeInsets.all(4), child: icon),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -707,17 +1039,14 @@ class _WishlistButton extends StatelessWidget {
       toggled: wishlisted,
       label: wishlisted ? 'Quitar de favoritos' : 'Guardar en favoritos',
       child: SizedBox(
-        width: BoutiqueSpace.tapTarget,
-        height: BoutiqueSpace.tapTarget,
+        width: mini ? 40 : BoutiqueSpace.tapTarget,
+        height: mini ? 40 : BoutiqueSpace.tapTarget,
         child: IconButton(
           tooltip: wishlisted ? 'Quitar de favoritos' : 'Guardar',
           onPressed: onPressed,
-          padding: EdgeInsets.zero,
-          icon: Icon(
-            wishlisted ? Icons.favorite : Icons.favorite_border,
-            size: 19,
-            color: wishlisted ? palette.goldText : palette.ink,
-          ),
+          padding: cornerIcon ? const EdgeInsets.all(4) : EdgeInsets.zero,
+          alignment: cornerIcon ? Alignment.topRight : Alignment.center,
+          icon: _heartIcon(context, palette),
         ),
       ),
     );
@@ -782,7 +1111,10 @@ int productGridColumns(double width) =>
 /// A grid delegate sized from the real tile width and the shopper's own text
 /// scale, so large type produces taller rows instead of clipped captions.
 ///
-/// [spacing] and [rowSpacing] default to the [variant]'s own gaps.
+/// [spacing] and [rowSpacing] default to the [variant]'s own gaps. A card
+/// reserves its «VER PRODUCTO» pill by default ([footerExtent] null); pass 0
+/// only for a grid whose cards show none. [priceLines] is 2 when any product
+/// of the grid carries a compare-at price (see [tilePriceLinesFor]).
 SliverGridDelegate productGridDelegate(
   BuildContext context, {
   required double availableWidth,
@@ -790,20 +1122,24 @@ SliverGridDelegate productGridDelegate(
   ProductTileVariant variant = ProductTileVariant.card,
   double? spacing,
   double? rowSpacing,
-  double footerExtent = 0,
+  double? footerExtent,
+  int priceLines = 1,
 }) {
-  final columns = StorefrontLayout.columns(
-    availableWidth,
-    MediaQuery.textScalerOf(context),
-  );
+  final textScaler = MediaQuery.textScalerOf(context);
+  final columns = StorefrontLayout.columns(availableWidth, textScaler);
   final columnSpacing = spacing ?? variant.columnSpacing;
   final tileWidth = (availableWidth - columnSpacing * (columns - 1)) / columns;
   return SliverGridDelegateWithFixedCrossAxisCount(
     crossAxisCount: columns,
     crossAxisSpacing: columnSpacing,
     mainAxisSpacing: rowSpacing ?? variant.rowSpacing,
-    mainAxisExtent: tileWidth * density.imageHeightFactor +
-        variant.captionExtent(density, MediaQuery.textScalerOf(context)) +
-        footerExtent,
+    mainAxisExtent: productTileExtent(
+      tileWidth: tileWidth,
+      textScaler: textScaler,
+      density: density,
+      variant: variant,
+      priceLines: priceLines,
+      footerExtent: footerExtent,
+    ),
   );
 }

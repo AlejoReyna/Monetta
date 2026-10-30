@@ -36,7 +36,6 @@ import 'catalog_controls.dart';
 import 'catalog_query.dart';
 import 'product_card.dart';
 import 'search_history.dart';
-import '../product/quick_view.dart';
 
 enum _Sort { newest, priceAsc, priceDesc }
 
@@ -449,7 +448,7 @@ class _ProductSliverGrid extends StatelessWidget {
         gridDelegate: productGridDelegate(
           context,
           availableWidth: constraints.crossAxisExtent,
-          footerExtent: kTileFooterExtent,
+          priceLines: tilePriceLinesFor(products),
         ),
         delegate: SliverChildBuilderDelegate(
           (context, index) {
@@ -457,8 +456,6 @@ class _ProductSliverGrid extends StatelessWidget {
             return ProductCard(
               key: ValueKey('product-card-${product.id}'),
               product: product,
-              showViewProduct: true,
-              onQuickView: () => showProductQuickView(context, product),
             );
           },
           childCount: products.length,

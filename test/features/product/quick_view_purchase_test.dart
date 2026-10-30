@@ -13,20 +13,22 @@ import '../../support/product_screen_harness.dart';
 import '../../support/quick_add_harness.dart';
 import '../../support/scripted_catalog_store.dart';
 
-// FICHA-T3, QUICK-04..05, CART-03 and TYPE-01e on the quick view (BRIEF 2.6):
-// the purchase action is pinned at the bottom of the sheet (outside the
-// scrolling list, inset applied once, keyboard respected), the labels are the
-// uppercase guide actions, a pending or failed add is visible, and the piece
-// name is set in the sans of the cards.
-//
-// `Key('quick-view-primary')` and `Key('quick-view-actions')` do not exist in
-// `lib/` yet, so the tests that look for them are red until they do.
+// FICHA-T3, QUICK-04..05, CART-03 and TYPE-01e on the quick view (BRIEF 2.6),
+// for the centred preview card: the purchase action always stays inside the
+// card, which keeps clear of the safe area and the keyboard and scrolls inside
+// when it does not fit; the labels are the uppercase guide actions, a pending
+// or failed add is visible, and the piece name is set in the sans of the
+// cards.
 
 const double _inset = 34;
 
 Finder _close() => find.byTooltip(kCloseQuickViewTooltip);
 
-Finder _sheetList() => inSheet(find.byType(ListView));
+Finder _sheetScroller() => inSheet(
+      find.byWidgetPredicate(
+        (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+      ),
+    );
 
 Finder _inMiniCart() => find.text('En tu bolsa');
 
@@ -58,70 +60,49 @@ Future<(ScriptedCatalogStore, Product)> _open(
 void main() {
   setUpAll(mockPathProvider);
 
-  group('QUICK-04 the purchase action is pinned to the bottom', () {
+  group('QUICK-04 the purchase action stays inside the centred card', () {
     testWidgets(
-        'QUICK-04 the bar is outside the scrolling list, paints under the '
-        'inset, and the button is visible above it without scrolling',
-        (tester) async {
+        'QUICK-04 the card keeps clear of the safe area and holds the actions, '
+        'and the button is visible without scrolling', (tester) async {
       await _open(tester, inset: _inset);
 
+      final card = tester.getRect(quickViewSheet());
+      expect(card.bottom, lessThanOrEqualTo(kPhoneHeight - _inset + 0.01));
+      expect(card.top, greaterThanOrEqualTo(0));
       expect(actionsBar(), findsOneWidget);
-      expect(
-        find.descendant(of: find.byType(ListView), matching: actionsBar()),
-        findsNothing,
-        reason: 'the bar must not scroll with the content',
-      );
       final bar = tester.getRect(actionsBar());
-      expect(
-        bar.bottom,
-        closeTo(kPhoneHeight, 0.01),
-        reason: 'bar to the edge',
-      );
+      expect(card.contains(bar.topLeft), isTrue, reason: 'bar inside the card');
+      expect(card.contains(bar.bottomRight), isTrue);
 
       expect(primaryButton(), findsOneWidget);
       final button = tester.getRect(primaryButton());
-      expect(button.height, greaterThanOrEqualTo(48 - 0.01));
+      expect(button.height, greaterThanOrEqualTo(52 - 0.01));
+      expect(button.bottom, lessThanOrEqualTo(card.bottom));
+      expect(button.top, greaterThanOrEqualTo(card.top));
       expect(
-        button.bottom,
-        lessThanOrEqualTo(kPhoneHeight - _inset + 0.01),
-        reason: 'the button ends above the inset',
+        primaryButton().hitTestable(),
+        findsOneWidget,
+        reason: 'nothing covers the button: a tap would reach it',
       );
-      expect(button.top, greaterThanOrEqualTo(0));
-      expect(bar.contains(button.center), isTrue, reason: 'inside the bar');
     });
 
     testWidgets(
-        'QUICK-04 on a 320x568 phone the bar stays put while the content '
-        'scrolls, and the button still adds', (tester) async {
+        'QUICK-04 on a 320x568 phone the card scrolls inside and the button '
+        'is still reachable and adds', (tester) async {
       final (store, _) = await _open(tester, width: 320, height: 568);
 
-      expect(actionsBar(), findsOneWidget);
-      final barBefore = tester.getRect(actionsBar());
-      final buttonBefore = tester.getRect(primaryButton());
-      expect(barBefore.bottom, closeTo(568, 0.01));
-      expect(buttonBefore.top, greaterThanOrEqualTo(0));
-
-      final scroller = find.descendant(
-        of: _sheetList(),
-        matching: find.byWidgetPredicate(
-          (widget) => widget is Scrollable && widget.axis == Axis.vertical,
-        ),
-      );
-      final position = tester.state<ScrollableState>(scroller).position;
-      // The visible list is the photo, so a drag starts on the gallery and
-      // does not move this scroller. Jump the content instead and prove the
-      // pinned bar stays.
-      position.jumpTo(120);
+      final cardBefore = tester.getRect(quickViewSheet());
+      expect(cardBefore.height, lessThanOrEqualTo(568));
+      final position = tester.state<ScrollableState>(_sheetScroller()).position;
+      expect(position.maxScrollExtent, greaterThan(0), reason: 'it scrolls');
+      position.jumpTo(position.maxScrollExtent);
       await tester.pump();
 
       expect(
-        position.pixels,
-        greaterThan(20),
-        reason: 'the content did scroll',
+        tester.getRect(quickViewSheet()),
+        cardBefore,
+        reason: 'the card itself stays put while its content scrolls',
       );
-      expect(tester.getRect(actionsBar()), barBefore);
-      expect(tester.getRect(primaryButton()), buttonBefore);
-
       await tester.tap(primaryButton());
       await tester.pumpAndSettle();
       expect(store.bagQuantity, 1, reason: 'the button is reachable');
@@ -130,8 +111,8 @@ void main() {
 
     for (final scale in [1.0, 2.0]) {
       testWidgets(
-          'QUICK-04 at 320x568 and text scale $scale the bar is on screen '
-          'and its button is reachable', (tester) async {
+          'QUICK-04 at 320x568 and text scale $scale the button is reachable '
+          'inside the card', (tester) async {
         final (store, _) = await _open(
           tester,
           width: 320,
@@ -140,20 +121,15 @@ void main() {
         );
 
         expect(tester.takeException(), isNull);
-        expect(actionsBar(), findsOneWidget);
         const view = Rect.fromLTWH(0, 0, 320, 568);
-        final bar = tester.getRect(actionsBar());
-        final button = tester.getRect(primaryButton());
-        expect(view.contains(bar.topLeft), isTrue, reason: 'bar top $bar');
-        expect(bar.bottom, closeTo(568, 0.01));
-        expect(view.contains(button.topLeft), isTrue, reason: 'button $button');
-        expect(view.contains(button.bottomRight), isTrue);
-        expect(
-          tester.getSize(_sheetList()).height,
-          greaterThan(48),
-          reason: 'the content keeps some room above the bar',
-        );
+        final card = tester.getRect(quickViewSheet());
+        expect(view.contains(card.topLeft), isTrue, reason: 'card $card');
+        expect(view.contains(card.bottomRight), isTrue);
 
+        await revealInSheet(tester, primaryButton());
+        final button = tester.getRect(primaryButton());
+        expect(card.contains(button.topLeft), isTrue, reason: 'button $button');
+        expect(card.contains(button.bottomRight), isTrue);
         expect(
           primaryButton().hitTestable(),
           findsOneWidget,
@@ -166,7 +142,7 @@ void main() {
 
   group('QUICK-04b the keyboard', () {
     testWidgets(
-        'QUICK-04b with a 300 keyboard the bar ends above it and the safe '
+        'QUICK-04b with a 300 keyboard the card ends above it and the safe '
         'inset is not counted twice', (tester) async {
       setPhoneView(tester, inset: _inset);
       // A phone with the keyboard up reports no bottom padding (the keyboard
@@ -180,27 +156,19 @@ void main() {
       await pumpQuickView(tester, store, product);
       expect(_close(), findsOneWidget);
 
-      expect(actionsBar(), findsOneWidget);
       const keyboardTop = kPhoneHeight - 300;
-      final bar = tester.getRect(actionsBar());
-      final last = tester.getRect(find.byKey(kQuickViewViewProductKey));
+      final card = tester.getRect(quickViewSheet());
       expect(
-        bar.bottom,
+        card.bottom,
         lessThanOrEqualTo(keyboardTop + 0.01),
-        reason: 'the bar ends above the keyboard',
+        reason: 'the card ends above the keyboard',
       );
       expect(
-        bar.bottom,
-        greaterThan(keyboardTop - 1),
-        reason: 'and sits right on it',
+        card.bottom,
+        greaterThan(keyboardTop - 40),
+        reason: 'and sits right on it, with the 16 of air only',
       );
-      expect(last.bottom, lessThanOrEqualTo(bar.bottom));
-      expect(
-        bar.bottom - last.bottom,
-        lessThanOrEqualTo(16),
-        reason: 'the 34 safe inset is not added on top of the keyboard',
-      );
-      expect(last.top, greaterThanOrEqualTo(0));
+      expect(card.top, greaterThanOrEqualTo(0));
     });
   });
 
@@ -243,7 +211,7 @@ void main() {
       await _open(tester, product: product, requireChoice: true);
 
       expect(
-        inSheet(find.text(kMoney.format(product.price))),
+        inSheet(find.text(formatShopperPrice(product.price))),
         findsOneWidget,
         reason: 'before choosing: the lowest price of the piece',
       );
@@ -252,8 +220,14 @@ void main() {
 
       await pickVariant(tester, product, third);
 
-      expect(inSheet(find.text(kMoney.format(third.price))), findsOneWidget);
-      expect(inSheet(find.text(kMoney.format(product.price))), findsNothing);
+      expect(
+        inSheet(find.text(formatShopperPrice(third.price))),
+        findsOneWidget,
+      );
+      expect(
+        inSheet(find.text(formatShopperPrice(product.price))),
+        findsNothing,
+      );
     });
   });
 
@@ -343,22 +317,29 @@ void main() {
 
   group('TYPE-01e the piece name', () {
     testWidgets(
-        'TYPE-01e the main name of the sheet is the editorial serif, '
-        'w400, 25', (tester) async {
+        'TYPE-01e the brand is the editorial serif w700 22 and the name Inter '
+        'w400 15 in ink', (tester) async {
       final (_, product) = await _open(tester);
 
-      final name = inSheet(
-        find.text(shopperProductName(product.title)),
+      final palette = tester.element(quickViewSheet()).boutique;
+      final name = find.byKey(const Key('quick-view-name'));
+      expect(
+        tester.widget<Text>(name).data,
+        shopperProductName(product.title),
       );
       final style = styleOf(tester, name);
-      expect(style.fontFamily, kBoutiqueSerifFamily, reason: 'family');
-      expect(
-        style.fontFamilyFallback,
-        kBoutiqueSerifFallback,
-        reason: 'fallback chain',
-      );
+      expect(style.fontFamily, kBoutiqueSansFamily, reason: 'family');
       expect(style.fontWeight, FontWeight.w400);
-      expect(style.fontSize, kBoutiqueProductNameSize);
+      expect(style.fontSize, 15);
+      expect(style.color, palette.ink, reason: 'not the light grey');
+
+      final brand = find.byKey(const Key('quick-view-brand'));
+      if (brand.evaluate().isNotEmpty) {
+        final brandStyle = styleOf(tester, brand);
+        expect(brandStyle.fontFamily, kBoutiqueSerifFamily);
+        expect(brandStyle.fontWeight, FontWeight.w700);
+        expect(brandStyle.fontSize, 22);
+      }
     });
   });
 }

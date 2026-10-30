@@ -248,9 +248,9 @@ void main() {
         );
 
         expect(
-          find.semantics.byLabel('Catálogo').evaluate().single,
+          find.semantics.byLabel('Categorías').evaluate().single,
           isSemantics(
-            label: 'Catálogo',
+            label: 'Categorías',
             isButton: true,
             hasTapAction: true,
             isSelected: true,

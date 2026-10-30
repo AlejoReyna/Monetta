@@ -8,8 +8,10 @@ import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
+import 'package:monetta_app/features/catalog/quick_add_button.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
 import 'package:monetta_app/features/product/quick_view.dart';
+import 'package:monetta_app/main.dart';
 
 import 'product_screen_harness.dart';
 import 'scripted_catalog_store.dart';
@@ -28,6 +30,7 @@ import 'scripted_catalog_store.dart';
 
 Key quickAddKey(String productId) => Key('quick-add-$productId');
 const Key kQuickViewActionsKey = Key('quick-view-actions');
+const Key kQuickViewCardKey = Key('quick-view-card');
 const Key kQuickViewPrimaryKey = Key('quick-view-primary');
 const Key kQuickViewViewProductKey = Key('quick-view-view-product');
 const Key kQuickViewErrorKey = Key('quick-view-error');
@@ -40,7 +43,7 @@ const String kViewProductLabel = 'VER PRODUCTO';
 const String kAddFailureMessage =
     'No pudimos agregar la pieza. Intenta de nuevo.';
 const String kQuickViewTooltip = 'Vista rápida';
-const String kCloseQuickViewTooltip = 'Cerrar vista rápida';
+const String kCloseQuickViewTooltip = 'Cerrar vista previa';
 
 // ---------------------------------------------------------------------------
 // Stores and products
@@ -199,6 +202,108 @@ Widget cardApp(
       scale: scale,
     );
 
+/// A tile that carries the "+" ([ProductQuickAddButton]) in its photo slot.
+///
+/// No Monetta card shows the "+" any more (the quick view carries «AGREGAR A
+/// BOLSA»), but the control is still public API. This host mounts it the way
+/// `ProductCard` mounted it before the card redesign, so the control keeps its
+/// own tests: geometry, one-variant add, the variant choice, pending and
+/// failure.
+class PlusCard extends StatelessWidget {
+  const PlusCard({required this.product, this.onQuickView, super.key});
+
+  final Product product;
+  final VoidCallback? onQuickView;
+
+  @override
+  Widget build(BuildContext context) {
+    final store = StoreScope.of(context);
+    final data = ProductTileData.fromProduct(
+      product,
+      facets: store.facetsFor(product.id),
+    );
+    return MonettaProductTile(
+      data: data,
+      onTap: () => openProduct(context, product),
+      wishlisted: store.wishlist.contains(product.id),
+      onToggleWishlist: () => store.toggleWishlist(product.id),
+      onQuickView: onQuickView,
+      quickAction: product.isInStock
+          ? ProductQuickAddButton(
+              key: quickAddKey(product.id),
+              product: product,
+              productName: data.title,
+            )
+          : null,
+    );
+  }
+}
+
+/// [PlusCard] in a card-sized host, wired like [cardApp].
+Widget plusCardApp(
+  CatalogStore store,
+  Product product, {
+  double width = 200,
+  double scale = 1.0,
+  VoidCallback? onQuickView,
+  bool wireQuickView = true,
+}) =>
+    fichaApp(
+      store,
+      Scaffold(
+        body: Center(
+          child: SizedBox(
+            width: width,
+            child: Builder(
+              builder: (context) => KeyedSubtree(
+                key: cardKey(product),
+                child: PlusCard(
+                  product: product,
+                  onQuickView: onQuickView ??
+                      (wireQuickView
+                          ? () => openQuickView(context, product)
+                          : null),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+      scale: scale,
+    );
+
+/// A grid of [PlusCard]s sized with the shared delegate.
+Widget plusGridApp(
+  CatalogStore store,
+  List<Product> products, {
+  double scale = 1.0,
+}) =>
+    fichaApp(
+      store,
+      Scaffold(
+        body: LayoutBuilder(
+          builder: (context, constraints) => GridView.builder(
+            padding: const EdgeInsets.all(16),
+            gridDelegate: productGridDelegate(
+              context,
+              availableWidth: constraints.maxWidth - 32,
+              footerExtent: 0,
+              priceLines: tilePriceLinesFor(products),
+            ),
+            itemCount: products.length,
+            itemBuilder: (context, index) => KeyedSubtree(
+              key: cardKey(products[index]),
+              child: PlusCard(
+                product: products[index],
+                onQuickView: () => openQuickView(context, products[index]),
+              ),
+            ),
+          ),
+        ),
+      ),
+      scale: scale,
+    );
+
 /// A [ProductCardGrid] with the quick view wired, as search and the brand
 /// page wire it.
 Widget gridApp(
@@ -303,15 +408,22 @@ Finder actionsBar() => find.byKey(kQuickViewActionsKey);
 Finder inPrimary(Finder matching) =>
     find.descendant(of: primaryButton(), matching: matching);
 
-Finder quickViewSheet() => find.byType(DraggableScrollableSheet);
+/// The centred card of the preview (it is a dialog, not a sheet).
+Finder quickViewSheet() => find.byKey(kQuickViewCardKey);
 
 Finder inSheet(Finder matching) =>
     find.descendant(of: quickViewSheet(), matching: matching);
 
-/// Check marks the option selector draws on the selected option.
+/// The selected option of the selector: a swatch wears a ring and a text chip
+/// a check, both announced as selected buttons.
 Finder selectionMarks() => find.descendant(
       of: find.byType(ProductOptionSelector),
-      matching: find.byIcon(Icons.check),
+      matching: find.byWidgetPredicate(
+        (widget) =>
+            widget is Semantics &&
+            widget.properties.button == true &&
+            widget.properties.selected == true,
+      ),
     );
 
 Finder _swatch(String variantTitle) => find.byWidgetPredicate(
