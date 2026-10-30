@@ -347,42 +347,55 @@ class _BagContents extends StatelessWidget {
       final scope = cartScope;
       final checkout = checkoutCoordinator;
       final accountController = AccountScope.maybeOf(context);
-      final productionLauncher =
-          controller == null || scope == null || checkout == null
-              ? null
-              : (CheckoutDraft draft) async {
-                  // Reconstruye el intent desde la bolsa viva justo antes de
-                  // reconciliar — nunca reusa el snapshot de apertura (F17).
-                  final currentIntent = [
-                    for (final line in store.bagLines)
-                      LocalCartIntent(
-                        variantId: line.variant.id,
-                        quantity: line.quantity,
-                      ),
-                  ];
-                  final buyerIdentity = await resolveCheckoutBuyerIdentity(
-                    account: accountController?.account,
-                    shopifyAccessToken:
-                        accountController?.accessTokenForShopifyCheckout,
-                    email: draft.email,
-                    phone: draft.phone,
-                  );
-                  return checkout.present(
-                    controller: controller,
-                    // Signing in on the checkout screen moves the guest cart
-                    // to the account; the scope follows the shopper as now.
-                    scope: _sessionScopeFor(
-                      scope.shopDomain,
-                      accountController?.account,
-                    ),
-                    localIntent: currentIntent,
-                    buyerIdentity: buyerIdentity,
-                    onCompleted: (purchase) async {
-                      await store.applyCheckoutPurchase(purchase);
-                      await accountController?.loadOrders();
-                    },
-                  );
-                };
+      final productionLauncher = controller == null ||
+              scope == null ||
+              checkout == null
+          ? null
+          : (CheckoutDraft draft) async {
+              // Reconstruye el intent desde la bolsa viva justo antes de
+              // reconciliar — nunca reusa el snapshot de apertura (F17).
+              final currentIntent = [
+                for (final line in store.bagLines)
+                  LocalCartIntent(
+                    variantId: line.variant.id,
+                    quantity: line.quantity,
+                  ),
+              ];
+              // The account is read once: the identity, the cart scope
+              // and the check after the await all describe the same one.
+              final account = accountController?.account;
+              final buyerIdentity = await resolveCheckoutBuyerIdentity(
+                account: account,
+                shopifyAccessToken:
+                    accountController?.accessTokenForShopifyCheckout,
+                email: draft.email,
+                phone: draft.phone,
+              );
+              // The token of one account must never meet the cart scope of
+              // another: if the account changed while it was awaited, stop
+              // before reconciling or presenting anything.
+              if (accountController?.account?.localAccountId !=
+                  account?.localAccountId) {
+                return const CheckoutFailed(
+                  code: CheckoutFailureCode.unavailable,
+                  userMessage: 'Tu cuenta cambió. Revisa tu bolsa e intenta de '
+                      'nuevo.',
+                  allowExternalBrowser: false,
+                );
+              }
+              return checkout.present(
+                controller: controller,
+                // Signing in on the checkout screen moves the guest cart
+                // to the account; the scope follows the shopper as now.
+                scope: _sessionScopeFor(scope.shopDomain, account),
+                localIntent: currentIntent,
+                buyerIdentity: buyerIdentity,
+                onCompleted: (purchase) async {
+                  await store.applyCheckoutPurchase(purchase);
+                  await accountController?.loadOrders();
+                },
+              );
+            };
       final launcher = launchSecureCheckout ?? productionLauncher;
       // F05: no capturar contacto/entrega cuando el checkout no puede cerrar.
       if (launcher == null) {
@@ -397,7 +410,7 @@ class _BagContents extends StatelessWidget {
         return;
       }
       unawaited(
-        // With two sides, checkout spans both: form left, summary right.
+        // With two sides, checkout spans both: summary left, payment right.
         DuoWorkspace.taskNavigatorFor(context).push(
           monettaFadeRoute(
             StoreScope(
@@ -586,9 +599,9 @@ class CheckoutFlowScreen extends StatefulWidget {
   final SecureCheckoutLauncher? launchSecureCheckout;
   final ExternalCheckoutFallback? openExternalCheckout;
 
-  /// Métodos reales configurados en Shopify (nombres oficiales). Vacío = no
-  /// hay evidencia de config, así que no se dibuja ningún radio inventado y
-  /// se muestra el aviso alojado. El orquestador los conecta cuando existan.
+  /// Payment method names configured in Shopify. There are no radios and no
+  /// hosted notice any more: they only appear as text in `SecurePaymentLine`
+  /// (empty = nothing is claimed about methods).
   final List<String> availablePaymentMethods;
 
   /// When null, the signed-in account's existing order sources are used.
@@ -751,6 +764,9 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
 
   Future<void> _pay() async {
     if (_retryBlocked) return;
+    // Signing in and paying are exclusive: the account would change under the
+    // checkout that is about to open.
+    if (AccountScope.maybeOf(context)?.isLoading == true) return;
     final store = StoreScope.of(context);
     final lines = store.bagLines;
     if (widget.launchSecureCheckout case final launcher?) {
@@ -892,6 +908,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final store = StoreScope.of(context);
+    final signingIn = AccountScope.maybeOf(context)?.isLoading == true;
     if (store.bagLines.isEmpty) {
       return Scaffold(
         backgroundColor: palette.canvas,
@@ -921,12 +938,12 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             final pay = Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                const _CheckoutIdentity(),
+                _CheckoutIdentity(connectEnabled: !_retryBlocked),
                 _CheckoutPayPanel(
                   openingSheet: _openingSheet,
                   returnPhase: _returnPhase,
                   returnDetail: _returnDetail,
-                  payEnabled: !_retryBlocked,
+                  payEnabled: !_retryBlocked && !signingIn,
                   showPayButton: !_orderFound,
                   paymentMethods: widget.availablePaymentMethods,
                   onPay: () => unawaited(_pay()),
@@ -1598,7 +1615,13 @@ class _CheckoutPayPanel extends StatelessWidget {
 /// first; Shopify's checkout then applies the store's own rule for buying
 /// without an account.
 class _CheckoutIdentity extends StatelessWidget {
-  const _CheckoutIdentity();
+  const _CheckoutIdentity({required this.connectEnabled});
+
+  /// False while a payment is opening or being confirmed.
+  final bool connectEnabled;
+
+  /// The narrowest the guest label may get before the button drops below it.
+  static const _minLabelWidth = 100.0;
 
   Future<void> _connect(
     BuildContext context,
@@ -1613,6 +1636,24 @@ class _CheckoutIdentity extends StatelessWidget {
         content: Text('No pudimos iniciar sesión. Puedes pagar como invitado.'),
       ),
     );
+  }
+
+  /// Horizontal padding of the text button, per side.
+  static const _connectPadding = 12.0;
+  static const _identityMarkSize = 36.0;
+  static const _identityGap = 12.0;
+
+  /// Width of [text] on one line, at the shopper's text scale.
+  static double _textWidth(BuildContext context, String text, TextStyle style) {
+    final painter = TextPainter(
+      text: TextSpan(text: text, style: style),
+      textDirection: Directionality.of(context),
+      textScaler: MediaQuery.textScalerOf(context),
+      maxLines: 1,
+    )..layout();
+    final width = painter.width;
+    painter.dispose();
+    return width;
   }
 
   @override
@@ -1654,35 +1695,68 @@ class _CheckoutIdentity extends StatelessWidget {
         ],
       );
     } else if (controller.canLogin) {
-      content = Row(
-        children: [
-          const _IdentityMark(),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(
-              'Comprando como invitado',
-              style: boutiqueText(size: 14, color: palette.ink),
-            ),
-          ),
-          TextButton(
-            key: const Key('checkout-connect'),
-            onPressed: controller.isLoading
-                ? null
-                : () => unawaited(_connect(context, controller)),
-            style: TextButton.styleFrom(
-              foregroundColor: palette.ink,
-              minimumSize: const Size(0, BoutiqueSpace.tapTarget),
-            ),
-            child: Text(
-              controller.isLoading ? 'Conectando…' : 'Iniciar sesión',
-              style: boutiqueText(
-                size: 13,
-                weight: FontWeight.w600,
-                decoration: TextDecoration.underline,
+      final connecting = controller.isLoading;
+      final connectLabel = connecting ? 'Conectando…' : 'Iniciar sesión';
+      final connectStyle = boutiqueText(
+        size: 13,
+        weight: FontWeight.w600,
+        decoration: TextDecoration.underline,
+      );
+      final guestLabel = Text(
+        'Comprando como invitado',
+        style: boutiqueText(size: 14, color: palette.ink),
+      );
+      final connect = TextButton(
+        key: const Key('checkout-connect'),
+        onPressed: !connectEnabled || connecting
+            ? null
+            : () => unawaited(_connect(context, controller)),
+        style: TextButton.styleFrom(
+          foregroundColor: palette.ink,
+          minimumSize: const Size(0, BoutiqueSpace.tapTarget),
+        ),
+        child: Text(connectLabel, style: connectStyle),
+      );
+      // The button keeps its own line of text; the label gets what is left of
+      // the row. When that is too little to read, the button goes below.
+      final buttonWidth = _textWidth(
+            context,
+            connectLabel,
+            connectStyle,
+          ) +
+          2 * _connectPadding;
+      content = LayoutBuilder(
+        builder: (context, constraints) {
+          const markWidth = _identityMarkSize + _identityGap;
+          final labelWidth = constraints.maxWidth - markWidth - buttonWidth;
+          if (labelWidth >= _minLabelWidth) {
+            return Row(
+              children: [
+                const _IdentityMark(),
+                const SizedBox(width: _identityGap),
+                Expanded(child: guestLabel),
+                connect,
+              ],
+            );
+          }
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const _IdentityMark(),
+                  const SizedBox(width: _identityGap),
+                  Expanded(child: guestLabel),
+                ],
               ),
-            ),
-          ),
-        ],
+              // Under the label, not under the mark.
+              Padding(
+                padding: const EdgeInsets.only(left: markWidth),
+                child: connect,
+              ),
+            ],
+          );
+        },
       );
     } else {
       // Without sign-in in this build, Shopify's checkout handles the guest.
@@ -1726,7 +1800,14 @@ class _IdentityMark extends StatelessWidget {
         clipBehavior: Clip.antiAlias,
         child: image == null
             ? Icon(Icons.person_outline, size: 20, color: palette.ink)
-            : Image.memory(image, fit: BoxFit.cover, gaplessPlayback: true),
+            : Image.memory(
+                image,
+                fit: BoxFit.cover,
+                gaplessPlayback: true,
+                // Bytes that do not decode fall back to the glyph.
+                errorBuilder: (context, error, stackTrace) =>
+                    Icon(Icons.person_outline, size: 20, color: palette.ink),
+              ),
       ),
     );
   }
