@@ -19,7 +19,8 @@
   assign has_page_bar = false
   assign dock_mode = 'nav'
   assign dock_active = ''
-  if t == 'collection' or t == 'search' or t == 'cart'
+  # The client guide keeps the global header on collections (slides 06–20); search and the bag keep their page bar.
+  if t == 'search' or t == 'cart'
     assign has_page_bar = true
   endif
   if t == 'product'
@@ -30,7 +31,7 @@
   case t
     when 'index'
       assign dock_active = 'home'
-    when 'collection', 'search'
+    when 'collection', 'search', 'list-collections'
       assign dock_active = 'catalog'
     when 'cart'
       assign dock_active = 'cart'
@@ -68,6 +69,11 @@
 
     {%- section 'monetta-cart-sheet' -%}
     {% render 'monetta-saved-products' %}
+    {%- comment -%}Quick view of the client guide (sections/monetta-quick-view.liquid, filled by assets/monetta-guia.js).{%- endcomment -%}
+    <dialog class="overlay overlay--sheet" id="quick-view" aria-labelledby="quick-view-title">
+      <div class="overlay__backdrop" data-overlay-close></div>
+      <div class="overlay__panel" data-quick-view-panel></div>
+    </dialog>
     <div id="toast-root"></div>
     <div class="visually-hidden" id="status-live" role="status" aria-live="polite" aria-atomic="true"></div>
     <div class="visually-hidden" id="alert-live" role="alert" aria-live="assertive" aria-atomic="true"></div>

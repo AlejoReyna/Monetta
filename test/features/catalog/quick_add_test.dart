@@ -3,9 +3,11 @@ import 'dart:ui' show Tristate;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
+import 'package:monetta_app/features/product/external_product_screen.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
 
@@ -182,17 +184,25 @@ void main() {
     });
 
     group('CatalogBrowseScreen', () {
-      Future<(ScriptedCatalogStore, List<Product>, Product, Product)> mount(
+      Future<(ScriptedCatalogStore, List<CatalogItem>, Product, Product)> mount(
         WidgetTester tester, {
         bool withStore = true,
       }) async {
         setPhoneView(tester, height: 1600);
         final store = await scriptedStore();
         final soldOut = soldOutProduct();
-        addProducts(store, [soldOut]);
-        final single = singleVariantAssetProduct(store);
-        final several = chipAssetProduct(store);
-        final items = [soldOut, single, several];
+        final single = singleNamedVariantProduct(title: 'Bolsa negra');
+        final several = chipProduct(title: 'Bolsa negra de tallas');
+        addProducts(store, [soldOut, single, several]);
+        final all = store.catalogItems;
+        CatalogItem of(Product product) =>
+            all.firstWhere((item) => item.shopifyProductId == product.id);
+        final items = [
+          externalItem(),
+          of(soldOut),
+          of(single),
+          of(several),
+        ];
         await tester.pumpWidget(catalogApp(withStore ? store : null, items));
         await tester.pump();
         return (store, items, single, several);
@@ -200,17 +210,23 @@ void main() {
 
       testWidgets(
           'QUICK-01 a Monetta card has its "+" keyed by the Shopify id; '
-          'sold-out pieces have none', (tester) async {
+          'sold-out and external pieces have none', (tester) async {
         await withSemantics(tester, () async {
-          final (store, items, single, several) = await mount(tester);
-          final soldOutId = items.first.id;
+          final (_, items, single, several) = await mount(tester);
+          final soldOutId = items[1].shopifyProductId!;
 
           for (final product in [single, several]) {
             final plus = find.byKey(quickAddKey(product.id));
             expectQuickAddGeometry(tester, plus);
+            // This grid prints the catalog item's name, which has no colour
+            // suffix; the "+" must name the piece exactly as the card does.
+            final title = ProductTileData.fromCatalogItem(
+              items.firstWhere((item) => item.shopifyProductId == product.id),
+            ).title;
+            expect(find.text(title), findsOneWidget);
             expect(
               tester.getSemantics(plus).label,
-              addLabelFor(store, product),
+              'Agregar $title al carrito',
             );
           }
           expect(find.byKey(quickAddKey(soldOutId)), findsNothing);
@@ -227,6 +243,24 @@ void main() {
             reason: 'only the two buyable Monetta pieces carry a "+"',
           );
         });
+      });
+
+      testWidgets(
+          'QUICK-01 CART-04 an external piece has no "+" and its tap opens '
+          'the merchant detail, untouched', (tester) async {
+        final (store, items, _, _) = await mount(tester);
+        final external = items.first;
+        expect(external.isExternal, isTrue);
+
+        await tester.tap(
+          find.text(ProductTileData.fromCatalogItem(external).title),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.byType(ExternalProductScreen), findsOneWidget);
+        expect(find.byType(ProductScreen), findsNothing);
+        expect(store.addCalls, 0);
+        expect(store.bagQuantity, 0);
       });
 
       testWidgets(
@@ -375,7 +409,9 @@ void main() {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       final product = singleVariantAssetProduct(store);
-      await tester.pumpWidget(catalogApp(store, [product]));
+      final item = store.catalogItems
+          .firstWhere((entry) => entry.shopifyProductId == product.id);
+      await tester.pumpWidget(catalogApp(store, [item]));
       await tester.pump();
 
       await tapQuickAdd(tester, product);
@@ -486,7 +522,9 @@ void main() {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       final product = chipAssetProduct(store);
-      await tester.pumpWidget(catalogApp(store, [product]));
+      final item = store.catalogItems
+          .firstWhere((entry) => entry.shopifyProductId == product.id);
+      await tester.pumpWidget(catalogApp(store, [item]));
       await tester.pump();
 
       await tapQuickAdd(tester, product);

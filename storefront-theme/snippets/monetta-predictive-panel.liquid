@@ -1,0 +1,22 @@
+{%- doc -%}
+  Predictive panel for an existing native search form inside monetta-predictive-search.
+  The script assigns listbox and option IDs independently for each connected instance.
+{%- enddoc -%}
+<div class="monetta-predictive-search__panel" data-monetta-predictive-panel hidden>
+  <p class="monetta-predictive-search__heading" data-monetta-predictive-heading hidden>Búsquedas recientes</p>
+  <p class="monetta-predictive-search__message" data-monetta-predictive-message hidden></p>
+  <div class="monetta-predictive-search__body">
+    <ul class="monetta-predictive-search__list" role="listbox" aria-label="Sugerencias de búsqueda" data-monetta-predictive-list></ul>
+    <div class="monetta-predictive-search__removals" data-monetta-predictive-removals></div>
+  </div>
+</div>
+<template data-monetta-predictive-categories>
+  {%- assign predictive_categories = 'bolsas:Bolsas,carteras:Carteras,relojes:Relojes,perfumes:Perfumes' | split: ',' -%}
+  {%- for entry in predictive_categories -%}
+    {%- assign key = entry | split: ':' | first -%}
+    {%- capture category_url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
+    <li role="presentation"><a class="monetta-predictive-search__option" href="{{ category_url | strip | escape }}" role="option" tabindex="-1" data-monetta-predictive-option data-predictive-kind="category">{{ entry | split: ':' | last }}</a></li>
+  {%- endfor -%}
+</template>
+<span class="visually-hidden" data-monetta-predictive-help>Usa las flechas para recorrer las sugerencias y Enter para abrirlas. Escape cierra; otra vez borra. Suprimir quita la búsqueda reciente seleccionada.</span>
+<span class="visually-hidden" role="status" aria-live="polite" aria-atomic="true" data-monetta-predictive-live></span>

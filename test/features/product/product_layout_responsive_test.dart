@@ -1,14 +1,13 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/domain/product.dart';
-import 'package:monetta_app/features/checkout/checkout_screen.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
 
 import '../../support/product_screen_harness.dart';
 
-// FICHA-T2, RESP-02 / A11Y-01: the ficha under the
+// FICHA-T2, RESP-02 / A11Y-01: the ficha (Monetta and external) under the
 // width and text-scale matrix with a real bottom inset, and the accessibility
 // contract of its header, dock and secondary actions.
 
@@ -41,7 +40,31 @@ final Map<String, Product Function(CatalogStore)> _scenarios = {
       ),
 };
 
-/// Common contract of both fichas once mounted: no layout error, the dock is
+Future<void> _expectGuideContract(
+  WidgetTester tester, {
+  required double width,
+}) async {
+  final nav = find.byKey(const Key('bottom-nav-surface'));
+  expect(nav, findsOneWidget);
+  expect(tester.takeException(), isNull);
+  final rect = tester.getRect(nav);
+  expect(rect.left, greaterThanOrEqualTo(-0.01));
+  expect(rect.right, lessThanOrEqualTo(width + 0.01));
+  expect(rect.bottom, closeTo(kPhoneHeight, 0.01), reason: 'anchored below');
+  expect(find.byKey(const Key('home-menu-button')), findsOneWidget);
+  await scrollTo(tester, find.byKey(kDockPrimaryKey));
+  expect(find.byKey(kDockPrimaryKey), findsOneWidget);
+
+  await scrollToEnd(tester);
+  expect(tester.takeException(), isNull);
+  expect(
+    lastBuiltChildBottom(tester),
+    lessThanOrEqualTo(tester.getRect(nav).top + 0.5),
+    reason: 'the last element of the content ends above the nav',
+  );
+}
+
+/// Common contract of the external ficha: no layout error, the dock is
 /// inside the view and anchored to the bottom edge, the title is not clipped,
 /// and after scrolling to the end the last element of the content ends above
 /// the dock.
@@ -67,8 +90,7 @@ Future<void> _expectMatrixContract(
   expect(title.right, lessThanOrEqualTo(bar.right + 0.01));
   expect(title.top, greaterThanOrEqualTo(bar.top - 0.01));
   expect(title.bottom, lessThanOrEqualTo(bar.bottom + 0.01));
-  expect(title.width.isFinite, isTrue);
-  expect(title.height.isFinite, isTrue);
+  expect(lineCount(tester, headerTitle()), lessThanOrEqualTo(2));
 
   await scrollToEnd(tester);
   expect(tester.takeException(), isNull);
@@ -93,9 +115,20 @@ void main() {
           final product = pick(store);
           await pumpFicha(tester, store, product.id, scale: scale);
 
-          await _expectMatrixContract(tester, width: width);
+          await _expectGuideContract(tester, width: width);
         });
       }
+
+      testWidgets('RESP-02 ficha externa, long name, $label', (tester) async {
+        setPhoneView(tester, width: width, inset: _inset);
+        await pumpExternal(
+          tester,
+          item: externalItem(title: kLongProductName),
+          scale: scale,
+        );
+
+        await _expectMatrixContract(tester, width: width);
+      });
     }
   }
 
@@ -119,43 +152,49 @@ void main() {
     }
 
     testWidgets(
-        'A11Y-01 back, heart, bag, dock button and secondary actions are '
-        'named 48 px buttons', (tester) async {
-      await withSemantics(tester, () async {
-        setPhoneView(tester);
-        final store = await loadedStore();
-        final product = _added(store, syntheticProduct());
-        await pumpFicha(tester, store, product.id);
-        await tester.pump();
+      'A11Y-01 back, heart, bag, dock button and secondary actions are '
+      'named 48 px buttons',
+      (tester) async {
+        await withSemantics(tester, () async {
+          setPhoneView(tester);
+          final store = await loadedStore();
+          final product = _added(store, syntheticProduct());
+          await pumpFicha(tester, store, product.id);
+          await tester.pump();
 
-        expectButton(tester, find.byKey(kHeaderBackKey), what: 'back');
-        expectButton(
-          tester,
-          find.byKey(const Key('product-header-search')),
-          what: 'search',
-        );
-        expectButton(
-          tester,
-          find.byKey(const Key('product-header-account')),
-          what: 'account',
-        );
-        expectButton(tester, find.byKey(kHeaderFavoriteKey), what: 'heart');
-        expectButton(tester, inAppBar(find.byType(BagAction)), what: 'bag');
-        expectButton(tester, find.byKey(kDockPrimaryKey), what: 'dock button');
-        expect(
-          accessibleName(tester.getSemantics(find.byKey(kDockPrimaryKey))),
-          contains('Agregar al carrito'),
-        );
+          expectButton(
+            tester,
+            find.byKey(const Key('home-menu-button')),
+            what: 'menu',
+          );
+          expectButton(
+            tester,
+            find.byKey(const ValueKey('guide-search-button')),
+            what: 'search',
+          );
+          expectButton(tester, find.byKey(kHeaderFavoriteKey), what: 'heart');
+          await scrollTo(tester, find.byKey(kDockPrimaryKey));
+          expectButton(
+            tester,
+            find.byKey(kDockPrimaryKey),
+            what: 'add to bag',
+          );
+          expect(
+            accessibleName(tester.getSemantics(find.byKey(kDockPrimaryKey))),
+            contains('AGREGAR A BOLSA'),
+          );
 
-        await scrollTo(tester, find.byKey(kBuyNowKey));
-        expectButton(tester, find.byKey(kBuyNowKey), what: 'Comprar ahora');
-        await scrollTo(tester, find.byKey(kApartarKey));
-        expectButton(tester, find.byKey(kApartarKey), what: 'Apartar');
-      });
-    });
+          await scrollTo(tester, find.byKey(kBuyNowKey));
+          expectButton(tester, find.byKey(kBuyNowKey), what: 'COMPRAR AHORA');
+          await scrollTo(tester, find.byKey(kApartarKey));
+          expectButton(tester, find.byKey(kApartarKey), what: 'Apartar');
+        });
+      },
+    );
 
-    testWidgets('A11Y-01 the reading order is header, content, dock',
-        (tester) async {
+    testWidgets('A11Y-01 the reading order is header, content, dock', (
+      tester,
+    ) async {
       await withSemantics(tester, () async {
         setPhoneView(tester);
         final store = await loadedStore();
@@ -163,29 +202,29 @@ void main() {
         await pumpFicha(tester, store, product.id);
         await tester.pump();
 
-        expect(headerTitle(), findsOneWidget);
-        expect(find.byKey(kDockPrimaryKey), findsOneWidget);
+        expect(find.byKey(const Key('home-menu-button')), findsOneWidget);
         final name = contentNameText(shopperProductName(product.title));
+        await scrollTo(tester, find.byKey(kDockPrimaryKey));
         await scrollTo(tester, name);
-        final title = tester.getSemantics(headerTitle());
+        final title = tester.getSemantics(
+          find.byKey(const Key('home-menu-button')),
+        );
         final content = tester.getSemantics(name);
-        final dock = tester.getSemantics(find.byKey(kDockPrimaryKey));
+        final action = tester.getSemantics(find.byKey(kDockPrimaryKey));
 
-        final order = tester.semantics
-            .simulatedAccessibilityTraversal()
-            .map((node) => node.id);
-        final position = {
-          for (final (index, id) in order.indexed) id: index,
-        };
+        final order = tester.semantics.simulatedAccessibilityTraversal().map(
+              (node) => node.id,
+            );
+        final position = {for (final (index, id) in order.indexed) id: index};
         expect(position, contains(title.id), reason: 'header is traversable');
         expect(
           position,
           contains(content.id),
           reason: 'content is traversable',
         );
-        expect(position, contains(dock.id), reason: 'dock is traversable');
+        expect(position, contains(action.id), reason: 'action is traversable');
         expect(position[title.id]!, lessThan(position[content.id]!));
-        expect(position[content.id]!, lessThan(position[dock.id]!));
+        expect(position[content.id]!, lessThan(position[action.id]!));
       });
     });
   });

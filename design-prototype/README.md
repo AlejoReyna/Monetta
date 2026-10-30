@@ -10,7 +10,7 @@ public catalog. Cart, favourites and searches live only in this browser. Checkou
 sign-in, WhatsApp, social networks and external catalogs open an explanation of the
 Shopify handoff instead of the real destination. Nothing is bought, reserved or sent.
 
-The design and implementation documents are in [`docs/web-redesign/`](../docs/web-redesign/).
+The migration plan is in [`docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md`](../docs/MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md). Heavy web audit evidence is excluded from this PR.
 
 ## Requirements
 

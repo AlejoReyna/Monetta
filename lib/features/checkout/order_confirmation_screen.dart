@@ -1,4 +1,4 @@
-/// Fig.15 — confirmación. Solo se presenta con evidencia [CheckoutCompleted].
+/// Client guide page 17 — confirmación. Solo se presenta con evidencia [CheckoutCompleted].
 ///
 /// Nunca inventa número de pedido: [orderLabel] es el `displayNumber` real
 /// (`#1001`) correlacionado con el checkout recién completado, o null cuando
@@ -6,16 +6,17 @@
 /// muestra un estado honesto que dirige a Mis pedidos en vez de un
 /// `#MON12345` falso o del primer pedido de la lista.
 ///
-/// La entrega muestra la política comercial `3 a 5 días hábiles` sin fabricar
-/// fechas: sumar días naturales no es días hábiles y no hay calendario ni
-/// estimación logística por envío en este punto.
+/// The presentation never substitutes local bag estimates for an authoritative
+/// order summary. Missing product lines and totals stay explicit.
 library;
 
 import 'package:flutter/material.dart';
 
-import '../navigation/monetta_page_header.dart';
-
 import '../../app/motion.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../boutique/client_guide_scaffold.dart';
+import '../boutique/client_guide_components.dart';
+import '../boutique/guide_check.dart';
 import '../boutique/boutique_tokens.dart';
 
 /// Política comercial de entrega. Se conserva el parámetro [now] para
@@ -32,7 +33,7 @@ Future<void> showOrderConfirmation(
   VoidCallback? onViewOrder,
 }) {
   return Navigator.of(context).push(
-    monettaPageRoute(
+    monettaFadeRoute(
       OrderConfirmationScreen(
         orderLabel: orderLabel,
         email: email,
@@ -59,108 +60,131 @@ class OrderConfirmationScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final label = orderLabel?.trim();
+    final hasLabel = label != null && label.isNotEmpty;
 
-    return Scaffold(
-      backgroundColor: palette.canvas,
-      appBar: buildMonettaPageAppBar(
-        context,
-        title: 'Confirmación',
-        onBack: () => Navigator.of(context).popUntil((route) => route.isFirst),
-      ),
+    return ClientGuideScaffold(
+      current: ClientGuideDestination.bag,
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: const EdgeInsets.fromLTRB(20, 28, 20, 32),
+          padding: EdgeInsets.all(
+            MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+          ),
           child: Center(
             child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 440),
+              constraints: const BoxConstraints(
+                maxWidth: MonettaTokens.breakpointMedium,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  Container(
-                    width: 88,
-                    height: 88,
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(color: palette.gold, width: 1.5),
-                      color: Colors.transparent,
+                  const GuideSuccessMark(
+                    key: ValueKey('purchase-success-mark'),
+                    size: 96,
+                  ),
+                  SizedBox(height: MonettaTokens.space[4]),
+                  Text(
+                    '¡Gracias por tu compra!',
+                    textAlign: TextAlign.center,
+                    style: clientGuideStyle(context, MonettaTokens.screenTitle),
+                  ),
+                  SizedBox(height: MonettaTokens.space[1]),
+                  // With evidence the real number sits inside the sentence;
+                  // without it the sentence stays as it was.
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: hasLabel
+                              ? 'Tu pedido '
+                              : 'Tu pedido ha sido confirmado.',
+                        ),
+                        if (hasLabel) ...[
+                          TextSpan(
+                            text: label,
+                            style: const TextStyle(fontWeight: FontWeight.w700),
+                          ),
+                          const TextSpan(text: ' ha sido confirmado.'),
+                        ],
+                      ],
                     ),
-                    child: Icon(Icons.check, size: 40, color: palette.gold),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    '¡Listo!',
+                    key: const ValueKey('purchase-confirmed-sentence'),
                     textAlign: TextAlign.center,
-                    style: boutiqueDisplay(34, color: palette.ink),
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.body,
+                      color: palette.inkMuted,
+                    ),
                   ),
-                  const SizedBox(height: 10),
+                  SizedBox(height: MonettaTokens.space[1]),
                   Text(
-                    'Tu pedido ha sido confirmado.',
+                    'Te llegará un correo con los detalles de tu compra.',
+                    key: const ValueKey('purchase-email-sentence'),
                     textAlign: TextAlign.center,
-                    style: boutiqueText(size: 14, color: palette.inkMuted),
+                    style: clientGuideStyle(
+                      context,
+                      MonettaTokens.cardLabel,
+                      color: palette.inkMuted,
+                    ),
                   ),
-                  const SizedBox(height: 28),
-                  Text(
-                    'Número de pedido'.toUpperCase(),
-                    style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
-                  ),
-                  const SizedBox(height: 8),
-                  if (label != null && label.isNotEmpty)
-                    Text(
-                      label,
-                      style: boutiqueText(
-                        size: 16,
-                        weight: FontWeight.w700,
-                        color: palette.ink,
+                  SizedBox(height: MonettaTokens.space[4]),
+                  Container(
+                    width: double.infinity,
+                    padding: EdgeInsets.all(MonettaTokens.space[3]),
+                    decoration: BoxDecoration(
+                      borderRadius: const BorderRadius.all(
+                        Radius.circular(MonettaTokens.radiusCard),
                       ),
-                    )
-                  else ...[
+                      border: Border.all(color: palette.hairline),
+                    ),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Resumen del pedido',
+                          style: clientGuideStyle(
+                            context,
+                            MonettaTokens.sectionTitle,
+                          ),
+                        ),
+                        SizedBox(height: MonettaTokens.space[3]),
+                        Text(
+                          'El detalle de productos y el total aún no están disponibles aquí. Consulta la confirmación de Shopify o Mis pedidos.',
+                          style: clientGuideStyle(
+                            context,
+                            MonettaTokens.body,
+                            color: palette.inkMuted,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  if (!hasLabel) ...[
+                    SizedBox(height: MonettaTokens.space[4]),
                     Text(
                       'Confirmado en Shopify',
-                      style: boutiqueText(
-                        size: 15,
-                        weight: FontWeight.w600,
-                        color: palette.ink,
-                      ),
+                      style: clientGuideStyle(context, MonettaTokens.price),
                     ),
-                    const SizedBox(height: 6),
+                    SizedBox(height: MonettaTokens.space[0]),
                     Text(
                       'El número aparecerá en Mis pedidos en cuanto termine de sincronizarse.',
                       textAlign: TextAlign.center,
-                      style: boutiqueText(size: 12, color: palette.inkMuted),
+                      style: clientGuideStyle(
+                        context,
+                        MonettaTokens.cardLabel,
+                        color: palette.inkMuted,
+                      ),
                     ),
                   ],
-                  const SizedBox(height: 24),
-                  Text(
-                    'Fecha estimada de entrega'.toUpperCase(),
-                    style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    estimatedDeliveryLabel(),
-                    style: boutiqueText(size: 14, color: palette.ink),
-                  ),
-                  Text(
-                    'La fecha exacta se confirma con tu envío.',
-                    style: boutiqueText(size: 12, color: palette.inkMuted),
-                  ),
-                  if (email != null && email!.trim().isNotEmpty) ...[
-                    const SizedBox(height: 12),
-                    Text(
-                      'Enviamos la confirmación a ${email!.trim()}',
-                      textAlign: TextAlign.center,
-                      style: boutiqueText(size: 12, color: palette.inkMuted),
-                    ),
-                  ],
-                  const SizedBox(height: 32),
-                  BoutiqueButton(
-                    label: 'Ver pedido',
+                  SizedBox(height: MonettaTokens.space[5]),
+                  ClientGuideButton(
+                    label: 'Ver detalles del pedido',
                     onPressed: onViewOrder ??
                         () => Navigator.of(context).popUntil((r) => r.isFirst),
                   ),
-                  const SizedBox(height: 12),
-                  BoutiqueButton(
-                    label: 'Seguir comprando',
-                    filled: false,
+                  SizedBox(height: MonettaTokens.space[2]),
+                  ClientGuideButton(
+                    label: 'Volver al inicio',
+                    outlined: true,
                     onPressed: () =>
                         Navigator.of(context).popUntil((r) => r.isFirst),
                   ),

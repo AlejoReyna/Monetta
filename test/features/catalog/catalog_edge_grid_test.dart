@@ -1,5 +1,6 @@
-// Catalog cards retain the catalog data, typography and interactions, with
-// white rounded surfaces and slightly inset photographs.
+// Target-state tests for the edge-to-edge catalog screen (UI-CAT-01, 03, 04,
+// 05). They use only API that exists today, so they compile now and fail on
+// assertions until the redesign lands.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -15,22 +16,62 @@ import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
+import 'package:monetta_app/domain/catalog_item.dart';
+import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
 import 'package:monetta_app/main.dart';
 
-import '../../support/catalog_browse_fixtures.dart';
-
 const _longName =
     'Bolso Michael Kors Marilyn Medium Signature Convertible Satchel Crossbody';
-const double _price = 11624;
+const _price = Money(amount: 11624, currency: Currency.mxn);
 const _priceLabel = r'$11,624 MXN';
 
-BrowseEntry _monetta(int i, {String? title, double price = 1999}) =>
-    browseEntry(i, title: title, price: price);
+CatalogItem _monetta(
+  int i, {
+  String? title,
+  Money price = const Money(amount: 1999, currency: Currency.mxn),
+}) =>
+    CatalogItem(
+      sourceScopedId: 'monetta:$i',
+      source: CatalogSourceType.monettaShopify,
+      merchant: 'Monetta',
+      title: title ?? 'Monetta Item $i',
+      brand: 'Guess',
+      category: null,
+      imageUrl: null,
+      price: price,
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://monetta.mx/products/item-$i',
+      marketRestriction: MarketRestriction.mexico,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.monettaCheckout,
+      shopifyProductId: '$i',
+      vertical: CatalogVertical.general,
+    );
 
-List<BrowseEntry> _items(int count, {String? title, double? price}) => [
+CatalogItem _external(int i) => CatalogItem(
+      sourceScopedId: 'coach_us:$i',
+      source: CatalogSourceType.coachUs,
+      merchant: 'Coach',
+      title: 'External Item $i',
+      brand: 'Coach',
+      category: 'Handbags',
+      imageUrl: null,
+      price: const Money(amount: 300, currency: Currency.usd),
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://www.coach.com/products/item-$i/C$i.html',
+      marketRestriction: MarketRestriction.unitedStates,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.externalResearch,
+    );
+
+List<CatalogItem> _items(int count, {String? title, Money? price}) => [
       for (var i = 1; i <= count; i++)
-        _monetta(i, title: title, price: price ?? 1999),
+        _monetta(
+          i,
+          title: title,
+          price: price ?? const Money(amount: 1999, currency: Currency.mxn),
+        ),
     ];
 
 /// A text scaler that is deliberately not a single multiplier: small type
@@ -129,7 +170,7 @@ Widget _asOwner(Widget app) {
 
 Future<void> _pump(
   WidgetTester tester,
-  List<BrowseEntry> items, {
+  List<CatalogItem> items, {
   TextScaler? textScaler,
   bool pushed = false,
   bool owner = false,
@@ -143,15 +184,16 @@ Future<void> _pump(
               data: MediaQuery.of(context).copyWith(textScaler: textScaler),
               child: child!,
             ),
-    home:
-        pushed ? const Scaffold(body: SizedBox.shrink()) : browseScreen(items),
+    home: pushed
+        ? const Scaffold(body: SizedBox.shrink())
+        : CatalogBrowseScreen(items: items),
   );
   await tester.pumpWidget(owner ? _asOwner(app) : app);
   if (pushed) {
     unawaited(
       navigator.currentState!.push(
         MaterialPageRoute<void>(
-          builder: (_) => browseScreen(items),
+          builder: (_) => CatalogBrowseScreen(items: items),
         ),
       ),
     );
@@ -200,9 +242,9 @@ List<Rect> _firstRowPhotos(WidgetTester tester) {
 }
 
 void main() {
-  group('UI-CAT-01 the grid uses spaced product cards', () {
+  group('UI-CAT-01 the grid runs edge to edge', () {
     testWidgets(
-      'UI-CAT-01 at 390 pt: two 189 pt cards, 12 pt apart',
+      'UI-CAT-01 at 390 pt: two 193 pt columns, 4 pt apart, no row gap',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -215,23 +257,23 @@ void main() {
 
         // Row 1.
         expect(photo[0].left, closeTo(0, 0.01));
-        expect(photo[0].width, closeTo(189, 0.01));
-        expect(photo[0].height, closeTo(236.25, 0.01));
-        expect(photo[1].left, closeTo(201, 0.01));
+        expect(photo[0].width, closeTo(193, 0.01));
+        expect(photo[0].height, closeTo(241.25, 0.01));
+        expect(photo[1].left, closeTo(197, 0.01));
         expect(photo[1].right, closeTo(390, 0.01));
-        expect(photo[1].width, closeTo(189, 0.01));
+        expect(photo[1].width, closeTo(193, 0.01));
         expect(photo[1].top, closeTo(photo[0].top, 0.01));
 
         // Row 2 is aligned with itself and one full tile further down:
-        // 236.25 photo + 115.85 caption + 12 pt between card rows.
+        // 241.25 photo + 115.85 caption, with no extra space between rows.
         expect(photo[3].top, closeTo(photo[2].top, 0.01));
         expect(photo[2].left, closeTo(0, 0.01));
-        expect(photo[2].top - photo[0].top, closeTo(364.1, 0.01));
+        expect(photo[2].top - photo[0].top, closeTo(357.1, 0.01));
       },
     );
 
     testWidgets(
-      'UI-CAT-01 tiles use rounded cards and inset photos without a lift',
+      'UI-CAT-01 tiles carry no card: no lift, no clip, no photo inset',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -244,24 +286,20 @@ void main() {
           final tile = tiles.at(i);
           expect(
             find.descendant(of: tile, matching: find.byType(ClipRRect)),
-            findsNWidgets(2),
-            reason: 'tile $i clips the card and the inset photograph',
+            findsNothing,
+            reason: 'tile $i must not clip its photo into a rounded card',
           );
           final image = _rect(
             tester,
             find.descendant(of: tile, matching: find.byType(MonettaImage)),
           );
-          expect(
-            image,
-            _rect(tester, _photoOf(tile)).deflate(8),
-            reason: 'tile $i',
-          );
+          expect(image, _rect(tester, _photoOf(tile)), reason: 'tile $i');
         }
       },
     );
 
     testWidgets(
-      'UI-CAT-01 caption sits 12 pt in from the photo and 10 pt below it',
+      'UI-CAT-01 caption sits 8 pt in from the photo and 10 pt below it',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -271,8 +309,8 @@ void main() {
         final brand = _rect(tester, _brandOf(tile));
         final name = _rect(tester, _nameOf(tile));
 
-        expect(brand.left, closeTo(photo.left + 12, 0.01));
-        expect(name.left, closeTo(photo.left + 12, 0.01));
+        expect(brand.left, closeTo(photo.left + 8, 0.01));
+        expect(name.left, closeTo(photo.left + 8, 0.01));
         expect(brand.top, closeTo(photo.bottom + 10, 0.01));
       },
     );
@@ -291,7 +329,7 @@ void main() {
           await _pump(tester, _items(8));
 
           final row = _firstRowPhotos(tester);
-          final tileWidth = (width - 12.0 * (columns - 1)) / columns;
+          final tileWidth = (width - 4.0 * (columns - 1)) / columns;
           expect(row.length, columns);
           expect(row.first.left, closeTo(0, 0.01));
           expect(row.last.right, closeTo(width, 0.01));
@@ -345,32 +383,53 @@ void main() {
 
           expect(errors.takeUnexpected(), isEmpty);
 
-          final tiles = find.byType(MonettaProductTile);
-          expect(tiles, findsAtLeastNWidgets(4));
-          final photo = [
-            for (var i = 0; i < 4; i++) _rect(tester, _photoOf(tiles.at(i))),
-          ];
-          expect(photo[1].top, closeTo(photo[0].top, 0.01));
-          expect(photo[3].top, closeTo(photo[2].top, 0.01));
-          expect(photo[2].top, greaterThan(photo[0].top));
-
-          final prices = find.text(_priceLabel);
-          expect(prices, findsAtLeastNWidgets(4));
-          for (var i = 0; i < prices.evaluate().length; i++) {
-            expect(
-              tester
-                  .renderObject<RenderParagraph>(prices.at(i))
-                  .didExceedMaxLines,
-              isFalse,
-              reason: 'the price of tile $i must shrink, not end in "..."',
+          final items = _items(4, title: _longName, price: _price);
+          final scrollable = find
+              .descendant(
+                of: find.byType(CustomScrollView).first,
+                matching: find.byType(Scrollable),
+              )
+              .first;
+          final tops = <double>[];
+          final widths = <double>[];
+          for (final item in items) {
+            final tile = find.byKey(ValueKey(item.sourceScopedId));
+            await tester.scrollUntilVisible(tile, 200, scrollable: scrollable);
+            await tester.pumpAndSettle();
+            final photo = _rect(tester, _photoOf(tile));
+            tops.add(
+              photo.top +
+                  tester.state<ScrollableState>(scrollable).position.pixels,
             );
+            widths.add(photo.width);
+            final price =
+                find.descendant(of: tile, matching: find.text(_priceLabel));
+            expect(price, findsOneWidget);
+            await tester.ensureVisible(price);
+            await tester.pump();
+            expect(
+              tester.renderObject<RenderParagraph>(price).didExceedMaxLines,
+              isFalse,
+              reason: 'every full price remains readable after reflow',
+            );
+            expect(errors.takeUnexpected(), isEmpty);
+          }
+          if (label == 'x1.0' || label == 'x1.3') {
+            expect(tops[1], closeTo(tops[0], .01));
+            expect(tops[3], closeTo(tops[2], .01));
+            expect(widths, everyElement(closeTo(193, .01)));
+          } else {
+            expect(widths, everyElement(closeTo(390, .01)));
+            for (var i = 1; i < tops.length; i++) {
+              expect(tops[i], greaterThan(tops[i - 1]));
+            }
           }
         },
       );
     }
   });
 
-  group('UI-CAT-04 the header sits beside back', () {
+  group('UI-CAT-04 the header is centred', () {
     // Measured as an owner sees it: shoppers get the title alone, owners also
     // get the piece count under it.
     for (final pushed in [true, false]) {
@@ -381,7 +440,7 @@ void main() {
         final route = pushed ? 'with BackButton' : 'as root route';
 
         testWidgets(
-          'UI-CAT-04 title and count align beside the back arrow '
+          'UI-CAT-04 title and count are centred on the screen '
           '($route, $label)',
           (tester) async {
             _setView(tester, const Size(390, 844));
@@ -396,20 +455,16 @@ void main() {
 
             expect(errors.takeUnexpected(), isEmpty);
             expect(
-              find.byKey(const ValueKey('monetta-page-back')),
-              findsOneWidget,
+              find.byType(BackButton),
+              pushed ? findsOneWidget : findsNothing,
             );
             expect(
-              _rect(tester, find.text('Productos')).left,
-              closeTo(
-                _rect(tester, find.byKey(const ValueKey('monetta-page-back')))
-                    .right,
-                0.5,
-              ),
+              _rect(tester, find.text('Productos')).center.dx,
+              closeTo(195, 0.5),
             );
             expect(
-              _rect(tester, find.text('6 piezas')).left,
-              closeTo(_rect(tester, find.text('Productos')).left, 0.5),
+              _rect(tester, find.text('6 piezas')).center.dx,
+              closeTo(195, 0.5),
             );
           },
         );
@@ -439,10 +494,7 @@ void main() {
             );
             final buttons = [search, filter];
             if (pushed) {
-              final back = _rect(
-                tester,
-                find.byKey(const ValueKey('monetta-page-back')),
-              );
+              final back = _rect(tester, find.byType(BackButton));
               expect(back.left, lessThan(60));
               buttons.add(back);
             }
@@ -518,10 +570,7 @@ void main() {
       '(holds today and after)',
       (tester) async {
         _setView(tester, const Size(800, 1600), dpr: 1);
-        await _pump(tester, [
-          _monetta(1),
-          browseEntry(2, title: 'Bolsa de mano 2', category: 'bolsa'),
-        ]);
+        await _pump(tester, [_monetta(1), _external(1)]);
 
         final size = tester.getSize(button);
         expect(size.width, greaterThanOrEqualTo(48));

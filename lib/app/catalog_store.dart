@@ -39,13 +39,17 @@ import '../data/normalize/rules.dart';
 import '../data/repositories/catalog_repository.dart';
 import '../data/repositories/catalog_write_coordinator.dart';
 import '../data/repositories/realtime_catalog_repository.dart';
+import '../data/shopify/catalog_item_mapper.dart';
 import '../data/shopify/catalog_sync.dart' as shopify;
+import '../domain/catalog_item.dart';
 import '../domain/bag_line.dart';
 import '../domain/product.dart';
+import '../domain/shopify_sample_filter.dart';
 import '../reco/events.dart';
 import '../reco/explainer.dart';
 import '../reco/profile.dart';
 import '../reco/scorer.dart';
+import 'mixed_feed.dart';
 
 class Recommendation {
   const Recommendation({
@@ -126,8 +130,33 @@ class CatalogStore extends ChangeNotifier {
   /// variantId -> productId for the current [_accountScope].
   final Map<String, String> _bagProductByVariant = {};
 
-  List<Product> products = const [];
-  Map<String, CanonicalFacets> facetsById = const {};
+  List<Product> _products = const [];
+  Map<String, CanonicalFacets> _rawFacetsById = const {};
+  Map<String, CanonicalFacets> _facetsById = const {};
+
+  /// Shopper-facing products only. Persistence keeps the complete snapshot.
+  List<Product> get products => _products;
+  set products(List<Product> value) {
+    _products = value
+        .where((product) => !isShopifySampleProduct(product))
+        .toList(growable: false);
+    _rebuildVisibleFacets();
+  }
+
+  /// Facets for visible products, shared by filters and recommendation ranking.
+  Map<String, CanonicalFacets> get facetsById => _facetsById;
+  set facetsById(Map<String, CanonicalFacets> value) {
+    _rawFacetsById = value;
+    _rebuildVisibleFacets();
+  }
+
+  void _rebuildVisibleFacets() {
+    _facetsById = {
+      for (final product in _products)
+        if (_rawFacetsById[product.id] case final facets?) product.id: facets,
+    };
+  }
+
   late NormalizationRules rules;
 
   TasteProfile profile = const TasteProfile.empty();
@@ -419,10 +448,12 @@ class CatalogStore extends ChangeNotifier {
   void seedFrom({
     required List<String> brands,
     required List<String> categories,
+    List<String> silhouettes = const [],
   }) {
     profile = seedProfileFromOnboarding(
       brands: brands,
       categories: categories,
+      silhouettes: silhouettes,
       now: DateTime.now(),
     );
     notifyListeners();
@@ -686,7 +717,49 @@ class CatalogStore extends ChangeNotifier {
         .toList();
   }
 
+  /// The unified feed: Monetta products and external research items ranked
+  /// through the same [Recommender], deduplicated (Monetta preferred on an
+  /// exact brand+title match), so an external item can appear naturally
+  /// interleaved among Monetta recommendations rather than only in a
+  /// separate rail. See `app/mixed_feed.dart#unifiedRecommendations`.
+  List<MixedRecommendation> mixedFeed({
+    required List<CatalogItem> external,
+    int limit = 40,
+  }) {
+    if (!ready) return const [];
+
+    final discounts = <String, double>{
+      for (final p in products)
+        if (p.isOnSale) p.id: p.discountFraction,
+    };
+
+    return unifiedRecommendations(
+      recommender: _recommender,
+      explainer: _explainer,
+      profile: profile,
+      monettaProducts: products,
+      monettaFacetsById: facetsById,
+      externalItems: external,
+      context: ScoringContext(
+        viewedProductIds: _viewed,
+        wishlistedProductIds: _wishlist,
+        discountByProductId: discounts,
+      ),
+      limit: limit,
+    );
+  }
+
   CanonicalFacets? facetsFor(String productId) => facetsById[productId];
+
+  /// Every Monetta product mapped into the source-independent [CatalogItem]
+  /// shape. Home and collection open the full catalog through this list.
+  List<CatalogItem> get catalogItems => [
+        for (final product in products)
+          catalogItemFromShopifyProduct(
+            product,
+            facets: facetsById[product.id],
+          ),
+      ];
 
   /// Brands present in the catalog, most stocked first — drives onboarding.
   List<String> get availableBrands {

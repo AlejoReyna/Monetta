@@ -36,6 +36,7 @@ AppBar buildMonettaPageAppBar(
   VoidCallback? onBack,
   List<Widget> actions = const [],
   double actionsWidth = 0,
+  Color? backgroundColor,
   String? trailingLabel,
   Widget? subtitle,
   Key? titleKey,
@@ -81,7 +82,7 @@ AppBar buildMonettaPageAppBar(
 
   return AppBar(
     toolbarHeight: toolbarHeight,
-    backgroundColor: palette.canvas,
+    backgroundColor: backgroundColor ?? palette.canvas,
     foregroundColor: palette.ink,
     surfaceTintColor: Colors.transparent,
     elevation: 0,

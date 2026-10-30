@@ -3,6 +3,12 @@
 Configuration-only directory for the **CLI-managed Shopify app** that owns
 webhooks and compliance for `services/accounts_orders/`.
 
+On staging the app is also **embedded**: its app home
+(`https://monetta-accounts-staging.fly.dev/shopify/app`) is the push
+notifications panel served by `services/accounts_orders/src/shopifyAdmin/`.
+Access is per Shopify staff id; see
+[`docs/ADMIN_CONTROL_PANEL.md`](../docs/ADMIN_CONTROL_PANEL.md#panel-de-avisos-en-shopify-admin).
+
 This is **not** the Flutter project root. Never run `shopify app init` from the
 repo root — it will try to restructure the Flutter tree.
 

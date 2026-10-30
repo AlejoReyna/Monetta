@@ -58,7 +58,7 @@ export function designAccountPage() {
             <span class="identity__avatar" aria-hidden="true">A</span>
             <div>
               <p class="identity__name">Ana</p>
-              <p class="identity__email">ana@email.com</p>
+              <p class="identity__email">ana@example.com</p>
             </div>
           </div>
           <a class="balance-row" href="#rewards" aria-label="Monetta Rewards, saldo ${formatMoney('320.00', { code: true })}">

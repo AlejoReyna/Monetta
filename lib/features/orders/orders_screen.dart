@@ -6,17 +6,19 @@
 /// caché, sesión caducada) tiene presentación propia.
 library;
 
+import '../../platform/system_layout_context.dart';
 import 'package:flutter/material.dart';
-
-import '../navigation/monetta_page_header.dart';
 
 import '../../app/account_controller.dart';
 import '../../app/theme.dart';
+import '../../app/monetta_tokens.g.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
 import '../../data/local/database.dart' show OrderSummary;
 import '../../data/repositories/order_history_repository.dart';
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/client_guide_components.dart';
+import '../boutique/client_guide_scaffold.dart';
 import '../rewards/rewards_section.dart';
 import 'order_detail_screen.dart';
 import 'order_status.dart';
@@ -58,17 +60,22 @@ class _OrdersScreenState extends State<OrdersScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Scaffold(
-      backgroundColor: palette.canvas,
-      appBar: buildMonettaPageAppBar(
-        context,
-        title: 'Mis pedidos',
-      ),
-      body: SafeArea(
-        child: ListenableBuilder(
-          listenable: widget.controller,
-          builder: (context, _) => _buildBody(context),
+    return ClientGuideScaffold(
+      current: ClientGuideDestination.account,
+      accountController: widget.controller,
+      body: SystemUsableSurface(
+        child: SafeArea(
+          child: Center(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(
+                maxWidth: MonettaTokens.breakpointMedium,
+              ),
+              child: ListenableBuilder(
+                listenable: widget.controller,
+                builder: (context, _) => _buildBody(context),
+              ),
+            ),
+          ),
         ),
       ),
     );
@@ -81,12 +88,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
     }
     if (controller.ordersLoading && controller.orders.isEmpty) {
       return ListView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+        padding: EdgeInsets.fromLTRB(
+          MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+          MonettaTokens.space[4],
+          MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+          MonettaTokens.space[5],
+        ),
         children: [
-          const AccountPageHeader(
-            kicker: 'Historial',
-            title: 'Mis pedidos',
-          ),
+          const _OrdersHeading(),
           const SizedBox(height: BoutiqueSpace.lg),
           Text(
             'Cargando tus pedidos…',
@@ -101,12 +110,14 @@ class _OrdersScreenState extends State<OrdersScreen> {
     return RefreshIndicator(
       onRefresh: controller.loadOrders,
       child: ListView(
-        padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+        padding: EdgeInsets.fromLTRB(
+          MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+          MonettaTokens.space[4],
+          MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+          MonettaTokens.space[5],
+        ),
         children: [
-          const AccountPageHeader(
-            kicker: 'Historial',
-            title: 'Mis pedidos',
-          ),
+          const _OrdersHeading(),
           const SizedBox(height: BoutiqueSpace.lg),
           ..._statusNotices(controller),
           _FilterRow(
@@ -207,12 +218,14 @@ class _OrdersSignedOut extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 24, 20, 32),
+      padding: EdgeInsets.fromLTRB(
+        MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+        MonettaTokens.space[4],
+        MonettaTokens.gutterFor(MediaQuery.sizeOf(context).width),
+        MonettaTokens.space[5],
+      ),
       children: const [
-        AccountPageHeader(
-          kicker: 'Historial',
-          title: 'Mis pedidos',
-        ),
+        _OrdersHeading(),
         SizedBox(height: BoutiqueSpace.lg),
         ENotice(
           message: 'Inicia sesión con tu cuenta Shopify para ver tu historial.',
@@ -234,34 +247,84 @@ class _FilterRow extends StatelessWidget {
   final Map<OrderFilter, int> counts;
   final ValueChanged<OrderFilter> onChanged;
 
+  /// «Todos», «En camino» and «Completos» are always there, as in the guide.
+  /// The apartado tab only appears when there is one (or it is selected).
+  static bool _alwaysShown(OrderFilter option) =>
+      option == OrderFilter.all ||
+      option == OrderFilter.inTransit ||
+      option == OrderFilter.delivered;
+
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final options = [
+      for (final option in OrderFilter.values)
+        if (_alwaysShown(option) ||
+            (counts[option] ?? 0) > 0 ||
+            filter == option)
+          option,
+    ];
     return Semantics(
       label: 'Filtrar pedidos',
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        child: Row(
-          children: [
-            for (final option in OrderFilter.values) ...[
-              if (option != OrderFilter.all &&
-                  (counts[option] ?? 0) == 0 &&
-                  filter != option)
-                const SizedBox.shrink()
-              else
-                Padding(
-                  padding: const EdgeInsets.only(right: BoutiqueSpace.sm),
-                  child: EFilterChip(
-                    key: ValueKey('orders-filter-${option.name}'),
-                    label:
-                        '${orderFilterLabel(option)} (${counts[option] ?? 0})',
-                    selected: filter == option,
-                    onTap: () => onChanged(option),
+      child: Row(
+        children: [
+          for (var i = 0; i < options.length; i++) ...[
+            if (i > 0) SizedBox(width: MonettaTokens.space[1]),
+            Expanded(
+              child: Semantics(
+                label:
+                    '${orderFilterLabel(options[i])}: ${counts[options[i]] ?? 0} pedidos',
+                selected: filter == options[i],
+                button: true,
+                excludeSemantics: true,
+                onTap: () => onChanged(options[i]),
+                child: Material(
+                  key: ValueKey('orders-filter-${options[i].name}'),
+                  color: filter == options[i] ? palette.action : palette.canvas,
+                  shape: StadiumBorder(
+                    side: BorderSide(
+                      color: filter == options[i]
+                          ? palette.action
+                          : palette.hairline,
+                    ),
+                  ),
+                  child: InkWell(
+                    customBorder: const StadiumBorder(),
+                    onTap: () => onChanged(options[i]),
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(
+                        minHeight: MonettaTokens.tapTarget,
+                      ),
+                      child: Center(
+                        child: Padding(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: MonettaTokens.space[1],
+                          ),
+                          child: FittedBox(
+                            fit: BoxFit.scaleDown,
+                            child: Text(
+                              options[i] == OrderFilter.delivered
+                                  ? 'Completos'
+                                  : orderFilterLabel(options[i]),
+                              maxLines: 1,
+                              style: clientGuideStyle(
+                                context,
+                                MonettaTokens.cardLabel,
+                                color: filter == options[i]
+                                    ? palette.onAction
+                                    : palette.ink,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
                   ),
                 ),
-            ],
+              ),
+            ),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -302,19 +365,9 @@ class _OrdersList extends StatelessWidget {
         onAction: null,
       );
     }
-    final summary = summarizeOrders(visible);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _SummaryLine(summary: summary, filter: filter),
-        const SizedBox(height: BoutiqueSpace.md),
-        if (controller.account != null)
-          AutoRewardsSection(
-            controller: controller,
-            reader: rewardsReader,
-            showMovements: false,
-          ),
-        const SizedBox(height: BoutiqueSpace.md),
         for (final order in visible) ...[
           _OrderCard(
             order: order,
@@ -329,49 +382,6 @@ class _OrdersList extends StatelessWidget {
           ),
           const SizedBox(height: BoutiqueSpace.md),
         ],
-        Align(
-          alignment: Alignment.centerLeft,
-          child: TextButton(
-            key: const ValueKey('refresh-orders'),
-            onPressed:
-                controller.ordersLoading ? null : () => controller.loadOrders(),
-            child: Text(
-              controller.ordersLoading ? 'Actualizando…' : 'Actualizar pedidos',
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SummaryLine extends StatelessWidget {
-  const _SummaryLine({required this.summary, required this.filter});
-
-  final OrdersSummary summary;
-  final OrderFilter filter;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    final scope = filter == OrderFilter.all
-        ? 'En total'
-        : 'En ${orderFilterLabel(filter).toLowerCase()}';
-    final total = '$scope: ${summary.count} '
-        '${summary.count == 1 ? 'pedido' : 'pedidos'} · '
-        '${kMoney.format(summary.totalMxn)} MXN';
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          total,
-          style: boutiqueText(size: 13, color: palette.inkMuted),
-        ),
-        if (summary.otherCurrencyCount > 0)
-          Text(
-            '${summary.otherCurrencyCount} en otra moneda, sin convertir.',
-            style: boutiqueText(size: 12, color: palette.inkMuted),
-          ),
       ],
     );
   }
@@ -394,10 +404,18 @@ class _OrderCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final status = orderDisplayStatus(order);
+    final showAction = status.key != 'awaiting_transfer';
+    final action = status.actionLabel ?? 'Ver detalles';
+    final secondary = status.secondaryLabel;
+    final refundHelp = paidCancelledRefundWhatsAppUri(order) != null;
+    final actionPrefix = showAction ? '$action del pedido' : 'Pedido';
     return Semantics(
       button: true,
-      label: 'Ver detalles del pedido ${orderLabelOf(order)}, '
-          '${status.label}, ${kMoney.format(order.totalAmount)}',
+      label: '$actionPrefix ${orderLabelOf(order)}, '
+          '${status.label}'
+          '${secondary == null ? '' : ', $secondary'}'
+          '${refundHelp ? ', $paidCancelledRefundHelp' : ''}, '
+          '${kMoney.format(order.totalAmount)}',
       child: InkWell(
         key: ValueKey('order-card-${order.id}'),
         onTap: onTap,
@@ -412,36 +430,80 @@ class _OrderCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Row(
+              Wrap(
+                alignment: WrapAlignment.spaceBetween,
+                crossAxisAlignment: WrapCrossAlignment.center,
+                spacing: MonettaTokens.space[3],
+                runSpacing: MonettaTokens.space[2],
                 children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          orderLabelOf(order),
-                          style: boutiqueText(
-                            size: 15,
-                            weight: FontWeight.w700,
-                            color: palette.ink,
-                          ),
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        orderLabelOf(order),
+                        style: clientGuideStyle(
+                          context,
+                          MonettaTokens.sectionTitle,
                         ),
-                        const SizedBox(height: 2),
-                        Text(
-                          orderDateLabel(order.placedAt),
-                          style: boutiqueText(
-                            size: 12,
-                            color: palette.inkMuted,
-                          ),
+                      ),
+                      SizedBox(height: MonettaTokens.space[0]),
+                      Text(
+                        orderDateLabel(order.placedAt),
+                        style: clientGuideStyle(
+                          context,
+                          MonettaTokens.cardLabel,
+                          color: palette.inkMuted,
                         ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
-                  EStatusCapsule.forOrderKey(
-                    status.key,
-                    label: status.label,
+                  Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Flexible(
+                        child: EStatusCapsule.forOrderKey(
+                          status.key,
+                          label: status.label,
+                          guideIcon: status.key == 'in_transit'
+                              ? Icons.local_shipping_outlined
+                              : status.key == 'delivered'
+                                  ? Icons.check_circle_outline
+                                  : Icons.receipt_long_outlined,
+                        ),
+                      ),
+                      SizedBox(width: MonettaTokens.space[1]),
+                      Icon(
+                        Icons.chevron_right_rounded,
+                        color: palette.ink,
+                        size: 24,
+                      ),
+                    ],
                   ),
                 ],
+              ),
+              if (secondary != null) ...[
+                const SizedBox(height: 6),
+                Text(
+                  secondary,
+                  style: boutiqueText(
+                    size: 12,
+                    color: palette.inkMuted,
+                  ),
+                ),
+              ],
+              PaidCancelledRefundHelp(order: order),
+              SizedBox(height: MonettaTokens.space[3]),
+              // `OrderSummary` carries no order lines yet, so there is no
+              // product photograph to show: a discreet note stands in until
+              // the history brings lines (then up to three catalog photos).
+              Text(
+                'Las imágenes de este pedido aún no están disponibles.',
+                key: ValueKey('order-thumbs-placeholder-${order.id}'),
+                style: clientGuideStyle(
+                  context,
+                  MonettaTokens.navLabel,
+                  color: palette.inkMuted,
+                ),
               ),
               const SizedBox(height: BoutiqueSpace.md),
               Container(height: .5, color: palette.hairline),
@@ -459,32 +521,20 @@ class _OrderCard extends StatelessWidget {
                   Text(
                     'Total: ${kMoney.format(order.totalAmount)} '
                     '${order.currencyCode}',
-                    style: boutiqueText(
-                      size: 13,
-                      weight: FontWeight.w600,
-                      color: palette.ink,
+                    style: clientGuideStyle(context, MonettaTokens.price),
+                  ),
+                  if (showAction)
+                    SizedBox(
+                      // Narrow enough to sit beside the total at 390 px; a
+                      // larger text size flows it to its own line (Wrap).
+                      width: 136,
+                      child: ClientGuideButton(
+                        label: action,
+                        chevron: true,
+                        compact: true,
+                        onPressed: onTap,
+                      ),
                     ),
-                  ),
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 4,
-                    children: [
-                      Text(
-                        'Ver detalles',
-                        style: boutiqueText(
-                          size: 13,
-                          weight: FontWeight.w600,
-                          color: palette.ink,
-                          decoration: TextDecoration.underline,
-                        ),
-                      ),
-                      Icon(
-                        Icons.chevron_right_rounded,
-                        size: 18,
-                        color: palette.inkMuted,
-                      ),
-                    ],
-                  ),
                 ],
               ),
               AutoOrderRewardsLine(
@@ -498,4 +548,14 @@ class _OrderCard extends StatelessWidget {
       ),
     );
   }
+}
+
+class _OrdersHeading extends StatelessWidget {
+  const _OrdersHeading();
+  @override
+  Widget build(BuildContext context) => Text(
+        'Mis pedidos',
+        textAlign: TextAlign.center,
+        style: clientGuideStyle(context, MonettaTokens.screenTitle),
+      );
 }

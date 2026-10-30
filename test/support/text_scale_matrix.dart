@@ -152,7 +152,8 @@ Future<void> _scrollThrough(
   await tester.pump();
   _failOnError(tester, name, log, 'at the top');
 
-  for (var i = 0; i < 80; i++) {
+  // A short phone needs more steps to walk a long catalog than a tall one.
+  for (var i = 0; i < 200; i++) {
     final before = position.pixels;
     final target = (before + step).clamp(0.0, position.maxScrollExtent);
     position.jumpTo(target);
@@ -170,7 +171,7 @@ Future<void> _scrollThrough(
       return;
     }
   }
-  fail('$name: the main content never reached a stable end in 80 steps.');
+  fail('$name: the main content never reached a stable end in 200 steps.');
 }
 
 /// Routes every `FlutterError` of the test into a list instead of the

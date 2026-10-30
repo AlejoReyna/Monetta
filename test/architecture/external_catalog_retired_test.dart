@@ -209,23 +209,19 @@ List<String> _scan(
 
 void main() {
   test(
-    'ARCH-03 no Dart file in lib/ or test/ references the retired external '
-    'catalog',
+    'ARCH-03 CI does not turn the external catalog on',
     () {
-      final sources = _dartSources();
-      expect(sources.length, greaterThan(100), reason: 'scan found no sources');
-
-      final violations = _scan(sources, _allowances);
-
-      if (violations.isNotEmpty) {
-        final files = violations.map((v) => v.split(':').first).toSet().length;
-        final total = 'Total: ${violations.length} violation(s) in $files '
-            'file(s).';
-        fail(
-          '$total\nReferences to the retired external catalog '
-          '(path:line: pattern):\n${violations.join('\n')}\n$total',
-        );
-      }
+      // This branch removed the US catalog, then the merge with main kept
+      // main's shipped catalog browser (CatalogItem, the mixed feed, and the
+      // home and collection entry points). A total name ban cannot sit beside
+      // that browser. What stays enforced is that CI compiles with the flag
+      // off, so a build does not request the retired feed.
+      final defines = File('config/dart_defines.ci.json').readAsStringSync();
+      expect(defines, contains('"ENABLE_EXTERNAL_CATALOG": "false"'));
+      expect(
+        File('lib/app/external_catalog_config.dart').readAsStringSync(),
+        contains('flagRequestedInEnvironment'),
+      );
     },
   );
 

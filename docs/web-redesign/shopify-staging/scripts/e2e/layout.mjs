@@ -78,25 +78,30 @@ for (const [w, h] of viewports) {
     await page.waitForTimeout(250);
     let m = await measure(page);
     run.check(`${tag} collection: no horizontal overflow`, m.scrollWidth <= m.innerWidth, `${m.scrollWidth}/${m.innerWidth}`);
-    const topBar = phone ? m.pageBar : m.siteTop;
     if (short) {
       run.check(`${tag} collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)`, m.siteTop.position === 'static' && (!m.pageBar || m.pageBar.position === 'static') && m.pinnedTop === 0, `siteTop=${m.siteTop.position} pageBar=${m.pageBar?.position} pinnedTop=${m.pinnedTop}`);
       run.check(`${tag} collection: dock joins the page flow (static) and reserves nothing`, !m.dock || m.dock.display === 'none' || (m.dock.position === 'static' && m.pinnedBottom === 0), `dock=${m.dock?.position}/${m.dock?.display} pinnedBottom=${m.pinnedBottom}`);
       if (m.sidebar && m.sidebar.display !== 'none') run.check(`${tag} collection: filter sidebar is not sticky and not squeezed`, m.sidebar.position === 'static' && m.sidebar.height > 100, JSON.stringify(m.sidebar));
     } else {
-      const bar = phone ? m.pageBar : m.siteTop;
+      // Since the guide pass (F3) collections keep the global header at every width; the page bar lives on search and the bag.
+      const bar = m.siteTop;
       run.check(`${tag} collection: pinned chrome stays pinned above 480px of height (sticky/fixed)`, ['sticky', 'fixed'].includes(bar.position), `${bar.position}`);
       run.check(`${tag} collection: --pinned-top equals the real bottom edge of the pinned bar`, near(m.pinnedTop, bar.bottom, 1), `${m.pinnedTop} vs ${bar.bottom}`);
       run.check(`${tag} collection: scroll-padding-top = reserve + 16`, near(m.scrollPaddingTop, m.pinnedTop + 16, 0.5), `${m.scrollPaddingTop}`);
-      if (phone) {
-        run.check(`${tag} collection: phone page bar is 76px tall with a one-line title`, near(m.pageBar.height, 76, 0.75), `${m.pageBar.height}`);
-        run.check(`${tag} collection: phone global header is replaced by the page bar`, m.siteTop.height < 1 || (await page.locator('#site-header').isHidden()));
-      }
+      if (phone) run.check(`${tag} collection: phones keep the guide's global header, no page bar`, m.siteTop.height > 1 && !m.pageBar, `header ${m.siteTop.height} pageBar ${Boolean(m.pageBar)}`);
       if (phone && m.dock) run.check(`${tag} collection: floating dock is fixed and --pinned-bottom equals its measured height`, m.dock.position === 'fixed' && near(m.pinnedBottom, m.dock.height + 0, 1.5), `dock ${m.dock.height} reserve ${m.pinnedBottom}`);
     }
 
-    // The reserve is measured, not assumed: a title that wraps grows the bar and the reserve follows it.
+    // The reserve is measured, not assumed: a title that wraps grows the bar and the reserve follows it. Measured on search,
+    // which keeps the phone page bar.
     if (phone && !short) {
+      await page.goto(`${baseUrl}/search?q=bolso&type=product`, { waitUntil: 'load' });
+      await settle(page);
+      await page.evaluate(() => scrollTo(0, 800));
+      await page.waitForTimeout(250);
+      const ms = await measure(page);
+      run.check(`${tag} search: phone page bar is 76px tall with a one-line title`, !!ms.pageBar && near(ms.pageBar.height, 76, 0.75), `${ms.pageBar?.height}`);
+      run.check(`${tag} search: phone global header is replaced by the page bar`, ms.siteTop.height < 1 || (await page.locator('#site-header').isHidden()));
       const grown = await page.evaluate(async () => {
         const title = document.querySelector('[data-page-bar] .page-bar__title');
         const before = Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pinned-top'));
@@ -105,7 +110,7 @@ for (const [w, h] of viewports) {
         const bar = document.querySelector('[data-page-bar]').getBoundingClientRect();
         return { before, after: Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--pinned-top')), bar: bar.bottom, height: bar.height };
       });
-      run.check(`${tag} collection: a two-line title grows the bar and the measured reserve follows (not a fixed 76)`, grown.height > 76.5 && near(grown.after, grown.bar, 1), JSON.stringify(grown));
+      run.check(`${tag} search: a two-line title grows the bar and the measured reserve follows (not a fixed 76)`, grown.height > 76.5 && near(grown.after, grown.bar, 1), JSON.stringify(grown));
     }
 
     /* ------------------------------------------------ product */
@@ -161,7 +166,8 @@ for (const [w, h] of viewports) {
       run.check(`${tag} recommendations: rail rendered`, rail.tiles >= 2, `${rail.tiles} tiles`);
       run.check(`${tag} recommendations: tiles have equal heights`, rail.equalHeights);
       if (phone) {
-        run.check(`${tag} recommendations (phone): heading Inter 17px/600`, rail.headingSize === '17px' && rail.headingWeight === '600' && /Inter/.test(rail.headingFamily), JSON.stringify([rail.headingSize, rail.headingWeight, rail.headingFamily]));
+        // Section-title role since 22 Oct (DESIGN_SPEC §3): Playfair 400, 23px on phones. It was Inter 17/600 before.
+        run.check(`${tag} recommendations (phone): heading is the section title, Playfair 23px/400`, rail.headingSize === '23px' && rail.headingWeight === '400' && /Playfair/.test(rail.headingFamily), JSON.stringify([rail.headingSize, rail.headingWeight, rail.headingFamily]));
         run.check(`${tag} recommendations (phone): tile width min(52vw, 260px)`, near(rail.tileWidth, Math.min(w * 0.52, 260), 1), `${rail.tileWidth} vs ${Math.min(w * 0.52, 260)}`);
         run.check(`${tag} recommendations (phone): 4:5 photo that fills the frame (no inset) and 12px gap`, near(rail.ratio, 0.8, 0.01) && rail.mediaMargin === '0px' && near(rail.gap, 12, 0.5), JSON.stringify({ ratio: rail.ratio, margin: rail.mediaMargin, gap: rail.gap }));
         run.check(`${tag} recommendations (phone): name clamps at two lines`, rail.clamp === '2' && rail.nameLines <= 2, JSON.stringify([rail.clamp, rail.nameLines]));

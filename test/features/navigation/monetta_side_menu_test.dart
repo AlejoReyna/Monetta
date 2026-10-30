@@ -1,206 +1,282 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:material_symbols_icons/symbols.dart';
-import 'package:monetta_app/features/boutique/boutique_tokens.dart';
+import 'package:monetta_app/domain/home_content.dart';
 import 'package:monetta_app/features/navigation/monetta_side_menu.dart';
 
-Widget _menu({
-  bool isSignedIn = false,
-  String? accountName,
-  String? accountEmail,
-  VoidCallback? onAccount,
-  VoidCallback? onSettings,
-}) {
-  void doNothing() {}
-  return MaterialApp(
-    home: Scaffold(
-      body: MonettaSideMenu(
-        onCatalog: doNothing,
-        onBags: doNothing,
-        onWallets: doNothing,
-        onWatches: doNothing,
-        onPerfumes: doNothing,
-        onBeauty: doNothing,
-        onAbout: doNothing,
-        onPartner: doNothing,
-        onSupport: doNothing,
-        isSignedIn: isSignedIn,
-        accountName: accountName,
-        accountEmail: accountEmail,
-        onAccount: onAccount,
-        onSettings: onSettings,
-      ),
-    ),
-  );
-}
+import '../../support/client_guide_capture.dart';
 
 void main() {
-  testWidgets('links are plain icon rows with no separators', (tester) async {
+  testWidgets('shows only navigation links and a direct theme toggle', (
+    tester,
+  ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1600);
     tester.view.devicePixelRatio = 1;
 
-    await tester.pumpWidget(_menu(onSettings: () {}));
+    void doNothing() {}
+    var themeToggleCalls = 0;
 
-    final menu = find.byKey(const Key('monetta-side-menu'));
-    for (final label in [
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MonettaSideMenu(
+            onSearch: doNothing,
+            onCatalog: doNothing,
+            onBags: doNothing,
+            onWallets: doNothing,
+            onWatches: doNothing,
+            onPerfumes: doNothing,
+            onBeauty: doNothing,
+            onToggleTheme: () => themeToggleCalls++,
+            onAbout: doNothing,
+            onPartner: doNothing,
+            onSupport: doNothing,
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('Bolsas'), findsOneWidget);
+    expect(find.text('Nuestra historia'), findsNothing);
+    expect(find.text('TIENDA'), findsNothing);
+    expect(find.text('MÁS DE MONETTA'), findsNothing);
+    expect(find.text('Mis notificaciones'), findsNothing);
+    expect(find.text('Apariencia'), findsNothing);
+    expect(find.byKey(const Key('side-menu-appearance')), findsOneWidget);
+    expect(find.byTooltip('Activar modo oscuro'), findsOneWidget);
+    expect(find.byIcon(Icons.light_mode_outlined), findsOneWidget);
+
+    await tester.tap(find.byKey(const Key('side-menu-appearance')));
+    expect(themeToggleCalls, 1);
+  });
+
+  testWidgets('shows identity, categories, sharing, WhatsApp and social links',
+      (
+    tester,
+  ) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 1600);
+    tester.view.devicePixelRatio = 1;
+
+    final opened = <String>[];
+    final social = <Uri>[];
+    Widget menu() => MonettaSideMenu(
+          onSearch: () {},
+          onCatalog: () {},
+          onCategories: () => opened.add('categories'),
+          onBags: () {},
+          onWallets: () {},
+          onWatches: () {},
+          onPerfumes: () {},
+          onBeauty: () {},
+          onToggleTheme: () {},
+          onAbout: () {},
+          onPartner: () {},
+          onSupport: () {},
+          identityName: 'Ana',
+          identityDetail: 'ana@example.com',
+          onNotifications: () => opened.add('notifications'),
+          onShare: () => opened.add('share'),
+          onWhatsApp: () => opened.add('whatsapp'),
+          socialLinks: HomeContent.fallback.socialLinks,
+          onOpenSocial: social.add,
+        );
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Builder(
+          builder: (context) => Scaffold(
+            body: TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute<void>(
+                    builder: (_) => Scaffold(body: menu()),
+                  ),
+                );
+              },
+              child: const Text('Abrir'),
+            ),
+          ),
+        ),
+      ),
+    );
+
+    Future<void> open() async {
+      await tester.tap(find.text('Abrir'));
+      await tester.pumpAndSettle();
+    }
+
+    await open();
+    expect(find.text('Ana'), findsOneWidget);
+    expect(find.text('ana@example.com'), findsOneWidget);
+    expect(find.byIcon(Icons.shopping_bag_outlined), findsWidgets);
+    expect(find.text('Categorías'), findsNothing);
+    expect(find.text('Comparte'), findsOneWidget);
+    expect(find.text('y gana'), findsOneWidget);
+    expect(find.text('Contacto por WhatsApp'), findsOneWidget);
+    expect(find.byKey(const Key('side-menu-social-instagram')), findsOneWidget);
+
+    expect(find.byKey(const Key('side-menu-categories')), findsNothing);
+    await tester.tap(find.byKey(const Key('side-menu-notifications')));
+    await tester.pumpAndSettle();
+    expect(opened, ['notifications']);
+
+    await open();
+    await tester.tap(find.byKey(const Key('side-menu-share-button')));
+    await tester.pumpAndSettle();
+    expect(opened, ['notifications', 'share']);
+
+    await open();
+    await tester.ensureVisible(find.byKey(const Key('side-menu-whatsapp')));
+    await tester.tap(find.byKey(const Key('side-menu-whatsapp')));
+    await tester.pumpAndSettle();
+    expect(opened, ['notifications', 'share', 'whatsapp']);
+
+    await open();
+    await tester
+        .ensureVisible(find.byKey(const Key('side-menu-social-instagram')));
+    await tester.tap(find.byKey(const Key('side-menu-social-instagram')));
+    await tester.pumpAndSettle();
+    expect(social.single.toString(), contains('instagram.com'));
+  });
+
+  testWidgets('MENU-GUIDE the menu holds exactly the guide items, in order', (
+    tester,
+  ) async {
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 1600);
+    tester.view.devicePixelRatio = 1;
+
+    final calls = <String>[];
+    final social = <Uri>[];
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MonettaSideMenu(
+            onSearch: () => calls.add('search'),
+            onCatalog: () => calls.add('brands'),
+            onCategories: () => calls.add('categories'),
+            onBags: () => calls.add('bags'),
+            onWallets: () => calls.add('wallets'),
+            onWatches: () => calls.add('watches'),
+            onPerfumes: () => calls.add('perfumes'),
+            onBeauty: () => calls.add('beauty'),
+            onToggleTheme: () {},
+            onAbout: () => calls.add('about'),
+            onPartner: () => calls.add('partner'),
+            onSupport: () => calls.add('support'),
+            identityName: 'Ana',
+            identityDetail: 'ana@example.com',
+            onNotifications: () => calls.add('notifications'),
+            onShare: () => calls.add('share'),
+            onWhatsApp: () => calls.add('whatsapp'),
+            socialLinks: HomeContent.fallback.socialLinks,
+            onOpenSocial: social.add,
+          ),
+        ),
+      ),
+    );
+
+    // Top: wordmark and the bell; the user row shows initial, name, email.
+    expect(find.byKey(const Key('side-menu-notifications')), findsOneWidget);
+    expect(find.text('A'), findsOneWidget);
+    expect(find.text('Ana'), findsOneWidget);
+    expect(find.text('ana@example.com'), findsOneWidget);
+
+    // The five links, top to bottom.
+    final labels = [
       'Bolsas',
       'Carteras',
       'Relojes',
       'Perfumes',
-      'Maquillaje y skincare',
       'Todas las marcas',
-      'Vende con Monetta',
+    ];
+    var previous = -1.0;
+    for (final label in labels) {
+      final top = tester.getTopLeft(find.text(label)).dy;
+      expect(top, greaterThan(previous), reason: label);
+      previous = top;
+    }
+    // Then the share banner, WhatsApp and the three networks, in guide order.
+    final share =
+        tester.getTopLeft(find.byKey(const Key('side-menu-share'))).dy;
+    final whatsapp = tester.getTopLeft(find.text('Contacto por WhatsApp')).dy;
+    expect(share, greaterThan(previous));
+    expect(whatsapp, greaterThan(share));
+    final xs = [
+      for (final id in ['tiktok', 'instagram', 'facebook'])
+        tester.getCenter(find.byKey(Key('side-menu-social-$id'))).dx,
+    ];
+    expect(xs[0], lessThan(xs[1]));
+    expect(xs[1], lessThan(xs[2]));
+    expect(
+      tester.getCenter(find.byKey(const Key('side-menu-social-tiktok'))).dy,
+      greaterThan(whatsapp),
+    );
+
+    // What the guide dropped.
+    for (final gone in [
+      'Buscar una pieza',
+      'Categorías',
+      'Maquillaje y skincare',
+      'Mayoreo',
       'Contacto',
       'Nuestra historia',
-      'Ajustes',
     ]) {
-      expect(
-        find.descendant(of: menu, matching: find.text(label)),
-        findsOneWidget,
-        reason: 'missing link $label',
-      );
+      expect(find.text(gone), findsNothing, reason: gone);
     }
-    for (final icon in [
-      Symbols.shopping_bag,
-      Symbols.account_balance_wallet,
-      Symbols.watch,
-      Symbols.spa,
-      Symbols.face,
-      Symbols.storefront,
-      Symbols.handshake,
-      Symbols.chat_bubble,
-      Symbols.auto_stories,
-      Symbols.settings,
-    ]) {
-      expect(
-        find.descendant(of: menu, matching: find.byIcon(icon)),
-        findsOneWidget,
-        reason: 'missing icon $icon',
-      );
-      final glyph = tester.widget<Icon>(
-        find.descendant(of: menu, matching: find.byIcon(icon)),
-      );
-      expect(glyph.weight, 300, reason: 'light stroke for $icon');
-    }
-    for (final label in ['Bolsas', 'Ajustes']) {
-      final style = tester
-          .widget<Text>(find.descendant(of: menu, matching: find.text(label)))
-          .style!;
-      expect(style.fontFamily, kBoutiqueSerifFamily);
-      expect(style.fontWeight, FontWeight.w400);
-    }
-    expect(find.text('Mayoreo'), findsNothing);
-    // "Vende con Monetta" follows "Todas las marcas".
-    expect(
-      tester.getTopLeft(find.text('Vende con Monetta')).dy,
-      greaterThan(tester.getTopLeft(find.text('Todas las marcas')).dy),
-    );
-    // Contacto, Nuestra historia and Ajustes form the block at the foot.
-    final footer = find.byKey(const Key('side-menu-footer'));
-    for (final label in ['Contacto', 'Nuestra historia', 'Ajustes']) {
-      expect(
-        find.descendant(of: footer, matching: find.text(label)),
-        findsOneWidget,
-      );
-    }
-    expect(
-      tester.getBottomLeft(footer).dy,
-      greaterThan(tester.getBottomLeft(menu).dy - 60),
-    );
-    expect(find.text('Buscar una pieza'), findsNothing);
     expect(find.byKey(const Key('side-menu-search')), findsNothing);
+
+    // The share pill keeps the share action.
+    final pill = find.byKey(const Key('side-menu-share-button'));
     expect(
-      find.descendant(of: menu, matching: find.byType(Divider)),
-      findsNothing,
+      find.descendant(of: pill, matching: find.text('VER CATÁLOGO')),
+      findsOneWidget,
     );
-    expect(find.text('TIENDA'), findsNothing);
-    expect(find.text('MÁS DE MONETTA'), findsNothing);
-  });
-
-  testWidgets('ajustes gear row delegates to the settings callback', (
-    tester,
-  ) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1;
-
-    var settingsCalls = 0;
-    await tester.pumpWidget(_menu(onSettings: () => settingsCalls++));
-
-    await tester.tap(find.byKey(const Key('side-menu-settings')));
+    await tester.tap(pill);
     await tester.pump();
-    expect(settingsCalls, 1);
-  });
-
-  testWidgets('without a settings callback there is no ajustes row', (
-    tester,
-  ) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1;
-
-    await tester.pumpWidget(_menu());
-
-    expect(find.text('Ajustes'), findsNothing);
-    expect(find.byKey(const Key('side-menu-settings')), findsNothing);
-  });
-
-  testWidgets('signed out shows a sign-in entry that opens the account flow',
-      (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1;
-
-    var accountCalls = 0;
-    await tester.pumpWidget(
-      _menu(isSignedIn: false, onAccount: () => accountCalls++),
-    );
-
-    expect(find.text('Inicia sesión'), findsOneWidget);
-    expect(find.byKey(const Key('side-menu-account')), findsNothing);
-
-    await tester.tap(find.byKey(const Key('side-menu-sign-in')));
     await tester.pump();
-    expect(accountCalls, 1);
+    expect(calls, ['share']);
   });
 
-  testWidgets('signed in shows the shopper data that opens the account hub',
-      (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1;
-
-    var accountCalls = 0;
-    await tester.pumpWidget(
-      _menu(
-        isSignedIn: true,
-        accountName: 'Alexis Reyna',
-        accountEmail: 'alexis@example.com',
-        onAccount: () => accountCalls++,
-      ),
-    );
-
-    expect(find.text('Inicia sesión'), findsNothing);
-    expect(find.text('Alexis Reyna'), findsOneWidget);
-    expect(find.text('alexis@example.com'), findsOneWidget);
-
-    await tester.tap(find.byKey(const Key('side-menu-account')));
-    await tester.pump();
-    expect(accountCalls, 1);
-  });
-
-  testWidgets('without an account callback there is no account header', (
-    tester,
-  ) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 1600);
-    tester.view.devicePixelRatio = 1;
-
-    await tester.pumpWidget(_menu());
-
-    expect(find.text('Inicia sesión'), findsNothing);
-    expect(find.byKey(const Key('side-menu-account')), findsNothing);
-    expect(find.byKey(const Key('side-menu-sign-in')), findsNothing);
-  });
+  for (final (size, brightness) in [
+    (const Size(390, 1400), Brightness.light),
+    (const Size(390, 1400), Brightness.dark),
+    (const Size(834, 1400), Brightness.light),
+  ]) {
+    testWidgets('menu capture ${size.width} ${brightness.name}',
+        (tester) async {
+      await pumpClientGuide(
+        tester,
+        MonettaSideMenu(
+          onSearch: () {},
+          onCatalog: () {},
+          onCategories: () {},
+          onBags: () {},
+          onWallets: () {},
+          onWatches: () {},
+          onPerfumes: () {},
+          onBeauty: () {},
+          onToggleTheme: () {},
+          onAbout: () {},
+          onPartner: () {},
+          onSupport: () {},
+          identityName: 'Ana',
+          identityDetail: 'ana@example.com',
+          onNotifications: () {},
+          onShare: () {},
+          onWhatsApp: () {},
+          socialLinks: HomeContent.fallback.socialLinks,
+          onOpenSocial: (_) {},
+        ),
+        size: size,
+        brightness: brightness,
+      );
+      await captureClientGuide(
+        tester,
+        'menu-${size.width.toInt()}-${brightness.name}',
+      );
+      expect(find.text('Bolsas'), findsOneWidget);
+    });
+  }
 }

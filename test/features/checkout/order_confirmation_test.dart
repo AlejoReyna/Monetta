@@ -19,12 +19,14 @@ void main() {
       (tester) async {
     await tester.pumpWidget(_app(const OrderConfirmationScreen()));
 
-    expect(find.text('¡Listo!'), findsOneWidget);
+    expect(find.text('¡Gracias por tu compra!'), findsOneWidget);
     expect(find.text('Confirmado en Shopify'), findsOneWidget);
+    // Without a number the sentence keeps its previous text.
+    expect(find.text('Tu pedido ha sido confirmado.'), findsOneWidget);
     expect(find.textContaining('#MON'), findsNothing);
     expect(find.textContaining('MON12345'), findsNothing);
-    expect(find.text('Ver pedido'), findsOneWidget);
-    expect(find.text('Seguir comprando'), findsOneWidget);
+    expect(find.text('Ver detalles del pedido'), findsOneWidget);
+    expect(find.text('Volver al inicio'), findsOneWidget);
   });
 
   testWidgets('confirmation with a real label shows it verbatim',
@@ -38,9 +40,21 @@ void main() {
       ),
     );
 
-    expect(find.text('#1001'), findsOneWidget);
-    expect(find.textContaining('ana@example.com'), findsOneWidget);
-    expect(find.text('3 a 5 días hábiles'), findsOneWidget);
+    // «Tu pedido #1001 ha sido confirmado.» with the number verbatim.
+    expect(
+      find.textContaining('Tu pedido #1001 ha sido confirmado.'),
+      findsOneWidget,
+    );
+    expect(
+      find.text('Te llegará un correo con los detalles de tu compra.'),
+      findsOneWidget,
+    );
+    expect(find.textContaining('ana@example.com'), findsNothing);
+    expect(
+      find.textContaining('contenido pendiente de aprobación'),
+      findsNothing,
+    );
+    expect(find.text('3 a 5 días hábiles'), findsNothing);
   });
 
   testWidgets('confirmation never lists payment methods or card fields',

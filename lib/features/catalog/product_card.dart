@@ -3,8 +3,8 @@
 /// This is the widget every package uses — Home's rails (A), the catalog
 /// surfaces here (B), the related grid on the product page (C) and Favourites
 /// (E). It is a thin, store-aware wrapper: the anatomy, proportions and
-/// typography live in [MonettaProductTile], so the full-catalog browser
-/// renders identically without this store-aware wrapper.
+/// typography live in [MonettaProductTile] so a [CatalogItem] renders
+/// identically without being forced into a [Product].
 ///
 /// ## Contract
 ///
@@ -27,6 +27,7 @@ import '../../main.dart';
 import '../../reco/events.dart';
 import '../product/product_screen.dart';
 import 'product_tile.dart';
+import 'browse_detail_layout.dart';
 import 'quick_add_button.dart';
 
 export 'product_tile.dart'
@@ -35,6 +36,7 @@ export 'product_tile.dart'
         ProductTileData,
         ProductTileDensity,
         ProductTileMetrics,
+        kTileFooterExtent,
         ProductTileVariant,
         ProductTileVariantMetrics,
         productGridColumns,
@@ -46,11 +48,9 @@ class ProductCard extends StatelessWidget {
     this.urgency,
     this.wide = false,
     this.density = ProductTileDensity.grid,
-    this.variant = ProductTileVariant.card,
     this.showWishlist = true,
     this.showQuickAdd = true,
-    this.showSaleBadge = true,
-    this.photoInset,
+    this.showViewProduct = false,
     this.onQuickView,
     this.onTap,
     super.key,
@@ -70,7 +70,6 @@ class ProductCard extends StatelessWidget {
   /// matches the card shipped before the redesign. [ProductTileDensity.compact]
   /// squares the image and keeps the name to one line, for narrow rails.
   final ProductTileDensity density;
-  final ProductTileVariant variant;
 
   /// Set false where a favourite would be meaningless or unsupported.
   final bool showWishlist;
@@ -79,11 +78,9 @@ class ProductCard extends StatelessWidget {
   /// off for its own recommendations.
   final bool showQuickAdd;
 
-  /// Whether a discount pill is drawn over the photograph.
-  final bool showSaleBadge;
-
-  /// Overrides the space around the photograph; zero fills the image frame.
-  final double? photoInset;
+  /// Draws the brown «VER PRODUCTO» pill under the price (collection grid).
+  /// The grid that sets it reserves [kTileFooterExtent] per row.
+  final bool showViewProduct;
 
   /// Reserved for package C. When given, a long press opens the quick view;
   /// no button is added and tapping still opens the full product page.
@@ -97,36 +94,36 @@ class ProductCard extends StatelessWidget {
     final store = StoreScope.of(context);
     final facets = store.facetsFor(product.id);
     final wishlisted = store.wishlist.contains(product.id);
-    final data = variant == ProductTileVariant.edgeToEdge
-        ? ProductTileData.forCatalogBrowse(product, facets: facets)
-        : ProductTileData.fromProduct(
-            product,
-            facets: facets,
-            allowDiscounts: false,
-          );
+    final data = ProductTileData.fromProduct(product, facets: facets);
     // Only a piece with something to buy gets the "+"; a sold-out one keeps
     // the eye (when the surface wires it).
     final canQuickAdd = showQuickAdd && product.isInStock;
 
-    return MonettaProductTile(
-      data: data,
-      density: density,
-      variant: variant,
-      showSaleBadge: showSaleBadge,
-      photoInset: photoInset,
-      eyebrow: urgency,
-      wishlisted: wishlisted,
-      onToggleWishlist:
-          showWishlist ? () => store.toggleWishlist(product.id) : null,
-      onQuickView: onQuickView,
-      quickAction: canQuickAdd
-          ? ProductQuickAddButton(
-              key: Key('quick-add-${product.id}'),
-              product: product,
-              productName: data.title,
-            )
-          : null,
-      onTap: onTap ?? () => openProduct(context, product),
+    return ProductResultAnchor(
+      productId: product.id,
+      child: MonettaProductTile(
+        data: data,
+        density: density,
+        eyebrow: urgency,
+        wishlisted: wishlisted,
+        onToggleWishlist:
+            showWishlist ? () => store.toggleWishlist(product.id) : null,
+        onQuickView: onQuickView,
+        quickAction: canQuickAdd
+            ? ProductQuickAddButton(
+                key: Key('quick-add-${product.id}'),
+                product: product,
+                productName: data.title,
+              )
+            : null,
+        footer: showViewProduct
+            ? TileViewProductButton(
+                key: Key('view-product-${product.id}'),
+                onPressed: onTap ?? () => openProduct(context, product),
+              )
+            : null,
+        onTap: onTap ?? () => openProduct(context, product),
+      ),
     );
   }
 }
@@ -136,10 +133,16 @@ void openProduct(
   Product product, {
   int initialVariantIndex = 0,
 }) {
+  final browse = BrowseDetailScope.maybeOf(context);
+  if (browse != null &&
+      context.findAncestorWidgetOfExactType<ProductScreen>() == null) {
+    browse.select(product, initialVariantIndex);
+    return;
+  }
   final store = StoreScope.of(context);
   store.record(EventType.productView, productId: product.id);
   Navigator.of(context).push(
-    monettaPageRoute(
+    monettaFadeRoute(
       StoreScope(
         notifier: store,
         child: ProductScreen(
@@ -151,55 +154,6 @@ void openProduct(
   );
 }
 
-/// Full-page product grids share the catalog's edge-to-edge photographs,
-/// column spacing and caption reserve, including landscape safe areas.
-class ProductCardSliverGrid extends StatelessWidget {
-  const ProductCardSliverGrid({
-    required this.products,
-    this.showWishlist = false,
-    this.onQuickView,
-    this.gridKey,
-    this.cardKeyPrefix = 'product-card',
-    super.key,
-  });
-
-  final List<Product> products;
-  final bool showWishlist;
-  final ValueChanged<Product>? onQuickView;
-  final Key? gridKey;
-  final String cardKeyPrefix;
-
-  @override
-  Widget build(BuildContext context) => SliverSafeArea(
-        top: false,
-        bottom: false,
-        sliver: SliverLayoutBuilder(
-          builder: (context, constraints) => SliverGrid(
-            key: gridKey,
-            gridDelegate: productGridDelegate(
-              context,
-              availableWidth: constraints.crossAxisExtent,
-              variant: ProductTileVariant.edgeToEdge,
-            ),
-            delegate: SliverChildBuilderDelegate(
-              (context, index) {
-                final product = products[index];
-                return ProductCard(
-                  key: ValueKey('$cardKeyPrefix-${product.id}'),
-                  product: product,
-                  variant: ProductTileVariant.edgeToEdge,
-                  showWishlist: showWishlist,
-                  onQuickView:
-                      onQuickView == null ? null : () => onQuickView!(product),
-                );
-              },
-              childCount: products.length,
-            ),
-          ),
-        ),
-      );
-}
-
 /// The shared grid used by search results, the product list, collections and
 /// the brand page. Kept here so every consumer gets the same columns, spacing
 /// and text-scale behaviour from one import.
@@ -208,8 +162,6 @@ class ProductCardGrid extends StatelessWidget {
     required this.products,
     this.padding = EdgeInsets.zero,
     this.density = ProductTileDensity.grid,
-    this.variant = ProductTileVariant.card,
-    this.showWishlist = true,
     this.shrinkWrap = false,
     this.physics,
     this.controller,
@@ -220,8 +172,6 @@ class ProductCardGrid extends StatelessWidget {
   final List<Product> products;
   final EdgeInsets padding;
   final ProductTileDensity density;
-  final ProductTileVariant variant;
-  final bool showWishlist;
   final bool shrinkWrap;
   final ScrollPhysics? physics;
   final ScrollController? controller;
@@ -242,7 +192,6 @@ class ProductCardGrid extends StatelessWidget {
             context,
             availableWidth: available,
             density: density,
-            variant: variant,
           ),
           itemCount: products.length,
           itemBuilder: (context, index) {
@@ -251,8 +200,6 @@ class ProductCardGrid extends StatelessWidget {
               key: ValueKey('product-card-${product.id}'),
               product: product,
               density: density,
-              variant: variant,
-              showWishlist: showWishlist,
               onQuickView:
                   onQuickView == null ? null : () => onQuickView!(product),
             );

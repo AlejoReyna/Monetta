@@ -1,4 +1,4 @@
-.PHONY: help setup gen gen-watch test test-core test-services test-all analyze format fix clean run-dev run-staging run-production validate-staging validate-production build-staging-android build-production-android refresh-catalog verify-catalog verify-catalog-remote doctor
+.PHONY: help setup gen gen-watch test test-core test-services test-all analyze format fix schema clean run-dev run-staging run-production validate-staging validate-production build-staging-android build-production-android refresh-catalog verify-catalog verify-catalog-remote doctor
 
 FLUTTER ?= flutter
 DART    ?= dart
@@ -17,6 +17,9 @@ gen: ## Run code generation (drift)
 
 gen-watch: ## Code generation in watch mode
 	$(DART) run build_runner watch --delete-conflicting-outputs
+
+schema: ## Download the Shopify Storefront API schema for ferry codegen
+	./scripts/fetch_schema.sh
 
 test: ## Run all tests
 	$(FLUTTER) test

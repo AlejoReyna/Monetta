@@ -10,7 +10,7 @@
 {%- liquid
   assign variant = item.variant
   capture brand
-    render 'monetta-brand', product: item.product
+    render 'monetta-facet', product: item.product, kind: 'brands'
   endcapture
   assign brand = brand | strip
   assign max_qty = 99

@@ -296,6 +296,9 @@ Future<void> addToBagAndShowMiniCart(
   await showMiniCart(context);
 }
 
+/// Opens the bag on a context that outlives a preview sheet.
+Future<void> openShoppingBag(BuildContext context) => openBag(context);
+
 /// "Comprar ahora": add + open the bag. The bag opens only after a real add.
 Future<void> buyNowOpenBag(
   BuildContext context,
@@ -331,10 +334,14 @@ class ProductOptionSelector extends StatelessWidget {
     required this.product,
     required this.selectedIndex,
     required this.onSelect,
+    this.colorHeading = 'COLOR',
     super.key,
   });
 
   final Product product;
+
+  /// Heading above the swatches when the options are colours.
+  final String colorHeading;
 
   /// The chosen option. Null means none is chosen yet (the quick view opened
   /// to make the shopper pick); an out-of-range index falls back to the first.
@@ -360,7 +367,7 @@ class ProductOptionSelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'COLOR',
+            colorHeading,
             style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
           ),
           const SizedBox(height: BoutiqueSpace.sm),

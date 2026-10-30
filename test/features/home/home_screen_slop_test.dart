@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
-import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
@@ -17,10 +16,7 @@ Future<CatalogStore> _loadedStore() async {
 Widget _app(CatalogStore store) {
   return MaterialApp(
     theme: buildLightTheme(),
-    home: StoreScope(
-      notifier: store,
-      child: const HomeScreen(),
-    ),
+    home: StoreScope(notifier: store, child: const HomeScreen()),
   );
 }
 
@@ -44,15 +40,20 @@ void main() {
 
     expect(find.text('Personaliza tu experiencia'), findsNothing);
     expect(find.text('¿Qué le gusta?'), findsNothing);
-    expect(find.byKey(const ValueKey('home-search-bar')), findsOneWidget);
+    expect(find.byKey(const ValueKey('home-search-bar')), findsNothing);
+    expect(
+      find.byKey(const ValueKey('home-appbar-search-button')),
+      findsOneWidget,
+    );
     expect(find.byKey(const ValueKey('home-compact-hero')), findsOneWidget);
-    expect(find.text('Novedades'), findsOneWidget);
+    expect(find.text('Nueva colección'), findsOneWidget);
     expect(find.text('Compra por estilo'), findsOneWidget);
     expect(find.byKey(const ValueKey('home-style-rail')), findsOneWidget);
   });
 
-  testWidgets('shopper home does not narrate the engine or the scrape',
-      (tester) async {
+  testWidgets('shopper home does not narrate the engine or the scrape', (
+    tester,
+  ) async {
     final store = await _loadedStore();
     addTearDown(store.dispose);
     await tester.pumpWidget(_app(store));
@@ -69,7 +70,7 @@ void main() {
     expect(find.text('ORDENAR'), findsNothing);
   });
 
-  testWidgets('search replaces the action in the half-height hero', (
+  testWidgets('the hero sits under the header and leaves room to shop', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -82,27 +83,22 @@ void main() {
     await tester.pumpWidget(_app(store));
     await tester.pump();
 
-    final hero = tester.getRect(
+    final search = tester.getRect(
+      find.byKey(const ValueKey('home-appbar-search-button')),
+    );
+    final banner = tester.getRect(
       find.byKey(const ValueKey('home-compact-hero')),
     );
-    final search = tester.getRect(
-      find.byKey(const ValueKey('home-search-bar')),
-    );
 
-    // The photograph starts right under the white app bar, rail to rail.
-    final topBarBottom = tester.getRect(find.byType(AppBar)).bottom;
-    expect(hero.top, topBarBottom);
-    expect(hero.left, 0);
-    expect(hero.right, 390);
-    expect(hero.height, 844 * .3);
-    expect(find.text('Estilo que te acompaña en cada momento'), findsNothing);
-    // The search pill floats over the hero's bottom, not above the banner.
-    expect(search.top, greaterThan(hero.top));
-    expect(search.bottom, lessThanOrEqualTo(hero.bottom));
-    expect(search.left, greaterThanOrEqualTo(hero.left));
-    expect(search.right, lessThanOrEqualTo(hero.right));
-    expect(find.text('Ver novedades'), findsNothing);
-    expect(tester.takeException(), isNull);
+    expect(search.bottom, lessThanOrEqualTo(banner.top));
+    expect(find.byKey(const ValueKey('home-search-bar')), findsNothing);
+    // The brief's 25–32% of the viewport, never the whole first fold.
+    expect(banner.height / 844, greaterThanOrEqualTo(0.25));
+    expect(banner.height / 844, lessThanOrEqualTo(0.32));
+    // Full bleed, as on figure 03 — the photograph runs rail to rail.
+    expect(banner.left, 0);
+    expect(banner.right, 390);
+    expect(find.text('desde México'), findsOneWidget);
   });
 
   testWidgets('modules sit on a 24–32px rhythm, not a 64–72px one', (
@@ -120,15 +116,15 @@ void main() {
     final banner = tester.getRect(
       find.byKey(const ValueKey('home-compact-hero')),
     );
-    final newest = tester.getRect(
-      find.byKey(const ValueKey('home-section-new-products')),
-    );
     final style = tester.getRect(
       find.byKey(const ValueKey('home-section-bag-types')),
     );
+    final brands = tester.getRect(
+      find.byKey(const ValueKey('home-section-brands')),
+    );
 
-    expect(newest.top - banner.bottom, inInclusiveRange(24, 40));
-    expect(style.top - newest.bottom, inInclusiveRange(24, 40));
+    expect(style.top - banner.bottom, inInclusiveRange(24, 40));
+    expect(brands.top - style.bottom, inInclusiveRange(24, 40));
   });
 
   testWidgets('new arrivals are a rail of the shared product card', (
@@ -158,7 +154,7 @@ void main() {
     );
   });
 
-  testWidgets('the header is a solid page-ground bar above the hero', (
+  testWidgets('the header is compact and opaque from the first frame', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -172,7 +168,7 @@ void main() {
 
     final appBar = tester.widget<AppBar>(find.byType(AppBar));
     expect(appBar.toolbarHeight, 60);
-    expect(appBar.backgroundColor, MonettaTokens.canvas);
+    expect(appBar.backgroundColor, isNot(Colors.transparent));
     expect(
       tester.widget<Scaffold>(find.byType(Scaffold)).extendBodyBehindAppBar,
       isFalse,
@@ -186,20 +182,9 @@ void main() {
       tester.widget<MonettaWordmark>(wordmark).height,
       kAppBarWordmarkHeight,
     );
-
-    // It stays on the page ground once the hero scrolls away.
-    await tester.drag(
-      find.byKey(const ValueKey('home-discovery-header')),
-      const Offset(0, -600),
-    );
-    await tester.pump();
-    expect(
-      tester.widget<AppBar>(find.byType(AppBar)).backgroundColor,
-      MonettaTokens.canvas,
-    );
   });
 
-  testWidgets('the hero search field hands over to the app-bar icon', (
+  testWidgets('the header search icon is visible and opens search', (
     tester,
   ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
@@ -211,69 +196,14 @@ void main() {
     await tester.pumpWidget(_app(store));
     await tester.pump();
 
-    expect(
-      tester
-          .widget<Opacity>(
-            find.byKey(const ValueKey('home-search-bar-transition')),
-          )
-          .opacity,
-      closeTo(1, .00001),
-    );
-    expect(
-      tester
-          .widget<Opacity>(
-            find.byKey(const ValueKey('home-appbar-search-transition')),
-          )
-          .opacity,
-      0,
-    );
-
-    await tester.drag(
-      find.byKey(const ValueKey('home-discovery-header')),
-      const Offset(0, -180),
-    );
-    await tester.pump();
-
-    expect(
-      tester
-          .widget<Opacity>(
-            find.byKey(const ValueKey('home-search-bar-transition')),
-          )
-          .opacity,
-      0,
-    );
-    expect(
-      tester
-          .widget<Opacity>(
-            find.byKey(const ValueKey('home-appbar-search-transition')),
-          )
-          .opacity,
-      closeTo(1, .00001),
-    );
-    expect(
-      find.byKey(const ValueKey('home-appbar-search-button')).hitTestable(),
-      findsOneWidget,
-    );
-  });
-
-  testWidgets('home search field opens the product search', (tester) async {
-    addTearDown(() => tester.view.resetPhysicalSize());
-    tester.view.physicalSize = const Size(390, 2000);
-    tester.view.devicePixelRatio = 1.0;
-
-    final store = await _loadedStore();
-    addTearDown(store.dispose);
-    await tester.pumpWidget(_app(store));
-    await tester.pump();
-
-    await tester.tap(find.byKey(const ValueKey('home-search-bar')));
+    await tester.tap(find.byKey(const ValueKey('home-appbar-search-button')));
     await tester.pumpAndSettle();
 
     expect(find.byKey(const ValueKey('search-query-field')), findsOneWidget);
     expect(find.byKey(const ValueKey('search-empty-state')), findsOneWidget);
   });
 
-  testWidgets('mayoreo editorial card opens the partner view', (tester) async {
+  testWidgets('mayoreo editorial banner opens wholesale', (tester) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 2000);
     tester.view.devicePixelRatio = 1.0;
@@ -284,19 +214,15 @@ void main() {
     await tester.pump();
 
     await tester.scrollUntilVisible(
-      find.byKey(const ValueKey('home-offers-rail')),
+      find.byKey(const ValueKey('home-wholesale-button')),
       800,
       scrollable: _homeScroll(),
     );
     await tester.pumpAndSettle();
-    await tester.drag(
-      find.byKey(const ValueKey('home-offers-rail')),
-      const Offset(-620, 0),
-    );
-    await tester.pumpAndSettle();
-    await tester.tap(find.text('Conocer mayoreo'));
+
+    await tester.tap(find.byKey(const ValueKey('home-wholesale-button')));
     await tester.pumpAndSettle();
 
-    expect(find.byKey(const ValueKey('partner-hub-scroll')), findsOneWidget);
+    expect(find.byKey(const ValueKey('wholesale-scroll')), findsOneWidget);
   });
 }

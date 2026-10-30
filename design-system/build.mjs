@@ -7,7 +7,7 @@
 //
 // Outputs
 //  * design-prototype/src/styles/tokens.css   the block between the @generated markers. The Shopify theme
-//    receives it through docs/web-redesign/shopify-staging/scripts/port-css.mjs, never by hand.
+//    receives it through tools/style-guideline-theme/port-css.mjs, never by hand.
 //  * lib/app/monetta_tokens.g.dart            constants only; theme.dart and boutique_tokens.dart adapt them.
 //
 // The contrast gate is part of the build: a manifest whose listed pairs miss their minimum does not generate.

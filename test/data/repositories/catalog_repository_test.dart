@@ -4,9 +4,11 @@
 library;
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:monetta_app/data/local/bag_store.dart';
 import 'package:monetta_app/data/local/catalog_cache_store.dart';
 import 'package:monetta_app/data/local/database.dart' hide SyncCursor;
 import 'package:monetta_app/data/local/sync_cursor_store.dart';
+import 'package:monetta_app/data/local/wishlist_store.dart';
 import 'package:monetta_app/data/normalize/rules.dart';
 import 'package:monetta_app/data/repositories/catalog_repository.dart';
 import 'package:monetta_app/data/shopify/catalog_sync.dart';
@@ -625,6 +627,156 @@ void main() {
       expect(products.single.id, 'gid://shopify/Product/302');
       expect((await cursorStore.load()).shopDomain, 'monetta.mx');
       expect((await cache.metadata())?.shopDomain, 'monetta.mx');
+    });
+
+    test('unstamped asset cache keeps the bag and records this shop', () async {
+      final cache = CatalogCacheStore(db);
+      final bags = BagStore(db);
+      await cache.saveMetadata(
+        CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.asset,
+          products: const [],
+          syncedAt: DateTime.utc(2026, 10, 7),
+          status: CatalogCacheStatus.fallback,
+        ),
+      );
+      await bags.upsert(productId: 'p', variantId: 'v', quantity: 2);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: SyncCursorStore(db),
+        rules: _emptyRules(),
+        shopDomain: 'monetta-staging.myshopify.com',
+        bagStore: bags,
+        wishlistStore: WishlistStore(db),
+      );
+
+      await repo.prepareConfiguredShop();
+
+      expect((await bags.all()).single.quantity, 2);
+      expect(
+        (await cache.metadata())?.shopDomain,
+        'monetta-staging.myshopify.com',
+      );
+      expect(
+        (await SyncCursorStore(db).load()).shopDomain,
+        'monetta-staging.myshopify.com',
+      );
+      await repo.prepareConfiguredShop();
+      expect((await bags.all()).single.quantity, 2);
+    });
+
+    test('a foreign shop still clears the bag', () async {
+      final cache = CatalogCacheStore(db);
+      final bags = BagStore(db);
+      await cache.saveMetadata(
+        CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.shopify,
+          products: const [],
+          syncedAt: DateTime.utc(2026, 10, 7),
+          status: CatalogCacheStatus.healthy,
+          shopDomain: 'old-shop.myshopify.com',
+        ),
+      );
+      await bags.upsert(productId: 'p', variantId: 'v', quantity: 2);
+      final repo = CatalogRepository(
+        cache: cache,
+        cursorStore: SyncCursorStore(db),
+        rules: _emptyRules(),
+        shopDomain: 'monetta-staging.myshopify.com',
+        bagStore: bags,
+      );
+
+      await repo.prepareConfiguredShop();
+
+      expect(await bags.all(), isEmpty);
+      expect(
+        (await cache.metadata())?.shopDomain,
+        'monetta-staging.myshopify.com',
+      );
+    });
+
+    test('T1-INV-01 a named foreign shop clears every local shopper scope',
+        () async {
+      final cache = CatalogCacheStore(db);
+      final bags = BagStore(db);
+      final wishlist = WishlistStore(db);
+      final product = Product(
+        id: 'gid://shopify/Product/301',
+        handle: 'foreign',
+        title: 'Foreign product',
+        vendor: 'Monetta',
+        productType: 'Bolsa',
+        tags: const [],
+        variants: const [],
+        images: const [],
+        createdAt: DateTime.utc(2026),
+        updatedAt: DateTime.utc(2026),
+      );
+      await cache.replaceProducts(
+        [product],
+        metadata: CatalogCacheMetadata.forProducts(
+          source: CatalogCacheSource.shopify,
+          products: [product],
+          syncedAt: DateTime.utc(2026, 10, 7),
+          status: CatalogCacheStatus.healthy,
+          shopDomain: 'old-shop.myshopify.com',
+        ),
+      );
+      await SyncCursorStore(db).save(
+        const SyncCursor(shopDomain: 'old-shop.myshopify.com'),
+      );
+      await db.into(db.accounts).insert(
+            AccountsCompanion.insert(
+              localAccountId: 'foreign-account',
+              createdAt: DateTime.utc(2026),
+              lastSeenAt: DateTime.utc(2026),
+            ),
+          );
+      await db.into(db.sessions).insert(
+            SessionsCompanion.insert(
+              accountId: 'foreign-account',
+              secureStorageKeyRef: 'session/foreign-account',
+              accessTokenExpiresAt: DateTime.utc(2026, 11),
+              createdAt: DateTime.utc(2026),
+            ),
+          );
+      for (final accountId in [null, 'foreign-account']) {
+        await bags.upsert(
+          productId: product.id,
+          variantId: 'gid://shopify/ProductVariant/301',
+          quantity: 2,
+          accountId: accountId,
+        );
+        await wishlist.add(product.id, accountId: accountId);
+      }
+      expect(await cache.allProducts(), hasLength(1));
+      expect(await db.select(db.bagLines).get(), hasLength(2));
+      expect(await db.select(db.wishlistItems).get(), hasLength(2));
+      expect(await db.select(db.sessions).get(), hasLength(1));
+      expect(await db.select(db.accounts).get(), hasLength(1));
+
+      await CatalogRepository(
+        cache: cache,
+        cursorStore: SyncCursorStore(db),
+        rules: _emptyRules(),
+        shopDomain: 'monetta-staging.myshopify.com',
+        bagStore: bags,
+        wishlistStore: wishlist,
+      ).prepareConfiguredShop();
+
+      expect(await cache.allProducts(), isEmpty);
+      expect(await db.select(db.bagLines).get(), isEmpty);
+      expect(await db.select(db.wishlistItems).get(), isEmpty);
+      expect(await db.select(db.sessions).get(), isEmpty);
+      expect(await db.select(db.accounts).get(), isEmpty);
+      expect(
+        (await SyncCursorStore(db).load()).shopDomain,
+        'monetta-staging.myshopify.com',
+      );
+      expect(
+        (await cache.metadata())?.shopDomain,
+        'monetta-staging.myshopify.com',
+      );
     });
   });
 }

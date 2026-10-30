@@ -1,69 +1,67 @@
-/// Editorial navigation drawer for shopper-facing shortcuts and services.
-///
-/// X-style account header: when the shopper is signed in the drawer opens
-/// with their avatar, name and email; otherwise it offers an
-/// "Inicia sesión" entry. Links are plain icon rows with no separators, and
-/// the app settings live behind the "Ajustes" gear row. Type is the home
-/// hero's serif at its regular weight, with light-stroke icons.
+/// Shopper menu from the client guide: identity, shortcuts and sharing.
 library;
 
 import 'package:flutter/material.dart';
-import 'package:material_symbols_icons/symbols.dart';
 
+import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
+import '../../domain/home_content.dart';
 import '../boutique/boutique_tokens.dart';
-
-/// Stroke weight of the drawer's Material Symbols (100–700; 400 is regular).
-const double _kIconWeight = 300;
-
-TextStyle _menuSerif(double size, Color color) => boutiqueDisplay(
-      size,
-      color: color,
-      height: 1.2,
-    );
+import '../boutique/client_guide_components.dart';
+import '../boutique/guide_art.dart';
 
 class MonettaSideMenu extends StatelessWidget {
   const MonettaSideMenu({
+    required this.onSearch,
     required this.onCatalog,
+    this.onCategories,
     required this.onBags,
     required this.onWallets,
     required this.onWatches,
     required this.onPerfumes,
     required this.onBeauty,
+    required this.onToggleTheme,
     required this.onAbout,
     required this.onPartner,
     required this.onSupport,
-    this.isSignedIn = false,
-    this.accountName,
-    this.accountEmail,
-    this.onAccount,
-    this.onSettings,
+    this.identityName,
+    this.identityDetail,
+    this.onNotifications,
+    this.onShare,
+    this.onWhatsApp,
+    this.socialLinks = const <HomeSocialLink>[],
+    this.onOpenSocial,
     super.key,
   });
 
+  // The guide's menu no longer lists search, Categorías, Maquillaje y
+  // skincare, Mayoreo, Contacto or Nuestra historia. Those callbacks stay in
+  // the constructor so call sites keep compiling; Mayoreo and Contacto are
+  // reached from Cuenta.
+  final VoidCallback onSearch;
   final VoidCallback onCatalog;
+  final VoidCallback? onCategories;
   final VoidCallback onBags;
   final VoidCallback onWallets;
   final VoidCallback onWatches;
   final VoidCallback onPerfumes;
   final VoidCallback onBeauty;
 
+  /// Switches immediately between the light and dark storefront themes.
+  ///
+  /// This deliberately does not use [_select]: changing appearance should not
+  /// dismiss the drawer or route the shopper to a separate selection view.
+  final VoidCallback onToggleTheme;
   final VoidCallback onAbout;
   final VoidCallback onPartner;
   final VoidCallback onSupport;
-
-  /// Whether a shopper session is active. When true the header shows the
-  /// account's data; otherwise it shows an "Inicia sesión" entry.
-  final bool isSignedIn;
-  final String? accountName;
-  final String? accountEmail;
-
-  /// Opens the account flow (sign-in when signed out, account hub when
-  /// signed in). When null the account header is omitted.
-  final VoidCallback? onAccount;
-
-  /// Opens the app settings ("Ajustes"). When null the row is omitted.
-  final VoidCallback? onSettings;
+  final String? identityName;
+  final String? identityDetail;
+  final VoidCallback? onNotifications;
+  final VoidCallback? onShare;
+  final VoidCallback? onWhatsApp;
+  final List<HomeSocialLink> socialLinks;
+  final void Function(Uri uri)? onOpenSocial;
 
   void _select(BuildContext context, VoidCallback callback) {
     Navigator.of(context).pop();
@@ -73,14 +71,23 @@ class MonettaSideMenu extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final width = MediaQuery.sizeOf(context).width.clamp(300.0, 366.0);
+    final palette = context.boutique;
+    final name = identityName?.trim();
+    final detail = identityDetail?.trim();
+    final shownName = (name == null || name.isEmpty) ? 'Invitado' : name;
+    final initial = shownName.substring(0, 1).toUpperCase();
+    final gutter = MonettaTokens.space[3];
+    final dark = Theme.of(context).brightness == Brightness.dark;
 
     return Drawer(
       key: const Key('monetta-side-menu'),
       width: width,
       elevation: 0,
-      backgroundColor: context.monettaColors.surfaceRaised,
+      backgroundColor: palette.canvas,
       shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.horizontal(right: Radius.circular(30)),
+        borderRadius: BorderRadius.horizontal(
+          right: Radius.circular(MonettaTokens.radiusSheet),
+        ),
       ),
       child: SafeArea(
         right: false,
@@ -88,108 +95,168 @@ class MonettaSideMenu extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(20, 22, 14, 0),
+              padding: EdgeInsets.fromLTRB(
+                gutter,
+                gutter,
+                MonettaTokens.space[1],
+                0,
+              ),
               child: Row(
                 children: [
-                  // Keep the mark anchored to the drawer's editorial grid,
-                  // rather than centring it inside the remaining header space.
-                  const MonettaWordmark(height: 21),
+                  const MonettaWordmark(height: MonettaTokens.logoHeight),
                   const Spacer(),
+                  // Appearance stays reachable: this menu is the only place
+                  // that switches the light and dark storefront themes.
                   IconButton(
-                    key: const Key('close-side-menu'),
-                    tooltip: 'Cerrar menú',
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(
-                      Symbols.close,
-                      size: 22,
-                      weight: _kIconWeight,
+                    key: const Key('side-menu-appearance'),
+                    tooltip:
+                        dark ? 'Activar modo claro' : 'Activar modo oscuro',
+                    onPressed: onToggleTheme,
+                    icon: Icon(
+                      dark
+                          ? Icons.dark_mode_outlined
+                          : Icons.light_mode_outlined,
+                      size: 21,
+                      color: palette.goldText,
+                    ),
+                  ),
+                  if (onNotifications != null)
+                    IconButton(
+                      key: const Key('side-menu-notifications'),
+                      tooltip: 'Notificaciones',
+                      onPressed: () => _select(context, onNotifications!),
+                      icon: Icon(
+                        Icons.notifications_none_rounded,
+                        color: palette.goldText,
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            Padding(
+              key: const Key('side-menu-identity'),
+              padding: EdgeInsets.fromLTRB(gutter, gutter, gutter, gutter),
+              child: Row(
+                children: [
+                  CircleAvatar(
+                    radius: 28,
+                    backgroundColor: palette.action,
+                    foregroundColor: palette.onAction,
+                    child: Text(
+                      initial,
+                      style: clientGuideStyle(
+                        context,
+                        MonettaTokens.screenTitle,
+                        color: palette.onAction,
+                      ),
+                    ),
+                  ),
+                  SizedBox(width: MonettaTokens.space[2]),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          shownName,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: clientGuideStyle(
+                            context,
+                            MonettaTokens.accountRow,
+                          ),
+                        ),
+                        if (detail != null && detail.isNotEmpty)
+                          Text(
+                            detail,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: clientGuideStyle(
+                              context,
+                              MonettaTokens.navLabel,
+                              color: palette.inkMuted,
+                            ),
+                          ),
+                      ],
                     ),
                   ),
                 ],
               ),
             ),
-            if (onAccount != null)
-              _AccountHeader(
-                isSignedIn: isSignedIn,
-                accountName: accountName,
-                accountEmail: accountEmail,
-                onTap: () {
-                  final callback = onAccount;
-                  if (callback != null) _select(context, callback);
-                },
-              ),
-            const SizedBox(height: 14),
             Expanded(
               child: ListView(
-                padding: const EdgeInsets.fromLTRB(18, 0, 18, 12),
+                padding: EdgeInsets.fromLTRB(
+                  gutter,
+                  0,
+                  gutter,
+                  MonettaTokens.space[4],
+                ),
                 children: [
+                  Divider(height: 1, thickness: .5, color: palette.hairline),
                   _MenuLink(
                     key: const Key('side-menu-bags'),
-                    icon: Symbols.shopping_bag,
+                    icon: Icons.shopping_bag_outlined,
                     label: 'Bolsas',
                     onTap: () => _select(context, onBags),
                   ),
                   _MenuLink(
-                    icon: Symbols.account_balance_wallet,
+                    key: const Key('side-menu-wallets'),
+                    icon: Icons.account_balance_wallet_outlined,
                     label: 'Carteras',
                     onTap: () => _select(context, onWallets),
                   ),
                   _MenuLink(
-                    icon: Symbols.watch,
+                    key: const Key('side-menu-watches'),
+                    icon: Icons.watch_outlined,
                     label: 'Relojes',
                     onTap: () => _select(context, onWatches),
                   ),
                   _MenuLink(
-                    icon: Symbols.spa,
+                    key: const Key('side-menu-perfumes'),
+                    icon: Icons.spa_outlined,
                     label: 'Perfumes',
                     onTap: () => _select(context, onPerfumes),
                   ),
                   _MenuLink(
-                    icon: Symbols.face,
-                    label: 'Maquillaje y skincare',
-                    onTap: () => _select(context, onBeauty),
-                  ),
-                  _MenuLink(
-                    icon: Symbols.storefront,
+                    key: const Key('side-menu-brands'),
+                    icon: Icons.storefront_outlined,
                     label: 'Todas las marcas',
                     onTap: () => _select(context, onCatalog),
                   ),
-                  _MenuLink(
-                    key: const Key('side-menu-partner'),
-                    icon: Symbols.handshake,
-                    label: 'Vende con Monetta',
-                    onTap: () => _select(context, onPartner),
+                  SizedBox(height: MonettaTokens.space[3]),
+                  _ShareCard(
+                    onShare: onShare == null
+                        ? null
+                        : () => _select(context, onShare!),
                   ),
-                ],
-              ),
-            ),
-            // Service links sit as one block at the foot of the drawer.
-            Padding(
-              key: const Key('side-menu-footer'),
-              padding: const EdgeInsets.fromLTRB(18, 0, 18, 10),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _MenuLink(
-                    icon: Symbols.chat_bubble,
-                    label: 'Contacto',
-                    onTap: () => _select(context, onSupport),
-                  ),
-                  _MenuLink(
-                    icon: Symbols.auto_stories,
-                    label: 'Nuestra historia',
-                    onTap: () => _select(context, onAbout),
-                  ),
-                  if (onSettings != null)
+                  if (onWhatsApp != null)
                     _MenuLink(
-                      key: const Key('side-menu-settings'),
-                      icon: Symbols.settings,
-                      label: 'Ajustes',
-                      onTap: () {
-                        final callback = onSettings;
-                        if (callback != null) _select(context, callback);
-                      },
+                      key: const Key('side-menu-whatsapp'),
+                      assetIcon: kGuideIconContactWhatsApp,
+                      label: 'Contacto por WhatsApp',
+                      onTap: () => _select(context, onWhatsApp!),
                     ),
+                  if (_orderedSocial().isNotEmpty) ...[
+                    SizedBox(height: MonettaTokens.space[2]),
+                    Row(
+                      key: const Key('side-menu-social'),
+                      children: [
+                        for (final link in _orderedSocial())
+                          Expanded(
+                            child: IconButton(
+                              key: Key('side-menu-social-${link.id}'),
+                              tooltip: link.label,
+                              onPressed: onOpenSocial == null
+                                  ? null
+                                  : () => _select(
+                                        context,
+                                        () => onOpenSocial!(link.uri!),
+                                      ),
+                              icon: _socialIcon(link.id, palette.goldText),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ],
                 ],
               ),
             ),
@@ -198,96 +265,76 @@ class MonettaSideMenu extends StatelessWidget {
       ),
     );
   }
+
+  /// The guide's order (TikTok, Instagram, Facebook), then any other network
+  /// the owner configured. Links without a URL are not shown.
+  List<HomeSocialLink> _orderedSocial() {
+    const order = <String>['tiktok', 'instagram', 'facebook'];
+    int rank(HomeSocialLink link) {
+      final index = order.indexOf(link.id);
+      return index < 0 ? order.length : index;
+    }
+
+    final links = <HomeSocialLink>[
+      for (final link in socialLinks)
+        if (link.uri != null) link,
+    ];
+    final position = <HomeSocialLink, int>{
+      for (var i = 0; i < links.length; i++) links[i]: i,
+    };
+    links.sort((a, b) {
+      final byRank = rank(a).compareTo(rank(b));
+      return byRank != 0 ? byRank : position[a]!.compareTo(position[b]!);
+    });
+    return links;
+  }
 }
 
-/// Account block at the top of the drawer: the shopper's data when signed
-/// in, an "Inicia sesión" entry otherwise.
-class _AccountHeader extends StatelessWidget {
-  const _AccountHeader({
-    required this.isSignedIn,
-    required this.accountName,
-    required this.accountEmail,
-    required this.onTap,
-  });
+Widget _socialIcon(String id, Color fallbackColor) {
+  final asset = switch (id) {
+    'instagram' => kGuideIconInstagram,
+    'facebook' => kGuideIconFacebook,
+    'tiktok' => kGuideIconTikTok,
+    _ => null,
+  };
+  if (asset == null) {
+    return Icon(Icons.open_in_new, color: fallbackColor);
+  }
+  // The three networks are drawn with different stroke weights; tinting them
+  // with one solid colour makes them read with the same intensity.
+  return Image.asset(
+    asset,
+    width: 30,
+    height: 30,
+    fit: BoxFit.contain,
+    color: fallbackColor,
+    colorBlendMode: BlendMode.srcIn,
+    excludeFromSemantics: true,
+    errorBuilder: (_, __, ___) => Icon(Icons.open_in_new, color: fallbackColor),
+  );
+}
 
-  final bool isSignedIn;
-  final String? accountName;
-  final String? accountEmail;
-  final VoidCallback onTap;
+class _ShareCard extends StatelessWidget {
+  const _ShareCard({required this.onShare});
+
+  final VoidCallback? onShare;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.monettaColors;
-    if (!isSignedIn) {
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-        child: FilledButton.tonalIcon(
-          key: const Key('side-menu-sign-in'),
-          onPressed: onTap,
-          icon: const Icon(Symbols.login, size: 20, weight: _kIconWeight),
-          label: const Text('Inicia sesión'),
-          style: FilledButton.styleFrom(
-            minimumSize: const Size(double.infinity, 48),
-            textStyle: boutiqueDisplay(16, height: 1.2),
-          ),
-        ),
-      );
-    }
-    final name = accountName?.trim();
-    final email = accountEmail?.trim();
-    final displayName = (name != null && name.isNotEmpty)
-        ? name
-        : (email != null && email.isNotEmpty)
-            ? email.split('@').first
-            : 'Mi cuenta';
-    final initial = displayName.trim().isEmpty
-        ? '?'
-        : displayName.trim().substring(0, 1).toUpperCase();
     return Padding(
-      padding: const EdgeInsets.fromLTRB(18, 18, 18, 0),
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          key: const Key('side-menu-account'),
-          onTap: onTap,
-          borderRadius: BorderRadius.circular(14),
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 6),
-            child: Row(
-              children: [
-                CircleAvatar(
-                  radius: 22,
-                  backgroundColor: colors.contentPrimary,
-                  foregroundColor: colors.surfaceRaised,
-                  child: Text(
-                    initial,
-                    style: boutiqueDisplay(18, height: 1.2),
-                  ),
-                ),
-                const SizedBox(width: 13),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        displayName,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: _menuSerif(17, colors.contentPrimary),
-                      ),
-                      if (email != null && email.isNotEmpty) ...[
-                        const SizedBox(height: 2),
-                        Text(
-                          email,
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: sans(size: 12, color: colors.contentMuted),
-                        ),
-                      ],
-                    ],
-                  ),
-                ),
-              ],
+      padding: EdgeInsets.only(bottom: MonettaTokens.space[3]),
+      child: KeyedSubtree(
+        key: const Key('side-menu-share'),
+        // The callback opens the system share sheet directly with the same
+        // action as before; only the button is the guide's small pill.
+        child: GuideShareEarnBanner(
+          asset: kGuideShareCatalog,
+          action: Align(
+            alignment: Alignment.centerLeft,
+            child: GuidePillButton(
+              key: const Key('side-menu-share-button'),
+              label: 'VER CATÁLOGO',
+              onPressed: onShare,
             ),
           ),
         ),
@@ -296,45 +343,72 @@ class _AccountHeader extends StatelessWidget {
   }
 }
 
-/// A plain icon row: no separators, no chevrons.
 class _MenuLink extends StatelessWidget {
   const _MenuLink({
-    required this.icon,
     required this.label,
     required this.onTap,
+    this.icon,
+    this.assetIcon,
     super.key,
   });
 
-  final IconData icon;
   final String label;
   final VoidCallback onTap;
+  final IconData? icon;
+
+  /// Gold line icon drawn for the guide; wins over [icon].
+  final String? assetIcon;
 
   @override
   Widget build(BuildContext context) {
-    final colors = context.monettaColors;
-    return Material(
-      color: Colors.transparent,
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(14),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 13),
-          child: Row(
-            children: [
-              Icon(
-                icon,
-                size: 22,
-                weight: _kIconWeight,
-                color: colors.contentPrimary,
+    final palette = context.boutique;
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: palette.hairline, width: .5)),
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(MonettaTokens.radiusCard),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              minHeight: MonettaTokens.tapTarget,
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: MonettaTokens.space[1],
+                vertical: MonettaTokens.space[2],
               ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Text(
-                  label,
-                  style: _menuSerif(17, colors.contentPrimary),
-                ),
+              child: Row(
+                children: [
+                  SizedBox(
+                    width: 28,
+                    child: assetIcon != null
+                        ? Image.asset(
+                            assetIcon!,
+                            width: 28,
+                            height: 28,
+                            fit: BoxFit.contain,
+                            excludeFromSemantics: true,
+                            errorBuilder: (_, __, ___) => const SizedBox(),
+                          )
+                        : Icon(icon, size: 24, color: palette.goldText),
+                  ),
+                  SizedBox(width: MonettaTokens.space[3]),
+                  Expanded(
+                    child: Text(
+                      label,
+                      style: clientGuideStyle(
+                        context,
+                        MonettaTokens.accountRow,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.chevron_right, size: 20, color: palette.goldText),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),

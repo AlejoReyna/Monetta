@@ -21,11 +21,11 @@
         assign doc_title = 'Buscar'
       endif
     when 'collection'
-      capture collection_title
-        render 'monetta-collection-title', collection: collection
-      endcapture
-      if collection_title != collection.title
-        assign doc_title = collection_title
+      if collection.handle == 'all'
+        assign seeded_title = collection.title | strip | downcase
+        if seeded_title == 'products' or seeded_title == 'all products' or seeded_title == 'all' or seeded_title == 'productos' or seeded_title == 'todos los productos'
+          assign doc_title = 'Catálogo'
+        endif
       endif
     when 'blog'
       assign blog_key = blog.title | strip | downcase
@@ -42,10 +42,10 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#fbf8f2">
+<link rel="canonical" href="{{ canonical_url }}">
 {%- if template.suffix == 'account' or template.suffix == 'orders' -%}
   <meta name="robots" content="noindex, nofollow">
 {%- endif -%}
-<link rel="canonical" href="{{ canonical_url }}">
 <link rel="icon" type="image/png" sizes="32x32" href="{{ 'monetta-favicon-32.png' | asset_url }}">
 <link rel="icon" type="image/png" sizes="96x96" href="{{ 'monetta-favicon-96.png' | asset_url }}">
 
@@ -75,8 +75,11 @@
 {{ 'monetta-base.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-components.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-pages.css' | asset_url | stylesheet_tag }}
+{{ 'monetta-home-22oct.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-theme.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-app-alignment.css' | asset_url | stylesheet_tag }}
+{{ 'monetta-guia.css' | asset_url | stylesheet_tag }}
+{{ 'monetta-predictive-search.css' | asset_url | stylesheet_tag }}
 
 <script>
   document.documentElement.classList.add('js');
@@ -99,6 +102,9 @@
 <script src="{{ 'monetta-core.js' | asset_url }}" defer></script>
 <script src="{{ 'monetta-cart.js' | asset_url }}" defer></script>
 <script src="{{ 'monetta-merchandising.js' | asset_url }}" defer></script>
+<script src="{{ 'monetta-search-history.js' | asset_url }}" defer></script>
+<script src="{{ 'monetta-guia.js' | asset_url }}" defer></script>
+<script src="{{ 'monetta-predictive-search.js' | asset_url }}" defer></script>
 {%- if t == 'collection' or t == 'search' %}
   <script src="{{ 'monetta-listing.js' | asset_url }}" defer></script>
 {%- endif %}

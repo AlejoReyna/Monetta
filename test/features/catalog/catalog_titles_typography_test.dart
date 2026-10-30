@@ -1,25 +1,42 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
+import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
+import 'package:monetta_app/features/boutique/guide_art.dart';
+import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
 import 'package:monetta_app/features/home/home_account_invitation.dart';
 import 'package:monetta_app/main.dart';
 
-import '../../support/catalog_browse_fixtures.dart';
-
-// Product-related titles share the family and fallback chain of the card
-// names (`boutiqueText`): Inter + the platform sans (FICHA-T1, BRIEF 2.3).
+// The client guide sets screen and banner titles in the editorial serif.
+// Filter panels, compact bar titles and product card labels retain the sans.
 // Editorial surfaces (Home, welcome, account...) must stay serif.
 //
 // These tests read the style handed to each `Text`, so the Ahem test font is
 // irrelevant to them.
 
-BrowseEntry _item(int i) => browseEntry(i, price: 1000.0 + i);
+CatalogItem _item(int i) => CatalogItem(
+      sourceScopedId: 'monetta:$i',
+      source: CatalogSourceType.monettaShopify,
+      merchant: 'Monetta',
+      title: 'Monetta Item $i',
+      brand: 'Guess',
+      category: null,
+      imageUrl: null,
+      price: Money(amount: 1000.0 + i, currency: Currency.mxn),
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://monetta.mx/products/item-$i',
+      marketRestriction: MarketRestriction.mexico,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.monettaCheckout,
+      shopifyProductId: '$i',
+    );
 
 void _view(WidgetTester tester, {double height = 1600}) {
   addTearDown(tester.view.reset);
@@ -43,8 +60,8 @@ TextStyle _styleOf(WidgetTester tester, Finder finder) {
 }
 
 /// The style the first card of the screen gives to its product name.
-TextStyle _cardNameStyle(WidgetTester tester, BrowseEntry item) {
-  final name = item.tileData.title;
+TextStyle _cardNameStyle(WidgetTester tester, CatalogItem item) {
+  final name = ProductTileData.fromCatalogItem(item).title;
   return _styleOf(
     tester,
     find.descendant(
@@ -89,25 +106,26 @@ Future<void> _openCatalogPanel(WidgetTester tester) async {
 }
 
 void main() {
-  group('TYPE-01 page titles use the editorial face of the bag', () {
-    testWidgets(
-        'TYPE-01 Productos uses the bag title face beside the back arrow',
-        (tester) async {
+  group('TYPE-01 catalog titles follow the client guide', () {
+    testWidgets('TYPE-01 "Productos" is serif w400, 26', (tester) async {
       _view(tester);
       final items = [_item(1), _item(2), _item(3)];
-      await tester.pumpWidget(_app(browseScreen(items)));
+      await tester.pumpWidget(_app(CatalogBrowseScreen(items: items)));
       await tester.pump();
 
       final title = _styleOf(tester, find.text('Productos'));
-      expect(title.fontFamily, kBoutiqueSerifFamily);
-      expect(title.fontWeight, FontWeight.w400);
-      expect(title.fontSize, 28);
+      _expectSerif(title, reason: 'Productos');
+      expect(title.fontSize, MonettaTokens.screenTitle.compact);
+      expect(
+        _cardNameStyle(tester, items.first).fontFamily,
+        kBoutiqueSansFamily,
+      );
     });
 
     testWidgets('TYPE-01b "Sin resultados" of the empty catalog is serif w400',
         (tester) async {
       _view(tester);
-      await tester.pumpWidget(_app(browseScreen(const [])));
+      await tester.pumpWidget(_app(const CatalogBrowseScreen(items: [])));
       await tester.pump();
 
       _expectSerif(
@@ -138,7 +156,7 @@ void main() {
         (tester) async {
       _view(tester);
       final items = [_item(1), _item(2), _item(3)];
-      await tester.pumpWidget(_app(browseScreen(items)));
+      await tester.pumpWidget(_app(CatalogBrowseScreen(items: items)));
       await tester.pump();
       await _openCatalogPanel(tester);
 
@@ -174,41 +192,151 @@ void main() {
     });
   });
 
-  group('TYPE-01c collections share the bag heading', () {
-    for (final image in <String?>[null, 'assets/images/campaign_olive.jpg']) {
-      testWidgets('collection heading remains beside back with artwork $image',
-          (tester) async {
-        _view(tester, height: 844);
-        final store = await _loadedStore();
-        addTearDown(store.dispose);
-        await tester.pumpWidget(
-          _app(
-            StoreScope(
-              notifier: store,
-              child: CollectionScreen(
-                title: 'Bolsas',
-                filter: const CollectionFilter(category: 'bolsa'),
-                heroImageAsset: image,
-              ),
+  group('TYPE-01c collection titles follow the client guide', () {
+    Future<CatalogStore> pump(
+      WidgetTester tester, {
+      String? heroImageAsset,
+    }) async {
+      _view(tester, height: 844);
+      final store = await _loadedStore();
+      addTearDown(store.dispose);
+      await tester.pumpWidget(
+        _app(
+          StoreScope(
+            notifier: store,
+            child: CollectionScreen(
+              title: 'Bolsas',
+              filter: const CollectionFilter(category: 'bolsa'),
+              heroImageAsset: heroImageAsset,
             ),
           ),
-        );
-        await tester.pump();
-        final title = find.byKey(const ValueKey('monetta-page-title'));
-        final back = find.byKey(const ValueKey('monetta-page-back'));
-        final style = _styleOf(tester, title);
-        expect(style.fontFamily, kBoutiqueSerifFamily);
-        expect(style.fontSize, 28);
-        expect(
-          tester.getRect(title).left,
-          closeTo(tester.getRect(back).right, .01),
-        );
-        final before = tester.getRect(title);
-        await tester.drag(find.byType(CustomScrollView), const Offset(0, -400));
-        await tester.pumpAndSettle();
-        expect(tester.getRect(title), before);
-      });
+        ),
+      );
+      await tester.pump();
+      return store;
     }
+
+    // «Bolsas» is also the label of a category pill under the banner; the
+    // title is the one inside the banner.
+    Iterable<TextStyle> stylesOfTitle(WidgetTester tester) => tester
+        .widgetList<Text>(
+          find.descendant(
+            of: find.byType(CatalogEditorialBanner),
+            matching: find.text('Bolsas'),
+          ),
+        )
+        .map((text) => text.style!)
+        .toList();
+
+    testWidgets('TYPE-01c typographic banner title is serif w400, 26',
+        (tester) async {
+      // A bag collection now resolves to a guide photograph; the studio still
+      // is passed explicitly to keep exercising the plain banner title.
+      await pump(tester, heroImageAsset: kGuideStudioBanner);
+
+      final title = _styleOf(
+        tester,
+        find.descendant(
+          of: find.byType(CatalogEditorialBanner),
+          matching: find.text('Bolsas'),
+        ),
+      );
+      _expectSerif(title, reason: 'banner title');
+      expect(title.fontSize, MonettaTokens.screenTitle.compact);
+    });
+
+    testWidgets('TYPE-01c photo banner title is serif w400, 26',
+        (tester) async {
+      await pump(tester, heroImageAsset: 'assets/images/campaign_olive.jpg');
+
+      final title = _styleOf(
+        tester,
+        find.descendant(
+          of: find.byType(CatalogEditorialBanner),
+          matching: find.text('Bolsas'),
+        ),
+      );
+      _expectSerif(title, reason: 'photo banner title');
+      expect(title.fontSize, MonettaTokens.screenTitle.compact);
+    });
+
+    testWidgets(
+        'TYPE-01c the bar keeps the wordmark and the banner title stays serif',
+        (tester) async {
+      await pump(tester, heroImageAsset: kGuideStudioBanner);
+      expect(
+        find.descendant(
+          of: find.byType(SliverAppBar),
+          matching: find.byType(MonettaWordmark),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.descendant(
+          of: find.byType(SliverAppBar),
+          matching: find.text('Bolsas'),
+        ),
+        findsNothing,
+      );
+      final title = _styleOf(
+        tester,
+        find.descendant(
+          of: find.byType(CatalogEditorialBanner),
+          matching: find.text('Bolsas'),
+        ),
+      );
+      _expectSerif(title, reason: 'banner title');
+      expect(title.fontSize, MonettaTokens.screenTitle.compact);
+      expect(stylesOfTitle(tester), hasLength(1));
+
+      await tester.drag(
+        find.byType(CustomScrollView),
+        const Offset(0, -400),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(SliverAppBar),
+          matching: find.text('Bolsas'),
+        ),
+        findsNothing,
+        reason: 'the guide bar keeps the wordmark after the banner scrolls',
+      );
+    });
+
+    testWidgets('TYPE-01c a photo banner keeps its serif title out of the bar',
+        (tester) async {
+      await pump(tester, heroImageAsset: 'assets/images/campaign_olive.jpg');
+
+      final titles = stylesOfTitle(tester).toList();
+      expect(titles, hasLength(1));
+      _expectSerif(titles.single, reason: 'photo banner');
+      expect(titles.single.fontSize, MonettaTokens.screenTitle.compact);
+      expect(
+        find.descendant(
+          of: find.byType(SliverAppBar),
+          matching: find.text('Bolsas'),
+        ),
+        findsNothing,
+        reason: 'the collection name stays in the photograph',
+      );
+
+      await tester.drag(
+        find.byType(CustomScrollView),
+        const Offset(0, -400),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        find.descendant(
+          of: find.byType(SliverAppBar),
+          matching: find.text('Bolsas'),
+        ),
+        findsNothing,
+        reason: 'scrolling does not move the name into the wordmark bar',
+      );
+    });
   });
 
   group('TYPE-02 editorial surfaces stay serif (vigente)', () {
@@ -237,7 +365,7 @@ void main() {
       );
       await tester.pump();
 
-      final style = _styleOf(tester, find.text('OBTEN TU PRIMER ENVÍO GRATIS'));
+      final style = _styleOf(tester, find.text('REGÍSTRATE'));
       expect(style.fontFamily, kBoutiqueSerifFamily);
       expect(style.fontFamilyFallback, kBoutiqueSerifFallback);
     });

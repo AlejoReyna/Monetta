@@ -1,0 +1,11 @@
+{%- doc -%}
+  The guide's social row: TikTok, Instagram and Facebook with its gold line icons (the app's side menu order and URLs,
+  lib/features/home in PR #33). Each icon sits in a 48px target and names the network.
+
+  @param {string} [class] - Extra class of the list.
+{%- enddoc -%}
+<ul class="guia-social {{ class }}" role="list">
+  <li><a class="guia-social__link" href="https://www.tiktok.com/@monetta.oficial" target="_blank" rel="noopener" aria-label="Monetta en TikTok (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-tiktok', size: 30 %}</a></li>
+  <li><a class="guia-social__link" href="https://www.instagram.com/_monetta.mx" target="_blank" rel="noopener" aria-label="Monetta en Instagram (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-instagram', size: 30 %}</a></li>
+  <li><a class="guia-social__link" href="https://www.facebook.com/profile.php?id=100091065527635" target="_blank" rel="noopener" aria-label="Monetta en Facebook (se abre en otra pestaña)">{% render 'monetta-guia-icon', name: 'red-facebook', size: 30 %}</a></li>
+</ul>

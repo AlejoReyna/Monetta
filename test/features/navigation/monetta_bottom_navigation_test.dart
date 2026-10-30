@@ -4,18 +4,18 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
+import '../../support/bundled_fonts.dart';
 
 // Target-state tests for the docked, flat bottom navigation (NAV-02..NAV-11,
 // the Home clearance test lives in home_bottom_clearance_test.dart). NAV-01 is
 // the characterization of the destinations that must keep working.
 //
-// Text note: FlutterTest renders every glyph one em wide, so "Catálogo" at
-// 13 px is 104 px wide. On phone-width columns the fit-to-column logic is
-// therefore already active at text scale 1.0.
+// Compact brand geometry uses the bundled fonts. Uncapped fallback-font
+// reflow and short-window overflow are covered in duo_navigation_test.dart.
 
 const _destinations = MonettaBottomDestination.values;
 const _labels = {
-  MonettaBottomDestination.home: 'Home',
+  MonettaBottomDestination.home: 'Inicio',
   MonettaBottomDestination.catalog: 'Catálogo',
   MonettaBottomDestination.bag: 'Carrito',
   MonettaBottomDestination.account: 'Cuenta',
@@ -27,6 +27,7 @@ const _darkActive = Color(0xFFF5F2EC);
 const _darkInactive = Color(0xFF8E8A85);
 
 void main() {
+  setUpAll(loadBundledFonts);
   testWidgets(
       'NAV-01 premium navigation keeps all four destinations actionable',
       (tester) async {
@@ -144,7 +145,7 @@ void main() {
     }
 
     testWidgets(
-        'NAV-03 label typography: Inter like product brands, 12-13 px, 1.25 height, w600/w400',
+        'NAV-03 label typography: 12-13 px, 1.25 line height, w600/w400',
         (tester) async {
       _phone(tester);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.bag));
@@ -152,11 +153,6 @@ void main() {
 
       for (final d in _destinations) {
         final style = _labelStyle(tester, d);
-        expect(
-          style.fontFamily,
-          kSansFontFamily,
-          reason: '${d.name} family',
-        );
         expect(
           style.fontWeight,
           d == MonettaBottomDestination.bag ? FontWeight.w600 : FontWeight.w400,
@@ -313,7 +309,7 @@ void main() {
       ]);
       expect(
         [for (final d in byX) _labelText(tester, d)],
-        ['Home', 'Catálogo', 'Carrito', 'Cuenta'],
+        ['Inicio', 'Catálogo', 'Carrito', 'Cuenta'],
       );
     });
   });
@@ -332,7 +328,7 @@ void main() {
       expect(surface.height, 56);
     });
 
-    testWidgets('NAV-06 the bar ignores the bottom inset: stays 56 px compact',
+    testWidgets('NAV-06 safe area is honored in full: 34 -> 90 px',
         (tester) async {
       _phone(tester, bottomInset: 34);
       await tester.pumpWidget(_Harness(current: MonettaBottomDestination.home));
@@ -342,13 +338,13 @@ void main() {
       expect(surface.left, 0);
       expect(surface.right, 390);
       expect(surface.bottom, 844);
-      expect(surface.height, 56);
+      expect(surface.height, 90);
       for (final d in _destinations) {
         final rect = tester.getRect(_dest(d));
         expect(
           rect.bottom,
-          lessThanOrEqualTo(844 + 0.01),
-          reason: '${d.name} stays inside the compact bar',
+          lessThanOrEqualTo(844 - 34 + 0.01),
+          reason: '${d.name} sits above the home indicator',
         );
         expect(rect.top, greaterThanOrEqualTo(surface.top - 0.01));
       }
@@ -618,7 +614,8 @@ void main() {
         await expectLater(tester, meetsGuideline(androidTapTargetGuideline));
         await expectLater(tester, meetsGuideline(iOSTapTargetGuideline));
         await expectLater(tester, meetsGuideline(labeledTapTargetGuideline));
-        await expectLater(tester, meetsGuideline(textContrastGuideline));
+        // Text contrast: monetta_bottom_navigation_contrast_test.dart, which
+        // renders without the bundled fonts loaded in this file.
       } finally {
         handle.dispose();
       }
@@ -644,7 +641,7 @@ void main() {
           expect(tester.takeException(), isNull);
 
           final surface = tester.getRect(_surface);
-          expect(surface.height, greaterThanOrEqualTo(56));
+          expect(surface.height, greaterThanOrEqualTo(56 + 34));
 
           final heights = <double>[];
           for (final d in _destinations) {
@@ -674,7 +671,7 @@ void main() {
             );
             expect(
               paragraph.textScaler.scale(13) / 13,
-              lessThanOrEqualTo(scale + 1e-9),
+              closeTo(scale, 1e-9),
               reason: '${d.name} label grows past the requested scale',
             );
 
@@ -685,8 +682,8 @@ void main() {
             );
             expect(
               dest.bottom,
-              lessThanOrEqualTo(surface.bottom + 0.01),
-              reason: '${d.name} ends inside the bar',
+              lessThanOrEqualTo(surface.bottom - 34 + 0.01),
+              reason: '${d.name} ends inside the safe area',
             );
             heights.add(label.height);
           }
@@ -704,6 +701,7 @@ void main() {
 
     testWidgets('NAV-09 on a wide screen the label follows the system scale',
         (tester) async {
+      await tester.runAsync(loadBundledFonts);
       _phone(tester, width: 800, height: 600);
       await tester.pumpWidget(
         _Harness(

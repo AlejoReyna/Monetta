@@ -93,9 +93,9 @@ class _StartupRevealState extends State<StartupReveal>
                             child: ClipRect(
                               child: Align(
                                 alignment: Alignment.centerLeft,
-                                // The first 30px of the 132px brand asset are M.
+                                // The first 39px of the 132px brand asset are M.
                                 // Reveal the same bitmap so the letter never swaps.
-                                widthFactor: 30 / 132 + (1 - 30 / 132) * reveal,
+                                widthFactor: 39 / 132 + (1 - 39 / 132) * reveal,
                                 heightFactor: 1,
                                 child: const SizedBox(
                                   width: 132 / 38 * 48,

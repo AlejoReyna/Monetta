@@ -3,6 +3,8 @@
 /// results once submitted.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
+import 'browse_detail_layout.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -10,14 +12,20 @@ import 'package:flutter/material.dart';
 import '../../app/motion.dart';
 import '../../app/product_telemetry.dart';
 import '../../app/shopper_copy.dart';
-import '../../app/text_scale_policy.dart';
 import '../../data/normalize/facets.dart' show FacetValue;
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
+import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
-import '../navigation/monetta_page_header.dart';
+import '../boutique/client_guide_components.dart';
+import '../boutique/guide_art.dart';
+import '../checkout/checkout_screen.dart';
+import '../navigation/guide_chrome.dart';
+import '../navigation/guide_drawer.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import '../product/quick_view.dart';
+import 'categories_screen.dart';
 import 'catalog_controls.dart';
 import 'catalog_query.dart';
 import 'collection_screen.dart';
@@ -51,10 +59,12 @@ Future<void> openSearch(
 }) async {
   final store = StoreScope.of(context);
   await Navigator.of(context).push<void>(
-    monettaPageRoute(
+    monettaFadeRoute(
       StoreScope(
         notifier: store,
-        child: SearchScreen(initialQuery: initialQuery, prompt: prompt),
+        child: BrowseDetailLayout(
+          child: SearchScreen(initialQuery: initialQuery, prompt: prompt),
+        ),
       ),
     ),
   );
@@ -122,6 +132,17 @@ class _SearchScreenState extends State<SearchScreen> {
 
   List<Product> _matches(String raw) =>
       searchProducts(StoreScope.of(context), raw);
+
+  List<String> _matchingHistory(String raw) {
+    final tokens = normalizeSearchText(
+      raw,
+    ).split(' ').where((token) => token.isNotEmpty);
+    return <String>[
+      for (final entry in _history.queries)
+        if (tokens.every((token) => normalizeSearchText(entry).contains(token)))
+          entry,
+    ];
+  }
 
   List<_SearchSuggestion> _suggestions(String raw) {
     final query = normalizeSearchText(raw);
@@ -193,9 +214,9 @@ class _SearchScreenState extends State<SearchScreen> {
           value,
     }.toList()
       ..sort(
-        (a, b) => categoryPlural(a).toLowerCase().compareTo(
-              categoryPlural(b).toLowerCase(),
-            ),
+        (a, b) => categoryPlural(
+          a,
+        ).toLowerCase().compareTo(categoryPlural(b).toLowerCase()),
       );
     return slugs;
   }
@@ -231,10 +252,7 @@ class _SearchScreenState extends State<SearchScreen> {
     logProductEvent(
       context,
       ProductEvent.searchSubmitted,
-      parameters: {
-        'query_length': query.length,
-        'result_count': resultCount,
-      },
+      parameters: {'query_length': query.length, 'result_count': resultCount},
     );
   }
 
@@ -290,14 +308,17 @@ class _SearchScreenState extends State<SearchScreen> {
     final matches = _matches(query);
     final suggestions = _suggestions(query);
 
-    return Scaffold(
+    final store = StoreScope.of(context);
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       backgroundColor: palette.canvas,
-      appBar: buildMonettaPageAppBar(
+      drawer: guideDrawer(context),
+      appBar: guideAppBar(
         context,
-        title: 'Buscar',
-        backKey: const ValueKey('search-back-button'),
+        onSearch: () => _focus.requestFocus(),
       ),
       body: SafeArea(
+        top: false,
         child: Column(
           children: [
             _SearchField(
@@ -336,14 +357,43 @@ class _SearchScreenState extends State<SearchScreen> {
                               products: matches,
                               onSeeAll: () => _openAllResults(query.trim()),
                             )
-                      : _SearchSuggestions(
-                          query: query,
+                      : _LiveQuery(
+                          query: query.trim(),
+                          history: _matchingHistory(query),
                           suggestions: suggestions,
-                          onSelected: _selectSuggestion,
+                          products: matches,
+                          categories: _availableCategories(),
+                          onQuery: _runQuery,
+                          onForget: (value) =>
+                              unawaited(_history.forget(value)),
+                          onSuggestion: _selectSuggestion,
+                          onSeeAll: () => _openAllResults(query.trim()),
+                          onEdit: _edit,
+                          onClear: _clear,
+                          onCategory: _openCategory,
                         ),
             ),
           ],
         ),
+      ),
+      bottomNavigationBar: MonettaBottomNavigation(
+        current: null,
+        bagCount: store.bagQuantity,
+        onSelected: (destination) {
+          switch (destination) {
+            case MonettaBottomDestination.home:
+              Navigator.of(context).popUntil((route) => route.isFirst);
+            case MonettaBottomDestination.catalog:
+              unawaited(openCategories(context));
+            case MonettaBottomDestination.bag:
+              unawaited(openBag(context));
+            case MonettaBottomDestination.account:
+              final account = AccountScope.maybeOf(context);
+              if (account != null) {
+                unawaited(openAccount(context, controller: account));
+              }
+          }
+        },
       ),
     );
   }
@@ -550,8 +600,10 @@ class _SectionTitle extends StatelessWidget {
           Expanded(
             child: Text(
               title,
-              style:
-                  boutiqueSectionHeading(context: context, color: palette.ink),
+              style: boutiqueSectionHeading(
+                context: context,
+                color: palette.ink,
+              ),
             ),
           ),
           if (actionLabel case final label? when onAction != null)
@@ -601,15 +653,17 @@ class _HistoryRow extends StatelessWidget {
           padding: const EdgeInsets.only(left: BoutiqueSpace.gutter),
           child: Row(
             children: [
-              Icon(
-                Icons.history_rounded,
-                size: 20,
-                color: palette.inkMuted,
+              _MarkChip(
+                child: Icon(
+                  Icons.schedule_rounded,
+                  size: 19,
+                  color: palette.goldText,
+                ),
               ),
               const SizedBox(width: BoutiqueSpace.md),
               Expanded(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 14),
+                  padding: const EdgeInsets.symmetric(vertical: 8),
                   child: Text(
                     query,
                     maxLines: 1,
@@ -639,14 +693,48 @@ class _HistoryRow extends StatelessWidget {
   }
 }
 
-/// Category row with the drawn mark the reference uses for each family.
-class _CategoryRow extends StatelessWidget {
-  const _CategoryRow({required this.slug, required this.onTap, super.key});
+/// Round chip that carries the leading mark of a search row.
+class _MarkChip extends StatelessWidget {
+  const _MarkChip({required this.child});
 
-  final String slug;
-  final VoidCallback onTap;
+  final Widget child;
 
-  static const Map<String, IconData> _marks = <String, IconData>{
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: 36,
+      height: 36,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: context.boutique.surfaceDeep,
+        shape: BoxShape.circle,
+      ),
+      child: child,
+    );
+  }
+}
+
+/// The mark of a category family in search rows. Perfumes and accessories use
+/// the guide's gold line icons; the rest keep their Material marks.
+Widget _categoryMark(BuildContext context, String? slug) {
+  final palette = context.boutique;
+  final asset = switch (slug) {
+    'perfume' => kGuideIconCategoryPerfumes,
+    'accesorio' => kGuideIconCategoryAccessories,
+    _ => null,
+  };
+  if (asset != null) {
+    return Image.asset(
+      asset,
+      width: 20,
+      height: 20,
+      fit: BoxFit.contain,
+      excludeFromSemantics: true,
+      errorBuilder: (_, __, ___) =>
+          Icon(Icons.style_outlined, size: 19, color: palette.goldText),
+    );
+  }
+  const marks = <String, IconData>{
     'bolsa': Icons.shopping_bag_outlined,
     'cartera': Icons.account_balance_wallet_outlined,
     'monedero': Icons.savings_outlined,
@@ -654,9 +742,20 @@ class _CategoryRow extends StatelessWidget {
     'reloj': Icons.watch_outlined,
     'cosmetiquera': Icons.brush_outlined,
     'set': Icons.category_outlined,
-    'accesorio': Icons.auto_awesome_outlined,
-    'perfume': Icons.local_florist_outlined,
   };
+  return Icon(
+    slug == null ? Icons.search_rounded : (marks[slug] ?? Icons.style_outlined),
+    size: 19,
+    color: palette.goldText,
+  );
+}
+
+/// Category row with the drawn mark the reference uses for each family.
+class _CategoryRow extends StatelessWidget {
+  const _CategoryRow({required this.slug, required this.onTap, super.key});
+
+  final String slug;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
@@ -669,24 +768,11 @@ class _CategoryRow extends StatelessWidget {
         child: Padding(
           padding: const EdgeInsets.symmetric(
             horizontal: BoutiqueSpace.gutter,
-            vertical: 12,
+            vertical: 8,
           ),
           child: Row(
             children: [
-              Container(
-                width: 36,
-                height: 36,
-                alignment: Alignment.center,
-                decoration: BoxDecoration(
-                  color: palette.surfaceDeep,
-                  borderRadius: BoutiqueRadius.tile,
-                ),
-                child: Icon(
-                  _marks[slug] ?? Icons.style_outlined,
-                  size: 19,
-                  color: palette.ink,
-                ),
-              ),
+              _MarkChip(child: _categoryMark(context, slug)),
               const SizedBox(width: BoutiqueSpace.md),
               Expanded(
                 child: Text(
@@ -696,11 +782,6 @@ class _CategoryRow extends StatelessWidget {
                   style: boutiqueText(size: 15, color: palette.ink),
                 ),
               ),
-              Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: palette.inkMuted,
-              ),
             ],
           ),
         ),
@@ -709,51 +790,163 @@ class _CategoryRow extends StatelessWidget {
   }
 }
 
+/// «Productos» of the guide: the first three pieces in three small columns.
+/// The key keeps the name of the rail it replaces.
 class _ProductRail extends StatelessWidget {
-  const _ProductRail({required this.products});
+  const _ProductRail({required this.products, super.key});
 
   final List<Product> products;
 
   @override
   Widget build(BuildContext context) {
-    final width = MediaQuery.sizeOf(context).width;
-    final cardWidth = (width * .40).clamp(140.0, 200.0);
-    final caption = ProductTileDensity.compact.captionHeight *
-        textScaleFactorFor(
-          MediaQuery.textScalerOf(context),
-          ProductTileDensity.compact.nameSize,
-        );
-
-    return SizedBox(
+    final width = MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2;
+    const gap = BoutiqueSpace.sm;
+    final columns = width >= 600 ? 4 : 3;
+    final tileWidth = (width - gap * (columns - 1)) / columns;
+    final caption = MediaQuery.textScalerOf(
+      context,
+    ).scale(ProductTileDensity.compact.captionHeight);
+    return GridView.builder(
       key: const ValueKey('search-product-rail'),
-      height: cardWidth * ProductTileDensity.compact.imageHeightFactor +
-          caption +
-          BoutiqueSpace.md,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        clipBehavior: Clip.none,
-        padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(width: BoutiqueSpace.md),
-        itemBuilder: (context, index) {
-          final product = products[index];
-          return SizedBox(
-            width: cardWidth,
-            child: ProductCard(
-              product: product,
-              density: ProductTileDensity.compact,
-              onQuickView: () => showProductQuickView(context, product),
-            ),
-          );
-        },
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: columns,
+        crossAxisSpacing: gap,
+        mainAxisSpacing: BoutiqueSpace.md,
+        mainAxisExtent:
+            tileWidth * ProductTileDensity.compact.imageHeightFactor + caption,
       ),
+      itemCount: products.length < columns ? products.length : columns,
+      itemBuilder: (context, index) {
+        final product = products[index];
+        return ProductCard(
+          product: product,
+          density: ProductTileDensity.compact,
+          onQuickView: () => showProductQuickView(context, product),
+        );
+      },
     );
   }
 }
 
 // ---------------------------------------------------------------------------
-// Typing
+// Typing — live catalog matches, not only after submit
 // ---------------------------------------------------------------------------
+
+class _LiveQuery extends StatelessWidget {
+  const _LiveQuery({
+    required this.query,
+    required this.history,
+    required this.suggestions,
+    required this.products,
+    required this.categories,
+    required this.onQuery,
+    required this.onForget,
+    required this.onSuggestion,
+    required this.onSeeAll,
+    required this.onEdit,
+    required this.onClear,
+    required this.onCategory,
+  });
+
+  final String query;
+  final List<String> history;
+  final List<_SearchSuggestion> suggestions;
+  final List<Product> products;
+  final List<String> categories;
+  final ValueChanged<String> onQuery;
+  final ValueChanged<String> onForget;
+  final ValueChanged<_SearchSuggestion> onSuggestion;
+  final VoidCallback onSeeAll;
+  final VoidCallback onEdit;
+  final VoidCallback onClear;
+  final ValueChanged<String> onCategory;
+
+  @override
+  Widget build(BuildContext context) {
+    final preview = products.take(8).toList(growable: false);
+    return ListView(
+      key: const ValueKey('search-live-query'),
+      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      padding: const EdgeInsets.only(bottom: BoutiqueSpace.xxl),
+      children: [
+        if (history.isNotEmpty) ...[
+          const _SectionTitle(title: 'Búsquedas recientes'),
+          for (final entry in history)
+            _HistoryRow(
+              key: ValueKey('search-history-$entry'),
+              query: entry,
+              onTap: () => onQuery(entry),
+              onForget: () => onForget(entry),
+            ),
+        ],
+        if (suggestions.isNotEmpty) ...[
+          const _SectionTitle(title: 'Sugerencias'),
+          _SearchSuggestions(
+            query: query,
+            suggestions: suggestions,
+            onSelected: onSuggestion,
+          ),
+        ],
+        if (preview.isEmpty)
+          _NoResults(
+            query: query,
+            categories: categories,
+            onEdit: onEdit,
+            onClear: onClear,
+            onCategory: onCategory,
+            shrinkWrap: true,
+          )
+        else ...[
+          const _SectionTitle(title: 'Productos'),
+          _ProductRail(
+            key: const ValueKey('search-live-results'),
+            products: preview,
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              BoutiqueSpace.gutter,
+              BoutiqueSpace.lg,
+              BoutiqueSpace.gutter,
+              BoutiqueSpace.md,
+            ),
+            child: ClientGuideButton(
+              key: const ValueKey('search-see-all'),
+              label: 'Ver todo',
+              onPressed: onSeeAll,
+              outlined: true,
+              chevron: true,
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+/// The category a suggestion names («Bolsas», «Relojes»...), if it names one.
+String? _categorySlugForLabel(String label) {
+  final folded = normalizeSearchText(label);
+  const slugs = <String>[
+    'bolsa',
+    'cartera',
+    'monedero',
+    'tarjetero',
+    'reloj',
+    'cosmetiquera',
+    'set',
+    'accesorio',
+    'perfume',
+  ];
+  for (final slug in slugs) {
+    if (folded == slug || folded == normalizeSearchText(categoryPlural(slug))) {
+      return slug;
+    }
+  }
+  return null;
+}
 
 class _SearchSuggestion {
   const _SearchSuggestion({required this.label, required this.priority});
@@ -782,7 +975,8 @@ class _SearchSuggestions extends StatelessWidget {
     return ListView.separated(
       key: const ValueKey('search-suggestions'),
       padding: EdgeInsets.zero,
-      keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       itemCount: suggestions.length,
       separatorBuilder: (context, _) => Divider(
         height: .5,
@@ -797,9 +991,7 @@ class _SearchSuggestions extends StatelessWidget {
           child: InkWell(
             onTap: () => onSelected(suggestion),
             child: ConstrainedBox(
-              constraints: const BoxConstraints(
-                minHeight: 56,
-              ),
+              constraints: const BoxConstraints(minHeight: 56),
               child: Padding(
                 padding: const EdgeInsets.symmetric(
                   horizontal: BoutiqueSpace.gutter,
@@ -807,10 +999,11 @@ class _SearchSuggestions extends StatelessWidget {
                 ),
                 child: Row(
                   children: [
-                    Icon(
-                      Icons.search_rounded,
-                      size: 19,
-                      color: context.boutique.inkMuted,
+                    _MarkChip(
+                      child: _categoryMark(
+                        context,
+                        _categorySlugForLabel(suggestion.label),
+                      ),
                     ),
                     const SizedBox(width: BoutiqueSpace.md),
                     Expanded(
@@ -911,9 +1104,12 @@ class _Results extends StatelessWidget {
           child: ProductCardGrid(
             key: const ValueKey('search-result-grid'),
             products: products,
-            variant: ProductTileVariant.edgeToEdge,
-            showWishlist: false,
-            padding: const EdgeInsets.only(top: BoutiqueSpace.md),
+            padding: const EdgeInsets.fromLTRB(
+              BoutiqueSpace.gutter,
+              BoutiqueSpace.xs,
+              BoutiqueSpace.gutter,
+              BoutiqueSpace.xxl,
+            ),
             onQuickView: (product) => showProductQuickView(context, product),
           ),
         ),
@@ -926,11 +1122,12 @@ class _Results extends StatelessWidget {
               BoutiqueSpace.gutter,
               BoutiqueSpace.md,
             ),
-            child: BoutiqueButton(
+            child: ClientGuideButton(
               key: const ValueKey('search-see-all'),
               label: 'Ver todo',
               onPressed: onSeeAll,
-              filled: false,
+              outlined: true,
+              chevron: true,
             ),
           ),
         ),
@@ -946,6 +1143,7 @@ class _NoResults extends StatelessWidget {
     required this.onEdit,
     required this.onClear,
     required this.onCategory,
+    this.shrinkWrap = false,
   });
 
   final String query;
@@ -953,11 +1151,14 @@ class _NoResults extends StatelessWidget {
   final VoidCallback onEdit;
   final VoidCallback onClear;
   final ValueChanged<String> onCategory;
+  final bool shrinkWrap;
 
   @override
   Widget build(BuildContext context) {
     return ListView(
       key: const ValueKey('search-no-results'),
+      shrinkWrap: shrinkWrap,
+      physics: shrinkWrap ? const NeverScrollableScrollPhysics() : null,
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       children: [
         CatalogEmptyState(
@@ -976,9 +1177,7 @@ class _NoResults extends StatelessWidget {
           ],
         ),
         Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.gutter,
-          ),
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           child: Align(
             alignment: Alignment.centerLeft,
             child: TextButton(

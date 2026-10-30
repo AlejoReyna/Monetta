@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
-import 'package:monetta_app/app/motion.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/app/catalog_store.dart';
@@ -24,19 +23,8 @@ Widget _app(CatalogStore store, Widget child) {
 }
 
 void main() {
-  test('free-shipping incentive covers empty, partial and complete', () {
-    expect(remainingForFreeShipping(0), kFreeShippingThreshold);
-    expect(
-      remainingForFreeShipping(kFreeShippingThreshold - 1),
-      1,
-    );
-    expect(remainingForFreeShipping(kFreeShippingThreshold), 0);
-    expect(remainingForFreeShipping(kFreeShippingThreshold + 500), 0);
-    expect(shippingFor(0), kStandardShippingFee);
-    expect(shippingFor(kFreeShippingThreshold), 0);
-  });
-
-  testWidgets('bag shows lines, remove action and recommendations',
+  testWidgets(
+      'bag shows policy placeholder, save-for-later and recommendations',
       (tester) async {
     final store = await _loadedStore();
     final product = store.products.firstWhere((item) => item.isInStock);
@@ -45,28 +33,30 @@ void main() {
     await tester.pumpWidget(_app(store, const BagScreen()));
     await tester.pump();
 
-    // The editorial heading lives beside the back arrow in the top bar.
+    expect(find.text('Mi bolsa'), findsOneWidget);
     expect(
-      find.descendant(
-        of: find.byType(AppBar),
-        matching: find.text('Mi bolsa'),
-      ),
+      find.byKey(const ValueKey('purchase-policy-notice')),
       findsOneWidget,
     );
-    // Sin incentivo de envío gratis ni stepper de progreso en la bolsa.
+    // No shipping promise by amount: neither the old bar nor any "gratis".
     expect(
       find.byKey(const ValueKey('free-shipping-incentive')),
       findsNothing,
     );
     expect(
-      find.textContaining(
-        RegExp(r'(Te faltan|Tienes envío gratis)'),
-      ),
+      find.textContaining(RegExp('gratis', caseSensitive: false)),
       findsNothing,
     );
-    // Solo Eliminar: sin Guardar para después.
-    expect(find.text('Guardar para después'), findsNothing);
-    expect(find.text('Eliminar'), findsOneWidget);
+    expect(
+      find.textContaining('contenido pendiente de aprobación'),
+      findsWidgets,
+    );
+    // Guardar para después = favorito.
+    expect(find.text('Guardar para después'), findsOneWidget);
+    await tester.tap(find.text('Guardar para después'));
+    await tester.pump();
+    expect(store.wishlist.contains(product.id), isTrue);
+    expect(find.text('Guardado ✓'), findsOneWidget);
     // Recomendaciones con ProductCard de lectura.
     await tester.scrollUntilVisible(
       find.byKey(const ValueKey('bag-recommendations')),
@@ -76,20 +66,6 @@ void main() {
       find.byKey(const ValueKey('bag-recommendations')),
       findsOneWidget,
     );
-  });
-
-  testWidgets('bag remove action empties the line', (tester) async {
-    final store = await _loadedStore();
-    final product = store.products.firstWhere((item) => item.isInStock);
-    await store.addToBag(product);
-
-    await tester.pumpWidget(_app(store, const BagScreen()));
-    await tester.pump();
-
-    await tester.tap(find.text('Eliminar'));
-    await tester.pump();
-    expect(store.bagLines, isEmpty);
-    expect(find.text('Tu bolsa está vacía'), findsOneWidget);
   });
 
   testWidgets('quantity zero removes the line; large values clamp to 10',
@@ -190,7 +166,7 @@ void main() {
       findsOneWidget,
     );
     // Volver del navegador jamás confirma: seguimos en revisión, sin éxito.
-    expect(find.text('¡Listo!'), findsNothing);
+    expect(find.text('¡Gracias por tu compra!'), findsNothing);
   });
 
   testWidgets('mini cart shows the added line and both exits', (tester) async {

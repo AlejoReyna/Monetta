@@ -90,6 +90,13 @@ void _installPlatformFakes(WidgetTester tester, Directory dir) {
     const MethodChannel('plugins.flutter.io/path_provider'),
     (call) async => dir.path,
   );
+  messenger.setMockMethodCallHandler(
+    const MethodChannel('plugins.flutter.io/shared_preferences'),
+    (call) async {
+      if (call.method == 'getAll') return <String, Object>{};
+      return null;
+    },
+  );
 
   final secure = <String, String>{};
   messenger.setMockMethodCallHandler(
@@ -135,6 +142,10 @@ void _installPlatformFakes(WidgetTester tester, Directory dir) {
   addTearDown(() {
     messenger.setMockMethodCallHandler(
       const MethodChannel('plugins.flutter.io/path_provider'),
+      null,
+    );
+    messenger.setMockMethodCallHandler(
+      const MethodChannel('plugins.flutter.io/shared_preferences'),
       null,
     );
     messenger.setMockMethodCallHandler(

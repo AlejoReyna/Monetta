@@ -6,7 +6,10 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../../app/storefront_layout.dart';
 import '../../app/theme.dart';
+import 'storefront_pane_scope.dart';
 
 enum MonettaBottomDestination { home, catalog, bag, account }
 
@@ -15,7 +18,7 @@ const double _kBarMinHeight = 56;
 const double _kBarSidePadding = 10;
 const double _kBarMaxContentWidth = 480;
 const double _kItemHorizontalPadding = 4;
-const double _kItemVerticalPadding = 5;
+const double _kItemVerticalPadding = 6;
 const double _kIconBox = 24;
 const double _kIconStroke = 1.7;
 const double _kIconLabelGap = 3;
@@ -24,7 +27,7 @@ const double _kLabelHeight = 1.25;
 const double _kPressedOpacity = 0.55;
 
 String _labelOf(MonettaBottomDestination destination) => switch (destination) {
-      MonettaBottomDestination.home => 'Home',
+      MonettaBottomDestination.home => 'Inicio',
       MonettaBottomDestination.catalog => 'Catálogo',
       MonettaBottomDestination.bag => 'Carrito',
       MonettaBottomDestination.account => 'Cuenta',
@@ -38,23 +41,90 @@ TextStyle _labelStyle({required FontWeight weight, Color? color}) => sans(
     );
 
 /// Flat bar docked to the bottom edge on the theme's navigation surface. The
-/// selected destination is shown only through color and label weight; nothing
-/// moves or scales.
+/// selected destination has semantic, weight and underline/border cues. Labels
+/// retain the requested system text scale and reflow when space is limited.
 class MonettaBottomNavigation extends StatelessWidget {
   const MonettaBottomNavigation({
     required this.current,
     required this.bagCount,
     required this.onSelected,
+    this.vertical = false,
     super.key,
   });
 
-  final MonettaBottomDestination current;
+  final bool vertical;
+
+  MonettaBottomNavigation asRail() => MonettaBottomNavigation(
+        current: current,
+        bagCount: bagCount,
+        onSelected: onSelected,
+        vertical: true,
+      );
+
+  final MonettaBottomDestination? current;
   final int bagCount;
   final ValueChanged<MonettaBottomDestination> onSelected;
 
   @override
   Widget build(BuildContext context) {
+    if (!StorefrontPaneScope.ownsNavigationOf(context)) {
+      return const SizedBox.shrink();
+    }
     final colors = context.monettaColors;
+    if (vertical) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          for (final destination in MonettaBottomDestination.values)
+            Semantics(
+              selected: destination == current,
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 4),
+                child: IconButton(
+                  key: Key('bottom-nav-${destination.name}'),
+                  tooltip: destination == MonettaBottomDestination.bag &&
+                          bagCount > 0
+                      ? '${_labelOf(destination)}, $bagCount ${bagCount == 1 ? 'artículo' : 'artículos'}'
+                      : _labelOf(destination),
+                  style: IconButton.styleFrom(
+                    minimumSize: const Size(48, 48),
+                    side: destination == current
+                        ? BorderSide(color: colors.navigationForeground)
+                        : null,
+                    backgroundColor: destination == current
+                        ? colors.navigationForeground.withValues(alpha: .08)
+                        : null,
+                  ),
+                  onPressed: () => onSelected(destination),
+                  icon: destination == MonettaBottomDestination.bag &&
+                          bagCount > 0 &&
+                          StorefrontLayout.enlargedText(
+                            MediaQuery.textScalerOf(context),
+                          )
+                      ? Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            _NavGlyph(destination: destination),
+                            Text(
+                              bagCount > 9 ? '9+' : '$bagCount',
+                              key: const Key('rail-bag-count'),
+                              style: sans(size: 10),
+                            ),
+                          ],
+                        )
+                      : Badge(
+                          isLabelVisible:
+                              destination == MonettaBottomDestination.bag &&
+                                  bagCount > 0,
+                          label: Text('$bagCount'),
+                          child: _NavGlyph(destination: destination),
+                        ),
+                ),
+              ),
+            ),
+        ],
+      );
+    }
     final media = MediaQuery.maybeOf(context);
     final animationsDisabled =
         media?.disableAnimations == true || media?.accessibleNavigation == true;
@@ -65,40 +135,106 @@ class MonettaBottomNavigation extends StatelessWidget {
         color: colors.navigationSurface,
         border: Border(top: BorderSide(color: colors.divider, width: 0.5)),
       ),
-      // Ink and focus paint on the bar's surface. Compact by decision: no
-      // bottom safe-area inset, so the bar is always 56 px of content docked
-      // to the edge; the OS home indicator floats over the surface.
+      // Ink and focus paint on the bar's surface.
       child: Material(
         type: MaterialType.transparency,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: _kBarSidePadding),
-          child: Center(
-            heightFactor: 1,
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: _kBarMaxContentWidth),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final labelScaler = _fittedLabelScaler(
-                    context,
-                    constraints.maxWidth /
-                        MonettaBottomDestination.values.length,
-                  );
-                  return Row(
-                    children: [
+        child: SafeArea(
+          top: false,
+          maintainBottomViewPadding: true,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: _kBarSidePadding),
+            child: Center(
+              heightFactor: 1,
+              child: ConstrainedBox(
+                constraints:
+                    const BoxConstraints(maxWidth: _kBarMaxContentWidth),
+                child: LayoutBuilder(
+                  builder: (context, constraints) {
+                    final scaler = MediaQuery.textScalerOf(context);
+                    var widest = 0.0;
+                    for (final destination in MonettaBottomDestination.values) {
+                      final painter = TextPainter(
+                        text: TextSpan(
+                          text: _labelOf(destination),
+                          style: DefaultTextStyle.of(context).style.merge(
+                                _labelStyle(
+                                  weight: MediaQuery.boldTextOf(context)
+                                      ? FontWeight.bold
+                                      : FontWeight.w600,
+                                ),
+                              ),
+                        ),
+                        textDirection: Directionality.of(context),
+                        textScaler: scaler,
+                        maxLines: 1,
+                      )..layout();
+                      widest = math.max(widest, painter.width);
+                      painter.dispose();
+                    }
+                    var columns = 4;
+                    while (columns > 1 &&
+                        widest >
+                            constraints.maxWidth / columns -
+                                2 * _kItemHorizontalPadding) {
+                      columns ~/= 2;
+                    }
+                    final wrapLabel = widest >
+                        constraints.maxWidth - 2 * _kItemHorizontalPadding;
+                    final itemHeight = math.max(
+                      _kBarMinHeight,
+                      _kIconBox +
+                          _kIconLabelGap +
+                          scaler.scale(_kLabelSize) * _kLabelHeight +
+                          2 * _kItemVerticalPadding,
+                    );
+                    final usableHeight =
+                        (media?.size.height ?? constraints.maxHeight) -
+                            (media?.viewInsets.bottom ?? 0);
+                    if (usableHeight -
+                            itemHeight * (4 / columns) -
+                            (media?.viewPadding.bottom ?? 0) <
+                        StorefrontLayout.minimumTaskHeight) {
+                      return SizedBox(
+                        height: _kBarMinHeight,
+                        width: double.infinity,
+                        child: PopupMenuButton<MonettaBottomDestination>(
+                          key: const Key('navigation-overflow'),
+                          tooltip:
+                              'Destinos${current == null ? '' : '. ${_labelOf(current!)} seleccionado'}',
+                          onSelected: onSelected,
+                          itemBuilder: (context) => [
+                            for (final destination
+                                in MonettaBottomDestination.values)
+                              CheckedPopupMenuItem(
+                                value: destination,
+                                checked: current == destination,
+                                child: Text(
+                                  '${_labelOf(destination)}${destination == MonettaBottomDestination.bag && bagCount > 0 ? ' ($bagCount)' : ''}',
+                                ),
+                              ),
+                          ],
+                          icon: const Icon(Icons.more_horiz),
+                        ),
+                      );
+                    }
+                    final items = [
                       for (final destination in MonettaBottomDestination.values)
-                        Expanded(
+                        SizedBox(
+                          width: constraints.maxWidth / columns,
                           child: _NavItem(
                             destination: destination,
                             selected: destination == current,
                             bagCount: bagCount,
-                            labelScaler: labelScaler,
+                            labelScaler: scaler,
+                            wrapLabel: wrapLabel,
                             animationsDisabled: animationsDisabled,
                             onSelected: onSelected,
                           ),
                         ),
-                    ],
-                  );
-                },
+                    ];
+                    return Wrap(children: items);
+                  },
+                ),
               ),
             ),
           ),
@@ -108,59 +244,13 @@ class MonettaBottomNavigation extends StatelessWidget {
   }
 }
 
-/// Follows the system text scale until the widest label fills its column;
-/// from there the four labels stop growing together, so they stay uniform
-/// and are never clipped. [context] must sit below the bar's [Material] so
-/// the measured style matches the one the labels render with.
-TextScaler _fittedLabelScaler(BuildContext context, double columnWidth) {
-  final requested = MediaQuery.textScalerOf(context);
-  final room = columnWidth - 2 * _kItemHorizontalPadding;
-  if (!room.isFinite || room <= 0) return requested;
-
-  // Measure in the selected weight (bold when the platform asks for bold
-  // text) so the fit never changes when the selection moves.
-  final weight =
-      MediaQuery.boldTextOf(context) ? FontWeight.bold : FontWeight.w600;
-  final style = DefaultTextStyle.of(context).style.merge(
-        _labelStyle(weight: weight),
-      );
-  final direction = Directionality.maybeOf(context) ?? TextDirection.ltr;
-  double widestAt(TextScaler scaler) {
-    var widest = 0.0;
-    for (final destination in MonettaBottomDestination.values) {
-      final painter = TextPainter(
-        text: TextSpan(text: _labelOf(destination), style: style),
-        textDirection: direction,
-        textScaler: scaler,
-        maxLines: 1,
-      )..layout();
-      widest = math.max(widest, painter.width);
-      painter.dispose();
-    }
-    return widest;
-  }
-
-  final widest = widestAt(requested);
-  if (widest <= room) return requested;
-
-  // The theme's text style may carry letter spacing, which does not scale, so
-  // the width is affine in the font size (`a * size + b`) rather than
-  // proportional. Two measurements give both terms.
-  final size = requested.scale(_kLabelSize);
-  final half = widestAt(TextScaler.linear(size / 2 / _kLabelSize));
-  final slope = (widest - half) / (size / 2);
-  if (slope <= 0) return requested;
-  final offset = widest - slope * size;
-  final fitted = math.min((room - offset) / slope, size);
-  return TextScaler.linear(math.max(fitted, 1) / _kLabelSize);
-}
-
 class _NavItem extends StatefulWidget {
   const _NavItem({
     required this.destination,
     required this.selected,
     required this.bagCount,
     required this.labelScaler,
+    this.wrapLabel = false,
     required this.animationsDisabled,
     required this.onSelected,
   });
@@ -169,6 +259,7 @@ class _NavItem extends StatefulWidget {
   final bool selected;
   final int bagCount;
   final TextScaler labelScaler;
+  final bool wrapLabel;
   final bool animationsDisabled;
   final ValueChanged<MonettaBottomDestination> onSelected;
 
@@ -248,14 +339,17 @@ class _NavItemState extends State<_NavItem> {
                         Text(
                           label,
                           key: Key('bottom-nav-${destination.name}-label'),
-                          maxLines: 1,
-                          softWrap: false,
+                          maxLines: widget.wrapLabel ? null : 1,
+                          softWrap: widget.wrapLabel,
                           textAlign: TextAlign.center,
                           textScaler: widget.labelScaler,
                           style: _labelStyle(
                             weight:
                                 selected ? FontWeight.w600 : FontWeight.w400,
                             color: color,
+                          ).copyWith(
+                            decoration:
+                                selected ? TextDecoration.underline : null,
                           ),
                         ),
                       ],
@@ -339,18 +433,22 @@ class _NavGlyphPainter extends CustomPainter {
             ..close(),
           paint,
         );
-      // Three index lines beside a magnifier.
+      // Categories: four cells, matching the directory destination.
       case MonettaBottomDestination.catalog:
-        canvas
-          ..drawLine(const Offset(1.5, 4.19), const Offset(7.18, 4.19), paint)
-          ..drawLine(const Offset(1.5, 7.72), const Offset(5.29, 7.72), paint)
-          ..drawLine(const Offset(1.5, 11.61), const Offset(3.71, 11.61), paint)
-          ..drawCircle(const Offset(14.13, 11.76), 6.63, paint)
-          ..drawLine(
-            const Offset(18.82, 16.45),
-            const Offset(22.5, 19.81),
-            paint,
-          );
+        final inset = MonettaTokens.space[0];
+        final gap = MonettaTokens.space[0];
+        final cell = (MonettaTokens.logoHeight - inset * 2 - gap) / 2;
+        for (final x in [inset, inset + cell + gap]) {
+          for (final y in [inset, inset + cell + gap]) {
+            canvas.drawRRect(
+              RRect.fromRectAndRadius(
+                Rect.fromLTWH(x, y, cell, cell),
+                Radius.circular(inset / 2),
+              ),
+              paint,
+            );
+          }
+        }
       // Body narrowing towards the base, curved handle.
       case MonettaBottomDestination.bag:
         canvas

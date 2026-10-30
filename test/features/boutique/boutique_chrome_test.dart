@@ -9,6 +9,7 @@ import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/database.dart';
 import 'package:monetta_app/data/local/order_summary_store.dart';
 import 'package:monetta_app/data/repositories/order_history_repository.dart';
+import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/features/account/account_screen.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/catalog/brand_screen.dart';
@@ -26,8 +27,6 @@ import 'package:monetta_app/features/orders/orders_screen.dart';
 import 'package:monetta_app/features/product/product_screen.dart';
 import 'package:monetta_app/features/rewards/rewards_section.dart';
 import 'package:monetta_app/main.dart';
-
-import '../../support/catalog_browse_fixtures.dart';
 
 /// The grey the owner asked for on both bars, light mode.
 const Color _barGrey = MonettaTokens.bar;
@@ -92,11 +91,26 @@ Color? _scaffoldColor(WidgetTester tester) {
 Color? _bottomBarColor(WidgetTester tester) {
   final surface = find.byKey(const Key('bottom-nav-surface'));
   expect(surface, findsOneWidget);
-  return tester.widget<Material>(surface).color;
+  final decoration = tester.widget<DecoratedBox>(surface).decoration;
+  return (decoration as BoxDecoration).color;
 }
 
-BrowseEntry _monettaItem(int i, String category) =>
-    browseEntry(i, category: category);
+CatalogItem _monettaItem(int i, String category) => CatalogItem(
+      sourceScopedId: 'monetta:$i',
+      source: CatalogSourceType.monettaShopify,
+      merchant: 'Monetta',
+      title: 'Monetta Item $i',
+      brand: 'Guess',
+      category: category,
+      imageUrl: null,
+      price: const Money(amount: 1999, currency: Currency.mxn),
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://monetta.mx/products/item-$i',
+      marketRestriction: MarketRestriction.mexico,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.monettaCheckout,
+      shopifyProductId: '$i',
+    );
 
 OrderSummary _order() => OrderSummary(
       id: 'gid://shopify/Order/1',
@@ -143,11 +157,13 @@ Future<void> _mountCatalog(WidgetTester tester, ThemeData theme) async {
   await tester.pumpWidget(
     _app(
       theme,
-      browseScreen([
-        _monettaItem(1, 'cartera'),
-        _monettaItem(2, 'reloj'),
-        _monettaItem(3, 'perfume'),
-      ]),
+      CatalogBrowseScreen(
+        items: [
+          _monettaItem(1, 'cartera'),
+          _monettaItem(2, 'reloj'),
+          _monettaItem(3, 'perfume'),
+        ],
+      ),
     ),
   );
   await _settle(tester);
@@ -274,19 +290,8 @@ Future<void> _mountContact(WidgetTester tester, ThemeData theme) async {
   await _settle(tester);
 }
 
-/// Scrolls the home past its hero — the home equivalent of scrolling a
-/// collection banner away.
-Future<void> _scrollHomePastHero(WidgetTester tester) async {
-  await tester.drag(
-    find.byKey(const ValueKey('home-discovery-header')),
-    const Offset(0, -700),
-  );
-  await _settle(tester);
-}
-
 final _screens = <_Screen>[
-  // Home is not in this loop: it has no page title header. Dedicated Home
-  // cases below pin its bar at rest and after the hero scrolls away.
+  const _Screen('Home', _mountHome),
   const _Screen('Catálogo', _mountCatalog),
   const _Screen('Colección (sólido)', _mountCollection),
   const _Screen('Marca', _mountBrand),
@@ -315,44 +320,30 @@ void main() {
   final light = buildTheme();
   final dark = buildDarkTheme();
 
-  group('UI-THEME-04 light: page ground and screen header', () {
+  group('UI-THEME-04 light: white page, grey top bar', () {
     for (final screen in _screens) {
-      final topBarColor = _white;
       testWidgets(
-        'UI-THEME-04 (objetivo) ${screen.name}: top bar ${_hex(topBarColor)}, '
+        'UI-THEME-04 (objetivo) ${screen.name}: top bar ${_hex(_barGrey)}, '
         'scaffold ${_hex(_white)}',
         (tester) async {
           await screen.mount(tester, light);
 
           final problems = <String>[
-            if (_topBarColor(tester) != topBarColor)
+            if (_topBarColor(tester) != _barGrey)
               'top bar painted ${_hex(_topBarColor(tester))}, '
-                  'expected ${_hex(topBarColor)}',
+                  'expected ${_hex(_barGrey)}',
             if (_scaffoldColor(tester) != _white)
               'scaffold painted ${_hex(_scaffoldColor(tester))}, '
                   'expected ${_hex(_white)}',
           ];
           expect(problems, isEmpty);
-          if (screen.name != 'Producto') {
-            final title = find.byKey(const ValueKey('monetta-page-title'));
-            final back = find.byKey(const ValueKey('monetta-page-back'));
-            expect(
-              tester.widget<Text>(title).style!.fontFamily,
-              kBoutiqueSerifFamily,
-            );
-            expect(tester.widget<Text>(title).textAlign, TextAlign.start);
-            expect(
-              tester.getRect(title).left,
-              closeTo(tester.getRect(back).right, .01),
-            );
-          }
         },
       );
     }
 
     testWidgets(
-      'UI-THEME-04 (objetivo) Colección con foto: the white bar stays fixed '
-      '${_hex(_white)} once the banner has scrolled away',
+      'UI-THEME-04 (objetivo) Colección con foto: the bar turns solid '
+      '${_hex(_barGrey)} once the banner has scrolled away',
       (tester) async {
         _phone(tester);
         final store = await _loadedStore();
@@ -389,17 +380,17 @@ void main() {
           reason: 'precondition: the banner has scrolled away',
         );
         final problems = <String>[
-          if (_topBarColor(tester) != _white)
+          if (_topBarColor(tester) != _barGrey)
             'solid bar painted ${_hex(_topBarColor(tester))}, '
-                'expected ${_hex(_white)}',
+                'expected ${_hex(_barGrey)}',
         ];
         expect(problems, isEmpty);
       },
     );
 
     testWidgets(
-      'UI-THEME-04 (caracterización) Colección con foto: the bar stays white '
-      'above the photograph',
+      'UI-THEME-04 (objetivo) Colección con foto: the bar is solid '
+      '${_hex(_barGrey)} over the photograph',
       (tester) async {
         _phone(tester);
         final store = await _loadedStore();
@@ -416,71 +407,42 @@ void main() {
         );
         await _settle(tester);
 
-        expect(_topBarColor(tester), _white);
-      },
-    );
-
-    testWidgets(
-      'UI-THEME-04 (caracterización) Home: the bar is ${_hex(_white)} above '
-      'the hero',
-      (tester) async {
-        await _mountHome(tester, light);
-
-        final problems = <String>[
-          if (_topBarColor(tester) != _white)
-            'top bar painted ${_hex(_topBarColor(tester))}, '
-                'expected ${_hex(_white)} above the hero',
-          if (_scaffoldColor(tester) != _white)
-            'scaffold painted ${_hex(_scaffoldColor(tester))}, '
-                'expected ${_hex(_white)}',
-        ];
-        expect(problems, isEmpty);
-      },
-    );
-
-    testWidgets(
-      'UI-THEME-04 (objetivo) Home: the bar stays ${_hex(_white)} once the '
-      'hero has scrolled away',
-      (tester) async {
-        await _mountHome(tester, light);
-        await _scrollHomePastHero(tester);
-
-        final problems = <String>[
-          if (_topBarColor(tester) != _white)
-            'solid bar painted ${_hex(_topBarColor(tester))}, '
-                'expected ${_hex(_white)}',
-        ];
-        expect(problems, isEmpty);
+        expect(_topBarColor(tester), _barGrey);
       },
     );
   });
 
-  group('UI-THEME-05 light: flat full-width navigation', () {
-    for (final screen in <_Screen>[
+  group('UI-THEME-05 light: bottom bar matches the top bar', () {
+    final withBottomBar = <_Screen>[
+      const _Screen('Home', _mountHome),
       const _Screen('Catálogo', _mountCatalog),
       const _Screen('Colección', _mountCollection),
-    ]) {
-      testWidgets('${screen.name}: flat light bar under the page-ground header',
-          (tester) async {
-        await screen.mount(tester, light);
-        expect(_bottomBarColor(tester), _barGrey);
-        expect(_topBarColor(tester), _white);
-      });
-    }
-    testWidgets('Home: flat bar stays light while the hero scrolls away',
+    ];
+    for (final screen in withBottomBar) {
+      testWidgets(
+        'UI-THEME-05 (objetivo) ${screen.name}: bottom bar ${_hex(_barGrey)}, '
+        'equal to the top bar',
         (tester) async {
-      await _mountHome(tester, light);
-      expect(_bottomBarColor(tester), _barGrey);
-      expect(_topBarColor(tester), _white);
-      await _scrollHomePastHero(tester);
-      expect(_bottomBarColor(tester), _barGrey);
-      expect(_topBarColor(tester), _white);
-    });
+          await screen.mount(tester, light);
+
+          final bottom = _bottomBarColor(tester);
+          final top = _topBarColor(tester);
+          final problems = <String>[
+            if (bottom != _barGrey)
+              'bottom bar painted ${_hex(bottom)}, expected ${_hex(_barGrey)}',
+            if (bottom != top)
+              'bottom bar ${_hex(bottom)} differs from the top bar '
+                  '${_hex(top)}',
+          ];
+          expect(problems, isEmpty);
+        },
+      );
+    }
   });
 
   group('UI-THEME-06 dark: unchanged', () {
     final subset = <_Screen>[
-      // Home is covered by its own case below, at rest and after scroll.
+      const _Screen('Home', _mountHome),
       const _Screen('Catálogo', _mountCatalog),
       const _Screen('Producto', _mountProduct),
       const _Screen('Cuenta', _mountAccount),
@@ -498,21 +460,6 @@ void main() {
       );
     }
 
-    testWidgets(
-      'UI-THEME-06 (caracterización) Home: the bar is the dark canvas above '
-      'the hero and once it scrolls away',
-      (tester) async {
-        await _mountHome(tester, dark);
-
-        expect(_topBarColor(tester), MonettaColors.dark.canvas);
-        expect(_scaffoldColor(tester), MonettaColors.dark.canvas);
-
-        await _scrollHomePastHero(tester);
-
-        expect(_topBarColor(tester), MonettaColors.dark.canvas);
-      },
-    );
-
     for (final screen in <_Screen>[
       const _Screen('Home', _mountHome),
       const _Screen('Catálogo', _mountCatalog),
@@ -526,7 +473,7 @@ void main() {
 
           expect(
             _bottomBarColor(tester),
-            const Color(0xFF191A18),
+            MonettaColors.dark.navigationSurface,
           );
         },
       );

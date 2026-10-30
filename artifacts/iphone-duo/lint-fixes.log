@@ -1,0 +1,10 @@
+Computing fixes in iphone-duo...
+Applying fixes...
+
+test/features/checkout/duo_checkout_continuity_test.dart
+  require_trailing_commas - 4 fixes
+
+test/features/navigation/duo_navigation_test.dart
+  require_trailing_commas - 2 fixes
+
+6 fixes made in 2 files.

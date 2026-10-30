@@ -5,25 +5,29 @@
 /// the only entry to it.
 library;
 
+import '../../platform/system_layout_context.dart';
+import '../navigation/adaptive_storefront_scaffold.dart';
+import 'browse_detail_layout.dart';
 import 'dart:async';
 
 import 'package:flutter/material.dart';
 
-import '../navigation/monetta_page_header.dart';
-
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
-import '../../data/normalize/facets.dart';
+import '../../domain/catalog_item.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
+import '../../reco/external_facets.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../checkout/checkout_screen.dart';
-import '../navigation/monetta_floating_bottom_navigation.dart';
-import '../product/product_screen.dart';
+import '../navigation/monetta_bottom_navigation.dart';
+import '../product/external_product_screen.dart';
+import 'product_card.dart';
 import 'catalog_controls.dart';
-import 'product_tile.dart';
+import 'categories_screen.dart';
+import 'extracted_badge.dart';
 import 'quick_add_button.dart';
 import 'search_screen.dart';
 
@@ -84,6 +88,11 @@ class _CatalogFilters {
 
 /// Gap at each end of the header, outside the 48pt button slots.
 const double _kHeaderEdgeInset = 4;
+
+/// Width reserved on both sides of the title: the two end buttons' slots plus
+/// the edge gap. The leading side reserves the same, empty or not.
+const double _kHeaderSlotWidth =
+    _kHeaderEdgeInset + BoutiqueSpace.tapTarget * 2;
 
 const Map<String, List<String>> _bagTypeTerms = {
   'Crossbody': ['crossbody', 'bandolera', 'messenger'],
@@ -146,13 +155,12 @@ const List<String> _catalogCategoryOrder = [
 String _categoryLabel(String category) =>
     _catalogCategoryLabels[category] ?? categoryPlural(category);
 
-String _categoryFor(CanonicalFacets? facets) {
-  final rawCategory = facets?.category?.value.trim().toLowerCase();
+String _categoryFor(CatalogItem item) {
+  final externalCategory =
+      item.isExternal ? externalItemFacets(item).category?.value : null;
+  final rawCategory = (externalCategory ?? item.category)?.trim().toLowerCase();
 
-  // A piece without a category facet has no bag/wallet/perfume vertical to
-  // fall back on (the vertical was itself derived from the category), so it
-  // is simply "otros".
-  return switch (rawCategory) {
+  final category = switch (rawCategory) {
     'bolsas' || 'handbag' || 'handbags' => 'bolsa',
     'carteras' || 'wallet' || 'wallets' => 'cartera',
     'monederos' => 'monedero',
@@ -168,19 +176,34 @@ String _categoryFor(CanonicalFacets? facets) {
     'fragrances' =>
       'perfume',
     final value? when value.isNotEmpty => value,
-    _ => 'otros',
+    _ => null,
   };
+  if (category != null) return category;
+
+  if (item.vertical == CatalogVertical.perfumes) return 'perfume';
+  if (item.vertical == CatalogVertical.bagsWallets) {
+    final terms = item.title.toLowerCase();
+    if (RegExp(r'\b(?:wallet|billfold|cartera)\b').hasMatch(terms)) {
+      return 'cartera';
+    }
+    if (RegExp(r'\b(?:card case|card holder|tarjeter[oa])\b').hasMatch(terms)) {
+      return 'tarjetero';
+    }
+    if (RegExp(r'\b(?:monedero|coin purse)\b').hasMatch(terms)) {
+      return 'monedero';
+    }
+    if (RegExp(r'\b(?:cosmetiquera|cosmetic case)\b').hasMatch(terms)) {
+      return 'cosmetiquera';
+    }
+    return 'bolsa';
+  }
+  return 'otros';
 }
 
-/// Categories present in [products], in the canonical order and then
+/// Categories present in [items], in the canonical order and then
 /// alphabetically by label.
-List<String> _availableCategories(
-  List<Product> products,
-  Map<String, CanonicalFacets> facetsById,
-) {
-  final categories = {
-    for (final product in products) _categoryFor(facetsById[product.id]),
-  };
+List<String> _availableCategories(List<CatalogItem> items) {
+  final categories = {for (final item in items) _categoryFor(item)};
   return [
     for (final category in _catalogCategoryOrder)
       if (categories.remove(category)) category,
@@ -197,17 +220,14 @@ String _sectionKeySuffix(_CatalogFilters filters) {
 
 class CatalogBrowseScreen extends StatefulWidget {
   const CatalogBrowseScreen({
-    required this.products,
-    required this.facetsById,
+    required this.items,
+    this.openExternalLink = defaultExternalLinkOpener,
     this.bagCount = 0,
     super.key,
   });
 
-  final List<Product> products;
-
-  /// Canonical facets by product id; a product without an entry simply has no
-  /// category or brand facet.
-  final Map<String, CanonicalFacets> facetsById;
+  final List<CatalogItem> items;
+  final ExternalLinkOpener openExternalLink;
   final int bagCount;
 
   @override
@@ -217,9 +237,8 @@ class CatalogBrowseScreen extends StatefulWidget {
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   _CatalogFilters _filters = const _CatalogFilters();
 
-  List<Product> _visibleProducts([_CatalogFilters? filters]) => _filterCatalog(
-        widget.products,
-        widget.facetsById,
+  List<CatalogItem> _visibleItems([_CatalogFilters? filters]) => _filterCatalog(
+        widget.items,
         query: '',
         filters: filters ?? _filters,
       );
@@ -235,14 +254,15 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
     FocusManager.instance.primaryFocus?.unfocus();
     final result = await showModalBottomSheet<_CatalogFilters>(
       context: context,
+      anchorPoint: presentationAnchor(context),
+      useSafeArea: true,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: context.monettaColors.scrim,
       builder: (sheetContext) => _CatalogFilterSheet(
-        products: widget.products,
-        facetsById: widget.facetsById,
+        items: widget.items,
         initial: _filters,
-        visibleCount: (draft) => _visibleProducts(draft).length,
+        visibleCount: (draft) => _visibleItems(draft).length,
       ),
     );
     // Dismissing the sheet keeps the filters that were already applied.
@@ -251,20 +271,49 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final visibleProducts = _visibleProducts();
-    final bagCount =
-        StoreScope.maybeOf(context)?.bagQuantity ?? widget.bagCount;
+    final visibleItems = _visibleItems();
 
-    return Scaffold(
-      extendBody: true,
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
+      // Never `extendBody`: the last row of products must not sit under the
+      // navigation bar, and this screen has no floating bar competing with it.
+      extendBody: false,
       backgroundColor: context.boutique.canvas,
-      appBar: buildMonettaPageAppBar(
-        context,
-        title: 'Productos',
-        subtitle: CatalogResultCount(
-          count: visibleProducts.length,
-          noun: 'pieza',
-          pluralNoun: 'piezas',
+      appBar: AppBar(
+        toolbarHeight: 76,
+        backgroundColor: context.boutique.bar,
+        foregroundColor: context.boutique.ink,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        // One button at the start and two at the end: a centred title meets
+        // the end buttons first and is pushed off centre. Both sides reserve
+        // the same slot, so "Productos" stays on the screen's centre.
+        centerTitle: true,
+        titleSpacing: BoutiqueSpace.sm,
+        leadingWidth: _kHeaderSlotWidth,
+        leading: const _HeaderBackSlot(),
+        // The FittedBox only shrinks the block when it does not fit between
+        // the slots; it never truncates it or runs it under a button.
+        title: FittedBox(
+          fit: BoxFit.scaleDown,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                'Productos',
+                textAlign: TextAlign.center,
+                style: boutiqueScreenTitle(color: context.boutique.ink),
+              ),
+              const SizedBox(height: 2),
+              // Counted from the very list the grid renders below.
+              CatalogResultCount(
+                count: visibleItems.length,
+                noun: 'pieza',
+                pluralNoun: 'piezas',
+              ),
+            ],
+          ),
         ),
         actions: [
           SizedBox.square(
@@ -289,7 +338,6 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
           ),
           const SizedBox(width: _kHeaderEdgeInset),
         ],
-        actionsWidth: 100,
       ),
       body: ClipRect(
         child: AnimatedSwitcher(
@@ -318,7 +366,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
             primary: false,
             keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
             slivers: [
-              if (visibleProducts.isEmpty)
+              if (visibleItems.isEmpty)
                 SliverFillRemaining(
                   hasScrollBody: false,
                   child: _EmptyCatalogState(
@@ -344,36 +392,30 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
                           variant: ProductTileVariant.edgeToEdge,
                         ),
                         delegate: SliverChildBuilderDelegate(
-                          (context, index) {
-                            final product = visibleProducts[index];
-                            return _BrowseTile(
-                              key: ValueKey('monetta:${product.id}'),
-                              product: product,
-                              facets: widget.facetsById[product.id],
-                            );
-                          },
-                          childCount: visibleProducts.length,
+                          (context, index) => _BrowseTile(
+                            key: ValueKey(visibleItems[index].sourceScopedId),
+                            item: visibleItems[index],
+                            openExternalLink: widget.openExternalLink,
+                          ),
+                          childCount: visibleItems.length,
                         ),
                       ),
                     ),
                   ),
                 ),
-              const SliverToBoxAdapter(
-                child: MonettaFloatingNavigationClearance(),
-              ),
             ],
           ),
         ),
       ),
-      bottomNavigationBar: MonettaFloatingBottomNavigation(
+      bottomNavigationBar: MonettaBottomNavigation(
         current: MonettaBottomDestination.catalog,
-        bagCount: bagCount,
+        bagCount: StoreScope.maybeOf(context)?.bagQuantity ?? widget.bagCount,
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
               Navigator.of(context).popUntil((route) => route.isFirst);
             case MonettaBottomDestination.catalog:
-              break;
+              unawaited(openCategories(context));
             case MonettaBottomDestination.bag:
               unawaited(openBag(context));
             case MonettaBottomDestination.account:
@@ -392,22 +434,40 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
 
 void openCatalogBrowse(
   BuildContext context, {
-  required List<Product> products,
-  required Map<String, CanonicalFacets> facetsById,
+  required List<CatalogItem> items,
 }) {
   final store = StoreScope.of(context);
   Navigator.of(context).push(
-    monettaPageRoute(
+    monettaFadeRoute(
       StoreScope(
         notifier: store,
-        child: CatalogBrowseScreen(
-          products: products,
-          facetsById: facetsById,
-          bagCount: store.bagQuantity,
+        child: BrowseDetailLayout(
+          child: CatalogBrowseScreen(
+            items: items,
+            bagCount: store.bagQuantity,
+          ),
         ),
       ),
     ),
   );
+}
+
+class _HeaderBackSlot extends StatelessWidget {
+  const _HeaderBackSlot();
+
+  @override
+  Widget build(BuildContext context) {
+    final canLeave = ModalRoute.of(context)?.impliesAppBarDismissal ?? false;
+    return Align(
+      alignment: AlignmentDirectional.centerStart,
+      child: canLeave
+          ? const Padding(
+              padding: EdgeInsetsDirectional.only(start: _kHeaderEdgeInset),
+              child: BackButton(),
+            )
+          : null,
+    );
+  }
 }
 
 class _FilterIconButton extends StatelessWidget {
@@ -463,14 +523,12 @@ class _FilterIconButton extends StatelessWidget {
 
 class _CatalogFilterSheet extends StatefulWidget {
   const _CatalogFilterSheet({
-    required this.products,
-    required this.facetsById,
+    required this.items,
     required this.initial,
     required this.visibleCount,
   });
 
-  final List<Product> products;
-  final Map<String, CanonicalFacets> facetsById;
+  final List<CatalogItem> items;
   final _CatalogFilters initial;
 
   final int Function(_CatalogFilters filters) visibleCount;
@@ -518,14 +576,13 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
 
   List<String> get _typeOptions => _optionsWithMatches(
         _bagTypeTerms.keys,
-        (product, facets, value) => _bagTypeFor(product, facets) == value,
+        (item, value) => _bagTypeFor(item) == value,
       );
 
   List<String> get _brandOptions {
     final values = {
-      for (final product in widget.products)
-        if (_brandFor(product, widget.facetsById[product.id]).isNotEmpty)
-          _brandFor(product, widget.facetsById[product.id]),
+      for (final item in widget.items)
+        if (_brandFor(item).isNotEmpty) _brandFor(item),
     }.toList();
     values.sort((a, b) => a.toLowerCase().compareTo(b.toLowerCase()));
     return values;
@@ -537,27 +594,25 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
           'mxn-1000-2499',
           'mxn-2500-4999',
           'mxn-5000-plus',
+          'usd-under-100',
+          'usd-100-249',
+          'usd-250-499',
+          'usd-500-plus',
         ],
-        (product, facets, value) => _priceBandFor(product) == value,
+        (item, value) => _priceBandFor(item) == value,
       );
 
   List<String> get _colorOptions => _optionsWithMatches(
         _colorTerms.keys,
-        (product, facets, value) => _colorsFor(product, facets).contains(value),
+        (item, value) => _colorsFor(item).contains(value),
       );
 
   List<String> _optionsWithMatches(
     Iterable<String> candidates,
-    bool Function(Product product, CanonicalFacets? facets, String value)
-        matches,
+    bool Function(CatalogItem item, String value) matches,
   ) =>
       candidates
-          .where(
-            (value) => widget.products.any(
-              (product) =>
-                  matches(product, widget.facetsById[product.id], value),
-            ),
-          )
+          .where((value) => widget.items.any((item) => matches(item, value)))
           .toList(growable: false);
 
   void _toggleExpanded(_FilterSection section) {
@@ -581,8 +636,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
-    final categoryOptions =
-        _availableCategories(widget.products, widget.facetsById);
+    final categoryOptions = _availableCategories(widget.items);
     final typeOptions = _typeOptions;
     final brandOptions = _brandOptions;
     final priceOptions = _priceOptions;
@@ -896,8 +950,8 @@ class _FilterChoiceRow extends StatelessWidget {
   Widget build(BuildContext context) {
     return InkWell(
       onTap: onTap,
-      child: SizedBox(
-        height: 52,
+      child: ConstrainedBox(
+        constraints: const BoxConstraints(minHeight: 52),
         child: Row(
           children: [
             _SelectionMark(selected: selected, radio: radio),
@@ -1041,106 +1095,120 @@ class _EmptyCatalogState extends StatelessWidget {
 
 class _BrowseTile extends StatelessWidget {
   const _BrowseTile({
-    required this.product,
-    required this.facets,
+    required this.item,
+    required this.openExternalLink,
     super.key,
   });
 
-  final Product product;
-  final CanonicalFacets? facets;
+  final CatalogItem item;
+  final ExternalLinkOpener openExternalLink;
 
   void _tap(BuildContext context) {
+    if (!item.isExternal) {
+      final productId = item.shopifyProductId;
+      if (productId == null) return;
+      final store = StoreScope.of(context);
+      final matches = store.products.where((p) => p.id == productId);
+      if (matches.isNotEmpty) openProduct(context, matches.first);
+      return;
+    }
+
     unawaited(
-      Navigator.of(context).push(
-        MaterialPageRoute<void>(
-          builder: (_) => StoreScope(
-            notifier: StoreScope.of(context),
-            child: ProductScreen(productId: product.id),
-          ),
-        ),
+      showExternalProductDetail(
+        context,
+        item: item,
+        openLink: openExternalLink,
       ),
     );
   }
 
-  /// The store's current copy of this product when it can be bought from here.
+  /// The Monetta product behind this tile when it can be bought from here.
   ///
   /// Reads the store without subscribing to it and degrades to null when the
-  /// screen is mounted without a [StoreScope]; unknown and sold-out pieces
-  /// have nothing to add.
+  /// screen is mounted without a [StoreScope]; external, unknown and sold-out
+  /// pieces have nothing to add.
   Product? _buyableProduct(BuildContext context) {
+    if (item.isExternal) return null;
+    final productId = item.shopifyProductId;
+    if (productId == null) return null;
     final store = context.getInheritedWidgetOfExactType<StoreScope>()?.notifier;
     if (store == null) return null;
-    for (final candidate in store.products) {
-      if (candidate.id == product.id) {
-        return candidate.isInStock ? candidate : null;
-      }
+    for (final product in store.products) {
+      if (product.id == productId) return product.isInStock ? product : null;
     }
     return null;
   }
 
   @override
   Widget build(BuildContext context) {
-    // The same presentation the product grids use; only its view data is
-    // adapted, with the browser's plain-price rules.
-    final data = ProductTileData.forCatalogBrowse(product, facets: facets);
-    final buyable = _buyableProduct(context);
-    return MonettaProductTile(
-      data: data,
-      onTap: () => _tap(context),
-      variant: ProductTileVariant.edgeToEdge,
-      quickAction: buyable == null
-          ? null
-          : ProductQuickAddButton(
-              key: Key('quick-add-${buyable.id}'),
-              product: buyable,
-              productName: data.title,
-            ),
-      // No favourite here: this screen renders without a wishlist-bearing
-      // store.
+    // The same presentation the product grids use. A [CatalogItem] is not
+    // turned into a [Product] — currency, origin and purchase destination
+    // would be lost — only its view data is adapted.
+    final data = ProductTileData.fromCatalogItem(item);
+    final product = _buyableProduct(context);
+    return ProductResultAnchor(
+      productId: item.shopifyProductId ?? item.sourceScopedId,
+      child: MonettaProductTile(
+        data: data,
+        onTap: () => _tap(context),
+        variant: ProductTileVariant.edgeToEdge,
+        quickAction: product == null
+            ? null
+            : ProductQuickAddButton(
+                key: Key('quick-add-${product.id}'),
+                product: product,
+                productName: data.title,
+              ),
+        // No favourite here: an external listing has no Monetta product id to
+        // save, and this screen renders without a wishlist-bearing store.
+        imageOverlay: item.isExternal ? const ExtractedBadge() : null,
+      ),
     );
   }
 }
 
-List<Product> _filterCatalog(
-  List<Product> products,
-  Map<String, CanonicalFacets> facetsById, {
+List<CatalogItem> _filterCatalog(
+  List<CatalogItem> items, {
   required String query,
   required _CatalogFilters filters,
 }) {
   final normalizedQuery = query.trim().toLowerCase();
-  final result = products.where((product) {
-    final facets = facetsById[product.id];
+  final result = items.where((item) {
     if (normalizedQuery.isNotEmpty) {
       final searchable = [
-        product.title,
-        facets?.brand?.value ?? product.vendor,
-        'Monetta',
-        facets?.category?.value ?? '',
+        item.title,
+        item.brand,
+        item.merchant,
+        item.category ?? '',
+        ...item.variants.map((variant) => variant.displayName),
       ].join(' ').toLowerCase();
       if (!searchable.contains(normalizedQuery)) return false;
     }
 
     if (filters.categories.isNotEmpty &&
-        !filters.categories.contains(_categoryFor(facets))) {
+        !filters.categories.contains(_categoryFor(item))) {
       return false;
     }
     if (filters.types.isNotEmpty &&
-        !filters.types.contains(_bagTypeFor(product, facets))) {
+        !filters.types.contains(_bagTypeFor(item))) {
       return false;
     }
     if (filters.brands.isNotEmpty &&
-        !filters.brands.contains(_brandFor(product, facets))) {
+        !filters.brands.contains(_brandFor(item))) {
       return false;
     }
     if (filters.priceBands.isNotEmpty &&
-        !filters.priceBands.contains(_priceBandFor(product))) {
+        !filters.priceBands.contains(_priceBandFor(item))) {
       return false;
     }
     if (filters.colors.isNotEmpty &&
-        filters.colors.intersection(_colorsFor(product, facets)).isEmpty) {
+        filters.colors.intersection(_colorsFor(item)).isEmpty) {
       return false;
     }
-    if (filters.inStockOnly && !product.isInStock) return false;
+    if (filters.inStockOnly &&
+        item.availability != CatalogAvailability.inStock) {
+      return false;
+    }
     return true;
   }).toList(growable: false);
 
@@ -1148,7 +1216,7 @@ List<Product> _filterCatalog(
     case _CatalogSort.featured:
       break;
     case _CatalogSort.newest:
-      result.sort((a, b) => b.updatedAt.compareTo(a.updatedAt));
+      result.sort((a, b) => b.lastObservedAt.compareTo(a.lastObservedAt));
     case _CatalogSort.priceAsc:
       result.sort(_comparePriceAsc);
     case _CatalogSort.priceDesc:
@@ -1157,24 +1225,48 @@ List<Product> _filterCatalog(
   return result;
 }
 
-int _comparePriceAsc(Product a, Product b) => a.price.compareTo(b.price);
+int _comparePriceAsc(CatalogItem a, CatalogItem b) {
+  final aPrice = a.price;
+  final bPrice = b.price;
+  if (aPrice == null && bPrice == null) return 0;
+  if (aPrice == null) return 1;
+  if (bPrice == null) return -1;
+  final currencyOrder = aPrice.currency.index.compareTo(bPrice.currency.index);
+  if (currencyOrder != 0) return currencyOrder;
+  return aPrice.amount.compareTo(bPrice.amount);
+}
 
-String _brandFor(Product product, CanonicalFacets? facets) =>
-    catalogBrowseBrand(product, facets);
+String _brandFor(CatalogItem item) {
+  final brand = item.brand.trim();
+  return humanizeCatalogValue(
+    brand.isEmpty ? item.merchant.trim() : brand,
+  );
+}
 
-String? _bagTypeFor(Product product, CanonicalFacets? facets) {
-  final terms =
-      '${facets?.category?.value ?? ''} ${product.title}'.toLowerCase();
+String? _bagTypeFor(CatalogItem item) {
+  final terms = '${item.category ?? ''} ${item.title}'.toLowerCase();
   for (final entry in _bagTypeTerms.entries) {
     if (entry.value.any(terms.contains)) return entry.key;
   }
   return null;
 }
 
-Set<String> _colorsFor(Product product, CanonicalFacets? facets) {
+Set<String> _colorsFor(CatalogItem item) {
+  // External variant names often append hardware finishes (for example
+  // "Café/Dorado"). Those should not make a brown bag appear under a gold
+  // body-colour filter, so metallic hardware words are ignored in variants;
+  // a genuinely gold or silver bag still matches when its product title says
+  // so explicitly.
+  final variantColors = item.variants.map(
+    (variant) => variant.displayName.toLowerCase().replaceAll(
+          RegExp(r'\b(dorado|dorada|plateado|plateada|gold|silver)\b'),
+          '',
+        ),
+  );
   final terms = [
-    product.title,
-    facets?.category?.value ?? '',
+    item.title,
+    item.category ?? '',
+    ...variantColors,
   ].join(' ').toLowerCase();
   return {
     for (final entry in _colorTerms.entries)
@@ -1182,12 +1274,19 @@ Set<String> _colorsFor(Product product, CanonicalFacets? facets) {
   };
 }
 
-String _priceBandFor(Product product) {
-  final amount = product.price;
-  if (amount < 1000) return 'mxn-under-1000';
-  if (amount < 2500) return 'mxn-1000-2499';
-  if (amount < 5000) return 'mxn-2500-4999';
-  return 'mxn-5000-plus';
+String? _priceBandFor(CatalogItem item) {
+  final price = item.price;
+  if (price == null) return null;
+  if (price.currency == Currency.mxn) {
+    if (price.amount < 1000) return 'mxn-under-1000';
+    if (price.amount < 2500) return 'mxn-1000-2499';
+    if (price.amount < 5000) return 'mxn-2500-4999';
+    return 'mxn-5000-plus';
+  }
+  if (price.amount < 100) return 'usd-under-100';
+  if (price.amount < 250) return 'usd-100-249';
+  if (price.amount < 500) return 'usd-250-499';
+  return 'usd-500-plus';
 }
 
 String _priceBandLabel(String value) => switch (value) {
@@ -1195,6 +1294,10 @@ String _priceBandLabel(String value) => switch (value) {
       'mxn-1000-2499' => '\$1,000 – \$2,499 MXN',
       'mxn-2500-4999' => '\$2,500 – \$4,999 MXN',
       'mxn-5000-plus' => '\$5,000 MXN o más',
+      'usd-under-100' => 'Menos de \$100 USD',
+      'usd-100-249' => '\$100 – \$249 USD',
+      'usd-250-499' => '\$250 – \$499 USD',
+      'usd-500-plus' => '\$500 USD o más',
       _ => value,
     };
 

@@ -4,7 +4,7 @@
 # in docs/web-redesign/shopify-staging/runs/<stamp>-<name>/ through scripts/e2e/lib.mjs.
 #   docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/validate.sh [base-url]
 set -u
-ROOT=/Users/alexis_reyna/MyCode/Monetta
+ROOT=${0:A:h:h:h:h:h:h}
 B=${1:-http://127.0.0.1:9292}
 E=$ROOT/docs/web-redesign/shopify-staging/scripts/e2e
 D=$ROOT/docs/web-redesign/shopify-staging/design-language-2026-10-22
@@ -23,7 +23,7 @@ step() {
 
 echo "# validate.sh $(date -u +%FT%TZ) base=$B head=$(git rev-parse --short HEAD)" >> $LOG
 step build-check node design-system/build.mjs --check
-step port-parity node docs/web-redesign/shopify-staging/scripts/port-css.mjs --check
+step port-parity node tools/style-guideline-theme/port-css.mjs --check
 step theme-check-diff node $D/scripts/theme-check-diff.mjs --out=$OUT/theme-check
 step dl-checks node $D/scripts/checks.mjs --base-url=$B --flows --name=dl-checks
 # Negative controls: each reintroduces one defect this pass fixed; the matching checks must fail.

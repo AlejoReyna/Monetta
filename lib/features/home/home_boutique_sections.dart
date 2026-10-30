@@ -5,49 +5,60 @@
 /// controllers and catalog access stay in [HomeScreen].
 library;
 
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 
-import '../../app/card_lift.dart';
-import '../../app/text_scale_policy.dart';
-import '../../domain/home_content.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../../domain/campaign.dart';
 import '../../domain/product.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/guide_art.dart';
 import '../catalog/product_card.dart';
 import '../product/quick_view.dart';
 
-const String kHomeBannerAsset = 'assets/images/home_banner.jpg';
+/// The home banner's film, with a real editorial poster frame.
+///
+/// `CampaignMedia.monettaHome` points its poster at `hero_poster.jpg`, which is
+/// a blown-out white frame — acceptable behind a full-bleed hero that fills the
+/// screen in under a second, wrong for a banner that is the first thing under
+/// the search field. The film is unchanged; only the still it rests on is.
+final CampaignMedia kHomeBannerCampaign = CampaignMedia(
+  videoUrl: CampaignMedia.monettaHome.videoUrl,
+  posterAsset: 'assets/images/campaign_olive.jpg',
+);
 
-/// Compact hero under the app bar: about a third of the viewport.
-double homeHeroHeight(BuildContext context) =>
-    (MediaQuery.sizeOf(context).height * 0.3).clamp(220.0, 280.0);
+/// Banner height as a share of the viewport.
+///
+/// The brief's 25–32% starting point, landed at 29% and clamped so a small
+/// phone still gets a banner worth looking at and a tall one does not hand the
+/// whole first fold to a single image.
+double homeBannerHeight(BuildContext context) =>
+    (MediaQuery.sizeOf(context).height * 0.29).clamp(200.0, 320.0) *
+    MediaQuery.textScalerOf(context).scale(1).clamp(1.0, double.infinity);
 
 // ---------------------------------------------------------------------------
 // Search
 // ---------------------------------------------------------------------------
 
-/// Search entry, embedded in the hero or shown on its own when it is hidden.
+/// The search field, in the page rather than floating over the hero: on the
+/// reference it is a standing part of the header, visible before any scroll.
 class HomeSearchField extends StatelessWidget {
-  const HomeSearchField({
-    required this.onTap,
-    required this.prompt,
-    this.padding = const EdgeInsets.fromLTRB(
-      BoutiqueSpace.gutter,
-      BoutiqueSpace.md,
-      BoutiqueSpace.gutter,
-      BoutiqueSpace.lg,
-    ),
-    super.key,
-  });
+  const HomeSearchField({required this.onTap, required this.prompt, super.key});
 
   final VoidCallback onTap;
   final String prompt;
-  final EdgeInsetsGeometry padding;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
     return Padding(
-      padding: padding,
+      padding: const EdgeInsets.fromLTRB(
+        BoutiqueSpace.gutter,
+        BoutiqueSpace.md,
+        BoutiqueSpace.gutter,
+        BoutiqueSpace.lg,
+      ),
       child: Semantics(
         button: true,
         label: 'Buscar productos',
@@ -90,42 +101,215 @@ class HomeSearchField extends StatelessWidget {
 // Editorial banner
 // ---------------------------------------------------------------------------
 
-/// The home photograph under the white app bar, with the search field
-/// resting on its lower edge. No copy and no scrims: the photograph is light,
-/// so the bar and the search pill read directly over it.
-class HomeEditorialBanner extends StatelessWidget {
+/// Three-slide opening carousel (guide page 3): swipeable, with indicator
+/// dots, no autoplay and no timers.
+class HomeEditorialBanner extends StatefulWidget {
   const HomeEditorialBanner({
-    required this.searchField,
+    required this.playing,
+    required this.onOpenNew,
+    this.onOpenCatalog,
+    this.onOpenPerfumes,
     super.key,
   });
 
-  final Widget searchField;
+  final bool playing;
+
+  /// Slide 2, «Nueva colección».
+  final VoidCallback onOpenNew;
+
+  /// Slide 1, «Compra fácil desde México»: the full catalog.
+  final VoidCallback? onOpenCatalog;
+
+  /// Slide 3, «Perfumes».
+  final VoidCallback? onOpenPerfumes;
+
+  /// Number of slides, one dot each.
+  static const int slideCount = 3;
+
+  /// Banner height: the home banner's viewport share, capped near the
+  /// photographs' own proportions so a tall phone does not crop them hard.
+  static double heightFor(BuildContext context) {
+    final width = MediaQuery.sizeOf(context).width;
+    return math.min(homeBannerHeight(context), width / 1.8);
+  }
+
+  @override
+  State<HomeEditorialBanner> createState() => _HomeEditorialBannerState();
+}
+
+class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
+  final PageController _controller = PageController();
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
+    final width = MediaQuery.sizeOf(context).width;
+    final gutter = MonettaTokens.gutterFor(width);
+    final serif = MonettaTokens.campaign.sizeFor(width) * 1.05;
+    // Full bleed, square to the edges — figure 03 runs the photograph from
+    // rail to rail under the header, not as an inset card.
     return SizedBox(
       key: const ValueKey('home-compact-hero'),
-      height: homeHeroHeight(context),
+      height: HomeEditorialBanner.heightFor(context),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          Image.asset(
-            kHomeBannerAsset,
-            fit: BoxFit.cover,
-            // Keeps the hand and the bag's hardware in frame on wide crops.
-            alignment: const Alignment(0, .45),
-            excludeFromSemantics: true,
+          PageView(
+            controller: _controller,
+            onPageChanged: (page) => setState(() => _page = page),
+            children: [
+              _BannerSlide(
+                key: const ValueKey('home-banner-slide-easy'),
+                photo: const GuidePhoto(
+                  kGuideHomeBannerEasy,
+                  GuideTextSide.right,
+                ),
+                focus: const Alignment(-.6, 0),
+                gutter: gutter,
+                onTap: widget.onOpenCatalog,
+                children: [
+                  Text.rich(
+                    TextSpan(
+                      children: [
+                        TextSpan(
+                          text: 'Compra ',
+                          style: guideSerifItalicStyle(
+                            context,
+                            size: serif,
+                            color: palette.ink,
+                          ),
+                        ),
+                        TextSpan(
+                          text: 'fácil',
+                          style: guideAccentStyle(
+                            context,
+                            size: serif * 1.7,
+                            color: palette.ink,
+                          ),
+                        ),
+                      ],
+                    ),
+                    textAlign: TextAlign.end,
+                  ),
+                  Text(
+                    'desde México',
+                    textAlign: TextAlign.end,
+                    style: guideSerifItalicStyle(
+                      context,
+                      size: serif,
+                      color: palette.ink,
+                    ),
+                  ),
+                ],
+              ),
+              _BannerSlide(
+                photo: const GuidePhoto(
+                  kGuideHomeBannerNew,
+                  GuideTextSide.left,
+                ),
+                focus: const Alignment(.4, 0),
+                gutter: gutter,
+                actionKey: const ValueKey('home-banner-action'),
+                onTap: widget.onOpenNew,
+                children: [
+                  Text(
+                    'NUEVA',
+                    style: guideSerifStyle(
+                      context,
+                      size: serif * 0.6,
+                      color: palette.ink,
+                      weight: FontWeight.w500,
+                      letterSpacing: serif * 0.1,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    'COLECCIÓN',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: guideSerifStyle(
+                      context,
+                      size: serif * 1.15,
+                      color: palette.ink,
+                      height: 1.05,
+                      letterSpacing: serif * 0.04,
+                    ),
+                  ),
+                  const SizedBox(height: BoutiqueSpace.sm),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: width * .58),
+                    child: Text(
+                      'Un paraíso de marcas\npor descubrir.',
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: guideSerifItalicStyle(
+                        context,
+                        size: serif * 0.62,
+                        color: palette.ink,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              _BannerSlide(
+                key: const ValueKey('home-banner-slide-perfumes'),
+                photo: const GuidePhoto(
+                  kGuideHomeBannerPerfumes,
+                  GuideTextSide.right,
+                ),
+                focus: const Alignment(-.3, 0),
+                gutter: gutter,
+                onTap: widget.onOpenPerfumes,
+                children: [
+                  Text(
+                    'PERFUMES',
+                    textAlign: TextAlign.end,
+                    style: guideSerifStyle(
+                      context,
+                      size: serif * 1.15,
+                      color: palette.ink,
+                      height: 1.05,
+                      letterSpacing: serif * 0.04,
+                    ),
+                  ),
+                  const SizedBox(height: BoutiqueSpace.sm),
+                  ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: width * .5),
+                    child: Text(
+                      'Descubre nuestra selección de fragancias originales',
+                      textAlign: TextAlign.end,
+                      style: guideSerifItalicStyle(
+                        context,
+                        size: serif * 0.62,
+                        color: palette.ink,
+                        weight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              BoutiqueSpace.gutter,
-              BoutiqueSpace.sm,
-              BoutiqueSpace.gutter,
-              BoutiqueSpace.md,
-            ),
-            child: Align(
-              alignment: Alignment.bottomCenter,
-              child: searchField,
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: BoutiqueSpace.md,
+            child: IgnorePointer(
+              child: Center(
+                key: const ValueKey('home-banner-dots'),
+                child: _HeroDots(
+                  count: HomeEditorialBanner.slideCount,
+                  active: _page,
+                ),
+              ),
             ),
           ),
         ],
@@ -134,8 +318,99 @@ class HomeEditorialBanner extends StatelessWidget {
   }
 }
 
+/// One carousel slide: a guide still, a cream wash on the text side and the
+/// copy aligned to that side. The copy scales down instead of overflowing.
+class _BannerSlide extends StatelessWidget {
+  const _BannerSlide({
+    required this.photo,
+    required this.focus,
+    required this.gutter,
+    required this.children,
+    this.onTap,
+    this.actionKey,
+    super.key,
+  });
+
+  final GuidePhoto photo;
+  final Alignment focus;
+  final double gutter;
+  final List<Widget> children;
+  final VoidCallback? onTap;
+  final Key? actionKey;
+
+  @override
+  Widget build(BuildContext context) {
+    final onRight = photo.textSide == GuideTextSide.right;
+    return GestureDetector(
+      key: actionKey,
+      behavior: HitTestBehavior.opaque,
+      onTap: onTap,
+      child: Stack(
+        fit: StackFit.expand,
+        children: [
+          GuideArt(asset: photo.asset, alignment: focus),
+          GuideScrim(textSide: photo.textSide),
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              gutter,
+              BoutiqueSpace.lg,
+              gutter,
+              BoutiqueSpace.xl,
+            ),
+            child: Align(
+              alignment: onRight ? Alignment.centerRight : Alignment.centerLeft,
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment:
+                    onRight ? Alignment.centerRight : Alignment.centerLeft,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: onRight
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: children,
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _HeroDots extends StatelessWidget {
+  const _HeroDots({required this.count, required this.active});
+
+  final int count;
+  final int active;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        for (var i = 0; i < count; i++)
+          Container(
+            key: ValueKey('home-banner-dot-$i'),
+            width: i == active ? 16 : 6,
+            height: 6,
+            margin: const EdgeInsets.symmetric(horizontal: 3),
+            decoration: BoxDecoration(
+              color: i == active
+                  ? palette.goldText
+                  : palette.ink.withValues(alpha: .28),
+              borderRadius: BorderRadius.circular(6),
+            ),
+          ),
+      ],
+    );
+  }
+}
+
 // ---------------------------------------------------------------------------
-// Novedades
+// Nueva colección
 // ---------------------------------------------------------------------------
 
 /// New arrivals as a horizontal rail.
@@ -149,38 +424,86 @@ class HomeNewArrivalsRail extends StatelessWidget {
   const HomeNewArrivalsRail({
     required this.products,
     required this.onOpenAll,
+    this.title = 'Nueva colección',
+    this.sectionKey = const ValueKey('home-section-new-products'),
+    this.railKey = const ValueKey('home-new-products-rail'),
+    this.asGrid = false,
     super.key,
   });
 
   final List<Product> products;
+  final String title;
   final VoidCallback onOpenAll;
+  final Key sectionKey;
+  final Key railKey;
+
+  /// Guide page 3 lays “Nueva colección” as a two-column grid. The follow-up
+  /// rail and wholesale keep the horizontal strip.
+  final bool asGrid;
 
   static const ProductTileDensity _density = ProductTileDensity.compact;
 
   @override
   Widget build(BuildContext context) {
     if (products.isEmpty) return const SizedBox.shrink();
+    if (asGrid) {
+      final shown = products.length > 4 ? products.sublist(0, 4) : products;
+      return Column(
+        key: sectionKey,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          BoutiqueSectionHeader(
+            title: title,
+            actionLabel: 'Ver todo',
+            onAction: onOpenAll,
+          ),
+          LayoutBuilder(
+            builder: (context, constraints) {
+              return GridView.builder(
+                key: railKey,
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BoutiqueSpace.gutter,
+                ),
+                gridDelegate: productGridDelegate(
+                  context,
+                  availableWidth:
+                      constraints.maxWidth - BoutiqueSpace.gutter * 2,
+                ),
+                itemCount: shown.length,
+                itemBuilder: (context, index) {
+                  final product = shown[index];
+                  return ProductCard(
+                    product: product,
+                    onQuickView: () => showProductQuickView(context, product),
+                  );
+                },
+              );
+            },
+          ),
+        ],
+      );
+    }
     final width = MediaQuery.sizeOf(context).width;
     // Just under three cards across, so the rail reads as scrollable.
     final cardWidth = (width * .36).clamp(132.0, 190.0);
-    final textScaler = MediaQuery.textScalerOf(context);
     final railHeight = cardWidth * _density.imageHeightFactor +
-        _density.captionHeight *
-            textScaleFactorFor(textScaler, _density.nameSize);
+        MediaQuery.textScalerOf(context).scale(_density.captionHeight);
 
     return Column(
-      key: const ValueKey('home-section-new-products'),
+      key: sectionKey,
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         BoutiqueSectionHeader(
-          title: 'Novedades',
+          title: title,
           actionLabel: 'Ver todo',
           onAction: onOpenAll,
         ),
         SizedBox(
           height: railHeight,
           child: ListView.separated(
-            key: const ValueKey('home-new-products-rail'),
+            key: railKey,
             scrollDirection: Axis.horizontal,
             clipBehavior: Clip.none,
             padding: const EdgeInsets.symmetric(
@@ -196,7 +519,6 @@ class HomeNewArrivalsRail extends StatelessWidget {
                 child: ProductCard(
                   product: product,
                   density: _density,
-                  showSaleBadge: false,
                   onQuickView: () => showProductQuickView(context, product),
                 ),
               );
@@ -212,33 +534,91 @@ class HomeNewArrivalsRail extends StatelessWidget {
 // Compra por estilo
 // ---------------------------------------------------------------------------
 
-/// Silhouettes — crossbody, tote, shoulder and whatever else the owner has
-/// configured. The bundled artwork is a consistent set shot at one scale on
-/// white, so it is laid out `contain` on a neutral ground rather than cropped.
+/// One entry of «Compra por estilo»: a line icon, its label and the catalog
+/// destination it opens.
+@immutable
+class HomeStyleEntry {
+  const HomeStyleEntry({
+    required this.id,
+    required this.label,
+    required this.collectionTitle,
+    required this.iconAsset,
+    this.category,
+    this.silhouette,
+  });
+
+  /// Stable id, used for the widget key (`home-style-<id>`).
+  final String id;
+  final String label;
+
+  /// Title of the collection the entry opens.
+  final String collectionTitle;
+  final String iconAsset;
+  final String? category;
+  final String? silhouette;
+}
+
+/// The guide's five styles, in order. Silhouettes are the catalog's own
+/// facet values; perfumes are a category.
+const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
+  HomeStyleEntry(
+    id: 'crossbody',
+    label: 'Crossbody',
+    collectionTitle: 'Crossbody',
+    iconAsset: kGuideIconStyleCrossbody,
+    category: 'bolsa',
+    silhouette: 'crossbody',
+  ),
+  HomeStyleEntry(
+    id: 'tote',
+    label: 'Tote',
+    collectionTitle: 'Totes',
+    iconAsset: kGuideIconStyleTote,
+    category: 'bolsa',
+    silhouette: 'tote',
+  ),
+  HomeStyleEntry(
+    id: 'shoulder',
+    label: 'Shoulder',
+    collectionTitle: 'Shoulder',
+    iconAsset: kGuideIconStyleShoulder,
+    category: 'bolsa',
+    silhouette: 'shoulder',
+  ),
+  HomeStyleEntry(
+    id: 'satchel',
+    label: 'Satchel',
+    collectionTitle: 'Satchel',
+    iconAsset: kGuideIconStyleSatchel,
+    category: 'bolsa',
+    silhouette: 'satchel',
+  ),
+  HomeStyleEntry(
+    id: 'perfumes',
+    label: 'Perfumes',
+    collectionTitle: 'Perfumes',
+    iconAsset: kGuideIconStylePerfumes,
+    category: 'perfume',
+  ),
+];
+
+/// «Compra por estilo»: five line icons across, label underneath, no card.
 class HomeShopByStyle extends StatelessWidget {
   const HomeShopByStyle({
-    required this.cards,
     required this.onOpen,
+    this.entries = kHomeStyleEntries,
     this.onSeeAll,
     super.key,
   });
 
-  final List<HomeCollectionCard> cards;
-  final void Function(HomeCollectionCard card) onOpen;
+  final List<HomeStyleEntry> entries;
+  final void Function(HomeStyleEntry entry) onOpen;
   final VoidCallback? onSeeAll;
 
   @override
   Widget build(BuildContext context) {
-    if (cards.isEmpty) return const SizedBox.shrink();
-    final width = MediaQuery.sizeOf(context).width;
-    // Iconos más grandes: cada tile muestra un tercio del ancho para que
-    // cinco estilos siempre desborden y el rail se lea como scrolleable.
-    final tileWidth = (width * .32).clamp(112.0, 172.0);
-    // Imagen cuadrada + banda de etiqueta centrada de una línea.
-    final labelBand =
-        34 * textScaleFactorFor(MediaQuery.textScalerOf(context), 13);
-    final tileHeight = tileWidth + 8 + labelBand;
-
+    if (entries.isEmpty) return const SizedBox.shrink();
+    final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
     return Column(
       key: const ValueKey('home-section-bag-types'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -248,28 +628,39 @@ class HomeShopByStyle extends StatelessWidget {
           actionLabel: onSeeAll == null ? null : 'Ver todo',
           onAction: onSeeAll,
         ),
-        SizedBox(
-          height: tileHeight,
-          child: ListView.separated(
-            key: const ValueKey('home-style-rail'),
-            scrollDirection: Axis.horizontal,
-            physics: const AlwaysScrollableScrollPhysics(),
-            clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(
-              horizontal: BoutiqueSpace.gutter,
-            ),
-            itemCount: cards.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(width: BoutiqueSpace.md),
-            itemBuilder: (context, index) => SizedBox(
-              width: tileWidth,
-              child: _StyleTile(
-                key: ValueKey('home-style-${cards[index].handle}'),
-                card: cards[index],
-                onTap: () => onOpen(cards[index]),
-              ),
-            ),
-          ),
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.sm),
+          child: large
+              ? Wrap(
+                  key: const ValueKey('home-style-rail'),
+                  alignment: WrapAlignment.center,
+                  runSpacing: BoutiqueSpace.md,
+                  children: [
+                    for (final entry in entries)
+                      SizedBox(
+                        width: 108,
+                        child: _StyleTile(
+                          key: ValueKey('home-style-${entry.id}'),
+                          entry: entry,
+                          onTap: () => onOpen(entry),
+                        ),
+                      ),
+                  ],
+                )
+              : Row(
+                  key: const ValueKey('home-style-rail'),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    for (final entry in entries)
+                      Expanded(
+                        child: _StyleTile(
+                          key: ValueKey('home-style-${entry.id}'),
+                          entry: entry,
+                          onTap: () => onOpen(entry),
+                        ),
+                      ),
+                  ],
+                ),
         ),
       ],
     );
@@ -277,9 +668,9 @@ class HomeShopByStyle extends StatelessWidget {
 }
 
 class _StyleTile extends StatelessWidget {
-  const _StyleTile({required this.card, required this.onTap, super.key});
+  const _StyleTile({required this.entry, required this.onTap, super.key});
 
-  final HomeCollectionCard card;
+  final HomeStyleEntry entry;
   final VoidCallback onTap;
 
   @override
@@ -287,45 +678,41 @@ class _StyleTile extends StatelessWidget {
     final palette = context.boutique;
     return Semantics(
       button: true,
-      label: 'Ver ${card.title}',
+      label: 'Ver ${entry.label}',
       excludeSemantics: true,
       onTap: onTap,
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: MonettaCardLift(
-          borderRadius: BorderRadius.zero,
-          child: ColoredBox(
-            color: Colors.transparent,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // Icono sin borde ni fondo: la silueta va directa sobre el
-                // lienzo, contenida y centrada, nunca recortada.
-                Expanded(
-                  child: Center(
-                    child: HomeAssetImage(
-                      imageUrl: card.imageUrl,
-                      fallbackAsset: card.fallbackAsset,
-                      fit: BoxFit.contain,
-                    ),
-                  ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(
+            horizontal: BoutiqueSpace.xs,
+            vertical: BoutiqueSpace.xs,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Every icon sits in the same box so the five labels share a
+              // baseline whatever the artwork's own proportions.
+              SizedBox(
+                height: 64,
+                child: Image.asset(
+                  entry.iconAsset,
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true,
+                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
                 ),
-                const SizedBox(height: 8),
-                Text(
-                  card.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  textAlign: TextAlign.center,
-                  style: boutiqueText(
-                    size: 13,
-                    height: 1.2,
-                    color: palette.ink,
-                  ),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: BoutiqueSpace.sm),
+              Text(
+                entry.label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                textAlign: TextAlign.center,
+                style:
+                    boutiqueText(size: 12.5, height: 1.2, color: palette.ink),
+              ),
+            ],
           ),
         ),
       ),

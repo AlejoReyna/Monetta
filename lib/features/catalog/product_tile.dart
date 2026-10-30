@@ -4,27 +4,30 @@
 /// draw the same anatomy: a complete photograph on a neutral ground, an
 /// optional data-backed badge, an optional favourite, then brand, name and
 /// price. The screens differ in *what they scope*, never in how a piece looks.
-/// The full catalog keeps its plain-price data and compact caption reserve,
-/// with the same white card and inset photograph as the other surfaces.
+/// The one deliberate exception is the full catalog, which uses the
+/// [ProductTileVariant.edgeToEdge] variant: the same data in a continuous
+/// photographic grid.
 ///
 /// ## Why a presentation widget and not one model
 ///
-/// The tile never reads a [Product] itself: the *view data* is shared and each
-/// screen adapts what it knows through a small factory,
-/// [ProductTileData.fromProduct] for the product grids and
-/// [ProductTileData.forCatalogBrowse] for the full-catalog browser.
+/// [Product] (Shopify, MXN, Monetta checkout) and [CatalogItem] (source
+/// independent, possibly USD, possibly an external merchant) are genuinely
+/// different domain objects — collapsing them would lose currency, identity,
+/// origin and purchase destination. So the *view data* is shared and the two
+/// models keep their own small adapters:
+/// [ProductTileData.fromProduct] and [ProductTileData.fromCatalogItem].
 library;
 
+import '../../app/storefront_layout.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/card_lift.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/shopper_copy.dart';
-import '../../app/text_scale_policy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../data/normalize/facets.dart';
-import '../../domain/money.dart';
+import '../../domain/catalog_item.dart';
 import '../../domain/product.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
@@ -63,20 +66,20 @@ extension ProductTileMetrics on ProductTileDensity {
   /// caption peaks near 100pt with a wrapped compare-at price (was 98pt and
   /// overflowed by 9pt); a compact caption peaks near 82pt when the price
   /// wraps under a narrow card (was 74pt and overflowed by up to 25pt).
-  double get captionHeight => this == ProductTileDensity.compact ? 100 : 124;
+  double get captionHeight => this == ProductTileDensity.compact ? 88 : 112;
 }
 
 /// Which presentation a [MonettaProductTile] takes. The data and the anatomy
 /// (photo, brand, name, price) are the same; only the framing differs.
 enum ProductTileVariant {
-  /// A standalone white card with an inset photograph. The whole tile lifts
-  /// when pressed. Used by Home, search, collections and
+  /// A standalone card: the photo is inset on a tinted, rounded ground and the
+  /// whole tile lifts when pressed. Used by Home, search, collections and
   /// favourites, and the default.
   card,
 
-  /// The full catalog's plain-price card, with a tighter caption reserve and
-  /// no lift. The legacy name is retained for existing callers; its photograph
-  /// now has the same inset and rounded frame as every product card.
+  /// The full catalog's continuous photographic grid. Photos run to the edges
+  /// and meet 4pt apart, with no frame, radius, inset or lift; only the
+  /// caption is inset.
   edgeToEdge,
 }
 
@@ -87,47 +90,54 @@ const double _nameLineHeight = 1.3;
 const double _priceLineHeight = 1.2;
 const double _brandGap = 2;
 const double _priceGap = BoutiqueSpace.xs;
+const double _footerGap = BoutiqueSpace.sm;
+
+/// Height a grid reserves under a tile that carries a footer control.
+const double kTileFooterExtent = _footerGap + 40;
 
 extension ProductTileVariantMetrics on ProductTileVariant {
   bool get _edge => this == ProductTileVariant.edgeToEdge;
 
   /// Horizontal gap between grid columns.
-  double get columnSpacing => BoutiqueSpace.md;
+  double get columnSpacing => _edge ? 4 : BoutiqueSpace.md;
 
-  /// Vertical gap between standalone cards.
-  double get rowSpacing => _edge ? BoutiqueSpace.md : BoutiqueSpace.xl;
+  /// Vertical gap between grid rows. The edge-to-edge tile carries its own
+  /// trailing air instead.
+  double get rowSpacing => _edge ? 0 : BoutiqueSpace.xl;
 
   /// Space between the tile edge and the photograph.
-  double get photoInset => BoutiqueSpace.sm;
+  double get photoInset => _edge ? 0 : BoutiqueSpace.sm;
 
-  BorderRadius get photoRadius => BoutiqueRadius.tile;
+  BorderRadius get photoRadius =>
+      _edge ? BorderRadius.zero : BoutiqueRadius.tile;
 
   /// Horizontal inset of the caption text.
-  double get captionInset => BoutiqueSpace.md;
+  double get captionInset => _edge ? BoutiqueSpace.sm : 0;
 
   /// Gap between the photograph and the caption.
   double get captionGap => _edge ? 10 : BoutiqueSpace.md;
 
-  /// Air inside the card under its caption.
-  double get captionTrailing =>
-      _edge ? BoutiqueSpace.xl + BoutiqueSpace.xs : BoutiqueSpace.sm;
+  /// Air inside the tile, under the caption (there is no row spacing).
+  double get captionTrailing => _edge ? BoutiqueSpace.xl + BoutiqueSpace.xs : 0;
 
   /// Whether the tile rises when pressed.
   bool get lifts => !_edge;
 
   /// Height the grid reserves under the photograph.
   ///
-  /// [ProductTileVariant.card] keeps the measured allowance. The catalog
+  /// [ProductTileVariant.card] keeps the measured allowance. The edge-to-edge
   /// tile reserves exactly brand, a two-line name and one price line. Each
   /// font size is scaled on its own, so a non-linear scaler (Android 14+)
   /// grows the reserve exactly as it grows the text.
   double captionExtent(ProductTileDensity density, TextScaler textScaler) {
-    // The caption is sized for its text, not for its own height: the factor
-    // is read at the name size so a root cap by font size cannot shrink the
-    // reserve below what the text needs.
     if (!_edge) {
-      return density.captionHeight *
-          textScaleFactorFor(textScaler, density.nameSize);
+      // Scale the measured block by the name's factor. Passing the whole
+      // height to [TextScaler.scale] treats it as one font size, so a
+      // non-linear scaler caps a 100px block at 1.2x while the 14px name
+      // still grows to 1.5x and the caption overflows.
+      final name = density.nameSize;
+      final factor = name == 0 ? 1.0 : textScaler.scale(name) / name;
+      return density.captionHeight * factor;
     }
     return captionGap +
         textScaler.scale(density.brandSize) * _brandLineHeight +
@@ -203,11 +213,10 @@ class ProductTileData {
     Product product, {
     CanonicalFacets? facets,
     bool allowNewBadge = true,
-    bool allowDiscounts = true,
   }) {
     final brand = facets?.brand?.value;
     final discount = (product.discountFraction * 100).round();
-    final badge = allowDiscounts && product.isOnSale && discount > 0
+    final badge = product.isOnSale && discount > 0
         ? ProductTileBadge(label: '-$discount%', tone: ProductBadgeTone.sale)
         : allowNewBadge && (facets?.newArrival ?? false)
             ? const ProductTileBadge(
@@ -225,41 +234,81 @@ class ProductTileData {
             : facets.colors.first.value,
       ),
       priceLabel: kMoney.format(product.price),
-      compareAtLabel: allowDiscounts && product.isOnSale
-          ? kMoney.format(product.compareAtPrice)
-          : null,
+      compareAtLabel:
+          product.isOnSale ? kMoney.format(product.compareAtPrice) : null,
       badge: badge,
       imageUrls: product.images,
       inStock: product.isInStock,
     );
   }
 
-  /// Full-catalog browser → tile.
+  /// Source-independent catalog item → tile.
   ///
-  /// Currency stays explicit ([formatCatalogMoney] prints `MXN`) and no badge
-  /// or struck-through price is derived here: the browser shows the plain
-  /// current price. [facets] supplies the brand, as in [catalogBrowseBrand].
-  factory ProductTileData.forCatalogBrowse(
-    Product product, {
-    CanonicalFacets? facets,
-  }) {
+  /// Currency stays explicit ([formatCatalogMoney] prints `MXN`/`USD`) and an
+  /// unknown price is never coerced to `$0`. No badge is derived here: a
+  /// [CatalogItem] carries no `compare_at`, and `sourcePrice` is the merchant's
+  /// own listing, not a Monetta discount.
+  factory ProductTileData.fromCatalogItem(CatalogItem item) {
     return ProductTileData(
-      brand: catalogBrowseBrand(product, facets),
-      title: shopperProductName(product.title),
-      priceLabel: formatCatalogMoney(
-        Money(amount: product.price, currency: Currency.mxn),
-      ),
-      imageUrls: [if (product.primaryImage case final url?) url],
-      inStock: product.isInStock,
+      brand: _catalogBrandLabel(item),
+      title: item.isExternal
+          ? externalProductName(title: item.title, category: item.category)
+          : shopperProductName(item.title),
+      priceLabel: formatCatalogMoney(item.price),
+      imageUrls: [if (item.imageUrl case final url?) url],
+      inStock: item.availability != CatalogAvailability.outOfStock,
     );
   }
 }
 
-/// The humanized brand the full-catalog browser shows and filters by: the
-/// canonical brand facet, else the raw vendor, else the store name.
-String catalogBrowseBrand(Product product, CanonicalFacets? facets) {
-  final brand = (facets?.brand?.value ?? product.vendor).trim();
-  return humanizeCatalogValue(brand.isEmpty ? 'Monetta' : brand);
+String _catalogBrandLabel(CatalogItem item) {
+  final brand = item.brand.trim();
+  return humanizeCatalogValue(brand.isEmpty ? item.merchant.trim() : brand);
+}
+
+/// The brown «VER PRODUCTO» pill of the collection grid.
+class TileViewProductButton extends StatelessWidget {
+  const TileViewProductButton({required this.onPressed, super.key});
+
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Semantics(
+      button: true,
+      label: 'Ver producto',
+      excludeSemantics: true,
+      onTap: onPressed,
+      child: SizedBox(
+        height: 40,
+        width: double.infinity,
+        child: Material(
+          color: palette.action,
+          shape: const StadiumBorder(),
+          child: InkWell(
+            customBorder: const StadiumBorder(),
+            onTap: onPressed,
+            child: Center(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  'VER PRODUCTO',
+                  maxLines: 1,
+                  style: boutiqueText(
+                    size: 12,
+                    weight: FontWeight.w600,
+                    color: palette.onAction,
+                    height: 1.1,
+                  ).copyWith(letterSpacing: 0.6),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
 }
 
 /// The shared card.
@@ -273,14 +322,13 @@ class MonettaProductTile extends StatelessWidget {
     required this.onTap,
     this.density = ProductTileDensity.grid,
     this.variant = ProductTileVariant.card,
-    this.showSaleBadge = true,
-    this.photoInset,
     this.wishlisted = false,
     this.onToggleWishlist,
     this.onQuickView,
     this.quickAction,
     this.imageOverlay,
     this.eyebrow,
+    this.footer,
     super.key,
   });
 
@@ -290,9 +338,6 @@ class MonettaProductTile extends StatelessWidget {
 
   /// See [ProductTileVariant]; the card by default.
   final ProductTileVariant variant;
-
-  final bool showSaleBadge;
-  final double? photoInset;
 
   /// Favourite state. The heart is only drawn when [onToggleWishlist] is
   /// given, so a surface without wishlist support never shows a dead control.
@@ -309,19 +354,24 @@ class MonettaProductTile extends StatelessWidget {
   /// both. A long press still opens the quick view through [onQuickView].
   final Widget? quickAction;
 
-  /// Extra marker pinned to the top-left of the photograph. Drawn under the
-  /// discount badge's slot.
+  /// Extra marker pinned to the top-left of the photograph, e.g. the
+  /// external-source badge. Drawn under the discount badge's slot.
   final Widget? imageOverlay;
 
   /// Optional short line above the brand — a real restock or discount reason,
   /// never a recommender sentence.
   final String? eyebrow;
 
+  /// A full-width control under the price (the collection grid's «VER
+  /// PRODUCTO»). A grid that shows it reserves [kTileFooterExtent] more
+  /// height per row through [productGridDelegate].
+  final Widget? footer;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
 
-    final content = GestureDetector(
+    final tile = GestureDetector(
       onTap: onTap,
       onLongPress: onQuickView,
       behavior: HitTestBehavior.opaque,
@@ -334,8 +384,6 @@ class MonettaProductTile extends StatelessWidget {
             child: _TileImage(
               data: data,
               variant: variant,
-              showSaleBadge: showSaleBadge,
-              photoInset: photoInset ?? variant.photoInset,
               wishlisted: wishlisted,
               onToggleWishlist: onToggleWishlist,
               onQuickView: onQuickView,
@@ -345,12 +393,7 @@ class MonettaProductTile extends StatelessWidget {
           ),
           SizedBox(height: variant.captionGap),
           Padding(
-            padding: EdgeInsets.fromLTRB(
-              variant.captionInset,
-              0,
-              variant.captionInset,
-              variant.captionTrailing,
-            ),
+            padding: EdgeInsets.symmetric(horizontal: variant.captionInset),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisSize: MainAxisSize.min,
@@ -390,6 +433,10 @@ class MonettaProductTile extends StatelessWidget {
                 ),
                 const SizedBox(height: _priceGap),
                 _PriceLine(data: data, density: density, variant: variant),
+                if (footer case final control?) ...[
+                  const SizedBox(height: _footerGap),
+                  control,
+                ],
               ],
             ),
           ),
@@ -397,28 +444,11 @@ class MonettaProductTile extends StatelessWidget {
       ),
     );
 
-    final tile = DecoratedBox(
-      key: const ValueKey('product-tile-card-surface'),
-      decoration: BoxDecoration(
-        color: palette.canvas,
-        borderRadius: BoutiqueRadius.card,
-        border: Border.all(color: palette.hairline, width: .5),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: .035),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      child: ClipRRect(borderRadius: BoutiqueRadius.card, child: content),
-    );
-
     return Semantics(
       button: true,
       label: data.semanticLabel,
       child: variant.lifts
-          ? MonettaCardLift(borderRadius: BoutiqueRadius.card, child: tile)
+          ? MonettaCardLift(borderRadius: BoutiqueRadius.tile, child: tile)
           : tile,
     );
   }
@@ -496,8 +526,6 @@ class _TileImage extends StatefulWidget {
   const _TileImage({
     required this.data,
     required this.variant,
-    required this.showSaleBadge,
-    required this.photoInset,
     required this.wishlisted,
     required this.onToggleWishlist,
     required this.overlay,
@@ -507,8 +535,6 @@ class _TileImage extends StatefulWidget {
 
   final ProductTileData data;
   final ProductTileVariant variant;
-  final bool showSaleBadge;
-  final double photoInset;
   final bool wishlisted;
   final VoidCallback? onToggleWishlist;
   final VoidCallback? onQuickView;
@@ -545,13 +571,16 @@ class _TileImageState extends State<_TileImage> {
     final url = candidates.isEmpty ? null : candidates[_activeIndex];
     final badge = widget.data.badge;
 
+    final edge = widget.variant == ProductTileVariant.edgeToEdge;
+
     final photo = MonettaImage(
       key: ValueKey(url ?? 'fallback'),
       url: url,
       fit: BoxFit.contain,
-      backgroundColor:
-          widget.photoInset == 0 ? kPackshotGround : palette.surface,
-      maxCoverTrim: widget.photoInset == 0 ? kPackshotMaxCoverTrim : null,
+      // Edge to edge: the widget inset is gone, but the white margin the file
+      // already carries stays. `cover` is chosen only when it crops less than
+      // that margin; otherwise the photo is contained whole.
+      maxCoverTrim: edge ? kPackshotMaxCoverTrim : null,
       cacheWidth: widget.data.imageCacheWidth,
       fallbackLabel: widget.data.fallbackLabel,
       onFailed: _advance,
@@ -562,13 +591,13 @@ class _TileImageState extends State<_TileImage> {
       children: [
         // Card: `contain` with a small inset. A handbag's handle and straps
         // are the part a shopper recognises, and `cover` crops exactly those.
-        Padding(
-          padding: EdgeInsets.all(widget.photoInset),
-          child: ClipRRect(
-            borderRadius: widget.variant.photoRadius,
+        if (edge)
+          photo
+        else
+          Padding(
+            padding: EdgeInsets.all(widget.variant.photoInset),
             child: photo,
           ),
-        ),
         if (!widget.data.inStock)
           IgnorePointer(
             child: ColoredBox(
@@ -594,8 +623,7 @@ class _TileImageState extends State<_TileImage> {
               ),
             ),
           ),
-        if (badge != null &&
-            (widget.showSaleBadge || badge.tone != ProductBadgeTone.sale))
+        if (badge != null)
           Positioned(
             top: BoutiqueSpace.sm,
             left: BoutiqueSpace.sm,
@@ -631,7 +659,11 @@ class _TileImageState extends State<_TileImage> {
       ],
     );
 
-    return stack;
+    if (edge) return stack;
+    return ClipRRect(
+      borderRadius: widget.variant.photoRadius,
+      child: ColoredBox(color: palette.surfaceDeep, child: stack),
+    );
   }
 }
 
@@ -752,12 +784,8 @@ class _QuickViewButton extends StatelessWidget {
 ///
 /// Columns drop rather than squeeze: below ~150pt a two-column tile can no
 /// longer show a bag and a readable price at the same time.
-int productGridColumns(double width) {
-  if (width >= 1060) return 4;
-  if (width >= 720) return 3;
-  if (width < 340) return 1;
-  return 2;
-}
+int productGridColumns(double width) =>
+    StorefrontLayout.columns(width, TextScaler.noScaling);
 
 /// A grid delegate sized from the real tile width and the shopper's own text
 /// scale, so large type produces taller rows instead of clipped captions.
@@ -770,8 +798,12 @@ SliverGridDelegate productGridDelegate(
   ProductTileVariant variant = ProductTileVariant.card,
   double? spacing,
   double? rowSpacing,
+  double footerExtent = 0,
 }) {
-  final columns = productGridColumns(availableWidth);
+  final columns = StorefrontLayout.columns(
+    availableWidth,
+    MediaQuery.textScalerOf(context),
+  );
   final columnSpacing = spacing ?? variant.columnSpacing;
   final tileWidth = (availableWidth - columnSpacing * (columns - 1)) / columns;
   return SliverGridDelegateWithFixedCrossAxisCount(
@@ -779,6 +811,7 @@ SliverGridDelegate productGridDelegate(
     crossAxisSpacing: columnSpacing,
     mainAxisSpacing: rowSpacing ?? variant.rowSpacing,
     mainAxisExtent: tileWidth * density.imageHeightFactor +
-        variant.captionExtent(density, MediaQuery.textScalerOf(context)),
+        variant.captionExtent(density, MediaQuery.textScalerOf(context)) +
+        footerExtent,
   );
 }

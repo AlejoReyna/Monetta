@@ -8,7 +8,7 @@
 ///
 /// Product images need the network and never load in tests, so cards stay in
 /// their placeholder state, the same on every run. The tests carry the
-/// `golden` tag: Ubuntu excludes them and macOS runs them, with a pixel
+/// `golden` tag: Linux skips them and local macOS runs them, with a pixel
 /// tolerance of 0.5 % (see `tolerant_golden_comparator.dart`) because CoreText
 /// can vary between macOS releases.
 ///
@@ -18,6 +18,7 @@
 library;
 
 import 'dart:async';
+import 'dart:io';
 
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
@@ -47,6 +48,7 @@ import 'package:monetta_app/main.dart';
 import '../support/bundled_fonts.dart';
 import '../support/product_screen_harness.dart' show mockPathProvider;
 import '../support/tolerant_golden_comparator.dart';
+import '../support/ui_catalog_fixture.dart';
 
 /// Phones in logical pixels, at a device pixel ratio of 3.0.
 const List<Size> _phones = <Size>[Size(375, 812), Size(440, 956)];
@@ -293,7 +295,9 @@ void main() {
           addTearDown(tester.view.resetDevicePixelRatio);
           mockPathProvider();
 
-          final store = CatalogStore(database: openTestDatabase());
+          final database = openTestDatabase();
+          await seedUi04Catalog(database);
+          final store = CatalogStore(database: database);
           addTearDown(store.dispose);
           await store.loadFromAsset();
 
@@ -326,6 +330,7 @@ void main() {
           );
         },
         tags: ['golden'],
+        skip: !Platform.isMacOS,
       );
     }
   }

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/data/local/database.dart';
-import 'package:monetta_app/data/normalize/facets.dart';
+import 'package:monetta_app/domain/catalog_item.dart';
 import 'package:monetta_app/domain/product.dart';
 import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
@@ -32,11 +32,11 @@ const Key kQuickViewPrimaryKey = Key('quick-view-primary');
 const Key kQuickViewViewProductKey = Key('quick-view-view-product');
 const Key kQuickViewErrorKey = Key('quick-view-error');
 
-const String kAddLabel = 'Agregar al carrito';
-const String kPendingLabel = 'Agregando…';
+const String kAddLabel = 'AGREGAR A BOLSA';
+const String kPendingLabel = 'AGREGANDO…';
 const String kChooseLabel = 'Elige una opción';
 const String kRestockLabel = 'Avísame cuando vuelva';
-const String kViewProductLabel = 'Ver producto';
+const String kViewProductLabel = 'VER PRODUCTO';
 const String kAddFailureMessage =
     'No pudimos agregar la pieza. Intenta de nuevo.';
 const String kQuickViewTooltip = 'Vista rápida';
@@ -94,11 +94,7 @@ Product singleNamedVariantProduct({
       id: id,
       title: title,
       variants: [
-        syntheticVariant(
-          id: 'v-negro-unica',
-          title: 'Negro',
-          price: 1850,
-        ),
+        syntheticVariant(id: 'v-negro-unica', title: 'Negro', price: 1850),
       ],
     );
 
@@ -225,22 +221,15 @@ Widget gridApp(
     );
 
 /// [CatalogBrowseScreen] with the store above it, or without when [store] is
-/// null (the browse screen must degrade gracefully). Facets default to the
-/// store's own.
+/// null (the browse screen must degrade gracefully).
 Widget catalogApp(
   CatalogStore? store,
-  List<Product> products, {
-  Map<String, CanonicalFacets>? facetsById,
+  List<CatalogItem> items, {
   double scale = 1.0,
-}) {
-  final screen = CatalogBrowseScreen(
-    products: products,
-    facetsById: facetsById ?? store?.facetsById ?? const {},
-  );
-  return store == null
-      ? externalApp(screen, scale: scale)
-      : fichaApp(store, screen, scale: scale);
-}
+}) =>
+    store == null
+        ? externalApp(CatalogBrowseScreen(items: items), scale: scale)
+        : fichaApp(store, CatalogBrowseScreen(items: items), scale: scale);
 
 /// A host with one button that opens the quick view of [product].
 Widget quickViewApp(
@@ -255,11 +244,8 @@ Widget quickViewApp(
         body: Builder(
           builder: (context) => Center(
             child: ElevatedButton(
-              onPressed: () => openQuickView(
-                context,
-                product,
-                requireChoice: requireChoice,
-              ),
+              onPressed: () =>
+                  openQuickView(context, product, requireChoice: requireChoice),
               child: const Text('ABRIR'),
             ),
           ),
@@ -337,8 +323,15 @@ Finder _swatch(String variantTitle) => find.byWidgetPredicate(
 /// The tappable option of [variant]: its swatch or its text chip.
 Finder optionOf(Product product, ProductVariant variant) =>
     hasReliableColorOptions(product)
-        ? _swatch(variant.title).first
+        ? _swatch(variant.title)
         : optionChip(variant.title);
+
+Finder _sheetVerticalScroll() => find.descendant(
+      of: quickViewSheet(),
+      matching: find.byWidgetPredicate(
+        (widget) => widget is Scrollable && widget.axis == Axis.vertical,
+      ),
+    );
 
 /// Brings [target] into view inside the quick view's scrolling list. The list
 /// is lazy, so a far child may not exist yet: scroll until it is built.
@@ -347,9 +340,7 @@ Future<void> revealInSheet(WidgetTester tester, Finder target) async {
     await tester.scrollUntilVisible(
       target,
       120,
-      scrollable: find
-          .descendant(of: quickViewSheet(), matching: find.byType(Scrollable))
-          .first,
+      scrollable: _sheetVerticalScroll(),
     );
   }
   await tester.ensureVisible(target);

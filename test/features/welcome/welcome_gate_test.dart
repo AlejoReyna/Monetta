@@ -61,7 +61,7 @@ void main() {
     await pumpApp(tester);
 
     expect(find.byKey(const ValueKey('welcome-screen')), findsOneWidget);
-    expect(find.text('Comenzar'), findsOneWidget);
+    expect(find.text('COMENZAR'), findsOneWidget);
     expect(find.byType(MonettaWordmark), findsWidgets);
   });
 
@@ -72,7 +72,10 @@ void main() {
     await pumpApp(tester);
 
     expect(find.byKey(const ValueKey('welcome-screen')), findsNothing);
-    expect(find.byKey(const ValueKey('home-search-bar')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('home-appbar-search-button')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('a shopper who skipped earlier is not asked again', (
@@ -110,7 +113,10 @@ void main() {
     expect(store.profile.weights, isEmpty);
     expect(store.feed(), isNotEmpty);
     expect(find.byKey(const ValueKey('welcome-screen')), findsNothing);
-    expect(find.byKey(const ValueKey('home-search-bar')), findsOneWidget);
+    expect(
+      find.byKey(const ValueKey('home-appbar-search-button')),
+      findsOneWidget,
+    );
   });
 
   testWidgets('skipping never leaves the shopper on an empty app', (

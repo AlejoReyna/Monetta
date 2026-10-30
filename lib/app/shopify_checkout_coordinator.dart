@@ -3,10 +3,13 @@ library;
 
 import 'dart:convert';
 import 'package:crypto/crypto.dart';
+
 import '../data/shopify/cart/cart_api.dart';
 import '../data/shopify/cart/cart_repository.dart';
 import '../data/shopify/cart/cart_session_store.dart';
 import '../data/shopify/cart/checkout_launcher.dart';
+import '../data/shopify/cart/storefront_password_gate.dart';
+import '../domain/cart.dart';
 import 'cart_controller.dart';
 
 typedef CheckoutCompletion = Future<void> Function(
@@ -30,21 +33,25 @@ final class ShopifyCheckoutCoordinator {
     required CheckoutUrlPolicy urlPolicy,
     required CartSessionStore sessions,
     ExternalCheckoutOpener? externalOpener,
+    StorefrontPasswordProbe? passwordProbe,
   })  : _launcher = launcher,
         _urlPolicy = urlPolicy,
         _sessions = sessions,
-        _externalOpener = externalOpener;
+        _externalOpener = externalOpener,
+        _passwordProbe = passwordProbe;
 
   final CheckoutLauncher _launcher;
   final CheckoutUrlPolicy _urlPolicy;
   final CartSessionStore _sessions;
   final ExternalCheckoutOpener? _externalOpener;
+  final StorefrontPasswordProbe? _passwordProbe;
 
   Future<void> Function()? _pendingCompletion;
   CartSessionScope? _pendingScope;
 
   bool _presenting = false;
   bool _openingFallback = false;
+  int _generation = 0;
   ValidatedCheckoutUrl? _latestUrl;
 
   bool get isPresenting => _presenting;
@@ -56,16 +63,18 @@ final class ShopifyCheckoutCoordinator {
 
   Future<void> preload(CartReconciliation reconciliation) async {
     if (_presenting) return;
+    final generation = ++_generation;
     _latestUrl = null;
     final cart = reconciliation.cart;
     if (cart == null ||
-        cart.isEmpty ||
-        cart.totalQuantity <= 0 ||
         reconciliation.status != CartReconciliationStatus.authoritative) {
       return;
     }
     try {
+      if (_cartCannotCheckout(cart)) return;
       final validated = _urlPolicy.validate(cart.checkoutUrl);
+      if (await _storefrontPasswordBlocks(validated, generation)) return;
+      if (generation != _generation) return;
       _latestUrl = validated;
       await _launcher.preload(validated);
     } on Exception {
@@ -85,6 +94,7 @@ final class ShopifyCheckoutCoordinator {
       return _unavailable('Ya hay un checkout abierto.');
     }
     _presenting = true;
+    final generation = ++_generation;
     _latestUrl = null;
     try {
       final pending = _pendingCompletion;
@@ -105,7 +115,9 @@ final class ShopifyCheckoutCoordinator {
         localIntent: List<LocalCartIntent>.unmodifiable(localIntent),
         buyerIdentity: buyerIdentity,
       );
-      if (refreshed == null ||
+      if (generation != _generation ||
+          controller.currentScope != scope ||
+          refreshed == null ||
           refreshed.status != CartReconciliationStatus.authoritative ||
           refreshed.cart == null) {
         return _unavailable(
@@ -113,19 +125,29 @@ final class ShopifyCheckoutCoordinator {
         );
       }
       final cart = refreshed.cart!;
-      if (cart.isEmpty || cart.totalQuantity <= 0) {
-        // A non-empty bag reconciled to nothing: Shopify dropped every line
-        // (sold out, deleted, or from another shop).
-        return CheckoutFailed(
-          code: CheckoutFailureCode.invalidCart,
-          userMessage: localIntent.isEmpty
-              ? 'Tu bolsa está vacía. Agrega un producto antes de continuar al pago.'
-              : 'Los productos de tu bolsa ya no están disponibles en la tienda. '
-                  'Revisa tu bolsa antes de continuar al pago.',
+      if (_cartCannotCheckout(cart)) {
+        return const CheckoutFailed(
+          code: CheckoutFailureCode.configuration,
+          userMessage: kEmptyCartCheckoutMessage,
+          allowExternalBrowser: false,
         );
       }
 
       final validated = _urlPolicy.validate(cart.checkoutUrl);
+      final passwordBlocked =
+          await _storefrontPasswordBlocks(validated, generation);
+      if (generation != _generation || controller.currentScope != scope) {
+        return _unavailable(
+          'Tu cuenta cambió. Revisa tu bolsa e intenta de nuevo.',
+        );
+      }
+      if (passwordBlocked) {
+        return const CheckoutFailed(
+          code: CheckoutFailureCode.configuration,
+          userMessage: kStorefrontPasswordCheckoutMessage,
+          allowExternalBrowser: false,
+        );
+      }
       _latestUrl = validated;
       // Keep the SDK's preloaded document aligned with the just-reconciled
       // cart. This is an optimization; present() remains the only operation
@@ -134,6 +156,12 @@ final class ShopifyCheckoutCoordinator {
         await _launcher.preload(validated);
       } on Exception {
         // The native SDK can still present the authoritative URL directly.
+      }
+      if (generation != _generation || controller.currentScope != scope) {
+        if (generation == _generation) _latestUrl = null;
+        return _unavailable(
+          'Tu cuenta cambió. Revisa tu bolsa e intenta de nuevo.',
+        );
       }
       final result = await _launcher.present(validated);
       if (result is CheckoutCompleted) {
@@ -208,12 +236,42 @@ final class ShopifyCheckoutCoordinator {
   }
 
   Future<void> invalidate() async {
+    _generation += 1;
     _latestUrl = null;
     try {
       await _launcher.invalidate();
     } on Exception {
       // Cache invalidation has no user data side effect and can safely fail.
     }
+  }
+
+  /// A cart with no merchandise still carries a `checkoutUrl`. Shopify sends
+  /// that URL to the store home, which is the page the shopper sees instead
+  /// of checkout.
+  static bool _cartCannotCheckout(Cart cart) =>
+      cart.isEmpty || cart.totalQuantity <= 0;
+
+  /// Drops any cached sheet when the public shop root is the password page.
+  ///
+  /// Returns false when the probe is absent or inconclusive so a network
+  /// blip cannot block a store that is not password protected.
+  Future<bool> _storefrontPasswordBlocks(
+    ValidatedCheckoutUrl checkout,
+    int generation,
+  ) async {
+    final probe = _passwordProbe;
+    if (probe == null) return false;
+    final gate = await probe.checkHost(checkout.revealForNativeBridge().host);
+    if (generation != _generation ||
+        gate != StorefrontPasswordGate.passwordProtected) {
+      return false;
+    }
+    try {
+      await _launcher.invalidate();
+    } on Exception {
+      // The sheet was never presented. A stale preload is the only cache.
+    }
+    return true;
   }
 
   static CheckoutFailed _unavailable(String message) => CheckoutFailed(

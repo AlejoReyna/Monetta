@@ -28,6 +28,7 @@ import { ServerAdminAuthorizer, hashAdminBearerToken } from '../admin/authorizer
 import { registerAdminRoutes } from '../admin/routes.js';
 import { resumeInterruptedSyncJobs } from '../admin/routes.js';
 import { PgAdminPrincipalsRepository } from '../admin/pgAdminPrincipalsRepository.js';
+import { canonicalShopDomain, ShopifySessionTokenVerifier } from '../admin/shopifySessionToken.js';
 import type { AdminAuthorizer } from '../admin/authorizer.js';
 import { ShopifyAdminClient } from '../admin/shopifyAdminClient.js';
 import type { ShopifyAdminWriteClient } from '../admin/shopifyAdminClient.js';
@@ -68,6 +69,18 @@ import type {
 } from '../webhooks/payloads.js';
 import type { Platform } from '../domain/types.js';
 import { AccountRegistrationConflictError } from '../domain/accountErrors.js';
+import { AccountDeletionService } from '../privacy/accountDeletionService.js';
+import { FirebaseAppDataEraser } from '../privacy/firebaseAppData.js';
+import { ShopifyFreshLoginVerifier } from '../privacy/freshLogin.js';
+import {
+  PgAccountDeletionAuditRepository,
+  PgAccountDeletionStateRepository,
+} from '../privacy/pgAccountDeletionRepository.js';
+import { PgCustomerDataEraser } from '../privacy/pgCustomerErasure.js';
+import { registerAccountDeletionRoutes } from '../privacy/routes.js';
+import { CustomerAccountOrderLookup } from '../privacy/shopifyOrderCheck.js';
+import { ShopifyCustomerDataErasureClient } from '../privacy/shopifyErasure.js';
+import { registerShopifyAdminPanel } from '../shopifyAdmin/routes.js';
 
 export interface ServerDeps extends HandlerDeps {
   readonly webhookSecret: string;
@@ -95,6 +108,10 @@ export interface ServerDeps extends HandlerDeps {
   readonly engagement?: EngagementRouteDeps & { readonly internalCatalogEventSecret: string };
   /** Paquete F: Rewards. Ausente = programa no montado (rutas 404). */
   readonly rewards?: { readonly service: RewardsService };
+  /** In-app account deletion. Absent in tests that do not exercise the route. */
+  readonly accountDeletion?: AccountDeletionService;
+  /** Embedded Shopify Admin notifications page. Absent until the Shopify app is configured. */
+  readonly shopifyAdminPanel?: { readonly clientId: string; readonly shopDomain: string };
 }
 
 const appSessionLifetimeMs = 180 * 24 * 60 * 60 * 1000;
@@ -144,6 +161,15 @@ async function authenticatedCustomerId(
   req: Request,
   res: Response,
 ): Promise<string | null> {
+  const shopper = await authenticateShopper(deps, req, res);
+  return shopper?.customerId ?? null;
+}
+
+async function authenticateShopper(
+  deps: ServerDeps,
+  req: Request,
+  res: Response,
+): Promise<{ readonly customerId: string; readonly credential: 'customer_account' | 'monetta_session' } | null> {
   const token = bearerToken(req);
   if (token === null) {
     res.status(401).json({ error: 'unauthorized' });
@@ -157,7 +183,7 @@ async function authenticatedCustomerId(
       res.status(403).json({ error: 'shopify_customer_not_linked' });
       return null;
     }
-    return customerId;
+    return { customerId, credential: 'monetta_session' };
   }
 
   try {
@@ -171,7 +197,7 @@ async function authenticatedCustomerId(
       res.status(503).json({ error: 'authentication_unavailable' });
       return null;
     }
-    return customerId;
+    return { customerId, credential: 'customer_account' };
   } catch (error) {
     // The verifier deliberately never places a token in its errors. Log only
     // the error class anyway, keeping that invariant even for injected code.
@@ -527,6 +553,10 @@ export function createApp(deps: ServerDeps): Express {
     registerEngagementRoutes(app, deps.engagement);
   }
 
+  if (deps.shopifyAdminPanel !== undefined) {
+    registerShopifyAdminPanel(app, deps.shopifyAdminPanel);
+  }
+
   if (deps.rewards !== undefined) {
     registerRewardsRoutes(app, {
       service: deps.rewards.service,
@@ -757,16 +787,26 @@ export function createApp(deps: ServerDeps): Express {
           source: o.source,
           attributionCode: o.attributionCode,
           financialStatus: o.financialStatus,
+          paymentMethod: o.paymentMethod ?? null,
           fulfillmentStatus: o.fulfillmentStatus,
           totalAmount: o.totalAmount,
           currencyCode: o.currencyCode,
           placedAt: o.placedAt?.toISOString() ?? null,
+          checkoutToken: o.checkoutToken ?? null,
+          cartToken: o.cartToken ?? null,
         })),
       });
     } catch (error) {
       next(error);
     }
   });
+
+  if (deps.accountDeletion !== undefined) {
+    registerAccountDeletionRoutes(app, {
+      deletion: deps.accountDeletion,
+      authenticate: (req, res) => authenticateShopper(deps, req, res),
+    });
+  }
 
   // Generic JSON 404 for unknown routes; must stay after every route.
   app.use((_req: Request, res: Response) => {
@@ -800,11 +840,26 @@ if (isMain) {
   const customerTokenVerifier = new ShopifyCustomerTokenVerifier({
     shopDomain: config.shopDomain,
   });
+  // The embedded Shopify Admin panel needs the same three values Shopify uses
+  // to sign its session tokens; without them that login path stays closed.
+  const shopifyEmbeddedAdminReady = canonicalShopDomain(config.shopDomain) !== ''
+    && config.shopifyAppClientId !== ''
+    && config.webhookSecret !== '';
   const adminAuthorizer = new ServerAdminAuthorizer({
     appAccounts,
     customerTokenVerifier,
     principals: adminPrincipals,
     ownerShopifyCustomerIds: config.ownerShopifyCustomerIds,
+    ...(shopifyEmbeddedAdminReady
+      ? {
+          shopifySessionTokens: new ShopifySessionTokenVerifier({
+            clientId: config.shopifyAppClientId,
+            clientSecret: config.webhookSecret,
+            shopDomain: config.shopDomain,
+          }),
+          ownerShopifyStaffIds: config.ownerShopifyStaffIds,
+        }
+      : {}),
   });
   const authRateLimiter = new SlidingWindowAdminRateLimiter(20, 60_000);
   let shopifyAdmin: ShopifyAdminClient | undefined;
@@ -855,6 +910,48 @@ if (isMain) {
     };
     catalogEvents = new PgShopifyCatalogEventProcessor(pool, engagementService);
   }
+  const firebaseDeletionReady = config.firebaseProjectId !== ''
+    && config.firebaseClientEmail !== ''
+    && config.firebasePrivateKey !== '';
+  const shopifyErasureReady = config.shopDomain !== '' && (
+    config.shopifyAdminAccessToken.length >= 16
+    || (config.shopifyAppClientId !== '' && config.webhookSecret.length >= 16)
+  );
+  const deletionTokens = firebaseDeletionReady
+    ? new GoogleAccessTokenProvider(config.firebaseClientEmail, config.firebasePrivateKey)
+    : null;
+  const customerAccount = new CustomerAccountOrderLookup({ shopDomain: config.shopDomain });
+  const accountDeletion = new AccountDeletionService({
+    orders: new PgOrdersRepository(pool),
+    state: new PgAccountDeletionStateRepository(pool),
+    audit: new PgAccountDeletionAuditRepository(pool),
+    appData: new FirebaseAppDataEraser({
+      projectId: config.firebaseProjectId,
+      accessToken: async () => {
+        if (deletionTokens === null) throw new Error('firebase_not_configured');
+        return deletionTokens.accessToken();
+      },
+    }),
+    customerData: new PgCustomerDataEraser(pool),
+    shopifyErasure: new ShopifyCustomerDataErasureClient({
+      shopDomain: config.shopDomain,
+      apiVersion: config.shopifyAdminApiVersion,
+      adminAccessToken: config.shopifyAdminAccessToken,
+      clientId: config.shopifyAppClientId,
+      clientSecret: config.webhookSecret,
+    }),
+    shopifyOrders: customerAccount,
+    customerEmail: customerAccount,
+    appAccounts,
+    hashSessionToken: hashToken,
+    freshLogin: new ShopifyFreshLoginVerifier({
+      shopDomain: config.shopDomain,
+      customerTokens: customerTokenVerifier,
+      customerAccountClientId: config.customerAccountClientId,
+      maxAgeMs: config.accountDeletionReauthMaxAgeSeconds * 1000,
+    }),
+    ready: firebaseDeletionReady && shopifyErasureReady,
+  });
   const rewardsEnv = loadRewardsEnv();
   const rewardsService = new RewardsService({
     rewards: new PgRewardsRepository(pool),
@@ -897,6 +994,15 @@ if (isMain) {
     engagementPrivacy: config.notificationsEnabled
       ? new PgEngagementPrivacyRepository(pool)
       : undefined,
+    accountDeletion,
+    ...(shopifyEmbeddedAdminReady
+      ? {
+          shopifyAdminPanel: {
+            clientId: config.shopifyAppClientId,
+            shopDomain: config.shopDomain,
+          },
+        }
+      : {}),
   });
   const server = app.listen(config.port, () => {
     logger.info('accounts & orders API listening', { port: config.port });

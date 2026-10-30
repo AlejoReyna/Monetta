@@ -11,12 +11,15 @@
 client_id = "4a29ba522a35bd476f3d1f467749234f"
 name = "monetta-staging"
 # Staging backend. The Fly app is provisioned before this config is released.
-application_url = "https://monetta-accounts-staging.fly.dev"
-embedded = false
+# The app home is the embedded push notifications panel served by
+# services/accounts_orders (src/shopifyAdmin/). It authenticates staff with
+# App Bridge session tokens; access is granted per staff id on the server.
+application_url = "https://monetta-accounts-staging.fly.dev/shopify/app"
+embedded = true
 handle = "monetta-staging"
 
 [access_scopes]
-scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects"
+scopes = "read_orders,read_customers,read_products,write_products,read_publications,write_publications,read_metaobjects,write_metaobjects,write_customer_data_erasure"
 
 # App-owned singleton for the native admin control plane. The $app type keeps
 # the schema under this app's ownership while allowing the merchant to update

@@ -1,23 +1,24 @@
+import '../../support/bundled_fonts.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/domain/catalog_item.dart';
+import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
 import 'package:monetta_app/main.dart';
 
-import '../../support/catalog_browse_fixtures.dart';
-
 // Contract of the compact bottom bar (FICHA-T1, BRIEF 2.1): 56 px of
-// interactive content, always, with no bottom safe-area inset — the surface
-// stays docked to the edge and the OS home indicator floats over it.
-// Destinations stay >= 48x48 and the bar grows (never clips) with large text.
+// interactive content plus the real bottom inset, applied once, with the
+// surface painted under the inset. Destinations stay >= 48x48 and the bar
+// grows (never clips) with large text.
 //
-// Text note: FlutterTest renders every glyph one em wide, so the bar's
-// fit-to-column logic is active even at scale 1.0 on phone-width columns.
+// Compact brand geometry uses the bundled fonts. Uncapped fallback-font
+// reflow and short-window overflow are covered in duo_navigation_test.dart.
 
 const _destinations = MonettaBottomDestination.values;
 const _viewHeight = 844.0;
@@ -82,7 +83,22 @@ Future<void> _pumpBar(
   await tester.pump();
 }
 
-BrowseEntry _item(int i) => browseEntry(i, price: 1000.0 + i);
+CatalogItem _item(int i) => CatalogItem(
+      sourceScopedId: 'monetta:$i',
+      source: CatalogSourceType.monettaShopify,
+      merchant: 'Monetta',
+      title: 'Monetta Item $i',
+      brand: 'Guess',
+      category: null,
+      imageUrl: null,
+      price: Money(amount: 1000.0 + i, currency: Currency.mxn),
+      availability: CatalogAvailability.inStock,
+      detailUrl: 'https://monetta.mx/products/item-$i',
+      marketRestriction: MarketRestriction.mexico,
+      lastObservedAt: DateTime.utc(2026, 8, 10),
+      purchaseMode: PurchaseMode.monettaCheckout,
+      shopifyProductId: '$i',
+    );
 
 Future<CatalogStore> _loadedStore() async {
   final store = CatalogStore(database: openTestDatabase());
@@ -124,6 +140,7 @@ double _lowestBottom(WidgetTester tester, Finder finder) {
 }
 
 void main() {
+  setUpAll(loadBundledFonts);
   testWidgets('NAV-01 at scale 1.0 the surface and every destination are 56 px',
       (tester) async {
     await _pumpBar(tester);
@@ -135,13 +152,18 @@ void main() {
     }
   });
 
-  group('NAV-02 the bar stays 56 px compact with any bottom inset', () {
-    for (final inset in [0.0, 20.0, 34.0]) {
-      testWidgets('NAV-02 inset ${inset.toInt()} -> 56', (tester) async {
+  group('NAV-02 the safe area is added once and painted under', () {
+    for (final (inset, expectedHeight) in [
+      (0.0, 56.0),
+      (20.0, 76.0),
+      (34.0, 90.0),
+    ]) {
+      testWidgets('NAV-02 inset ${inset.toInt()} -> ${expectedHeight.toInt()}',
+          (tester) async {
         await _pumpBar(tester, inset: inset);
 
         final surface = tester.getRect(_surface);
-        expect(surface.height, 56, reason: 'always 56, no inset added');
+        expect(surface.height, expectedHeight, reason: '56 + inset, once');
         expect(surface.bottom, _viewHeight, reason: 'docked to the bottom');
         expect(surface.left, 0);
         expect(surface.right, 390);
@@ -150,14 +172,14 @@ void main() {
           final rect = tester.getRect(_dest(d));
           expect(
             rect.bottom,
-            closeTo(_viewHeight, 0.01),
-            reason: '${d.name} fills the compact bar',
+            closeTo(_viewHeight - inset, 0.01),
+            reason: '${d.name} stops above the inset',
           );
           expect(rect.height, 56, reason: '${d.name} keeps 56 of content');
         }
 
-        // The surface color is painted by the surface itself, docked to the
-        // bottom edge with no inset.
+        // The surface color is painted by the surface itself, so it also
+        // fills the area under the inset.
         final decorated = tester.widget<DecoratedBox>(_surface);
         final colors =
             tester.element(find.byType(MonettaBottomNavigation)).monettaColors;
@@ -234,7 +256,7 @@ void main() {
             isSelected: true,
           ),
         );
-        for (final other in ['Home', 'Cuenta']) {
+        for (final other in ['Inicio', 'Cuenta']) {
           expect(
             find.semantics.byLabel(other).evaluate().single,
             isSemantics(
@@ -325,9 +347,9 @@ void main() {
           'contenido (ancho ${width.toInt()})', (tester) async {
         const inset = 34.0;
 
-        // Control: at scale 1.0 the bar is exactly 56.
+        // Control: at scale 1.0 the bar is exactly 56 + inset.
         await _pumpBar(tester, width: width, inset: inset);
-        expect(tester.getSize(_surface).height, 56, reason: 'x1.0');
+        expect(tester.getSize(_surface).height, 56 + inset, reason: 'x1.0');
 
         await _pumpBar(tester, width: width, inset: inset, scale: 2.0);
         expect(tester.takeException(), isNull);
@@ -335,8 +357,8 @@ void main() {
         final surface = tester.getRect(_surface);
         expect(
           surface.height,
-          greaterThanOrEqualTo(56),
-          reason: 'never below the 56 px floor',
+          greaterThanOrEqualTo(56 + inset),
+          reason: 'never below the 56 px floor plus the inset',
         );
         expect(surface.bottom, _viewHeight);
 
@@ -351,7 +373,7 @@ void main() {
         }
         expect(
           surface.height,
-          greaterThanOrEqualTo(tallestStack),
+          greaterThanOrEqualTo(inset + tallestStack),
           reason: 'the content ($tallestStack) must fit in the bar',
         );
 
@@ -379,7 +401,7 @@ void main() {
             lessThanOrEqualTo(dest.bottom + 0.5),
             reason: '${d.name} label bottom',
           );
-          expect(dest.bottom, lessThanOrEqualTo(_viewHeight + 0.01));
+          expect(dest.bottom, lessThanOrEqualTo(_viewHeight - inset + 0.01));
 
           final rich = find.descendant(
             of: _label(d),
@@ -403,7 +425,9 @@ void main() {
       await tester.pumpWidget(
         MaterialApp(
           theme: buildLightTheme(),
-          home: browseScreen([for (var i = 1; i <= 30; i++) _item(i)]),
+          home: CatalogBrowseScreen(
+            items: [for (var i = 1; i <= 30; i++) _item(i)],
+          ),
         ),
       );
       await tester.pump();
@@ -452,30 +476,23 @@ void main() {
       );
     });
 
-    testWidgets(
-        'NAV-04b the catalog bar is flush with the edge and keeps its items above the inset of 34',
+    testWidgets('NAV-04b the catalog bar measures 90 with an inset of 34',
         (tester) async {
       _view(tester, inset: 34);
       await tester.pumpWidget(
         MaterialApp(
           theme: buildLightTheme(),
-          home: browseScreen([_item(1), _item(2), _item(3)]),
+          home: CatalogBrowseScreen(items: [_item(1), _item(2), _item(3)]),
         ),
       );
       await tester.pump();
 
-      // Flat bar: flush with the screen edge, full width, and its items stay
-      // above the 34 px system inset.
       final surface = tester.getRect(_surface);
-      expect(surface.height, greaterThanOrEqualTo(64 + 34));
+      expect(surface.height, 90);
       expect(surface.bottom, _viewHeight);
-      expect(surface.left, 0);
-      final item = tester.getRect(find.byKey(const Key('bottom-nav-home')));
-      expect(item.bottom, lessThanOrEqualTo(_viewHeight - 34));
     });
 
-    testWidgets(
-        'NAV-04b the collection bar is flush with the edge and keeps its items above the inset of 34',
+    testWidgets('NAV-04b the collection bar measures 90 with an inset of 34',
         (tester) async {
       _view(tester, inset: 34);
       final store = await _loadedStore();
@@ -494,14 +511,9 @@ void main() {
       );
       await tester.pump();
 
-      // Flat bar: flush with the screen edge, full width, and its items stay
-      // above the 34 px system inset.
       final surface = tester.getRect(_surface);
-      expect(surface.height, greaterThanOrEqualTo(64 + 34));
+      expect(surface.height, 90);
       expect(surface.bottom, _viewHeight);
-      expect(surface.left, 0);
-      final item = tester.getRect(find.byKey(const Key('bottom-nav-home')));
-      expect(item.bottom, lessThanOrEqualTo(_viewHeight - 34));
     });
   });
 }

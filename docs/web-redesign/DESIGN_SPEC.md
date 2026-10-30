@@ -13,12 +13,12 @@ document disagree, this document wins.
 
 **Where the values live.** The manifest generates the token block of `design-prototype/src/styles/tokens.css` and
 `lib/app/monetta_tokens.g.dart` (`node design-system/build.mjs`); the theme receives it through
-`docs/web-redesign/shopify-staging/scripts/port-css.mjs`, together with the prototype's base, component and page sheets
+`tools/style-guideline-theme/port-css.mjs`, together with the prototype's base, component and page sheets
 (`assets/monetta-{tokens,base,components,pages}.css`, generated, never edited by hand). Everything specific to the theme
 and to the current app is in two theme-owned sheets: `assets/monetta-theme.css` (what a server-rendered Shopify theme
 needs: dialogs, forms, Shopify widgets) and `assets/monetta-app-alignment.css` (one block per component, each naming the app
 widget it follows). Checks: `node design-system/build.mjs --check` (outputs current, 22 contrast pairs) and
-`node docs/web-redesign/shopify-staging/scripts/port-css.mjs --check` (the theme's four ported sheets equal a fresh port:
+`node tools/style-guideline-theme/port-css.mjs --check` (the theme's four ported sheets equal a fresh port:
 Shopify token parity).
 
 ---

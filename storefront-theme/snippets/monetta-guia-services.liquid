@@ -1,0 +1,34 @@
+{%- doc -%}
+  ClientGuideServices: the guide's four services with its gold icons. The home variant (kClientGuideHomeServices) opens
+  with «Envíos seguros»; the wholesale variant (kClientGuideWholesaleServices) opens with the free-shipping threshold.
+
+  @param {string} [variant] - 'home' (default) or 'wholesale'.
+  @param {string} [label] - Accessible name of the list (default «Nuestros servicios»).
+{%- enddoc -%}
+<ul class="guide-services" aria-label="{{ label | default: 'Nuestros servicios' | escape }}">
+  <li class="guide-services__item">
+    {% render 'monetta-guia-icon', name: 'servicio-envios', size: 72, class: 'guide-services__icon' %}
+    {%- if variant == 'wholesale' -%}
+      <p class="guide-services__title">Envío gratis</p>
+      <p class="guide-services__body">En compras mayores a $1,999 MXN</p>
+    {%- else -%}
+      <p class="guide-services__title">Envíos seguros</p>
+      <p class="guide-services__body">Seguros y garantizados a todo México</p>
+    {%- endif -%}
+  </li>
+  <li class="guide-services__item">
+    {% render 'monetta-guia-icon', name: 'servicio-pagos', size: 72, class: 'guide-services__icon' %}
+    <p class="guide-services__title">Pagos seguros</p>
+    <p class="guide-services__body">Compra con confianza</p>
+  </li>
+  <li class="guide-services__item">
+    {% render 'monetta-guia-icon', name: 'servicio-originales', size: 72, class: 'guide-services__icon' %}
+    <p class="guide-services__title">Productos 100% originales</p>
+    <p class="guide-services__body">Garantía de autenticidad</p>
+  </li>
+  <li class="guide-services__item">
+    {% render 'monetta-guia-icon', name: 'servicio-atencion', size: 72, class: 'guide-services__icon' %}
+    <p class="guide-services__title">Atención personalizada</p>
+    <p class="guide-services__body">Estamos para ayudarte</p>
+  </li>
+</ul>

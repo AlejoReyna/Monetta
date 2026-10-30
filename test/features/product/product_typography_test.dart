@@ -4,7 +4,6 @@ import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/reco/events.dart';
-import 'package:monetta_app/reco/explainer.dart';
 
 import '../../support/product_screen_harness.dart';
 
@@ -12,6 +11,16 @@ import '../../support/product_screen_harness.dart';
 // headings of the ficha are the editorial serif (Playfair Display, w400); the
 // earlier brief set them in the sans of the card names. The style handed to
 // each `Text` is read directly, so the Ahem test font is irrelevant.
+
+void _expectSans(TextStyle style, {required String reason}) {
+  expect(style.fontFamily, kBoutiqueSansFamily, reason: '$reason: family');
+  expect(
+    style.fontFamilyFallback,
+    kBoutiqueSansFallback,
+    reason: '$reason: fallback chain',
+  );
+  expect(style.fontWeight, FontWeight.w600, reason: '$reason: weight');
+}
 
 void _expectSerif(TextStyle style, {required String reason}) {
   expect(style.fontFamily, kBoutiqueSerifFamily, reason: '$reason: family');
@@ -72,7 +81,11 @@ void main() {
         (tester) async {
       await mount(tester);
 
-      for (final label in ['Descripción', 'Detalles', 'Envíos y cambios']) {
+      for (final label in [
+        'Descripción',
+        'Detalles',
+        'Envíos y devoluciones',
+      ]) {
         await _expectSectionHeading(
           tester,
           find.text(label),
@@ -83,11 +96,11 @@ void main() {
 
     testWidgets('TYPE-01d the rail headings are section headings',
         (tester) async {
-      final ficha = await mount(tester);
+      await mount(tester);
 
       await _expectSectionHeading(
         tester,
-        find.text('Más de ${brandLabel(ficha.brand)}'),
+        find.text('Productos relacionados'),
         reason: 'related rail',
       );
       await _expectSectionHeading(
@@ -106,6 +119,54 @@ void main() {
         find.text('Otras formas de comprar'),
         reason: 'purchase section',
       );
+    });
+  });
+
+  group('TYPE-01d ficha externa', () {
+    final item = externalItem();
+    final name = externalProductName(
+      title: item.title,
+      category: item.category,
+    );
+
+    Future<void> mount(WidgetTester tester) async {
+      setPhoneView(tester);
+      await pumpExternal(tester, item: item);
+    }
+
+    testWidgets('TYPE-01d the main name is serif w400, 25', (tester) async {
+      await mount(tester);
+
+      await scrollTo(tester, contentNameText(name));
+      final style = styleOf(tester, contentNameText(name));
+      _expectSerif(style, reason: 'main name');
+      expect(style.fontSize, MonettaTokens.productName.compact);
+    });
+
+    testWidgets('TYPE-01d "Descripción del producto" is a section heading',
+        (tester) async {
+      await mount(tester);
+
+      // Case-insensitive: the heading used to be set in capitals.
+      final heading = find.byWidgetPredicate(
+        (widget) =>
+            widget is Text &&
+            widget.data?.toLowerCase() == 'descripción del producto',
+      );
+      await _expectSectionHeading(
+        tester,
+        heading,
+        reason: 'Descripción del producto',
+      );
+    });
+
+    testWidgets('TYPE-01d the header title is 18-20', (tester) async {
+      await mount(tester);
+
+      expect(headerTitle(), findsOneWidget);
+      final style = styleOf(tester, headerTitle());
+      _expectSans(style, reason: 'header title');
+      expect(style.fontSize, inInclusiveRange(18, 20));
     });
   });
 }

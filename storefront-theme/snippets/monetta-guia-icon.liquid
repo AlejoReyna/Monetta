@@ -1,0 +1,10 @@
+{%- doc -%}
+  One of the guide's 21 gold line icons (the app's assets/images/guide/icons, extracted from the guide's own artwork), as
+  WebP with transparency. Always decorative: the label next to it names the thing.
+
+  @param {string} name - e.g. 'estilo-tote', 'categoria-carteras', 'servicio-envios', 'red-instagram', 'contacto-whatsapp'.
+  @param {number} [size] - Box size in px (default 48); the artwork is contained in it.
+  @param {string} [class] - Class of the img.
+{%- enddoc -%}
+{%- assign size = size | default: 48 -%}
+<img class="guide-icon {{ class }}" src="{{ 'monetta-guia-icon-' | append: name | append: '.webp' | asset_url }}" width="{{ size }}" height="{{ size }}" alt="" loading="lazy" decoding="async">

@@ -65,9 +65,6 @@
           <dl>
             <div class="summary__row"><dt>Subtotal ({{ count_label }})</dt><dd>{{ cart.original_total_price | money_without_trailing_zeros }}</dd></div>
             {%- if cart.total_discount > 0 -%}
-              {%- for discount in cart.cart_level_discount_applications -%}
-                <div class="summary__row"><dt>{{ discount.title | escape }}</dt><dd>−{{ discount.total_allocated_amount | money_without_trailing_zeros }}</dd></div>
-              {%- endfor -%}
               <div class="summary__row"><dt>Descuentos aplicados</dt><dd>−{{ cart.total_discount | money_without_trailing_zeros }}</dd></div>
             {%- endif -%}
             <div class="summary__row"><dt>Envío</dt><dd>Se calcula en el checkout</dd></div>

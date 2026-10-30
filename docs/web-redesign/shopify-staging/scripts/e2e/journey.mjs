@@ -138,11 +138,21 @@ try {
       run.note('backarrow: the page bar arrow is phone-only (hidden from 768 px); covered at 375/440 widths.');
       return;
     }
-    // Entered from the home: Novedades -> collection -> filter -> sort. Back (arrow) must leave the screen, not step through them.
+    // Entered from the home: search results -> filter -> sort. Back (arrow) must leave the screen, not step through them.
+    // Since the guide pass (F3) collections keep the global header on phones; the page bar and its arrow are on search and
+    // the bag, so the arrow is exercised on search.
     await page.goto(`${baseUrl}/`, { waitUntil: 'load' });
     await settle(page);
-    await page.locator('a.link-action', { hasText: 'Ver todo' }).first().click();
-    await page.waitForURL(/\/collections\/all/);
+    // Reached by following a link, as a visitor would (a typed address starts a new screen history at 0).
+    await page.evaluate(() => {
+      const link = document.createElement('a');
+      link.href = '/search?q=bolso&type=product';
+      link.id = 'journey-search-link';
+      link.textContent = 'bolso';
+      document.querySelector('main')?.prepend(link);
+    });
+    await page.click('#journey-search-link');
+    await page.waitForURL(/\/search/);
     await settle(page);
     await page.locator('[data-open-dialog="filters-drawer"]:visible').first().click();
     await page.waitForTimeout(450);
@@ -158,21 +168,51 @@ try {
     await settle(page);
     const state = await page.evaluate(() => history.state);
     run.check('backarrow: entry/idx recorded for the screen (idx 2 steps past its start)', state?.idx - state?.entry === 2 && state?.entry > 0, JSON.stringify(state));
+    // A slow network: the home answers 1.2 s after the arrow's traversal starts, past its 500 ms fallback (a phone on mobile
+    // data; headless Chromium has no bfcache and Shopify sends no-store, so the traversal always fetches). On 22 Oct and in
+    // F4, with the proxy slower than 500 ms, the fallback assigned the parent mid-traversal; that new entry dropped the
+    // forward history and Forward stayed on the home.
+    const historyBefore = await page.evaluate(() => history.length);
+    const slowed = [];
+    const slowHome = (route) => {
+      const handled = (async () => {
+        if (route.request().isNavigationRequest()) await new Promise((r) => setTimeout(r, 1200));
+        await route.continue().catch(() => {});
+      })();
+      slowed.push(handled);
+      return handled;
+    };
+    const isHome = (u) => u.origin === new URL(baseUrl).origin && u.pathname === '/';
+    await page.route(isHome, slowHome);
     await page.locator('.page-bar__back').click();
     await page.waitForURL((u) => u.pathname === '/', { timeout: 15000 });
+    // Leave time for a stale fallback to fire, then let every held request finish before the route goes.
+    await page.waitForTimeout(700);
+    await Promise.all(slowed);
+    await page.waitForLoadState('load');
+    await page.unroute(isHome, slowHome);
+    const historyAfter = await page.evaluate(() => history.length);
     run.check('backarrow: the arrow skips filter and sort and returns to the previous screen (home)', new URL(page.url()).pathname === '/', page.url());
+    run.check('backarrow: on a slow network the arrow still travels back, no new entry (the fallback stays out of the way)', slowed.length > 0 && historyAfter === historyBefore, JSON.stringify({ slowedRequests: slowed.length, historyBefore, historyAfter }));
     // Forward after the arrow restores the screen where it was, and the fallback timer must not undo it.
     await page.goForward({ waitUntil: 'load' });
     await page.waitForTimeout(900);
     // The browser's Forward goes to the next entry, the first one of that screen; the point is that the arrow's 500 ms fallback
     // (armed by the click) does not throw the visitor back to the parent after they pressed Forward.
-    run.check('backarrow: Forward after the arrow returns to the collection and stays there (no stale fallback)', new URL(page.url()).pathname === '/collections/all', page.url());
-    // A visit that began on the collection goes to the parent URL.
+    run.check('backarrow: Forward after the arrow returns to the search results and stays there (no stale fallback)', new URL(page.url()).pathname === '/search', page.url());
+    // A visit that began on the results goes to the parent URL.
     const second = await context.newPage();
-    await second.goto(`${baseUrl}/collections/all?filter.v.availability=1`, { waitUntil: 'load' });
+    await second.goto(`${baseUrl}/search?q=bolso&type=product&filter.v.availability=1`, { waitUntil: 'load' });
     await second.locator('.page-bar__back').click();
     await second.waitForURL((u) => u.pathname === '/', { timeout: 15000 });
-    run.check('backarrow: a visit that began on the collection leaves to the parent URL (/)', new URL(second.url()).pathname === '/', second.url());
+    run.check('backarrow: a visit that began on the search results leaves to the parent URL (/)', new URL(second.url()).pathname === '/', second.url());
+    // State that names more entries than this tab has (sessionStorage is copied into a tab opened from the site): history.go
+    // does nothing, no traversal starts, and the fallback must still take the visitor to the parent.
+    await second.goto(`${baseUrl}/search?q=bolso&type=product`, { waitUntil: 'load' });
+    await second.evaluate(() => history.replaceState({ idx: 40, entry: 2 }, '', location.href));
+    await second.locator('.page-bar__back').click();
+    await second.waitForURL((u) => u.pathname === '/', { timeout: 15000 }).catch(() => {});
+    run.check('backarrow: when history.go has nowhere to go, the fallback still leaves to the parent URL (/)', new URL(second.url()).pathname === '/', second.url());
     await second.close();
   });
 
@@ -313,9 +353,14 @@ try {
     const heldChange = new Promise((resolve) => {
       releaseChange = resolve;
     });
+    let continued;
+    const changeContinued = new Promise((resolve) => {
+      continued = resolve;
+    });
     const holdChange = async (route) => {
       await heldChange;
       await route.continue();
+      continued();
     };
     await page.route('**/cart/change.js', holdChange);
     await lineEl.locator('[data-step="1"]').click();
@@ -323,6 +368,8 @@ try {
     const lockedWhile = await page.evaluate(() => ({ locked: document.documentElement.hasAttribute('data-cart-locked'), buttons: [...document.querySelectorAll('[name="checkout"]')].map((b) => b.disabled) }));
     run.check('bag: while the + request is held every checkout button is disabled', lockedWhile.locked && lockedWhile.buttons.length >= 1 && lockedWhile.buttons.every(Boolean), JSON.stringify(lockedWhile));
     releaseChange();
+    // Unrouting while the held handler is still running marks its route handled, and its continue() then throws.
+    await changeContinued;
     await page.unroute('**/cart/change.js', holdChange);
     await page.waitForFunction((k) => document.querySelector(`[data-line="${k}"] .stepper__value`)?.textContent.trim() === '2', first.key);
     let c2 = await cartJson();

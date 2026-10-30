@@ -154,9 +154,8 @@ void main() {
       gateway.succeed();
       await tester.pumpAndSettle();
 
-      expect(find.text('Qué gusto verte,'), findsOneWidget);
-      expect(find.text('ana@example.com'), findsNothing);
-      expect(find.text('Tu cuenta'), findsWidgets);
+      expect(find.byKey(const ValueKey('account-identity')), findsOneWidget);
+      expect(find.text('ana@example.com'), findsOneWidget);
       expect(find.byType(TextFormField), findsNothing);
 
       final adminEntry = find.byKey(const ValueKey('open-owner-admin'));
@@ -167,7 +166,19 @@ void main() {
       await tester.tap(adminEntry);
       expect(openedAdmin, isTrue);
 
-      final logout = find.text('CERRAR SESIÓN');
+      final deleteLink = find.text('Eliminar mi cuenta');
+      await tester.scrollUntilVisible(deleteLink, 400);
+      await tester.pumpAndSettle();
+      expect(find.text('Política de privacidad'), findsOneWidget);
+      expect(
+        tester.widget<Text>(deleteLink).style?.color,
+        const Color(0xFFA3342B),
+      );
+
+      // One «Cerrar sesión» only: the duplicate text button is gone.
+      expect(find.text('Cerrar sesión'), findsOneWidget);
+      expect(find.text('CERRAR SESIÓN'), findsNothing);
+      final logout = find.byKey(const ValueKey('account-logout'));
       await tester.scrollUntilVisible(logout, 400);
       await tester.pumpAndSettle();
       await tester.tap(logout);
@@ -238,22 +249,24 @@ void main() {
     await tester.pumpAndSettle();
 
     // Force a failed status with no rows — must not read as empty history.
+    // The history lives on its own screen now (Cuenta has no preview).
+    await tester.tap(find.byKey(const ValueKey('account-open-orders')));
+    await tester.pumpAndSettle();
     controller.orders = const [];
     controller.ordersStatus = OrderHistoryStatus.failed;
     controller.ordersLoading = false;
     controller.notifyListeners();
     await tester.pump();
 
-    expect(find.text('Aún no tienes pedidos.'), findsNothing);
+    expect(find.text('Aún no tienes pedidos'), findsNothing);
     expect(
       find.textContaining('No pudimos cargar tus pedidos'),
       findsOneWidget,
     );
-    expect(find.byKey(const ValueKey('refresh-orders')), findsOneWidget);
 
     controller.ordersStatus = OrderHistoryStatus.empty;
     controller.notifyListeners();
     await tester.pump();
-    expect(find.text('Aún no tienes pedidos.'), findsOneWidget);
+    expect(find.text('Aún no tienes pedidos'), findsOneWidget);
   });
 }

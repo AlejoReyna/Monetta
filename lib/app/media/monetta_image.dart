@@ -24,6 +24,14 @@ const double kPackshotMaxCoverTrim = 0.033;
 /// without a visible seam.
 const Color kPackshotGround = Color(0xFFFFFFFF);
 
+/// Test stand-in for a catalog photograph.
+///
+/// Widget captures have no CDN. When this is set, [MonettaImage] paints it
+/// instead of opening the network, so product photos are visible without
+/// inventing catalog data. Production leaves it null.
+@visibleForTesting
+ImageProvider? debugMonettaFixtureImage;
+
 /// Chooses between `cover` and `contain` for a photo in a frame.
 ///
 /// Returns [BoxFit.cover] only when it would crop at most [maxCoverTrim] from
@@ -229,6 +237,20 @@ class _MonettaImageState extends State<MonettaImage> {
       return _ImageFallback(
         label: widget.fallbackLabel,
         backgroundColor: widget.backgroundColor,
+      );
+    }
+
+    final fixture = debugMonettaFixtureImage;
+    if (fixture != null) {
+      return ColoredBox(
+        color: kPackshotGround,
+        child: Image(
+          image: fixture,
+          fit: widget.fit,
+          width: double.infinity,
+          height: double.infinity,
+          gaplessPlayback: true,
+        ),
       );
     }
 

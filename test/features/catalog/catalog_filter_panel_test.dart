@@ -3,12 +3,12 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/catalog_store.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/domain/catalog_item.dart';
+import 'package:monetta_app/features/catalog/catalog_browse_screen.dart';
 import 'package:monetta_app/features/catalog/catalog_controls.dart';
 import 'package:monetta_app/features/catalog/collection_screen.dart';
 import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/main.dart';
-
-import '../../support/catalog_browse_fixtures.dart';
 
 // The filter panel is the only entry to filtering (FICHA-T1, BRIEF 2.2): the
 // quick-filter pills of the catalog and the silhouette / sort pills of the
@@ -16,22 +16,30 @@ import '../../support/catalog_browse_fixtures.dart';
 // works, from the panel. FLT-02 and FLT-03 characterize the panel as it is
 // today; FLT-01* are the target state and fail until the pills are removed.
 
-BrowseEntry _item(
+CatalogItem _item(
   int i, {
   required String title,
   required String brand,
   required double price,
-  String category = 'bolsa',
-  bool inStock = true,
+  String? category,
+  CatalogAvailability availability = CatalogAvailability.inStock,
 }) =>
-    browseEntry(
-      i,
+    CatalogItem(
+      sourceScopedId: 'monetta:$i',
+      source: CatalogSourceType.monettaShopify,
+      merchant: 'Monetta',
       title: title,
-      vendor: brand,
+      brand: brand,
       category: category,
-      price: price,
-      inStock: inStock,
-      updatedAt: DateTime.utc(2026, 8, 10, i),
+      imageUrl: null,
+      price: Money(amount: price, currency: Currency.mxn),
+      availability: availability,
+      detailUrl: 'https://monetta.mx/products/item-$i',
+      marketRestriction: MarketRestriction.mexico,
+      lastObservedAt: DateTime.utc(2026, 8, 10, i),
+      purchaseMode: PurchaseMode.monettaCheckout,
+      shopifyProductId: '$i',
+      vertical: CatalogVertical.bagsWallets,
     );
 
 /// Feed order is 1..6; prices are all different so any sort is unambiguous.
@@ -51,12 +59,12 @@ final _items = [
     title: 'Bolsa Crossbody Azul',
     brand: 'Michael Kors',
     price: 4000,
-    inStock: false,
+    availability: CatalogAvailability.outOfStock,
   ),
   _item(6, title: 'Bolsa Tote Negra', brand: 'Guess', price: 2000),
 ];
 
-String _name(int i) => _items[i - 1].tileData.title;
+String _name(int i) => ProductTileData.fromCatalogItem(_items[i - 1]).title;
 
 List<String> _feedOrder() => [for (var i = 1; i <= 6; i++) _name(i)];
 
@@ -79,11 +87,11 @@ Widget _app(Widget home, {double scale = 1.0}) => MaterialApp(
 
 Future<void> _pumpCatalog(
   WidgetTester tester, {
-  List<BrowseEntry>? items,
+  List<CatalogItem>? items,
   double scale = 1.0,
 }) async {
   await tester.pumpWidget(
-    _app(browseScreen(items ?? _items), scale: scale),
+    _app(CatalogBrowseScreen(items: items ?? _items), scale: scale),
   );
   await tester.pump();
 }
@@ -467,18 +475,25 @@ void main() {
     });
 
     testWidgets(
-        'FLT-01c with no brand link, no active filter and no owner count '
-        'there is no empty band under the banner', (tester) async {
+        'FLT-01c (guide v2) under the banner there is one toolbar: filter '
+        'button, category pills, count and «Ordenar por»; no brand link and '
+        'no clear action while nothing is filtered', (tester) async {
       _view(tester, height: 844);
       final store = await _loadedStore();
       addTearDown(store.dispose);
       await _pumpCollection(tester, store);
 
       expect(find.byKey(const Key('collection-open-brand')), findsNothing);
+      expect(find.text('Ver Coach'), findsNothing);
       expect(find.byKey(const Key('collection-clear-inline')), findsNothing);
-      final banner = tester.getRect(find.byType(AppBar));
+      expect(find.byKey(const Key('collection-count')), findsOneWidget);
+      expect(find.byKey(const Key('collection-sort-button')), findsOneWidget);
+      final banner = tester.getRect(find.byType(CatalogEditorialBanner));
+      final toolbar =
+          tester.getRect(find.byKey(const Key('collection-pill-bolsa')));
       final firstCard = tester.getRect(find.byType(ProductCard).first);
-      expect(firstCard.top - banner.bottom, inInclusiveRange(8, 16));
+      expect(toolbar.top - banner.bottom, inInclusiveRange(8, 24));
+      expect(firstCard.top, greaterThan(toolbar.bottom));
     });
   });
 

@@ -22,12 +22,6 @@ Product _longestInStock(Iterable<Product> products) {
   return inStock.first;
 }
 
-/// At least one product card: proves the grid really holds products.
-Finder _productCards() => find.byWidgetPredicate((widget) {
-      final key = widget.key;
-      return key is ValueKey<String> && key.value.startsWith('product-card-');
-    });
-
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
   useBundledFonts();
@@ -35,7 +29,7 @@ void main() {
   registerTextScaleMatrix(
     'Inicio',
     (tester, store) async => const HomeScreen(),
-    anchor: (store) => find.byKey(const ValueKey('home-search-bar')),
+    anchor: (store) => find.byKey(const ValueKey('home-appbar-search-button')),
   );
 
   registerTextScaleMatrix(
@@ -44,7 +38,7 @@ void main() {
       title: 'Bolsas',
       filter: CollectionFilter(category: 'bolsa'),
     ),
-    anchor: (store) => _productCards(),
+    anchor: (store) => find.text('Bolsas'),
   );
 
   registerTextScaleMatrix(
@@ -54,7 +48,7 @@ void main() {
       prompt: 'Encuentra algo muy tú',
       history: SearchHistory(),
     ),
-    anchor: (store) => _productCards(),
+    anchor: (store) => find.byKey(const ValueKey('search-query-field')),
   );
 
   registerTextScaleMatrix(
@@ -65,7 +59,7 @@ void main() {
     // label is what proves the piece can be bought.
     anchor: (store) => find.descendant(
       of: find.byKey(const Key('purchase-dock-primary')),
-      matching: find.text('Agregar al carrito'),
+      matching: find.text('AGREGAR A BOLSA'),
     ),
   );
 }

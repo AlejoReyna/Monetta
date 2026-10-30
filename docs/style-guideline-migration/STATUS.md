@@ -1,5 +1,9 @@
 # Migración a la guía de estilo: estado
 
+**Estado vigente, 21 oct 2026:** M1 se porta a `feat/client-guide-m1` sobre `origin/main` (`ce0c9d2`), en sustitución del PR #22. Véanse los resultados, adaptaciones y goldens por aprobar en [INTEGRATION_MAIN.md](INTEGRATION_MAIN.md).
+
+**Registro histórico del 20 oct:** el resto de este documento describe `c828d68` (rf-17). Sus 15 fallos y avisos de formato no son la línea base de `main`; no deben atribuirse al PR limpio.
+
 **Última actualización:** 20 de octubre de 2026. **Hito 1:** fases 0 y 1 cerradas para revisión, fase 2 iniciada. Nada está confirmado (commit), publicado ni subido a Shopify.
 
 Plan: [MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md](../MONETTA_STYLE_GUIDELINE_MIGRATION_PLAN.md). Referencia: `guideline.pdf` (SHA-256 `7e7414de…97db`). Vista revisable: [m1/index.html](2026-10-20/m1/index.html).

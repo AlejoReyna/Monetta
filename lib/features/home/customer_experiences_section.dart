@@ -701,9 +701,10 @@ class _TrustBadge extends StatelessWidget {
         if (average != null) '${average!.toStringAsFixed(1)} de 5',
         if (count != null) '$count reseñas',
       ].join('. '),
-      child: Row(
+      child: Wrap(
         key: const ValueKey('customer-experiences-trust-badge'),
-        mainAxisAlignment: MainAxisAlignment.center,
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           _StarRow(rating: filled, size: 18),
           if (count != null) ...[

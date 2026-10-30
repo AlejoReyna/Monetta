@@ -5,9 +5,10 @@
 /// es lo guardado en este dispositivo para la cuenta activa.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/storefront_destination_navigation.dart';
+import '../navigation/monetta_bottom_navigation.dart';
 import 'package:flutter/material.dart';
-
-import '../navigation/monetta_page_header.dart';
 
 import '../../app/catalog_store.dart';
 import '../../domain/product.dart';
@@ -15,10 +16,13 @@ import '../../main.dart' show StoreScope;
 import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
+import '../catalog/browse_detail_layout.dart';
 
 Future<void> openFavorites(BuildContext context) {
   return Navigator.of(context).push(
-    MaterialPageRoute<void>(builder: (_) => const FavoritesScreen()),
+    MaterialPageRoute<void>(
+      builder: (_) => const BrowseDetailLayout(child: FavoritesScreen()),
+    ),
   );
 }
 
@@ -28,11 +32,26 @@ class FavoritesScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       backgroundColor: palette.canvas,
-      appBar: buildMonettaPageAppBar(
+      bottomNavigationBar: storefrontNavigation(
         context,
-        title: 'Favoritos',
+        current: MonettaBottomDestination.account,
+      ),
+      appBar: AppBar(
+        backgroundColor: palette.bar,
+        foregroundColor: palette.ink,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text(
+          'Favoritos',
+          style: boutiqueTitle(size: 15, color: palette.ink),
+        ),
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(.5),
+          child: Container(height: .5, color: palette.hairline),
+        ),
       ),
       body: SafeArea(
         child: ListenableBuilder(
@@ -108,11 +127,20 @@ class _FavoritesBody extends StatelessWidget {
             ),
           ),
         SliverPadding(
-          padding: const EdgeInsets.only(top: BoutiqueSpace.md),
-          sliver: ProductCardSliverGrid(
-            products: saved,
-            showWishlist: true,
-            cardKeyPrefix: 'favorite-card',
+          padding: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+          sliver: SliverGrid(
+            gridDelegate: productGridDelegate(
+              context,
+              availableWidth:
+                  MediaQuery.sizeOf(context).width - BoutiqueSpace.gutter * 2,
+            ),
+            delegate: SliverChildBuilderDelegate(
+              (context, index) => ProductCard(
+                key: ValueKey('favorite-card-${saved[index].id}'),
+                product: saved[index],
+              ),
+              childCount: saved.length,
+            ),
           ),
         ),
       ],

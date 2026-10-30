@@ -10,18 +10,28 @@
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-
-import '../navigation/monetta_page_header.dart';
 import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/cart_controller.dart';
+import '../../app/storefront_layout.dart';
+import '../../platform/system_layout_context.dart';
+import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/monetta_bottom_navigation.dart';
+import '../catalog/categories_screen.dart';
 import '../../app/checkout_buyer_identity.dart';
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/monetta_tokens.g.dart';
+import '../boutique/client_guide_components.dart';
+import 'purchase_notices.dart';
 import '../../app/shopify_checkout_coordinator.dart';
+import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
+import '../../data/local/database.dart' show OrderSummary;
 import '../../data/media/media_url.dart';
 import '../../data/shopify/cart/cart_repository.dart';
 import '../../data/shopify/cart/cart_session_store.dart';
@@ -31,8 +41,14 @@ import '../../main.dart';
 import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
+import '../orders/order_detail_screen.dart';
+import '../orders/orders_screen.dart';
 import '../product/quick_view.dart';
-import 'checkout_summary_row.dart';
+import 'checkout_double_charge_sheet.dart';
+import 'checkout_order_lookup.dart';
+import 'checkout_return.dart';
+import 'checkout_return_banner.dart';
+import 'reviewing_checkout.dart';
 import 'order_confirmation_screen.dart';
 import 'shopify_cart_summary.dart';
 
@@ -58,13 +74,29 @@ typedef SecureCheckoutLauncher = Future<CheckoutResult> Function(
 );
 typedef ExternalCheckoutFallback = Future<bool> Function();
 
+void openCheckoutOrders(BuildContext context) {
+  final account = AccountScope.maybeOf(context);
+  if (account == null || !account.isSignedIn) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Inicia sesión para ver Mis pedidos. Te enviamos la '
+          'confirmación a tu correo.',
+        ),
+      ),
+    );
+    return;
+  }
+  unawaited(openOrders(context, controller: account));
+}
+
 Future<void> openBag(
   BuildContext context, {
   SecureCheckoutLauncher? launchSecureCheckout,
 }) {
   final store = StoreScope.of(context);
   return Navigator.of(context).push(
-    monettaPageRoute(
+    monettaFadeRoute(
       StoreScope(
         notifier: store,
         child: BagScreen(launchSecureCheckout: launchSecureCheckout),
@@ -161,29 +193,51 @@ class _BagScreenState extends State<BagScreen> {
       );
     }
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
       backgroundColor: palette.canvas,
-      appBar: buildMonettaPageAppBar(
-        context,
-        title: 'Mi bolsa',
-        titleRowKey: const ValueKey('bag-heading-row'),
-        trailingLabel:
-            '${store.bagQuantity} ${store.bagQuantity == 1 ? 'artículo' : 'artículos'}',
-        onBack: () => Navigator.of(context).pop(),
+      appBar: _BoutiqueBar(
+        leading: IconButton(
+          tooltip: 'Volver',
+          onPressed: () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back, size: 20),
+        ),
       ),
       body: SafeArea(
         bottom: true,
-        child: lines.isEmpty
-            ? const _EmptyBag()
-            : _BagContents(
-                lines: lines,
-                launchSecureCheckout: widget.launchSecureCheckout,
-                cartController: cartScope?.notifier,
-                checkoutCoordinator: cartScope?.checkoutCoordinator,
-                cartScope: sessionScope,
-                localIntent: localIntent,
-              ),
+        child: SystemUsableSurface(
+          child: lines.isEmpty
+              ? const _EmptyBag()
+              : _BagContents(
+                  lines: lines,
+                  launchSecureCheckout: widget.launchSecureCheckout,
+                  cartController: cartScope?.notifier,
+                  checkoutCoordinator: cartScope?.checkoutCoordinator,
+                  cartScope: sessionScope,
+                  localIntent: localIntent,
+                ),
+        ),
       ),
+      bottomNavigationBar: !SystemLayoutScope.of(context).supported
+          ? null
+          : MonettaBottomNavigation(
+              current: MonettaBottomDestination.bag,
+              bagCount: store.bagQuantity,
+              onSelected: (destination) {
+                switch (destination) {
+                  case MonettaBottomDestination.home:
+                    Navigator.of(context).popUntil((route) => route.isFirst);
+                  case MonettaBottomDestination.catalog:
+                    unawaited(openCategories(context));
+                  case MonettaBottomDestination.bag:
+                    break;
+                  case MonettaBottomDestination.account:
+                    final controller = AccountScope.maybeOf(context);
+                    if (controller != null) {
+                      unawaited(openAccount(context, controller: controller));
+                    }
+                }
+              },
+            ),
     );
   }
 
@@ -233,10 +287,26 @@ class _BagContents extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final store = StoreScope.of(context);
+    final count = store.bagQuantity;
     final subtotal = store.bagSubtotal;
-    final shipping = _shippingFor(subtotal);
 
-    void continueToCheckout() {
+    Future<void> continueToCheckout() async {
+      final guard = ReviewingCheckoutScope.maybeOf(context);
+      if (guard != null) {
+        await guard.ensureLoaded();
+        if (!context.mounted) return;
+      }
+      if (guard != null &&
+          guard.blocksCheckout(bagEmpty: store.bagLines.isEmpty)) {
+        final choice = await showCheckoutDoubleChargeSheet(context);
+        if (!context.mounted) return;
+        if (choice == CheckoutDoubleChargeChoice.viewOrders) {
+          openCheckoutOrders(context);
+          return;
+        }
+        if (choice != CheckoutDoubleChargeChoice.payAnyway) return;
+      }
+      if (!context.mounted) return;
       final controller = cartController;
       final scope = cartScope;
       final checkout = checkoutCoordinator;
@@ -261,16 +331,9 @@ class _BagContents extends StatelessWidget {
                     email: draft.email,
                     phone: draft.phone,
                   );
-                  final currentAccount = accountController?.account;
-                  final currentScope = currentAccount == null
-                      ? CartSessionScope.guest(shopDomain: scope.shopDomain)
-                      : CartSessionScope.authenticated(
-                          shopDomain: scope.shopDomain,
-                          localAccountId: currentAccount.localAccountId,
-                        );
                   return checkout.present(
                     controller: controller,
-                    scope: currentScope,
+                    scope: scope,
                     localIntent: currentIntent,
                     buyerIdentity: buyerIdentity,
                     onCompleted: (purchase) async {
@@ -292,15 +355,17 @@ class _BagContents extends StatelessWidget {
         );
         return;
       }
-      Navigator.of(context).push(
-        monettaPageRoute(
-          StoreScope(
-            notifier: store,
-            child: CheckoutFlowScreen(
-              launchSecureCheckout: launcher,
-              // El coordinador decide al invocar si hay URL fresca; no se
-              // congela estado antes de la reconciliación final.
-              openExternalCheckout: checkout?.openExternalFallback,
+      unawaited(
+        Navigator.of(context).push(
+          monettaFadeRoute(
+            StoreScope(
+              notifier: store,
+              child: CheckoutFlowScreen(
+                launchSecureCheckout: launcher,
+                // El coordinador decide al invocar si hay URL fresca; no se
+                // congela estado antes de la reconciliación final.
+                openExternalCheckout: checkout?.openExternalFallback,
+              ),
             ),
           ),
         ),
@@ -309,7 +374,52 @@ class _BagContents extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final wide = constraints.maxWidth >= 860;
+        final wide = constraints.maxWidth >= StorefrontLayout.cartSplitWidth &&
+            StorefrontLayout.canSplit(
+              constraints.biggest,
+              MediaQuery.textScalerOf(context),
+            );
+        final heading = Padding(
+          padding: const EdgeInsets.fromLTRB(20, 20, 20, 12),
+          child: StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
+              ? Column(
+                  key: const ValueKey('bag-heading-stacked'),
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Mi bolsa', style: boutiqueDisplay(wide ? 32 : 28)),
+                    const SizedBox(height: 8),
+                    Text(
+                      '$count ${count == 1 ? 'artículo' : 'artículos'}',
+                      style: boutiqueText(
+                        size: 12,
+                        color: context.boutique.inkMuted,
+                      ),
+                    ),
+                  ],
+                )
+              : Row(
+                  key: const ValueKey('bag-heading-row'),
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
+                  children: [
+                    Expanded(
+                      child: Text(
+                        'Mi bolsa',
+                        style: boutiqueDisplay(wide ? 32 : 28),
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Text(
+                      '$count ${count == 1 ? 'artículo' : 'artículos'}',
+                      style: boutiqueText(
+                        size: 12,
+                        color: context.boutique.inkMuted,
+                      ),
+                    ),
+                  ],
+                ),
+        );
+
         final lineTiles = Column(
           children: [
             for (final line in lines)
@@ -322,6 +432,13 @@ class _BagContents extends StatelessWidget {
           ],
         );
 
+        final incentive = Padding(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 0),
+          child: const PurchasePolicyNotice(
+            key: ValueKey('purchase-policy-notice'),
+          ),
+        );
+
         final controller = cartController;
         final scope = cartScope;
         final hasRemoteCart = controller?.scopedSnapshot?.scope == scope &&
@@ -331,13 +448,12 @@ class _BagContents extends StatelessWidget {
                 controller: controller,
                 scope: scope,
                 localIntent: localIntent,
-                onContinue: continueToCheckout,
+                onContinue: () => unawaited(continueToCheckout()),
               )
             : _OrderSummary(
                 subtotal: subtotal,
-                shipping: shipping,
                 ctaLabel: 'Continuar al checkout',
-                onContinue: continueToCheckout,
+                onContinue: () => unawaited(continueToCheckout()),
               );
 
         final bagIds = {for (final line in lines) line.product.id};
@@ -352,6 +468,8 @@ class _BagContents extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    const _CheckoutProgress(activeIndex: 0),
+                    const SizedBox(height: 8),
                     Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -359,15 +477,23 @@ class _BagContents extends StatelessWidget {
                           flex: 7,
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [lineTiles],
+                            children: [heading, lineTiles],
                           ),
                         ),
                         const SizedBox(width: 48),
                         Expanded(
                           flex: 4,
                           child: Padding(
-                            padding: const EdgeInsets.only(top: 16),
-                            child: summary,
+                            padding: const EdgeInsets.only(top: 64),
+                            child: Column(
+                              children: [
+                                const PurchasePolicyNotice(
+                                  key: ValueKey('purchase-policy-notice'),
+                                ),
+                                const SizedBox(height: 16),
+                                summary,
+                              ],
+                            ),
                           ),
                         ),
                       ],
@@ -384,7 +510,10 @@ class _BagContents extends StatelessWidget {
         return ListView(
           padding: const EdgeInsets.only(bottom: 32),
           children: [
+            const _CheckoutProgress(activeIndex: 0),
+            heading,
             lineTiles,
+            incentive,
             Padding(
               padding: const EdgeInsets.fromLTRB(20, 16, 20, 0),
               child: summary,
@@ -402,6 +531,14 @@ class CheckoutFlowScreen extends StatefulWidget {
     this.launchSecureCheckout,
     this.openExternalCheckout,
     this.availablePaymentMethods = const [],
+    this.orderLookup,
+    this.attemptIdentity,
+    this.orderLookupInterval = kCheckoutOrderLookupInterval,
+    this.orderLookupTimeout = kCheckoutOrderLookupTimeout,
+    this.orderLookupDelay,
+    this.onOrderFound,
+    this.correlationAvailable = kCheckoutTokenCorrelationAvailable,
+    this.openUri,
     super.key,
   });
 
@@ -413,6 +550,30 @@ class CheckoutFlowScreen extends StatefulWidget {
   /// se muestra el aviso alojado. El orquestador los conecta cuando existan.
   final List<String> availablePaymentMethods;
 
+  /// When null, the signed-in account's existing order sources are used.
+  /// Tests pass a fake. With no account and no fake, there is nothing to poll.
+  final CheckoutOrderLookup? orderLookup;
+
+  /// Overrides the cart/checkout token read from the reconciled cart.
+  final CheckoutAttemptIdentity? attemptIdentity;
+
+  final Duration orderLookupInterval;
+  final Duration orderLookupTimeout;
+  final CheckoutOrderDelay? orderLookupDelay;
+
+  /// Replaces the default route to order detail. Used by tests.
+  final Future<void> Function(
+    BuildContext context,
+    CheckoutOrderMatch match,
+  )? onOrderFound;
+
+  /// Banner 1 is allowed only when this is true. Production stays false
+  /// until order sources return a checkout or cart token.
+  final bool correlationAvailable;
+
+  /// Opens the concierge WhatsApp link. Tests pass a fake.
+  final Future<bool> Function(Uri uri)? openUri;
+
   @override
   State<CheckoutFlowScreen> createState() => _CheckoutFlowScreenState();
 }
@@ -423,19 +584,26 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   final _email = TextEditingController();
   final _phone = TextEditingController();
   bool _reviewing = false;
-  bool _launching = false;
-  String? _prefilledAccountId;
+  bool _openingSheet = false;
+  bool _checkingOrder = false;
+  bool _orderFound = false;
+  bool _didPrefillContact = false;
+  int _returnGeneration = 0;
+  CheckoutReturnPhase? _returnPhase;
+  String? _returnDetail;
   String? _selectedPayment;
+  Timer? _pollTimer;
+  Completer<void>? _pollDelay;
+
+  bool get _retryBlocked => _openingSheet || _checkingOrder || _orderFound;
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
+    if (_didPrefillContact) return;
+    _didPrefillContact = true;
     final account = AccountScope.maybeOf(context)?.account;
-    if (account == null || _prefilledAccountId == account.localAccountId) {
-      return;
-    }
-    _prefilledAccountId = account.localAccountId;
-    final email = account.email?.trim();
+    final email = account?.email?.trim();
     if (email != null && email.isNotEmpty && _email.text.isEmpty) {
       _email.text = email;
     }
@@ -443,27 +611,32 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
 
   @override
   void dispose() {
+    _returnGeneration += 1;
+    _finishPollDelay();
     _scrollController.dispose();
     _email.dispose();
     _phone.dispose();
     super.dispose();
   }
 
-  Future<void> _signIn() async {
-    final controller = AccountScope.maybeOf(context);
-    if (controller == null || !controller.canLogin || controller.isLoading) {
-      return;
-    }
-    await controller.login();
-    if (!mounted || controller.isSignedIn) return;
-    final error = controller.lastError;
-    if (error != null && !error.isSilent) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('No pudimos iniciar sesión. Inténtalo de nuevo.'),
-        ),
-      );
-    }
+  Future<void> _delayPoll(Duration duration) {
+    final injected = widget.orderLookupDelay;
+    if (injected != null) return injected(duration);
+    final completer = Completer<void>();
+    _pollDelay = completer;
+    _pollTimer?.cancel();
+    _pollTimer = Timer(duration, () {
+      if (!completer.isCompleted) completer.complete();
+    });
+    return completer.future;
+  }
+
+  void _finishPollDelay() {
+    _pollTimer?.cancel();
+    _pollTimer = null;
+    final completer = _pollDelay;
+    _pollDelay = null;
+    if (completer != null && !completer.isCompleted) completer.complete();
   }
 
   void _review() {
@@ -477,12 +650,107 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     );
   }
 
+  CheckoutOrderLookup? _lookup() {
+    final injected = widget.orderLookup;
+    if (injected != null) return injected;
+    final account = AccountScope.maybeOf(context);
+    if (account == null) return null;
+    return AccountCheckoutOrderLookup(account);
+  }
+
+  CheckoutAttemptIdentity _attemptIdentity() {
+    final override = widget.attemptIdentity;
+    if (override != null) return override;
+    final cart = CartScope.maybeOf(context)?.notifier?.snapshot?.cart;
+    return checkoutAttemptFromCart(
+      cartId: cart?.id,
+      checkoutUrl: cart?.checkoutUrl,
+    );
+  }
+
+  void _showBrowserFallback(CheckoutFailed failure) {
+    if (!failure.allowExternalBrowser) return;
+    final fallback = widget.openExternalCheckout;
+    if (fallback == null) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(
+          '${failure.userMessage} Abrir el navegador no confirma el pago; '
+          'revisa Mis pedidos si terminaste ahí.',
+        ),
+        action: SnackBarAction(
+          label: 'ABRIR NAVEGADOR',
+          onPressed: () => unawaited(fallback()),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _openConciergeWhatsApp() async {
+    final uri = conciergeWhatsAppUri();
+    final open = widget.openUri ??
+        ((target) => launchUrl(target, mode: LaunchMode.externalApplication));
+    final ok = await open(uri);
+    if (!ok && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('No se pudo abrir el enlace.')),
+      );
+    }
+  }
+
+  void _viewOrders() => openCheckoutOrders(context);
+
+  void _activateReviewing() {
+    ReviewingCheckoutScope.maybeOf(context)?.markActive();
+  }
+
+  void _deactivateReviewing() {
+    ReviewingCheckoutScope.maybeOf(context)?.clear();
+  }
+
+  Future<void> _openMatchedOrder(CheckoutOrderMatch match) async {
+    final handler = widget.onOrderFound;
+    if (handler != null) {
+      await handler(context, match);
+      return;
+    }
+    if (!mounted) return;
+    final account = AccountScope.maybeOf(context);
+    if (account != null) await account.loadOrders();
+    if (!mounted) return;
+    OrderSummary? summary;
+    for (final order in account?.orders ?? const <OrderSummary>[]) {
+      if (order.id == match.orderId ||
+          (order.shopifyOrderId != null &&
+              order.shopifyOrderId == match.orderId)) {
+        summary = order;
+        break;
+      }
+    }
+    if (summary == null || !mounted) return;
+    final matched = summary;
+    await Navigator.of(context).pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => OrderDetailScreen(
+          order: matched,
+          rewardsController: account,
+        ),
+      ),
+    );
+  }
+
   Future<void> _pay() async {
+    if (_retryBlocked) return;
     final store = StoreScope.of(context);
     final lines = store.bagLines;
     if (widget.launchSecureCheckout case final launcher?) {
       NotificationScope.maybeOf(context)?.recordPushOutcome('checkout_started');
-      setState(() => _launching = true);
+      final generation = ++_returnGeneration;
+      setState(() {
+        _openingSheet = true;
+        _returnPhase = null;
+        _returnDetail = null;
+      });
       try {
         final email = _email.text.trim();
         final result = await launcher(
@@ -492,9 +760,12 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
             phone: _phone.text.trim(),
           ),
         );
-        if (!mounted) return;
+        if (!mounted || generation != _returnGeneration) return;
+        setState(() => _openingSheet = false);
         switch (result) {
           case CheckoutCompleted():
+            _deactivateReviewing();
+            setState(() => _returnPhase = null);
             // Confirmación solo con evidencia del result. CheckoutCompleted no
             // porta identidad de pedido y la sincronización de Mis pedidos
             // puede aún no incluir el pedido nuevo: tomar el primer
@@ -530,36 +801,74 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
               },
             );
           case CheckoutCancelled():
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(
-                content: Text('Checkout cancelado. Tu bolsa se conserva.'),
-              ),
+          case CheckoutFailed():
+            if (result is CheckoutFailed) _showBrowserFallback(result);
+            final kind = classifyCheckoutResult(result);
+            if (kind == CheckoutReturnKind.sheetDidNotOpen) {
+              final detail =
+                  result is CheckoutFailed && !result.allowExternalBrowser
+                      ? result.userMessage
+                      : null;
+              setState(() {
+                _returnPhase = CheckoutReturnPhase.sheetDidNotOpen;
+                _returnDetail = detail;
+              });
+              return;
+            }
+            final lookup = _lookup();
+            final attempt = _attemptIdentity();
+            if (lookup == null) {
+              // Nothing to correlate against. That is not proof of no charge.
+              _activateReviewing();
+              setState(() => _returnPhase = CheckoutReturnPhase.reviewing);
+              return;
+            }
+            setState(() {
+              _checkingOrder = true;
+              _returnPhase = CheckoutReturnPhase.confirming;
+            });
+            final decision = await resolvePaymentReturn(
+              lookup: lookup,
+              attempt: attempt,
+              interval: widget.orderLookupInterval,
+              timeout: widget.orderLookupTimeout,
+              correlationAvailable: widget.correlationAvailable,
+              delay: _delayPoll,
+              isCancelled: () => !mounted || generation != _returnGeneration,
             );
-          case CheckoutFailed(:final userMessage):
-            final fallback = widget.openExternalCheckout;
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(
-                  fallback == null
-                      ? userMessage
-                      : '$userMessage Abrir el navegador no confirma el pago; '
-                          'revisa Mis pedidos si terminaste ahí.',
-                ),
-                action: fallback == null
-                    ? null
-                    : SnackBarAction(
-                        label: 'ABRIR NAVEGADOR',
-                        onPressed: () => unawaited(fallback()),
-                      ),
-              ),
-            );
+            if (!mounted || generation != _returnGeneration) return;
+            if (decision is CheckoutOrderFound) {
+              _deactivateReviewing();
+              setState(() {
+                _checkingOrder = false;
+                _orderFound = true;
+                _returnPhase = null;
+              });
+              await _openMatchedOrder(decision.match);
+              return;
+            }
+            if (decision is! CheckoutOrderNotFound) {
+              _activateReviewing();
+            }
+            setState(() {
+              _checkingOrder = false;
+              _returnPhase = decision is CheckoutOrderNotFound
+                  ? CheckoutReturnPhase.paymentNotCompleted
+                  : CheckoutReturnPhase.reviewing;
+            });
         }
       } finally {
-        if (mounted) setState(() => _launching = false);
+        if (mounted && generation == _returnGeneration) {
+          setState(() {
+            _openingSheet = false;
+            _checkingOrder = false;
+          });
+        }
       }
       return;
     }
     if (!mounted) return;
+    setState(() => _returnPhase = CheckoutReturnPhase.sheetDidNotOpen);
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
@@ -576,35 +885,22 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
     if (store.bagLines.isEmpty) {
       return Scaffold(
         backgroundColor: palette.canvas,
-        appBar: buildMonettaPageAppBar(context, title: 'Mi bolsa'),
+        appBar: const _BoutiqueBar(),
         body: const SafeArea(child: _EmptyBag()),
       );
     }
 
     return Scaffold(
       backgroundColor: palette.canvas,
-      appBar: buildMonettaPageAppBar(
-        context,
+      appBar: _BoutiqueBar(
+        leading: IconButton(
+          tooltip: 'Volver',
+          onPressed: _reviewing
+              ? () => setState(() => _reviewing = false)
+              : () => Navigator.of(context).pop(),
+          icon: const Icon(Icons.arrow_back, size: 20),
+        ),
         title: 'Checkout',
-        onBack: _reviewing
-            ? () => setState(() => _reviewing = false)
-            : () => Navigator.of(context).pop(),
-        actionsWidth: 96,
-        actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 18),
-            child: Row(
-              children: [
-                const Icon(Icons.lock_outline, size: 15),
-                const SizedBox(width: 6),
-                Text(
-                  'SEGURO',
-                  style: boutiqueEyebrow(size: 9, color: palette.ink),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
       body: SafeArea(
         bottom: true,
@@ -613,6 +909,7 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
           padding: const EdgeInsets.only(bottom: 40),
           child: Column(
             children: [
+              _CheckoutProgress(activeIndex: _reviewing ? 2 : 1),
               LayoutBuilder(
                 builder: (context, constraints) {
                   final wide = constraints.maxWidth >= 900;
@@ -620,22 +917,25 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
                       ? _ReviewPanel(
                           email: _email.text,
                           phone: _phone.text,
-                          shipping: _shippingFor(store.bagSubtotal),
-                          launching: _launching,
+                          openingSheet: _openingSheet,
+                          returnPhase: _returnPhase,
+                          returnDetail: _returnDetail,
+                          payEnabled: !_retryBlocked,
+                          showPayButton: !_orderFound,
                           paymentMethods: widget.availablePaymentMethods,
                           selectedPayment: _selectedPayment,
                           onSelectPayment: (value) =>
                               setState(() => _selectedPayment = value),
                           onEdit: () => setState(() => _reviewing = false),
                           onPay: () => unawaited(_pay()),
+                          onViewOrders: _viewOrders,
+                          onWhatsApp: () => unawaited(_openConciergeWhatsApp()),
                         )
                       : _ContactForm(
                           formKey: _formKey,
                           email: _email,
                           phone: _phone,
-                          shipping: _shippingFor(store.bagSubtotal),
                           onContinue: _review,
-                          onSignIn: () => unawaited(_signIn()),
                         );
 
                   final summary = _CheckoutSummary(
@@ -683,6 +983,177 @@ class _CheckoutFlowScreenState extends State<CheckoutFlowScreen> {
   }
 }
 
+class _BoutiqueBar extends StatelessWidget implements PreferredSizeWidget {
+  const _BoutiqueBar({this.leading, this.title});
+
+  final Widget? leading;
+  final String? title;
+
+  @override
+  Size get preferredSize => const Size.fromHeight(60.5);
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return AppBar(
+      toolbarHeight: 60,
+      leading: leading,
+      automaticallyImplyLeading: false,
+      backgroundColor: palette.bar,
+      foregroundColor: palette.ink,
+      elevation: 0,
+      scrolledUnderElevation: 0,
+      centerTitle: true,
+      title: title == null
+          ? const MonettaWordmark.appBar()
+          : Text(title!, style: boutiqueTitle(size: 16, color: palette.ink)),
+      actions: title == 'Checkout'
+          ? [
+              Padding(
+                padding: const EdgeInsets.only(right: 18),
+                child: Row(
+                  children: [
+                    const Icon(Icons.lock_outline, size: 15),
+                    const SizedBox(width: 6),
+                    Text(
+                      'SEGURO',
+                      style: boutiqueEyebrow(size: 9, color: palette.ink),
+                    ),
+                  ],
+                ),
+              ),
+            ]
+          : null,
+      bottom: PreferredSize(
+        preferredSize: const Size.fromHeight(.5),
+        child: Container(height: .5, color: palette.hairline),
+      ),
+    );
+  }
+}
+
+class _CheckoutProgress extends StatelessWidget {
+  const _CheckoutProgress({required this.activeIndex});
+
+  final int activeIndex;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    const labels = ['Bolsa', 'Entrega', 'Pago', 'Confirmación'];
+    if (StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))) {
+      return Semantics(
+        value: labels.join(', '),
+        child: Container(
+          key: const ValueKey('checkout-progress-enlarged'),
+          width: double.infinity,
+          color: palette.surfaceDeep,
+          padding: const EdgeInsets.all(16),
+          child: Text(
+            'Paso ${activeIndex + 1} de ${labels.length} · ${labels[activeIndex]}',
+            style: boutiqueText(size: 12, weight: FontWeight.w600),
+          ),
+        ),
+      );
+    }
+    return Container(
+      color: palette.surfaceDeep,
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 560),
+          child: Row(
+            children: [
+              for (var index = 0; index < labels.length; index++) ...[
+                if (index > 0)
+                  Expanded(
+                    child: Container(
+                      height: 1,
+                      color:
+                          index <= activeIndex ? palette.ink : palette.hairline,
+                    ),
+                  ),
+                _ProgressStep(
+                  label: labels[index],
+                  number: index + 1,
+                  active: index == activeIndex,
+                  complete: index < activeIndex,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _ProgressStep extends StatelessWidget {
+  const _ProgressStep({
+    required this.label,
+    required this.number,
+    required this.active,
+    required this.complete,
+  });
+
+  final String label;
+  final int number;
+  final bool active;
+  final bool complete;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    return Semantics(
+      label:
+          '$label, ${active ? 'paso actual' : complete ? 'completado' : 'pendiente'}',
+      child: Column(
+        children: [
+          Container(
+            width: 26,
+            height: 26,
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: active || complete ? palette.ink : palette.surface,
+              border: Border.all(
+                color: active || complete ? palette.ink : palette.hairline,
+              ),
+            ),
+            child: complete
+                ? Icon(Icons.check, size: 13, color: palette.canvas)
+                : Text(
+                    '$number',
+                    style: boutiqueText(
+                      size: 11,
+                      color: active ? palette.canvas : palette.inkMuted,
+                      weight: FontWeight.w600,
+                      height: 1,
+                    ),
+                  ),
+          ),
+          const SizedBox(height: 5),
+          ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 88),
+            child: FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                label.toUpperCase(),
+                maxLines: 1,
+                softWrap: false,
+                style: boutiqueEyebrow(
+                  size: 8,
+                  color: active || complete ? palette.ink : palette.inkMuted,
+                ).copyWith(letterSpacing: 1.0),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 class _BagLineTile extends StatelessWidget {
   const _BagLineTile({
     required this.line,
@@ -699,8 +1170,9 @@ class _BagLineTile extends StatelessWidget {
     final palette = context.boutique;
     final store = StoreScope.of(context);
     final brand = store.facetsFor(line.product.id)?.brand?.value;
+    final wishlisted = store.wishlist.contains(line.product.id);
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
       decoration: BoxDecoration(
         border: Border(
           top: BorderSide(color: palette.hairline, width: 0.5),
@@ -712,8 +1184,8 @@ class _BagLineTile extends StatelessWidget {
           ClipRRect(
             borderRadius: BoutiqueRadius.tile,
             child: SizedBox(
-              width: 96,
-              height: 116,
+              width: 76,
+              height: 92,
               child: _ProductImage(url: line.product.primaryImage),
             ),
           ),
@@ -725,17 +1197,25 @@ class _BagLineTile extends StatelessWidget {
                 if (brand != null) ...[
                   Text(
                     brand.toUpperCase(),
-                    style: boutiqueEyebrow(size: 10, color: palette.inkMuted),
+                    style: boutiqueEyebrow(size: 9, color: palette.inkMuted),
                   ),
-                  const SizedBox(height: 5),
+                  const SizedBox(height: 4),
                 ],
                 Text(
                   line.product.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
+                  maxLines: StorefrontLayout.enlargedText(
+                    MediaQuery.textScalerOf(context),
+                  )
+                      ? null
+                      : 2,
+                  overflow: StorefrontLayout.enlargedText(
+                    MediaQuery.textScalerOf(context),
+                  )
+                      ? TextOverflow.visible
+                      : TextOverflow.ellipsis,
                   style: boutiqueText(
-                    size: 15,
-                    weight: FontWeight.w600,
+                    size: 14,
+                    weight: FontWeight.w500,
                     height: 1.35,
                   ),
                 ),
@@ -746,20 +1226,32 @@ class _BagLineTile extends StatelessWidget {
                     style: boutiqueText(size: 12, color: palette.inkMuted),
                   ),
                 ],
-                const SizedBox(height: 7),
+                const SizedBox(height: 6),
                 Text(
                   kMoney.format(line.lineTotal),
-                  style: boutiqueText(size: 16, weight: FontWeight.w700),
+                  style: boutiqueText(size: 14, weight: FontWeight.w700),
                 ),
-                const SizedBox(height: 12),
+                const SizedBox(height: 10),
                 _QuantityStepper(
                   quantity: line.quantity,
                   onChanged: onChanged,
                 ),
-                const SizedBox(height: 2),
-                _BagTextAction(
-                  label: 'Eliminar',
-                  onTap: onRemove,
+                const SizedBox(height: 4),
+                Wrap(
+                  spacing: 16,
+                  runSpacing: 4,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    _BagTextAction(
+                      label: 'Eliminar',
+                      onTap: onRemove,
+                    ),
+                    _BagTextAction(
+                      label: wishlisted ? 'Guardado ✓' : 'Guardar para después',
+                      onTap: () =>
+                          unawaited(store.toggleWishlist(line.product.id)),
+                    ),
+                  ],
                 ),
               ],
             ),
@@ -825,11 +1317,16 @@ class _QuantityStepper extends StatelessWidget {
     return Semantics(
       label: 'Cantidad $quantity',
       child: Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 8),
+        height: StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
+            ? math.max(
+                48,
+                MediaQuery.textScalerOf(context).scale(13) * 1.4 + 12,
+              )
+            : 40,
         decoration: BoxDecoration(
           border: Border.all(color: palette.hairline),
-          borderRadius: BoutiqueRadius.control,
+          borderRadius: BoutiqueRadius.tile,
+          color: palette.surface,
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -840,11 +1337,11 @@ class _QuantityStepper extends StatelessWidget {
               onPressed: () => onChanged(quantity - 1),
             ),
             ConstrainedBox(
-              constraints: const BoxConstraints(minWidth: 48),
+              constraints: const BoxConstraints(minWidth: 36),
               child: Text(
                 '$quantity',
                 textAlign: TextAlign.center,
-                style: boutiqueText(size: 14, weight: FontWeight.w600),
+                style: boutiqueText(size: 13, weight: FontWeight.w600),
               ),
             ),
             _StepperButton(
@@ -875,8 +1372,18 @@ class _StepperButton extends StatelessWidget {
     return IconButton(
       tooltip: tooltip,
       onPressed: onPressed,
-      icon: Icon(icon, size: 16),
-      constraints: const BoxConstraints.tightFor(width: 56, height: 48),
+      icon: Icon(icon, size: 15),
+      constraints: BoxConstraints.tightFor(
+        width: StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
+            ? 48
+            : 40,
+        height: StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))
+            ? math.max(
+                48,
+                MediaQuery.textScalerOf(context).scale(13) * 1.4 + 12,
+              )
+            : 40,
+      ),
       padding: EdgeInsets.zero,
     );
   }
@@ -950,13 +1457,11 @@ class _BagRecommendations extends StatelessWidget {
 class _OrderSummary extends StatelessWidget {
   const _OrderSummary({
     required this.subtotal,
-    required this.shipping,
     required this.ctaLabel,
     required this.onContinue,
   });
 
   final double subtotal;
-  final double shipping;
   final String ctaLabel;
   final VoidCallback onContinue;
 
@@ -974,21 +1479,24 @@ class _OrderSummary extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Resumen de compra', style: boutiqueTitle(color: palette.ink)),
+          Text(
+            'Resumen de compra',
+            style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+          ),
           const SizedBox(height: 18),
-          CheckoutSummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
+          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
           const SizedBox(height: 10),
-          CheckoutSummaryRow(
+          _SummaryRow(
             label: 'Envío',
-            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
+            value: 'Se calcula en Shopify',
           ),
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: Container(height: .5, color: palette.hairline),
           ),
-          CheckoutSummaryRow(
-            label: 'Total',
-            value: kMoney.format(subtotal + shipping),
+          _SummaryRow(
+            label: 'Total estimado',
+            value: kMoney.format(subtotal),
             prominent: true,
           ),
           const SizedBox(height: 6),
@@ -1007,11 +1515,58 @@ class _OrderSummary extends StatelessWidget {
             children: [
               Icon(Icons.lock_outline, size: 14, color: palette.inkMuted),
               Text(
-                'Pago procesado de forma segura',
+                'Pagos seguros con Shopify.',
                 textAlign: TextAlign.center,
                 style: boutiqueText(size: 11, color: palette.inkMuted),
               ),
             ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _SummaryRow extends StatelessWidget {
+  const _SummaryRow({
+    required this.label,
+    required this.value,
+    this.prominent = false,
+  });
+
+  final String label;
+  final String value;
+  final bool prominent;
+
+  @override
+  Widget build(BuildContext context) {
+    final palette = context.boutique;
+    // The value may be a sentence ("Se calcula en Shopify"), so it is capped
+    // and allowed to wrap instead of overflowing at large text scales.
+    return LayoutBuilder(
+      builder: (context, constraints) => Row(
+        children: [
+          Expanded(
+            child: Text(
+              label,
+              style: boutiqueText(
+                size: prominent ? 15 : 13,
+                weight: prominent ? FontWeight.w600 : FontWeight.w400,
+                color: palette.ink,
+              ),
+            ),
+          ),
+          ConstrainedBox(
+            constraints: BoxConstraints(maxWidth: constraints.maxWidth * .65),
+            child: Text(
+              value,
+              textAlign: TextAlign.end,
+              style: boutiqueText(
+                size: prominent ? 16 : 13,
+                weight: prominent ? FontWeight.w700 : FontWeight.w500,
+                color: palette.ink,
+              ),
+            ),
           ),
         ],
       ),
@@ -1024,17 +1579,13 @@ class _ContactForm extends StatelessWidget {
     required this.formKey,
     required this.email,
     required this.phone,
-    required this.shipping,
     required this.onContinue,
-    required this.onSignIn,
   });
 
   final GlobalKey<FormState> formKey;
   final TextEditingController email;
   final TextEditingController phone;
-  final double shipping;
   final VoidCallback onContinue;
-  final VoidCallback onSignIn;
 
   String? _required(String? value) =>
       value == null || value.trim().isEmpty ? 'Completa este campo' : null;
@@ -1042,30 +1593,13 @@ class _ContactForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final accountController = AccountScope.maybeOf(context);
     return Form(
       key: formKey,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (accountController?.isSignedIn != true) ...[
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                key: const ValueKey('checkout-shop-login'),
-                onPressed: accountController?.canLogin == true &&
-                        accountController?.isLoading == false
-                    ? onSignIn
-                    : null,
-                child: Text(
-                  accountController?.isLoading == true
-                      ? 'Iniciando sesión…'
-                      : 'Inicia sesión con Shop',
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-          ],
+          Text('¿Cómo te contactamos?', style: boutiqueDisplay(28)),
+          const SizedBox(height: 8),
           Text(
             'La dirección y el envío se capturan en el checkout seguro de '
             'Shopify para no pedirlos dos veces. Totales finales también '
@@ -1098,7 +1632,7 @@ class _ContactForm extends StatelessWidget {
             validator: _required,
           ),
           const SizedBox(height: 24),
-          _DeliveryOption(shipping: shipping),
+          const _DeliveryOption(),
           const SizedBox(height: 24),
           BoutiqueButton(label: 'REVISAR PEDIDO', onPressed: onContinue),
         ],
@@ -1162,9 +1696,7 @@ class _CheckoutField extends StatelessWidget {
 }
 
 class _DeliveryOption extends StatelessWidget {
-  const _DeliveryOption({required this.shipping});
-
-  final double shipping;
+  const _DeliveryOption();
 
   @override
   Widget build(BuildContext context) {
@@ -1207,16 +1739,14 @@ class _DeliveryOption extends StatelessWidget {
                   ),
                 ),
                 Text(
-                  'Recíbelo en 3 a 5 días hábiles',
+                  'Envíos: contenido pendiente de aprobación.',
                   style: boutiqueText(size: 11, color: palette.inkMuted),
                 ),
               ],
             ),
           ),
           Text(
-            shipping == 0
-                ? 'ESTIMADO: GRATIS'
-                : 'ESTIMADO: ${kMoney.format(shipping)}',
+            'SE CALCULA EN SHOPIFY',
             style: boutiqueEyebrow(size: 9, color: palette.ink),
           ),
         ],
@@ -1225,28 +1755,44 @@ class _DeliveryOption extends StatelessWidget {
   }
 }
 
+/// The first pay control stays up, disabled, while we confirm. Settled
+/// banners own their own actions, and banner 3 has no retry.
+bool _showsCheckoutPayButton(CheckoutReturnPhase? phase) {
+  return phase == null || phase == CheckoutReturnPhase.confirming;
+}
+
 class _ReviewPanel extends StatelessWidget {
   const _ReviewPanel({
     required this.email,
     required this.phone,
-    required this.shipping,
-    required this.launching,
+    required this.openingSheet,
+    required this.returnPhase,
+    this.returnDetail,
+    required this.payEnabled,
+    required this.showPayButton,
     required this.paymentMethods,
     required this.selectedPayment,
     required this.onSelectPayment,
     required this.onEdit,
     required this.onPay,
+    required this.onViewOrders,
+    required this.onWhatsApp,
   });
 
   final String email;
   final String phone;
-  final double shipping;
-  final bool launching;
+  final bool openingSheet;
+  final CheckoutReturnPhase? returnPhase;
+  final String? returnDetail;
+  final bool payEnabled;
+  final bool showPayButton;
   final List<String> paymentMethods;
   final String? selectedPayment;
   final ValueChanged<String> onSelectPayment;
   final VoidCallback onEdit;
   final VoidCallback onPay;
+  final VoidCallback onViewOrders;
+  final VoidCallback onWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -1275,8 +1821,8 @@ class _ReviewPanel extends StatelessWidget {
         ),
         _ReviewBlock(
           title: 'Método de envío',
-          value: 'Envío estándar · 3 a 5 días hábiles\n'
-              'Estimado previo: ${shipping == 0 ? 'gratis' : kMoney.format(shipping)} (no final)',
+          value: 'Envíos: contenido pendiente de aprobación.\n'
+              'Se calcula en Shopify',
         ),
         _PaymentBlock(
           methods: paymentMethods,
@@ -1284,7 +1830,15 @@ class _ReviewPanel extends StatelessWidget {
           onSelect: onSelectPayment,
         ),
         const SizedBox(height: 24),
-        if (launching)
+        if (returnPhase != null)
+          CheckoutReturnBanner(
+            phase: returnPhase!,
+            bodyOverride: returnDetail,
+            onRetry: payEnabled ? onPay : null,
+            onViewOrders: onViewOrders,
+            onWhatsApp: onWhatsApp,
+          ),
+        if (openingSheet)
           Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Semantics(
@@ -1309,10 +1863,12 @@ class _ReviewPanel extends StatelessWidget {
               ),
             ),
           ),
-        BoutiqueButton(
-          label: 'CONTINUAR AL PAGO SEGURO',
-          onPressed: launching ? null : onPay,
-        ),
+        if (showPayButton && _showsCheckoutPayButton(returnPhase))
+          BoutiqueButton(
+            key: const ValueKey('checkout-pay-button'),
+            label: 'CONTINUAR AL PAGO SEGURO',
+            onPressed: payEnabled ? onPay : null,
+          ),
         const SizedBox(height: 14),
         Text(
           'Shopify procesa el pago. Monetta nunca ve los datos de tu tarjeta.',
@@ -1365,7 +1921,7 @@ class _PaymentBlock extends StatelessWidget {
                   ),
                   const SizedBox(height: 6),
                   Text(
-                    'Pago seguro en Shopify',
+                    'Pagos seguros con Shopify.',
                     style: boutiqueText(
                       size: 13,
                       weight: FontWeight.w600,
@@ -1409,6 +1965,8 @@ class _PaymentBlock extends StatelessWidget {
               selected: (selected ?? methods.first) == method,
               onTap: () => onSelect(method),
             ),
+          SizedBox(height: MonettaTokens.space[3]),
+          SecurePaymentLine(methods: methods),
         ],
       ),
     );
@@ -1533,7 +2091,6 @@ class _CheckoutSummary extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final shipping = _shippingFor(subtotal);
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -1547,8 +2104,10 @@ class _CheckoutSummary extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child:
-                    Text('Tu pedido', style: boutiqueTitle(color: palette.ink)),
+                child: Text(
+                  'Tu pedido',
+                  style: clientGuideStyle(context, MonettaTokens.sectionTitle),
+                ),
               ),
               Text(
                 '${lines.fold(0, (sum, line) => sum + line.quantity)} ART.',
@@ -1604,16 +2163,16 @@ class _CheckoutSummary extends StatelessWidget {
             ),
           Container(height: .5, color: palette.hairline),
           const SizedBox(height: 14),
-          CheckoutSummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
+          _SummaryRow(label: 'Subtotal', value: kMoney.format(subtotal)),
           const SizedBox(height: 8),
-          CheckoutSummaryRow(
+          _SummaryRow(
             label: 'Envío estimado',
-            value: shipping == 0 ? 'Gratis' : kMoney.format(shipping),
+            value: 'Se calcula en Shopify',
           ),
           const SizedBox(height: 14),
-          CheckoutSummaryRow(
+          _SummaryRow(
             label: 'Total estimado',
-            value: kMoney.format(subtotal + shipping),
+            value: kMoney.format(subtotal),
             prominent: true,
           ),
         ],
@@ -1689,5 +2248,3 @@ class _EmptyBag extends StatelessWidget {
     );
   }
 }
-
-double _shippingFor(double subtotal) => shippingFor(subtotal);

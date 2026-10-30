@@ -12,18 +12,20 @@
 /// has no sales ranking to sort by.
 library;
 
+import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/storefront_destination_navigation.dart';
+import '../navigation/monetta_bottom_navigation.dart';
+import 'browse_detail_layout.dart';
 import 'package:flutter/material.dart';
-
-import '../navigation/monetta_page_header.dart';
 
 import '../../app/catalog_store.dart';
 import '../../app/motion.dart';
 import '../../app/shopper_copy.dart';
-import '../../app/text_scale_policy.dart';
 import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
+import '../boutique/guide_art.dart';
 import '../product/quick_view.dart';
 import 'catalog_controls.dart';
 import 'collection_screen.dart';
@@ -47,16 +49,18 @@ Future<void> openBrand(
 }) async {
   final store = StoreScope.of(context);
   await Navigator.of(context).push<void>(
-    monettaPageRoute(
+    monettaFadeRoute(
       StoreScope(
         notifier: store,
-        child: BrandScreen(
-          brandSlug: brandSlug,
-          title: title,
-          tagline: tagline,
-          story: story,
-          heroImageUrl: heroImageUrl,
-          heroImageAsset: heroImageAsset,
+        child: BrowseDetailLayout(
+          child: BrandScreen(
+            brandSlug: brandSlug,
+            title: title,
+            tagline: tagline,
+            story: story,
+            heroImageUrl: heroImageUrl,
+            heroImageAsset: heroImageAsset,
+          ),
         ),
       ),
     ),
@@ -167,11 +171,27 @@ class _BrandScreenState extends State<BrandScreen> {
     final visible = _visible(store, products);
     final story = widget.story?.trim() ?? '';
 
-    return Scaffold(
+    return AdaptiveStorefrontScaffold(
+      avoidReservedRegions: true,
       backgroundColor: palette.canvas,
-      appBar: buildMonettaPageAppBar(
+      bottomNavigationBar: storefrontNavigation(
         context,
-        title: _title,
+        current: MonettaBottomDestination.catalog,
+      ),
+      appBar: AppBar(
+        backgroundColor: palette.bar,
+        foregroundColor: palette.ink,
+        surfaceTintColor: Colors.transparent,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text(
+          _title,
+          style: boutiqueText(
+            size: 15,
+            weight: FontWeight.w600,
+            color: palette.ink,
+          ),
+        ),
       ),
       body: CustomScrollView(
         slivers: [
@@ -221,12 +241,32 @@ class _BrandScreenState extends State<BrandScreen> {
             )
           else
             SliverPadding(
-              padding: const EdgeInsets.only(top: BoutiqueSpace.md),
-              sliver: ProductCardSliverGrid(
-                products: visible,
-                gridKey: const ValueKey('brand-product-grid'),
-                onQuickView: (product) =>
-                    showProductQuickView(context, product),
+              padding: const EdgeInsets.fromLTRB(
+                BoutiqueSpace.gutter,
+                BoutiqueSpace.lg,
+                BoutiqueSpace.gutter,
+                BoutiqueSpace.lg,
+              ),
+              sliver: SliverLayoutBuilder(
+                builder: (context, constraints) => SliverGrid(
+                  key: const ValueKey('brand-product-grid'),
+                  gridDelegate: productGridDelegate(
+                    context,
+                    availableWidth: constraints.crossAxisExtent,
+                  ),
+                  delegate: SliverChildBuilderDelegate(
+                    (context, index) {
+                      final product = visible[index];
+                      return ProductCard(
+                        key: ValueKey('product-card-${product.id}'),
+                        product: product,
+                        onQuickView: () =>
+                            showProductQuickView(context, product),
+                      );
+                    },
+                    childCount: visible.length,
+                  ),
+                ),
               ),
             ),
           if (story.isNotEmpty)
@@ -282,6 +322,12 @@ class _BrandHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final hasPhoto = heroImageUrl != null || heroImageAsset != null;
+    // Only this brand's own guide photograph: the lookup is by brand alone, so
+    // a brand without one keeps the typographic header.
+    final guide = hasPhoto ? null : guideCollectionPhoto(brand: slug);
+    if (guide != null) {
+      return CatalogEditorialBanner(title: title, guidePhoto: guide);
+    }
     if (hasPhoto) {
       return CatalogEditorialBanner(
         title: title,
@@ -358,8 +404,7 @@ class _BrandTabs extends StatelessWidget {
     ];
 
     return SizedBox(
-      // The tab band holds 14pt labels, so it follows their scale.
-      height: 52 * textScaleFactorFor(MediaQuery.textScalerOf(context), 14),
+      height: MediaQuery.textScalerOf(context).scale(52),
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),

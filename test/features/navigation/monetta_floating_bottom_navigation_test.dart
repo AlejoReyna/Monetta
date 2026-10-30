@@ -7,6 +7,7 @@ import 'package:monetta_app/app/monetta_tokens.g.dart';
 import 'package:monetta_app/app/motion.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/data/local/database.dart';
+import 'package:monetta_app/features/navigation/monetta_bottom_navigation.dart';
 import 'package:monetta_app/features/navigation/monetta_floating_bottom_navigation.dart';
 import 'package:monetta_app/main.dart';
 
@@ -84,7 +85,7 @@ void main() {
         notifier: store,
         child: MaterialApp(
           theme: buildLightTheme(),
-          home: browseScreen(const [], bagCount: 0),
+          home: browseScreen(bagCount: 0),
         ),
       ),
     );
@@ -94,8 +95,8 @@ void main() {
     await tester.pumpAndSettle();
     expect(
       tester
-          .widget<MonettaFloatingBottomNavigation>(
-            find.byType(MonettaFloatingBottomNavigation),
+          .widget<MonettaBottomNavigation>(
+            find.byType(MonettaBottomNavigation),
           )
           .bagCount,
       1,
@@ -117,76 +118,51 @@ void main() {
   }
 
   testWidgets(
-      'light mode paints the flat bar in the shared bar color; the selection is '
-      'accent color, weight and a rule', (
-    tester,
-  ) async {
+      'light mode paints the shipped bar and emphasizes the selected label',
+      (tester) async {
     await tester.pumpWidget(dock(buildLightTheme()));
 
+    // The floating pill is gone. The compatibility widget draws the shipped
+    // full-width bar: a DecoratedBox in the bar color, selected label at
+    // w600 with an underline, the others at w400.
     final surface = find.byKey(const Key('bottom-nav-surface'));
-    expect(tester.widget<Material>(surface).color, MonettaTokens.bar);
-    // Full width and flat: it spans the screen and has no rounded corners.
+    final decoration =
+        tester.widget<DecoratedBox>(surface).decoration as BoxDecoration;
+    expect(decoration.color, MonettaTokens.bar);
     expect(
       tester.getSize(surface).width,
       tester.view.physicalSize.width / tester.view.devicePixelRatio,
     );
-    expect(tester.widget<Material>(surface).shape, isNot(isA<StadiumBorder>()));
-
-    final rule = tester.widget<Container>(
-      find.byKey(const Key('bottom-nav-home-rule')),
-    );
     expect(
-      (rule.decoration! as BoxDecoration).color,
-      MonettaTokens.navigationActive,
-    );
-    expect(
-      tester.getSize(find.byKey(const Key('bottom-nav-home-rule'))),
-      const Size(28, 2),
-    );
-    expect(find.byKey(const Key('bottom-nav-catalog-rule')), findsNothing);
-    expect(
-      tester.widget<Icon>(find.byKey(const Key('bottom-nav-home-icon'))).color,
-      MonettaTokens.navigationActive,
+      tester
+          .widget<Text>(find.byKey(const Key('bottom-nav-home-label')))
+          .style!
+          .fontWeight,
+      FontWeight.w600,
     );
     expect(
       tester
-          .widget<Icon>(find.byKey(const Key('bottom-nav-catalog-icon')))
-          .color,
-      MonettaTokens.navigationInactive,
+          .widget<Text>(find.byKey(const Key('bottom-nav-home-label')))
+          .style!
+          .decoration,
+      TextDecoration.underline,
     );
-    final label =
-        tester.widget<Text>(find.byKey(const Key('bottom-nav-home-label')));
-    expect(label.style!.fontWeight, FontWeight.w600);
     expect(
       tester
           .widget<Text>(find.byKey(const Key('bottom-nav-catalog-label')))
           .style!
           .fontWeight,
-      FontWeight.w500,
+      FontWeight.w400,
     );
   });
 
-  testWidgets('dark mode keeps the dark bar and selects with the gold accent', (
-    tester,
-  ) async {
+  testWidgets('dark mode keeps the dark bar surface', (tester) async {
     await tester.pumpWidget(dock(buildDarkTheme()));
 
-    expect(
-      tester
-          .widget<Material>(find.byKey(const Key('bottom-nav-surface')))
-          .color,
-      const Color(0xFF191A18),
-    );
-    expect(
-      tester.widget<Icon>(find.byKey(const Key('bottom-nav-home-icon'))).color,
-      MonettaColors.dark.accent,
-    );
-    expect(
-      tester
-          .widget<Icon>(find.byKey(const Key('bottom-nav-catalog-icon')))
-          .color,
-      const Color(0xFFC2C3BB),
-    );
+    final decoration = tester
+        .widget<DecoratedBox>(find.byKey(const Key('bottom-nav-surface')))
+        .decoration as BoxDecoration;
+    expect(decoration.color, MonettaColors.dark.navigationSurface);
   });
 
   testWidgets('the dock stays put while the next page slides behind it', (
@@ -214,7 +190,8 @@ void main() {
         home: page('home', MonettaBottomDestination.home),
       ),
     );
-    final before = tester.getRect(find.byKey(const Key('bottom-nav-surface')));
+    final bars = find.byKey(const Key('bottom-nav-surface'));
+    final before = tester.getRect(bars);
 
     unawaited(
       navigator.currentState!.push<void>(
@@ -226,26 +203,28 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
 
-    final during = tester.getRect(find.byKey(const Key('bottom-nav-surface')));
-    expect(during.left, closeTo(before.left, 1));
-    expect(during.top, closeTo(before.top, 1));
-    expect(during.width, closeTo(before.width, 1));
+    // The bar belongs to its page, so it travels with that page. Mid-push
+    // both bars are mounted and the incoming page has not finished arriving.
+    expect(bars, findsNWidgets(2));
     expect(
       tester.getTopLeft(find.byKey(const Key('catalog-marker'))).dx,
       greaterThan(20),
     );
 
     await tester.pumpAndSettle();
-    final after = tester.getRect(find.byKey(const Key('bottom-nav-surface')));
+    expect(bars, findsOneWidget);
+    final after = tester.getRect(bars);
     expect(after.left, closeTo(before.left, 1));
-    expect(after.top, closeTo(before.top, 1));
+    expect(after.width, closeTo(before.width, 1));
 
     unawaited(navigator.currentState!.maybePop());
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 150));
-    final popping = tester.getRect(find.byKey(const Key('bottom-nav-surface')));
-    expect(popping.left, closeTo(before.left, 1));
-    expect(popping.top, closeTo(before.top, 1));
+    expect(bars, findsNWidgets(2));
+    expect(
+      tester.getTopLeft(find.byKey(const Key('catalog-marker'))).dx,
+      greaterThan(20),
+    );
     expect(
       tester.getTopLeft(find.byKey(const Key('catalog-marker'))).dx,
       greaterThan(20),

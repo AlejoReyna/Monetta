@@ -3,6 +3,7 @@ import 'dart:convert';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
+import 'package:monetta_app/data/accounts_orders/account_deletion_client.dart';
 import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
 import 'package:monetta_app/data/accounts_orders/system_account_client.dart';
 import 'package:monetta_app/data/accounts_orders/system_account_session_repository.dart';
@@ -10,6 +11,7 @@ import 'package:monetta_app/data/customer_auth/customer_account_config.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_error.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_gateway.dart';
 import 'package:monetta_app/data/customer_auth/customer_session_repository.dart';
+import 'package:monetta_app/data/customer_auth/jwt.dart';
 import 'package:monetta_app/data/customer_auth/secure_token_store.dart';
 import 'package:monetta_app/data/local/account_store.dart';
 import 'package:monetta_app/data/local/bag_store.dart';
@@ -23,6 +25,10 @@ class _FakeGateway implements CustomerAuthGateway {
   _FakeGateway({this.shouldThrow = false, this.throws});
 
   bool shouldThrow;
+  String customerId = 'gid://shopify/Customer/1';
+  String email = 'a@b.com';
+  int endSessionCalls = 0;
+  String? lastEndedIdToken;
 
   /// A classified failure, the way `AppAuthCustomerGateway` reports one.
   Object? throws;
@@ -36,8 +42,8 @@ class _FakeGateway implements CustomerAuthGateway {
         .encode(
           utf8.encode(
             jsonEncode({
-              'sub': 'gid://shopify/Customer/1',
-              'email': 'a@b.com',
+              'sub': customerId,
+              'email': email,
             }),
           ),
         )
@@ -54,7 +60,10 @@ class _FakeGateway implements CustomerAuthGateway {
   Future<CustomerAuthResult> refresh(String refreshToken) => login();
 
   @override
-  Future<void> endSession({required String idTokenHint}) async {}
+  Future<void> endSession({required String idTokenHint}) async {
+    endSessionCalls += 1;
+    lastEndedIdToken = idTokenHint;
+  }
 }
 
 /// Refuses every refresh the way Shopify does once a refresh token has been
@@ -137,6 +146,38 @@ class _FakeSystemClient implements SystemAccountClient {
 
   @override
   Future<void> logout(String sessionToken) async {}
+}
+
+class _MatchClient implements AccountDeletionClient {
+  _MatchClient(this.outcome);
+
+  final AccountDeletionOutcome outcome;
+  int deleteCalls = 0;
+  String? deletedAccessToken;
+
+  @override
+  Future<AccountDeletionOutcome> precheck(String accessToken) async => outcome;
+
+  @override
+  Future<AccountDeletionOutcome> matchLegacyEmail({
+    required String shopifyAccessToken,
+    required String legacySessionToken,
+  }) async =>
+      outcome;
+
+  @override
+  Future<AccountDeletionOutcome> delete({
+    required String accessToken,
+    required String idToken,
+    String? legacySessionToken,
+  }) async {
+    deleteCalls += 1;
+    deletedAccessToken = accessToken;
+    return const AccountDeletionDeleted();
+  }
+
+  @override
+  void close() {}
 }
 
 void main() {
@@ -256,6 +297,124 @@ void main() {
     expect(controller.account?.email, 'a@b.com');
     expect(controller.lastError, isNull);
   });
+
+  test('a mismatched deletion login keeps the legacy account', () async {
+    final controller = buildController(systemClient: _FakeSystemClient());
+    await controller.loginWithSystemAccount(
+      email: 'legacy@example.com',
+      password: 'secret',
+    );
+    final localId = controller.account?.localAccountId;
+    expect(controller.account?.authProvider, 'monetta');
+
+    final result = await controller.signInForAccountDeletion(
+      _MatchClient(const AccountDeletionEmailMismatch('a•••@gmail.com')),
+    );
+
+    expect(result, isA<LegacyDeletionMismatch>());
+    expect((result as LegacyDeletionMismatch).maskedEmail, 'a•••@gmail.com');
+    expect(controller.account?.authProvider, 'monetta');
+    expect(controller.account?.localAccountId, localId);
+    expect(await controller.accessTokenForBackend(), 'session-token');
+    final device = await deviceStore.byId('dev-1');
+    expect(device?.accountId, localId);
+  });
+
+  test('a matching deletion login adopts Shopify only after the server agrees',
+      () async {
+    final controller = buildController(systemClient: _FakeSystemClient());
+    await controller.loginWithSystemAccount(
+      email: 'legacy@example.com',
+      password: 'secret',
+    );
+
+    final result = await controller.signInForAccountDeletion(
+      _MatchClient(const AccountDeletionEmailMatch()),
+    );
+
+    expect(result, isA<LegacyDeletionMatched>());
+    expect(controller.account?.authProvider, 'shopify');
+    expect(
+      (result as LegacyDeletionMatched).legacySessionToken,
+      'session-token',
+    );
+    expect(await controller.accessTokenForBackend(), 'access');
+  });
+
+  test('legacy deletion cannot bypass the server email check', () async {
+    final controller = buildController(systemClient: _FakeSystemClient());
+    await controller.loginWithSystemAccount(
+      email: 'legacy@example.com',
+      password: 'secret',
+    );
+    await expectLater(
+      controller.reauthenticateForDeletion(),
+      throwsA(isA<CustomerAuthException>()),
+    );
+    expect(controller.account?.authProvider, 'monetta');
+    expect(await controller.accessTokenForBackend(), 'session-token');
+  });
+
+  for (final sameCustomer in [true, false]) {
+    test(
+      'deletion re-login ${sameCustomer ? 'accepts the same' : 'rejects another'} customer',
+      () async {
+        final gateway = _FakeGateway();
+        final controller = buildController(gateway: gateway);
+        await controller.login();
+        final target = controller.account!;
+        final storedTokens = Map<String, String>.of(secureStore.values);
+        if (sameCustomer) {
+          // Changing email does not change the Shopify customer identity.
+          gateway.email = 'updated@example.com';
+        } else {
+          // A shared email must not let a different customer pass the check.
+          gateway.customerId = 'gid://shopify/Customer/2';
+        }
+        final client = _MatchClient(const AccountDeletionClear());
+        Future<void> deleteAfterReauth() async {
+          final fresh = await controller.reauthenticateForDeletion();
+          await client.delete(
+            accessToken: fresh.accessToken,
+            idToken: fresh.idToken,
+          );
+        }
+
+        if (sameCustomer) {
+          await deleteAfterReauth();
+          expect(client.deleteCalls, 1);
+          expect(client.deletedAccessToken, 'access');
+          expect(gateway.endSessionCalls, 0);
+        } else {
+          await expectLater(
+            deleteAfterReauth(),
+            throwsA(isA<AccountDeletionIdentityMismatch>()),
+          );
+          expect(client.deleteCalls, 0);
+          expect(gateway.endSessionCalls, 1);
+          expect(
+            decodeIdTokenClaims(gateway.lastEndedIdToken!)['sub'],
+            gateway.customerId,
+          );
+          expect(secureStore.values, storedTokens);
+          expect(
+            await accountStore.byShopifyCustomerId(gateway.customerId),
+            isNull,
+          );
+        }
+        expect(controller.account?.localAccountId, target.localAccountId);
+        expect(
+          controller.account?.email,
+          sameCustomer ? gateway.email : target.email,
+        );
+        expect(
+          (await deviceStore.byId('dev-1'))?.accountId,
+          target.localAccountId,
+        );
+        controller.dispose();
+      },
+    );
+  }
 
   test('login() surfaces a failure without throwing, and does not sign in',
       () async {

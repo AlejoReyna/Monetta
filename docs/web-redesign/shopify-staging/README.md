@@ -9,4 +9,4 @@ Seguimiento de la traslación de `design-prototype/` a un tema de `monetta-stagi
 | `THEME.env` | Tienda e ID del único tema autorizado |
 | `baseline/` | Respaldo (`.tgz`) y manifiesto SHA-256 de la copia de Atelier 3.5.0 usada como base, lista de temas «antes», Theme Check de la base |
 | `runs/` | Una carpeta por ejecución (`result.json` o `result.partial.json`, capturas, hojas de contacto); `antes-de-corregir/` conserva el registro de la ejecución interrumpida que encontró defectos de anillo |
-| `scripts/` | `theme-push.sh` (subida con guardián), `start-theme-dev.command` (proxy autenticado), `port-css.mjs` y `port-icons.mjs` (portado reproducible del CSS y de los iconos), `shot.mjs`, `runs-index.mjs`, `e2e/` (verificadores con Brave y `playwright-core`) |
+| `scripts/` | `theme-push.sh` (subida con guardián), `start-theme-dev.command` (proxy autenticado), `port-icons.mjs` (portado reproducible de los iconos; el del CSS vive en `tools/style-guideline-theme/port-css.mjs`), `shot.mjs`, `runs-index.mjs`, `e2e/` (verificadores con Brave y `playwright-core`) |

@@ -2,11 +2,9 @@
   "layout": "monetta",
   "sections": {
     "main": {
-      "type": "monetta-collection-list",
+      "type": "monetta-guia-categories",
       "settings": {}
     }
   },
-  "order": [
-    "main"
-  ]
+  "order": ["main"]
 }

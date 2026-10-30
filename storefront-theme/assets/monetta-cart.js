@@ -166,7 +166,7 @@
   }
   const pageSections = () => [cartSectionId(), SHEET_SECTION].filter(Boolean);
 
-  function renderCartPage(sections, { focusKey, focusStep, discountCodes } = {}) {
+  function renderCartPage(sections, { focusKey, focusStep } = {}) {
     const id = cartSectionId();
     const wrapper = $(`#shopify-section-${CSS.escape(id)}`);
     const html = sections?.[id];
@@ -182,8 +182,7 @@
       document.body.classList.toggle('has-dock', count === 0);
     }
     markConfirmed();
-    // A cart-JSON write passes its discount_codes; only the others need showDiscountRemoval to read /cart.js.
-    showDiscountRemoval(discountCodes);
+    enableDiscountRemoval();
     Monetta.refreshPinnedChrome?.();
     const line = focusKey ? $(`[data-line="${CSS.escape(focusKey)}"]`) : null;
     const target =
@@ -299,13 +298,7 @@
 
   /* Discount writes share the cart queue and checkout lock; never send quantity updates here. */
   async function updateDiscount(form, remove = false) {
-    if (checkoutBlocked()) {
-      const blocked = unconfirmed ? 'Actualiza tu bolsa antes de aplicar un código.' : 'Estamos actualizando tu bolsa. Espera un momento y vuelve a intentarlo.';
-      const message = form.querySelector('[data-discount-message]');
-      if (message) message.textContent = blocked;
-      Monetta.announce?.(blocked);
-      return;
-    }
+    if (checkoutBlocked()) return;
     const input = form.elements.discount;
     const requested = remove ? '' : input.value.trim();
     if (!remove && !requested) { input.focus(); return; }
@@ -318,7 +311,7 @@
       try {
         result = await postJson(routes.cartUpdate, {discount: requested, sections: pageSections().join(','), sections_url: routes.cart});
       } catch { result = {ok:false,status:0,data:null}; }
-      const shown = result.ok && renderCartPage(result.data?.sections || {}, { discountCodes: result.data?.discount_codes });
+      const shown = result.ok && renderCartPage(result.data?.sections || {});
       if (!shown) await recoverFromServer();
       const next = document.querySelector('[data-discount-form]');
       const message = next?.querySelector('[data-discount-message]');
@@ -331,6 +324,7 @@
           : confirmed ? 'Código aplicado. El resumen muestra los importes de Shopify.'
           : 'El código no se aplicó a los artículos. Revisa sus condiciones; los descuentos de envío se confirman en el checkout.';
         if (!confirmed && !remove) next.elements.discount.value = requested;
+        showDiscountRemoval(result.ok ? result.data?.discount_codes : undefined);
         message.focus({preventScroll:true});
         Monetta.announce?.(message.textContent);
       }
@@ -442,7 +436,7 @@
         } catch {
           result = { ok: false, status: 0, data: null };
         }
-        if (result.ok && renderCartPage(result.data?.sections || {}, { focusKey: quantity > 0 ? key : null, focusStep: step, discountCodes: result.data?.discount_codes })) {
+        if (result.ok && renderCartPage(result.data?.sections || {}, { focusKey: quantity > 0 ? key : null, focusStep: step })) {
           if (quantity === 0) {
             Monetta.toast?.(`Eliminaste ${name || 'la pieza'} del carrito.`, {
               action: restore ? { label: 'Deshacer', onClick: () => undoRemoval(restore) } : null,

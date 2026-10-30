@@ -368,7 +368,12 @@
   }
   Monetta.screenBackSteps = screenBackSteps;
 
-  /** The fallback belongs to this one click: any navigation after it bumps the epoch and it lapses. */
+  /**
+   * The fallback belongs to this one click: any navigation after it bumps the epoch and it lapses. A traversal that has
+   * started counts too (beforeunload): on a slow network this document outlives the 500 ms, and assigning the parent then
+   * would replace the traversal with a new entry and drop the forward history. The listener lives only while the fallback
+   * is armed.
+   */
   function leaveScreen(parent) {
     const steps = screenBackSteps(history.state);
     if (steps <= 0) {
@@ -376,8 +381,13 @@
       return;
     }
     const epoch = navigationEpoch;
+    const leaving = () => {
+      navigationEpoch += 1;
+    };
+    window.addEventListener('beforeunload', leaving, { once: true });
     history.go(-steps);
     window.setTimeout(() => {
+      window.removeEventListener('beforeunload', leaving);
       if (navigationEpoch === epoch) location.assign(parent);
     }, LEAVE_FALLBACK_MS);
   }

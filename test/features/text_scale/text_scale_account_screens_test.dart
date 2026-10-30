@@ -8,6 +8,7 @@
 /// statuses and an apartado with an attribution code.
 library;
 
+import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
 import 'package:monetta_app/data/accounts_orders/accounts_orders_config.dart';
@@ -155,7 +156,7 @@ void main() {
         onOpenInvite: () {},
       );
     },
-    anchor: (store) => find.text('Mi cuenta'),
+    anchor: (store) => find.byKey(const ValueKey('account-identity')),
   );
 
   registerTextScaleMatrix(

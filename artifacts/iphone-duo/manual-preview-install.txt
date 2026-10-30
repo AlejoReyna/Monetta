@@ -1,0 +1,10 @@
+Installed and reopened from Home: Monetta Staging
+Simulator: Monetta Duo Implementation
+UUID: A38CDB10-3E59-4575-A58C-4E1072B8A4CC
+Bundle: mx.monetta.monettaApp.staging
+Target: lib/main.dart (normal application)
+Native Debug build: passed, 42.0 seconds
+Configuration: existing staging defines validated; values not recorded
+Flutter CLI detached with d; app remains installed
+Home icon: page 2
+Left visible: welcome screen, COMENZAR

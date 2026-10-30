@@ -331,21 +331,27 @@ function deviceRoute(deps: EngagementRouteDeps, handler: DeviceHandler) {
 function ownerRoute(deps: EngagementRouteDeps, handler: OwnerHandler) {
   return asyncRoute(async (req, res) => {
     const token = bearerCredential(req);
-    const owner = token === null
-      ? null
-      : deps.adminAuthorizer !== undefined
-        ? await deps.adminAuthorizer.authenticate(token)
-        : await deps.ownerAuthorizer.authenticate(token);
-    if (owner === null) {
+    const actorId = token === null ? null : await notificationAdminId(deps, token);
+    if (actorId === null) {
       res.status(403).json({ error: 'owner_forbidden' });
       return;
     }
-    await handler(
-      req,
-      res,
-      'actorId' in owner ? owner.actorId : owner.id,
-    );
+    await handler(req, res, actorId);
   });
+}
+
+/**
+ * Checks the notifications capability rather than full owner access, so the
+ * embedded Shopify Admin panel — scoped to notifications — can use these routes.
+ */
+async function notificationAdminId(deps: EngagementRouteDeps, token: string): Promise<string | null> {
+  if (deps.adminAuthorizer === undefined) {
+    return (await deps.ownerAuthorizer.authenticate(token))?.actorId ?? null;
+  }
+  const authentication = await deps.adminAuthorizer.resolve(token);
+  return authentication?.capabilities.manageNotifications === true
+    ? authentication.actor.id
+    : null;
 }
 
 function objectBody(req: Request): Record<string, unknown> {

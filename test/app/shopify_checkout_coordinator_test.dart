@@ -9,6 +9,7 @@ import 'package:monetta_app/data/shopify/cart/cart_api.dart';
 import 'package:monetta_app/data/shopify/cart/cart_repository.dart';
 import 'package:monetta_app/data/shopify/cart/cart_session_store.dart';
 import 'package:monetta_app/data/shopify/cart/checkout_launcher.dart';
+import 'package:monetta_app/data/shopify/cart/storefront_password_gate.dart';
 import 'package:monetta_app/data/shopify/shopify_gid.dart';
 import 'package:monetta_app/domain/cart.dart';
 
@@ -179,6 +180,199 @@ void main() {
     expect(cleanupCalls, 1);
   });
 
+  test('password-protected storefront never opens checkout or the browser',
+      () async {
+    final launcher = _RecordingLauncher(const CheckoutCancelled());
+    final opener = _RecordingExternalOpener();
+    final probe = _FixedPasswordProbe(StorefrontPasswordGate.passwordProtected);
+    final coordinator = ShopifyCheckoutCoordinator(
+      launcher: launcher,
+      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+      sessions: InMemoryCartSessionStore(),
+      externalOpener: opener,
+      passwordProbe: probe,
+    );
+
+    await coordinator.preload(_authoritativeCart());
+    final result = await coordinator.present(
+      controller: CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart()),
+      ),
+      scope: scope,
+      localIntent: localIntent,
+      onCompleted: (_) async => fail('Checkout was not opened'),
+    ) as CheckoutFailed;
+
+    expect(result.code, CheckoutFailureCode.configuration);
+    expect(result.userMessage, kStorefrontPasswordCheckoutMessage);
+    expect(result.allowExternalBrowser, isFalse);
+    expect(probe.hosts, ['checkout.invalid', 'checkout.invalid']);
+    expect(probe.hosts.every((host) => !host.contains('/')), isTrue);
+    expect(launcher.presentCalls, 0);
+    expect(launcher.preloadCalls, 0);
+    expect(launcher.invalidateCalls, 2);
+    expect(coordinator.canOpenExternalFallback, isFalse);
+    expect(await coordinator.openExternalFallback(), isFalse);
+    expect(opener.calls, 0);
+  });
+
+  test('an inconclusive password probe still presents checkout', () async {
+    final launcher = _RecordingLauncher(const CheckoutCancelled());
+    final coordinator = ShopifyCheckoutCoordinator(
+      launcher: launcher,
+      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+      sessions: InMemoryCartSessionStore(),
+      passwordProbe: _FixedPasswordProbe(StorefrontPasswordGate.unknown),
+    );
+
+    final result = await coordinator.present(
+      controller: CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart()),
+      ),
+      scope: scope,
+      localIntent: localIntent,
+      onCompleted: (_) async {},
+    );
+
+    expect(result, isA<CheckoutCancelled>());
+    expect(launcher.presentCalls, 1);
+  });
+
+  for (final gate in [
+    StorefrontPasswordGate.open,
+    StorefrontPasswordGate.unknown,
+  ]) {
+    test('T1-INV-09 account change during ${gate.name} probe cancels present',
+        () async {
+      const accountA = CartSessionScope.authenticated(
+        shopDomain: 'checkout.invalid',
+        localAccountId: 'A',
+      );
+      const accountB = CartSessionScope.authenticated(
+        shopDomain: 'checkout.invalid',
+        localAccountId: 'B',
+      );
+      final launcher = _RecordingLauncher(const CheckoutCancelled());
+      final opener = _RecordingExternalOpener();
+      final probe = _DelayedPasswordProbe();
+      final coordinator = ShopifyCheckoutCoordinator(
+        launcher: launcher,
+        urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+        sessions: InMemoryCartSessionStore(),
+        externalOpener: opener,
+        passwordProbe: probe,
+      );
+      final controller = CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart()),
+      );
+      addTearDown(controller.dispose);
+      final pending = coordinator.present(
+        controller: controller,
+        scope: accountA,
+        localIntent: localIntent,
+        onCompleted: (_) async =>
+            fail('The invalidated checkout must not open'),
+      );
+      await probe.entered.future;
+
+      await coordinator.invalidate();
+      await controller.reconcileLocalBag(
+        scope: accountB,
+        localIntent: localIntent,
+      );
+      expect(controller.currentScope, accountB);
+      probe.result.complete(gate);
+      await pending;
+
+      expect(
+        {
+          'preloadCalls': launcher.preloadCalls,
+          'presentCalls': launcher.presentCalls,
+          'canOpenExternalFallback': coordinator.canOpenExternalFallback,
+          'openedExternalFallback': await coordinator.openExternalFallback(),
+          'externalCalls': opener.calls,
+        },
+        {
+          'preloadCalls': 0,
+          'presentCalls': 0,
+          'canOpenExternalFallback': false,
+          'openedExternalFallback': false,
+          'externalCalls': 0,
+        },
+        reason:
+            'the late probe must not restore account A checkout after B logs in',
+      );
+    });
+
+    test('T1-INV-09 invalidation during ${gate.name} probe cancels preload',
+        () async {
+      final launcher = _RecordingLauncher(const CheckoutCancelled());
+      final opener = _RecordingExternalOpener();
+      final probe = _DelayedPasswordProbe();
+      final coordinator = ShopifyCheckoutCoordinator(
+        launcher: launcher,
+        urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+        sessions: InMemoryCartSessionStore(),
+        externalOpener: opener,
+        passwordProbe: probe,
+      );
+      final pending = coordinator.preload(_authoritativeCart());
+      await probe.entered.future;
+
+      await coordinator.invalidate();
+      expect(coordinator.canOpenExternalFallback, isFalse);
+      probe.result.complete(gate);
+      await pending;
+
+      expect(
+        {
+          'preloadCalls': launcher.preloadCalls,
+          'presentCalls': launcher.presentCalls,
+          'canOpenExternalFallback': coordinator.canOpenExternalFallback,
+          'openedExternalFallback': await coordinator.openExternalFallback(),
+          'externalCalls': opener.calls,
+        },
+        {
+          'preloadCalls': 0,
+          'presentCalls': 0,
+          'canOpenExternalFallback': false,
+          'openedExternalFallback': false,
+          'externalCalls': 0,
+        },
+        reason: 'invalidation must also discard the pending preload result',
+      );
+    });
+  }
+
+  test('an empty authoritative cart never opens its checkout URL', () async {
+    final launcher = _RecordingLauncher(const CheckoutCancelled());
+    final opener = _RecordingExternalOpener();
+    final probe = _FixedPasswordProbe(StorefrontPasswordGate.open);
+    final coordinator = ShopifyCheckoutCoordinator(
+      launcher: launcher,
+      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
+      sessions: InMemoryCartSessionStore(),
+      externalOpener: opener,
+      passwordProbe: probe,
+    );
+
+    final result = await coordinator.present(
+      controller: CartController(
+        reconciler: _CheckoutReconciler(_authoritativeCart(empty: true)),
+      ),
+      scope: scope,
+      localIntent: localIntent,
+      onCompleted: (_) async => fail('Checkout was not opened'),
+    ) as CheckoutFailed;
+
+    expect(result.code, CheckoutFailureCode.configuration);
+    expect(result.userMessage, kEmptyCartCheckoutMessage);
+    expect(result.allowExternalBrowser, isFalse);
+    expect(probe.hosts, isEmpty);
+    expect(launcher.presentCalls, 0);
+    expect(coordinator.canOpenExternalFallback, isFalse);
+  });
+
   test('invalid or non-authoritative checkout never reaches native', () async {
     final invalid = _authoritativeCart(checkoutUrl: 'not-a-checkout');
     final launcher = _RecordingLauncher(const CheckoutCancelled());
@@ -194,87 +388,6 @@ void main() {
 
     expect(result, isA<CheckoutFailed>());
     expect(launcher.presentCalls, 0);
-  });
-
-  test('an empty authoritative cart cannot open checkout or browser fallback',
-      () async {
-    final launcher = _RecordingLauncher(const CheckoutCompleted());
-    final sessions = InMemoryCartSessionStore();
-    final opener = _RecordingExternalOpener();
-    await sessions.write(scope, SensitiveCartId(_opaque('cart-session')));
-    final coordinator = ShopifyCheckoutCoordinator(
-      launcher: launcher,
-      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
-      sessions: sessions,
-      externalOpener: opener,
-    );
-    await coordinator.preload(_authoritativeCart());
-    expect(coordinator.canOpenExternalFallback, isTrue);
-    final preloadCalls = launcher.preloadCalls;
-    var cleanupCalls = 0;
-
-    final result = await coordinator.present(
-      controller: CartController(
-        reconciler: _CheckoutReconciler(_authoritativeCart(empty: true)),
-      ),
-      scope: scope,
-      localIntent: const [],
-      onCompleted: (_) async => cleanupCalls += 1,
-    ) as CheckoutFailed;
-
-    expect(result.code, CheckoutFailureCode.invalidCart);
-    expect(result.userMessage, contains('bolsa está vacía'));
-    expect(launcher.preloadCalls, preloadCalls);
-    expect(launcher.presentCalls, 0);
-    expect(cleanupCalls, 0);
-    expect(await sessions.read(scope), isNotNull);
-    expect(coordinator.canOpenExternalFallback, isFalse);
-    expect(await coordinator.openExternalFallback(), isFalse);
-    expect(opener.calls, 0);
-  });
-
-  test('an empty Shopify cart for a non-empty bag reports unavailable pieces',
-      () async {
-    final launcher = _RecordingLauncher(const CheckoutCompleted());
-    final coordinator = ShopifyCheckoutCoordinator(
-      launcher: launcher,
-      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
-      sessions: InMemoryCartSessionStore(),
-      externalOpener: _RecordingExternalOpener(),
-    );
-
-    final result = await coordinator.present(
-      controller: CartController(
-        reconciler: _CheckoutReconciler(_authoritativeCart(empty: true)),
-      ),
-      scope: scope,
-      localIntent: localIntent,
-      onCompleted: (_) async {},
-    ) as CheckoutFailed;
-
-    expect(result.code, CheckoutFailureCode.invalidCart);
-    expect(result.userMessage, isNot(contains('vacía')));
-    expect(result.userMessage, contains('ya no están disponibles'));
-    expect(launcher.presentCalls, 0);
-  });
-
-  test('an empty cart clears preload and cannot leave a stale fallback',
-      () async {
-    final launcher = _RecordingLauncher(const CheckoutCancelled());
-    final opener = _RecordingExternalOpener();
-    final coordinator = ShopifyCheckoutCoordinator(
-      launcher: launcher,
-      urlPolicy: CheckoutUrlPolicy.forShopDomain('checkout.invalid'),
-      sessions: InMemoryCartSessionStore(),
-      externalOpener: opener,
-    );
-    await coordinator.preload(_authoritativeCart());
-    await coordinator.preload(_authoritativeCart(empty: true));
-
-    expect(launcher.preloadCalls, 1);
-    expect(coordinator.canOpenExternalFallback, isFalse);
-    expect(await coordinator.openExternalFallback(), isFalse);
-    expect(opener.calls, 0);
   });
 
   test('external fallback is explicit and never marks completion', () async {
@@ -445,22 +558,23 @@ CartReconciliation _authoritativeCart({
           ).toString(),
       createdAt: timestamp,
       updatedAt: timestamp,
-      lines: [
-        if (!empty)
-          CartLine(
-            id: _opaque('line'),
-            variantId: shopifyVariantGid(1),
-            productId: shopifyProductGid(1),
-            title: 'Producto',
-            variantTitle: 'Variante',
-            quantity: 1,
-            cost: const CartLineCost(
-              amountPerQuantity: money,
-              subtotal: money,
-              total: money,
-            ),
-          ),
-      ],
+      lines: empty
+          ? const <CartLine>[]
+          : [
+              CartLine(
+                id: _opaque('line'),
+                variantId: shopifyVariantGid(1),
+                productId: shopifyProductGid(1),
+                title: 'Producto',
+                variantTitle: 'Variante',
+                quantity: 1,
+                cost: const CartLineCost(
+                  amountPerQuantity: money,
+                  subtotal: money,
+                  total: money,
+                ),
+              ),
+            ],
       totalQuantity: empty ? 0 : 1,
       buyerIdentity: const CartBuyerSummary(
         countryCode: 'MX',
@@ -517,6 +631,30 @@ final class _RecordingLauncher implements CheckoutLauncher {
   @override
   Future<void> invalidate() async {
     invalidateCalls += 1;
+  }
+}
+
+final class _FixedPasswordProbe implements StorefrontPasswordProbe {
+  _FixedPasswordProbe(this.gate);
+
+  final StorefrontPasswordGate gate;
+  final List<String> hosts = [];
+
+  @override
+  Future<StorefrontPasswordGate> checkHost(String host) async {
+    hosts.add(host);
+    return gate;
+  }
+}
+
+final class _DelayedPasswordProbe implements StorefrontPasswordProbe {
+  final entered = Completer<void>();
+  final result = Completer<StorefrontPasswordGate>();
+
+  @override
+  Future<StorefrontPasswordGate> checkHost(String host) {
+    entered.complete();
+    return result.future;
   }
 }
 

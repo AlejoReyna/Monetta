@@ -13,8 +13,28 @@
   @param {number} active_count - Number of active filters.
   @param {boolean} has_products - false hides the controls (nothing to filter).
   @param {string} [query] - Search terms (search page only).
+  @param {boolean} [guide] - The client guide's row: «N productos» and «Ordenar por» (the filters button lives in the pills).
+  @param {string} [count_text] - The count shown in that row.
 {%- enddoc -%}
+{%- if guide and has_products -%}
+  <div class="guia-listing-bar">
+    <p class="guia-listing-bar__count" data-count aria-live="polite">{{ count_text }}</p>
+    {%- if sort_options.size > 1 -%}
+      <form class="guia-sort" action="{{ base_url }}" method="get" data-sort-form>
+        {% render 'monetta-hidden-filters', filters: filters, query: query %}
+        <label class="guia-sort__label" for="sort-select">Ordenar por</label>
+        <select class="guia-sort__select" id="sort-select" name="sort_by" data-sort-select>
+          {%- for option in sort_options -%}
+            <option value="{{ option.value }}"{% if option.value == sort_by %} selected{% endif %}>{% render 'monetta-label', kind: 'sort', option: option, text_only: true %}</option>
+          {%- endfor -%}
+        </select>
+        <noscript><button type="submit" class="btn btn--quiet btn--sm">Ordenar</button></noscript>
+      </form>
+    {%- endif -%}
+  </div>
+{%- endif -%}
 {%- if has_products or active_count > 0 -%}
+  {%- unless guide -%}
   <div class="toolbar">
     <div class="toolbar__start">
       <button type="button" class="btn btn--quiet btn--sm filters-button" data-open-dialog="filters-drawer" aria-haspopup="dialog" aria-controls="filters-drawer">
@@ -35,6 +55,7 @@
       </form>
     </div>
   </div>
+  {%- endunless -%}
 
   {%- if active_count > 0 -%}
     <div class="active-chips">

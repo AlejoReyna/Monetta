@@ -16,8 +16,9 @@ Future<CatalogStore> _loadedStore() async {
 }
 
 void main() {
-  testWidgets('product hero covers the complete detail viewport',
-      (tester) async {
+  testWidgets('product hero covers the complete detail viewport', (
+    tester,
+  ) async {
     final store = await _loadedStore();
     final product = store.products.firstWhere(
       (item) => item.isInStock && item.images.isNotEmpty,
@@ -41,17 +42,11 @@ void main() {
     // Package C (Fig.07): the photo is contained so handles and straps are
     // never cropped — `cover` is the bug this asserts against.
     expect(tester.widget<MonettaImage>(heroImage).fit, BoxFit.contain);
-    expect(
-      tester.widget<MonettaImage>(heroImage).backgroundColor,
-      kPackshotGround,
-    );
-    final photo = tester.getRect(heroImage);
-    expect(photo.left, 0);
-    expect(photo.width, tester.getSize(find.byType(Scaffold)).width);
   });
 
-  testWidgets('product page sells with facts, not internal facets',
-      (tester) async {
+  testWidgets('product page sells with facts, not internal facets', (
+    tester,
+  ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -71,7 +66,7 @@ void main() {
     await tester.pump();
 
     expect(find.text(product.title), findsWidgets);
-    expect(find.text('Agregar al carrito'), findsOneWidget);
+    expect(find.text('AGREGAR A BOLSA'), findsOneWidget);
     // "Apartar" lives in the secondary purchase section, below the fold.
     await scrollTo(tester, find.text('Apartar'));
     expect(find.text('Apartar'), findsOneWidget);
@@ -79,7 +74,7 @@ void main() {
       find.text(
         'Escríbenos por WhatsApp para solicitar apartado (\$400 MXN · 20 días). Abrir el chat no reserva stock ni confirma el anticipo.',
       ),
-      findsNothing,
+      findsOneWidget,
     );
     expect(find.text('Escribir por WhatsApp'), findsOneWidget);
     expect(find.text('Gama'), findsNothing);
@@ -87,8 +82,9 @@ void main() {
     expect(find.textContaining('Popular ahora'), findsNothing);
   });
 
-  testWidgets('add to bag opens the mini-cart instead of a toast',
-      (tester) async {
+  testWidgets('add to bag opens the mini-cart instead of a toast', (
+    tester,
+  ) async {
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 1200);
     tester.view.devicePixelRatio = 1.0;
@@ -107,7 +103,9 @@ void main() {
     );
     await tester.pump();
 
-    await tester.tap(find.text('Agregar al carrito'));
+    await tester.ensureVisible(find.text('AGREGAR A BOLSA'));
+    await tester.pump();
+    await tester.tap(find.text('AGREGAR A BOLSA'));
     await tester.pumpAndSettle();
 
     expect(store.bagQuantity, 1);

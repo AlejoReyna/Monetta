@@ -16,17 +16,6 @@ const Duration kKenBurns = Duration(seconds: 18);
 /// Ease-out expo. No overshoot — overshoot is a template tell.
 const Cubic kMotionCurve = Cubic(0.16, 1, 0.3, 1);
 
-const double kFreeShippingThreshold = 1499;
-const double kStandardShippingFee = 149;
-
-double shippingFor(double subtotal) =>
-    subtotal >= kFreeShippingThreshold ? 0 : kStandardShippingFee;
-
-double remainingForFreeShipping(double subtotal) {
-  final left = kFreeShippingThreshold - subtotal;
-  return left > 0 ? left : 0;
-}
-
 bool get inWidgetTest =>
     WidgetsBinding.instance.runtimeType.toString().contains('Test');
 
@@ -41,6 +30,29 @@ bool reduceMotion(BuildContext context) {
 /// Material routes keep the previous page mounted, including its scroll state.
 Route<T> monettaPageRoute<T extends Object?>(Widget page) {
   return MaterialPageRoute<T>(builder: (_) => page);
+}
+
+/// Fade used by the shipped catalog, product and checkout pushes.
+Route<T> monettaFadeRoute<T extends Object?>(Widget page) {
+  return PageRouteBuilder<T>(
+    pageBuilder: (context, animation, secondaryAnimation) => page,
+    transitionDuration: kEnter,
+    reverseTransitionDuration: kSettle,
+    transitionsBuilder: (context, animation, secondaryAnimation, child) {
+      if (reduceMotion(context)) return child;
+      final curved = CurvedAnimation(parent: animation, curve: kMotionCurve);
+      return FadeTransition(
+        opacity: curved,
+        child: SlideTransition(
+          position: Tween<Offset>(
+            begin: const Offset(0, 0.012),
+            end: Offset.zero,
+          ).animate(curved),
+          child: child,
+        ),
+      );
+    },
+  );
 }
 
 /// Native edge-swipe recognition, drag progress, cancellation and settling.

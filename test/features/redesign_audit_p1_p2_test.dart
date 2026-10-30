@@ -57,7 +57,8 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('P2: Ver pedido uses its callback, Seguir comprando pops',
+  testWidgets(
+      'P2: Ver detalles del pedido uses its callback, Volver al inicio pops',
       (tester) async {
     var viewed = 0;
     await tester.pumpWidget(
@@ -77,12 +78,13 @@ void main() {
     await tester.tap(find.text('open'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Ver pedido'), findsOneWidget);
-    await tester.tap(find.text('Ver pedido'));
+    expect(find.text('Ver detalles del pedido'), findsOneWidget);
+    await tester.ensureVisible(find.text('Ver detalles del pedido'));
+    await tester.tap(find.text('Ver detalles del pedido'));
     await tester.pumpAndSettle();
     // Callback path: no pop, confirmation stays, callback ran.
     expect(viewed, 1);
-    expect(find.text('Ver pedido'), findsOneWidget);
+    expect(find.text('Ver detalles del pedido'), findsOneWidget);
 
     // Fallback path without a callback still pops to first.
     await tester.pumpWidget(
@@ -92,7 +94,7 @@ void main() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('Seguir comprando'), findsOneWidget);
+    expect(find.text('Volver al inicio'), findsOneWidget);
   });
 
   test('P2: delivery estimate never fabricates dates', () {

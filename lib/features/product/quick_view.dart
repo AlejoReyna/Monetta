@@ -18,6 +18,7 @@
 /// ```
 library;
 
+import '../../platform/system_layout_context.dart';
 import 'package:flutter/material.dart';
 
 import '../../app/media/monetta_image.dart';
@@ -48,6 +49,8 @@ Future<void> showProductQuickView(
   store.record(EventType.galleryInteraction, productId: product.id);
   return showModalBottomSheet<void>(
     context: context,
+    anchorPoint: presentationAnchor(context),
+    useSafeArea: true,
     useRootNavigator: true,
     isScrollControlled: true,
     backgroundColor: Colors.transparent,
@@ -168,8 +171,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     if (notifications == null || !notifications.available) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content:
-              Text('Los avisos todavía no están disponibles en esta versión.'),
+          content: Text(
+            'Los avisos todavía no están disponibles en esta versión.',
+          ),
         ),
       );
       return;
@@ -200,7 +204,7 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
       label = 'Avísame cuando vuelva';
       onPressed = () => _requestRestock(widget.product);
     } else {
-      label = _adding ? 'Agregando…' : 'Agregar al carrito';
+      label = _adding ? 'AGREGANDO…' : 'AGREGAR A BOLSA';
       onPressed = _addToBag;
     }
     return DecoratedBox(
@@ -239,6 +243,13 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                 pending: _adding,
                 onPressed: onPressed,
               ),
+              const SizedBox(height: BoutiqueSpace.sm),
+              BoutiqueButton(
+                key: const Key('quick-view-view-product'),
+                label: 'VER PRODUCTO',
+                onPressed: _viewFullProduct,
+                filled: false,
+              ),
             ],
           ),
         ),
@@ -253,9 +264,14 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
     final store = StoreScope.of(context);
     final facets = store.facetsFor(product.id);
     final chosen = _variantIndex;
-    // Prices and stock follow the actual selected variant.
+    // Until an option is chosen the sheet shows the piece's own price and no
+    // sale or availability claim: those belong to one variant.
     final price =
         chosen == null ? product.price : selectionPrice(product, chosen);
+    final compare = chosen == null ? null : selectionCompareAt(product, chosen);
+    final onSale = chosen != null && selectionOnSale(product, chosen);
+    final discount =
+        chosen == null ? 0 : selectionDiscountPercent(product, chosen);
     final inStock = chosen == null || selectionInStock(product, chosen);
     final images = product.images.isEmpty ? <String?>[null] : product.images;
 
@@ -323,8 +339,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                   onPageChanged: (i) =>
                                       setState(() => _page = i),
                                   itemBuilder: (_, i) => Padding(
-                                    padding:
-                                        const EdgeInsets.all(BoutiqueSpace.sm),
+                                    padding: const EdgeInsets.all(
+                                      BoutiqueSpace.sm,
+                                    ),
                                     child: MonettaImage(
                                       url: images[i],
                                       fit: BoxFit.contain,
@@ -368,8 +385,9 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                     child: Row(
                                       mainAxisAlignment:
                                           MainAxisAlignment.center,
-                                      children:
-                                          List.generate(images.length, (i) {
+                                      children: List.generate(images.length, (
+                                        i,
+                                      ) {
                                         final on = i == _page;
                                         return AnimatedContainer(
                                           duration: reduceMotion(context)
@@ -383,10 +401,12 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                                           decoration: BoxDecoration(
                                             color: on
                                                 ? palette.ink
-                                                : palette.ink
-                                                    .withValues(alpha: 0.25),
-                                            borderRadius:
-                                                BorderRadius.circular(2),
+                                                : palette.ink.withValues(
+                                                    alpha: 0.25,
+                                                  ),
+                                            borderRadius: BorderRadius.circular(
+                                              2,
+                                            ),
                                           ),
                                         );
                                       }),
@@ -452,10 +472,11 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       const SizedBox(height: BoutiqueSpace.lg),
                       if (facets?.brand != null)
                         Text(
-                          brandLabel(facets!.brand!.value).toUpperCase(),
-                          style: boutiqueEyebrow(
-                            size: 11,
-                            color: palette.inkMuted,
+                          brandLabel(facets!.brand!.value),
+                          key: const Key('quick-view-brand'),
+                          style: boutiqueDisplay(
+                            22,
+                            color: palette.ink,
                           ),
                         ),
                       if (facets?.brand != null)
@@ -482,6 +503,37 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                               color: inStock ? palette.ink : palette.inkMuted,
                             ),
                           ),
+                          // Same rule as the ficha: previous price and
+                          // -% only off real compare_at data.
+                          if (onSale && compare != null) ...[
+                            Text(
+                              kMoney.format(compare),
+                              style: boutiqueText(
+                                size: 13,
+                                color: palette.inkMuted,
+                                decoration: TextDecoration.lineThrough,
+                              ),
+                            ),
+                            if (discount > 0)
+                              Container(
+                                key: const ValueKey('discount-badge'),
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 5,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: palette.saleSurface,
+                                  borderRadius: BoutiqueRadius.capsule,
+                                ),
+                                child: Text(
+                                  '-$discount%',
+                                  style: boutiqueEyebrow(
+                                    size: 11,
+                                    color: palette.sale,
+                                  ),
+                                ),
+                              ),
+                          ],
                         ],
                       ),
                       const SizedBox(height: BoutiqueSpace.sm),
@@ -489,14 +541,14 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                       // Low-stock urgency ("Últimas piezas") needs a
                       // quantity the catalog does not carry, so it is
                       // deliberately never rendered here.
-                      if (chosen == null || !inStock)
-                        Text(
-                          chosen == null
-                              ? 'Elige una opción para ver la disponibilidad'
-                              : 'Agotado · te avisamos cuando vuelva',
-                          style:
-                              boutiqueText(size: 12, color: palette.inkMuted),
-                        ),
+                      Text(
+                        chosen == null
+                            ? 'Elige una opción para ver la disponibilidad'
+                            : inStock
+                                ? 'Disponible · envío 3 a 5 días'
+                                : 'Agotado · te avisamos cuando vuelva',
+                        style: boutiqueText(size: 12, color: palette.inkMuted),
+                      ),
                       if (selectableVariants(product).isNotEmpty) ...[
                         const SizedBox(height: BoutiqueSpace.lg),
                         if (chosen == null) ...[
@@ -514,20 +566,14 @@ class _QuickViewSheetState extends State<_QuickViewSheet> {
                         ProductOptionSelector(
                           product: product,
                           selectedIndex: chosen,
+                          colorHeading: 'COLORES',
                           onSelect: (i) => setState(() {
                             _variantIndex = i;
                             _error = null;
                           }),
                         ),
                       ],
-                      const SizedBox(height: BoutiqueSpace.xl),
-                      BoutiqueButton(
-                        key: const Key('quick-view-view-product'),
-                        label: 'Ver producto',
-                        onPressed: _viewFullProduct,
-                        filled: false,
-                      ),
-                      const SizedBox(height: BoutiqueSpace.sm),
+                      const SizedBox(height: BoutiqueSpace.lg),
                     ],
                   ),
                 ),

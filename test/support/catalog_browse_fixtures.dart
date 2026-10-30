@@ -16,7 +16,7 @@ class BrowseEntry {
 
   /// The view data the browser builds for this piece.
   ProductTileData get tileData =>
-      ProductTileData.forCatalogBrowse(product, facets: facets);
+      ProductTileData.fromProduct(product, facets: facets);
 }
 
 /// Piece number [i]: title `Monetta Item <i>`, vendor `Guess`, one variant
@@ -68,15 +68,7 @@ BrowseEntry browseEntry(
 }
 
 /// [CatalogBrowseScreen] over [entries], with the facets keyed by product id.
-CatalogBrowseScreen browseScreen(
-  Iterable<BrowseEntry> entries, {
-  int bagCount = 0,
-}) =>
-    CatalogBrowseScreen(
-      products: [for (final entry in entries) entry.product],
-      facetsById: {
-        for (final entry in entries)
-          if (entry.facets != null) entry.product.id: entry.facets!,
-      },
-      bagCount: bagCount,
-    );
+/// An empty shipped catalog browser. The screen reads the bag from
+/// [StoreScope] when one is present, and falls back to [bagCount].
+CatalogBrowseScreen browseScreen({int bagCount = 0}) =>
+    CatalogBrowseScreen(items: const [], bagCount: bagCount);

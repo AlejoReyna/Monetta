@@ -15,18 +15,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import 'platform/system_layout_context.dart';
 import 'app/account_controller.dart';
 import 'app/admin_config.dart';
 import 'app/admin_controller.dart';
 import 'app/admin_notification_controller.dart';
 import 'app/app_build_metadata.dart';
 import 'app/catalog_store.dart';
+import 'app/text_scale_policy.dart';
 import 'app/cart_controller.dart';
-import 'app/checkout_buyer_identity.dart';
-import 'app/checkout_return_router.dart';
 import 'app/editorial_content_controller.dart';
 import 'app/featured_catalog_controller.dart';
-import 'app/font_licenses.dart';
 import 'app/home_content_controller.dart';
 import 'app/notification_controller.dart';
 import 'app/onboarding_controller.dart';
@@ -36,14 +35,12 @@ import 'app/shopify_cart_composition.dart';
 import 'app/shopify_checkout_coordinator.dart';
 import 'app/theme.dart';
 import 'app/startup_reveal.dart';
-import 'app/text_scale_policy.dart';
 import 'app/theme_controller.dart';
 import 'data/accounts_orders/accounts_orders_config.dart';
 import 'data/accounts_orders/system_account_client.dart';
 import 'data/accounts_orders/system_account_session_repository.dart';
 import 'data/admin/admin_client.dart';
 import 'data/customer_auth/customer_account_config.dart';
-import 'data/customer_auth/customer_api_discovery.dart';
 import 'data/customer_auth/customer_auth_gateway.dart';
 import 'data/customer_auth/customer_identity.dart';
 import 'data/customer_auth/customer_orders.dart';
@@ -71,9 +68,6 @@ import 'data/repositories/order_history_repository.dart';
 import 'data/reviews/loox_reviews_repository.dart';
 import 'data/shopify/catalog_sync.dart' as shopify;
 import 'data/shopify/cart_attribution.dart';
-import 'data/shopify/cart/cart_repository.dart';
-import 'data/shopify/cart/cart_session_store.dart';
-import 'data/shopify/cart/checkout_launcher.dart';
 import 'data/shopify/editorial_content_repository.dart';
 import 'data/shopify/featured_catalog_repository.dart';
 import 'data/shopify/home_content_repository.dart';
@@ -81,14 +75,13 @@ import 'data/shopify/http_storefront_transport.dart';
 import 'data/shopify/storefront_client.dart';
 import 'data/shopify/storefront_config.dart';
 import 'features/catalog/collection_screen.dart';
-import 'features/checkout/checkout_screen.dart';
+import 'features/catalog/browse_detail_layout.dart';
 import 'features/catalog/search_history.dart';
 import 'features/catalog/search_history_persistence.dart';
+import 'features/checkout/reviewing_checkout.dart';
 import 'features/home/home_screen.dart';
 import 'features/product/product_screen.dart';
 import 'features/welcome/welcome_gate.dart';
-import 'platform/checkout_return_link_receiver.dart';
-import 'platform/external_checkout_opener.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -373,6 +366,9 @@ class AppRouteScopes extends StatelessWidget {
     this.checkoutCoordinator,
     this.catalogStore,
     this.notificationController,
+    this.reviewingCheckout,
+    this.reviewingWarningStore,
+    this.reviewingClock,
     required this.shopDomain,
     required this.child,
     super.key,
@@ -383,20 +379,32 @@ class AppRouteScopes extends StatelessWidget {
   final ShopifyCheckoutCoordinator? checkoutCoordinator;
   final CatalogStore? catalogStore;
   final NotificationController? notificationController;
+
+  /// Banner-3 warning. Null lets [ReviewingCheckoutHost] restore the on-device
+  /// flag. The stored record is a flag and a timestamp, never a cart token.
+  final ReviewingCheckoutCart? reviewingCheckout;
+  final ReviewingWarningStore? reviewingWarningStore;
+  final DateTime Function()? reviewingClock;
   final String shopDomain;
   final Widget child;
 
   @override
   Widget build(BuildContext context) {
     final cart = cartController;
-    Widget routedApp = cart == null
-        ? child
-        : CartScope(
-            shopDomain: shopDomain,
-            notifier: cart,
-            checkoutCoordinator: checkoutCoordinator,
-            child: child,
-          );
+    Widget routedApp = ReviewingCheckoutHost(
+      bag: catalogStore,
+      reviewing: reviewingCheckout,
+      store: reviewingWarningStore,
+      clock: reviewingClock,
+      child: cart == null
+          ? child
+          : CartScope(
+              shopDomain: shopDomain,
+              notifier: cart,
+              checkoutCoordinator: checkoutCoordinator,
+              child: child,
+            ),
+    );
     final notifications = notificationController;
     if (notifications != null) {
       routedApp = NotificationScope(
@@ -538,7 +546,6 @@ class _MonettaAppState extends State<MonettaApp> {
   /// [_load] (nullable rather than `late final`, since [dispose] can run
   /// before that future completes, and since a build without Customer Account
   /// credentials never creates one at all).
-  CustomerApiDiscoveryService? _customerApiDiscovery;
   HttpCustomerIdentityService? _customerIdentityService;
   HttpCustomerOrdersService? _customerOrdersService;
   HttpAdminClient? _adminClient;
@@ -661,16 +668,12 @@ class _MonettaAppState extends State<MonettaApp> {
     final customerConfig = CustomerAccountConfig.fromEnvironment();
     CustomerSessionRepository? customerSession;
     if (customerConfig.isUsable) {
-      final discovery = CustomerApiDiscoveryService(config: customerConfig);
-      _customerApiDiscovery = discovery;
       final identityService = HttpCustomerIdentityService(
         config: customerConfig,
-        discovery: discovery,
       );
       _customerIdentityService = identityService;
       final ordersService = HttpCustomerOrdersService(
         config: customerConfig,
-        discovery: discovery,
       );
       _customerOrdersService = ordersService;
       customerSession = CustomerSessionRepository(
@@ -705,6 +708,7 @@ class _MonettaAppState extends State<MonettaApp> {
       ),
       accountStore: AccountStore(_database),
       deviceStore: deviceStore,
+      wishlistStore: WishlistStore(_database),
       orderHistoryRepository: OrderHistoryRepository(
         store: OrderSummaryStore(_database),
         config: accountsConfig,
@@ -786,145 +790,13 @@ class _MonettaAppState extends State<MonettaApp> {
     unawaited(_editorialContent.refresh());
     unawaited(_homeContent.refresh());
     unawaited(_featuredCatalog.refresh());
-    // Notifications initialize in the background: restore() never throws and
-    // talks to the OS and the network, so the first paint must not wait on it.
-    // A route it delivers before the Navigator exists is held by
-    // `_openNotificationRoute`.
-    unawaited(_notifications!.restore());
+    await _notifications!.restore();
     await _store.waitForInitialCatalog();
-    _attachReturnLinkReceiver();
-  }
-
-  /// Latest notification route that arrived before the Navigator existed.
-  NotificationRouteData? _pendingNotificationRoute;
-  bool _pendingNotificationRouteScheduled = false;
-
-  /// Offsite-payment return links (Fase 5). Attached once the cart stack,
-  /// account state and Navigator key exist; detached in [dispose].
-  CheckoutReturnLinkReceiver? _returnLinkReceiver;
-
-  void _attachReturnLinkReceiver() {
-    final composition = _shopifyCart;
-    if (composition == null || _returnLinkReceiver != null) return;
-    final router = CheckoutReturnRouter(
-      policy: composition.returnPolicy,
-      onResumeCheckout: _resumeCheckoutAfterReturn,
-      onOpenBag: _openBagAfterReturn,
-      externalOpener: const UrlLauncherExternalCheckoutOpener(),
-    );
-    final receiver = CheckoutReturnLinkReceiver(router: router);
-    _returnLinkReceiver = receiver;
-    unawaited(receiver.attach());
-  }
-
-  /// Re-presents the same-scope checkout after an offsite return.
-  ///
-  /// The incoming URL only triggers this call: presentation reconciles the
-  /// live bag, refreshes the checkout URL and waits for Shopify's real
-  /// terminal event. Coming back from a provider never counts as paid;
-  /// `cancelled`/`failed` keep the bag, `completed` cleans it once through
-  /// the coordinator.
-  Future<CheckoutResult> _resumeCheckoutAfterReturn(
-    ValidatedCheckoutUrl _,
-  ) async {
-    final composition = _shopifyCart;
-    if (composition == null) {
-      return const CheckoutFailed(
-        code: CheckoutFailureCode.unavailable,
-        userMessage: 'El checkout seguro no está disponible en esta '
-            'configuración. Tu bolsa se conserva.',
-      );
-    }
-    final shopDomain = StorefrontConfig.fromEnvironment().shopDomain.trim();
-    final account = _account.account;
-    final scope = account == null
-        ? CartSessionScope.guest(shopDomain: shopDomain)
-        : CartSessionScope.authenticated(
-            shopDomain: shopDomain,
-            localAccountId: account.localAccountId,
-          );
-    final intent = [
-      for (final line in _store.bagLines)
-        LocalCartIntent(variantId: line.variant.id, quantity: line.quantity),
-    ];
-    final buyerIdentity = await resolveCheckoutBuyerIdentity(
-      account: account,
-      shopifyAccessToken: _account.accessTokenForShopifyCheckout,
-    );
-    final result = await composition.checkout.present(
-      controller: composition.controller,
-      scope: scope,
-      localIntent: intent,
-      buyerIdentity: buyerIdentity,
-      onCompleted: (purchase) async {
-        await _store.applyCheckoutPurchase(purchase);
-        await _account.loadOrders();
-      },
-    );
-    switch (result) {
-      case CheckoutCancelled():
-        _showReturnLinkNotice('Checkout cancelado. Tu bolsa se conserva.');
-      case CheckoutFailed(:final userMessage):
-        _showReturnLinkNotice(userMessage);
-      case CheckoutCompleted():
-        break;
-    }
-    return result;
-  }
-
-  Future<void> _openBagAfterReturn() async {
-    final context = _navigatorKey.currentContext;
-    if (context == null || !mounted) return;
-    await openBag(context);
-  }
-
-  void _showReturnLinkNotice(String message) {
-    final context = _navigatorKey.currentContext;
-    if (context == null || !mounted) return;
-    ScaffoldMessenger.maybeOf(context)?.showSnackBar(
-      SnackBar(content: Text(message)),
-    );
   }
 
   void _openNotificationRoute(NotificationRouteData route) {
     final navigator = _navigatorKey.currentState;
-    if (navigator == null) {
-      // Cold start: the Navigator is only mounted once `_loading` finishes.
-      // Keep the latest route and open it after the frame that mounts it.
-      _pendingNotificationRoute = route;
-      if (!_pendingNotificationRouteScheduled) {
-        _pendingNotificationRouteScheduled = true;
-        unawaited(
-          _loading.then<void>(
-            (_) => WidgetsBinding.instance.addPostFrameCallback(
-              (_) => _openPendingNotificationRoute(),
-            ),
-            onError: (Object _, StackTrace __) {
-              _pendingNotificationRoute = null;
-            },
-          ),
-        );
-      }
-      return;
-    }
-    _pendingNotificationRoute = null;
-    _navigateToNotificationRoute(navigator, route);
-  }
-
-  void _openPendingNotificationRoute() {
-    final route = _pendingNotificationRoute;
-    _pendingNotificationRoute = null;
-    _pendingNotificationRouteScheduled = false;
-    if (route == null || !mounted) return;
-    final navigator = _navigatorKey.currentState;
     if (navigator == null) return;
-    _navigateToNotificationRoute(navigator, route);
-  }
-
-  void _navigateToNotificationRoute(
-    NavigatorState navigator,
-    NotificationRouteData route,
-  ) {
     if (route.type == 'product' && route.productKey != null) {
       final key = route.productKey!;
       // external:* notification routes are ignored — monitor catalog retired.
@@ -950,9 +822,11 @@ class _MonettaAppState extends State<MonettaApp> {
       // Using category here opened the wrong (or empty) result set (F28).
       navigator.push(
         MaterialPageRoute<void>(
-          builder: (_) => CollectionScreen(
-            title: handle,
-            filter: CollectionFilter(collectionHandle: handle),
+          builder: (_) => BrowseDetailLayout(
+            child: CollectionScreen(
+              title: handle,
+              filter: CollectionFilter(collectionHandle: handle),
+            ),
           ),
         ),
       );
@@ -966,12 +840,6 @@ class _MonettaAppState extends State<MonettaApp> {
   }
 
   @override
-  void initState() {
-    super.initState();
-    registerFontLicenses();
-  }
-
-  @override
   void dispose() {
     if (_adminCapListenerAttached) {
       _account.removeListener(_refreshAdminCapabilities);
@@ -980,10 +848,7 @@ class _MonettaAppState extends State<MonettaApp> {
     _storefrontTransport?.close();
     _customerIdentityService?.close();
     _customerOrdersService?.close();
-    _customerApiDiscovery?.close();
     _adminClient?.close();
-    _returnLinkReceiver?.detach();
-    _returnLinkReceiver = null;
     _admin?.dispose();
     _notifications?.dispose();
     _adminNotifications?.dispose();
@@ -1016,42 +881,41 @@ class _MonettaAppState extends State<MonettaApp> {
               final overlay =
                   Theme.of(context).appBarTheme.systemOverlayStyle ??
                       SystemUiOverlayStyle.light;
-              final region = AnnotatedRegion<SystemUiOverlayStyle>(
-                value: overlay,
-                child: FutureBuilder<void>(
-                  future: _loading,
-                  builder: (context, snapshot) {
-                    if (snapshot.hasError) {
-                      return _ErrorScreen(error: '${snapshot.error}');
-                    }
-                    final ready =
-                        snapshot.connectionState == ConnectionState.done;
-                    return StartupReveal(
-                      ready: ready,
-                      child: ready
-                          ? AppRouteScopes(
-                              accountController: _account,
-                              cartController: _shopifyCart?.controller,
-                              checkoutCoordinator: _shopifyCart?.checkout,
-                              catalogStore: _store,
-                              notificationController: _notifications,
-                              shopDomain:
-                                  StorefrontConfig.fromEnvironment().shopDomain,
-                              child: navigator!,
-                            )
-                          : const SizedBox.expand(),
-                    );
-                  },
-                ),
-              );
-              // RF-17 (E-T1 / D-12): one bounded scaler at the root, so no
-              // call site has to clamp the system text scale on its own.
               final media = MediaQuery.of(context);
               return MediaQuery(
                 data: media.copyWith(
                   textScaler: BoundedTextScaler(media.textScaler),
                 ),
-                child: region,
+                child: SystemLayoutHost(
+                  child: AnnotatedRegion<SystemUiOverlayStyle>(
+                    value: overlay,
+                    child: FutureBuilder<void>(
+                      future: _loading,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return _ErrorScreen(error: '${snapshot.error}');
+                        }
+                        final ready =
+                            snapshot.connectionState == ConnectionState.done;
+                        return StartupReveal(
+                          ready: ready,
+                          child: ready
+                              ? AppRouteScopes(
+                                  accountController: _account,
+                                  cartController: _shopifyCart?.controller,
+                                  checkoutCoordinator: _shopifyCart?.checkout,
+                                  catalogStore: _store,
+                                  notificationController: _notifications,
+                                  shopDomain: StorefrontConfig.fromEnvironment()
+                                      .shopDomain,
+                                  child: navigator!,
+                                )
+                              : const SizedBox.expand(),
+                        );
+                      },
+                    ),
+                  ),
+                ),
               );
             },
             home: StoreScope(

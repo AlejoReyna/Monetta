@@ -5,12 +5,12 @@ library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 
+import '../domain/catalog_item.dart' show Money;
 import 'monetta_tokens.g.dart';
 import 'motion.dart';
 import 'shopper_copy.dart';
-
-export 'money_format.dart' show formatCatalogMoney, kMoney, kUnknownPriceLabel;
 
 // ---------------------------------------------------------------------------
 // Palette
@@ -334,27 +334,51 @@ const double kSectionGap = 52;
 /// silently render the Monetta identity at different sizes.
 const double kAppBarWordmarkHeight = 24;
 
+/// Matches the store's `money_format` of `$ {{amount}}` in MXN.
+final NumberFormat kMoney = NumberFormat.currency(
+  locale: 'es_MX',
+  symbol: r'$ ',
+  decimalDigits: 2,
+);
+
+/// The neutral label shown in place of a price line when [Money] is `null` —
+/// an unknown price is never rendered as `$0`, which would read as "free."
+const String kUnknownPriceLabel = 'Consultar precio';
+
+/// Renders a mixed-feed [Money] with an explicit currency code — `$1,999
+/// MXN`, `$350 USD` — never converted, never inferred. `null` (a genuinely
+/// unknown price — see `domain/catalog_item.dart`) renders
+/// [kUnknownPriceLabel] rather than being coerced to a number. Used by the
+/// external research section (`features/home/external_catalog_section.dart`)
+/// and the unified feed/browse screens; the existing Monetta-only screens
+/// keep using [kMoney] unchanged.
+String formatCatalogMoney(Money? money) {
+  if (money == null) return kUnknownPriceLabel;
+  final isWhole = money.amount == money.amount.roundToDouble();
+  final formatter = NumberFormat.currency(
+    locale: 'en_US',
+    symbol: r'$',
+    decimalDigits: isWhole ? 0 : 2,
+  );
+  return '${formatter.format(money.amount)} ${money.currencyCode}';
+}
+
 // ---------------------------------------------------------------------------
 // Typography
 // ---------------------------------------------------------------------------
 
-/// Sans family bundled with the app (Inter, SIL OFL; see `assets/fonts/`).
-///
-/// Single source of the app's sans face: every sans helper and the Material
-/// theme read it. The fallbacks only matter if the bundled files fail to load.
-const String kSansFontFamily = 'Inter';
-const List<String> kSansFontFallback = <String>[
-  'SF Pro Text',
-  'Helvetica Neue',
+const String _displayFamily = 'Inter';
+const List<String> _displayFallback = <String>[
   'Helvetica',
   'Arial',
   'sans-serif',
 ];
 
-/// Serif family bundled with the app (Playfair Display, SIL OFL; see
-/// `assets/fonts/`), used by storefront navigation and editorial titles.
-const String kSerifFontFamily = 'Playfair Display';
-const List<String> kSerifFontFallback = <String>[
+/// Serif used by Monetta's storefront navigation and editorial section titles.
+///
+/// The client guide uses the bundled Playfair face; system serifs remain fallbacks.
+const String kEditorialFontFamily = 'Playfair Display';
+const List<String> _editorialFallback = <String>[
   'New York',
   'Iowan Old Style',
   'Baskerville',
@@ -362,9 +386,6 @@ const List<String> kSerifFontFallback = <String>[
   'Times New Roman',
   'serif',
 ];
-
-/// Serif used by Monetta's storefront navigation and editorial section titles.
-const String kEditorialFontFamily = kSerifFontFamily;
 
 /// Editorial headline. Clean geometric sans with restrained tracking.
 TextStyle display(
@@ -374,8 +395,8 @@ TextStyle display(
   double height = 1.3,
 }) =>
     TextStyle(
-      fontFamily: kSansFontFamily,
-      fontFamilyFallback: kSansFontFallback,
+      fontFamily: _displayFamily,
+      fontFamilyFallback: _displayFallback,
       fontSize: size,
       fontWeight: weight,
       letterSpacing: size * -0.025,
@@ -390,8 +411,8 @@ TextStyle editorial(
   double height = 1.2,
 }) =>
     TextStyle(
-      fontFamily: kSerifFontFamily,
-      fontFamilyFallback: kSerifFontFallback,
+      fontFamily: kEditorialFontFamily,
+      fontFamilyFallback: _editorialFallback,
       fontSize: size,
       fontWeight: weight,
       letterSpacing: size * -0.012,
@@ -401,8 +422,8 @@ TextStyle editorial(
 
 /// Text fallback for the bitmap wordmark.
 TextStyle wordmark({double size = 19, Color? color}) => TextStyle(
-      fontFamily: kSansFontFamily,
-      fontFamilyFallback: kSansFontFallback,
+      fontFamily: _displayFamily,
+      fontFamilyFallback: _displayFallback,
       fontSize: size,
       fontWeight: FontWeight.w700,
       letterSpacing: size * 0.18,
@@ -418,8 +439,8 @@ TextStyle eyebrow({
   FontWeight weight = FontWeight.w500,
 }) =>
     TextStyle(
-      fontFamily: kSansFontFamily,
-      fontFamilyFallback: kSansFontFallback,
+      fontFamily: _displayFamily,
+      fontFamilyFallback: _displayFallback,
       fontSize: size,
       fontWeight: weight,
       letterSpacing: 1.8,
@@ -436,8 +457,8 @@ TextStyle sans({
   TextDecoration? decoration,
 }) =>
     TextStyle(
-      fontFamily: kSansFontFamily,
-      fontFamilyFallback: kSansFontFallback,
+      fontFamily: _displayFamily,
+      fontFamilyFallback: _displayFallback,
       fontSize: size,
       fontWeight: weight,
       height: height,
@@ -492,13 +513,15 @@ class UnderlineLink extends StatelessWidget {
   }
 }
 
-/// The real wordmark, taken from the storefront's own asset
-/// (`monetta.mx/cdn/shop/files/FINAL_12.png`), trimmed of its transparent
-/// margin and emitted at 1x/2x/3x into `assets/images/`.
+/// The real wordmark, generated from the brand master
+/// (`docs/design/brand/monetta-wordmark.webp`) by
+/// `bin/generate_brand_assets.py`: lifted off its white background and fitted
+/// into a 132:38 canvas at 1x/2x/3x in `assets/images/`.
 ///
-/// It is a gold-gradient didone with a teardrop accent on the M — high stroke
-/// contrast, which is the same class of face Dior sets its own logotype in. So
-/// the mark was already speaking this language; the app just wasn't.
+/// It is a polished-gold didone whose M carries a teardrop and a swash under
+/// the O — high stroke contrast, which is the same class of face Dior sets its
+/// own logotype in. So the mark was already speaking this language; the app
+/// just wasn't.
 ///
 /// This supersedes [wordmark] as the app's identity. That text style stays for
 /// the two places a bitmap will not do: anywhere the mark must be a single
@@ -777,15 +800,8 @@ ThemeData buildTheme({Brightness brightness = Brightness.light}) {
 
   return ThemeData(
     useMaterial3: true,
-    pageTransitionsTheme: const PageTransitionsTheme(
-      builders: {
-        TargetPlatform.android: MonettaPageTransitionsBuilder(),
-        TargetPlatform.iOS: MonettaPageTransitionsBuilder(),
-        TargetPlatform.macOS: MonettaPageTransitionsBuilder(),
-      },
-    ),
-    fontFamily: kSansFontFamily,
-    fontFamilyFallback: kSansFontFallback,
+    fontFamily: _displayFamily,
+    fontFamilyFallback: _displayFallback,
     brightness: brightness,
     colorScheme: scheme,
     extensions: <ThemeExtension<dynamic>>[colors],

@@ -76,6 +76,7 @@ class NotificationsScreen extends StatelessWidget {
       appBar: buildMonettaPageAppBar(
         context,
         title: 'Notificaciones',
+        backgroundColor: palette.bar,
         actions: [
           ListenableBuilder(
             listenable: inbox,

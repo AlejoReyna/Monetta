@@ -12,7 +12,9 @@ const args = parseArgs();
 const baseUrl = args['base-url'] || 'http://127.0.0.1:9292';
 const insetPx = args.insets === undefined ? 0 : Number(args.insets);
 const viewports = (args.viewports || '768x1024,812x375,1023x768,1024x768,1440x900').split(',').map((v) => v.split('x').map(Number));
-const run = new Run(`nav${insetPx ? `-insets${insetPx}` : ''}`, { baseUrl, extra: { viewports, insetPx } });
+// Negative controls and diagnosis: a stylesheet added to every document of the run (lib.mjs launch).
+const injectCss = args['inject-css'] || null;
+const run = new Run(`nav${insetPx ? `-insets${insetPx}` : ''}`, { baseUrl, extra: { viewports, insetPx, injectCss } });
 
 const MASK_OFF = '.site-nav__list{-webkit-mask-image:none!important;mask-image:none!important}';
 
@@ -78,7 +80,7 @@ async function ringSides(page, rect, offset, width) {
 
 for (const [w, h] of viewports) {
   const tag = `${w}×${h}${insetPx ? ` +${insetPx}px insets` : ''}`;
-  const { browser, page } = await launch({ width: w, height: h, insets: insetPx || null, reducedMotion: 'reduce' });
+  const { browser, page } = await launch({ width: w, height: h, insets: insetPx || null, reducedMotion: 'reduce', injectCss });
   page.setDefaultTimeout(30000);
   try {
     await page.goto(`${baseUrl}/`, { waitUntil: 'load' });
@@ -173,5 +175,5 @@ for (const [w, h] of viewports) {
   }
 }
 
-const result = run.finish({ complete: !args.viewports });
+const result = run.finish({ complete: !args.viewports && !injectCss });
 process.exit(result.summary.failed ? 1 : 0);

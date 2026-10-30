@@ -36,6 +36,11 @@ export interface AccountsOrdersConfig {
   readonly ownerEmails: ReadonlySet<string>;
   /** Verified Shopify Customer ids allowed to bootstrap an owner principal. */
   readonly ownerShopifyCustomerIds: ReadonlySet<string>;
+  /**
+   * Shopify Admin staff ids (session-token `sub`) allowed to bootstrap a
+   * principal for the embedded notifications panel.
+   */
+  readonly ownerShopifyStaffIds: ReadonlySet<string>;
   readonly adminEnvironment: 'staging' | 'production';
   /**
    * When false, POST /accounts/register is closed. Existing legacy accounts
@@ -43,6 +48,12 @@ export interface AccountsOrdersConfig {
    */
   readonly legacyAccountRegistrationEnabled: boolean;
   // Rewards (paquete F) lee sus banderas en src/rewards/rewardsConfig.ts.
+  /** Static Admin API token. Optional when client-credentials can mint one. */
+  readonly shopifyAdminAccessToken: string;
+  /** Public Customer Account mobile client id, used to check id-token `aud`. */
+  readonly customerAccountClientId: string;
+  /** Interactive Shopify login must be at least this recent to delete an account. */
+  readonly accountDeletionReauthMaxAgeSeconds: number;
 }
 
 function int(value: string | undefined, fallback: number): number {
@@ -120,12 +131,19 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AccountsOrders
     internalCatalogEventSecret: env.INTERNAL_CATALOG_EVENT_SECRET ?? '',
     ownerEmails: csv(env.OWNER_ADMIN_EMAILS),
     ownerShopifyCustomerIds: csv(env.OWNER_SHOPIFY_CUSTOMER_IDS),
+    ownerShopifyStaffIds: csv(env.OWNER_SHOPIFY_STAFF_IDS),
     adminEnvironment,
     // Default on so existing local/staging clients keep working; production
     // should set LEGACY_ACCOUNT_REGISTRATION_ENABLED=false once Shopify-only.
     legacyAccountRegistrationEnabled: bool(
       env.LEGACY_ACCOUNT_REGISTRATION_ENABLED,
       true,
+    ),
+    shopifyAdminAccessToken: (env.SHOPIFY_ADMIN_ACCESS_TOKEN ?? '').trim(),
+    customerAccountClientId: (env.CUSTOMER_ACCOUNT_CLIENT_ID ?? '').trim(),
+    accountDeletionReauthMaxAgeSeconds: Math.max(
+      60,
+      int(env.ACCOUNT_DELETION_REAUTH_MAX_AGE_SECONDS, 600),
     ),
   };
 }

@@ -1,0 +1,16 @@
+00:00 +0: loading /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/checkout/duo_checkout_continuity_test.dart
+00:00 +0: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/checkout/duo_checkout_continuity_test.dart: cart reflows progress, heading, full name and quantity at largest text
+00:01 +1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/checkout/duo_checkout_continuity_test.dart: cart reflows progress, heading, full name and quantity at largest text
+00:05 +2: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/checkout/duo_checkout_continuity_test.dart: cart reflows progress, heading, full name and quantity at largest text
+00:06 +3: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/checkout/duo_checkout_continuity_test.dart: cart reflows progress, heading, full name and quantity at largest text
+00:08 +4: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/checkout/duo_checkout_continuity_test.dart: cart reflows progress, heading, full name and quantity at largest text
+00:08 +5: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: synthetic fold, camera, asymmetric insets and keyboard keep actions usable
+00:09 +6: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/checkout/duo_checkout_continuity_test.dart: contact draft and one fake checkout launch survive resizing and cancellation
+00:12 +7: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: same product/variant/gallery/sections survive repeated reflow
+00:12 +8: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: an unselected collection preserves its visible result ID across column changes
+00:13 +9: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: resizing an in-flight add issues exactly one exact-variant mutation
+00:14 +10: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: browse expands, collapses and Back restores the source selection
+00:15 +11: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: direct product opened over browsing keeps independent history
+00:17 +12: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: real collection keeps filter/sort drafts and applied results through reflow
+00:18 +13: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: (tearDownAll)
+00:19 +13: All tests passed!
