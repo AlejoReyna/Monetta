@@ -2,6 +2,7 @@
 library;
 
 import 'dart:math' as math;
+import 'dart:ui' show ImageFilter;
 
 import 'package:flutter/material.dart';
 
@@ -26,6 +27,19 @@ const double _kLabelSize = 13;
 const double _kLabelHeight = 1.25;
 const double _kPressedOpacity = 0.55;
 
+// iOS-only floating glass capsule. The fill is the theme's navigation surface,
+// so dark mode and high contrast need no special colors.
+const double _kGlassHorizontalMargin = 16;
+const double _kGlassTopMargin = 6;
+const double _kGlassMinBottomMargin = 12;
+const double _kGlassRadius = 28;
+const double _kGlassBlurSigma = 24;
+const double _kGlassFillAlpha = 0.82;
+const double _kGlassEdgeWidth = 0.5;
+const double _kGlassShadowAlpha = 0.08;
+const double _kGlassShadowBlur = 24;
+const Offset _kGlassShadowOffset = Offset(0, 8);
+
 String _labelOf(MonettaBottomDestination destination) => switch (destination) {
       MonettaBottomDestination.home => 'Inicio',
       MonettaBottomDestination.catalog => 'Catálogo',
@@ -40,9 +54,11 @@ TextStyle _labelStyle({required FontWeight weight, Color? color}) => sans(
       color: color,
     );
 
-/// Flat bar docked to the bottom edge on the theme's navigation surface. The
-/// selected destination has semantic, weight and underline/border cues. Labels
-/// retain the requested system text scale and reflow when space is limited.
+/// Persistent bar on the theme's navigation surface. On iOS it floats as a
+/// translucent, rounded glass capsule above the home indicator; on every other
+/// platform it stays a flat bar docked to the bottom edge. The selected
+/// destination has semantic, weight and underline/border cues. Labels retain
+/// the requested system text scale and reflow when space is limited.
 class MonettaBottomNavigation extends StatelessWidget {
   const MonettaBottomNavigation({
     required this.current,
@@ -125,10 +141,9 @@ class MonettaBottomNavigation extends StatelessWidget {
         ],
       );
     }
-    final media = MediaQuery.maybeOf(context);
-    final animationsDisabled =
-        media?.disableAnimations == true || media?.accessibleNavigation == true;
-
+    if (Theme.of(context).platform == TargetPlatform.iOS) {
+      return _buildGlassCapsule(context, colors);
+    }
     return DecoratedBox(
       key: const Key('bottom-nav-surface'),
       decoration: BoxDecoration(
@@ -141,102 +156,193 @@ class MonettaBottomNavigation extends StatelessWidget {
         child: SafeArea(
           top: false,
           maintainBottomViewPadding: true,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: _kBarSidePadding),
-            child: Center(
-              heightFactor: 1,
-              child: ConstrainedBox(
-                constraints:
-                    const BoxConstraints(maxWidth: _kBarMaxContentWidth),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final scaler = MediaQuery.textScalerOf(context);
-                    var widest = 0.0;
-                    for (final destination in MonettaBottomDestination.values) {
-                      final painter = TextPainter(
-                        text: TextSpan(
-                          text: _labelOf(destination),
-                          style: DefaultTextStyle.of(context).style.merge(
-                                _labelStyle(
-                                  weight: MediaQuery.boldTextOf(context)
-                                      ? FontWeight.bold
-                                      : FontWeight.w600,
-                                ),
-                              ),
-                        ),
-                        textDirection: Directionality.of(context),
-                        textScaler: scaler,
-                        maxLines: 1,
-                      )..layout();
-                      widest = math.max(widest, painter.width);
-                      painter.dispose();
-                    }
-                    var columns = 4;
-                    while (columns > 1 &&
-                        widest >
-                            constraints.maxWidth / columns -
-                                2 * _kItemHorizontalPadding) {
-                      columns ~/= 2;
-                    }
-                    final wrapLabel = widest >
-                        constraints.maxWidth - 2 * _kItemHorizontalPadding;
-                    final itemHeight = math.max(
-                      _kBarMinHeight,
-                      _kIconBox +
-                          _kIconLabelGap +
-                          scaler.scale(_kLabelSize) * _kLabelHeight +
-                          2 * _kItemVerticalPadding,
-                    );
-                    final usableHeight =
-                        (media?.size.height ?? constraints.maxHeight) -
-                            (media?.viewInsets.bottom ?? 0);
-                    if (usableHeight -
-                            itemHeight * (4 / columns) -
-                            (media?.viewPadding.bottom ?? 0) <
-                        StorefrontLayout.minimumTaskHeight) {
-                      return SizedBox(
-                        height: _kBarMinHeight,
-                        width: double.infinity,
-                        child: PopupMenuButton<MonettaBottomDestination>(
-                          key: const Key('navigation-overflow'),
-                          tooltip:
-                              'Destinos${current == null ? '' : '. ${_labelOf(current!)} seleccionado'}',
-                          onSelected: onSelected,
-                          itemBuilder: (context) => [
-                            for (final destination
-                                in MonettaBottomDestination.values)
-                              CheckedPopupMenuItem(
-                                value: destination,
-                                checked: current == destination,
-                                child: Text(
-                                  '${_labelOf(destination)}${destination == MonettaBottomDestination.bag && bagCount > 0 ? ' ($bagCount)' : ''}',
-                                ),
-                              ),
-                          ],
-                          icon: const Icon(Icons.more_horiz),
-                        ),
-                      );
-                    }
-                    final items = [
-                      for (final destination in MonettaBottomDestination.values)
-                        SizedBox(
-                          width: constraints.maxWidth / columns,
-                          child: _NavItem(
-                            destination: destination,
-                            selected: destination == current,
-                            bagCount: bagCount,
-                            labelScaler: scaler,
-                            wrapLabel: wrapLabel,
-                            animationsDisabled: animationsDisabled,
-                            onSelected: onSelected,
-                          ),
-                        ),
-                    ];
-                    return Wrap(children: items);
-                  },
-                ),
+          child: _buildHorizontalContent(context),
+        ),
+      ),
+    );
+  }
+
+  /// Floating translucent capsule used on iOS. The blur is dropped under high
+  /// contrast and the fill becomes opaque.
+  Widget _buildGlassCapsule(BuildContext context, MonettaColors colors) {
+    final highContrast = MediaQuery.highContrastOf(context);
+    final radius = BorderRadius.circular(_kGlassRadius);
+    // Space the capsule adds around the destinations, so the overflow
+    // decision keeps at least the task height the flat bar leaves.
+    final bottomInset = MediaQuery.maybeViewPaddingOf(context)?.bottom ?? 0;
+    final reservedHeight =
+        _kGlassTopMargin + math.max(0.0, _kGlassMinBottomMargin - bottomInset);
+    Widget capsule = DecoratedBox(
+      decoration: ShapeDecoration(
+        color: highContrast
+            ? colors.navigationSurface.withValues(alpha: 1)
+            : colors.navigationSurface.withValues(alpha: _kGlassFillAlpha),
+        shape: RoundedRectangleBorder(
+          borderRadius: radius,
+          side: BorderSide(color: colors.divider, width: _kGlassEdgeWidth),
+        ),
+      ),
+      // Ink and focus paint on the capsule.
+      child: Material(
+        type: MaterialType.transparency,
+        child: _buildHorizontalContent(
+          context,
+          reservedHeight: reservedHeight,
+        ),
+      ),
+    );
+    if (!highContrast) {
+      capsule = BackdropFilter(
+        filter: ImageFilter.blur(
+          sigmaX: _kGlassBlurSigma,
+          sigmaY: _kGlassBlurSigma,
+        ),
+        child: capsule,
+      );
+    }
+    return SafeArea(
+      top: false,
+      maintainBottomViewPadding: true,
+      minimum: const EdgeInsets.only(bottom: _kGlassMinBottomMargin),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          _kGlassHorizontalMargin,
+          _kGlassTopMargin,
+          _kGlassHorizontalMargin,
+          0,
+        ),
+        child: Center(
+          heightFactor: 1,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(
+              maxWidth: _kBarMaxContentWidth + 2 * _kBarSidePadding,
+            ),
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                borderRadius: radius,
+                boxShadow: [
+                  BoxShadow(
+                    color: const Color(0xFF000000)
+                        .withValues(alpha: _kGlassShadowAlpha),
+                    blurRadius: _kGlassShadowBlur,
+                    offset: _kGlassShadowOffset,
+                  ),
+                ],
+              ),
+              child: ClipRRect(
+                key: const Key('bottom-nav-glass'),
+                borderRadius: radius,
+                child: capsule,
               ),
             ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  /// Destinations of the horizontal bar, shared by the flat bar and the iOS
+  /// capsule. [reservedHeight] is extra vertical space the surrounding chrome
+  /// takes besides the bar itself.
+  Widget _buildHorizontalContent(
+    BuildContext context, {
+    double reservedHeight = 0,
+  }) {
+    final media = MediaQuery.maybeOf(context);
+    final animationsDisabled =
+        media?.disableAnimations == true || media?.accessibleNavigation == true;
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: _kBarSidePadding),
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _kBarMaxContentWidth),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final scaler = MediaQuery.textScalerOf(context);
+              var widest = 0.0;
+              for (final destination in MonettaBottomDestination.values) {
+                final painter = TextPainter(
+                  text: TextSpan(
+                    text: _labelOf(destination),
+                    style: DefaultTextStyle.of(context).style.merge(
+                          _labelStyle(
+                            weight: MediaQuery.boldTextOf(context)
+                                ? FontWeight.bold
+                                : FontWeight.w600,
+                          ),
+                        ),
+                  ),
+                  textDirection: Directionality.of(context),
+                  textScaler: scaler,
+                  maxLines: 1,
+                )..layout();
+                widest = math.max(widest, painter.width);
+                painter.dispose();
+              }
+              var columns = 4;
+              while (columns > 1 &&
+                  widest >
+                      constraints.maxWidth / columns -
+                          2 * _kItemHorizontalPadding) {
+                columns ~/= 2;
+              }
+              final wrapLabel =
+                  widest > constraints.maxWidth - 2 * _kItemHorizontalPadding;
+              final itemHeight = math.max(
+                _kBarMinHeight,
+                _kIconBox +
+                    _kIconLabelGap +
+                    scaler.scale(_kLabelSize) * _kLabelHeight +
+                    2 * _kItemVerticalPadding,
+              );
+              final usableHeight =
+                  (media?.size.height ?? constraints.maxHeight) -
+                      (media?.viewInsets.bottom ?? 0);
+              if (usableHeight -
+                      itemHeight * (4 / columns) -
+                      (media?.viewPadding.bottom ?? 0) -
+                      reservedHeight <
+                  StorefrontLayout.minimumTaskHeight) {
+                return SizedBox(
+                  height: _kBarMinHeight,
+                  width: double.infinity,
+                  child: PopupMenuButton<MonettaBottomDestination>(
+                    key: const Key('navigation-overflow'),
+                    tooltip:
+                        'Destinos${current == null ? '' : '. ${_labelOf(current!)} seleccionado'}',
+                    onSelected: onSelected,
+                    itemBuilder: (context) => [
+                      for (final destination in MonettaBottomDestination.values)
+                        CheckedPopupMenuItem(
+                          value: destination,
+                          checked: current == destination,
+                          child: Text(
+                            '${_labelOf(destination)}${destination == MonettaBottomDestination.bag && bagCount > 0 ? ' ($bagCount)' : ''}',
+                          ),
+                        ),
+                    ],
+                    icon: const Icon(Icons.more_horiz),
+                  ),
+                );
+              }
+              final items = [
+                for (final destination in MonettaBottomDestination.values)
+                  SizedBox(
+                    width: constraints.maxWidth / columns,
+                    child: _NavItem(
+                      destination: destination,
+                      selected: destination == current,
+                      bagCount: bagCount,
+                      labelScaler: scaler,
+                      wrapLabel: wrapLabel,
+                      animationsDisabled: animationsDisabled,
+                      onSelected: onSelected,
+                    ),
+                  ),
+              ];
+              return Wrap(children: items);
+            },
           ),
         ),
       ),
