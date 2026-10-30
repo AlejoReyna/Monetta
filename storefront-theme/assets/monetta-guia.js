@@ -2,9 +2,9 @@
 // indicator dots that follow the visible slide, previous/next buttons from 1024 px, no autoplay and no timers, as in
 // the app. A slide reached with Tab is brought fully into view. «Colecciones» on phones opens on its middle card. The search
 // screen's «Búsquedas recientes» (slide 05):
-// the last five searches, kept in this browser only, each one removable. The quick view (slide 12): a card's «+» on a piece
-// with several variants loads sections/monetta-quick-view.liquid and nothing is added until a variant is chosen. Rebinds when
-// the theme editor reloads a section.
+// the last five searches, kept in this browser only, each one removable. The preview (the client's 29 Oct reference): tapping a
+// card loads sections/monetta-quick-view.liquid with the card's variant chosen; a modified click still opens the product page
+// in a new tab. Rebinds when the theme editor reloads a section.
 (() => {
   const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -171,6 +171,7 @@
     const hint = root.querySelector('[data-quick-view-hint]');
     const price = root.querySelector('[data-quick-view-price]');
     const photo = root.querySelector('[data-quick-view-photo]');
+    const stock = root.querySelector('[data-quick-view-stock]');
     let chosen = null;
     const update = () => {
       const picked = groups.map((group) => group.querySelector('input:checked')?.value ?? null);
@@ -181,6 +182,12 @@
         if (chosen.image && photo) photo.src = chosen.image;
       }
       const ready = Boolean(chosen?.available);
+      if (stock) {
+        // Shopify's own count, only when it tracks the piece and refuses overselling; otherwise just whether it can be bought.
+        const low = ready && chosen.low > 0;
+        stock.textContent = !chosen ? 'Elige una opción' : low ? `Últimas ${chosen.low} ${chosen.low === 1 ? 'pieza' : 'piezas'}` : ready ? 'Disponible' : 'Agotado';
+        stock.dataset.tone = !chosen ? 'idle' : low || !ready ? 'alert' : 'ok';
+      }
       add.disabled = !ready;
       hint.textContent = ready ? '' : !complete ? 'Elige una opción para agregarla a tu bolsa.' : !chosen ? 'Esa combinación no está disponible.' : 'Esta opción está agotada.';
       hint.hidden = ready;
@@ -230,10 +237,13 @@
   }
 
   document.addEventListener('click', (event) => {
-    const button = event.target.closest?.('[data-quick-view]');
-    if (!button) return;
+    const trigger = event.target.closest?.('[data-quick-view]');
+    if (!trigger) return;
+    // A card is a real link to the product page: a new-tab click, or a page without the preview dialog, follows it.
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!document.getElementById('quick-view') || !window.Monetta?.openDialog) return;
     event.preventDefault();
-    openQuickView(button);
+    openQuickView(trigger);
   });
 
   const bind = (scope = document) => {

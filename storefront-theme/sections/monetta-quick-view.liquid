@@ -1,67 +1,83 @@
 {%- comment -%}
-  Quick view of the client guide (slide 12; quick_view.dart in PR #33), rendered by Shopify for one product through the Section
-  Rendering API (/products/<handle>?section_id=monetta-quick-view) and shown by assets/monetta-guia.js in the #quick-view
-  dialog: a bottom sheet on phones, a dialog from 768 px. As in the app it opens from a card's «+» when the piece has
-  several variants, and nothing is added until the shopper picks one. Prices and availability are Shopify's.
+  Preview card of the client's 29 Oct reference (quick_view.dart), rendered by Shopify for one product through the Section
+  Rendering API (/products/<handle>?section_id=monetta-quick-view) and shown by assets/monetta-guia.js in the #quick-view dialog:
+  a centred card over the dimmed page on every width. It opens from a tap on any product card with the card's variant chosen,
+  so «Agregar a bolsa» works at once; changing an option re-reads price, photo and stock from the variants below. Prices,
+  availability and the low-stock count are Shopify's; the count shows only when Shopify tracks the piece and refuses overselling.
 {%- endcomment -%}
 {%- liquid
   assign current = product.selected_or_first_available_variant
+  assign currency = cart.currency.iso_code
   capture brand
     render 'monetta-facet', product: product, kind: 'brands'
   endcapture
   assign brand = brand | strip
-  assign image = product.featured_image
+  assign image = current.featured_image | default: product.featured_image
 -%}
 <div class="quick-view" data-quick-view-root data-product-title="{{ product.title | escape }}">
-  <div class="quick-view__head">
-    <button type="button" class="icon-button" data-overlay-close aria-label="Cerrar vista rápida">{% render 'monetta-icon', name: 'close', size: 22 %}</button>
+  <div class="quick-view__media">
+    {%- if image -%}
+      <img class="quick-view__photo" data-quick-view-photo src="{{ image | image_url: width: 900 }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt | default: product.title | escape }}">
+    {%- endif -%}
+    <div class="quick-view__head">
+      <button type="button" class="round-button quick-view__back" data-overlay-close aria-label="Regresar">{% render 'monetta-icon', name: 'chevronLeft', size: 26 %}</button>
+      <button type="button" class="round-button quick-view__close" data-overlay-close aria-label="Cerrar vista previa">{% render 'monetta-icon', name: 'close', size: 24 %}</button>
+    </div>
   </div>
-  <div class="quick-view__grid">
-    <div class="quick-view__media">
-      {%- if image -%}
-        <img class="quick-view__photo" data-quick-view-photo src="{{ image | image_url: width: 900 }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt | default: product.title | escape }}">
-      {%- endif -%}
-      {%- if product.images.size > 1 -%}
-        <ul class="quick-view__thumbs" role="list">
-          {%- for thumb in product.images limit: 4 -%}
-            <li><button type="button" class="quick-view__thumb" data-quick-view-thumb="{{ thumb | image_url: width: 900 }}" aria-label="Ver foto {{ forloop.index }} de {{ product.images.size }}"{% if forloop.first %} aria-current="true"{% endif %}><img src="{{ thumb | image_url: width: 160 }}" width="72" height="72" alt="" loading="lazy"></button></li>
-          {%- endfor -%}
-        </ul>
-      {%- endif -%}
-    </div>
-    <div class="quick-view__body">
-      {%- if brand != blank -%}<p class="quick-view__brand">{{ brand | escape }}</p>{%- endif -%}
-      <h2 class="quick-view__name" id="quick-view-title">{{ product.title | escape }}</h2>
-      <p class="quick-view__price" data-quick-view-price>
-        {%- if product.price_varies -%}
-          <span class="price">Desde {{ product.price_min | money_without_trailing_zeros }}</span>
-        {%- else -%}
-          <span class="price">{{ current.price | money_without_trailing_zeros }}</span>
-          {%- if current.compare_at_price > current.price -%}
-            {%- assign pct = current.compare_at_price | minus: current.price | times: 100.0 | divided_by: current.compare_at_price | round -%}
-            <s class="price-compare">{{ current.compare_at_price | money_without_trailing_zeros }}</s><span class="badge badge--sale">-{{ pct }}%</span>
-          {%- endif -%}
-        {%- endif -%}
-      </p>
-      {%- unless product.has_only_default_variant -%}
-        {%- for option in product.options_with_values -%}
-          <fieldset class="quick-view__option" data-quick-view-group>
-            <legend class="quick-view__legend">{{ option.name | escape }}</legend>
-            <div class="quick-view__values">
-              {%- for value in option.values -%}
-                <label class="quick-view__value"><input type="radio" name="quick-view-option-{{ forloop.parentloop.index }}" value="{{ value | escape }}"><span>{{ value | escape }}</span></label>
-              {%- endfor -%}
-            </div>
-          </fieldset>
+  <div class="quick-view__body">
+    {%- if product.images.size > 1 -%}
+      <ul class="quick-view__thumbs" role="list">
+        {%- for thumb in product.images limit: 4 -%}
+          <li><button type="button" class="quick-view__thumb" data-quick-view-thumb="{{ thumb | image_url: width: 900 }}" aria-label="Ver foto {{ forloop.index }} de {{ product.images.size }}"{% if forloop.first %} aria-current="true"{% endif %}><img src="{{ thumb | image_url: width: 200 }}" width="80" height="80" alt="" loading="lazy"></button></li>
         {%- endfor -%}
-      {%- endunless -%}
-      <p class="quick-view__hint" data-quick-view-hint role="status">Elige una opción para agregarla a tu bolsa.</p>
-      <button type="button" class="btn btn--primary btn--block" data-quick-view-add disabled>Agregar a bolsa</button>
-      <a class="btn btn--outline btn--block" href="{{ product.url }}">Ver producto</a>
-    </div>
+      </ul>
+    {%- endif -%}
+    {%- if brand != blank -%}<p class="quick-view__brand">{{ brand | escape }}</p>{%- endif -%}
+    <h2 class="quick-view__name" id="quick-view-title">{{ product.title | escape }}</h2>
+    <p class="quick-view__price" data-quick-view-price>
+      <span class="price">{{ current.price | money_without_trailing_zeros }} {{ currency }}</span>
+      {%- if current.compare_at_price > current.price -%}
+        {%- assign pct = current.compare_at_price | minus: current.price | times: 100.0 | divided_by: current.compare_at_price | round -%}
+        <s class="price-compare">{{ current.compare_at_price | money_without_trailing_zeros }} {{ currency }}</s><span class="badge badge--sale">-{{ pct }}%</span>
+      {%- endif -%}
+    </p>
+    {%- unless product.has_only_default_variant -%}
+      {%- for option in product.options_with_values -%}
+        {%- liquid
+          assign option_label = option.name
+          assign option_name = option.name | downcase
+          if option_name == 'color' or option_name == 'colour' or option_name == 'colores'
+            assign option_label = 'Colores'
+          endif
+        -%}
+        <fieldset class="quick-view__option" data-quick-view-group>
+          <legend class="quick-view__legend">{{ option_label | escape }}</legend>
+          <div class="quick-view__values">
+            {%- for value in option.values -%}
+              <label class="quick-view__value{% if value.swatch %} quick-view__value--swatch{% endif %}">
+                <input type="radio" name="quick-view-option-{{ forloop.parentloop.index }}" value="{{ value | escape }}"{% if value.selected %} checked{% endif %}>
+                {%- if value.swatch -%}
+                  <span class="quick-view__swatch">{% render 'monetta-swatch', swatch: value.swatch %}<span class="visually-hidden">{{ value | escape }}</span></span>
+                {%- else -%}
+                  <span>{{ value | escape }}</span>
+                {%- endif -%}
+              </label>
+            {%- endfor -%}
+          </div>
+        </fieldset>
+      {%- endfor -%}
+    {%- endunless -%}
+    <p class="quick-view__stock"><span class="quick-view__stock-label">Stock</span><span class="quick-view__stock-pill" data-quick-view-stock role="status">{% if current.available %}Disponible{% else %}Agotado{% endif %}</span></p>
+    <p class="quick-view__hint" data-quick-view-hint role="status" hidden></p>
+    <button type="button" class="btn btn--primary btn--block" data-quick-view-add{% unless current.available %} disabled{% endunless %}>Agregar a bolsa</button>
+    <a class="btn btn--outline btn--block" href="{{ product.url }}">Ver producto</a>
   </div>
   <script type="application/json" data-quick-view-variants>
-    [{%- for v in product.variants -%}{"id":{{ v.id }},"available":{{ v.available }},"options":{{ v.options | json }},"price":{{ v.price | money_without_trailing_zeros | json }},"compare":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money_without_trailing_zeros | json }}{% else %}null{% endif %},"pct":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round }}{% else %}0{% endif %},"image":{% if v.featured_image %}{{ v.featured_image | image_url: width: 900 | json }}{% else %}null{% endif %}}{% unless forloop.last %},{% endunless %}{%- endfor -%}]
+    [{%- for v in product.variants -%}
+      {%- assign low = 0 -%}
+      {%- if v.available and v.inventory_management == 'shopify' and v.inventory_policy == 'deny' and v.inventory_quantity > 0 and v.inventory_quantity <= 3 -%}{%- assign low = v.inventory_quantity -%}{%- endif -%}
+      {"id":{{ v.id }},"available":{{ v.available }},"low":{{ low }},"options":{{ v.options | json }},"price":{{ v.price | money_without_trailing_zeros | append: ' ' | append: currency | json }},"compare":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money_without_trailing_zeros | append: ' ' | append: currency | json }}{% else %}null{% endif %},"pct":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round }}{% else %}0{% endif %},"image":{% if v.featured_image %}{{ v.featured_image | image_url: width: 900 | json }}{% else %}null{% endif %}}{% unless forloop.last %},{% endunless %}
+    {%- endfor -%}]
   </script>
 </div>
 

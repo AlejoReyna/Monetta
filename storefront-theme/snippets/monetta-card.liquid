@@ -1,24 +1,29 @@
 {%- doc -%}
-  The shared product card (MonettaProductTile): canvas card with a hairline, 12px radius, 4:5 photo inset on the warm tile
-  ground, then brand, two-line name and price in Inter (the card-label role; DESIGN_SPEC §3). Everything shown is read from the
-  product at render time (price, compare-at, availability); nothing is cached.
+  The shared product card (MonettaProductTile), as the client's 29 Oct reference: one warm card with a 6px radius holding a square
+  photo multiplied onto the card ground, the heart, brand, name and price in Playfair, then the brown «VER PRODUCTO» pill.
+  Tapping the card opens the preview (#quick-view, assets/monetta-guia.js); the pill and a modified click (new tab) open the
+  product page, and without JavaScript the whole card is a plain link to it. Everything shown is read from the product at render
+  time (price, compare-at, availability); nothing is cached.
 
   @param {object} product - Shopify product.
-  @param {string} [density] - 'grid' (default; 4:5 photo, two-line name) or 'compact' (square photo, one line) for Home rails.
-  @param {boolean} [flush] - Photo fills the frame on white (product-page recommendation rails).
+  @param {string} [density] - 'grid' (default; two-line name) or 'compact' (one-line name) for Home rails; 'mini' is the product
+    page's four-across related row: photo, brand, one-line name and price, no pill.
   @param {boolean} [eager] - Eager-load the photo (first row only).
-  @param {boolean} [quick_add] - Show the "+" (default true): it adds a single-variant piece, and opens the quick view to
-    choose a variant when there are several.
   @param {string} [sizes] - The sizes attribute of the photo's slot.
   @param {string} [xl_widths] - Additional image candidates from 1280px only; mobile cards and compact rails keep 600px.
   @param {boolean} [listing_card] - Reserve empty metadata slots for XL collection row alignment.
-  @param {boolean} [view_button] - The collection grid's «VER PRODUCTO» pill (TileViewProductButton): visual only, inside the card's link.
+  @param {boolean} [view_button] - Pass false to hide the «VER PRODUCTO» pill; every grid and rail card shows it.
 {%- enddoc -%}
 {%- liquid
   assign density = density | default: 'grid'
   assign sizes = sizes | default: '(min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw'
   assign variant = product.selected_or_first_available_variant
   assign in_stock = product.available
+  assign currency = cart.currency.iso_code
+  assign show_view = true
+  if view_button == false or density == 'mini'
+    assign show_view = false
+  endif
   assign pct = 0
   if in_stock and variant.compare_at_price > variant.price
     assign pct = variant.compare_at_price | minus: variant.price | times: 100.0 | divided_by: variant.compare_at_price | round
@@ -28,17 +33,13 @@
   endcapture
   assign brand = brand | strip
   assign eyebrow = ''
-  if in_stock
+  if in_stock and density != 'mini'
     assign delivery = product.metafields.custom.entrega.value
     if delivery != blank
       assign eyebrow = delivery
     elsif product.tags contains 'Envío inmediato'
       assign eyebrow = 'Envío inmediato'
     endif
-  endif
-  assign can_quick_add = false
-  if quick_add != false and in_stock and product.has_only_default_variant
-    assign can_quick_add = true
   endif
   assign now_seconds = 'now' | date: '%s' | plus: 0
   assign created_seconds = product.created_at | date: '%s' | plus: 0
@@ -49,8 +50,8 @@
   endif
   assign image = product.featured_image
 -%}
-<article class="card card--{{ density }}{% if flush %} card--flush{% endif %}" data-product-handle="{{ product.handle }}">
-  <a class="card__link" href="{{ product.url }}">
+<article class="card card--{{ density }}" data-product-handle="{{ product.handle }}">
+  <a class="card__link" href="{{ product.url }}" data-quick-view="{{ product.handle }}" data-product-url="{{ product.url }}" aria-haspopup="dialog">
     <div class="card__media">
       {%- if image -%}
         {%- if xl_widths != blank -%}
@@ -77,28 +78,20 @@
       <h3 class="card__name">{{ product.title | escape }}</h3>
       <p class="card__price">
         <span class="price">
-          {%- if product.price_varies -%}Desde {{ product.price_min | money_without_trailing_zeros }}{%- else -%}{{ variant.price | money_without_trailing_zeros }}{%- endif -%}
+          {%- if product.price_varies -%}Desde {{ product.price_min | money_without_trailing_zeros }} {{ currency }}{%- else -%}{{ variant.price | money_without_trailing_zeros }} {{ currency }}{%- endif -%}
         </span>
         {%- if pct > 0 -%}
-          <span class="visually-hidden">, antes</span><s class="price-compare">{{ variant.compare_at_price | money_without_trailing_zeros }}</s>
+          <span class="visually-hidden">, antes</span><s class="price-compare">{{ variant.compare_at_price | money_without_trailing_zeros }} {{ currency }}</s>
         {%- endif -%}
         {%- unless in_stock -%}<span class="visually-hidden">, agotado</span>{%- endunless -%}
       </p>
-      {%- if view_button -%}<span class="card__view" aria-hidden="true">Ver producto</span>{%- endif -%}
     </div>
   </a>
+  {%- if show_view -%}
+    <a class="card__view" href="{{ product.url }}" aria-label="Ver producto: {{ product.title | escape }}">Ver producto</a>
+  {%- endif -%}
   <div class="card__actions">
     {%- comment -%}The favourite is browser-local (assets/monetta-merchandising.js shows it once it can read the list).{%- endcomment -%}
     <button type="button" class="card__fav" data-save-product="{{ product.handle }}" data-product-title="{{ product.title | escape }}" aria-pressed="false" aria-label="Guardar {{ product.title | escape }}" hidden>{% render 'monetta-icon', name: 'heart', size: 20, class: 'save-icon--off' %}{% render 'monetta-icon', name: 'heartFilled', size: 20, class: 'save-icon--on' %}</button>
-    {%- if can_quick_add -%}
-      <form action="{{ routes.cart_add_url }}" method="post" data-quick-add>
-        <input type="hidden" name="id" value="{{ variant.id }}">
-        <input type="hidden" name="quantity" value="1">
-        <button type="submit" class="card__quick" aria-label="Agregar {{ product.title | escape }} a la bolsa"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
-      </form>
-    {%- elsif quick_add != false and in_stock -%}
-      {%- comment -%}Several variants: the «+» opens the quick view to choose one, as in the app (quick_add_button.dart).{%- endcomment -%}
-      <button type="button" class="card__quick" data-quick-view="{{ product.handle }}" data-product-url="{{ product.url }}" aria-haspopup="dialog" aria-controls="quick-view" aria-label="Elegir opciones de {{ product.title | escape }}"><span class="card__quick-circle">{% render 'monetta-icon', name: 'add', size: 22 %}</span></button>
-    {%- endif -%}
   </div>
 </article>
