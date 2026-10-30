@@ -81,7 +81,7 @@ void main() {
 
   testWidgets(
       'Colecciones sits between Compra por estilo and the brands, opening on '
-      'its middle photo card', (tester) async {
+      'its first photo card', (tester) async {
     // Tall enough for the whole opening to be built at once.
     addTearDown(() => tester.view.resetPhysicalSize());
     tester.view.physicalSize = const Size(390, 3000);
@@ -112,22 +112,23 @@ void main() {
       greaterThan(tester.getBottomLeft(section).dy),
     );
 
-    // «Carteras», the middle card, is centred and drawn full size.
-    final middle =
-        find.byKey(const ValueKey('home-collection-card-carteras-1'));
-    expect(tester.getCenter(middle).dx, closeTo(195, 1));
-    final width = tester.getSize(middle).width;
-    expect(width, inInclusiveRange(220, 320));
+    // Changed with the web-parity pass: the track opens on the FIRST card,
+    // «Bolsas», as the live web does (it used to open on the middle one).
+    // It is centred and drawn full size.
+    final first = find.byKey(const ValueKey('home-collection-card-guess'));
+    expect(tester.getCenter(first).dx, closeTo(195, 1));
+    // The web's card is 56% of the viewport (capped at 270): 218.4 at 390.
+    expect(tester.getSize(first).width, closeTo(390 * .56, .5));
     expect(
-      find.descendant(of: middle, matching: find.text('Carteras')),
+      find.descendant(of: first, matching: find.text('Bolsas')),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: middle, matching: find.text('VER COLECCIÓN')),
+      find.descendant(of: first, matching: find.text('VER COLECCIÓN')),
       findsOneWidget,
     );
     expect(
-      find.descendant(of: middle, matching: find.byType(Image)),
+      find.descendant(of: first, matching: find.byType(Image)),
       findsOneWidget,
     );
   });

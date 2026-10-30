@@ -32,7 +32,11 @@ String _assetOf(WidgetTester tester, Finder within) {
   final image = tester.widget<Image>(
     find.descendant(of: within, matching: find.byType(Image)),
   );
-  return (image.image as AssetImage).assetName;
+  // The tile decodes at its display size, so the asset sits under a
+  // ResizeImage.
+  var provider = image.image;
+  if (provider is ResizeImage) provider = provider.imageProvider;
+  return (provider as AssetImage).assetName;
 }
 
 void main() {
@@ -60,7 +64,9 @@ void main() {
   }
 
   group('Compra por estilo', () {
-    testWidgets('five entries in order, each with its icon and label', (
+    // Changed with the web-parity pass: the five line icons are now the live
+    // web's five square photo tiles, and «Hobo» replaces «Perfumes».
+    testWidgets('five photo tiles in order, each with its photo and label', (
       tester,
     ) async {
       final opened = <String>[];
@@ -72,14 +78,14 @@ void main() {
           ),
         ),
       );
-      const ids = ['crossbody', 'tote', 'shoulder', 'satchel', 'perfumes'];
-      const labels = ['Crossbody', 'Tote', 'Shoulder', 'Satchel', 'Perfumes'];
-      const icons = [
-        kGuideIconStyleCrossbody,
-        kGuideIconStyleTote,
-        kGuideIconStyleShoulder,
-        kGuideIconStyleSatchel,
-        kGuideIconStylePerfumes,
+      const ids = ['crossbody', 'tote', 'shoulder', 'satchel', 'hobo'];
+      const labels = ['Crossbody', 'Tote', 'Shoulder', 'Satchel', 'Hobo'];
+      const photos = [
+        kGuideStyleCrossbody,
+        kGuideStyleTote,
+        kGuideStyleShoulder,
+        kGuideStyleSatchel,
+        kGuideStyleHobo,
       ];
       var previousX = -1.0;
       for (var i = 0; i < ids.length; i++) {
@@ -89,7 +95,8 @@ void main() {
           find.descendant(of: tile, matching: find.text(labels[i])),
           findsOneWidget,
         );
-        expect(_assetOf(tester, tile), icons[i]);
+        expect(_assetOf(tester, tile), photos[i]);
+        expect(File(photos[i]).existsSync(), isTrue, reason: photos[i]);
         final x = tester.getCenter(tile).dx;
         expect(x, greaterThan(previousX), reason: ids[i]);
         previousX = x;
@@ -98,14 +105,64 @@ void main() {
           tester.getTopLeft(tile).dy,
           tester.getTopLeft(find.byKey(const ValueKey('home-style-tote'))).dy,
         );
+        // The whole tile is a tap target of at least 48.
+        expect(tester.getSize(tile).height, greaterThanOrEqualTo(48));
+        expect(tester.getSize(tile).width, greaterThanOrEqualTo(48));
       }
+      // Perfumes left the strip: Hobo took its place.
+      expect(find.byKey(const ValueKey('home-style-perfumes')), findsNothing);
+      expect(find.text('Perfumes'), findsNothing);
       for (final id in ids) {
         await tester.tap(find.byKey(ValueKey('home-style-$id')));
       }
       expect(opened, ids);
     });
 
-    testWidgets('each entry opens its silhouette, perfumes its category', (
+    testWidgets('tiles follow the web: cream, radius 10, square photo, gap 4', (
+      tester,
+    ) async {
+      await pumpClientGuide(
+        tester,
+        Scaffold(
+          body: SingleChildScrollView(
+            child: HomeShopByStyle(onOpen: (_) {}),
+          ),
+        ),
+      );
+      final tote = find.byKey(const ValueKey('home-style-tote'));
+      final crossbody = find.byKey(const ValueKey('home-style-crossbody'));
+      // Four logical pixels between neighbours.
+      expect(
+        tester.getTopLeft(tote).dx - tester.getTopRight(crossbody).dx,
+        closeTo(4, .01),
+      );
+      // The photo is square and fills the tile's width.
+      final photo = find.descendant(of: tote, matching: find.byType(Image));
+      final photoSize = tester.getSize(photo);
+      expect(photoSize.width, closeTo(photoSize.height, .01));
+      expect(photoSize.width, closeTo(tester.getSize(tote).width, .01));
+      expect(tester.widget<Image>(photo).fit, BoxFit.cover);
+      // Cream ground with the 10 px tile radius.
+      final decorated = tester.widget<DecoratedBox>(
+        find.descendant(of: tote, matching: find.byType(DecoratedBox)).first,
+      );
+      final decoration = decorated.decoration as BoxDecoration;
+      expect(decoration.color, const Color(0xFFF4EEE5));
+      expect(decoration.borderRadius, BorderRadius.circular(10));
+      // The label: Playfair Display 12, centred, one line with ellipsis.
+      final label = tester.widget<Text>(
+        find.descendant(of: tote, matching: find.text('Tote')),
+      );
+      expect(label.style?.fontFamily, 'Playfair Display');
+      expect(label.style?.fontSize, 12);
+      expect(label.maxLines, 1);
+      expect(label.overflow, TextOverflow.ellipsis);
+      expect(label.textAlign, TextAlign.center);
+      // «Ver <label>» for assistive technology.
+      expect(find.bySemanticsLabel('Ver Tote'), findsOneWidget);
+    });
+
+    testWidgets('each entry opens its silhouette, Hobo the hobo filter', (
       tester,
     ) async {
       final catalog = await store();
@@ -114,11 +171,11 @@ void main() {
         StoreScope(notifier: catalog, child: const HomeScreen()),
       );
       const expected = {
-        'crossbody': ('bolsa', 'crossbody'),
-        'tote': ('bolsa', 'tote'),
-        'shoulder': ('bolsa', 'shoulder'),
-        'satchel': ('bolsa', 'satchel'),
-        'perfumes': ('perfume', null),
+        'crossbody': ('bolsa', 'crossbody', 'Crossbody'),
+        'tote': ('bolsa', 'tote', 'Totes'),
+        'shoulder': ('bolsa', 'shoulder', 'Shoulder'),
+        'satchel': ('bolsa', 'satchel', 'Satchel'),
+        'hobo': ('bolsa', 'hobo', 'Hobo'),
       };
       for (final entry in expected.entries) {
         final tile = find.byKey(ValueKey('home-style-${entry.key}'));
@@ -136,6 +193,7 @@ void main() {
         );
         expect(screen.filter.category, entry.value.$1, reason: entry.key);
         expect(screen.filter.silhouette, entry.value.$2, reason: entry.key);
+        expect(screen.title, entry.value.$3, reason: entry.key);
         Navigator.of(tester.element(find.byType(CollectionScreen))).pop();
         await tester.pumpAndSettle();
       }

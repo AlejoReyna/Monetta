@@ -3,6 +3,7 @@ library;
 
 import '../navigation/adaptive_storefront_scaffold.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ import '../boutique/guide_brand_tile.dart';
 import '../wholesale/wholesale_screen.dart';
 import '../contact/contact_screen.dart';
 import '../../app/mixed_feed.dart';
+import '../../app/monetta_tokens.g.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
@@ -728,8 +730,14 @@ class _HomeOffersSection extends StatelessWidget {
 }
 
 /// «Colecciones», between «Compra por estilo» and «Tus marcas favoritas»: the
-/// three photo cards of monetta.mx's earlier home. It opens on the middle card,
-/// drawn full size, with its neighbours peeking in smaller on each side.
+/// three photo cards of monetta.mx's home (`.guia-collections__track`).
+///
+/// On a phone it is a snap scroller whose cards are `min(56% of the viewport,
+/// 270)` wide, 12 apart, with side room so the first and the last can sit
+/// centred. It always opens on the FIRST card; the centred card is drawn full
+/// size and the others at 0.9 (web `guia-collection-focus`). From 768 px the
+/// cards sit in a row. On first appearance the cards rise 24 px and fade in
+/// one after the other, once, unless animations are disabled.
 class _HomeCollectionsSection extends StatefulWidget {
   const _HomeCollectionsSection({required this.cards});
 
@@ -740,16 +748,89 @@ class _HomeCollectionsSection extends StatefulWidget {
       _HomeCollectionsSectionState();
 }
 
-class _HomeCollectionsSectionState extends State<_HomeCollectionsSection> {
+/// Phone card width: `min(56vw, 270px)`.
+const double _kCollectionCardMaxWidth = 270;
+const double _kCollectionCardShare = .56;
+
+/// Space between cards (`--space-3`).
+const double _kCollectionGap = 12;
+
+/// Wide layout (web `@media (min-width: 768px)`): gap `--space-5`, at most 960
+/// wide, each card 30% of what is left after the gaps.
+const double _kCollectionWideGap = 24;
+const double _kCollectionWideMaxWidth = 960;
+const double _kCollectionWideShare = .3;
+
+/// Height over width of the collection photographs (800 x 930).
+const double _kCollectionPhotoRatio = 930 / 800;
+
+/// Reveal (web `monetta-guia.js` `initCollectionsReveal`): each card rises 24
+/// px and fades in over 420 ms, 120 ms after the previous one.
+const double _kCollectionRiseOffset = 24;
+const Duration _kCollectionRevealDuration = Duration(milliseconds: 420);
+const Duration _kCollectionRevealStagger = Duration(milliseconds: 120);
+const Cubic _kCollectionRevealCurve = Cubic(0.22, 1, 0.36, 1);
+
+/// Card typography (web `.guia-collection-card__title` / `__button`).
+const double _kCollectionTitleSize = 28;
+const double _kCollectionTitleLineHeight = 1.1;
+const double _kCollectionPillTextSize = 12;
+const double _kCollectionPillLineHeight = 1.2;
+const double _kCollectionPillMinHeight = 40;
+
+/// Whether the section's motion (reveal, focus scale) is off: the web's
+/// `prefers-reduced-motion`. Read from the media query rather than from the
+/// app's `reduceMotion`, which is always true under `flutter_test`.
+bool _collectionsMotionOff(BuildContext context) =>
+    MediaQuery.disableAnimationsOf(context) ||
+    MediaQuery.accessibleNavigationOf(context);
+
+/// Room for the font's own rounding of the title's line box.
+const double _kCollectionHeightSlack = 2;
+
+/// Natural height of a collection card of [width]: photo, 12, title, 12, pill,
+/// 24 — grown with the shopper's text scale.
+double _collectionCardHeight(BuildContext context, double width) {
+  final scaler = MediaQuery.textScalerOf(context);
+  final title =
+      scaler.scale(_kCollectionTitleSize) * _kCollectionTitleLineHeight;
+  final pill = math.max(
+    _kCollectionPillMinHeight,
+    scaler.scale(_kCollectionPillTextSize) * _kCollectionPillLineHeight,
+  );
+  return width * _kCollectionPhotoRatio +
+      _kCollectionGap +
+      title +
+      _kCollectionGap +
+      pill +
+      BoutiqueSpace.xl +
+      _kCollectionHeightSlack;
+}
+
+class _HomeCollectionsSectionState extends State<_HomeCollectionsSection>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _reveal = AnimationController(
+    vsync: this,
+    duration: _revealDuration(widget.cards.length),
+  );
   PageController? _controller;
   double? _fraction;
+  ScrollPosition? _scrollPosition;
+  bool _checkScheduled = false;
+  bool _started = false;
 
+  static Duration _revealDuration(int count) =>
+      _kCollectionRevealDuration +
+      _kCollectionRevealStagger * (count <= 1 ? 0 : count - 1);
+
+  /// The page controller for a viewport fraction. Rebuilt when the fraction
+  /// changes (rotation, window resize) on the card the shopper was looking at;
+  /// a fresh one starts on the first card.
   PageController _controllerFor(double fraction) {
     final current = _controller;
     if (current != null && _fraction == fraction) return current;
-    final page = current != null && current.hasClients
-        ? (current.page ?? 0).round()
-        : widget.cards.length ~/ 2;
+    final page =
+        current != null && current.hasClients ? (current.page ?? 0).round() : 0;
     current?.dispose();
     _fraction = fraction;
     return _controller =
@@ -757,9 +838,84 @@ class _HomeCollectionsSectionState extends State<_HomeCollectionsSection> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = Scrollable.maybeOf(context)?.position;
+    if (next != _scrollPosition) {
+      _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+      _scrollPosition = next;
+      _scrollPosition?.addListener(_scheduleVisibilityCheck);
+    }
+    if (_collectionsMotionOff(context)) {
+      // Nothing to wait for: the cards are simply there.
+      _started = true;
+      _reveal.value = 1;
+    } else {
+      _scheduleVisibilityCheck();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _HomeCollectionsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_started && oldWidget.cards.length != widget.cards.length) {
+      _reveal.duration = _revealDuration(widget.cards.length);
+    }
+  }
+
+  @override
   void dispose() {
+    _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+    _reveal.dispose();
     _controller?.dispose();
     super.dispose();
+  }
+
+  void _scheduleVisibilityCheck() {
+    if (_started || _checkScheduled || !mounted) return;
+    _checkScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkScheduled = false;
+      if (!mounted || _started) return;
+      final renderObject = context.findRenderObject();
+      if (renderObject is! RenderBox || !renderObject.attached) return;
+      final top = renderObject.localToGlobal(Offset.zero).dy;
+      final bottom = top + renderObject.size.height;
+      if (bottom <= 0 || top >= MediaQuery.sizeOf(context).height) return;
+      _started = true;
+      unawaited(_reveal.forward());
+    });
+  }
+
+  /// Progress of card [index]: 0 until its turn, then eased to 1.
+  Animation<double> _progress(int index) {
+    final total = _reveal.duration!.inMilliseconds;
+    final start = _kCollectionRevealStagger.inMilliseconds * index;
+    final end = start + _kCollectionRevealDuration.inMilliseconds;
+    return _reveal.drive(
+      CurveTween(
+        curve: Interval(
+          (start / total).clamp(0.0, 1.0),
+          (end / total).clamp(0.0, 1.0),
+          curve: _kCollectionRevealCurve,
+        ),
+      ),
+    );
+  }
+
+  Widget _revealed(int index, Widget child) {
+    final progress = _progress(index);
+    return AnimatedBuilder(
+      animation: progress,
+      child: child,
+      builder: (context, child) => Opacity(
+        opacity: progress.value.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, _kCollectionRiseOffset * (1 - progress.value)),
+          child: child,
+        ),
+      ),
+    );
   }
 
   @override
@@ -767,41 +923,82 @@ class _HomeCollectionsSectionState extends State<_HomeCollectionsSection> {
     final cards = widget.cards;
     if (cards.isEmpty) return const SizedBox.shrink();
     final viewportWidth = MediaQuery.sizeOf(context).width;
-    final cardWidth = (viewportWidth * .62).clamp(220.0, 320.0);
-    final controller = _controllerFor(
-      ((cardWidth + BoutiqueSpace.md) / viewportWidth).clamp(.1, 1.0),
+    final header = const BoutiqueSectionHeader(title: 'Colecciones');
+    if (viewportWidth >= kHomeWideBreakpoint) {
+      final container = math.min(viewportWidth, _kCollectionWideMaxWidth) -
+          BoutiqueSpace.gutter * 2;
+      final cardWidth =
+          (container - _kCollectionWideGap * 2) * _kCollectionWideShare;
+      return Column(
+        key: const ValueKey('home-section-collections'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header,
+          Center(
+            child: Wrap(
+              key: const ValueKey('home-collections-row'),
+              alignment: WrapAlignment.center,
+              spacing: _kCollectionWideGap,
+              runSpacing: _kCollectionWideGap,
+              children: [
+                for (var i = 0; i < cards.length; i++)
+                  _revealed(
+                    i,
+                    SizedBox(
+                      width: cardWidth,
+                      child: _CollectionPhotoCard(card: cards[i]),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    final cardWidth = math.min(
+      viewportWidth * _kCollectionCardShare,
+      _kCollectionCardMaxWidth,
     );
-    final initialPage = controller.initialPage.toDouble();
+    final controller = _controllerFor(
+      ((cardWidth + _kCollectionGap) / viewportWidth).clamp(.1, 1.0),
+    );
+    final motionOff = _collectionsMotionOff(context);
     return Column(
       key: const ValueKey('home-section-collections'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const BoutiqueSectionHeader(title: 'Colecciones'),
+        header,
         SizedBox(
-          height: cardWidth * _kCollectionPhotoRatio +
-              _collectionCaptionHeight(context),
+          height: _collectionCardHeight(context, cardWidth),
           child: PageView.builder(
+            key: const ValueKey('home-collections-track'),
             controller: controller,
+            // The cards' shadow reaches past the track.
             clipBehavior: Clip.none,
             padEnds: true,
             itemCount: cards.length,
-            itemBuilder: (context, index) => AnimatedBuilder(
-              animation: controller,
-              builder: (context, child) {
-                final page =
-                    controller.hasClients && controller.position.haveDimensions
-                        ? controller.page ?? initialPage
-                        : initialPage;
-                final distance = (page - index).abs().clamp(0.0, 1.0);
-                return Transform.scale(
-                  scale: reduceMotion(context) ? 1 : 1 - .1 * distance,
-                  child: child,
-                );
-              },
-              child: Center(
-                child: SizedBox(
-                  width: cardWidth,
-                  child: _CollectionPhotoCard(card: cards[index]),
+            itemBuilder: (context, index) => _revealed(
+              index,
+              AnimatedBuilder(
+                animation: controller,
+                builder: (context, child) {
+                  final page = controller.hasClients &&
+                          controller.position.haveDimensions
+                      ? controller.page ?? controller.initialPage.toDouble()
+                      : controller.initialPage.toDouble();
+                  final distance = (page - index).abs().clamp(0.0, 1.0);
+                  return Transform.scale(
+                    scale: motionOff ? 1 : 1 - .1 * distance,
+                    child: child,
+                  );
+                },
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: _CollectionPhotoCard(card: cards[index]),
+                  ),
                 ),
               ),
             ),
@@ -812,14 +1009,8 @@ class _HomeCollectionsSectionState extends State<_HomeCollectionsSection> {
   }
 }
 
-/// Height over width of the collection photographs (800 x 930).
-const double _kCollectionPhotoRatio = 930 / 800;
-
-/// The title and the «VER COLECCIÓN» pill under the photograph: 116 at the
-/// default text size, growing with the shopper's text scale.
-double _collectionCaptionHeight(BuildContext context) =>
-    52 + MediaQuery.textScalerOf(context).scale(64);
-
+/// Web `.guia-collection-card`: white card, photo, serif title and the
+/// «VER COLECCIÓN» pill. The whole card is the tap target.
 class _CollectionPhotoCard extends StatelessWidget {
   const _CollectionPhotoCard({required this.card});
 
@@ -837,55 +1028,88 @@ class _CollectionPhotoCard extends StatelessWidget {
         onTap: () => _openHomeCollection(context, card),
         child: MonettaCardLift(
           borderRadius: BoutiqueRadius.card,
-          child: ClipRRect(
-            borderRadius: BoutiqueRadius.card,
-            child: ColoredBox(
-              color: palette.surface,
-              child: Column(
-                children: [
-                  AspectRatio(
-                    aspectRatio: 1 / _kCollectionPhotoRatio,
-                    child: _HomeImage(
-                      imageUrl: card.imageUrl,
-                      fallbackAsset: card.fallbackAsset,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.monettaColors.surfaceRaised,
+              borderRadius: BoutiqueRadius.card,
+              // --shadow-card: 0 4px 14px rgba(61, 43, 28, 0.059)
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0F3D2B1C),
+                  blurRadius: 14,
+                  offset: Offset(0, 4),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BoutiqueRadius.card,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: BoutiqueSpace.xl),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 1 / _kCollectionPhotoRatio,
+                      child: _HomeImage(
+                        imageUrl: card.imageUrl,
+                        fallbackAsset: card.fallbackAsset,
+                      ),
                     ),
-                  ),
-                  Expanded(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Text(
-                          card.title,
+                    const SizedBox(height: _kCollectionGap),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BoutiqueSpace.md,
+                      ),
+                      child: Text(
+                        card.title,
+                        key: ValueKey('home-collection-title-${card.handle}'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: guideSerifStyle(
+                          context,
+                          size: _kCollectionTitleSize,
+                          height: _kCollectionTitleLineHeight,
+                          color: palette.ink,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: _kCollectionGap),
+                    Container(
+                      key: ValueKey('home-collection-pill-${card.handle}'),
+                      constraints: const BoxConstraints(
+                        minHeight: _kCollectionPillMinHeight,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BoutiqueSpace.xl,
+                      ),
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFECECEC),
+                        borderRadius: BorderRadius.all(Radius.circular(999)),
+                      ),
+                      // At large text scales the label shrinks rather than
+                      // wrapping or overflowing the card.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        child: Text(
+                          'VER COLECCIÓN',
                           maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                          style: boutiqueDisplay(26, color: palette.ink),
-                        ),
-                        const SizedBox(height: BoutiqueSpace.md),
-                        Container(
-                          constraints: const BoxConstraints(minHeight: 36),
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: BoutiqueSpace.xl,
-                          ),
-                          alignment: Alignment.center,
-                          decoration: const BoxDecoration(
-                            color: Color(0xFFECECEC),
-                            borderRadius:
-                                BorderRadius.all(Radius.circular(999)),
-                          ),
-                          child: const Text(
-                            'VER COLECCIÓN',
-                            style: TextStyle(
-                              color: Color(0xFF211B16),
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              letterSpacing: 1.4,
-                            ),
+                          style: boutiqueText(
+                            size: _kCollectionPillTextSize,
+                            weight: FontWeight.w600,
+                            height: _kCollectionPillLineHeight,
+                            // The pill is a light grey on both themes: dark
+                            // ink, whatever the palette.
+                            color: MonettaTokens.ink,
+                          ).copyWith(
+                            letterSpacing: _kCollectionPillTextSize * .12,
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),

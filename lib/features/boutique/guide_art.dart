@@ -37,16 +37,14 @@ const String kGuideShareCatalog =
 const String kGuideShareRewards =
     'assets/images/guide/comparte_gana_rewards.jpg';
 
+// Square photo tiles of «Compra por estilo» (the live web's 720 px files).
+const String kGuideStyleCrossbody = 'assets/images/guide/estilo_crossbody.webp';
+const String kGuideStyleTote = 'assets/images/guide/estilo_tote.webp';
+const String kGuideStyleShoulder = 'assets/images/guide/estilo_shoulder.webp';
+const String kGuideStyleSatchel = 'assets/images/guide/estilo_satchel.webp';
+const String kGuideStyleHobo = 'assets/images/guide/estilo_hobo.webp';
+
 // Gold and silver line icons (transparent PNG) drawn for the guide.
-const String kGuideIconStyleCrossbody =
-    'assets/images/guide/icons/estilo_crossbody.png';
-const String kGuideIconStyleTote = 'assets/images/guide/icons/estilo_tote.png';
-const String kGuideIconStyleShoulder =
-    'assets/images/guide/icons/estilo_shoulder.png';
-const String kGuideIconStyleSatchel =
-    'assets/images/guide/icons/estilo_satchel.png';
-const String kGuideIconStylePerfumes =
-    'assets/images/guide/icons/estilo_perfumes.png';
 const String kGuideIconServiceShipping =
     'assets/images/guide/icons/servicio_envios.png';
 const String kGuideIconServicePayments =
