@@ -1,0 +1,1336 @@
+--- a/storefront-theme/assets/monetta-cart.js
++++ b/storefront-theme/assets/monetta-cart.js
+@@ -3,6 +3,11 @@
+  * discount and error shown comes back from them (rendered by Liquid through the Section Rendering API). The browser never
+  * adds up prices. Lines are identified by their key, never by position, so a change made in another tab cannot hit the
+  * wrong line. Without JavaScript the same controls are ordinary forms (/cart/add, /cart/change, /cart checkout).
++ *
++ * Mutations and checkout are coordinated here: every cart write (add, change, remove, undo) is a "mutation" that runs strictly one
++ * after another, and while one is running, queued, or has ended without the bag on screen being confirmed as Shopify's, every way out
++ * to checkout (the summary and bar buttons, the sheet's button, the accelerated checkout buttons, Enter on any of them) is refused.
++ * The lock is released after a success or after a recovery that re-read the cart from Shopify.
+  */
+ (() => {
+   'use strict';
+@@ -13,14 +18,18 @@
+   const $ = (selector, root = document) => root.querySelector(selector);
+   const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+   const SHEET_SECTION = 'monetta-cart-sheet';
++  const REQUEST_TIMEOUT_MS = 25000;
+ 
+   const parseHtml = (html) => new DOMParser().parseFromString(html, 'text/html');
++  /** `lang` for text Shopify wrote in the store's language, when that is not the page's (Spanish). */
++  const storeLang = () => (config.storeLang && !/^es/i.test(config.storeLang) ? config.storeLang : '');
+ 
+   async function postJson(url, payload) {
+     const response = await fetch(url, {
+       method: 'POST',
+       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+       body: JSON.stringify(payload),
++      signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
+     });
+     let data = null;
+     try {
+@@ -31,10 +40,11 @@
+     return { ok: response.ok, status: response.status, data };
+   }
+ 
+-  /** Shopify's own wording first (stock limits, quantity rules), then a calm generic message. */
+-  function errorMessage(result) {
++  /** Shopify's own wording first (stock limits, quantity rules, written in the store's language), then a calm generic message. */
++  function errorMessage(result, fallback = 'No pudimos agregar la pieza. Intenta de nuevo.') {
+     const data = result.data || {};
+-    return data.description || data.message || 'No pudimos agregar la pieza. Intenta de nuevo.';
++    const fromShopify = data.description || data.message;
++    return { text: fromShopify || fallback, lang: fromShopify ? storeLang() : '' };
+   }
+ 
+   /* ------------------------------------------------------------ counts */
+@@ -49,6 +59,60 @@
+   }
+   Monetta.setCartCount = setCount;
+ 
++  /* ------------------------------------------------------------ mutations vs checkout */
++  let pending = 0; // mutations started and not finished (running or waiting their turn)
++  let tail = Promise.resolve(); // they run one at a time, in order
++  let unconfirmed = false; // a mutation ended and the bag on screen is not known to be Shopify's
++
++  const checkoutBlocked = () => pending > 0 || unconfirmed;
++
++  /** Real blocking, re-applied after every render: buttons disabled, third-party checkout buttons inert, the notice shown. */
++  function syncCheckoutLock() {
++    const blocked = checkoutBlocked();
++    for (const button of $$('[name="checkout"]')) button.disabled = blocked;
++    for (const area of $$('.cart-additional-checkout')) area.inert = blocked;
++    for (const notice of $$('[data-cart-sync]')) notice.hidden = !unconfirmed;
++    document.documentElement.toggleAttribute('data-cart-locked', blocked);
++  }
++
++  function markConfirmed() {
++    unconfirmed = false;
++    syncCheckoutLock();
++  }
++  function markUnconfirmed() {
++    unconfirmed = true;
++    syncCheckoutLock();
++  }
++
++  function mutation(task) {
++    pending += 1;
++    syncCheckoutLock();
++    const run = tail.then(task);
++    tail = run.then(
++      () => {},
++      () => {},
++    );
++    return run.finally(() => {
++      pending -= 1;
++      syncCheckoutLock();
++    });
++  }
++
++  // Capture phase: before any other listener. A checkout submitted while the bag is changing (or unconfirmed) is cancelled, whichever
++  // button, key or programmatic requestSubmit() produced it.
++  document.addEventListener(
++    'submit',
++    (event) => {
++      const form = event.target;
++      if (!(form instanceof HTMLFormElement) || !checkoutBlocked()) return;
++      if (event.submitter?.name !== 'checkout' && !form.querySelector('[name="checkout"]')) return;
++      event.preventDefault();
++      event.stopImmediatePropagation();
++      Monetta.announce?.(unconfirmed ? 'No pudimos confirmar tu bolsa. Actualízala antes de continuar al checkout.' : 'Estamos actualizando tu bolsa. Espera un momento y vuelve a intentarlo.');
++    },
++    true,
++  );
++
+   /* ------------------------------------------------------------ the "En tu bolsa" sheet */
+   function applySheet(html, { highlightVariantId } = {}) {
+     const sheet = $('#cart-sheet');
+@@ -61,6 +125,7 @@
+     if (highlightVariantId) {
+       $(`[data-variant-id="${highlightVariantId}"]`, sheet)?.classList.add('cart-line--highlight');
+     }
++    syncCheckoutLock();
+     return sheet;
+   }
+ 
+@@ -79,31 +144,114 @@
+     sheet.querySelector('.overlay__footer .btn--primary')?.focus({ preventScroll: true });
+   }
+ 
+-  /* ------------------------------------------------------------ add */
+   /**
+-   * The single add path (product page, quick add). Returns { ok, status, message }. Opening the sheet, announcing and the
+-   * count are done here; the caller handles pending state and its own inline error.
++   * Reads the bag from Shopify (a GET, safe to repeat). Resolves to the sections object, or null when it cannot be read or does not hold
++   * every section asked for. No `Accept: application/json` here: on /cart that header makes Shopify answer with the cart object (like
++   * /cart.js) and ignore `sections`, which would read back as "nothing to render".
+    */
+-  async function add({ id, quantity = 1, properties, name = '', trigger = null }) {
+-    const payload = { id: Number(id), quantity: Number(quantity), sections: SHEET_SECTION, sections_url: location.pathname };
+-    if (properties) payload.properties = properties;
+-    let result;
++  async function fetchCartSections(ids) {
+     try {
+-      result = await postJson(routes.cartAdd, payload);
++      const response = await fetch(`${routes.cart}?sections=${encodeURIComponent(ids.join(','))}`, { signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
++      if (!response.ok) return null;
++      const data = await response.json();
++      return data && typeof data === 'object' && ids.every((id) => typeof data[id] === 'string') ? data : null;
+     } catch {
+-      const message = 'No pudimos conectar con la tienda. Revisa tu conexión e intenta de nuevo.';
+-      Monetta.toast?.(message, { tone: 'error' });
+-      return { ok: false, status: 0, message };
++      return null;
+     }
+-    if (!result.ok) {
+-      const message = errorMessage(result);
+-      Monetta.toast?.(message, { tone: 'error' });
+-      return { ok: false, status: result.status, message };
++  }
++
++  /* ------------------------------------------------------------ the bag page */
++  function cartSectionId() {
++    return $('[data-cart-section]')?.dataset.sectionId || null;
++  }
++  const pageSections = () => [cartSectionId(), SHEET_SECTION].filter(Boolean);
++
++  function renderCartPage(sections, { focusKey, focusStep } = {}) {
++    const id = cartSectionId();
++    const wrapper = $(`#shopify-section-${CSS.escape(id)}`);
++    const html = sections?.[id];
++    if (!wrapper || !html) return false;
++    const next = parseHtml(html).querySelector(`#shopify-section-${CSS.escape(id)}`);
++    if (!next || !$('[data-cart-section]', next)) return false;
++    wrapper.replaceChildren(...next.childNodes);
++    applySheet(sections[SHEET_SECTION]);
++    const count = Number($('[data-cart-section]')?.dataset.itemCount);
++    if (Number.isFinite(count)) {
++      setCount(count);
++      document.body.classList.toggle('has-checkout-bar', count > 0);
++      document.body.classList.toggle('has-dock', count === 0);
+     }
+-    applySheet(result.data?.sections?.[SHEET_SECTION], { highlightVariantId: Number(id) });
+-    openSheet(trigger);
+-    Monetta.announce?.(`Agregado al carrito${name ? `: ${name}` : ''}.`);
+-    return { ok: true, status: result.status };
++    markConfirmed();
++    Monetta.refreshPinnedChrome?.();
++    const line = focusKey ? $(`[data-line="${CSS.escape(focusKey)}"]`) : null;
++    const target =
++      (line && focusStep && $(`[data-step="${focusStep}"]:not(:disabled)`, line)) ||
++      (line && $('[data-step]:not(:disabled)', line)) ||
++      (count === 0 ? $('#cart-empty') : $('.cart-line__name'));
++    target?.focus({ preventScroll: true });
++    return true;
++  }
++
++  /**
++   * After a write whose outcome is not shown from Shopify's own response (refusal, transport failure, incomplete answer): read the bag
++   * again and render it. If that cannot be done either, the bag on screen stays unconfirmed and checkout stays locked until it can.
++   */
++  async function recoverFromServer(focus) {
++    const ids = pageSections();
++    const sections = await fetchCartSections(ids);
++    if (cartSectionId()) {
++      if (sections && renderCartPage(sections, focus)) return true;
++    } else if (sections && applySheet(sections[SHEET_SECTION])) {
++      markConfirmed();
++      return true;
++    }
++    markUnconfirmed();
++    return false;
++  }
++
++  /* ------------------------------------------------------------ add */
++  /**
++   * The single add path (product page, quick add). Returns { ok, status, message, lang }. Opening the sheet, announcing and the
++   * count are done here; the caller handles pending state and its own inline error. A write whose result is unknown (no answer, a 5xx)
++   * is never repeated: the bag is read back and shown, and the message tells the shopper to check it before trying again.
++   */
++  function add({ id, quantity = 1, properties, name = '', trigger = null }) {
++    return mutation(async () => {
++      const cartId = cartSectionId();
++      const payload = { id: Number(id), quantity: Number(quantity), sections: [SHEET_SECTION, cartId].filter(Boolean).join(','), sections_url: cartId ? routes.cart : location.pathname };
++      if (properties) payload.properties = properties;
++      let result;
++      try {
++        result = await postJson(routes.cartAdd, payload);
++      } catch {
++        result = { ok: false, status: 0, data: null };
++      }
++      if (!result.ok && result.status >= 400 && result.status < 500) {
++        const { text, lang } = errorMessage(result);
++        Monetta.toast?.(text, { tone: 'error', lang });
++        return { ok: false, status: result.status, message: text, lang };
++      }
++      if (!result.ok) return uncertainAdd(result.status, trigger);
++
++      const shown = cartId ? renderCartPage(result.data?.sections || {}) : false;
++      if (!shown && !applySheet(result.data?.sections?.[SHEET_SECTION], { highlightVariantId: Number(id) })) {
++        // Shopify accepted it but the answer carries no usable bag: show the bag as Shopify has it.
++        await recoverFromServer();
++      } else {
++        markConfirmed();
++        $(`[data-variant-id="${Number(id)}"]`, $('#cart-sheet'))?.classList.add('cart-line--highlight');
++      }
++      openSheet(trigger);
++      Monetta.announce?.(`Agregado al carrito${name ? `: ${name}` : ''}.`);
++      return { ok: true, status: result.status };
++    });
++  }
++
++  async function uncertainAdd(status, trigger) {
++    const message = 'No pudimos confirmar si la pieza se agregó. Revisa tu bolsa antes de volver a intentarlo.';
++    if (await recoverFromServer()) openSheet(trigger);
++    Monetta.toast?.(message, { tone: 'error' });
++    return { ok: false, status, message, lang: '', uncertain: true };
+   }
+ 
+   function setPending(button, pending, label = 'Agregando…') {
+@@ -129,7 +277,7 @@
+     }
+   }
+   Monetta.setPending = setPending;
+-  Monetta.cart = { add };
++  Monetta.cart = { add, isLocked: checkoutBlocked };
+ 
+   // Quick add on cards: one buyable variant, added directly.
+   document.addEventListener('submit', async (event) => {
+@@ -147,84 +295,97 @@
+     delete button.dataset.pending;
+   });
+ 
+-  /* ------------------------------------------------------------ the bag page */
+-  function cartSectionId() {
+-    return $('[data-cart-section]')?.dataset.sectionId || null;
++  /* ------------------------------------------------------------ change, remove, undo */
++  /** What identifies a line besides its variant: the properties (public and private) and the selling plan, as the line rendered them. */
++  function readRestore(row) {
++    try {
++      const data = JSON.parse(row?.dataset.restore || '');
++      if (!Number.isInteger(data.id) || !Number.isInteger(data.quantity) || data.quantity < 1) return null;
++      // An object of properties; a list of [name, value] pairs is accepted too, so a different serialisation can never read as "none".
++      const raw = data.properties;
++      const properties = Array.isArray(raw) ? Object.fromEntries(raw.filter((pair) => Array.isArray(pair) && pair.length === 2)) : raw && typeof raw === 'object' ? raw : {};
++      return { id: data.id, quantity: data.quantity, properties, selling_plan: Number.isInteger(data.selling_plan) ? data.selling_plan : null };
++    } catch {
++      return null;
++    }
+   }
+ 
+-  async function fetchCartSections() {
+-    const id = cartSectionId();
+-    if (!id) return null;
+-    const response = await fetch(`${routes.cart}?sections=${encodeURIComponent(`${id},${SHEET_SECTION}`)}`, { headers: { Accept: 'application/json' } });
+-    if (!response.ok) return null;
+-    return response.json();
+-  }
++  const sameProperties = (a = {}, b = {}) => {
++    const left = Object.entries(a || {}).filter(([, value]) => value !== '' && value != null);
++    const right = Object.entries(b || {}).filter(([, value]) => value !== '' && value != null);
++    return left.length === right.length && left.every(([key, value]) => String(b?.[key]) === String(value));
++  };
+ 
+-  function renderCartPage(sections, { focusKey, focusStep } = {}) {
+-    const id = cartSectionId();
+-    const wrapper = $(`#shopify-section-${CSS.escape(id)}`);
+-    const html = sections?.[id];
+-    if (!wrapper || !html) return false;
+-    const next = parseHtml(html).querySelector(`#shopify-section-${CSS.escape(id)}`);
+-    if (!next) return false;
+-    wrapper.replaceChildren(...next.childNodes);
+-    applySheet(sections[SHEET_SECTION]);
+-    const count = Number($('[data-cart-section]')?.dataset.itemCount);
+-    if (Number.isFinite(count)) {
+-      setCount(count);
+-      document.body.classList.toggle('has-checkout-bar', count > 0);
+-      document.body.classList.toggle('has-dock', count === 0);
+-    }
+-    Monetta.refreshPinnedChrome?.();
+-    const line = focusKey ? $(`[data-line="${CSS.escape(focusKey)}"]`) : null;
+-    const target =
+-      (line && focusStep && $(`[data-step="${focusStep}"]:not(:disabled)`, line)) ||
+-      (line && $('[data-step]:not(:disabled)', line)) ||
+-      (count === 0 ? $('#cart-empty') : $('.cart-line__name'));
+-    target?.focus({ preventScroll: true });
+-    return true;
++  /** Puts a removed line back with everything that made it that line. Shopify's refusal is shown as is; nothing else is added instead. */
++  function undoRemoval(restore) {
++    return mutation(async () => {
++      const sections = pageSections().join(',');
++      const payload = { id: restore.id, quantity: restore.quantity, sections, sections_url: routes.cart };
++      if (Object.keys(restore.properties).length) payload.properties = restore.properties;
++      if (restore.selling_plan) payload.selling_plan = restore.selling_plan;
++      let result;
++      try {
++        result = await postJson(routes.cartAdd, payload);
++      } catch {
++        result = { ok: false, status: 0, data: null };
++      }
++      if (result.ok) {
++        const item = result.data;
++        const planId = item?.selling_plan_allocation?.selling_plan?.id ?? null;
++        const identityKept = item && Number(item.variant_id ?? item.id) === restore.id && sameProperties(item.properties, restore.properties) && planId === restore.selling_plan;
++        const shown = cartSectionId() ? renderCartPage(result.data?.sections || {}) : applySheet(result.data?.sections?.[SHEET_SECTION]);
++        if (!shown) await recoverFromServer();
++        else markConfirmed();
++        if (!identityKept) Monetta.toast?.('Restauramos la pieza, pero Shopify la registró con datos distintos a los de antes. Revisa tu bolsa.', { tone: 'error' });
++        return;
++      }
++      if (result.status >= 400 && result.status < 500) {
++        const { text, lang } = errorMessage(result, 'No pudimos restaurar la pieza. Intenta de nuevo.');
++        Monetta.toast?.(text, { tone: 'error', lang });
++      } else {
++        Monetta.toast?.('No pudimos confirmar si la pieza se restauró. Revisa tu bolsa antes de volver a intentarlo.', { tone: 'error' });
++      }
++      await recoverFromServer();
++    });
+   }
+ 
+-  let changing = false;
+-  async function changeLine({ key, quantity, step, name, variantId, previousQuantity }) {
+-    if (changing) return;
++  async function changeLine({ key, quantity, step, name, restore }) {
+     const id = cartSectionId();
+-    if (!id) return;
+-    changing = true;
++    // One change at a time, and none on top of a bag that is not confirmed: a click made on stale numbers would send stale numbers.
++    if (!id || checkoutBlocked()) {
++      if (unconfirmed) Monetta.announce?.('Actualiza tu bolsa antes de hacer más cambios.');
++      return;
++    }
+     const line = $(`[data-line="${CSS.escape(key)}"]`);
+     line?.setAttribute('aria-busy', 'true');
+-    try {
+-      const result = await postJson(routes.cartChange, {
+-        id: key,
+-        quantity,
+-        sections: `${id},${SHEET_SECTION}`,
+-        sections_url: routes.cart,
+-      });
+-      if (result.ok && result.data?.sections) {
+-        renderCartPage(result.data.sections, { focusKey: quantity > 0 ? key : null, focusStep: step });
+-        if (quantity === 0) {
+-          Monetta.toast?.(`Eliminaste ${name || 'la pieza'} del carrito.`, {
+-            action: {
+-              label: 'Deshacer',
+-              onClick: async () => {
+-                const restored = await postJson(routes.cartAdd, { id: variantId, quantity: previousQuantity, sections: `${id},${SHEET_SECTION}`, sections_url: routes.cart });
+-                if (restored.ok && restored.data?.sections) renderCartPage(restored.data.sections);
+-                else Monetta.toast?.(errorMessage(restored), { tone: 'error' });
+-              },
+-            },
+-          });
++    await mutation(async () => {
++      try {
++        let result;
++        try {
++          result = await postJson(routes.cartChange, { id: key, quantity, sections: `${id},${SHEET_SECTION}`, sections_url: routes.cart });
++        } catch {
++          result = { ok: false, status: 0, data: null };
+         }
+-      } else {
+-        // Shopify refused (stock ceiling, quantity rule): say so in its words and show the cart as it really is.
+-        Monetta.toast?.(result.data?.description || result.data?.message || 'No pudimos actualizar la bolsa. Intenta de nuevo.', { tone: 'error' });
+-        renderCartPage(await fetchCartSections(), { focusKey: key, focusStep: step });
++        if (result.ok && renderCartPage(result.data?.sections || {}, { focusKey: quantity > 0 ? key : null, focusStep: step })) {
++          if (quantity === 0) {
++            Monetta.toast?.(`Eliminaste ${name || 'la pieza'} del carrito.`, {
++              action: restore ? { label: 'Deshacer', onClick: () => undoRemoval(restore) } : null,
++            });
++          }
++          return;
++        }
++        if (result.status >= 400 && result.status < 500) {
++          // Shopify refused (stock ceiling, quantity rule): say so in its words and show the cart as it really is.
++          const { text, lang } = errorMessage(result, 'No pudimos actualizar la bolsa. Intenta de nuevo.');
++          Monetta.toast?.(text, { tone: 'error', lang });
++        } else {
++          Monetta.toast?.(result.ok ? 'No pudimos mostrar tu bolsa actualizada.' : 'No pudimos confirmar el cambio. Revisamos tu bolsa para mostrarla como está.', { tone: 'error' });
++        }
++        await recoverFromServer({ focusKey: key, focusStep: step });
++      } finally {
++        line?.removeAttribute('aria-busy');
+       }
+-    } catch {
+-      Monetta.toast?.('No pudimos conectar con la tienda. Revisa tu conexión e intenta de nuevo.', { tone: 'error' });
+-    } finally {
+-      changing = false;
+-      line?.removeAttribute('aria-busy');
+-    }
++    });
+   }
+ 
+   document.addEventListener('submit', (event) => {
+@@ -234,22 +395,28 @@
+     const submitter = event.submitter;
+     if (!submitter || submitter.disabled) return;
+     const row = form.closest('[data-line]');
+-    const quantity = Number(submitter.value);
+     changeLine({
+       key: form.elements.id.value,
+-      quantity,
++      quantity: Number(submitter.value),
+       step: submitter.dataset.step || null,
+       name: row?.querySelector('.cart-line__name')?.textContent?.trim(),
+-      variantId: Number(row?.dataset.variantId),
+-      previousQuantity: Number(form.querySelector('.stepper__value')?.textContent) || 1,
++      restore: readRestore(row),
+     });
+   });
+ 
++  // "Actualizar bolsa": the way out of an unconfirmed state. It reads the bag again; checkout stays locked until that succeeds.
++  document.addEventListener('click', (event) => {
++    if (!event.target.closest?.('[data-cart-resync]')) return;
++    event.preventDefault();
++    mutation(() => recoverFromServer());
++  });
++
+   // Amounts and availability in the bag were Shopify's when this page rendered; a restored or long-hidden page asks again.
+   let hiddenAt = 0;
+   const revalidate = async () => {
+-    if (!cartSectionId() || changing) return;
+-    renderCartPage(await fetchCartSections());
++    if (!cartSectionId() || checkoutBlocked()) return;
++    const sections = await fetchCartSections(pageSections());
++    if (sections) renderCartPage(sections);
+   };
+   document.addEventListener('visibilitychange', () => {
+     if (document.hidden) {
+@@ -267,5 +434,6 @@
+   document.addEventListener('shopify:section:load', () => {
+     const total = Number($('[data-cart-total]')?.textContent);
+     if (Number.isFinite(total)) setCount(total);
++    syncCheckoutLock();
+   });
+ })();
+--- a/storefront-theme/assets/monetta-core.js
++++ b/storefront-theme/assets/monetta-core.js
+@@ -24,7 +24,7 @@
+     }, 30);
+   }
+ 
+-  function toast(message, { tone = 'default', action = null, duration = 5000 } = {}) {
++  function toast(message, { tone = 'default', action = null, duration = 5000, lang = '' } = {}) {
+     const root = $('#toast-root');
+     if (!root) return;
+     const element = document.createElement('div');
+@@ -33,6 +33,8 @@
+     const text = document.createElement('span');
+     text.className = 'toast__text';
+     text.textContent = message;
++    // Text Shopify wrote in the store's own language (stock limits, rejections) when that is not the page's.
++    if (lang) text.lang = lang;
+     element.append(text);
+     if (action) {
+       const button = document.createElement('button');
+--- a/storefront-theme/assets/monetta-listing.js
++++ b/storefront-theme/assets/monetta-listing.js
+@@ -49,45 +49,112 @@
+   });
+ 
+   /* ------------------------------------------------------------ load more */
++  // "Ver más piezas" is a link to ?page=n (filters and sort travel in that address). Clicking it appends the page without leaving;
++  // nothing is added to the grid and the address is not touched until the answer is a real listing page. When it fails, the box offers
++  // two different things: retry the in-page load, and go to that page as an ordinary navigation (the link stops being intercepted).
++  const LOAD_TIMEOUT_MS = 20000;
+   let loading = false;
+-  document.addEventListener('click', async (event) => {
+-    const more = event.target.closest?.('[data-more]');
+-    if (!more || event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
+-    event.preventDefault();
++
++  /** The listing page behind `url`, or an Error when what came back is not that page (error body, login wall, an empty or foreign document). */
++  async function fetchListingPage(url) {
++    const response = await fetch(url, { headers: { Accept: 'text/html' }, signal: AbortSignal.timeout(LOAD_TIMEOUT_MS) });
++    if (!response.ok) throw new Error(`HTTP ${response.status}`);
++    const asked = new URL(url, location.href);
++    const answered = new URL(response.url || asked.href, location.href);
++    if (answered.pathname !== asked.pathname) throw new Error('redirected');
++    const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
++    const items = $$('[data-grid] > li', doc).filter((item) => $('.card', item));
++    if (!$('[data-grid]', doc) || items.length === 0) throw new Error('not-a-listing-page');
++    return { doc, items };
++  }
++
++  function showLoadFailure(box, link) {
++    box.querySelector('[data-load-error]')?.remove();
++    link.removeAttribute('aria-busy');
++    link.removeAttribute('data-more'); // from now on the link is an ordinary navigation
++    link.dataset.moreNative = 'true';
++    link.textContent = 'Ir a la página siguiente';
++    const failure = document.createElement('div');
++    failure.dataset.loadError = '';
++    failure.setAttribute('role', 'alert');
++    failure.className = 'load-more__error';
++    const text = document.createElement('p');
++    text.className = 'form-error';
++    text.textContent = 'No pudimos cargar más piezas aquí.';
++    const retry = document.createElement('button');
++    retry.type = 'button';
++    retry.className = 'btn btn--outline';
++    retry.dataset.moreRetry = link.href;
++    retry.textContent = 'Reintentar';
++    failure.append(text, retry);
++    link.before(failure);
++    retry.focus({ preventScroll: true });
++  }
++
++  async function loadMore(link) {
+     if (loading) return;
+     loading = true;
+-    const label = more.textContent;
+-    more.setAttribute('aria-busy', 'true');
+-    more.textContent = 'Cargando…';
++    const box = link.closest('[data-load-more]');
++    const url = link.dataset.moreRetry || link.href;
++    const trigger = link;
++    trigger.setAttribute('aria-busy', 'true');
++    const label = trigger.textContent;
++    trigger.textContent = 'Cargando…';
+     try {
+-      const url = more.href;
+-      const response = await fetch(url, { headers: { Accept: 'text/html' } });
+-      if (!response.ok) throw new Error(String(response.status));
+-      const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
++      const { doc, items } = await fetchListingPage(url);
+       const grid = $('[data-grid]');
+-      const incoming = $$('[data-grid] > li', doc);
+       const start = grid.children.length;
+-      grid.append(...incoming.map((item) => document.importNode(item, true)));
++      grid.append(...items.map((item) => document.importNode(item, true)));
+       const nextBox = $('[data-load-more]', doc);
+-      const box = $('[data-load-more]');
+       if (nextBox && box) box.replaceWith(document.importNode(nextBox, true));
++      else box?.remove();
+       // The address names the page now shown; a pending "back" fallback must not act on it.
+       history.replaceState(history.state, '', url);
+       Monetta.noteNavigation?.();
+-      const first = grid.children[start]?.querySelector('.card__link');
+-      first?.focus({ preventScroll: false });
++      grid.children[start]?.querySelector('.card__link')?.focus({ preventScroll: false });
+       const progress = $('[data-progress-text]')?.textContent;
+       Monetta.announce?.(progress ? `${progress}.` : 'Se cargaron más piezas.');
+     } catch {
+-      more.textContent = label;
+-      more.removeAttribute('aria-busy');
+-      Monetta.toast?.('No pudimos cargar más piezas. Usa el enlace para ir a la página siguiente.', { tone: 'error' });
+-      // The link still works as a normal navigation.
++      trigger.textContent = label;
++      if (box) {
++        const next = box.querySelector('[data-more], [data-more-native]');
++        // After a failed retry the native link is already in place; only the first failure converts the interceptable one.
++        if (next) showLoadFailure(box, next);
++      }
+     } finally {
+       loading = false;
+     }
++  }
++
++  document.addEventListener('click', (event) => {
++    if (event.metaKey || event.ctrlKey || event.shiftKey || event.button !== 0) return;
++    const retry = event.target.closest?.('[data-more-retry]');
++    if (retry) {
++      event.preventDefault();
++      loadMore(retry);
++      return;
++    }
++    const more = event.target.closest?.('[data-more]');
++    if (!more) return;
++    event.preventDefault();
++    loadMore(more);
+   });
+ 
++  // "Editar búsqueda" (a search with no results) goes to the search field that is on screen. The phone hides the header field on this
++  // page, so the link cannot point at one fixed id: its href is the page field (right on a phone, where the header field is hidden)
++  // and this picks whichever of the two is actually visible, focuses it and selects the text so typing replaces the old terms.
++  const isShown = (element) => !!element && element.getClientRects().length > 0 && getComputedStyle(element).visibility !== 'hidden';
++  document.addEventListener('click', (event) => {
++    const edit = event.target.closest?.('[data-edit-search]');
++    if (!edit) return;
++    const field = ['page-search-input', 'header-search-input'].map((id) => document.getElementById(id)).find(isShown);
++    if (!field) return;
++    event.preventDefault();
++    field.focus();
++    field.select?.();
++    field.scrollIntoView({ block: 'nearest' });
++  });
++
+   // Search opened empty from another screen focuses its field (the router of the prototype does the same).
+   const searchInput = $('[data-search-autofocus]');
+   if (searchInput && !searchInput.value) searchInput.focus({ preventScroll: true });
+--- a/storefront-theme/assets/monetta-product.js
++++ b/storefront-theme/assets/monetta-product.js
+@@ -6,7 +6,8 @@
+  *    cached or recomputed here,
+  *  - the quantity stepper and the add button's states (waiting, success, error, no double sends),
+  *  - the lazily requested recommendations rail.
+- * The add request carries the exact variant id; it is never substituted.
++ * The add request carries the exact variant id; it is never substituted. A choice that Shopify has not confirmed (pending, failed,
++ * answered with an incomplete document) blocks adding and the accelerated checkout; see "variants" below.
+  */
+ (() => {
+   'use strict';
+@@ -67,77 +68,249 @@
+   }
+ 
+   /* ------------------------------------------------------------ variants */
+-  function readVariants() {
++  // The page always shows ONE variant: the one Shopify rendered (hidden input [data-variant-id], price, availability, buttons,
++  // address). A choice on the chips is only a request until Shopify renders that variant; until then the page is "pending" and adding
++  // and paying are refused (not just dimmed). If the confirmation fails, the chips go back to the rendered variant. So the id a
++  // button sends, the option on screen and the price beside it can only disagree while the buttons are dead.
++  const readVariants = () => {
+     try {
+       return JSON.parse($('[data-product-variants]', page())?.textContent || '[]');
+     } catch {
+       return [];
+     }
++  };
++  const variantById = (id) => readVariants().find((variant) => variant.id === Number(id)) || null;
++  const shownId = (root = page()) => Number($('[data-variant-id]', root)?.value) || 0;
++  const chosenValues = (root = page()) => $$('[data-options] fieldset', root).map((group) => $('input:checked', group)?.value);
++  const describe = (variant) => (variant ? variant.options.join(' / ') : '');
++  // Without a script the options are links (css hides the radios); with this one running the radios take over.
++  document.documentElement.classList.add('mw-variants-js');
++
++  /** True when the choice on screen is the variant the form would send AND Shopify has confirmed it. The only gate for adding and paying. */
++  function purchasable() {
++    const root = page();
++    if (!root || root.dataset.selection !== 'valid') return false;
++    const variant = variantById(shownId(root));
++    if (!variant) return false;
++    const chosen = chosenValues(root);
++    return chosen.every((value, index) => value === variant.options[index]);
+   }
+ 
+-  /** The variant the current radio selection names; when that exact combination does not exist, the closest one. */
+-  function pickVariant(changedPosition) {
+-    const variants = readVariants();
+-    const groups = $$('[data-options] fieldset');
+-    const chosen = groups.map((group) => $('input:checked', group)?.value);
+-    const exact = variants.find((variant) => variant.options.every((value, index) => value === chosen[index]));
+-    if (exact) return exact;
+-    const keep = changedPosition - 1;
+-    const sameChanged = variants.filter((variant) => variant.options[keep] === chosen[keep]);
+-    return sameChanged.find((variant) => variant.available) || sameChanged[0] || null;
++  /** Puts the chips (and the value beside each option name) on a variant. */
++  function showChoice(root, variant) {
++    if (!variant) return;
++    $$('[data-options] fieldset', root).forEach((group, index) => {
++      const input = $$('[data-option-input]', group).find((radio) => radio.value === variant.options[index]);
++      if (input) input.checked = true;
++      const value = $('[data-option-value]', group);
++      if (value) value.textContent = variant.options[index];
++    });
+   }
+ 
+-  let swapController = null;
+-  async function swapVariant(variantId, { announceAvailability = true } = {}) {
++  function showError(root, text, lang = '') {
++    const box = $('[data-add-error]', root);
++    if (!box) return;
++    const target = $('[data-error-text]', box);
++    target.textContent = text;
++    if (lang) target.lang = lang;
++    else target.removeAttribute('lang');
++    box.hidden = false;
++  }
++  function hideError(root) {
++    const box = $('[data-add-error]', root);
++    if (box) box.hidden = true;
++  }
++
++  /** Real blocking: the add buttons are disabled and the accelerated-checkout / WhatsApp area is inert. Remembers what the server had. */
++  function lockPurchase(root, locked) {
++    for (const button of $$('[data-add]', root)) {
++      if (locked) {
++        if (button.dataset.lockedWasDisabled === undefined) button.dataset.lockedWasDisabled = button.disabled ? '1' : '0';
++        button.disabled = true;
++      } else if (button.dataset.lockedWasDisabled !== undefined) {
++        button.disabled = button.dataset.lockedWasDisabled === '1';
++        delete button.dataset.lockedWasDisabled;
++      }
++    }
++    for (const area of $$('.other-ways', root)) area.inert = locked;
++  }
++
++  function setStatus(root, text) {
++    const status = $('[data-selection-status]', root);
++    if (!status) return;
++    status.textContent = text || '';
++    status.hidden = !text;
++  }
++
++  // Capture phase, before Shopify's own listeners on the accelerated-checkout button: while the choice is unconfirmed, nothing that
++  // buys (add buttons, "Buy it now", wallet buttons) or quotes (the WhatsApp request names the variant and price) may act.
++  document.addEventListener(
++    'click',
++    (event) => {
++      const root = page();
++      if (!root || purchasable()) return;
++      if (event.target.closest?.('[data-add], .other-ways')) {
++        event.preventDefault();
++        event.stopImmediatePropagation();
++      }
++    },
++    true,
++  );
++
++  let sequence = 0; // every choice takes the next number; only the newest may touch the page
++  let controller = null;
++  let validatedId = 0;
++
++  /** The section Shopify rendered for ?variant=ID, or an Error when it is not a complete, coherent product section. */
++  function validateSection(doc, root) {
++    const next = $('[data-product-page]', doc);
++    const dynamic = next && $('[data-product-dynamic]', next);
++    const dock = next && $('[data-purchase-dock]', next);
++    const id = Number(dynamic && $('[data-variant-id]', dynamic)?.value);
++    let variants = [];
++    try {
++      variants = JSON.parse((dynamic && $('[data-product-variants]', dynamic)?.textContent) || '[]');
++    } catch {
++      /* rejected below */
++    }
++    const variant = variants.find((candidate) => candidate.id === id);
++    if (!next || next.dataset.sectionId !== root.dataset.sectionId || !dynamic || !dock || !variant || !$('[data-product-form]', dynamic) || !$('[data-add]', dock)) {
++      throw new Error('invalid-section');
++    }
++    const rendered = $$('[data-options] fieldset', dynamic).map((group) => $('input:checked', group)?.value);
++    if (!rendered.every((value, index) => value === variant.options[index])) throw new Error('incoherent-section');
++    return { next, variant };
++  }
++
++  /**
++   * Asks Shopify to render the product section for a variant and swaps it in only when it is complete and still the newest request.
++   *  - 'choice':  the shopper picked a chip. Buying is locked meanwhile; on failure the chips return to the rendered variant.
++   *  - 'resync':  Shopify refused an add (422): the rendered variant is not real. Locked; on failure it stays locked and asks for a reload.
++   *  - 'refresh': a restored or long-hidden page asks again for the variant it already shows. Buying is not locked; failure is only reported.
++   */
++  async function confirmVariant(variantId, { kind = 'choice', announceAvailability = true, keepError = '' } = {}) {
+     const root = page();
+     if (!root) return;
+-    swapController?.abort();
+-    swapController = new AbortController();
+-    const { signal } = swapController;
++    const mine = ++sequence;
++    controller?.abort();
++    controller = new AbortController();
++    const { signal } = controller;
++    const label = describe(variantById(variantId));
++    if (kind !== 'refresh') {
++      root.dataset.selection = 'pending';
++      root.setAttribute('aria-busy', 'true');
++      lockPurchase(root, true);
++      hideError(root);
++      setStatus(root, label ? `Confirmando disponibilidad de ${label}…` : 'Confirmando disponibilidad…');
++    }
+     const focused = document.activeElement;
+     const focusedValue = focused?.matches?.('[data-option-input]') ? { position: focused.closest('fieldset').dataset.optionPosition, value: focused.value } : null;
+-    root.setAttribute('aria-busy', 'true');
++    let section;
+     try {
+       const url = `${root.dataset.productUrl}?variant=${variantId}&section_id=${encodeURIComponent(root.dataset.sectionId)}`;
+       const response = await fetch(url, { signal, headers: { Accept: 'text/html' } });
+-      if (!response.ok) throw new Error(String(response.status));
+-      const doc = new DOMParser().parseFromString(await response.text(), 'text/html');
+-      const next = $('[data-product-page]', doc);
+-      if (!next || signal.aborted) return;
+-      $('[data-product-dynamic]', root).replaceChildren(...$('[data-product-dynamic]', next).childNodes);
+-      $('[data-purchase-dock]', root).replaceChildren(...$('[data-purchase-dock]', next).childNodes);
+-      const seal = $('[data-seal]', root);
+-      const nextSeal = $('[data-seal]', next);
+-      if (seal && nextSeal) seal.hidden = nextSeal.hidden;
+-      // The address names the variant Shopify actually rendered (an unknown id falls back to the default variant); a
+-      // pending "back" fallback must not act on it.
+-      const shown = $('[data-variant-id]', root)?.value || variantId;
+-      history.replaceState(history.state, '', `${root.dataset.productUrl}?variant=${shown}`);
+-      Monetta.noteNavigation?.();
+-      const index = Number(next.dataset.selectedIndex) || 0;
+-      Monetta.gallery?.goTo(index);
+-      if (focusedValue) {
+-        $(`fieldset[data-option-position="${focusedValue.position}"] input[value="${CSS.escape(focusedValue.value)}"]`, root)?.focus({ preventScroll: true });
+-      }
+-      if (announceAvailability) {
+-        const text = $('[data-availability]', root)?.textContent?.trim();
+-        const price = $('[data-price] .price', root)?.textContent?.trim();
+-        if (text) Monetta.announce?.(`${price ? `${price}. ` : ''}${text}`);
+-      }
+-      Monetta.refreshPinnedChrome?.();
++      if (!response.ok) throw new Error(`HTTP ${response.status}`);
++      const text = await response.text();
++      if (mine !== sequence) return; // a newer choice owns the page; this answer, however late, is ignored
++      section = validateSection(new DOMParser().parseFromString(text, 'text/html'), root);
+     } catch (error) {
+-      if (error.name === 'AbortError') return;
++      if (mine !== sequence || error?.name === 'AbortError') return;
++      failConfirmation(root, { kind, label });
++      return;
++    }
++    if (mine !== sequence) return;
++
++    const { next, variant } = section;
++    $('[data-product-dynamic]', root).replaceChildren(...$('[data-product-dynamic]', next).childNodes);
++    $('[data-purchase-dock]', root).replaceChildren(...$('[data-purchase-dock]', next).childNodes);
++    const seal = $('[data-seal]', root);
++    const nextSeal = $('[data-seal]', next);
++    if (seal && nextSeal) seal.hidden = nextSeal.hidden;
++    validatedId = variant.id;
++    root.dataset.selection = 'valid';
++    root.removeAttribute('aria-busy');
++    // The address names the variant Shopify actually rendered (an unknown id falls back to the default variant); a pending "back"
++    // fallback must not act on it.
++    history.replaceState(history.state, '', `${root.dataset.productUrl}?variant=${variant.id}`);
++    Monetta.noteNavigation?.();
++    Monetta.gallery?.goTo(Number(next.dataset.selectedIndex) || 0);
++    if (focusedValue) {
++      $(`fieldset[data-option-position="${focusedValue.position}"] input[value="${CSS.escape(focusedValue.value)}"]`, root)?.focus({ preventScroll: true });
++    }
++    if (keepError) showError(root, keepError.text, keepError.lang);
++    if (variant.id !== Number(variantId) && kind !== 'refresh') {
++      // Shopify rendered another variant than the one asked for (the combination no longer exists): say so, never pretend.
++      Monetta.toast?.(`Esa combinación ya no está disponible. Mostramos ${describe(variant)}.`, { tone: 'error' });
++    } else if (announceAvailability) {
++      const text = $('[data-availability]', root)?.textContent?.trim();
++      const price = $('[data-price] .price', root)?.textContent?.trim();
++      if (text) Monetta.announce?.(`${price ? `${price}. ` : ''}${text}`);
++    }
++    Monetta.refreshPinnedChrome?.();
++  }
++
++  function failConfirmation(root, { kind, label }) {
++    root.removeAttribute('aria-busy');
++    setStatus(root, '');
++    if (kind === 'refresh') {
+       Monetta.toast?.('No pudimos actualizar la disponibilidad. Recarga la página para ver el estado real.', { tone: 'error' });
+-    } finally {
+-      if (!signal.aborted) root.removeAttribute('aria-busy');
++      return;
+     }
++    if (kind === 'resync') {
++      // Shopify refused this variant and its replacement could not be fetched: the page has nothing valid to sell.
++      root.dataset.selection = 'error';
++      showError(root, 'No pudimos confirmar la disponibilidad de esta pieza. Recarga la página para continuar.');
++      return;
++    }
++    // A failed choice: put the chips back on the variant the page really shows and say which one stayed.
++    const kept = variantById(validatedId) || variantById(shownId(root));
++    showChoice(root, kept);
++    root.dataset.selection = 'valid';
++    lockPurchase(root, false);
++    showError(root, `No pudimos confirmar${label ? ` «${label}»` : ' esa opción'}. Se mantiene${kept ? ` «${describe(kept)}»` : ' la opción anterior'}; elígela otra vez para reintentar.`);
++    Monetta.announce?.('No se pudo cambiar la opción.');
+   }
+ 
++  function choose(input) {
++    const root = page();
++    const position = Number(input.closest('fieldset').dataset.optionPosition);
++    // The value beside the option name follows the chip at once, so the two never disagree.
++    $$('[data-options] fieldset', root).forEach((group) => {
++      const value = $('[data-option-value]', group);
++      if (value) value.textContent = $('input:checked', group)?.value ?? '';
++    });
++    const variants = readVariants();
++    const chosen = chosenValues(root);
++    let variant = variants.find((candidate) => candidate.options.every((value, index) => value === chosen[index]));
++    if (!variant) {
++      // That exact combination does not exist: the nearest one that keeps the option just changed (available first).
++      const keep = position - 1;
++      const sameChanged = variants.filter((candidate) => candidate.options[keep] === chosen[keep]);
++      variant = sameChanged.find((candidate) => candidate.available) || sameChanged[0] || null;
++    }
++    if (!variant) {
++      failConfirmation(root, { kind: 'choice', label: chosen.join(' / ') });
++      return;
++    }
++    showChoice(root, variant);
++    if (variant.id === validatedId && root.dataset.selection !== 'error') {
++      // Back on the variant the page already shows: nothing to confirm, and whatever was in flight must not apply.
++      sequence += 1;
++      controller?.abort();
++      root.dataset.selection = 'valid';
++      root.removeAttribute('aria-busy');
++      lockPurchase(root, false);
++      setStatus(root, '');
++      hideError(root);
++      return;
++    }
++    confirmVariant(variant.id);
++  }
++
+   document.addEventListener('change', (event) => {
+     const input = event.target.closest?.('[data-option-input]');
+     if (input) {
+-      const variant = pickVariant(Number(input.closest('fieldset').dataset.optionPosition));
+-      if (variant) swapVariant(variant.id);
++      choose(input);
+       return;
+     }
+     const qty = event.target.closest?.('[data-qty-input]');
+@@ -193,24 +366,26 @@
+     event.preventDefault();
+     const root = page();
+     const buttons = $$('[data-add]', root);
+-    // One request at a time: further clicks and Enter presses are ignored until Shopify answers.
+-    if (adding || buttons.some((button) => button.disabled)) return;
++    // One request at a time, and only for a confirmed choice: further clicks and Enter presses are ignored until Shopify answers.
++    if (adding || !purchasable() || buttons.some((button) => button.disabled)) return;
+     adding = true;
+-    const errorBox = $('[data-add-error]', root);
+-    if (errorBox) errorBox.hidden = true;
++    hideError(root);
+     buttons.forEach((button) => Monetta.setPending(button, true));
+-    const variantId = Number(form.elements.id.value);
++    lockPurchase(root, true); // the accelerated checkout must not start while the add is in flight
++    const variantId = shownId(root);
+     const quantity = Number($('[data-qty-input]', form)?.value) || 1;
+     const name = $('.product-panel__name', root)?.textContent?.trim() || '';
+     const option = $$('[data-options] [data-option-value]', root).map((el) => el.textContent.trim()).filter(Boolean).join(' / ');
+     const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: $('[data-add]', form) });
+     buttons.forEach((button) => Monetta.setPending(button, false));
+     adding = false;
+-    if (!result.ok && errorBox) {
+-      $('[data-error-text]', errorBox).textContent = result.message;
+-      errorBox.hidden = false;
+-      // The store refused (sold out meanwhile, stock ceiling): show what Shopify says about this variant now.
+-      if (result.status === 422 || result.status === 0) swapVariant(variantId, { announceAvailability: false });
++    if (root.dataset.selection === 'valid') lockPurchase(root, false);
++    if (!result.ok) {
++      const error = { text: result.message, lang: result.lang || '' };
++      showError(root, error.text, error.lang);
++      // Shopify refused the variant (it no longer exists): show what it renders for this product now. A connection failure or a 5xx
++      // is NOT retried and not re-synced: whether the add happened is unknown, and the message says so.
++      if (result.status === 422 && shownId(root) === variantId) confirmVariant(variantId, { kind: 'resync', announceAvailability: false, keepError: error });
+     }
+   });
+ 
+@@ -250,8 +425,9 @@
+   // foreground after a while, asks Shopify again instead of showing them indefinitely.
+   let hiddenAt = 0;
+   const revalidate = () => {
+-    const id = Number($('[data-variant-id]', page())?.value);
+-    if (id) swapVariant(id, { announceAvailability: false });
++    const root = page();
++    const id = shownId(root);
++    if (id && root.dataset.selection === 'valid') confirmVariant(id, { kind: 'refresh', announceAvailability: false });
+   };
+   document.addEventListener('visibilitychange', () => {
+     if (document.hidden) {
+@@ -262,10 +438,29 @@
+     }
+   });
+   window.addEventListener('pageshow', (event) => {
+-    if (event.persisted) revalidate();
++    if (event.persisted) {
++      reconcile();
++      revalidate();
++    }
+   });
+ 
++  /** The browser may restore radios from an older state; the rendered variant (hidden id) is the truth, so the chips follow it. */
++  function reconcile() {
++    const root = page();
++    if (!root) return;
++    const rendered = variantById(shownId(root));
++    if (rendered && root.dataset.selection === 'valid' && !chosenValues(root).every((value, index) => value === rendered.options[index])) showChoice(root, rendered);
++  }
++
++  Monetta.product = { purchasable, confirmVariant };
++
+   function start() {
++    const root = page();
++    if (root) {
++      validatedId = shownId(root);
++      root.dataset.selection = 'valid';
++      reconcile();
++    }
+     initGallery();
+     loadRecommendations();
+   }
+--- a/storefront-theme/assets/monetta-theme.css
++++ b/storefront-theme/assets/monetta-theme.css
+@@ -236,4 +236,66 @@
+ 
+ .other-ways .shopify-payment-button__button--unbranded:hover:not([disabled]) {
+   background: var(--color-surface-deep);
++}
++
++/* ------------------------------------------------------------ Variant options: links without JavaScript, radios with it */
++/* Each option is rendered twice with the same look. Without a script the chips are links to ?variant=ID (choosing = navigating, so the
++   form always sends the variant on screen); monetta-product.js sets html.mw-variants-js and takes over with the radio group, which it can
++   confirm without a reload. A control that looked selectable but changed nothing in the request is the defect this avoids. */
++.options__list--radios {
++  display: none;
++}
++
++.mw-variants-js .options__list--radios {
++  display: flex;
++}
++
++.mw-variants-js .options__list--links {
++  display: none;
++}
++
++a.option-chip {
++  color: inherit;
++  text-decoration: none;
++}
++
++a.option-chip[aria-current='true'] {
++  border-color: var(--color-ink);
++  box-shadow: inset 0 0 0 1px var(--color-ink);
++  background: var(--color-surface-deep);
++}
++
++a.option-chip[aria-current='true'] .option-chip__check {
++  display: inline-grid;
++}
++
++a.option-chip:focus-visible {
++  outline: 2px solid var(--color-ink);
++  outline-offset: 2px;
+ }
++
++/* "Confirmando disponibilidad de …" under the options while a choice waits for Shopify. */
++.product-panel__options .choice-hint {
++  margin: 12px 0 0;
++}
++
++/* ------------------------------------------------------------ Recovery boxes (load more failed, bag not confirmed) */
++.load-more__error {
++  display: grid;
++  gap: 8px;
++  justify-items: center;
++  margin-bottom: 12px;
++}
++
++.cart-sync {
++  flex-wrap: wrap;
++  align-items: center;
++  gap: 8px 12px;
++  margin-top: 12px;
++}
++
++/* The message shares the row with its icon and the button drops below only when there is no room for both. */
++.cart-sync > span {
++  flex: 1 1 14rem;
++  min-width: 0;
++}
+--- a/storefront-theme/layout/monetta.liquid
++++ b/storefront-theme/layout/monetta.liquid
+@@ -3,6 +3,11 @@
+   cart) through the "layout" key of their JSON templates. It deliberately loads none of Atelier's base.css or
+   scripts, so the approved design's CSS runs unchanged; the templates not yet ported keep layout/theme.liquid.
+   Commerce stays Shopify's: catalog, cart and checkout come from the store; this file only frames them.
++
++  Language: every text this theme writes is Spanish (Mexico), so the document declares es-MX instead of the store locale (the staging
++  store's is English, which made a Spanish page announce itself as English). Fragments Shopify renders in the store's own language
++  are marked individually with the monetta-store-lang snippet; the store's language setting is not touched and a multilingual
++  store is out of scope.
+ {%- endcomment -%}
+ {%- liquid
+   assign t = template.name
+@@ -28,7 +33,7 @@
+   assign og_image = page_image | default: shop.brand.logo
+ -%}
+ <!doctype html>
+-<html lang="{{ request.locale.iso_code }}"{% if request.design_mode %} class="shopify-design-mode"{% endif %}>
++<html lang="es-MX"{% if request.design_mode %} class="shopify-design-mode"{% endif %}>
+   <head>
+     <meta charset="utf-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+@@ -78,7 +83,8 @@
+           allProducts: {{ routes.all_products_collection_url | json }}
+         },
+         template: {{ t | json }},
+-        currency: {{ cart.currency.iso_code | json }}
++        currency: {{ cart.currency.iso_code | json }},
++        storeLang: {{ request.locale.iso_code | json }}
+       };
+     </script>
+     <script src="{{ 'monetta-core.js' | asset_url }}" defer></script>
+--- a/storefront-theme/sections/monetta-cart-sheet.liquid
++++ b/storefront-theme/sections/monetta-cart-sheet.liquid
+@@ -12,6 +12,11 @@
+       <button type="button" class="icon-button" data-overlay-close aria-label="Cerrar">{% render 'monetta-icon', name: 'close', size: 22 %}</button>
+     </div>
+     <div class="overlay__body" data-cart-sheet-body>
++      <div class="cart-sync form-error" data-cart-sync role="alert" hidden>
++        {% render 'monetta-icon', name: 'error', size: 18 %}
++        <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de continuar al checkout.</span>
++        <button type="button" class="btn btn--outline" data-cart-resync>Actualizar bolsa</button>
++      </div>
+       {%- if cart.item_count == 0 -%}
+         <div class="empty">
+           <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'bag', size: 28 %}</span>
+--- a/storefront-theme/sections/monetta-cart.liquid
++++ b/storefront-theme/sections/monetta-cart.liquid
+@@ -2,7 +2,9 @@
+   The bag (/cart). Phones: pinned page bar (back, "Mi bolsa", item count), the lines, the summary and a checkout bar that
+   replaces the dock. Lines are exact variants identified by their key; quantity and removal are real forms to /cart/change
+   (monetta-cart.js upgrades them to in-page requests that re-render this very section). Every amount, discount, limit and error
+-  is Shopify's; the theme adds nothing up. Checkout is Shopify's: the form posts to /cart with the checkout button.
++  is Shopify's; the theme adds nothing up. Checkout is Shopify's: the form posts to /cart with the checkout button. While a change
++  is in flight, or its result could not be confirmed, monetta-cart.js disables every way to checkout (buttons and the accelerated
++  checkout area below) and shows [data-cart-sync] when the only way out is to read the bag again.
+ {%- endcomment -%}
+ {%- liquid
+   assign count_label = cart.item_count | append: ' artículos'
+@@ -19,6 +21,12 @@
+       {% render 'monetta-page-bar', title: 'Mi bolsa', back: routes.root_url, ruled: true, trailing: bar_trailing %}
+     </div>
+ 
++    <div class="cart-sync form-error" data-cart-sync role="alert" hidden>
++      {% render 'monetta-icon', name: 'error', size: 18 %}
++      <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de continuar al checkout.</span>
++      <button type="button" class="btn btn--outline" data-cart-resync>Actualizar bolsa</button>
++    </div>
++
+     {%- if cart.item_count == 0 -%}
+       <div class="empty">
+         <span class="empty__mark" aria-hidden="true">{% render 'monetta-icon', name: 'bag', size: 28 %}</span>
+--- a/storefront-theme/sections/monetta-footer.liquid
++++ b/storefront-theme/sections/monetta-footer.liquid
+@@ -21,7 +21,7 @@
+           {%- if block.settings.heading != blank -%}<h2>{{ block.settings.heading | escape }}</h2>{%- endif -%}
+           <ul role="list">
+             {%- for link in linklists[block.settings.menu].links -%}
+-              <li><a href="{{ link.url }}">{{ link.title }}</a></li>
++              <li><a href="{{ link.url }}"{% render 'monetta-store-lang' %}>{{ link.title }}</a></li>
+             {%- endfor -%}
+           </ul>
+         </div>
+--- a/storefront-theme/sections/monetta-header.liquid
++++ b/storefront-theme/sections/monetta-header.liquid
+@@ -75,7 +75,7 @@
+   <nav class="site-nav" aria-label="Categorías">
+     <ul class="site-nav__list" role="list">
+       {%- for link in nav_menu.links -%}
+-        <li><a class="site-nav__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}>{{ link.title }}</a></li>
++        <li><a class="site-nav__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}{% render 'monetta-store-lang' %}>{{ link.title }}</a></li>
+       {%- else -%}
+         <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">Novedades</a></li>
+         <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}">Catálogo</a></li>
+@@ -102,7 +102,7 @@
+         <div class="menu__links">
+           {%- for link in nav_menu.links -%}
+             {%- capture icon_name -%}{% render 'monetta-menu-icon', handle: link.handle %}{%- endcapture -%}
+-            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span>{{ link.title }}</span></a>
++            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span {% render 'monetta-store-lang' %}>{{ link.title }}</span></a>
+           {%- else -%}
+             <a class="menu-link" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">{% render 'monetta-icon', name: 'sparkle', size: 22 %}<span>Novedades</span></a>
+             <a class="menu-link" href="{{ routes.all_products_collection_url }}">{% render 'monetta-icon', name: 'store', size: 22 %}<span>Catálogo</span></a>
+@@ -111,7 +111,7 @@
+         <div class="menu__footer">
+           {%- for link in drawer_menu.links limit: 4 -%}
+             {%- capture icon_name -%}{% render 'monetta-menu-icon', handle: link.handle %}{%- endcapture -%}
+-            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span>{{ link.title }}</span></a>
++            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span {% render 'monetta-store-lang' %}>{{ link.title }}</span></a>
+           {%- endfor -%}
+         </div>
+       </nav>
+--- a/storefront-theme/sections/monetta-product.liquid
++++ b/storefront-theme/sections/monetta-product.liquid
+@@ -5,7 +5,13 @@
+   Everything commercial is rendered by Shopify at request time: price, compare-at, availability, options, the selected variant.
+   When the shopper changes an option, assets/monetta-product.js asks the Section Rendering API for this same section with
+   ?variant=ID and swaps the [data-product-dynamic] and [data-purchase-dock] regions, so no price or stock is ever cached or
+-  recomputed in the browser. The add button posts the exact variant id and never substitutes another.
++  recomputed in the browser. The add button posts the exact variant id and never substitutes another: while a choice has not been
++  confirmed by Shopify (or its confirmation failed) adding and the accelerated checkout are blocked, and a failed confirmation puts
++  the chips back on the variant the page really shows.
++
++  Without JavaScript the chips are plain links to ?variant=ID, so choosing an option is a navigation and the form always sends the
++  variant the page shows. monetta-product.js swaps them for the radio group (html.mw-variants-js) because it can confirm each choice
++  without a reload.
+ {%- endcomment -%}
+ {%- liquid
+   assign current = product.selected_or_first_available_variant
+@@ -47,6 +53,9 @@
+     endif
+   endfor
+ -%}
++<script type="application/ld+json">
++  {{ product | structured_data }}
++</script>
+ <article
+   class="product-page"
+   data-product-page
+@@ -133,15 +142,16 @@
+         -%}
+         <p class="availability availability--{{ tone }}" data-availability><span class="availability__dot" aria-hidden="true"></span><span>{{ availability_text }}</span></p>
+ 
+-        {%- form 'product', product, id: form_id, class: 'product-form', novalidate: 'novalidate', data-product-form: 'true' -%}
++        {%- form 'product', product, id: form_id, class: 'product-form', novalidate: 'novalidate', autocomplete: 'off', data-product-form: 'true' -%}
+           <input type="hidden" name="id" value="{{ current.id }}" data-variant-id>
+ 
+           {%- unless product.has_only_default_variant -%}
+             <div class="product-panel__options" data-options>
+               {%- for option in product.options_with_values -%}
++                {%- assign option_index = forloop.index0 -%}
+                 <fieldset class="options" data-option-position="{{ forloop.index }}">
+                   <legend><span class="eyebrow eyebrow--muted">{{ option.name | escape }}</span><span class="options__value" data-option-value>{{ option.selected_value | escape }}</span></legend>
+-                  <div class="options__list">
++                  <div class="options__list options__list--radios">
+                     {%- for value in option.values -%}
+                       {%- assign value_variant = value.variant -%}
+                       {%- assign value_sold_out = false -%}
+@@ -152,10 +162,34 @@
+                         <span class="option-chip__label">{{ value | escape }}</span>
+                         {%- if value_sold_out -%}<span class="option-chip__note">Agotado</span>{%- endif -%}
+                       </label>
++                    {%- endfor -%}
++                  </div>
++                  <div class="options__list options__list--links">
++                    {%- for value in option.values -%}
++                      {%- assign value_name = value | append: '' -%}
++                      {%- assign target = value.variant -%}
++                      {%- if target == nil -%}
++                        {%- for candidate in product.variants -%}
++                          {%- if candidate.options[option_index] == value_name -%}
++                            {%- assign target = candidate -%}
++                            {%- break -%}
++                          {%- endif -%}
++                        {%- endfor -%}
++                      {%- endif -%}
++                      {%- assign link_sold_out = false -%}
++                      {%- if target == nil or target.available == false -%}{%- assign link_sold_out = true -%}{%- endif -%}
++                      {%- if target -%}
++                        <a class="option-chip option-chip--link{% if link_sold_out %} option-chip--soldout{% endif %}" href="{{ product.url }}?variant={{ target.id }}"{% if value.selected %} aria-current="true"{% endif %}>
++                          <span class="option-chip__check" aria-hidden="true">{% render 'monetta-icon', name: 'check', size: 16 %}</span>
++                          <span class="option-chip__label">{{ value | escape }}</span>
++                          {%- if link_sold_out -%}<span class="option-chip__note">Agotado</span>{%- endif -%}
++                        </a>
++                      {%- endif -%}
+                     {%- endfor -%}
+                   </div>
+                 </fieldset>
+               {%- endfor -%}
++              <p class="choice-hint" data-selection-status hidden></p>
+             </div>
+           {%- endunless -%}
+ 
+@@ -186,7 +220,7 @@
+             <div class="other-ways">
+               <h2 class="other-ways__title">Otras formas de comprar</h2>
+               {%- if show_pay -%}
+-                {{ form | payment_button }}
++                <div class="other-ways__pay"{% render 'monetta-store-lang' %}>{{ form | payment_button }}</div>
+               {%- endif -%}
+               {%- if show_apartado -%}
+                 {%- capture apartado_text -%}Hola, me interesa {% if current.available %}apartar{% else %}preguntar por la disponibilidad de{% endif %}: {{ product.title }}{% if variant_label != blank %} ({{ variant_label }}){% endif %} — {{ current.price | money_with_currency }}. {{ product_link }}{%- endcapture -%}
+--- a/storefront-theme/snippets/monetta-cart-line.liquid
++++ b/storefront-theme/snippets/monetta-cart-line.liquid
+@@ -1,6 +1,8 @@
+ {%- doc -%}
+   One bag line. Amounts, discounts and the quantity ceiling come from Shopify; nothing is recomputed here.
+-  The line is identified by its key (variant + properties + selling plan), never by position.
++  The line is identified by its key (variant + properties + selling plan), never by position. The editable line also carries
++  data-restore: the variant, quantity, properties (public and private) and selling plan it has right now, so that "Deshacer"
++  can put back that very line and not just another purchase of the same variant.
+ 
+   @param {object} item - A cart line item.
+   @param {boolean} [compact] - Read-only variant for the "En tu bolsa" sheet.
+@@ -19,8 +21,15 @@
+   if variant.compare_at_price > item.original_price
+     assign marked_down = true
+   endif
++  assign restore_plan = 'null'
++  if item.selling_plan_allocation
++    assign restore_plan = item.selling_plan_allocation.selling_plan.id
++  endif
+ -%}
+-<li class="cart-line"{% unless compact %} data-line="{{ item.key }}"{% endunless %} data-variant-id="{{ item.variant_id }}">
++{%- comment -%}`item.properties | json` serialises the pairs as an array, which would read back as "no properties"; write the object explicitly.{%- endcomment -%}
++{%- capture restore_properties -%}{ {%- for property in item.properties -%}{{ property.first | json }}:{{ property.last | json }}{%- unless forloop.last -%},{%- endunless -%}{%- endfor -%} }{%- endcapture -%}
++{%- capture restore_json -%}{"id":{{ item.variant_id }},"quantity":{{ item.quantity }},"properties":{{ restore_properties }},"selling_plan":{{ restore_plan }}}{%- endcapture -%}
++<li class="cart-line"{% unless compact %} data-line="{{ item.key }}" data-restore="{{ restore_json | escape }}"{% endunless %} data-variant-id="{{ item.variant_id }}">
+   <a class="cart-line__media" href="{{ item.url }}" tabindex="-1" aria-hidden="true">
+     {%- if item.image -%}
+       <img src="{{ item.image | image_url: width: 240 }}" srcset="{{ item.image | image_url: width: 240 }} 240w, {{ item.image | image_url: width: 360 }} 360w" sizes="(min-width: 1024px) 112px, 88px" alt="" width="{{ item.image.width | at_most: 240 }}" height="{{ item.image.height | times: 240 | divided_by: item.image.width }}" loading="lazy">
+--- a/storefront-theme/snippets/monetta-results.liquid
++++ b/storefront-theme/snippets/monetta-results.liquid
+@@ -26,7 +26,7 @@
+       <h2 class="empty__title" tabindex="-1" id="empty-heading">{{ empty_title | default: 'Muy pronto encontrarás nuevas piezas aquí' }}</h2>
+       {%- if empty_body != blank -%}<p class="body-copy">{{ empty_body }}</p>{%- endif -%}
+       <div class="empty__actions">
+-        {%- if search_url != blank -%}<a class="btn btn--primary" href="#header-search-input" data-edit-search>Editar búsqueda</a><a class="btn btn--outline" href="{{ search_url }}">Limpiar búsqueda</a>{%- else -%}<a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">Ver todo el catálogo</a>{%- endif -%}
++        {%- if search_url != blank -%}<a class="btn btn--primary" href="#page-search-input" data-edit-search>Editar búsqueda</a><a class="btn btn--outline" href="{{ search_url }}">Limpiar búsqueda</a>{%- else -%}<a class="btn btn--primary" href="{{ routes.all_products_collection_url }}">Ver todo el catálogo</a>{%- endif -%}
+       </div>
+     {%- endif -%}
+   </div>
+--- /dev/null
++++ b/storefront-theme/snippets/monetta-store-lang.liquid
+@@ -0,0 +1,9 @@
++{%- doc -%}
++  Outputs ` lang="xx"` when the store's own language is not Spanish, and nothing when it is. The Monetta interface is written in
++  Spanish and the page declares it (layout/monetta.liquid), but a few fragments are rendered by Shopify in the store's language
++  (menu titles the merchant typed in the admin, the accelerated-checkout buttons, store-side error messages). Marking them lets a
++  screen reader pronounce them in that language instead of the page's. The store locale is the best signal available: Shopify gives
++  no language per menu title, and a multilingual store is out of scope for this delivery.
++{%- enddoc -%}
++{%- assign store_language = request.locale.iso_code | slice: 0, 2 -%}
++{% unless store_language == 'es' %} lang="{{ request.locale.iso_code }}"{%- endunless -%}

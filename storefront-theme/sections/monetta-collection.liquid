@@ -21,6 +21,9 @@
   if sort_by != collection.default_sort_by
     assign clear_url = collection.url | append: '?sort_by=' | append: sort_by
   endif
+  capture collection_title
+    render 'monetta-collection-title', collection: collection
+  endcapture
   assign count_text = collection.products_count | append: ' piezas'
   if collection.products_count == 1
     assign count_text = '1 pieza'
@@ -32,7 +35,7 @@
       <nav class="breadcrumbs" aria-label="Ruta de navegación">
         <ol>
           <li><a href="{{ routes.root_url }}">Inicio</a></li>
-          <li><span aria-current="page">{{ collection.title | escape }}</span></li>
+          <li><span aria-current="page">{{ collection_title | escape }}</span></li>
         </ol>
       </nav>
       {%- capture bar_sub -%}<p class="page-bar__sub" data-count aria-live="polite">{{ count_text }}</p>{%- endcapture -%}
@@ -42,11 +45,17 @@
           <button type="button" class="icon-button page-bar__action" data-open-dialog="filters-drawer" aria-haspopup="dialog" aria-controls="filters-drawer" aria-label="Filtrar y ordenar{% if active_count > 0 %}, {{ active_count }} activos{% endif %}" title="Filtrar y ordenar">{% render 'monetta-icon', name: 'tune', size: 24 %}{% if active_count > 0 %}<span class="page-bar__badge" aria-hidden="true">{{ active_count }}</span>{% endif %}</button>
         {%- endif -%}
       {%- endcapture -%}
-      {% render 'monetta-page-bar', title: collection.title, back: routes.root_url, sub: bar_sub, actions: bar_actions %}
+      {% render 'monetta-page-bar', title: collection_title, back: routes.root_url, sub: bar_sub, actions: bar_actions %}
       {%- if collection.description != blank and paginate.current_page == 1 -%}
         <div class="body-copy page-intro">{{ collection.description }}</div>
       {%- endif -%}
     </div>
+
+    {%- if collection.image != blank and paginate.current_page == 1 -%}
+      <div class="collection-editorial">
+        {% render 'monetta-image', image: collection.image, widths: '600,900,1400', sizes: '(min-width: 1200px) 1200px, 100vw', alt: collection_title, eager: true %}
+      </div>
+    {%- endif -%}
 
     {%- if shortcuts.links.size > 0 -%}
       <nav class="collection-shortcuts" aria-label="Atajos">

@@ -1,0 +1,11 @@
+{
+  "before": {
+    "warning": 64,
+    "error": 187
+  },
+  "after": {
+    "warning": 64,
+    "error": 187
+  },
+  "new_issues": []
+}

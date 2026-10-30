@@ -1,0 +1,159 @@
+{
+  "run": "journey-440x956",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/journey.mjs --base-url=http://127.0.0.1:9292 --w=440 --h=956",
+  "startedAt": "2026-10-19T22:33:40.926Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 611,
+      "sha256": "7f509763105897cdd4cc0518532a788586c63139ab339965e9e283a8099ce449"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewport": {
+    "width": 440,
+    "height": 956
+  },
+  "finishedAt": "2026-10-19T22:39:02.436Z",
+  "status": "complete-with-failures",
+  "error": null,
+  "summary": {
+    "checks": 23,
+    "passed": 16,
+    "failed": 7
+  },
+  "checks": [
+    {
+      "name": "home: one h1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home: real products rendered (Novedades + Selección)",
+      "pass": true,
+      "detail": "16 cards"
+    },
+    {
+      "name": "home: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":440,\"innerWidth\":440}"
+    },
+    {
+      "name": "home: visible images loaded and decoded",
+      "pass": true,
+      "detail": "{\"total\":19,\"broken\":[]}"
+    },
+    {
+      "name": "home: no prototype strip or demo UI",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home — unexpected error",
+      "pass": false,
+      "detail": "page.screenshot: Timeout 30000ms exceeded.",
+      "kind": "error"
+    },
+    {
+      "name": "collection: count line shown (Shopify products_count)",
+      "pass": true,
+      "detail": "202 piezas"
+    },
+    {
+      "name": "collection: first page has 24 cards",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "collection: filters drawer settled inside the viewport (x and y)",
+      "pass": true,
+      "detail": "{\"x\":0,\"y\":0,\"width\":440,\"height\":956}"
+    },
+    {
+      "name": "collection: filter applied and the count matches Shopify's facet count",
+      "pass": true,
+      "detail": "199 vs facet 199"
+    },
+    {
+      "name": "collection: active filter chip with a remove link",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "collection: sort price ascending from the drawer, filter kept",
+      "pass": true,
+      "detail": "9.95 ≤ 600 ≤ 629.95 ≤ 679 ≤ 699.95 ≤ 729.95 ≤ 749 ≤ 749"
+    },
+    {
+      "name": "collection: \"Ver más piezas\" is a real link to ?page=2",
+      "pass": true,
+      "detail": "/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "collection: load more appends to 48 and updates the address",
+      "pass": true,
+      "detail": "http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "collection: Back leaves the filtered/sorted state coherent",
+      "pass": true,
+      "detail": "http://127.0.0.1:9292/collections/all?sort_by=title-ascending&filter.v.availability=1"
+    },
+    {
+      "name": "collection: Forward returns to the same URL",
+      "pass": true,
+      "detail": "http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "backarrow — unexpected error",
+      "pass": false,
+      "detail": "locator.click: Target page, context or browser has been closed",
+      "kind": "error"
+    },
+    {
+      "name": "product — unexpected error",
+      "pass": false,
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "kind": "error"
+    },
+    {
+      "name": "add — unexpected error",
+      "pass": false,
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "kind": "error"
+    },
+    {
+      "name": "refusal — unexpected error",
+      "pass": false,
+      "detail": "page.evaluate: Target page, context or browser has been closed",
+      "kind": "error"
+    },
+    {
+      "name": "bag — unexpected error",
+      "pass": false,
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "kind": "error"
+    },
+    {
+      "name": "checkout — unexpected error",
+      "pass": false,
+      "detail": "page.goto: Target page, context or browser has been closed",
+      "kind": "error"
+    },
+    {
+      "name": "no unexpected console errors or page errors from the theme",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": [
+    "sort select hidden at this width (the phone uses the drawer); sort checked from the drawer in the next block"
+  ]
+}

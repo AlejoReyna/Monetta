@@ -1,0 +1,23 @@
+{%- doc -%}
+  The shopper-facing brand label (card, cart line, product page), as the app's tile does it: the canonical brand facet,
+  else the product's own vendor. The store's own vendor names (storeVendorAliases in normalization_rules.json) are never
+  a brand, so they render nothing.
+
+  @param {object} product - Shopify product.
+{%- enddoc -%}
+{%- liquid
+  capture brand
+    render 'monetta-facet', product: product, kind: 'brands'
+  endcapture
+  assign brand = brand | strip
+  if brand == blank
+    capture folded_vendor
+      render 'monetta-fold', text: product.vendor
+    endcapture
+    assign folded_vendor = folded_vendor | strip
+    unless folded_vendor == 'monetta' or folded_vendor == 'monetta wholesale' or folded_vendor == 'monetta wholesale llc'
+      assign brand = product.vendor | strip
+    endunless
+  endif
+  echo brand
+-%}

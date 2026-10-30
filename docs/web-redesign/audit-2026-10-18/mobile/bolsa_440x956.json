@@ -1,0 +1,25 @@
+{
+  "screen": "bolsa",
+  "width": 440.0,
+  "height": 956.0,
+  "firstCard": {
+    "x": 20.0,
+    "y": 917.1,
+    "width": 148.0,
+    "height": 251.9999999999999
+  },
+  "textRoles": [
+    {
+      "text": "Resumen de compra",
+      "fontFamily": "Inter",
+      "fontSize": 17.0,
+      "fontWeight": 600
+    },
+    {
+      "text": "Mi bolsa",
+      "fontFamily": "Playfair Display",
+      "fontSize": 28.0,
+      "fontWeight": 400
+    }
+  ]
+}

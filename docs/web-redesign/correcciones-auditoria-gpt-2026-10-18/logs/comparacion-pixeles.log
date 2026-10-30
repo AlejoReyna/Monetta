@@ -1,0 +1,8 @@
+.....................................................................DIFF cart-empty @ 768×1024 top: 4 px, box 37,592,44,843
+DIFF cart-empty @ 768×1024 middle: 4 px, box 37,310,44,561
+DIFF cart-empty @ 768×1024 end: 1 px, box 37,279,37,279
+........................................................DIFF not-found @ 768×1024 top: 4 px, box 37,547,44,797
+DIFF not-found @ 768×1024 middle: 4 px, box 37,287,44,537
+DIFF not-found @ 768×1024 end: 1 px, box 37,278,37,278
+...
+378/384 captures identical (6 differ)

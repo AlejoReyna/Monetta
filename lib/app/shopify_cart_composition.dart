@@ -70,9 +70,9 @@ final class ShopifyCartComposition {
   /// their own `--dart-define-from-file` values.
   final CheckoutReturnPolicy returnPolicy;
 
-  /// Shop domain plus the optional dedicated return domain
+  /// The shop's checkout hosts plus the optional dedicated return domain
   /// (`SHOPIFY_CHECKOUT_RETURN_DOMAIN`). Empty or malformed values fall back
-  /// to the shop domain alone; production must set its own file's value.
+  /// to the shop's hosts alone; production must set its own file's value.
   static Set<String> _checkoutHosts(StorefrontConfig config) {
     const raw = String.fromEnvironment('SHOPIFY_CHECKOUT_RETURN_DOMAIN');
     final candidate = raw.trim().toLowerCase();
@@ -80,10 +80,10 @@ final class ShopifyCartComposition {
         candidate.contains(RegExp(r'[/\\:@\s]')) ||
         candidate.startsWith('.') ||
         candidate.endsWith('.')) {
-      return {config.shopDomain};
+      return config.checkoutHosts;
     }
     final parsed = Uri.tryParse('https://$candidate');
-    if (parsed?.host != candidate) return {config.shopDomain};
-    return {config.shopDomain, candidate};
+    if (parsed?.host != candidate) return config.checkoutHosts;
+    return {...config.checkoutHosts, candidate};
   }
 }

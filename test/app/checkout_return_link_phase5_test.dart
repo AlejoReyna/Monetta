@@ -199,8 +199,8 @@ void main() {
 
     test('ruta de navegador usa el opener explícito', () async {
       final opener = _FakeOpener();
-      final outcome = await router(opener: opener)
-          .handle(_url('/checkouts/abc/thank-you'));
+      final outcome =
+          await router(opener: opener).handle(_url('/checkouts/abc/thank-you'));
       expect(outcome, CheckoutReturnOutcome.browser);
       expect(opener.calls, 1);
     });
@@ -249,12 +249,10 @@ void main() {
     });
 
     Future<void> pushNative(String method, Object? arguments) {
-      final data =
-          const StandardMethodCodec().encodeMethodCall(
-            MethodCall(method, arguments),
-          );
-      return TestDefaultBinaryMessengerBinding
-          .instance.defaultBinaryMessenger
+      final data = const StandardMethodCodec().encodeMethodCall(
+        MethodCall(method, arguments),
+      );
+      return TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .handlePlatformMessage(channelName, data, (_) {});
     }
 
@@ -344,9 +342,7 @@ void main() {
         ),
       );
       expect(
-        composition.returnPolicy
-            .decide(_url('/checkouts/abc'))
-            .route,
+        composition.returnPolicy.decide(_url('/checkouts/abc')).route,
         CheckoutReturnRoute.resumeCheckout,
       );
       expect(
@@ -375,7 +371,8 @@ final class _MemorySecureStore implements SecureTokenStore {
   }
 }
 
-final class _FakeOpener implements ExternalCheckoutOpener {  int calls = 0;
+final class _FakeOpener implements ExternalCheckoutOpener {
+  int calls = 0;
 
   @override
   Future<bool> open(ValidatedCheckoutUrl checkoutUrl) async {

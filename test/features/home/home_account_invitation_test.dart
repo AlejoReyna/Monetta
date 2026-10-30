@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart' show ScrollCacheExtent;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/theme.dart';
 import 'package:monetta_app/features/home/home_account_invitation.dart';
@@ -69,20 +70,26 @@ void main() {
     final scroll = ScrollController();
     addTearDown(scroll.dispose);
     final invitationKey = GlobalKey();
-    await tester.pumpWidget(MaterialApp(
-      theme: buildLightTheme(),
-      home: Scaffold(
+    await tester.pumpWidget(
+      MaterialApp(
+        theme: buildLightTheme(),
+        home: Scaffold(
           body: ListView(
-        controller: scroll,
-        cacheExtent: 500,
-        children: [
-          const SizedBox(height: 900),
-          HomeAccountInvitation(
-              key: invitationKey, scrollController: scroll, onRegister: () {}),
-          const SizedBox(height: 2000),
-        ],
-      )),
-    ));
+            controller: scroll,
+            scrollCacheExtent: const ScrollCacheExtent.pixels(500),
+            children: [
+              const SizedBox(height: 900),
+              HomeAccountInvitation(
+                key: invitationKey,
+                scrollController: scroll,
+                onRegister: () {},
+              ),
+              const SizedBox(height: 2000),
+            ],
+          ),
+        ),
+      ),
+    );
     await tester.pump(const Duration(seconds: 2));
     expect(opacity(tester, revealKey), 0);
     final firstState = invitationKey.currentState;
@@ -110,12 +117,16 @@ void main() {
       expect(opacity(tester, ValueKey('home-payment-reveal-$i')), 0);
     }
     await tester.pump(const Duration(milliseconds: 320));
-    expect(opacity(tester, const ValueKey('home-payment-reveal-0')),
-        greaterThan(0));
+    expect(
+      opacity(tester, const ValueKey('home-payment-reveal-0')),
+      greaterThan(0),
+    );
     expect(opacity(tester, const ValueKey('home-payment-reveal-1')), 0);
     await tester.pump(const Duration(milliseconds: 120));
-    expect(opacity(tester, const ValueKey('home-payment-reveal-1')),
-        greaterThan(0));
+    expect(
+      opacity(tester, const ValueKey('home-payment-reveal-1')),
+      greaterThan(0),
+    );
     expect(opacity(tester, const ValueKey('home-payment-reveal-2')), 0);
     await tester.pumpAndSettle();
     for (var i = 0; i < 7; i++) {
@@ -127,17 +138,19 @@ void main() {
     testWidgets(
         'shows everything immediately when motion is reduced (accessible=$accessibleNavigation)',
         (tester) async {
-      await tester.pumpWidget(MaterialApp(
-        theme: buildLightTheme(),
-        builder: (context, child) => MediaQuery(
-          data: MediaQuery.of(context).copyWith(
-            disableAnimations: !accessibleNavigation,
-            accessibleNavigation: accessibleNavigation,
+      await tester.pumpWidget(
+        MaterialApp(
+          theme: buildLightTheme(),
+          builder: (context, child) => MediaQuery(
+            data: MediaQuery.of(context).copyWith(
+              disableAnimations: !accessibleNavigation,
+              accessibleNavigation: accessibleNavigation,
+            ),
+            child: child!,
           ),
-          child: child!,
+          home: Scaffold(body: HomeAccountInvitation(onRegister: () {})),
         ),
-        home: Scaffold(body: HomeAccountInvitation(onRegister: () {})),
-      ));
+      );
       expect(opacity(tester, revealKey), 1);
       for (var i = 0; i < 7; i++) {
         expect(opacity(tester, ValueKey('home-payment-reveal-$i')), 1);

@@ -1,0 +1,400 @@
+{
+  "ranAt": "2026-10-19T04:30:44.346Z",
+  "mutations": [
+    {
+      "name": "control-sin-mutar",
+      "note": "the corrected tree, copied and served like the others",
+      "grep": "RE-0",
+      "port": 4611,
+      "passed": 22,
+      "failed": 0,
+      "checks": [
+        {
+          "passed": true,
+          "name": "RE-01 1024×200 behaves like 1023×200: the collection scrolled 800px leaves the whole window to the products on both sides of the width limit",
+          "detail": "free 200px at 1023 and 200px at 1024"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1023px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "collection free px — 200: 200 · 360: 360 · 480: 480"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1024px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "collection free px — 200: 200 · 360: 360 · 480: 480"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1280px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "collection free px — 200: 200 · 360: 360 · 480: 480"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1440px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "collection free px — 200: 200 · 360: 360 · 480: 480"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 in a short window the desktop columns flow with the page: filters, product panel and bag summary are not sticky and the gallery keeps its natural size (1024×200, 1280×200, 1440×360)",
+          "detail": "1024×200 viewer 432×540 · 1280×200 viewer 571×714 · 1440×360 viewer 664×830"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 across the 480px height limit the header changes (static at 480, pinned at 481) and normal windows keep their pinned header, sticky columns and fitted gallery (1024 and 1440 wide, 481 / 768 / 900 tall)",
+          "detail": "1024×480 static · 1440×480 static · 1024×481 sticky · 1440×481 sticky · 1024×768 sticky · 1440×900 sticky"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1024×200: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1280×240: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1440×360: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-01 Tab traversal in short desktop windows (product at 1024×200, bag at 1280×240, collection at 1440×360): no focused control, text or ring is hidden, footer links included",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-01 with 44px emulated insets the header is not pinned at 1024×200 or 812×300 and controls and text stay inside the safe region (home, collection, product, bag, search)",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-02 768×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 537…667 (text to 655), fade from 676"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 812×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 576…706 (text to 694), fade from 715"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 1023×768 (tablet, one pixel below the width limit): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 770…900 (text to 888), fade from 900"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 1024×768 (desktop, one pixel above it): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 882…1012 (text to 1000), fade from none"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 1440×900 (desktop): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 1102…1232 (text to 1220), fade from none"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 768×1024 (tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 537…667 (text to 655), fade from 676"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 812×375 (short tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 576…706 (text to 694), fade from 715"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 768×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "scrolled to 330, link ends at 667, fade from 676"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 812×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "scrolled to 291, link ends at 706, fade from 715"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 1023×768: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "scrolled to 97, link ends at 900, fade from 900"
+        }
+      ]
+    },
+    {
+      "name": "sin-espacio-al-final-de-la-fila",
+      "note": "the row keeps the inset ring but loses its end padding: the last link cannot scroll out of the fade",
+      "grep": "RE-02",
+      "port": 4612,
+      "passed": 2,
+      "failed": 8,
+      "checks": [
+        {
+          "passed": false,
+          "name": "RE-02 768×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Nuestra historia: ring painted on 3/4 sides, the container's mask washes out 532 painted pixels (by up to 180/255) · Tab Nuestra historia: ring painted on 3/4 sides · Tab Nuestra historia: the fade changes 532 painted pixels (up to 180/255) ·"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 812×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Nuestra historia: ring painted on 3/4 sides, the container's mask washes out 561 painted pixels (by up to 184/255) · Tab Nuestra historia: ring painted on 3/4 sides · Tab Nuestra historia: the fade changes 561 painted pixels (up to 184/255) ·"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 1023×768 (tablet, one pixel below the width limit): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Nuestra historia: ring painted on 3/4 sides, the container's mask washes out 737 painted pixels (by up to 195/255) · Tab Nuestra historia: ring painted on 3/4 sides · Tab Nuestra historia: the fade changes 737 painted pixels (up to 195/255) ·"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 1024×768 (desktop, one pixel above it): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 882…1012 (text to 1000), fade from none"
+        },
+        {
+          "passed": true,
+          "name": "RE-02 1440×900 (desktop): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "9 links, last “Nuestra historia” 1102…1232 (text to 1220), fade from none"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 768×1024 (tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Nuestra historia: ring painted on 3/4 sides, the container's mask washes out 321 painted pixels (by up to 119/255) · Tab Nuestra historia: ring painted on 3/4 sides · Tab Nuestra historia: the fade changes 321 painted pixels (up to 119/255) ·"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 812×375 (short tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Nuestra historia: ring painted on 3/4 sides, the container's mask washes out 355 painted pixels (by up to 125/255) · Tab Nuestra historia: ring painted on 3/4 sides · Tab Nuestra historia: the fade changes 355 painted pixels (up to 125/255) ·"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 768×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "last link entered from the end: Shift+Tab Nuestra historia: ring painted on 3/4 sides, the container's mask washes out 532 painted pixels (by up to 181/255) · Shift+Tab Nuestra historia: ring painted on 3/4 sides · Shift+Tab Nuestra historia: the fade changes "
+        },
+        {
+          "passed": false,
+          "name": "RE-02 812×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "last link entered from the end: Shift+Tab Nuestra historia: ring painted on 3/4 sides, the container's mask washes out 561 painted pixels (by up to 184/255) · Shift+Tab Nuestra historia: ring painted on 3/4 sides · Shift+Tab Nuestra historia: the fade changes "
+        },
+        {
+          "passed": false,
+          "name": "RE-02 1023×768: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "last link entered from the end: Shift+Tab Nuestra historia: ring painted on 3/4 sides, the container's mask washes out 736 painted pixels (by up to 195/255) · Shift+Tab Nuestra historia: ring painted on 3/4 sides · Shift+Tab Nuestra historia: the fade changes "
+        }
+      ]
+    },
+    {
+      "name": "anillo-fuera-de-la-caja",
+      "note": "the row keeps its end padding but the ring goes back outside the 44px link: the row clips its top and bottom",
+      "grep": "RE-02",
+      "port": 4613,
+      "passed": 0,
+      "failed": 10,
+      "checks": [
+        {
+          "passed": false,
+          "name": "RE-02 768×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Novedades: ring painted on 2/4 sides · Tab Novedades: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 side"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 812×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Novedades: ring painted on 2/4 sides · Tab Novedades: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 side"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 1023×768 (tablet, one pixel below the width limit): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Novedades: ring painted on 2/4 sides · Tab Novedades: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 side"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 1024×768 (desktop, one pixel above it): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Novedades: ring painted on 2/4 sides · Tab Novedades: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 side"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 1440×900 (desktop): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Novedades: ring painted on 2/4 sides · Tab Novedades: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 side"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 768×1024 (tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Novedades: ring painted on 2/4 sides · Tab Novedades: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 side"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 812×375 (short tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides",
+          "detail": "category row: Tab Novedades: ring painted on 2/4 sides · Tab Novedades: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Bolsas: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 sides · Tab Carteras: ring painted on 2/4 side"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 768×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "last link entered from the end: Shift+Tab Nuestra historia: ring painted on 2/4 sides · Shift+Tab Nuestra historia: ring painted on 2/4 sides"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 812×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "last link entered from the end: Shift+Tab Nuestra historia: ring painted on 2/4 sides · Shift+Tab Nuestra historia: ring painted on 2/4 sides"
+        },
+        {
+          "passed": false,
+          "name": "RE-02 1023×768: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted",
+          "detail": "last link entered from the end: Shift+Tab Nuestra historia: ring painted on 2/4 sides · Shift+Tab Nuestra historia: ring painted on 2/4 sides"
+        }
+      ]
+    },
+    {
+      "name": "limite-de-ancho-1024",
+      "note": "the short-window rule is limited to < 1024px wide again",
+      "grep": "RE-01",
+      "port": 4614,
+      "passed": 2,
+      "failed": 10,
+      "checks": [
+        {
+          "passed": false,
+          "name": "RE-01 1024×200 behaves like 1023×200: the collection scrolled 800px leaves the whole window to the products on both sides of the width limit",
+          "detail": "1024×200: #site-top is sticky, ends at 146px and leaves 54px of 200 to the products"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1023px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "collection free px — 200: 200 · 360: 360 · 480: 480"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 1024px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "content squeezed under pinned chrome: 1024×200 home: 54px of 200 free (site-top) · 1024×200 home: still pinned div.site-top:sticky · 1024×200 collection: 54px of 200 free (site-top) · 1024×200 collection: still pinned div.site-top:sticky · 1024×200 product: 54"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 1280px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "content squeezed under pinned chrome: 1280×200 home: 54px of 200 free (site-top) · 1280×200 home: still pinned div.site-top:sticky · 1280×200 collection: 54px of 200 free (site-top) · 1280×200 collection: still pinned div.site-top:sticky, aside.filter-sidebar:"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 1440px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "content squeezed under pinned chrome: 1440×200 home: 54px of 200 free (site-top) · 1440×200 home: still pinned div.site-top:sticky · 1440×200 collection: 54px of 200 free (site-top) · 1440×200 collection: still pinned div.site-top:sticky, aside.filter-sidebar:"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 in a short window the desktop columns flow with the page: filters, product panel and bag summary are not sticky and the gallery keeps its natural size (1024×200, 1280×200, 1440×360)",
+          "detail": "columns tuned to a pinned header: 1024×200: product panel is sticky · 1024×200: gallery viewer is 0×0px · 1024×200: gallery thumbnails are 7px tall · 1024×200: bag summary is sticky · 1280×200: filter sidebar is sticky · 1280×200: filter sidebar is 23px tall ("
+        },
+        {
+          "passed": false,
+          "name": "RE-01 across the 480px height limit the header changes (static at 480, pinned at 481) and normal windows keep their pinned header, sticky columns and fitted gallery (1024 and 1440 wide, 481 / 768 / 900 tall)",
+          "detail": "limit or normal view changed: 1024×480 product: header is sticky, expected static · 1024×480 product: panel is sticky, expected static · 1024×480 product: gallery viewer collapsed to 196px · 1024×480 bag: summary is sticky, expected static · 1440×480 product: "
+        },
+        {
+          "passed": false,
+          "name": "RE-01 1024×200: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": "a control is unusable in a short desktop window: search results link: not fully on screen · search results link: covered by another element"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 1280×240: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": "a control is unusable in a short desktop window: search results link: not fully on screen"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1440×360: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": ""
+        },
+        {
+          "passed": false,
+          "name": "RE-01 Tab traversal in short desktop windows (product at 1024×200, bag at 1280×240, collection at 1440×360): no focused control, text or ring is hidden, footer links included",
+          "detail": "hidden stops: 1024×200 product: Solicitar apartado (main): ring covered on top · 1024×200 product: Sobre pedido Coach Cartera Coach Snap Wallet $2,289.00 (main): box covered by site-nav__link · 1024×200 product: Sobre pedido Coach Bolso Coach Jet Shoulder Bag "
+        },
+        {
+          "passed": false,
+          "name": "RE-01 with 44px emulated insets the header is not pinned at 1024×200 or 812×300 and controls and text stay inside the safe region (home, collection, product, bag, search)",
+          "detail": "short window with insets: 1024×200 home: 54px of 200 free · 1024×200 collection: 54px of 200 free · 1024×200 product: 54px of 200 free · 1024×200 search: 54px of 200 free · 1024×200 cart: 54px of 200 free"
+        }
+      ]
+    },
+    {
+      "name": "sin-columnas-de-escritorio",
+      "note": "the rule applies at every width but the sticky columns and the fitted gallery keep their header-sized formulas",
+      "grep": "RE-01",
+      "port": 4615,
+      "passed": 7,
+      "failed": 5,
+      "checks": [
+        {
+          "passed": true,
+          "name": "RE-01 1024×200 behaves like 1023×200: the collection scrolled 800px leaves the whole window to the products on both sides of the width limit",
+          "detail": "free 200px at 1023 and 200px at 1024"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1023px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "collection free px — 200: 200 · 360: 360 · 480: 480"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 1024px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "content squeezed under pinned chrome: 1024×200 product: still pinned div.product-panel:sticky · 1024×200 cart: still pinned aside.summary:sticky · 1024×360 product: still pinned div.product-panel:sticky · 1024×360 cart: still pinned aside.summary:sticky · 1024"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 1280px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "content squeezed under pinned chrome: 1280×200 collection: still pinned aside.filter-sidebar:sticky · 1280×200 product: still pinned div.product-panel:sticky · 1280×200 search: still pinned aside.filter-sidebar:sticky · 1280×200 cart: still pinned aside.summar"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 1440px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it",
+          "detail": "content squeezed under pinned chrome: 1440×200 collection: still pinned aside.filter-sidebar:sticky · 1440×200 product: still pinned div.product-panel:sticky · 1440×200 search: still pinned aside.filter-sidebar:sticky · 1440×200 cart: still pinned aside.summar"
+        },
+        {
+          "passed": false,
+          "name": "RE-01 in a short window the desktop columns flow with the page: filters, product panel and bag summary are not sticky and the gallery keeps its natural size (1024×200, 1280×200, 1440×360)",
+          "detail": "columns tuned to a pinned header: 1024×200: product panel is sticky · 1024×200: gallery viewer is 0×0px · 1024×200: gallery thumbnails are 7px tall · 1024×200: bag summary is sticky · 1280×200: filter sidebar is sticky · 1280×200: filter sidebar is 23px tall ("
+        },
+        {
+          "passed": false,
+          "name": "RE-01 across the 480px height limit the header changes (static at 480, pinned at 481) and normal windows keep their pinned header, sticky columns and fitted gallery (1024 and 1440 wide, 481 / 768 / 900 tall)",
+          "detail": "limit or normal view changed: 1024×480 product: panel is sticky, expected static · 1024×480 product: gallery viewer collapsed to 196px · 1024×480 bag: summary is sticky, expected static · 1440×480 product: panel is sticky, expected static · 1440×480 product: g"
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1024×200: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1280×240: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-01 1440×360: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-01 Tab traversal in short desktop windows (product at 1024×200, bag at 1280×240, collection at 1440×360): no focused control, text or ring is hidden, footer links included",
+          "detail": ""
+        },
+        {
+          "passed": true,
+          "name": "RE-01 with 44px emulated insets the header is not pinned at 1024×200 or 812×300 and controls and text stay inside the safe region (home, collection, product, bag, search)",
+          "detail": ""
+        }
+      ]
+    },
+    {
+      "name": "fila-centrada-con-desborde",
+      "note": "the desktop row is centred with justify-content again: when it overflows, the first link ends up under the inset",
+      "grep": "RE-01 with 44px",
+      "port": 4616,
+      "passed": 0,
+      "failed": 1,
+      "checks": [
+        {
+          "passed": false,
+          "name": "RE-01 with 44px emulated insets the header is not pinned at 1024×200 or 812×300 and controls and text stay inside the safe region (home, collection, product, bag, search)",
+          "detail": "short window with insets: 1024×200 home: control a.site-nav__link “Novedades”: 23…123 · 1024×200 home: text a.site-nav__link “Novedades”: 35…111 · 1024×200 collection: control a.site-nav__link “Novedades”: 23…123 · 1024×200 collection: text a.site-nav__link “N"
+        }
+      ]
+    }
+  ]
+}

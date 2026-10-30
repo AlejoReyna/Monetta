@@ -1,0 +1,106 @@
+import { Liquid } from 'liquidjs';
+import { createRequire } from 'node:module';
+import { readFile, writeFile, mkdir } from 'node:fs/promises';
+import http from 'node:http';
+import path from 'node:path';
+import assert from 'node:assert/strict';
+const repo = '/Users/alexis_reyna/MyCode/Monetta';
+const theme = path.join(repo, 'storefront-theme');
+const out = path.join(repo, 'docs/web-redesign/shopify-staging/account-design-2026-10-30');
+await mkdir(out, {recursive: true});
+const { firefox } = createRequire(path.join(repo, 'design-prototype/package.json'))('playwright-core');
+const liquid = new Liquid({root: [path.join(theme, 'snippets'), path.join(theme, 'sections')], extname: '.liquid'});
+for (const name of ['doc','schema']) liquid.registerTag(name, {parse(token, remain) { while(remain.length) { if (remain.shift().name === 'end' + name) break; } }, render() { return ''; }});
+liquid.registerTag('paginate', {parse(token, remain) {this.tpls=[]; const stream=liquid.parser.parseStream(remain); stream.on('tag:endpaginate',()=>stream.stop()).on('template',t=>this.tpls.push(t)).start();}, *render(ctx, emitter) {yield liquid.renderer.renderTemplates(this.tpls,ctx,emitter);}});
+liquid.registerFilter('asset_url',x=>'/assets/'+x);
+liquid.registerFilter('image_url',x=>x?.src || x);
+liquid.registerFilter('json',JSON.stringify);
+liquid.registerFilter('url_encode',encodeURIComponent);
+liquid.registerFilter('money_with_currency',x=>new Intl.NumberFormat('es-MX',{style:'currency',currency:'MXN',maximumFractionDigits:0}).format(Number(x)/100)+' MXN');
+liquid.registerFilter('stylesheet_tag',x=>`<link rel="stylesheet" href="${x}">`);
+liquid.registerFilter('preload_tag',()=> '');
+liquid.registerFilter('format_address',x=>`<p>${x.name}<br>${x.address1}<br>${x.city}, ${x.province}<br>${x.country}</p>`);
+const imageFiles=['monetta-app-home_bag_tote.webp','monetta-app-home_bag_crossbody.webp','monetta-app-home_bag_shoulder.webp'];
+const items = imageFiles.map((f,i)=>({title:['Bolsa tote café','Bolsa crossbody negra','Bolsa de hombro'][i], quantity:1, final_line_price:250000, image:'/assets/'+f}));
+const address={name:'Ana García',address1:'Calle de ejemplo 123',city:'Monterrey',province:'Nuevo León',country:'México'};
+const orders=[{id:2345,name:'#MNT2345',created_at:'2025-05-11T12:00:00-06:00',fulfillment_status:'fulfilled',total_price:1148000,line_items:items,customer_url:'/hosted-order/2345'}, {id:2344,name:'#MNT2344',created_at:'2025-05-05T12:00:00-06:00',fulfillment_status:'fulfilled',metafields:{monetta:{delivery_status:{value:'delivered'}}},total_price:1149000,line_items:[...items].reverse(),customer_url:'/hosted-order/2344'}, {id:2343,name:'#MNT2343',created_at:'2025-04-05T12:00:00-06:00',fulfillment_status:'unfulfilled',total_price:250000,line_items:items.slice(0,1),customer_url:'/hosted-order/2343'}].map(o=>({...o,line_items_subtotal_price:o.total_price,shipping_price:0,tax_price:0}));
+const routes={root_url:'/',search_url:'/search',all_products_collection_url:'/collections/all',cart_url:'/cart',account_profile_url:'/hosted-profile',account_addresses_url:'/hosted-addresses',account_logout_url:'/account/logout'};
+const css=['monetta-tokens.css','monetta-base.css','monetta-components.css','monetta-pages.css','monetta-theme.css','monetta-app-alignment.css'];
+async function render(view, state='customer') {
+ const customer=state==='guest'?null:{first_name:'Ana',name:'Ana García',email:state==='long'?'una.direccion.muy.larga.para.verificar.el.diseno@ejemplo.com':'ana@email.com',orders:state==='empty'?[]:orders,addresses:[address],default_address:address,accepts_marketing:false,metafields:{monetta:{rewards_points:{value:320}}}};
+ if(state==='long') customer.first_name='María Alejandra de los Ángeles';
+ const context={customer,routes,template:{name:'index',suffix:view},shop:{name:'Monetta'},cart:{item_count:0},request:{origin:'https://monetta-staging.myshopify.com'},linklists:{},paginate:{pages:1},section:{settings:{view}}};
+ const [fonts,header,content,dock,saved]=await Promise.all(['monetta-fonts','monetta-header','monetta-account','monetta-dock','monetta-saved-products'].map(x=>liquid.renderFile(x,{...context,dock_active:'account'}, {globals: context})));
+ return `<!doctype html><html lang="es-MX"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">${fonts}${css.map(f=>`<link rel="stylesheet" href="/assets/${f}">`).join('')}<title>Prueba de diseño Monetta</title></head><body class="mw has-dock ${customer ? 'has-account-sidebar' : ''}" data-template="${view}"><div id="page"><div id="site-top" class="site-top">${header}</div><main id="MainContent">${content}</main>${dock}</div>${saved}<div id="toast-root"></div><div id="status-live" role="status"></div><script src="/assets/monetta-core.js"></script></body></html>`;
+}
+const server=http.createServer(async(req,res)=>{try{const u=new URL(req.url,'http://127.0.0.1');if(u.pathname.startsWith('/assets/')){const p=path.join(theme,u.pathname);const buf=await readFile(p);res.setHeader('Content-Type',({'css':'text/css','js':'application/javascript','woff2':'font/woff2','webp':'image/webp','png':'image/png'})[p.split('.').pop()]||'application/octet-stream');res.end(buf);}else{res.setHeader('Content-Type','text/html');res.end(await render(u.searchParams.get('view')||'account',u.searchParams.get('state')||'customer'));}}catch(e){res.statusCode=500;res.end(String(e.stack));}});
+await new Promise(r=>server.listen(9734,'127.0.0.1',r));
+const browser=await firefox.launch({headless:true});
+const results=[];const errors=[];
+try {
+ const page=await browser.newPage({viewport:{width:1440,height:1000},reducedMotion:'reduce'});
+ page.on('pageerror',e=>errors.push(String(e)));
+ for(const view of ['account','orders']) for(const width of [320,390,750,768,1024,1440]) {
+   await page.setViewportSize({width,height:width<750?1000:1100});
+   await page.goto(`http://127.0.0.1:9734/?view=${view}`);await page.evaluate(()=>document.fonts.ready);
+   assert.equal(await page.locator('.site-nav').count(),0,'Account category navigation removed');
+   assert.equal(await page.getByText('TU ESPACIO MONETTA',{exact:true}).count(),0);
+   if (width>=750) {
+     const before=await page.locator('.account-sidebar').boundingBox();
+     const header=await page.locator('#site-top').boundingBox();
+     assert.equal(before.x,0,`${view} left edge at ${width}`);
+     assert.ok(Math.abs(before.y-(header.y+header.height))<1,`${view} flush under header at ${width}`);
+     await page.evaluate(()=>window.scrollTo(0,400));
+     const after=await page.locator('.account-sidebar').boundingBox();
+     assert.equal(after.x,before.x);
+     assert.equal(after.y,before.y,`${view} fixed sidebar at ${width}`);
+     await page.evaluate(()=>window.scrollTo(0,0));
+   }
+   const overflow=await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth);
+   assert.equal(overflow,false,`${view} overflows at ${width}`);
+   const bad=await page.locator('.account-shell').evaluate(root=>[...root.querySelectorAll('*')].filter(el=>el.getBoundingClientRect().width>0&&getComputedStyle(el).position!=='fixed'&&el.getBoundingClientRect().right>innerWidth+1).map(el=>el.className));
+   assert.deepEqual(bad,[],`Content overflow ${view} ${width}`);
+   await page.screenshot({path:path.join(out,`${view}-${width}.png`),fullPage:true});
+   if (width===390 || width===1440) { await page.addScriptTag({path:path.join(repo,'design-prototype/node_modules/axe-core/axe.min.js')}); const audit=await page.evaluate(async()=>await axe.run(document.querySelector('.account-shell'))); assert.deepEqual(audit.violations.map(v=>({id:v.id,nodes:v.nodes.map(n=>n.target)})),[],`${view} accessibility ${width}`); }
+   results.push({view,width,overflow});
+ }
+ await page.setViewportSize({width:1440,height:1000});
+ await page.goto('http://127.0.0.1:9734/?view=orders');
+ await page.getByRole('button',{name:'En camino',exact:true}).click();
+ assert.equal(await page.locator('[data-order-card]:visible').count(),1);
+ assert.equal(await page.getByRole('button',{name:'En camino',exact:true}).getAttribute('aria-pressed'),'true');
+ await page.getByRole('button',{name:'Completos',exact:true}).click();
+ assert.equal(await page.locator('[data-order-card]:visible').count(),1);
+ assert.match(await page.locator('[data-order-card]:visible').textContent(),/2344/);
+ await page.getByRole('button',{name:'Todos',exact:true}).click();
+ assert.equal(await page.locator('[data-order-card]:visible').count(),3);
+ await page.getByRole('link',{name:'Ver detalles del pedido #MNT2345'}).click();
+ await page.waitForFunction(()=>document.getElementById('order-2345').open);
+ assert.equal(await page.locator('html').evaluate(el=>el.classList.contains('is-locked')),true);
+ await page.keyboard.press('Escape');
+ await page.waitForFunction(()=>!document.getElementById('order-2345').open);
+ assert.equal(await page.getByRole('link',{name:'Ver detalles del pedido #MNT2345'}).evaluate(el=>document.activeElement===el),true);
+ await page.goto('http://127.0.0.1:9734/?view=account');
+ for(const name of ['Direcciones','Notificaciones','Métodos de pago','Preferencias','Monetta Rewards']) {
+  await page.getByRole(name==='Direcciones'||name==='Preferencias'?'link':'button',{name,exact:name!=='Monetta Rewards'}).first().click();
+  assert.equal(await page.locator('.account-dialog[open]').count(),1,name);
+  await page.keyboard.press('Escape');
+ }
+ for(const view of ['account','orders']) {
+  await page.goto(`http://127.0.0.1:9734/?view=${view}&state=guest`);
+  assert.equal(await page.locator('[data-order-card]').count(),0);
+  const login=await page.getByRole('link',{name:'Iniciar sesión'}).getAttribute('href');
+  assert.equal(new URL(login,'https://example.com').searchParams.get('return_to'),`/?view=${view}`);
+  await page.screenshot({path:path.join(out,`${view}-guest-1440.png`),fullPage:true});
+ }
+ await page.goto('http://127.0.0.1:9734/?view=orders&state=empty');
+ assert.equal(await page.locator('[data-order-card]').count(),0);
+ assert.equal(await page.getByRole('heading',{name:'Tu próxima historia empieza aquí'}).count(),1);
+ for(const width of [320,768,1440]) {
+  await page.setViewportSize({width,height:1000});await page.goto('http://127.0.0.1:9734/?view=account&state=long');
+  assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);
+ }
+ assert.deepEqual(errors,[]);
+ await writeFile(path.join(out,'local-verification.json'),JSON.stringify({fixtureData:true,browser:'Firefox (isolated headless profile)',checks:results,functional:['sidebar flush left and below header','sidebar fixed during page scroll','account category navigation removed','account eyebrow removed','order filters','actual shipping vs delivered status','order detail dialog','Escape and focus restoration','account actions','guest isolation','correct login return URL','empty order history','long profile text'],pageErrors:errors},null,2));
+ console.log(JSON.stringify({ok:true,screenshots:results.length+2,out,errors}));
+} finally {await browser.close();server.close();}

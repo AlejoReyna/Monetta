@@ -1,0 +1,57 @@
+{
+  "run": "negative-control-sidebar-ring-keyboard",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/keyboard.mjs --base-url=http://127.0.0.1:9292 --viewports=1440x900 --pages=collection --label=sidebar-ring --inject-css=@media (min-width:1200px){.collection-layout--filters .filter-sidebar{margin:0 !important;padding:0 4px 0 0 !important}}",
+  "startedAt": "2026-10-19T14:19:06.833Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      1440,
+      900
+    ]
+  ],
+  "pages": [
+    "collection"
+  ],
+  "insetPx": 0,
+  "injectCss": "@media (min-width:1200px){.collection-layout--filters .filter-sidebar{margin:0 !important;padding:0 4px 0 0 !important}}",
+  "finishedAt": "2026-10-19T14:19:27.538Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 3,
+    "passed": 2,
+    "failed": 1
+  },
+  "checks": [
+    {
+      "name": "1440×900 collection: 70 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": false,
+      "detail": "[\"summary. \\\"Availability\\\": focus ring top side not painted (0% of 3 samples dark)\",\"summary. \\\"Availability\\\": focus ring left side not painted (0% of 3 samples dark)\",\"input. \\\"filter.v.availability\\\": focus ring left side not painted (0% of 3 samples dark)\",\"input. \\\"filter.v.availability\\\": focus ring left side not painted (0% of 3 samples dark)\",\"summary. \\\"Price\\\": focus ring bottom side not painted (0% of 3 samples dark)\",\"summary. \\\"Price\\\": focus ring left side not painted (0% of 3 samples dark)\"]"
+    },
+    {
+      "name": "1440×900 collection: Shift+Tab visits the same 70 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440×900 collection: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    }
+  ],
+  "notes": []
+}

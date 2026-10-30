@@ -119,8 +119,10 @@ StorefrontClient _client(_RecordingTransport transport) {
 }
 
 final class _CallbackCartTransport implements CartStorefrontTransport {
-  const _CallbackCartTransport({required GraphQLTransport query, required GraphQLTransport mutation})
-      : _query = query,
+  const _CallbackCartTransport({
+    required GraphQLTransport query,
+    required GraphQLTransport mutation,
+  })  : _query = query,
         _mutation = mutation;
 
   final GraphQLTransport _query;
@@ -233,8 +235,8 @@ void main() {
 
       expect(result.cart, isNotNull);
       expect(transport.operations, ['CartBuyerIdentityUpdate']);
-      final identity = transport.variables.single['buyerIdentity']
-          as Map<String, dynamic>;
+      final identity =
+          transport.variables.single['buyerIdentity'] as Map<String, dynamic>;
       expect(identity['customerAccessToken'], token);
       expect(identity['email'], 'compradora@example.invalid');
       expect(identity['phone'], '8111111111');
@@ -410,8 +412,7 @@ final class _ScopedSessions implements CartSessionStore {
   final Map<CartSessionScope, SensitiveCartId> _values = {};
 
   @override
-  Future<SensitiveCartId?> read(CartSessionScope scope) async =>
-      _values[scope];
+  Future<SensitiveCartId?> read(CartSessionScope scope) async => _values[scope];
 
   @override
   Future<void> write(CartSessionScope scope, SensitiveCartId cartId) async {

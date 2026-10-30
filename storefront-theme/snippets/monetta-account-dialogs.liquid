@@ -1,0 +1,46 @@
+{%- doc -%}
+  Account actions keep real Shopify data and Shopify's secure editing flows.
+  @param {string} orders_url - Storefront order history URL.
+  @param {string} [rewards_url] - Merchant-configured program destination.
+{%- enddoc -%}
+{%- assign panels = 'addresses,notifications,payment,preferences,rewards' | split: ',' -%}
+{%- for panel in panels -%}
+  {%- capture panel_title -%}{% case panel %}{% when 'addresses' %}Mis direcciones{% when 'notifications' %}Notificaciones{% when 'payment' %}Métodos de pago{% when 'preferences' %}Preferencias{% when 'rewards' %}Monetta Rewards{% endcase %}{%- endcapture -%}
+  <dialog class="overlay overlay--drawer-right account-dialog" id="account-{{ panel }}" aria-labelledby="account-{{ panel }}-title">
+    <div class="overlay__backdrop" data-overlay-close></div><div class="overlay__panel"><div class="overlay__header"><h2 class="overlay__title" id="account-{{ panel }}-title">{{ panel_title }}</h2><button type="button" class="icon-button" data-overlay-close aria-label="Cerrar {{ panel_title | escape }}">{% render 'monetta-icon', name: 'close', size: 22 %}</button></div>
+    <div class="overlay__body account-dialog__body">
+      {%- case panel -%}
+        {%- when 'addresses' -%}
+          {% for address in customer.addresses %}<div class="account-address">{% if address == customer.default_address %}<span class="account-eyebrow">PREDETERMINADA</span>{% endif %}{{ address | format_address }}</div>{% else %}<p>Aún no has guardado una dirección.</p>{% endfor %}
+          <a class="account-button" href="{{ routes.account_addresses_url }}">Administrar direcciones{% render 'monetta-account-icon', name: 'chevron' %}</a>
+        {%- when 'notifications' -%}
+          {% render 'monetta-account-icon', name: 'bell' %}<h3>Al día con tus compras</h3><p>Las confirmaciones y actualizaciones de tus pedidos se envían a {{ customer.email | escape }}.</p><a class="account-button" href="{{ orders_url }}">Consultar mis pedidos{% render 'monetta-account-icon', name: 'chevron' %}</a>
+        {%- when 'payment' -%}
+          {% render 'monetta-account-icon', name: 'card' %}<h3>Compra con confianza</h3><p>Elige tu método de pago al finalizar tu compra. Los datos de tus tarjetas se gestionan de forma segura durante el pago.</p><a class="account-button" href="{{ routes.cart_url }}">Ir a mi carrito{% render 'monetta-account-icon', name: 'chevron' %}</a>
+        {%- when 'preferences' -%}
+          <dl class="account-totals"><div><dt>Nombre</dt><dd>{{ customer.name | escape }}</dd></div><div><dt>Correo</dt><dd>{{ customer.email | escape }}</dd></div><div><dt>Novedades por correo</dt><dd>{% if customer.accepts_marketing %}Activadas{% else %}Desactivadas{% endif %}</dd></div></dl><a class="account-button" href="{{ routes.account_profile_url }}">Editar mis datos{% render 'monetta-account-icon', name: 'chevron' %}</a>
+        {%- when 'rewards' -%}
+          {% render 'monetta-account-icon', name: 'gift' %}<h3>Monetta Rewards</h3>{% if customer.metafields.monetta.rewards_points.value != blank %}<p class="account-reward-points">{{ customer.metafields.monetta.rewards_points.value | escape }} pts</p>{% else %}<p>Consulta con nuestro equipo los beneficios y el saldo disponible de tu cuenta.</p>{% endif %}{% if rewards_url != blank %}<a class="account-button" href="{{ rewards_url }}">Ver mis beneficios{% render 'monetta-account-icon', name: 'chevron' %}</a>{% else %}<a class="account-button" href="{{ routes.root_url }}pages/contact">Consultar beneficios{% render 'monetta-account-icon', name: 'chevron' %}</a>{% endif %}
+      {%- endcase -%}
+    </div></div>
+  </dialog>
+{%- endfor -%}
+<dialog class="overlay overlay--drawer-right account-dialog" id="account-profile-editor" aria-labelledby="account-profile-editor-title">
+  <div class="overlay__backdrop" data-overlay-close></div>
+  <div class="overlay__panel">
+    <div class="overlay__header"><h2 class="overlay__title" id="account-profile-editor-title">Editar mi perfil</h2><button type="button" class="icon-button" data-overlay-close aria-label="Cerrar editor de perfil">{% render 'monetta-icon', name: 'close', size: 22 %}</button></div>
+    <form class="overlay__body account-dialog__body account-profile-form" data-profile-form>
+      <div class="account-profile-form__photo">
+        <span class="account-profile-form__preview" aria-hidden="true"><span data-profile-preview-initial>{{ customer.first_name | default: customer.email | slice: 0 | upcase | escape }}</span><img data-profile-preview-photo width="240" height="240" alt="" hidden></span>
+        <label class="account-button account-button--outline account-profile-form__upload" for="account-profile-photo">Elegir foto<input id="account-profile-photo" type="file" accept="image/jpeg,image/png,image/webp,image/avif" data-profile-file aria-describedby="account-profile-photo-help"></label>
+        <button type="button" class="account-profile-form__remove" data-profile-remove hidden>Quitar foto</button>
+        <p id="account-profile-photo-help">JPG, PNG, WebP o AVIF. Máximo 10 MB.</p>
+      </div>
+      <div class="account-profile-form__field"><label for="account-profile-name">Nombre que se muestra</label><input id="account-profile-name" name="display_name" type="text" value="{{ customer.first_name | default: 'Mi cuenta' | escape }}" maxlength="80" required autocomplete="given-name" data-profile-input></div>
+      <p class="account-profile-form__note">Tu foto y el nombre mostrado se guardan en este navegador.</p>
+      <p class="account-profile-form__error" role="alert" data-profile-error hidden></p>
+      <button type="submit" class="account-button" data-profile-save>Guardar cambios</button>
+      <button type="button" class="account-profile-form__cancel" data-overlay-close>Cancelar</button>
+    </form>
+  </div>
+</dialog>

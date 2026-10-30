@@ -1,0 +1,57 @@
+{
+  "run": "negative-control-thumbs-ring-keyboard",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/keyboard.mjs --base-url=http://127.0.0.1:9292 --viewports=1440x900 --pages=product --label=thumbs-ring --inject-css=.gallery__thumbs .thumb:focus-visible{outline-offset:2px !important}",
+  "startedAt": "2026-10-19T14:01:41.693Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      1440,
+      900
+    ]
+  ],
+  "pages": [
+    "product"
+  ],
+  "insetPx": 0,
+  "injectCss": ".gallery__thumbs .thumb:focus-visible{outline-offset:2px !important}",
+  "finishedAt": "2026-10-19T14:18:45.761Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 3,
+    "passed": 2,
+    "failed": 1
+  },
+  "checks": [
+    {
+      "name": "1440×900 product: 57 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": false,
+      "detail": "[\"button.thumb \\\"Ver foto 1 de 8\\\": focus ring top side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 1 de 8\\\": focus ring left side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 1 de 8\\\": focus ring right side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 2 de 8\\\": focus ring left side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 2 de 8\\\": focus ring right side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 3 de 8\\\": focus ring left side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 3 de 8\\\": focus ring right side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 4 de 8\\\": focus ring left side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 4 de 8\\\": focus ring right side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 5 de 8\\\": focus ring left side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 5 de 8\\\": focus ring right side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 6 de 8\\\": focus ring left side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 6 de 8\\\": focus ring right side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 7 de 8\\\": focus ring left side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 7 de 8\\\": focus ring right side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 8 de 8\\\": focus ring bottom side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 8 de 8\\\": focus ring left side not painted (0% of 3 samples dark)\",\"button.thumb \\\"Ver foto 8 de 8\\\": focus ring right side not painted (0% of 3 samples dark)\"]"
+    },
+    {
+      "name": "1440×900 product: Shift+Tab visits the same 57 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440×900 product: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    }
+  ],
+  "notes": []
+}

@@ -300,11 +300,13 @@
     });
   }
 
+  // Bound per field, so it runs again when the theme editor re-renders a section; a field is never bound twice.
   function watchSearchClear() {
     for (const field of $$('.search-field')) {
       const input = $('input[type="search"]', field);
       const clear = $('[data-search-clear]', field);
-      if (!input || !clear) continue;
+      if (!input || !clear || field.dataset.clearBound) continue;
+      field.dataset.clearBound = 'true';
       const sync = () => {
         clear.hidden = input.value === '';
       };
@@ -406,6 +408,7 @@
     watchScroll();
     watchTyping();
     watchSearchClear();
+    document.addEventListener('shopify:section:load', watchSearchClear);
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();

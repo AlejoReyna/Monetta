@@ -1,0 +1,51 @@
+{
+  "run": "motion",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/motion.mjs --base-url=http://127.0.0.1:9292",
+  "startedAt": "2026-10-19T10:57:53.227Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "finishedAt": "2026-10-19T10:57:57.973Z",
+  "status": "complete-pass",
+  "error": null,
+  "summary": {
+    "checks": 4,
+    "passed": 4,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "reduced: every transition collapses to ~0 (buttons, cards, drawer panel and backdrop)",
+      "pass": true,
+      "detail": "{\"btn\":\"1e-05s\",\"card\":\"1e-05s\",\"panel\":\"1e-05s\",\"backdrop\":\"1e-05s\",\"scroll\":\"auto\"}"
+    },
+    {
+      "name": "reduced: smooth scrolling is off",
+      "pass": true,
+      "detail": "auto"
+    },
+    {
+      "name": "reduced: the menu drawer is in place at once (no slide to wait for)",
+      "pass": true,
+      "detail": "none 120 ms after opening"
+    },
+    {
+      "name": "no preference: the design's motion is present (panel 280 ms, buttons 180 ms)",
+      "pass": true,
+      "detail": "{\"btn\":\"0.18s, 0.18s, 0.18s, 0.18s\",\"card\":\"0.18s, 0.18s\",\"panel\":\"0.28s, 0.28s\",\"backdrop\":\"0.28s\",\"scroll\":\"auto\"}"
+    }
+  ],
+  "notes": []
+}

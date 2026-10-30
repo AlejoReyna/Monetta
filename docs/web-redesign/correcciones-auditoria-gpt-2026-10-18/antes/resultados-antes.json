@@ -1,0 +1,967 @@
+{
+  "label": "antes",
+  "measuredAt": "2026-10-19T01:12:29.726Z",
+  "browser": "155.0.8059.40",
+  "base": "http://127.0.0.1:4401",
+  "findings": {
+    "gpt01": {
+      "title": "GPT-01 focused controls hidden by the dock",
+      "data": {
+        "viewport": "390×844",
+        "method": "real Tab presses from the skip link; hit test of the rendered stacking and pixels of the screenshot at the four sides of the ring and inside the box",
+        "pages": {
+          "collection": {
+            "stops": 103,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 6,
+            "examples": [
+              {
+                "label": "WhatsApp 826 106 6868",
+                "region": "footer",
+                "y": 735,
+                "reasons": [
+                  "ring covered on bottom",
+                  "ring painted on 3/4 sides"
+                ]
+              },
+              {
+                "label": "Novedades",
+                "region": "footer",
+                "y": 804,
+                "reasons": [
+                  "box covered by dock__item",
+                  "ring covered on top/right",
+                  "ring painted on 1/3 sides"
+                ]
+              },
+              {
+                "label": "Contacto y preguntas frecuentes",
+                "region": "footer",
+                "y": 721,
+                "reasons": [
+                  "ring covered on bottom",
+                  "ring painted on 3/4 sides"
+                ]
+              },
+              {
+                "label": "Envíos",
+                "region": "footer",
+                "y": 761,
+                "reasons": [
+                  "box covered by dock__item",
+                  "ring covered on bottom/right",
+                  "ring painted on 2/4 sides"
+                ]
+              },
+              {
+                "label": "Cambios y devoluciones",
+                "region": "footer",
+                "y": 801,
+                "reasons": [
+                  "box covered by dock__bar",
+                  "ring covered on top/right",
+                  "ring painted on 2/4 sides"
+                ]
+              },
+              {
+                "label": "Mi cuenta",
+                "region": "footer",
+                "y": 804,
+                "reasons": [
+                  "box covered by dock__item",
+                  "ring covered on top/right",
+                  "ring painted on 1/3 sides"
+                ]
+              }
+            ]
+          },
+          "product": {
+            "stops": 66,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 10,
+            "examples": [
+              {
+                "label": "Agregar una pieza",
+                "region": "main",
+                "y": 755,
+                "reasons": [
+                  "box covered by purchase-dock",
+                  "ring covered on bottom/left/right"
+                ]
+              },
+              {
+                "label": "Descripción",
+                "region": "main",
+                "y": 792,
+                "reasons": [
+                  "box covered by SPAN",
+                  "ring covered on top/left/right"
+                ]
+              },
+              {
+                "label": "Bolsas",
+                "region": "footer",
+                "y": 738,
+                "reasons": [
+                  "ring covered on bottom",
+                  "ring painted on 3/4 sides"
+                ]
+              },
+              {
+                "label": "Carteras",
+                "region": "footer",
+                "y": 778,
+                "reasons": [
+                  "box covered by btn btn--primary",
+                  "ring covered on bottom/left/right",
+                  "ring painted on 3/4 sides"
+                ]
+              },
+              {
+                "label": "Relojes",
+                "region": "footer",
+                "y": 804,
+                "reasons": [
+                  "box covered by btn btn--primary",
+                  "ring covered on top/left/right",
+                  "ring painted on 2/3 sides"
+                ]
+              },
+              {
+                "label": "Todo el catálogo",
+                "region": "footer",
+                "y": 804,
+                "reasons": [
+                  "box covered by btn btn--primary",
+                  "ring covered on top/left/right",
+                  "ring painted on 2/3 sides"
+                ]
+              }
+            ]
+          },
+          "cart": {
+            "stops": 30,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 6,
+            "examples": [
+              {
+                "label": "WhatsApp 826 106 6868",
+                "region": "footer",
+                "y": 790,
+                "reasons": [
+                  "box covered by checkout-bar",
+                  "ring covered on top/bottom/left/right",
+                  "ring painted on 1/4 sides"
+                ]
+              },
+              {
+                "label": "Contacto y preguntas frecuentes",
+                "region": "footer",
+                "y": 760,
+                "reasons": [
+                  "box covered by checkout-bar",
+                  "ring covered on bottom/left/right",
+                  "ring painted on 1/4 sides"
+                ]
+              },
+              {
+                "label": "Envíos",
+                "region": "footer",
+                "y": 800,
+                "reasons": [
+                  "box covered by STRONG",
+                  "ring covered on top/bottom/left/right",
+                  "ring painted on 0/4 sides"
+                ]
+              },
+              {
+                "label": "Cambios y devoluciones",
+                "region": "footer",
+                "y": 804,
+                "reasons": [
+                  "box covered by STRONG",
+                  "ring covered on top/left/right",
+                  "ring painted on 1/3 sides"
+                ]
+              },
+              {
+                "label": "Aviso de privacidad",
+                "region": "footer",
+                "y": 828,
+                "reasons": [
+                  "box covered by checkout-bar",
+                  "ring covered on top/left/right",
+                  "ring painted on 0/3 sides",
+                  "only 0 text pixels"
+                ]
+              },
+              {
+                "label": "Términos del servicio",
+                "region": "footer",
+                "y": 828,
+                "reasons": [
+                  "box covered by checkout-bar",
+                  "ring covered on top/left/right",
+                  "ring painted on 1/3 sides"
+                ]
+              }
+            ]
+          },
+          "home": {
+            "stops": 83,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 21,
+            "examples": [
+              {
+                "label": "Juicy Couture Bolsa Juicy Couture Crossbody Satchel Blanca $",
+                "region": "main",
+                "y": 435,
+                "reasons": [
+                  "box offscreen"
+                ]
+              },
+              {
+                "label": "Michael Kors Cartera Michael Kors Slim Billfold Taupe $1,099",
+                "region": "main",
+                "y": 435,
+                "reasons": [
+                  "box offscreen"
+                ]
+              },
+              {
+                "label": "Michael Kors Cartera Michael Kors Slim Billfold Negra Monogr",
+                "region": "main",
+                "y": 435,
+                "reasons": [
+                  "box offscreen"
+                ]
+              },
+              {
+                "label": "Totes",
+                "region": "main",
+                "y": 695,
+                "reasons": [
+                  "box covered by dock__item",
+                  "ring covered on right"
+                ]
+              },
+              {
+                "label": "Crossbodys",
+                "region": "main",
+                "y": 695,
+                "reasons": [
+                  "box covered by dock__item",
+                  "ring covered on left/right"
+                ]
+              },
+              {
+                "label": "Hombro",
+                "region": "main",
+                "y": 695,
+                "reasons": [
+                  "ring covered on left"
+                ]
+              }
+            ]
+          },
+          "search": {
+            "stops": 100,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 6,
+            "examples": [
+              {
+                "label": "WhatsApp 826 106 6868",
+                "region": "footer",
+                "y": 735,
+                "reasons": [
+                  "ring covered on bottom",
+                  "ring painted on 3/4 sides"
+                ]
+              },
+              {
+                "label": "Novedades",
+                "region": "footer",
+                "y": 804,
+                "reasons": [
+                  "box covered by dock__item",
+                  "ring covered on top/right",
+                  "ring painted on 1/3 sides"
+                ]
+              },
+              {
+                "label": "Contacto y preguntas frecuentes",
+                "region": "footer",
+                "y": 721,
+                "reasons": [
+                  "ring covered on bottom",
+                  "ring painted on 3/4 sides"
+                ]
+              },
+              {
+                "label": "Envíos",
+                "region": "footer",
+                "y": 761,
+                "reasons": [
+                  "box covered by dock__item",
+                  "ring covered on bottom/right",
+                  "ring painted on 2/4 sides"
+                ]
+              },
+              {
+                "label": "Cambios y devoluciones",
+                "region": "footer",
+                "y": 801,
+                "reasons": [
+                  "box covered by dock__bar",
+                  "ring covered on top/right",
+                  "ring painted on 2/4 sides"
+                ]
+              },
+              {
+                "label": "Mi cuenta",
+                "region": "footer",
+                "y": 804,
+                "reasons": [
+                  "box covered by dock__item",
+                  "ring covered on top/right",
+                  "ring painted on 1/3 sides"
+                ]
+              }
+            ]
+          }
+        }
+      }
+    },
+    "gpt02": {
+      "title": "GPT-02 arrow fallback races a valid Forward",
+      "data": {
+        "original": "http://127.0.0.1:4401/products/cartera-calvin-klein-negra-texturizada",
+        "backMs": 36,
+        "forwardMs": 41,
+        "raceWindowOk": true,
+        "urlRightAfterForward": "http://127.0.0.1:4401/products/cartera-calvin-klein-negra-texturizada",
+        "urlAfter900ms": "http://127.0.0.1:4401/collections/carteras-1",
+        "forwardPreserved": false
+      }
+    },
+    "gpt03": {
+      "title": "GPT-03 search headings and axe in every state",
+      "data": {
+        "390": {
+          "empty": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Buscar"
+            ],
+            "hiddenH1": [],
+            "h2": [],
+            "axe": []
+          },
+          "results": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Resultados para “bolsa”"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "Productos"
+            ],
+            "axe": []
+          },
+          "suggestions": {
+            "exposedH1": 0,
+            "texts": [],
+            "hiddenH1": [
+              "Resultados para “bolsa”"
+            ],
+            "h2": [],
+            "axe": [
+              "page-has-heading-one (moderate)"
+            ]
+          },
+          "noResults": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Resultados para “zzzz-no-match”"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "Sin resultados"
+            ],
+            "axe": []
+          },
+          "error": {
+            "exposedH1": 0,
+            "texts": [],
+            "hiddenH1": [],
+            "h2": [
+              "No pudimos cargar los resultados"
+            ],
+            "axe": [
+              "page-has-heading-one (moderate)"
+            ]
+          }
+        },
+        "1440": {
+          "empty": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Buscar"
+            ],
+            "hiddenH1": [],
+            "h2": [],
+            "axe": []
+          },
+          "results": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Resultados para “bolsa”"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "Productos"
+            ],
+            "axe": []
+          },
+          "suggestions": {
+            "exposedH1": 0,
+            "texts": [],
+            "hiddenH1": [
+              "Resultados para “bolsa”"
+            ],
+            "h2": [],
+            "axe": [
+              "page-has-heading-one (moderate)"
+            ]
+          },
+          "noResults": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Resultados para “zzzz-no-match”"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "Sin resultados"
+            ],
+            "axe": []
+          },
+          "error": {
+            "exposedH1": 0,
+            "texts": [],
+            "hiddenH1": [],
+            "h2": [
+              "No pudimos cargar los resultados"
+            ],
+            "axe": [
+              "page-has-heading-one (moderate)"
+            ]
+          }
+        }
+      }
+    },
+    "gpt04": {
+      "title": "GPT-04 reserve of a bar that grows (two-line title at 320)",
+      "data": {
+        "viewport": "320×812",
+        "nearest": {
+          "barHeight": 97.3125,
+          "barBottom": 125.3125,
+          "scrollPaddingTop": "120px",
+          "focusTop": 120.25,
+          "overlap": 5.0625
+        },
+        "keyboardShiftTab": {
+          "barHeight": 97.3125,
+          "barBottom": 125.3125,
+          "scrollPaddingTop": "120px",
+          "focusTop": 190.3125,
+          "overlap": 0
+        },
+        "keyboardShiftTabPeeking": {
+          "focused": "card__link",
+          "barBottom": 125.3125,
+          "scrollPaddingTop": "120px",
+          "focusTop": 119.625,
+          "overlap": 5.6875
+        },
+        "anchorStart": {
+          "barBottom": 125.3125,
+          "targetTop": 119.9375,
+          "overlap": 5.375
+        }
+      }
+    },
+    "gpt05": {
+      "title": "GPT-05 content left between pinned bars in a short viewport",
+      "data": {
+        "320×200": {
+          "equivalent": "1280×800 at 400 % (CSS-pixel reflow viewport, not the browser's zoom control)",
+          "home": {
+            "free": 29,
+            "ratio": 0.14,
+            "pinnedTop": 89,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "dock:fixed"
+            ]
+          },
+          "collection": {
+            "free": 14,
+            "ratio": 0.07,
+            "pinnedTop": 104,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "dock:fixed"
+            ]
+          },
+          "product": {
+            "free": 46,
+            "ratio": 0.23,
+            "pinnedTop": 89,
+            "pinnedBottom": 65,
+            "pinned": [
+              "site-top:sticky",
+              "purchase-dock:fixed"
+            ]
+          },
+          "search": {
+            "free": 14,
+            "ratio": 0.07,
+            "pinnedTop": 104,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "dock:fixed"
+            ]
+          },
+          "cart": {
+            "free": 23,
+            "ratio": 0.12,
+            "pinnedTop": 104,
+            "pinnedBottom": 73,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "checkout-bar:fixed"
+            ]
+          }
+        },
+        "360×225": {
+          "equivalent": "1440×900 at 400 % (CSS-pixel reflow viewport, not the browser's zoom control)",
+          "home": {
+            "free": 54,
+            "ratio": 0.24,
+            "pinnedTop": 89,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "dock:fixed"
+            ]
+          },
+          "collection": {
+            "free": 39,
+            "ratio": 0.17,
+            "pinnedTop": 104,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "dock:fixed"
+            ]
+          },
+          "product": {
+            "free": 71,
+            "ratio": 0.32,
+            "pinnedTop": 89,
+            "pinnedBottom": 65,
+            "pinned": [
+              "site-top:sticky",
+              "purchase-dock:fixed"
+            ]
+          },
+          "search": {
+            "free": 39,
+            "ratio": 0.17,
+            "pinnedTop": 104,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "dock:fixed"
+            ]
+          },
+          "cart": {
+            "free": 48,
+            "ratio": 0.21,
+            "pinnedTop": 104,
+            "pinnedBottom": 73,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "checkout-bar:fixed"
+            ]
+          }
+        },
+        "640×400": {
+          "equivalent": "1280×800 at 200 % (CSS-pixel reflow viewport, not the browser's zoom control)",
+          "home": {
+            "free": 229,
+            "ratio": 0.57,
+            "pinnedTop": 89,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "dock:fixed"
+            ]
+          },
+          "collection": {
+            "free": 214,
+            "ratio": 0.54,
+            "pinnedTop": 104,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "dock:fixed"
+            ]
+          },
+          "product": {
+            "free": 246,
+            "ratio": 0.61,
+            "pinnedTop": 89,
+            "pinnedBottom": 65,
+            "pinned": [
+              "site-top:sticky",
+              "purchase-dock:fixed"
+            ]
+          },
+          "search": {
+            "free": 214,
+            "ratio": 0.54,
+            "pinnedTop": 104,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "dock:fixed"
+            ]
+          },
+          "cart": {
+            "free": 223,
+            "ratio": 0.56,
+            "pinnedTop": 104,
+            "pinnedBottom": 73,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "checkout-bar:fixed"
+            ]
+          }
+        },
+        "667×375": {
+          "equivalent": "a phone on its side (an orientation, not a zoom)",
+          "home": {
+            "free": 204,
+            "ratio": 0.54,
+            "pinnedTop": 89,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "dock:fixed"
+            ]
+          },
+          "collection": {
+            "free": 189,
+            "ratio": 0.5,
+            "pinnedTop": 104,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "dock:fixed"
+            ]
+          },
+          "product": {
+            "free": 221,
+            "ratio": 0.59,
+            "pinnedTop": 89,
+            "pinnedBottom": 65,
+            "pinned": [
+              "site-top:sticky",
+              "purchase-dock:fixed"
+            ]
+          },
+          "search": {
+            "free": 189,
+            "ratio": 0.5,
+            "pinnedTop": 104,
+            "pinnedBottom": 82,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "dock:fixed"
+            ]
+          },
+          "cart": {
+            "free": 198,
+            "ratio": 0.53,
+            "pinnedTop": 104,
+            "pinnedBottom": 73,
+            "pinned": [
+              "site-top:sticky",
+              "page-bar:sticky",
+              "checkout-bar:fixed"
+            ]
+          }
+        },
+        "812×375": {
+          "equivalent": "a phone on its side (an orientation, not a zoom)",
+          "home": {
+            "free": 237,
+            "ratio": 0.63,
+            "pinnedTop": 138,
+            "pinnedBottom": 0,
+            "pinned": [
+              "site-top:sticky"
+            ]
+          },
+          "collection": {
+            "free": 237,
+            "ratio": 0.63,
+            "pinnedTop": 138,
+            "pinnedBottom": 0,
+            "pinned": [
+              "site-top:sticky"
+            ]
+          },
+          "product": {
+            "free": 237,
+            "ratio": 0.63,
+            "pinnedTop": 138,
+            "pinnedBottom": 0,
+            "pinned": [
+              "site-top:sticky"
+            ]
+          },
+          "search": {
+            "free": 237,
+            "ratio": 0.63,
+            "pinnedTop": 138,
+            "pinnedBottom": 0,
+            "pinned": [
+              "site-top:sticky"
+            ]
+          },
+          "cart": {
+            "free": 164,
+            "ratio": 0.44,
+            "pinnedTop": 138,
+            "pinnedBottom": 73,
+            "pinned": [
+              "site-top:sticky",
+              "checkout-bar:fixed"
+            ]
+          }
+        },
+        "844×390": {
+          "equivalent": "a phone on its side (an orientation, not a zoom)",
+          "home": {
+            "free": 252,
+            "ratio": 0.65,
+            "pinnedTop": 138,
+            "pinnedBottom": 0,
+            "pinned": [
+              "site-top:sticky"
+            ]
+          },
+          "collection": {
+            "free": 252,
+            "ratio": 0.65,
+            "pinnedTop": 138,
+            "pinnedBottom": 0,
+            "pinned": [
+              "site-top:sticky"
+            ]
+          },
+          "product": {
+            "free": 252,
+            "ratio": 0.65,
+            "pinnedTop": 138,
+            "pinnedBottom": 0,
+            "pinned": [
+              "site-top:sticky"
+            ]
+          },
+          "search": {
+            "free": 252,
+            "ratio": 0.65,
+            "pinnedTop": 138,
+            "pinnedBottom": 0,
+            "pinned": [
+              "site-top:sticky"
+            ]
+          },
+          "cart": {
+            "free": 179,
+            "ratio": 0.46,
+            "pinnedTop": 138,
+            "pinnedBottom": 73,
+            "pinned": [
+              "site-top:sticky",
+              "checkout-bar:fixed"
+            ]
+          }
+        }
+      }
+    },
+    "gpt06": {
+      "title": "GPT-06 lateral safe-area insets",
+      "data": {
+        "667×375": {
+          "home": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [
+              ".site-header__menu: 8.0…56.0",
+              ".search-pill: 20.0…647.0",
+              "#rail-novedades .card: 20.0…210.0",
+              ".footer-grid: 20.0…647.0"
+            ],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "collection": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [
+              "[data-page-bar] .page-bar__back: 0.0…48.0",
+              "[data-page-bar] .page-bar__actions .icon-button:last-child: 619.0…667.0",
+              "[data-grid] .card: 0.0…327.5",
+              ".collection-shortcuts .chip: 20.0…163.7"
+            ],
+            "overflow": 0,
+            "firstCard": {
+              "left": 0,
+              "right": 327.5,
+              "width": 327.5
+            }
+          },
+          "product": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [
+              ".site-header__back: 4.0…52.0",
+              ".site-header .header-utility--cart: 615.0…663.0",
+              ".product-panel__name: 20.0…647.0",
+              ".gallery__tools .round-button: 611.0…659.0",
+              ".purchase-dock .btn: 20.0…647.0"
+            ],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "cart": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [
+              "[data-page-bar] .page-bar__back: 0.0…48.0",
+              "[data-page-bar] .page-bar__trailing: 587.5…647.0",
+              ".cart-line__media: 20.0…108.0",
+              ".checkout-bar .btn: 151.2…647.0"
+            ],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "search": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [
+              "[data-page-bar] .page-bar__back: 0.0…48.0",
+              ".search-field: 20.0…647.0",
+              "[data-grid] .card: 0.0…327.5"
+            ],
+            "overflow": 0,
+            "firstCard": {
+              "left": 0,
+              "right": 327.5,
+              "width": 327.5
+            }
+          }
+        },
+        "812×375": {
+          "home": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [
+              ".site-header__menu: 24.0…72.0",
+              "#rail-novedades .card: 32.0…235.8",
+              ".footer-grid: 32.0…780.0"
+            ],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "collection": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [
+              "[data-grid] .card: 32.0…270.7",
+              ".collection-shortcuts .chip: 32.0…175.7",
+              ".site-header__menu: 24.0…72.0",
+              ".header-utility--cart: 740.0…788.0"
+            ],
+            "overflow": 0,
+            "firstCard": {
+              "left": 32,
+              "right": 270.65625,
+              "width": 238.65625
+            }
+          },
+          "product": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [
+              ".site-header__back: 24.0…72.0",
+              ".site-header .header-utility--cart: 740.0…788.0",
+              ".product-panel__name: 435.8…780.0",
+              ".buy-inline .btn: 581.8…780.0"
+            ],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "cart": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [
+              "[data-page-bar] .page-bar__trailing: 710.6…780.0",
+              ".cart-line__media: 32.0…120.0",
+              ".checkout-bar .btn: 163.2…780.0"
+            ],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "search": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [
+              "[data-grid] .card: 32.0…270.7"
+            ],
+            "overflow": 0,
+            "firstCard": {
+              "left": 32,
+              "right": 270.65625,
+              "width": 238.65625
+            }
+          }
+        }
+      }
+    }
+  }
+}

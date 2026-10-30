@@ -1,0 +1,108 @@
+{
+  "startedAt": "2026-10-19T18:07:11.493Z",
+  "base": "http://127.0.0.1:9292",
+  "mutationsSentToShopify": 0,
+  "cases": [
+    {
+      "name": "control-variant-after-server-response",
+      "source": "live rendered theme, real section response, add stubbed",
+      "controlPassed": true,
+      "chosen": 68551021625378,
+      "sent": 68551021625378
+    },
+    {
+      "name": "variant-change-pending-and-failed",
+      "source": "live rendered theme, add stubbed, variant fetch delayed then 503",
+      "defectReproduced": true,
+      "pending": {
+        "initial": 68551021592610,
+        "target": 68551021625378,
+        "selectedOption": "Café",
+        "hiddenVariant": 68551021592610,
+        "busy": "true",
+        "addDisabled": false
+      },
+      "addWhilePending": [
+        {
+          "id": 68551021592610,
+          "quantity": 1
+        }
+      ],
+      "afterError": {
+        "selectedOption": "Café",
+        "hiddenVariant": 68551021592610,
+        "addDisabled": false,
+        "calls": [
+          68551021592610,
+          68551021592610
+        ]
+      }
+    },
+    {
+      "name": "variant-without-javascript",
+      "source": "live rendered theme, JavaScript disabled, native FormData (form not submitted)",
+      "defectReproduced": true,
+      "initialVariant": "68551021592610",
+      "selectedOption": "Café",
+      "expectedVariant": 68551021625378,
+      "nativeFormId": "68551021592610",
+      "availableFallbackVariantSelect": false,
+      "addDisabled": false
+    },
+    {
+      "name": "product-structured-data-and-language",
+      "source": "live rendered theme",
+      "defectReproduced": true,
+      "lang": "en",
+      "jsonLdCount": 0,
+      "microdataProducts": 0,
+      "addCopy": "Agregar al carrito",
+      "canonical": "https://monetta-staging.myshopify.com/products/reloj-coach-talia-saddle"
+    },
+    {
+      "name": "search-empty-edit-link-on-phone",
+      "source": "live rendered theme, 375x812",
+      "defectReproduced": true,
+      "href": "#header-search-input",
+      "targetVisible": false,
+      "activeElement": "BODY",
+      "realSearchVisible": true
+    },
+    {
+      "name": "load-more-retry-fallback",
+      "source": "live rendered theme, controlled 503 for next page",
+      "defectReproduced": true,
+      "failedFetches": 2,
+      "documentNavigations": 0,
+      "url": "http://127.0.0.1:9292/collections/all",
+      "toast": "No pudimos cargar más piezas. Usa el enlace para ir a la página siguiente."
+    },
+    {
+      "name": "checkout-during-cart-change",
+      "source": "controlled DOM fixture with unchanged monetta-cart.js; request held pending",
+      "defectReproduced": true,
+      "checkout": [
+        {
+          "pending": "true",
+          "shownQuantity": "1"
+        }
+      ],
+      "checkoutDisabled": false
+    },
+    {
+      "name": "undo-preserves-line-identity",
+      "source": "controlled cart fixture with line property Grabado=ANA and unchanged monetta-cart.js",
+      "defectReproduced": true,
+      "originalProperties": {
+        "Grabado": "ANA"
+      },
+      "restoredPayload": {
+        "id": 111,
+        "quantity": 1,
+        "sections": "audit-cart,monetta-cart-sheet",
+        "sections_url": "/cart"
+      }
+    }
+  ],
+  "finishedAt": "2026-10-19T18:07:20.620Z"
+}

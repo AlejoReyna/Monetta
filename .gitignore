@@ -83,3 +83,8 @@ tools/audit/.env
 tools/audit/secrets/
 tools/audit/**/secrets.json
 *.audit-secrets.json
+
+# Signed local releases and generated visual-test failures stay on this Mac.
+artifacts/releases/**/*.ipa
+artifacts/releases/**/package/
+test/goldens/failures/

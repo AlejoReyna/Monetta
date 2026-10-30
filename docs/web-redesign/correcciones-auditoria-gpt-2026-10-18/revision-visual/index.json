@@ -1,0 +1,780 @@
+{
+  "capturedAt": "2026-10-19T00:35:20.381Z",
+  "browser": "155.0.8059.40",
+  "base": "http://127.0.0.1:4402",
+  "shots": [
+    {
+      "file": "A-320x568-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "320x568",
+      "page": "home"
+    },
+    {
+      "file": "A-320x568-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "320x568",
+      "page": "collection"
+    },
+    {
+      "file": "A-320x568-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "320x568",
+      "page": "product"
+    },
+    {
+      "file": "A-320x568-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "320x568",
+      "page": "search"
+    },
+    {
+      "file": "A-320x568-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "320x568",
+      "page": "cart"
+    },
+    {
+      "file": "A-320x568-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "320x568",
+      "page": "account"
+    },
+    {
+      "file": "A-360x800-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "360x800",
+      "page": "home"
+    },
+    {
+      "file": "A-360x800-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "360x800",
+      "page": "collection"
+    },
+    {
+      "file": "A-360x800-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "360x800",
+      "page": "product"
+    },
+    {
+      "file": "A-360x800-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "360x800",
+      "page": "search"
+    },
+    {
+      "file": "A-360x800-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "360x800",
+      "page": "cart"
+    },
+    {
+      "file": "A-360x800-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "360x800",
+      "page": "account"
+    },
+    {
+      "file": "A-375x812-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "375x812",
+      "page": "home"
+    },
+    {
+      "file": "A-375x812-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "375x812",
+      "page": "collection"
+    },
+    {
+      "file": "A-375x812-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "375x812",
+      "page": "product"
+    },
+    {
+      "file": "A-375x812-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "375x812",
+      "page": "search"
+    },
+    {
+      "file": "A-375x812-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "375x812",
+      "page": "cart"
+    },
+    {
+      "file": "A-375x812-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "375x812",
+      "page": "account"
+    },
+    {
+      "file": "A-390x844-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "390x844",
+      "page": "home"
+    },
+    {
+      "file": "A-390x844-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "390x844",
+      "page": "collection"
+    },
+    {
+      "file": "A-390x844-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "390x844",
+      "page": "product"
+    },
+    {
+      "file": "A-390x844-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "390x844",
+      "page": "search"
+    },
+    {
+      "file": "A-390x844-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "390x844",
+      "page": "cart"
+    },
+    {
+      "file": "A-390x844-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "390x844",
+      "page": "account"
+    },
+    {
+      "file": "A-440x956-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "440x956",
+      "page": "home"
+    },
+    {
+      "file": "A-440x956-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "440x956",
+      "page": "collection"
+    },
+    {
+      "file": "A-440x956-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "440x956",
+      "page": "product"
+    },
+    {
+      "file": "A-440x956-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "440x956",
+      "page": "search"
+    },
+    {
+      "file": "A-440x956-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "440x956",
+      "page": "cart"
+    },
+    {
+      "file": "A-440x956-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "440x956",
+      "page": "account"
+    },
+    {
+      "file": "A-667x375-insets44-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "667x375-insets44",
+      "page": "home"
+    },
+    {
+      "file": "A-667x375-insets44-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "667x375-insets44",
+      "page": "collection"
+    },
+    {
+      "file": "A-667x375-insets44-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "667x375-insets44",
+      "page": "product"
+    },
+    {
+      "file": "A-667x375-insets44-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "667x375-insets44",
+      "page": "search"
+    },
+    {
+      "file": "A-667x375-insets44-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "667x375-insets44",
+      "page": "cart"
+    },
+    {
+      "file": "A-667x375-insets44-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "667x375-insets44",
+      "page": "account"
+    },
+    {
+      "file": "A-812x375-insets44-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "812x375-insets44",
+      "page": "home"
+    },
+    {
+      "file": "A-812x375-insets44-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "812x375-insets44",
+      "page": "collection"
+    },
+    {
+      "file": "A-812x375-insets44-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "812x375-insets44",
+      "page": "product"
+    },
+    {
+      "file": "A-812x375-insets44-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "812x375-insets44",
+      "page": "search"
+    },
+    {
+      "file": "A-812x375-insets44-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "812x375-insets44",
+      "page": "cart"
+    },
+    {
+      "file": "A-812x375-insets44-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "812x375-insets44",
+      "page": "account"
+    },
+    {
+      "file": "A-768x1024-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "768x1024",
+      "page": "home"
+    },
+    {
+      "file": "A-768x1024-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "768x1024",
+      "page": "collection"
+    },
+    {
+      "file": "A-768x1024-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "768x1024",
+      "page": "product"
+    },
+    {
+      "file": "A-768x1024-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "768x1024",
+      "page": "search"
+    },
+    {
+      "file": "A-768x1024-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "768x1024",
+      "page": "cart"
+    },
+    {
+      "file": "A-768x1024-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "768x1024",
+      "page": "account"
+    },
+    {
+      "file": "A-1024x768-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1024x768",
+      "page": "home"
+    },
+    {
+      "file": "A-1024x768-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1024x768",
+      "page": "collection"
+    },
+    {
+      "file": "A-1024x768-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1024x768",
+      "page": "product"
+    },
+    {
+      "file": "A-1024x768-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1024x768",
+      "page": "search"
+    },
+    {
+      "file": "A-1024x768-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1024x768",
+      "page": "cart"
+    },
+    {
+      "file": "A-1024x768-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1024x768",
+      "page": "account"
+    },
+    {
+      "file": "A-1440x900-home.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1440x900",
+      "page": "home"
+    },
+    {
+      "file": "A-1440x900-collection.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1440x900",
+      "page": "collection"
+    },
+    {
+      "file": "A-1440x900-product.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1440x900",
+      "page": "product"
+    },
+    {
+      "file": "A-1440x900-search.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1440x900",
+      "page": "search"
+    },
+    {
+      "file": "A-1440x900-cart.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1440x900",
+      "page": "cart"
+    },
+    {
+      "file": "A-1440x900-account.jpg",
+      "overflow": 0,
+      "section": "matrix",
+      "viewport": "1440x900",
+      "page": "account"
+    },
+    {
+      "file": "B-390x844-filtros-abiertos.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "collection",
+      "state": "filters drawer"
+    },
+    {
+      "file": "B-390x844-vista-rapida.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "collection",
+      "state": "quick view (variant required)"
+    },
+    {
+      "file": "B-390x844-variantes.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "product",
+      "state": "variant chosen"
+    },
+    {
+      "file": "B-390x844-busqueda-sugerencias.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "search",
+      "state": "suggestions"
+    },
+    {
+      "file": "B-390x844-cuenta.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "account"
+    },
+    {
+      "file": "B-390x844-menu.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "home",
+      "state": "menu drawer"
+    },
+    {
+      "file": "B-390x844-foco-novedades.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "collection",
+      "state": "keyboard focus on footer link \"Novedades\""
+    },
+    {
+      "file": "B-390x844-foco-envios.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "collection",
+      "state": "keyboard focus on footer link \"Envíos\""
+    },
+    {
+      "file": "B-390x844-foco-mi-cuenta.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "collection",
+      "state": "keyboard focus on footer link \"Mi cuenta\""
+    },
+    {
+      "file": "B-667x375-insets44-menu.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "home",
+      "state": "menu drawer with insets"
+    },
+    {
+      "file": "B-667x375-insets44-filtros.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "collection",
+      "state": "filters drawer with insets"
+    },
+    {
+      "file": "B-812x375-insets44-menu.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "home",
+      "state": "menu drawer with insets"
+    },
+    {
+      "file": "B-812x375-insets44-filtros.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "collection",
+      "state": "filters drawer with insets"
+    },
+    {
+      "file": "B-812x375-insets44-carrito.jpg",
+      "overflow": 0,
+      "section": "flow",
+      "page": "home",
+      "state": "bag drawer with insets"
+    },
+    {
+      "file": "C-320x200-reflow400-home-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "home",
+      "position": "top"
+    },
+    {
+      "file": "C-320x200-reflow400-home-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "home",
+      "position": "end"
+    },
+    {
+      "file": "C-320x200-reflow400-collection-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "collection",
+      "position": "top"
+    },
+    {
+      "file": "C-320x200-reflow400-collection-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "collection",
+      "position": "end"
+    },
+    {
+      "file": "C-320x200-reflow400-product-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "product",
+      "position": "top"
+    },
+    {
+      "file": "C-320x200-reflow400-product-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "product",
+      "position": "end"
+    },
+    {
+      "file": "C-320x200-reflow400-search-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "search",
+      "position": "top"
+    },
+    {
+      "file": "C-320x200-reflow400-search-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "search",
+      "position": "end"
+    },
+    {
+      "file": "C-320x200-reflow400-cart-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "cart",
+      "position": "top"
+    },
+    {
+      "file": "C-320x200-reflow400-cart-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "320x200-reflow400",
+      "page": "cart",
+      "position": "end"
+    },
+    {
+      "file": "C-320x200-reflow400-filtros-abiertos.jpg",
+      "overflow": 0,
+      "section": "short",
+      "page": "collection",
+      "state": "filters drawer"
+    },
+    {
+      "file": "C-320x200-reflow400-checkout-abierto.jpg",
+      "overflow": 0,
+      "section": "short",
+      "page": "cart",
+      "state": "checkout dialog"
+    },
+    {
+      "file": "C-360x225-reflow400-home-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "home",
+      "position": "top"
+    },
+    {
+      "file": "C-360x225-reflow400-home-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "home",
+      "position": "end"
+    },
+    {
+      "file": "C-360x225-reflow400-collection-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "collection",
+      "position": "top"
+    },
+    {
+      "file": "C-360x225-reflow400-collection-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "collection",
+      "position": "end"
+    },
+    {
+      "file": "C-360x225-reflow400-product-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "product",
+      "position": "top"
+    },
+    {
+      "file": "C-360x225-reflow400-product-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "product",
+      "position": "end"
+    },
+    {
+      "file": "C-360x225-reflow400-search-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "search",
+      "position": "top"
+    },
+    {
+      "file": "C-360x225-reflow400-search-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "search",
+      "position": "end"
+    },
+    {
+      "file": "C-360x225-reflow400-cart-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "cart",
+      "position": "top"
+    },
+    {
+      "file": "C-360x225-reflow400-cart-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "360x225-reflow400",
+      "page": "cart",
+      "position": "end"
+    },
+    {
+      "file": "C-640x400-reflow200-home-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "home",
+      "position": "top"
+    },
+    {
+      "file": "C-640x400-reflow200-home-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "home",
+      "position": "end"
+    },
+    {
+      "file": "C-640x400-reflow200-collection-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "collection",
+      "position": "top"
+    },
+    {
+      "file": "C-640x400-reflow200-collection-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "collection",
+      "position": "end"
+    },
+    {
+      "file": "C-640x400-reflow200-product-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "product",
+      "position": "top"
+    },
+    {
+      "file": "C-640x400-reflow200-product-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "product",
+      "position": "end"
+    },
+    {
+      "file": "C-640x400-reflow200-search-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "search",
+      "position": "top"
+    },
+    {
+      "file": "C-640x400-reflow200-search-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "search",
+      "position": "end"
+    },
+    {
+      "file": "C-640x400-reflow200-cart-inicio.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "cart",
+      "position": "top"
+    },
+    {
+      "file": "C-640x400-reflow200-cart-final.jpg",
+      "overflow": 0,
+      "section": "short",
+      "viewport": "640x400-reflow200",
+      "page": "cart",
+      "position": "end"
+    }
+  ],
+  "problems": [],
+  "count": 106
+}

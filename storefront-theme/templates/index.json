@@ -4,10 +4,25 @@
     "hero": {
       "type": "monetta-hero",
       "blocks": {
-        "original": { "type": "fact", "settings": { "icon": "check", "text": "Productos originales" } },
-        "shipping": { "type": "fact", "settings": { "icon": "truck", "text": "Envíos a todo México" } }
+        "original": {
+          "type": "fact",
+          "settings": {
+            "icon": "check",
+            "text": "Productos originales"
+          }
+        },
+        "shipping": {
+          "type": "fact",
+          "settings": {
+            "icon": "truck",
+            "text": "Envíos a todo México"
+          }
+        }
       },
-      "block_order": ["original", "shipping"],
+      "block_order": [
+        "original",
+        "shipping"
+      ],
       "settings": {
         "button_1_label": "Ver novedades",
         "button_1_link": "/collections/all?sort_by=created-descending",
@@ -22,33 +37,73 @@
         "collection": "all",
         "products_to_show": 8,
         "link_label": "Ver todo",
-        "link_url": "/collections/all?sort_by=created-descending"
+        "link_url": "/collections/all?sort_by=created-descending",
+        "newest_first": true
       }
     },
     "accesos": {
-      "type": "monetta-quick-links",
-      "blocks": {
-        "novedades": { "type": "tile", "settings": { "title": "Novedades", "link": "/collections/all?sort_by=created-descending" } },
-        "catalogo": { "type": "tile", "settings": { "title": "Todo el catálogo", "link": "/collections/all" } }
-      },
-      "block_order": ["novedades", "catalogo"],
+      "type": "monetta-app-home",
       "settings": {
-        "heading": "Compra por estilo",
-        "link_label": "Ver todo",
-        "link_url": "/collections/all"
+        "mode": "styles",
+        "heading": "Compra por estilo"
       }
     },
     "seleccion": {
       "type": "monetta-featured-grid",
       "settings": {
         "eyebrow": "Selección Monetta",
-        "heading": "Catálogo de hoy",
+        "heading": "Selección de hoy",
         "collection": "all",
         "products_to_show": 8,
         "link_label": "Ver catálogo",
         "link_url": "/collections/all"
       }
+    },
+    "colecciones": {
+      "type": "monetta-app-home",
+      "settings": {
+        "mode": "collections",
+        "heading": "Colecciones"
+      }
+    },
+    "marcas": {
+      "type": "monetta-app-home",
+      "settings": {
+        "mode": "brands",
+        "heading": "Tus marcas favoritas"
+      }
+    },
+    "historia": {
+      "type": "monetta-app-home",
+      "settings": {
+        "mode": "story",
+        "heading": "Más sobre Monetta"
+      }
+    },
+    "redes": {
+      "type": "monetta-app-home",
+      "settings": {
+        "mode": "social",
+        "heading": "Conecta con Monetta"
+      }
+    },
+    "experiencias": {
+      "type": "monetta-app-home",
+      "settings": {
+        "mode": "reviews",
+        "heading": "Experiencias Monetta"
+      }
     }
   },
-  "order": ["hero", "novedades", "accesos", "seleccion"]
+  "order": [
+    "hero",
+    "novedades",
+    "accesos",
+    "colecciones",
+    "seleccion",
+    "marcas",
+    "historia",
+    "redes",
+    "experiencias"
+  ]
 }

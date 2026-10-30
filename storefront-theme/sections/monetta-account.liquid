@@ -1,0 +1,67 @@
+{%- liquid
+  assign view = section.settings.view | default: 'account'
+  capture account_url
+    render 'monetta-account-link'
+  endcapture
+  capture orders_url
+    render 'monetta-account-link', view: 'orders'
+  endcapture
+  assign login_return = account_url
+  if view == 'orders'
+    assign login_return = orders_url
+  endif
+  assign login_url = routes.root_url | append: 'customer_authentication/login?return_to='
+  assign encoded_return = login_return | url_encode
+  assign login_url = login_url | append: encoded_return
+-%}
+{{ 'monetta-account.css' | asset_url | stylesheet_tag }}
+<script src="{{ 'monetta-account.js' | asset_url }}" defer></script>
+<div class="container account-shell account-shell--{{ view }}" data-account-root data-account-customer="{{ customer.id }}" {{ section.shopify_attributes }}>
+  {%- if customer -%}
+    <div class="account-layout">
+      <aside class="account-sidebar" aria-label="Mi perfil">
+        <button type="button" class="account-profile" data-open-dialog="account-profile-editor" aria-label="Editar foto y nombre" aria-haspopup="dialog" aria-controls="account-profile-editor">
+          <span class="account-profile__avatar" aria-hidden="true"><span data-profile-initial>{{ customer.first_name | default: customer.email | slice: 0 | upcase | escape }}</span><img data-profile-photo width="116" height="116" alt="" hidden><span class="account-profile__edit">{% render 'monetta-account-icon', name: 'edit' %}</span></span>
+          <span class="account-profile__identity"><span class="account-profile__name" data-profile-name>{{ customer.first_name | default: 'Mi cuenta' | escape }}</span><span class="account-profile__email" title="{{ customer.email | escape }}">{{ customer.email | escape }}</span></span>
+        </button>
+        <p class="visually-hidden" role="status" aria-live="polite" data-profile-status></p>
+        <div class="account-sidebar__menu">{% render 'monetta-account-menu', view: view %}</div>
+        <a class="account-logout account-sidebar__logout" href="{{ routes.account_logout_url }}">{% render 'monetta-account-icon', name: 'logout' %}Cerrar sesión</a>
+      </aside>
+      <div class="account-content">
+        <header class="account-heading"><h1>{% if view == 'orders' %}Mis pedidos{% else %}Mi cuenta{% endif %}</h1><p>{% if view == 'orders' %}Cada pieza, una nueva historia. Sigue aquí tus compras.{% else %}Todo lo que te gusta, en un solo lugar.{% endif %}</p></header>
+        {%- if view == 'orders' -%}
+          {%- paginate customer.orders by 20 -%}
+            {%- if customer.orders.size > 0 -%}
+              <div class="account-order-filters" role="group" aria-label="Filtrar pedidos" hidden data-order-filters><button type="button" data-order-filter="all" aria-pressed="true">Todos</button><button type="button" data-order-filter="transit" aria-pressed="false">En camino</button><button type="button" data-order-filter="complete" aria-pressed="false">Completos</button></div>
+              <p class="visually-hidden" role="status" aria-live="polite" data-order-count></p>
+              <div class="account-orders" data-orders>{% for account_order in customer.orders %}{% render 'monetta-account-order', account_order: account_order %}{% endfor %}</div>
+              <div class="account-empty" data-order-empty hidden>{% render 'monetta-account-icon', name: 'box' %}<h2>Sin pedidos en este filtro</h2><p>{% if paginate.pages > 1 %}No hay coincidencias en esta página del historial.{% else %}Cuando un pedido tenga este estado, aparecerá aquí.{% endif %}</p><button type="button" class="account-button account-button--outline" data-order-reset>Ver todos los pedidos</button></div>
+              {% if paginate.pages > 1 %}<nav class="account-pagination" aria-label="Páginas del historial">{% if paginate.previous %}<a href="{{ paginate.previous.url }}">Anterior</a>{% endif %}<span>Página {{ paginate.current_page }} de {{ paginate.pages }}</span>{% if paginate.next %}<a href="{{ paginate.next.url }}">Siguiente</a>{% endif %}</nav>{% endif %}
+            {%- else -%}
+              <div class="account-empty">{% render 'monetta-account-icon', name: 'bag' %}<h2>Tu próxima historia empieza aquí</h2><p>Aún no tienes pedidos. Descubre las piezas que tenemos para ti.</p><a class="account-button" href="{{ routes.all_products_collection_url }}">Explorar catálogo{% render 'monetta-account-icon', name: 'chevron' %}</a></div>
+            {%- endif -%}
+          {%- endpaginate -%}
+        {%- else -%}
+          <button type="button" class="account-rewards" data-open-dialog="account-rewards"><span class="account-rewards__gift">{% render 'monetta-account-icon', name: 'gift' %}</span><span class="account-rewards__name">Monetta Rewards</span><span class="account-rewards__balance">{% render 'monetta-icon', name: 'star', size: 22 %}{% if customer.metafields.monetta.rewards_points.value != blank %}{{ customer.metafields.monetta.rewards_points.value | escape }} pts{% else %}<span>Ver beneficios</span>{% endif %}</span>{% render 'monetta-account-icon', name: 'chevron' %}</button>
+          <div class="account-mobile-menu">{% render 'monetta-account-menu', view: view %}</div>
+          <section class="account-recent" aria-labelledby="account-recent-title"><div class="account-section-heading"><h2 id="account-recent-title">Tu último pedido</h2><a href="{{ orders_url }}">Ver todos{% render 'monetta-account-icon', name: 'chevron' %}</a></div>{% for account_order in customer.orders limit: 1 %}{% render 'monetta-account-order', account_order: account_order, prefix: 'recent', heading_level: 3 %}{% else %}<div class="account-empty account-empty--compact">{% render 'monetta-account-icon', name: 'bag' %}<h3>Encuentra tu próxima pieza favorita</h3><p>Tus compras aparecerán aquí.</p><a href="{{ routes.all_products_collection_url }}">Descubrir el catálogo</a></div>{% endfor %}</section>
+          <section class="account-share" aria-labelledby="account-share-title"><div class="account-share__copy"><span class="account-share__icon">{% render 'monetta-account-icon', name: 'share' %}</span><p class="account-eyebrow">EL ESTILO SE COMPARTE</p><h2 id="account-share-title">Comparte el catálogo<br>y gana</h2><p>Únete al mundo Monetta</p><button type="button" class="account-button" data-share-catalog data-share-url="{{ request.origin }}{{ routes.all_products_collection_url }}">Compartir catálogo{% render 'monetta-account-icon', name: 'chevron' %}</button><p class="account-share__status" role="status" aria-live="polite" data-share-status></p></div><img src="{{ 'monetta-app-home_bag_shoulder.webp' | asset_url }}" width="480" height="480" alt="Bolsa de la colección Monetta" loading="lazy"></section>
+          <a class="account-logout account-mobile-logout" href="{{ routes.account_logout_url }}">{% render 'monetta-account-icon', name: 'logout' %}Cerrar sesión</a>
+        {%- endif -%}
+      </div>
+    </div>
+    {% render 'monetta-account-dialogs', orders_url: orders_url, rewards_url: section.settings.rewards_url %}
+  {%- else -%}
+    <div class="account-login"><span class="account-login__icon">{% render 'monetta-account-icon', name: 'user' %}</span><p class="account-eyebrow">BIENVENIDA A MONETTA</p><h1>{% if view == 'orders' %}Mis pedidos{% else %}Tu mundo Monetta{% endif %}</h1><p>Inicia sesión para consultar tus pedidos y tener tus datos siempre a mano.</p><a class="account-button" href="{{ login_url }}">Iniciar sesión{% render 'monetta-account-icon', name: 'chevron' %}</a><a class="account-login__catalog" href="{{ routes.all_products_collection_url }}">Seguir explorando</a><div class="account-login__perks"><span>{% render 'monetta-account-icon', name: 'box' %}Tus pedidos</span><span>{% render 'monetta-account-icon', name: 'heart' %}Tus favoritos</span><span>{% render 'monetta-account-icon', name: 'pin' %}Tus direcciones</span></div></div>
+  {%- endif -%}
+</div>
+{% schema %}
+{
+  "name": "Monetta · Mi cuenta",
+  "settings": [
+    { "type": "select", "id": "view", "label": "Vista", "options": [{ "value": "account", "label": "Mi cuenta" }, { "value": "orders", "label": "Mis pedidos" }], "default": "account" },
+    { "type": "url", "id": "rewards_url", "label": "Enlace al programa Rewards", "info": "Opcional. El saldo solo se muestra si existe el metafield de cliente monetta.rewards_points." }
+  ]
+}
+{% endschema %}

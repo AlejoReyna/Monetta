@@ -1,0 +1,1021 @@
+{
+  "baseUrl": "http://127.0.0.1:9292",
+  "capturedAt": "2026-10-22T22:13:24.861Z",
+  "captures": [
+    {
+      "file": "320-home.png",
+      "width": 320,
+      "height": 640,
+      "name": "home",
+      "url": "/",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 32,
+      "full": "320-home-full.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_FAILED"
+      ]
+    },
+    {
+      "file": "320-collection.png",
+      "width": 320,
+      "height": 640,
+      "name": "collection",
+      "url": "/collections/all",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 25,
+      "full": "320-collection-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "320-search.png",
+      "width": 320,
+      "height": 640,
+      "name": "search",
+      "url": "/search?q=bolso&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 25,
+      "consoleErrors": []
+    },
+    {
+      "file": "320-search-zero.png",
+      "width": 320,
+      "height": 640,
+      "name": "search-zero",
+      "url": "/search?q=zzqxv&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 1,
+      "consoleErrors": []
+    },
+    {
+      "file": "320-product.png",
+      "width": 320,
+      "height": 640,
+      "name": "product",
+      "url": "/products/reloj-coach-talia-saddle",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 18,
+      "full": "320-product-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "320-product-sale.png",
+      "width": 320,
+      "height": 640,
+      "name": "product-sale",
+      "url": "/products/bolso-steve-madden-shoulder-negro",
+      "status": 200,
+      "brokenImages": 7,
+      "visibleImages": 12,
+      "consoleErrors": []
+    },
+    {
+      "file": "320-product-long-name.png",
+      "width": 320,
+      "height": 640,
+      "name": "product-long-name",
+      "url": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 22,
+      "consoleErrors": []
+    },
+    {
+      "file": "320-product-soldout-variant.png",
+      "width": 320,
+      "height": 640,
+      "name": "product-soldout-variant",
+      "url": "/products/bolso-steve-madden-crossbody-3?variant=68550844121122",
+      "status": 200,
+      "brokenImages": 6,
+      "visibleImages": 21,
+      "consoleErrors": []
+    },
+    {
+      "file": "320-bag-empty.png",
+      "width": 320,
+      "height": 640,
+      "name": "bag-empty",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 9,
+      "consoleErrors": []
+    },
+    {
+      "file": "320-bag.png",
+      "width": 320,
+      "height": 640,
+      "name": "bag",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 3,
+      "full": "320-bag-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "320-contact.png",
+      "width": 320,
+      "height": 640,
+      "name": "contact",
+      "url": "/pages/contact",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "full": "320-contact-full.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "file": "320-not-found.png",
+      "width": 320,
+      "height": 640,
+      "name": "not-found",
+      "url": "/pages/no-existe",
+      "status": 404,
+      "brokenImages": 0,
+      "visibleImages": 5,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "320-collections-index.png",
+      "width": 320,
+      "height": 640,
+      "name": "collections-index",
+      "url": "/collections",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 3,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "file": "320-blog.png",
+      "width": 320,
+      "height": 640,
+      "name": "blog",
+      "url": "/blogs/news",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "320-policy.png",
+      "width": 320,
+      "height": 640,
+      "name": "policy",
+      "url": "/policies/privacy-policy",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "320-menu-drawer.png",
+      "width": 320,
+      "height": 640,
+      "name": "menu-drawer",
+      "url": "/",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 33,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "name": "saved-drawer",
+      "width": 320,
+      "error": "locator.click: Timeout 30000ms exceeded."
+    },
+    {
+      "file": "390-home.png",
+      "width": 390,
+      "height": 844,
+      "name": "home",
+      "url": "/",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 32,
+      "full": "390-home-full.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_FAILED"
+      ]
+    },
+    {
+      "file": "390-collection.png",
+      "width": 390,
+      "height": 844,
+      "name": "collection",
+      "url": "/collections/all",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 25,
+      "full": "390-collection-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "390-search.png",
+      "width": 390,
+      "height": 844,
+      "name": "search",
+      "url": "/search?q=bolso&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 25,
+      "consoleErrors": []
+    },
+    {
+      "file": "390-search-zero.png",
+      "width": 390,
+      "height": 844,
+      "name": "search-zero",
+      "url": "/search?q=zzqxv&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 1,
+      "consoleErrors": []
+    },
+    {
+      "file": "390-product.png",
+      "width": 390,
+      "height": 844,
+      "name": "product",
+      "url": "/products/reloj-coach-talia-saddle",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "full": "390-product-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "390-product-sale.png",
+      "width": 390,
+      "height": 844,
+      "name": "product-sale",
+      "url": "/products/bolso-steve-madden-shoulder-negro",
+      "status": 200,
+      "brokenImages": 5,
+      "visibleImages": 12,
+      "consoleErrors": []
+    },
+    {
+      "file": "390-product-long-name.png",
+      "width": 390,
+      "height": 844,
+      "name": "product-long-name",
+      "url": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "status": 200,
+      "brokenImages": 5,
+      "visibleImages": 22,
+      "consoleErrors": []
+    },
+    {
+      "file": "390-product-soldout-variant.png",
+      "width": 390,
+      "height": 844,
+      "name": "product-soldout-variant",
+      "url": "/products/bolso-steve-madden-crossbody-3?variant=68550844121122",
+      "status": 200,
+      "brokenImages": 3,
+      "visibleImages": 21,
+      "consoleErrors": []
+    },
+    {
+      "file": "390-bag-empty.png",
+      "width": 390,
+      "height": 844,
+      "name": "bag-empty",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 9,
+      "consoleErrors": []
+    },
+    {
+      "file": "390-bag.png",
+      "width": 390,
+      "height": 844,
+      "name": "bag",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 3,
+      "full": "390-bag-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "390-contact.png",
+      "width": 390,
+      "height": 844,
+      "name": "contact",
+      "url": "/pages/contact",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "full": "390-contact-full.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "390-not-found.png",
+      "width": 390,
+      "height": 844,
+      "name": "not-found",
+      "url": "/pages/no-existe",
+      "status": 404,
+      "brokenImages": 0,
+      "visibleImages": 5,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "390-collections-index.png",
+      "width": 390,
+      "height": 844,
+      "name": "collections-index",
+      "url": "/collections",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 3,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()",
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "file": "390-blog.png",
+      "width": 390,
+      "height": 844,
+      "name": "blog",
+      "url": "/blogs/news",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "390-policy.png",
+      "width": 390,
+      "height": 844,
+      "name": "policy",
+      "url": "/policies/privacy-policy",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "390-menu-drawer.png",
+      "width": 390,
+      "height": 844,
+      "name": "menu-drawer",
+      "url": "/",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 33,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "name": "saved-drawer",
+      "width": 390,
+      "error": "locator.click: Timeout 30000ms exceeded."
+    },
+    {
+      "file": "768-home.png",
+      "width": 768,
+      "height": 1024,
+      "name": "home",
+      "url": "/",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 32,
+      "full": "768-home-full.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_FAILED"
+      ]
+    },
+    {
+      "file": "768-collection.png",
+      "width": 768,
+      "height": 1024,
+      "name": "collection",
+      "url": "/collections/all",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "full": "768-collection-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "768-search.png",
+      "width": 768,
+      "height": 1024,
+      "name": "search",
+      "url": "/search?q=bolso&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "consoleErrors": []
+    },
+    {
+      "file": "768-search-zero.png",
+      "width": 768,
+      "height": 1024,
+      "name": "search-zero",
+      "url": "/search?q=zzqxv&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 2,
+      "consoleErrors": []
+    },
+    {
+      "file": "768-product.png",
+      "width": 768,
+      "height": 1024,
+      "name": "product",
+      "url": "/products/reloj-coach-talia-saddle",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 18,
+      "full": "768-product-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "768-product-sale.png",
+      "width": 768,
+      "height": 1024,
+      "name": "product-sale",
+      "url": "/products/bolso-steve-madden-shoulder-negro",
+      "status": 200,
+      "brokenImages": 13,
+      "visibleImages": 20,
+      "consoleErrors": []
+    },
+    {
+      "file": "768-product-long-name.png",
+      "width": 768,
+      "height": 1024,
+      "name": "product-long-name",
+      "url": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "status": 200,
+      "brokenImages": 5,
+      "visibleImages": 22,
+      "consoleErrors": []
+    },
+    {
+      "file": "768-product-soldout-variant.png",
+      "width": 768,
+      "height": 1024,
+      "name": "product-soldout-variant",
+      "url": "/products/bolso-steve-madden-crossbody-3?variant=68550844121122",
+      "status": 200,
+      "brokenImages": 1,
+      "visibleImages": 13,
+      "consoleErrors": []
+    },
+    {
+      "file": "768-bag-empty.png",
+      "width": 768,
+      "height": 1024,
+      "name": "bag-empty",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 10,
+      "consoleErrors": []
+    },
+    {
+      "file": "768-bag.png",
+      "width": 768,
+      "height": 1024,
+      "name": "bag",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 4,
+      "full": "768-bag-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "768-contact.png",
+      "width": 768,
+      "height": 1024,
+      "name": "contact",
+      "url": "/pages/contact",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "full": "768-contact-full.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "768-not-found.png",
+      "width": 768,
+      "height": 1024,
+      "name": "not-found",
+      "url": "/pages/no-existe",
+      "status": 404,
+      "brokenImages": 0,
+      "visibleImages": 5,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "768-collections-index.png",
+      "width": 768,
+      "height": 1024,
+      "name": "collections-index",
+      "url": "/collections",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 3,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "768-blog.png",
+      "width": 768,
+      "height": 1024,
+      "name": "blog",
+      "url": "/blogs/news",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "768-policy.png",
+      "width": 768,
+      "height": 1024,
+      "name": "policy",
+      "url": "/policies/privacy-policy",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "768-saved-drawer.png",
+      "width": 768,
+      "height": 1024,
+      "name": "saved-drawer",
+      "url": "/collections/all",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 28,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "file": "1024-home.png",
+      "width": 1024,
+      "height": 768,
+      "name": "home",
+      "url": "/",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 32,
+      "full": "1024-home-full.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_FAILED"
+      ]
+    },
+    {
+      "file": "1024-collection.png",
+      "width": 1024,
+      "height": 768,
+      "name": "collection",
+      "url": "/collections/all",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "full": "1024-collection-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-search.png",
+      "width": 1024,
+      "height": 768,
+      "name": "search",
+      "url": "/search?q=bolso&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-search-zero.png",
+      "width": 1024,
+      "height": 768,
+      "name": "search-zero",
+      "url": "/search?q=zzqxv&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 2,
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-product.png",
+      "width": 1024,
+      "height": 768,
+      "name": "product",
+      "url": "/products/reloj-coach-talia-saddle",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "full": "1024-product-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-product-sale.png",
+      "width": 1024,
+      "height": 768,
+      "name": "product-sale",
+      "url": "/products/bolso-steve-madden-shoulder-negro",
+      "status": 200,
+      "brokenImages": 5,
+      "visibleImages": 12,
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-product-long-name.png",
+      "width": 1024,
+      "height": 768,
+      "name": "product-long-name",
+      "url": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "status": 200,
+      "brokenImages": 5,
+      "visibleImages": 22,
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-product-soldout-variant.png",
+      "width": 1024,
+      "height": 768,
+      "name": "product-soldout-variant",
+      "url": "/products/bolso-steve-madden-crossbody-3?variant=68550844121122",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 13,
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-bag-empty.png",
+      "width": 1024,
+      "height": 768,
+      "name": "bag-empty",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 10,
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-bag.png",
+      "width": 1024,
+      "height": 768,
+      "name": "bag",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 4,
+      "full": "1024-bag-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "1024-contact.png",
+      "width": 1024,
+      "height": 768,
+      "name": "contact",
+      "url": "/pages/contact",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "full": "1024-contact-full.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1024-not-found.png",
+      "width": 1024,
+      "height": 768,
+      "name": "not-found",
+      "url": "/pages/no-existe",
+      "status": 404,
+      "brokenImages": 0,
+      "visibleImages": 5,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1024-collections-index.png",
+      "width": 1024,
+      "height": 768,
+      "name": "collections-index",
+      "url": "/collections",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 3,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1024-blog.png",
+      "width": 1024,
+      "height": 768,
+      "name": "blog",
+      "url": "/blogs/news",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1024-policy.png",
+      "width": 1024,
+      "height": 768,
+      "name": "policy",
+      "url": "/policies/privacy-policy",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1024-saved-drawer.png",
+      "width": 1024,
+      "height": 768,
+      "name": "saved-drawer",
+      "url": "/collections/all",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 28,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    },
+    {
+      "file": "1440-home.png",
+      "width": 1440,
+      "height": 900,
+      "name": "home",
+      "url": "/",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 32,
+      "full": "1440-home-full.png",
+      "consoleErrors": [
+        "Failed to load resource: net::ERR_FAILED"
+      ]
+    },
+    {
+      "file": "1440-collection.png",
+      "width": 1440,
+      "height": 900,
+      "name": "collection",
+      "url": "/collections/all",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "full": "1440-collection-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-search.png",
+      "width": 1440,
+      "height": 900,
+      "name": "search",
+      "url": "/search?q=bolso&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-search-zero.png",
+      "width": 1440,
+      "height": 900,
+      "name": "search-zero",
+      "url": "/search?q=zzqxv&type=product",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 2,
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-product.png",
+      "width": 1440,
+      "height": 900,
+      "name": "product",
+      "url": "/products/reloj-coach-talia-saddle",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 26,
+      "full": "1440-product-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-product-sale.png",
+      "width": 1440,
+      "height": 900,
+      "name": "product-sale",
+      "url": "/products/bolso-steve-madden-shoulder-negro",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 20,
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-product-long-name.png",
+      "width": 1440,
+      "height": 900,
+      "name": "product-long-name",
+      "url": "/products/bolso-michael-kors-marilyn-medium-signature-convertible-satchel-vanilla-rosa",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 22,
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-product-soldout-variant.png",
+      "width": 1440,
+      "height": 900,
+      "name": "product-soldout-variant",
+      "url": "/products/bolso-steve-madden-crossbody-3?variant=68550844121122",
+      "status": 200,
+      "brokenImages": 2,
+      "visibleImages": 21,
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-bag-empty.png",
+      "width": 1440,
+      "height": 900,
+      "name": "bag-empty",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 10,
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-bag.png",
+      "width": 1440,
+      "height": 900,
+      "name": "bag",
+      "url": "/cart",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 4,
+      "full": "1440-bag-full.png",
+      "consoleErrors": []
+    },
+    {
+      "file": "1440-contact.png",
+      "width": 1440,
+      "height": 900,
+      "name": "contact",
+      "url": "/pages/contact",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "full": "1440-contact-full.png",
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1440-not-found.png",
+      "width": 1440,
+      "height": 900,
+      "name": "not-found",
+      "url": "/pages/no-existe",
+      "status": 404,
+      "brokenImages": 0,
+      "visibleImages": 5,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 404 (Not Found)",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1440-collections-index.png",
+      "width": 1440,
+      "height": 900,
+      "name": "collections-index",
+      "url": "/collections",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 3,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1440-blog.png",
+      "width": 1440,
+      "height": 900,
+      "name": "blog",
+      "url": "/blogs/news",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1440-policy.png",
+      "width": 1440,
+      "height": 900,
+      "name": "policy",
+      "url": "/policies/privacy-policy",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 0,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()",
+        "Failed to load resource: the server responded with a status of 400 ()"
+      ]
+    },
+    {
+      "file": "1440-saved-drawer.png",
+      "width": 1440,
+      "height": 900,
+      "name": "saved-drawer",
+      "url": "/collections/all",
+      "status": 200,
+      "brokenImages": 0,
+      "visibleImages": 28,
+      "consoleErrors": [
+        "Failed to load resource: the server responded with a status of 403 ()"
+      ]
+    }
+  ]
+}

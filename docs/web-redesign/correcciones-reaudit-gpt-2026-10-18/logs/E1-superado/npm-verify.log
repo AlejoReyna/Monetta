@@ -1,0 +1,239 @@
+## inicio npm run verify · 2026-10-18 22:41:56 CST · árbol f3a58b2dc6673f70544c5e76b10468fb37e10fc97d8ab78e301f8ed712588290
+
+> monetta-web-design-prototype@0.1.0 verify
+> node verify/run-all.mjs --out=../docs/web-redesign/correcciones-reaudit-gpt-2026-10-18/evidence --port=4621
+
+Building… done
+Browser: /Applications/Brave Browser.app/Contents/MacOS/Brave Browser (155.0.8059.40)
+Serving: http://127.0.0.1:4621
+PASS [D02] Web fonts load in the weights the design uses
+PASS [D02] Renderer uses Playfair Display for: Section heading (Novedades)
+PASS [D02] Renderer uses Inter for: Product card brand
+PASS [D02] Renderer uses Inter for: Product card name
+PASS [D02] Renderer uses Inter for: Product card price
+PASS [D02] Renderer uses Inter for: Category navigation
+PASS [D02] Renderer uses Inter for: Primary button
+PASS [D02] Computed tokens match the boutique palette and geometry
+PASS [D02] Wordmark is the app artwork at its own proportions
+PASS [D02] Selected dock item uses boutique gold with dark text
+PASS [D03] home @ 375px
+PASS [D03] collection @ 375px
+PASS [D03] product @ 375px
+PASS [D03] search @ 375px
+PASS [D03] cart @ 375px
+PASS [D03] home @ 390px
+PASS [D03] collection @ 390px
+PASS [D03] product @ 390px
+PASS [D03] search @ 390px
+PASS [D03] cart @ 390px
+PASS [D03] home @ 440px
+PASS [D03] collection @ 440px
+PASS [D03] product @ 440px
+PASS [D03] search @ 440px
+PASS [D03] cart @ 440px
+PASS [D03] home @ 768px
+PASS [D03] collection @ 768px
+PASS [D03] product @ 768px
+PASS [D03] search @ 768px
+PASS [D03] cart @ 768px
+PASS [D03] home @ 1024px
+PASS [D03] collection @ 1024px
+PASS [D03] product @ 1024px
+PASS [D03] search @ 1024px
+PASS [D03] cart @ 1024px
+PASS [D03] home @ 1280px
+PASS [D03] collection @ 1280px
+PASS [D03] product @ 1280px
+PASS [D03] search @ 1280px
+PASS [D03] cart @ 1280px
+PASS [D03] home @ 1440px
+PASS [D03] collection @ 1440px
+PASS [D03] product @ 1440px
+PASS [D03] search @ 1440px
+PASS [D03] cart @ 1440px
+PASS [D09] Reflow at 320px (400% zoom equivalent): home
+PASS [D09] Reflow at 320px (400% zoom equivalent): collection
+PASS [D09] Reflow at 320px (400% zoom equivalent): product
+PASS [D09] Reflow at 320px (400% zoom equivalent): search
+PASS [D09] Reflow at 320px (400% zoom equivalent): cart
+PASS [D06] Predictive search shows products and suggestions while typing
+PASS [D06] Enter carries the query to the results route
+PASS [D06] Sidebar filter and sort update URL, count and chips together
+PASS [D06] Browser Back restores the previous sort, then the unfiltered results
+PASS [D06] An impossible filter offers recovery that works
+PASS [D06] Load more keeps its page in the URL and Back returns to the same spot
+PASS [D05] Cards show genuine sale, sold-out and sobre-pedido states
+PASS [D05] Long names stay complete in the DOM and clamp to two lines
+PASS [D05] Guest favourites toggle on cards and list on the favourites page
+PASS [D05] Quick view requires a choice and hands the same variant to the product page
+PASS [D07] Two rapid clicks add one unit, with visible pending feedback
+PASS [D07] Drawer quantity, removal and undo update the cart
+PASS [D07] Checkout explains the Shopify handoff and creates nothing
+PASS [D07] An emptied cart recovers to the store
+PASS [D07] A failed add explains the error beside the control and keeps the cart
+PASS [D06] Suggestions can fail without blocking search
+PASS [D05] Sobre pedido, sold-out and apartado states are honest
+PASS [D05] Blocked storage keeps favourites usable for the visit and says so
+PASS [D08] Phone home: dock visible, search icon appears after the hero search scrolls away
+PASS [D08] Typing hides the dock so the keyboard never stacks controls
+PASS [D08] Product: purchase dock replaces the nav dock; the add sheet covers both
+PASS [D06] Phone filter drawer previews the count and applies to the URL
+PASS [D09] Menu drawer traps focus, closes on Escape and restores focus
+PASS [D09] axe: home @ 390px
+PASS [D09] axe: collection @ 390px
+PASS [D09] axe: product @ 390px
+PASS [D09] axe: search @ 390px
+PASS [D09] axe: cart @ 390px
+PASS [D09] axe: brand page @ 390px
+PASS [D09] axe: favourites @ 390px
+PASS [D09] axe: mayoreo @ 390px
+PASS [D09] axe: nuestra historia @ 390px
+PASS [D09] axe: contacto @ 390px
+PASS [D09] axe: cuenta @ 390px
+PASS [D09] axe: política de envíos @ 390px
+PASS [D09] axe: no encontrada @ 390px
+PASS [D09] axe: menu drawer @ 390px
+PASS [D09] axe: filter drawer @ 390px
+PASS [D09] axe: quick view @ 390px
+PASS [D09] axe: home @ 1440px
+PASS [D09] axe: collection @ 1440px
+PASS [D09] axe: product @ 1440px
+PASS [D09] axe: search @ 1440px
+PASS [D09] axe: cart @ 1440px
+PASS [D09] axe: brand page @ 1440px
+PASS [D09] axe: favourites @ 1440px
+PASS [D09] axe: mayoreo @ 1440px
+PASS [D09] axe: nuestra historia @ 1440px
+PASS [D09] axe: contacto @ 1440px
+PASS [D09] axe: cuenta @ 1440px
+PASS [D09] axe: política de envíos @ 1440px
+PASS [D09] axe: no encontrada @ 1440px
+PASS [D09] axe: cart drawer @ 1440px
+PASS [D09] axe: predictive search @ 1440px
+PASS [D09] axe: checkout handoff @ 1440px
+PASS [D09] axe: prototype panel @ 1440px
+PASS [D09] Skip link is the first stop and moves focus to the main content
+PASS [D09] Focused controls show a visible focus indicator
+PASS [D09] Product dialog: focus trap, Escape and focus restoration
+PASS [D09] Variant options are native radios operable with arrow keys
+PASS [D09] Reduced motion: editorial sections visible at once, transitions disabled
+PASS [D11] H01 collection @ 375px: one pinned bar (back · title · search · filters) replaces header, breadcrumbs and toolbar
+PASS [D11] H01 collection @ 375px: only the bar and the style shortcuts sit above the first product
+PASS [D11] H01 collection @ 375px: the bar stays pinned under the strip and draws its rule on scroll
+PASS [D11] H01 collection @ 375px: keyboard focus lands below the pinned bar, not under it
+PASS [D11] H01 search results @ 375px: "Buscar" bar, field, Inter results heading, filters in the bar
+PASS [D11] H01 search @ 375px: suggestions replace the results and take the bar's filters with them
+PASS [D11] H01 bag @ 375px: back · Mi bolsa · count in one bar, lines right below
+PASS [D11] H01 collection @ 390px: one pinned bar (back · title · search · filters) replaces header, breadcrumbs and toolbar
+PASS [D11] H01 collection @ 390px: only the bar and the style shortcuts sit above the first product
+PASS [D11] H01 collection @ 390px: the bar stays pinned under the strip and draws its rule on scroll
+PASS [D11] H01 collection @ 390px: keyboard focus lands below the pinned bar, not under it
+PASS [D11] H01 search results @ 390px: "Buscar" bar, field, Inter results heading, filters in the bar
+PASS [D11] H01 search @ 390px: suggestions replace the results and take the bar's filters with them
+PASS [D11] H01 bag @ 390px: back · Mi bolsa · count in one bar, lines right below
+PASS [D11] H01 collection @ 440px: one pinned bar (back · title · search · filters) replaces header, breadcrumbs and toolbar
+PASS [D11] H01 collection @ 440px: only the bar and the style shortcuts sit above the first product
+PASS [D11] H01 collection @ 440px: the bar stays pinned under the strip and draws its rule on scroll
+PASS [D11] H01 collection @ 440px: keyboard focus lands below the pinned bar, not under it
+PASS [D11] H01 search results @ 440px: "Buscar" bar, field, Inter results heading, filters in the bar
+PASS [D11] H01 search @ 440px: suggestions replace the results and take the bar's filters with them
+PASS [D11] H01 bag @ 440px: back · Mi bolsa · count in one bar, lines right below
+PASS [D11] H01 the bar arrow leaves the screen; the browser Back still steps through filters (390px)
+PASS [D11] H01 collection, search and bag @ 768px keep the global header, breadcrumbs and title row
+PASS [D11] H01 collection, search and bag @ 1024px keep the global header, breadcrumbs and title row
+PASS [D11] H01 collection, search and bag @ 1440px keep the global header, breadcrumbs and title row
+PASS [D11] H02 product header @ 375px: back + search · logo · account + bag
+PASS [D11] H02 product header @ 390px: back + search · logo · account + bag
+PASS [D11] H02 product header @ 440px: back + search · logo · account + bag
+PASS [D11] H02 the product header search and account links work (390px)
+PASS [D11] H02 product header @ 768px keeps the tablet/desktop navigation
+PASS [D11] H02 product header @ 1440px keeps the tablet/desktop navigation
+PASS [D11] H03 recommendations @ 375px: section headings are Inter 17/600
+PASS [D11] H03 recommendations @ 375px: tiles 52vw wide, 4:5 photo flush on white, two-line names
+PASS [D11] H03 Home @ 375px keeps the Playfair heading and the compact rail tiles
+PASS [D11] H03 recommendations @ 390px: section headings are Inter 17/600
+PASS [D11] H03 recommendations @ 390px: tiles 52vw wide, 4:5 photo flush on white, two-line names
+PASS [D11] H03 Home @ 390px keeps the Playfair heading and the compact rail tiles
+PASS [D11] H03 recommendations @ 440px: section headings are Inter 17/600
+PASS [D11] H03 recommendations @ 440px: tiles 52vw wide, 4:5 photo flush on white, two-line names
+PASS [D11] H03 Home @ 440px keeps the Playfair heading and the compact rail tiles
+PASS [D11] H03 recommendations from tablet up: Inter headings step to 20/22 and the tiles keep the 4:5 anatomy
+PASS [D11] GPT-01 scroll-padding-bottom is the real height of the pinned bar of each page plus 16px (dock, purchase bar, checkout bar)
+PASS [D11] GPT-01 the reserve grows with the home indicator and returns when it goes (+34px, then back)
+PASS [D11] GPT-01 Tab traversal @ 390×844 · collection: no focused control, text or ring is hidden under the pinned bars
+PASS [D11] GPT-01 Tab traversal @ 390×844 · product: no focused control, text or ring is hidden under the pinned bars
+PASS [D11] GPT-01 Tab traversal @ 390×844 · cart: no focused control, text or ring is hidden under the pinned bars
+PASS [D11] GPT-01 Tab traversal @ 390×844 · home: no focused control, text or ring is hidden under the pinned bars
+PASS [D11] GPT-01 Tab traversal @ 390×844 · search: no focused control, text or ring is hidden under the pinned bars
+PASS [D11] GPT-01 the audit's own footer links (Novedades, Envíos, Mi cuenta) show their text and a painted ring above the dock
+PASS [D11] GPT-01 Tab traversal @ 375×812 · collection, product and bag: nothing hidden under the pinned bars
+PASS [D11] GPT-01 Tab traversal @ 440×956 · collection, product and bag: nothing hidden under the pinned bars
+PASS [D11] GPT-01 Tab traversal @ 320×568 · collection, product and bag: nothing hidden under the pinned bars
+PASS [D11] GPT-01 Tab traversal @ 768×1024 · bag: the checkout bar still pins below 1024px and hides nothing
+PASS [D11] A1 Tab through the rails, chip rows and thumbnails @ 390px (Home, collection, product): every focused item is fully on screen
+PASS [D11] A1 Tab through the rails, chip rows and thumbnails @ 320px (Home, collection, product): every focused item is fully on screen
+PASS [D11] GPT-02 Forward right after the arrow keeps the restored product (0, 150, 450 and 700 ms later)
+PASS [D11] GPT-02 a product opened right after the arrow is not replaced by the fallback, even at the same address
+PASS [D11] GPT-02 the arrow still works after Forward and keeps working
+PASS [D11] GPT-02 the arrow leaves a filtered screen in one step; Forward then restores the filtered list and the fallback stays quiet
+PASS [D11] GPT-02 a visit that began on the product: the arrow goes straight to its parent and Back returns to the product
+PASS [D11] GPT-02 after a reload the arrow still leaves the screen and stays gone
+PASS [D11] GPT-02 when a restored session lost the entries before this one, the arrow still reaches its parent after the fallback window
+PASS [D11] GPT-02 the browser's own Back and Forward, paused for 0, 700 and 1500 ms between them, keep the history intact
+PASS [D11] GPT-03 search @ 390px: one exposed h1 and no axe violation in the empty, suggestions, results, no-results and error states
+PASS [D11] GPT-03 search @ 1440px: one exposed h1 and no axe violation in the empty, suggestions, results, no-results and error states
+PASS [D11] GPT-03 results → another query → back to the query keeps one h1 each time, and the heading role goes with the suggestions
+PASS [D11] GPT-04 320px · two-line title: the bar is taller than its minimum and the reserve covers it (nearest, Shift+Tab and scrollIntoView start)
+PASS [D11] GPT-04 375px · one-line title keeps the 120px reserve of the 76px bar (no regression)
+PASS [D11] GPT-04 the reserve follows the bar when the text gets larger and when it shrinks back
+PASS [D11] GPT-04 the reserve follows a viewport resize (375 → 320 wraps the title, 320 → 375 restores it)
+PASS [D11] GPT-04 a late web font changes the bar and the reserve tracks it (Playfair held back for 1.5 s)
+PASS [D11] GPT-04 navigating between pages swaps the reserve: bar page → product header → back to the bar page
+PASS [D11] GPT-04 @ 390px the "Ver catálogos" anchor lands below the pinned header (strip and header)
+PASS [D11] GPT-04 @ 1440px the "Ver catálogos" anchor lands below the pinned header (strip, header and category row)
+PASS [D11] GPT-05 reflow-equivalent 320×200 (1280×800 at 400 %, not the browser zoom): five pages leave the viewport to the content
+PASS [D11] GPT-05 reflow-equivalent 360×225 (1440×900 at 400 %, not the browser zoom): five pages leave the viewport to the content
+PASS [D11] GPT-05 reflow-equivalent 640×400 (1280×800 at 200 %, not the browser zoom): five pages leave the viewport to the content
+PASS [D11] GPT-05 a phone on its side 667×375 (an orientation, not a zoom): five pages leave the viewport to the content
+PASS [D11] GPT-05 a phone on its side 812×375 (an orientation, not a zoom): five pages leave the viewport to the content
+PASS [D11] GPT-05 a phone on its side 844×390 (an orientation, not a zoom): five pages leave the viewport to the content
+PASS [D11] GPT-05 320×200: the product's add button, the bag's checkout, the filters, the search and the dock all work
+PASS [D11] GPT-05 360×225: the product's add button, the bag's checkout, the filters, the search and the dock all work
+PASS [D11] GPT-05 640×400: the product's add button, the bag's checkout, the filters, the search and the dock all work
+PASS [D11] GPT-05 320×200 Tab traversal · product and bag (no pinned bar left to hide a focus ring)
+PASS [D11] GPT-05 the pinned bars come back with height: 375×812 keeps header, bar and dock pinned
+PASS [D11] GPT-06 667×375 with 44px side insets (CDP emulation): controls and text of eight pages stay inside the safe region, no horizontal overflow
+PASS [D11] GPT-06 667×375: the product grid sits between the insets (first card at x = 44, equal columns, last card ends at 623)
+PASS [D11] GPT-06 812×375 with 44px side insets (CDP emulation): controls and text of eight pages stay inside the safe region, no horizontal overflow
+PASS [D11] GPT-06 812×375: the product grid sits between the insets (first card at x = 44, equal columns, last card ends at 768)
+PASS [D11] GPT-06 without insets nothing moves: the grid is edge to edge and the gutters are the design's (375px and 1440px)
+PASS [D11] GPT-06 drawers, sheets and dialogs keep their content out of the cut-outs (menu, filters, quick view, bag drawer)
+PASS [D11] GPT-06 a bag with a 21px home indicator: the checkout bar and the dock add it below their buttons
+PASS [D11] RE-01 1024×200 behaves like 1023×200: the collection scrolled 800px leaves the whole window to the products on both sides of the width limit
+PASS [D11] RE-01 1023px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it
+PASS [D11] RE-01 1024px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it
+PASS [D11] RE-01 1280px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it
+PASS [D11] RE-01 1440px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it
+PASS [D11] RE-01 in a short window the desktop columns flow with the page: filters, product panel and bag summary are not sticky and the gallery keeps its natural size (1024×200, 1280×200, 1440×360)
+PASS [D11] RE-01 across the 480px height limit the header changes (static at 480, pinned at 481) and normal windows keep their pinned header, sticky columns and fitted gallery (1024 and 1440 wide, 481 / 768 / 900 tall)
+PASS [D11] RE-01 1024×200: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered
+PASS [D11] RE-01 1280×240: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered
+PASS [D11] RE-01 1440×360: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered
+PASS [D11] RE-01 Tab traversal in short desktop windows (product at 1024×200, bag at 1280×240, collection at 1440×360): no focused control, text or ring is hidden, footer links included
+PASS [D11] RE-01 with 44px emulated insets the header is not pinned at 1024×200 or 812×300 and controls and text stay inside the safe region (home, collection, product, bag, search)
+PASS [D11] RE-02 768×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides
+PASS [D11] RE-02 812×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides
+PASS [D11] RE-02 1023×768 (tablet, one pixel below the width limit): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides
+PASS [D11] RE-02 1024×768 (desktop, one pixel above it): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides
+PASS [D11] RE-02 1440×900 (desktop): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides
+PASS [D11] RE-02 768×1024 (tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides
+PASS [D11] RE-02 812×375 (short tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides
+PASS [D11] RE-02 768×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted
+PASS [D11] RE-02 812×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted
+PASS [D11] RE-02 1023×768: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted
+PASS [D10] No console errors, page errors or failed requests during the checks
+
+226/226 checks passed in 602s · D02 10/10 · D03 35/35 · D09 44/44 · D06 8/8 · D05 6/6 · D07 5/5 · D08 3/3 · D11 114/114 · D10 1/1
+Report: ../docs/web-redesign/correcciones-reaudit-gpt-2026-10-18/evidence/verify-report.json
+## exit 0
+## fin npm run verify · 2026-10-18 22:51:59 CST · árbol f3a58b2dc6673f70544c5e76b10468fb37e10fc97d8ab78e301f8ed712588290

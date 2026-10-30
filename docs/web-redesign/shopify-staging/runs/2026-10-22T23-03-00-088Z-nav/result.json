@@ -1,0 +1,212 @@
+{
+  "run": "nav",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/nav.mjs --base-url=http://127.0.0.1:9292",
+  "startedAt": "2026-10-22T23:03:00.088Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 657,
+      "sha256": "f5c60cdb01ea93db182e24638a2f6f493265fd0e91657c306023fec5225dab60"
+    },
+    "repoHead": "6833c20d56ffac653e9cbb3bab3b121456e6c71a",
+    "repoBranch": "feat/client-guide-oct20"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      768,
+      1024
+    ],
+    [
+      812,
+      375
+    ],
+    [
+      1023,
+      768
+    ],
+    [
+      1024,
+      768
+    ],
+    [
+      1440,
+      900
+    ]
+  ],
+  "insetPx": 0,
+  "finishedAt": "2026-10-22T23:03:34.670Z",
+  "status": "complete-pass",
+  "error": null,
+  "summary": {
+    "checks": 31,
+    "passed": 31,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "768×1024: row overflows after adding links (the layout under test is active)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "768×1024: Tab reached all 12 row links in order",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "768×1024: focus ring painted on all four sides for every link",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024: every focused link keeps ink-dark text (not faded)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024: the last link ends before the 88% fade start",
+      "pass": true,
+      "detail": "671 <= 676"
+    },
+    {
+      "name": "768×1024: Shift+Tab walks the same links in reverse",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "812×375: row overflows after adding links (the layout under test is active)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "812×375: Tab reached all 12 row links in order",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "812×375: focus ring painted on all four sides for every link",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375: every focused link keeps ink-dark text (not faded)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375: the last link ends before the 88% fade start",
+      "pass": true,
+      "detail": "706 <= 715"
+    },
+    {
+      "name": "812×375: Shift+Tab walks the same links in reverse",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "1023×768: row overflows after adding links (the layout under test is active)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1023×768: Tab reached all 12 row links in order",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "1023×768: focus ring painted on all four sides for every link",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1023×768: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1023×768: every focused link keeps ink-dark text (not faded)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1023×768: the last link ends before the 88% fade start",
+      "pass": true,
+      "detail": "892 <= 900"
+    },
+    {
+      "name": "1023×768: Shift+Tab walks the same links in reverse",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "1024×768: Tab reached all 12 row links in order",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "1024×768: focus ring painted on all four sides for every link",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768: every focused link keeps ink-dark text (not faded)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768: Shift+Tab walks the same links in reverse",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "1440×900: Tab reached all 12 row links in order",
+      "pass": true,
+      "detail": "12/12"
+    },
+    {
+      "name": "1440×900: focus ring painted on all four sides for every link",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900: no link is touched by the row's fade or clip (below 1024px: pixels identical with the mask removed, tolerance 0; from 1024px: no mask)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900: every focused link keeps ink-dark text (not faded)",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900: Shift+Tab walks the same links in reverse",
+      "pass": true,
+      "detail": "12/12"
+    }
+  ],
+  "notes": [
+    "1024×768: row overflows with 12 links (desktop: fit-content, no fade)",
+    "1440×900: row fits with 12 links (desktop: fit-content, no fade)"
+  ]
+}

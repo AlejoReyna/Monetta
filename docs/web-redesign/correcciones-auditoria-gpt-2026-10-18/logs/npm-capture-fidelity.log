@@ -1,0 +1,31 @@
+
+> monetta-web-design-prototype@0.1.0 capture:fidelity
+> node verify/capture-fidelity.mjs --out=../docs/web-redesign/correcciones-auditoria-gpt-2026-10-18/capturas-fidelidad
+
+Captured inicio_375x812.jpg
+Captured coleccion_375x812.jpg
+Captured ficha_375x812.jpg
+Captured ficha_recomendaciones_375x812.jpg
+Captured busqueda_375x812.jpg
+Captured bolsa_375x812.jpg
+Captured ficha_vistas_375x812.jpg
+Captured coleccion_desplazada_375x812.jpg
+Captured inicio_440x956.jpg
+Captured coleccion_440x956.jpg
+Captured ficha_440x956.jpg
+Captured ficha_recomendaciones_440x956.jpg
+Captured busqueda_440x956.jpg
+Captured bolsa_440x956.jpg
+Captured ficha_vistas_440x956.jpg
+Captured coleccion_desplazada_440x956.jpg
+Captured inicio_768x1024.jpg
+Captured coleccion_768x1024.jpg
+Captured ficha_768x1024.jpg
+Captured busqueda_768x1024.jpg
+Captured bolsa_768x1024.jpg
+Captured inicio_1440x900.jpg
+Captured coleccion_1440x900.jpg
+Captured ficha_1440x900.jpg
+Captured busqueda_1440x900.jpg
+Captured bolsa_1440x900.jpg
+Saved 26 captures, metrics.json and comparacion.html to ../docs/web-redesign/correcciones-auditoria-gpt-2026-10-18/capturas-fidelidad

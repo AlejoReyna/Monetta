@@ -1,0 +1,2933 @@
+{
+  "label": "despues",
+  "measuredAt": "2026-10-19T04:58:24.693Z",
+  "browser": "155.0.8059.40",
+  "base": "http://127.0.0.1:4602",
+  "findings": {
+    "re01": {
+      "title": "RE-01 pinned header and sticky columns in short windows from 1024px up",
+      "data": {
+        "pair": {
+          "1023×200": {
+            "header": {
+              "position": "static",
+              "bottom": -662,
+              "scrollPaddingTop": "16px"
+            },
+            "free": 200,
+            "ratio": 1,
+            "pinned": []
+          },
+          "1024×200": {
+            "header": {
+              "position": "static",
+              "bottom": -654,
+              "scrollPaddingTop": "16px"
+            },
+            "free": 200,
+            "ratio": 1,
+            "pinned": []
+          }
+        },
+        "matrix": {
+          "1023×200": {
+            "note": "one pixel below the width limit",
+            "home": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 1353.328125,
+                  "width": 445.6875,
+                  "rectTop": -605.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 601.640625,
+                  "width": 481.3125,
+                  "rectTop": -605.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 80,
+                  "width": 481.3125,
+                  "rectTop": -4.21875
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 384.265625,
+                  "width": 959,
+                  "rectTop": -163.53125
+                }
+              }
+            }
+          },
+          "1024×200": {
+            "note": "the width limit",
+            "home": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1443.21875,
+                  "width": 376.328125,
+                  "rectTop": -597.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 539.578125,
+                  "width": 431.671875,
+                  "rectTop": -597.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 760,
+                  "width": 72,
+                  "rectTop": -597.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 495.828125,
+                  "width": 325.828125,
+                  "rectTop": -569.203125
+                }
+              }
+            }
+          },
+          "1280×200": {
+            "note": "",
+            "home": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": {
+                  "position": "static",
+                  "top": "161px",
+                  "maxHeight": "none",
+                  "height": 978,
+                  "width": 240,
+                  "rectTop": -376.265625
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1398.921875,
+                  "width": 477.125,
+                  "rectTop": -597.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 713.59375,
+                  "width": 570.875,
+                  "rectTop": -597.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 760,
+                  "width": 72,
+                  "rectTop": -597.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": {
+                  "position": "static",
+                  "top": "161px",
+                  "maxHeight": "none",
+                  "height": 1022,
+                  "width": 240,
+                  "rectTop": -381.0625
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 424.546875,
+                  "width": 413.09375,
+                  "rectTop": -569.203125
+                }
+              }
+            }
+          },
+          "1440×200": {
+            "note": "",
+            "home": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": {
+                  "position": "static",
+                  "top": "161px",
+                  "maxHeight": "none",
+                  "height": 978,
+                  "width": 240,
+                  "rectTop": -376.265625
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1268.828125,
+                  "width": 544.328125,
+                  "rectTop": -597.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 829.578125,
+                  "width": 663.671875,
+                  "rectTop": -597.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 760,
+                  "width": 72,
+                  "rectTop": -597.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": {
+                  "position": "static",
+                  "top": "161px",
+                  "maxHeight": "none",
+                  "height": 1022,
+                  "width": 240,
+                  "rectTop": -381.0625
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "free": 200,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 424.546875,
+                  "width": 471.28125,
+                  "rectTop": -569.203125
+                }
+              }
+            }
+          },
+          "1024×360": {
+            "note": "",
+            "home": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1443.21875,
+                  "width": 376.328125,
+                  "rectTop": -597.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 539.578125,
+                  "width": 431.671875,
+                  "rectTop": -597.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 760,
+                  "width": 72,
+                  "rectTop": -597.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 495.828125,
+                  "width": 325.828125,
+                  "rectTop": -569.203125
+                }
+              }
+            }
+          },
+          "1440×360": {
+            "note": "",
+            "home": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": {
+                  "position": "static",
+                  "top": "161px",
+                  "maxHeight": "none",
+                  "height": 978,
+                  "width": 240,
+                  "rectTop": -376.265625
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1268.828125,
+                  "width": 544.328125,
+                  "rectTop": -597.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 829.578125,
+                  "width": 663.671875,
+                  "rectTop": -597.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 760,
+                  "width": 72,
+                  "rectTop": -597.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": {
+                  "position": "static",
+                  "top": "161px",
+                  "maxHeight": "none",
+                  "height": 1022,
+                  "width": 240,
+                  "rectTop": -381.0625
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "free": 360,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 424.546875,
+                  "width": 471.28125,
+                  "rectTop": -569.203125
+                }
+              }
+            }
+          },
+          "1024×480": {
+            "note": "the height limit (still short)",
+            "home": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1443.21875,
+                  "width": 376.328125,
+                  "rectTop": -597.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 539.578125,
+                  "width": 431.671875,
+                  "rectTop": -597.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 760,
+                  "width": 72,
+                  "rectTop": -597.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 495.828125,
+                  "width": 325.828125,
+                  "rectTop": -524.203125
+                }
+              }
+            }
+          },
+          "1440×480": {
+            "note": "the height limit (still short)",
+            "home": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": {
+                  "position": "static",
+                  "top": "161px",
+                  "maxHeight": "none",
+                  "height": 978,
+                  "width": 240,
+                  "rectTop": -376.265625
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1268.828125,
+                  "width": 544.328125,
+                  "rectTop": -597.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 829.578125,
+                  "width": 663.671875,
+                  "rectTop": -597.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "none",
+                  "height": 760,
+                  "width": 72,
+                  "rectTop": -597.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": {
+                  "position": "static",
+                  "top": "161px",
+                  "maxHeight": "none",
+                  "height": 1022,
+                  "width": 240,
+                  "rectTop": -381.0625
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "free": 480,
+              "ratio": 1,
+              "pinnedTop": 0,
+              "pinned": [],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "static",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 424.546875,
+                  "width": 471.28125,
+                  "rectTop": -453.203125
+                }
+              }
+            }
+          }
+        },
+        "boundary": {
+          "1024×480": {
+            "header": "static",
+            "columns": {
+              "filterSidebar": null,
+              "productPanel": {
+                "position": "static",
+                "top": "169px",
+                "maxHeight": "none",
+                "height": 1443.21875,
+                "width": 376.328125,
+                "rectTop": -197.859375
+              },
+              "galleryViewer": {
+                "position": "relative",
+                "top": "0px",
+                "maxHeight": "none",
+                "height": 539.578125,
+                "width": 431.671875,
+                "rectTop": -197.859375
+              },
+              "galleryThumbs": {
+                "position": "static",
+                "top": "auto",
+                "maxHeight": "none",
+                "height": 760,
+                "width": 72,
+                "rectTop": -197.859375
+              },
+              "cartSummary": null
+            }
+          },
+          "1024×481": {
+            "header": "sticky",
+            "columns": {
+              "filterSidebar": null,
+              "productPanel": {
+                "position": "sticky",
+                "top": "169px",
+                "maxHeight": "none",
+                "height": 1443.21875,
+                "width": 376.328125,
+                "rectTop": -197.859375
+              },
+              "galleryViewer": {
+                "position": "relative",
+                "top": "0px",
+                "maxHeight": "none",
+                "height": 245.984375,
+                "width": 196.796875,
+                "rectTop": -197.859375
+              },
+              "galleryThumbs": {
+                "position": "static",
+                "top": "auto",
+                "maxHeight": "288px",
+                "height": 288,
+                "width": 72,
+                "rectTop": -197.859375
+              },
+              "cartSummary": null
+            }
+          },
+          "1440×480": {
+            "header": "static",
+            "columns": {
+              "filterSidebar": null,
+              "productPanel": {
+                "position": "static",
+                "top": "169px",
+                "maxHeight": "none",
+                "height": 1268.828125,
+                "width": 544.328125,
+                "rectTop": -197.859375
+              },
+              "galleryViewer": {
+                "position": "relative",
+                "top": "0px",
+                "maxHeight": "none",
+                "height": 829.578125,
+                "width": 663.671875,
+                "rectTop": -197.859375
+              },
+              "galleryThumbs": {
+                "position": "static",
+                "top": "auto",
+                "maxHeight": "none",
+                "height": 760,
+                "width": 72,
+                "rectTop": -197.859375
+              },
+              "cartSummary": null
+            }
+          },
+          "1440×481": {
+            "header": "sticky",
+            "columns": {
+              "filterSidebar": null,
+              "productPanel": {
+                "position": "sticky",
+                "top": "169px",
+                "maxHeight": "none",
+                "height": 1268.828125,
+                "width": 544.328125,
+                "rectTop": -197.859375
+              },
+              "galleryViewer": {
+                "position": "relative",
+                "top": "0px",
+                "maxHeight": "none",
+                "height": 245.984375,
+                "width": 196.796875,
+                "rectTop": -197.859375
+              },
+              "galleryThumbs": {
+                "position": "static",
+                "top": "auto",
+                "maxHeight": "288px",
+                "height": 288,
+                "width": 72,
+                "rectTop": -197.859375
+              },
+              "cartSummary": null
+            }
+          }
+        },
+        "normal": {
+          "1024×768": {
+            "home": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "sticky",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1443.21875,
+                  "width": 376.328125,
+                  "rectTop": -197.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 532.984375,
+                  "width": 426.390625,
+                  "rectTop": -197.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "575px",
+                  "height": 575,
+                  "width": 72,
+                  "rectTop": -197.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "sticky",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 495.828125,
+                  "width": 325.828125,
+                  "rectTop": -169.203125
+                }
+              }
+            }
+          },
+          "1440×900": {
+            "home": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "collection": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": {
+                  "position": "sticky",
+                  "top": "161px",
+                  "maxHeight": "723px",
+                  "height": 723,
+                  "width": 240,
+                  "rectTop": 161
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "product": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": {
+                  "position": "sticky",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 1268.828125,
+                  "width": 544.328125,
+                  "rectTop": -197.859375
+                },
+                "galleryViewer": {
+                  "position": "relative",
+                  "top": "0px",
+                  "maxHeight": "none",
+                  "height": 665,
+                  "width": 532,
+                  "rectTop": -197.859375
+                },
+                "galleryThumbs": {
+                  "position": "static",
+                  "top": "auto",
+                  "maxHeight": "707px",
+                  "height": 707,
+                  "width": 72,
+                  "rectTop": -197.859375
+                },
+                "cartSummary": null
+              }
+            },
+            "search": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": {
+                  "position": "sticky",
+                  "top": "161px",
+                  "maxHeight": "723px",
+                  "height": 723,
+                  "width": 240,
+                  "rectTop": 161
+                },
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": null
+              }
+            },
+            "cart": {
+              "pinnedTop": 146,
+              "pinned": [
+                "site-top:sticky"
+              ],
+              "columns": {
+                "filterSidebar": null,
+                "productPanel": null,
+                "galleryViewer": null,
+                "galleryThumbs": null,
+                "cartSummary": {
+                  "position": "sticky",
+                  "top": "169px",
+                  "maxHeight": "none",
+                  "height": 424.546875,
+                  "width": 471.28125,
+                  "rectTop": -64.203125
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "re02": {
+      "title": "RE-02 the last category link of the tablet navigation under the fade, keyboard forward and back",
+      "data": {
+        "768×1024": {
+          "navigationStops": 9,
+          "last": {
+            "label": "Nuestra historia",
+            "box": {
+              "left": 537.27,
+              "right": 667.42,
+              "top": 93,
+              "height": 44
+            },
+            "text": {
+              "left": 549.27,
+              "right": 655.42
+            },
+            "outline": "self",
+            "ringPainted": "4/4",
+            "textInk": 1054,
+            "maskDiffering": 0,
+            "maskMaxDelta": 0
+          },
+          "scroller": {
+            "scrollLeft": 330,
+            "maxScroll": 330,
+            "scrollport": {
+              "left": 0,
+              "right": 768,
+              "width": 768,
+              "height": 44
+            },
+            "paddingRight": "100.156px",
+            "scrollPaddingInline": "12px 12%",
+            "mask": "linear-gradient(90deg, rgb(0, 0, 0) 88%, rgba(0, 0, 0, 0))",
+            "fadeStartsAt": 675.84
+          },
+          "forward": [
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 20,
+                "right": 119.81,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 32,
+                "right": 107.81
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 846,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 123.81,
+                "right": 192.03,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 135.81,
+                "right": 180.03
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 584,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 196.03,
+                "right": 277.61,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 208.03,
+                "right": 265.61
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 672,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 281.61,
+                "right": 354,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 293.61,
+                "right": 342
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 608,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 358,
+                "right": 435.59,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 370,
+                "right": 419.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 643,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 439.59,
+                "right": 532.3,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 451.59,
+                "right": 516.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 734,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 507.3,
+                "right": 675.77,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 519.3,
+                "right": 659.77
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1367,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 378.77,
+                "right": 533.27,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 390.77,
+                "right": 521.27
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1253,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Nuestra historia",
+              "box": {
+                "left": 537.27,
+                "right": 667.42,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 549.27,
+                "right": 655.42
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1054,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "backward": [
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 378.77,
+                "right": 533.27,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 390.77,
+                "right": 521.27
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1253,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 206.3,
+                "right": 374.77,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 218.3,
+                "right": 358.77
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1367,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 109.59,
+                "right": 202.3,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 121.59,
+                "right": 186.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 734,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 28,
+                "right": 105.59,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 40,
+                "right": 89.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 643,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 11.61,
+                "right": 84,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 23.61,
+                "right": 72
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 608,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 196.03,
+                "right": 277.61,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 208.03,
+                "right": 265.61
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 672,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 123.81,
+                "right": 192.03,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 135.81,
+                "right": 180.03
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 584,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 20,
+                "right": 119.81,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 32,
+                "right": 107.81
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 846,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "problemsForward": [],
+          "problemsBackward": []
+        },
+        "812×1024": {
+          "navigationStops": 9,
+          "last": {
+            "label": "Nuestra historia",
+            "box": {
+              "left": 576.27,
+              "right": 706.42,
+              "top": 93,
+              "height": 44
+            },
+            "text": {
+              "left": 588.27,
+              "right": 694.42
+            },
+            "outline": "self",
+            "ringPainted": "4/4",
+            "textInk": 1055,
+            "maskDiffering": 0,
+            "maskMaxDelta": 0
+          },
+          "scroller": {
+            "scrollLeft": 291,
+            "maxScroll": 291,
+            "scrollport": {
+              "left": 0,
+              "right": 812,
+              "width": 812,
+              "height": 44
+            },
+            "paddingRight": "105.438px",
+            "scrollPaddingInline": "12px 12%",
+            "mask": "linear-gradient(90deg, rgb(0, 0, 0) 88%, rgba(0, 0, 0, 0))",
+            "fadeStartsAt": 714.56
+          },
+          "forward": [
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 20,
+                "right": 119.81,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 32,
+                "right": 107.81
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 846,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 123.81,
+                "right": 192.03,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 135.81,
+                "right": 180.03
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 585,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 196.03,
+                "right": 277.61,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 208.03,
+                "right": 265.61
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 672,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 281.61,
+                "right": 354,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 293.61,
+                "right": 342
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 608,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 358,
+                "right": 435.59,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 370,
+                "right": 419.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 643,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 439.59,
+                "right": 532.3,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 451.59,
+                "right": 516.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 734,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 536.3,
+                "right": 704.77,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 548.3,
+                "right": 688.77
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1367,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 559.77,
+                "right": 714.27,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 571.77,
+                "right": 702.27
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1253,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Nuestra historia",
+              "box": {
+                "left": 576.27,
+                "right": 706.42,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 588.27,
+                "right": 694.42
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1055,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "backward": [
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 417.77,
+                "right": 572.27,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 429.77,
+                "right": 560.27
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1253,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 245.3,
+                "right": 413.77,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 257.3,
+                "right": 397.77
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1367,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 148.59,
+                "right": 241.3,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 160.59,
+                "right": 225.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 734,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 67,
+                "right": 144.59,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 79,
+                "right": 128.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 643,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 11.61,
+                "right": 84,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 23.61,
+                "right": 72
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 608,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 196.03,
+                "right": 277.61,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 208.03,
+                "right": 265.61
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 672,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 123.81,
+                "right": 192.03,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 135.81,
+                "right": 180.03
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 585,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 20,
+                "right": 119.81,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 32,
+                "right": 107.81
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 846,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "problemsForward": [],
+          "problemsBackward": []
+        },
+        "1023×768": {
+          "navigationStops": 9,
+          "last": {
+            "label": "Nuestra historia",
+            "box": {
+              "left": 770.27,
+              "right": 900.42,
+              "top": 93,
+              "height": 44
+            },
+            "text": {
+              "left": 782.27,
+              "right": 888.42
+            },
+            "outline": "self",
+            "ringPainted": "4/4",
+            "textInk": 1055,
+            "maskDiffering": 0,
+            "maskMaxDelta": 0
+          },
+          "scroller": {
+            "scrollLeft": 97,
+            "maxScroll": 105,
+            "scrollport": {
+              "left": 0,
+              "right": 1023,
+              "width": 1023,
+              "height": 44
+            },
+            "paddingRight": "130.75px",
+            "scrollPaddingInline": "12px 12%",
+            "mask": "linear-gradient(90deg, rgb(0, 0, 0) 88%, rgba(0, 0, 0, 0))",
+            "fadeStartsAt": 900.24
+          },
+          "forward": [
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 20,
+                "right": 119.81,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 32,
+                "right": 107.81
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 846,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 123.81,
+                "right": 192.03,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 135.81,
+                "right": 180.03
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 585,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 196.03,
+                "right": 277.61,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 208.03,
+                "right": 265.61
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 672,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 281.61,
+                "right": 354,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 293.61,
+                "right": 342
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 608,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 358,
+                "right": 435.59,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 370,
+                "right": 419.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 643,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 439.59,
+                "right": 532.3,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 451.59,
+                "right": 516.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 734,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 536.3,
+                "right": 704.77,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 548.3,
+                "right": 688.77
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1367,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 708.77,
+                "right": 863.27,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 720.77,
+                "right": 851.27
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1253,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Nuestra historia",
+              "box": {
+                "left": 770.27,
+                "right": 900.42,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 782.27,
+                "right": 888.42
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1055,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "backward": [
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 611.77,
+                "right": 766.27,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 623.77,
+                "right": 754.27
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1253,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 439.3,
+                "right": 607.77,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 451.3,
+                "right": 591.77
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1367,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 342.59,
+                "right": 435.3,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 354.59,
+                "right": 419.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 734,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 261,
+                "right": 338.59,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 273,
+                "right": 322.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 643,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 184.61,
+                "right": 257,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 196.61,
+                "right": 245
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 608,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 99.03,
+                "right": 180.61,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 111.03,
+                "right": 168.61
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 672,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 26.81,
+                "right": 95.03,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 38.81,
+                "right": 83.03
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 585,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 12,
+                "right": 111.81,
+                "top": 93,
+                "height": 44
+              },
+              "text": {
+                "left": 24,
+                "right": 99.81
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 846,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "problemsForward": [],
+          "problemsBackward": []
+        },
+        "1024×768": {
+          "navigationStops": 9,
+          "last": {
+            "label": "Nuestra historia",
+            "box": {
+              "left": 882.27,
+              "right": 1012.42,
+              "top": 101,
+              "height": 44
+            },
+            "text": {
+              "left": 894.27,
+              "right": 1000.42
+            },
+            "outline": "self",
+            "ringPainted": "4/4",
+            "textInk": 1054,
+            "maskDiffering": 0,
+            "maskMaxDelta": 0
+          },
+          "scroller": {
+            "scrollLeft": 5,
+            "maxScroll": 33,
+            "scrollport": {
+              "left": 0,
+              "right": 1024,
+              "width": 1024,
+              "height": 44
+            },
+            "paddingRight": "40px",
+            "scrollPaddingInline": "12px",
+            "mask": "none",
+            "fadeStartsAt": null
+          },
+          "forward": [
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 40,
+                "right": 139.81,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 52,
+                "right": 127.81
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 846,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 143.81,
+                "right": 212.03,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 155.81,
+                "right": 200.03
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 585,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 216.03,
+                "right": 297.61,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 228.03,
+                "right": 285.61
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 672,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 301.61,
+                "right": 374,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 313.61,
+                "right": 362
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 608,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 378,
+                "right": 455.59,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 390,
+                "right": 439.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 643,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 459.59,
+                "right": 552.3,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 471.59,
+                "right": 536.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 734,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 556.3,
+                "right": 724.77,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 568.3,
+                "right": 708.77
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1367,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 728.77,
+                "right": 883.27,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 740.77,
+                "right": 871.27
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1253,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Nuestra historia",
+              "box": {
+                "left": 882.27,
+                "right": 1012.42,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 894.27,
+                "right": 1000.42
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1054,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "backward": [
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 723.77,
+                "right": 878.27,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 735.77,
+                "right": 866.27
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1253,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 551.3,
+                "right": 719.77,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 563.3,
+                "right": 703.77
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1367,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 454.59,
+                "right": 547.3,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 466.59,
+                "right": 531.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 734,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 373,
+                "right": 450.59,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 385,
+                "right": 434.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 643,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 296.61,
+                "right": 369,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 308.61,
+                "right": 357
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 608,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 211.03,
+                "right": 292.61,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 223.03,
+                "right": 280.61
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 672,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 138.81,
+                "right": 207.03,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 150.81,
+                "right": 195.03
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 585,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 35,
+                "right": 134.81,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 47,
+                "right": 122.81
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 846,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "problemsForward": [],
+          "problemsBackward": []
+        },
+        "1440×900": {
+          "navigationStops": 9,
+          "last": {
+            "label": "Nuestra historia",
+            "box": {
+              "left": 1101.56,
+              "right": 1231.72,
+              "top": 101,
+              "height": 44
+            },
+            "text": {
+              "left": 1113.56,
+              "right": 1219.72
+            },
+            "outline": "self",
+            "ringPainted": "4/4",
+            "textInk": 1074,
+            "maskDiffering": 0,
+            "maskMaxDelta": 0
+          },
+          "scroller": {
+            "scrollLeft": 0,
+            "maxScroll": 0,
+            "scrollport": {
+              "left": 0,
+              "right": 1440,
+              "width": 1440,
+              "height": 44
+            },
+            "paddingRight": "48px",
+            "scrollPaddingInline": "12px",
+            "mask": "none",
+            "fadeStartsAt": null
+          },
+          "forward": [
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 208.3,
+                "right": 308.11,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 220.3,
+                "right": 296.11
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 847,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 312.11,
+                "right": 380.33,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 324.11,
+                "right": 368.33
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 577,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 384.33,
+                "right": 465.91,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 396.33,
+                "right": 453.91
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 686,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 469.91,
+                "right": 542.3,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 481.91,
+                "right": 530.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 632,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 546.3,
+                "right": 641.89,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 558.3,
+                "right": 629.89
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 733,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 645.89,
+                "right": 752.59,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 657.89,
+                "right": 740.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 840,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 756.59,
+                "right": 939.06,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 768.59,
+                "right": 927.06
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1443,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 943.06,
+                "right": 1097.56,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 955.06,
+                "right": 1085.56
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1271,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Nuestra historia",
+              "box": {
+                "left": 1101.56,
+                "right": 1231.72,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 1113.56,
+                "right": 1219.72
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1074,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "backward": [
+            {
+              "label": "Vende con Monetta",
+              "box": {
+                "left": 943.06,
+                "right": 1097.56,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 955.06,
+                "right": 1085.56
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1271,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Maquillaje y skincare",
+              "box": {
+                "left": 756.59,
+                "right": 939.06,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 768.59,
+                "right": 927.06
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 1443,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Perfumes",
+              "box": {
+                "left": 645.89,
+                "right": 752.59,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 657.89,
+                "right": 740.59
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 840,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Marcas",
+              "box": {
+                "left": 546.3,
+                "right": 641.89,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 558.3,
+                "right": 629.89
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 733,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Relojes",
+              "box": {
+                "left": 469.91,
+                "right": 542.3,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 481.91,
+                "right": 530.3
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 632,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Carteras",
+              "box": {
+                "left": 384.33,
+                "right": 465.91,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 396.33,
+                "right": 453.91
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 686,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Bolsas",
+              "box": {
+                "left": 312.11,
+                "right": 380.33,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 324.11,
+                "right": 368.33
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 577,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            },
+            {
+              "label": "Novedades",
+              "box": {
+                "left": 208.3,
+                "right": 308.11,
+                "top": 101,
+                "height": 44
+              },
+              "text": {
+                "left": 220.3,
+                "right": 296.11
+              },
+              "outline": "self",
+              "ringPainted": "4/4",
+              "textInk": 847,
+              "maskDiffering": 0,
+              "maskMaxDelta": 0
+            }
+          ],
+          "problemsForward": [],
+          "problemsBackward": []
+        }
+      }
+    }
+  }
+}

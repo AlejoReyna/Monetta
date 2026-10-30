@@ -1,0 +1,8 @@
+{
+  "bundleId": "mx.monetta.monettaApp.staging",
+  "version": "0.1.0",
+  "build": "1",
+  "profileExpires": "2026-11-01T02:38:20",
+  "alexisIPhoneIncluded": true,
+  "sourceCommit": "9775d45374c7b333a50f8ee134aeb74e1dcb6896"
+}

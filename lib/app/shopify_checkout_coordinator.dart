@@ -59,6 +59,8 @@ final class ShopifyCheckoutCoordinator {
     _latestUrl = null;
     final cart = reconciliation.cart;
     if (cart == null ||
+        cart.isEmpty ||
+        cart.totalQuantity <= 0 ||
         reconciliation.status != CartReconciliationStatus.authoritative) {
       return;
     }
@@ -111,6 +113,17 @@ final class ShopifyCheckoutCoordinator {
         );
       }
       final cart = refreshed.cart!;
+      if (cart.isEmpty || cart.totalQuantity <= 0) {
+        // A non-empty bag reconciled to nothing: Shopify dropped every line
+        // (sold out, deleted, or from another shop).
+        return CheckoutFailed(
+          code: CheckoutFailureCode.invalidCart,
+          userMessage: localIntent.isEmpty
+              ? 'Tu bolsa está vacía. Agrega un producto antes de continuar al pago.'
+              : 'Los productos de tu bolsa ya no están disponibles en la tienda. '
+                  'Revisa tu bolsa antes de continuar al pago.',
+        );
+      }
 
       final validated = _urlPolicy.validate(cart.checkoutUrl);
       _latestUrl = validated;

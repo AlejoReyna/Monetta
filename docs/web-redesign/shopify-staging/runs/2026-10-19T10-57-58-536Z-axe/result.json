@@ -1,0 +1,122 @@
+{
+  "run": "axe",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/axe.mjs --base-url=http://127.0.0.1:9292",
+  "startedAt": "2026-10-19T10:57:58.536Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "axe": "4.13.0",
+  "finishedAt": "2026-10-19T10:58:24.057Z",
+  "status": "complete-pass",
+  "error": null,
+  "summary": {
+    "checks": 18,
+    "passed": 18,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "375×812 home: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 search results: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 search empty: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 bag empty: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection with the filters drawer open: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 home with the menu drawer open: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product with the \"En tu bolsa\" sheet open: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 bag with one line: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 home: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 collection: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 product: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 search results: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 search empty: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 bag empty: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 product with the \"En tu bolsa\" sheet open: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 bag with one line: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": []
+}

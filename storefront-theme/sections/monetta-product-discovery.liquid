@@ -1,0 +1,14 @@
+{%- capture brand -%}{% render 'monetta-facet', product: product, kind: 'brands' %}{%- endcapture -%}
+{%- assign brand = brand | strip -%}
+{% if brand != blank %}
+  <section class="section container" data-brand-rail="{{ brand | escape }}" data-current-product="{{ product.handle }}" aria-labelledby="{{ section.id }}" hidden>
+    {% assign title = 'Más de ' | append: brand %}{% assign term = brand | url_encode %}{% assign href = routes.search_url | append: '?type=product&q=' | append: term %}
+    {% render 'monetta-section-header', id: section.id, title: title, link_url: href, link_label: 'Ver todo' %}
+    <div class="rail"><ul class="rail__track" role="list" data-brand-products></ul></div>
+  </section>
+{% endif %}
+<section class="section container" data-recent-products="{{ product.handle }}" aria-labelledby="{{ section.id }}-recent" hidden>
+  <h2 class="display display--section" id="{{ section.id }}-recent">Vistas hace un momento</h2>
+  <div class="rail"><ul class="rail__track" role="list" data-recent-track></ul></div>
+</section>
+{% schema %}{"name":"Monetta · Descubrimiento","settings":[]}{% endschema %}

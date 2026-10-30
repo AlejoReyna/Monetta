@@ -1,0 +1,444 @@
+{
+  "run": "layout-insets44",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/layout.mjs --base-url=http://127.0.0.1:9292 --insets=44 --viewports=375x812,812x375,1024x200,768x1024,1440x900,1024x481",
+  "startedAt": "2026-10-19T11:33:51.971Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      375,
+      812
+    ],
+    [
+      812,
+      375
+    ],
+    [
+      1024,
+      200
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      1440,
+      900
+    ],
+    [
+      1024,
+      481
+    ]
+  ],
+  "insetPx": 44,
+  "injectCss": null,
+  "finishedAt": "2026-10-19T11:34:44.051Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 77,
+    "passed": 77,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "375×812 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "375/375"
+    },
+    {
+      "name": "375×812 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)",
+      "pass": true,
+      "detail": "sticky"
+    },
+    {
+      "name": "375×812 collection: --pinned-top equals the real bottom edge of the pinned bar",
+      "pass": true,
+      "detail": "76 vs 76"
+    },
+    {
+      "name": "375×812 collection: scroll-padding-top = reserve + 16",
+      "pass": true,
+      "detail": "92"
+    },
+    {
+      "name": "375×812 collection: phone page bar is 76px tall with a one-line title",
+      "pass": true,
+      "detail": "76"
+    },
+    {
+      "name": "375×812 collection: phone global header is replaced by the page bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "375×812 collection: floating dock is fixed and --pinned-bottom equals its measured height",
+      "pass": true,
+      "detail": "dock 90 reserve 90"
+    },
+    {
+      "name": "375×812 collection: a two-line title grows the bar and the measured reserve follows (not a fixed 76)",
+      "pass": true,
+      "detail": "{\"before\":76,\"after\":254.11,\"bar\":254.109375,\"height\":254.109375}"
+    },
+    {
+      "name": "375×812 product: no horizontal overflow",
+      "pass": true,
+      "detail": "375/375"
+    },
+    {
+      "name": "375×812 product header (phone): back + search · logo · account + bag in that order",
+      "pass": true,
+      "detail": "{\"back\":{\"x\":44,\"cx\":68,\"w\":48,\"h\":48},\"search\":{\"x\":92,\"cx\":116,\"w\":48,\"h\":48},\"logo\":{\"x\":145.8125,\"cx\":187.4921875,\"w\":83.359375,\"h\":24},\"account\":{\"x\":235,\"cx\":259,\"w\":48,\"h\":48},\"bag\":{\"x\":283,\"cx\":307,\"w\":48,\"h\":48},\"menu\":null,\"searchIcon\":null}"
+    },
+    {
+      "name": "375×812 product header (phone): menu and the plain search icon are hidden",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "375×812 product header (phone): logo centred and targets are 48px",
+      "pass": true,
+      "detail": "logo cx 187.4921875/187.5"
+    },
+    {
+      "name": "375×812 product: purchase dock fixed at the bottom and reserved",
+      "pass": true,
+      "detail": "dock 65 reserve 65"
+    },
+    {
+      "name": "375×812 recommendations: rail rendered",
+      "pass": true,
+      "detail": "8 tiles"
+    },
+    {
+      "name": "375×812 recommendations: tiles have equal heights",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "375×812 recommendations (phone): heading Inter 17px/600",
+      "pass": true,
+      "detail": "[\"17px\",\"600\",\"Inter\"]"
+    },
+    {
+      "name": "375×812 recommendations (phone): tile width min(52vw, 260px)",
+      "pass": true,
+      "detail": "195 vs 195"
+    },
+    {
+      "name": "375×812 recommendations (phone): 4:5 photo that fills the frame (no inset) and 12px gap",
+      "pass": true,
+      "detail": "{\"ratio\":0.8,\"margin\":\"0px\",\"gap\":12}"
+    },
+    {
+      "name": "375×812 recommendations (phone): name clamps at two lines",
+      "pass": true,
+      "detail": "[\"2\",2]"
+    },
+    {
+      "name": "375×812 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "375/375"
+    },
+    {
+      "name": "375×812 bag: checkout bar fixed, reserve equals its height",
+      "pass": true,
+      "detail": "bar 73 reserve 73"
+    },
+    {
+      "name": "375×812 bag: the dock gives way to the checkout bar",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "375×812 home: no horizontal overflow",
+      "pass": true,
+      "detail": "375/375"
+    },
+    {
+      "name": "812×375 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "812/812"
+    },
+    {
+      "name": "812×375 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)",
+      "pass": true,
+      "detail": "siteTop=static pageBar=static pinnedTop=0"
+    },
+    {
+      "name": "812×375 collection: dock joins the page flow (static) and reserves nothing",
+      "pass": true,
+      "detail": "dock=static/none pinnedBottom=0"
+    },
+    {
+      "name": "812×375 product: no horizontal overflow",
+      "pass": true,
+      "detail": "812/812"
+    },
+    {
+      "name": "812×375 product: product panel not sticky, gallery not squeezed (viewer 359×449, panel static)",
+      "pass": true,
+      "detail": "{\"viewer\":{\"position\":\"relative\",\"display\":\"block\",\"top\":-233.859375,\"bottom\":215.25,\"height\":449.109375,\"width\":359.296875,\"maxHeight\":\"none\",\"maxWidth\":\"none\"},\"panel\":\"static\",\"thumbs\":\"none\"}"
+    },
+    {
+      "name": "812×375 product: purchase dock hidden and the inline add button takes over",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "812×375 product: gallery drops its viewport-fitted max width and thumbnails their max height",
+      "pass": true,
+      "detail": "viewer none thumbs none"
+    },
+    {
+      "name": "812×375 recommendations: rail rendered",
+      "pass": true,
+      "detail": "8 tiles"
+    },
+    {
+      "name": "812×375 recommendations: tiles have equal heights",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "812×375 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "812/812"
+    },
+    {
+      "name": "812×375 bag: checkout bar hidden and the summary's button takes over; summary not sticky",
+      "pass": true,
+      "detail": "summary static"
+    },
+    {
+      "name": "812×375 home: no horizontal overflow",
+      "pass": true,
+      "detail": "812/812"
+    },
+    {
+      "name": "1024×200 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×200 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)",
+      "pass": true,
+      "detail": "siteTop=static pageBar=static pinnedTop=0"
+    },
+    {
+      "name": "1024×200 collection: dock joins the page flow (static) and reserves nothing",
+      "pass": true,
+      "detail": "dock=static/none pinnedBottom=0"
+    },
+    {
+      "name": "1024×200 product: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×200 product: product panel not sticky, gallery not squeezed (viewer 427×534, panel static)",
+      "pass": true,
+      "detail": "{\"viewer\":{\"position\":\"relative\",\"display\":\"block\",\"top\":-225.859375,\"bottom\":307.921875,\"height\":533.78125,\"width\":427.03125,\"maxHeight\":\"none\",\"maxWidth\":\"none\"},\"panel\":\"static\",\"thumbs\":\"none\"}"
+    },
+    {
+      "name": "1024×200 product: purchase dock hidden and the inline add button takes over",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 product: gallery drops its viewport-fitted max width and thumbnails their max height",
+      "pass": true,
+      "detail": "viewer none thumbs none"
+    },
+    {
+      "name": "1024×200 recommendations: rail rendered",
+      "pass": true,
+      "detail": "8 tiles"
+    },
+    {
+      "name": "1024×200 recommendations: tiles have equal heights",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×200 bag: checkout bar hidden and the summary's button takes over; summary not sticky",
+      "pass": true,
+      "detail": "summary static"
+    },
+    {
+      "name": "1024×200 home: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "768×1024 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "768/768"
+    },
+    {
+      "name": "768×1024 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)",
+      "pass": true,
+      "detail": "sticky"
+    },
+    {
+      "name": "768×1024 collection: --pinned-top equals the real bottom edge of the pinned bar",
+      "pass": true,
+      "detail": "110 vs 110"
+    },
+    {
+      "name": "768×1024 collection: scroll-padding-top = reserve + 16",
+      "pass": true,
+      "detail": "126"
+    },
+    {
+      "name": "768×1024 product: no horizontal overflow",
+      "pass": true,
+      "detail": "768/768"
+    },
+    {
+      "name": "768×1024 recommendations: rail rendered",
+      "pass": true,
+      "detail": "8 tiles"
+    },
+    {
+      "name": "768×1024 recommendations: tiles have equal heights",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "768×1024 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "768/768"
+    },
+    {
+      "name": "768×1024 home: no horizontal overflow",
+      "pass": true,
+      "detail": "768/768"
+    },
+    {
+      "name": "768×1024 tablet category row: the last link scrolls out of the fade (its right edge is before the 88% fade start)",
+      "pass": true,
+      "detail": "{\"right\":668.21875,\"fadeStart\":675.84,\"listRight\":768,\"scrollWidth\":971,\"clientWidth\":768,\"paddingRight\":\"100.156px\"}"
+    },
+    {
+      "name": "1440×900 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "1440/1440"
+    },
+    {
+      "name": "1440×900 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)",
+      "pass": true,
+      "detail": "sticky"
+    },
+    {
+      "name": "1440×900 collection: --pinned-top equals the real bottom edge of the pinned bar",
+      "pass": true,
+      "detail": "118 vs 118"
+    },
+    {
+      "name": "1440×900 collection: scroll-padding-top = reserve + 16",
+      "pass": true,
+      "detail": "134"
+    },
+    {
+      "name": "1440×900 product: no horizontal overflow",
+      "pass": true,
+      "detail": "1440/1440"
+    },
+    {
+      "name": "1440×900 product: desktop columns stay sticky / fitted above 480px of height",
+      "pass": true,
+      "detail": "panel sticky viewer 554.4px"
+    },
+    {
+      "name": "1440×900 recommendations: rail rendered",
+      "pass": true,
+      "detail": "8 tiles"
+    },
+    {
+      "name": "1440×900 recommendations: tiles have equal heights",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440×900 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "1440/1440"
+    },
+    {
+      "name": "1440×900 home: no horizontal overflow",
+      "pass": true,
+      "detail": "1440/1440"
+    },
+    {
+      "name": "1024×481 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×481 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)",
+      "pass": true,
+      "detail": "sticky"
+    },
+    {
+      "name": "1024×481 collection: --pinned-top equals the real bottom edge of the pinned bar",
+      "pass": true,
+      "detail": "118 vs 118"
+    },
+    {
+      "name": "1024×481 collection: scroll-padding-top = reserve + 16",
+      "pass": true,
+      "detail": "134"
+    },
+    {
+      "name": "1024×481 product: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×481 product: desktop columns stay sticky / fitted above 480px of height",
+      "pass": true,
+      "detail": "panel sticky viewer 219.2px"
+    },
+    {
+      "name": "1024×481 recommendations: rail rendered",
+      "pass": true,
+      "detail": "8 tiles"
+    },
+    {
+      "name": "1024×481 recommendations: tiles have equal heights",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×481 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×481 home: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    }
+  ],
+  "notes": []
+}

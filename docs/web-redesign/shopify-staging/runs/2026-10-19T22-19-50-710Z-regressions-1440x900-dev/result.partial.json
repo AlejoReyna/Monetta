@@ -1,0 +1,288 @@
+{
+  "run": "regressions-1440x900-dev",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/regressions.mjs --base-url=http://127.0.0.1:9292 --w=1440 --h=900 --only=p2,p7 --label=dev",
+  "startedAt": "2026-10-19T22:19:50.710Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 611,
+      "sha256": "3bc7b18d54861884fba1bdcc1264514eadcd3bd1bef22a209a24c95f49359eec"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "incidents": [],
+  "proxyHealthAfter": {
+    "checkedAt": "2026-10-19T22:20:27.219Z",
+    "baseUrl": "http://127.0.0.1:9292",
+    "store": "monetta-staging.myshopify.com",
+    "expectedTheme": {
+      "id": "192125304866",
+      "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+    },
+    "timeoutMs": 20000,
+    "checks": [
+      {
+        "name": "exactly one healthy theme dev proxy exists, it serves the authorised draft theme and it is the one under test",
+        "pass": true,
+        "detail": "[[9292,\"192125304866\",\"healthy\"]]"
+      },
+      {
+        "name": "the probe page answers 200 within the time limit",
+        "pass": true,
+        "detail": "285 ms"
+      },
+      {
+        "name": "the document is the expected theme (Shopify.theme id, role unpublished, name)",
+        "pass": true,
+        "detail": "{\"name\":\"Monetta Web F1 borrador sin publicar 2026-10-19\",\"id\":192125304866,\"schema_name\":\"Atelier\",\"schema_version\":\"3.5.0\",\"theme_store_id\":null,\"role\":\"unpublished\"}"
+      },
+      {
+        "name": "the document uses the Monetta layout (body.mw)",
+        "pass": true,
+        "detail": ""
+      },
+      {
+        "name": "served monetta-product.js equals the local file",
+        "pass": true,
+        "detail": "served 4d3a8395e4a3 · local 4d3a8395e4a3"
+      },
+      {
+        "name": "served monetta-cart.js equals the local file",
+        "pass": true,
+        "detail": "served 332f3e54df41 · local 332f3e54df41"
+      },
+      {
+        "name": "served monetta-core.js equals the local file",
+        "pass": true,
+        "detail": "served 9e0cd64e6b81 · local 9e0cd64e6b81"
+      }
+    ],
+    "incidents": [],
+    "processes": [
+      "96196 15:39:24 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off"
+    ],
+    "proxies": [
+      {
+        "port": 9292,
+        "theme": "192125304866",
+        "state": "healthy",
+        "process": "96196 15:39:24 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --pat"
+      }
+    ],
+    "ok": true
+  },
+  "finishedAt": "2026-10-19T22:20:27.981Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 38,
+    "passed": 38,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "P2 [staging] increment: the change request is held on the wire",
+      "pass": true,
+      "detail": "held=1"
+    },
+    {
+      "name": "P2 [staging] increment: while it is pending every checkout button is disabled and the lock flag is set",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] increment: the tab order never reaches a checkout button while the change is pending",
+      "pass": true,
+      "detail": "reached=0"
+    },
+    {
+      "name": "P2 [staging] increment: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] increment: after the answer the lock is released and the bag matches Shopify's",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] increment: positive control, with the lock released the bag hands over to Shopify's checkout of the staging store",
+      "pass": true,
+      "detail": "302 /cart -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx | 302 /checkouts/cn/hWNIAMCACiLop8x1Mmb7Jvn8/en-mx -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx"
+    },
+    {
+      "name": "P2 [staging] decrement: the change request is held on the wire",
+      "pass": true,
+      "detail": "held=1"
+    },
+    {
+      "name": "P2 [staging] decrement: while it is pending every checkout button is disabled and the lock flag is set",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] decrement: the tab order never reaches a checkout button while the change is pending",
+      "pass": true,
+      "detail": "reached=0"
+    },
+    {
+      "name": "P2 [staging] decrement: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] decrement: after the answer the lock is released and the bag matches Shopify's",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] remove: the change request is held on the wire",
+      "pass": true,
+      "detail": "held=1"
+    },
+    {
+      "name": "P2 [staging] remove: while it is pending every checkout button is disabled and the lock flag is set",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] remove: the tab order never reaches a checkout button while the change is pending",
+      "pass": true,
+      "detail": "reached=0"
+    },
+    {
+      "name": "P2 [staging] remove: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] remove: after the answer the lock is released and the bag matches Shopify's",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] undo: the change request is held on the wire",
+      "pass": true,
+      "detail": "held=1"
+    },
+    {
+      "name": "P2 [staging] undo: while it is pending every checkout button is disabled and the lock flag is set",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] undo: the tab order never reaches a checkout button while the change is pending",
+      "pass": true,
+      "detail": "reached=0"
+    },
+    {
+      "name": "P2 [staging] undo: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] undo: after the answer the lock is released and the bag matches Shopify's",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] transport failure and no read-back: the bag is unconfirmed, the notice shows and every checkout button stays disabled",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[true,true]}"
+    },
+    {
+      "name": "P2 [staging] transport failure and no read-back: checkout cannot be submitted",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] transport failure and no read-back: a further change is refused until the bag is confirmed (no blind second write)",
+      "pass": true,
+      "detail": "change requests 1"
+    },
+    {
+      "name": "P2 [staging] recovery: \"Actualizar bolsa\" shows Shopify's bag (the change never reached it) and releases the lock",
+      "pass": true,
+      "detail": "{\"shown\":\"1\",\"truth\":1,\"state\":{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}}"
+    },
+    {
+      "name": "P2 [staging] Shopify rejects a change (422): its message is shown, marked with the store language, and the lock is released after the bag is read back",
+      "pass": true,
+      "detail": "{\"toast\":{\"text\":\"You can only add 1 of this item to your cart.\",\"lang\":\"en\"},\"state\":{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}}"
+    },
+    {
+      "name": "P2 [staging] Deshacer pressed during a pending change does not run on top of it (waits its turn)",
+      "pass": true,
+      "detail": "add before the change finished: 0; overlapping writes: 0"
+    },
+    {
+      "name": "P2 [controlled] the accelerated-checkout area is inert while the change is pending: a pointer or keyboard press does not reach its button",
+      "pass": true,
+      "detail": "{\"inert\":[true],\"activations\":0}"
+    },
+    {
+      "name": "P2 [controlled] the accelerated-checkout area is released with the lock",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[],\"accelerated\":[],\"notice\":[]}"
+    },
+    {
+      "name": "P7 [staging] the anonymous cart has two distinct lines of the same variant (plain ×1, personalised ×2)",
+      "pass": true,
+      "detail": "[[\"68551021592610:3045cf69d46ffc49a2c6c4d034a349ce\",2,{\"Grabado\":\"ANA\",\"_canal\":\"prueba controlada\"}],[\"68551021592610:c9c9fede87392015840a26293b50ecb1\",1,{}]]"
+    },
+    {
+      "name": "P7 [staging] the rendered line carries its full identity (variant, quantity, public and private properties, selling plan)",
+      "pass": true,
+      "detail": "{\"id\":68551021592610,\"quantity\":2,\"properties\":{\"Grabado\":\"ANA\",\"_canal\":\"prueba controlada\"},\"selling_plan\":null}"
+    },
+    {
+      "name": "P7 [staging] Deshacer restores the personalised line with its quantity and both properties, under the same key",
+      "pass": true,
+      "detail": "[[\"68551021592610:3045cf69d46ffc49a2c6c4d034a349ce\",2,{\"Grabado\":\"ANA\",\"_canal\":\"prueba controlada\"}],[\"68551021592610:c9c9fede87392015840a26293b50ecb1\",1,{}]]"
+    },
+    {
+      "name": "P7 [staging] the plain line of the same variant was not merged into (still ×1, nothing added to it)",
+      "pass": true,
+      "detail": "[[\"68551021592610:3045cf69d46ffc49a2c6c4d034a349ce\",2],[\"68551021592610:c9c9fede87392015840a26293b50ecb1\",1]]"
+    },
+    {
+      "name": "P7 [controlled] Deshacer re-adds with the line's quantity, properties and selling plan (controlled plan 777; staging has no selling plans)",
+      "pass": true,
+      "detail": "[{\"id\":111,\"quantity\":3,\"sections\":\"ctl-cart,monetta-cart-sheet\",\"sections_url\":\"/cart\",\"properties\":{\"Grabado\":\"ANA\"},\"selling_plan\":777}]"
+    },
+    {
+      "name": "P7 [controlled] if Shopify rejects the restore, its message is shown and no other line is added in its place",
+      "pass": true,
+      "detail": "{\"adds\":[{\"id\":111,\"quantity\":1,\"sections\":\"ctl-cart,monetta-cart-sheet\",\"sections_url\":\"/cart\",\"properties\":{\"Grabado\":\"ANA\"}}],\"toast\":\"Cannot restore: this item is sold out.\"}"
+    },
+    {
+      "name": "P7 [controlled] the rejected restore is not retried without its properties (exactly one add, with the full identity)",
+      "pass": true,
+      "detail": "[{\"id\":111,\"quantity\":1,\"sections\":\"ctl-cart,monetta-cart-sheet\",\"sections_url\":\"/cart\",\"properties\":{\"Grabado\":\"ANA\"}}]"
+    },
+    {
+      "name": "P7 [controlled] a line whose identity cannot be read offers no Deshacer (it would be a different purchase)",
+      "pass": true,
+      "detail": "{\"offered\":false,\"adds\":[]}"
+    },
+    {
+      "name": "proxy: after the run it still serves the expected theme with the local scripts (checked with bounded waits)",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "proxy incidents during the run: 0"
+  ]
+}

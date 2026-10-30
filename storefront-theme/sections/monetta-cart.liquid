@@ -73,6 +73,7 @@
             <div class="summary__row"><dt>Envío</dt><dd>Se calcula en el checkout</dd></div>
             <div class="summary__row summary__row--total"><dt>Total estimado</dt><dd>{{ cart.total_price | money_with_currency }}</dd></div>
           </dl>
+          {% render 'monetta-cart-discount' %}
           <p class="summary__note">Los descuentos, impuestos y el envío finales se confirman en el checkout de Shopify.</p>
           <form action="{{ routes.cart_url }}" method="post" id="cart-checkout-form" novalidate>
             <button type="submit" name="checkout" class="btn btn--primary btn--block">{% render 'monetta-icon', name: 'lock', size: 18 %} Continuar al checkout</button>

@@ -1,0 +1,121 @@
+--- a/sections/monetta-header.liquid
++++ b/sections/monetta-header.liquid
+@@ -29,8 +29,13 @@
+     endif
+   endif
+   assign search_hidden = false
++  assign is_account = false
+   if template.name == 'search'
+     assign search_hidden = true
++  endif
++  if template.suffix == 'account' or template.suffix == 'orders'
++    assign search_hidden = false
++    assign is_account = true
+   endif
+ -%}
+ <header
+@@ -70,7 +75,7 @@
+     <div class="site-header__end">
+       <a class="icon-button site-header__search-icon" href="{{ routes.search_url }}" aria-label="Buscar productos"{% if search_hidden %} hidden{% endif %}>{% render 'monetta-icon', name: 'search', size: 24 %}</a>
+       <button type="button" class="icon-button header-utility header-utility--saved" data-open-dialog="saved-products" aria-label="Ver guardados" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 22 %}</button>
+-      <a class="icon-button header-utility header-utility--account" href="{{ routes.account_url }}" aria-label="Cuenta">{% render 'monetta-icon', name: 'person', size: 24 %}<span class="header-utility__label" aria-hidden="true">Cuenta</span></a>
++      <a class="icon-button header-utility header-utility--account" href="{% render 'monetta-account-link' %}" aria-label="Cuenta"{% if is_account %} aria-current="page"{% endif %}>{% render 'monetta-icon', name: 'person', size: 24 %}<span class="header-utility__label" aria-hidden="true">Cuenta</span></a>
+       <a class="icon-button header-utility header-utility--cart" href="{{ routes.cart_url }}" aria-label="{{ cart_label }}" data-cart-link>{% render 'monetta-icon', name: 'bag', size: 23 %}<span class="header-utility__label" aria-hidden="true">Carrito</span><span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></a>
+     </div>
+   </div>
+@@ -79,7 +84,7 @@
+     The guide's categories (Bolsas, Carteras, Relojes, Perfumes, Marcas, Mayoreo); snippets/monetta-guia-url.liquid resolves
+     each. A collection leaves them out: its pills (snippets/monetta-guia-pills.liquid) carry the same links under the banner.
+   {%- endcomment -%}
+-  {%- unless template.name == 'collection' -%}
++  {%- unless template.name == 'collection' or is_account -%}
+   <nav class="site-nav" aria-label="Categorías">
+     <ul class="site-nav__list" role="list">
+       {%- assign nav_entries = 'bolsas:Bolsas,carteras:Carteras,relojes:Relojes,perfumes:Perfumes,categorias:Marcas,mayoreo:Mayoreo' | split: ',' -%}
+@@ -104,12 +109,12 @@
+         </div>
+         <div class="menu__identity">
+           {%- if customer -%}
+-            <a class="guia-identity" href="{{ routes.account_url }}">
++            <a class="guia-identity" href="{% render 'monetta-account-link' %}">
+               <span class="guia-identity__avatar" aria-hidden="true">{{ customer.first_name | default: customer.email | slice: 0 | upcase }}</span>
+               <span class="guia-identity__text"><span class="guia-identity__name">{{ customer.name | default: customer.email | escape }}</span><span class="guia-identity__email">{{ customer.email | escape }}</span></span>
+             </a>
+           {%- else -%}
+-            <a class="guia-identity" href="{{ routes.account_login_url }}">
++            <a class="guia-identity" href="{% render 'monetta-account-link' %}">
+               <span class="guia-identity__avatar" aria-hidden="true">{% render 'monetta-icon', name: 'person', size: 24 %}</span>
+               <span class="guia-identity__text"><span class="guia-identity__name">Invitado</span><span class="guia-identity__email">Inicia sesión o crea tu cuenta</span></span>
+             </a>
+--- a/snippets/monetta-head.liquid
++++ b/snippets/monetta-head.liquid
+@@ -5,6 +5,9 @@
+ {%- enddoc -%}
+ {%- liquid
+   assign t = template.name
++  if template.suffix == 'account' or template.suffix == 'orders'
++    assign t = template.suffix
++  endif
+   assign og_image = page_image | default: shop.brand.logo
+   assign doc_title = page_title
+   case request.page_type
+@@ -33,10 +36,18 @@
+         assign doc_title = 'Noticias'
+       endif
+   endcase
++  if template.suffix == 'account'
++    assign doc_title = 'Mi cuenta'
++  elsif template.suffix == 'orders'
++    assign doc_title = 'Mis pedidos'
++  endif
+ -%}
+ <meta charset="utf-8">
+ <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
+ <meta name="theme-color" content="#fbf8f2">
++{%- if template.suffix == 'account' or template.suffix == 'orders' -%}
++  <meta name="robots" content="noindex, nofollow">
++{%- endif -%}
+ <link rel="canonical" href="{{ canonical_url }}">
+ <link rel="icon" type="image/png" sizes="32x32" href="{{ 'monetta-favicon-32.png' | asset_url }}">
+ <link rel="icon" type="image/png" sizes="96x96" href="{{ 'monetta-favicon-96.png' | asset_url }}">
+--- a/snippets/monetta-dock.liquid
++++ b/snippets/monetta-dock.liquid
+@@ -25,7 +25,7 @@
+     <a class="dock__item" href="{{ routes.cart_url }}" data-dock="cart" aria-label="{{ cart_label }}"{% if dock_active == 'cart' %} aria-current="page"{% endif %}>
+       <span class="dock__icon">{% render 'monetta-nav-glyph', name: 'cart' %}<span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></span>Carrito
+     </a>
+-    <a class="dock__item" href="{{ routes.account_url }}" data-dock="account">
++    <a class="dock__item" href="{% render 'monetta-account-link' %}" data-dock="account"{% if dock_active == 'account' %} aria-current="page"{% endif %}>
+       <span class="dock__icon">{% render 'monetta-nav-glyph', name: 'account' %}</span>Cuenta
+     </a>
+   </div>
+--- a/layout/monetta.liquid
++++ b/layout/monetta.liquid
+@@ -13,6 +13,9 @@
+ {%- endcomment -%}
+ {%- liquid
+   assign t = template.name
++  if template.suffix == 'account' or template.suffix == 'orders'
++    assign t = template.suffix
++  endif
+   assign has_page_bar = false
+   assign dock_mode = 'nav'
+   assign dock_active = ''
+@@ -31,6 +34,8 @@
+       assign dock_active = 'catalog'
+     when 'cart'
+       assign dock_active = 'cart'
++    when 'account', 'orders'
++      assign dock_active = 'account'
+   endcase
+ -%}
+ <!doctype html>
+@@ -42,7 +47,7 @@
+   </head>
+ 
+   <body
+-    class="mw {% case dock_mode %}{% when 'nav' %}has-dock{% when 'purchase' %}has-purchase-dock{% else %}has-checkout-bar{% endcase %}{% if has_page_bar %} has-page-bar{% endif %}"
++    class="mw {% case dock_mode %}{% when 'nav' %}has-dock{% when 'purchase' %}has-purchase-dock{% else %}has-checkout-bar{% endcase %}{% if has_page_bar %} has-page-bar{% endif %}{% if customer and dock_active == 'account' %} has-account-sidebar{% endif %}"
+     data-template="{{ t }}"
+     data-dock-active="{{ dock_active }}"
+   >

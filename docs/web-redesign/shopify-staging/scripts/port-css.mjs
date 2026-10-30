@@ -1,6 +1,8 @@
 // Ports the approved prototype stylesheets (design-prototype/src/styles) to the Shopify theme.
 //
-//   node docs/web-redesign/shopify-staging/scripts/port-css.mjs
+//   node docs/web-redesign/shopify-staging/scripts/port-css.mjs           write the four theme files
+//   node docs/web-redesign/shopify-staging/scripts/port-css.mjs --check   write nothing; exit 1 when a theme file differs
+//                                                                        from a fresh port (Shopify token parity)
 //
 // What it changes, and nothing else:
 //  * tokens.css  -> assets/monetta-tokens.css   @font-face moves to snippets/monetta-fonts.liquid
@@ -13,7 +15,7 @@
 //                                               copied byte for byte so the verified measurements travel intact.
 // Run it again after editing the prototype; the output is deterministic.
 import { createRequire } from 'node:module';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -22,7 +24,13 @@ const require = createRequire(path.join(root, 'design-prototype/package.json'));
 const postcss = require('postcss');
 
 const src = (name) => readFileSync(path.join(root, 'design-prototype/src/styles', name), 'utf8');
-const out = (name, css) => writeFileSync(path.join(root, 'storefront-theme/assets', name), css);
+const check = process.argv.includes('--check');
+const stale = [];
+const out = (name, css) => {
+  const file = path.join(root, 'storefront-theme/assets', name);
+  if (!check) return writeFileSync(file, css);
+  if (!existsSync(file) || readFileSync(file, 'utf8') !== css) stale.push(name);
+};
 
 // Prototype scaffolding or surfaces that are not part of this delivery's theme.
 const DROP = [
@@ -125,4 +133,12 @@ for (const [file, dest] of [
   });
   out(dest, `/* Ported from design-prototype/src/styles/${file}; prototype-only surfaces dropped (docs/web-redesign/shopify-staging/scripts/port-css.mjs). */\n${tree.toString()}`);
 }
-console.log('ported: monetta-tokens.css monetta-base.css monetta-components.css monetta-pages.css');
+if (check) {
+  if (stale.length) {
+    console.error(`stale (differs from a fresh port of design-prototype/src/styles): ${stale.join(', ')}`);
+    process.exit(1);
+  }
+  console.log('port: monetta-tokens.css monetta-base.css monetta-components.css monetta-pages.css match a fresh port');
+} else {
+  console.log('ported: monetta-tokens.css monetta-base.css monetta-components.css monetta-pages.css');
+}

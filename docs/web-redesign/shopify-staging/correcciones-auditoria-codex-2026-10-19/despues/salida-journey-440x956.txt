@@ -1,0 +1,27 @@
+run dir: /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-19T22-33-40-926Z-journey-440x956
+PASS  home: one h1
+PASS  home: real products rendered (Novedades + Selección)  — 16 cards
+PASS  home: no horizontal overflow  — {"scrollWidth":440,"innerWidth":440}
+PASS  home: visible images loaded and decoded  — {"total":19,"broken":[]}
+PASS  home: no prototype strip or demo UI
+FAIL  home — unexpected error  — page.screenshot: Timeout 30000ms exceeded.
+PASS  collection: count line shown (Shopify products_count)  — 202 piezas
+PASS  collection: first page has 24 cards
+PASS  collection: filters drawer settled inside the viewport (x and y)  — {"x":0,"y":0,"width":440,"height":956}
+PASS  collection: filter applied and the count matches Shopify's facet count  — 199 vs facet 199
+PASS  collection: active filter chip with a remove link
+note  sort select hidden at this width (the phone uses the drawer); sort checked from the drawer in the next block
+PASS  collection: sort price ascending from the drawer, filter kept  — 9.95 ≤ 600 ≤ 629.95 ≤ 679 ≤ 699.95 ≤ 729.95 ≤ 749 ≤ 749
+PASS  collection: "Ver más piezas" is a real link to ?page=2  — /collections/all?filter.v.availability=1&page=2&sort_by=price-ascending
+PASS  collection: load more appends to 48 and updates the address  — http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending
+PASS  collection: Back leaves the filtered/sorted state coherent  — http://127.0.0.1:9292/collections/all?sort_by=title-ascending&filter.v.availability=1
+PASS  collection: Forward returns to the same URL  — http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending
+FAIL  backarrow — unexpected error  — locator.click: Target page, context or browser has been closed
+FAIL  product — unexpected error  — page.goto: Target page, context or browser has been closed
+FAIL  add — unexpected error  — page.goto: Target page, context or browser has been closed
+FAIL  refusal — unexpected error  — page.evaluate: Target page, context or browser has been closed
+FAIL  bag — unexpected error  — page.goto: Target page, context or browser has been closed
+FAIL  checkout — unexpected error  — page.goto: Target page, context or browser has been closed
+PASS  no unexpected console errors or page errors from the theme  — []
+
+complete-with-failures: 16/23 checks · /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-19T22-33-40-926Z-journey-440x956/result.json

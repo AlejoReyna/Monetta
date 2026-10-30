@@ -1,0 +1,19 @@
+{
+  "screen": "inicio",
+  "width": 440.0,
+  "height": 956.0,
+  "firstCard": {
+    "x": 20.0,
+    "y": 432.5,
+    "width": 158.4,
+    "height": 258.4
+  },
+  "textRoles": [
+    {
+      "text": "Novedades",
+      "fontFamily": "Playfair Display",
+      "fontSize": 24.0,
+      "fontWeight": 400
+    }
+  ]
+}

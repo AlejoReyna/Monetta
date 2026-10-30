@@ -1,0 +1,162 @@
+{
+  "run": "screens",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/screens.mjs --base-url=http://127.0.0.1:9292 --viewports=1024x768,320x640",
+  "startedAt": "2026-10-19T14:25:27.411Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      1024,
+      768
+    ],
+    [
+      320,
+      640
+    ]
+  ],
+  "insetPx": 0,
+  "finishedAt": "2026-10-19T14:25:56.713Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 24,
+    "passed": 24,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "1024×768 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 collection-filters-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 collection-filters-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 menu-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": []
+}

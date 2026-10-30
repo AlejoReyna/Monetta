@@ -177,6 +177,7 @@
     if (!next || next.dataset.sectionId !== root.dataset.sectionId || !dynamic || !dock || !variant || !$('[data-product-form]', dynamic) || !$('[data-add]', dock)) {
       throw new Error('invalid-section');
     }
+    if ($('[data-variant-details]', root) && !$('[data-variant-details]', next)) throw new Error('missing-variant-details');
     const rendered = $$('[data-options] fieldset', dynamic).map((group) => $('input:checked', group)?.value);
     if (!rendered.every((value, index) => value === variant.options[index])) throw new Error('incoherent-section');
     return { next, variant };
@@ -223,6 +224,8 @@
     const { next, variant } = section;
     $('[data-product-dynamic]', root).replaceChildren(...$('[data-product-dynamic]', next).childNodes);
     $('[data-purchase-dock]', root).replaceChildren(...$('[data-purchase-dock]', next).childNodes);
+    const details = $('[data-variant-details]', root);
+    if (details) details.replaceChildren(...$('[data-variant-details]', next).childNodes);
     const seal = $('[data-seal]', root);
     const nextSeal = $('[data-seal]', next);
     if (seal && nextSeal) seal.hidden = nextSeal.hidden;
@@ -466,4 +469,11 @@
   }
   if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', start);
   else start();
+  // The theme editor replaces a section's DOM when its settings change: bind the new gallery and rail. The old nodes, and
+  // the listeners on them, are gone with it; document-level listeners above are shared and never re-added.
+  document.addEventListener('shopify:section:load', (event) => {
+    // Only a replaced product section gets a new gallery; rebinding the untouched one would stack its listeners.
+    if (event.target.querySelector?.('[data-product-page]')) start();
+    else if (event.target.querySelector?.('[data-recommendations]')) loadRecommendations();
+  });
 })();

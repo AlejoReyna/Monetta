@@ -1,0 +1,117 @@
+{
+  "run": "axe",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/axe.mjs --base-url=http://127.0.0.1:9292",
+  "startedAt": "2026-10-19T08:07:25.451Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "2ee0090e7b1c4f488c4065411a96fb5935ec47b4942c9c7c64980a992f6b8748"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "axe": "4.13.0",
+  "finishedAt": "2026-10-19T08:08:20.897Z",
+  "status": "complete-with-failures",
+  "error": null,
+  "summary": {
+    "checks": 17,
+    "passed": 14,
+    "failed": 3
+  },
+  "checks": [
+    {
+      "name": "375×812 home: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product: no serious or critical axe violations",
+      "pass": false,
+      "detail": "[\"color-contrast (serious): .shopify-payment-button__button\"]"
+    },
+    {
+      "name": "375×812 search results: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 search empty: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 bag empty: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection with the filters drawer open: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 home with the menu drawer open: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product with the \"En tu bolsa\" sheet open: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 bag with one line: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 home: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 collection: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 product: no serious or critical axe violations",
+      "pass": false,
+      "detail": "[\"color-contrast (serious): .shopify-payment-button__button\"]"
+    },
+    {
+      "name": "1440×900 search results: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 search empty: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 bag empty: no serious or critical axe violations",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 — unexpected error",
+      "pass": false,
+      "detail": "locator.click: Timeout 30000ms exceeded."
+    }
+  ],
+  "notes": []
+}

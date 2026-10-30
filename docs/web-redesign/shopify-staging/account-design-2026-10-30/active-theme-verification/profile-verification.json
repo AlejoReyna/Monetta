@@ -1,0 +1,20 @@
+{
+  "fixtureData": true,
+  "browser": "isolated Firefox",
+  "checks": [
+    "profile click stays inside Monetta",
+    "image upload and JPEG resizing",
+    "name and photo persist after reload",
+    "editor accessibility at 390 and 1440",
+    "profile shared by account and orders",
+    "cancel discards edits",
+    "remove photo restores initial",
+    "unsupported and corrupt image rejection",
+    "10 MB size limit",
+    "whitespace name rejection",
+    "storage failure preserves original profile and shows error",
+    "customer isolation",
+    "guest sees no stored profile"
+  ],
+  "pageErrors": []
+}

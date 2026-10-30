@@ -18,8 +18,8 @@ final class CheckoutReturnLinkReceiver {
     required CheckoutReturnRouter router,
     MethodChannel? channel,
   })  : _router = router,
-        _channel =
-            channel ?? const MethodChannel(MethodChannelCheckoutLauncher.channelName);
+        _channel = channel ??
+            const MethodChannel(MethodChannelCheckoutLauncher.channelName);
 
   final CheckoutReturnRouter _router;
   final MethodChannel _channel;

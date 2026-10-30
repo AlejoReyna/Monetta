@@ -1,0 +1,98 @@
+{
+  "run": "regressions-1440x900-dev",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/regressions.mjs --base-url=http://127.0.0.1:9292 --w=1440 --h=900 --only=p1 --label=dev",
+  "startedAt": "2026-10-19T22:08:31.237Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 611,
+      "sha256": "3952b90ff3acc13905018081ef8fc167362b746de85a99faf17f03ee58952ac9"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "incidents": [
+    {
+      "at": "2026-10-19T22:08:33.509Z",
+      "url": "http://127.0.0.1:9292/products/reloj-coach-talia-saddle",
+      "kind": "unexpected-document",
+      "detail": "HTTP 200 <!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <title>Monetta Staging</tit",
+      "attempt": 1
+    },
+    {
+      "at": "2026-10-19T22:08:34.045Z",
+      "url": "http://127.0.0.1:9292/products/reloj-coach-talia-saddle",
+      "kind": "unexpected-document",
+      "detail": "HTTP 200 <!DOCTYPE html>\n<html lang=\"en\">\n  <head>\n    <meta charset=\"utf-8\">\n    <title>Monetta Staging</tit",
+      "attempt": 2
+    }
+  ],
+  "proxyHealthAfter": {
+    "checkedAt": "2026-10-19T22:08:34.059Z",
+    "baseUrl": "http://127.0.0.1:9292",
+    "store": "monetta-staging.myshopify.com",
+    "expectedTheme": {
+      "id": "192125304866",
+      "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+    },
+    "timeoutMs": 20000,
+    "checks": [
+      {
+        "name": "exactly one theme dev proxy for the authorised draft is running",
+        "pass": true,
+        "detail": "96196 15:27:31 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off"
+      },
+      {
+        "name": "the probe page answers 200 within the time limit",
+        "pass": false,
+        "detail": "HTTP 302"
+      }
+    ],
+    "incidents": [
+      {
+        "at": "2026-10-19T22:08:34.353Z",
+        "url": "http://127.0.0.1:9292/products/reloj-coach-talia-saddle",
+        "kind": "unexpected-document",
+        "detail": "HTTP 302"
+      }
+    ],
+    "processes": [
+      "96196 15:27:31 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off"
+    ],
+    "ok": false
+  },
+  "finishedAt": "2026-10-19T22:08:34.409Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 2,
+    "passed": 0,
+    "failed": 2
+  },
+  "checks": [
+    {
+      "name": "p1 variant choice pending / failed (product page) — the check could not run",
+      "pass": false,
+      "detail": "ERROR: unexpected document (HTTP 200)",
+      "kind": "error"
+    },
+    {
+      "name": "proxy: after the run it still serves the expected theme with the local scripts (checked with bounded waits)",
+      "pass": false,
+      "detail": "[{\"name\":\"the probe page answers 200 within the time limit\",\"pass\":false,\"detail\":\"HTTP 302\"}]"
+    }
+  ],
+  "notes": [
+    "proxy incidents during the run: 2 (unexpected-document, unexpected-document)"
+  ]
+}

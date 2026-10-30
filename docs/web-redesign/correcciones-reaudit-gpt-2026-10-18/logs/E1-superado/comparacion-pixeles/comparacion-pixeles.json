@@ -1,0 +1,2967 @@
+{
+  "comparedAt": "2026-10-19T05:05:31.404Z",
+  "browser": "155.0.8059.40",
+  "a": "http://127.0.0.1:4601",
+  "b": "http://127.0.0.1:4602",
+  "captures": 288,
+  "identical": 187,
+  "different": 101,
+  "viewports": [
+    "375×812",
+    "440×956",
+    "768×1024",
+    "1024×768",
+    "1440×900",
+    "1060×768"
+  ],
+  "routes": [
+    "home",
+    "collection",
+    "collection-long-title",
+    "product",
+    "search-empty",
+    "search-results",
+    "search-none",
+    "cart",
+    "cart-empty",
+    "favorites",
+    "account",
+    "mayoreo",
+    "contact",
+    "story",
+    "policy",
+    "not-found"
+  ],
+  "positions": [
+    "top",
+    "middle",
+    "end"
+  ],
+  "rows": [
+    {
+      "label": "home @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-home-1024x768-top-a.png",
+        "diff-home-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "home @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-home-1024x768-middle-a.png",
+        "diff-home-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "home @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-home-1024x768-end-a.png",
+        "diff-home-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "home @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-home-1440x900-top-a.png",
+        "diff-home-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "home @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-home-1440x900-middle-a.png",
+        "diff-home-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "home @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-home-1440x900-end-a.png",
+        "diff-home-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "home @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "home @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6576,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-collection-1024x768-top-a.png",
+        "diff-collection-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "collection @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6576,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-collection-1024x768-middle-a.png",
+        "diff-collection-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "collection @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6576,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-collection-1024x768-end-a.png",
+        "diff-collection-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "collection @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-collection-1440x900-top-a.png",
+        "diff-collection-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "collection @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-collection-1440x900-middle-a.png",
+        "diff-collection-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "collection @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-collection-1440x900-end-a.png",
+        "diff-collection-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "collection @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-collection-long-title-1024x768-top-a.png",
+        "diff-collection-long-title-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "collection-long-title @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-collection-long-title-1024x768-middle-a.png",
+        "diff-collection-long-title-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "collection-long-title @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-collection-long-title-1024x768-end-a.png",
+        "diff-collection-long-title-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "collection-long-title @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-collection-long-title-1440x900-top-a.png",
+        "diff-collection-long-title-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "collection-long-title @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-collection-long-title-1440x900-middle-a.png",
+        "diff-collection-long-title-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "collection-long-title @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-collection-long-title-1440x900-end-a.png",
+        "diff-collection-long-title-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "collection-long-title @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "collection-long-title @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6576,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-product-1024x768-top-a.png",
+        "diff-product-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "product @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6576,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-product-1024x768-middle-a.png",
+        "diff-product-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "product @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6576,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-product-1024x768-end-a.png",
+        "diff-product-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "product @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-product-1440x900-top-a.png",
+        "diff-product-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "product @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-product-1440x900-middle-a.png",
+        "diff-product-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "product @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-product-1440x900-end-a.png",
+        "diff-product-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "product @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "product @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-empty-1024x768-top-a.png",
+        "diff-search-empty-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "search-empty @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-empty-1024x768-middle-a.png",
+        "diff-search-empty-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "search-empty @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-empty-1024x768-end-a.png",
+        "diff-search-empty-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "search-empty @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-empty-1440x900-top-a.png",
+        "diff-search-empty-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "search-empty @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-empty-1440x900-middle-a.png",
+        "diff-search-empty-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "search-empty @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-empty-1440x900-end-a.png",
+        "diff-search-empty-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "search-empty @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-empty @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-results-1024x768-top-a.png",
+        "diff-search-results-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "search-results @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-results-1024x768-middle-a.png",
+        "diff-search-results-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "search-results @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-results-1024x768-end-a.png",
+        "diff-search-results-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "search-results @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-results-1440x900-top-a.png",
+        "diff-search-results-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "search-results @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-results-1440x900-middle-a.png",
+        "diff-search-results-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "search-results @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-results-1440x900-end-a.png",
+        "diff-search-results-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "search-results @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-results @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-none-1024x768-top-a.png",
+        "diff-search-none-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "search-none @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-none-1024x768-middle-a.png",
+        "diff-search-none-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "search-none @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-search-none-1024x768-end-a.png",
+        "diff-search-none-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "search-none @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-none-1440x900-top-a.png",
+        "diff-search-none-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "search-none @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-none-1440x900-middle-a.png",
+        "diff-search-none-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "search-none @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-search-none-1440x900-end-a.png",
+        "diff-search-none-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "search-none @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "search-none @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-cart-1024x768-top-a.png",
+        "diff-cart-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "cart @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-cart-1024x768-middle-a.png",
+        "diff-cart-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "cart @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-cart-1024x768-end-a.png",
+        "diff-cart-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "cart @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-cart-1440x900-top-a.png",
+        "diff-cart-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "cart @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-cart-1440x900-middle-a.png",
+        "diff-cart-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "cart @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-cart-1440x900-end-a.png",
+        "diff-cart-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "cart @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 4,
+      "box": [
+        25,
+        485,
+        32,
+        705
+      ],
+      "files": [
+        "diff-cart-empty-440x956-top-a.png",
+        "diff-cart-empty-440x956-top-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 1,
+      "box": [
+        25,
+        212,
+        25,
+        212
+      ],
+      "files": [
+        "diff-cart-empty-440x956-middle-a.png",
+        "diff-cart-empty-440x956-middle-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 4,
+      "box": [
+        37,
+        592,
+        44,
+        843
+      ],
+      "files": [
+        "diff-cart-empty-768x1024-top-a.png",
+        "diff-cart-empty-768x1024-top-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 4,
+      "box": [
+        37,
+        310,
+        44,
+        561
+      ],
+      "files": [
+        "diff-cart-empty-768x1024-middle-a.png",
+        "diff-cart-empty-768x1024-middle-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 1,
+      "box": [
+        37,
+        279,
+        37,
+        279
+      ],
+      "files": [
+        "diff-cart-empty-768x1024-end-a.png",
+        "diff-cart-empty-768x1024-end-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-cart-empty-1024x768-top-a.png",
+        "diff-cart-empty-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-cart-empty-1024x768-middle-a.png",
+        "diff-cart-empty-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-cart-empty-1024x768-end-a.png",
+        "diff-cart-empty-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-cart-empty-1440x900-top-a.png",
+        "diff-cart-empty-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-cart-empty-1440x900-middle-a.png",
+        "diff-cart-empty-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-cart-empty-1440x900-end-a.png",
+        "diff-cart-empty-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "cart-empty @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "cart-empty @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-favorites-1024x768-top-a.png",
+        "diff-favorites-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "favorites @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-favorites-1024x768-middle-a.png",
+        "diff-favorites-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "favorites @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-favorites-1024x768-end-a.png",
+        "diff-favorites-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "favorites @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-favorites-1440x900-top-a.png",
+        "diff-favorites-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "favorites @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-favorites-1440x900-middle-a.png",
+        "diff-favorites-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "favorites @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-favorites-1440x900-end-a.png",
+        "diff-favorites-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "favorites @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "favorites @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-account-1024x768-top-a.png",
+        "diff-account-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "account @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-account-1024x768-middle-a.png",
+        "diff-account-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "account @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-account-1024x768-end-a.png",
+        "diff-account-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "account @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-account-1440x900-top-a.png",
+        "diff-account-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "account @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-account-1440x900-middle-a.png",
+        "diff-account-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "account @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-account-1440x900-end-a.png",
+        "diff-account-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "account @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "account @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6574,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-mayoreo-1024x768-top-a.png",
+        "diff-mayoreo-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "mayoreo @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6574,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-mayoreo-1024x768-middle-a.png",
+        "diff-mayoreo-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "mayoreo @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6574,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-mayoreo-1024x768-end-a.png",
+        "diff-mayoreo-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "mayoreo @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-mayoreo-1440x900-top-a.png",
+        "diff-mayoreo-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "mayoreo @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-mayoreo-1440x900-middle-a.png",
+        "diff-mayoreo-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "mayoreo @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-mayoreo-1440x900-end-a.png",
+        "diff-mayoreo-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "mayoreo @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "mayoreo @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-contact-1024x768-top-a.png",
+        "diff-contact-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "contact @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-contact-1024x768-middle-a.png",
+        "diff-contact-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "contact @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-contact-1024x768-end-a.png",
+        "diff-contact-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "contact @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-contact-1440x900-top-a.png",
+        "diff-contact-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "contact @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-contact-1440x900-middle-a.png",
+        "diff-contact-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "contact @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-contact-1440x900-end-a.png",
+        "diff-contact-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "contact @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "contact @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6572,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-story-1024x768-top-a.png",
+        "diff-story-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "story @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6572,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-story-1024x768-middle-a.png",
+        "diff-story-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "story @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6572,
+      "box": [
+        36,
+        117,
+        1004,
+        138
+      ],
+      "files": [
+        "diff-story-1024x768-end-a.png",
+        "diff-story-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "story @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-story-1440x900-top-a.png",
+        "diff-story-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "story @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-story-1440x900-middle-a.png",
+        "diff-story-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "story @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-story-1440x900-end-a.png",
+        "diff-story-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "story @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "story @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-policy-1024x768-top-a.png",
+        "diff-policy-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "policy @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-policy-1024x768-middle-a.png",
+        "diff-policy-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "policy @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-policy-1024x768-end-a.png",
+        "diff-policy-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "policy @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-policy-1440x900-top-a.png",
+        "diff-policy-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "policy @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-policy-1440x900-middle-a.png",
+        "diff-policy-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "policy @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-policy-1440x900-end-a.png",
+        "diff-policy-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "policy @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "policy @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 375×812 top",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 375×812 middle",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 375×812 end",
+      "width": 375,
+      "height": 812,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 440×956 top",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 440×956 middle",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 440×956 end",
+      "width": 440,
+      "height": 956,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 768×1024 top",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 768×1024 middle",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 768×1024 end",
+      "width": 768,
+      "height": 1024,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 1024×768 top",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-not-found-1024x768-top-a.png",
+        "diff-not-found-1024x768-top-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 1024×768 middle",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-not-found-1024x768-middle-a.png",
+        "diff-not-found-1024x768-middle-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 1024×768 end",
+      "width": 1024,
+      "height": 768,
+      "differing": 6504,
+      "box": [
+        36,
+        117,
+        1004,
+        130
+      ],
+      "files": [
+        "diff-not-found-1024x768-end-a.png",
+        "diff-not-found-1024x768-end-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 1440×900 top",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-not-found-1440x900-top-a.png",
+        "diff-not-found-1440x900-top-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 1440×900 middle",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-not-found-1440x900-middle-a.png",
+        "diff-not-found-1440x900-middle-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 1440×900 end",
+      "width": 1440,
+      "height": 900,
+      "differing": 248,
+      "box": [
+        231,
+        117,
+        1194,
+        128
+      ],
+      "files": [
+        "diff-not-found-1440x900-end-a.png",
+        "diff-not-found-1440x900-end-b.png"
+      ]
+    },
+    {
+      "label": "not-found @ 1060×768 top",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 1060×768 middle",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    },
+    {
+      "label": "not-found @ 1060×768 end",
+      "width": 1060,
+      "height": 768,
+      "differing": 0,
+      "box": null
+    }
+  ]
+}

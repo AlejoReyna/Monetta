@@ -1,0 +1,13 @@
+Registros del estado E1 (árbol f3a58b2dc6673f70544c5e76b10468fb37e10fc97d8ab78e301f8ed712588290), superado por E2.
+
+E1 se congeló a las 22:41 CST y sobre él se ejecutaron, entre las 22:41 y las 23:05: npm test (52/52), npm run build,
+npm run verify (226/226 en 602 s, D11 114/114), los controles RE contra la copia anterior (2/22) y la corregida (22/22), las
+reproducciones antes/después y la comparación de píxeles (187/288 idénticas).
+
+La comparación de píxeles mostró que la fila de categorías de escritorio, construida en E1 con márgenes automáticos en su primer
+y último elemento, se desplazaba una unidad de layout (+0,0156 px) en todos los anchos con espacio libre: 48 capturas a 1440×900
+con 248 píxeles de borde de glifo distintos (máx. 60/255). Se sustituyó por una lista de ancho fit-content (posiciones idénticas a
+las anteriores y mismo arreglo a 1024 px) y se añadió un control que vigila el centrado. Ese cambio de código creó el estado E2;
+por eso la puerta completa y todo lo demás se repitieron sobre E2 (ver ../../RESULTADO.md y ../../estados/).
+
+Estos archivos se conservan como traza de lo ejecutado sobre E1; no cubren el árbol final.

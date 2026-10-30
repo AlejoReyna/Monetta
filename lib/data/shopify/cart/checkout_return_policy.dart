@@ -33,7 +33,8 @@ final class CheckoutReturnDecision {
   const CheckoutReturnDecision.resume(ValidatedCheckoutUrl url)
       : this._(CheckoutReturnRoute.resumeCheckout, url);
 
-  const CheckoutReturnDecision.openBag() : this._(CheckoutReturnRoute.openBag, null);
+  const CheckoutReturnDecision.openBag()
+      : this._(CheckoutReturnRoute.openBag, null);
 
   const CheckoutReturnDecision.openBrowser(ValidatedCheckoutUrl url)
       : this._(CheckoutReturnRoute.openBrowser, url);

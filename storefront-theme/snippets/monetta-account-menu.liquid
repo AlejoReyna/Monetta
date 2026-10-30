@@ -1,0 +1,15 @@
+{%- doc -%}
+  Shared desktop sidebar / mobile account rows. No duplicated element IDs.
+  @param {string} view - account or orders.
+{%- enddoc -%}
+<nav class="account-menu" aria-label="Opciones de mi cuenta">
+  <a class="account-menu__row account-menu__overview" href="{% render 'monetta-account-link' %}"{% if view == 'account' %} aria-current="page"{% endif %}>{% render 'monetta-account-icon', name: 'user' %}<span>Mi cuenta</span>{% render 'monetta-account-icon', name: 'chevron' %}</a>
+  <a class="account-menu__row" href="{% render 'monetta-account-link', view: 'orders' %}"{% if view == 'orders' %} aria-current="page"{% endif %}>{% render 'monetta-account-icon', name: 'box' %}<span>Mis pedidos</span>{% render 'monetta-account-icon', name: 'chevron' %}</a>
+  <button type="button" class="account-menu__row" data-open-dialog="saved-products">{% render 'monetta-account-icon', name: 'heart' %}<span>Favoritos</span>{% render 'monetta-account-icon', name: 'chevron' %}</button>
+  <button type="button" class="account-menu__row" data-open-dialog="account-notifications">{% render 'monetta-account-icon', name: 'bell' %}<span>Notificaciones</span>{% render 'monetta-account-icon', name: 'chevron' %}</button>
+  <a class="account-menu__row" href="{{ routes.account_addresses_url }}" data-open-dialog="account-addresses">{% render 'monetta-account-icon', name: 'pin' %}<span>Direcciones</span>{% render 'monetta-account-icon', name: 'chevron' %}</a>
+  <button type="button" class="account-menu__row" data-open-dialog="account-payment">{% render 'monetta-account-icon', name: 'card' %}<span>Métodos de pago</span>{% render 'monetta-account-icon', name: 'chevron' %}</button>
+  <a class="account-menu__row" href="{{ routes.account_profile_url }}" data-open-dialog="account-preferences">{% render 'monetta-account-icon', name: 'settings' %}<span>Preferencias</span>{% render 'monetta-account-icon', name: 'chevron' %}</a>
+  <a class="account-menu__row" href="{{ routes.root_url }}pages/contact?view=guia-mayoreo">{% render 'monetta-account-icon', name: 'bag' %}<span>Modo Mayoreo<small>Desde 3 piezas</small></span>{% render 'monetta-account-icon', name: 'chevron' %}</a>
+  <a class="account-menu__row" href="{{ routes.root_url }}pages/contact">{% render 'monetta-account-icon', name: 'help' %}<span>Ayuda y contacto</span>{% render 'monetta-account-icon', name: 'chevron' %}</a>
+</nav>

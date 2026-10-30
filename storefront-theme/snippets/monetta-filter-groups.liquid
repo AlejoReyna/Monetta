@@ -19,7 +19,7 @@
     -%}
     <details class="filter-group"{% if is_open %} open{% endif %}>
       <summary>
-        <span>{{ filter.label | escape }}</span>
+        <span>{% render 'monetta-label', kind: 'filter', filter: filter %}</span>
         {%- if filter.active_values.size > 0 -%}<span class="filter-group__selected">{{ filter.active_values.size }}</span>{%- endif -%}
         {% render 'monetta-icon', name: 'expand', size: 20 %}
       </summary>
@@ -45,7 +45,7 @@
           {%- when 'boolean' -%}
             <label class="check">
               <input type="checkbox" name="{{ filter.true_value.param_name }}" value="{{ filter.true_value.value }}"{% if filter.true_value.active %} checked{% endif %}>
-              <span>{{ filter.true_value.label | escape }}</span>
+              <span>{% render 'monetta-label', kind: 'filter_value', filter: filter, value: filter.true_value %}</span>
               <span class="check__count">{{ filter.true_value.count }}</span>
             </label>
           {%- else -%}
@@ -54,7 +54,7 @@
               {%- if value.count == 0 and value.active == false -%}{%- assign unavailable = true -%}{%- endif -%}
               <label class="check{% if unavailable %} check--disabled{% endif %}">
                 <input type="checkbox" name="{{ value.param_name }}" value="{{ value.value }}"{% if value.active %} checked{% endif %}{% if unavailable %} disabled{% endif %}>
-                <span>{{ value.label | escape }}</span>
+                <span>{% render 'monetta-label', kind: 'filter_value', filter: filter, value: value %}</span>
                 <span class="check__count">{{ value.count }}</span>
               </label>
             {%- endfor -%}

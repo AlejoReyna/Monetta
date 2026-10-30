@@ -1,0 +1,1033 @@
+{
+  "date": "2026-10-22T22:30:44.743Z",
+  "browser": "155.0.8059.40",
+  "engine": "Brave Chromium, headless, macOS",
+  "widths": [
+    320,
+    390,
+    768,
+    1440
+  ],
+  "checks": [
+    {
+      "name": "skip-link-keyboard-visible",
+      "pass": true
+    },
+    {
+      "name": "layout-320",
+      "pass": true,
+      "width": 320,
+      "scroll": 320,
+      "client": 320,
+      "images": [],
+      "specimens": [
+        {
+          "width": 286,
+          "scroll": 286
+        },
+        {
+          "width": 286,
+          "scroll": 286
+        },
+        {
+          "width": 286,
+          "scroll": 286
+        },
+        {
+          "width": 286,
+          "scroll": 286
+        },
+        {
+          "width": 286,
+          "scroll": 286
+        },
+        {
+          "width": 286,
+          "scroll": 286
+        }
+      ]
+    },
+    {
+      "name": "images-320",
+      "pass": true
+    },
+    {
+      "name": "layout-390",
+      "pass": true,
+      "width": 390,
+      "scroll": 390,
+      "client": 390,
+      "images": [],
+      "specimens": [
+        {
+          "width": 348,
+          "scroll": 348
+        },
+        {
+          "width": 348,
+          "scroll": 348
+        },
+        {
+          "width": 348,
+          "scroll": 348
+        },
+        {
+          "width": 348,
+          "scroll": 348
+        },
+        {
+          "width": 348,
+          "scroll": 348
+        },
+        {
+          "width": 348,
+          "scroll": 348
+        }
+      ]
+    },
+    {
+      "name": "images-390",
+      "pass": true
+    },
+    {
+      "name": "layout-768",
+      "pass": true,
+      "width": 768,
+      "scroll": 768,
+      "client": 768,
+      "images": [],
+      "specimens": [
+        {
+          "width": 718,
+          "scroll": 718
+        },
+        {
+          "width": 718,
+          "scroll": 718
+        },
+        {
+          "width": 718,
+          "scroll": 718
+        },
+        {
+          "width": 718,
+          "scroll": 718
+        },
+        {
+          "width": 718,
+          "scroll": 718
+        },
+        {
+          "width": 718,
+          "scroll": 718
+        }
+      ]
+    },
+    {
+      "name": "images-768",
+      "pass": true
+    },
+    {
+      "name": "layout-1440",
+      "pass": true,
+      "width": 1440,
+      "scroll": 1440,
+      "client": 1440,
+      "images": [],
+      "specimens": [
+        {
+          "width": 958,
+          "scroll": 958
+        },
+        {
+          "width": 958,
+          "scroll": 958
+        },
+        {
+          "width": 958,
+          "scroll": 958
+        },
+        {
+          "width": 958,
+          "scroll": 958
+        },
+        {
+          "width": 958,
+          "scroll": 958
+        },
+        {
+          "width": 958,
+          "scroll": 958
+        }
+      ]
+    },
+    {
+      "name": "images-1440",
+      "pass": true
+    },
+    {
+      "name": "keyboard-opens-native-modal",
+      "pass": true
+    },
+    {
+      "name": "modal-tab-contained",
+      "pass": true,
+      "focusSequence": [
+        {
+          "id": "Novedades ↗",
+          "inside": true
+        },
+        {
+          "id": "Bolsas ↗",
+          "inside": true
+        },
+        {
+          "id": "Carteras ↗",
+          "inside": true
+        },
+        {
+          "id": "Relojes ↗",
+          "inside": true
+        },
+        {
+          "id": "dialog-close",
+          "inside": true
+        },
+        {
+          "id": "Novedades ↗",
+          "inside": true
+        },
+        {
+          "id": "Bolsas ↗",
+          "inside": true
+        },
+        {
+          "id": "Carteras ↗",
+          "inside": true
+        }
+      ]
+    },
+    {
+      "name": "modal-shift-tab-contained",
+      "pass": true
+    },
+    {
+      "name": "escape-restores-invoker",
+      "pass": true
+    },
+    {
+      "name": "dialog-close-reverses",
+      "pass": true
+    },
+    {
+      "name": "open-dialog-resize-contained",
+      "pass": true,
+      "box": {
+        "x": 0,
+        "y": 0,
+        "width": 440,
+        "height": 1000
+      }
+    },
+    {
+      "name": "search-initial-focus",
+      "pass": true
+    },
+    {
+      "name": "search-empty-state",
+      "pass": true
+    },
+    {
+      "name": "rapid-gallery-latest-wins",
+      "pass": true
+    },
+    {
+      "name": "select-current-cancels-pending",
+      "pass": true
+    },
+    {
+      "name": "gallery-failure-preserves-image",
+      "pass": true
+    },
+    {
+      "name": "gallery-retry",
+      "pass": true
+    },
+    {
+      "name": "pending-has-no-optimistic-success",
+      "pass": true
+    },
+    {
+      "name": "duplicate-add-suppressed",
+      "pass": true
+    },
+    {
+      "name": "add-focus-preserved",
+      "pass": true
+    },
+    {
+      "name": "failed-add-preserves-cart",
+      "pass": true
+    },
+    {
+      "name": "quantity-confirmed-count-waits",
+      "pass": true
+    },
+    {
+      "name": "quantity-last-value-confirmed",
+      "pass": true
+    },
+    {
+      "name": "quantity-failure-restores",
+      "pass": true
+    },
+    {
+      "name": "saved-keyboard-state",
+      "pass": true
+    },
+    {
+      "name": "saved-repeated-toggle",
+      "pass": true
+    },
+    {
+      "name": "visible-focus-style",
+      "pass": true
+    },
+    {
+      "name": "disclosure-keyboard-open",
+      "pass": true
+    },
+    {
+      "name": "disclosure-keyboard-close",
+      "pass": true
+    },
+    {
+      "name": "context-bar-shows-after-inline-exit",
+      "pass": true
+    },
+    {
+      "name": "context-bar-retains-focused-action",
+      "pass": true
+    },
+    {
+      "name": "context-bar-hides-after-focus-exits",
+      "pass": true
+    },
+    {
+      "name": "forced-reduced-zero-transition",
+      "pass": true
+    },
+    {
+      "name": "system-preference-detected",
+      "pass": true
+    },
+    {
+      "name": "reduced-removes-card-transform",
+      "pass": true
+    },
+    {
+      "name": "forced-full-preview-overrides-system",
+      "pass": true
+    },
+    {
+      "name": "static-baseline-zero",
+      "pass": true
+    },
+    {
+      "name": "reset-cancels-pending-add",
+      "pass": true
+    },
+    {
+      "name": "reset-accessible-count",
+      "pass": true
+    },
+    {
+      "name": "cap-is-truthful",
+      "pass": true
+    },
+    {
+      "name": "touch-save-without-hover",
+      "pass": true
+    },
+    {
+      "name": "touch-filter-bottom-sheet",
+      "pass": true,
+      "box": {
+        "x": 0,
+        "y": 349,
+        "width": 390,
+        "height": 495
+      }
+    },
+    {
+      "name": "no-js-native-disclosure",
+      "pass": true
+    },
+    {
+      "name": "no-js-essential-content-visible",
+      "pass": true
+    },
+    {
+      "name": "no-console-errors",
+      "pass": true,
+      "errors": []
+    },
+    {
+      "name": "no-failed-requests",
+      "pass": true,
+      "failedRequests": []
+    },
+    {
+      "name": "only-local-read-requests",
+      "pass": true,
+      "count": 12
+    }
+  ],
+  "consoleErrors": [],
+  "failedRequests": [],
+  "requests": [
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/lab.css"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/lab.js"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/monetta-logo-3x.png"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/campaign_terracotta.jpg"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/home_bag_shoulder.webp"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/home_bag_tote.webp"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/home_bag_crossbody.webp"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/Inter-Regular.woff2"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/Inter-Medium.woff2"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/PlayfairDisplay-Regular.woff2"
+    },
+    {
+      "method": "GET",
+      "url": "http://127.0.0.1:8876/assets/Inter-SemiBold.woff2"
+    }
+  ],
+  "limitations": [
+    "No real device, Safari/Firefox, assistive technology or field performance test.",
+    "Touch is browser emulation. CPU slowdown is DevTools emulation."
+  ],
+  "trace": {
+    "cpuSlowdown": 6,
+    "scenario": "menu open + close",
+    "events": {
+      "Layout": 7,
+      "Paint": 12,
+      "UpdateLayoutTree": 31,
+      "PrePaint": 39,
+      "CompositeLayers": 0,
+      "AnimationFrame": 92
+    },
+    "layoutEvents": [
+      {
+        "ts": 30133504388,
+        "durationMicroseconds": 2361
+      },
+      {
+        "ts": 30133507539,
+        "durationMicroseconds": 30
+      },
+      {
+        "ts": 30133687637,
+        "durationMicroseconds": 34
+      },
+      {
+        "ts": 30133786950,
+        "durationMicroseconds": 534
+      },
+      {
+        "ts": 30133975629,
+        "durationMicroseconds": 1552
+      },
+      {
+        "ts": 30134293311,
+        "durationMicroseconds": 989
+      },
+      {
+        "ts": 30134295264,
+        "durationMicroseconds": 21
+      }
+    ]
+  },
+  "performance": {
+    "shifts": [
+      {
+        "value": 0.003777578907591289,
+        "hadRecentInput": false
+      },
+      {
+        "value": 0.0039672289481368335,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.062273749999999996,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.05936740740740741,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.6097119409882973,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.301448125,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.980265106635071,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.00011052476532250122,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.00016521796613986253,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.00016521796613986253,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.6953342013888889,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.00002213511525848765,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000009409993489583333,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000009409993489583333,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000009409993489583333,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000009409993489583333,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000009376265914351853,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000008301934136284724,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000008301934136284724,
+        "hadRecentInput": false
+      },
+      {
+        "value": 0.000008301934136284724,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000008301934136284724,
+        "hadRecentInput": false
+      },
+      {
+        "value": 0.00001803611472800926,
+        "hadRecentInput": true
+      },
+      {
+        "value": 1,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.000018445766230168538,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.00006245668368686859,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.00006245668368686859,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.00006245668368686859,
+        "hadRecentInput": true
+      },
+      {
+        "value": 0.00006245668368686859,
+        "hadRecentInput": false
+      },
+      {
+        "value": 0.00016521796613986253,
+        "hadRecentInput": true
+      }
+    ],
+    "longTasks": [
+      {
+        "start": 48.900000002235174,
+        "duration": 110
+      }
+    ]
+  },
+  "interactionLog": [
+    {
+      "event": "preferences",
+      "at": 52,
+      "reduced": false,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "context-bar",
+      "at": 197,
+      "visible": false
+    },
+    {
+      "event": "context-bar",
+      "at": 778,
+      "visible": false
+    },
+    {
+      "event": "context-bar",
+      "at": 1045,
+      "visible": false
+    },
+    {
+      "event": "dialog-open",
+      "at": 2031,
+      "kind": "menu"
+    },
+    {
+      "event": "dialog-closing",
+      "at": 2152,
+      "duration": 280
+    },
+    {
+      "event": "dialog-closed",
+      "at": 2470
+    },
+    {
+      "event": "preferences",
+      "at": 2541,
+      "reduced": false,
+      "scale": 2,
+      "mode": "animated"
+    },
+    {
+      "event": "dialog-open",
+      "at": 2586,
+      "kind": "filters"
+    },
+    {
+      "event": "dialog-closing",
+      "at": 2732,
+      "duration": 560
+    },
+    {
+      "event": "dialog-open",
+      "at": 2795,
+      "kind": "filters"
+    },
+    {
+      "event": "dialog-reversed",
+      "at": 2795
+    },
+    {
+      "event": "dialog-closing",
+      "at": 3560,
+      "duration": 560
+    },
+    {
+      "event": "dialog-closed",
+      "at": 4161
+    },
+    {
+      "event": "preferences",
+      "at": 4220,
+      "reduced": false,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "dialog-open",
+      "at": 4252,
+      "kind": "search"
+    },
+    {
+      "event": "dialog-closing",
+      "at": 4275,
+      "duration": 280
+    },
+    {
+      "event": "dialog-closed",
+      "at": 4598
+    },
+    {
+      "event": "gallery-request",
+      "at": 4685,
+      "key": "crossbody",
+      "sequence": 1,
+      "network": "slow"
+    },
+    {
+      "event": "gallery-request",
+      "at": 4712,
+      "key": "tote",
+      "sequence": 2,
+      "network": "slow"
+    },
+    {
+      "event": "gallery-commit",
+      "at": 6210,
+      "key": "tote",
+      "sequence": 2
+    },
+    {
+      "event": "gallery-request",
+      "at": 6247,
+      "key": "crossbody",
+      "sequence": 3,
+      "network": "slow"
+    },
+    {
+      "event": "gallery-existing",
+      "at": 6279,
+      "key": "tote",
+      "sequence": 4
+    },
+    {
+      "event": "gallery-request",
+      "at": 7663,
+      "key": "shoulder",
+      "sequence": 5,
+      "network": "fail"
+    },
+    {
+      "event": "gallery-error",
+      "at": 7884,
+      "key": "shoulder",
+      "sequence": 5
+    },
+    {
+      "event": "gallery-request",
+      "at": 8064,
+      "key": "shoulder",
+      "sequence": 6,
+      "network": "normal"
+    },
+    {
+      "event": "gallery-commit",
+      "at": 8561,
+      "key": "shoulder",
+      "sequence": 6
+    },
+    {
+      "event": "cart-request",
+      "at": 8728,
+      "result": "success"
+    },
+    {
+      "event": "cart-duplicate-ignored",
+      "at": 8731
+    },
+    {
+      "event": "cart-duplicate-ignored",
+      "at": 8732
+    },
+    {
+      "event": "cart-success",
+      "at": 9382,
+      "count": 1
+    },
+    {
+      "event": "cart-request",
+      "at": 9596,
+      "result": "error"
+    },
+    {
+      "event": "cart-error",
+      "at": 10247
+    },
+    {
+      "event": "quantity-request",
+      "at": 10430,
+      "value": 2,
+      "sequence": 3
+    },
+    {
+      "event": "quantity-request",
+      "at": 10462,
+      "value": 3,
+      "sequence": 4
+    },
+    {
+      "event": "quantity-request",
+      "at": 10496,
+      "value": 4,
+      "sequence": 5
+    },
+    {
+      "event": "quantity-commit",
+      "at": 10998,
+      "value": 4,
+      "sequence": 5
+    },
+    {
+      "event": "quantity-request",
+      "at": 11196,
+      "value": 5,
+      "sequence": 6
+    },
+    {
+      "event": "quantity-error",
+      "at": 11697
+    },
+    {
+      "event": "saved-toggle",
+      "at": 11859,
+      "saved": true
+    },
+    {
+      "event": "saved-toggle",
+      "at": 11866,
+      "saved": false
+    },
+    {
+      "event": "context-bar",
+      "at": 12045,
+      "visible": true
+    },
+    {
+      "event": "context-bar",
+      "at": 12294,
+      "visible": false
+    },
+    {
+      "event": "preferences",
+      "at": 12524,
+      "reduced": true,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "dialog-open",
+      "at": 12565,
+      "kind": "menu"
+    },
+    {
+      "event": "dialog-closed",
+      "at": 12571
+    },
+    {
+      "event": "dialog-closing",
+      "at": 12571,
+      "duration": 0
+    },
+    {
+      "event": "preferences",
+      "at": 12626,
+      "reduced": true,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "preferences",
+      "at": 12629,
+      "reduced": true,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "preferences",
+      "at": 12770,
+      "reduced": false,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "preferences",
+      "at": 12773,
+      "reduced": true,
+      "scale": 1,
+      "mode": "static"
+    },
+    {
+      "event": "preferences",
+      "at": 12864,
+      "reduced": false,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "preferences",
+      "at": 12870,
+      "reduced": false,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "preferences",
+      "at": 12877,
+      "reduced": false,
+      "scale": 1,
+      "mode": "animated"
+    },
+    {
+      "event": "cart-request",
+      "at": 12895,
+      "result": "slow"
+    },
+    {
+      "event": "reset",
+      "at": 12928,
+      "which": "feedback"
+    },
+    {
+      "event": "cart-request",
+      "at": 14864,
+      "result": "success"
+    },
+    {
+      "event": "cart-success",
+      "at": 15517,
+      "count": 1
+    },
+    {
+      "event": "quantity-request",
+      "at": 15698,
+      "value": 2,
+      "sequence": 10
+    },
+    {
+      "event": "quantity-request",
+      "at": 15731,
+      "value": 3,
+      "sequence": 11
+    },
+    {
+      "event": "quantity-request",
+      "at": 15761,
+      "value": 4,
+      "sequence": 12
+    },
+    {
+      "event": "quantity-request",
+      "at": 15794,
+      "value": 5,
+      "sequence": 13
+    },
+    {
+      "event": "quantity-request",
+      "at": 15827,
+      "value": 6,
+      "sequence": 14
+    },
+    {
+      "event": "quantity-request",
+      "at": 15861,
+      "value": 7,
+      "sequence": 15
+    },
+    {
+      "event": "quantity-request",
+      "at": 15894,
+      "value": 8,
+      "sequence": 16
+    },
+    {
+      "event": "quantity-request",
+      "at": 15928,
+      "value": 9,
+      "sequence": 17
+    },
+    {
+      "event": "quantity-request",
+      "at": 15961,
+      "value": 10,
+      "sequence": 18
+    },
+    {
+      "event": "quantity-commit",
+      "at": 16463,
+      "value": 10,
+      "sequence": 18
+    },
+    {
+      "event": "cart-limit",
+      "at": 16646
+    },
+    {
+      "event": "reset",
+      "at": 16678,
+      "which": "feedback"
+    },
+    {
+      "event": "dialog-open",
+      "at": 17048,
+      "kind": "menu"
+    },
+    {
+      "event": "dialog-closing",
+      "at": 17514,
+      "duration": 280
+    },
+    {
+      "event": "dialog-closed",
+      "at": 17835
+    }
+  ],
+  "recording": {
+    "frames": 61,
+    "start": 1792708263.465777,
+    "end": 1792708264.982398,
+    "type": "CDP screencast, JPEG timestamps; encoded to MP4 separately; not FPS measurement"
+  },
+  "codeSha256": {
+    "index.html": "70d99d9ddcabf35cc71266cc872c0b0dac01456f833649b1432335cec5ae24b5",
+    "lab.css": "41114de432289e0fa5972f5554b29e59bdbb729f70f0ee788229661363aa9605",
+    "lab.js": "801b3278ef0c66af951318dbbe58c51ccfd56f1881aa4065afb6a3a4f503ceb3",
+    "validate.mjs": "df0ab1581e4cad717d2675949df0375624a49c4c383450fd7f3ad2ed7d7b8ab4"
+  },
+  "summary": {
+    "passed": 51,
+    "failed": 0
+  }
+}

@@ -1,0 +1,67 @@
+## inicio npm test · 2026-10-18 22:41:55 CST · árbol f3a58b2dc6673f70544c5e76b10468fb37e10fc97d8ab78e301f8ed712588290
+
+> monetta-web-design-prototype@0.1.0 test
+> node --test tests/unit/*.test.mjs
+
+✔ the page bar is reserved at its real height, not at its minimum (2.689167ms)
+✔ bars that are hidden, static or without an offset cover nothing (0.110875ms)
+✔ fixed bottom controls reserve their offset plus their height (0.166ms)
+✔ the largest reserve wins when several bars are pinned to the same edge (0.197291ms)
+✔ a card that is already inside the rail leaves it alone (0.199125ms)
+✔ a snapping rail takes the focused card to its own snap position (0.101209ms)
+✔ going back to a card scrolled out on the left aligns it to the start padding (0.080041ms)
+✔ the target never leaves the scrollable range (0.085458ms)
+✔ a chip half outside the row moves the least that clears the padding (0.246083ms)
+✔ a chip hidden on the left comes back to the start padding (0.630792ms)
+✔ a percentage end padding keeps a faded edge clear (0.072666ms)
+✔ an item wider than the visible band aligns by its start (0.05275ms)
+✔ scroll-padding alone cannot take the last link out of the fade: the clamp to the scrollable room wins (0.090083ms)
+✔ with end padding as wide as the fade the last link scrolls out of it (0.058792ms)
+✔ a link that already ends before the fade is left where it is (0.04675ms)
+✔ money parses decimal strings into exact centavos and formats MXN labels (42.69325ms)
+✔ a discount appears only for a genuine compare-at price (0.288834ms)
+✔ adding the same exact variant raises its quantity; another colour is its own line (0.99875ms)
+✔ a sold-out variant is refused and never substituted (0.153459ms)
+✔ an inventory limit caps additions and quantity changes (0.141583ms)
+✔ quantity zero and removal drop the line; totals are summed in centavos (0.361791ms)
+✔ Shopify-style filter URLs parse and serialize back unchanged (1.873792ms)
+✔ search URLs keep q and type, and default sort is omitted (0.277792ms)
+✔ values combine with OR inside a facet and AND across facets (1.775334ms)
+✔ facet counts answer "how many if I add this", excluding the facet itself (11.626084ms)
+✔ price range keeps any product with a variant inside it (0.488334ms)
+✔ sorting by price and newest is stable and correct (1.301625ms)
+✔ changing filters or sort returns to page one; clearing keeps the query and sort (0.252708ms)
+✔ each active chip removes exactly its own value (16.753458ms)
+✔ load more pages through results in steps of PAGE_SIZE (0.316583ms)
+✔ search is accent-, plural- and synonym-tolerant and ranks brand matches first (3.112625ms)
+✔ suggestions only offer terms that lead to results (0.612584ms)
+✔ swatches only for reliable single colours, never for bicolours (0.396083ms)
+✔ every product image exists locally and every image has a recorded source (5.748667ms)
+✔ default variants are buyable whenever any variant is (0.205458ms)
+✔ collections reference catalog products only and keep their live counts (0.22825ms)
+✔ sale flags match genuine compare-at prices (0.315541ms)
+✔ synthetic states are labelled in the data and in the manifest (1.548625ms)
+✔ real merchandising states exist in the snapshot (0.284542ms)
+✔ descriptions split facts from copy and turn "sobre pedido" into a state (1.713208ms)
+✔ a visit that began on this screen has nothing to go back to (1.019625ms)
+✔ opening another screen makes one step back leave it (1.291ms)
+✔ filter and sort entries stay inside the screen they belong to (0.084875ms)
+✔ the next screen starts its own run after filters (0.066958ms)
+✔ filters applied on the first screen of a visit still have nowhere to go back to (0.070584ms)
+✔ replacing the entry (retry, variant) never moves the counters (0.059167ms)
+✔ Forward right after the arrow is not undone by the arrow's fallback (1.899084ms)
+✔ a link opened after the arrow wins even when it lands on the address the arrow left (0.64425ms)
+✔ a changed address or a restore from the cache after the arrow also retires the fallback (1.258875ms)
+✔ when the earlier entries are gone the arrow still reaches its parent (0.60575ms)
+✔ a visit that began on the screen goes to the parent without touching the history (0.142708ms)
+✔ the arrow skips the filter entries of its screen in one step; the fallback stays quiet (0.149041ms)
+ℹ tests 52
+ℹ suites 0
+ℹ pass 52
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 157.080959
+## exit 0
+## fin npm test · 2026-10-18 22:41:55 CST · árbol f3a58b2dc6673f70544c5e76b10468fb37e10fc97d8ab78e301f8ed712588290

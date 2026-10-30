@@ -1,0 +1,16 @@
+## inicio npm run build · 2026-10-18 23:10:52 CST · árbol d81416b09eb1e6f177e20d9c1e5efae434f79868c71a66ca9497fc17a31029e0
+
+> monetta-web-design-prototype@0.1.0 build
+> vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   1.99 kB │ gzip:  0.86 kB
+dist/assets/index-rl9Uyrpi.css   68.49 kB │ gzip: 12.81 kB
+dist/assets/index-B5broLU7.js   274.30 kB │ gzip: 61.87 kB
+✓ built in 1.65s
+## exit 0
+## fin npm run build · 2026-10-18 23:10:55 CST · árbol d81416b09eb1e6f177e20d9c1e5efae434f79868c71a66ca9497fc17a31029e0

@@ -30,8 +30,13 @@
     endif
   endif
   assign search_hidden = false
+  assign is_account = false
   if template.name == 'index' or template.name == 'search'
     assign search_hidden = true
+  endif
+  if template.suffix == 'account' or template.suffix == 'orders'
+    assign search_hidden = false
+    assign is_account = true
   endif
 -%}
 <header
@@ -67,21 +72,24 @@
     </form>
     <div class="site-header__end">
       <a class="icon-button site-header__search-icon" href="{{ routes.search_url }}" aria-label="Buscar productos"{% if search_hidden %} hidden{% endif %}>{% render 'monetta-icon', name: 'search', size: 24 %}</a>
-      <a class="icon-button header-utility header-utility--account" href="{{ routes.account_url }}" aria-label="Cuenta">{% render 'monetta-icon', name: 'person', size: 24 %}<span class="header-utility__label" aria-hidden="true">Cuenta</span></a>
+      <button type="button" class="icon-button header-utility header-utility--saved" data-open-dialog="saved-products" aria-label="Ver guardados" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 22 %}</button>
+      <a class="icon-button header-utility header-utility--account" href="{% render 'monetta-account-link' %}" aria-label="Cuenta"{% if template.suffix == 'account' or template.suffix == 'orders' %} aria-current="page"{% endif %}>{% render 'monetta-icon', name: 'person', size: 24 %}<span class="header-utility__label" aria-hidden="true">Cuenta</span></a>
       <a class="icon-button header-utility header-utility--cart" href="{{ routes.cart_url }}" aria-label="{{ cart_label }}" data-cart-link>{% render 'monetta-icon', name: 'bag', size: 23 %}<span class="header-utility__label" aria-hidden="true">Carrito</span><span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></a>
     </div>
   </div>
 
+  {%- unless is_account -%}
   <nav class="site-nav" aria-label="Categorías">
     <ul class="site-nav__list" role="list">
       {%- for link in nav_menu.links -%}
-        <li><a class="site-nav__link" href="{{ link.url }}"{% if link.current %} aria-current="page"{% endif %}{% render 'monetta-store-lang' %}>{{ link.title }}</a></li>
+        <li><a class="site-nav__link" href="{{ link.url }}"{% if link.current and template.suffix != 'account' and template.suffix != 'orders' %} aria-current="page"{% endif %}>{% render 'monetta-label', kind: 'link', link: link %}</a></li>
       {%- else -%}
         <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">Novedades</a></li>
         <li><a class="site-nav__link" href="{{ routes.all_products_collection_url }}">Catálogo</a></li>
       {%- endfor -%}
     </ul>
   </nav>
+  {%- endunless -%}
 
   <dialog class="overlay overlay--drawer-left" id="menu-drawer" aria-labelledby="menu-title">
     <div class="overlay__backdrop" data-overlay-close></div>
@@ -94,15 +102,16 @@
         </div>
         <div class="menu__account">
           {%- if customer -%}
-            <a class="btn btn--quiet" href="{{ routes.account_url }}">{% render 'monetta-icon', name: 'user', size: 20 %} Mi cuenta</a>
+            <a class="btn btn--quiet" href="{% render 'monetta-account-link' %}">{% render 'monetta-icon', name: 'user', size: 20 %} Mi cuenta</a>
           {%- else -%}
-            <a class="btn btn--quiet" href="{{ routes.account_login_url }}">{% render 'monetta-icon', name: 'login', size: 20 %} Inicia sesión</a>
+            <a class="btn btn--quiet" href="{% render 'monetta-account-link' %}">{% render 'monetta-icon', name: 'login', size: 20 %} Inicia sesión</a>
           {%- endif -%}
         </div>
         <div class="menu__links">
+          <button type="button" class="menu-link" data-open-dialog="saved-products" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 22 %}<span>Guardados</span></button>
           {%- for link in nav_menu.links -%}
             {%- capture icon_name -%}{% render 'monetta-menu-icon', handle: link.handle %}{%- endcapture -%}
-            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span {% render 'monetta-store-lang' %}>{{ link.title }}</span></a>
+            <a class="menu-link" href="{{ link.url }}"{% if link.current and template.suffix != 'account' and template.suffix != 'orders' %} aria-current="page"{% endif %}>{% render 'monetta-icon', name: icon_name, size: 22 %}<span>{% render 'monetta-label', kind: 'link', link: link %}</span></a>
           {%- else -%}
             <a class="menu-link" href="{{ routes.all_products_collection_url }}?sort_by=created-descending">{% render 'monetta-icon', name: 'sparkle', size: 22 %}<span>Novedades</span></a>
             <a class="menu-link" href="{{ routes.all_products_collection_url }}">{% render 'monetta-icon', name: 'store', size: 22 %}<span>Catálogo</span></a>
@@ -111,7 +120,7 @@
         <div class="menu__footer">
           {%- for link in drawer_menu.links limit: 4 -%}
             {%- capture icon_name -%}{% render 'monetta-menu-icon', handle: link.handle %}{%- endcapture -%}
-            <a class="menu-link" href="{{ link.url }}">{% render 'monetta-icon', name: icon_name, size: 22 %}<span {% render 'monetta-store-lang' %}>{{ link.title }}</span></a>
+            <a class="menu-link" href="{{ link.url }}"{% if link.current and template.suffix != 'account' and template.suffix != 'orders' %} aria-current="page"{% endif %}>{% render 'monetta-icon', name: icon_name, size: 22 %}<span>{% render 'monetta-label', kind: 'link', link: link %}</span></a>
           {%- endfor -%}
         </div>
       </nav>

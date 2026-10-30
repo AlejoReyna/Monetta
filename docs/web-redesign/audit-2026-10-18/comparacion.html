@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Monetta · Revisión de fidelidad móvil</title>
+  <style>
+    :root { font-family: system-ui, sans-serif; color: #111; background: #f5f5f5; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    main { max-width: 1120px; margin: 0 auto; padding: 28px 24px 48px; }
+    h1 { font-size: 27px; line-height: 1.2; margin: 0 0 12px; }
+    p { line-height: 1.55; margin: 8px 0; }
+    a { color: #785724; text-underline-offset: 3px; }
+    .intro { max-width: 85ch; color: #555; }
+    .controls { display: flex; gap: 20px; flex-wrap: wrap; margin: 24px 0 16px; }
+    label { display: grid; gap: 6px; font-size: 14px; font-weight: 600; }
+    select { min-height: 44px; padding: 9px 36px 9px 12px; font: inherit; border: 1px solid #bbb; border-radius: 8px; background: white; }
+    :focus-visible { outline: 3px solid #8f6838; outline-offset: 3px; }
+    .finding { padding: 16px 20px; border: 1px solid #d6c59f; border-radius: 10px; background: #fff; margin-bottom: 22px; }
+    .pair { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; align-items: start; }
+    figure { margin: 0; min-width: 0; }
+    figcaption { font-size: 16px; font-weight: 600; margin: 0 auto 10px; max-width: var(--phone-width, 375px); }
+    figcaption span { display: block; font-size: 12px; font-weight: 400; color: #666; margin-top: 4px; }
+    .screen { width: 100%; max-width: var(--phone-width, 375px); margin: 0 auto; background: white; border: 1px solid #ddd; box-shadow: 0 6px 20px #0000000b; }
+    img { display: block; width: 100%; height: auto; }
+    .note { margin-top: 20px; color: #555; font-size: 13px; }
+    @media (max-width: 650px) { .pair { grid-template-columns: 1fr; gap: 28px; } main { padding: 24px 16px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>Monetta · App móvil y prototipo del 17 de octubre</h1>
+    <p class="intro">Revisión del 18 de octubre de 2026. La identidad coincide; quedan tres diferencias en los encabezados interiores, las acciones de la ficha y las recomendaciones.</p>
+    <p><a href="REVISION_FIDELIDAD_MOBILE.md">Leer revisión y fuentes</a> · <a href="../../prompts/MONETTA_WEB_DESIGN_CLAUDE.md">Prompt original del 17 de octubre</a></p>
+    <div class="controls">
+      <label for="page">Pantalla
+        <select id="page">
+          <option value="inicio">Inicio</option>
+          <option value="coleccion">Colección · Bolsas</option>
+          <option value="ficha">Ficha de producto</option>
+          <option value="ficha_recomendaciones">Ficha · Recomendaciones</option>
+          <option value="busqueda">Búsqueda</option>
+          <option value="bolsa">Mi bolsa</option>
+        </select>
+      </label>
+      <label for="viewport">Viewport lógico
+        <select id="viewport">
+          <option value="375x812">375 × 812</option>
+          <option value="440x956">440 × 956</option>
+        </select>
+      </label>
+    </div>
+    <p class="finding" id="finding" role="status"></p>
+    <div class="pair">
+      <figure>
+        <figcaption>App móvil actual<span>Widgets Flutter · Inter y Playfair reales · DPR 3</span></figcaption>
+        <div class="screen"><img id="mobile" alt=""></div>
+      </figure>
+      <figure>
+        <figcaption>Prototipo web del 17 de octubre<span>Navegador Brave · build actual · DPR 1</span></figcaption>
+        <div class="screen"><img id="web" alt=""></div>
+      </figure>
+    </div>
+    <p class="note">Ambas imágenes se muestran a la misma escala lógica. La web incluye 28 px del aviso de prototipo: se descuentan al comparar posiciones. Las fotos de producto no cargan en el harness Flutter y quedan como placeholders; esos espacios no son fallos de diseño. Los productos y estados de bolsa difieren entre los dos snapshots. Este comparador muestra el estado previo a las correcciones.</p>
+  </main>
+  <script>
+    const descriptions = {
+      inicio: 'Coincidencia: fotografía, buscador, tipografías, tarjetas y dock conservan la composición de Inicio. A 375 px, Novedades empieza en y=396,1 en la app y en y=396,59 en la web al descontar el aviso.',
+      coleccion: 'H01 · Media. La barra con logo, migas, título, atajos y filtros desplaza la primera tarjeta: y=88 en la app frente a y=351,63 en web. Descontado el aviso, son 235,63 px adicionales. Falta el acceso directo para volver.',
+      ficha: 'H02 · Media. App: volver, buscar, logo, cuenta y bolsa. Web: volver, menú, logo, buscar y bolsa. Conviene recuperar la distribución y el acceso a cuenta de la ficha móvil actual.',
+      ficha_recomendaciones: 'H03 · Media. La app usa Inter 17/600, tarjetas de 52vw, foto 4:5 y nombres de dos líneas. La web aplica Playfair 24/400 y el carrusel compacto de Inicio: 36vw, foto cuadrada y una línea.',
+      busqueda: 'H01 · Media. La web acumula la barra global, la búsqueda, las migas, otro título y los filtros. A 375 px, la primera tarjeta aparece 122,92 px más abajo después de descontar el aviso; faltan el encabezado compacto y la acción de volver de la app.',
+      bolsa: 'H01 · Encabezado. La app abre con volver, Mi bolsa y el contador en una sola barra. La web conserva la barra global y añade el título debajo. Las líneas, el resumen y la acción de checkout mantienen la identidad; los productos de esta captura son distintos.',
+    };
+    const names = { inicio: 'Inicio', coleccion: 'Colección Bolsas', ficha: 'Ficha de producto', ficha_recomendaciones: 'Recomendaciones de producto', busqueda: 'Búsqueda', bolsa: 'Mi bolsa' };
+    const page = document.getElementById('page');
+    const viewport = document.getElementById('viewport');
+    function update() {
+      const key = page.value;
+      const size = viewport.value;
+      document.documentElement.style.setProperty('--phone-width', `${size.split('x')[0]}px`);
+      document.getElementById('mobile').src = `mobile/${key}_${size}.png`;
+      document.getElementById('mobile').alt = `${names[key]} en la app actual, ${size}`;
+      document.getElementById('web').src = `web/${key}_${size}.jpg`;
+      document.getElementById('web').alt = `${names[key]} en el prototipo web, ${size}`;
+      document.getElementById('finding').textContent = descriptions[key];
+    }
+    page.addEventListener('change', update);
+    viewport.addEventListener('change', update);
+    update();
+  </script>
+</body>
+</html>

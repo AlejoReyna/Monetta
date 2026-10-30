@@ -1,0 +1,22 @@
+{
+  "store": "monetta-staging.myshopify.com",
+  "themeId": 192672989218,
+  "verifiedAt": "2026-10-30T07:29:51.903240+00:00",
+  "files": {
+    "assets/monetta-account.css": "31b7204743d99f2ee1a0b5a4e7a98bbc97cb4d87cbac9a0ef137f888ed6d388f",
+    "assets/monetta-account.js": "5e27fac3228155708d128798157da66ed21bde35e4dab36dbf96a91f805d500f",
+    "sections/monetta-account.liquid": "fd758e92c24db0e16acb51227a239d6ec68def66d3b633027074fe83b2333247",
+    "snippets/monetta-account-link.liquid": "91d9d492a43d3b17dc1bb4a9b662c133dcc47d44b234f85902e6094ee594f83e",
+    "snippets/monetta-account-icon.liquid": "f6cc12f67ef011365a9646fc1508a7e6fdb2e63f8868f3963caf981bc4769542",
+    "snippets/monetta-account-menu.liquid": "36285ebce961325c8ea9e9d86b2c9461ec43ee64ce28a7183c1e180d542ea4c9",
+    "snippets/monetta-account-order.liquid": "0f6a0ff3eb64907ece8916f5fff61b96d2be5fb360855e852c065abc145ad27c",
+    "snippets/monetta-account-dialogs.liquid": "b38bb8af848f782b1be0b6f653bfb65f87b87045a4e9f3b79de2a2ac7386cce1",
+    "templates/index.account.json": "122b920b58b45a3826da0531fc3c76938d53c7ec4f574d2ea9b461119e109ca5",
+    "templates/index.orders.json": "87f76d31b39311f49bd893e435c4aecabb1ec1a917b5f1d1f3008bd3b6c137ab",
+    "sections/monetta-header.liquid": "bb1ef572d97516d7559d538d47c0b3f718aefc369c02b75be6e9d9e97a789ef1",
+    "snippets/monetta-dock.liquid": "7b1fc2aace8d172670fa09599bed2f84d02e7555382329cf9990a4e7394198fe",
+    "layout/monetta.liquid": "a243a09991df34660a07f62b5646397ef2888b4b69af7469e68d63b15ffd6df3",
+    "snippets/monetta-head.liquid": "b40019bdce0391349e18da5d72f90764b441a7012ad7afc3c6d09a87a38491a5"
+  },
+  "method": "downloaded from Shopify and compared to reviewed integration"
+}

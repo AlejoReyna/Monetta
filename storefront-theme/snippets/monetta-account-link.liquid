@@ -1,0 +1,6 @@
+{%- doc -%}
+  Storefront account routes. Alternate index templates work without creating Pages
+  or switching the store back to legacy customer accounts. Shopify still owns login.
+  @param {string} [view] - account (default) or orders.
+{%- enddoc -%}
+{{- routes.root_url -}}?view={{- view | default: 'account' -}}

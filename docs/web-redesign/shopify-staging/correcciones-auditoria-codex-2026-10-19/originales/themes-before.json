@@ -1,0 +1,31 @@
+<claude-code-hint v="1" type="plugin" value="shopify-ai-toolkit@claude-plugins-official" />
+[
+  {
+    "id": 189719183394,
+    "name": "monetta-production-copy-2026-08-21",
+    "processing": false,
+    "createdAtRuntime": false,
+    "role": "live"
+  },
+  {
+    "id": 189523230754,
+    "name": "Horizon",
+    "processing": false,
+    "createdAtRuntime": false,
+    "role": "unpublished"
+  },
+  {
+    "id": 189523263522,
+    "name": "test-data",
+    "processing": false,
+    "createdAtRuntime": false,
+    "role": "unpublished"
+  },
+  {
+    "id": 189523296290,
+    "name": "debut-vintage-theme",
+    "processing": false,
+    "createdAtRuntime": false,
+    "role": "unpublished"
+  }
+]
