@@ -124,9 +124,9 @@
 
       <div data-product-dynamic>
         <div class="product-panel__price" data-price>
-          <span class="price">{{ current.price | money_without_trailing_zeros }} {{ currency }}</span>
+          <span class="price">{{ current.price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</span>
           {%- if pct > 0 -%}
-            <span class="visually-hidden">Precio anterior:</span><s class="price-compare">{{ current.compare_at_price | money_without_trailing_zeros }} {{ currency }}</s><span class="badge badge--sale">-{{ pct }}%</span>
+            <span class="visually-hidden">Precio anterior:</span><s class="price-compare">{{ current.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</s><span class="badge badge--sale">-{{ pct }}%</span>
           {%- endif -%}
         </div>
 

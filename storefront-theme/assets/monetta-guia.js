@@ -179,7 +179,15 @@
       chosen = groups.length === 0 ? variants[0] : complete ? variants.find((v) => v.options.every((o, i) => o === picked[i])) || null : null;
       if (chosen) {
         renderPrice(price, chosen);
-        if (chosen.image && photo) photo.src = chosen.image;
+        if (chosen.image && photo) {
+          photo.src = chosen.image;
+          // The highlighted thumbnail follows the variant's photo when it is one of the four shown.
+          const match = root.querySelector(`[data-image-id="${chosen.imageId}"]`);
+          if (match) {
+            root.querySelectorAll('[data-quick-view-thumb]').forEach((t) => t.removeAttribute('aria-current'));
+            match.setAttribute('aria-current', 'true');
+          }
+        }
       }
       const ready = Boolean(chosen?.available);
       if (stock) {

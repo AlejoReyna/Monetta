@@ -28,30 +28,26 @@
     {%- if product.images.size > 1 -%}
       <ul class="quick-view__thumbs" role="list">
         {%- for thumb in product.images limit: 4 -%}
-          <li><button type="button" class="quick-view__thumb" data-quick-view-thumb="{{ thumb | image_url: width: 900 }}" aria-label="Ver foto {{ forloop.index }} de {{ product.images.size }}"{% if forloop.first %} aria-current="true"{% endif %}><img src="{{ thumb | image_url: width: 200 }}" width="80" height="80" alt="" loading="lazy"></button></li>
+          <li><button type="button" class="quick-view__thumb" data-quick-view-thumb="{{ thumb | image_url: width: 900 }}" data-image-id="{{ thumb.id }}" aria-label="Ver foto {{ forloop.index }} de {{ product.images.size }}"{% if thumb.id == image.id %} aria-current="true"{% endif %}><img src="{{ thumb | image_url: width: 200 }}" width="80" height="80" alt="" loading="lazy"></button></li>
         {%- endfor -%}
       </ul>
     {%- endif -%}
     {%- if brand != blank -%}<p class="quick-view__brand">{{ brand | escape }}</p>{%- endif -%}
     <h2 class="quick-view__name" id="quick-view-title">{{ product.title | escape }}</h2>
     <p class="quick-view__price" data-quick-view-price>
-      <span class="price">{{ current.price | money_without_trailing_zeros }} {{ currency }}</span>
+      <span class="price">{{ current.price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</span>
       {%- if current.compare_at_price > current.price -%}
         {%- assign pct = current.compare_at_price | minus: current.price | times: 100.0 | divided_by: current.compare_at_price | round -%}
-        <s class="price-compare">{{ current.compare_at_price | money_without_trailing_zeros }} {{ currency }}</s><span class="badge badge--sale">-{{ pct }}%</span>
+        <s class="price-compare">{{ current.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' }} {{ currency }}</s><span class="badge badge--sale">-{{ pct }}%</span>
       {%- endif -%}
     </p>
     {%- unless product.has_only_default_variant -%}
       {%- for option in product.options_with_values -%}
-        {%- liquid
-          assign option_label = option.name
-          assign option_name = option.name | downcase
-          if option_name == 'color' or option_name == 'colour' or option_name == 'colores'
-            assign option_label = 'Colores'
-          endif
-        -%}
+        {%- capture option_label -%}{% render 'monetta-label', kind: 'option', name: option.name %}{%- endcapture -%}
+        {%- assign option_label = option_label | strip -%}
+        {%- if option_label == 'Color' -%}{%- assign option_label = 'Colores' -%}{%- endif -%}
         <fieldset class="quick-view__option" data-quick-view-group>
-          <legend class="quick-view__legend">{{ option_label | escape }}</legend>
+          <legend class="quick-view__legend">{{ option_label }}</legend>
           <div class="quick-view__values">
             {%- for value in option.values -%}
               <label class="quick-view__value{% if value.swatch %} quick-view__value--swatch{% endif %}">
@@ -76,7 +72,7 @@
     [{%- for v in product.variants -%}
       {%- assign low = 0 -%}
       {%- if v.available and v.inventory_management == 'shopify' and v.inventory_policy == 'deny' and v.inventory_quantity > 0 and v.inventory_quantity <= 3 -%}{%- assign low = v.inventory_quantity -%}{%- endif -%}
-      {"id":{{ v.id }},"available":{{ v.available }},"low":{{ low }},"options":{{ v.options | json }},"price":{{ v.price | money_without_trailing_zeros | append: ' ' | append: currency | json }},"compare":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money_without_trailing_zeros | append: ' ' | append: currency | json }}{% else %}null{% endif %},"pct":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round }}{% else %}0{% endif %},"image":{% if v.featured_image %}{{ v.featured_image | image_url: width: 900 | json }}{% else %}null{% endif %}}{% unless forloop.last %},{% endunless %}
+      {"id":{{ v.id }},"available":{{ v.available }},"low":{{ low }},"options":{{ v.options | json }},"price":{{ v.price | money_without_trailing_zeros | replace: '$ ', '$' | append: ' ' | append: currency | json }},"compare":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | money_without_trailing_zeros | replace: '$ ', '$' | append: ' ' | append: currency | json }}{% else %}null{% endif %},"pct":{% if v.compare_at_price > v.price %}{{ v.compare_at_price | minus: v.price | times: 100.0 | divided_by: v.compare_at_price | round }}{% else %}0{% endif %},"image":{% if v.featured_image %}{{ v.featured_image | image_url: width: 900 | json }}{% else %}null{% endif %},"imageId":{% if v.featured_image %}{{ v.featured_image.id }}{% else %}null{% endif %}}{% unless forloop.last %},{% endunless %}
     {%- endfor -%}]
   </script>
 </div>
