@@ -1,0 +1,16 @@
+{%- doc -%}
+  Thin line glyphs of the bottom bar (monetta_bottom_navigation.dart _NavGlyphPainter), drawn as the client's 29 Oct reference:
+  a house with a rectangular door, four rounded cells, a shopping cart and a person. 24-unit canvas, 1.7 px stroke, currentColor.
+
+  @param {string} name - 'home', 'catalog', 'cart' or 'account'.
+  @param {number} [size] - Pixel size, 24 by default.
+{%- enddoc -%}
+{%- assign size = size | default: 24 -%}
+<svg class="icon nav-glyph" viewBox="0 0 24 24" width="{{ size }}" height="{{ size }}" aria-hidden="true" focusable="false" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+  {%- case name -%}
+    {%- when 'home' -%}<path d="M3 20.9V10.3L12 3.1l9 7.2v10.6zM9.7 20.9v-6.2h4.6v6.2"/>
+    {%- when 'catalog' -%}<rect x="4" y="4" width="6.2" height="6.2" rx="1.5"/><rect x="13.8" y="4" width="6.2" height="6.2" rx="1.5"/><rect x="4" y="13.8" width="6.2" height="6.2" rx="1.5"/><rect x="13.8" y="13.8" width="6.2" height="6.2" rx="1.5"/>
+    {%- when 'cart' -%}<path d="M2.6 4.2h2.5l2.3 10.3c.2.8.8 1.3 1.6 1.3h8.4c.8 0 1.4-.5 1.6-1.2L21 7.9H5.9"/><circle cx="9.6" cy="19.6" r="1.4"/><circle cx="17.2" cy="19.6" r="1.4"/>
+    {%- when 'account' -%}<circle cx="12" cy="8" r="3.9"/><path d="M4.5 20.6c.9-3.6 3.9-5.8 7.5-5.8s6.6 2.2 7.5 5.8"/>
+  {%- endcase -%}
+</svg>

@@ -75,27 +75,42 @@
 
   {%- when 'brands' -%}
     {%- capture all_url -%}{% render 'monetta-guia-url', key: 'categorias' %}{%- endcapture -%}
-    {%- comment -%}The guide's eight brands in its order, shown when the store sells them, so no tile leads to an empty page.{%- endcomment -%}
+    {%- comment -%}
+      The app's twelve logos in the app's order (guideBrandsFor in home_screen.dart: the guide's five first), then the
+      guide's text-only brands when the store sells them. Destinations: snippets/monetta-guia-brand-tile.liquid.
+    {%- endcomment -%}
     <section class="section container guia-brands" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       {% render 'monetta-section-header', id: heading_id, title: 'Tus marcas favoritas', link_url: all_url, link_label: 'Ver todas' %}
       <ul class="guia-brands__grid" role="list">
-        {%- assign brand_entries = 'Coach:coach,Guess:guess,Michael Kors:michael_kors,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Tory Burch:,Kate Spade:,Marc Jacobs:' | split: ',' -%}
+        {%- assign brand_entries = 'Coach:coach,Guess:guess,Michael Kors:michael_kors,Steve Madden:steve_madden,Tommy Hilfiger:tommy_hilfiger,Anne Klein:anne_klein,Olaplex:olaplex,Dior:dior:Christian Dior,The Ordinary:the_ordinary,Summer Fridays:summer_fridays,Laneige:laneige,Rhode:rhode,Tory Burch,Kate Spade,Marc Jacobs' | split: ',' -%}
         {%- for entry in brand_entries -%}
-          {%- assign name = entry | split: ':' | first -%}
-          {%- assign art = entry | split: ':' | last -%}
-          {%- if art == name -%}{%- assign art = '' -%}{%- endif -%}
-          {%- if shop.vendors contains name -%}
-            {%- capture url -%}{% render 'monetta-guia-url', key: 'brand', brand: name %}{%- endcapture -%}
-            <li>
-              <a class="guia-brand" href="{{ url | strip }}" aria-label="Ver {{ name }}">
-                {%- if art != blank -%}
-                  <img src="{{ 'monetta-app-brand-' | append: art | append: '.webp' | asset_url }}" width="600" height="600" alt="" loading="lazy" decoding="async">
-                {%- else -%}
-                  <span class="guia-brand__name">{{ name }}</span>
-                {%- endif -%}
-              </a>
-            </li>
-          {%- endif -%}
+          {% render 'monetta-guia-brand-tile', entry: entry %}
+        {%- endfor -%}
+      </ul>
+    </section>
+
+  {%- when 'collections' -%}
+    {%- comment -%}
+      «Colecciones» between «Compra por estilo» and «Tus marcas favoritas», as in the app (_HomeCollectionsSection): the three
+      photo cards of monetta.mx's earlier home, each with its photo, a serif title and a grey «VER COLECCIÓN» pill. Phones
+      swipe them and open on the middle card (assets/monetta-guia.js); wider screens show the three in a row.
+    {%- endcomment -%}
+    <section class="section guia-collections" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
+      <div class="container">
+        {% render 'monetta-section-header', id: heading_id, title: 'Colecciones' %}
+      </div>
+      <ul class="guia-collections__track" role="list" data-guia-collections>
+        {%- assign collection_entries = 'bolsas:Bolsas:bags,carteras:Carteras:wallets,relojes:Relojes:watches' | split: ',' -%}
+        {%- for entry in collection_entries -%}
+          {%- assign parts = entry | split: ':' -%}
+          {%- capture url -%}{% render 'monetta-guia-url', key: parts[0] %}{%- endcapture -%}
+          <li class="guia-collections__item">
+            <a class="guia-collection-card" href="{{ url | strip }}" aria-label="Ver colección {{ parts[1] }}">
+              <img class="guia-collection-card__photo" src="{{ 'monetta-app-home_collection_' | append: parts[2] | append: '.webp' | asset_url }}" width="800" height="930" alt="" loading="lazy" decoding="async">
+              <span class="guia-collection-card__title">{{ parts[1] }}</span>
+              <span class="guia-collection-card__button" aria-hidden="true">Ver colección</span>
+            </a>
+          </li>
         {%- endfor -%}
       </ul>
     </section>
@@ -148,6 +163,7 @@
       "options": [
         { "value": "carousel", "label": "Carrusel de 3 fotos" },
         { "value": "styles", "label": "Compra por estilo" },
+        { "value": "collections", "label": "Colecciones" },
         { "value": "brands", "label": "Tus marcas favoritas" },
         { "value": "offers", "label": "Precios de mayoreo" },
         { "value": "services", "label": "Servicios" },

@@ -28,10 +28,12 @@ void main() {
       // Thumbnails under the gallery.
       expect(find.byKey(const ValueKey('thumb-0')), findsOneWidget);
       expect(find.byKey(const ValueKey('thumb-1')), findsOneWidget);
-      // Brand in the serif, no invented stock line.
+      // Brand in the serif; the stock line only says whether it is available,
+      // never an invented quantity.
       expect(find.byKey(const Key('quick-view-brand')), findsOneWidget);
       expect(find.textContaining('Últimas'), findsNothing);
-      expect(find.textContaining('Stock'), findsNothing);
+      expect(find.text('Stock'), findsOneWidget);
+      expect(find.byKey(const Key('quick-view-stock')), findsOneWidget);
     });
 
     testWidgets('the -N% badge shows with a real compare-at price',
@@ -77,7 +79,7 @@ void main() {
       addProducts(store, [colored]);
       expect(hasReliableColorOptions(colored), isTrue);
       await pumpQuickView(tester, store, colored);
-      expect(find.text('COLORES'), findsOneWidget);
+      expect(find.text('Colores'), findsOneWidget);
       expect(find.text('COMPRAR AHORA'), findsNothing);
     });
   });

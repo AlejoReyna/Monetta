@@ -145,7 +145,9 @@ void main() {
         );
 
         expect(
-          _inMainList(find.text(kMoney.format(selectionPrice(product, 0)))),
+          _inMainList(
+            find.text(formatShopperPrice(selectionPrice(product, 0))),
+          ),
           findsWidgets,
         );
         expect(_inMainList(find.textContaining('Disponible')), findsOneWidget);

@@ -43,7 +43,6 @@ import '../boutique/boutique_tokens.dart';
 import '../catalog/product_card.dart';
 import '../orders/order_detail_screen.dart';
 import '../orders/orders_screen.dart';
-import '../product/quick_view.dart';
 import 'checkout_double_charge_sheet.dart';
 import 'checkout_order_lookup.dart';
 import 'checkout_return.dart';
@@ -1428,7 +1427,12 @@ class _BagRecommendations extends StatelessWidget {
           const SizedBox(height: 12),
           SizedBox(
             key: const ValueKey('bag-recommendations'),
-            height: 252,
+            height: productTileExtent(
+              tileWidth: 148,
+              textScaler: MediaQuery.textScalerOf(context),
+              density: ProductTileDensity.compact,
+              priceLines: tilePriceLinesFor(items),
+            ),
             child: ListView.separated(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -1441,8 +1445,6 @@ class _BagRecommendations extends StatelessWidget {
                   child: ProductCard(
                     product: product,
                     density: ProductTileDensity.compact,
-                    showQuickAdd: false,
-                    onQuickView: () => showProductQuickView(context, product),
                   ),
                 );
               },

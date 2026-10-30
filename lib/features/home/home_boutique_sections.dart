@@ -5,17 +5,18 @@
 /// controllers and catalog access stay in [HomeScreen].
 library;
 
+import 'dart:async';
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 
 import '../../app/monetta_tokens.g.dart';
+import '../../app/theme.dart';
 import '../../domain/campaign.dart';
 import '../../domain/product.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/guide_art.dart';
 import '../catalog/product_card.dart';
-import '../product/quick_view.dart';
 
 /// The home banner's film, with a real editorial poster frame.
 ///
@@ -102,7 +103,11 @@ class HomeSearchField extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 /// Three-slide opening carousel (guide page 3): swipeable, with indicator
-/// dots, no autoplay and no timers.
+/// dots. It advances one slide every 4 s and loops after the last one. It
+/// waits while a finger is on it, while [playing] is false (the app is in the
+/// background or the carousel scrolled away), while the route is covered
+/// (`TickerMode`) and when the OS asks to reduce motion
+/// (`MediaQuery.disableAnimations`); a swipe restarts the count.
 class HomeEditorialBanner extends StatefulWidget {
   const HomeEditorialBanner({
     required this.playing,
@@ -112,6 +117,8 @@ class HomeEditorialBanner extends StatefulWidget {
     super.key,
   });
 
+  /// Whether the carousel is on screen and the app in the foreground; the
+  /// home drives it from the scroll offset and the app lifecycle.
   final bool playing;
 
   /// Slide 2, «Nueva colección».
@@ -138,13 +145,75 @@ class HomeEditorialBanner extends StatefulWidget {
 }
 
 class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
+  /// One slide every 4 s.
+  static const Duration autoplayDelay = Duration(seconds: 4);
+  static const Duration _slideDuration = Duration(milliseconds: 450);
+
   final PageController _controller = PageController();
+  final Set<int> _pointers = <int>{};
+  Timer? _autoplayTimer;
   int _page = 0;
+  bool _reducedMotion = false;
+  bool _tickersEnabled = true;
+
+  bool get _autoplayAllowed =>
+      widget.playing && _tickersEnabled && !_reducedMotion && _pointers.isEmpty;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // `disableAnimationsOf`, not the app's `reduceMotion`: that one is always
+    // true under `flutter_test`, and the web gates autoplay on the same media
+    // query (`prefers-reduced-motion`).
+    _reducedMotion = MediaQuery.disableAnimationsOf(context);
+    _tickersEnabled = TickerMode.valuesOf(context).enabled;
+    _restartAutoplay();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeEditorialBanner oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.playing != widget.playing) _restartAutoplay();
+  }
 
   @override
   void dispose() {
+    _autoplayTimer?.cancel();
     _controller.dispose();
     super.dispose();
+  }
+
+  /// Cancels any pending advance and, when allowed, waits a full delay again.
+  void _restartAutoplay() {
+    _autoplayTimer?.cancel();
+    _autoplayTimer = null;
+    if (!_autoplayAllowed) return;
+    _autoplayTimer = Timer(autoplayDelay, _advance);
+  }
+
+  void _advance() {
+    _autoplayTimer = null;
+    if (!mounted || !_controller.hasClients) return;
+    final next = (_page + 1) % HomeEditorialBanner.slideCount;
+    // The page change callback re-arms the timer once the slide has moved.
+    unawaited(
+      _controller.animateToPage(
+        next,
+        duration: _slideDuration,
+        curve: Curves.easeOut,
+      ),
+    );
+  }
+
+  void _onPointerDown(PointerDownEvent event) {
+    _pointers.add(event.pointer);
+    _restartAutoplay();
+  }
+
+  void _onPointerEnd(PointerEvent event) {
+    if (!_pointers.remove(event.pointer)) return;
+    // A swipe (or a tap) restarts the 4 s count.
+    _restartAutoplay();
   }
 
   @override
@@ -161,142 +230,151 @@ class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
       child: Stack(
         fit: StackFit.expand,
         children: [
-          PageView(
-            controller: _controller,
-            onPageChanged: (page) => setState(() => _page = page),
-            children: [
-              _BannerSlide(
-                key: const ValueKey('home-banner-slide-easy'),
-                photo: const GuidePhoto(
-                  kGuideHomeBannerEasy,
-                  GuideTextSide.right,
-                ),
-                focus: const Alignment(-.6, 0),
-                gutter: gutter,
-                onTap: widget.onOpenCatalog,
-                children: [
-                  Text.rich(
-                    TextSpan(
-                      children: [
-                        TextSpan(
-                          text: 'Compra ',
-                          style: guideSerifItalicStyle(
-                            context,
-                            size: serif,
-                            color: palette.ink,
+          Listener(
+            behavior: HitTestBehavior.translucent,
+            onPointerDown: _onPointerDown,
+            onPointerUp: _onPointerEnd,
+            onPointerCancel: _onPointerEnd,
+            child: PageView(
+              controller: _controller,
+              onPageChanged: (page) {
+                setState(() => _page = page);
+                _restartAutoplay();
+              },
+              children: [
+                _BannerSlide(
+                  key: const ValueKey('home-banner-slide-easy'),
+                  photo: const GuidePhoto(
+                    kGuideHomeBannerEasy,
+                    GuideTextSide.right,
+                  ),
+                  focus: const Alignment(-.6, 0),
+                  gutter: gutter,
+                  onTap: widget.onOpenCatalog,
+                  children: [
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Compra ',
+                            style: guideSerifItalicStyle(
+                              context,
+                              size: serif,
+                              color: palette.ink,
+                            ),
                           ),
-                        ),
-                        TextSpan(
-                          text: 'fácil',
-                          style: guideAccentStyle(
-                            context,
-                            size: serif * 1.7,
-                            color: palette.ink,
+                          TextSpan(
+                            text: 'fácil',
+                            style: guideAccentStyle(
+                              context,
+                              size: serif * 1.7,
+                              color: palette.ink,
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                    textAlign: TextAlign.end,
-                  ),
-                  Text(
-                    'desde México',
-                    textAlign: TextAlign.end,
-                    style: guideSerifItalicStyle(
-                      context,
-                      size: serif,
-                      color: palette.ink,
-                    ),
-                  ),
-                ],
-              ),
-              _BannerSlide(
-                photo: const GuidePhoto(
-                  kGuideHomeBannerNew,
-                  GuideTextSide.left,
-                ),
-                focus: const Alignment(.4, 0),
-                gutter: gutter,
-                actionKey: const ValueKey('home-banner-action'),
-                onTap: widget.onOpenNew,
-                children: [
-                  Text(
-                    'NUEVA',
-                    style: guideSerifStyle(
-                      context,
-                      size: serif * 0.6,
-                      color: palette.ink,
-                      weight: FontWeight.w500,
-                      letterSpacing: serif * 0.1,
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'COLECCIÓN',
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                    style: guideSerifStyle(
-                      context,
-                      size: serif * 1.15,
-                      color: palette.ink,
-                      height: 1.05,
-                      letterSpacing: serif * 0.04,
-                    ),
-                  ),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: width * .58),
-                    child: Text(
-                      'Un paraíso de marcas\npor descubrir.',
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style: guideSerifItalicStyle(
-                        context,
-                        size: serif * 0.62,
-                        color: palette.ink,
-                        weight: FontWeight.w500,
+                        ],
                       ),
+                      textAlign: TextAlign.end,
                     ),
-                  ),
-                ],
-              ),
-              _BannerSlide(
-                key: const ValueKey('home-banner-slide-perfumes'),
-                photo: const GuidePhoto(
-                  kGuideHomeBannerPerfumes,
-                  GuideTextSide.right,
-                ),
-                focus: const Alignment(-.3, 0),
-                gutter: gutter,
-                onTap: widget.onOpenPerfumes,
-                children: [
-                  Text(
-                    'PERFUMES',
-                    textAlign: TextAlign.end,
-                    style: guideSerifStyle(
-                      context,
-                      size: serif * 1.15,
-                      color: palette.ink,
-                      height: 1.05,
-                      letterSpacing: serif * 0.04,
-                    ),
-                  ),
-                  const SizedBox(height: BoutiqueSpace.sm),
-                  ConstrainedBox(
-                    constraints: BoxConstraints(maxWidth: width * .5),
-                    child: Text(
-                      'Descubre nuestra selección de fragancias originales',
+                    Text(
+                      'desde México',
                       textAlign: TextAlign.end,
                       style: guideSerifItalicStyle(
                         context,
-                        size: serif * 0.62,
+                        size: serif,
                         color: palette.ink,
-                        weight: FontWeight.w500,
                       ),
                     ),
+                  ],
+                ),
+                _BannerSlide(
+                  photo: const GuidePhoto(
+                    kGuideHomeBannerNew,
+                    GuideTextSide.left,
                   ),
-                ],
-              ),
-            ],
+                  focus: const Alignment(.4, 0),
+                  gutter: gutter,
+                  actionKey: const ValueKey('home-banner-action'),
+                  onTap: widget.onOpenNew,
+                  children: [
+                    Text(
+                      'NUEVA',
+                      style: guideSerifStyle(
+                        context,
+                        size: serif * 0.6,
+                        color: palette.ink,
+                        weight: FontWeight.w500,
+                        letterSpacing: serif * 0.1,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      'COLECCIÓN',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: guideSerifStyle(
+                        context,
+                        size: serif * 1.15,
+                        color: palette.ink,
+                        height: 1.05,
+                        letterSpacing: serif * 0.04,
+                      ),
+                    ),
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: width * .58),
+                      child: Text(
+                        'Un paraíso de marcas\npor descubrir.',
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: guideSerifItalicStyle(
+                          context,
+                          size: serif * 0.62,
+                          color: palette.ink,
+                          weight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                _BannerSlide(
+                  key: const ValueKey('home-banner-slide-perfumes'),
+                  photo: const GuidePhoto(
+                    kGuideHomeBannerPerfumes,
+                    GuideTextSide.right,
+                  ),
+                  focus: const Alignment(-.3, 0),
+                  gutter: gutter,
+                  onTap: widget.onOpenPerfumes,
+                  children: [
+                    Text(
+                      'PERFUMES',
+                      textAlign: TextAlign.end,
+                      style: guideSerifStyle(
+                        context,
+                        size: serif * 1.15,
+                        color: palette.ink,
+                        height: 1.05,
+                        letterSpacing: serif * 0.04,
+                      ),
+                    ),
+                    const SizedBox(height: BoutiqueSpace.sm),
+                    ConstrainedBox(
+                      constraints: BoxConstraints(maxWidth: width * .5),
+                      child: Text(
+                        'Descubre nuestra selección de fragancias originales',
+                        textAlign: TextAlign.end,
+                        style: guideSerifItalicStyle(
+                          context,
+                          size: serif * 0.62,
+                          color: palette.ink,
+                          weight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
           ),
           Positioned(
             left: 0,
@@ -470,14 +548,12 @@ class HomeNewArrivalsRail extends StatelessWidget {
                   context,
                   availableWidth:
                       constraints.maxWidth - BoutiqueSpace.gutter * 2,
+                  priceLines: tilePriceLinesFor(shown),
                 ),
                 itemCount: shown.length,
                 itemBuilder: (context, index) {
                   final product = shown[index];
-                  return ProductCard(
-                    product: product,
-                    onQuickView: () => showProductQuickView(context, product),
-                  );
+                  return ProductCard(product: product);
                 },
               );
             },
@@ -488,8 +564,12 @@ class HomeNewArrivalsRail extends StatelessWidget {
     final width = MediaQuery.sizeOf(context).width;
     // Just under three cards across, so the rail reads as scrollable.
     final cardWidth = (width * .36).clamp(132.0, 190.0);
-    final railHeight = cardWidth * _density.imageHeightFactor +
-        MediaQuery.textScalerOf(context).scale(_density.captionHeight);
+    final railHeight = productTileExtent(
+      tileWidth: cardWidth,
+      textScaler: MediaQuery.textScalerOf(context),
+      density: _density,
+      priceLines: tilePriceLinesFor(products),
+    );
 
     return Column(
       key: sectionKey,
@@ -519,7 +599,6 @@ class HomeNewArrivalsRail extends StatelessWidget {
                 child: ProductCard(
                   product: product,
                   density: _density,
-                  onQuickView: () => showProductQuickView(context, product),
                 ),
               );
             },
@@ -534,7 +613,7 @@ class HomeNewArrivalsRail extends StatelessWidget {
 // Compra por estilo
 // ---------------------------------------------------------------------------
 
-/// One entry of «Compra por estilo»: a line icon, its label and the catalog
+/// One entry of «Compra por estilo»: a square photo, its label and the catalog
 /// destination it opens.
 @immutable
 class HomeStyleEntry {
@@ -542,7 +621,7 @@ class HomeStyleEntry {
     required this.id,
     required this.label,
     required this.collectionTitle,
-    required this.iconAsset,
+    required this.photoAsset,
     this.category,
     this.silhouette,
   });
@@ -553,19 +632,22 @@ class HomeStyleEntry {
 
   /// Title of the collection the entry opens.
   final String collectionTitle;
-  final String iconAsset;
+
+  /// Square photograph of the tile (the live web's own file).
+  final String photoAsset;
   final String? category;
   final String? silhouette;
 }
 
-/// The guide's five styles, in order. Silhouettes are the catalog's own
-/// facet values; perfumes are a category.
+/// The five styles of monetta.mx's «Compra por estilo», in order. Silhouettes
+/// are the catalog's own facet values (`hobo` is one of them, see
+/// `lib/data/normalize/facets.dart`).
 const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
   HomeStyleEntry(
     id: 'crossbody',
     label: 'Crossbody',
     collectionTitle: 'Crossbody',
-    iconAsset: kGuideIconStyleCrossbody,
+    photoAsset: kGuideStyleCrossbody,
     category: 'bolsa',
     silhouette: 'crossbody',
   ),
@@ -573,7 +655,7 @@ const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
     id: 'tote',
     label: 'Tote',
     collectionTitle: 'Totes',
-    iconAsset: kGuideIconStyleTote,
+    photoAsset: kGuideStyleTote,
     category: 'bolsa',
     silhouette: 'tote',
   ),
@@ -581,7 +663,7 @@ const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
     id: 'shoulder',
     label: 'Shoulder',
     collectionTitle: 'Shoulder',
-    iconAsset: kGuideIconStyleShoulder,
+    photoAsset: kGuideStyleShoulder,
     category: 'bolsa',
     silhouette: 'shoulder',
   ),
@@ -589,20 +671,25 @@ const List<HomeStyleEntry> kHomeStyleEntries = <HomeStyleEntry>[
     id: 'satchel',
     label: 'Satchel',
     collectionTitle: 'Satchel',
-    iconAsset: kGuideIconStyleSatchel,
+    photoAsset: kGuideStyleSatchel,
     category: 'bolsa',
     silhouette: 'satchel',
   ),
   HomeStyleEntry(
-    id: 'perfumes',
-    label: 'Perfumes',
-    collectionTitle: 'Perfumes',
-    iconAsset: kGuideIconStylePerfumes,
-    category: 'perfume',
+    id: 'hobo',
+    label: 'Hobo',
+    collectionTitle: 'Hobo',
+    photoAsset: kGuideStyleHobo,
+    category: 'bolsa',
+    silhouette: 'hobo',
   ),
 ];
 
-/// «Compra por estilo»: five line icons across, label underneath, no card.
+/// Width from which the web's wide layout applies (iPad, unfolded Duo).
+const double kHomeWideBreakpoint = 768;
+
+/// «Compra por estilo»: five square photo tiles across (web
+/// `.guia-styles__list`), 4 px apart on a phone.
 class HomeShopByStyle extends StatelessWidget {
   const HomeShopByStyle({
     required this.onOpen,
@@ -618,7 +705,9 @@ class HomeShopByStyle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (entries.isEmpty) return const SizedBox.shrink();
-    final large = MediaQuery.textScalerOf(context).scale(1) > 1.3;
+    final wide = MediaQuery.sizeOf(context).width >= kHomeWideBreakpoint;
+    // Web: gap 4 on a phone, 16 from 768; the list is at most 1000 wide.
+    final gap = wide ? BoutiqueSpace.lg : BoutiqueSpace.xs;
     return Column(
       key: const ValueKey('home-section-bag-types'),
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -628,49 +717,50 @@ class HomeShopByStyle extends StatelessWidget {
           actionLabel: onSeeAll == null ? null : 'Ver todo',
           onAction: onSeeAll,
         ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.sm),
-          child: large
-              ? Wrap(
-                  key: const ValueKey('home-style-rail'),
-                  alignment: WrapAlignment.center,
-                  runSpacing: BoutiqueSpace.md,
-                  children: [
-                    for (final entry in entries)
-                      SizedBox(
-                        width: 108,
-                        child: _StyleTile(
-                          key: ValueKey('home-style-${entry.id}'),
-                          entry: entry,
-                          onTap: () => onOpen(entry),
-                        ),
+        Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 1000),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(
+                horizontal: BoutiqueSpace.gutter,
+              ),
+              child: Row(
+                key: const ValueKey('home-style-rail'),
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  for (var i = 0; i < entries.length; i++) ...[
+                    if (i > 0) SizedBox(width: gap),
+                    Expanded(
+                      child: _StyleTile(
+                        key: ValueKey('home-style-${entries[i].id}'),
+                        entry: entries[i],
+                        labelSize: wide ? 15 : 12,
+                        onTap: () => onOpen(entries[i]),
                       ),
+                    ),
                   ],
-                )
-              : Row(
-                  key: const ValueKey('home-style-rail'),
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    for (final entry in entries)
-                      Expanded(
-                        child: _StyleTile(
-                          key: ValueKey('home-style-${entry.id}'),
-                          entry: entry,
-                          onTap: () => onOpen(entry),
-                        ),
-                      ),
-                  ],
-                ),
+                ],
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
 }
 
+/// Web `.guia-styles__tile`: a cream tile with a square photo and a one-line
+/// serif label under it. The whole tile is the tap target.
 class _StyleTile extends StatelessWidget {
-  const _StyleTile({required this.entry, required this.onTap, super.key});
+  const _StyleTile({
+    required this.entry,
+    required this.labelSize,
+    required this.onTap,
+    super.key,
+  });
 
   final HomeStyleEntry entry;
+  final double labelSize;
   final VoidCallback onTap;
 
   @override
@@ -684,35 +774,54 @@ class _StyleTile extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: BoutiqueSpace.xs,
-            vertical: BoutiqueSpace.xs,
-          ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              // Every icon sits in the same box so the five labels share a
-              // baseline whatever the artwork's own proportions.
-              SizedBox(
-                height: 64,
-                child: Image.asset(
-                  entry.iconAsset,
-                  fit: BoxFit.contain,
-                  excludeFromSemantics: true,
-                  errorBuilder: (_, __, ___) => const SizedBox.shrink(),
-                ),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: BoutiqueSpace.tapTarget),
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.monettaColors.surfaceTile,
+              borderRadius: BoutiqueRadius.tile,
+            ),
+            child: ClipRRect(
+              borderRadius: BoutiqueRadius.tile,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: Image.asset(
+                      entry.photoAsset,
+                      fit: BoxFit.cover,
+                      // The files are 720 px; the tiles are ~70 logical px.
+                      cacheWidth: 360,
+                      excludeFromSemantics: true,
+                      errorBuilder: (_, __, ___) => const SizedBox.shrink(),
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(
+                      BoutiqueSpace.xs,
+                      0,
+                      BoutiqueSpace.xs,
+                      BoutiqueSpace.sm,
+                    ),
+                    child: Text(
+                      entry.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontFamily: kBoutiqueSerifFamily,
+                        fontFamilyFallback: kBoutiqueSerifFallback,
+                        fontSize: labelSize,
+                        height: 1.2,
+                        color: palette.ink,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: BoutiqueSpace.sm),
-              Text(
-                entry.label,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                textAlign: TextAlign.center,
-                style:
-                    boutiqueText(size: 12.5, height: 1.2, color: palette.ink),
-              ),
-            ],
+            ),
           ),
         ),
       ),

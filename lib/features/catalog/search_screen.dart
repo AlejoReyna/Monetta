@@ -24,7 +24,6 @@ import '../checkout/checkout_screen.dart';
 import '../navigation/guide_chrome.dart';
 import '../navigation/guide_drawer.dart';
 import '../navigation/monetta_bottom_navigation.dart';
-import '../product/quick_view.dart';
 import 'categories_screen.dart';
 import 'catalog_controls.dart';
 import 'catalog_query.dart';
@@ -803,9 +802,12 @@ class _ProductRail extends StatelessWidget {
     const gap = BoutiqueSpace.sm;
     final columns = width >= 600 ? 4 : 3;
     final tileWidth = (width - gap * (columns - 1)) / columns;
-    final caption = MediaQuery.textScalerOf(
-      context,
-    ).scale(ProductTileDensity.compact.captionHeight);
+    final extent = productTileExtent(
+      tileWidth: tileWidth,
+      textScaler: MediaQuery.textScalerOf(context),
+      density: ProductTileDensity.compact,
+      priceLines: tilePriceLinesFor(products.take(columns)),
+    );
     return GridView.builder(
       key: const ValueKey('search-product-rail'),
       shrinkWrap: true,
@@ -814,9 +816,8 @@ class _ProductRail extends StatelessWidget {
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: columns,
         crossAxisSpacing: gap,
-        mainAxisSpacing: BoutiqueSpace.md,
-        mainAxisExtent:
-            tileWidth * ProductTileDensity.compact.imageHeightFactor + caption,
+        mainAxisSpacing: BoutiqueSpace.sm,
+        mainAxisExtent: extent,
       ),
       itemCount: products.length < columns ? products.length : columns,
       itemBuilder: (context, index) {
@@ -824,7 +825,6 @@ class _ProductRail extends StatelessWidget {
         return ProductCard(
           product: product,
           density: ProductTileDensity.compact,
-          onQuickView: () => showProductQuickView(context, product),
         );
       },
     );
@@ -1110,7 +1110,6 @@ class _Results extends StatelessWidget {
               BoutiqueSpace.gutter,
               BoutiqueSpace.xxl,
             ),
-            onQuickView: (product) => showProductQuickView(context, product),
           ),
         ),
         SafeArea(

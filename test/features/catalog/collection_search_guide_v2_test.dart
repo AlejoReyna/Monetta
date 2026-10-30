@@ -135,7 +135,8 @@ void main() {
       expect(find.byKey(const Key('collection-filter-sort')), findsOneWidget);
     });
 
-    testWidgets('«VER PRODUCTO» opens the ficha; the "+" and heart stay',
+    testWidgets(
+        '«VER PRODUCTO» opens the ficha; the card has no "+" and keeps its heart',
         (tester) async {
       final store = await _loadedStore();
       addTearDown(store.dispose);
@@ -156,11 +157,8 @@ void main() {
         find.descendant(of: button, matching: find.text('VER PRODUCTO')),
         findsOneWidget,
       );
-      // The purchase shortcut and the favourite are untouched.
-      expect(
-        find.byKey(Key('quick-add-${first.id}')),
-        first.isInStock ? findsOneWidget : findsNothing,
-      );
+      // The card has no purchase shortcut any more; the favourite stays.
+      expect(find.byKey(Key('quick-add-${first.id}')), findsNothing);
       expect(find.byTooltip('Guardar'), findsWidgets);
 
       await tester.tap(button);

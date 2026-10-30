@@ -26,7 +26,6 @@ import '../../main.dart';
 import '../../reco/explainer.dart';
 import '../boutique/boutique_tokens.dart';
 import '../boutique/guide_art.dart';
-import '../product/quick_view.dart';
 import 'catalog_controls.dart';
 import 'collection_screen.dart';
 import 'product_card.dart';
@@ -253,6 +252,7 @@ class _BrandScreenState extends State<BrandScreen> {
                   gridDelegate: productGridDelegate(
                     context,
                     availableWidth: constraints.crossAxisExtent,
+                    priceLines: tilePriceLinesFor(visible),
                   ),
                   delegate: SliverChildBuilderDelegate(
                     (context, index) {
@@ -260,8 +260,6 @@ class _BrandScreenState extends State<BrandScreen> {
                       return ProductCard(
                         key: ValueKey('product-card-${product.id}'),
                         product: product,
-                        onQuickView: () =>
-                            showProductQuickView(context, product),
                       );
                     },
                     childCount: visible.length,

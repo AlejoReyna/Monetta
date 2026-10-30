@@ -297,7 +297,7 @@ async function f2() {
 
 /* ======================================================================== F3: colecciones, Categorías y Búsqueda */
 const LISTINGS = [
-  { path: '/collections/vendors?q=Coach', photo: 'coleccion-coach', title: 'Coach', italic: false, pill: null },
+  { path: '/collections/vendors?q=Coach', photo: 'coleccion-coach', title: 'Coach', italic: false, pill: 'Marcas' },
   { path: '/collections/all/tote', photo: 'coleccion-totes', title: 'Totes', italic: true, pill: 'Bolsas' },
   { path: '/collections/types?q=Cartera', photo: 'coleccion-carteras', title: 'Carteras', italic: true, pill: 'Carteras' },
   { path: '/collections/all/reloj', photo: 'coleccion-accesorios', title: 'Relojes', italic: true, pill: 'Relojes' },
@@ -330,12 +330,16 @@ async function f3() {
             count: document.querySelector('.guia-listing-bar__count')?.textContent.trim() || '',
             sortLabel: document.querySelector('.guia-sort__label')?.textContent.trim() || '',
             header: !!header && getComputedStyle(header).display !== 'none' && header.getBoundingClientRect().height > 0,
+            siteNav: !!document.querySelector('.site-nav'),
+            searchFocused: document.activeElement?.id === 'header-search-input',
+            predictiveOpen: !!document.querySelector('#site-header [data-monetta-predictive-panel]:not([hidden])'),
           };
         });
         const tag = `F3 ${w} ${l.title}`;
         run.check(`${tag}: the guide's banner photograph and the title as the page's only h1`, info.photo.includes(l.photo) && info.tag === 'H1' && info.h1.length === 1 && info.h1[0] === l.title, JSON.stringify({ photo: info.photo.split('/').pop()?.split('?')[0], h1: info.h1 }));
         run.check(`${tag}: title in capitals, ${l.italic ? 'italic (silhouette or category)' : 'upright (brand)'}`, info.transform === 'uppercase' && (info.style === 'italic') === l.italic, JSON.stringify({ transform: info.transform, style: info.style }));
-        run.check(`${tag}: pills Bolsas, Carteras, Accesorios, Relojes, Más; current ${l.pill || 'none'}; 48px filters button`, info.pills.join(',') === 'Bolsas,Carteras,Accesorios,Relojes,Más' && info.current === l.pill && info.filterBtn && info.filterBtn[0] >= 48 && info.filterBtn[1] >= 48, JSON.stringify({ pills: info.pills, current: info.current, filterBtn: info.filterBtn }));
+        run.check(`${tag}: pills Bolsas, Carteras, Accesorios, Relojes, Perfumes, Marcas, Mayoreo; current ${l.pill || 'none'}; 48px filters button`, info.pills.join(',') === 'Bolsas,Carteras,Accesorios,Relojes,Perfumes,Marcas,Mayoreo' && info.current === l.pill && info.filterBtn && info.filterBtn[0] >= 48 && info.filterBtn[1] >= 48, JSON.stringify({ pills: info.pills, current: info.current, filterBtn: info.filterBtn }));
+        run.check(`${tag}: no header category row (the pills carry it) and the search field stays closed on arrival`, !info.siteNav && !info.searchFocused && !info.predictiveOpen, JSON.stringify({ siteNav: info.siteNav, searchFocused: info.searchFocused, predictiveOpen: info.predictiveOpen }));
         run.check(`${tag}: «N productos» and «Ordenar por»`, /^\d+ productos?$/.test(info.count) && info.sortLabel === 'Ordenar por', JSON.stringify({ count: info.count, sort: info.sortLabel }));
         if (w === 390) run.check(`${tag}: phones keep the guide's header (no page bar) on the collection`, info.header, JSON.stringify({ header: info.header }));
       }

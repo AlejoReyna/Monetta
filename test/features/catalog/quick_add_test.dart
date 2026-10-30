@@ -15,13 +15,24 @@ import '../../support/product_screen_harness.dart';
 import '../../support/quick_add_harness.dart';
 import '../../support/scripted_catalog_store.dart';
 
-// FICHA-T3, QUICK-01..03b, CART-03/04 on the card (BRIEF 2.6): the "+" of the
-// Monetta cards. One buyable variant adds straight away; several open the
-// quick view so the shopper picks explicitly; nothing is ever added silently.
+// FICHA-T3, QUICK-01..03b, CART-03/04 (BRIEF 2.6): the "+" control
+// (`ProductQuickAddButton`). One buyable variant adds straight away; several
+// open the quick view so the shopper picks explicitly; nothing is ever added
+// silently.
+//
+// Since the card redesign no Monetta card draws the "+": tapping a card opens
+// the quick view, whose «AGREGAR A BOLSA» adds the exact variant. The control
+// stays public API and keeps its own tests through `PlusCard` (a tile with
+// the control in its photo slot); the surface-level tests below assert that
+// the real surfaces show no "+" and that the quick view adds from the card.
 //
 // The "+" is measured on its tappable zone (`quick-add-<product.id>`, 48x48),
 // not on the circle or the icon. Nothing here exists in `lib/` yet: every test
 // that looks for the key is red until the control is built.
+
+bool _isQuickAddKey(Widget widget) =>
+    widget.key is ValueKey<String> &&
+    (widget.key! as ValueKey<String>).value.startsWith('quick-add-');
 
 Finder _inMiniCart() => find.text('En tu bolsa');
 
@@ -48,7 +59,7 @@ Future<ScriptedCatalogStore> _mountCard(
   addProducts(store, extra);
   final product = pick(store);
   await tester.pumpWidget(
-    cardApp(
+    plusCardApp(
       store,
       product,
       onQuickView: onQuickView,
@@ -62,7 +73,7 @@ Future<ScriptedCatalogStore> _mountCard(
 void main() {
   setUpAll(mockPathProvider);
 
-  group('QUICK-01 the "+" replaces the eye on buyable cards', () {
+  group('QUICK-01 the "+" control on a tile (no eye)', () {
     for (final entry in <(String, Product Function(ScriptedCatalogStore))>[
       ('single-variant', singleVariantAssetProduct),
       ('multi-variant', chipAssetProduct),
@@ -92,8 +103,8 @@ void main() {
     }
 
     testWidgets(
-        'QUICK-01 a fully sold-out piece has no "+" and keeps the eye, which '
-        'still opens the quick view callback', (tester) async {
+        'QUICK-01 a fully sold-out piece has no "+" and no eye; a long press '
+        'still calls onQuickView', (tester) async {
       var quickViews = 0;
       final soldOut = soldOutProduct();
       final store = await _mountCard(
@@ -105,8 +116,8 @@ void main() {
 
       expect(quickAddOf(soldOut), findsNothing);
       expect(find.text('AGOTADO'), findsOneWidget);
-      expect(find.byTooltip(kQuickViewTooltip), findsOneWidget);
-      await tester.tap(find.byTooltip(kQuickViewTooltip));
+      expect(find.byTooltip(kQuickViewTooltip), findsNothing);
+      await tester.longPress(cardName(store, soldOut));
       await tester.pump();
       expect(quickViews, 1);
       expect(store.addCalls, 0);
@@ -129,34 +140,27 @@ void main() {
     });
 
     testWidgets(
-        'QUICK-01 ProductCardGrid: every buyable card has its "+", the '
-        'sold-out one keeps the eye', (tester) async {
+        'QUICK-01 a grid of tiles: every buyable one has its "+", the '
+        'sold-out one has none and there is no eye', (tester) async {
       setPhoneView(tester);
       final store = await scriptedStore();
       final soldOut = soldOutProduct();
       addProducts(store, [soldOut]);
       final single = singleVariantAssetProduct(store);
       final several = chipAssetProduct(store);
-      await tester.pumpWidget(gridApp(store, [single, several, soldOut]));
+      await tester.pumpWidget(plusGridApp(store, [single, several, soldOut]));
       await tester.pump();
 
       for (final product in [single, several]) {
         expectQuickAddGeometry(tester, quickAddOf(product));
       }
       expect(quickAddOf(soldOut), findsNothing);
-      expect(find.byTooltip(kQuickViewTooltip), findsOneWidget);
-      expect(
-        find.descendant(
-          of: find.byKey(cardKey(soldOut)),
-          matching: find.byTooltip(kQuickViewTooltip),
-        ),
-        findsOneWidget,
-        reason: 'the eye belongs to the sold-out card',
-      );
+      expect(find.byTooltip(kQuickViewTooltip), findsNothing);
     });
 
-    testWidgets('QUICK-01 CollectionScreen: every card has its "+", no eye',
-        (tester) async {
+    testWidgets(
+        'QUICK-01 CollectionScreen: no card has a "+", every card has its '
+        '«VER PRODUCTO»', (tester) async {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       await tester.pumpWidget(
@@ -173,13 +177,13 @@ void main() {
       final cards = tester.widgetList<ProductCard>(find.byType(ProductCard));
       expect(cards, isNotEmpty);
       for (final card in cards) {
+        expect(quickAddOf(card.product), findsNothing);
         expect(
-          quickAddOf(card.product),
+          find.byKey(Key('view-product-${card.product.id}')),
           findsOneWidget,
-          reason: '${card.product.title} is buyable',
+          reason: '${card.product.title} has its pill',
         );
       }
-      expectQuickAddGeometry(tester, quickAddOf(cards.first.product));
       expect(find.byTooltip(kQuickViewTooltip), findsNothing);
     });
 
@@ -209,44 +213,32 @@ void main() {
       }
 
       testWidgets(
-          'QUICK-01 a Monetta card has its "+" keyed by the Shopify id; '
-          'sold-out and external pieces have none', (tester) async {
-        await withSemantics(tester, () async {
-          final (_, items, single, several) = await mount(tester);
-          final soldOutId = items[1].shopifyProductId!;
+          'QUICK-01 a Monetta catalog card has «VER PRODUCTO» keyed by the '
+          'Shopify id and no "+"; external pieces have neither',
+          (tester) async {
+        final (_, items, single, several) = await mount(tester);
+        final soldOutId = items[1].shopifyProductId!;
 
-          for (final product in [single, several]) {
-            final plus = find.byKey(quickAddKey(product.id));
-            expectQuickAddGeometry(tester, plus);
-            // This grid prints the catalog item's name, which has no colour
-            // suffix; the "+" must name the piece exactly as the card does.
-            final title = ProductTileData.fromCatalogItem(
-              items.firstWhere((item) => item.shopifyProductId == product.id),
-            ).title;
-            expect(find.text(title), findsOneWidget);
-            expect(
-              tester.getSemantics(plus).label,
-              'Agregar $title al carrito',
-            );
-          }
-          expect(find.byKey(quickAddKey(soldOutId)), findsNothing);
-          expect(find.text('AGOTADO'), findsOneWidget);
+        for (final product in [single, several]) {
           expect(
-            find.byWidgetPredicate(
-              (widget) =>
-                  widget.key is ValueKey<String> &&
-                  (widget.key! as ValueKey<String>)
-                      .value
-                      .startsWith('quick-add-'),
-            ),
-            findsNWidgets(2),
-            reason: 'only the two buyable Monetta pieces carry a "+"',
+            find.byKey(Key('view-product-${product.id}')),
+            findsOneWidget,
           );
-        });
+          expect(quickAddOf(product), findsNothing);
+        }
+        // A sold-out Monetta piece still opens its page.
+        expect(find.byKey(Key('view-product-$soldOutId')), findsOneWidget);
+        expect(find.text('AGOTADO'), findsOneWidget);
+        expect(find.byWidgetPredicate(_isQuickAddKey), findsNothing);
+        expect(
+          find.text('VER PRODUCTO'),
+          findsNWidgets(3),
+          reason: 'the three Monetta pieces; the external one has none',
+        );
       });
 
       testWidgets(
-          'QUICK-01 CART-04 an external piece has no "+" and its tap opens '
+          'QUICK-01 CART-04 an external piece has no pill and its tap opens '
           'the merchant detail, untouched', (tester) async {
         final (store, items, _, _) = await mount(tester);
         final external = items.first;
@@ -264,7 +256,7 @@ void main() {
       });
 
       testWidgets(
-          'QUICK-01 without a StoreScope the catalog mounts without "+" and '
+          'QUICK-01 without a StoreScope the catalog mounts without pills and '
           'without exceptions (characterization)', (tester) async {
         final (_, items, _, _) = await mount(tester, withStore: false);
 
@@ -404,8 +396,8 @@ void main() {
     });
 
     testWidgets(
-        'QUICK-02 the catalog "+" of a single-variant piece adds it directly',
-        (tester) async {
+        'QUICK-02 tapping a catalog card opens the quick view, and its '
+        '«AGREGAR A BOLSA» adds exactly that variant once', (tester) async {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       final product = singleVariantAssetProduct(store);
@@ -413,13 +405,20 @@ void main() {
           .firstWhere((entry) => entry.shopifyProductId == product.id);
       await tester.pumpWidget(catalogApp(store, [item]));
       await tester.pump();
+      expect(quickAddOf(product), findsNothing);
 
-      await tapQuickAdd(tester, product);
+      await tester.tap(find.byType(AspectRatio).first);
+      await tester.pumpAndSettle();
+      expect(_closeQuickView(), findsOneWidget);
+      expect(store.addCalls, 0, reason: 'opening the sheet adds nothing');
+
+      await tester.tap(primaryButton());
       await tester.pumpAndSettle();
 
       expect(store.addCalls, 1);
+      expect(store.bagLines, hasLength(1));
       expect(store.bagLines.single.variant.id, product.variants.single.id);
-      expect(_inMiniCart(), findsOneWidget);
+      expect(store.bagLines.single.quantity, 1);
       await flush(tester);
     });
   });
@@ -450,11 +449,11 @@ void main() {
         expect(selectionMarks(), findsNothing, reason: 'no option is marked');
         expect(
           find.descendant(
-            of: inSheet(find.byType(ListView)),
-            matching: find.text(kChooseLabel),
+            of: quickViewSheet(),
+            matching: find.byKey(const Key('quick-view-choose-hint')),
           ),
           findsOneWidget,
-          reason: 'guide text in the content',
+          reason: 'guide text in the content (the button repeats it)',
         );
         expect(primaryButton(), findsOneWidget);
         expect(inPrimary(find.text(kChooseLabel)), findsOneWidget);
@@ -517,8 +516,8 @@ void main() {
     });
 
     testWidgets(
-        'QUICK-03 the catalog "+" of a several-variant piece also opens the '
-        'quick view and adds nothing', (tester) async {
+        'QUICK-03 tapping a catalog card of a several-variant piece opens '
+        'the quick view and adds nothing', (tester) async {
       setPhoneView(tester, height: 1600);
       final store = await scriptedStore();
       final product = chipAssetProduct(store);
@@ -527,14 +526,12 @@ void main() {
       await tester.pumpWidget(catalogApp(store, [item]));
       await tester.pump();
 
-      await tapQuickAdd(tester, product);
+      await tester.tap(find.byType(AspectRatio).first);
       await tester.pumpAndSettle();
 
       expect(_closeQuickView(), findsOneWidget);
       expect(store.addCalls, 0);
       expect(store.bagQuantity, 0);
-      expect(selectionMarks(), findsNothing);
-      expect(inPrimary(find.text(kChooseLabel)), findsOneWidget);
     });
   });
 

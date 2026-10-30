@@ -332,7 +332,10 @@ const double kSectionGap = 52;
 ///
 /// Keep navigation wordmarks on this token so routes and scroll states cannot
 /// silently render the Monetta identity at different sizes.
-const double kAppBarWordmarkHeight = 24;
+///
+/// 28.5 is the former 24 plus 18.75 %: the wordmark is larger while the bars
+/// keep their height (60 on the home, 56 on the guide screens).
+const double kAppBarWordmarkHeight = 28.5;
 
 /// Matches the store's `money_format` of `$ {{amount}}` in MXN.
 final NumberFormat kMoney = NumberFormat.currency(
@@ -340,6 +343,22 @@ final NumberFormat kMoney = NumberFormat.currency(
   symbol: r'$ ',
   decimalDigits: 2,
 );
+
+final NumberFormat _shopperWholeFormat = NumberFormat('#,##0', 'es_MX');
+final NumberFormat _shopperCentsFormat = NumberFormat('#,##0.00', 'es_MX');
+
+/// How a card, the quick view and the product page print a price: `$6,299
+/// MXN`, with cents only when there are any (`$1,299.50 MXN`).
+///
+/// Presentation only. No total is ever computed from this string; the bag and
+/// the checkout keep [kMoney] and the cart's own decimal strings.
+String formatShopperPrice(num amount) {
+  final cents = (amount * 100).round();
+  final label = cents % 100 == 0
+      ? _shopperWholeFormat.format(cents ~/ 100)
+      : _shopperCentsFormat.format(cents / 100);
+  return '\$$label MXN';
+}
 
 /// The neutral label shown in place of a price line when [Money] is `null` —
 /// an unknown price is never rendered as `$0`, which would read as "free."

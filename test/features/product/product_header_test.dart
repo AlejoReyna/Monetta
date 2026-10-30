@@ -364,7 +364,8 @@ void main() {
       await tester.pump();
       expect(find.text('Productos'), findsOneWidget);
 
-      await tester.tap(find.byType(MonettaProductTile).first);
+      // «VER PRODUCTO» opens the ficha (tapping the card opens the quick view).
+      await tester.tap(find.text('VER PRODUCTO').first);
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsOneWidget);
 
@@ -395,7 +396,7 @@ void main() {
       await tester.pump();
       expect(find.text('BOLSAS'), findsOneWidget);
 
-      await tester.tap(find.byType(ProductCard).first);
+      await tester.tap(find.text('VER PRODUCTO').first);
       await tester.pumpAndSettle();
       expect(find.byType(ProductScreen), findsOneWidget);
 
