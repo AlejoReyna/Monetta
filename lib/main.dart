@@ -22,6 +22,7 @@ import 'app/admin_controller.dart';
 import 'app/admin_notification_controller.dart';
 import 'app/app_build_metadata.dart';
 import 'app/catalog_store.dart';
+import 'app/font_licenses.dart';
 import 'app/text_scale_policy.dart';
 import 'app/cart_controller.dart';
 import 'app/editorial_content_controller.dart';
@@ -86,6 +87,7 @@ import 'features/welcome/welcome_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerFontLicenses();
   final accountsConfig = AccountsOrdersConfig.fromEnvironment();
   final notifications = NotificationConfig.fromEnvironment(
     fallbackBaseUrl: accountsConfig.baseUrl,
@@ -500,6 +502,13 @@ class MonettaApp extends StatefulWidget {
 
 class _MonettaAppState extends State<MonettaApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
+
+  @override
+  void initState() {
+    super.initState();
+    registerFontLicenses();
+  }
+
   final AppDatabase _database = AppDatabase.connect();
   late final ThemeController _theme = ThemeController(
     store: AppearanceStore(_database),
