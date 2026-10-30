@@ -103,10 +103,11 @@ class HomeSearchField extends StatelessWidget {
 // ---------------------------------------------------------------------------
 
 /// Three-slide opening carousel (guide page 3): swipeable, with indicator
-/// dots. As on monetta.mx it advances one slide every 5 s and loops after the
-/// last one. It waits while a finger is on it, while [playing] is false (the
-/// app is in the background or the carousel scrolled away), while the route is
-/// covered (`TickerMode`) and with reduced motion; a swipe restarts the count.
+/// dots. It advances one slide every 4 s and loops after the last one. It
+/// waits while a finger is on it, while [playing] is false (the app is in the
+/// background or the carousel scrolled away), while the route is covered
+/// (`TickerMode`) and when the OS asks to reduce motion
+/// (`MediaQuery.disableAnimations`); a swipe restarts the count.
 class HomeEditorialBanner extends StatefulWidget {
   const HomeEditorialBanner({
     required this.playing,
@@ -144,8 +145,8 @@ class HomeEditorialBanner extends StatefulWidget {
 }
 
 class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
-  /// Web `initAutoplay`: one slide every 5 s.
-  static const Duration autoplayDelay = Duration(seconds: 5);
+  /// One slide every 4 s.
+  static const Duration autoplayDelay = Duration(seconds: 4);
   static const Duration _slideDuration = Duration(milliseconds: 450);
 
   final PageController _controller = PageController();
@@ -211,7 +212,7 @@ class _HomeEditorialBannerState extends State<HomeEditorialBanner> {
 
   void _onPointerEnd(PointerEvent event) {
     if (!_pointers.remove(event.pointer)) return;
-    // A swipe (or a tap) restarts the 5 s count.
+    // A swipe (or a tap) restarts the 4 s count.
     _restartAutoplay();
   }
 

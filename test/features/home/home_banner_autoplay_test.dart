@@ -1,5 +1,5 @@
-/// Web-parity pass: the opening banner advances by itself every 5 s, loops
-/// after the last slide and waits whenever autoplay would be rude.
+/// The opening banner advances by itself every 4 s, loops after the last
+/// slide and waits whenever autoplay would be rude.
 library;
 
 import 'package:flutter/material.dart';
@@ -8,7 +8,7 @@ import 'package:monetta_app/features/home/home_boutique_sections.dart';
 
 import '../../support/client_guide_capture.dart';
 
-const Duration _delay = Duration(seconds: 5);
+const Duration _delay = Duration(seconds: 4);
 const Duration _slide = Duration(milliseconds: 450);
 
 PageView _hero(WidgetTester tester) => tester.widget<PageView>(
@@ -64,14 +64,14 @@ Future<void> _swipeLeft(WidgetTester tester) async {
 }
 
 void main() {
-  testWidgets('advances after 5 s and loops from the last slide to the first', (
+  testWidgets('advances after 4 s and loops from the last slide to the first', (
     tester,
   ) async {
     await _pumpBanner(tester);
     expect(_page(tester), 0);
 
-    await tester.pump(const Duration(milliseconds: 4900));
-    expect(_page(tester), 0, reason: 'not before the 5 s are up');
+    await tester.pump(const Duration(milliseconds: 3900));
+    expect(_page(tester), 0, reason: 'not before the 4 s are up');
 
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(_slide + const Duration(milliseconds: 50));
@@ -104,13 +104,18 @@ void main() {
     expect(_hero(tester).controller!.page, 1);
   });
 
-  testWidgets('does not advance with animations disabled', (tester) async {
-    await _pumpBanner(tester, disableAnimations: true);
+  testWidgets(
+    'stays on the first slide when the OS disables animations',
+    (tester) async {
+      // `disableAnimations` is the platform reduce-motion / remove-animations
+      // flag. Autoplay stays off for the whole time the banner is up.
+      await _pumpBanner(tester, disableAnimations: true);
 
-    await _idle(tester, const Duration(seconds: 30));
+      await _idle(tester, const Duration(seconds: 30));
 
-    expect(_page(tester), 0);
-  });
+      expect(_page(tester), 0);
+    },
+  );
 
   testWidgets('does not advance while playing is false, and resumes after', (
     tester,
@@ -146,7 +151,7 @@ void main() {
     expect(_page(tester), 0);
 
     // Back on screen: a muted animation must not complete at once, and the
-    // 5 s count starts only now.
+    // 4 s count starts only now.
     await tester.pumpWidget(app(covered: false));
     await tester.pump(_slide + const Duration(milliseconds: 50));
     await tester.pump(_slide + const Duration(milliseconds: 50));
@@ -165,14 +170,14 @@ void main() {
     expect(_page(tester), 0);
 
     await hold.up();
-    await tester.pump(const Duration(milliseconds: 4900));
+    await tester.pump(const Duration(milliseconds: 3900));
     expect(_page(tester), 0, reason: 'the count starts again on release');
     await tester.pump(const Duration(milliseconds: 100));
     await tester.pump(_slide + const Duration(milliseconds: 50));
     expect(_page(tester), 1);
   });
 
-  testWidgets('a swipe restarts the 5 s count', (tester) async {
+  testWidgets('a swipe restarts the 4 s count', (tester) async {
     await _pumpBanner(tester);
     await tester.pump(const Duration(seconds: 3));
     expect(_page(tester), 0);
@@ -180,9 +185,9 @@ void main() {
     await _swipeLeft(tester);
     expect(_page(tester), 1);
 
-    // 3 s + the swipe put the first timer past 5 s long ago; a restarted
-    // count has not run out yet.
-    await tester.pump(const Duration(milliseconds: 4300));
+    // 3 s plus the swipe and this wait are past the original 4 s mark. The
+    // count the swipe restarted has not run out yet.
+    await tester.pump(const Duration(milliseconds: 3300));
     expect(_page(tester), 1);
 
     await tester.pump(const Duration(milliseconds: 200));
