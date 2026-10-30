@@ -7,11 +7,14 @@
 /// fully-functional state — see `lib/data/customer_auth/README.md` § 5.
 library;
 
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 
 import '../data/accounts_orders/system_account_session_repository.dart';
 import '../data/customer_auth/customer_account_config.dart';
 import '../data/customer_auth/customer_auth_error.dart';
+import '../data/customer_auth/customer_profile.dart';
 import '../data/customer_auth/customer_session_repository.dart';
 import '../data/accounts_orders/account_deletion_client.dart';
 import '../data/local/account_store.dart';
@@ -50,6 +53,39 @@ class AccountError {
   String toString() => 'AccountError(${flow.name}/${kind.name})';
 }
 
+/// How a [AccountController.saveProfile] call ended.
+enum ProfileSaveStatus {
+  saved,
+  tooLarge,
+  sessionExpired,
+  failed,
+
+  /// The account changed (logout or switch) while the request was in flight;
+  /// nothing was applied.
+  discarded,
+}
+
+const String kProfilePhotoTooLargeMessage =
+    'La foto es demasiado grande. Elige otra.';
+const String kProfileOfflineMessage =
+    'Sin conexión. Revisa tu internet e inténtalo de nuevo.';
+const String kProfileSessionExpiredMessage =
+    'Tu sesión terminó. Inicia sesión de nuevo.';
+const String kProfileSaveFailedMessage =
+    'No pudimos guardar tu perfil. Inténtalo de nuevo.';
+
+/// A typed result the editor can render without inspecting an exception.
+class ProfileSaveOutcome {
+  const ProfileSaveOutcome(this.status, {this.message});
+
+  final ProfileSaveStatus status;
+
+  /// Spanish, ready to show; null when [status] is saved or discarded.
+  final String? message;
+
+  bool get isSaved => status == ProfileSaveStatus.saved;
+}
+
 class AccountController extends ChangeNotifier {
   AccountController({
     CustomerSessionRepository? sessionRepository,
@@ -61,6 +97,7 @@ class AccountController extends ChangeNotifier {
     required String deviceId,
     WishlistStore? wishlistStore,
     Future<void> Function(String? accountId)? onAccountScopeChanged,
+    CustomerProfileService? profileService,
   })  : _sessionRepository = sessionRepository,
         _systemSessionRepository = systemSessionRepository,
         _accountStore = accountStore,
@@ -69,7 +106,8 @@ class AccountController extends ChangeNotifier {
         _config = config,
         _deviceId = deviceId,
         _wishlistStore = wishlistStore,
-        _onAccountScopeChanged = onAccountScopeChanged;
+        _onAccountScopeChanged = onAccountScopeChanged,
+        _profileService = profileService;
 
   final CustomerSessionRepository? _sessionRepository;
   final SystemAccountSessionRepository? _systemSessionRepository;
@@ -80,6 +118,7 @@ class AccountController extends ChangeNotifier {
   final String _deviceId;
   final WishlistStore? _wishlistStore;
   final Future<void> Function(String? accountId)? _onAccountScopeChanged;
+  final CustomerProfileService? _profileService;
   HeldShopifyLogin? _heldDeletionLogin;
 
   local.Account? account;
@@ -98,7 +137,48 @@ class AccountController extends ChangeNotifier {
   bool ordersLoading = false;
   int _ordersGeneration = 0;
 
+  /// Shopify-stored name and photo of the signed-in account. Memory only —
+  /// never persisted (the photo especially: no schema change). Null until
+  /// [loadProfile] succeeds; cleared whenever the account changes.
+  CustomerProfile? profile;
+  bool profileLoading = false;
+  bool profileSaving = false;
+
+  /// Bumped whenever the signed-in account changes, so an answer that was
+  /// requested for account A is never applied once B (or nobody) is signed
+  /// in. Same idea as [_ordersGeneration], kept separate because orders
+  /// reload on their own schedule.
+  int _profileGeneration = 0;
+  String? _profileOwnerId;
+
+  /// The profile request currently in flight and the generation it was made
+  /// for, so a second caller (the identity card, say) joins it instead of
+  /// asking Shopify again.
+  Future<void>? _profileLoad;
+  int _profileLoadGeneration = -1;
+  String? _photoBytesSource;
+  Uint8List? _photoBytes;
+
   bool get isSignedIn => account != null;
+
+  /// Only Shopify accounts can edit: the name and photo are Shopify's.
+  /// Legacy Monetta accounts keep the plain avatar.
+  bool get canEditProfile =>
+      _profileService != null &&
+      _sessionRepository != null &&
+      account?.authProvider == 'shopify';
+
+  /// The decoded profile photo, cached so the avatar does not re-decode (and
+  /// re-upload to the image cache) on every rebuild.
+  Uint8List? get profilePhotoBytes {
+    final source = profile?.photoDataUrl;
+    if (source == null) return null;
+    if (source != _photoBytesSource) {
+      _photoBytesSource = source;
+      _photoBytes = decodeProfilePhotoDataUrl(source);
+    }
+    return _photoBytes;
+  }
 
   /// True once a Partner-dashboard registration exists — see
   /// `CustomerAccountConfig.isUsable`. The login entry point should hide or
@@ -159,7 +239,9 @@ class AccountController extends ChangeNotifier {
       return;
     }
     account = restored;
+    _syncProfileScope();
     notifyListeners();
+    _prefetchProfile();
     await _publishAccountScope();
   }
 
@@ -210,6 +292,7 @@ class AccountController extends ChangeNotifier {
   ) async {
     await repository.logout(localAccountId);
     account = null;
+    _syncProfileScope();
     orders = const [];
     ordersStatus = OrderHistoryStatus.unavailable;
     _ordersGeneration += 1;
@@ -231,6 +314,7 @@ class AccountController extends ChangeNotifier {
     try {
       final session = await sessionRepository.login();
       account = session.account;
+      _syncProfileScope();
     } catch (error) {
       // Classified rather than stringified: a cancelled browser (by far the
       // most common outcome that isn't success) must not read like a crash,
@@ -256,6 +340,7 @@ class AccountController extends ChangeNotifier {
     // `ordersLoading` is the separate flag that governs the order list's
     // own spinner.
     if (isSignedIn) {
+      _prefetchProfile();
       await _publishAccountScope();
       await loadOrders();
     }
@@ -278,6 +363,7 @@ class AccountController extends ChangeNotifier {
         displayName:
             displayName?.trim().isEmpty == true ? null : displayName?.trim(),
       );
+      _syncProfileScope();
     } catch (error) {
       lastError = _monettaError(error);
     } finally {
@@ -301,6 +387,7 @@ class AccountController extends ChangeNotifier {
         email: email.trim(),
         password: password,
       );
+      _syncProfileScope();
     } catch (error) {
       lastError = _monettaError(error);
     } finally {
@@ -384,7 +471,9 @@ class AccountController extends ChangeNotifier {
         final session = await repository.commitHeldLogin(held);
         _heldDeletionLogin = null;
         account = session.account;
+        _syncProfileScope();
         notifyListeners();
+        _prefetchProfile();
         await _publishAccountScope();
         await loadOrders();
         return LegacyDeletionMatched(
@@ -442,6 +531,7 @@ class AccountController extends ChangeNotifier {
     }
     final session = await repository.commitHeldLogin(login);
     account = session.account;
+    _syncProfileScope();
     notifyListeners();
     await _publishAccountScope();
     await loadOrders();
@@ -459,6 +549,7 @@ class AccountController extends ChangeNotifier {
       await logout();
     } catch (_) {
       account = null;
+      _syncProfileScope();
       orders = const [];
       ordersStatus = OrderHistoryStatus.unavailable;
       notifyListeners();
@@ -480,6 +571,7 @@ class AccountController extends ChangeNotifier {
         await _sessionRepository?.logout(current.localAccountId);
       }
       account = null;
+      _syncProfileScope();
       orders = const [];
       ordersStatus = OrderHistoryStatus.unavailable;
       _ordersGeneration += 1;
@@ -574,6 +666,238 @@ class AccountController extends ChangeNotifier {
 
   bool _ordersStillCurrent(int generation, String accountId) =>
       generation == _ordersGeneration && account?.localAccountId == accountId;
+
+  bool _profileStillCurrent(int generation, String accountId) =>
+      generation == _profileGeneration && account?.localAccountId == accountId;
+
+  /// Call after every assignment to [account]. When the signed-in account
+  /// actually changed (login, logout, switch) the profile is dropped and the
+  /// generation advances, which orphans any load or save still in flight. A
+  /// re-login of the same account keeps what it already has.
+  void _syncProfileScope() {
+    final currentId = account?.localAccountId;
+    if (currentId == _profileOwnerId) return;
+    _profileOwnerId = currentId;
+    _profileGeneration += 1;
+    profile = null;
+    profileLoading = false;
+    profileSaving = false;
+    _photoBytesSource = null;
+    _photoBytes = null;
+  }
+
+  /// Starts [loadProfile] without waiting for it, so the bottom bar can show
+  /// the photo on every screen rather than only after the account screen has
+  /// been opened. Silent on failure, like [loadProfile] itself.
+  void _prefetchProfile() => unawaited(loadProfile());
+
+  /// Fetches the Shopify name and photo for the signed-in Shopify account.
+  /// Failure is silent: the identity card simply keeps its initial, and the
+  /// editor falls back to the stored display name.
+  ///
+  /// Joins a request already in flight for the same account and does nothing
+  /// once the profile is loaded; a failed load can be retried by calling it
+  /// again.
+  Future<void> loadProfile() {
+    final current = account;
+    if (!canEditProfile || current == null || profile != null) {
+      return Future<void>.value();
+    }
+    final inFlight = _profileLoad;
+    if (inFlight != null && _profileLoadGeneration == _profileGeneration) {
+      return inFlight;
+    }
+    final generation = _profileGeneration;
+    final request = _fetchProfile(generation, current.localAccountId);
+    _profileLoad = request;
+    _profileLoadGeneration = generation;
+    unawaited(
+      request.whenComplete(() {
+        if (identical(_profileLoad, request)) _profileLoad = null;
+      }),
+    );
+    return request;
+  }
+
+  Future<void> _fetchProfile(int generation, String accountId) async {
+    final service = _profileService!;
+    profileLoading = true;
+    notifyListeners();
+    try {
+      final token = await accessTokenForShopifyCheckout();
+      if (!_profileStillCurrent(generation, accountId) || token == null) {
+        return;
+      }
+      final fetched = await service.fetch(token);
+      if (!_profileStillCurrent(generation, accountId)) return;
+      profile = fetched;
+    } on Object {
+      // Deliberately swallowed: nothing here is worth interrupting the shopper
+      // for, and the exception text is not something to keep around.
+    } finally {
+      if (_profileStillCurrent(generation, accountId)) {
+        profileLoading = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  /// Saves only what is passed: [firstName], a new [photoJpeg], or
+  /// [removePhoto]. The name goes first; if the photo then fails, the name
+  /// stays saved and applied, so a retry sends just the photo.
+  Future<ProfileSaveOutcome> saveProfile({
+    String? firstName,
+    Uint8List? photoJpeg,
+    bool removePhoto = false,
+  }) async {
+    assert(
+      !(removePhoto && photoJpeg != null),
+      'Pass either a new photo or removePhoto, not both.',
+    );
+    final current = account;
+    final service = _profileService;
+    final name = firstName?.trim();
+    if (!canEditProfile ||
+        current == null ||
+        service == null ||
+        (name != null && name.isEmpty)) {
+      return const ProfileSaveOutcome(
+        ProfileSaveStatus.failed,
+        message: kProfileSaveFailedMessage,
+      );
+    }
+    if (profileSaving) {
+      return const ProfileSaveOutcome(ProfileSaveStatus.discarded);
+    }
+    final generation = _profileGeneration;
+    final accountId = current.localAccountId;
+
+    profileSaving = true;
+    notifyListeners();
+    try {
+      final token = await accessTokenForShopifyCheckout();
+      if (!_profileStillCurrent(generation, accountId)) {
+        return const ProfileSaveOutcome(ProfileSaveStatus.discarded);
+      }
+      final customerId =
+          profile?.shopifyCustomerId ?? current.shopifyCustomerId;
+      if (token == null || customerId == null || customerId.isEmpty) {
+        return const ProfileSaveOutcome(
+          ProfileSaveStatus.failed,
+          message: kProfileSaveFailedMessage,
+        );
+      }
+
+      if (name != null) {
+        final reported = await service.updateFirstName(token, name);
+        if (!_profileStillCurrent(generation, accountId)) {
+          return const ProfileSaveOutcome(ProfileSaveStatus.discarded);
+        }
+        final displayName = reported ?? name;
+        profile = _profileOrBase(customerId, current)
+            .copyWith(firstName: name, displayName: displayName);
+        await _storeDisplayName(current, displayName);
+        if (!_profileStillCurrent(generation, accountId)) {
+          return const ProfileSaveOutcome(ProfileSaveStatus.discarded);
+        }
+        notifyListeners();
+      }
+
+      if (photoJpeg != null) {
+        final dataUrl = profilePhotoDataUrl(photoJpeg);
+        await service.setPhoto(token, customerId, dataUrl);
+        if (!_profileStillCurrent(generation, accountId)) {
+          return const ProfileSaveOutcome(ProfileSaveStatus.discarded);
+        }
+        profile =
+            _profileOrBase(customerId, current).copyWith(photoDataUrl: dataUrl);
+      } else if (removePhoto) {
+        await service.removePhoto(token, customerId);
+        if (!_profileStillCurrent(generation, accountId)) {
+          return const ProfileSaveOutcome(ProfileSaveStatus.discarded);
+        }
+        profile = _profileOrBase(customerId, current).copyWith(
+          clearPhoto: true,
+        );
+      }
+      return const ProfileSaveOutcome(ProfileSaveStatus.saved);
+    } on ProfilePhotoTooLargeException {
+      return _stillCurrentOr(
+        generation,
+        accountId,
+        const ProfileSaveOutcome(
+          ProfileSaveStatus.tooLarge,
+          message: kProfilePhotoTooLargeMessage,
+        ),
+      );
+    } on CustomerAuthException catch (error) {
+      final outcome = switch (error.kind) {
+        CustomerAuthErrorKind.sessionExpired => const ProfileSaveOutcome(
+            ProfileSaveStatus.sessionExpired,
+            message: kProfileSessionExpiredMessage,
+          ),
+        CustomerAuthErrorKind.offline => const ProfileSaveOutcome(
+            ProfileSaveStatus.failed,
+            message: kProfileOfflineMessage,
+          ),
+        _ => const ProfileSaveOutcome(
+            ProfileSaveStatus.failed,
+            message: kProfileSaveFailedMessage,
+          ),
+      };
+      return _stillCurrentOr(generation, accountId, outcome);
+    } on Object {
+      return _stillCurrentOr(
+        generation,
+        accountId,
+        const ProfileSaveOutcome(
+          ProfileSaveStatus.failed,
+          message: kProfileSaveFailedMessage,
+        ),
+      );
+    } finally {
+      if (_profileStillCurrent(generation, accountId)) {
+        profileSaving = false;
+        notifyListeners();
+      }
+    }
+  }
+
+  ProfileSaveOutcome _stillCurrentOr(
+    int generation,
+    String accountId,
+    ProfileSaveOutcome outcome,
+  ) =>
+      _profileStillCurrent(generation, accountId)
+          ? outcome
+          : const ProfileSaveOutcome(ProfileSaveStatus.discarded);
+
+  CustomerProfile _profileOrBase(String customerId, local.Account current) =>
+      profile ??
+      CustomerProfile(
+        shopifyCustomerId: customerId,
+        displayName: current.displayName,
+      );
+
+  /// Mirrors the new name into the existing `Accounts.displayName` column so
+  /// the identity card shows it; every other column is written back as it was.
+  Future<void> _storeDisplayName(
+    local.Account current,
+    String displayName,
+  ) async {
+    await _accountStore.upsert(
+      localAccountId: current.localAccountId,
+      shopifyCustomerId: current.shopifyCustomerId,
+      email: current.email,
+      displayName: displayName,
+      authProvider: current.authProvider,
+      createdAt: current.createdAt,
+    );
+    final updated = await _accountStore.byLocalId(current.localAccountId);
+    if (updated != null && account?.localAccountId == current.localAccountId) {
+      account = updated;
+    }
+  }
 
   /// Fresh Customer Account access token for authenticated Shopify checkout.
   /// Returns null for guests, legacy Monetta accounts, or refresh failures.

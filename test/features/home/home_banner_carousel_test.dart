@@ -24,7 +24,16 @@ Finder _dots() => find.byWidgetPredicate(
     );
 
 Future<void> _swipeLeft(WidgetTester tester) async {
-  await tester.drag(find.byType(PageView), const Offset(-300, 0));
+  // The hero's pages; «Colecciones» further down is a PageView too.
+  await tester.drag(
+    find
+        .descendant(
+          of: find.byType(HomeEditorialBanner),
+          matching: find.byType(PageView),
+        )
+        .first,
+    const Offset(-300, 0),
+  );
   await tester.pumpAndSettle();
 }
 

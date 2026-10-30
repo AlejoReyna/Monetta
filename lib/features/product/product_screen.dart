@@ -1,18 +1,19 @@
 /// Ficha de producto Fig.07 — boutique cálida.
 ///
-/// Galería contenida (nunca recorta asas) con miniaturas, fav y compartir;
-/// marca + nombre + precio con `-X%` solo cuando `compare_at` lo respalda;
-/// swatches solo con mapeo fiable ([ProductOptionSelector]); envío y entrega
-/// estimadas; muelle inferior con «Agregar a bolsa» y, al final de la
-/// información, «Otras formas de comprar» (comprar ahora y apartar); confianza;
-/// acordeones Descripción–Detalles–Envíos; relacionados con la [ProductCard]
-/// compartida.
+/// Galería cuadrada y contenida (nunca recorta asas) con cuatro miniaturas,
+/// fav, compartir, zoom y flechas; marca + nombre + precio con `-X%` solo
+/// cuando `compare_at` lo respalda; swatches solo con mapeo fiable
+/// ([ProductOptionSelector]); fila de confianza; «Agregar a bolsa» y «Comprar
+/// ahora»; disponibilidad y frase de apartado; acordeones Descripción–
+/// Detalles–Envíos (cerrados al abrir); «Apartar»; relacionados en cuatro
+/// tarjetas mini con la [ProductCard] compartida.
 ///
 /// Agotado abre igual pero se distingue (sello + CTA de aviso en el muelle). El corazón
 /// solo guarda — jamás navega.
 library;
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:share_plus/share_plus.dart';
@@ -20,6 +21,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../app/media/monetta_image.dart';
 import '../../app/motion.dart';
+import '../../app/storefront_layout.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
@@ -33,6 +35,7 @@ import '../account/account_screen.dart';
 import '../boutique/boutique_tokens.dart';
 import '../catalog/categories_screen.dart';
 import '../catalog/product_card.dart';
+import '../catalog/product_tile.dart' show PackshotBlend;
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
 import '../checkout/mini_cart.dart' show showMiniCart;
@@ -45,7 +48,6 @@ import '../navigation/adaptive_storefront_scaffold.dart';
 import '../../platform/system_layout_context.dart';
 import '../../data/shopify/storefront_config.dart';
 import 'purchase_dock.dart';
-import 'quick_view.dart';
 
 class ProductScreen extends StatefulWidget {
   const ProductScreen({
@@ -294,11 +296,19 @@ class _ProductScreenState extends State<ProductScreen> {
           bottom: false,
           child: ProductAdaptiveBody(
             galleryAccessoryHeight: images.length > 1 ? 100 : 0,
-            gallery: (height) => Column(
-              children: [
-                SizedBox(
-                  height: height,
-                  child: _Gallery(
+            // The gallery is a square as wide as the content: the body always
+            // scrolls it (a list, or a scroll view per region), so the height
+            // the body suggests is not a cap.
+            gallery: (_) => Padding(
+              padding: const EdgeInsets.fromLTRB(
+                BoutiqueSpace.gutter,
+                BoutiqueSpace.sm,
+                BoutiqueSpace.gutter,
+                0,
+              ),
+              child: Column(
+                children: [
+                  _Gallery(
                     product: product,
                     shareKey: _shareSource,
                     images: images,
@@ -318,15 +328,15 @@ class _ProductScreenState extends State<ProductScreen> {
                     onToggleWishlist: () => store.toggleWishlist(product.id),
                     onShare: () => _share(product, price),
                   ),
-                ),
-                if (images.length > 1)
-                  _Thumbnails(
-                    images: images,
-                    active: _page,
-                    title: product.title,
-                    onSelect: _goToPage,
-                  ),
-              ],
+                  if (images.length > 1)
+                    _Thumbnails(
+                      images: images,
+                      active: _page,
+                      title: product.title,
+                      onSelect: _goToPage,
+                    ),
+                ],
+              ),
             ),
             details: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -356,17 +366,18 @@ class _ProductScreenState extends State<ProductScreen> {
                           color: palette.ink,
                         ),
                       ),
-                      const SizedBox(height: BoutiqueSpace.lg),
+                      const SizedBox(height: BoutiqueSpace.md),
                       Wrap(
                         spacing: BoutiqueSpace.md,
                         runSpacing: 6,
                         crossAxisAlignment: WrapCrossAlignment.center,
                         children: [
                           Text(
-                            kMoney.format(price),
+                            formatShopperPrice(price),
+                            key: const Key('product-price'),
                             style: boutiqueText(
-                              size: 20,
-                              weight: FontWeight.w700,
+                              size: 22,
+                              weight: FontWeight.w600,
                               color: inStock ? palette.ink : palette.inkMuted,
                               height: 1.2,
                             ),
@@ -375,7 +386,7 @@ class _ProductScreenState extends State<ProductScreen> {
                           // `compare_at` data — never otherwise.
                           if (onSale && compare != null) ...[
                             Text(
-                              kMoney.format(compare),
+                              formatShopperPrice(compare),
                               style: boutiqueText(
                                 size: 14,
                                 color: palette.inkMuted,
@@ -388,7 +399,7 @@ class _ProductScreenState extends State<ProductScreen> {
                                 key: const ValueKey('discount-badge'),
                                 padding: const EdgeInsets.symmetric(
                                   horizontal: 10,
-                                  vertical: 5,
+                                  vertical: 4,
                                 ),
                                 decoration: BoxDecoration(
                                   color: palette.saleSurface,
@@ -396,9 +407,11 @@ class _ProductScreenState extends State<ProductScreen> {
                                 ),
                                 child: Text(
                                   '-$discount%',
-                                  style: boutiqueEyebrow(
-                                    size: 11,
+                                  style: boutiqueText(
+                                    size: 13,
+                                    weight: FontWeight.w500,
                                     color: palette.sale,
+                                    height: 1.2,
                                   ),
                                 ),
                               ),
@@ -406,7 +419,7 @@ class _ProductScreenState extends State<ProductScreen> {
                         ],
                       ),
                       if (selectable.isNotEmpty) ...[
-                        const SizedBox(height: BoutiqueSpace.xl),
+                        const SizedBox(height: BoutiqueSpace.lg),
                         ProductOptionSelector(
                           product: product,
                           selectedIndex: _variantIndex,
@@ -416,7 +429,7 @@ class _ProductScreenState extends State<ProductScreen> {
                           }),
                         ),
                       ],
-                      const SizedBox(height: BoutiqueSpace.xl),
+                      const SizedBox(height: BoutiqueSpace.lg),
                       const _TrustRow(),
                       const SizedBox(height: BoutiqueSpace.lg),
                       if (inStock) ...[
@@ -424,16 +437,21 @@ class _ProductScreenState extends State<ProductScreen> {
                           key: const Key('purchase-dock-primary'),
                           label: _adding ? 'AGREGANDO…' : 'AGREGAR A BOLSA',
                           pending: _adding,
+                          large: true,
                           onPressed: _adding ? null : () => _add(product),
                         ),
                         const SizedBox(height: BoutiqueSpace.sm),
-                        BoutiqueButton(
+                        PurchaseOutlineButton(
                           key: const Key('purchase-buy-now'),
                           label: 'COMPRAR AHORA',
-                          filled: false,
+                          textColor: palette.ink,
                           onPressed: _adding ? null : () => _buyNow(product),
                         ),
                         const SizedBox(height: BoutiqueSpace.lg),
+                      ],
+                      _AvailabilityLine(inStock: inStock),
+                      if (inStock) ...[
+                        const SizedBox(height: BoutiqueSpace.sm),
                         Text(
                           kApartadoSentence,
                           style: boutiqueText(
@@ -443,9 +461,8 @@ class _ProductScreenState extends State<ProductScreen> {
                           ),
                         ),
                       ],
-                      const SizedBox(height: BoutiqueSpace.sm),
-                      _AvailabilityLine(inStock: inStock),
-                      if (!inStock)
+                      if (!inStock) ...[
+                        const SizedBox(height: BoutiqueSpace.sm),
                         KeyedSubtree(
                           key: const ValueKey('create-restock-alert'),
                           child: PurchaseDockButton(
@@ -453,12 +470,15 @@ class _ProductScreenState extends State<ProductScreen> {
                             label: notifications?.saving == true
                                 ? 'Guardando…'
                                 : 'Avísame cuando vuelva',
+                            large: true,
                             onPressed: notifications?.saving == true
                                 ? null
                                 : () => _createRestockAlert(product),
                           ),
                         ),
+                      ],
                       const SizedBox(height: BoutiqueSpace.lg),
+                      Divider(height: 1, thickness: 1, color: palette.hairline),
                       _BoutiqueAccordion(
                         label: 'Descripción',
                         open: _open.contains('descripcion'),
@@ -623,131 +643,130 @@ class _Gallery extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return ColoredBox(
-      color: palette.surfaceDeep,
-      child: AspectRatio(
-        aspectRatio: 4 / 5,
-        child: Stack(
-          fit: StackFit.expand,
-          children: [
-            PageView.builder(
-              controller: controller,
-              itemCount: images.length,
-              onPageChanged: onPageChanged,
-              itemBuilder: (_, i) => Hero(
-                tag: i == 0
-                    ? 'product-image-${product.id}'
-                    : 'p-${product.id}-$i',
-                // `contain` + inset: handles and straps are the
-                // recognisable part — `cover` crops exactly those.
-                child: Padding(
-                  padding: const EdgeInsets.all(BoutiqueSpace.sm),
+    return ClipRRect(
+      borderRadius: const BorderRadius.all(Radius.circular(14)),
+      child: ColoredBox(
+        color: palette.surfaceDeep,
+        child: AspectRatio(
+          aspectRatio: 1,
+          child: Stack(
+            fit: StackFit.expand,
+            children: [
+              PageView.builder(
+                controller: controller,
+                itemCount: images.length,
+                onPageChanged: onPageChanged,
+                itemBuilder: (_, i) => Hero(
+                  tag: i == 0
+                      ? 'product-image-${product.id}'
+                      : 'p-${product.id}-$i',
+                  // `contain`: handles and straps are the recognisable
+                  // part — `cover` crops exactly those.
                   child: InteractiveViewer(
                     minScale: 1,
                     maxScale: 2.2,
-                    child: MonettaImage(
-                      url: images[i],
-                      fit: BoxFit.contain,
-                      cacheWidth: MediaUrl.heroWidth,
-                      fallbackLabel:
-                          '${shopperProductName(product.title)} · Monetta',
+                    child: PackshotBlend(
+                      ground: palette.surfaceDeep,
+                      child: MonettaImage(
+                        url: images[i],
+                        fit: BoxFit.contain,
+                        cacheWidth: MediaUrl.heroWidth,
+                        fallbackLabel:
+                            '${shopperProductName(product.title)} · Monetta',
+                      ),
                     ),
                   ),
                 ),
               ),
-            ),
-            if (!inStock)
-              IgnorePointer(
-                child: Center(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: BoutiqueSpace.lg,
-                      vertical: 8,
-                    ),
-                    decoration: BoxDecoration(
-                      color: palette.canvas,
-                      borderRadius: BoutiqueRadius.capsule,
-                      border: Border.all(color: palette.ink, width: 1),
-                    ),
-                    child: Text(
-                      'AGOTADO',
-                      style: boutiqueEyebrow(size: 11, color: palette.ink),
+              if (!inStock)
+                IgnorePointer(
+                  child: Center(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BoutiqueSpace.lg,
+                        vertical: 8,
+                      ),
+                      decoration: BoxDecoration(
+                        color: palette.canvas,
+                        borderRadius: BoutiqueRadius.capsule,
+                        border: Border.all(color: palette.ink, width: 1),
+                      ),
+                      child: Text(
+                        'AGOTADO',
+                        style: boutiqueEyebrow(size: 11, color: palette.ink),
+                      ),
                     ),
                   ),
                 ),
-              ),
-            if (onPrevious != null)
+              if (onPrevious != null)
+                Positioned(
+                  left: BoutiqueSpace.xs,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: _RoundPhotoButton(
+                      buttonKey: const Key('product-gallery-prev'),
+                      tooltip: 'Foto anterior',
+                      icon: Icons.chevron_left,
+                      onPressed: onPrevious!,
+                    ),
+                  ),
+                ),
+              if (onNext != null)
+                Positioned(
+                  right: BoutiqueSpace.xs,
+                  top: 0,
+                  bottom: 0,
+                  child: Center(
+                    child: _RoundPhotoButton(
+                      buttonKey: const Key('product-gallery-next'),
+                      tooltip: 'Foto siguiente',
+                      icon: Icons.chevron_right,
+                      onPressed: onNext!,
+                    ),
+                  ),
+                ),
+              // The heart (and the share control under it) sits top right,
+              // the zoom bottom right. The heart only toggles the wishlist —
+              // it never navigates.
               Positioned(
-                left: BoutiqueSpace.xs,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: _RoundPhotoButton(
-                    buttonKey: const Key('product-gallery-prev'),
-                    tooltip: 'Foto anterior',
-                    icon: Icons.chevron_left,
-                    onPressed: onPrevious!,
-                  ),
-                ),
-              ),
-            if (onNext != null)
-              Positioned(
+                top: BoutiqueSpace.xs,
                 right: BoutiqueSpace.xs,
-                top: 0,
-                bottom: 0,
-                child: Center(
-                  child: _RoundPhotoButton(
-                    buttonKey: const Key('product-gallery-next'),
-                    tooltip: 'Foto siguiente',
-                    icon: Icons.chevron_right,
-                    onPressed: onNext!,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _RoundPhotoButton(
+                      buttonKey: const Key('product-header-favorite'),
+                      tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
+                      icon: wishlisted ? Icons.favorite : Icons.favorite_border,
+                      filled: wishlisted,
+                      onPressed: onToggleWishlist,
+                    ),
+                    _RoundPhotoButton(
+                      buttonKey: shareKey,
+                      tooltip: 'Compartir',
+                      icon: Icons.ios_share,
+                      onPressed: onShare,
+                    ),
+                  ],
+                ),
+              ),
+              Positioned(
+                bottom: BoutiqueSpace.xs,
+                right: BoutiqueSpace.xs,
+                child: _RoundPhotoButton(
+                  buttonKey: const Key('product-gallery-zoom'),
+                  tooltip: 'Ampliar foto',
+                  icon: Icons.zoom_in,
+                  onPressed: () => _openZoom(
+                    context,
+                    images[page],
+                    shopperProductName(product.title),
                   ),
                 ),
               ),
-            // Fav, zoom and share sit over the photo. The heart only
-            // toggles the wishlist — it never navigates.
-            Positioned(
-              top: BoutiqueSpace.sm,
-              right: BoutiqueSpace.sm,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  _RoundPhotoButton(
-                    buttonKey: const Key('product-header-favorite'),
-                    tooltip: wishlisted ? 'Quitar de guardados' : 'Guardar',
-                    icon: wishlisted ? Icons.favorite : Icons.favorite_border,
-                    filled: wishlisted,
-                    onPressed: onToggleWishlist,
-                  ),
-                  const SizedBox(width: BoutiqueSpace.sm),
-                  _RoundPhotoButton(
-                    buttonKey: const Key('product-gallery-zoom'),
-                    tooltip: 'Ampliar foto',
-                    icon: Icons.zoom_in,
-                    onPressed: () => _openZoom(
-                      context,
-                      images[page],
-                      shopperProductName(product.title),
-                    ),
-                  ),
-                  const SizedBox(width: BoutiqueSpace.sm),
-                  _RoundPhotoButton(
-                    buttonKey: shareKey,
-                    tooltip: 'Compartir',
-                    icon: Icons.ios_share,
-                    onPressed: onShare,
-                  ),
-                ],
-              ),
-            ),
-            if (images.length > 1)
-              Positioned(
-                left: 0,
-                right: 0,
-                bottom: BoutiqueSpace.lg,
-                child: _RuleIndicator(count: images.length, active: page),
-              ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -806,9 +825,17 @@ class _RoundPhotoButton extends StatelessWidget {
   final Key? buttonKey;
   final bool filled;
 
+  /// Visible disc; the touch zone around it is the full 48pt.
+  static const double _disc = 40;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    // White at 92 % over the photograph; in the dark theme the surface does
+    // the same job, because the ink there is light.
+    final ground = Theme.of(context).brightness == Brightness.dark
+        ? palette.surfaceDeep.withValues(alpha: 0.92)
+        : const Color(0xEBFFFFFF);
     return Semantics(
       button: true,
       toggled: filled,
@@ -817,23 +844,27 @@ class _RoundPhotoButton extends StatelessWidget {
         key: buttonKey,
         width: BoutiqueSpace.tapTarget,
         height: BoutiqueSpace.tapTarget,
-        child: Center(
-          child: Material(
-            color: palette.surface,
-            shape: const CircleBorder(),
-            elevation: 0,
-            child: InkWell(
-              customBorder: const CircleBorder(),
-              onTap: onPressed,
-              child: Tooltip(
-                message: tooltip,
-                child: SizedBox(
-                  width: BoutiqueSpace.tapTarget,
-                  height: BoutiqueSpace.tapTarget,
-                  child: Icon(
-                    icon,
-                    size: 19,
-                    color: filled ? palette.goldText : palette.ink,
+        child: Material(
+          type: MaterialType.transparency,
+          child: InkResponse(
+            onTap: onPressed,
+            radius: BoutiqueSpace.tapTarget / 2,
+            child: Tooltip(
+              message: tooltip,
+              child: Center(
+                child: DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: ground,
+                    shape: BoxShape.circle,
+                  ),
+                  child: SizedBox(
+                    width: _disc,
+                    height: _disc,
+                    child: Icon(
+                      icon,
+                      size: 19,
+                      color: filled ? palette.goldText : palette.ink,
+                    ),
                   ),
                 ),
               ),
@@ -845,6 +876,8 @@ class _RoundPhotoButton extends StatelessWidget {
   }
 }
 
+/// Four equal square thumbnails across the content; a fifth photograph and
+/// beyond are reached with the arrows and by swiping the gallery.
 class _Thumbnails extends StatelessWidget {
   const _Thumbnails({
     required this.images,
@@ -861,50 +894,43 @@ class _Thumbnails extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    return Container(
-      color: palette.surfaceDeep,
-      padding: const EdgeInsets.fromLTRB(
-        BoutiqueSpace.gutter,
-        BoutiqueSpace.sm,
-        BoutiqueSpace.gutter,
-        BoutiqueSpace.md,
-      ),
+    return Padding(
+      padding: const EdgeInsets.only(top: BoutiqueSpace.sm),
       child: LayoutBuilder(
         builder: (context, constraints) {
           const gap = BoutiqueSpace.sm;
-          // Four thumbs across, matching the guide strip. Extra photos scroll.
           final thumb = (constraints.maxWidth - gap * 3) / 4;
-          return SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                for (var i = 0; i < images.length; i++)
-                  Padding(
-                    padding: EdgeInsets.only(
-                      right: i == images.length - 1 ? 0 : gap,
-                    ),
-                    child: Semantics(
-                      button: true,
-                      selected: i == active,
-                      label: 'Foto ${i + 1} de ${images.length}',
-                      child: GestureDetector(
-                        onTap: () => onSelect(i),
-                        behavior: HitTestBehavior.opaque,
-                        child: Container(
-                          key: ValueKey('thumb-$i'),
-                          width: thumb,
-                          height: thumb,
-                          decoration: BoxDecoration(
-                            color: palette.surface,
-                            borderRadius: BoutiqueRadius.tile,
-                            border: Border.all(
-                              color:
-                                  i == active ? palette.ink : palette.hairline,
-                              width: i == active ? 1.5 : 1,
-                            ),
+          final shown = math.min(images.length, 4);
+          return Row(
+            children: [
+              for (var i = 0; i < shown; i++)
+                Padding(
+                  padding: EdgeInsets.only(right: i == shown - 1 ? 0 : gap),
+                  child: Semantics(
+                    button: true,
+                    selected: i == active,
+                    label: 'Foto ${i + 1} de ${images.length}',
+                    child: GestureDetector(
+                      onTap: () => onSelect(i),
+                      behavior: HitTestBehavior.opaque,
+                      child: Container(
+                        key: ValueKey('thumb-$i'),
+                        width: thumb,
+                        height: thumb,
+                        decoration: BoxDecoration(
+                          color: palette.surfaceDeep,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: i == active
+                                ? palette.borderControl
+                                : Colors.transparent,
+                            width: 1.5,
                           ),
-                          child: ClipRRect(
-                            borderRadius: BoutiqueRadius.tile,
+                        ),
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(6.5),
+                          child: PackshotBlend(
+                            ground: palette.surfaceDeep,
                             child: MonettaImage(
                               url: images[i],
                               fit: BoxFit.contain,
@@ -916,39 +942,11 @@ class _Thumbnails extends StatelessWidget {
                       ),
                     ),
                   ),
-              ],
-            ),
+                ),
+            ],
           );
         },
       ),
-    );
-  }
-}
-
-class _RuleIndicator extends StatelessWidget {
-  const _RuleIndicator({required this.count, required this.active});
-
-  final int count;
-  final int active;
-
-  @override
-  Widget build(BuildContext context) {
-    final palette = context.boutique;
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: List.generate(count, (i) {
-        final on = i == active;
-        return AnimatedContainer(
-          duration: reduceMotion(context) ? Duration.zero : kSnap,
-          margin: const EdgeInsets.symmetric(horizontal: 3),
-          width: on ? 22 : 12,
-          height: 2,
-          decoration: BoxDecoration(
-            color: on ? palette.ink : palette.ink.withValues(alpha: 0.25),
-            borderRadius: BorderRadius.circular(2),
-          ),
-        );
-      }),
     );
   }
 }
@@ -1006,67 +1004,74 @@ class _TrustRow extends StatelessWidget {
       ),
       (Icons.credit_card_outlined, 'Pago seguro', 'Compra con confianza'),
     ];
-    return Container(
-      key: const Key('product-trust-row'),
-      padding: const EdgeInsets.symmetric(vertical: BoutiqueSpace.md),
-      decoration: BoxDecoration(
-        border: Border(
-          top: BorderSide(color: palette.hairline, width: 1),
-          bottom: BorderSide(color: palette.hairline, width: 1),
-        ),
-      ),
-      child: IntrinsicHeight(
-        child: Row(
+
+    Widget item(int i) => Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            for (var i = 0; i < items.length; i++) ...[
-              if (i > 0) Container(width: 1, color: palette.hairline),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: BoutiqueSpace.xs,
+            Icon(items[i].$1, size: 26, color: palette.ink),
+            const SizedBox(width: BoutiqueSpace.sm),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text(
+                    items[i].$2,
+                    style: boutiqueText(
+                      size: 12,
+                      weight: FontWeight.w600,
+                      color: palette.ink,
+                      height: 1.25,
+                    ),
                   ),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Icon(items[i].$1, size: 22, color: palette.ink),
-                      const SizedBox(width: BoutiqueSpace.xs),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              items[i].$2,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: boutiqueText(
-                                size: 11,
-                                weight: FontWeight.w600,
-                                color: palette.ink,
-                                height: 1.25,
-                              ),
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              items[i].$3,
-                              maxLines: 2,
-                              overflow: TextOverflow.ellipsis,
-                              style: boutiqueText(
-                                size: 10,
-                                color: palette.inkMuted,
-                                height: 1.25,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 2),
+                  Text(
+                    items[i].$3,
+                    style: boutiqueText(
+                      size: 11.5,
+                      color: palette.inkMuted,
+                      height: 1.25,
+                    ),
                   ),
+                ],
+              ),
+            ),
+          ],
+        );
+
+    // With enlarged text three columns would truncate the copy: stack them.
+    if (StorefrontLayout.enlargedText(MediaQuery.textScalerOf(context))) {
+      return Column(
+        key: const Key('product-trust-row'),
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0) const SizedBox(height: BoutiqueSpace.md),
+            item(i),
+          ],
+        ],
+      );
+    }
+    return IntrinsicHeight(
+      key: const Key('product-trust-row'),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          for (var i = 0; i < items.length; i++) ...[
+            if (i > 0)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: BoutiqueSpace.sm,
+                ),
+                child: VerticalDivider(
+                  width: 1,
+                  thickness: 1,
+                  color: palette.hairline,
                 ),
               ),
-            ],
+            Expanded(child: item(i)),
           ],
-        ),
+        ],
       ),
     );
   }
@@ -1113,7 +1118,7 @@ class _BoutiqueAccordion extends StatelessWidget {
                       child: Text(
                         label,
                         style: boutiqueSectionHeading(
-                          context: context,
+                          size: 18,
                           color: palette.ink,
                         ),
                       ),
@@ -1286,37 +1291,61 @@ class _Details extends StatelessWidget {
   }
 }
 
+/// A horizontal rail of related pieces.
+///
+/// Four [ProductTileDensity.mini] cards across the width, scrolling when there
+/// are more. With enlarged text four across would not fit a caption, so the
+/// rail falls back to the regular compact card at about 40 % of the width.
 class _Rail extends StatelessWidget {
   const _Rail({required this.products});
 
   final List<Product> products;
 
+  static const double _gap = 8;
+
   @override
   Widget build(BuildContext context) {
-    final tileWidth = MediaQuery.sizeOf(context).width * 0.52;
-    // 12pt photo gap plus ~120pt for brand, two-line name and price, matching
-    // the grid caption contract. The caption is text, so it grows with the
-    // text scale; the gap does not.
-    final caption = MediaQuery.textScalerOf(context).scale(120);
-    return SizedBox(
-      height: tileWidth * 1.25 + 12 + caption,
-      child: ListView.separated(
-        clipBehavior: Clip.none,
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
-        itemCount: products.length,
-        separatorBuilder: (_, __) => const SizedBox(width: BoutiqueSpace.md),
-        itemBuilder: (context, index) {
-          final product = products[index];
-          return SizedBox(
-            width: tileWidth,
-            child: ProductCard(
-              product: product,
-              onQuickView: () => showProductQuickView(context, product),
+    final textScaler = MediaQuery.textScalerOf(context);
+    final enlarged = StorefrontLayout.enlargedText(textScaler);
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final width = constraints.maxWidth;
+        final density =
+            enlarged ? ProductTileDensity.compact : ProductTileDensity.mini;
+        final tileWidth = enlarged
+            ? width * 0.4
+            : (width - 2 * BoutiqueSpace.gutter - 3 * _gap) / 4;
+        return SizedBox(
+          height: productTileExtent(
+            tileWidth: tileWidth,
+            textScaler: textScaler,
+            density: density,
+            footerExtent: enlarged ? null : 0,
+          ),
+          child: ListView.separated(
+            key: const Key('product-rail'),
+            clipBehavior: Clip.none,
+            scrollDirection: Axis.horizontal,
+            padding:
+                const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
+            itemCount: products.length,
+            separatorBuilder: (_, __) => SizedBox(
+              width: enlarged ? BoutiqueSpace.md : _gap,
             ),
-          );
-        },
-      ),
+            itemBuilder: (context, index) {
+              final product = products[index];
+              return SizedBox(
+                width: tileWidth,
+                child: ProductCard(
+                  product: product,
+                  density: density,
+                  showViewProduct: enlarged,
+                ),
+              );
+            },
+          ),
+        );
+      },
     );
   }
 }

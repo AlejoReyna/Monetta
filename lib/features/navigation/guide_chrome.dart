@@ -8,7 +8,6 @@ library;
 import 'dart:async';
 import 'package:flutter/material.dart';
 
-import '../../app/monetta_tokens.g.dart';
 import '../../app/theme.dart';
 import '../boutique/boutique_tokens.dart';
 
@@ -46,7 +45,7 @@ AppBar guideAppBar(
               icon: const Icon(Icons.menu_rounded, size: 22),
             ),
           ),
-    title: const MonettaWordmark(height: MonettaTokens.logoHeight),
+    title: const MonettaWordmark.appBar(),
     actions: [
       if (goBack != null)
         Builder(

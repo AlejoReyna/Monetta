@@ -50,25 +50,20 @@ void main() {
     );
     await tester.pump();
 
-    // The bundled catalog carries five brands, all with a bundled logo; the
-    // other configured brands (Rhode, Olaplex...) have no product behind them.
-    for (final handle in [
-      'coach',
-      'guess-1',
-      'michael-kors',
-      'steve-madden',
-      'tommy-hilfiger',
-    ]) {
-      expect(find.byKey(ValueKey('home-brand-$handle')), findsOneWidget);
+    // All twelve configured brands, each with its bundled logo, including
+    // those the bundled catalog has no product of yet (Rhode, Olaplex...).
+    for (final brand in HomeContent.fallback.brands) {
+      expect(
+        find.byKey(ValueKey('home-brand-${brand.handle}')),
+        findsOneWidget,
+      );
     }
-    expect(find.byKey(const ValueKey('home-brand-rhode')), findsNothing);
-    expect(find.byKey(const ValueKey('home-brand-olalplex')), findsNothing);
     expect(
       find.descendant(
         of: brandsSection,
         matching: find.byType(SlideTransition),
       ),
-      findsNWidgets(5),
+      findsNWidgets(12),
     );
     expect(
       find.byKey(const ValueKey('home-brand-entrance-coach')),
@@ -80,15 +75,17 @@ void main() {
     );
     expect(
       find.descendant(of: brandsSection, matching: find.byType(Image)),
-      findsNWidgets(5),
+      findsNWidgets(12),
     );
   });
 
-  testWidgets('collection cards use full-bleed editorial overlays', (
-    tester,
-  ) async {
-    await tester.binding.setSurfaceSize(const Size(390, 900));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
+  testWidgets(
+      'Colecciones sits between Compra por estilo and the brands, opening on '
+      'its first photo card', (tester) async {
+    // Tall enough for the whole opening to be built at once.
+    addTearDown(() => tester.view.resetPhysicalSize());
+    tester.view.physicalSize = const Size(390, 3000);
+    tester.view.devicePixelRatio = 1.0;
     final store = CatalogStore(database: openTestDatabase());
     addTearDown(store.dispose);
     await store.loadFromAsset();
@@ -101,29 +98,37 @@ void main() {
         ),
       ),
     );
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    final card = find.byKey(const ValueKey('home-collection-card-guess'));
-    final homeScroll = find
-        .byWidgetPredicate(
-          (widget) =>
-              widget is Scrollable &&
-              widget.axisDirection == AxisDirection.down,
-        )
-        .first;
-    await tester.scrollUntilVisible(card, 500, scrollable: homeScroll);
-    await tester.pump();
-    final cardSize = tester.getSize(card);
-    expect(cardSize.width, inInclusiveRange(280, 460));
-    expect(cardSize.height, closeTo(cardSize.width / .7, .1));
-
-    final cardBottom = tester.getBottomLeft(card).dy;
-    final titleBottom = tester
-        .getBottomLeft(find.descendant(of: card, matching: find.text('Bolsas')))
-        .dy;
-    expect(cardBottom - titleBottom, lessThan(52));
+    final section = find.byKey(const ValueKey('home-section-collections'));
+    final styles = find.byKey(const ValueKey('home-section-bag-types'));
+    final brands = find.byKey(const ValueKey('home-section-brands'));
     expect(
-      find.descendant(of: card, matching: find.byType(Image)),
+      tester.getTopLeft(section).dy,
+      greaterThan(tester.getTopLeft(styles).dy),
+    );
+    expect(
+      tester.getTopLeft(brands).dy,
+      greaterThan(tester.getBottomLeft(section).dy),
+    );
+
+    // Changed with the web-parity pass: the track opens on the FIRST card,
+    // «Bolsas», as the live web does (it used to open on the middle one).
+    // It is centred and drawn full size.
+    final first = find.byKey(const ValueKey('home-collection-card-guess'));
+    expect(tester.getCenter(first).dx, closeTo(195, 1));
+    // The web's card is 56% of the viewport (capped at 270): 218.4 at 390.
+    expect(tester.getSize(first).width, closeTo(390 * .56, .5));
+    expect(
+      find.descendant(of: first, matching: find.text('Bolsas')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: first, matching: find.text('VER COLECCIÓN')),
+      findsOneWidget,
+    );
+    expect(
+      find.descendant(of: first, matching: find.byType(Image)),
       findsOneWidget,
     );
   });

@@ -23,7 +23,7 @@ const _bottomInset = 34.0;
 
 const _labels = {
   MonettaBottomDestination.home: 'Inicio',
-  MonettaBottomDestination.catalog: 'Catálogo',
+  MonettaBottomDestination.catalog: 'Categorías',
   MonettaBottomDestination.bag: 'Carrito',
   MonettaBottomDestination.account: 'Cuenta',
 };

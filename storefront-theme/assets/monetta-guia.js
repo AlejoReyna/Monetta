@@ -1,9 +1,10 @@
 // Guide components that need a script. The home carousel (HomeEditorialBanner in PR #33): swipe through scroll snap,
 // indicator dots that follow the visible slide, previous/next buttons from 1024 px, no autoplay and no timers, as in
-// the app. A slide reached with Tab is brought fully into view. The search screen's «Búsquedas recientes» (slide 05):
-// the last five searches, kept in this browser only, each one removable. The quick view (slide 12): a card's «+» on a piece
-// with several variants loads sections/monetta-quick-view.liquid and nothing is added until a variant is chosen. Rebinds when
-// the theme editor reloads a section.
+// the app. A slide reached with Tab is brought fully into view. «Colecciones» on phones opens on its middle card. The search
+// screen's «Búsquedas recientes» (slide 05):
+// the last five searches, kept in this browser only, each one removable. The preview (the client's 29 Oct reference): tapping a
+// card loads sections/monetta-quick-view.liquid with the card's variant chosen; a modified click still opens the product page
+// in a new tab. Rebinds when the theme editor reloads a section.
 (() => {
   const reduceMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
@@ -30,6 +31,46 @@
       const index = slides.findIndex((slide) => slide.contains(event.target));
       if (index >= 0 && index !== current()) show(index);
     });
+  }
+
+  // «Colecciones» on phones opens on its middle card, as monetta.mx's earlier home did. Only the scroller moves, never the page.
+  function initCollections(track) {
+    if (track.dataset.guiaReady) return;
+    track.dataset.guiaReady = 'true';
+    const items = track.children;
+    if (items.length < 3 || track.scrollWidth <= track.clientWidth) return;
+    const middle = items[Math.floor(items.length / 2)];
+    const card = middle.getBoundingClientRect();
+    const box = track.getBoundingClientRect();
+    track.scrollLeft += card.left + card.width / 2 - (box.left + box.width / 2);
+  }
+
+  // Reveal the Home invitation once on arrival. Content stays visible without JS/animation support or with reduced motion.
+  function initRegister(root) {
+    if (root.dataset.guiaReady) return;
+    root.dataset.guiaReady = 'true';
+    if (reduceMotion() || !('IntersectionObserver' in window) || typeof root.animate !== 'function') return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      if (reduceMotion() || root.contains(document.activeElement)) return;
+      const elements = [...root.querySelectorAll('.guia-register__inner > *')];
+      const animations = elements.map((element, index) => element.animate(
+        [{ opacity: 0, transform: 'translateY(20px)' }, { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 600, delay: index * 80, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' },
+      ));
+      const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
+      const reveal = () => animations.forEach((animation) => animation.cancel());
+      const onMotionChange = () => { if (motion.matches) reveal(); };
+      // A keyboard user can always focus the button immediately, even during the staggered entrance.
+      root.addEventListener('focusin', reveal);
+      motion.addEventListener('change', onMotionChange);
+      Promise.all(animations.map((animation) => animation.finished.catch(() => {}))).then(() => {
+        root.removeEventListener('focusin', reveal);
+        motion.removeEventListener('change', onMotionChange);
+      });
+    }, { threshold: 0.2, rootMargin: '0px 0px -48px 0px' });
+    observer.observe(root);
   }
 
   const readRecent = () => window.MonettaSearchHistory?.read() || [];
@@ -130,6 +171,7 @@
     const hint = root.querySelector('[data-quick-view-hint]');
     const price = root.querySelector('[data-quick-view-price]');
     const photo = root.querySelector('[data-quick-view-photo]');
+    const stock = root.querySelector('[data-quick-view-stock]');
     let chosen = null;
     const update = () => {
       const picked = groups.map((group) => group.querySelector('input:checked')?.value ?? null);
@@ -137,9 +179,23 @@
       chosen = groups.length === 0 ? variants[0] : complete ? variants.find((v) => v.options.every((o, i) => o === picked[i])) || null : null;
       if (chosen) {
         renderPrice(price, chosen);
-        if (chosen.image && photo) photo.src = chosen.image;
+        if (chosen.image && photo) {
+          photo.src = chosen.image;
+          // The highlighted thumbnail follows the variant's photo when it is one of the four shown.
+          const match = root.querySelector(`[data-image-id="${chosen.imageId}"]`);
+          if (match) {
+            root.querySelectorAll('[data-quick-view-thumb]').forEach((t) => t.removeAttribute('aria-current'));
+            match.setAttribute('aria-current', 'true');
+          }
+        }
       }
       const ready = Boolean(chosen?.available);
+      if (stock) {
+        // Shopify's own count, only when it tracks the piece and refuses overselling; otherwise just whether it can be bought.
+        const low = ready && chosen.low > 0;
+        stock.textContent = !chosen ? 'Elige una opción' : low ? `Últimas ${chosen.low} ${chosen.low === 1 ? 'pieza' : 'piezas'}` : ready ? 'Disponible' : 'Agotado';
+        stock.dataset.tone = !chosen ? 'idle' : low || !ready ? 'alert' : 'ok';
+      }
       add.disabled = !ready;
       hint.textContent = ready ? '' : !complete ? 'Elige una opción para agregarla a tu bolsa.' : !chosen ? 'Esa combinación no está disponible.' : 'Esta opción está agotada.';
       hint.hidden = ready;
@@ -189,14 +245,19 @@
   }
 
   document.addEventListener('click', (event) => {
-    const button = event.target.closest?.('[data-quick-view]');
-    if (!button) return;
+    const trigger = event.target.closest?.('[data-quick-view]');
+    if (!trigger) return;
+    // A card is a real link to the product page: a new-tab click, or a page without the preview dialog, follows it.
+    if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    if (!document.getElementById('quick-view') || !window.Monetta?.openDialog) return;
     event.preventDefault();
-    openQuickView(button);
+    openQuickView(trigger);
   });
 
   const bind = (scope = document) => {
     scope.querySelectorAll('[data-guia-carousel]').forEach(initCarousel);
+    scope.querySelectorAll('[data-guia-collections]').forEach(initCollections);
+    scope.querySelectorAll('.guia-register').forEach(initRegister);
     scope.querySelectorAll('[data-guia-recent]').forEach(initRecent);
     scope.querySelectorAll('[data-guia-copy]').forEach(initCopy);
   };

@@ -72,9 +72,19 @@
 {{ 'monetta-app-alignment.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-guia.css' | asset_url | stylesheet_tag }}
 {{ 'monetta-predictive-search.css' | asset_url | stylesheet_tag }}
+{{ 'monetta-tarjetas.css' | asset_url | stylesheet_tag }}
 
 <script>
   document.documentElement.classList.add('js');
+  // The launch reveal (snippets/monetta-intro.liquid) plays once per browser session, as the app's plays once per launch.
+  {%- unless request.design_mode %}
+  try {
+    if (!sessionStorage.getItem('monetta-intro') && !window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      sessionStorage.setItem('monetta-intro', '1');
+      document.documentElement.classList.add('has-intro');
+    }
+  } catch (error) {}
+  {%- endunless %}
   window.MonettaConfig = {
     routes: {
       root: {{ routes.root_url | json }},

@@ -15,9 +15,18 @@
 /// ProductCard(product: product, onQuickView: () {…})   // long press (C)
 /// ```
 ///
-/// Every parameter except [product] is optional and defaults to the behaviour
-/// shipped before the redesign, so existing call sites need no edit.
+/// ## Interaction
+///
+/// Tapping the card (photo or text) opens the quick view
+/// ([showProductQuickView]); the brown «VER PRODUCTO» pill opens the product
+/// page ([openProduct]). Inside a tablet detail pane ([BrowseDetailScope]) a
+/// tap selects the product in that pane instead. The card has no "+": adding
+/// to the bag happens in the quick view.
+///
+/// Every parameter except [product] is optional.
 library;
+
+import 'dart:async';
 
 import 'package:flutter/material.dart';
 
@@ -26,13 +35,14 @@ import '../../domain/product.dart';
 import '../../main.dart';
 import '../../reco/events.dart';
 import '../product/product_screen.dart';
+import '../product/quick_view.dart';
 import 'product_tile.dart';
 import 'browse_detail_layout.dart';
-import 'quick_add_button.dart';
 
 export 'product_tile.dart'
     show
         MonettaProductTile,
+        TileViewProductButton,
         ProductTileData,
         ProductTileDensity,
         ProductTileMetrics,
@@ -40,7 +50,9 @@ export 'product_tile.dart'
         ProductTileVariant,
         ProductTileVariantMetrics,
         productGridColumns,
-        productGridDelegate;
+        productGridDelegate,
+        productTileExtent,
+        tilePriceLinesFor;
 
 class ProductCard extends StatelessWidget {
   const ProductCard({
@@ -49,8 +61,8 @@ class ProductCard extends StatelessWidget {
     this.wide = false,
     this.density = ProductTileDensity.grid,
     this.showWishlist = true,
-    this.showQuickAdd = true,
-    this.showViewProduct = false,
+    this.showQuickAdd = false,
+    this.showViewProduct = true,
     this.onQuickView,
     this.onTap,
     super.key,
@@ -66,28 +78,56 @@ class ProductCard extends StatelessWidget {
   /// supported control.
   final bool wide;
 
-  /// [ProductTileDensity.grid] (4:5 image, two-line name) is the default and
-  /// matches the card shipped before the redesign. [ProductTileDensity.compact]
-  /// squares the image and keeps the name to one line, for narrow rails.
+  /// [ProductTileDensity.grid] is the default for two-column grids.
+  /// [ProductTileDensity.compact] tightens the padding and keeps the name to
+  /// one line, for narrow rails.
   final ProductTileDensity density;
 
   /// Set false where a favourite would be meaningless or unsupported.
   final bool showWishlist;
 
-  /// Whether a buyable card draws the "+" quick-add control. The bag turns it
-  /// off for its own recommendations.
+  /// Retained for source compatibility. The card no longer draws a "+": the
+  /// quick view carries «AGREGAR A BOLSA». The value is ignored.
   final bool showQuickAdd;
 
-  /// Draws the brown «VER PRODUCTO» pill under the price (collection grid).
-  /// The grid that sets it reserves [kTileFooterExtent] per row.
+  /// Draws the brown «VER PRODUCTO» pill under the price. On by default; the
+  /// grids reserve [kTileFooterExtent] per row for it.
   final bool showViewProduct;
 
-  /// Reserved for package C. When given, a long press opens the quick view;
-  /// no button is added and tapping still opens the full product page.
+  /// Overrides what a long press does. By default a long press opens the
+  /// quick view, like a tap (a tap always opens it unless [onTap] is given).
   final VoidCallback? onQuickView;
 
-  /// Overrides the default "open this product" navigation.
+  /// Overrides the default tap, which opens the quick view (or selects the
+  /// product in a tablet detail pane).
   final VoidCallback? onTap;
+
+  void _openQuickView(BuildContext context) =>
+      unawaited(showProductQuickView(context, product));
+
+  /// A long press: the caller's [onQuickView] when given, the quick view
+  /// otherwise.
+  void _longPress(BuildContext context) {
+    if (onQuickView != null) {
+      onQuickView!();
+    } else {
+      _openQuickView(context);
+    }
+  }
+
+  void _tap(BuildContext context) {
+    if (onTap != null) {
+      onTap!();
+      return;
+    }
+    // A tablet detail pane keeps selecting the product beside the list.
+    if (BrowseDetailScope.maybeOf(context) != null &&
+        context.findAncestorWidgetOfExactType<ProductScreen>() == null) {
+      openProduct(context, product);
+      return;
+    }
+    _openQuickView(context);
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -95,9 +135,6 @@ class ProductCard extends StatelessWidget {
     final facets = store.facetsFor(product.id);
     final wishlisted = store.wishlist.contains(product.id);
     final data = ProductTileData.fromProduct(product, facets: facets);
-    // Only a piece with something to buy gets the "+"; a sold-out one keeps
-    // the eye (when the surface wires it).
-    final canQuickAdd = showQuickAdd && product.isInStock;
 
     return ProductResultAnchor(
       productId: product.id,
@@ -108,21 +145,15 @@ class ProductCard extends StatelessWidget {
         wishlisted: wishlisted,
         onToggleWishlist:
             showWishlist ? () => store.toggleWishlist(product.id) : null,
-        onQuickView: onQuickView,
-        quickAction: canQuickAdd
-            ? ProductQuickAddButton(
-                key: Key('quick-add-${product.id}'),
-                product: product,
-                productName: data.title,
-              )
-            : null,
+        onQuickView: () => _longPress(context),
         footer: showViewProduct
             ? TileViewProductButton(
                 key: Key('view-product-${product.id}'),
-                onPressed: onTap ?? () => openProduct(context, product),
+                onPressed: () => openProduct(context, product),
               )
             : null,
-        onTap: onTap ?? () => openProduct(context, product),
+        semanticHint: 'Abre la vista previa',
+        onTap: () => _tap(context),
       ),
     );
   }
@@ -192,6 +223,7 @@ class ProductCardGrid extends StatelessWidget {
             context,
             availableWidth: available,
             density: density,
+            priceLines: tilePriceLinesFor(products),
           ),
           itemCount: products.length,
           itemBuilder: (context, index) {

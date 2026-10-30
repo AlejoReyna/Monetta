@@ -1,0 +1,709 @@
+/*
+ * The client's 29 Oct reference: product card and grid, bottom bar, preview card and product page. Loaded after every other
+ * Monetta stylesheet (snippets/monetta-head.liquid), so it only restates what the reference changes. App twins:
+ * product_tile.dart, monetta_bottom_navigation.dart, quick_view.dart and product_screen.dart.
+ */
+
+/* ============================================================ Product card */
+/* One warm card (6px radius, 12px inside) holding a square photo multiplied onto its ground, the heart, brand / name / price in
+   Playfair and the «VER PRODUCTO» pill. The pill is its own link; the rest of the card opens the preview. */
+.mw .card {
+  padding: 12px;
+  border-radius: 6px;
+  background: var(--color-surface-warm);
+  box-shadow: none;
+}
+
+@media (hover: hover) {
+  .mw .card:hover {
+    box-shadow: var(--shadow-card);
+  }
+}
+
+.mw .card__link,
+.mw .card__link:focus-visible {
+  border-radius: 4px;
+}
+
+.mw .card__media,
+.mw .card--compact .card__media {
+  margin: 0;
+  aspect-ratio: 1;
+  border-radius: 0;
+  background: transparent;
+}
+
+/* White packshot grounds take the card's colour, as in the reference. The store's photos sit on #F9F9F9, which multiplies
+   to a visible box; lifting them 3% turns that ground white before the blend and leaves the piece itself unchanged to the eye. */
+.mw .card__media img,
+.mw .quick-view__photo,
+.mw .quick-view__thumb img,
+.mw .product-page .gallery__slide img,
+.mw .product-page .thumb img {
+  object-fit: contain;
+  mix-blend-mode: multiply;
+  filter: brightness(1.03);
+}
+
+.mw .card__badge {
+  top: 0;
+  left: 0;
+}
+
+.mw .card__body {
+  padding: 10px 0 0;
+}
+
+.mw .card :is(.card__brand, .card__name, .card__price) {
+  font-family: var(--font-serif);
+  letter-spacing: 0;
+}
+
+.mw .card__brand {
+  font-size: 15px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--color-ink);
+}
+
+.mw .card__name {
+  margin-top: 1px;
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--color-ink);
+}
+
+.mw .card__price {
+  gap: 2px 6px;
+  margin-top: 3px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.mw .card__price .price {
+  font-size: inherit;
+  font-weight: 700;
+}
+
+.mw .card__price .price-compare {
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 400;
+  color: var(--color-ink-muted);
+}
+
+.mw .card--compact .card__brand {
+  font-size: 13px;
+}
+
+.mw .card--compact .card__name {
+  font-size: 13px;
+}
+
+.mw .card--compact .card__price {
+  font-size: 14px;
+}
+
+.mw .card__view {
+  flex-shrink: 0;
+  height: 40px;
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-decoration: none;
+}
+
+.mw .card__view:hover {
+  background: var(--color-action-dark);
+}
+
+.mw .card__view:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+/* The heart sits in the photo's top corner, inside the card's padding. */
+.mw .card__actions,
+.mw .card--compact .card__actions {
+  top: 12px;
+  left: 12px;
+  right: 12px;
+  aspect-ratio: 1;
+}
+
+.mw .card__fav {
+  top: -12px;
+  right: -12px;
+}
+
+/* Mini: the product page's four-across «Productos relacionados». */
+.mw .card--mini {
+  padding: 6px;
+  border-radius: 6px;
+}
+
+.mw .card--mini .card__actions {
+  top: 6px;
+  left: 6px;
+  right: 6px;
+}
+
+.mw .card--mini .card__fav {
+  top: -6px;
+  right: -6px;
+  width: 40px;
+  height: 40px;
+}
+
+.mw .card--mini .card__fav .icon {
+  width: 16px;
+  height: 16px;
+}
+
+.mw .card--mini .card__badge {
+  padding: 3px 6px;
+  font-size: 9px;
+}
+
+.mw .card--mini .card__body {
+  padding: 6px 2px 2px;
+}
+
+.mw .card--mini .card__brand,
+.mw .card--mini .card__name,
+.mw .card--mini .card__price {
+  font-size: 12px;
+}
+
+.mw .card--mini .card__name {
+  -webkit-line-clamp: 1;
+}
+
+.mw .card--mini .card__price .price-compare {
+  display: none;
+}
+
+/* ============================================================ Grids */
+/* 8px between cards and the page's own side margin on phones (the reference is not edge to edge). */
+.mw .product-grid {
+  gap: 8px;
+}
+
+@media (max-width: 767.98px) {
+  .mw .product-grid--flush {
+    margin-inline: 0;
+    gap: 8px;
+  }
+}
+
+@media (min-width: 768px) {
+  .mw .product-grid {
+    gap: 12px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mw .product-grid {
+    gap: 16px;
+  }
+}
+
+@media (min-width: 1280px) {
+  .mw .listing--collection .product-grid {
+    gap: 20px;
+  }
+
+  .mw .listing--collection .card__body {
+    padding: 12px 0 0;
+  }
+}
+
+@media (max-width: 767.98px) {
+  .mw .rail__track {
+    gap: 8px;
+  }
+}
+
+/* ============================================================ Bottom bar */
+/* Flat, full width, a hairline on top; the active destination is the brand's brown-gold on icon and label, the others ink.
+   No underline: colour and weight carry the state, as in the app (NAV-03). */
+.mw .dock {
+  border-top: 1px solid var(--color-divider);
+  background: var(--color-bar);
+}
+
+.mw .dock__item {
+  gap: 5px;
+  min-height: 62px;
+  padding: 9px 3px 9px;
+  color: var(--color-navigation-inactive);
+  font-weight: 400;
+}
+
+.mw .dock__item[aria-current='page'] {
+  color: var(--color-navigation-active);
+  font-weight: 600;
+}
+
+.mw .dock__item[aria-current='page']::after {
+  content: none;
+}
+
+/* ============================================================ Preview card */
+/* A centred card over the dimmed page on every width (the bar stays visible under the scrim): the photo runs to the card's
+   edges under «‹» and «×», then four thumbnails, brand, name, price, colours, stock and the two buttons. */
+.mw .overlay--preview {
+  padding: 24px max(28px, var(--safe-right)) calc(24px + var(--safe-bottom)) max(28px, var(--safe-left));
+}
+
+.mw .overlay--preview .overlay__panel {
+  width: min(440px, 100%);
+  max-height: min(100%, 900px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: 22px;
+  background: var(--color-canvas);
+}
+
+@media (min-width: 1024px) {
+  .mw .overlay--preview .overlay__panel {
+    width: min(460px, 100%);
+  }
+}
+
+.mw .quick-view {
+  padding: 0;
+}
+
+.mw .quick-view__media {
+  position: relative;
+  display: block;
+  background: var(--color-surface-warm);
+}
+
+.mw .quick-view__photo {
+  display: block;
+  width: 100%;
+  max-height: none;
+  aspect-ratio: 6 / 5;
+  object-fit: contain;
+  border-radius: 0;
+  background: transparent;
+  mix-blend-mode: multiply;
+}
+
+.mw .quick-view__head {
+  position: absolute;
+  top: 6px;
+  left: 6px;
+  right: 6px;
+  display: flex;
+  justify-content: space-between;
+}
+
+.mw .quick-view__head .round-button {
+  color: var(--color-ink);
+}
+
+.mw .quick-view__head .round-button:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: -4px;
+  border-radius: 50%;
+}
+
+.mw .quick-view__body {
+  display: grid;
+  gap: 0;
+  padding: 14px 20px 20px;
+}
+
+.mw .quick-view__thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin-bottom: 14px;
+}
+
+.mw .quick-view__thumb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: var(--color-surface-warm);
+}
+
+.mw .quick-view__thumb[aria-current='true'] {
+  border: 1.5px solid var(--color-border-control);
+}
+
+.mw .quick-view__thumb img {
+  mix-blend-mode: multiply;
+}
+
+.mw .quick-view__thumb:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.mw .quick-view__brand {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--color-ink);
+}
+
+.mw .quick-view__name {
+  margin-top: 2px;
+  font-family: var(--font-sans);
+  font-size: 15px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--color-ink) 85%, var(--color-canvas));
+}
+
+.mw .quick-view__price {
+  gap: 6px 10px;
+  margin-top: 12px;
+}
+
+.mw .quick-view__price .price {
+  font-size: 21px;
+  font-weight: 600;
+}
+
+.mw .quick-view__price .price-compare {
+  font-size: 14px;
+  color: var(--color-ink-muted);
+}
+
+.mw .quick-view__option {
+  margin-top: 16px;
+}
+
+.mw .quick-view__legend {
+  margin-bottom: 8px;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.mw .quick-view__values {
+  gap: 10px;
+}
+
+/* A colour the store gives a swatch for is a circle; the selected one wears a ring. Other options keep the chips. */
+.mw .quick-view__value--swatch .quick-view__swatch,
+.mw .quick-view__value--swatch input:checked + .quick-view__swatch {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  min-height: 0;
+  height: 38px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.mw .quick-view__value--swatch .option-swatch {
+  display: block;
+  width: 30px;
+  min-height: 0;
+  height: 30px;
+  padding: 0;
+  border-radius: 50%;
+  border: 1px solid rgba(33, 27, 22, 0.12);
+  background: var(--swatch-color);
+  object-fit: cover;
+}
+
+.mw .quick-view__value--swatch input:checked + .quick-view__swatch {
+  box-shadow: 0 0 0 1.5px var(--color-ink);
+}
+
+.mw .quick-view__value--swatch input:focus-visible + .quick-view__swatch {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 3px;
+}
+
+.mw .quick-view__stock {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  font-size: 15px;
+}
+
+.mw .quick-view__stock-pill {
+  padding: 5px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--color-surface-warm);
+  color: var(--color-ink);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.mw .quick-view__stock-pill[data-tone='alert'] {
+  background: var(--color-sale-surface);
+  color: var(--color-sale);
+}
+
+.mw .quick-view__hint:not([hidden]) {
+  margin-top: 8px;
+}
+
+.mw .quick-view .btn {
+  min-height: 52px;
+  font-weight: 400;
+  font-size: 15px;
+}
+
+.mw .quick-view [data-quick-view-add] {
+  margin-top: 18px;
+}
+
+.mw .quick-view .btn--outline {
+  margin-top: 10px;
+  color: var(--color-action-primary);
+}
+
+/* ============================================================ Product page */
+.mw .product-page .gallery__main {
+  margin: 8px var(--edge-r) 0 var(--edge-l);
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--color-surface-warm);
+}
+
+.mw .product-page .gallery__slide {
+  aspect-ratio: 1;
+  background: transparent;
+}
+
+/* The thumbnails show where you are, so the dashes under the photo go. */
+.mw .product-page .gallery:not(.gallery--single) .gallery__rules {
+  display: none;
+}
+
+.mw .gallery__arrow {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.mw .gallery__arrow--prev {
+  left: 4px;
+}
+
+.mw .gallery__arrow--next {
+  right: 4px;
+}
+
+.mw .gallery__zoom {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+}
+
+.mw .product-page .gallery__tools {
+  top: 4px;
+  right: 4px;
+}
+
+.mw .product-page .round-button__circle {
+  background: color-mix(in srgb, #ffffff 92%, transparent);
+}
+
+.mw .product-page .gallery__thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding: 10px var(--edge-r) 4px var(--edge-l);
+  overflow: visible;
+}
+
+.mw .product-page .thumb {
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  border: 1px solid transparent;
+  border-radius: 8px;
+  background: var(--color-surface-warm);
+}
+
+.mw .product-page .thumb:nth-child(n + 5) {
+  display: none;
+}
+
+.mw .product-page .thumb[aria-current='true'] {
+  border: 1.5px solid var(--color-border-control);
+}
+
+.mw .product-panel__brand {
+  font-family: var(--font-serif);
+  font-size: 22px;
+  font-weight: 400;
+  line-height: 1.2;
+  color: var(--color-ink);
+  text-decoration: none;
+}
+
+.mw .product-panel__name {
+  margin-top: 2px;
+  font-size: 23px;
+}
+
+.mw .product-panel__price {
+  margin-top: 12px;
+}
+
+.mw .product-panel__price .price {
+  font-size: 23px;
+  font-weight: 600;
+}
+
+.mw .product-panel__price .price-compare {
+  font-size: 15px;
+  color: var(--color-ink-muted);
+}
+
+/* «Color: Negro», then the swatches as circles with a ring on the chosen one. */
+.mw .product-panel__options legend .eyebrow {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  color: var(--color-ink);
+}
+
+.mw .product-panel__options legend .eyebrow::after {
+  content: ':';
+}
+
+.mw .product-panel__options legend {
+  display: flex;
+  justify-content: flex-start;
+  gap: 4px;
+}
+
+.mw .product-panel__options legend .options__value {
+  margin-left: 0;
+  font-size: 14px;
+  color: var(--color-ink);
+}
+
+.mw .option-chip:has(.option-swatch) {
+  width: 40px;
+  min-width: 40px;
+  height: 40px;
+  min-height: 40px;
+  padding: 0;
+  justify-content: center;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+}
+
+.mw .option-chip:has(.option-swatch) :is(.option-chip__check, .option-chip__label) {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.mw .option-chip:has(.option-swatch) .option-swatch {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(33, 27, 22, 0.12);
+}
+
+.mw .option-chip:has(.option-swatch):has(input:checked),
+.mw .option-chip--link:has(.option-swatch)[aria-current='true'] {
+  box-shadow: 0 0 0 1.5px var(--color-ink);
+}
+
+/* Trust row: three columns split by hairlines. */
+.mw .guia-trust {
+  gap: 0;
+  margin: 20px 0 18px;
+}
+
+.mw .guia-trust li {
+  gap: 6px;
+  padding: 2px 6px;
+  font-size: 11px;
+}
+
+.mw .guia-trust__icon {
+  width: 22px;
+  height: 22px;
+}
+
+.mw .guia-trust li:first-child {
+  padding-left: 0;
+}
+
+.mw .guia-trust li + li {
+  border-left: 1px solid var(--color-divider);
+}
+
+.mw .guia-trust li > span > span {
+  display: block;
+  margin-top: 1px;
+}
+
+.mw .guia-trust strong {
+  font-size: 11.5px;
+}
+
+.mw .buy-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.mw .buy-stack .btn {
+  min-height: 52px;
+  font-size: 15px;
+  font-weight: 400;
+}
+
+.mw .buy-stack .btn--outline {
+  color: var(--color-ink);
+}
+
+.mw .product-panel .availability {
+  margin-top: 14px;
+}
+
+.mw .product-panel .product-panel__tax {
+  margin-top: 2px;
+}
+
+.mw .product-panel__accordions {
+  margin-top: 18px;
+}
+
+.mw .product-panel__accordions .accordion > summary {
+  font-family: var(--font-serif);
+  font-size: 18px;
+  font-weight: 400;
+}
+
+/* Productos relacionados: four across on phones, more scroll sideways. */
+@media (max-width: 767.98px) {
+  .mw .rail--recs .rail__track {
+    --rail-item: calc((100vw - var(--edge-l) - var(--edge-r) - 3 * 8px) / 4);
+  }
+}
+
+@media (min-width: 768px) {
+  .mw .rail--recs .rail__track {
+    --rail-item: calc((100% - 5 * 16px) / 6);
+  }
+}

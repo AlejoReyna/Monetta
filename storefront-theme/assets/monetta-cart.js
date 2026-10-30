@@ -216,7 +216,7 @@
    * count are done here; the caller handles pending state and its own inline error. A write whose result is unknown (no answer, a 5xx)
    * is never repeated: the bag is read back and shown, and the message tells the shopper to check it before trying again.
    */
-  function add({ id, quantity = 1, properties, name = '', trigger = null }) {
+  function add({ id, quantity = 1, properties, name = '', trigger = null, open = true }) {
     return mutation(async () => {
       const cartId = cartSectionId();
       const payload = { id: Number(id), quantity: Number(quantity), sections: [SHEET_SECTION, cartId].filter(Boolean).join(','), sections_url: cartId ? routes.cart : location.pathname };
@@ -242,7 +242,8 @@
         markConfirmed();
         $(`[data-variant-id="${Number(id)}"]`, $('#cart-sheet'))?.classList.add('cart-line--highlight');
       }
-      openSheet(trigger);
+      // «Comprar ahora» goes straight on to the checkout, so the bag is not opened in between.
+      if (open) openSheet(trigger);
       Monetta.announce?.(`Agregado al carrito${name ? `: ${name}` : ''}.`);
       return { ok: true, status: result.status };
     });

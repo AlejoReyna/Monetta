@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/shopper_copy.dart';
 import 'package:monetta_app/app/theme.dart';
-import 'package:monetta_app/features/catalog/product_card.dart';
 import 'package:monetta_app/features/product/product_selection.dart';
 
 import '../../support/product_screen_harness.dart';
@@ -10,10 +9,10 @@ import '../../support/quick_add_harness.dart';
 
 // FICHA-T3, RESP-03 and A11Y-02: the "+" of the cards and the quick view hold
 // their layout across phone widths and text scales, and the sheet reads in a
-// sensible order for a screen reader (close, content, then the pinned bar).
+// sensible order for a screen reader (close, content, then the actions).
 //
-// Keys do not exist in `lib/` yet, so these are red until the control and the
-// bar are built.
+// The preview is a centred card: its actions stay inside it (scrolling inside
+// when the card does not fit).
 
 /// Phone-sized viewports, narrow to wide (the last one is a tablet).
 final Map<double, double> _viewports = {
@@ -31,7 +30,7 @@ void main() {
       for (final scale in [1.0, 2.0]) {
         testWidgets(
             'RESP-03 ${entry.key.toInt()} wide at text scale $scale: the grid '
-            'keeps a 48x48 "+" inside every photo and the sheet shows its bar',
+            'keeps a 48x48 "+" inside every photo and the preview shows its actions',
             (tester) async {
           setPhoneView(tester, width: entry.key, height: entry.value);
           final store = await scriptedStore();
@@ -41,13 +40,13 @@ void main() {
               .where((p) => p.isInStock && selectableVariants(p).isEmpty)
               .take(3);
           await tester.pumpWidget(
-            gridApp(store, [several, ...singles], scale: scale),
+            plusGridApp(store, [several, ...singles], scale: scale),
           );
           await tester.pump();
 
           expect(tester.takeException(), isNull);
           final cards =
-              tester.widgetList<ProductCard>(find.byType(ProductCard)).toList();
+              tester.widgetList<PlusCard>(find.byType(PlusCard)).toList();
           expect(cards, isNotEmpty);
           for (final card in cards) {
             expectQuickAddFitsPhoto(tester, quickAddOf(card.product));
@@ -61,12 +60,13 @@ void main() {
           expect(find.byTooltip(kCloseQuickViewTooltip), findsOneWidget);
           final view = Rect.fromLTWH(0, 0, entry.key, entry.value);
           expect(actionsBar(), findsOneWidget);
-          final bar = tester.getRect(actionsBar());
+          final card = tester.getRect(quickViewSheet());
+          expect(view.contains(card.topLeft), isTrue, reason: 'card $card');
+          expect(view.contains(card.bottomRight), isTrue);
+          await revealInSheet(tester, primaryButton());
           final button = tester.getRect(primaryButton());
-          expect(bar.bottom, closeTo(entry.value, 0.01), reason: 'bar at edge');
-          expect(view.contains(bar.topLeft), isTrue, reason: 'bar $bar');
-          expect(view.contains(button.topLeft), isTrue, reason: 'btn $button');
-          expect(view.contains(button.bottomRight), isTrue);
+          expect(card.contains(button.topLeft), isTrue, reason: 'btn $button');
+          expect(card.contains(button.bottomRight), isTrue);
           expect(inPrimary(find.text(kChooseLabel)), findsOneWidget);
         });
       }
@@ -102,7 +102,7 @@ void main() {
           inSheet(find.text(shopperProductName(product.title))),
         );
         final price = tester.getSemantics(
-          inSheet(find.text(kMoney.format(selectionPrice(product, 0)))),
+          inSheet(find.text(formatShopperPrice(selectionPrice(product, 0)))),
         );
         final options = tester.getSemantics(
           optionOf(product, selectableVariants(product).first),

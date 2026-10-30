@@ -1,6 +1,5 @@
-// Target-state tests for the edge-to-edge catalog screen (UI-CAT-01, 03, 04,
-// 05). They use only API that exists today, so they compile now and fail on
-// assertions until the redesign lands.
+// Tests of the catalog screen (UI-CAT-01, 03, 04, 05). Since the card
+// redesign its grid draws the same card as every other surface.
 import 'dart:async';
 
 import 'package:flutter/material.dart';
@@ -242,9 +241,9 @@ List<Rect> _firstRowPhotos(WidgetTester tester) {
 }
 
 void main() {
-  group('UI-CAT-01 the grid runs edge to edge', () {
+  group('UI-CAT-01 the grid draws the shared card', () {
     testWidgets(
-      'UI-CAT-01 at 390 pt: two 193 pt columns, 4 pt apart, no row gap',
+      'UI-CAT-01 at 390 pt: two 171 pt cards, 8 pt apart, 8 pt row gap',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -255,39 +254,45 @@ void main() {
           for (var i = 0; i < 4; i++) _rect(tester, _photoOf(tiles.at(i))),
         ];
 
-        // Row 1.
-        expect(photo[0].left, closeTo(0, 0.01));
-        expect(photo[0].width, closeTo(193, 0.01));
-        expect(photo[0].height, closeTo(241.25, 0.01));
-        expect(photo[1].left, closeTo(197, 0.01));
-        expect(photo[1].right, closeTo(390, 0.01));
-        expect(photo[1].width, closeTo(193, 0.01));
+        // Row 1: 20 pt margin + 12 pt card padding, square photographs.
+        expect(photo[0].left, closeTo(32, 0.01));
+        expect(photo[0].width, closeTo(147, 0.01));
+        expect(photo[0].height, closeTo(147, 0.01));
+        expect(photo[1].left, closeTo(211, 0.01));
+        expect(photo[1].right, closeTo(358, 0.01));
         expect(photo[1].top, closeTo(photo[0].top, 0.01));
 
-        // Row 2 is aligned with itself and one full tile further down:
-        // 241.25 photo + 115.85 caption, with no extra space between rows.
+        // Row 2 is one card (307.747) plus the 8 pt row gap further down.
         expect(photo[3].top, closeTo(photo[2].top, 0.01));
-        expect(photo[2].left, closeTo(0, 0.01));
-        expect(photo[2].top - photo[0].top, closeTo(357.1, 0.01));
+        expect(photo[2].left, closeTo(32, 0.01));
+        expect(photo[2].top - photo[0].top, closeTo(315.747, 0.01));
       },
     );
 
     testWidgets(
-      'UI-CAT-01 tiles carry no card: no lift, no clip, no photo inset',
+      'UI-CAT-01 tiles are cards: lifted, photo clipped inside the padding',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
-
-        expect(find.byType(MonettaCardLift), findsNothing);
 
         final tiles = find.byType(MonettaProductTile);
         expect(tiles, findsWidgets);
         for (var i = 0; i < tiles.evaluate().length; i++) {
           final tile = tiles.at(i);
           expect(
+            tester.widget<MonettaProductTile>(tile).variant,
+            ProductTileVariant.card,
+            reason: 'tile $i',
+          );
+          expect(
+            find.descendant(of: tile, matching: find.byType(MonettaCardLift)),
+            findsOneWidget,
+            reason: 'tile $i lifts when pressed',
+          );
+          expect(
             find.descendant(of: tile, matching: find.byType(ClipRRect)),
-            findsNothing,
-            reason: 'tile $i must not clip its photo into a rounded card',
+            findsWidgets,
+            reason: 'tile $i clips its photo',
           );
           final image = _rect(
             tester,
@@ -295,11 +300,12 @@ void main() {
           );
           expect(image, _rect(tester, _photoOf(tile)), reason: 'tile $i');
         }
+        expect(find.byType(MonettaCardLift), findsWidgets);
       },
     );
 
     testWidgets(
-      'UI-CAT-01 caption sits 8 pt in from the photo and 10 pt below it',
+      'UI-CAT-01 the caption is flush with the photo and 8 pt below it',
       (tester) async {
         _setView(tester, const Size(390, 844));
         await _pump(tester, _items(6));
@@ -309,15 +315,15 @@ void main() {
         final brand = _rect(tester, _brandOf(tile));
         final name = _rect(tester, _nameOf(tile));
 
-        expect(brand.left, closeTo(photo.left + 8, 0.01));
-        expect(name.left, closeTo(photo.left + 8, 0.01));
-        expect(brand.top, closeTo(photo.bottom + 10, 0.01));
+        expect(brand.left, closeTo(photo.left, 0.01));
+        expect(name.left, closeTo(photo.left, 0.01));
+        expect(brand.top, closeTo(photo.bottom + 8, 0.01));
       },
     );
 
     for (final (width, columns) in const [
       (320.0, 1),
-      (360.0, 2),
+      (400.0, 2),
       (768.0, 3),
       (1100.0, 4),
     ]) {
@@ -329,13 +335,13 @@ void main() {
           await _pump(tester, _items(8));
 
           final row = _firstRowPhotos(tester);
-          final tileWidth = (width - 4.0 * (columns - 1)) / columns;
+          final tileWidth = (width - 40 - 8.0 * (columns - 1)) / columns;
           expect(row.length, columns);
-          expect(row.first.left, closeTo(0, 0.01));
-          expect(row.last.right, closeTo(width, 0.01));
+          expect(row.first.left, closeTo(32, 0.01));
+          expect(row.last.right, closeTo(width - 32, 0.01));
           for (final photo in row) {
-            expect(photo.width, closeTo(tileWidth, 0.01));
-            expect(photo.height, closeTo(tileWidth * 1.25, 0.01));
+            expect(photo.width, closeTo(tileWidth - 24, 0.01));
+            expect(photo.height, closeTo(tileWidth - 24, 0.01));
           }
         },
       );
@@ -353,8 +359,9 @@ void main() {
 
         final row = _firstRowPhotos(tester);
         expect(row, isNotEmpty);
-        expect(row.first.left, closeTo(47, 0.01));
-        expect(row.last.right, closeTo(844 - 47, 0.01));
+        // 47 safe area + 20 margin + 12 card padding.
+        expect(row.first.left, closeTo(79, 0.01));
+        expect(row.last.right, closeTo(844 - 79, 0.01));
       },
     );
   });
@@ -414,12 +421,13 @@ void main() {
             );
             expect(errors.takeUnexpected(), isEmpty);
           }
-          if (label == 'x1.0' || label == 'x1.3') {
+          if (label == 'x1.0') {
             expect(tops[1], closeTo(tops[0], .01));
             expect(tops[3], closeTo(tops[2], .01));
-            expect(widths, everyElement(closeTo(193, .01)));
+            expect(widths, everyElement(closeTo(147, .01)));
           } else {
-            expect(widths, everyElement(closeTo(390, .01)));
+            // Larger type drops to one column: 390 - 40 margin - 24 padding.
+            expect(widths, everyElement(closeTo(326, .01)));
             for (var i = 1; i < tops.length; i++) {
               expect(tops[i], greaterThan(tops[i - 1]));
             }

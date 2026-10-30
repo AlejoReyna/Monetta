@@ -1,3 +1,3 @@
 {%- comment -%}Fresh server-rendered cards for saved/recent handles; never persist price or stock.{%- endcomment -%}
-{% if product %}{% render 'monetta-card', product: product, density: 'compact', quick_add: false %}{% endif %}
+{% if product %}{% render 'monetta-card', product: product, density: 'compact' %}{% endif %}
 {% schema %}{"name":"Monetta · Tarjeta actual","settings":[]}{% endschema %}

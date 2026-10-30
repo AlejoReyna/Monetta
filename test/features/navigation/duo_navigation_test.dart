@@ -78,7 +78,7 @@ void main() {
       tester.getSize(find.byKey(const Key('bottom-nav-surface'))).height,
       56,
     );
-    for (final label in ['Inicio', 'Catálogo', 'Carrito (2)', 'Cuenta']) {
+    for (final label in ['Inicio', 'Categorías', 'Carrito (2)', 'Cuenta']) {
       await tester.tap(find.byKey(const Key('navigation-overflow')));
       await tester.pumpAndSettle();
       await Scrollable.ensureVisible(
@@ -104,7 +104,7 @@ void main() {
       expect(
         last,
         MonettaBottomDestination.values[
-            ['Inicio', 'Catálogo', 'Carrito (2)', 'Cuenta'].indexOf(label)],
+            ['Inicio', 'Categorías', 'Carrito (2)', 'Cuenta'].indexOf(label)],
       );
     }
     expect(tester.takeException(), isNull);
