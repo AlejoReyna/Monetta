@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import '../../app/storefront_layout.dart';
 import '../../app/theme.dart';
 import '../../platform/system_layout_context.dart';
+import 'duo_workspace.dart';
 import 'monetta_bottom_navigation.dart';
 import 'storefront_pane_scope.dart';
 
@@ -46,7 +47,17 @@ class AdaptiveStorefrontScaffold extends StatelessWidget {
       drawer: drawer,
       drawerScrimColor: drawerScrimColor,
       extendBody: extendBody,
-      bottomNavigationBar: vertical ? null : bottomNavigationBar,
+      // On a two-sided window the workspace draws one rail for both sides;
+      // the visible browsing page lends it its destinations and handlers.
+      bottomNavigationBar: vertical
+          ? null
+          : switch (bottomNavigationBar) {
+              final MonettaBottomNavigation navigation => DuoRailRegistration(
+                  navigation: navigation,
+                  child: navigation,
+                ),
+              final other => other,
+            },
       body: ViewRelativeLayout(
         builder: (context, constraints, origin) {
           // The same Stack/Positioned slots survive changes of bar axis.

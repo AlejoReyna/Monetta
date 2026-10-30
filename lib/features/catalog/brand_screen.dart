@@ -13,6 +13,7 @@
 library;
 
 import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/duo_workspace.dart';
 import '../navigation/storefront_destination_navigation.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import 'browse_detail_layout.dart';
@@ -47,7 +48,8 @@ Future<void> openBrand(
   String? heroImageAsset,
 }) async {
   final store = StoreScope.of(context);
-  await Navigator.of(context).push<void>(
+  // A brand always opens on the browsing side.
+  await DuoWorkspace.navigatorFor(context).push<void>(
     monettaFadeRoute(
       StoreScope(
         notifier: store,

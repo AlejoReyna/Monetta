@@ -6,6 +6,7 @@
 library;
 
 import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/duo_workspace.dart';
 import '../navigation/storefront_destination_navigation.dart';
 import '../navigation/monetta_bottom_navigation.dart';
 import 'package:flutter/material.dart';
@@ -19,7 +20,8 @@ import '../catalog/product_card.dart';
 import '../catalog/browse_detail_layout.dart';
 
 Future<void> openFavorites(BuildContext context) {
-  return Navigator.of(context).push(
+  // Saved pieces are browsed on the browsing side, beside the account.
+  return DuoWorkspace.navigatorFor(context).push(
     MaterialPageRoute<void>(
       builder: (_) => const BrowseDetailLayout(child: FavoritesScreen()),
     ),

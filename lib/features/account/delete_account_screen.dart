@@ -14,6 +14,7 @@ import '../../app/shopper_copy.dart';
 import '../../data/accounts_orders/account_deletion_client.dart';
 import '../../data/accounts_orders/accounts_orders_config.dart';
 import '../../data/customer_auth/customer_auth_error.dart';
+import '../navigation/duo_workspace.dart';
 import '../boutique/boutique_tokens.dart';
 import 'account_boutique.dart';
 
@@ -392,7 +393,9 @@ class _DeleteAccountScreenState extends State<DeleteAccountScreen> {
   Future<void> _finish() async {
     await widget.signOutToHome();
     if (!mounted) return;
-    Navigator.of(context).popUntil((route) => route.isFirst);
+    // On a two-sided window the account lives on the right side: close it
+    // and return the browsing side to its start as well.
+    DuoWorkspace.returnToStart(context);
   }
 
   Future<void> _openSupport() =>

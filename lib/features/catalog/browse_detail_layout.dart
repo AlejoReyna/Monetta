@@ -11,6 +11,7 @@ import '../../main.dart';
 import '../../platform/system_layout_context.dart';
 import '../../reco/events.dart';
 import '../product/product_screen.dart';
+import '../navigation/duo_workspace.dart';
 import '../navigation/storefront_pane_scope.dart';
 
 class BrowseDetailScope extends InheritedWidget {
@@ -55,6 +56,11 @@ class _BrowseDetailLayoutState extends State<BrowseDetailLayout> {
   int _restoreGeneration = 0;
   String? _selectedId;
   int _initialVariant = 0;
+
+  /// One key per selection, so the same product page can move to a
+  /// two-sided window's right side with its state when the window opens.
+  GlobalKey _detailKey = GlobalKey();
+  bool _handOverQueued = false;
   double _anchorAlignment = 0;
   Size? _lastSize;
   SystemLayoutContext? _lastGeometry;
@@ -123,8 +129,39 @@ class _BrowseDetailLayoutState extends State<BrowseDetailLayout> {
     setState(() {
       _selectedId = product.id;
       _initialVariant = variant;
+      _detailKey = GlobalKey(debugLabel: 'detail ${product.id}');
     });
     _restoreAnchor(product.id);
+  }
+
+  /// A piece chosen while the window had one side moves to the right side
+  /// when a second side appears, with its variant, photo and open sections;
+  /// the results fill the left side again.
+  void _handOver() {
+    _handOverQueued = false;
+    final id = _selectedId;
+    if (!mounted || id == null || !DuoWorkspace.isDual(context)) return;
+    final key = _detailKey;
+    final variant = _initialVariant;
+    final store = StoreScope.of(context);
+    final shown = DuoWorkspace.showPane(
+      context,
+      DuoPanePage(
+        kind: DuoPaneKind.product,
+        productId: id,
+        builder: (_) => StoreScope(
+          notifier: store,
+          child: ProductScreen(
+            key: key,
+            productId: id,
+            initialVariantIndex: variant,
+          ),
+        ),
+      ),
+    );
+    if (!shown) return;
+    setState(() => _selectedId = null);
+    _restoreAnchor(id);
   }
 
   void _restoreAnchor(String? requested, {bool restoreFocus = false}) {
@@ -159,13 +196,24 @@ class _BrowseDetailLayoutState extends State<BrowseDetailLayout> {
   }
 
   @override
-  Widget build(BuildContext context) => PopScope(
+  Widget build(BuildContext context) {
+    final dual = DuoWorkspace.isDual(context, listen: true);
+    if (dual && _selectedId != null && !_handOverQueued) {
+      _handOverQueued = true;
+      WidgetsBinding.instance.addPostFrameCallback((_) => _handOver());
+    }
+    return _build(context, dual);
+  }
+
+  Widget _build(BuildContext context, bool dual) => PopScope(
         canPop: _selectedId == null,
         onPopInvokedWithResult: (didPop, _) {
           if (!didPop && _selectedId != null) _close();
         },
         child: BrowseDetailScope(
           selectedId: _selectedId,
+          // A two-sided window shows the selection on its own right side.
+          enabled: !dual,
           select: _select,
           register: _register,
           // A list card and its detail coexist on one route. Neither needs a
@@ -244,7 +292,10 @@ class _BrowseDetailLayoutState extends State<BrowseDetailLayout> {
                             browse,
                             size,
                             StorefrontPaneScope(
-                              ownsNavigation: _selectedId == null,
+                              ownsNavigation: _selectedId == null &&
+                                  StorefrontPaneScope.ownsNavigationOf(
+                                    context,
+                                  ),
                               child: widget.child,
                             ),
                           ),
@@ -264,7 +315,7 @@ class _BrowseDetailLayoutState extends State<BrowseDetailLayout> {
                             select: _select,
                             register: _register,
                             child: ProductScreen(
-                              key: ValueKey(id),
+                              key: _detailKey,
                               productId: id,
                               initialVariantIndex: _initialVariant,
                               onClose: _close,
@@ -356,7 +407,8 @@ class _ProductResultAnchorState extends State<ProductResultAnchor>
   @override
   Widget build(BuildContext context) {
     super.build(context);
-    final selected = _scope?.selectedId == widget.productId;
+    final selected = _scope?.selectedId == widget.productId ||
+        DuoWorkspace.focusedProductOf(context) == widget.productId;
     return Semantics(
       selected: selected,
       child: DecoratedBox(

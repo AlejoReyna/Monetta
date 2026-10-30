@@ -13,18 +13,21 @@ import '../boutique/client_guide_components.dart';
 import '../boutique/client_guide_scaffold.dart';
 import '../boutique/guide_art.dart';
 import '../boutique/guide_brand_tile.dart';
+import '../navigation/duo_workspace.dart';
 import 'brand_screen.dart';
 import 'collection_screen.dart';
 
 Future<void> openCategories(BuildContext context) async {
-  if (ModalRoute.of(context)?.settings.name == '/categories') return;
+  if (ModalRoute.of(context)?.settings.name == DuoWorkspace.categoriesRoute) {
+    return;
+  }
   final store = StoreScope.maybeOf(context);
   final account = AccountScope.maybeOf(context);
   final content =
       HomeContentScope.maybeOf(context)?.content ?? HomeContent.fallback;
-  await Navigator.of(context).push<void>(
+  await DuoWorkspace.navigatorFor(context).push<void>(
     MaterialPageRoute<void>(
-      settings: const RouteSettings(name: '/categories'),
+      settings: const RouteSettings(name: DuoWorkspace.categoriesRoute),
       builder: (_) {
         Widget screen = CategoriesScreen(content: content);
         if (store != null) screen = StoreScope(notifier: store, child: screen);

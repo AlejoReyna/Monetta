@@ -12,9 +12,13 @@ import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
 import '../../main.dart';
 import '../boutique/boutique_tokens.dart';
+import '../navigation/duo_workspace.dart';
 import 'checkout_screen.dart';
 
 Future<void> showMiniCart(BuildContext context) {
+  // A two-sided window already shows the bag on its right side: a short
+  // confirmation there replaces the sheet.
+  if (DuoWorkspace.confirmAdded(context)) return Future<void>.value();
   final store = StoreScope.of(context);
   return showModalBottomSheet<void>(
     context: context,
