@@ -153,11 +153,13 @@ Future<void> _scrollThrough(
   _failOnError(tester, name, log, 'at the top');
 
   // A short phone needs more steps to walk a long catalog than a tall one.
-  for (var i = 0; i < 200; i++) {
-    final before = position.pixels;
-    final target = (before + step).clamp(0.0, position.maxScrollExtent);
+  // Walk in viewport steps, then jump to the current end until a lazy
+  // list stops growing. A short phone cannot walk a long catalog in a
+  // fixed step count.
+  for (var i = 0; i < 40; i++) {
+    final beforeExtent = position.maxScrollExtent;
+    final target = (position.pixels + step).clamp(0.0, beforeExtent);
     position.jumpTo(target);
-    await tester.pump(const Duration(milliseconds: 50));
     await tester.pump(const Duration(milliseconds: 50));
     _failOnError(
       tester,
@@ -166,12 +168,23 @@ Future<void> _scrollThrough(
       'after scrolling to ${position.pixels.toStringAsFixed(0)} of '
       '${position.maxScrollExtent.toStringAsFixed(0)}',
     );
-    if (position.pixels >= position.maxScrollExtent - 0.5 &&
-        position.pixels == before) {
+  }
+  for (var i = 0; i < 30; i++) {
+    final beforeExtent = position.maxScrollExtent;
+    position.jumpTo(beforeExtent);
+    await tester.pump(const Duration(milliseconds: 50));
+    _failOnError(
+      tester,
+      name,
+      log,
+      'after jumping to ${position.maxScrollExtent.toStringAsFixed(0)}',
+    );
+    if ((position.maxScrollExtent - beforeExtent).abs() < 1 &&
+        position.pixels >= position.maxScrollExtent - 1) {
       return;
     }
   }
-  fail('$name: the main content never reached a stable end in 200 steps.');
+  fail('$name: the main content never reached a stable end.');
 }
 
 /// Routes every `FlutterError` of the test into a list instead of the
