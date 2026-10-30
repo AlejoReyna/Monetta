@@ -325,8 +325,9 @@ Future<void> testOnlyAdd(
 
 /// Variant picker shared by the ficha and the quick-view.
 ///
-/// * Reliable single-colour options → swatches (48pt targets, fill + border +
-///   check, never colour alone).
+/// * Reliable single-colour options → swatches: 30pt circles in 48pt targets,
+///   the chosen one wrapped in a thin ink ring (a shape cue, never colour
+///   alone).
 /// * Anything else → neutral text chips.
 /// * Single-variant products → nothing (no fake choice).
 class ProductOptionSelector extends StatelessWidget {
@@ -334,14 +335,19 @@ class ProductOptionSelector extends StatelessWidget {
     required this.product,
     required this.selectedIndex,
     required this.onSelect,
-    this.colorHeading = 'COLOR',
+    this.colorHeading = 'Color',
+    this.showSelectedName = true,
     super.key,
   });
 
   final Product product;
 
-  /// Heading above the swatches when the options are colours.
+  /// Label above the swatches when the options are colours.
   final String colorHeading;
+
+  /// Appends the chosen colour to the label («Color: Negro»). The preview
+  /// turns it off and prints a bare «Colores».
+  final bool showSelectedName;
 
   /// The chosen option. Null means none is chosen yet (the quick view opened
   /// to make the shopper pick); an out-of-range index falls back to the first.
@@ -367,20 +373,13 @@ class ProductOptionSelector extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            colorHeading,
-            style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
+            showSelectedName && selectedTitle != null
+                ? '$colorHeading: $selectedTitle'
+                : colorHeading,
+            style: boutiqueText(size: 14, color: palette.ink, height: 1.3),
           ),
-          const SizedBox(height: BoutiqueSpace.sm),
-          if (selectedTitle != null) ...[
-            Text(
-              selectedTitle,
-              style: boutiqueText(size: 13, color: palette.ink),
-            ),
-            const SizedBox(height: BoutiqueSpace.sm),
-          ],
+          const SizedBox(height: BoutiqueSpace.xs),
           Wrap(
-            spacing: BoutiqueSpace.sm,
-            runSpacing: BoutiqueSpace.sm,
             children: [
               for (var i = 0; i < selectable.length; i++)
                 _Swatch(
@@ -401,8 +400,8 @@ class ProductOptionSelector extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Text(
-          'OPCIÓN',
-          style: boutiqueEyebrow(size: 11, color: palette.inkMuted),
+          'Opción',
+          style: boutiqueText(size: 14, color: palette.ink, height: 1.3),
         ),
         const SizedBox(height: BoutiqueSpace.sm),
         Wrap(
@@ -438,10 +437,12 @@ class _Swatch extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
 
+  /// Diameter of the colour disc.
+  static const double _disc = 30;
+
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
-    final light = fill.computeLuminance() > 0.6;
     return Semantics(
       button: true,
       selected: selected,
@@ -455,24 +456,26 @@ class _Swatch extends StatelessWidget {
           child: Center(
             child: Opacity(
               opacity: available ? 1 : 0.35,
+              // The ring is always laid out so choosing a colour never moves
+              // its neighbours; only its paint changes.
               child: Container(
-                width: 32,
-                height: 32,
+                padding: const EdgeInsets.all(2.5),
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: fill,
                   border: Border.all(
-                    color: selected ? palette.ink : palette.hairline,
-                    width: selected ? 2 : 1,
+                    color: selected ? palette.ink : Colors.transparent,
+                    width: 1.5,
                   ),
                 ),
-                child: selected
-                    ? Icon(
-                        Icons.check,
-                        size: 16,
-                        color: light ? palette.ink : palette.onDark,
-                      )
-                    : null,
+                child: Container(
+                  width: _disc,
+                  height: _disc,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: fill,
+                    border: Border.all(color: palette.hairline),
+                  ),
+                ),
               ),
             ),
           ),

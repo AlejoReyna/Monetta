@@ -39,7 +39,7 @@
       track.scrollTo({ left: clamped * track.clientWidth, behavior: smooth ? behavior() : 'auto' });
       mark(clamped);
     };
-    Monetta.gallery = { goTo, count: () => slides.length };
+    Monetta.gallery = { goTo, count: () => slides.length, current: () => current };
 
     if (typeof ResizeObserver !== 'undefined') {
       new ResizeObserver(() => track.scrollTo({ left: current * track.clientWidth, behavior: 'auto' })).observe(track);
@@ -339,7 +339,39 @@
       return;
     }
     if (event.target.closest?.('[data-share]')) share();
+    const arrow = event.target.closest?.('[data-gallery-step]');
+    if (arrow && Monetta.gallery) {
+      const count = Monetta.gallery.count();
+      Monetta.gallery.goTo((Monetta.gallery.current() + Number(arrow.dataset.galleryStep) + count) % count);
+    }
+    if (event.target.closest?.('[data-gallery-zoom]')) zoom(event.target.closest('[data-gallery-zoom]'));
   });
+
+  /* ------------------------------------------------------------ zoom */
+  // The current photo at full size in a dialog of its own; the page's gallery is not touched.
+  function zoom(trigger) {
+    const index = Monetta.gallery?.current() || 0;
+    const source = $$('.gallery__slide img', page())[index];
+    if (!source) return;
+    let dialog = document.getElementById('photo-zoom');
+    if (!dialog) {
+      dialog = document.createElement('dialog');
+      dialog.className = 'overlay overlay--dialog overlay--zoom';
+      dialog.id = 'photo-zoom';
+      dialog.setAttribute('aria-label', 'Foto ampliada');
+      dialog.innerHTML =
+        '<div class="overlay__backdrop" data-overlay-close></div><div class="overlay__panel photo-zoom" tabindex="-1">' +
+        '<button type="button" class="round-button photo-zoom__close" data-overlay-close aria-label="Cerrar foto ampliada"><span class="round-button__circle">' +
+        '<svg class="icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true" focusable="false"><path fill="currentColor" d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></svg>' +
+        '</span></button><img class="photo-zoom__img" alt=""></div>';
+      document.body.append(dialog);
+    }
+    const img = $('.photo-zoom__img', dialog);
+    const widest = (source.getAttribute('srcset') || '').split(',').map((entry) => entry.trim().split(/\s+/)[0]).filter(Boolean).pop();
+    img.src = widest || source.currentSrc || source.src;
+    img.alt = source.alt || '';
+    Monetta.openDialog(dialog, trigger);
+  }
 
   async function share() {
     const root = page();
@@ -381,7 +413,12 @@
     const option = $$('[data-options] [data-option-value]', root).map((el) => el.textContent.trim()).filter(Boolean).join(' / ');
     // The pressed button gets the focus back when the bag closes. On phones that is the purchase dock's, outside the form.
     const pressed = event.submitter?.matches?.('[data-add]') ? event.submitter : buttons.find((button) => button.offsetParent !== null);
-    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form) });
+    const buyNow = event.submitter?.matches?.('[data-buy-now]') ? event.submitter : null;
+    const result = await Monetta.cart.add({ id: variantId, quantity, name: option ? `${name} (${option})` : name, trigger: pressed || $('[data-add]', form), open: !buyNow });
+    if (result.ok && buyNow) {
+      window.location.assign(buyNow.value);
+      return;
+    }
     buttons.forEach((button) => Monetta.setPending(button, false));
     adding = false;
     if (root.dataset.selection === 'valid') lockPurchase(root, false);

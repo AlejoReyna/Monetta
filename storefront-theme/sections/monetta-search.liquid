@@ -3,7 +3,10 @@
   filter, the filters icon. The page always has exactly one h1: the bar's "Buscar" when there is no query, the results
   heading ("Resultados para “q”") once a search ran. Results, counts, filters and sort are Shopify's.
   Under the field, the client guide's search screen (slide 05): «Búsquedas recientes» (kept in this browser only, each one
-  removable) and «Sugerencias» (the guide's categories). The field is a real GET form, so Enter always works.
+  removable) and «Sugerencias» (the guide's categories), only until a search runs: then the page is its results alone. From
+  768 px the header's own field is the search field (assets/monetta-guia.css hides this one), so the query is never shown
+  twice. Both fields list matching pieces under them as the shopper types (assets/monetta-predictive-search.js). The field
+  is a real GET form, so Enter always works.
 {%- endcomment -%}
 {%- liquid
   assign performed = search.performed
@@ -59,7 +62,7 @@
     </monetta-predictive-search>
 
     {%- assign suggestion_entries = 'bolsas:Bolsas:bag,carteras:Carteras:wallet,relojes:Relojes:watch,perfumes:Perfumes:perfume' | split: ',' -%}
-    <div class="guia-search" data-guia-recent data-current="{{ search.terms | escape }}">
+    <div class="guia-search" data-guia-recent data-current="{{ search.terms | escape }}"{% if performed %} hidden{% endif %}>
       <section class="guia-search__block" data-guia-recent-block aria-labelledby="guia-recent-heading" hidden>
         <h2 class="guia-search__title" id="guia-recent-heading">Búsquedas recientes</h2>
         <ul class="guia-search__list" role="list" data-guia-recent-list></ul>

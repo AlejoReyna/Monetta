@@ -12,7 +12,6 @@ import 'package:monetta_app/features/catalog/search_history.dart';
 import 'package:monetta_app/features/catalog/search_history_persistence.dart';
 import 'package:monetta_app/features/checkout/order_confirmation_screen.dart';
 import 'package:monetta_app/domain/product.dart';
-import 'package:monetta_app/main.dart';
 
 import '../support/product_screen_harness.dart';
 import '../support/quick_add_harness.dart';
@@ -104,12 +103,13 @@ void main() {
     );
   });
 
-  // FICHA-T3: the visible corner action of a card is the "+" for a piece that
-  // Monetta sells (it adds a single-variant piece straight away and never opens
-  // the quick view for it) and stays the eye ("Vista rápida") for a sold-out
-  // piece. Same intent as before: a visible, accessible, 48 px corner action.
-  testWidgets('P2: tile exposes a visible, accessible quick-view action',
-      (tester) async {
+  // The card is its own accessible action since the card redesign: tapping it
+  // (photo or text) opens the quick view, a long press calls `onQuickView`,
+  // the heart keeps its 48 px zone and the «VER PRODUCTO» pill is the way to
+  // the product page. No "+" and no corner eye are drawn.
+  testWidgets(
+      'P2: the card is a labelled, hinted button that opens the quick '
+      'view', (tester) async {
     mockPathProvider();
     final db = openTestDatabase();
     addTearDown(db.close);
@@ -122,17 +122,14 @@ void main() {
 
     Future<void> mount(Product piece, VoidCallback onQuickView) async {
       await tester.pumpWidget(
-        MaterialApp(
-          theme: buildTheme(),
-          home: Scaffold(
-            body: SizedBox(
-              width: 200,
-              child: StoreScope(
-                notifier: store,
-                child: ProductCard(
-                  product: piece,
-                  onQuickView: onQuickView,
-                ),
+        fichaApp(
+          store,
+          Scaffold(
+            body: Center(
+              child: SizedBox(
+                width: 200,
+                height: 420,
+                child: ProductCard(product: piece, onQuickView: onQuickView),
               ),
             ),
           ),
@@ -142,35 +139,37 @@ void main() {
     }
 
     await withSemantics(tester, () async {
-      // (a) A buyable piece: the "+" is the corner action, 48x48 and named.
-      var quickViews = 0;
-      await mount(product, () => quickViews++);
+      var longPresses = 0;
+      await mount(product, () => longPresses++);
 
-      final plus = find.byKey(quickAddKey(product.id));
-      expect(plus, findsOneWidget);
-      expect(tester.getSize(plus).width, greaterThanOrEqualTo(48 - 0.01));
-      expect(tester.getSize(plus).height, greaterThanOrEqualTo(48 - 0.01));
-      expect(
-        tester.getSemantics(plus).label,
-        addLabelFor(store, product),
-      );
+      expect(find.byKey(quickAddKey(product.id)), findsNothing);
       expect(find.byTooltip('Vista rápida'), findsNothing);
+      final heart = find.byTooltip('Guardar');
+      expect(tester.getSize(heart).width, greaterThanOrEqualTo(48 - 0.01));
+      expect(tester.getSize(heart).height, greaterThanOrEqualTo(48 - 0.01));
+      final tile = find.byType(MonettaProductTile);
+      final node = tester.getSemantics(tile).getSemanticsData();
+      expect(node.flagsCollection.isButton, isTrue);
+      expect(node.hint, 'Abre la vista previa');
+      expect(node.label, contains(cardTitle(store, product)));
 
-      await tester.tap(plus);
+      await tester.longPress(tile);
+      await tester.pump();
+      expect(longPresses, 1);
+
+      await tester.tap(find.byType(AspectRatio).first);
       await tester.pumpAndSettle();
-      expect(quickViews, 0, reason: 'one variant: it adds, no quick view');
-      expect(store.bagQuantity, 1);
+      expect(quickViewSheet(), findsOneWidget);
+      expect(store.bagQuantity, 0, reason: 'opening the sheet adds nothing');
 
-      // (b) A sold-out piece keeps the visible "Vista rápida" action.
-      await dismissMiniCart(tester);
-      await mount(soldOut, () => quickViews++);
-
+      // A sold-out piece opens the same sheet from its card.
+      await tester.tapAt(const Offset(8, 40));
+      await tester.pumpAndSettle();
+      await mount(soldOut, () => longPresses++);
       expect(find.byKey(quickAddKey(soldOut.id)), findsNothing);
-      final button = find.byTooltip('Vista rápida');
-      expect(button, findsOneWidget);
-      await tester.tap(button);
+      await tester.tap(find.byType(AspectRatio).first);
       await tester.pumpAndSettle();
-      expect(quickViews, 1);
+      expect(quickViewSheet(), findsOneWidget);
     });
   });
 

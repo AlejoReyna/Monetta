@@ -108,7 +108,6 @@
       this.invalidate(); // Older responses are stale even during the debounce interval.
       if (document.activeElement !== this.input || this.composing) { this.close(); return; }
       if (!this.query) { this.showRecent(); return; }
-      if ([...this.query].length < 2) { this.close(); return; }
       const term = this.query;
       const epoch = this.epoch;
       this.render('loading', [], 'Buscando…');

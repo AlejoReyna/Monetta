@@ -3,6 +3,7 @@ library;
 
 import '../navigation/adaptive_storefront_scaffold.dart';
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart' show ListEquality;
 import 'package:flutter/material.dart';
@@ -20,6 +21,7 @@ import '../boutique/guide_brand_tile.dart';
 import '../wholesale/wholesale_screen.dart';
 import '../contact/contact_screen.dart';
 import '../../app/mixed_feed.dart';
+import '../../app/monetta_tokens.g.dart';
 import '../../app/shopper_copy.dart';
 import '../../app/theme.dart';
 import '../../app/theme_controller.dart';
@@ -38,7 +40,6 @@ import '../catalog/collection_screen.dart';
 import '../catalog/product_card.dart';
 import '../catalog/search_screen.dart';
 import '../checkout/checkout_screen.dart';
-import '../product/quick_view.dart';
 import '../boutique/boutique_tokens.dart';
 import '../notifications/notifications_screen.dart';
 import '../navigation/monetta_bottom_navigation.dart';
@@ -57,9 +58,9 @@ const int _kNewestCount = 8;
 /// default order — see `_resolveSectionOrder`.
 const List<HomeSectionId> _kBoutiqueSectionOrder = <HomeSectionId>[
   HomeSectionId.bagTypes,
+  HomeSectionId.collections,
   HomeSectionId.brands,
   HomeSectionId.newProducts,
-  HomeSectionId.collections,
   HomeSectionId.about,
   HomeSectionId.social,
   HomeSectionId.testimonials,
@@ -67,6 +68,7 @@ const List<HomeSectionId> _kBoutiqueSectionOrder = <HomeSectionId>[
 
 const Set<HomeSectionId> _kGuideOpeningSections = <HomeSectionId>{
   HomeSectionId.bagTypes,
+  HomeSectionId.collections,
   HomeSectionId.brands,
   HomeSectionId.newProducts,
 };
@@ -580,7 +582,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                   _openCatalogSection(title: 'Bolsas', category: 'bolsa'),
             ),
           HomeSectionId.brands => _BrandsSection(
-              brands: guideBrandsFor(content.brands, store.availableBrands),
+              brands: guideBrandsFor(content.brands),
               onSeeAll: () => unawaited(openCategories(context)),
             ),
           HomeSectionId.about => _AboutMonettaSection(
@@ -727,36 +729,278 @@ class _HomeOffersSection extends StatelessWidget {
       );
 }
 
-class _HomeCollectionsSection extends StatelessWidget {
+/// «Colecciones», between «Compra por estilo» and «Tus marcas favoritas»: the
+/// three photo cards of monetta.mx's home (`.guia-collections__track`).
+///
+/// On a phone it is a snap scroller whose cards are `min(56% of the viewport,
+/// 270)` wide, 12 apart, with side room so the first and the last can sit
+/// centred. It always opens on the FIRST card; the centred card is drawn full
+/// size and the others at 0.9 (web `guia-collection-focus`). From 768 px the
+/// cards sit in a row. On first appearance the cards rise 24 px and fade in
+/// one after the other, once, unless animations are disabled.
+class _HomeCollectionsSection extends StatefulWidget {
   const _HomeCollectionsSection({required this.cards});
 
   final List<HomeCollectionCard> cards;
 
   @override
+  State<_HomeCollectionsSection> createState() =>
+      _HomeCollectionsSectionState();
+}
+
+/// Phone card width: `min(56vw, 270px)`.
+const double _kCollectionCardMaxWidth = 270;
+const double _kCollectionCardShare = .56;
+
+/// Space between cards (`--space-3`).
+const double _kCollectionGap = 12;
+
+/// Wide layout (web `@media (min-width: 768px)`): gap `--space-5`, at most 960
+/// wide, each card 30% of what is left after the gaps.
+const double _kCollectionWideGap = 24;
+const double _kCollectionWideMaxWidth = 960;
+const double _kCollectionWideShare = .3;
+
+/// Height over width of the collection photographs (800 x 930).
+const double _kCollectionPhotoRatio = 930 / 800;
+
+/// Reveal (web `monetta-guia.js` `initCollectionsReveal`): each card rises 24
+/// px and fades in over 420 ms, 120 ms after the previous one.
+const double _kCollectionRiseOffset = 24;
+const Duration _kCollectionRevealDuration = Duration(milliseconds: 420);
+const Duration _kCollectionRevealStagger = Duration(milliseconds: 120);
+const Cubic _kCollectionRevealCurve = Cubic(0.22, 1, 0.36, 1);
+
+/// Card typography (web `.guia-collection-card__title` / `__button`).
+const double _kCollectionTitleSize = 28;
+const double _kCollectionTitleLineHeight = 1.1;
+const double _kCollectionPillTextSize = 12;
+const double _kCollectionPillLineHeight = 1.2;
+const double _kCollectionPillMinHeight = 40;
+
+/// Whether the section's motion (reveal, focus scale) is off: the web's
+/// `prefers-reduced-motion`. Read from the media query rather than from the
+/// app's `reduceMotion`, which is always true under `flutter_test`.
+bool _collectionsMotionOff(BuildContext context) =>
+    MediaQuery.disableAnimationsOf(context) ||
+    MediaQuery.accessibleNavigationOf(context);
+
+/// Room for the font's own rounding of the title's line box.
+const double _kCollectionHeightSlack = 2;
+
+/// Natural height of a collection card of [width]: photo, 12, title, 12, pill,
+/// 24 — grown with the shopper's text scale.
+double _collectionCardHeight(BuildContext context, double width) {
+  final scaler = MediaQuery.textScalerOf(context);
+  final title =
+      scaler.scale(_kCollectionTitleSize) * _kCollectionTitleLineHeight;
+  final pill = math.max(
+    _kCollectionPillMinHeight,
+    scaler.scale(_kCollectionPillTextSize) * _kCollectionPillLineHeight,
+  );
+  return width * _kCollectionPhotoRatio +
+      _kCollectionGap +
+      title +
+      _kCollectionGap +
+      pill +
+      BoutiqueSpace.xl +
+      _kCollectionHeightSlack;
+}
+
+class _HomeCollectionsSectionState extends State<_HomeCollectionsSection>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _reveal = AnimationController(
+    vsync: this,
+    duration: _revealDuration(widget.cards.length),
+  );
+  PageController? _controller;
+  double? _fraction;
+  ScrollPosition? _scrollPosition;
+  bool _checkScheduled = false;
+  bool _started = false;
+
+  static Duration _revealDuration(int count) =>
+      _kCollectionRevealDuration +
+      _kCollectionRevealStagger * (count <= 1 ? 0 : count - 1);
+
+  /// The page controller for a viewport fraction. Rebuilt when the fraction
+  /// changes (rotation, window resize) on the card the shopper was looking at;
+  /// a fresh one starts on the first card.
+  PageController _controllerFor(double fraction) {
+    final current = _controller;
+    if (current != null && _fraction == fraction) return current;
+    final page =
+        current != null && current.hasClients ? (current.page ?? 0).round() : 0;
+    current?.dispose();
+    _fraction = fraction;
+    return _controller =
+        PageController(viewportFraction: fraction, initialPage: page);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final next = Scrollable.maybeOf(context)?.position;
+    if (next != _scrollPosition) {
+      _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+      _scrollPosition = next;
+      _scrollPosition?.addListener(_scheduleVisibilityCheck);
+    }
+    if (_collectionsMotionOff(context)) {
+      // Nothing to wait for: the cards are simply there.
+      _started = true;
+      _reveal.value = 1;
+    } else {
+      _scheduleVisibilityCheck();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _HomeCollectionsSection oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!_started && oldWidget.cards.length != widget.cards.length) {
+      _reveal.duration = _revealDuration(widget.cards.length);
+    }
+  }
+
+  @override
+  void dispose() {
+    _scrollPosition?.removeListener(_scheduleVisibilityCheck);
+    _reveal.dispose();
+    _controller?.dispose();
+    super.dispose();
+  }
+
+  void _scheduleVisibilityCheck() {
+    if (_started || _checkScheduled || !mounted) return;
+    _checkScheduled = true;
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkScheduled = false;
+      if (!mounted || _started) return;
+      final renderObject = context.findRenderObject();
+      if (renderObject is! RenderBox || !renderObject.attached) return;
+      final top = renderObject.localToGlobal(Offset.zero).dy;
+      final bottom = top + renderObject.size.height;
+      if (bottom <= 0 || top >= MediaQuery.sizeOf(context).height) return;
+      _started = true;
+      unawaited(_reveal.forward());
+    });
+  }
+
+  /// Progress of card [index]: 0 until its turn, then eased to 1.
+  Animation<double> _progress(int index) {
+    final total = _reveal.duration!.inMilliseconds;
+    final start = _kCollectionRevealStagger.inMilliseconds * index;
+    final end = start + _kCollectionRevealDuration.inMilliseconds;
+    return _reveal.drive(
+      CurveTween(
+        curve: Interval(
+          (start / total).clamp(0.0, 1.0),
+          (end / total).clamp(0.0, 1.0),
+          curve: _kCollectionRevealCurve,
+        ),
+      ),
+    );
+  }
+
+  Widget _revealed(int index, Widget child) {
+    final progress = _progress(index);
+    return AnimatedBuilder(
+      animation: progress,
+      child: child,
+      builder: (context, child) => Opacity(
+        opacity: progress.value.clamp(0.0, 1.0),
+        child: Transform.translate(
+          offset: Offset(0, _kCollectionRiseOffset * (1 - progress.value)),
+          child: child,
+        ),
+      ),
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final cards = widget.cards;
     if (cards.isEmpty) return const SizedBox.shrink();
     final viewportWidth = MediaQuery.sizeOf(context).width;
-    final cardWidth = (viewportWidth * .73).clamp(280.0, 460.0);
-    final cardHeight = cardWidth / .7;
+    final header = const BoutiqueSectionHeader(title: 'Colecciones');
+    if (viewportWidth >= kHomeWideBreakpoint) {
+      final container = math.min(viewportWidth, _kCollectionWideMaxWidth) -
+          BoutiqueSpace.gutter * 2;
+      final cardWidth =
+          (container - _kCollectionWideGap * 2) * _kCollectionWideShare;
+      return Column(
+        key: const ValueKey('home-section-collections'),
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          header,
+          Center(
+            child: Wrap(
+              key: const ValueKey('home-collections-row'),
+              alignment: WrapAlignment.center,
+              spacing: _kCollectionWideGap,
+              runSpacing: _kCollectionWideGap,
+              children: [
+                for (var i = 0; i < cards.length; i++)
+                  _revealed(
+                    i,
+                    SizedBox(
+                      width: cardWidth,
+                      child: _CollectionPhotoCard(card: cards[i]),
+                    ),
+                  ),
+              ],
+            ),
+          ),
+        ],
+      );
+    }
+
+    final cardWidth = math.min(
+      viewportWidth * _kCollectionCardShare,
+      _kCollectionCardMaxWidth,
+    );
+    final controller = _controllerFor(
+      ((cardWidth + _kCollectionGap) / viewportWidth).clamp(.1, 1.0),
+    );
+    final motionOff = _collectionsMotionOff(context);
     return Column(
       key: const ValueKey('home-section-collections'),
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const BoutiqueSectionHeader(title: 'Colecciones'),
+        header,
         SizedBox(
-          height: cardHeight,
-          child: ListView.separated(
-            scrollDirection: Axis.horizontal,
+          height: _collectionCardHeight(context, cardWidth),
+          child: PageView.builder(
+            key: const ValueKey('home-collections-track'),
+            controller: controller,
+            // The cards' shadow reaches past the track.
             clipBehavior: Clip.none,
-            padding: const EdgeInsets.symmetric(
-              horizontal: BoutiqueSpace.gutter,
-            ),
+            padEnds: true,
             itemCount: cards.length,
-            separatorBuilder: (_, __) =>
-                const SizedBox(width: BoutiqueSpace.md),
-            itemBuilder: (context, index) => SizedBox(
-              width: cardWidth,
-              child: _CollectionEditorialCard(card: cards[index]),
+            itemBuilder: (context, index) => _revealed(
+              index,
+              AnimatedBuilder(
+                animation: controller,
+                builder: (context, child) {
+                  final page = controller.hasClients &&
+                          controller.position.haveDimensions
+                      ? controller.page ?? controller.initialPage.toDouble()
+                      : controller.initialPage.toDouble();
+                  final distance = (page - index).abs().clamp(0.0, 1.0);
+                  return Transform.scale(
+                    scale: motionOff ? 1 : 1 - .1 * distance,
+                    child: child,
+                  );
+                },
+                child: Align(
+                  alignment: Alignment.topCenter,
+                  child: SizedBox(
+                    width: cardWidth,
+                    child: _CollectionPhotoCard(card: cards[index]),
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -765,70 +1009,108 @@ class _HomeCollectionsSection extends StatelessWidget {
   }
 }
 
-class _CollectionEditorialCard extends StatelessWidget {
-  const _CollectionEditorialCard({required this.card});
+/// Web `.guia-collection-card`: white card, photo, serif title and the
+/// «VER COLECCIÓN» pill. The whole card is the tap target.
+class _CollectionPhotoCard extends StatelessWidget {
+  const _CollectionPhotoCard({required this.card});
 
   final HomeCollectionCard card;
 
   @override
   Widget build(BuildContext context) {
+    final palette = context.boutique;
     return Semantics(
       button: true,
       label: 'Ver colección ${card.title}',
+      excludeSemantics: true,
       child: GestureDetector(
         key: ValueKey('home-collection-card-${card.handle}'),
         onTap: () => _openHomeCollection(context, card),
         child: MonettaCardLift(
           borderRadius: BoutiqueRadius.card,
-          child: ClipRRect(
-            borderRadius: BoutiqueRadius.card,
-            child: Stack(
-              fit: StackFit.expand,
-              children: [
-                _HomeImage(
-                  imageUrl: card.imageUrl,
-                  fallbackAsset: card.fallbackAsset,
+          child: DecoratedBox(
+            decoration: BoxDecoration(
+              color: context.monettaColors.surfaceRaised,
+              borderRadius: BoutiqueRadius.card,
+              // --shadow-card: 0 4px 14px rgba(61, 43, 28, 0.059)
+              boxShadow: const [
+                BoxShadow(
+                  color: Color(0x0F3D2B1C),
+                  blurRadius: 14,
+                  offset: Offset(0, 4),
                 ),
-                const IgnorePointer(
-                  child: DecoratedBox(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Color(0x00000000),
-                          Color(0x08000000),
-                          Color(0xB8000000),
-                        ],
-                        stops: [.46, .64, 1],
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BoutiqueRadius.card,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: BoutiqueSpace.xl),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 1 / _kCollectionPhotoRatio,
+                      child: _HomeImage(
+                        imageUrl: card.imageUrl,
+                        fallbackAsset: card.fallbackAsset,
                       ),
                     ),
-                  ),
-                ),
-                Positioned(
-                  left: 20,
-                  right: 16,
-                  bottom: 18,
-                  child: Row(
-                    children: [
-                      Expanded(
+                    const SizedBox(height: _kCollectionGap),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BoutiqueSpace.md,
+                      ),
+                      child: Text(
+                        card.title,
+                        key: ValueKey('home-collection-title-${card.handle}'),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        textAlign: TextAlign.center,
+                        style: guideSerifStyle(
+                          context,
+                          size: _kCollectionTitleSize,
+                          height: _kCollectionTitleLineHeight,
+                          color: palette.ink,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: _kCollectionGap),
+                    Container(
+                      key: ValueKey('home-collection-pill-${card.handle}'),
+                      constraints: const BoxConstraints(
+                        minHeight: _kCollectionPillMinHeight,
+                      ),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: BoutiqueSpace.xl,
+                      ),
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                        color: Color(0xFFECECEC),
+                        borderRadius: BorderRadius.all(Radius.circular(999)),
+                      ),
+                      // At large text scales the label shrinks rather than
+                      // wrapping or overflowing the card.
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
                         child: Text(
-                          card.title,
-                          style: boutiqueDisplay(
-                            24,
-                            color: context.boutique.onDark,
+                          'VER COLECCIÓN',
+                          maxLines: 1,
+                          style: boutiqueText(
+                            size: _kCollectionPillTextSize,
+                            weight: FontWeight.w600,
+                            height: _kCollectionPillLineHeight,
+                            // The pill is a light grey on both themes: dark
+                            // ink, whatever the palette.
+                            color: MonettaTokens.ink,
+                          ).copyWith(
+                            letterSpacing: _kCollectionPillTextSize * .12,
                           ),
                         ),
                       ),
-                      const Icon(
-                        Icons.arrow_forward,
-                        size: 21,
-                        color: Colors.white,
-                      ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),
@@ -868,7 +1150,7 @@ class _BrandsSection extends StatefulWidget {
   State<_BrandsSection> createState() => _BrandsSectionState();
 }
 
-/// Brands of the guide's 4 x 2 grid, in the guide's own order.
+/// The guide's own brands, first in the grid and in this order.
 const List<String> _kGuideBrandOrder = <String>[
   'coach',
   'guess',
@@ -880,29 +1162,17 @@ const List<String> _kGuideBrandOrder = <String>[
 String _brandSlug(String brand) =>
     brand.trim().toLowerCase().replaceAll(RegExp(r'[\s\-]+'), '_');
 
-/// The brands the grid shows: only those the catalog really carries (they all
-/// come with bundled artwork), the guide's own five first, at most eight.
-///
-/// When the catalog reports no brand at all (a cold start), the configured
-/// list is shown as it is so the section never disappears.
+/// The brands the grid shows: every configured brand (they all come with
+/// bundled artwork), the guide's own five first. A brand the catalog does not
+/// carry yet still has its tile; it opens its (empty) listing.
 @visibleForTesting
-List<HomeBrandCard> guideBrandsFor(
-  List<HomeBrandCard> configured,
-  List<String> catalogBrands,
-) {
-  final carried = <String>{...catalogBrands};
-  final eligible = carried.isEmpty
-      ? configured
-      : [
-          for (final brand in configured)
-            if (carried.contains(_brandSlug(brand.brand))) brand,
-        ];
+List<HomeBrandCard> guideBrandsFor(List<HomeBrandCard> configured) {
   int rank(HomeBrandCard brand) {
     final index = _kGuideBrandOrder.indexOf(_brandSlug(brand.brand));
     return index < 0 ? _kGuideBrandOrder.length : index;
   }
 
-  final ordered = [...eligible];
+  final ordered = [...configured];
   // List.sort is not stable: tie-break on the configured position.
   final position = <HomeBrandCard, int>{
     for (var i = 0; i < ordered.length; i++) ordered[i]: i,
@@ -911,7 +1181,7 @@ List<HomeBrandCard> guideBrandsFor(
     final byRank = rank(a).compareTo(rank(b));
     return byRank != 0 ? byRank : position[a]!.compareTo(position[b]!);
   });
-  return ordered.take(8).toList();
+  return ordered;
 }
 
 Duration _brandEntranceDuration(int brandCount) {
@@ -1309,32 +1579,20 @@ class _CatalogGrid extends StatelessWidget {
     if (products.isEmpty) return const SizedBox.shrink();
     return LayoutBuilder(
       builder: (context, constraints) {
-        final columns = constraints.maxWidth >= 1060
-            ? 4
-            : constraints.maxWidth >= 720
-                ? 3
-                : 2;
         return GridView.builder(
           clipBehavior: Clip.none,
           padding: const EdgeInsets.symmetric(horizontal: BoutiqueSpace.gutter),
           physics: const NeverScrollableScrollPhysics(),
           shrinkWrap: true,
-          // 0.50 reserves ~115pt for the caption under a 4:5 photo plus the
-          // 12pt gap, matching the grid delegate's 112pt contract. 0.52
-          // overflowed by 5-8pt on two-line names.
-          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: columns,
-            childAspectRatio: 0.50,
-            crossAxisSpacing: BoutiqueSpace.md,
-            mainAxisSpacing: BoutiqueSpace.xxl,
+          gridDelegate: productGridDelegate(
+            context,
+            availableWidth: constraints.maxWidth - BoutiqueSpace.gutter * 2,
+            priceLines: tilePriceLinesFor(products),
           ),
           itemCount: products.length,
           itemBuilder: (context, index) {
             final product = products[index];
-            return ProductCard(
-              product: product,
-              onQuickView: () => showProductQuickView(context, product),
-            );
+            return ProductCard(product: product);
           },
         );
       },

@@ -23,15 +23,14 @@
   if t == 'search' or t == 'cart'
     assign has_page_bar = true
   endif
-  if t == 'product'
-    assign dock_mode = 'purchase'
-  elsif t == 'cart' and cart.item_count > 0
+  # The product page keeps the nav bar, as the client's 29 Oct reference; its buttons sit in the page.
+  if t == 'cart' and cart.item_count > 0
     assign dock_mode = 'checkout'
   endif
   case t
     when 'index'
       assign dock_active = 'home'
-    when 'collection', 'search', 'list-collections'
+    when 'collection', 'search', 'list-collections', 'product'
       assign dock_active = 'catalog'
     when 'cart'
       assign dock_active = 'cart'
@@ -52,6 +51,7 @@
     data-template="{{ t }}"
     data-dock-active="{{ dock_active }}"
   >
+    {%- render 'monetta-intro' -%}
     <a class="skip-link" href="#MainContent">Saltar al contenido</a>
 
     <div id="page">
@@ -70,7 +70,7 @@
     {%- section 'monetta-cart-sheet' -%}
     {% render 'monetta-saved-products' %}
     {%- comment -%}Quick view of the client guide (sections/monetta-quick-view.liquid, filled by assets/monetta-guia.js).{%- endcomment -%}
-    <dialog class="overlay overlay--sheet" id="quick-view" aria-labelledby="quick-view-title">
+    <dialog class="overlay overlay--dialog overlay--preview" id="quick-view" aria-labelledby="quick-view-title">
       <div class="overlay__backdrop" data-overlay-close></div>
       <div class="overlay__panel" data-quick-view-panel></div>
     </dialog>

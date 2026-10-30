@@ -15,7 +15,8 @@ import 'package:monetta_app/features/home/home_account_invitation.dart';
 import 'package:monetta_app/main.dart';
 
 // The client guide sets screen and banner titles in the editorial serif.
-// Filter panels, compact bar titles and product card labels retain the sans.
+// Filter panels and compact bar titles retain the sans; the product card
+// caption is serif since the card redesign.
 // Editorial surfaces (Home, welcome, account...) must stay serif.
 //
 // These tests read the style handed to each `Text`, so the Ahem test font is
@@ -91,15 +92,6 @@ void _expectSans(TextStyle style, {required String reason}) {
   expect(style.fontWeight, FontWeight.w600, reason: '$reason: weight');
 }
 
-void _expectSameFace(TextStyle style, TextStyle reference, String reason) {
-  expect(style.fontFamily, reference.fontFamily, reason: '$reason: family');
-  expect(
-    style.fontFamilyFallback,
-    reference.fontFamilyFallback,
-    reason: '$reason: fallback chain',
-  );
-}
-
 Future<void> _openCatalogPanel(WidgetTester tester) async {
   await tester.tap(find.byKey(const Key('catalog-filter-button')));
   await tester.pumpAndSettle();
@@ -116,9 +108,10 @@ void main() {
       final title = _styleOf(tester, find.text('Productos'));
       _expectSerif(title, reason: 'Productos');
       expect(title.fontSize, MonettaTokens.screenTitle.compact);
+      // The card's own caption is set in the serif since the card redesign.
       expect(
         _cardNameStyle(tester, items.first).fontFamily,
-        kBoutiqueSansFamily,
+        kBoutiqueSerifFamily,
       );
     });
 
@@ -162,7 +155,11 @@ void main() {
 
       final title = _styleOf(tester, find.text('Filtrar y ordenar'));
       _expectSans(title, reason: 'catalog panel title');
-      _expectSameFace(title, _cardNameStyle(tester, items.first), 'vs card');
+      // Panel chrome stays sans while the card caption is serif.
+      expect(
+        _cardNameStyle(tester, items.first).fontFamily,
+        isNot(title.fontFamily),
+      );
     });
 
     testWidgets('TYPE-01b the collection panel title is sans w600',

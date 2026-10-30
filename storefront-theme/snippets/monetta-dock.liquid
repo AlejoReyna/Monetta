@@ -1,7 +1,7 @@
 {%- doc -%}
-  Floating dock for phones (lib/features/navigation/monetta_floating_bottom_navigation.dart): Inicio · Categorías · Carrito ·
-  Cuenta, as the client guide. The layout's body class
-  decides whether it shows: browsing pages yes, the product page and a non-empty bag use their own bottom bar.
+  Bottom bar for phones (lib/features/navigation/monetta_bottom_navigation.dart, the flat bar): Inicio · Categorías · Carrito ·
+  Cuenta with line glyphs, as the client's 29 Oct reference. The layout's body class decides whether it shows: browsing pages and
+  the product page yes, a non-empty bag uses its own checkout bar.
 
   @param {string} [dock_active] - 'home', 'catalog', 'cart' or 'account': the item marked aria-current="page".
 {%- enddoc -%}
@@ -17,16 +17,16 @@
 <nav class="dock" id="dock" aria-label="Navegación principal">
   <div class="dock__bar">
     <a class="dock__item" href="{{ routes.root_url }}" data-dock="home"{% if dock_active == 'home' %} aria-current="page"{% endif %}>
-      <span class="dock__icon">{% render 'monetta-icon', name: 'home', size: 22 %}</span>Inicio
+      <span class="dock__icon">{% render 'monetta-nav-glyph', name: 'home' %}</span>Inicio
     </a>
     <a class="dock__item" href="{{ routes.collections_url }}" data-dock="catalog"{% if dock_active == 'catalog' %} aria-current="page"{% endif %}>
-      <span class="dock__icon">{% render 'monetta-icon', name: 'grid', size: 22 %}</span>Categorías
+      <span class="dock__icon">{% render 'monetta-nav-glyph', name: 'catalog' %}</span>Categorías
     </a>
     <a class="dock__item" href="{{ routes.cart_url }}" data-dock="cart" aria-label="{{ cart_label }}"{% if dock_active == 'cart' %} aria-current="page"{% endif %}>
-      <span class="dock__icon">{% render 'monetta-icon', name: 'bag', size: 22 %}<span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></span>Carrito
+      <span class="dock__icon">{% render 'monetta-nav-glyph', name: 'cart' %}<span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></span>Carrito
     </a>
     <a class="dock__item" href="{% render 'monetta-account-link' %}" data-dock="account"{% if dock_active == 'account' %} aria-current="page"{% endif %}>
-      <span class="dock__icon">{% render 'monetta-icon', name: 'person', size: 22 %}</span>Cuenta
+      <span class="dock__icon">{% render 'monetta-nav-glyph', name: 'account' %}</span>Cuenta
     </a>
   </div>
 </nav>

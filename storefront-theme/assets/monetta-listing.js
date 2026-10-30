@@ -156,6 +156,9 @@
   });
 
   // Search opened empty from another screen focuses its field (the router of the prototype does the same).
-  const searchInput = $('[data-search-autofocus]');
+  // The search page's own field on phones, the header's from 768 px, where the page's is hidden. Only the search page
+  // carries the hook: a collection shares this script, and focusing the header field there opens the predictive panel.
+  const searchHook = $('[data-search-autofocus]');
+  const searchInput = searchHook && [searchHook, document.getElementById('header-search-input')].find(isShown);
   if (searchInput && !searchInput.value) searchInput.focus({ preventScroll: true });
 })();

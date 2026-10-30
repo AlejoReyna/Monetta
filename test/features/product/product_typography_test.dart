@@ -77,7 +77,7 @@ void main() {
       expect(style.fontSize, MonettaTokens.productName.compact);
     });
 
-    testWidgets('TYPE-01d the three accordion labels are section headings',
+    testWidgets('TYPE-01d the three accordion labels are serif w400, 18',
         (tester) async {
       await mount(tester);
 
@@ -86,11 +86,10 @@ void main() {
         'Detalles',
         'Envíos y devoluciones',
       ]) {
-        await _expectSectionHeading(
-          tester,
-          find.text(label),
-          reason: 'accordion "$label"',
-        );
+        await scrollTo(tester, find.text(label));
+        final style = styleOf(tester, find.text(label));
+        _expectSerif(style, reason: 'accordion "$label"');
+        expect(style.fontSize, 18, reason: 'accordion "$label": size');
       }
     });
 

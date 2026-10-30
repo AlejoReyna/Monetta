@@ -1,0 +1,19 @@
+{%- doc -%}
+  The app's launch reveal (lib/app/startup_reveal.dart) on the first page of a browser session: an opaque surface where the
+  wordmark opens from its «M» to the full MONETTA, then fades out. Drawn only when snippets/monetta-head.liquid set
+  html.has-intro (once per session, never in the theme editor, never with reduced motion); the CSS in
+  assets/monetta-guia.css hides it on its own when the fade ends, and this script drops the class.
+{%- enddoc -%}
+<div class="monetta-intro" aria-hidden="true">
+  <span class="monetta-intro__clip">{% render 'monetta-logo', height: 48 %}</span>
+</div>
+<script>
+  (() => {
+    const root = document.documentElement;
+    if (!root.classList.contains('has-intro')) return;
+    const intro = document.currentScript.previousElementSibling;
+    const done = () => root.classList.remove('has-intro');
+    intro.addEventListener('animationend', (event) => { if (event.target === intro) done(); });
+    window.setTimeout(done, 2000);
+  })();
+</script>

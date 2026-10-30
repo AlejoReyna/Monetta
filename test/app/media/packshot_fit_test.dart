@@ -7,7 +7,6 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/media/monetta_image.dart';
-import 'package:monetta_app/features/boutique/boutique_tokens.dart';
 import 'package:monetta_app/features/catalog/product_tile.dart';
 
 /// Frame of an edge-to-edge photo at 390 pt: 193 pt wide, 4:5.
@@ -206,7 +205,7 @@ void main() {
   });
 
   group('UI-CAT-06 the tile variant', () {
-    testWidgets('UI-CAT-06 edge-to-edge tiles trim-cover; cards do not',
+    testWidgets('UI-CAT-06 both variants trim-cover the photograph',
         (tester) async {
       await tester.pumpWidget(
         MaterialApp(
@@ -244,22 +243,22 @@ void main() {
         ),
       );
       final card = tester.widget<MonettaImage>(find.byType(MonettaImage));
-      expect(card.maxCoverTrim, isNull);
+      expect(card.maxCoverTrim, kPackshotMaxCoverTrim);
       expect(card.fit, BoxFit.contain);
     });
 
     test('UI-CAT-06 variant metrics', () {
-      expect(ProductTileVariant.card.columnSpacing, 12);
+      expect(ProductTileVariant.card.columnSpacing, 8);
       expect(ProductTileVariant.edgeToEdge.columnSpacing, 4);
-      expect(ProductTileVariant.card.rowSpacing, 24);
+      expect(ProductTileVariant.card.rowSpacing, 8);
       expect(ProductTileVariant.edgeToEdge.rowSpacing, 0);
-      expect(ProductTileVariant.card.photoInset, 8);
+      expect(ProductTileVariant.card.photoInset, 12);
       expect(ProductTileVariant.edgeToEdge.photoInset, 0);
-      expect(ProductTileVariant.card.photoRadius, BoutiqueRadius.tile);
+      expect(ProductTileVariant.card.photoRadius, kProductCardRadius);
       expect(ProductTileVariant.edgeToEdge.photoRadius, BorderRadius.zero);
       expect(ProductTileVariant.card.captionInset, 0);
       expect(ProductTileVariant.edgeToEdge.captionInset, 8);
-      expect(ProductTileVariant.card.captionGap, 12);
+      expect(ProductTileVariant.card.captionGap, 8);
       expect(ProductTileVariant.edgeToEdge.captionGap, 10);
       expect(ProductTileVariant.card.captionTrailing, 0);
       expect(ProductTileVariant.edgeToEdge.captionTrailing, 28);
@@ -276,12 +275,13 @@ void main() {
         ),
         closeTo(115.85, 0.001),
       );
+      // The card's serif caption: 14.5 + 1.015 * (15*1.25 + 14*1.3*2 + 15*1.2).
       expect(
         ProductTileVariant.card.captionExtent(
           ProductTileDensity.grid,
           TextScaler.noScaling,
         ),
-        112,
+        closeTo(88.747, 0.001),
       );
     });
 
@@ -319,11 +319,12 @@ void main() {
       );
     });
 
-    testWidgets('UI-CAT-06 the card delegate is unchanged', (tester) async {
+    testWidgets('UI-CAT-06 the card delegate: 8/8 and the whole card',
+        (tester) async {
       final delegate = await _delegate(tester, availableWidth: 350);
-      expect(delegate.crossAxisSpacing, 12);
-      expect(delegate.mainAxisSpacing, 24);
-      expect(delegate.mainAxisExtent, closeTo(169 * 1.25 + 112, 0.001));
+      expect(delegate.crossAxisSpacing, 8);
+      expect(delegate.mainAxisSpacing, 8);
+      expect(delegate.mainAxisExtent, closeTo(307.747, 0.001));
     });
   });
 }
