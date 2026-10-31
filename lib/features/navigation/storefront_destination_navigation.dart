@@ -6,6 +6,7 @@ import '../../main.dart';
 import '../account/account_screen.dart';
 import '../catalog/categories_screen.dart';
 import '../checkout/checkout_screen.dart';
+import 'duo_workspace.dart';
 import 'monetta_bottom_navigation.dart';
 
 /// Secondary routes share the same four destinations without inventing a
@@ -20,7 +21,8 @@ MonettaBottomNavigation storefrontNavigation(
       onSelected: (destination) {
         switch (destination) {
           case MonettaBottomDestination.home:
-            Navigator.of(context).popUntil((route) => route.isFirst);
+            DuoWorkspace.navigatorFor(context)
+                .popUntil((route) => route.isFirst);
           case MonettaBottomDestination.catalog:
             unawaited(openCategories(context));
           case MonettaBottomDestination.bag:

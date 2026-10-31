@@ -4,6 +4,7 @@
 library;
 
 import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/duo_workspace.dart';
 import 'browse_detail_layout.dart';
 import 'dart:async';
 
@@ -57,7 +58,8 @@ Future<void> openSearch(
   String? prompt,
 }) async {
   final store = StoreScope.of(context);
-  await Navigator.of(context).push<void>(
+  // Search always opens on the browsing side.
+  await DuoWorkspace.navigatorFor(context).push<void>(
     monettaFadeRoute(
       StoreScope(
         notifier: store,
@@ -381,7 +383,8 @@ class _SearchScreenState extends State<SearchScreen> {
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              DuoWorkspace.navigatorFor(context)
+                  .popUntil((route) => route.isFirst);
             case MonettaBottomDestination.catalog:
               unawaited(openCategories(context));
             case MonettaBottomDestination.bag:

@@ -2,6 +2,7 @@
 library;
 
 import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/duo_workspace.dart';
 import 'dart:async';
 import 'package:flutter/material.dart';
 import '../../app/account_controller.dart';
@@ -36,7 +37,7 @@ class ClientGuideScaffold extends StatelessWidget {
     void select(ClientGuideDestination destination) {
       switch (destination) {
         case ClientGuideDestination.home:
-          Navigator.of(context).popUntil((route) => route.isFirst);
+          DuoWorkspace.navigatorFor(context).popUntil((route) => route.isFirst);
         case ClientGuideDestination.categories:
           if (current != ClientGuideDestination.categories) {
             unawaited(openCategories(context));

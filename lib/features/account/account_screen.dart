@@ -14,6 +14,7 @@
 library;
 
 import '../../platform/system_layout_context.dart';
+import '../navigation/duo_workspace.dart';
 import '../navigation/adaptive_storefront_scaffold.dart';
 import 'dart:async';
 import 'dart:typed_data';
@@ -94,9 +95,7 @@ Future<void> openAccount(
   }
 
   if (!context.mounted) return;
-  await Navigator.of(context).push(
-    MaterialPageRoute<void>(
-      builder: (_) => AccountScreen(
+  Widget page(BuildContext _) => AccountScreen(
         controller: controller,
         canOpenAdmin: canOpenAdmin,
         onOpenAdmin: onOpenAdmin,
@@ -108,7 +107,23 @@ Future<void> openAccount(
         privacyPolicy: privacyPolicy,
         openExternalUri: openExternalUri,
         profilePhotoPicker: profilePhotoPicker,
+      );
+  // A two-sided window keeps the catalog on the left and the account on the
+  // right side.
+  if (DuoWorkspace.showPane(
+    context,
+    DuoPanePage(kind: DuoPaneKind.account, builder: page),
+  )) {
+    return;
+  }
+  await DuoWorkspace.navigatorFor(context).push(
+    MaterialPageRoute<void>(
+      // Named so the account moves to the right side when the window opens.
+      settings: RouteSettings(
+        name: DuoWorkspace.accountRoute,
+        arguments: DuoPanePage(kind: DuoPaneKind.account, builder: page),
       ),
+      builder: page,
     ),
   );
 }
@@ -206,7 +221,8 @@ class AccountScreen extends StatelessWidget {
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              DuoWorkspace.navigatorFor(context)
+                  .popUntil((route) => route.isFirst);
             case MonettaBottomDestination.catalog:
               unawaited(openCategories(context));
             case MonettaBottomDestination.bag:

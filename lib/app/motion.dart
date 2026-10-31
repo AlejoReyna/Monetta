@@ -33,8 +33,12 @@ Route<T> monettaPageRoute<T extends Object?>(Widget page) {
 }
 
 /// Fade used by the shipped catalog, product and checkout pushes.
-Route<T> monettaFadeRoute<T extends Object?>(Widget page) {
+Route<T> monettaFadeRoute<T extends Object?>(
+  Widget page, {
+  RouteSettings? settings,
+}) {
   return PageRouteBuilder<T>(
+    settings: settings,
     pageBuilder: (context, animation, secondaryAnimation) => page,
     transitionDuration: kEnter,
     reverseTransitionDuration: kSettle,

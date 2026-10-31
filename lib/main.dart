@@ -80,8 +80,10 @@ import 'features/catalog/collection_screen.dart';
 import 'features/catalog/browse_detail_layout.dart';
 import 'features/catalog/search_history.dart';
 import 'features/catalog/search_history_persistence.dart';
+import 'features/checkout/checkout_screen.dart' show BagScreen;
 import 'features/checkout/reviewing_checkout.dart';
 import 'features/home/home_screen.dart';
+import 'features/navigation/duo_workspace.dart';
 import 'features/product/product_screen.dart';
 import 'features/welcome/welcome_gate.dart';
 
@@ -503,6 +505,9 @@ class MonettaApp extends StatefulWidget {
 class _MonettaAppState extends State<MonettaApp> {
   final GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
+  /// Lets a two-sided window read the browsing side's top page.
+  final DuoRouteObserver _duoRoutes = DuoRouteObserver();
+
   @override
   void initState() {
     super.initState();
@@ -875,6 +880,7 @@ class _MonettaAppState extends State<MonettaApp> {
     _featuredCatalog.dispose();
     _onboarding.dispose();
     _theme.dispose();
+    _duoRoutes.dispose();
     super.dispose();
   }
 
@@ -888,6 +894,7 @@ class _MonettaAppState extends State<MonettaApp> {
           notifier: _theme,
           child: MaterialApp(
             navigatorKey: _navigatorKey,
+            navigatorObservers: [_duoRoutes],
             title: 'Monetta',
             debugShowCheckedModeBanner: false,
             theme: buildLightTheme(),
@@ -924,7 +931,16 @@ class _MonettaAppState extends State<MonettaApp> {
                                   notificationController: _notifications,
                                   shopDomain: StorefrontConfig.fromEnvironment()
                                       .shopDomain,
-                                  child: navigator!,
+                                  // A foldable's inner display: browsing on the
+                                  // left, the bag and its companions on the
+                                  // right. Every other window is unchanged.
+                                  child: DuoWorkspace(
+                                    navigatorKey: _navigatorKey,
+                                    routes: _duoRoutes,
+                                    paneRoot: (_) =>
+                                        const BagScreen(embedded: true),
+                                    child: navigator!,
+                                  ),
                                 )
                               : const SizedBox.expand(),
                         );

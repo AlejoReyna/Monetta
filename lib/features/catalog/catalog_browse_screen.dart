@@ -7,9 +7,11 @@ library;
 
 import '../../platform/system_layout_context.dart';
 import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/duo_workspace.dart';
 import 'browse_detail_layout.dart';
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 
 import '../../app/motion.dart';
@@ -237,6 +239,30 @@ class CatalogBrowseScreen extends StatefulWidget {
 class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
   _CatalogFilters _filters = const _CatalogFilters();
 
+  /// The applied filters, followed by the filter page on a two-sided window's
+  /// right side so it stays in step with changes made here.
+  final _applied = ValueNotifier<_CatalogFilters>(const _CatalogFilters());
+  DuoWorkspaceState? _workspace;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _workspace = DuoWorkspace.stateOf(context);
+  }
+
+  @override
+  void dispose() {
+    // Filters for a page that is gone have nothing left to filter.
+    _workspace?.dismissOwnedBy(this);
+    _applied.dispose();
+    super.dispose();
+  }
+
+  void _apply(_CatalogFilters filters) {
+    setState(() => _filters = filters);
+    _applied.value = filters;
+  }
+
   List<CatalogItem> _visibleItems([_CatalogFilters? filters]) => _filterCatalog(
         widget.items,
         query: '',
@@ -245,13 +271,30 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
 
   void _resetAll() {
     FocusManager.instance.primaryFocus?.unfocus();
-    setState(() {
-      _filters = const _CatalogFilters();
-    });
+    _apply(const _CatalogFilters());
   }
 
   Future<void> _openFilters() async {
     FocusManager.instance.primaryFocus?.unfocus();
+    // A two-sided window edits the filters on its right side and applies
+    // every change at once to the grid on the left.
+    final beside = DuoWorkspace.showPane(
+      context,
+      DuoPanePage(
+        kind: DuoPaneKind.filters,
+        owner: this,
+        builder: (_) => _CatalogFilterSheet(
+          items: widget.items,
+          initial: _filters,
+          visibleCount: (draft) => _visibleItems(draft).length,
+          applied: _applied,
+          onChanged: (filters) {
+            if (mounted) _apply(filters);
+          },
+        ),
+      ),
+    );
+    if (beside) return;
     final result = await showModalBottomSheet<_CatalogFilters>(
       context: context,
       anchorPoint: presentationAnchor(context),
@@ -266,7 +309,7 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
       ),
     );
     // Dismissing the sheet keeps the filters that were already applied.
-    if (result != null && mounted) setState(() => _filters = result);
+    if (result != null && mounted) _apply(result);
   }
 
   @override
@@ -415,7 +458,8 @@ class _CatalogBrowseScreenState extends State<CatalogBrowseScreen> {
         onSelected: (destination) {
           switch (destination) {
             case MonettaBottomDestination.home:
-              Navigator.of(context).popUntil((route) => route.isFirst);
+              DuoWorkspace.navigatorFor(context)
+                  .popUntil((route) => route.isFirst);
             case MonettaBottomDestination.catalog:
               unawaited(openCategories(context));
             case MonettaBottomDestination.bag:
@@ -439,7 +483,8 @@ void openCatalogBrowse(
   required List<CatalogItem> items,
 }) {
   final store = StoreScope.of(context);
-  Navigator.of(context).push(
+  // The catalog always opens on the browsing side.
+  DuoWorkspace.navigatorFor(context).push(
     monettaFadeRoute(
       StoreScope(
         notifier: store,
@@ -528,12 +573,22 @@ class _CatalogFilterSheet extends StatefulWidget {
     required this.items,
     required this.initial,
     required this.visibleCount,
+    this.applied,
+    this.onChanged,
   });
 
   final List<CatalogItem> items;
   final _CatalogFilters initial;
 
   final int Function(_CatalogFilters filters) visibleCount;
+
+  /// On a two-sided window's right side: the filters the grid shows, which
+  /// this page follows, and the callback that applies each change at once.
+  /// Without them it is the ordinary sheet that applies on «Ver».
+  final ValueListenable<_CatalogFilters>? applied;
+  final ValueChanged<_CatalogFilters>? onChanged;
+
+  bool get live => onChanged != null;
 
   @override
   State<_CatalogFilterSheet> createState() => _CatalogFilterSheetState();
@@ -550,10 +605,35 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
 
   late final Set<_FilterSection> _expanded = {_FilterSection.sort};
 
+  /// The last selection this page applied, to tell its own changes apart.
+  _CatalogFilters? _sent;
+
   @override
   void initState() {
     super.initState();
     _load(widget.initial);
+    widget.applied?.addListener(_followApplied);
+  }
+
+  @override
+  void dispose() {
+    widget.applied?.removeListener(_followApplied);
+    super.dispose();
+  }
+
+  /// The grid changed by other means (its reset, say): show what it applies.
+  void _followApplied() {
+    final applied = widget.applied!.value;
+    if (identical(applied, _sent)) return;
+    setState(() => _load(applied));
+  }
+
+  /// A change of selection; a live page applies it at once.
+  void _change(VoidCallback change) {
+    setState(change);
+    if (!widget.live) return;
+    final selection = _sent = _selection;
+    widget.onChanged!(selection);
   }
 
   void _load(_CatalogFilters filters) {
@@ -626,13 +706,13 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
   }
 
   void _toggle(Set<String> values, String value) {
-    setState(
+    _change(
       () => values.contains(value) ? values.remove(value) : values.add(value),
     );
   }
 
   void _clear() {
-    setState(() => _load(const _CatalogFilters()));
+    _change(() => _load(const _CatalogFilters()));
   }
 
   @override
@@ -645,14 +725,17 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
     final colorOptions = _colorOptions;
     final resultCount = widget.visibleCount(_selection);
 
+    // On the right side the page fills it; as a sheet it rises from below.
     return FractionallySizedBox(
-      heightFactor: 0.94,
+      heightFactor: widget.live ? 1 : 0.94,
       child: Material(
         color: context.boutique.canvas,
         clipBehavior: Clip.antiAlias,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(22)),
+        borderRadius: widget.live
+            ? null
+            : const BorderRadius.vertical(top: Radius.circular(22)),
         child: SafeArea(
-          top: false,
+          top: widget.live,
           child: Column(
             children: [
               SizedBox(
@@ -695,7 +778,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                                 label: option.label,
                                 selected: _sort == option,
                                 radio: true,
-                                onTap: () => setState(() => _sort = option),
+                                onTap: () => _change(() => _sort = option),
                               ),
                           ],
                         ),
@@ -792,7 +875,7 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                           label: 'En existencia',
                           selected: _inStockOnly,
                           onTap: () =>
-                              setState(() => _inStockOnly = !_inStockOnly),
+                              _change(() => _inStockOnly = !_inStockOnly),
                         ),
                       ),
                     ],
@@ -832,8 +915,10 @@ class _CatalogFilterSheetState extends State<_CatalogFilterSheet> {
                       Expanded(
                         child: FilledButton(
                           key: const Key('catalog-filter-apply'),
-                          onPressed: () =>
-                              Navigator.of(context).pop(_selection),
+                          // Live filters are already applied: «Ver» closes.
+                          onPressed: () => widget.live
+                              ? Navigator.of(context).pop()
+                              : Navigator.of(context).pop(_selection),
                           style: FilledButton.styleFrom(
                             backgroundColor: colors.navigationSelection,
                             foregroundColor: colors.accentContent,
@@ -1161,12 +1246,15 @@ class _BrowseTile extends StatelessWidget {
       }
     }
 
-    return ProductResultAnchor(
+    // Beside the bag a long press lifts a Monetta piece instead.
+    final lifts = DuoWorkspace.isDual(context, listen: true) &&
+        DuoWorkspace.regionOf(context) == DuoRegion.browse;
+    final tile = ProductResultAnchor(
       productId: item.shopifyProductId ?? item.sourceScopedId,
       child: MonettaProductTile(
         data: data,
         onTap: onTap,
-        onQuickView: product == null
+        onQuickView: product == null || lifts
             ? null
             : () => unawaited(showProductQuickView(context, product)),
         footer: product == null
@@ -1181,6 +1269,9 @@ class _BrowseTile extends StatelessWidget {
         imageOverlay: item.isExternal ? const ExtractedBadge() : null,
       ),
     );
+    return product == null
+        ? tile
+        : DuoBagDragSource(drag: productBagDrag(product), child: tile);
   }
 }
 

@@ -18,6 +18,7 @@ import '../boutique/client_guide_scaffold.dart';
 import '../boutique/client_guide_components.dart';
 import '../boutique/guide_check.dart';
 import '../boutique/boutique_tokens.dart';
+import '../navigation/duo_workspace.dart';
 
 /// Política comercial de entrega. Se conserva el parámetro [now] para
 /// compatibilidad con llamadas existentes; la política no depende del reloj
@@ -185,8 +186,8 @@ class OrderConfirmationScreen extends StatelessWidget {
                   ClientGuideButton(
                     label: 'Volver al inicio',
                     outlined: true,
-                    onPressed: () =>
-                        Navigator.of(context).popUntil((r) => r.isFirst),
+                    // Also closes checkout's layer on a two-sided window.
+                    onPressed: () => DuoWorkspace.returnToStart(context),
                   ),
                 ],
               ),

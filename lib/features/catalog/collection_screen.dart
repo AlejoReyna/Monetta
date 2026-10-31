@@ -7,11 +7,13 @@
 library;
 
 import '../navigation/adaptive_storefront_scaffold.dart';
+import '../navigation/duo_workspace.dart';
 import 'browse_detail_layout.dart';
 import '../../platform/system_layout_context.dart';
 import '../navigation/storefront_pane_scope.dart';
 import 'dart:async';
 
+import 'package:flutter/foundation.dart' show ValueListenable;
 import 'package:flutter/material.dart';
 
 import '../../app/catalog_store.dart';
@@ -166,6 +168,17 @@ class _CollectionScreenState extends State<CollectionScreen> {
   late _CollectionFilters _filters;
   final ScrollController _scroll = ScrollController();
 
+  /// The applied filters, followed by the filter page on a two-sided window's
+  /// right side so it stays in step with the pills here.
+  late final ValueNotifier<_CollectionFilters> _applied =
+      ValueNotifier(_filters);
+  DuoWorkspaceState? _workspace;
+
+  void _apply(_CollectionFilters filters) {
+    setState(() => _filters = filters);
+    _applied.value = filters;
+  }
+
   bool get _hasHero =>
       widget.heroImageUrl != null || widget.heroImageAsset != null;
 
@@ -193,7 +206,16 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _workspace = DuoWorkspace.stateOf(context);
+  }
+
+  @override
   void dispose() {
+    // Filters for a page that is gone have nothing left to filter.
+    _workspace?.dismissOwnedBy(this);
+    _applied.dispose();
     _scroll.dispose();
     super.dispose();
   }
@@ -292,7 +314,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   void _handleBottomNavigation(MonettaBottomDestination destination) {
     switch (destination) {
       case MonettaBottomDestination.home:
-        Navigator.of(context).popUntil((route) => route.isFirst);
+        DuoWorkspace.navigatorFor(context).popUntil((route) => route.isFirst);
       case MonettaBottomDestination.catalog:
         unawaited(openCategories(context));
       case MonettaBottomDestination.bag:
@@ -303,7 +325,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
   }
 
   void _clearFilters() {
-    setState(() => _filters = _initialFilters);
+    _apply(_initialFilters);
   }
 
   List<String> _brandsFor(Iterable<Product> products, CatalogStore store) {
@@ -335,6 +357,30 @@ class _CollectionScreenState extends State<CollectionScreen> {
   Future<void> _openFilterSheet() async {
     final store = StoreScope.of(context);
     final scopedItems = _scopedItems(_filters.category);
+    // A two-sided window edits the filters on its right side and applies
+    // every change at once to the pieces on the left.
+    final beside = DuoWorkspace.showPane(
+      context,
+      DuoPanePage(
+        kind: DuoPaneKind.filters,
+        owner: this,
+        builder: (_) => StoreScope(
+          notifier: store,
+          child: _CollectionFilterSheet(
+            initial: _filters,
+            reset: _initialFilters,
+            brands: _brandsFor(scopedItems, store),
+            silhouettes: _silhouettesFor(scopedItems, store),
+            resultCount: (selection) => _items(selection).length,
+            applied: _applied,
+            onChanged: (filters) {
+              if (mounted) _apply(filters);
+            },
+          ),
+        ),
+      ),
+    );
+    if (beside) return;
     final result = await showModalBottomSheet<_CollectionFilters>(
       context: context,
       anchorPoint: presentationAnchor(context),
@@ -354,7 +400,7 @@ class _CollectionScreenState extends State<CollectionScreen> {
       ),
     );
     // A dismissed sheet returns null and the applied filters stand.
-    if (result != null && mounted) setState(() => _filters = result);
+    if (result != null && mounted) _apply(result);
   }
 
   @override
@@ -395,8 +441,8 @@ class _CollectionScreenState extends State<CollectionScreen> {
               category: _filters.category,
               onClear: activeCount == 0 ? null : _clearFilters,
               onFilters: _openFilterSheet,
-              onCategory: (value) => setState(
-                () => _filters = _filters.copyWith(
+              onCategory: (value) => _apply(
+                _filters.copyWith(
                   category: _filters.category == value ? null : value,
                   // A silhouette only exists inside bags.
                   silhouette: value == 'bolsa' ? _filters.silhouette : null,
@@ -806,6 +852,8 @@ class _CollectionFilterSheet extends StatefulWidget {
     required this.brands,
     required this.silhouettes,
     required this.resultCount,
+    this.applied,
+    this.onChanged,
   });
 
   final _CollectionFilters initial;
@@ -817,6 +865,14 @@ class _CollectionFilterSheet extends StatefulWidget {
   final List<String> silhouettes;
   final int Function(_CollectionFilters filters) resultCount;
 
+  /// On a two-sided window's right side: the filters the pieces show, which
+  /// this page follows, and the callback that applies each change at once.
+  /// Without them it is the ordinary sheet that applies on «Ver».
+  final ValueListenable<_CollectionFilters>? applied;
+  final ValueChanged<_CollectionFilters>? onChanged;
+
+  bool get live => onChanged != null;
+
   @override
   State<_CollectionFilterSheet> createState() => _CollectionFilterSheetState();
 }
@@ -827,6 +883,37 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
     _CollectionFilterSection.sort,
   };
 
+  @override
+  void initState() {
+    super.initState();
+    widget.applied?.addListener(_followApplied);
+  }
+
+  @override
+  void dispose() {
+    widget.applied?.removeListener(_followApplied);
+    super.dispose();
+  }
+
+  /// The pieces changed by other means (a pill, say): show what they apply.
+  void _followApplied() {
+    final applied = widget.applied!.value;
+    if (identical(applied, _selection)) return;
+    setState(() => _selection = applied);
+  }
+
+  /// A change of selection; a live page applies it at once.
+  void _select(_CollectionFilters selection) {
+    setState(() => _selection = selection);
+    widget.onChanged?.call(selection);
+  }
+
+  /// «Cancelar» on a live page puts back what the pieces showed on opening.
+  void _cancel() {
+    if (widget.live) _select(widget.initial);
+    Navigator.of(context).pop();
+  }
+
   void _toggleExpanded(_CollectionFilterSection section) {
     setState(() {
       _expanded.contains(section)
@@ -835,20 +922,23 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
     });
   }
 
-  void _clear() => setState(() => _selection = widget.reset);
+  void _clear() => _select(widget.reset);
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
     final resultCount = widget.resultCount(_selection);
+    // On the right side the page fills it; as a sheet it rises from below.
     return FractionallySizedBox(
-      heightFactor: 0.94,
+      heightFactor: widget.live ? 1 : 0.94,
       child: Material(
         color: palette.canvas,
         clipBehavior: Clip.antiAlias,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(20)),
+        borderRadius: widget.live
+            ? null
+            : const BorderRadius.vertical(top: Radius.circular(20)),
         child: SafeArea(
-          top: false,
+          top: widget.live,
           child: Column(
             children: [
               SizedBox(
@@ -865,7 +955,7 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                       left: BoutiqueSpace.sm,
                       child: TextButton(
                         key: const Key('collection-filter-cancel'),
-                        onPressed: () => Navigator.of(context).pop(),
+                        onPressed: _cancel,
                         style: TextButton.styleFrom(
                           minimumSize: const Size(0, BoutiqueSpace.tapTarget),
                           foregroundColor: palette.inkMuted,
@@ -920,8 +1010,8 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                                 label: option.label,
                                 selected: _selection.sort == option,
                                 radio: true,
-                                onTap: () => setState(
-                                  () => _selection = _selection.copyWith(
+                                onTap: () => _select(
+                                  _selection.copyWith(
                                     sort: option,
                                   ),
                                 ),
@@ -947,8 +1037,8 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                                   label: silhouetteLabel(slug),
                                   selected: _selection.silhouette == slug,
                                   radio: true,
-                                  onTap: () => setState(
-                                    () => _selection = _selection.copyWith(
+                                  onTap: () => _select(
+                                    _selection.copyWith(
                                       silhouette: _selection.silhouette == slug
                                           ? null
                                           : slug,
@@ -974,8 +1064,8 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                                   label: brandLabel(brand),
                                   selected: _selection.brand == brand,
                                   radio: true,
-                                  onTap: () => setState(
-                                    () => _selection = _selection.copyWith(
+                                  onTap: () => _select(
+                                    _selection.copyWith(
                                       brand: _selection.brand == brand
                                           ? null
                                           : brand,
@@ -997,8 +1087,8 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                           key: const Key('collection-filter-stock'),
                           label: 'En existencia',
                           selected: _selection.inStockOnly,
-                          onTap: () => setState(
-                            () => _selection = _selection.copyWith(
+                          onTap: () => _select(
+                            _selection.copyWith(
                               inStockOnly: !_selection.inStockOnly,
                             ),
                           ),
@@ -1047,8 +1137,10 @@ class _CollectionFilterSheetState extends State<_CollectionFilterSheet> {
                           label: resultCount == 1
                               ? 'Ver 1 pieza'
                               : 'Ver $resultCount piezas',
-                          onPressed: () =>
-                              Navigator.of(context).pop(_selection),
+                          // Live filters are already applied: «Ver» closes.
+                          onPressed: () => widget.live
+                              ? Navigator.of(context).pop()
+                              : Navigator.of(context).pop(_selection),
                         ),
                       ),
                     ],
@@ -1218,9 +1310,8 @@ class _CollectionSelectionMark extends StatelessWidget {
 
 void openCollection(BuildContext context, CollectionScreen screen) {
   final store = StoreScope.of(context);
-  Navigator.of(
-    context,
-  ).push(
+  // Collections always open on the browsing side.
+  DuoWorkspace.navigatorFor(context).push(
     monettaFadeRoute(
       StoreScope(notifier: store, child: BrowseDetailLayout(child: screen)),
     ),
