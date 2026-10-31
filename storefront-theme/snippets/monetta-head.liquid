@@ -33,11 +33,19 @@
         assign doc_title = 'Noticias'
       endif
   endcase
+  if template.suffix == 'account'
+    assign doc_title = 'Mi cuenta'
+  elsif template.suffix == 'orders'
+    assign doc_title = 'Mis pedidos'
+  endif
 -%}
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#fbf8f2">
 <link rel="canonical" href="{{ canonical_url }}">
+{%- if template.suffix == 'account' or template.suffix == 'orders' -%}
+  <meta name="robots" content="noindex, nofollow">
+{%- endif -%}
 <link rel="icon" type="image/png" sizes="32x32" href="{{ 'monetta-favicon-32.png' | asset_url }}">
 <link rel="icon" type="image/png" sizes="96x96" href="{{ 'monetta-favicon-96.png' | asset_url }}">
 

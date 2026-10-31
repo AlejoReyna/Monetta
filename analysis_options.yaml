@@ -6,19 +6,20 @@ analyzer:
     - "tools/style-guideline-content/test/fixtures/**"
     - "docs/style-guideline-migration/content-readiness/reports/archive/**/test/fixtures/**"
     - "**/*.g.dart"
-    - "**/*.freezed.dart"
     - "lib/data/shopify/generated/**"
     # `flutter build ios` vendors the whole FlutterFire repo — its own tests
     # included — into build/ios/SourcePackages. That is third-party source
     # which does not resolve against this app's pubspec, and it buries
     # `flutter analyze` under ~12k errors belonging to nobody.
     - "build/**"
+    # Local experiments and archived snippets are not Flutter app sources.
+    - "scratch/**"
+    - "docs/**"
+    - "tools/style-guideline-content/test/fixtures/**"
   language:
     strict-casts: true
     strict-inference: true
     strict-raw-types: true
-  errors:
-    invalid_annotation_target: ignore
 
 linter:
   rules:

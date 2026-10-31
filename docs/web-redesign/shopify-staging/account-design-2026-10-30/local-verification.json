@@ -1,0 +1,94 @@
+{
+  "fixtureData": true,
+  "browser": "Firefox (isolated headless profile)",
+  "checks": [
+    {
+      "view": "account",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "view": "account",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "view": "account",
+      "width": 750,
+      "overflow": false
+    },
+    {
+      "view": "account",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "view": "account",
+      "width": 1024,
+      "overflow": false
+    },
+    {
+      "view": "account",
+      "width": 1440,
+      "overflow": false
+    },
+    {
+      "view": "orders",
+      "width": 320,
+      "overflow": false
+    },
+    {
+      "view": "orders",
+      "width": 390,
+      "overflow": false
+    },
+    {
+      "view": "orders",
+      "width": 750,
+      "overflow": false
+    },
+    {
+      "view": "orders",
+      "width": 768,
+      "overflow": false
+    },
+    {
+      "view": "orders",
+      "width": 1024,
+      "overflow": false
+    },
+    {
+      "view": "orders",
+      "width": 1440,
+      "overflow": false
+    }
+  ],
+  "functional": [
+    "sidebar flush left and below header",
+    "sidebar fixed during page scroll",
+    "account category navigation removed",
+    "account eyebrow removed",
+    "order filters",
+    "actual shipping vs delivered status",
+    "order detail dialog",
+    "Escape and focus restoration",
+    "account actions",
+    "guest isolation",
+    "correct login return URL",
+    "empty order history",
+    "long profile text"
+  ],
+  "pageErrors": [],
+  "accessibility": {
+    "engine": "axe-core",
+    "views": [
+      "account",
+      "orders"
+    ],
+    "widths": [
+      390,
+      1440
+    ],
+    "violations": 0
+  }
+}

@@ -82,9 +82,8 @@ class CustomerAccountConfig {
       apiVersion.isNotEmpty &&
       shopId != _placeholderShopId;
 
-  /// Mirrors `ExternalCatalogConfig.fromEnvironment()`'s shape
-  /// (`lib/app/external_catalog_config.dart`): build-time `--dart-define`
-  /// values, empty string standing in for "not set".
+  /// Build-time `--dart-define` values, empty string standing in for "not
+  /// set".
   ///
   /// ```
   /// flutter run --dart-define-from-file=config/dart_defines.staging.json

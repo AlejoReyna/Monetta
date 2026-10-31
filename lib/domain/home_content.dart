@@ -258,6 +258,20 @@ class HomeContent {
         silhouette: 'shoulder',
         fallbackAsset: 'assets/images/home_bag_shoulder.webp',
       ),
+      HomeCollectionCard(
+        title: 'Satchel',
+        handle: 'satchel',
+        category: 'bolsa',
+        silhouette: 'satchel',
+        fallbackAsset: 'assets/images/home_bag_tote.webp',
+      ),
+      HomeCollectionCard(
+        title: 'Hobo',
+        handle: 'hobo',
+        category: 'bolsa',
+        silhouette: 'hobo',
+        fallbackAsset: 'assets/images/home_bag_shoulder.webp',
+      ),
     ],
     brands: <HomeBrandCard>[
       HomeBrandCard(

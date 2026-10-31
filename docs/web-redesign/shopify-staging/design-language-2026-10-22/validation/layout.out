@@ -1,0 +1,222 @@
+run dir: /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-19-18-697Z-layout
+PASS  375×812 collection: no horizontal overflow  — 375/375
+PASS  375×812 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  375×812 collection: --pinned-top equals the real bottom edge of the pinned bar  — 76 vs 76
+PASS  375×812 collection: scroll-padding-top = reserve + 16  — 92
+PASS  375×812 collection: phone page bar is 76px tall with a one-line title  — 76
+PASS  375×812 collection: phone global header is replaced by the page bar
+PASS  375×812 collection: floating dock is fixed and --pinned-bottom equals its measured height  — dock 65 reserve 65
+PASS  375×812 collection: a two-line title grows the bar and the measured reserve follows (not a fixed 76)  — {"before":76,"after":160.03,"bar":160.03125,"height":160.03125}
+PASS  375×812 product: no horizontal overflow  — 375/375
+PASS  375×812 product header (phone): back + search · logo · account + bag in that order  — {"back":{"x":4,"cx":28,"w":48,"h":48},"search":{"x":52,"cx":76,"w":48,"h":48},"logo":{"x":145.8125,"cx":187.4921875,"w":83.359375,"h":48},"account":{"x":275,"cx":299,"w":48,"h":48},"bag":{"x":323,"cx":347,"w":48,"h":48},"menu":null,"searchIcon":null}
+PASS  375×812 product header (phone): menu and the plain search icon are hidden
+PASS  375×812 product header (phone): logo centred and targets are 48px  — logo cx 187.4921875/187.5
+PASS  375×812 product: purchase dock fixed at the bottom and reserved  — dock 65 reserve 65
+PASS  375×812 recommendations: rail rendered  — 8 tiles
+PASS  375×812 recommendations: tiles have equal heights
+FAIL  375×812 recommendations (phone): heading Inter 17px/600  — ["23px","400","\"Playfair Display\""]
+PASS  375×812 recommendations (phone): tile width min(52vw, 260px)  — 195 vs 195
+PASS  375×812 recommendations (phone): 4:5 photo that fills the frame (no inset) and 12px gap  — {"ratio":0.8,"margin":"0px","gap":12}
+PASS  375×812 recommendations (phone): name clamps at two lines  — ["2",2]
+PASS  375×812 bag: no horizontal overflow  — 375/375
+PASS  375×812 bag: checkout bar fixed, reserve equals its height  — bar 73 reserve 73
+PASS  375×812 bag: the dock gives way to the checkout bar
+PASS  375×812 home: no horizontal overflow  — 375/375
+PASS  440×956 collection: no horizontal overflow  — 440/440
+PASS  440×956 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  440×956 collection: --pinned-top equals the real bottom edge of the pinned bar  — 76 vs 76
+PASS  440×956 collection: scroll-padding-top = reserve + 16  — 92
+PASS  440×956 collection: phone page bar is 76px tall with a one-line title  — 76
+PASS  440×956 collection: phone global header is replaced by the page bar
+PASS  440×956 collection: floating dock is fixed and --pinned-bottom equals its measured height  — dock 65 reserve 65
+PASS  440×956 collection: a two-line title grows the bar and the measured reserve follows (not a fixed 76)  — {"before":76,"after":160.03,"bar":160.03125,"height":160.03125}
+PASS  440×956 product: no horizontal overflow  — 440/440
+PASS  440×956 product header (phone): back + search · logo · account + bag in that order  — {"back":{"x":4,"cx":28,"w":48,"h":48},"search":{"x":52,"cx":76,"w":48,"h":48},"logo":{"x":178.3125,"cx":219.9921875,"w":83.359375,"h":48},"account":{"x":340,"cx":364,"w":48,"h":48},"bag":{"x":388,"cx":412,"w":48,"h":48},"menu":null,"searchIcon":null}
+PASS  440×956 product header (phone): menu and the plain search icon are hidden
+PASS  440×956 product header (phone): logo centred and targets are 48px  — logo cx 219.9921875/220
+PASS  440×956 product: purchase dock fixed at the bottom and reserved  — dock 65 reserve 65
+PASS  440×956 recommendations: rail rendered  — 8 tiles
+PASS  440×956 recommendations: tiles have equal heights
+FAIL  440×956 recommendations (phone): heading Inter 17px/600  — ["23px","400","\"Playfair Display\""]
+PASS  440×956 recommendations (phone): tile width min(52vw, 260px)  — 228.796875 vs 228.8
+PASS  440×956 recommendations (phone): 4:5 photo that fills the frame (no inset) and 12px gap  — {"ratio":0.8000327815112277,"margin":"0px","gap":12}
+PASS  440×956 recommendations (phone): name clamps at two lines  — ["2",2]
+PASS  440×956 bag: no horizontal overflow  — 440/440
+PASS  440×956 bag: checkout bar fixed, reserve equals its height  — bar 73 reserve 73
+PASS  440×956 bag: the dock gives way to the checkout bar
+PASS  440×956 home: no horizontal overflow  — 440/440
+PASS  768×1024 collection: no horizontal overflow  — 768/768
+PASS  768×1024 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  768×1024 collection: --pinned-top equals the real bottom edge of the pinned bar  — 114 vs 114
+PASS  768×1024 collection: scroll-padding-top = reserve + 16  — 130
+PASS  768×1024 product: no horizontal overflow  — 768/768
+PASS  768×1024 recommendations: rail rendered  — 8 tiles
+PASS  768×1024 recommendations: tiles have equal heights
+PASS  768×1024 bag: no horizontal overflow  — 768/768
+PASS  768×1024 home: no horizontal overflow  — 768/768
+PASS  768×1024 tablet category row: the last link scrolls out of the fade (its right edge is before the 88% fade start)  — {"right":531.453125,"fadeStart":538.963125,"listRight":588,"scrollWidth":948,"clientWidth":409,"paddingRight":"57.0312px"}
+PASS  1024×768 collection: no horizontal overflow  — 1024/1024
+PASS  1024×768 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  1024×768 collection: --pinned-top equals the real bottom edge of the pinned bar  — 122 vs 122
+PASS  1024×768 collection: scroll-padding-top = reserve + 16  — 138
+PASS  1024×768 product: no horizontal overflow  — 1024/1024
+PASS  1024×768 product: desktop columns stay sticky / fitted above 480px of height  — panel sticky viewer 448.8px
+PASS  1024×768 recommendations: rail rendered  — 8 tiles
+PASS  1024×768 recommendations: tiles have equal heights
+PASS  1024×768 bag: no horizontal overflow  — 1024/1024
+PASS  1024×768 home: no horizontal overflow  — 1024/1024
+PASS  1440×900 collection: no horizontal overflow  — 1440/1440
+PASS  1440×900 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  1440×900 collection: --pinned-top equals the real bottom edge of the pinned bar  — 122 vs 122
+PASS  1440×900 collection: scroll-padding-top = reserve + 16  — 138
+PASS  1440×900 product: no horizontal overflow  — 1440/1440
+PASS  1440×900 product: desktop columns stay sticky / fitted above 480px of height  — panel sticky viewer 554.4px
+PASS  1440×900 recommendations: rail rendered  — 8 tiles
+PASS  1440×900 recommendations: tiles have equal heights
+PASS  1440×900 bag: no horizontal overflow  — 1440/1440
+PASS  1440×900 home: no horizontal overflow  — 1440/1440
+PASS  320×640 collection: no horizontal overflow  — 320/320
+PASS  320×640 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  320×640 collection: --pinned-top equals the real bottom edge of the pinned bar  — 76 vs 76
+PASS  320×640 collection: scroll-padding-top = reserve + 16  — 92
+PASS  320×640 collection: phone page bar is 76px tall with a one-line title  — 76
+PASS  320×640 collection: phone global header is replaced by the page bar
+PASS  320×640 collection: floating dock is fixed and --pinned-bottom equals its measured height  — dock 65 reserve 65
+PASS  320×640 collection: a two-line title grows the bar and the measured reserve follows (not a fixed 76)  — {"before":76,"after":222.75,"bar":222.75,"height":222.75}
+PASS  320×640 product: no horizontal overflow  — 320/320
+PASS  320×640 product header (phone): back + search · logo · account + bag in that order  — {"back":{"x":4,"cx":28,"w":48,"h":48},"search":{"x":52,"cx":76,"w":48,"h":48},"logo":{"x":118.3125,"cx":159.9921875,"w":83.359375,"h":48},"account":{"x":220,"cx":244,"w":48,"h":48},"bag":{"x":268,"cx":292,"w":48,"h":48},"menu":null,"searchIcon":null}
+PASS  320×640 product header (phone): menu and the plain search icon are hidden
+PASS  320×640 product header (phone): logo centred and targets are 48px  — logo cx 159.9921875/160
+PASS  320×640 product: purchase dock fixed at the bottom and reserved  — dock 65 reserve 65
+PASS  320×640 recommendations: rail rendered  — 8 tiles
+PASS  320×640 recommendations: tiles have equal heights
+FAIL  320×640 recommendations (phone): heading Inter 17px/600  — ["23px","400","\"Playfair Display\""]
+PASS  320×640 recommendations (phone): tile width min(52vw, 260px)  — 166.390625 vs 166.4
+PASS  320×640 recommendations (phone): 4:5 photo that fills the frame (no inset) and 12px gap  — {"ratio":0.800015025167155,"margin":"0px","gap":12}
+PASS  320×640 recommendations (phone): name clamps at two lines  — ["2",2]
+PASS  320×640 bag: no horizontal overflow  — 320/320
+PASS  320×640 bag: checkout bar fixed, reserve equals its height  — bar 73 reserve 73
+PASS  320×640 bag: the dock gives way to the checkout bar
+PASS  320×640 home: no horizontal overflow  — 320/320
+PASS  812×375 collection: no horizontal overflow  — 812/812
+PASS  812×375 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)  — siteTop=static pageBar=static pinnedTop=0
+PASS  812×375 collection: dock joins the page flow (static) and reserves nothing  — dock=static/none pinnedBottom=0
+PASS  812×375 product: no horizontal overflow  — 812/812
+PASS  812×375 product: product panel not sticky, gallery not squeezed (viewer 748×225, panel static)  — {"viewer":{"position":"relative","display":"block","top":-229.859375,"bottom":-4.859375,"height":225,"width":748,"maxHeight":"none","maxWidth":"none"},"panel":"static","thumbs":"none"}
+PASS  812×375 product: purchase dock hidden and the inline add button takes over
+PASS  812×375 product: gallery drops its viewport-fitted max width and thumbnails their max height  — viewer none thumbs none
+PASS  812×375 recommendations: rail rendered  — 8 tiles
+PASS  812×375 recommendations: tiles have equal heights
+PASS  812×375 bag: no horizontal overflow  — 812/812
+PASS  812×375 bag: checkout bar hidden and the summary's button takes over; summary not sticky  — summary static
+PASS  812×375 home: no horizontal overflow  — 812/812
+PASS  1024×200 collection: no horizontal overflow  — 1024/1024
+PASS  1024×200 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)  — siteTop=static pageBar=static pinnedTop=0
+PASS  1024×200 collection: dock joins the page flow (static) and reserves nothing  — dock=static/none pinnedBottom=0
+PASS  1024×200 product: no horizontal overflow  — 1024/1024
+PASS  1024×200 product: product panel not sticky, gallery not squeezed (viewer 432×540, panel static)  — {"viewer":{"position":"relative","display":"block","top":-221.859375,"bottom":317.71875,"height":539.578125,"width":431.671875,"maxHeight":"none","maxWidth":"none"},"panel":"static","thumbs":"none"}
+PASS  1024×200 product: purchase dock hidden and the inline add button takes over
+PASS  1024×200 product: gallery drops its viewport-fitted max width and thumbnails their max height  — viewer none thumbs none
+PASS  1024×200 recommendations: rail rendered  — 8 tiles
+PASS  1024×200 recommendations: tiles have equal heights
+PASS  1024×200 bag: no horizontal overflow  — 1024/1024
+PASS  1024×200 bag: checkout bar hidden and the summary's button takes over; summary not sticky  — summary static
+PASS  1024×200 home: no horizontal overflow  — 1024/1024
+PASS  1280×200 collection: no horizontal overflow  — 1280/1280
+PASS  1280×200 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)  — siteTop=static pageBar=static pinnedTop=0
+PASS  1280×200 collection: dock joins the page flow (static) and reserves nothing  — dock=static/none pinnedBottom=0
+PASS  1280×200 collection: filter sidebar is not sticky and not squeezed  — {"position":"static","display":"block","top":-475.171875,"bottom":-247.171875,"height":228,"width":252,"maxHeight":"none","maxWidth":"none"}
+PASS  1280×200 product: no horizontal overflow  — 1280/1280
+PASS  1280×200 product: product panel not sticky, gallery not squeezed (viewer 571×714, panel static)  — {"viewer":{"position":"relative","display":"block","top":-221.859375,"bottom":491.734375,"height":713.59375,"width":570.875,"maxHeight":"none","maxWidth":"none"},"panel":"static","thumbs":"none"}
+PASS  1280×200 product: purchase dock hidden and the inline add button takes over
+PASS  1280×200 product: gallery drops its viewport-fitted max width and thumbnails their max height  — viewer none thumbs none
+PASS  1280×200 recommendations: rail rendered  — 8 tiles
+PASS  1280×200 recommendations: tiles have equal heights
+PASS  1280×200 bag: no horizontal overflow  — 1280/1280
+PASS  1280×200 bag: checkout bar hidden and the summary's button takes over; summary not sticky  — summary static
+PASS  1280×200 home: no horizontal overflow  — 1280/1280
+PASS  1024×480 collection: no horizontal overflow  — 1024/1024
+PASS  1024×480 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)  — siteTop=static pageBar=static pinnedTop=0
+PASS  1024×480 collection: dock joins the page flow (static) and reserves nothing  — dock=static/none pinnedBottom=0
+PASS  1024×480 product: no horizontal overflow  — 1024/1024
+PASS  1024×480 product: product panel not sticky, gallery not squeezed (viewer 432×540, panel static)  — {"viewer":{"position":"relative","display":"block","top":-221.859375,"bottom":317.71875,"height":539.578125,"width":431.671875,"maxHeight":"none","maxWidth":"none"},"panel":"static","thumbs":"none"}
+PASS  1024×480 product: purchase dock hidden and the inline add button takes over
+PASS  1024×480 product: gallery drops its viewport-fitted max width and thumbnails their max height  — viewer none thumbs none
+PASS  1024×480 recommendations: rail rendered  — 8 tiles
+PASS  1024×480 recommendations: tiles have equal heights
+PASS  1024×480 bag: no horizontal overflow  — 1024/1024
+PASS  1024×480 bag: checkout bar hidden and the summary's button takes over; summary not sticky  — summary static
+PASS  1024×480 home: no horizontal overflow  — 1024/1024
+PASS  1024×481 collection: no horizontal overflow  — 1024/1024
+PASS  1024×481 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  1024×481 collection: --pinned-top equals the real bottom edge of the pinned bar  — 122 vs 122
+PASS  1024×481 collection: scroll-padding-top = reserve + 16  — 138
+PASS  1024×481 product: no horizontal overflow  — 1024/1024
+PASS  1024×481 product: desktop columns stay sticky / fitted above 480px of height  — panel sticky viewer 219.2px
+PASS  1024×481 recommendations: rail rendered  — 8 tiles
+PASS  1024×481 recommendations: tiles have equal heights
+PASS  1024×481 bag: no horizontal overflow  — 1024/1024
+PASS  1024×481 home: no horizontal overflow  — 1024/1024
+PASS  360×480 collection: no horizontal overflow  — 360/360
+PASS  360×480 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)  — siteTop=static pageBar=static pinnedTop=0
+PASS  360×480 collection: dock joins the page flow (static) and reserves nothing  — dock=static/block pinnedBottom=0
+PASS  360×480 product: no horizontal overflow  — 360/360
+PASS  360×480 product: product panel not sticky, gallery not squeezed (viewer 360×450, panel static)  — {"viewer":{"position":"relative","display":"block","top":-339,"bottom":111,"height":450,"width":360,"maxHeight":"none","maxWidth":"none"},"panel":"static","thumbs":"none"}
+PASS  360×480 product: purchase dock hidden and the inline add button takes over
+PASS  360×480 product: gallery drops its viewport-fitted max width and thumbnails their max height  — viewer none thumbs none
+PASS  360×480 recommendations: rail rendered  — 8 tiles
+PASS  360×480 recommendations: tiles have equal heights
+FAIL  360×480 recommendations (phone): heading Inter 17px/600  — ["23px","400","\"Playfair Display\""]
+PASS  360×480 recommendations (phone): tile width min(52vw, 260px)  — 187.1875 vs 187.20000000000002
+PASS  360×480 recommendations (phone): 4:5 photo that fills the frame (no inset) and 12px gap  — {"ratio":0.8,"margin":"0px","gap":12}
+PASS  360×480 recommendations (phone): name clamps at two lines  — ["2",2]
+PASS  360×480 bag: no horizontal overflow  — 360/360
+PASS  360×480 bag: checkout bar hidden and the summary's button takes over; summary not sticky  — summary static
+PASS  360×480 home: no horizontal overflow  — 360/360
+PASS  360×481 collection: no horizontal overflow  — 360/360
+PASS  360×481 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  360×481 collection: --pinned-top equals the real bottom edge of the pinned bar  — 76 vs 76
+PASS  360×481 collection: scroll-padding-top = reserve + 16  — 92
+PASS  360×481 collection: phone page bar is 76px tall with a one-line title  — 76
+PASS  360×481 collection: phone global header is replaced by the page bar
+PASS  360×481 collection: floating dock is fixed and --pinned-bottom equals its measured height  — dock 65 reserve 65
+PASS  360×481 collection: a two-line title grows the bar and the measured reserve follows (not a fixed 76)  — {"before":76,"after":160.03,"bar":160.03125,"height":160.03125}
+PASS  360×481 product: no horizontal overflow  — 360/360
+PASS  360×481 product header (phone): back + search · logo · account + bag in that order  — {"back":{"x":4,"cx":28,"w":48,"h":48},"search":{"x":52,"cx":76,"w":48,"h":48},"logo":{"x":138.3125,"cx":179.9921875,"w":83.359375,"h":48},"account":{"x":260,"cx":284,"w":48,"h":48},"bag":{"x":308,"cx":332,"w":48,"h":48},"menu":null,"searchIcon":null}
+PASS  360×481 product header (phone): menu and the plain search icon are hidden
+PASS  360×481 product header (phone): logo centred and targets are 48px  — logo cx 179.9921875/180
+PASS  360×481 product: purchase dock fixed at the bottom and reserved  — dock 65 reserve 65
+PASS  360×481 recommendations: rail rendered  — 8 tiles
+PASS  360×481 recommendations: tiles have equal heights
+FAIL  360×481 recommendations (phone): heading Inter 17px/600  — ["23px","400","\"Playfair Display\""]
+PASS  360×481 recommendations (phone): tile width min(52vw, 260px)  — 187.1875 vs 187.20000000000002
+PASS  360×481 recommendations (phone): 4:5 photo that fills the frame (no inset) and 12px gap  — {"ratio":0.8,"margin":"0px","gap":12}
+PASS  360×481 recommendations (phone): name clamps at two lines  — ["2",2]
+PASS  360×481 bag: no horizontal overflow  — 360/360
+PASS  360×481 bag: checkout bar fixed, reserve equals its height  — bar 73 reserve 73
+PASS  360×481 bag: the dock gives way to the checkout bar
+PASS  360×481 home: no horizontal overflow  — 360/360
+PASS  768×480 collection: no horizontal overflow  — 768/768
+PASS  768×480 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)  — siteTop=static pageBar=static pinnedTop=0
+PASS  768×480 collection: dock joins the page flow (static) and reserves nothing  — dock=static/none pinnedBottom=0
+PASS  768×480 product: no horizontal overflow  — 768/768
+PASS  768×480 product: product panel not sticky, gallery not squeezed (viewer 704×288, panel static)  — {"viewer":{"position":"relative","display":"block","top":-229.859375,"bottom":58.140625,"height":288,"width":704,"maxHeight":"none","maxWidth":"none"},"panel":"static","thumbs":"none"}
+PASS  768×480 product: purchase dock hidden and the inline add button takes over
+PASS  768×480 product: gallery drops its viewport-fitted max width and thumbnails their max height  — viewer none thumbs none
+PASS  768×480 recommendations: rail rendered  — 8 tiles
+PASS  768×480 recommendations: tiles have equal heights
+PASS  768×480 bag: no horizontal overflow  — 768/768
+PASS  768×480 bag: checkout bar hidden and the summary's button takes over; summary not sticky  — summary static
+PASS  768×480 home: no horizontal overflow  — 768/768
+PASS  768×481 collection: no horizontal overflow  — 768/768
+PASS  768×481 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)  — sticky
+PASS  768×481 collection: --pinned-top equals the real bottom edge of the pinned bar  — 114 vs 114
+PASS  768×481 collection: scroll-padding-top = reserve + 16  — 130
+PASS  768×481 product: no horizontal overflow  — 768/768
+PASS  768×481 recommendations: rail rendered  — 8 tiles
+PASS  768×481 recommendations: tiles have equal heights
+PASS  768×481 bag: no horizontal overflow  — 768/768
+PASS  768×481 home: no horizontal overflow  — 768/768
+PASS  768×481 tablet category row: the last link scrolls out of the fade (its right edge is before the 88% fade start)  — {"right":531.453125,"fadeStart":538.963125,"listRight":588,"scrollWidth":948,"clientWidth":409,"paddingRight":"57.0312px"}
+
+complete-with-failures: 214/219 checks · /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-19-18-697Z-layout/result.json

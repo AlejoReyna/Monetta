@@ -98,8 +98,7 @@ class CanonicalFacets {
   final List<FacetValue> patterns;
 
   /// `accesible`, `medio`, `alto`, `premium`. Null when there is no price to
-  /// band from at all (an external item with an unknown price, see
-  /// `reco/external_facets.dart`) — never a fabricated band.
+  /// band from at all — never a fabricated band.
   final String? priceBand;
 
   final bool onSale;

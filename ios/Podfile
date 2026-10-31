@@ -40,6 +40,14 @@ target 'Runner' do
 end
 
 post_install do |installer|
+  require_relative 'patches/appauth_numeric_subject'
+  app_auth = installer.pod_targets.find { |target| target.pod_name == 'AppAuth' }
+  raise 'AppAuth must be installed to apply the Shopify numeric-subject compatibility patch' unless app_auth
+  MonettaAppAuthNumericSubject.apply(
+    installer.sandbox.pod_dir('AppAuth').join('Sources/AppAuthCore/OIDIDToken.m'),
+    version: app_auth.root_spec.version.to_s,
+  )
+
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
     # Xcode 27 rejects iOS deployment targets below 15.0, and several pods

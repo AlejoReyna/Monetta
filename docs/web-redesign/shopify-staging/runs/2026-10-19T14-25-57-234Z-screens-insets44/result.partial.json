@@ -1,0 +1,103 @@
+{
+  "run": "screens-insets44",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/screens.mjs --base-url=http://127.0.0.1:9292 --insets=44 --viewports=375x812",
+  "startedAt": "2026-10-19T14:25:57.234Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      375,
+      812
+    ]
+  ],
+  "insetPx": 44,
+  "finishedAt": "2026-10-19T14:26:12.937Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 13,
+    "passed": 13,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "375×812 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection-filters-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 menu-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": []
+}

@@ -5,6 +5,8 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 
+import '../navigation/monetta_page_header.dart';
+
 import '../../app/media/monetta_image.dart';
 import '../../app/theme.dart';
 import '../../data/media/media_url.dart';
@@ -173,15 +175,9 @@ class _CustomerExperiencesScreenState extends State<CustomerExperiencesScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: context.monettaColors.surface,
-      appBar: AppBar(
-        title: Text(
-          'Experiencias',
-          style: display(20, weight: FontWeight.w500, height: 1.1),
-        ),
-        bottom: PreferredSize(
-          preferredSize: Size.fromHeight(0.5),
-          child: Divider(height: 0.5, color: context.monettaColors.divider),
-        ),
+      appBar: buildMonettaPageAppBar(
+        context,
+        title: 'Experiencias',
       ),
       body: CustomScrollView(
         key: const ValueKey('customer-experiences-scroll'),

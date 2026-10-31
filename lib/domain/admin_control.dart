@@ -12,7 +12,6 @@ class AdminCapabilities {
     this.manageFeaturedCatalog = false,
     this.manageProducts = false,
     this.manageStorefront = false,
-    this.manageExternalSources = false,
     this.manageNotifications = false,
   });
 
@@ -21,14 +20,12 @@ class AdminCapabilities {
         manageFeaturedCatalog = false,
         manageProducts = false,
         manageStorefront = false,
-        manageExternalSources = false,
         manageNotifications = false;
 
   final bool openAdmin;
   final bool manageFeaturedCatalog;
   final bool manageProducts;
   final bool manageStorefront;
-  final bool manageExternalSources;
   final bool manageNotifications;
 
   factory AdminCapabilities.fromJson(Map<String, dynamic> json) {
@@ -38,7 +35,6 @@ class AdminCapabilities {
       manageFeaturedCatalog: flag('manageFeaturedCatalog'),
       manageProducts: flag('manageProducts'),
       manageStorefront: flag('manageStorefront'),
-      manageExternalSources: flag('manageExternalSources'),
       manageNotifications: flag('manageNotifications'),
     );
   }
@@ -265,59 +261,6 @@ class AdminStorefrontSettings {
   }
 }
 
-class AdminSourcePolicy {
-  const AdminSourcePolicy({
-    required this.id,
-    required this.merchant,
-    required this.enabled,
-    required this.itemLimit,
-    required this.baseCommissionRate,
-    required this.highValueCommissionRate,
-    required this.highValueThreshold,
-    required this.itemCount,
-    this.lastSuccessfulRunAt,
-    this.healthStatus = 'unavailable',
-    this.healthErrorCode,
-  });
-
-  final String id;
-  final String merchant;
-  final bool enabled;
-  final int itemLimit;
-  final double baseCommissionRate;
-  final double highValueCommissionRate;
-  final double highValueThreshold;
-  final int itemCount;
-  final DateTime? lastSuccessfulRunAt;
-  final String healthStatus;
-  final String? healthErrorCode;
-
-  AdminSourcePolicy copyWith({
-    bool? enabled,
-    int? itemLimit,
-    double? baseCommissionRate,
-    double? highValueCommissionRate,
-    double? highValueThreshold,
-    String? healthStatus,
-    String? healthErrorCode,
-  }) {
-    return AdminSourcePolicy(
-      id: id,
-      merchant: merchant,
-      enabled: enabled ?? this.enabled,
-      itemLimit: itemLimit ?? this.itemLimit,
-      baseCommissionRate: baseCommissionRate ?? this.baseCommissionRate,
-      highValueCommissionRate:
-          highValueCommissionRate ?? this.highValueCommissionRate,
-      highValueThreshold: highValueThreshold ?? this.highValueThreshold,
-      itemCount: itemCount,
-      lastSuccessfulRunAt: lastSuccessfulRunAt,
-      healthStatus: healthStatus ?? this.healthStatus,
-      healthErrorCode: healthErrorCode ?? this.healthErrorCode,
-    );
-  }
-}
-
 class AdminAuditEvent {
   const AdminAuditEvent({
     required this.description,
@@ -336,18 +279,14 @@ class AdminSnapshot {
   const AdminSnapshot({
     required this.products,
     required this.storefront,
-    required this.sources,
     this.featured,
     this.shopifyHealthStatus,
-    this.sourcesHealthStatus,
     this.productsMeta,
   });
 
   final List<AdminProductRecord> products;
   final AdminStorefrontSettings storefront;
-  final List<AdminSourcePolicy> sources;
   final AdminFeaturedCatalog? featured;
   final String? shopifyHealthStatus;
-  final String? sourcesHealthStatus;
   final AdminProductsPageMeta? productsMeta;
 }

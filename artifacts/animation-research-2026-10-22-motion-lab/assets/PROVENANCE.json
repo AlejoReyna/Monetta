@@ -1,0 +1,47 @@
+{
+  "Inter-Medium.woff2": {
+    "source": "storefront-theme/assets/Inter-Medium.woff2",
+    "sha256": "2a26ab9d9f7912e97a88ae7bd26906e08c6620819cf9a221389a9802fbf74039",
+    "unchangedCopy": true
+  },
+  "Inter-Regular.woff2": {
+    "source": "storefront-theme/assets/Inter-Regular.woff2",
+    "sha256": "d51311b2560236e34cd4f0e7601f7093e4c597caf132494b7185f4d9a6541bc3",
+    "unchangedCopy": true
+  },
+  "home_bag_tote.webp": {
+    "source": "assets/images/home_bag_tote.webp",
+    "sha256": "8dff302eacd6afdbfd5c0cc776402b979e846505b14449040e797373f4415c79",
+    "unchangedCopy": true
+  },
+  "PlayfairDisplay-Regular.woff2": {
+    "source": "storefront-theme/assets/PlayfairDisplay-Regular.woff2",
+    "sha256": "fde2098bb488b652d843e54c029d4b3d927c663c2063daf908f0ebbd144b2090",
+    "unchangedCopy": true
+  },
+  "Inter-SemiBold.woff2": {
+    "source": "storefront-theme/assets/Inter-SemiBold.woff2",
+    "sha256": "7a691ea16d75f5acd1961ba88f1276dc517c5c0a588b565b2575c8abac6f66fa",
+    "unchangedCopy": true
+  },
+  "monetta-logo-3x.png": {
+    "source": "storefront-theme/assets/monetta-logo-3x.png",
+    "sha256": "bb72488586bb2bc1d3ac9e2cee9eff68ac8c5701cb776ccd475d1c684989c070",
+    "unchangedCopy": true
+  },
+  "campaign_terracotta.jpg": {
+    "source": "assets/images/campaign_terracotta.jpg",
+    "sha256": "7981f12fcb233cf6872bb9cb035a6c60ce10a877f929946940b56c1d905033ab",
+    "unchangedCopy": true
+  },
+  "home_bag_shoulder.webp": {
+    "source": "assets/images/home_bag_shoulder.webp",
+    "sha256": "2b0137b0bf3bbc1e0854ec927bc5a00cda1135f5a16b28bd8d058404b263a08d",
+    "unchangedCopy": true
+  },
+  "home_bag_crossbody.webp": {
+    "source": "assets/images/home_bag_crossbody.webp",
+    "sha256": "a0ff8544ddf9a302970727b1e384f17b2e6a0ab4ee650ca352411c33972b0b07",
+    "unchangedCopy": true
+  }
+}

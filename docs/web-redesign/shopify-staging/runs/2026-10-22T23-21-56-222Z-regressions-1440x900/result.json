@@ -1,0 +1,721 @@
+{
+  "run": "regressions-1440x900",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/regressions.mjs --base-url=http://127.0.0.1:9292",
+  "startedAt": "2026-10-22T23:21:56.222Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 657,
+      "sha256": "f5c60cdb01ea93db182e24638a2f6f493265fd0e91657c306023fec5225dab60"
+    },
+    "repoHead": "6833c20d56ffac653e9cbb3bab3b121456e6c71a",
+    "repoBranch": "feat/client-guide-oct20"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewport": {
+    "width": 1440,
+    "height": 900
+  },
+  "incidents": [],
+  "proxyHealthAfter": {
+    "checkedAt": "2026-10-22T23:23:45.148Z",
+    "baseUrl": "http://127.0.0.1:9292",
+    "store": "monetta-staging.myshopify.com",
+    "expectedTheme": {
+      "id": "192125304866",
+      "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+    },
+    "timeoutMs": 20000,
+    "checks": [
+      {
+        "name": "exactly one healthy theme dev proxy exists, it serves the authorised draft theme and it is the one under test",
+        "pass": false,
+        "detail": "[[9292,\"192125304866\",\"healthy\"],[9292,\"192125304866\",\"healthy\"]]"
+      },
+      {
+        "name": "the probe page answers 200 within the time limit",
+        "pass": true,
+        "detail": "705 ms"
+      },
+      {
+        "name": "the document is the expected theme (Shopify.theme id, role unpublished, name)",
+        "pass": true,
+        "detail": "{\"name\":\"Monetta Web F1 borrador sin publicar 2026-10-19\",\"id\":192125304866,\"schema_name\":\"Atelier\",\"schema_version\":\"3.5.0\",\"theme_store_id\":null,\"role\":\"unpublished\"}"
+      },
+      {
+        "name": "the document uses the Monetta layout (body.mw)",
+        "pass": true,
+        "detail": ""
+      },
+      {
+        "name": "served monetta-product.js equals the local file",
+        "pass": true,
+        "detail": "served d83c35ee53fd · local d83c35ee53fd"
+      },
+      {
+        "name": "served monetta-cart.js equals the local file",
+        "pass": true,
+        "detail": "served 7c6fd3d6caf8 · local 7c6fd3d6caf8"
+      },
+      {
+        "name": "served monetta-core.js equals the local file",
+        "pass": true,
+        "detail": "served 1dc0b4ba4774 · local 1dc0b4ba4774"
+      }
+    ],
+    "incidents": [],
+    "processes": [
+      "13504 01:15:45 /bin/zsh -c source /Users/alexis_reyna/.claude/shell-snapshots/snapshot-zsh-1792706538526-p03bde.sh 2>/dev/null || true && setopt NO_EXTENDED_GLOB NO_BARE_GLOB_QUAL 2>/dev/null || true && { \\builtin unalias -- 'unsetenv'; \\builtin unset -f -- 'unsetenv'; } >/dev/null 2>&1 || true && eval 'shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off --no-color 2>&1' < /dev/null && pwd -P >| /tmp/claude-05ec-cwd",
+      "13505 01:15:45 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off --no-color"
+    ],
+    "proxies": [
+      {
+        "port": 9292,
+        "theme": "192125304866",
+        "state": "healthy",
+        "process": "13504 01:15:45 /bin/zsh -c source /Users/alexis_reyna/.claude/shell-snapshots/snapshot-zsh-1792706538526-p03bde.sh 2>/de"
+      },
+      {
+        "port": 9292,
+        "theme": "192125304866",
+        "state": "healthy",
+        "process": "13505 01:15:45 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --pat"
+      }
+    ],
+    "ok": false
+  },
+  "finishedAt": "2026-10-22T23:23:47.233Z",
+  "status": "complete-with-failures",
+  "error": null,
+  "summary": {
+    "checks": 123,
+    "passed": 121,
+    "failed": 2
+  },
+  "checks": [
+    {
+      "name": "P1 [staging] control: after Shopify answers, id, chip, header, address and price are the chosen variant's",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021625378,\"chosen\":[\"Café\"],\"header\":[\"Café\"],\"url\":\"68551021625378\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] control: the page is confirmed (selection=valid) and not busy",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null}"
+    },
+    {
+      "name": "P1 [staging] control: adding after confirmation sends the chosen variant, once",
+      "pass": true,
+      "detail": "[{\"id\":68551021625378,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"}]"
+    },
+    {
+      "name": "P1 [staging] slow answer: the page reports the choice as pending (selection=pending, aria-busy, status text)",
+      "pass": true,
+      "detail": "{\"selection\":\"pending\",\"busy\":\"true\",\"status\":\"Confirmando disponibilidad de Café…\"}"
+    },
+    {
+      "name": "P1 [staging] slow answer: the chip and the value beside the option name agree on the chosen option",
+      "pass": true,
+      "detail": "{\"chosen\":[\"Café\"],\"header\":[\"Café\"]}"
+    },
+    {
+      "name": "P1 [staging] slow answer: every add button is really disabled (not only dimmed)",
+      "pass": true,
+      "detail": "[true,true]"
+    },
+    {
+      "name": "P1 [staging] slow answer: the accelerated-checkout / WhatsApp area is inert",
+      "pass": true,
+      "detail": "[true]"
+    },
+    {
+      "name": "P1 [staging] slow answer: pressing every add button (2) by mouse, click() and dispatch, and Enter in the quantity field, sends no add request",
+      "pass": true,
+      "detail": "enter=true adds=0 []"
+    },
+    {
+      "name": "P1 [staging] slow answer: the accelerated-checkout button (Buy it now) starts nothing: no cartCreate request",
+      "pass": true,
+      "detail": "payment buttons=1 cartCreate=0"
+    },
+    {
+      "name": "P1 [staging] slow answer: when it arrives, id, chip, header, address and price are B's together and buying is open again",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021625378,\"chosen\":[\"Café\"],\"header\":[\"Café\"],\"url\":\"68551021625378\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] slow answer: adding afterwards sends exactly B, with the page showing B at that instant",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021625378,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021625378,\"chosen\":[\"Café\"],\"t\":4976.39999999851}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 503: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] HTTP 503: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] HTTP 503: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":7557.5}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 503: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] dropped connection: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] dropped connection: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] dropped connection: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":10202.699999999255}]"
+    },
+    {
+      "name": "P1 [staging] dropped connection: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a document that is not the product section: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a document that is not the product section: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a document that is not the product section: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":12836.39999999851}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a document that is not the product section: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section that has no product form: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section that has no product form: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section that has no product form: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":15650.89999999851}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section that has no product form: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section whose chips disagree with its variant: the chips, the header value, the id and the address go back to the variant the page really shows",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section whose chips disagree with its variant: the page says it could not confirm and which option stayed (role=alert)",
+      "pass": true,
+      "detail": "No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar."
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section whose chips disagree with its variant: adding sends the variant shown (the initial one), never the failed choice",
+      "pass": true,
+      "detail": "[{\"path\":\"/cart/add.js\",\"body\":{\"id\":68551021592610,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"},\"selection\":\"valid\",\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"t\":18349.800000000745}]"
+    },
+    {
+      "name": "P1 [staging] HTTP 200 with a section whose chips disagree with its variant: choosing the option again retries and succeeds",
+      "pass": true,
+      "detail": "{\"hidden\":68551021625378,\"selection\":\"valid\",\"error\":\"\"}"
+    },
+    {
+      "name": "P1 [staging] another variant rendered than asked: the page adopts what Shopify rendered and shows it everywhere",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021658146,\"chosen\":[\"Negro/Plateado\"],\"header\":[\"Negro/Plateado\"],\"url\":\"68551021658146\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] another variant rendered than asked: the shopper is told (alert toast)",
+      "pass": true,
+      "detail": "Esa combinación ya no está disponible. Mostramos Negro/Plateado."
+    },
+    {
+      "name": "P1 [staging] A→B→C, B answers after C: the page ends on C (id, chip, header, address, price) and B's late answer changed nothing",
+      "pass": true,
+      "detail": "ask B · ask C | {\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021658146,\"chosen\":[\"Negro/Plateado\"],\"header\":[\"Negro/Plateado\"],\"url\":\"68551021658146\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] A→B→C out of order: adding sends C",
+      "pass": true,
+      "detail": "[{\"id\":68551021658146,\"quantity\":1,\"sections\":\"monetta-cart-sheet\",\"sections_url\":\"/products/reloj-coach-talia-saddle\"}]"
+    },
+    {
+      "name": "P1 [staging] A→B→C, B answers while C is pending: nothing of B is applied and buying stays closed",
+      "pass": true,
+      "detail": "{\"selection\":\"pending\",\"busy\":\"true\",\"hidden\":68551021592610,\"chosen\":[\"Negro/Plateado\"],\"header\":[\"Negro/Plateado\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[true,true],\"payInert\":[true],\"status\":\"Confirmando disponibilidad de Negro/Plateado…\",\"error\":\"\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [staging] A→B→C, C then fails: the page ends on A everywhere (id, chip, header, address, price)",
+      "pass": true,
+      "detail": "{\"selection\":\"valid\",\"busy\":null,\"hidden\":68551021592610,\"chosen\":[\"Rosa Blush\"],\"header\":[\"Rosa Blush\"],\"url\":\"68551021592610\",\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":[false,false],\"payInert\":[false],\"status\":\"\",\"error\":\"No pudimos confirmar «Negro/Plateado». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.\",\"payButtons\":1}"
+    },
+    {
+      "name": "P1 [controlled] two options: choosing B with x checked requests exactly the variant A/x→B/x (R3) and shows B / x",
+      "pass": true,
+      "detail": "{\"asked\":[68551021658146],\"seen\":{\"chosen\":[\"B\",\"x\"],\"header\":[\"B\",\"x\"]}}"
+    },
+    {
+      "name": "P1 [controlled] two options: B/y does not exist, so the nearest variant that keeps B (R3 = B/x) is requested and the chips show B / x at once",
+      "pass": true,
+      "detail": "{\"asked\":[68551021658146,68551021625378,68551021658146],\"seen\":{\"chosen\":[\"B\",\"x\"],\"header\":[\"B\",\"x\"]}}"
+    },
+    {
+      "name": "P1 [staging] over all 8 adds of this run, the id sent equalled the variant shown, the chips and a confirmed selection at that instant",
+      "pass": true,
+      "detail": "[[68551021625378,68551021625378,\"valid\",\"Café\"],[68551021625378,68551021625378,\"valid\",\"Café\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021592610,68551021592610,\"valid\",\"Rosa Blush\"],[68551021658146,68551021658146,\"valid\",\"Negro/Plateado\"]]"
+    },
+    {
+      "name": "P1 [staging] no console or page errors from the theme during the scenarios",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, the initial variant is what the form sends",
+      "pass": true,
+      "detail": "form id 68551021592610 vs 68551021592610"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, no radio chip is shown (nothing that looks selectable but sends nothing); the option links are",
+      "pass": true,
+      "detail": "{\"radiosShown\":0,\"linksShown\":8,\"current\":[\"Rosa Blush\"],\"price\":\"$ 3,647.00 MXN\",\"addDisabled\":false,\"seal\":false}"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, choosing another available variant makes the form send exactly that variant",
+      "pass": true,
+      "detail": "form id 68551021625378 vs 68551021625378; [\"Café\"]"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, the price on the page is that variant's price",
+      "pass": true,
+      "detail": "$ 3,647.00 MXN vs 3647"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, a native form submission adds exactly the chosen variant to the anonymous cart",
+      "pass": true,
+      "detail": "[[68551021625378,1]]"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, a sold-out variant is reachable, is marked, and its add button is disabled",
+      "pass": true,
+      "detail": "{\"radiosShown\":0,\"linksShown\":2,\"current\":[\"Negro\"],\"price\":\"$ 1,445.00 MXN\",\"addDisabled\":true,\"seal\":true}"
+    },
+    {
+      "name": "P3 [staging] without JavaScript, the sold-out variant's form carries that variant (never an available one)",
+      "pass": true,
+      "detail": "form id 68550844121122 vs 68550844121122"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: one valid JSON-LD block is rendered (the legacy markup had none)",
+      "pass": true,
+      "detail": "{\"count\":1,\"errors\":[],\"type\":\"ProductGroup\"}"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: its type is native (ProductGroup) and it names the product",
+      "pass": true,
+      "detail": "{\"type\":\"ProductGroup\",\"name\":\"Reloj Coach Talia Saddle\",\"title\":\"Reloj Coach Talia Saddle\"}"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: it lists every variant Shopify has (8), by id",
+      "pass": true,
+      "detail": "8 offered of 8"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: each offer's price and availability equal Shopify's for that variant",
+      "pass": true,
+      "detail": "[[\"3647.00\",\"http://schema.org/InStock\"],[\"3647.00\",\"http://schema.org/InStock\"],[\"3647.00\",\"http://schema.org/InStock\"],[\"3647.00\",\"http://schema.org/InStock\"]]"
+    },
+    {
+      "name": "P4 [staging] reloj-coach-talia-saddle: canonical and page metadata are kept",
+      "pass": true,
+      "detail": "{\"canonical\":\"https://monetta-staging.myshopify.com/products/reloj-coach-talia-saddle\",\"og\":\"Reloj Coach Talia Saddle\",\"microdata\":0}"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: one valid JSON-LD block is rendered (the legacy markup had none)",
+      "pass": true,
+      "detail": "{\"count\":1,\"errors\":[],\"type\":\"ProductGroup\"}"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: its type is native (ProductGroup) and it names the product",
+      "pass": true,
+      "detail": "{\"type\":\"ProductGroup\",\"name\":\"Bolso Steve Madden Crossbody\",\"title\":\"Bolso Steve Madden Crossbody\"}"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: it lists every variant Shopify has (2), by id",
+      "pass": true,
+      "detail": "2 offered of 2"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: each offer's price and availability equal Shopify's for that variant",
+      "pass": true,
+      "detail": "[[\"1445.00\",\"http://schema.org/InStock\"],[\"1445.00\",\"http://schema.org/OutOfStock\"]]"
+    },
+    {
+      "name": "P4 [staging] bolso-steve-madden-crossbody-3: canonical and page metadata are kept",
+      "pass": true,
+      "detail": "{\"canonical\":\"https://monetta-staging.myshopify.com/products/bolso-steve-madden-crossbody-3\",\"og\":\"Bolso Steve Madden Crossbody\",\"microdata\":0}"
+    },
+    {
+      "name": "P4 [source] the markup is produced by the native structured_data filter; the section has no literal price, availability or id in it",
+      "pass": true,
+      "detail": "{{ product | structured_data }}"
+    },
+    {
+      "name": "P5 [staging] \"Ver más piezas\" is a link that keeps the filters and the sort in its address",
+      "pass": true,
+      "detail": "/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] after a 503 nothing is appended and the address does not change",
+      "pass": true,
+      "detail": "24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] the failure box offers a retry button and, separately, a link that is no longer intercepted (still filtered and sorted)",
+      "pass": true,
+      "detail": "{\"retry\":true,\"native\":\"/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending\",\"interceptable\":false,\"alert\":\"alert\",\"focus\":true}"
+    },
+    {
+      "name": "P5 [staging] retrying while Shopify still fails sends one more fetch, adds nothing and leaves the box in place",
+      "pass": true,
+      "detail": "fetches 2"
+    },
+    {
+      "name": "P5 [staging] the native link performs a real navigation to page 2, keeping filter and sort",
+      "pass": true,
+      "detail": "1 navigation(s); http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] recovery: the retry appends page 2, updates the address and keeps filter and sort",
+      "pass": true,
+      "detail": "48 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] HTTP 200 with a body that is not a listing: nothing is added and the address is untouched",
+      "pass": true,
+      "detail": "24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] HTTP 200 with a listing page with an empty grid: nothing is added and the address is untouched",
+      "pass": true,
+      "detail": "24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "P5 [staging] HTTP 200 with a password wall: nothing is added and the address is untouched",
+      "pass": true,
+      "detail": "24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "P6 [staging] phone 375×812, mouse: the focus lands on a search field that is visible and on screen, with its text selected",
+      "pass": true,
+      "detail": "{\"id\":\"page-search-input\",\"visible\":true,\"inView\":true,\"selected\":true,\"value\":\"zzcorreccionesnoexiste987\"}"
+    },
+    {
+      "name": "P6 [staging] phone 375×812, mouse: the link's own href (without JavaScript) points at a visible field",
+      "pass": true,
+      "detail": "#page-search-input"
+    },
+    {
+      "name": "P6 [staging] phone 375×812, keyboard: the focus lands on a search field that is visible and on screen, with its text selected",
+      "pass": true,
+      "detail": "{\"id\":\"page-search-input\",\"visible\":true,\"inView\":true,\"selected\":true,\"value\":\"zzcorreccionesnoexiste987\"}"
+    },
+    {
+      "name": "P6 [staging] phone 375×812, keyboard: the link's own href (without JavaScript) points at a visible field",
+      "pass": true,
+      "detail": "#page-search-input"
+    },
+    {
+      "name": "P6 [staging] desktop 1440×900, mouse: the focus lands on a search field that is visible and on screen, with its text selected",
+      "pass": true,
+      "detail": "{\"id\":\"page-search-input\",\"visible\":true,\"inView\":true,\"selected\":true,\"value\":\"zzcorreccionesnoexiste987\"}"
+    },
+    {
+      "name": "P6 [staging] desktop 1440×900, mouse: the link's own href (without JavaScript) points at a visible field",
+      "pass": true,
+      "detail": "#page-search-input"
+    },
+    {
+      "name": "P6 [staging] desktop 1440×900, keyboard: the focus lands on a search field that is visible and on screen, with its text selected",
+      "pass": true,
+      "detail": "{\"id\":\"page-search-input\",\"visible\":true,\"inView\":true,\"selected\":true,\"value\":\"zzcorreccionesnoexiste987\"}"
+    },
+    {
+      "name": "P6 [staging] desktop 1440×900, keyboard: the link's own href (without JavaScript) points at a visible field",
+      "pass": true,
+      "detail": "#page-search-input"
+    },
+    {
+      "name": "P8 [staging] home: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] collection: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] product: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] cart: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] search: the served HTML declares lang=\"es-MX\" (read from the raw document, before any script)",
+      "pass": true,
+      "detail": "lang=es-MX"
+    },
+    {
+      "name": "P8 [staging] the page's own text is Spanish (more Spanish than English function words outside fragments marked with another language)",
+      "pass": true,
+      "detail": "{\"es\":34,\"en\":0}"
+    },
+    {
+      "name": "P8 [staging] fragments Shopify writes in the store's language are marked with it: menu titles and the accelerated checkout",
+      "pass": false,
+      "detail": "{\"storeLang\":\"en\",\"nav\":[[\"Inicio\",null],[\"Catálogo\",null],[\"Contacto\",null]],\"pay\":\"en\",\"payText\":\"Buy it now\"}"
+    },
+    {
+      "name": "P2 [staging] increment: the change request is held on the wire",
+      "pass": true,
+      "detail": "held=1"
+    },
+    {
+      "name": "P2 [staging] increment: while it is pending every checkout button is disabled and the lock flag is set",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] increment: the tab order never reaches a checkout button while the change is pending",
+      "pass": true,
+      "detail": "reached=0"
+    },
+    {
+      "name": "P2 [staging] increment: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] increment: after the answer the lock is released and the bag matches Shopify's",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] increment: positive control, with the lock released the bag hands over to Shopify's checkout of the staging store",
+      "pass": true,
+      "detail": "302 /cart -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx | 302 /checkouts/cn/hWNIHWKogQCj1Igej7HCQYcs/en-mx -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx"
+    },
+    {
+      "name": "P2 [staging] decrement: the change request is held on the wire",
+      "pass": true,
+      "detail": "held=1"
+    },
+    {
+      "name": "P2 [staging] decrement: while it is pending every checkout button is disabled and the lock flag is set",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] decrement: the tab order never reaches a checkout button while the change is pending",
+      "pass": true,
+      "detail": "reached=0"
+    },
+    {
+      "name": "P2 [staging] decrement: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] decrement: after the answer the lock is released and the bag matches Shopify's",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] remove: the change request is held on the wire",
+      "pass": true,
+      "detail": "held=1"
+    },
+    {
+      "name": "P2 [staging] remove: while it is pending every checkout button is disabled and the lock flag is set",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] remove: the tab order never reaches a checkout button while the change is pending",
+      "pass": true,
+      "detail": "reached=0"
+    },
+    {
+      "name": "P2 [staging] remove: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] remove: after the answer the lock is released and the bag matches Shopify's",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] undo: the change request is held on the wire",
+      "pass": true,
+      "detail": "held=1"
+    },
+    {
+      "name": "P2 [staging] undo: while it is pending every checkout button is disabled and the lock flag is set",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] undo: the tab order never reaches a checkout button while the change is pending",
+      "pass": true,
+      "detail": "reached=0"
+    },
+    {
+      "name": "P2 [staging] undo: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] undo: after the answer the lock is released and the bag matches Shopify's",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}"
+    },
+    {
+      "name": "P2 [staging] transport failure and no read-back: the bag is unconfirmed, the notice shows and every checkout button stays disabled",
+      "pass": true,
+      "detail": "{\"locked\":true,\"checkoutDisabled\":[true,true,true],\"accelerated\":[],\"notice\":[true,true]}"
+    },
+    {
+      "name": "P2 [staging] transport failure and no read-back: checkout cannot be submitted",
+      "pass": true,
+      "detail": "hand-overs=0"
+    },
+    {
+      "name": "P2 [staging] transport failure and no read-back: a further change is refused until the bag is confirmed (no blind second write)",
+      "pass": true,
+      "detail": "change requests 1"
+    },
+    {
+      "name": "P2 [staging] recovery: \"Actualizar bolsa\" shows Shopify's bag (the change never reached it) and releases the lock",
+      "pass": true,
+      "detail": "{\"shown\":\"1\",\"truth\":1,\"state\":{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}}"
+    },
+    {
+      "name": "P2 [staging] Shopify rejects a change (422): its message is shown, marked with the store language, and the lock is released after the bag is read back",
+      "pass": true,
+      "detail": "{\"toast\":{\"text\":\"You can only add 1 of this item to your cart.\",\"lang\":\"en\"},\"state\":{\"locked\":false,\"checkoutDisabled\":[false,false,false],\"accelerated\":[],\"notice\":[false,false]}}"
+    },
+    {
+      "name": "P2 [staging] Deshacer pressed during a pending change does not run on top of it (waits its turn)",
+      "pass": true,
+      "detail": "add before the change finished: 0; overlapping writes: 0"
+    },
+    {
+      "name": "P2 [staging] quick add on a card adds exactly that variant once, opens the sheet and updates the count",
+      "pass": true,
+      "detail": "{\"wanted\":68550943277090,\"items\":[[68550943277090,1]],\"badge\":\"1\"}"
+    },
+    {
+      "name": "P2 [staging] quick add: no console or page errors from the theme",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "P2 [controlled] the accelerated-checkout area is inert while the change is pending: a pointer or keyboard press does not reach its button",
+      "pass": true,
+      "detail": "{\"inert\":[true],\"activations\":0}"
+    },
+    {
+      "name": "P2 [controlled] the accelerated-checkout area is released with the lock",
+      "pass": true,
+      "detail": "{\"locked\":false,\"checkoutDisabled\":[],\"accelerated\":[],\"notice\":[]}"
+    },
+    {
+      "name": "P7 [staging] the anonymous cart has two distinct lines of the same variant (plain ×1, personalised ×2)",
+      "pass": true,
+      "detail": "[[\"68551021592610:3045cf69d46ffc49a2c6c4d034a349ce\",2,{\"Grabado\":\"ANA\",\"_canal\":\"prueba controlada\"}],[\"68551021592610:c9c9fede87392015840a26293b50ecb1\",1,{}]]"
+    },
+    {
+      "name": "P7 [staging] the rendered line carries its full identity (variant, quantity, public and private properties, selling plan)",
+      "pass": true,
+      "detail": "{\"id\":68551021592610,\"quantity\":2,\"properties\":{\"Grabado\":\"ANA\",\"_canal\":\"prueba controlada\"},\"selling_plan\":null}"
+    },
+    {
+      "name": "P7 [staging] Deshacer restores the personalised line with its quantity and both properties, under the same key",
+      "pass": true,
+      "detail": "[[\"68551021592610:3045cf69d46ffc49a2c6c4d034a349ce\",2,{\"Grabado\":\"ANA\",\"_canal\":\"prueba controlada\"}],[\"68551021592610:c9c9fede87392015840a26293b50ecb1\",1,{}]]"
+    },
+    {
+      "name": "P7 [staging] the plain line of the same variant was not merged into (still ×1, nothing added to it)",
+      "pass": true,
+      "detail": "[[\"68551021592610:3045cf69d46ffc49a2c6c4d034a349ce\",2],[\"68551021592610:c9c9fede87392015840a26293b50ecb1\",1]]"
+    },
+    {
+      "name": "P7 [controlled] Deshacer re-adds with the line's quantity, properties and selling plan (controlled plan 777; staging has no selling plans)",
+      "pass": true,
+      "detail": "[{\"id\":111,\"quantity\":3,\"sections\":\"ctl-cart,monetta-cart-sheet\",\"sections_url\":\"/cart\",\"properties\":{\"Grabado\":\"ANA\"},\"selling_plan\":777}]"
+    },
+    {
+      "name": "P7 [controlled] if Shopify rejects the restore, its message is shown and no other line is added in its place",
+      "pass": true,
+      "detail": "{\"adds\":[{\"id\":111,\"quantity\":1,\"sections\":\"ctl-cart,monetta-cart-sheet\",\"sections_url\":\"/cart\",\"properties\":{\"Grabado\":\"ANA\"}}],\"toast\":\"Cannot restore: this item is sold out.\"}"
+    },
+    {
+      "name": "P7 [controlled] the rejected restore is not retried without its properties (exactly one add, with the full identity)",
+      "pass": true,
+      "detail": "[{\"id\":111,\"quantity\":1,\"sections\":\"ctl-cart,monetta-cart-sheet\",\"sections_url\":\"/cart\",\"properties\":{\"Grabado\":\"ANA\"}}]"
+    },
+    {
+      "name": "P7 [controlled] a line whose identity cannot be read offers no Deshacer (it would be a different purchase)",
+      "pass": true,
+      "detail": "{\"offered\":false,\"adds\":[]}"
+    },
+    {
+      "name": "proxy: after the run it still serves the expected theme with the local scripts (checked with bounded waits)",
+      "pass": false,
+      "detail": "[{\"name\":\"exactly one healthy theme dev proxy exists, it serves the authorised draft theme and it is the one under test\",\"pass\":false,\"detail\":\"[[9292,\\\"192125304866\\\",\\\"healthy\\\"],[9292,\\\"192125304866\\\",\\\"healthy\\\"]]\"}]"
+    }
+  ],
+  "notes": [
+    "P1 page: reloj-coach-talia-saddle; initial variant 68551021592610 \"Rosa Blush\", B 68551021625378 \"Café\", C 68551021658146 \"Negro/Plateado\"",
+    "proxy incidents during the run: 0"
+  ]
+}

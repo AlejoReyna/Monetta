@@ -54,7 +54,10 @@ For the live checkout:
 
 Production validation and startup reject a different shop even if its
 Storefront token works. The supported live hosts are `monetta.mx`,
-`www.monetta.mx` and `fakcei-n9.myshopify.com`.
+`www.monetta.mx` and `fakcei-n9.myshopify.com`; checkout accepts all three,
+whichever one is configured. Pick one and keep it: changing
+`SHOPIFY_STORE_DOMAIN` on an installed app, even between these aliases, wipes
+its local catalog, bag, favorites and sessions.
 
 The handoff remains `cartCreate` / reconciliation with the selected **variant
 IDs and quantities**, followed by the **fresh `cart.checkoutUrl` returned by

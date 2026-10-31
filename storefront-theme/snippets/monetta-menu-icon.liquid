@@ -1,0 +1,38 @@
+{%- doc -%}
+  Picks the drawer icon for a menu link from its handle, so the merchant manages links in Online Store > Navigation
+  and the design's icons follow. Unknown links get a chevron. Echoes an icon name for snippets/monetta-icon.liquid.
+
+  @param {string} handle - The menu link's handle (title handleized).
+{%- enddoc -%}
+{%- liquid
+  assign h = handle | default: ''
+  if h == 'home' or h contains 'inicio'
+    echo 'home'
+  elsif h contains 'search' or h contains 'busca'
+    echo 'search'
+  elsif h contains 'novedad' or h contains 'nuevo' or h contains 'new'
+    echo 'sparkle'
+  elsif h contains 'bolsa' or h contains 'bolso' or h contains 'bag'
+    echo 'bag'
+  elsif h contains 'cartera'
+    echo 'wallet'
+  elsif h contains 'reloj'
+    echo 'watch'
+  elsif h contains 'mayoreo' or h contains 'vend'
+    echo 'handshake'
+  elsif h contains 'contact' or h contains 'ayuda'
+    echo 'chat'
+  elsif h contains 'historia' or h contains 'nosotros'
+    echo 'book'
+  elsif h contains 'perfume'
+    echo 'perfume'
+  elsif h contains 'maquillaje' or h contains 'skincare' or h contains 'belleza'
+    echo 'face'
+  elsif h contains 'catalog'
+    echo 'grid'
+  elsif h contains 'marca' or h contains 'todo'
+    echo 'store'
+  else
+    echo 'chevronRight'
+  endif
+-%}

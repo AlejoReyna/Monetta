@@ -8,8 +8,8 @@
 /// mid-frame with no `await`. Persistence is write-through: a mutation
 /// updates the in-memory field immediately (so the UI never waits on disk
 /// I/O) and fires an unawaited write to Drift alongside it, the same
-/// fire-and-forget shape `main.dart` already uses for
-/// `ExternalCatalogController.loadAndRefresh()`.
+/// fire-and-forget shape `main.dart` already uses for its other background
+/// loads.
 ///
 /// The catalog itself still seeds from the bundled snapshot asset on a cold
 /// cache — there is still no Storefront access token configured anywhere in
@@ -388,6 +388,7 @@ class CatalogStore extends ChangeNotifier {
       source: source,
       cache: _cacheStore,
       writeCoordinator: _writeCoordinator,
+      shopDomain: _shopDomain,
     );
     _realtimeSubscription = repository.watch().listen(_applyRealtimeUpdate);
   }
@@ -751,9 +752,7 @@ class CatalogStore extends ChangeNotifier {
   CanonicalFacets? facetsFor(String productId) => facetsById[productId];
 
   /// Every Monetta product mapped into the source-independent [CatalogItem]
-  /// shape. Used by the mixed-feed dedupe rule (`app/mixed_feed.dart`) — the
-  /// external section must know Monetta's brand+title set even though it
-  /// never re-ranks Monetta items through this list.
+  /// shape. Home and collection open the full catalog through this list.
   List<CatalogItem> get catalogItems => [
         for (final product in products)
           catalogItemFromShopifyProduct(

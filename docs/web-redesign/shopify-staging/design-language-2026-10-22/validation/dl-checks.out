@@ -1,0 +1,343 @@
+run dir: /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T22-56-39-216Z-dl-checks
+PASS  320×640 home: document language es-MX  — es-MX
+PASS  320×640 home: section title is Playfair 23px (sectionTitle role)  — {"family":"Playfair Display","size":23,"weight":"400","transform":"none","radius":0,"width":108.984375,"height":26.4375,"left":16,"right":124.984375,"top":323.78125,"bottom":350.21875,"text":"Novedades"}
+PASS  320×640 home: collection tile on the card radius (12px)  — 12
+PASS  320×640 home: brand cell on the card radius (12px)  — 12
+PASS  320×640 home: style silhouette has no box radius (straight on the canvas)
+PASS  320×640 home: header icon buttons are at least 48 x 48  — [{"label":"Abrir menú","w":48,"h":48}]
+PASS  320×640 home: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  320×640 home: no horizontal overflow  — {"scrollWidth":320,"clientWidth":320}
+PASS  320×640 home: header, menu and footer labels carry no untranslated Shopify defaults  — []
+PASS  320×640 footer: column labels are the Inter eyebrow, not the serif  — {"family":"Inter","size":12,"weight":"600","transform":"uppercase","radius":0,"width":288,"height":18.59375,"left":16,"right":304,"top":6556.1875,"bottom":6574.78125,"text":"Comprar"}
+PASS  320×640 collection: product-card name is Inter (card-label role, the documented exception)  — {"family":"Inter","size":14,"weight":"400","transform":"none","radius":0,"width":296,"height":36.375,"left":12,"right":308,"top":507.5,"bottom":543.875,"text":"Bolsa Guess Beige y Blanca Hobo Hombro y Crossbody"}
+PASS  320×640 collection: product-card brand is Inter 600  — {"family":"Inter","size":14,"weight":"600","transform":"none","radius":0,"width":296,"height":17.5,"left":12,"right":308,"top":488,"bottom":505.5,"text":"Guess"}
+PASS  320×640 collection: card radius 12, photo mat radius 10  — {"card":12,"media":10}
+PASS  320×640 collection: favourite target is 48 x 48  — {"w":48,"h":48}
+PASS  320×640 collection: quick-add target is 48 x 48  — {"w":48,"h":48}
+PASS  320×640 collection: 1 product column(s)  — 1
+PASS  320×640 collection: Shopify's all-products collection is titled "Catálogo"  — Catálogo
+PASS  320×640 collection: sort options and filter labels are Spanish  — []
+PASS  320×640 collection: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  320×640 collection: no horizontal overflow  — {"scrollWidth":320,"clientWidth":320}
+PASS  320×640 product: name is Playfair 25px (productName role)  — {"family":"Playfair Display","size":25,"weight":"400","transform":"none","radius":0,"width":288,"height":28.75,"left":16,"right":304,"top":599.296875,"bottom":628.046875,"text":"Reloj Coach Talia Saddle"}
+PASS  320×640 product: accordion titles are Playfair  — Playfair Display
+PASS  320×640 product: "Otras formas de comprar" is the Inter panel title  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":288,"height":26.34375,"left":16,"right":304,"top":1201.453125,"bottom":1227.796875,"text":"Otras formas de comprar"}
+PASS  320×640 product: purchase button at least 48px tall  — {"h":48,"text":"Agregar al carrito"}
+PASS  320×640 product: option legends use the app's labels (Color), not the raw "Band color"  — ["Color"]
+PASS  320×640 product: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"PÁGINA DE PREGUNTAS FRECUENTES\" 195x43","a. \"Aviso de privacidad\" 121x16"]}
+PASS  320×640 product: no horizontal overflow  — {"scrollWidth":320,"clientWidth":320}
+PASS  320×640 product (one photo): the viewer keeps a real width  — {"width":320}
+PASS  320×640 bag: "Resumen de compra" is the Inter panel title (boutiqueTitle)  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":238,"height":26.34375,"left":41,"right":279,"top":653.28125,"bottom":679.625,"text":"Resumen de compra"}
+PASS  320×640 bag: discount field on the control radius (12px), at least 48px tall  — {"r":12,"h":52}
+PASS  320×640 bag: "Quitar códigos" hidden while the bag holds no code
+PASS  320×640 bag: summary under the lines below 1024  — {"linesBottom":540.28125,"summaryTop":628.28125}
+PASS  320×640 bag: the total amount stays on one line  — 1
+PASS  320×640 bag: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  320×640 bag: no horizontal overflow  — {"scrollWidth":320,"clientWidth":320}
+PASS  320×640 search: results heading is the serif screen title at 22px (search_screen.dart)  — {"family":"Playfair Display","size":22,"weight":"400","transform":"none","radius":0,"width":227.140625,"height":24.625,"left":16,"right":243.140625,"top":161,"bottom":185.625,"text":"Resultados para “bolso”"}
+PASS  320×640 search (no results): empty-state title is Playfair  — {"family":"Playfair Display","size":26,"weight":"400","transform":"none","radius":0,"width":165.15625,"height":29.890625,"left":77.421875,"right":242.578125,"top":337.765625,"bottom":367.65625,"text":"Sin resultados"}
+PASS  320×640 contact: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  320×640 contact: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+note  320×640 contact (merchant blocks): targets under 48px: []
+note  320×640 contact: merchant blocks overflow to 377px; body overflow-x clip
+PASS  320×640 contact: the page never scrolls sideways (the shell clips merchant blocks wider than the viewport)  — {"scrollWidth":377,"clientWidth":320,"scrollX":0,"bodyOverflowX":"clip"}
+PASS  320×640 policy: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  320×640 policy: no untranslated theme or Shopify default labels in headings, navigation and buttons  — ["Privacy policy"]
+PASS  320×640 policy: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Shopify Consumer Privacy Policy\" 217x42","a. \"Shopify Privacy Portal Link\" 241x42","a. \"Aviso de privacidad\" 121x16"]}
+PASS  320×640 policy: no horizontal overflow  — {"scrollWidth":320,"clientWidth":320}
+PASS  320×640 blog: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  320×640 blog: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  320×640 blog: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  320×640 blog: no horizontal overflow  — {"scrollWidth":320,"clientWidth":320}
+PASS  320×640 collections index: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  320×640 collections index: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  320×640 collections index: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  320×640 collections index: no horizontal overflow  — {"scrollWidth":320,"clientWidth":320}
+PASS  320×640 404: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  320×640 404: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  320×640 404: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  320×640 404: no horizontal overflow  — {"scrollWidth":320,"clientWidth":320}
+PASS  320×640 discount: unknown code reported as not applied  — El código no se aplicó a los artículos. Revisa sus condiciones; los descuentos de envío se confirman en el checkout.
+PASS  320×640 discount: Shopify's total is unchanged after the unknown code  — {"before":139900,"after":139900,"codes":[{"code":"PRUEBA-NO-EXISTE-2210","applicable":false}]}
+PASS  320×640 discount: "Quitar códigos" visible exactly when Shopify keeps a code (1 stored)  — {"removeAfter":true,"stored":1}
+PASS  320×640 discount: "Quitar códigos" clears the codes in Shopify  — []
+PASS  320×640 saved: the heart toggles on (aria-pressed) and stores the handle in this browser  — {"pressed":"true","savedList":["bolsa-guess-beige-y-blanca-hobo"]}
+PASS  320×640 saved: the filled heart shows once saved  — block
+PASS  320×640 saved: the list shows the saved piece, re-rendered by Shopify, without the empty state  — {"cards":1,"emptyHidden":true,"status":"1 pieza guardada."}
+PASS  320×640 saved: removing the last piece shows the empty state with its catalog link  — {"cards":0,"emptyShown":true}
+PASS  320×640 recent: the second product lists the first one as recently viewed  — {"hidden":false,"handles":["bolso-steve-madden-shoulder-negro"]}
+PASS  320×640: no errors from Monetta scripts  — []
+PASS  390×844 home: document language es-MX  — es-MX
+PASS  390×844 home: section title is Playfair 23px (sectionTitle role)  — {"family":"Playfair Display","size":23,"weight":"400","transform":"none","radius":0,"width":108.984375,"height":26.4375,"left":20,"right":128.984375,"top":356.96875,"bottom":383.40625,"text":"Novedades"}
+PASS  390×844 home: collection tile on the card radius (12px)  — 12
+PASS  390×844 home: brand cell on the card radius (12px)  — 12
+PASS  390×844 home: style silhouette has no box radius (straight on the canvas)
+PASS  390×844 home: header icon buttons are at least 48 x 48  — [{"label":"Abrir menú","w":48,"h":48}]
+PASS  390×844 home: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  390×844 home: no horizontal overflow  — {"scrollWidth":390,"clientWidth":390}
+PASS  390×844 home: header, menu and footer labels carry no untranslated Shopify defaults  — []
+PASS  390×844 footer: column labels are the Inter eyebrow, not the serif  — {"family":"Inter","size":12,"weight":"600","transform":"uppercase","radius":0,"width":350,"height":18.59375,"left":20,"right":370,"top":4024.59375,"bottom":4043.1875,"text":"Comprar"}
+PASS  390×844 collection: product-card name is Inter (card-label role, the documented exception)  — {"family":"Inter","size":14,"weight":"400","transform":"none","radius":0,"width":165,"height":36.375,"left":12,"right":177,"top":343.75,"bottom":380.125,"text":"Bolsa Guess Beige y Blanca Hobo Hombro y Crossbody"}
+PASS  390×844 collection: product-card brand is Inter 600  — {"family":"Inter","size":14,"weight":"600","transform":"none","radius":0,"width":165,"height":17.5,"left":12,"right":177,"top":324.25,"bottom":341.75,"text":"Guess"}
+PASS  390×844 collection: card radius 12, photo mat radius 10  — {"card":12,"media":10}
+PASS  390×844 collection: favourite target is 48 x 48  — {"w":48,"h":48}
+PASS  390×844 collection: quick-add target is 48 x 48  — {"w":48,"h":48}
+PASS  390×844 collection: 2 product column(s)  — 2
+PASS  390×844 collection: Shopify's all-products collection is titled "Catálogo"  — Catálogo
+PASS  390×844 collection: sort options and filter labels are Spanish  — []
+PASS  390×844 collection: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  390×844 collection: no horizontal overflow  — {"scrollWidth":390,"clientWidth":390}
+PASS  390×844 product: name is Playfair 25px (productName role)  — {"family":"Playfair Display","size":25,"weight":"400","transform":"none","radius":0,"width":350,"height":28.75,"left":20,"right":370,"top":686.796875,"bottom":715.546875,"text":"Reloj Coach Talia Saddle"}
+PASS  390×844 product: accordion titles are Playfair  — Playfair Display
+PASS  390×844 product: "Otras formas de comprar" is the Inter panel title  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":350,"height":26.34375,"left":20,"right":370,"top":1212.8125,"bottom":1239.15625,"text":"Otras formas de comprar"}
+PASS  390×844 product: purchase button at least 48px tall  — {"h":48,"text":"Agregar al carrito"}
+PASS  390×844 product: option legends use the app's labels (Color), not the raw "Band color"  — ["Color"]
+PASS  390×844 product: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"PÁGINA DE PREGUNTAS FRECUENTES\" 279x19","a. \"Aviso de privacidad\" 121x16"]}
+PASS  390×844 product: no horizontal overflow  — {"scrollWidth":390,"clientWidth":390}
+PASS  390×844 product (one photo): the viewer keeps a real width  — {"width":390}
+PASS  390×844 bag: "Resumen de compra" is the Inter panel title (boutiqueTitle)  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":300,"height":26.34375,"left":45,"right":345,"top":541.28125,"bottom":567.625,"text":"Resumen de compra"}
+PASS  390×844 bag: discount field on the control radius (12px), at least 48px tall  — {"r":12,"h":52}
+PASS  390×844 bag: "Quitar códigos" hidden while the bag holds no code
+PASS  390×844 bag: summary under the lines below 1024  — {"linesBottom":428.28125,"summaryTop":516.28125}
+PASS  390×844 bag: the total amount stays on one line  — 1
+PASS  390×844 bag: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  390×844 bag: no horizontal overflow  — {"scrollWidth":390,"clientWidth":390}
+PASS  390×844 search: results heading is the serif screen title at 22px (search_screen.dart)  — {"family":"Playfair Display","size":22,"weight":"400","transform":"none","radius":0,"width":227.140625,"height":24.625,"left":20,"right":247.140625,"top":161,"bottom":185.625,"text":"Resultados para “bolso”"}
+PASS  390×844 search (no results): empty-state title is Playfair  — {"family":"Playfair Display","size":26,"weight":"400","transform":"none","radius":0,"width":165.15625,"height":29.890625,"left":112.421875,"right":277.578125,"top":315.140625,"bottom":345.03125,"text":"Sin resultados"}
+PASS  390×844 contact: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  390×844 contact: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+note  390×844 contact (merchant blocks): targets under 48px: []
+note  390×844 contact: merchant blocks fit; body overflow-x clip
+PASS  390×844 contact: the page never scrolls sideways (the shell clips merchant blocks wider than the viewport)  — {"scrollWidth":390,"clientWidth":390,"scrollX":0,"bodyOverflowX":"clip"}
+PASS  390×844 policy: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  390×844 policy: no untranslated theme or Shopify default labels in headings, navigation and buttons  — ["Privacy policy"]
+PASS  390×844 policy: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Shopify Consumer Privacy Policy\" 235x19","a. \"Shopify Privacy Portal Link\" 190x19","a. \"Aviso de privacidad\" 121x16"]}
+PASS  390×844 policy: no horizontal overflow  — {"scrollWidth":390,"clientWidth":390}
+PASS  390×844 blog: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  390×844 blog: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  390×844 blog: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  390×844 blog: no horizontal overflow  — {"scrollWidth":390,"clientWidth":390}
+PASS  390×844 collections index: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  390×844 collections index: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  390×844 collections index: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  390×844 collections index: no horizontal overflow  — {"scrollWidth":390,"clientWidth":390}
+PASS  390×844 404: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  390×844 404: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  390×844 404: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  390×844 404: no horizontal overflow  — {"scrollWidth":390,"clientWidth":390}
+PASS  390×844 discount: unknown code reported as not applied  — El código no se aplicó a los artículos. Revisa sus condiciones; los descuentos de envío se confirman en el checkout.
+PASS  390×844 discount: Shopify's total is unchanged after the unknown code  — {"before":139900,"after":139900,"codes":[{"code":"PRUEBA-NO-EXISTE-2210","applicable":false}]}
+PASS  390×844 discount: "Quitar códigos" visible exactly when Shopify keeps a code (1 stored)  — {"removeAfter":true,"stored":1}
+PASS  390×844 discount: "Quitar códigos" clears the codes in Shopify  — []
+PASS  390×844 saved: the heart toggles on (aria-pressed) and stores the handle in this browser  — {"pressed":"true","savedList":["bolsa-guess-beige-y-blanca-hobo"]}
+PASS  390×844 saved: the filled heart shows once saved  — block
+PASS  390×844 saved: the list shows the saved piece, re-rendered by Shopify, without the empty state  — {"cards":1,"emptyHidden":true,"status":"1 pieza guardada."}
+PASS  390×844 saved: removing the last piece shows the empty state with its catalog link  — {"cards":0,"emptyShown":true}
+PASS  390×844 recent: the second product lists the first one as recently viewed  — {"hidden":false,"handles":["bolso-steve-madden-shoulder-negro"]}
+PASS  390×844: no errors from Monetta scripts  — []
+PASS  768×1024 home: document language es-MX  — es-MX
+PASS  768×1024 home: section title is Playfair 27px (sectionTitle role)  — {"family":"Playfair Display","size":27,"weight":"400","transform":"none","radius":0,"width":127.9375,"height":31.046875,"left":32,"right":159.9375,"top":639.515625,"bottom":670.5625,"text":"Novedades"}
+PASS  768×1024 home: collection tile on the card radius (12px)  — 12
+PASS  768×1024 home: brand cell on the card radius (12px)  — 12
+PASS  768×1024 home: style silhouette has no box radius (straight on the canvas)
+PASS  768×1024 home: header icon buttons are at least 48 x 48  — [{"label":"Abrir menú","w":48,"h":48},{"label":"Ver guardados","w":48,"h":48},{"label":"Cuenta","w":48,"h":48},{"label":"Carrito, vacío","w":48,"h":48}]
+PASS  768×1024 home: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  768×1024 home: no horizontal overflow  — {"scrollWidth":768,"clientWidth":768}
+PASS  768×1024 home: header, menu and footer labels carry no untranslated Shopify defaults  — []
+PASS  768×1024 footer: column labels are the Inter eyebrow, not the serif  — {"family":"Inter","size":12,"weight":"600","transform":"uppercase","radius":0,"width":336,"height":18.59375,"left":400,"right":736,"top":4035.484375,"bottom":4054.078125,"text":"Comprar"}
+PASS  768×1024 collection: product-card name is Inter (card-label role, the documented exception)  — {"family":"Inter","size":15,"weight":"400","transform":"none","radius":0,"width":200,"height":39,"left":44,"right":244,"top":608.578125,"bottom":647.578125,"text":"Bolsa Guess Beige y Blanca Hobo Hombro y Crossbody"}
+PASS  768×1024 collection: product-card brand is Inter 600  — {"family":"Inter","size":15,"weight":"600","transform":"none","radius":0,"width":200,"height":18.75,"left":44,"right":244,"top":587.828125,"bottom":606.578125,"text":"Guess"}
+PASS  768×1024 collection: card radius 12, photo mat radius 10  — {"card":12,"media":10}
+PASS  768×1024 collection: favourite target is 48 x 48  — {"w":48,"h":48}
+PASS  768×1024 collection: quick-add target is 48 x 48  — {"w":48,"h":48}
+PASS  768×1024 collection: 3 product column(s)  — 3
+PASS  768×1024 collection: Shopify's all-products collection is titled "Catálogo"  — Catálogo
+PASS  768×1024 collection: sort options and filter labels are Spanish  — []
+PASS  768×1024 collection: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  768×1024 collection: no horizontal overflow  — {"scrollWidth":768,"clientWidth":768}
+PASS  768×1024 product: name is Playfair 29px (productName role)  — {"family":"Playfair Display","size":29,"weight":"400","transform":"none","radius":0,"width":704,"height":33.34375,"left":32,"right":736,"top":914.828125,"bottom":948.171875,"text":"Reloj Coach Talia Saddle"}
+PASS  768×1024 product: accordion titles are Playfair  — Playfair Display
+PASS  768×1024 product: "Otras formas de comprar" is the Inter panel title  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":704,"height":26.34375,"left":32,"right":736,"top":1392.53125,"bottom":1418.875,"text":"Otras formas de comprar"}
+PASS  768×1024 product: purchase button at least 52px tall  — {"h":52,"text":"Agregar al carrito"}
+PASS  768×1024 product: one column on tablets (panel under the gallery)  — {"galleryBottom":784.53125,"panelTop":888.53125}
+PASS  768×1024 product: option legends use the app's labels (Color), not the raw "Band color"  — ["Color"]
+PASS  768×1024 product: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Catálogo\" 55x32","a. \"PÁGINA DE PREGUNTAS FRECUENTES\" 279x19","a. \"Aviso de privacidad\" 121x16"]}
+PASS  768×1024 product: no horizontal overflow  — {"scrollWidth":768,"clientWidth":768}
+PASS  768×1024 product (one photo): the viewer keeps a real width  — {"width":704}
+PASS  768×1024 bag: "Resumen de compra" is the Inter panel title (boutiqueTitle)  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":654,"height":26.34375,"left":57,"right":711,"top":609.46875,"bottom":635.8125,"text":"Resumen de compra"}
+PASS  768×1024 bag: discount field on the control radius (12px), at least 48px tall  — {"r":12,"h":52}
+PASS  768×1024 bag: "Quitar códigos" hidden while the bag holds no code
+PASS  768×1024 bag: summary under the lines below 1024  — {"linesBottom":496.46875,"summaryTop":584.46875}
+PASS  768×1024 bag: the total amount stays on one line  — 1
+PASS  768×1024 bag: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  768×1024 bag: no horizontal overflow  — {"scrollWidth":768,"clientWidth":768}
+PASS  768×1024 search (no results): empty-state title is Playfair  — {"family":"Playfair Display","size":26,"weight":"400","transform":"none","radius":0,"width":165.15625,"height":29.890625,"left":301.421875,"right":466.578125,"top":393.828125,"bottom":423.71875,"text":"Sin resultados"}
+PASS  768×1024 contact: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  768×1024 contact: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+note  768×1024 contact (merchant blocks): targets under 48px: []
+note  768×1024 contact: merchant blocks overflow to 784px; body overflow-x clip
+PASS  768×1024 contact: the page never scrolls sideways (the shell clips merchant blocks wider than the viewport)  — {"scrollWidth":784,"clientWidth":768,"scrollX":0,"bodyOverflowX":"clip"}
+PASS  768×1024 policy: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  768×1024 policy: no untranslated theme or Shopify default labels in headings, navigation and buttons  — ["Privacy policy"]
+PASS  768×1024 policy: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Shopify Consumer Privacy Policy\" 251x20","a. \"Shopify Privacy Portal Link\" 644x44","a. \"Aviso de privacidad\" 121x16"]}
+PASS  768×1024 policy: no horizontal overflow  — {"scrollWidth":768,"clientWidth":768}
+PASS  768×1024 blog: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  768×1024 blog: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  768×1024 blog: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  768×1024 blog: no horizontal overflow  — {"scrollWidth":768,"clientWidth":768}
+PASS  768×1024 collections index: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  768×1024 collections index: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  768×1024 collections index: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  768×1024 collections index: no horizontal overflow  — {"scrollWidth":768,"clientWidth":768}
+PASS  768×1024 404: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  768×1024 404: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  768×1024 404: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  768×1024 404: no horizontal overflow  — {"scrollWidth":768,"clientWidth":768}
+PASS  768×1024 discount: unknown code reported as not applied  — El código no se aplicó a los artículos. Revisa sus condiciones; los descuentos de envío se confirman en el checkout.
+PASS  768×1024 discount: Shopify's total is unchanged after the unknown code  — {"before":139900,"after":139900,"codes":[{"code":"PRUEBA-NO-EXISTE-2210","applicable":false}]}
+PASS  768×1024 discount: "Quitar códigos" visible exactly when Shopify keeps a code (1 stored)  — {"removeAfter":true,"stored":1}
+PASS  768×1024 discount: "Quitar códigos" clears the codes in Shopify  — []
+PASS  768×1024 saved: the heart toggles on (aria-pressed) and stores the handle in this browser  — {"pressed":"true","savedList":["bolsa-guess-beige-y-blanca-hobo"]}
+PASS  768×1024 saved: the filled heart shows once saved  — block
+PASS  768×1024 saved: the list shows the saved piece, re-rendered by Shopify, without the empty state  — {"cards":1,"emptyHidden":true,"status":"1 pieza guardada."}
+PASS  768×1024 saved: removing the last piece shows the empty state with its catalog link  — {"cards":0,"emptyShown":true}
+PASS  768×1024 recent: the second product lists the first one as recently viewed  — {"hidden":false,"handles":["bolso-steve-madden-shoulder-negro"]}
+PASS  768×1024: no errors from Monetta scripts  — []
+PASS  1024×768 home: document language es-MX  — es-MX
+PASS  1024×768 home: section title is Playfair 30px (sectionTitle role)  — {"family":"Playfair Display","size":30,"weight":"400","transform":"none","radius":0,"width":142.140625,"height":34.5,"left":40,"right":182.140625,"top":897.625,"bottom":932.125,"text":"Novedades"}
+PASS  1024×768 home: collection tile on the card radius (12px)  — 12
+PASS  1024×768 home: brand cell on the card radius (12px)  — 12
+PASS  1024×768 home: style silhouette has no box radius (straight on the canvas)
+PASS  1024×768 home: header icon buttons are at least 48 x 48  — [{"label":"Ver guardados","w":48,"h":48},{"label":"Cuenta","w":104,"h":48},{"label":"Carrito, vacío","w":101,"h":48}]
+PASS  1024×768 home: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  1024×768 home: no horizontal overflow  — {"scrollWidth":1024,"clientWidth":1024}
+PASS  1024×768 home: header, menu and footer labels carry no untranslated Shopify defaults  — []
+PASS  1024×768 footer: column labels are the Inter eyebrow, not the serif  — {"family":"Inter","size":12,"weight":"600","transform":"uppercase","radius":0,"width":181.828125,"height":18.59375,"left":342.53125,"right":524.359375,"top":4225.390625,"bottom":4243.984375,"text":"Comprar"}
+PASS  1024×768 collection: product-card name is Inter (card-label role, the documented exception)  — {"family":"Inter","size":16,"weight":"400","transform":"none","radius":0,"width":200,"height":41.59375,"left":52,"right":252,"top":632.828125,"bottom":674.421875,"text":"Bolsa Guess Beige y Blanca Hobo Hombro y Crossbody"}
+PASS  1024×768 collection: product-card brand is Inter 600  — {"family":"Inter","size":16,"weight":"600","transform":"none","radius":0,"width":200,"height":20,"left":52,"right":252,"top":610.828125,"bottom":630.828125,"text":"Guess"}
+PASS  1024×768 collection: card radius 12, photo mat radius 10  — {"card":12,"media":10}
+PASS  1024×768 collection: favourite target is 48 x 48  — {"w":48,"h":48}
+PASS  1024×768 collection: quick-add target is 48 x 48  — {"w":48,"h":48}
+PASS  1024×768 collection: 4 product column(s)  — 4
+PASS  1024×768 collection: Shopify's all-products collection is titled "Catálogo"  — Catálogo
+PASS  1024×768 collection: sort options and filter labels are Spanish  — []
+PASS  1024×768 collection: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1024×768 collection: no horizontal overflow  — {"scrollWidth":1024,"clientWidth":1024}
+PASS  1024×768 product: name is Playfair 32px (productName role)  — {"family":"Playfair Display","size":32,"weight":"400","transform":"none","radius":0,"width":376.328125,"height":36.796875,"left":607.671875,"right":984,"top":209.734375,"bottom":246.53125,"text":"Reloj Coach Talia Saddle"}
+PASS  1024×768 product: accordion titles are Playfair  — Playfair Display
+PASS  1024×768 product: "Otras formas de comprar" is the Inter panel title  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":376.328125,"height":26.34375,"left":607.671875,"right":984,"top":749.984375,"bottom":776.328125,"text":"Otras formas de comprar"}
+PASS  1024×768 product: purchase button at least 52px tall  — {"h":52,"text":"Agregar al carrito"}
+PASS  1024×768 product: two columns from 1024 (panel beside the gallery)  — {"galleryRight":559.671875,"panelLeft":607.671875}
+PASS  1024×768 product: option legends use the app's labels (Color), not the raw "Band color"  — ["Color"]
+PASS  1024×768 product: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Catálogo\" 55x32","a. \"PÁGINA DE PREGUNTAS FRECUENTES\" 279x19","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1024×768 product: no horizontal overflow  — {"scrollWidth":1024,"clientWidth":1024}
+PASS  1024×768 product (one photo): the viewer keeps a real width  — {"width":448.796875}
+PASS  1024×768 bag: "Resumen de compra" is the Inter panel title (boutiqueTitle)  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":308.390625,"height":26.34375,"left":650.59375,"right":958.984375,"top":227.6875,"bottom":254.03125,"text":"Resumen de compra"}
+PASS  1024×768 bag: discount field on the control radius (12px), at least 48px tall  — {"r":12,"h":52}
+PASS  1024×768 bag: "Quitar códigos" hidden while the bag holds no code
+PASS  1024×768 bag: summary beside the lines from 1024  — {"linesRight":577.59375,"summaryLeft":625.59375}
+PASS  1024×768 bag: the total amount stays on one line  — 1
+PASS  1024×768 bag: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  1024×768 bag: no horizontal overflow  — {"scrollWidth":1024,"clientWidth":1024}
+PASS  1024×768 search (no results): empty-state title is Playfair  — {"family":"Playfair Display","size":26,"weight":"400","transform":"none","radius":0,"width":165.15625,"height":29.890625,"left":429.421875,"right":594.578125,"top":408.828125,"bottom":438.71875,"text":"Sin resultados"}
+PASS  1024×768 contact: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1024×768 contact: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+note  1024×768 contact (merchant blocks): targets under 48px: []
+note  1024×768 contact: merchant blocks fit; body overflow-x clip
+PASS  1024×768 contact: the page never scrolls sideways (the shell clips merchant blocks wider than the viewport)  — {"scrollWidth":1024,"clientWidth":1024,"scrollX":0,"bodyOverflowX":"clip"}
+PASS  1024×768 policy: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1024×768 policy: no untranslated theme or Shopify default labels in headings, navigation and buttons  — ["Privacy policy"]
+PASS  1024×768 policy: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Shopify Consumer Privacy Policy\" 266x20","a. \"Shopify Privacy Portal Link\" 684x46","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1024×768 policy: no horizontal overflow  — {"scrollWidth":1024,"clientWidth":1024}
+PASS  1024×768 blog: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1024×768 blog: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  1024×768 blog: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1024×768 blog: no horizontal overflow  — {"scrollWidth":1024,"clientWidth":1024}
+PASS  1024×768 collections index: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1024×768 collections index: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  1024×768 collections index: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1024×768 collections index: no horizontal overflow  — {"scrollWidth":1024,"clientWidth":1024}
+PASS  1024×768 404: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1024×768 404: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  1024×768 404: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  1024×768 404: no horizontal overflow  — {"scrollWidth":1024,"clientWidth":1024}
+PASS  1024×768 discount: unknown code reported as not applied  — El código no se aplicó a los artículos. Revisa sus condiciones; los descuentos de envío se confirman en el checkout.
+PASS  1024×768 discount: Shopify's total is unchanged after the unknown code  — {"before":139900,"after":139900,"codes":[{"code":"PRUEBA-NO-EXISTE-2210","applicable":false}]}
+PASS  1024×768 discount: "Quitar códigos" visible exactly when Shopify keeps a code (1 stored)  — {"removeAfter":true,"stored":1}
+PASS  1024×768 discount: "Quitar códigos" clears the codes in Shopify  — []
+PASS  1024×768 saved: the heart toggles on (aria-pressed) and stores the handle in this browser  — {"pressed":"true","savedList":["bolsa-guess-beige-y-blanca-hobo"]}
+PASS  1024×768 saved: the filled heart shows once saved  — block
+PASS  1024×768 saved: the list shows the saved piece, re-rendered by Shopify, without the empty state  — {"cards":1,"emptyHidden":true,"status":"1 pieza guardada."}
+PASS  1024×768 saved: removing the last piece shows the empty state with its catalog link  — {"cards":0,"emptyShown":true}
+PASS  1024×768 recent: the second product lists the first one as recently viewed  — {"hidden":false,"handles":["bolso-steve-madden-shoulder-negro"]}
+PASS  1024×768: no errors from Monetta scripts  — []
+PASS  1440×900 home: document language es-MX  — es-MX
+PASS  1440×900 home: section title is Playfair 30px (sectionTitle role)  — {"family":"Playfair Display","size":30,"weight":"400","transform":"none","radius":0,"width":142.140625,"height":34.5,"left":48,"right":190.140625,"top":676.75,"bottom":711.25,"text":"Novedades"}
+PASS  1440×900 home: collection tile on the card radius (12px)  — 12
+PASS  1440×900 home: brand cell on the card radius (12px)  — 12
+PASS  1440×900 home: style silhouette has no box radius (straight on the canvas)
+PASS  1440×900 home: header icon buttons are at least 48 x 48  — [{"label":"Ver guardados","w":48,"h":48},{"label":"Cuenta","w":104,"h":48},{"label":"Carrito, vacío","w":101,"h":48}]
+PASS  1440×900 home: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  1440×900 home: no horizontal overflow  — {"scrollWidth":1440,"clientWidth":1440}
+PASS  1440×900 home: header, menu and footer labels carry no untranslated Shopify defaults  — []
+PASS  1440×900 footer: column labels are the Inter eyebrow, not the serif  — {"family":"Inter","size":12,"weight":"600","transform":"uppercase","radius":0,"width":272.71875,"height":18.59375,"left":477.8125,"right":750.53125,"top":4587.609375,"bottom":4606.203125,"text":"Comprar"}
+PASS  1440×900 collection: product-card name is Inter (card-label role, the documented exception)  — {"family":"Inter","size":16,"weight":"400","transform":"none","radius":0,"width":230,"height":41.59375,"left":340,"right":570,"top":670.328125,"bottom":711.921875,"text":"Bolsa Guess Beige y Blanca Hobo Hombro y Crossbody"}
+PASS  1440×900 collection: product-card brand is Inter 600  — {"family":"Inter","size":16,"weight":"600","transform":"none","radius":0,"width":230,"height":20,"left":340,"right":570,"top":648.328125,"bottom":668.328125,"text":"Guess"}
+PASS  1440×900 collection: card radius 12, photo mat radius 10  — {"card":12,"media":10}
+PASS  1440×900 collection: favourite target is 48 x 48  — {"w":48,"h":48}
+PASS  1440×900 collection: quick-add target is 48 x 48  — {"w":48,"h":48}
+PASS  1440×900 collection: 4 product column(s)  — 4
+PASS  1440×900 collection: Shopify's all-products collection is titled "Catálogo"  — Catálogo
+PASS  1440×900 collection: sort options and filter labels are Spanish  — []
+PASS  1440×900 collection: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1440×900 collection: no horizontal overflow  — {"scrollWidth":1440,"clientWidth":1440}
+PASS  1440×900 product: name is Playfair 32px (productName role)  — {"family":"Playfair Display","size":32,"weight":"400","transform":"none","radius":0,"width":544.328125,"height":36.796875,"left":847.671875,"right":1392,"top":209.734375,"bottom":246.53125,"text":"Reloj Coach Talia Saddle"}
+PASS  1440×900 product: accordion titles are Playfair  — Playfair Display
+PASS  1440×900 product: "Otras formas de comprar" is the Inter panel title  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":544.328125,"height":26.34375,"left":847.671875,"right":1392,"top":693.984375,"bottom":720.328125,"text":"Otras formas de comprar"}
+PASS  1440×900 product: purchase button at least 52px tall  — {"h":52,"text":"Agregar al carrito"}
+PASS  1440×900 product: two columns from 1024 (panel beside the gallery)  — {"galleryRight":745.03125,"panelLeft":847.671875}
+PASS  1440×900 product: option legends use the app's labels (Color), not the raw "Band color"  — ["Color"]
+PASS  1440×900 product: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Catálogo\" 55x32","a. \"PÁGINA DE PREGUNTAS FRECUENTES\" 279x19","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1440×900 product: no horizontal overflow  — {"scrollWidth":1440,"clientWidth":1440}
+PASS  1440×900 product (one photo): the viewer keeps a real width  — {"width":554.390625}
+PASS  1440×900 bag: "Resumen de compra" is the Inter panel title (boutiqueTitle)  — {"family":"Inter","size":17,"weight":"600","transform":"none","radius":0,"width":421.28125,"height":26.34375,"left":945.71875,"right":1367,"top":227.6875,"bottom":254.03125,"text":"Resumen de compra"}
+PASS  1440×900 bag: discount field on the control radius (12px), at least 48px tall  — {"r":12,"h":52}
+PASS  1440×900 bag: "Quitar códigos" hidden while the bag holds no code
+PASS  1440×900 bag: summary beside the lines from 1024  — {"linesRight":872.71875,"summaryLeft":920.71875}
+PASS  1440×900 bag: the total amount stays on one line  — 1
+PASS  1440×900 bag: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  1440×900 bag: no horizontal overflow  — {"scrollWidth":1440,"clientWidth":1440}
+PASS  1440×900 search (no results): empty-state title is Playfair  — {"family":"Playfair Display","size":26,"weight":"400","transform":"none","radius":0,"width":165.15625,"height":29.890625,"left":637.421875,"right":802.578125,"top":408.828125,"bottom":438.71875,"text":"Sin resultados"}
+PASS  1440×900 contact: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1440×900 contact: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+note  1440×900 contact (merchant blocks): targets under 48px: []
+note  1440×900 contact: merchant blocks fit; body overflow-x clip
+PASS  1440×900 contact: the page never scrolls sideways (the shell clips merchant blocks wider than the viewport)  — {"scrollWidth":1440,"clientWidth":1440,"scrollX":0,"bodyOverflowX":"clip"}
+PASS  1440×900 policy: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1440×900 policy: no untranslated theme or Shopify default labels in headings, navigation and buttons  — ["Privacy policy"]
+PASS  1440×900 policy: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Shopify Consumer Privacy Policy\" 266x20","a. \"Shopify Privacy Portal Link\" 684x46","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1440×900 policy: no horizontal overflow  — {"scrollWidth":1440,"clientWidth":1440}
+PASS  1440×900 blog: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1440×900 blog: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  1440×900 blog: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1440×900 blog: no horizontal overflow  — {"scrollWidth":1440,"clientWidth":1440}
+PASS  1440×900 collections index: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1440×900 collections index: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  1440×900 collections index: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Inicio\" 33x32","a. \"Aviso de privacidad\" 121x16"]}
+PASS  1440×900 collections index: no horizontal overflow  — {"scrollWidth":1440,"clientWidth":1440}
+PASS  1440×900 404: Monetta header, footer and dock; no Atelier header; es-MX  — {"monettaHeader":true,"atelierHeader":false,"lang":"es-MX","dock":true,"footer":true}
+PASS  1440×900 404: no untranslated theme or Shopify default labels in headings, navigation and buttons  — []
+PASS  1440×900 404: every tap target is at least 48px (inline/legal text links excepted)  — {"small":[],"inline":["a. \"Aviso de privacidad\" 121x16"]}
+PASS  1440×900 404: no horizontal overflow  — {"scrollWidth":1440,"clientWidth":1440}
+PASS  1440×900 discount: unknown code reported as not applied  — El código no se aplicó a los artículos. Revisa sus condiciones; los descuentos de envío se confirman en el checkout.
+PASS  1440×900 discount: Shopify's total is unchanged after the unknown code  — {"before":139900,"after":139900,"codes":[{"code":"PRUEBA-NO-EXISTE-2210","applicable":false}]}
+PASS  1440×900 discount: "Quitar códigos" visible exactly when Shopify keeps a code (1 stored)  — {"removeAfter":true,"stored":1}
+PASS  1440×900 discount: "Quitar códigos" clears the codes in Shopify  — []
+PASS  1440×900 saved: the heart toggles on (aria-pressed) and stores the handle in this browser  — {"pressed":"true","savedList":["bolsa-guess-beige-y-blanca-hobo"]}
+PASS  1440×900 saved: the filled heart shows once saved  — block
+PASS  1440×900 saved: the list shows the saved piece, re-rendered by Shopify, without the empty state  — {"cards":1,"emptyHidden":true,"status":"1 pieza guardada."}
+PASS  1440×900 saved: removing the last piece shows the empty state with its catalog link  — {"cards":0,"emptyShown":true}
+PASS  1440×900 recent: the second product lists the first one as recently viewed  — {"hidden":false,"handles":["bolso-steve-madden-shoulder-negro"]}
+PASS  1440×900: no errors from Monetta scripts  — []
+
+complete-pass: 330/330 checks · /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T22-56-39-216Z-dl-checks/result.json

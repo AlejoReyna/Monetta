@@ -78,7 +78,7 @@ class FakeSecureTokenStore implements SecureTokenStore {
   Future<void> delete(String key) async => values.remove(key);
 }
 
-String _fakeIdToken({required String sub, String? email}) {
+String _fakeIdToken({required Object? sub, String? email}) {
   String segment(Map<String, dynamic> json) =>
       base64Url.encode(utf8.encode(jsonEncode(json))).replaceAll('=', '');
   final header = segment({'alg': 'none'});
@@ -132,7 +132,7 @@ void main() {
   FakeCustomerAuthGateway gatewayWith({
     String accessToken = 'access-1',
     String? refreshToken = 'refresh-1',
-    String sub = 'gid://shopify/Customer/1',
+    Object? sub = 'gid://shopify/Customer/1',
     String? email,
     DateTime? expiresAt,
   }) {
@@ -224,6 +224,43 @@ void main() {
   });
 
   group('CustomerSessionRepository.login identity', () {
+    test('an integer Shopify subject survives an offline identity lookup',
+        () async {
+      final gateway = gatewayWith(sub: 9876543210123);
+      final identityService = FakeCustomerIdentityService(
+        error: const CustomerAuthException(CustomerAuthErrorKind.offline),
+      );
+      final first = await repoWith(
+        gateway,
+        identityService: identityService,
+      ).login();
+      final second = await repoWith(gatewayWith(sub: '9876543210123')).login();
+
+      expect(first.account.shopifyCustomerId, '9876543210123');
+      expect(second.account.localAccountId, first.account.localAccountId);
+      expect(await db.select(db.accounts).get(), hasLength(1));
+      expect(
+        await secureStore.read(
+          (await sessions.latestFor(first.account.localAccountId))!
+              .secureStorageKeyRef,
+        ),
+        'refresh-1',
+      );
+    });
+
+    for (final invalidSubject in [null, true, 1.5, 0, -1, <String>[]]) {
+      test('rejects invalid subject $invalidSubject before storing an account',
+          () async {
+        await expectLater(
+          repoWith(gatewayWith(sub: invalidSubject)).login(),
+          throwsA(isA<CustomerAuthException>()),
+        );
+        expect(await db.select(db.accounts).get(), isEmpty);
+        expect(secureStore.values, isEmpty);
+        expect((await devices.byId('dev-1'))?.accountId, isNull);
+      });
+    }
+
     test('the Customer Account API answer wins over the id token claims',
         () async {
       // The id token is decoded without verifying its signature, so it is the
@@ -524,6 +561,73 @@ void main() {
       expect(gateway.endSessionCalls, 1);
       expect(await sessions.latestFor(localAccountId), isNull);
       expect(secureStore.values, isEmpty);
+    });
+  });
+  group('CustomerSessionRepository.refreshProfile', () {
+    test('refreshes a cached missing name without a hosted login', () async {
+      final identityService = FakeCustomerIdentityService(
+        identity: const CustomerIdentity(
+          shopifyCustomerId: 'gid://shopify/Customer/1',
+          email: 'ana@example.com',
+        ),
+      );
+      final gateway = gatewayWith();
+      final repo = repoWith(gateway, identityService: identityService);
+      final session = await repo.login();
+      identityService.identity = const CustomerIdentity(
+        shopifyCustomerId: 'gid://shopify/Customer/1',
+        email: 'ana@example.com',
+        displayName: 'Ana Fernández',
+      );
+      final updated = await repo.refreshProfile(session.account.localAccountId);
+      expect(updated?.displayName, 'Ana Fernández');
+      expect(updated?.localAccountId, session.account.localAccountId);
+      expect(gateway.loginCalls, 1);
+      expect(
+        (await accounts.byLocalId(session.account.localAccountId))?.displayName,
+        'Ana Fernández',
+      );
+    });
+
+    test('keeps a personal name across profile refresh and login', () async {
+      final identityService = FakeCustomerIdentityService(
+        identity: const CustomerIdentity(
+          shopifyCustomerId: 'gid://shopify/Customer/1',
+          email: 'ana@example.com',
+        ),
+      );
+      final repo = repoWith(gatewayWith(), identityService: identityService);
+      final session = await repo.login();
+      await accounts.updateDisplayName(session.account.localAccountId, 'Ana');
+      expect(
+        (await repo.refreshProfile(session.account.localAccountId))
+            ?.displayName,
+        'Ana',
+      );
+      expect((await repo.login()).account.displayName, 'Ana');
+    });
+
+    test('refuses to write a profile returned for a different customer',
+        () async {
+      final identityService = FakeCustomerIdentityService(
+        identity: const CustomerIdentity(
+          shopifyCustomerId: 'gid://shopify/Customer/1',
+        ),
+      );
+      final repo = repoWith(gatewayWith(), identityService: identityService);
+      final session = await repo.login();
+      identityService.identity = const CustomerIdentity(
+        shopifyCustomerId: 'gid://shopify/Customer/other',
+        displayName: 'Otra persona',
+      );
+      await expectLater(
+        repo.refreshProfile(session.account.localAccountId),
+        throwsA(isA<CustomerAuthException>()),
+      );
+      expect(
+        (await accounts.byLocalId(session.account.localAccountId))?.displayName,
+        isNull,
+      );
     });
   });
 }

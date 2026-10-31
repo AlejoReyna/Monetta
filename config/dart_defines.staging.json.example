@@ -4,6 +4,7 @@
   "SHOPIFY_STORE_DOMAIN": "monetta.mx",
   "SHOPIFY_STOREFRONT_ACCESS_TOKEN": "public_live_storefront_token_or_empty",
   "SHOPIFY_API_VERSION": "2026-07",
+  "SHOPIFY_CHECKOUT_RETURN_DOMAIN": "",
   "LOOX_PUBLIC_STORE_ID": "o68QLEOJFW",
   "CUSTOMER_ACCOUNT_SHOP_ID": "72391655575",
   "CUSTOMER_ACCOUNT_CLIENT_ID": "xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx",

@@ -28,25 +28,19 @@ class RewardsSummary {
   final bool referralEnabled;
 
   factory RewardsSummary.fromJson(Map<String, dynamic> json) {
-    final balance =
-        (json['balance'] ?? <String, dynamic>{}) as Map<String, dynamic>;
+    final balance = _requiredObject(json, 'balance');
     final incentives =
         (json['incentives'] ?? <String, dynamic>{}) as Map<String, dynamic>;
     final program =
         (json['program'] ?? <String, dynamic>{}) as Map<String, dynamic>;
-    final expiry = balance['nextExpiry'] as Map<String, dynamic>?;
     return RewardsSummary(
       redemptionEnabled: program['redemptionEnabled'] == true,
-      availableCents: (balance['availableCents'] as num? ?? 0).toInt(),
-      pendingCents: (balance['pendingCents'] as num? ?? 0).toInt(),
-      reservedCents: (balance['reservedCents'] as num? ?? 0).toInt(),
-      nextExpiry: expiry == null
-          ? null
-          : RewardsExpiry(
-              cents: (expiry['cents'] as num? ?? 0).toInt(),
-              at: DateTime.tryParse('${expiry['at']}') ?? DateTime.now(),
-            ),
-      asOf: DateTime.tryParse('${balance['asOf']}') ?? DateTime.now(),
+      availableCents:
+          _requiredInt(balance, 'availableCents', prefix: 'balance.'),
+      pendingCents: _requiredInt(balance, 'pendingCents', prefix: 'balance.'),
+      reservedCents: _requiredInt(balance, 'reservedCents', prefix: 'balance.'),
+      nextExpiry: _optionalExpiry(balance),
+      asOf: _requiredDate(balance, 'asOf', prefix: 'balance.'),
       firstPurchaseEnabled:
           (incentives['firstPurchase'] as Map<String, dynamic>?)?['enabled'] ==
               true,
@@ -54,6 +48,20 @@ class RewardsSummary {
           (incentives['review'] as Map<String, dynamic>?)?['enabled'] == true,
       referralEnabled:
           (incentives['referral'] as Map<String, dynamic>?)?['enabled'] == true,
+    );
+  }
+
+  /// `balance.nextExpiry` may be absent or `null`; when present it must be a
+  /// complete object.
+  static RewardsExpiry? _optionalExpiry(Map<String, dynamic> balance) {
+    final raw = balance['nextExpiry'];
+    if (raw == null) return null;
+    if (raw is! Map<String, dynamic>) {
+      throw const RewardsContractError('balance.nextExpiry');
+    }
+    return RewardsExpiry(
+      cents: _requiredInt(raw, 'cents', prefix: 'balance.nextExpiry.'),
+      at: _requiredDate(raw, 'at', prefix: 'balance.nextExpiry.'),
     );
   }
 
@@ -96,13 +104,13 @@ class RewardsMovement {
 
   factory RewardsMovement.fromJson(Map<String, dynamic> json) =>
       RewardsMovement(
-        id: (json['id'] as num? ?? 0).toInt(),
+        id: _requiredInt(json, 'id'),
         type: '${json['type'] ?? ''}',
         state: '${json['state'] ?? ''}',
-        amountCents: (json['amountCents'] as num? ?? 0).toInt(),
-        orderShopifyId: json['orderShopifyId'] as String?,
-        reason: json['reason'] as String?,
-        createdAt: DateTime.tryParse('${json['createdAt']}') ?? DateTime.now(),
+        amountCents: _requiredInt(json, 'amountCents'),
+        orderShopifyId: _optionalString(json, 'orderShopifyId'),
+        reason: _optionalString(json, 'reason'),
+        createdAt: _requiredDate(json, 'createdAt'),
       );
 }
 
@@ -128,15 +136,14 @@ class RewardsQuote {
   final DateTime expiresAt;
 
   factory RewardsQuote.fromJson(Map<String, dynamic> json) => RewardsQuote(
-        quoteId: '${json['quoteId']}',
-        cartRevision: '${json['cartRevision'] ?? ''}',
-        subtotalEligibleCents:
-            (json['subtotalEligibleCents'] as num? ?? 0).toInt(),
-        availableCents: (json['availableCents'] as num? ?? 0).toInt(),
-        maxAllowedCents: (json['maxAllowedCents'] as num? ?? 0).toInt(),
-        estimatedEarnCents: (json['estimatedEarnCents'] as num? ?? 0).toInt(),
+        quoteId: _requiredNonEmptyString(json, 'quoteId'),
+        cartRevision: _requiredString(json, 'cartRevision'),
+        subtotalEligibleCents: _requiredInt(json, 'subtotalEligibleCents'),
+        availableCents: _requiredInt(json, 'availableCents'),
+        maxAllowedCents: _requiredInt(json, 'maxAllowedCents'),
+        estimatedEarnCents: _requiredInt(json, 'estimatedEarnCents'),
         redemptionEnabled: json['redemptionEnabled'] == true,
-        expiresAt: DateTime.tryParse('${json['expiresAt']}') ?? DateTime.now(),
+        expiresAt: _requiredDate(json, 'expiresAt'),
       );
 }
 
@@ -159,11 +166,11 @@ class OrderRewardsState {
 
   factory OrderRewardsState.fromJson(Map<String, dynamic> json) =>
       OrderRewardsState(
-        orderShopifyId: '${json['orderShopifyId']}',
+        orderShopifyId: _requiredNonEmptyString(json, 'orderShopifyId'),
         isWholesale: json['isWholesale'] == true,
-        earnedPendingCents: (json['earnedPendingCents'] as num? ?? 0).toInt(),
-        earnedReleasedCents: (json['earnedReleasedCents'] as num? ?? 0).toInt(),
-        usedCents: (json['usedCents'] as num? ?? 0).toInt(),
+        earnedPendingCents: _requiredInt(json, 'earnedPendingCents'),
+        earnedReleasedCents: _requiredInt(json, 'earnedReleasedCents'),
+        usedCents: _requiredInt(json, 'usedCents'),
         state: '${json['state'] ?? 'none'}',
       );
 }
@@ -186,6 +193,90 @@ class RewardsApiError implements Exception {
         'reconciliation_required' =>
           'Tu canje necesita revisión; no se liberó saldo.',
         'discount_already_used' => 'Ese descuento ya fue utilizado.',
+        'invalid_response' =>
+          'Recibimos una respuesta inesperada de Monetta Rewards. '
+              'Inténtalo de nuevo.',
         _ => 'No fue posible completar la operación.',
       };
+}
+
+/// The server answered, but the body does not satisfy the Rewards contract
+/// (missing or mistyped required field, unparseable date, non-JSON body).
+///
+/// Client-side code `invalid_response`: the UI shows it as a recoverable
+/// "service down" state, never as a connection problem. [field] is the path
+/// of the offending field; no body values are ever kept.
+class RewardsContractError extends RewardsApiError {
+  const RewardsContractError(this.field)
+      : super('invalid_response', 'Response does not match the contract.');
+
+  /// Path of the field that broke the contract, e.g. `balance.asOf`.
+  final String field;
+
+  @override
+  String toString() => 'RewardsContractError(field: $field)';
+}
+
+Map<String, dynamic> _requiredObject(
+  Map<String, dynamic> json,
+  String key, {
+  String prefix = '',
+}) {
+  final value = json[key];
+  if (value is Map<String, dynamic>) return value;
+  throw RewardsContractError('$prefix$key');
+}
+
+/// Accepts a JSON number with an integral value (`18400` or `18400.0`).
+int _requiredInt(
+  Map<String, dynamic> json,
+  String key, {
+  String prefix = '',
+}) {
+  final value = json[key];
+  if (value is num && value.isFinite && value == value.truncateToDouble()) {
+    return value.toInt();
+  }
+  throw RewardsContractError('$prefix$key');
+}
+
+DateTime _requiredDate(
+  Map<String, dynamic> json,
+  String key, {
+  String prefix = '',
+}) {
+  final value = json[key];
+  final parsed = value is String ? DateTime.tryParse(value) : null;
+  if (parsed != null) return parsed;
+  throw RewardsContractError('$prefix$key');
+}
+
+String _requiredString(
+  Map<String, dynamic> json,
+  String key, {
+  String prefix = '',
+}) {
+  final value = json[key];
+  if (value is String) return value;
+  throw RewardsContractError('$prefix$key');
+}
+
+String _requiredNonEmptyString(
+  Map<String, dynamic> json,
+  String key, {
+  String prefix = '',
+}) {
+  final value = _requiredString(json, key, prefix: prefix);
+  if (value.isEmpty) throw RewardsContractError('$prefix$key');
+  return value;
+}
+
+String? _optionalString(
+  Map<String, dynamic> json,
+  String key, {
+  String prefix = '',
+}) {
+  final value = json[key];
+  if (value == null || value is String) return value as String?;
+  throw RewardsContractError('$prefix$key');
 }

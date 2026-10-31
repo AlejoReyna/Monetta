@@ -1,0 +1,19 @@
+{
+  "screen": "coleccion",
+  "width": 440.0,
+  "height": 956.0,
+  "firstCard": {
+    "x": 0.0,
+    "y": 88.0,
+    "width": 214.0,
+    "height": 383.35
+  },
+  "textRoles": [
+    {
+      "text": "Bolsas",
+      "fontFamily": "Playfair Display",
+      "fontSize": 28.0,
+      "fontWeight": 400
+    }
+  ]
+}

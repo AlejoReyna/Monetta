@@ -1,0 +1,164 @@
+{
+  "checkedAt": "2026-10-19T18:05:51.441306+00:00",
+  "runs": 30,
+  "hashes": {
+    "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf": 30
+  },
+  "groups": {
+    "layout": {
+      "runs": 3,
+      "uniquePassingNamesByInsets": {
+        "0": 219,
+        "44": 77
+      }
+    },
+    "keyboard": {
+      "runs": 7,
+      "uniquePassingNamesByInsets": {
+        "0": 151,
+        "44": 45
+      },
+      "passingCombinationsInsets0": [
+        "1024×200 bag",
+        "1024×200 collection",
+        "1024×200 home",
+        "1024×200 product",
+        "1024×200 search",
+        "1024×480 bag",
+        "1024×480 collection",
+        "1024×480 home",
+        "1024×480 product",
+        "1024×480 search",
+        "1024×481 bag",
+        "1024×481 collection",
+        "1024×481 home",
+        "1024×481 product",
+        "1024×481 search",
+        "1024×768 bag",
+        "1024×768 collection",
+        "1024×768 home",
+        "1024×768 product",
+        "1024×768 search",
+        "1440×900 bag",
+        "1440×900 collection",
+        "1440×900 home",
+        "1440×900 product",
+        "1440×900 search",
+        "320×640 bag",
+        "320×640 collection",
+        "320×640 home",
+        "320×640 product",
+        "320×640 search",
+        "375×812 bag",
+        "375×812 collection",
+        "375×812 home",
+        "375×812 product",
+        "375×812 search",
+        "440×956 bag",
+        "440×956 collection",
+        "440×956 home",
+        "440×956 product",
+        "440×956 search",
+        "768×1024 bag",
+        "768×1024 collection",
+        "768×1024 home",
+        "768×1024 product",
+        "768×1024 search",
+        "812×375 bag",
+        "812×375 collection",
+        "812×375 home",
+        "812×375 product",
+        "812×375 search"
+      ],
+      "passingCombinationsInsets44": [
+        "1024×768 bag",
+        "1024×768 collection",
+        "1024×768 home",
+        "1024×768 product",
+        "1024×768 search",
+        "375×812 bag",
+        "375×812 collection",
+        "375×812 home",
+        "375×812 product",
+        "375×812 search",
+        "812×375 bag",
+        "812×375 collection",
+        "812×375 home",
+        "812×375 product",
+        "812×375 search"
+      ]
+    },
+    "screens": {
+      "runs": 4,
+      "uniquePassingNamesByInsets": {
+        "0": 95,
+        "44": 24
+      }
+    },
+    "journey": {
+      "runs": 7,
+      "uniquePassingNamesByInsets": {
+        "0": 57
+      }
+    },
+    "axe": {
+      "runs": 1,
+      "uniquePassingNamesByInsets": {
+        "0": 18
+      }
+    },
+    "motion": {
+      "runs": 1,
+      "uniquePassingNamesByInsets": {
+        "0": 4
+      }
+    },
+    "nav": {
+      "runs": 2,
+      "uniquePassingNamesByInsets": {
+        "0": 31,
+        "44": 31
+      }
+    }
+  },
+  "savedThemeCheck": {
+    "baselineErrors": 187,
+    "baselineWarnings": 64,
+    "finalErrors": 187,
+    "finalWarnings": 64,
+    "sameOffenses": true
+  },
+  "themesBeforeValidJson": false,
+  "storeThemeList": {
+    "sameExistingRolesAndNames": true,
+    "addedIds": [
+      192125304866
+    ]
+  },
+  "gitHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+  "gitStatus": [
+    " M Makefile",
+    " M config/README.md",
+    " M lib/app/runtime_config.dart",
+    " M lib/app/shopify_checkout_coordinator.dart",
+    " M lib/data/shopify/storefront_config.dart",
+    " M lib/main.dart",
+    " M lib/tooling/dart_defines_validation.dart",
+    " M test/app/runtime_config_test.dart",
+    " M test/app/shopify_checkout_coordinator_test.dart",
+    " M test/tooling/dart_defines_validation_test.dart",
+    "?? artifacts/",
+    "?? design-prototype/",
+    "?? docs/MONETTA_WEB_DESIGN_CLAUDE_RUNBOOK.md",
+    "?? docs/MONETTA_WEB_REDESIGN_PLAN.md",
+    "?? docs/prompts/",
+    "?? docs/web-redesign/",
+    "?? storefront-theme/",
+    "?? test/goldens/failures/"
+  ],
+  "freshThemeCheck": {
+    "errors": 187,
+    "warnings": 64,
+    "sameOffensesAsBaseline": true
+  }
+}

@@ -4,5 +4,14 @@
 <dict>
 	<key>aps-environment</key>
 	<string>development</string>
+	<!-- Offsite-payment return (Fase 5). One applinks entry per build
+	     configuration via CHECKOUT_RETURN_APPLINKS (staging and production
+	     stay separate, mirroring CUSTOMER_ACCOUNT_CALLBACK_SCHEME).
+	     Verified Universal Links additionally require the custom domain +
+	     Shopify-generated apple-app-site-association (operational step). -->
+	<key>com.apple.developer.associated-domains</key>
+	<array>
+		<string>$(CHECKOUT_RETURN_APPLINKS)</string>
+	</array>
 </dict>
 </plist>

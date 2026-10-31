@@ -3,7 +3,7 @@
   Cuenta with line glyphs, as the client's 29 Oct reference. The layout's body class decides whether it shows: browsing pages and
   the product page yes, a non-empty bag uses its own checkout bar.
 
-  @param {string} [dock_active] - 'home', 'catalog' or 'cart': the item marked aria-current="page".
+  @param {string} [dock_active] - 'home', 'catalog', 'cart' or 'account': the item marked aria-current="page".
 {%- enddoc -%}
 {%- liquid
   assign cart_label = 'Carrito'
@@ -25,7 +25,7 @@
     <a class="dock__item" href="{{ routes.cart_url }}" data-dock="cart" aria-label="{{ cart_label }}"{% if dock_active == 'cart' %} aria-current="page"{% endif %}>
       <span class="dock__icon">{% render 'monetta-nav-glyph', name: 'cart' %}<span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></span>Carrito
     </a>
-    <a class="dock__item" href="{{ routes.account_url }}" data-dock="account">
+    <a class="dock__item" href="{% render 'monetta-account-link' %}" data-dock="account"{% if dock_active == 'account' %} aria-current="page"{% endif %}>
       <span class="dock__icon">{% render 'monetta-nav-glyph', name: 'account' %}</span>Cuenta
     </a>
   </div>

@@ -30,7 +30,8 @@ jobs:
       - name: Static analysis
         run: flutter analyze
       - name: Flutter tests
-        run: flutter test
+        # Golden images are compared on macOS only (D-15); see the ios-compile job.
+        run: flutter test --exclude-tags golden
       - name: Catalog and secret gates
         run: |
           dart run bin/verify_catalog_snapshot.dart
@@ -59,6 +60,8 @@ jobs:
           key: ${{ runner.os }}-${{ runner.arch }}-cocoapods-${{ hashFiles('ios/Podfile.lock') }}
           restore-keys: |
             ${{ runner.os }}-${{ runner.arch }}-cocoapods-
+      - name: Golden tests (UI-04, macOS only)
+        run: flutter test --tags golden
       - name: iOS staging simulator compile
         run: flutter build ios --simulator --debug --dart-define-from-file=config/dart_defines.ci.json
 
@@ -132,6 +135,7 @@ jobs:
         working-directory: functions
       - run: npm run build
         working-directory: functions
+      - run: npm run test:api
       - run: npm run typecheck:api
       - run: npm run build:web
       - run: npm audit --omit=dev --audit-level=moderate

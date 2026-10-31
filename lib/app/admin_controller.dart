@@ -22,7 +22,6 @@ class AdminController extends ChangeNotifier {
 
   List<AdminProductRecord> products = const [];
   AdminStorefrontSettings storefront = AdminStorefrontSettings.defaults;
-  List<AdminSourcePolicy> sources = const [];
   List<AdminAuditEvent> audit = const [];
   AdminFeaturedCatalog? featuredCatalog;
   final Set<String> featuredPendingProductIds = <String>{};
@@ -113,8 +112,6 @@ class AdminController extends ChangeNotifier {
           ),
         )
         .toList();
-    // External monitor sources retired (WP-02 / F03 / F22).
-    sources = const [];
     auditCursor = null;
     lastError = null;
     notifyListeners();
@@ -132,10 +129,6 @@ class AdminController extends ChangeNotifier {
         productsCursor = snapshot.productsMeta?.endCursor;
       }
       storefront = snapshot.storefront;
-      if (snapshot.sourcesHealthStatus == null ||
-          snapshot.sourcesHealthStatus == 'ready') {
-        sources = snapshot.sources;
-      }
       final featuredClient = _client;
       if (featuredClient is FeaturedAdminClient) {
         try {
@@ -393,27 +386,6 @@ class AdminController extends ChangeNotifier {
     );
   }
 
-  Future<bool> saveSource(AdminSourcePolicy next) async {
-    return _mutate(
-      action: () async {
-        final client = _client;
-        if (client is ExternalSourceAdminClient) {
-          next = await (client as ExternalSourceAdminClient)
-              .updateSourceCanonical(next);
-        } else {
-          await client?.updateSource(next);
-        }
-        sources = [
-          for (final source in sources)
-            if (source.id == next.id) next else source,
-        ];
-      },
-      description: 'Actualizó la fuente ${next.merchant}',
-      channels: const {AdminChannel.app},
-      refreshAfter: true,
-    );
-  }
-
   Future<bool> syncAll() async {
     return _mutate(
       action: () async {
@@ -489,10 +461,6 @@ class AdminController extends ChangeNotifier {
         products = snapshot.products;
       }
       storefront = snapshot.storefront;
-      if (snapshot.sourcesHealthStatus == null ||
-          snapshot.sourcesHealthStatus == 'ready') {
-        sources = snapshot.sources;
-      }
       featuredCatalog = snapshot.featured;
     } on Object {
       // Keep the draft and the last error when a conflict recovery read also

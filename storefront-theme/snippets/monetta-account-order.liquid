@@ -1,0 +1,66 @@
+{%- doc -%}
+  A real customer order. Fulfilled means shipped, NOT delivered. A verified
+  monetta.delivery_status metafield can mark delivery; absent it we show Enviado.
+  @param {order} account_order - Order from the authenticated customer's orders.
+  @param {string} [prefix] - Unique dialog ID prefix.
+  @param {number} [heading_level] - 2 for history, 3 inside the recent-orders section.
+{%- enddoc -%}
+{%- liquid
+  assign group = 'processing'
+  assign label = 'En preparación'
+  assign status_icon = 'box'
+  if account_order.cancelled
+    assign group = 'cancelled'
+    assign label = 'Cancelado'
+  elsif account_order.metafields.monetta.delivery_status.value == 'delivered'
+    assign group = 'complete'
+    assign label = 'Completado'
+    assign status_icon = 'check'
+  elsif account_order.fulfillment_status == 'fulfilled' or account_order.fulfillment_status == 'partial'
+    assign group = 'transit'
+    assign label = 'Enviado'
+    assign status_icon = 'truck'
+    if account_order.fulfillment_status == 'partial'
+      assign label = 'Envío parcial'
+    endif
+  endif
+  assign dialog_id = prefix | default: 'order' | append: '-' | append: account_order.id
+  assign heading_level = heading_level | default: 2
+-%}
+<article class="account-order" data-order-card data-order-group="{{ group }}" aria-labelledby="{{ dialog_id }}-name">
+  <div class="account-order__top">
+    <div><h{{ heading_level }} id="{{ dialog_id }}-name">{{ account_order.name | escape }}</h{{ heading_level }}><p class="account-order__date">{% render 'monetta-date', date: account_order.created_at %}</p></div>
+    <span class="account-order__status account-order__status--{{ group }}">{% render 'monetta-account-icon', name: status_icon %}{{ label }}</span>
+  </div>
+  <ul class="account-order__photos" role="list" aria-label="Productos del pedido {{ account_order.name | escape }}">
+    {%- for item in account_order.line_items limit: 3 -%}
+      <li>
+        {%- if item.image -%}<img src="{{ item.image | image_url: width: 480 }}" alt="{{ item.title | escape }}" width="240" height="240" loading="lazy">
+        {%- else -%}<span class="account-order__missing">{% render 'monetta-account-icon', name: 'bag' %}<span>{{ item.title | escape }}</span></span>{%- endif -%}
+        {%- if forloop.index == 3 and account_order.line_items.size > 3 -%}<span class="account-order__more">+{{ account_order.line_items.size | minus: 3 }}<span class="visually-hidden"> productos más</span></span>{%- endif -%}
+      </li>
+    {%- endfor -%}
+  </ul>
+  <div class="account-order__footer">
+    <p>Total: <strong>{{ account_order.total_price | money_with_currency }}</strong></p>
+    <a class="account-button" href="{{ account_order.customer_url }}" data-open-dialog="{{ dialog_id }}">Ver detalles{% render 'monetta-account-icon', name: 'chevron' %}<span class="visually-hidden"> del pedido {{ account_order.name | escape }}</span></a>
+  </div>
+</article>
+<dialog class="overlay overlay--drawer-right account-dialog" id="{{ dialog_id }}" aria-labelledby="{{ dialog_id }}-title">
+  <div class="overlay__backdrop" data-overlay-close></div>
+  <div class="overlay__panel">
+    <div class="overlay__header"><h2 class="overlay__title" id="{{ dialog_id }}-title">Pedido {{ account_order.name | escape }}</h2><button type="button" class="icon-button" data-overlay-close aria-label="Cerrar detalle">{% render 'monetta-icon', name: 'close', size: 22 %}</button></div>
+    <div class="overlay__body account-dialog__body">
+      <span class="account-order__status account-order__status--{{ group }}">{% render 'monetta-account-icon', name: status_icon %}{{ label }}</span>
+      <p>{% render 'monetta-date', date: account_order.created_at %}</p>
+      <ul class="account-order-lines" role="list">
+        {%- for item in account_order.line_items -%}
+          <li>{% if item.image %}<img src="{{ item.image | image_url: width: 160 }}" width="80" height="80" alt="" loading="lazy">{% endif %}<div><p>{{ item.title | escape }}</p><small>Cantidad: {{ item.quantity }}</small><p>{{ item.final_line_price | money_with_currency }}</p>{% if item.fulfillment.tracking_url %}<a href="{{ item.fulfillment.tracking_url | escape }}" target="_blank" rel="noopener">Rastrear envío<span class="visually-hidden"> (se abre en otra pestaña)</span></a>{% endif %}</div></li>
+        {%- endfor -%}
+      </ul>
+      <dl class="account-totals"><div><dt>Subtotal</dt><dd>{{ account_order.line_items_subtotal_price | money_with_currency }}</dd></div><div><dt>Envío</dt><dd>{{ account_order.shipping_price | money_with_currency }}</dd></div><div><dt>Impuestos</dt><dd>{{ account_order.tax_price | money_with_currency }}</dd></div><div><dt>Total</dt><dd><strong>{{ account_order.total_price | money_with_currency }}</strong></dd></div></dl>
+      {% if account_order.shipping_address %}<div><h3>Dirección de entrega</h3>{{ account_order.shipping_address | format_address }}</div>{% endif %}
+      <a class="account-button" href="{{ account_order.customer_url }}">Ver pedido en Shopify{% render 'monetta-account-icon', name: 'chevron' %}</a>
+    </div>
+  </div>
+</dialog>

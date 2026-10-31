@@ -1,0 +1,61 @@
+
+> monetta-web-design-prototype@0.1.0 test
+> node --test tests/unit/*.test.mjs
+
+✔ the page bar is reserved at its real height, not at its minimum (1.632125ms)
+✔ bars that are hidden, static or without an offset cover nothing (0.341ms)
+✔ fixed bottom controls reserve their offset plus their height (0.311166ms)
+✔ the largest reserve wins when several bars are pinned to the same edge (0.336167ms)
+✔ a card that is already inside the rail leaves it alone (0.127584ms)
+✔ a snapping rail takes the focused card to its own snap position (0.068375ms)
+✔ going back to a card scrolled out on the left aligns it to the start padding (0.057958ms)
+✔ the target never leaves the scrollable range (0.056541ms)
+✔ a chip half outside the row moves the least that clears the padding (0.061792ms)
+✔ a chip hidden on the left comes back to the start padding (0.316375ms)
+✔ a percentage end padding keeps a faded edge clear (0.175666ms)
+✔ an item wider than the visible band aligns by its start (0.131917ms)
+✔ money parses decimal strings into exact centavos and formats MXN labels (30.261042ms)
+✔ a discount appears only for a genuine compare-at price (0.11025ms)
+✔ adding the same exact variant raises its quantity; another colour is its own line (0.538666ms)
+✔ a sold-out variant is refused and never substituted (0.098583ms)
+✔ an inventory limit caps additions and quantity changes (0.115ms)
+✔ quantity zero and removal drop the line; totals are summed in centavos (0.208167ms)
+✔ Shopify-style filter URLs parse and serialize back unchanged (1.297833ms)
+✔ search URLs keep q and type, and default sort is omitted (0.118208ms)
+✔ values combine with OR inside a facet and AND across facets (1.43175ms)
+✔ facet counts answer "how many if I add this", excluding the facet itself (9.460958ms)
+✔ price range keeps any product with a variant inside it (0.395541ms)
+✔ sorting by price and newest is stable and correct (0.961042ms)
+✔ changing filters or sort returns to page one; clearing keeps the query and sort (0.329542ms)
+✔ each active chip removes exactly its own value (15.490333ms)
+✔ load more pages through results in steps of PAGE_SIZE (0.166166ms)
+✔ search is accent-, plural- and synonym-tolerant and ranks brand matches first (2.149917ms)
+✔ suggestions only offer terms that lead to results (0.451916ms)
+✔ swatches only for reliable single colours, never for bicolours (0.150125ms)
+✔ every product image exists locally and every image has a recorded source (2.295459ms)
+✔ default variants are buyable whenever any variant is (0.16375ms)
+✔ collections reference catalog products only and keep their live counts (0.102375ms)
+✔ sale flags match genuine compare-at prices (0.091708ms)
+✔ synthetic states are labelled in the data and in the manifest (0.530958ms)
+✔ real merchandising states exist in the snapshot (0.145083ms)
+✔ descriptions split facts from copy and turn "sobre pedido" into a state (1.005209ms)
+✔ a visit that began on this screen has nothing to go back to (0.525291ms)
+✔ opening another screen makes one step back leave it (1.12175ms)
+✔ filter and sort entries stay inside the screen they belong to (0.082709ms)
+✔ the next screen starts its own run after filters (0.066208ms)
+✔ filters applied on the first screen of a visit still have nowhere to go back to (0.071917ms)
+✔ replacing the entry (retry, variant) never moves the counters (0.062083ms)
+✔ Forward right after the arrow is not undone by the arrow's fallback (1.002334ms)
+✔ a link opened after the arrow wins even when it lands on the address the arrow left (0.208375ms)
+✔ a changed address or a restore from the cache after the arrow also retires the fallback (0.222917ms)
+✔ when the earlier entries are gone the arrow still reaches its parent (0.602417ms)
+✔ a visit that began on the screen goes to the parent without touching the history (0.288875ms)
+✔ the arrow skips the filter entries of its screen in one step; the fallback stays quiet (0.158875ms)
+ℹ tests 49
+ℹ suites 0
+ℹ pass 49
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 101.526417

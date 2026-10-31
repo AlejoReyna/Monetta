@@ -1,0 +1,82 @@
+run dir: /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-19T07-48-49-102Z-keyboard
+PASS  375×812 home: 52 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  375×812 home: Shift+Tab visits the same 52 stops in reverse
+PASS  375×812 home: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  375×812 collection: 64 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  375×812 collection: Shift+Tab visits the same 64 stops in reverse
+PASS  375×812 collection: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  375×812 product: 51 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  375×812 product: Shift+Tab visits the same 51 stops in reverse
+PASS  375×812 product: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  375×812 bag: 15 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  375×812 bag: Shift+Tab visits the same 15 stops in reverse
+PASS  375×812 bag: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  375×812 search: 65 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  375×812 search: Shift+Tab visits the same 65 stops in reverse
+PASS  375×812 search: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  440×956 home: 52 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  440×956 home: Shift+Tab visits the same 52 stops in reverse
+PASS  440×956 home: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  440×956 collection: 64 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  440×956 collection: Shift+Tab visits the same 64 stops in reverse
+PASS  440×956 collection: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+FAIL  440×956 product: 51 tab stops; every centre visible, hit-testable and ring painted  — ["a. \"PÁGINA DE PREGUNTAS FRECUENTES\": focus ring top side not painted (0% of 3 samples dark)","a. \"PÁGINA DE PREGUNTAS FRECUENTES\": focus ring bottom side not painted (67% of 3 samples dark)","a. \"PÁGINA DE PREGUNTAS FRECUENTES\": focus ring left side not painted (33% of 3 samples dark)","a. \"PÁGINA DE PREGUNTAS FRECUENTES\": focus ring right side not painted (67% of 3 samples dark)"]
+PASS  440×956 product: Shift+Tab visits the same 51 stops in reverse
+PASS  440×956 product: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  440×956 bag: 15 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  440×956 bag: Shift+Tab visits the same 15 stops in reverse
+PASS  440×956 bag: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  440×956 search: 65 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  440×956 search: Shift+Tab visits the same 65 stops in reverse
+PASS  440×956 search: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  768×1024 home: 55 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  768×1024 home: Shift+Tab visits the same 55 stops in reverse
+PASS  768×1024 home: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  768×1024 collection: 68 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  768×1024 collection: Shift+Tab visits the same 68 stops in reverse
+PASS  768×1024 collection: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+FAIL  768×1024 product: 57 tab stops; every centre visible, hit-testable and ring painted  — ["button.thumb \"Ver foto 1 de 8\": focus ring bottom side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 1 de 8\": focus ring left side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 2 de 8\": focus ring bottom side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 3 de 8\": focus ring bottom side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 4 de 8\": focus ring bottom side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 5 de 8\": focus ring bottom side not painted (0% of 3 samples dark)"]
+PASS  768×1024 product: Shift+Tab visits the same 57 stops in reverse
+PASS  768×1024 product: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  768×1024 bag: 22 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  768×1024 bag: Shift+Tab visits the same 22 stops in reverse
+PASS  768×1024 bag: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  768×1024 search: 71 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  768×1024 search: Shift+Tab visits the same 71 stops in reverse
+PASS  768×1024 search: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+FAIL  1024×768 home: 56 tab stops; every centre visible, hit-testable and ring painted  — ["a.card__link \"-21% GuessBolsa Guess Beige y Blanca Hobo Hombro\": focus ring left side not painted (0% of 3 samples dark)","a.card__link \"MonettaBolsa Guess Crossbody Café $ 1,469\": focus ring right side not painted (0% of 3 samples dark)","a.card__link \"Envío inmediatoGuessBolsa Guess Crossbody Camera\": focus ring right side not painted (0% of 3 samples dark)","a.card__link \"Envío inmediatoGuessBolsa Guess Crossbody Camera\": focus ring right side not painted (0% of 3 samples dark)"]
+PASS  1024×768 home: Shift+Tab visits the same 56 stops in reverse
+PASS  1024×768 home: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  1024×768 collection: 67 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  1024×768 collection: Shift+Tab visits the same 67 stops in reverse
+PASS  1024×768 collection: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+FAIL  1024×768 product: 57 tab stops; every centre visible, hit-testable and ring painted  — ["button.thumb \"Ver foto 1 de 8\": focus ring top side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 1 de 8\": focus ring left side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 1 de 8\": focus ring right side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 2 de 8\": focus ring left side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 2 de 8\": focus ring right side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 3 de 8\": focus ring left side not painted (0% of 3 samples dark)"]
+PASS  1024×768 product: Shift+Tab visits the same 57 stops in reverse
+PASS  1024×768 product: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  1024×768 bag: 20 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  1024×768 bag: Shift+Tab visits the same 20 stops in reverse
+PASS  1024×768 bag: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  1024×768 search: 70 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  1024×768 search: Shift+Tab visits the same 70 stops in reverse
+PASS  1024×768 search: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+FAIL  1440×900 home: 56 tab stops; every centre visible, hit-testable and ring painted  — ["a.card__link \"-21% GuessBolsa Guess Beige y Blanca Hobo Hombro\": focus ring left side not painted (0% of 3 samples dark)","a.card__link \"MonettaBolsa Guess Crossbody Café $ 1,469\": focus ring right side not painted (0% of 3 samples dark)","a.card__link \"Envío inmediatoGuessBolsa Guess Crossbody Camera\": focus ring right side not painted (0% of 3 samples dark)","a.card__link \"Envío inmediatoGuessBolsa Guess Crossbody Camera\": focus ring right side not painted (0% of 3 samples dark)"]
+PASS  1440×900 home: Shift+Tab visits the same 56 stops in reverse
+PASS  1440×900 home: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+FAIL  1440×900 collection: 70 tab stops; every centre visible, hit-testable and ring painted  — ["summary. \"Availability\": focus ring top side not painted (0% of 3 samples dark)","summary. \"Availability\": focus ring left side not painted (0% of 3 samples dark)","input. \"filter.v.availability\": focus ring left side not painted (0% of 3 samples dark)","input. \"filter.v.availability\": focus ring left side not painted (0% of 3 samples dark)","summary. \"Price\": focus ring bottom side not painted (0% of 3 samples dark)","summary. \"Price\": focus ring left side not painted (0% of 3 samples dark)"]
+PASS  1440×900 collection: Shift+Tab visits the same 70 stops in reverse
+PASS  1440×900 collection: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+FAIL  1440×900 product: 57 tab stops; every centre visible, hit-testable and ring painted  — ["button.thumb \"Ver foto 1 de 8\": focus ring top side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 1 de 8\": focus ring left side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 1 de 8\": focus ring right side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 2 de 8\": focus ring left side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 2 de 8\": focus ring right side not painted (0% of 3 samples dark)","button.thumb \"Ver foto 3 de 8\": focus ring left side not painted (0% of 3 samples dark)"]
+PASS  1440×900 product: Shift+Tab visits the same 57 stops in reverse
+PASS  1440×900 product: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  1440×900 bag: 20 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  1440×900 bag: Shift+Tab visits the same 20 stops in reverse
+PASS  1440×900 bag: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+FAIL  1440×900 search: 73 tab stops; every centre visible, hit-testable and ring painted  — ["summary. \"Availability\": focus ring top side not painted (0% of 3 samples dark)","summary. \"Availability\": focus ring left side not painted (0% of 3 samples dark)","input. \"filter.v.availability\": focus ring left side not painted (0% of 3 samples dark)","input. \"filter.v.availability\": focus ring left side not painted (0% of 3 samples dark)","summary. \"Price\": focus ring bottom side not painted (0% of 3 samples dark)","summary. \"Price\": focus ring left side not painted (0% of 3 samples dark)"]
+PASS  1440×900 search: Shift+Tab visits the same 73 stops in reverse
+PASS  1440×900 search: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  320×640 home: 52 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  320×640 home: Shift+Tab visits the same 52 stops in reverse
+PASS  320×640 home: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"
+PASS  320×640 collection: 64 tab stops; every centre visible, hit-testable and ring painted  — []
+PASS  320×640 collection: Shift+Tab visits the same 64 stops in reverse
+PASS  320×640 collection: the skip link is the first stop and was not activated  — a.skip-link "Saltar al contenido"

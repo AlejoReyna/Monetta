@@ -1,0 +1,13 @@
+
+> monetta-web-design-prototype@0.1.0 build
+> vite build
+
+vite v6.4.3 building for production...
+transforming...
+✓ 43 modules transformed.
+rendering chunks...
+computing gzip size...
+dist/index.html                   1.99 kB │ gzip:  0.86 kB
+dist/assets/index-BJ8yPmA_.css   68.12 kB │ gzip: 12.75 kB
+dist/assets/index-BIC0_cgB.js   274.30 kB │ gzip: 61.87 kB
+✓ built in 618ms

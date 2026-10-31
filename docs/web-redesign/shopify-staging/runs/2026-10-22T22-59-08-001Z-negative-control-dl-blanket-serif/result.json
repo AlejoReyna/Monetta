@@ -1,0 +1,327 @@
+{
+  "run": "negative-control-dl-blanket-serif",
+  "command": "node docs/web-redesign/shopify-staging/design-language-2026-10-22/scripts/checks.mjs --base-url=http://127.0.0.1:9292 --viewports=390x844 --name=negative-control-dl-blanket-serif --inject-css=.mw :is(h1,h2,h3,h4,h5,h6){font-family:var(--font-serif) !important}",
+  "startedAt": "2026-10-22T22:59:08.001Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 657,
+      "sha256": "f5c60cdb01ea93db182e24638a2f6f493265fd0e91657c306023fec5225dab60"
+    },
+    "repoHead": "6833c20d56ffac653e9cbb3bab3b121456e6c71a",
+    "repoBranch": "feat/client-guide-oct20"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      390,
+      844
+    ]
+  ],
+  "injectCss": ".mw :is(h1,h2,h3,h4,h5,h6){font-family:var(--font-serif) !important}",
+  "flows": false,
+  "finishedAt": "2026-10-22T22:59:26.819Z",
+  "status": "complete-with-failures",
+  "error": null,
+  "summary": {
+    "checks": 57,
+    "passed": 53,
+    "failed": 4
+  },
+  "checks": [
+    {
+      "name": "390×844 home: document language es-MX",
+      "pass": true,
+      "detail": "es-MX"
+    },
+    {
+      "name": "390×844 home: section title is Playfair 23px (sectionTitle role)",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":23,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":108.984375,\"height\":26.4375,\"left\":20,\"right\":128.984375,\"top\":356.96875,\"bottom\":383.40625,\"text\":\"Novedades\"}"
+    },
+    {
+      "name": "390×844 home: collection tile on the card radius (12px)",
+      "pass": true,
+      "detail": "12"
+    },
+    {
+      "name": "390×844 home: brand cell on the card radius (12px)",
+      "pass": true,
+      "detail": "12"
+    },
+    {
+      "name": "390×844 home: style silhouette has no box radius (straight on the canvas)",
+      "pass": true,
+      "detail": "0"
+    },
+    {
+      "name": "390×844 home: header icon buttons are at least 48 x 48",
+      "pass": true,
+      "detail": "[{\"label\":\"Abrir menú\",\"w\":48,\"h\":48}]"
+    },
+    {
+      "name": "390×844 home: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": true,
+      "detail": "{\"small\":[],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 home: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 home: header, menu and footer labels carry no untranslated Shopify defaults",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 footer: column labels are the Inter eyebrow, not the serif",
+      "pass": false,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":12,\"weight\":\"600\",\"transform\":\"uppercase\",\"radius\":0,\"width\":350,\"height\":18.59375,\"left\":20,\"right\":370,\"top\":4024.59375,\"bottom\":4043.1875,\"text\":\"Comprar\"}"
+    },
+    {
+      "name": "390×844 collection: product-card name is Inter (card-label role, the documented exception)",
+      "pass": false,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":14,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":165,\"height\":36.375,\"left\":12,\"right\":177,\"top\":343.75,\"bottom\":380.125,\"text\":\"Bolsa Guess Beige y Blanca Hobo Hombro y Crossbody\"}"
+    },
+    {
+      "name": "390×844 collection: product-card brand is Inter 600",
+      "pass": true,
+      "detail": "{\"family\":\"Inter\",\"size\":14,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":165,\"height\":17.5,\"left\":12,\"right\":177,\"top\":324.25,\"bottom\":341.75,\"text\":\"Guess\"}"
+    },
+    {
+      "name": "390×844 collection: card radius 12, photo mat radius 10",
+      "pass": true,
+      "detail": "{\"card\":12,\"media\":10}"
+    },
+    {
+      "name": "390×844 collection: favourite target is 48 x 48",
+      "pass": true,
+      "detail": "{\"w\":48,\"h\":48}"
+    },
+    {
+      "name": "390×844 collection: quick-add target is 48 x 48",
+      "pass": true,
+      "detail": "{\"w\":48,\"h\":48}"
+    },
+    {
+      "name": "390×844 collection: 2 product column(s)",
+      "pass": true,
+      "detail": "2"
+    },
+    {
+      "name": "390×844 collection: Shopify's all-products collection is titled \"Catálogo\"",
+      "pass": true,
+      "detail": "Catálogo"
+    },
+    {
+      "name": "390×844 collection: sort options and filter labels are Spanish",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 collection: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": true,
+      "detail": "{\"small\":[],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 product: name is Playfair 25px (productName role)",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":25,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":350,\"height\":28.75,\"left\":20,\"right\":370,\"top\":686.796875,\"bottom\":715.546875,\"text\":\"Reloj Coach Talia Saddle\"}"
+    },
+    {
+      "name": "390×844 product: accordion titles are Playfair",
+      "pass": true,
+      "detail": "Playfair Display"
+    },
+    {
+      "name": "390×844 product: \"Otras formas de comprar\" is the Inter panel title",
+      "pass": false,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":17,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":350,\"height\":26.34375,\"left\":20,\"right\":370,\"top\":1212.8125,\"bottom\":1239.15625,\"text\":\"Otras formas de comprar\"}"
+    },
+    {
+      "name": "390×844 product: purchase button at least 48px tall",
+      "pass": true,
+      "detail": "{\"h\":48,\"text\":\"Agregar al carrito\"}"
+    },
+    {
+      "name": "390×844 product: option legends use the app's labels (Color), not the raw \"Band color\"",
+      "pass": true,
+      "detail": "[\"Color\"]"
+    },
+    {
+      "name": "390×844 product: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": true,
+      "detail": "{\"small\":[],\"inline\":[\"a. \\\"PÁGINA DE PREGUNTAS FRECUENTES\\\" 279x19\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 product: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 product (one photo): the viewer keeps a real width",
+      "pass": true,
+      "detail": "{\"width\":390}"
+    },
+    {
+      "name": "390×844 bag: \"Resumen de compra\" is the Inter panel title (boutiqueTitle)",
+      "pass": false,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":17,\"weight\":\"600\",\"transform\":\"none\",\"radius\":0,\"width\":300,\"height\":26.34375,\"left\":45,\"right\":345,\"top\":541.28125,\"bottom\":567.625,\"text\":\"Resumen de compra\"}"
+    },
+    {
+      "name": "390×844 bag: discount field on the control radius (12px), at least 48px tall",
+      "pass": true,
+      "detail": "{\"r\":12,\"h\":52}"
+    },
+    {
+      "name": "390×844 bag: \"Quitar códigos\" hidden while the bag holds no code",
+      "pass": true,
+      "detail": "false"
+    },
+    {
+      "name": "390×844 bag: summary under the lines below 1024",
+      "pass": true,
+      "detail": "{\"linesBottom\":428.28125,\"summaryTop\":516.28125}"
+    },
+    {
+      "name": "390×844 bag: the total amount stays on one line",
+      "pass": true,
+      "detail": "1"
+    },
+    {
+      "name": "390×844 bag: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": true,
+      "detail": "{\"small\":[],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 search: results heading is the serif screen title at 22px (search_screen.dart)",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":22,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":227.140625,\"height\":24.625,\"left\":20,\"right\":247.140625,\"top\":161,\"bottom\":185.625,\"text\":\"Resultados para “bolso”\"}"
+    },
+    {
+      "name": "390×844 search (no results): empty-state title is Playfair",
+      "pass": true,
+      "detail": "{\"family\":\"Playfair Display\",\"size\":26,\"weight\":\"400\",\"transform\":\"none\",\"radius\":0,\"width\":165.15625,\"height\":29.890625,\"left\":112.421875,\"right\":277.578125,\"top\":315.140625,\"bottom\":345.03125,\"text\":\"Sin resultados\"}"
+    },
+    {
+      "name": "390×844 contact: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 contact: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 contact: the page never scrolls sideways (the shell clips merchant blocks wider than the viewport)",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390,\"scrollX\":0,\"bodyOverflowX\":\"clip\"}"
+    },
+    {
+      "name": "390×844 policy: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 policy: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[\"Privacy policy\"]"
+    },
+    {
+      "name": "390×844 policy: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": true,
+      "detail": "{\"small\":[],\"inline\":[\"a. \\\"Shopify Consumer Privacy Policy\\\" 235x19\",\"a. \\\"Shopify Privacy Portal Link\\\" 190x19\",\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 policy: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 blog: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 blog: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 blog: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": true,
+      "detail": "{\"small\":[],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 blog: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 collections index: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 collections index: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 collections index: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": true,
+      "detail": "{\"small\":[],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 collections index: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844 404: Monetta header, footer and dock; no Atelier header; es-MX",
+      "pass": true,
+      "detail": "{\"monettaHeader\":true,\"atelierHeader\":false,\"lang\":\"es-MX\",\"dock\":true,\"footer\":true}"
+    },
+    {
+      "name": "390×844 404: no untranslated theme or Shopify default labels in headings, navigation and buttons",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "390×844 404: every tap target is at least 48px (inline/legal text links excepted)",
+      "pass": true,
+      "detail": "{\"small\":[],\"inline\":[\"a. \\\"Aviso de privacidad\\\" 121x16\"]}"
+    },
+    {
+      "name": "390×844 404: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":390,\"clientWidth\":390}"
+    },
+    {
+      "name": "390×844: no errors from Monetta scripts",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": [
+    "390×844 contact (merchant blocks): targets under 48px: []",
+    "390×844 contact: merchant blocks fit; body overflow-x clip"
+  ]
+}

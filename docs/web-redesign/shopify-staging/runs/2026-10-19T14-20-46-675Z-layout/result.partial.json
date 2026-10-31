@@ -1,0 +1,89 @@
+{
+  "run": "layout",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/layout.mjs --base-url=http://127.0.0.1:9292 --viewports=768x481",
+  "startedAt": "2026-10-19T14:20:46.675Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      768,
+      481
+    ]
+  ],
+  "insetPx": 0,
+  "injectCss": null,
+  "finishedAt": "2026-10-19T14:20:55.294Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 10,
+    "passed": 10,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "768×481 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "768/768"
+    },
+    {
+      "name": "768×481 collection: pinned chrome stays pinned above 480px of height (sticky/fixed)",
+      "pass": true,
+      "detail": "sticky"
+    },
+    {
+      "name": "768×481 collection: --pinned-top equals the real bottom edge of the pinned bar",
+      "pass": true,
+      "detail": "110 vs 110"
+    },
+    {
+      "name": "768×481 collection: scroll-padding-top = reserve + 16",
+      "pass": true,
+      "detail": "126"
+    },
+    {
+      "name": "768×481 product: no horizontal overflow",
+      "pass": true,
+      "detail": "768/768"
+    },
+    {
+      "name": "768×481 recommendations: rail rendered",
+      "pass": true,
+      "detail": "8 tiles"
+    },
+    {
+      "name": "768×481 recommendations: tiles have equal heights",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "768×481 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "768/768"
+    },
+    {
+      "name": "768×481 home: no horizontal overflow",
+      "pass": true,
+      "detail": "768/768"
+    },
+    {
+      "name": "768×481 tablet category row: the last link scrolls out of the fade (its right edge is before the 88% fade start)",
+      "pass": true,
+      "detail": "{\"right\":668.21875,\"fadeStart\":675.84,\"listRight\":768,\"scrollWidth\":947,\"clientWidth\":768,\"paddingRight\":\"100.156px\"}"
+    }
+  ],
+  "notes": []
+}

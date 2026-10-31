@@ -1,0 +1,12 @@
+{
+  "store": "monetta-staging.myshopify.com",
+  "themeId": 192672989218,
+  "name": "Monetta logos y XL 2026-10-29",
+  "role": "live",
+  "files": {
+    "sections/monetta-header.liquid": "3b475ddd3da277bc933fb8168e5a8b56b622ce65586f3c486a30b26d5c627e5e",
+    "snippets/monetta-head.liquid": "14ef861fb04a8ea2517fc13961f750f3b64b39f7830e47ae4a3a6ca6969238c1",
+    "snippets/monetta-dock.liquid": "144c108cb5cf577d7ee2aac60597e414025fb73a4c01d94bfa569e4c1b5cfa28",
+    "layout/monetta.liquid": "ab041cb82d63bb9472301fa6245778609d19aef65ac8ee06ce10e3182376e481"
+  }
+}

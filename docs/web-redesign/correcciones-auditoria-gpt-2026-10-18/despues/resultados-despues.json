@@ -1,0 +1,539 @@
+{
+  "label": "despues",
+  "measuredAt": "2026-10-19T01:13:43.455Z",
+  "browser": "155.0.8059.40",
+  "base": "http://127.0.0.1:4402",
+  "findings": {
+    "gpt01": {
+      "title": "GPT-01 focused controls hidden by the dock",
+      "data": {
+        "viewport": "390×844",
+        "method": "real Tab presses from the skip link; hit test of the rendered stacking and pixels of the screenshot at the four sides of the ring and inside the box",
+        "pages": {
+          "collection": {
+            "stops": 103,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 0,
+            "examples": []
+          },
+          "product": {
+            "stops": 66,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 0,
+            "examples": []
+          },
+          "cart": {
+            "stops": 30,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 0,
+            "examples": []
+          },
+          "home": {
+            "stops": 83,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 0,
+            "examples": []
+          },
+          "search": {
+            "stops": 100,
+            "footerStops": 19,
+            "footerWithPixels": 19,
+            "problems": 0,
+            "examples": []
+          }
+        }
+      }
+    },
+    "gpt02": {
+      "title": "GPT-02 arrow fallback races a valid Forward",
+      "data": {
+        "original": "http://127.0.0.1:4402/products/cartera-calvin-klein-negra-texturizada",
+        "backMs": 39,
+        "forwardMs": 47,
+        "raceWindowOk": true,
+        "urlRightAfterForward": "http://127.0.0.1:4402/products/cartera-calvin-klein-negra-texturizada",
+        "urlAfter900ms": "http://127.0.0.1:4402/products/cartera-calvin-klein-negra-texturizada",
+        "forwardPreserved": true
+      }
+    },
+    "gpt03": {
+      "title": "GPT-03 search headings and axe in every state",
+      "data": {
+        "390": {
+          "empty": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Buscar"
+            ],
+            "hiddenH1": [],
+            "h2": [],
+            "axe": []
+          },
+          "results": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Resultados para “bolsa”"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "Productos"
+            ],
+            "axe": []
+          },
+          "suggestions": {
+            "exposedH1": 1,
+            "texts": [
+              "p[role=heading]: Buscar"
+            ],
+            "hiddenH1": [
+              "Resultados para “bolsa”"
+            ],
+            "h2": [],
+            "axe": []
+          },
+          "noResults": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Resultados para “zzzz-no-match”"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "Sin resultados"
+            ],
+            "axe": []
+          },
+          "error": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Buscar"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "No pudimos cargar los resultados"
+            ],
+            "axe": []
+          }
+        },
+        "1440": {
+          "empty": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Buscar"
+            ],
+            "hiddenH1": [],
+            "h2": [],
+            "axe": []
+          },
+          "results": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Resultados para “bolsa”"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "Productos"
+            ],
+            "axe": []
+          },
+          "suggestions": {
+            "exposedH1": 1,
+            "texts": [
+              "p[role=heading]: Buscar"
+            ],
+            "hiddenH1": [
+              "Resultados para “bolsa”"
+            ],
+            "h2": [],
+            "axe": []
+          },
+          "noResults": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Resultados para “zzzz-no-match”"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "Sin resultados"
+            ],
+            "axe": []
+          },
+          "error": {
+            "exposedH1": 1,
+            "texts": [
+              "h1: Buscar"
+            ],
+            "hiddenH1": [],
+            "h2": [
+              "No pudimos cargar los resultados"
+            ],
+            "axe": []
+          }
+        }
+      }
+    },
+    "gpt04": {
+      "title": "GPT-04 reserve of a bar that grows (two-line title at 320)",
+      "data": {
+        "viewport": "320×812",
+        "nearest": {
+          "barHeight": 97.3125,
+          "barBottom": 125.3125,
+          "scrollPaddingTop": "141.31px",
+          "focusTop": 141.25,
+          "overlap": 0
+        },
+        "keyboardShiftTab": {
+          "barHeight": 97.3125,
+          "barBottom": 125.3125,
+          "scrollPaddingTop": "141.31px",
+          "focusTop": 190.3125,
+          "overlap": 0
+        },
+        "keyboardShiftTabPeeking": {
+          "focused": "card__link",
+          "barBottom": 125.3125,
+          "scrollPaddingTop": "141.31px",
+          "focusTop": 141.625,
+          "overlap": 0
+        },
+        "anchorStart": {
+          "barBottom": 125.3125,
+          "targetTop": 140.9375,
+          "overlap": 0
+        }
+      }
+    },
+    "gpt05": {
+      "title": "GPT-05 content left between pinned bars in a short viewport",
+      "data": {
+        "320×200": {
+          "equivalent": "1280×800 at 400 % (CSS-pixel reflow viewport, not the browser's zoom control)",
+          "home": {
+            "free": 200,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "collection": {
+            "free": 200,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "product": {
+            "free": 200,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "search": {
+            "free": 200,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "cart": {
+            "free": 200,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          }
+        },
+        "360×225": {
+          "equivalent": "1440×900 at 400 % (CSS-pixel reflow viewport, not the browser's zoom control)",
+          "home": {
+            "free": 225,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "collection": {
+            "free": 225,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "product": {
+            "free": 225,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "search": {
+            "free": 225,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "cart": {
+            "free": 225,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          }
+        },
+        "640×400": {
+          "equivalent": "1280×800 at 200 % (CSS-pixel reflow viewport, not the browser's zoom control)",
+          "home": {
+            "free": 400,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "collection": {
+            "free": 400,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "product": {
+            "free": 400,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "search": {
+            "free": 400,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "cart": {
+            "free": 400,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          }
+        },
+        "667×375": {
+          "equivalent": "a phone on its side (an orientation, not a zoom)",
+          "home": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "collection": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "product": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "search": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "cart": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          }
+        },
+        "812×375": {
+          "equivalent": "a phone on its side (an orientation, not a zoom)",
+          "home": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "collection": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "product": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "search": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "cart": {
+            "free": 375,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          }
+        },
+        "844×390": {
+          "equivalent": "a phone on its side (an orientation, not a zoom)",
+          "home": {
+            "free": 390,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "collection": {
+            "free": 390,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "product": {
+            "free": 390,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "search": {
+            "free": 390,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          },
+          "cart": {
+            "free": 390,
+            "ratio": 1,
+            "pinnedTop": 0,
+            "pinnedBottom": 0,
+            "pinned": []
+          }
+        }
+      }
+    },
+    "gpt06": {
+      "title": "GPT-06 lateral safe-area insets",
+      "data": {
+        "667×375": {
+          "home": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "collection": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": {
+              "left": 44,
+              "right": 327.5,
+              "width": 283.5
+            }
+          },
+          "product": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "cart": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "search": {
+            "envInsets": "44/44",
+            "safeRegion": "44…623",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": {
+              "left": 44,
+              "right": 327.5,
+              "width": 283.5
+            }
+          }
+        },
+        "812×375": {
+          "home": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "collection": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": {
+              "left": 44,
+              "right": 274.65625,
+              "width": 230.65625
+            }
+          },
+          "product": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "cart": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": null
+          },
+          "search": {
+            "envInsets": "44/44",
+            "safeRegion": "44…768",
+            "violations": [],
+            "overflow": 0,
+            "firstCard": {
+              "left": 44,
+              "right": 274.65625,
+              "width": 230.65625
+            }
+          }
+        }
+      }
+    }
+  }
+}

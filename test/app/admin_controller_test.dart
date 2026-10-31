@@ -19,7 +19,6 @@ class _AdminClient implements AdminClient {
   AdminCapabilities capabilities;
   AdminProductRecord? savedProduct;
   AdminStorefrontSettings? savedStorefront;
-  AdminSourcePolicy? savedSource;
   int syncCalls = 0;
   int meCalls = 0;
   int refreshTracked = 0;
@@ -52,11 +51,6 @@ class _AdminClient implements AdminClient {
   @override
   Future<void> updateProduct(AdminProductRecord product) async {
     savedProduct = product;
-  }
-
-  @override
-  Future<void> updateSource(AdminSourcePolicy source) async {
-    savedSource = source;
   }
 
   @override
@@ -94,7 +88,6 @@ void main() {
       snapshot: AdminSnapshot(
         products: const [],
         storefront: AdminStorefrontSettings.defaults,
-        sources: const [],
       ),
       capabilities:
           const AdminCapabilities(openAdmin: true, manageProducts: true),
@@ -194,7 +187,6 @@ void main() {
     );
 
     await controller.load(appProducts: [_product()]);
-    expect(controller.sources, isEmpty);
     final updated = controller.products.single.copyWith(price: 3100);
     final ok = await controller.saveProduct(updated);
 
@@ -221,7 +213,6 @@ void main() {
         ),
       ],
       storefront: AdminStorefrontSettings.defaults,
-      sources: const [],
     );
     final client = _AdminClient(snapshot: snapshot);
     var refreshes = 0;
@@ -248,7 +239,6 @@ void main() {
     final snapshot = AdminSnapshot(
       products: const [],
       storefront: AdminStorefrontSettings.defaults,
-      sources: const [],
     );
     final client = _AdminClient(snapshot: snapshot);
     final controller = AdminController(
@@ -274,7 +264,6 @@ void main() {
     final snapshot = AdminSnapshot(
       products: const [],
       storefront: AdminStorefrontSettings.defaults,
-      sources: const [],
     );
     final client = _AdminClient(snapshot: snapshot);
     var refreshes = 0;

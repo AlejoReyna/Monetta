@@ -1,0 +1,28 @@
+## inicio controles RE contra la build corregida · 2026-10-18 23:24:26 CST · build servida: dist de E2 · controles de E2 d81416b09eb1e6f177e20d9c1e5efae434f79868c71a66ca9497fc17a31029e0
+PASS [D11] RE-01 1024×200 behaves like 1023×200: the collection scrolled 800px leaves the whole window to the products on both sides of the width limit — free 200px at 1023 and 200px at 1024
+PASS [D11] RE-01 1023px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it — collection free px — 200: 200 · 360: 360 · 480: 480
+PASS [D11] RE-01 1024px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it — collection free px — 200: 200 · 360: 360 · 480: 480
+PASS [D11] RE-01 1280px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it — collection free px — 200: 200 · 360: 360 · 480: 480
+PASS [D11] RE-01 1440px wide, 200, 360 and 480px tall: the five pages leave the window to the content, with no header, bar or column pinned over it — collection free px — 200: 200 · 360: 360 · 480: 480
+PASS [D11] RE-01 in a short window the desktop columns flow with the page: filters, product panel and bag summary are not sticky and the gallery keeps its natural size (1024×200, 1280×200, 1440×360) — 1024×200 viewer 432×540 · 1280×200 viewer 571×714 · 1440×360 viewer 664×830
+PASS [D11] RE-01 across the 480px height limit the header changes (static at 480, pinned at 481) and normal windows keep their pinned header, sticky columns and fitted gallery (1024 and 1440 wide, 481 / 768 / 900 tall) — 1024×480 static · 1440×480 static · 1024×481 sticky · 1440×481 sticky · 1024×768 sticky · 1440×900 sticky
+PASS [D11] RE-01 1024×200: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered
+PASS [D11] RE-01 1280×240: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered
+PASS [D11] RE-01 1440×360: add to bag, bag checkout, filters, search and the browser's Back and Forward work and are not covered
+PASS [D11] RE-01 Tab traversal in short desktop windows (product at 1024×200, bag at 1280×240, collection at 1440×360): no focused control, text or ring is hidden, footer links included
+PASS [D11] RE-01 with 44px emulated insets the header is not pinned at 1024×200 or 812×300 and controls and text stay inside the safe region (home, collection, product, bag, search)
+PASS [D11] RE-02 768×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides — 9 links, last “Nuestra historia” 537…667 (text to 655), fade from 676
+PASS [D11] RE-02 812×1024 (tablet): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides — 9 links, last “Nuestra historia” 576…706 (text to 694), fade from 715
+PASS [D11] RE-02 1023×768 (tablet, one pixel below the width limit): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides — 9 links, last “Nuestra historia” 770…900 (text to 888), fade from 900
+PASS [D11] RE-02 1024×768 (desktop, one pixel above it): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides — 9 links, last “Nuestra historia” 882…1012 (text to 1000), fade from none
+PASS [D11] RE-02 1440×900 (desktop): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides — 9 links, last “Nuestra historia” 1102…1232 (text to 1220), fade from none
+PASS [D11] RE-02 768×1024 (tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides — 9 links, last “Nuestra historia” 537…667 (text to 655), fade from 676
+PASS [D11] RE-02 812×375 (short tablet with 44px emulated insets): Tab without the skip link and Shift+Tab back through the category row leave every link whole, outside the fade, with its ring painted on four sides — 9 links, last “Nuestra historia” 576…706 (text to 694), fade from 715
+PASS [D11] RE-02 the desktop row stays centred when its links fit (1280, 1440) and starts on the gutter, or on the inset, when they overflow a little (1024 with and without 44px insets) — 1280px: 128.3…1151.7 · 1440px: 208.3…1231.7 · 1024px: 40.0…1017.4 (overflow 33px) · 1024px with insets: 44.0…1021.4 (overflow 41px)
+PASS [D11] RE-02 768×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted — scrolled to 330, link ends at 667, fade from 676
+PASS [D11] RE-02 812×1024: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted — scrolled to 291, link ends at 706, fade from 715
+PASS [D11] RE-02 1023×768: entering the category row backwards (skip link, then Shift+Tab) lands on the last link already whole and painted — scrolled to 97, link ends at 900, fade from 900
+
+23/23 checks passed in 152s against http://127.0.0.1:4602
+## exit 0
+## fin · 2026-10-18 23:26:59 CST · build servida: dist de E2 · controles de E2 d81416b09eb1e6f177e20d9c1e5efae434f79868c71a66ca9497fc17a31029e0

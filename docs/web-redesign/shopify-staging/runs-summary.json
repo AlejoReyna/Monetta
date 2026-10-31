@@ -1,0 +1,203 @@
+{
+  "generatedFrom": "runs/*/result*.json",
+  "trees": {
+    "a962cd92f8a4": {
+      "axe": {
+        "unique": 18,
+        "passed": 18,
+        "failed": 0,
+        "runs": [
+          "axe"
+        ]
+      },
+      "journey": {
+        "unique": 318,
+        "passed": 317,
+        "failed": 1,
+        "runs": [
+          "journey-1024x768",
+          "journey-1440x900",
+          "journey-375x812",
+          "journey-440x956",
+          "journey-768x1024",
+          "journey-812x375"
+        ]
+      },
+      "keyboard": {
+        "unique": 200,
+        "passed": 196,
+        "failed": 4,
+        "runs": [
+          "keyboard",
+          "keyboard-insets44"
+        ]
+      },
+      "layout": {
+        "unique": 297,
+        "passed": 296,
+        "failed": 1,
+        "runs": [
+          "layout",
+          "layout-insets44"
+        ]
+      },
+      "motion": {
+        "unique": 4,
+        "passed": 4,
+        "failed": 0,
+        "runs": [
+          "motion"
+        ]
+      },
+      "nav": {
+        "unique": 62,
+        "passed": 62,
+        "failed": 0,
+        "runs": [
+          "nav",
+          "nav-insets44"
+        ]
+      },
+      "screens": {
+        "unique": 121,
+        "passed": 119,
+        "failed": 2,
+        "runs": [
+          "screens",
+          "screens-insets44"
+        ]
+      }
+    },
+    "f5c60cdb01ea": {
+      "axe": {
+        "unique": 18,
+        "passed": 18,
+        "failed": 0,
+        "runs": [
+          "axe"
+        ]
+      },
+      "keyboard": {
+        "unique": 150,
+        "passed": 147,
+        "failed": 3,
+        "runs": [
+          "keyboard"
+        ]
+      },
+      "layout": {
+        "unique": 219,
+        "passed": 214,
+        "failed": 5,
+        "runs": [
+          "layout"
+        ]
+      },
+      "motion": {
+        "unique": 4,
+        "passed": 4,
+        "failed": 0,
+        "runs": [
+          "motion"
+        ]
+      },
+      "nav": {
+        "unique": 31,
+        "passed": 31,
+        "failed": 0,
+        "runs": [
+          "nav"
+        ]
+      },
+      "regressions": {
+        "unique": 123,
+        "passed": 121,
+        "failed": 2,
+        "runs": [
+          "regressions-1440x900"
+        ]
+      },
+      "unknown": {
+        "unique": 330,
+        "passed": 330,
+        "failed": 0,
+        "runs": [
+          "dl-checks"
+        ]
+      }
+    }
+  },
+  "controls": [
+    {
+      "run": "negative-control-dock-ring-keyboard",
+      "dir": "2026-10-19T14-01-24-517Z-negative-control-dock-ring-keyboard",
+      "detected": true,
+      "reasons": [],
+      "expectations": 1
+    },
+    {
+      "run": "negative-control-thumbs-ring-keyboard",
+      "dir": "2026-10-19T14-01-41-693Z-negative-control-thumbs-ring-keyboard",
+      "detected": true,
+      "reasons": [],
+      "expectations": 1
+    },
+    {
+      "run": "negative-control-rail-ring-keyboard",
+      "dir": "2026-10-19T14-18-46-685Z-negative-control-rail-ring-keyboard",
+      "detected": true,
+      "reasons": [],
+      "expectations": 1
+    },
+    {
+      "run": "negative-control-sidebar-ring-keyboard",
+      "dir": "2026-10-19T14-19-06-833Z-negative-control-sidebar-ring-keyboard",
+      "detected": true,
+      "reasons": [],
+      "expectations": 1
+    },
+    {
+      "run": "negative-control-short-viewport-release-layout",
+      "dir": "2026-10-19T14-19-28-305Z-negative-control-short-viewport-release-layout",
+      "detected": true,
+      "reasons": [],
+      "expectations": 4
+    },
+    {
+      "run": "negative-control-dl-blanket-serif",
+      "dir": "2026-10-22T22-59-08-001Z-negative-control-dl-blanket-serif",
+      "detected": false,
+      "reasons": [
+        "no hay una aserción esperada registrada para este control"
+      ],
+      "expectations": 0
+    },
+    {
+      "run": "negative-control-dl-single-gallery",
+      "dir": "2026-10-22T22-59-27-051Z-negative-control-dl-single-gallery",
+      "detected": false,
+      "reasons": [
+        "no hay una aserción esperada registrada para este control"
+      ],
+      "expectations": 0
+    },
+    {
+      "run": "negative-control-dl-discount-overflow",
+      "dir": "2026-10-22T22-59-48-962Z-negative-control-dl-discount-overflow",
+      "detected": false,
+      "reasons": [
+        "no hay una aserción esperada registrada para este control"
+      ],
+      "expectations": 0
+    },
+    {
+      "run": "negative-control-dl-fav-40",
+      "dir": "2026-10-22T23-00-06-676Z-negative-control-dl-fav-40",
+      "detected": false,
+      "reasons": [
+        "no hay una aserción esperada registrada para este control"
+      ],
+      "expectations": 0
+    }
+  ]
+}

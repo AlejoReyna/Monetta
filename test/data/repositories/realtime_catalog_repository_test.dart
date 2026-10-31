@@ -197,4 +197,32 @@ void main() {
     );
     expect(source.listenCount, 2);
   });
+
+  test(
+      'CHAR-03 (RF-24) applied snapshot metadata carries the configured shop '
+      'and has none without one', () async {
+    final withShop = RealtimeCatalogRepository(
+      source: _StaticSource(
+        () => const Stream<List<CatalogRealtimeDocument>>.empty(),
+      ),
+      cache: cache,
+      shopDomain: 'monetta.mx',
+    );
+
+    final update = await withShop.applySnapshot([_document()]);
+
+    expect(update.metadata?.shopDomain, 'monetta.mx');
+    expect((await cache.metadata())?.shopDomain, 'monetta.mx');
+
+    final withoutShop = RealtimeCatalogRepository(
+      source: _StaticSource(
+        () => const Stream<List<CatalogRealtimeDocument>>.empty(),
+      ),
+      cache: cache,
+    );
+
+    final plain = await withoutShop.applySnapshot([_document()]);
+
+    expect(plain.metadata?.shopDomain, isNull);
+  });
 }

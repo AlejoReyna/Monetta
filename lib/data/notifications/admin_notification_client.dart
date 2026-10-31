@@ -1,10 +1,12 @@
 /// Owner-authenticated HTTP client for campaigns, reports and automation.
 library;
 
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 
+import '../http/timeout_http_client.dart';
 import 'notification_models.dart';
 
 class NotificationCampaignSummary {
@@ -152,7 +154,8 @@ class AdminNotificationClient {
     required this.baseUrl,
     required this.accessTokenProvider,
     http.Client? client,
-  })  : _client = client ?? http.Client(),
+    Duration timeout = kDefaultHttpTimeout,
+  })  : _client = TimeoutHttpClient(client ?? http.Client(), timeout: timeout),
         _ownsClient = client == null;
 
   final Uri baseUrl;
@@ -245,20 +248,28 @@ class AdminNotificationClient {
       if (body != null) 'Content-Type': 'application/json',
     };
     final encoded = body == null ? null : jsonEncode(body);
-    final response = switch (method) {
-      'GET' => await _client.get(baseUrl.resolve(path), headers: headers),
-      'POST' => await _client.post(
-          baseUrl.resolve(path),
-          headers: headers,
-          body: encoded,
-        ),
-      'PATCH' => await _client.patch(
-          baseUrl.resolve(path),
-          headers: headers,
-          body: encoded,
-        ),
-      _ => throw NotificationException('Método no soportado: $method'),
-    };
+    final http.Response response;
+    try {
+      response = switch (method) {
+        'GET' => await _client.get(baseUrl.resolve(path), headers: headers),
+        'POST' => await _client.post(
+            baseUrl.resolve(path),
+            headers: headers,
+            body: encoded,
+          ),
+        'PATCH' => await _client.patch(
+            baseUrl.resolve(path),
+            headers: headers,
+            body: encoded,
+          ),
+        _ => throw NotificationException('Método no soportado: $method'),
+      };
+    } on TimeoutException {
+      throw const NotificationException(
+        'El panel de notificaciones no respondió a tiempo. '
+        'Inténtalo de nuevo.',
+      );
+    }
     if (!acceptedStatuses.contains(response.statusCode)) {
       throw NotificationException(
         'El panel de notificaciones no respondió (${response.statusCode}).',

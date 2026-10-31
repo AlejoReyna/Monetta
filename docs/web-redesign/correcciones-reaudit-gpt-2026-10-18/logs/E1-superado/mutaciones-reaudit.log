@@ -1,0 +1,7 @@
+control-sin-mutar                    22 pass · 0 fail
+sin-espacio-al-final-de-la-fila      2 pass · 8 fail
+anillo-fuera-de-la-caja              0 pass · 10 fail
+limite-de-ancho-1024                 2 pass · 10 fail
+sin-columnas-de-escritorio           7 pass · 5 fail
+fila-centrada-con-desborde           0 pass · 1 fail
+Saved /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/correcciones-reaudit-gpt-2026-10-18/logs/mutaciones-reaudit.json

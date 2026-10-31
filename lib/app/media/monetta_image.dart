@@ -160,6 +160,7 @@ class MonettaImage extends StatefulWidget {
     this.onFailed,
     this.fallbackLabel,
     this.maxCoverTrim,
+    this.backgroundColor,
     super.key,
   });
 
@@ -173,6 +174,7 @@ class MonettaImage extends StatefulWidget {
   /// `cover` crops at most this fraction per side, and is shown whole
   /// otherwise (and [fit] is ignored). Null keeps [fit] as is.
   final double? maxCoverTrim;
+  final Color? backgroundColor;
 
   @override
   State<MonettaImage> createState() => _MonettaImageState();
@@ -226,9 +228,17 @@ class _MonettaImageState extends State<MonettaImage> {
     final raw = widget.url;
     if (raw == null || raw.isEmpty || !MediaUrl.isHttps(raw)) {
       WidgetsBinding.instance.addPostFrameCallback((_) => _notifyFailure());
-      return _ImageFallback(label: widget.fallbackLabel);
+      return _ImageFallback(
+        label: widget.fallbackLabel,
+        backgroundColor: widget.backgroundColor,
+      );
     }
-    if (_gaveUp) return _ImageFallback(label: widget.fallbackLabel);
+    if (_gaveUp) {
+      return _ImageFallback(
+        label: widget.fallbackLabel,
+        backgroundColor: widget.backgroundColor,
+      );
+    }
 
     final fixture = debugMonettaFixtureImage;
     if (fixture != null) {
@@ -246,7 +256,7 @@ class _MonettaImageState extends State<MonettaImage> {
 
     final url = MediaUrl.sized(raw, width: widget.cacheWidth);
     return ColoredBox(
-      color: colors.mediaPlaceholder,
+      color: widget.backgroundColor ?? colors.mediaPlaceholder,
       child: CachedNetworkImage(
         key: ValueKey('$url#$_attempt'),
         imageUrl: url,
@@ -269,10 +279,14 @@ class _MonettaImageState extends State<MonettaImage> {
                   maxCoverTrim: widget.maxCoverTrim!,
                 ),
         fadeInDuration: reduceMotion(context) ? Duration.zero : kSwap,
-        placeholder: (_, __) => ColoredBox(color: colors.mediaPlaceholder),
+        placeholder: (_, __) => ColoredBox(
+          color: widget.backgroundColor ?? colors.mediaPlaceholder,
+        ),
         errorWidget: (_, __, ___) {
           WidgetsBinding.instance.addPostFrameCallback((_) => _onError());
-          return ColoredBox(color: colors.mediaPlaceholder);
+          return ColoredBox(
+            color: widget.backgroundColor ?? colors.mediaPlaceholder,
+          );
         },
       ),
     );
@@ -280,15 +294,16 @@ class _MonettaImageState extends State<MonettaImage> {
 }
 
 class _ImageFallback extends StatelessWidget {
-  const _ImageFallback({this.label});
+  const _ImageFallback({this.label, this.backgroundColor});
 
   final String? label;
+  final Color? backgroundColor;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.monettaColors;
     return ColoredBox(
-      color: colors.mediaPlaceholder,
+      color: backgroundColor ?? colors.mediaPlaceholder,
       child: Center(
         child: Column(
           mainAxisSize: MainAxisSize.min,

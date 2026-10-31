@@ -8,6 +8,11 @@ final class ShopifyCheckoutBridge: NSObject, CheckoutDelegate {
   private let channel: FlutterMethodChannel
   private var pendingResult: FlutterResult?
 
+  // Offsite-payment return link (Fase 5). The OS delivers the Universal Link
+  // while Dart may not be listening yet (cold start), so the link stays
+  // pending until the push or the `drainReturnLink` pull delivers it.
+  private var pendingReturnLink: String?
+
   init(messenger: FlutterBinaryMessenger) {
     channel = FlutterMethodChannel(
       name: Self.channelName,
@@ -48,8 +53,34 @@ final class ShopifyCheckoutBridge: NSObject, CheckoutDelegate {
     case "invalidate":
       ShopifyCheckoutSheetKit.invalidate()
       result(nil)
+    case "drainReturnLink":
+      let pending = pendingReturnLink
+      pendingReturnLink = nil
+      if let pending {
+        result(["url": pending])
+      } else {
+        result(nil)
+      }
     default:
       result(FlutterMethodNotImplemented)
+    }
+  }
+
+  /// Forwards an OS-delivered Universal Link to Flutter for policy routing.
+  /// Validation lives in Dart (`CheckoutReturnPolicy`); anything unexpected
+  /// is rejected there. Overlong values are dropped before crossing.
+  func handleReturnLink(url: URL) {
+    let raw = url.absoluteString
+    guard raw.count <= 4096 else { return }
+    pendingReturnLink = raw
+    channel.invokeMethod("onReturnLink", arguments: ["url": raw]) { [weak self] result in
+      // Dart routes the link and answers void (nil). Anything else (a
+      // FlutterError, or the not-implemented sentinel when Dart is not
+      // listening yet on a cold start) keeps the link pending for the
+      // `drainReturnLink` pull.
+      if result == nil, self?.pendingReturnLink == raw {
+        self?.pendingReturnLink = nil
+      }
     }
   }
 

@@ -1,0 +1,5 @@
+{
+  "layout": "monetta",
+  "sections": { "main": { "type": "monetta-account", "settings": { "view": "orders" } } },
+  "order": ["main"]
+}

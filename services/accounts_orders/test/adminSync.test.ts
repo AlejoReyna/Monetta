@@ -1,11 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Server } from 'node:http';
 import { createApp } from '../src/api/server.js';
-import type {
-  ExternalCatalogAdminClient,
-  ExternalSourcePolicyInput,
-  ExternalSourceProjection,
-} from '../src/admin/externalCatalogClient.js';
 import type { ShopifyAdminReadClient } from '../src/admin/shopifyAdminClient.js';
 import type { AdminProductsPage } from '../src/admin/shopifyTypes.js';
 import {
@@ -24,12 +19,10 @@ import {
 describe('admin sync jobs', () => {
   let server: Server;
   let baseUrl: string;
-  let externalCatalog: FakeExternalCatalogClient;
   let shopify: FakeShopifyProductsClient;
   let syncJobs: InMemoryAdminSyncJobRepository;
 
   beforeEach(async () => {
-    externalCatalog = new FakeExternalCatalogClient();
     shopify = new FakeShopifyProductsClient();
     syncJobs = new InMemoryAdminSyncJobRepository();
     const app = createApp({
@@ -52,7 +45,6 @@ describe('admin sync jobs', () => {
           : null,
       },
       shopifyAdmin: shopify,
-      externalCatalog,
       syncJobs,
       idempotency: new InMemoryAdminIdempotencyRepository(),
       audit: new InMemoryAdminAuditLogger(),
@@ -88,36 +80,36 @@ describe('admin sync jobs', () => {
   }
 
   it('accepts an enum-scoped job, polls it, and replays the request without duplicating work', async () => {
-    const payload = JSON.stringify({ channel: 'external-status' });
+    const payload = JSON.stringify({ channel: 'shopify-products' });
     const first = await fetch(`${baseUrl}/admin/sync`, {
       method: 'POST',
       headers: {
         Authorization: 'Bearer owner-token',
         'Content-Type': 'application/json',
-        'Idempotency-Key': 'sync-external-1',
+        'Idempotency-Key': 'sync-products-1',
       },
       body: payload,
     });
     expect(first.status).toBe(202);
     const firstBody = await first.json();
-    expect(firstBody.job).toMatchObject({ channel: 'external-status', status: 'pending' });
+    expect(firstBody.job).toMatchObject({ channel: 'shopify-products', status: 'pending' });
 
     const statusBody = await pollJob(firstBody.job.id);
     expect(statusBody.job).toMatchObject({ status: 'completed', errorCode: null });
-    expect(externalCatalog.fetchCalls).toBe(1);
+    expect(shopify.listCalls).toBe(1);
 
     const replay = await fetch(`${baseUrl}/admin/sync`, {
       method: 'POST',
       headers: {
         Authorization: 'Bearer owner-token',
         'Content-Type': 'application/json',
-        'Idempotency-Key': 'sync-external-1',
+        'Idempotency-Key': 'sync-products-1',
       },
       body: payload,
     });
     expect(replay.status).toBe(202);
     expect(await replay.json()).toEqual(firstBody);
-    expect(externalCatalog.fetchCalls).toBe(1);
+    expect(shopify.listCalls).toBe(1);
   });
 
   it('rejects unsupported sync channels before creating a job', async () => {
@@ -131,7 +123,53 @@ describe('admin sync jobs', () => {
       body: JSON.stringify({ channel: 'force-crawl' }),
     });
     expect(response.status).toBe(422);
-    expect(externalCatalog.fetchCalls).toBe(0);
+    expect(shopify.listCalls).toBe(0);
+    expect(syncJobs.rows.size).toBe(0);
+  });
+
+  it('keeps jobs stored with the retired external-status channel readable', async () => {
+    const completedId = '22222222-2222-4222-8222-222222222222';
+    const now = new Date();
+    syncJobs.rows.set(completedId, {
+      id: completedId,
+      actorId: 'principal-1',
+      channel: 'external-status',
+      status: 'completed',
+      errorCode: null,
+      cursor: null,
+      pagesProcessed: 1,
+      productsSeen: 0,
+      createdAt: now,
+      updatedAt: now,
+    });
+    const completed = await fetch(`${baseUrl}/admin/sync/jobs/${completedId}`, {
+      headers: { Authorization: 'Bearer owner-token' },
+    });
+    expect(completed.status).toBe(200);
+    expect((await completed.json()).job).toMatchObject({
+      id: completedId,
+      channel: 'external-status',
+      status: 'completed',
+      errorCode: null,
+    });
+
+    // A job left pending by an older client cannot run any more; it must end in
+    // a stable failure instead of staying pending forever.
+    const pendingId = '33333333-3333-4333-8333-333333333333';
+    syncJobs.rows.set(pendingId, {
+      ...syncJobs.rows.get(completedId)!,
+      id: pendingId,
+      status: 'pending',
+      pagesProcessed: 0,
+    });
+    const settled = await pollJob(pendingId);
+    expect(settled.job).toMatchObject({
+      id: pendingId,
+      channel: 'external-status',
+      status: 'failed',
+      errorCode: 'SYNC_CHANNEL_RETIRED',
+    });
+    expect(shopify.listCalls).toBe(0);
   });
 
   it('completes shopify-products only after reading every page (F22)', async () => {
@@ -245,37 +283,5 @@ class FakeShopifyProductsClient implements ShopifyAdminReadClient {
 
   async countProducts(): Promise<number | null> {
     return this.pages.reduce((sum, page) => sum + page.products.length, 0);
-  }
-}
-
-class FakeExternalCatalogClient implements ExternalCatalogAdminClient {
-  readonly source: ExternalSourceProjection = {
-    id: 'coach_us',
-    merchant: 'Coach',
-    enabled: true,
-    itemLimit: 8,
-    baseCommissionRate: 0.22,
-    highValueCommissionRate: 0.14,
-    highValueThreshold: 4000,
-    itemCount: 0,
-    lastSuccessfulRunAt: null,
-    updatedAt: '2026-08-30T12:00:00.000Z',
-  };
-  fetchCalls = 0;
-
-  async fetchSources(): Promise<ExternalSourceProjection[]> {
-    this.fetchCalls += 1;
-    return [this.source];
-  }
-
-  async fetchSource(): Promise<ExternalSourceProjection> {
-    return this.source;
-  }
-
-  async updateSource(input: {
-    readonly sourceId: string;
-    readonly source: ExternalSourcePolicyInput;
-  }): Promise<ExternalSourceProjection> {
-    return { ...this.source, id: input.sourceId, ...input.source };
   }
 }

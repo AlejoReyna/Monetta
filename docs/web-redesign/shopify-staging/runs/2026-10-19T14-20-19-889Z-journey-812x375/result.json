@@ -1,0 +1,300 @@
+{
+  "run": "journey-812x375",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/journey.mjs --base-url=http://127.0.0.1:9292 --w=812 --h=375",
+  "startedAt": "2026-10-19T14:20:19.889Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewport": {
+    "width": 812,
+    "height": 375
+  },
+  "finishedAt": "2026-10-19T14:20:45.994Z",
+  "status": "complete-pass",
+  "error": null,
+  "summary": {
+    "checks": 52,
+    "passed": 52,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "home: one h1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "home: real products rendered (Novedades + Selección)",
+      "pass": true,
+      "detail": "16 cards"
+    },
+    {
+      "name": "home: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":812,\"innerWidth\":812}"
+    },
+    {
+      "name": "home: visible images loaded and decoded",
+      "pass": true,
+      "detail": "{\"total\":19,\"broken\":[]}"
+    },
+    {
+      "name": "home: no prototype strip or demo UI",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "collection: count line shown (Shopify products_count)",
+      "pass": true,
+      "detail": "202 piezas"
+    },
+    {
+      "name": "collection: first page has 24 cards",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "collection: filters drawer settled inside the viewport (x and y)",
+      "pass": true,
+      "detail": "{\"x\":352,\"y\":0,\"width\":460,\"height\":375}"
+    },
+    {
+      "name": "collection: filter applied and the count matches Shopify's facet count",
+      "pass": true,
+      "detail": "199 vs facet 199"
+    },
+    {
+      "name": "collection: active filter chip with a remove link",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "collection: sort price ascending is respected (Shopify order)",
+      "pass": true,
+      "detail": "9.95 ≤ 600 ≤ 629.95 ≤ 679 ≤ 699.95 ≤ 729.95 ≤ 749 ≤ 749"
+    },
+    {
+      "name": "collection: sort keeps the filter",
+      "pass": true,
+      "detail": "http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending"
+    },
+    {
+      "name": "collection: \"Ver más piezas\" is a real link to ?page=2",
+      "pass": true,
+      "detail": "/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "collection: load more appends to 48 and updates the address",
+      "pass": true,
+      "detail": "http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "collection: Back leaves the filtered/sorted state coherent",
+      "pass": true,
+      "detail": "http://127.0.0.1:9292/collections/all?sort_by=title-ascending&filter.v.availability=1"
+    },
+    {
+      "name": "collection: Forward returns to the same URL",
+      "pass": true,
+      "detail": "http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending"
+    },
+    {
+      "name": "product: one h1 with the product title",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "product: no horizontal overflow",
+      "pass": true,
+      "detail": "{\"scrollWidth\":812,\"innerWidth\":812}"
+    },
+    {
+      "name": "product: initial variant = first available variant of Shopify",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "product: option change selects exactly that variant (hidden id and ?variant=)",
+      "pass": true,
+      "detail": "variant 68551021690914 \"Rosa/Plateado\""
+    },
+    {
+      "name": "product: price shown equals Shopify's price for that variant",
+      "pass": true,
+      "detail": "3647 vs 3647"
+    },
+    {
+      "name": "product: gallery moved to the variant image or stayed valid",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "product: sold-out variant shows the Agotado seal and a disabled button",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "product: sold-out variant states it",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add: double click sent exactly one add request",
+      "pass": true,
+      "detail": "1 request(s)"
+    },
+    {
+      "name": "add: waiting state shown while pending (aria-busy)",
+      "pass": true,
+      "detail": "busy=true"
+    },
+    {
+      "name": "add: Shopify cart gained exactly the selected variant, once",
+      "pass": true,
+      "detail": "item_count 0→1"
+    },
+    {
+      "name": "add: \"En tu bolsa\" opens with the new line",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add: cart count badge updates",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "add: Esc closes the sheet and returns focus",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "refusal: Shopify rejects an unknown variant (422) and its message is surfaced",
+      "pass": true,
+      "detail": "{\"ok\":false,\"status\":422,\"message\":\"Cannot find variant\"}"
+    },
+    {
+      "name": "refusal: the bag is unchanged after the rejection",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "refusal: the toast is announced (role=alert)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "refusal: inline error under the button, role=alert, with Shopify's wording",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "refusal: the panel re-syncs to a real variant of the product after the rejection",
+      "pass": true,
+      "detail": "variant 68550844088354"
+    },
+    {
+      "name": "refusal: the address names that real variant, not the stale one",
+      "pass": true,
+      "detail": "http://127.0.0.1:9292/products/bolso-steve-madden-crossbody-3?variant=68550844088354"
+    },
+    {
+      "name": "refusal: still nothing added to the bag",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: lines equal Shopify's cart (same variants and quantities)",
+      "pass": true,
+      "detail": "1 line(s)"
+    },
+    {
+      "name": "bag: line identified by its key",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: total estimado equals Shopify's total_price",
+      "pass": true,
+      "detail": "3647 vs 3647"
+    },
+    {
+      "name": "bag: checkout bar / button present",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: no horizontal overflow",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: + raises that line to 2 in Shopify",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: total after change equals Shopify's",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: focus stays on the same stepper control",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: − returns it to 1",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: removing the last line empties Shopify's cart and shows the empty state",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: empty bag has no checkout bar and the dock returns",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag: Deshacer restores the same variant and quantity",
+      "pass": true,
+      "detail": "variant 68551021690914 x1"
+    },
+    {
+      "name": "checkout: the bag form hands the cart over to Shopify's checkout (first redirect targets /checkouts/)",
+      "pass": true,
+      "detail": "302 /cart -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx | 302 /checkouts/cn/hWNI9ZcfKHvXrVEZVC7jQATq/en-mx -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx"
+    },
+    {
+      "name": "checkout: the hand-over targets the staging store, not production",
+      "pass": true,
+      "detail": "302 /cart -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx | 302 /checkouts/cn/hWNI9ZcfKHvXrVEZVC7jQATq/en-mx -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx"
+    },
+    {
+      "name": "no unexpected console errors or page errors from the theme",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": [
+    "backarrow: the page bar arrow is phone-only (hidden from 768 px); covered at 375/440 widths.",
+    "Available:false variants are accepted by /cart/add.js in this store (probed with the Negro variant of bolso-steve-madden-crossbody-3 and a 5000-unit add on 60 products: no 422). The theme blocks them in the UI by Shopify's `available`; Shopify itself does not.",
+    "redirect chain after \"Continuar al checkout\": 302 /cart -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx | 302 /checkouts/cn/hWNI9ZcfKHvXrVEZVC7jQATq/en-mx -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx; landed on https://monetta-staging.myshopify.com/password",
+    "The checkout page itself was not reached: the headless browser has no storefront password for monetta-staging.myshopify.com, which gates the store domain. A signed-in staff browser or a password-holder reaches it. Nothing was entered; no order or payment was made."
+  ]
+}

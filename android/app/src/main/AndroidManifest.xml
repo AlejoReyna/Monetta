@@ -37,6 +37,19 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- Offsite-payment return links (Fase 5). The host comes from
+                 the flavor's checkoutReturnHost placeholder so staging and
+                 production stay separate. Verified App Links additionally
+                 require the custom domain + Shopify-generated assetlinks.json
+                 (operational step); until then this filter only routes
+                 explicit intents, and Dart's CheckoutReturnPolicy still
+                 rejects anything outside the allowlist. -->
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="https" android:host="${checkoutReturnHost}" />
+            </intent-filter>
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

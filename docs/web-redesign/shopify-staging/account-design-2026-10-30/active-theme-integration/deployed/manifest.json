@@ -1,0 +1,11 @@
+{
+  "store": "monetta-staging.myshopify.com",
+  "themeId": 192672989218,
+  "files": {
+    "sections/monetta-header.liquid": "bb1ef572d97516d7559d538d47c0b3f718aefc369c02b75be6e9d9e97a789ef1",
+    "sections/monetta-guia-home.liquid": "147b9e7c5a196cb75a980b9011ee53d599aacdc5c270a64e57041e222eee70c8",
+    "snippets/monetta-head.liquid": "b40019bdce0391349e18da5d72f90764b441a7012ad7afc3c6d09a87a38491a5",
+    "snippets/monetta-dock.liquid": "7b1fc2aace8d172670fa09599bed2f84d02e7555382329cf9990a4e7394198fe",
+    "layout/monetta.liquid": "a243a09991df34660a07f62b5646397ef2888b4b69af7469e68d63b15ffd6df3"
+  }
+}

@@ -1,0 +1,4 @@
+# 2026-10-19T22:33:03Z inicio · árbol 7f509763105897cdd4cc0518532a788586c63139ab339965e9e283a8099ce449 · base http://127.0.0.1:9292
+== 2026-10-19T22:33:04Z journey-375x812: node docs/web-redesign/shopify-staging/scripts/e2e/journey.mjs --base-url=http://127.0.0.1:9292 --w=375 --h=812
+   exit 1 · 
+== 2026-10-19T22:33:40Z journey-440x956: node docs/web-redesign/shopify-staging/scripts/e2e/journey.mjs --base-url=http://127.0.0.1:9292 --w=440 --h=956

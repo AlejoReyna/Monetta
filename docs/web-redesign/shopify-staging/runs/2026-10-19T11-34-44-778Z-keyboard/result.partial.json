@@ -1,0 +1,212 @@
+{
+  "run": "keyboard",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/keyboard.mjs --base-url=http://127.0.0.1:9292 --viewports=375x812,440x956,320x640",
+  "startedAt": "2026-10-19T11:34:44.778Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      375,
+      812
+    ],
+    [
+      440,
+      956
+    ],
+    [
+      320,
+      640
+    ]
+  ],
+  "pages": [
+    "home",
+    "collection",
+    "product",
+    "bag",
+    "search"
+  ],
+  "insetPx": 0,
+  "injectCss": null,
+  "finishedAt": "2026-10-19T12:16:10.307Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 31,
+    "passed": 30,
+    "failed": 1
+  },
+  "checks": [
+    {
+      "name": "375×812 — unexpected error",
+      "pass": false,
+      "detail": "page.goto: Timeout 30000ms exceeded."
+    },
+    {
+      "name": "440×956 home: 52 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 home: Shift+Tab visits the same 52 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "440×956 home: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "440×956 collection: 64 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 collection: Shift+Tab visits the same 64 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "440×956 collection: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "440×956 product: 51 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 product: Shift+Tab visits the same 51 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "440×956 product: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "440×956 bag: 15 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 bag: Shift+Tab visits the same 15 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "440×956 bag: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "440×956 search: 65 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 search: Shift+Tab visits the same 65 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "440×956 search: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "320×640 home: 52 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 home: Shift+Tab visits the same 52 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "320×640 home: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "320×640 collection: 64 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 collection: Shift+Tab visits the same 64 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "320×640 collection: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "320×640 product: 51 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 product: Shift+Tab visits the same 51 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "320×640 product: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "320×640 bag: 15 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 bag: Shift+Tab visits the same 15 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "320×640 bag: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "320×640 search: 65 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 search: Shift+Tab visits the same 65 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "320×640 search: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    }
+  ],
+  "notes": [
+    "440×956 product: a. \"PÁGINA DE PREGUNTAS FRECUENTES\" is an inline link that wraps over several lines (merchant content): its ring has no box to sample; visible focus and hit test only",
+    "320×640 product: a. \"PÁGINA DE PREGUNTAS FRECUENTES\" is an inline link that wraps over several lines (merchant content): its ring has no box to sample; visible focus and hit test only"
+  ]
+}

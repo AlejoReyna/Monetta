@@ -1,0 +1,30 @@
+{
+  "note": "Normalised copy of baseline/themes-before.json (historical list of themes BEFORE the first delivery, 2026-10-19). It is not a new query: the \"before\" stays the one captured then.",
+  "source": {
+    "file": "baseline/themes-before.json",
+    "sha256": "5a11656bc9ad20c3c641d0e953674ad251281e2628ef9dce250f4a846cecea40",
+    "bytes": 681,
+    "changed": false
+  },
+  "transformation": "removed the leading CLI plugin diagnostic line(s); the rest is byte-identical",
+  "removedLines": [
+    "<claude-code-hint v=\"1\" type=\"plugin\" value=\"shopify-ai-toolkit@claude-plugins-official\" />"
+  ],
+  "result": {
+    "file": "baseline/themes-before.normalized.json",
+    "sha256": "fdc211f76ae4c1e21b094333543b611dcb58abe0b312d6e024afab6a5865e006",
+    "bytes": 589
+  },
+  "validation": {
+    "jsonParses": true,
+    "themes": 4,
+    "roles": {
+      "189719183394": "live",
+      "189523230754": "unpublished",
+      "189523263522": "unpublished",
+      "189523296290": "unpublished"
+    },
+    "restOfFileIdenticalToOriginal": true
+  },
+  "producedBy": "docs/web-redesign/shopify-staging/scripts/normalize-themes-before.mjs"
+}

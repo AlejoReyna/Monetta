@@ -1,0 +1,144 @@
+run dir: /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-21-56-222Z-regressions-1440x900
+
+== p1 variant choice pending / failed (product page)
+note  P1 page: reloj-coach-talia-saddle; initial variant 68551021592610 "Rosa Blush", B 68551021625378 "Café", C 68551021658146 "Negro/Plateado"
+PASS  P1 [staging] control: after Shopify answers, id, chip, header, address and price are the chosen variant's  — {"selection":"valid","busy":null,"hidden":68551021625378,"chosen":["Café"],"header":["Café"],"url":"68551021625378","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"","payButtons":1}
+PASS  P1 [staging] control: the page is confirmed (selection=valid) and not busy  — {"selection":"valid","busy":null}
+PASS  P1 [staging] control: adding after confirmation sends the chosen variant, once  — [{"id":68551021625378,"quantity":1,"sections":"monetta-cart-sheet","sections_url":"/products/reloj-coach-talia-saddle"}]
+PASS  P1 [staging] slow answer: the page reports the choice as pending (selection=pending, aria-busy, status text)  — {"selection":"pending","busy":"true","status":"Confirmando disponibilidad de Café…"}
+PASS  P1 [staging] slow answer: the chip and the value beside the option name agree on the chosen option  — {"chosen":["Café"],"header":["Café"]}
+PASS  P1 [staging] slow answer: every add button is really disabled (not only dimmed)  — [true,true]
+PASS  P1 [staging] slow answer: the accelerated-checkout / WhatsApp area is inert  — [true]
+PASS  P1 [staging] slow answer: pressing every add button (2) by mouse, click() and dispatch, and Enter in the quantity field, sends no add request  — enter=true adds=0 []
+PASS  P1 [staging] slow answer: the accelerated-checkout button (Buy it now) starts nothing: no cartCreate request  — payment buttons=1 cartCreate=0
+PASS  P1 [staging] slow answer: when it arrives, id, chip, header, address and price are B's together and buying is open again  — {"selection":"valid","busy":null,"hidden":68551021625378,"chosen":["Café"],"header":["Café"],"url":"68551021625378","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"","payButtons":1}
+PASS  P1 [staging] slow answer: adding afterwards sends exactly B, with the page showing B at that instant  — [{"path":"/cart/add.js","body":{"id":68551021625378,"quantity":1,"sections":"monetta-cart-sheet","sections_url":"/products/reloj-coach-talia-saddle"},"selection":"valid","hidden":68551021625378,"chosen":["Café"],"t":4976.39999999851}]
+PASS  P1 [staging] HTTP 503: the chips, the header value, the id and the address go back to the variant the page really shows  — {"selection":"valid","busy":null,"hidden":68551021592610,"chosen":["Rosa Blush"],"header":["Rosa Blush"],"url":"68551021592610","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.","payButtons":1}
+PASS  P1 [staging] HTTP 503: the page says it could not confirm and which option stayed (role=alert)  — No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.
+PASS  P1 [staging] HTTP 503: adding sends the variant shown (the initial one), never the failed choice  — [{"path":"/cart/add.js","body":{"id":68551021592610,"quantity":1,"sections":"monetta-cart-sheet","sections_url":"/products/reloj-coach-talia-saddle"},"selection":"valid","hidden":68551021592610,"chosen":["Rosa Blush"],"t":7557.5}]
+PASS  P1 [staging] HTTP 503: choosing the option again retries and succeeds  — {"hidden":68551021625378,"selection":"valid","error":""}
+PASS  P1 [staging] dropped connection: the chips, the header value, the id and the address go back to the variant the page really shows  — {"selection":"valid","busy":null,"hidden":68551021592610,"chosen":["Rosa Blush"],"header":["Rosa Blush"],"url":"68551021592610","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.","payButtons":1}
+PASS  P1 [staging] dropped connection: the page says it could not confirm and which option stayed (role=alert)  — No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.
+PASS  P1 [staging] dropped connection: adding sends the variant shown (the initial one), never the failed choice  — [{"path":"/cart/add.js","body":{"id":68551021592610,"quantity":1,"sections":"monetta-cart-sheet","sections_url":"/products/reloj-coach-talia-saddle"},"selection":"valid","hidden":68551021592610,"chosen":["Rosa Blush"],"t":10202.699999999255}]
+PASS  P1 [staging] dropped connection: choosing the option again retries and succeeds  — {"hidden":68551021625378,"selection":"valid","error":""}
+PASS  P1 [staging] HTTP 200 with a document that is not the product section: the chips, the header value, the id and the address go back to the variant the page really shows  — {"selection":"valid","busy":null,"hidden":68551021592610,"chosen":["Rosa Blush"],"header":["Rosa Blush"],"url":"68551021592610","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.","payButtons":1}
+PASS  P1 [staging] HTTP 200 with a document that is not the product section: the page says it could not confirm and which option stayed (role=alert)  — No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.
+PASS  P1 [staging] HTTP 200 with a document that is not the product section: adding sends the variant shown (the initial one), never the failed choice  — [{"path":"/cart/add.js","body":{"id":68551021592610,"quantity":1,"sections":"monetta-cart-sheet","sections_url":"/products/reloj-coach-talia-saddle"},"selection":"valid","hidden":68551021592610,"chosen":["Rosa Blush"],"t":12836.39999999851}]
+PASS  P1 [staging] HTTP 200 with a document that is not the product section: choosing the option again retries and succeeds  — {"hidden":68551021625378,"selection":"valid","error":""}
+PASS  P1 [staging] HTTP 200 with a section that has no product form: the chips, the header value, the id and the address go back to the variant the page really shows  — {"selection":"valid","busy":null,"hidden":68551021592610,"chosen":["Rosa Blush"],"header":["Rosa Blush"],"url":"68551021592610","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.","payButtons":1}
+PASS  P1 [staging] HTTP 200 with a section that has no product form: the page says it could not confirm and which option stayed (role=alert)  — No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.
+PASS  P1 [staging] HTTP 200 with a section that has no product form: adding sends the variant shown (the initial one), never the failed choice  — [{"path":"/cart/add.js","body":{"id":68551021592610,"quantity":1,"sections":"monetta-cart-sheet","sections_url":"/products/reloj-coach-talia-saddle"},"selection":"valid","hidden":68551021592610,"chosen":["Rosa Blush"],"t":15650.89999999851}]
+PASS  P1 [staging] HTTP 200 with a section that has no product form: choosing the option again retries and succeeds  — {"hidden":68551021625378,"selection":"valid","error":""}
+PASS  P1 [staging] HTTP 200 with a section whose chips disagree with its variant: the chips, the header value, the id and the address go back to the variant the page really shows  — {"selection":"valid","busy":null,"hidden":68551021592610,"chosen":["Rosa Blush"],"header":["Rosa Blush"],"url":"68551021592610","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.","payButtons":1}
+PASS  P1 [staging] HTTP 200 with a section whose chips disagree with its variant: the page says it could not confirm and which option stayed (role=alert)  — No pudimos confirmar «Café». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.
+PASS  P1 [staging] HTTP 200 with a section whose chips disagree with its variant: adding sends the variant shown (the initial one), never the failed choice  — [{"path":"/cart/add.js","body":{"id":68551021592610,"quantity":1,"sections":"monetta-cart-sheet","sections_url":"/products/reloj-coach-talia-saddle"},"selection":"valid","hidden":68551021592610,"chosen":["Rosa Blush"],"t":18349.800000000745}]
+PASS  P1 [staging] HTTP 200 with a section whose chips disagree with its variant: choosing the option again retries and succeeds  — {"hidden":68551021625378,"selection":"valid","error":""}
+PASS  P1 [staging] another variant rendered than asked: the page adopts what Shopify rendered and shows it everywhere  — {"selection":"valid","busy":null,"hidden":68551021658146,"chosen":["Negro/Plateado"],"header":["Negro/Plateado"],"url":"68551021658146","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"","payButtons":1}
+PASS  P1 [staging] another variant rendered than asked: the shopper is told (alert toast)  — Esa combinación ya no está disponible. Mostramos Negro/Plateado.
+PASS  P1 [staging] A→B→C, B answers after C: the page ends on C (id, chip, header, address, price) and B's late answer changed nothing  — ask B · ask C | {"selection":"valid","busy":null,"hidden":68551021658146,"chosen":["Negro/Plateado"],"header":["Negro/Plateado"],"url":"68551021658146","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"","payButtons":1}
+PASS  P1 [staging] A→B→C out of order: adding sends C  — [{"id":68551021658146,"quantity":1,"sections":"monetta-cart-sheet","sections_url":"/products/reloj-coach-talia-saddle"}]
+PASS  P1 [staging] A→B→C, B answers while C is pending: nothing of B is applied and buying stays closed  — {"selection":"pending","busy":"true","hidden":68551021592610,"chosen":["Negro/Plateado"],"header":["Negro/Plateado"],"url":"68551021592610","price":"$ 3,647.00 MXN","addDisabled":[true,true],"payInert":[true],"status":"Confirmando disponibilidad de Negro/Plateado…","error":"","payButtons":1}
+PASS  P1 [staging] A→B→C, C then fails: the page ends on A everywhere (id, chip, header, address, price)  — {"selection":"valid","busy":null,"hidden":68551021592610,"chosen":["Rosa Blush"],"header":["Rosa Blush"],"url":"68551021592610","price":"$ 3,647.00 MXN","addDisabled":[false,false],"payInert":[false],"status":"","error":"No pudimos confirmar «Negro/Plateado». Se mantiene «Rosa Blush»; elígela otra vez para reintentar.","payButtons":1}
+PASS  P1 [controlled] two options: choosing B with x checked requests exactly the variant A/x→B/x (R3) and shows B / x  — {"asked":[68551021658146],"seen":{"chosen":["B","x"],"header":["B","x"]}}
+PASS  P1 [controlled] two options: B/y does not exist, so the nearest variant that keeps B (R3 = B/x) is requested and the chips show B / x at once  — {"asked":[68551021658146,68551021625378,68551021658146],"seen":{"chosen":["B","x"],"header":["B","x"]}}
+PASS  P1 [staging] over all 8 adds of this run, the id sent equalled the variant shown, the chips and a confirmed selection at that instant  — [[68551021625378,68551021625378,"valid","Café"],[68551021625378,68551021625378,"valid","Café"],[68551021592610,68551021592610,"valid","Rosa Blush"],[68551021592610,68551021592610,"valid","Rosa Blush"],[68551021592610,68551021592610,"valid","Rosa Blush"],[68551021592610,68551021592610,"valid","Rosa Blush"],[68551021592610,68551021592610,"valid","Rosa Blush"],[68551021658146,68551021658146,"valid","Negro/Plateado"]]
+PASS  P1 [staging] no console or page errors from the theme during the scenarios  — []
+
+== p3 variant choice without JavaScript
+PASS  P3 [staging] without JavaScript, the initial variant is what the form sends  — form id 68551021592610 vs 68551021592610
+PASS  P3 [staging] without JavaScript, no radio chip is shown (nothing that looks selectable but sends nothing); the option links are  — {"radiosShown":0,"linksShown":8,"current":["Rosa Blush"],"price":"$ 3,647.00 MXN","addDisabled":false,"seal":false}
+PASS  P3 [staging] without JavaScript, choosing another available variant makes the form send exactly that variant  — form id 68551021625378 vs 68551021625378; ["Café"]
+PASS  P3 [staging] without JavaScript, the price on the page is that variant's price  — $ 3,647.00 MXN vs 3647
+PASS  P3 [staging] without JavaScript, a native form submission adds exactly the chosen variant to the anonymous cart  — [[68551021625378,1]]
+PASS  P3 [staging] without JavaScript, a sold-out variant is reachable, is marked, and its add button is disabled  — {"radiosShown":0,"linksShown":2,"current":["Negro"],"price":"$ 1,445.00 MXN","addDisabled":true,"seal":true}
+PASS  P3 [staging] without JavaScript, the sold-out variant's form carries that variant (never an available one)  — form id 68550844121122 vs 68550844121122
+
+== p4 structured data on the product page
+PASS  P4 [staging] reloj-coach-talia-saddle: one valid JSON-LD block is rendered (the legacy markup had none)  — {"count":1,"errors":[],"type":"ProductGroup"}
+PASS  P4 [staging] reloj-coach-talia-saddle: its type is native (ProductGroup) and it names the product  — {"type":"ProductGroup","name":"Reloj Coach Talia Saddle","title":"Reloj Coach Talia Saddle"}
+PASS  P4 [staging] reloj-coach-talia-saddle: it lists every variant Shopify has (8), by id  — 8 offered of 8
+PASS  P4 [staging] reloj-coach-talia-saddle: each offer's price and availability equal Shopify's for that variant  — [["3647.00","http://schema.org/InStock"],["3647.00","http://schema.org/InStock"],["3647.00","http://schema.org/InStock"],["3647.00","http://schema.org/InStock"]]
+PASS  P4 [staging] reloj-coach-talia-saddle: canonical and page metadata are kept  — {"canonical":"https://monetta-staging.myshopify.com/products/reloj-coach-talia-saddle","og":"Reloj Coach Talia Saddle","microdata":0}
+PASS  P4 [staging] bolso-steve-madden-crossbody-3: one valid JSON-LD block is rendered (the legacy markup had none)  — {"count":1,"errors":[],"type":"ProductGroup"}
+PASS  P4 [staging] bolso-steve-madden-crossbody-3: its type is native (ProductGroup) and it names the product  — {"type":"ProductGroup","name":"Bolso Steve Madden Crossbody","title":"Bolso Steve Madden Crossbody"}
+PASS  P4 [staging] bolso-steve-madden-crossbody-3: it lists every variant Shopify has (2), by id  — 2 offered of 2
+PASS  P4 [staging] bolso-steve-madden-crossbody-3: each offer's price and availability equal Shopify's for that variant  — [["1445.00","http://schema.org/InStock"],["1445.00","http://schema.org/OutOfStock"]]
+PASS  P4 [staging] bolso-steve-madden-crossbody-3: canonical and page metadata are kept  — {"canonical":"https://monetta-staging.myshopify.com/products/bolso-steve-madden-crossbody-3","og":"Bolso Steve Madden Crossbody","microdata":0}
+PASS  P4 [source] the markup is produced by the native structured_data filter; the section has no literal price, availability or id in it  — {{ product | structured_data }}
+
+== p5 load more failure, recovery and native navigation
+PASS  P5 [staging] "Ver más piezas" is a link that keeps the filters and the sort in its address  — /collections/all?filter.v.availability=1&page=2&sort_by=price-ascending
+PASS  P5 [staging] after a 503 nothing is appended and the address does not change  — 24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending
+PASS  P5 [staging] the failure box offers a retry button and, separately, a link that is no longer intercepted (still filtered and sorted)  — {"retry":true,"native":"/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending","interceptable":false,"alert":"alert","focus":true}
+PASS  P5 [staging] retrying while Shopify still fails sends one more fetch, adds nothing and leaves the box in place  — fetches 2
+PASS  P5 [staging] the native link performs a real navigation to page 2, keeping filter and sort  — 1 navigation(s); http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending
+PASS  P5 [staging] recovery: the retry appends page 2, updates the address and keeps filter and sort  — 48 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&page=2&sort_by=price-ascending
+PASS  P5 [staging] HTTP 200 with a body that is not a listing: nothing is added and the address is untouched  — 24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending
+PASS  P5 [staging] HTTP 200 with a listing page with an empty grid: nothing is added and the address is untouched  — 24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending
+PASS  P5 [staging] HTTP 200 with a password wall: nothing is added and the address is untouched  — 24 items; http://127.0.0.1:9292/collections/all?filter.v.availability=1&sort_by=price-ascending
+
+== p6 edit-search link on empty results
+PASS  P6 [staging] phone 375×812, mouse: the focus lands on a search field that is visible and on screen, with its text selected  — {"id":"page-search-input","visible":true,"inView":true,"selected":true,"value":"zzcorreccionesnoexiste987"}
+PASS  P6 [staging] phone 375×812, mouse: the link's own href (without JavaScript) points at a visible field  — #page-search-input
+PASS  P6 [staging] phone 375×812, keyboard: the focus lands on a search field that is visible and on screen, with its text selected  — {"id":"page-search-input","visible":true,"inView":true,"selected":true,"value":"zzcorreccionesnoexiste987"}
+PASS  P6 [staging] phone 375×812, keyboard: the link's own href (without JavaScript) points at a visible field  — #page-search-input
+PASS  P6 [staging] desktop 1440×900, mouse: the focus lands on a search field that is visible and on screen, with its text selected  — {"id":"page-search-input","visible":true,"inView":true,"selected":true,"value":"zzcorreccionesnoexiste987"}
+PASS  P6 [staging] desktop 1440×900, mouse: the link's own href (without JavaScript) points at a visible field  — #page-search-input
+PASS  P6 [staging] desktop 1440×900, keyboard: the focus lands on a search field that is visible and on screen, with its text selected  — {"id":"page-search-input","visible":true,"inView":true,"selected":true,"value":"zzcorreccionesnoexiste987"}
+PASS  P6 [staging] desktop 1440×900, keyboard: the link's own href (without JavaScript) points at a visible field  — #page-search-input
+
+== p8 declared language of the ported pages
+PASS  P8 [staging] home: the served HTML declares lang="es-MX" (read from the raw document, before any script)  — lang=es-MX
+PASS  P8 [staging] collection: the served HTML declares lang="es-MX" (read from the raw document, before any script)  — lang=es-MX
+PASS  P8 [staging] product: the served HTML declares lang="es-MX" (read from the raw document, before any script)  — lang=es-MX
+PASS  P8 [staging] cart: the served HTML declares lang="es-MX" (read from the raw document, before any script)  — lang=es-MX
+PASS  P8 [staging] search: the served HTML declares lang="es-MX" (read from the raw document, before any script)  — lang=es-MX
+PASS  P8 [staging] the page's own text is Spanish (more Spanish than English function words outside fragments marked with another language)  — {"es":34,"en":0}
+FAIL  P8 [staging] fragments Shopify writes in the store's language are marked with it: menu titles and the accelerated checkout  — {"storeLang":"en","nav":[["Inicio",null],["Catálogo",null],["Contacto",null]],"pay":"en","payText":"Buy it now"}
+
+== p2 checkout is refused while a bag change is pending or unconfirmed
+PASS  P2 [staging] increment: the change request is held on the wire  — held=1
+PASS  P2 [staging] increment: while it is pending every checkout button is disabled and the lock flag is set  — {"locked":true,"checkoutDisabled":[true,true,true],"accelerated":[],"notice":[false,false]}
+PASS  P2 [staging] increment: the tab order never reaches a checkout button while the change is pending  — reached=0
+PASS  P2 [staging] increment: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing  — hand-overs=0
+PASS  P2 [staging] increment: after the answer the lock is released and the bag matches Shopify's  — {"locked":false,"checkoutDisabled":[false,false,false],"accelerated":[],"notice":[false,false]}
+PASS  P2 [staging] increment: positive control, with the lock released the bag hands over to Shopify's checkout of the staging store  — 302 /cart -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx | 302 /checkouts/cn/hWNIHWKogQCj1Igej7HCQYcs/en-mx -> https://monetta-staging.myshopify.com/checkouts/cn/<token>/en-mx
+PASS  P2 [staging] decrement: the change request is held on the wire  — held=1
+PASS  P2 [staging] decrement: while it is pending every checkout button is disabled and the lock flag is set  — {"locked":true,"checkoutDisabled":[true,true,true],"accelerated":[],"notice":[false,false]}
+PASS  P2 [staging] decrement: the tab order never reaches a checkout button while the change is pending  — reached=0
+PASS  P2 [staging] decrement: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing  — hand-overs=0
+PASS  P2 [staging] decrement: after the answer the lock is released and the bag matches Shopify's  — {"locked":false,"checkoutDisabled":[false,false,false],"accelerated":[],"notice":[false,false]}
+PASS  P2 [staging] remove: the change request is held on the wire  — held=1
+PASS  P2 [staging] remove: while it is pending every checkout button is disabled and the lock flag is set  — {"locked":true,"checkoutDisabled":[true,true,true],"accelerated":[],"notice":[false,false]}
+PASS  P2 [staging] remove: the tab order never reaches a checkout button while the change is pending  — reached=0
+PASS  P2 [staging] remove: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing  — hand-overs=0
+PASS  P2 [staging] remove: after the answer the lock is released and the bag matches Shopify's  — {"locked":false,"checkoutDisabled":[false,false,false],"accelerated":[],"notice":[false,false]}
+PASS  P2 [staging] undo: the change request is held on the wire  — held=1
+PASS  P2 [staging] undo: while it is pending every checkout button is disabled and the lock flag is set  — {"locked":true,"checkoutDisabled":[true,true,true],"accelerated":[],"notice":[false,false]}
+PASS  P2 [staging] undo: the tab order never reaches a checkout button while the change is pending  — reached=0
+PASS  P2 [staging] undo: 11 ways of submitting checkout (click, dispatched click, requestSubmit, form submit, mouse at the button, keyboard) send nothing  — hand-overs=0
+PASS  P2 [staging] undo: after the answer the lock is released and the bag matches Shopify's  — {"locked":false,"checkoutDisabled":[false,false,false],"accelerated":[],"notice":[false,false]}
+PASS  P2 [staging] transport failure and no read-back: the bag is unconfirmed, the notice shows and every checkout button stays disabled  — {"locked":true,"checkoutDisabled":[true,true,true],"accelerated":[],"notice":[true,true]}
+PASS  P2 [staging] transport failure and no read-back: checkout cannot be submitted  — hand-overs=0
+PASS  P2 [staging] transport failure and no read-back: a further change is refused until the bag is confirmed (no blind second write)  — change requests 1
+PASS  P2 [staging] recovery: "Actualizar bolsa" shows Shopify's bag (the change never reached it) and releases the lock  — {"shown":"1","truth":1,"state":{"locked":false,"checkoutDisabled":[false,false,false],"accelerated":[],"notice":[false,false]}}
+PASS  P2 [staging] Shopify rejects a change (422): its message is shown, marked with the store language, and the lock is released after the bag is read back  — {"toast":{"text":"You can only add 1 of this item to your cart.","lang":"en"},"state":{"locked":false,"checkoutDisabled":[false,false,false],"accelerated":[],"notice":[false,false]}}
+PASS  P2 [staging] Deshacer pressed during a pending change does not run on top of it (waits its turn)  — add before the change finished: 0; overlapping writes: 0
+PASS  P2 [staging] quick add on a card adds exactly that variant once, opens the sheet and updates the count  — {"wanted":68550943277090,"items":[[68550943277090,1]],"badge":"1"}
+PASS  P2 [staging] quick add: no console or page errors from the theme  — []
+PASS  P2 [controlled] the accelerated-checkout area is inert while the change is pending: a pointer or keyboard press does not reach its button  — {"inert":[true],"activations":0}
+PASS  P2 [controlled] the accelerated-checkout area is released with the lock  — {"locked":false,"checkoutDisabled":[],"accelerated":[],"notice":[]}
+
+== p7 undo restores the line, not just the variant
+PASS  P7 [staging] the anonymous cart has two distinct lines of the same variant (plain ×1, personalised ×2)  — [["68551021592610:3045cf69d46ffc49a2c6c4d034a349ce",2,{"Grabado":"ANA","_canal":"prueba controlada"}],["68551021592610:c9c9fede87392015840a26293b50ecb1",1,{}]]
+PASS  P7 [staging] the rendered line carries its full identity (variant, quantity, public and private properties, selling plan)  — {"id":68551021592610,"quantity":2,"properties":{"Grabado":"ANA","_canal":"prueba controlada"},"selling_plan":null}
+PASS  P7 [staging] Deshacer restores the personalised line with its quantity and both properties, under the same key  — [["68551021592610:3045cf69d46ffc49a2c6c4d034a349ce",2,{"Grabado":"ANA","_canal":"prueba controlada"}],["68551021592610:c9c9fede87392015840a26293b50ecb1",1,{}]]
+PASS  P7 [staging] the plain line of the same variant was not merged into (still ×1, nothing added to it)  — [["68551021592610:3045cf69d46ffc49a2c6c4d034a349ce",2],["68551021592610:c9c9fede87392015840a26293b50ecb1",1]]
+PASS  P7 [controlled] Deshacer re-adds with the line's quantity, properties and selling plan (controlled plan 777; staging has no selling plans)  — [{"id":111,"quantity":3,"sections":"ctl-cart,monetta-cart-sheet","sections_url":"/cart","properties":{"Grabado":"ANA"},"selling_plan":777}]
+PASS  P7 [controlled] if Shopify rejects the restore, its message is shown and no other line is added in its place  — {"adds":[{"id":111,"quantity":1,"sections":"ctl-cart,monetta-cart-sheet","sections_url":"/cart","properties":{"Grabado":"ANA"}}],"toast":"Cannot restore: this item is sold out."}
+PASS  P7 [controlled] the rejected restore is not retried without its properties (exactly one add, with the full identity)  — [{"id":111,"quantity":1,"sections":"ctl-cart,monetta-cart-sheet","sections_url":"/cart","properties":{"Grabado":"ANA"}}]
+PASS  P7 [controlled] a line whose identity cannot be read offers no Deshacer (it would be a different purchase)  — {"offered":false,"adds":[]}
+FAIL  proxy: after the run it still serves the expected theme with the local scripts (checked with bounded waits)  — [{"name":"exactly one healthy theme dev proxy exists, it serves the authorised draft theme and it is the one under test","pass":false,"detail":"[[9292,\"192125304866\",\"healthy\"],[9292,\"192125304866\",\"healthy\"]]"}]
+note  proxy incidents during the run: 0
+
+complete-with-failures: 121/123 checks · /Users/alexis_reyna/MyCode/Monetta/docs/web-redesign/shopify-staging/runs/2026-10-22T23-21-56-222Z-regressions-1440x900/result.json

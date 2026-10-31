@@ -89,7 +89,6 @@ describe('admin control-plane read projection', () => {
         ],
       }],
       storefront: null,
-      sources: [],
     });
   });
 

@@ -1,0 +1,99 @@
+{
+  "run": "negative-control-short-viewport-release-layout",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/layout.mjs --base-url=http://127.0.0.1:9292 --viewports=1024x200 --label=short-viewport-release --inject-css=@media (max-height:480px){.site-top,.page-bar{position:sticky !important}.product-panel,.cart-layout .summary{position:sticky !important}.gallery__main{max-width:calc((100vh - 146px) * 0.8) !important}}",
+  "startedAt": "2026-10-19T14:19:28.305Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      1024,
+      200
+    ]
+  ],
+  "insetPx": 0,
+  "injectCss": "@media (max-height:480px){.site-top,.page-bar{position:sticky !important}.product-panel,.cart-layout .summary{position:sticky !important}.gallery__main{max-width:calc((100vh - 146px) * 0.8) !important}}",
+  "finishedAt": "2026-10-19T14:19:36.766Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 12,
+    "passed": 8,
+    "failed": 4
+  },
+  "checks": [
+    {
+      "name": "1024×200 collection: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×200 collection: short viewport releases the top chrome (header group and page bar static, nothing pinned)",
+      "pass": false,
+      "detail": "siteTop=sticky pageBar=sticky pinnedTop=0"
+    },
+    {
+      "name": "1024×200 collection: dock joins the page flow (static) and reserves nothing",
+      "pass": true,
+      "detail": "dock=static/none pinnedBottom=0"
+    },
+    {
+      "name": "1024×200 product: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×200 product: product panel not sticky, gallery not squeezed (viewer 43×54, panel sticky)",
+      "pass": false,
+      "detail": "{\"viewer\":{\"position\":\"relative\",\"display\":\"block\",\"top\":-225.859375,\"bottom\":-171.875,\"height\":53.984375,\"width\":43.1875,\"maxHeight\":\"none\",\"maxWidth\":\"43.2px\"},\"panel\":\"sticky\",\"thumbs\":\"none\"}"
+    },
+    {
+      "name": "1024×200 product: purchase dock hidden and the inline add button takes over",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 product: gallery drops its viewport-fitted max width and thumbnails their max height",
+      "pass": false,
+      "detail": "viewer 43.2px thumbs none"
+    },
+    {
+      "name": "1024×200 recommendations: rail rendered",
+      "pass": true,
+      "detail": "8 tiles"
+    },
+    {
+      "name": "1024×200 recommendations: tiles have equal heights",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 bag: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    },
+    {
+      "name": "1024×200 bag: checkout bar hidden and the summary's button takes over; summary not sticky",
+      "pass": false,
+      "detail": "summary sticky"
+    },
+    {
+      "name": "1024×200 home: no horizontal overflow",
+      "pass": true,
+      "detail": "1024/1024"
+    }
+  ],
+  "notes": []
+}

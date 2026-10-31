@@ -1,0 +1,359 @@
+{
+  "run": "keyboard",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/keyboard.mjs --base-url=http://127.0.0.1:9292 --viewports=1440x900,1024x200,1024x480,1024x481",
+  "startedAt": "2026-10-19T08:12:48.929Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "2ee0090e7b1c4f488c4065411a96fb5935ec47b4942c9c7c64980a992f6b8748"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      1440,
+      900
+    ],
+    [
+      1024,
+      200
+    ],
+    [
+      1024,
+      480
+    ],
+    [
+      1024,
+      481
+    ]
+  ],
+  "pages": [
+    "home",
+    "collection",
+    "product",
+    "bag",
+    "search"
+  ],
+  "insetPx": 0,
+  "finishedAt": "2026-10-19T08:17:42.157Z",
+  "status": "partial",
+  "error": null,
+  "summary": {
+    "checks": 60,
+    "passed": 57,
+    "failed": 3
+  },
+  "checks": [
+    {
+      "name": "1440×900 home: 56 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 home: Shift+Tab visits the same 56 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440×900 home: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1440×900 collection: 70 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 collection: Shift+Tab visits the same 70 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440×900 collection: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1440×900 product: 57 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 product: Shift+Tab visits the same 57 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440×900 product: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1440×900 bag: 20 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 bag: Shift+Tab visits the same 20 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440×900 bag: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1440×900 search: 73 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 search: Shift+Tab visits the same 73 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1440×900 search: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×200 home: 56 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 home: Shift+Tab visits the same 56 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 home: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×200 collection: 67 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": false,
+      "detail": "[\"a.card__link \\\"-21% GuessBolsa Guess Beige y Blanca Hobo Hombro\\\": centre (192,251) is outside the viewport/safe region (control 469px tall)\",\"a.card__link \\\"-13% GuessBolsa Guess Crossbody Beige con Monede\\\": centre (512,-10) is outside the viewport/safe region (control 469px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Crossbody Camera\\\": centre (512,-1) is outside the viewport/safe region (control 490px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Crossbody Camera\\\": centre (832,-1) is outside the viewport/safe region (control 490px tall)\"]"
+    },
+    {
+      "name": "1024×200 collection: Shift+Tab visits the same 67 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 collection: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×200 product: 57 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": false,
+      "detail": "[\"div.gallery__track \\\"Galería: usa las flechas para cambiar de foto\\\": centre (344,286) is outside the viewport/safe region (control 540px tall)\",\"a.card__link \\\"GuessCartera Guess Compacta Taupe Monograma Blan\\\": centre (152,216) is outside the viewport/safe region (control 402px tall)\"]"
+    },
+    {
+      "name": "1024×200 product: Shift+Tab visits the same 57 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 product: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×200 bag: 20 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 bag: Shift+Tab visits the same 20 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 bag: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×200 search: 70 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": false,
+      "detail": "[\"a.card__link \\\"-13% GuessBolsa Guess Crossbody Beige con Monede\\\": centre (192,251) is outside the viewport/safe region (control 469px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Crossbody Satche\\\": centre (512,-9) is outside the viewport/safe region (control 471px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Satchel Negra Mo\\\": centre (832,-9) is outside the viewport/safe region (control 471px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Shoulder Camel T\\\": centre (512,-10) is outside the viewport/safe region (control 471px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Crossbody Should\\\": centre (832,-1) is outside the viewport/safe region (control 490px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Tote Negro Monog\\\": centre (512,-10) is outside the viewport/safe region (control 471px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Crossbody Satche\\\": centre (832,-1) is outside the viewport/safe region (control 490px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Crossbody Satche\\\": centre (512,-1) is outside the viewport/safe region (control 490px tall)\",\"a.card__link \\\"Envío inmediatoGuessBolsa Guess Crossbody Should\\\": centre (832,-10) is outside the viewport/safe region (control 471px tall)\"]"
+    },
+    {
+      "name": "1024×200 search: Shift+Tab visits the same 70 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×200 search: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×480 home: 56 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×480 home: Shift+Tab visits the same 56 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×480 home: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×480 collection: 67 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×480 collection: Shift+Tab visits the same 67 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×480 collection: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×480 product: 57 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×480 product: Shift+Tab visits the same 57 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×480 product: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×480 bag: 20 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×480 bag: Shift+Tab visits the same 20 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×480 bag: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×480 search: 70 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×480 search: Shift+Tab visits the same 70 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×480 search: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×481 home: 56 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×481 home: Shift+Tab visits the same 56 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×481 home: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×481 collection: 67 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×481 collection: Shift+Tab visits the same 67 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×481 collection: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×481 product: 57 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×481 product: Shift+Tab visits the same 57 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×481 product: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×481 bag: 20 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×481 bag: Shift+Tab visits the same 20 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×481 bag: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    },
+    {
+      "name": "1024×481 search: 70 tab stops; every centre visible, hit-testable and ring painted",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×481 search: Shift+Tab visits the same 70 stops in reverse",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "1024×481 search: the skip link is the first stop and was not activated",
+      "pass": true,
+      "detail": "a.skip-link \"Saltar al contenido\""
+    }
+  ],
+  "notes": [
+    "proxy error page for http://127.0.0.1:9292/ (attempt 1); retrying"
+  ]
+}

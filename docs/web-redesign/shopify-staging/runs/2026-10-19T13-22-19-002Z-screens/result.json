@@ -1,0 +1,541 @@
+{
+  "run": "screens",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/screens.mjs --base-url=http://127.0.0.1:9292",
+  "startedAt": "2026-10-19T13:22:19.002Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 610,
+      "sha256": "a962cd92f8a480e199bf880714c3c85addf9e8e5c4eb179aaf7550cf10e5f0bf"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewports": [
+    [
+      375,
+      812
+    ],
+    [
+      440,
+      956
+    ],
+    [
+      768,
+      1024
+    ],
+    [
+      1024,
+      768
+    ],
+    [
+      1440,
+      900
+    ],
+    [
+      320,
+      640
+    ],
+    [
+      812,
+      375
+    ],
+    [
+      1024,
+      200
+    ]
+  ],
+  "insetPx": 0,
+  "finishedAt": "2026-10-19T13:45:15.299Z",
+  "status": "complete-with-failures",
+  "error": null,
+  "summary": {
+    "checks": 95,
+    "passed": 93,
+    "failed": 2
+  },
+  "checks": [
+    {
+      "name": "375×812 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 collection-filters-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 menu-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "375×812 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 collection-filters-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 menu-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "440×956 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 collection-filters-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "768×1024 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 collection-filters-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×768 bag: captured",
+      "pass": false,
+      "detail": "page.goto: Timeout 30000ms exceeded."
+    },
+    {
+      "name": "1440×900 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1440×900 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 collection-filters-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 menu-drawer: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 search: captured",
+      "pass": false,
+      "detail": "page.goto: Timeout 30000ms exceeded."
+    },
+    {
+      "name": "320×640 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "320×640 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "812×375 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 home: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 home-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 collection: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 collection-filtered: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 product: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 product-full: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 product-soldout-variant: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 search: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 search-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 bag-empty: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    },
+    {
+      "name": "1024×200 bag: captured with every visible image loaded and decoded",
+      "pass": true,
+      "detail": "[]"
+    }
+  ],
+  "notes": []
+}

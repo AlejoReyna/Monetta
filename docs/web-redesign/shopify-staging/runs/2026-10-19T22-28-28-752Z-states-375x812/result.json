@@ -1,0 +1,99 @@
+{
+  "run": "states-375x812",
+  "command": "node docs/web-redesign/shopify-staging/scripts/e2e/states.mjs --base-url=http://127.0.0.1:9292 --w=375 --h=812",
+  "startedAt": "2026-10-19T22:28:28.752Z",
+  "store": "monetta-staging.myshopify.com",
+  "theme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "baseUrl": "http://127.0.0.1:9292",
+  "codeState": {
+    "storefrontTheme": {
+      "files": 611,
+      "sha256": "10fc869e85c5f94b3d6425d287e8491e6649b566046081ea10ebca9ff383230b"
+    },
+    "repoHead": "c828d684ed7ced1502a2c14ac5fc174cd882661f",
+    "repoBranch": "refactor/rf-17-tipografia"
+  },
+  "browser": "/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
+  "viewport": {
+    "width": 375,
+    "height": 812
+  },
+  "insets": null,
+  "incidents": [],
+  "finishedAt": "2026-10-19T22:28:45.138Z",
+  "status": "complete-pass",
+  "error": null,
+  "summary": {
+    "checks": 12,
+    "passed": 12,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "name": "product-initial: captured (product page, JavaScript on, nothing pending)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "product-pending: captured (a choice waiting for Shopify: status text, buttons disabled, chip and header value agree)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "product-failed: captured (the choice failed: chips back on the shown variant, message names both options)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "product-no-js: captured (JavaScript disabled: the options are links, the first one current)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "product-no-js-soldout: captured (JavaScript disabled, sold-out variant reached through its link)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "listing-load-failure: captured (load more failed: retry button and a separate link to the next page)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag-initial: captured (bag with a personalised line)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag-change-pending: captured (a quantity change on the wire: every checkout button disabled)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag-unconfirmed: captured (the change failed and the bag could not be read back: notice with \"Actualizar bolsa\", checkout disabled)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "bag-undo-toast: captured (line removed: the \"Deshacer\" toast (it restores the personalised line))",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "search-empty: captured (no results, before pressing \"Editar búsqueda\")",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "search-edit-focused: captured (after \"Editar búsqueda\": the visible field is focused with its text selected)",
+      "pass": true,
+      "detail": ""
+    }
+  ],
+  "notes": [
+    "proxy incidents during the run: 0"
+  ]
+}

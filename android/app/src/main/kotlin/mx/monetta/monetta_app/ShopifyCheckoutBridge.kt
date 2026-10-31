@@ -27,6 +27,11 @@ internal class ShopifyCheckoutBridge(
     private var pendingResult: MethodChannel.Result? = null
     private var checkoutDialog: CheckoutSheetKitDialog? = null
 
+    // Offsite-payment return link (Fase 5). The OS may deliver the App Link
+    // intent before Dart is listening (cold start), so the link stays pending
+    // until the push or the `drainReturnLink` pull delivers it.
+    private var pendingReturnLink: String? = null
+
     init {
         ShopifyCheckoutSheetKit.configure {
             it.logLevel = LogLevel.ERROR
@@ -63,8 +68,43 @@ internal class ShopifyCheckoutBridge(
                 }
                 result.success(null)
             }
+            "drainReturnLink" -> {
+                val pending = pendingReturnLink
+                pendingReturnLink = null
+                if (pending == null) result.success(null)
+                else result.success(mapOf("url" to pending))
+            }
             else -> result.notImplemented()
         }
+    }
+
+    /**
+     * Forwards an OS-delivered App Link intent to Flutter for policy routing.
+     * Validation lives in Dart ([CheckoutReturnPolicy]); anything unexpected
+     * is rejected there. Overlong values are dropped before crossing.
+     */
+    fun handleReturnLink(uri: Uri?) {
+        val raw = uri?.toString() ?: return
+        if (raw.isEmpty() || raw.length > 4096) return
+        pendingReturnLink = raw
+        channel.invokeMethod(
+            "onReturnLink",
+            mapOf("url" to raw),
+            object : MethodChannel.Result {
+                override fun success(result: Any?) {
+                    if (pendingReturnLink == raw) pendingReturnLink = null
+                }
+
+                override fun error(code: String, message: String?, details: Any?) {
+                    // Keep pending: Dart was not listening (cold start) and
+                    // will pull it through `drainReturnLink`.
+                }
+
+                override fun notImplemented() {
+                    // Same as error: keep pending for the drain pull.
+                }
+            },
+        )
     }
 
     private fun present(call: MethodCall, result: MethodChannel.Result) {

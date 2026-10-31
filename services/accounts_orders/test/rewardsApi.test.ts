@@ -33,7 +33,7 @@ describe('rewards API v1', () => {
     rewards = new InMemoryRewardsRepository();
     service = new RewardsService({
       rewards,
-      env: { ...loadRewardsEnv({} as NodeJS.ProcessEnv), redemptionEnabled: false },
+      env: { ...loadRewardsEnv({} as NodeJS.ProcessEnv), rewardsEnabled: true, redemptionEnabled: false },
       discounts: new DisabledDiscountAdapter(),
       shopDomain: 'monetta-staging.myshopify.com',
     });
@@ -120,5 +120,39 @@ describe('rewards API v1', () => {
       headers: { Authorization: 'Bearer tok-88', 'Content-Type': 'application/json' },
     });
     expect([401, 404]).toContain(other.status);
+  });
+});
+
+describe('bandera REWARDS_ENABLED', () => {
+  it('apagada si falta la variable; solo se enciende explicitamente', () => {
+    expect(loadRewardsEnv({} as NodeJS.ProcessEnv).rewardsEnabled).toBe(false);
+    expect(loadRewardsEnv({ REWARDS_ENABLED: '' } as NodeJS.ProcessEnv).rewardsEnabled).toBe(false);
+    expect(loadRewardsEnv({ REWARDS_ENABLED: 'true' } as NodeJS.ProcessEnv).rewardsEnabled).toBe(true);
+    expect(loadRewardsEnv({ REWARDS_ENABLED: 'false' } as NodeJS.ProcessEnv).rewardsEnabled).toBe(false);
+  });
+
+  it('sin programa montado, las rutas de Rewards no existen', async () => {
+    const app = createApp({
+      appAccounts: new InMemoryAppAccountsRepository(),
+      customers: new InMemoryCustomersRepository(),
+      orders: new InMemoryOrdersRepository(),
+      webhookEvents: new InMemoryWebhookEventsRepository(),
+      pushTokens: new InMemoryPushTokensRepository(),
+      webhookSecret: 'shpss_test_secret',
+      customerTokenVerifier: new Verifier(),
+    });
+    const server = await new Promise<Server>((resolve) => {
+      const s = app.listen(0, '127.0.0.1', () => resolve(s));
+    });
+    try {
+      const address = server.address();
+      if (address === null || typeof address === 'string') throw new Error('no address');
+      const res = await fetch(`http://127.0.0.1:${address.port}/customers/me/rewards`, { headers: auth });
+      expect(res.status).toBe(404);
+    } finally {
+      await new Promise<void>((resolve, reject) => {
+        server.close((err) => (err ? reject(err) : resolve()));
+      });
+    }
   });
 });

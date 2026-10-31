@@ -21,6 +21,7 @@ import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import 'rewards_api.dart';
 import 'rewards_components.dart';
+import 'rewards_error_kind.dart';
 import 'rewards_models.dart';
 
 /// Lectura mínima del contrato que necesitan las pantallas de E.
@@ -351,6 +352,11 @@ class _RewardsSectionState extends State<RewardsSection> {
         }
         final error = snapshot.error;
         if (error != null || !snapshot.hasData) {
+          if (classifyRewardsError(error) == RewardsErrorKind.unavailable) {
+            return const _RewardsUnavailable(
+              key: ValueKey('rewards-unavailable'),
+            );
+          }
           final controller = widget.controller;
           return _RewardsError(
             key: const ValueKey('rewards-error'),
@@ -466,20 +472,27 @@ class _RewardsError extends StatelessWidget {
   final VoidCallback onRetry;
   final VoidCallback? onRelogin;
 
-  bool get _isSession =>
-      error is RewardsApiError &&
-      const {'unauthenticated', 'unauthorized', 'session_expired'}
-          .contains((error! as RewardsApiError).code);
-
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    final kind = classifyRewardsError(error);
+    final isSession = kind == RewardsErrorKind.session;
     final title =
-        _isSession ? 'Tu sesión terminó' : 'No pudimos consultar tu saldo';
-    final body = _isSession
-        ? 'Inicia sesión de nuevo para ver tu saldo Monetta.'
-        : 'Revisa tu conexión e inténtalo de nuevo. Esto no afecta tus '
-            'pedidos ni tu cuenta.';
+        isSession ? 'Tu sesión terminó' : 'No pudimos consultar tu saldo';
+    final body = switch (kind) {
+      RewardsErrorKind.session =>
+        'Inicia sesión de nuevo para ver tu saldo Monetta.',
+      RewardsErrorKind.serviceDown =>
+        'Monetta Rewards no responde en este momento. Inténtalo más '
+            'tarde; esto no afecta tus pedidos ni tu cuenta.',
+      RewardsErrorKind.network ||
+      RewardsErrorKind.unavailable =>
+        'Revisa tu conexión e inténtalo de nuevo. Esto no afecta tus '
+            'pedidos ni tu cuenta.',
+    };
+    final retryIcon = kind == RewardsErrorKind.serviceDown
+        ? Icons.cloud_off_rounded
+        : Icons.signal_wifi_off_rounded;
     return _RewardsCardFrame(
       children: [
         Text(
@@ -491,7 +504,7 @@ class _RewardsError extends StatelessWidget {
         const SizedBox(height: BoutiqueSpace.xs),
         Text(body, style: boutiqueText(size: 13, color: palette.inkMuted)),
         const SizedBox(height: BoutiqueSpace.md),
-        if (_isSession && onRelogin != null)
+        if (isSession && onRelogin != null)
           ENotice(
             message: 'Tu sesión terminó.',
             actionLabel: 'Iniciar sesión',
@@ -503,7 +516,7 @@ class _RewardsError extends StatelessWidget {
             message: body,
             actionLabel: 'Reintentar',
             onAction: onRetry,
-            icon: Icons.signal_wifi_off_rounded,
+            icon: retryIcon,
           ),
       ],
     );

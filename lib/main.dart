@@ -22,6 +22,8 @@ import 'app/admin_controller.dart';
 import 'app/admin_notification_controller.dart';
 import 'app/app_build_metadata.dart';
 import 'app/catalog_store.dart';
+import 'app/font_licenses.dart';
+import 'app/text_scale_policy.dart';
 import 'app/cart_controller.dart';
 import 'app/editorial_content_controller.dart';
 import 'app/featured_catalog_controller.dart';
@@ -87,6 +89,7 @@ import 'features/welcome/welcome_gate.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  registerFontLicenses();
   final accountsConfig = AccountsOrdersConfig.fromEnvironment();
   final notifications = NotificationConfig.fromEnvironment(
     fallbackBaseUrl: accountsConfig.baseUrl,
@@ -504,6 +507,13 @@ class _MonettaAppState extends State<MonettaApp> {
 
   /// Lets a two-sided window read the browsing side's top page.
   final DuoRouteObserver _duoRoutes = DuoRouteObserver();
+
+  @override
+  void initState() {
+    super.initState();
+    registerFontLicenses();
+  }
+
   final AppDatabase _database = AppDatabase.connect();
   late final ThemeController _theme = ThemeController(
     store: AppearanceStore(_database),
@@ -894,42 +904,48 @@ class _MonettaAppState extends State<MonettaApp> {
               final overlay =
                   Theme.of(context).appBarTheme.systemOverlayStyle ??
                       SystemUiOverlayStyle.light;
-              return SystemLayoutHost(
-                child: AnnotatedRegion<SystemUiOverlayStyle>(
-                  value: overlay,
-                  child: FutureBuilder<void>(
-                    future: _loading,
-                    builder: (context, snapshot) {
-                      if (snapshot.hasError) {
-                        return _ErrorScreen(error: '${snapshot.error}');
-                      }
-                      final ready =
-                          snapshot.connectionState == ConnectionState.done;
-                      return StartupReveal(
-                        ready: ready,
-                        child: ready
-                            ? AppRouteScopes(
-                                accountController: _account,
-                                cartController: _shopifyCart?.controller,
-                                checkoutCoordinator: _shopifyCart?.checkout,
-                                catalogStore: _store,
-                                notificationController: _notifications,
-                                shopDomain: StorefrontConfig.fromEnvironment()
-                                    .shopDomain,
-                                // A foldable's inner display: browsing on the
-                                // left, the bag and its companions on the
-                                // right. Every other window is unchanged.
-                                child: DuoWorkspace(
-                                  navigatorKey: _navigatorKey,
-                                  routes: _duoRoutes,
-                                  paneRoot: (_) =>
-                                      const BagScreen(embedded: true),
-                                  child: navigator!,
-                                ),
-                              )
-                            : const SizedBox.expand(),
-                      );
-                    },
+              final media = MediaQuery.of(context);
+              return MediaQuery(
+                data: media.copyWith(
+                  textScaler: BoundedTextScaler(media.textScaler),
+                ),
+                child: SystemLayoutHost(
+                  child: AnnotatedRegion<SystemUiOverlayStyle>(
+                    value: overlay,
+                    child: FutureBuilder<void>(
+                      future: _loading,
+                      builder: (context, snapshot) {
+                        if (snapshot.hasError) {
+                          return _ErrorScreen(error: '${snapshot.error}');
+                        }
+                        final ready =
+                            snapshot.connectionState == ConnectionState.done;
+                        return StartupReveal(
+                          ready: ready,
+                          child: ready
+                              ? AppRouteScopes(
+                                  accountController: _account,
+                                  cartController: _shopifyCart?.controller,
+                                  checkoutCoordinator: _shopifyCart?.checkout,
+                                  catalogStore: _store,
+                                  notificationController: _notifications,
+                                  shopDomain: StorefrontConfig.fromEnvironment()
+                                      .shopDomain,
+                                  // A foldable's inner display: browsing on the
+                                  // left, the bag and its companions on the
+                                  // right. Every other window is unchanged.
+                                  child: DuoWorkspace(
+                                    navigatorKey: _navigatorKey,
+                                    routes: _duoRoutes,
+                                    paneRoot: (_) =>
+                                        const BagScreen(embedded: true),
+                                    child: navigator!,
+                                  ),
+                                )
+                              : const SizedBox.expand(),
+                        );
+                      },
+                    ),
                   ),
                 ),
               );

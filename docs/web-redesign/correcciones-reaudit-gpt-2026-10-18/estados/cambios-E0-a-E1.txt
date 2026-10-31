@@ -1,0 +1,14 @@
+Cambios del árbol de código entre el estado de partida (E0) y el congelado (E1)
+E0 c64c9a523e49b5a55b680519fa53614ee1a0a44f01693411ef185dd619cb0a0e
+E1 f3a58b2dc6673f70544c5e76b10468fb37e10fc97d8ab78e301f8ed712588290
+
+modificado  README.md                          8daa2139d6e3 → 77e513f78e68
+modificado  src/lib/scrollers.js               561f5f2976a7 → 05ecc7e8fdf6
+modificado  src/styles/components.css          abfb3a01f8ca → b61c2f3a39b3
+modificado  src/styles/pages.css               f9db82b0e56e → 322320f7db69
+modificado  tests/unit/chrome.test.mjs         07ffce623676 → e6398e3cce21
+nuevo       verify/check-reaudit-fixes.mjs     —            → 34283379c406
+modificado  verify/probes.mjs                  05f744847659 → 22c44c09c860
+modificado  verify/run-all.mjs                 76a817322450 → 0e302e8fad5f
+
+8 archivos distintos de 65; el resto (incluidos check-audit-fixes.mjs, check-fidelity.mjs y los demás controles anteriores) es idéntico byte a byte.

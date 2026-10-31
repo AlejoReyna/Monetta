@@ -10,6 +10,9 @@ library;
 import 'dart:async';
 
 import 'package:flutter/foundation.dart';
+import 'package:drift/drift.dart' show Value;
+
+import '../data/customer_auth/customer_identity.dart';
 
 import '../data/accounts_orders/system_account_session_repository.dart';
 import '../data/customer_auth/customer_account_config.dart';
@@ -160,6 +163,39 @@ class AccountController extends ChangeNotifier {
   Uint8List? _photoBytes;
 
   bool get isSignedIn => account != null;
+
+  /// Fetches a missing name for a restored account, without blocking its UI.
+  Future<void> refreshProfile() async {
+    final current = account;
+    final repository = _sessionRepository;
+    if (current == null ||
+        repository == null ||
+        current.authProvider != 'shopify' ||
+        customerProfileName(current.displayName) != null) {
+      return;
+    }
+    try {
+      final updated = await repository.refreshProfile(current.localAccountId);
+      if (updated != null &&
+          account?.localAccountId == current.localAccountId) {
+        account = updated;
+        notifyListeners();
+      }
+    } catch (_) {
+      // A missing name or offline lookup must not interrupt the session.
+    }
+  }
+
+  /// A personal display name, scoped to the account on this device.
+  Future<void> saveProfileName(String value) async {
+    final current = account;
+    final name = customerProfileName(value);
+    if (current == null || name == null) return;
+    await _accountStore.updateDisplayName(current.localAccountId, name);
+    if (account?.localAccountId != current.localAccountId) return;
+    account = current.copyWith(displayName: Value(name));
+    notifyListeners();
+  }
 
   /// Only Shopify accounts can edit: the name and photo are Shopify's.
   /// Legacy Monetta accounts keep the plain avatar.

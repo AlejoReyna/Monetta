@@ -1,0 +1,170 @@
+[
+  {
+    "file": "1024x768-home.png",
+    "viewport": "1024x768",
+    "name": "home",
+    "brokenImages": 0,
+    "visibleImages": 19
+  },
+  {
+    "file": "1024x768-home-full.png",
+    "viewport": "1024x768",
+    "name": "home-full",
+    "brokenImages": 0,
+    "visibleImages": 19
+  },
+  {
+    "file": "1024x768-collection.png",
+    "viewport": "1024x768",
+    "name": "collection",
+    "brokenImages": 0,
+    "visibleImages": 26
+  },
+  {
+    "file": "1024x768-collection-filtered.png",
+    "viewport": "1024x768",
+    "name": "collection-filtered",
+    "brokenImages": 0,
+    "visibleImages": 26
+  },
+  {
+    "file": "1024x768-collection-filters-drawer.png",
+    "viewport": "1024x768",
+    "name": "collection-filters-drawer",
+    "brokenImages": 0,
+    "visibleImages": 26
+  },
+  {
+    "file": "1024x768-product.png",
+    "viewport": "1024x768",
+    "name": "product",
+    "brokenImages": 0,
+    "visibleImages": 18
+  },
+  {
+    "file": "1024x768-product-full.png",
+    "viewport": "1024x768",
+    "name": "product-full",
+    "brokenImages": 0,
+    "visibleImages": 26
+  },
+  {
+    "file": "1024x768-product-soldout-variant.png",
+    "viewport": "1024x768",
+    "name": "product-soldout-variant",
+    "brokenImages": 0,
+    "visibleImages": 18
+  },
+  {
+    "file": "1024x768-search.png",
+    "viewport": "1024x768",
+    "name": "search",
+    "brokenImages": 0,
+    "visibleImages": 26
+  },
+  {
+    "file": "1024x768-search-empty.png",
+    "viewport": "1024x768",
+    "name": "search-empty",
+    "brokenImages": 0,
+    "visibleImages": 2
+  },
+  {
+    "file": "1024x768-bag-empty.png",
+    "viewport": "1024x768",
+    "name": "bag-empty",
+    "brokenImages": 0,
+    "visibleImages": 10
+  },
+  {
+    "file": "1024x768-bag.png",
+    "viewport": "1024x768",
+    "name": "bag",
+    "brokenImages": 0,
+    "visibleImages": 3
+  },
+  {
+    "file": "320x640-home.png",
+    "viewport": "320x640",
+    "name": "home",
+    "brokenImages": 0,
+    "visibleImages": 19
+  },
+  {
+    "file": "320x640-collection.png",
+    "viewport": "320x640",
+    "name": "collection",
+    "brokenImages": 0,
+    "visibleImages": 25
+  },
+  {
+    "file": "320x640-collection-filtered.png",
+    "viewport": "320x640",
+    "name": "collection-filtered",
+    "brokenImages": 0,
+    "visibleImages": 25
+  },
+  {
+    "file": "320x640-collection-filters-drawer.png",
+    "viewport": "320x640",
+    "name": "collection-filters-drawer",
+    "brokenImages": 0,
+    "visibleImages": 25
+  },
+  {
+    "file": "320x640-menu-drawer.png",
+    "viewport": "320x640",
+    "name": "menu-drawer",
+    "brokenImages": 0,
+    "visibleImages": 20
+  },
+  {
+    "file": "320x640-product.png",
+    "viewport": "320x640",
+    "name": "product",
+    "brokenImages": 0,
+    "visibleImages": 18
+  },
+  {
+    "file": "320x640-product-full.png",
+    "viewport": "320x640",
+    "name": "product-full",
+    "brokenImages": 0,
+    "visibleImages": 26
+  },
+  {
+    "file": "320x640-product-soldout-variant.png",
+    "viewport": "320x640",
+    "name": "product-soldout-variant",
+    "brokenImages": 0,
+    "visibleImages": 10
+  },
+  {
+    "file": "320x640-search.png",
+    "viewport": "320x640",
+    "name": "search",
+    "brokenImages": 0,
+    "visibleImages": 25
+  },
+  {
+    "file": "320x640-search-empty.png",
+    "viewport": "320x640",
+    "name": "search-empty",
+    "brokenImages": 0,
+    "visibleImages": 1
+  },
+  {
+    "file": "320x640-bag-empty.png",
+    "viewport": "320x640",
+    "name": "bag-empty",
+    "brokenImages": 0,
+    "visibleImages": 9
+  },
+  {
+    "file": "320x640-bag.png",
+    "viewport": "320x640",
+    "name": "bag",
+    "brokenImages": 0,
+    "visibleImages": 2
+  }
+]

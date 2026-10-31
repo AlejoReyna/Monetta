@@ -1,7 +1,6 @@
 /// Local read cache of `services/accounts_orders`'s order-mirror — see
-/// `tables.dart`'s `OrderSummaries` doc comment. Cache-first, same contract
-/// as `data/external_catalog/external_catalog_repository.dart`: a failed
-/// refresh must never clear what's already here.
+/// `tables.dart`'s `OrderSummaries` doc comment. Cache-first: a failed refresh
+/// must never clear what's already here.
 library;
 
 import 'package:drift/drift.dart';

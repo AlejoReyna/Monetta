@@ -15,6 +15,7 @@ import '../account/account_boutique.dart';
 import '../boutique/boutique_tokens.dart';
 import 'rewards_account.dart';
 import 'rewards_components.dart' as rc;
+import 'rewards_error_kind.dart';
 import 'rewards_models.dart';
 
 /// `accountId` es clave local de alcance; la identidad la deriva el backend
@@ -57,8 +58,10 @@ class _RewardsBalanceCardState extends State<RewardsBalanceCard> {
   Future<RewardsBalance?> _safeBalance() async {
     try {
       return await widget.service.balance(accountId: widget.accountId);
-    } on RewardsException catch (error) {
-      if (error.code == 'unavailable') return null;
+    } on Object catch (error) {
+      if (classifyRewardsError(error) == RewardsErrorKind.unavailable) {
+        return null;
+      }
       rethrow;
     }
   }
@@ -79,6 +82,7 @@ class _RewardsBalanceCardState extends State<RewardsBalanceCard> {
           // Error independiente: no rompe la pantalla que lo contiene.
           return _CardError(
             key: const ValueKey('rewards-card-error'),
+            kind: classifyRewardsError(snapshot.error),
             onRetry: _retry,
           );
         }
@@ -207,13 +211,17 @@ class _CardUnavailable extends StatelessWidget {
 }
 
 class _CardError extends StatelessWidget {
-  const _CardError({required this.onRetry, super.key});
+  const _CardError({required this.kind, required this.onRetry, super.key});
 
+  final RewardsErrorKind kind;
   final VoidCallback onRetry;
 
   @override
   Widget build(BuildContext context) {
     final palette = context.boutique;
+    final isSession = kind == RewardsErrorKind.session;
+    final title =
+        isSession ? 'Tu sesión terminó' : 'No pudimos consultar tu saldo';
     return _CardFrame(
       children: [
         Text(
@@ -222,16 +230,28 @@ class _CardError extends StatelessWidget {
         ),
         const SizedBox(height: BoutiqueSpace.sm),
         Text(
-          'No pudimos consultar tu saldo',
+          title,
           style: boutiqueTitle(size: 15, color: palette.ink),
         ),
         const SizedBox(height: BoutiqueSpace.md),
-        ENotice(
-          message: 'Revisa tu conexión e inténtalo de nuevo.',
-          actionLabel: 'Reintentar',
-          onAction: onRetry,
-          icon: Icons.signal_wifi_off_rounded,
-        ),
+        if (isSession)
+          const ENotice(
+            message: 'Tu sesión terminó. Inicia sesión de nuevo para ver tu '
+                'saldo Monetta.',
+            icon: Icons.lock_outline_rounded,
+          )
+        else
+          ENotice(
+            message: kind == RewardsErrorKind.serviceDown
+                ? 'Monetta Rewards no responde en este momento. '
+                    'Inténtalo más tarde.'
+                : 'Revisa tu conexión e inténtalo de nuevo.',
+            actionLabel: 'Reintentar',
+            onAction: onRetry,
+            icon: kind == RewardsErrorKind.serviceDown
+                ? Icons.cloud_off_rounded
+                : Icons.signal_wifi_off_rounded,
+          ),
       ],
     );
   }

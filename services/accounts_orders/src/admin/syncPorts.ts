@@ -1,15 +1,21 @@
+/** Channels that new sync jobs may be created with. */
 export type AdminSyncChannel =
   | 'shopify-products'
   | 'shopify-orders'
-  | 'storefront-content'
-  | 'external-status';
+  | 'storefront-content';
+
+/**
+ * Channels that may already be stored in `admin_sync_jobs` (migration 009 still
+ * permits `external-status`, which was retired). Stored jobs stay readable.
+ */
+export type StoredAdminSyncChannel = AdminSyncChannel | 'external-status';
 
 export type AdminSyncJobStatus = 'pending' | 'running' | 'completed' | 'failed';
 
 export interface AdminSyncJobRecord {
   readonly id: string;
   readonly actorId: string;
-  readonly channel: AdminSyncChannel;
+  readonly channel: StoredAdminSyncChannel;
   readonly status: AdminSyncJobStatus;
   readonly errorCode: string | null;
   readonly cursor: string | null;

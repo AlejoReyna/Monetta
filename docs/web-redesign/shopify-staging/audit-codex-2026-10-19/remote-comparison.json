@@ -1,0 +1,21 @@
+{
+  "checkedAt": "2026-10-19T18:05:08.192851+00:00",
+  "store": "monetta-staging.myshopify.com",
+  "theme": "192125304866",
+  "pullExitCode": 0,
+  "temporaryPath": "/var/folders/vp/1zm3yfq11_7bbzm2_t195l2r0000gn/T/monetta-theme-audit-6anvb10p",
+  "localFiles": 610,
+  "remoteFiles": 610,
+  "remoteOnly": [],
+  "localOnly": [],
+  "contentDifferences": [],
+  "formatOnlyDifferences": [
+    "sections/monetta-footer-group.json",
+    "sections/monetta-header-group.json",
+    "templates/cart.json",
+    "templates/collection.json",
+    "templates/index.json",
+    "templates/product.json",
+    "templates/search.json"
+  ]
+}

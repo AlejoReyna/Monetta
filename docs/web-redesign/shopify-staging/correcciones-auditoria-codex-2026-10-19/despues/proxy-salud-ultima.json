@@ -1,0 +1,60 @@
+{
+  "checkedAt": "2026-10-19T22:33:39.845Z",
+  "baseUrl": "http://127.0.0.1:9292",
+  "store": "monetta-staging.myshopify.com",
+  "expectedTheme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "timeoutMs": 20000,
+  "checks": [
+    {
+      "name": "exactly one healthy theme dev proxy exists, it serves the authorised draft theme and it is the one under test",
+      "pass": true,
+      "detail": "[[9292,\"192125304866\",\"healthy\"]]"
+    },
+    {
+      "name": "the probe page answers 200 within the time limit",
+      "pass": true,
+      "detail": "302 ms"
+    },
+    {
+      "name": "the document is the expected theme (Shopify.theme id, role unpublished, name)",
+      "pass": true,
+      "detail": "{\"name\":\"Monetta Web F1 borrador sin publicar 2026-10-19\",\"id\":192125304866,\"schema_name\":\"Atelier\",\"schema_version\":\"3.5.0\",\"theme_store_id\":null,\"role\":\"unpublished\"}"
+    },
+    {
+      "name": "the document uses the Monetta layout (body.mw)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "served monetta-product.js equals the local file",
+      "pass": true,
+      "detail": "served 4d3a8395e4a3 · local 4d3a8395e4a3"
+    },
+    {
+      "name": "served monetta-cart.js equals the local file",
+      "pass": true,
+      "detail": "served 332f3e54df41 · local 332f3e54df41"
+    },
+    {
+      "name": "served monetta-core.js equals the local file",
+      "pass": true,
+      "detail": "served 9e0cd64e6b81 · local 9e0cd64e6b81"
+    }
+  ],
+  "incidents": [],
+  "processes": [
+    "96196 15:52:36 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off"
+  ],
+  "proxies": [
+    {
+      "port": 9292,
+      "theme": "192125304866",
+      "state": "healthy",
+      "process": "96196 15:52:36 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --pat"
+    }
+  ],
+  "ok": true
+}

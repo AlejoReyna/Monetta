@@ -1,0 +1,17 @@
+{%- doc -%}
+  The shopper-facing collection title. Shopify's automatic all-products collection keeps the title it was seeded with in the
+  store language ("Products"); the theme calls it what the app calls it. A collection the merchant created and titled is
+  shown as titled.
+
+  @param {object} collection - Shopify collection.
+{%- enddoc -%}
+{%- liquid
+  assign collection_title = collection.title
+  if collection.handle == 'all'
+    assign seeded_title = collection.title | strip | downcase
+    if seeded_title == 'products' or seeded_title == 'all products' or seeded_title == 'all' or seeded_title == 'productos' or seeded_title == 'todos los productos'
+      assign collection_title = 'Catálogo'
+    endif
+  endif
+  echo collection_title
+-%}

@@ -70,12 +70,17 @@ class RealtimeCatalogRepository {
     required CatalogCacheStore cache,
     CatalogWriteCoordinator? writeCoordinator,
     RealtimeRetryDelay retryDelay = _defaultRetryDelay,
+    String? shopDomain,
   })  : _source = source,
         _cache = cache,
         _writeCoordinator =
             writeCoordinator ?? CatalogWriteCoordinator(expectsFirestore: true),
-        _retryDelay = retryDelay;
+        _retryDelay = retryDelay,
+        _shopDomain = shopDomain;
 
+  /// Configured shop recorded as provenance in each applied snapshot's
+  /// metadata. Null keeps the metadata without a shop, as before.
+  final String? _shopDomain;
   final CatalogRealtimeSource _source;
   final CatalogCacheStore _cache;
   final CatalogWriteCoordinator _writeCoordinator;
@@ -123,6 +128,7 @@ class RealtimeCatalogRepository {
       products: products,
       syncedAt: DateTime.now(),
       status: CatalogCacheStatus.healthy,
+      shopDomain: _shopDomain,
     );
     await _writeCoordinator.runFirestoreWrite(
       () => _cache.replaceProducts(products, metadata: metadata),

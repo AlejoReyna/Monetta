@@ -210,13 +210,14 @@ final class StorefrontCartApi implements CartApi {
     if (raw is! List) return;
     for (final item in raw.whereType<Map<String, dynamic>>()) {
       final code = _safeCode(item['code']);
+      final field = kind == CartMutationIssueKind.userError
+          ? _safeField(item['field'])
+          : const <String>[];
       yield CartMutationIssue(
         kind: kind,
         code: code,
-        field: kind == CartMutationIssueKind.userError
-            ? _safeField(item['field'])
-            : const [],
-        message: _localizedIssue(kind, code),
+        field: field,
+        message: _localizedIssue(kind, code, field: field),
       );
     }
   }
@@ -245,8 +246,17 @@ final class StorefrontCartApi implements CartApi {
 
   static String _localizedIssue(
     CartMutationIssueKind kind,
-    String? code,
-  ) {
+    String? code, {
+    List<String> field = const [],
+  }) {
+    // An expired/revoked Customer Account token must degrade to
+    // guest/re-login, never to a lost bag: the repository keeps the cart
+    // snapshot, and this message points at recovery. Raw Shopify detail is
+    // discarded before constructing the issue, so no token can leak here.
+    if (kind == CartMutationIssueKind.userError &&
+        CartMutationIssue.isAuthenticationSignal(code: code, field: field)) {
+      return 'Tu sesión venció. Inicia sesión de nuevo; tu bolsa se conserva.';
+    }
     if (kind == CartMutationIssueKind.warning) {
       return switch (code) {
         'MERCHANDISE_OUT_OF_STOCK' => 'Una variante está agotada.',

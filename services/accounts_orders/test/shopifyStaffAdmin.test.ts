@@ -128,7 +128,6 @@ describe('Shopify Admin staff in the notifications panel', () => {
         manageProducts: false,
         manageStorefront: false,
         manageFeaturedCatalog: false,
-        manageExternalSources: false,
         manageNotifications: true,
       },
       environment: 'staging',

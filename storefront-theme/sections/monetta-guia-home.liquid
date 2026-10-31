@@ -140,7 +140,7 @@
         {%- if customer -%}
           <h2 class="guia-register__title" id="{{ heading_id }}">Tu cuenta</h2>
           <p class="guia-register__body">Consulta tus pedidos y datos de compra</p>
-          <a class="btn btn--primary btn--block guia-register__action" href="{{ routes.account_url }}">Ver mi cuenta</a>
+          <a class="btn btn--primary btn--block guia-register__action" href="{% render 'monetta-account-link' %}">Ver mi cuenta</a>
         {%- else -%}
           <h2 class="guia-register__title" id="{{ heading_id }}">Regístrate</h2>
           <p class="guia-register__body">Consulta tus pedidos y datos de compra</p>

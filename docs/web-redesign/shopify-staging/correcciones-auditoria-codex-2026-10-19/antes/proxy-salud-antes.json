@@ -1,0 +1,52 @@
+{
+  "checkedAt": "2026-10-19T21:51:36.159Z",
+  "baseUrl": "http://127.0.0.1:9292",
+  "store": "monetta-staging.myshopify.com",
+  "expectedTheme": {
+    "id": "192125304866",
+    "name": "Monetta Web F1 borrador sin publicar 2026-10-19"
+  },
+  "timeoutMs": 20000,
+  "checks": [
+    {
+      "name": "exactly one theme dev proxy for the authorised draft is running",
+      "pass": true,
+      "detail": "96196 15:10:33 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off"
+    },
+    {
+      "name": "the probe page answers 200 within the time limit",
+      "pass": true,
+      "detail": "370 ms"
+    },
+    {
+      "name": "the document is the expected theme (Shopify.theme id, role unpublished, name)",
+      "pass": true,
+      "detail": "{\"name\":\"Monetta Web F1 borrador sin publicar 2026-10-19\",\"id\":192125304866,\"schema_name\":\"Atelier\",\"schema_version\":\"3.5.0\",\"theme_store_id\":null,\"role\":\"unpublished\"}"
+    },
+    {
+      "name": "the document uses the Monetta layout (body.mw)",
+      "pass": true,
+      "detail": ""
+    },
+    {
+      "name": "served monetta-product.js equals the local file",
+      "pass": true,
+      "detail": "served cd57d4a2c7f5 · local cd57d4a2c7f5"
+    },
+    {
+      "name": "served monetta-cart.js equals the local file",
+      "pass": true,
+      "detail": "served 4b77a6edaf73 · local 4b77a6edaf73"
+    },
+    {
+      "name": "served monetta-core.js equals the local file",
+      "pass": true,
+      "detail": "served f71cd67ef91d · local f71cd67ef91d"
+    }
+  ],
+  "incidents": [],
+  "processes": [
+    "96196 15:10:33 node /opt/homebrew/bin/shopify theme dev --store monetta-staging.myshopify.com --theme 192125304866 --path /Users/alexis_reyna/MyCode/Monetta/storefront-theme --port 9292 --live-reload off"
+  ],
+  "ok": true
+}

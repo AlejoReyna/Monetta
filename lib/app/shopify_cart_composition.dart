@@ -9,6 +9,7 @@ import '../data/local/secure_cart_session_store.dart';
 import '../data/shopify/cart/cart_repository.dart';
 import '../data/shopify/cart/cart_write_coordinator.dart';
 import '../data/shopify/cart/checkout_launcher.dart';
+import '../data/shopify/cart/checkout_return_policy.dart';
 import '../data/shopify/cart/storefront_cart_api.dart';
 import '../data/shopify/cart/storefront_password_gate.dart';
 import '../data/shopify/cart_attribution.dart';
@@ -24,6 +25,7 @@ final class ShopifyCartComposition {
   const ShopifyCartComposition._({
     required this.controller,
     required this.checkout,
+    required this.returnPolicy,
   });
 
   factory ShopifyCartComposition.production({
@@ -47,19 +49,43 @@ final class ShopifyCartComposition {
       attribution: attribution,
     );
     final controller = CartController(reconciler: repository);
+    final urlPolicy = CheckoutUrlPolicy(allowedHosts: _checkoutHosts(config));
     return ShopifyCartComposition._(
       controller: controller,
       checkout: ShopifyCheckoutCoordinator(
         launcher: checkoutLauncher ?? MethodChannelCheckoutLauncher(),
-        urlPolicy: CheckoutUrlPolicy.forShopDomain(config.shopDomain),
+        urlPolicy: urlPolicy,
         sessions: sessions,
         externalOpener:
             externalCheckoutOpener ?? const UrlLauncherExternalCheckoutOpener(),
         passwordProbe: HttpStorefrontPasswordProbe(),
       ),
+      returnPolicy: CheckoutReturnPolicy(urlPolicy: urlPolicy),
     );
   }
 
   final CartController controller;
   final ShopifyCheckoutCoordinator checkout;
+
+  /// Classifies offsite-payment return links with the same host allowlist
+  /// used for presentation. Staging and production stay separate through
+  /// their own `--dart-define-from-file` values.
+  final CheckoutReturnPolicy returnPolicy;
+
+  /// The shop's checkout hosts plus the optional dedicated return domain
+  /// (`SHOPIFY_CHECKOUT_RETURN_DOMAIN`). Empty or malformed values fall back
+  /// to the shop's hosts alone; production must set its own file's value.
+  static Set<String> _checkoutHosts(StorefrontConfig config) {
+    const raw = String.fromEnvironment('SHOPIFY_CHECKOUT_RETURN_DOMAIN');
+    final candidate = raw.trim().toLowerCase();
+    if (candidate.isEmpty ||
+        candidate.contains(RegExp(r'[/\\:@\s]')) ||
+        candidate.startsWith('.') ||
+        candidate.endsWith('.')) {
+      return config.checkoutHosts;
+    }
+    final parsed = Uri.tryParse('https://$candidate');
+    if (parsed?.host != candidate) return config.checkoutHosts;
+    return {...config.checkoutHosts, candidate};
+  }
 }

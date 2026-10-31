@@ -13,6 +13,9 @@
 {%- endcomment -%}
 {%- liquid
   assign t = template.name
+  if template.suffix == 'account' or template.suffix == 'orders'
+    assign t = template.suffix
+  endif
   assign has_page_bar = false
   assign dock_mode = 'nav'
   assign dock_active = ''
@@ -31,6 +34,8 @@
       assign dock_active = 'catalog'
     when 'cart'
       assign dock_active = 'cart'
+    when 'account', 'orders'
+      assign dock_active = 'account'
   endcase
 -%}
 <!doctype html>
@@ -42,7 +47,7 @@
   </head>
 
   <body
-    class="mw {% case dock_mode %}{% when 'nav' %}has-dock{% when 'purchase' %}has-purchase-dock{% else %}has-checkout-bar{% endcase %}{% if has_page_bar %} has-page-bar{% endif %}"
+    class="mw {% case dock_mode %}{% when 'nav' %}has-dock{% when 'purchase' %}has-purchase-dock{% else %}has-checkout-bar{% endcase %}{% if has_page_bar %} has-page-bar{% endif %}{% if customer and dock_active == 'account' %} has-account-sidebar{% endif %}"
     data-template="{{ t }}"
     data-dock-active="{{ dock_active }}"
   >

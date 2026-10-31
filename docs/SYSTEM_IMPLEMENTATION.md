@@ -333,14 +333,17 @@ tienda. Ante error o desconexión, vuelve a suscribirse con backoff exponencial 
 Después de validar el snapshot, el repositorio llama
 `CatalogCacheStore.replaceProducts`. La función elimina variantes y productos y
 recrea todo dentro de una sola transacción SQLite:
-[`catalog_cache_store.dart:63`](../lib/data/local/catalog_cache_store.dart#L63-L74).
+[`catalog_cache_store.dart:199`](../lib/data/local/catalog_cache_store.dart#L199-L209).
 
 La app nunca debe observar “mitad del catálogo viejo y mitad del nuevo”. Si la
 transacción falla, Drift revierte el reemplazo.
 
+La metadata de cada snapshot registra la tienda configurada como procedencia
+(ver §3.12).
+
 Luego `CatalogStore` publica la lista en memoria, recalcula facetas normalizadas y
 marca el estado `live`:
-[`CatalogStore._applyRealtimeUpdate`](../lib/app/catalog_store.dart#L288-L310).
+[`CatalogStore._applyRealtimeUpdate`](../lib/app/catalog_store.dart#L370-L406).
 
 ### 3.12 Arranque offline, snapshot incluido y delta fallback
 
@@ -353,11 +356,29 @@ El arranque es cache-first:
 5. Inicia el listener Firestore.
 
 Referencia:
-[`CatalogStore.loadFromAsset`](../lib/app/catalog_store.dart#L155-L200) y
-[`CatalogRepository.seedFromAssetIfEmpty`](../lib/data/repositories/catalog_repository.dart#L72-L97).
+[`CatalogStore.loadFromAsset`](../lib/app/catalog_store.dart#L169-L219) y
+[`CatalogRepository.seedFromAssetIfEmpty`](../lib/data/repositories/catalog_repository.dart#L89-L111).
 
 El asset es una red de seguridad de primer arranque, no la fuente que mantiene el
 catálogo actualizado.
+
+**Procedencia de tienda.** Antes de sembrar y antes de cada sync, la app compara
+el dominio configurado, con igualdad exacta, contra la tienda del cursor y la de
+la metadata del catálogo. Si alguna difiere, borra el estado de la tienda
+anterior: catálogo, bolsa, favoritos, eventos, sesiones, pedidos y cuentas.
+
+Para que el propio catálogo de monetta.mx no cuente como «otra tienda»:
+
+- la semilla registra la tienda de su `_source` (`https://monetta.mx/products.json`);
+- cada snapshot de Firestore registra la tienda configurada;
+- una instalación nueva guarda su tienda en el cursor desde el primer arranque.
+
+Así, un primer sync fallido ya no borra la semilla.
+
+Referencias:
+- [`CatalogRepository._cursorForConfiguredShop`](../lib/data/repositories/catalog_repository.dart#L295-L327);
+- las pruebas CHAR-03 de
+  [`shop_scope_characterization_test.dart`](../test/data/local/shop_scope_characterization_test.dart).
 
 Existe además un delta sync Storefront con cursor `updated_at`. Relee un segundo
 de solapamiento para no perder cambios con igual precisión temporal y fuerza una
@@ -475,11 +496,14 @@ customer {
 ```
 
 Referencia:
-[`customer_identity.dart:62`](../lib/data/customer_auth/customer_identity.dart#L62-L130).
+[`customer_identity.dart:69`](../lib/data/customer_auth/customer_identity.dart#L69-L138).
 
 El endpoint GraphQL tampoco está hardcodeado: se descubre desde
-`/.well-known/customer-account-api`, se valida que sea HTTPS y se cachea:
-[`customer_identity.dart:133`](../lib/data/customer_auth/customer_identity.dart#L133-L213).
+`/.well-known/customer-account-api`, se valida que sea HTTPS y se cachea.
+Las llamadas concurrentes comparten una sola petición y un fallo no se cachea.
+Identidad y pedidos usan la misma instancia de `CustomerApiDiscoveryService`,
+creada en `main.dart`, así que cada sesión de la app hace un solo discovery:
+[`customer_api_discovery.dart:34`](../lib/data/customer_auth/customer_api_discovery.dart#L34-L117).
 
 La identidad persistida proviene preferentemente de esa respuesta autenticada.
 Sólo si la consulta falla por un problema no relacionado con rechazo del token,

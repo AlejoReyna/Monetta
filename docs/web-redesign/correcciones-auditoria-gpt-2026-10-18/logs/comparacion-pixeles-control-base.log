@@ -1,0 +1,9 @@
+.......DIFF cart-empty @ 1440×900 middle: 2 px, box 53,622,59,705
+DIFF cart-empty @ 1440×900 end: 2 px, box 53,306,59,389
+.....DIFF not-found @ 440×956 top: 4 px, box 25,475,32,694
+DIFF not-found @ 440×956 middle: 1 px, box 25,206,25,206
+...DIFF not-found @ 1440×900 top: 1 px, box 59,891,59,891
+DIFF not-found @ 1440×900 middle: 2 px, box 53,598,59,681
+DIFF not-found @ 1440×900 end: 2 px, box 53,306,59,389
+.
+41/48 captures identical (7 differ)

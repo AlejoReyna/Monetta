@@ -36,8 +36,16 @@ Este documento es el contrato. El código que lo cumple:
 - Auth: `Authorization: Bearer <token>`. La cuenta se deriva del credential;
   **ninguna ruta acepta customer id del llamador**.
 - Contenido: JSON. Errores: `{ "error": "<codigo>", "message"?: "..." }`
-  con códigos estables (§6). `401` sin credencial, `404` ajeno/inexistente
+  con códigos estables (§4). `401` sin credencial, `404` ajeno/inexistente
   (sin fuga entre cuentas).
+- **Programa apagado** (`REWARDS_ENABLED` ausente o `false`): toda ruta de §3 responde
+  `404 {"error":"feature_disabled","requestId":"req_…"}`, sin autenticar.
+  - La app lo muestra como «Monetta Rewards aún no está disponible», nunca como un error de conexión (decisión E7).
+- **Ruta desconocida** (con el programa encendido o apagado): `404 {"error":"not_found","requestId":"req_…"}`.
+- En ambos casos, `requestId` es el mismo valor que la cabecera `X-Request-Id`.
+- Contrato CONTRACT-02: un mismo fixture (`test/fixtures/contracts/rewards_disabled.json`) en
+  `test/features/rewards/rewards_disabled_contract_test.dart` y en
+  `services/accounts_orders/test/rewardsDisabledContract.test.ts`.
 
 ## 3. Endpoints cliente
 
@@ -76,7 +84,12 @@ Este documento es el contrato. El código que lo cumple:
 
 ### `GET /customers/me/orders/:id/rewards`
 
-`:id` = **Shopify order id**. Sin snapshot o de otra cuenta → `404`.
+`:id` = **Shopify order id** numérico (`8001`), como un solo segmento de la ruta. La app lo envía siempre así.
+
+- El servidor también acepta el GID de pedido codificado como segmento (`gid%3A%2F%2Fshopify%2FOrder%2F8001`) y lo normaliza al numérico guardado.
+- Cualquier otro formato → `400 {"error":"invalid_request"}`.
+- Sin snapshot o de otra cuenta → `404`.
+- Contrato CONTRACT-01: un mismo fixture (`test/fixtures/contracts/rewards_order_id.json`) en `test/features/rewards/rewards_order_id_contract_test.dart` y en `services/accounts_orders/test/rewardsOrderIdContract.test.ts`.
 
 ```json
 { "orderShopifyId": "8001", "isWholesale": false,
@@ -137,7 +150,21 @@ prematura).
 `exceeds_limit` (422), `insufficient_balance` (422), `quote_expired` (409),
 `quote_not_found` (404), `not_found` (404), `already_settled` (409),
 `discount_already_used` (409), `reconciliation_required` (409),
-`invalid_idempotency_key` (400), `invalid_cart` (400).
+`invalid_idempotency_key` (400), `invalid_cart` (400),
+`feature_disabled` (404, programa apagado), `invalid_request` (400).
+
+Si la respuesta no trae un `error` en JSON, el cliente lo clasifica así:
+- `401`/`403` → `unauthorized`;
+- `404` → `not_found`;
+- `5xx` → `service_unavailable`;
+- fallo de transporte → `network`.
+
+`invalid_response` es un código del cliente, no del servidor: se usa cuando
+una respuesta 200/201 no cumple el contrato (cuerpo que no es JSON, no es
+objeto, falta un campo obligatorio, un tipo es incorrecto o una fecha no se
+puede leer). La app lo muestra como servicio caído («no responde en este
+momento»), no como fallo de conexión.
+
 Textos UI en `RewardsApiError.friendly` / `RewardsException.friendly`.
 
 ## 5. Flutter: lo que F entrega (listo para importar)

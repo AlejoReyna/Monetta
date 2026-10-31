@@ -70,7 +70,7 @@
     <div class="site-header__end">
       <a class="icon-button site-header__search-icon" href="{{ routes.search_url }}" aria-label="Buscar productos"{% if search_hidden %} hidden{% endif %}>{% render 'monetta-icon', name: 'search', size: 24 %}</a>
       <button type="button" class="icon-button header-utility header-utility--saved" data-open-dialog="saved-products" aria-label="Ver guardados" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 22 %}</button>
-      <a class="icon-button header-utility header-utility--account" href="{{ routes.account_url }}" aria-label="Cuenta">{% render 'monetta-icon', name: 'person', size: 24 %}<span class="header-utility__label" aria-hidden="true">Cuenta</span></a>
+      <a class="icon-button header-utility header-utility--account" href="{% render 'monetta-account-link' %}" aria-label="Cuenta"{% if template.suffix == 'account' or template.suffix == 'orders' %} aria-current="page"{% endif %}>{% render 'monetta-icon', name: 'person', size: 24 %}<span class="header-utility__label" aria-hidden="true">Cuenta</span></a>
       <a class="icon-button header-utility header-utility--cart" href="{{ routes.cart_url }}" aria-label="{{ cart_label }}" data-cart-link>{% render 'monetta-icon', name: 'bag', size: 23 %}<span class="header-utility__label" aria-hidden="true">Carrito</span><span class="count-badge" data-cart-count{% if cart.item_count == 0 %} hidden{% endif %}>{% if cart.item_count > 9 %}9+{% else %}{{ cart.item_count }}{% endif %}</span></a>
     </div>
   </div>
@@ -104,12 +104,12 @@
         </div>
         <div class="menu__identity">
           {%- if customer -%}
-            <a class="guia-identity" href="{{ routes.account_url }}">
+            <a class="guia-identity" href="{% render 'monetta-account-link' %}">
               <span class="guia-identity__avatar" aria-hidden="true">{{ customer.first_name | default: customer.email | slice: 0 | upcase }}</span>
               <span class="guia-identity__text"><span class="guia-identity__name">{{ customer.name | default: customer.email | escape }}</span><span class="guia-identity__email">{{ customer.email | escape }}</span></span>
             </a>
           {%- else -%}
-            <a class="guia-identity" href="{{ routes.account_login_url }}">
+            <a class="guia-identity" href="{% render 'monetta-account-link' %}">
               <span class="guia-identity__avatar" aria-hidden="true">{% render 'monetta-icon', name: 'person', size: 24 %}</span>
               <span class="guia-identity__text"><span class="guia-identity__name">Invitado</span><span class="guia-identity__email">Inicia sesión o crea tu cuenta</span></span>
             </a>
