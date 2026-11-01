@@ -5,6 +5,8 @@
   is Shopify's; the theme adds nothing up. Checkout is Shopify's: the form posts to /cart with the checkout button. While a change
   is in flight, or its result could not be confirmed, monetta-cart.js disables every way to checkout (buttons and the accelerated
   checkout area below) and shows [data-cart-sync] when the only way out is to read the bag again.
+  The summary is the app's one-step checkout (PR #46): the totals, who pays, «Ir a pagar» and one line under it. Contact,
+  address, shipping, discount codes and payment are asked by Shopify's checkout, not here.
 {%- endcomment -%}
 {%- liquid
   assign count_label = cart.item_count | append: ' artículos'
@@ -23,7 +25,7 @@
 
     <div class="cart-sync form-error" data-cart-sync role="alert" hidden>
       {% render 'monetta-icon', name: 'error', size: 18 %}
-      <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de continuar al checkout.</span>
+      <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de ir a pagar.</span>
       <button type="button" class="btn btn--outline" data-cart-resync>Actualizar bolsa</button>
     </div>
 
@@ -67,18 +69,17 @@
             {%- if cart.total_discount > 0 -%}
               <div class="summary__row"><dt>Descuentos aplicados</dt><dd>−{{ cart.total_discount | money_without_trailing_zeros }}</dd></div>
             {%- endif -%}
-            <div class="summary__row"><dt>Envío</dt><dd>Se calcula en el checkout</dd></div>
+            <div class="summary__row"><dt>Envío</dt><dd>Se calcula en Shopify</dd></div>
             <div class="summary__row summary__row--total"><dt>Total estimado</dt><dd>{{ cart.total_price | money_with_currency }}</dd></div>
           </dl>
-          {% render 'monetta-cart-discount' %}
-          <p class="summary__note">Los descuentos, impuestos y el envío finales se confirman en el checkout de Shopify.</p>
+          {% render 'monetta-checkout-identity' %}
           <form action="{{ routes.cart_url }}" method="post" id="cart-checkout-form" novalidate>
-            <button type="submit" name="checkout" class="btn btn--primary btn--block">{% render 'monetta-icon', name: 'lock', size: 18 %} Continuar al checkout</button>
+            <button type="submit" name="checkout" class="btn btn--primary btn--block">Ir a pagar</button>
             {%- if additional_checkout_buttons -%}
               <div class="cart-additional-checkout">{{ content_for_additional_checkout_buttons }}</div>
             {%- endif -%}
           </form>
-          <p class="secure-note">{% render 'monetta-icon', name: 'lock', size: 14 %} Pago procesado por Shopify</p>
+          <p class="secure-note">Pagos seguros con Shopify.</p>
         </aside>
       </div>
     {%- endif -%}
@@ -87,7 +88,7 @@
   {%- if cart.item_count > 0 -%}
     <div class="checkout-bar" data-checkout-bar>
       <div class="checkout-bar__total"><span>Total estimado</span><strong>{{ cart.total_price | money_with_currency }}</strong></div>
-      <button type="submit" form="cart-checkout-form" name="checkout" class="btn btn--primary">{% render 'monetta-icon', name: 'lock', size: 18 %} Ir al checkout</button>
+      <button type="submit" form="cart-checkout-form" name="checkout" class="btn btn--primary">Ir a pagar</button>
     </div>
   {%- endif -%}
 </div>

@@ -14,7 +14,7 @@
     <div class="overlay__body" data-cart-sheet-body>
       <div class="cart-sync form-error" data-cart-sync role="alert" hidden>
         {% render 'monetta-icon', name: 'error', size: 18 %}
-        <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de continuar al checkout.</span>
+        <span>No pudimos confirmar el estado de tu bolsa. Actualízala antes de ir a pagar.</span>
         <button type="button" class="btn btn--outline" data-cart-resync>Actualizar bolsa</button>
       </div>
       {%- if cart.item_count == 0 -%}
@@ -40,12 +40,12 @@
             {%- endfor -%}
           {%- endif -%}
           <p class="cart-drawer__subtotal"><span>Subtotal</span><span>{{ cart.total_price | money_with_currency }}</span></p>
-          <p class="small text-muted">Envío, impuestos y descuentos se confirman en el checkout de Shopify.</p>
         </div>
         <form class="cart-drawer__buttons" action="{{ routes.cart_url }}" method="post">
-          <button type="submit" name="checkout" class="btn btn--primary btn--block">{% render 'monetta-icon', name: 'lock', size: 18 %} Continuar al checkout</button>
-          <a class="btn btn--outline btn--block" href="{{ routes.cart_url }}">Ver carrito</a>
+          <button type="submit" name="checkout" class="btn btn--primary btn--block">Ir a pagar</button>
+          <a class="btn btn--outline btn--block" href="{{ routes.cart_url }}">Ver bolsa</a>
         </form>
+        <p class="secure-note">Pagos seguros con Shopify.</p>
       </div>
     {%- endif -%}
   </div>

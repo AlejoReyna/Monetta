@@ -120,7 +120,6 @@
         <a class="product-panel__brand" href="{{ brand_url }}">{{ brand | escape }}</a>
       {%- endif -%}
       <h1 class="product-panel__name" tabindex="-1">{{ product.title | escape }}</h1>
-      <button type="button" class="btn btn--text product-panel__saved" data-open-dialog="saved-products" data-saved-entry hidden>{% render 'monetta-icon', name: 'heart', size: 18 %} Ver mis guardados</button>
 
       <div data-product-dynamic>
         <div class="product-panel__price" data-price>

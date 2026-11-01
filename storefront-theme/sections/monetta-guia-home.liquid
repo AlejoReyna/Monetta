@@ -57,15 +57,24 @@
     <section class="section container guia-styles" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       {% render 'monetta-section-header', id: heading_id, title: 'Compra por estilo', link_url: all_url, link_label: 'Ver todo' %}
       <ul class="guia-styles__list" role="list">
-        {%- assign style_entries = 'crossbody:Crossbody,tote:Tote,shoulder:Shoulder,satchel:Satchel,perfumes:Perfumes' | split: ',' -%}
+        {%- assign style_entries = 'crossbody:Crossbody,tote:Tote,shoulder:Shoulder,satchel:Satchel,hobo:Hobo' | split: ',' -%}
         {%- for entry in style_entries -%}
           {%- assign key = entry | split: ':' | first -%}
           {%- assign label = entry | split: ':' | last -%}
-          {%- assign icon = 'estilo-' | append: key -%}
+          {%- assign photo = 'monetta-guia-estilo-' | append: key -%}
           {%- capture url -%}{% render 'monetta-guia-url', key: key %}{%- endcapture -%}
           <li>
             <a class="guia-styles__tile" href="{{ url | strip }}" aria-label="Ver {{ label }}">
-              {% render 'monetta-guia-icon', name: icon, size: 64, class: 'guia-styles__icon' %}
+              <img
+                class="guia-styles__photo"
+                src="{{ photo | append: '-720.webp' | asset_url }}"
+                srcset="{{ photo | append: '-360.webp' | asset_url }} 360w, {{ photo | append: '-720.webp' | asset_url }} 720w"
+                sizes="(min-width: 768px) 152px, 20vw"
+                width="720"
+                height="720"
+                alt=""
+                loading="lazy"
+              >
               <span class="guia-styles__label">{{ label }}</span>
             </a>
           </li>
@@ -134,19 +143,52 @@
     </section>
 
   {%- when 'register' -%}
-    {%- comment -%}HomeAccountInvitation: «REGÍSTRATE» for guests, «TU CUENTA» once signed in; Shopify's own account pages.{%- endcomment -%}
+    {%- comment -%}
+      Home sign-up band: copy on the left, an email field with a «REGISTRARME» pill on the right. Guests sign up through
+      Shopify's customer form (the email joins the store's customers with email marketing on, tagged «newsletter»); the
+      first-order free shipping is the store's own offer. Signed-in customers see «Tu cuenta» with a link instead.
+    {%- endcomment -%}
     <section class="guia-register" aria-labelledby="{{ heading_id }}" {{ section.shopify_attributes }}>
       <div class="guia-register__inner">
         {%- if customer -%}
-          <h2 class="guia-register__title" id="{{ heading_id }}">Tu cuenta</h2>
-          <p class="guia-register__body">Consulta tus pedidos y datos de compra</p>
-          <a class="btn btn--primary btn--block guia-register__action" href="{{ routes.account_url }}">Ver mi cuenta</a>
+          <div class="guia-register__copy">
+            <h2 class="guia-register__title" id="{{ heading_id }}">Tu cuenta</h2>
+            <p class="guia-register__body">Consulta tus pedidos y datos de compra.</p>
+          </div>
+          <a class="guia-register__submit guia-register__submit--link" href="{{ routes.account_url }}">Ver mi cuenta{% render 'monetta-icon', name: 'chevronRight', size: 20 %}</a>
         {%- else -%}
-          <h2 class="guia-register__title" id="{{ heading_id }}">Regístrate</h2>
-          <p class="guia-register__body">Consulta tus pedidos y datos de compra</p>
-          <a class="btn btn--primary btn--block guia-register__action" href="{{ routes.account_login_url }}">Registrarme ahora</a>
+          <div class="guia-register__copy">
+            <h2 class="guia-register__title" id="{{ heading_id }}">Regístrate y recibe <span class="guia-register__accent">envío gratis</span></h2>
+            <p class="guia-register__body">Sé la primera en enterarte de nuevas colecciones, promociones y más.</p>
+          </div>
+          {%- form 'customer', id: 'guia-register-form', class: 'guia-register__form' -%}
+            <input type="hidden" name="contact[tags]" value="newsletter">
+            {%- if form.posted_successfully? -%}
+              <p class="guia-register__status" role="status">¡Gracias! Tu correo quedó registrado.</p>
+            {%- else -%}
+              <div class="guia-register__field">
+                <label class="visually-hidden" for="{{ heading_id }}-email">Correo electrónico</label>
+                <input
+                  class="guia-register__input"
+                  id="{{ heading_id }}-email"
+                  type="email"
+                  name="contact[email]"
+                  value="{{ form.email | escape }}"
+                  placeholder="Tu correo electrónico"
+                  autocomplete="email"
+                  autocapitalize="off"
+                  spellcheck="false"
+                  required
+                  {% if form.errors %}aria-invalid="true" aria-describedby="{{ heading_id }}-error"{% endif %}
+                >
+                <button type="submit" class="guia-register__submit">Registrarme{% render 'monetta-icon', name: 'chevronRight', size: 20 %}</button>
+              </div>
+              {%- if form.errors -%}
+                <p class="guia-register__error" id="{{ heading_id }}-error" role="alert">Revisa tu correo electrónico e inténtalo de nuevo.</p>
+              {%- endif -%}
+            {%- endif -%}
+          {%- endform -%}
         {%- endif -%}
-        <p class="guia-register__payments">Pagos seguros con Shopify.</p>
       </div>
     </section>
 {%- endcase -%}

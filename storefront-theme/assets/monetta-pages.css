@@ -1118,3 +1118,75 @@
 /* ------------------------------------------------------------------------- */
 
 /* The dock is fixed in the shell; the board shows it in the flow. */
+
+/* ------------------------------------------------------------------------- */
+/* One-step checkout (sections/monetta-cart.liquid, snippets/monetta-checkout-identity.liquid): who pays, as the app's   */
+/* checkout shows it. A signed-in customer's email and «Conectado con Shopify», or a guest with «Iniciar sesión».       */
+/* ------------------------------------------------------------------------- */
+.checkout-identity {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding: 12px 16px;
+  border: 1px solid var(--color-hairline);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+}
+
+.checkout-identity__mark {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-hairline);
+  border-radius: 50%;
+  background: var(--color-surface-tile);
+  color: var(--color-ink);
+  font-family: var(--font-serif);
+  font-size: 16px;
+  line-height: 1;
+  overflow: hidden;
+}
+
+.checkout-identity__mark--photo {
+  background: var(--monetta-profile-photo) center / cover no-repeat, var(--color-surface-tile);
+  color: transparent;
+}
+
+.checkout-identity__text {
+  display: grid;
+  flex: 1;
+  min-width: 0;
+  font-size: 14px;
+  color: var(--color-ink);
+}
+
+.checkout-identity__email {
+  overflow: hidden;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.checkout-identity__status {
+  font-size: 13px;
+  color: var(--color-ink-muted);
+}
+
+.checkout-identity__connect {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  min-height: 48px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--color-ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.overlay__footer .secure-note {
+  margin-top: 8px;
+}

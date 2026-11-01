@@ -108,7 +108,7 @@
       if (event.submitter?.name !== 'checkout' && !form.querySelector('[name="checkout"]')) return;
       event.preventDefault();
       event.stopImmediatePropagation();
-      Monetta.announce?.(unconfirmed ? 'No pudimos confirmar tu bolsa. Actualízala antes de continuar al checkout.' : 'Estamos actualizando tu bolsa. Espera un momento y vuelve a intentarlo.');
+      Monetta.announce?.(unconfirmed ? 'No pudimos confirmar tu bolsa. Actualízala antes de ir a pagar.' : 'Estamos actualizando tu bolsa. Espera un momento y vuelve a intentarlo.');
     },
     true,
   );

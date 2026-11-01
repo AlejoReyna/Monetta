@@ -138,7 +138,16 @@
         {% render 'monetta-image', image: collection.image, widths: '600,900,1400', sizes: '(min-width: 1200px) 1200px, 100vw', alt: collection.title, eager: true %}
       </div>
     {%- endif -%}
-    {% render 'monetta-guia-pills', active: guide_pill, filters_button: has_controls, active_count: active_count %}
+    {%- comment -%}One row: the pills, then «Ordenar por» at its end. The product count is read to screen readers only.{%- endcomment -%}
+    <div class="guia-pills-bar">
+      {% render 'monetta-guia-pills', active: guide_pill, filters_button: has_controls, active_count: active_count %}
+      {%- if collection.all_products_count > 0 and collection.sort_options.size > 1 -%}
+        {% render 'monetta-guia-sort', filters: collection.filters, sort_options: collection.sort_options, sort_by: sort_by, base_url: collection.url, query: listing_query %}
+      {%- endif -%}
+    </div>
+    {%- if collection.all_products_count > 0 -%}
+      <p class="visually-hidden" data-count aria-live="polite">{{ count_text }}</p>
+    {%- endif -%}
 
     {%- capture results_html -%}
       {% render 'monetta-results', products: collection.products, paginate: paginate, total: collection.products_count, active_count: active_count, clear_url: clear_url, empty_body: 'Esta colección no tiene piezas disponibles por ahora.', view_button: true, listing_card: true, sizes: card_sizes, xl_widths: '240,360,480,600,720,900' %}
@@ -154,7 +163,6 @@
       active_count: active_count,
       has_products: collection.all_products_count,
       guide: true,
-      count_text: count_text,
       query: listing_query
     %}
   </div>

@@ -204,9 +204,18 @@
   outline-offset: -4px;
 }
 
+/* Mayoreo's opening banner is 40% shorter than a guide hero (0.6 × every bound); the banners further down keep theirs. */
+.guia-page--mayoreo > .guide-hero {
+  height: clamp(120px, calc(100vw / 2.667), 204px);
+}
+
 @media (min-width: 768px) {
   .guide-hero {
     height: clamp(280px, calc(100vw / 2.4), 560px);
+  }
+
+  .guia-page--mayoreo > .guide-hero {
+    height: clamp(168px, calc(100vw / 4), 336px);
   }
 
   .guide-hero__copy {
@@ -468,9 +477,14 @@
   display: none;
 }
 
+/* Half-height banner from tablet up so «Compra por estilo» shows above the fold; the copy scales with it. */
 @media (min-width: 768px) {
+  .guia-carousel {
+    --guia-serif: clamp(26px, calc(100vw / 36), 44px);
+  }
+
   .guia-carousel__slide {
-    height: clamp(300px, calc(100vw / 2.4), 560px);
+    height: clamp(150px, calc(100vw / 4.8), 280px);
   }
 
   .guia-slide__copy {
@@ -496,9 +510,14 @@
   .guia-carousel__arrow--next {
     right: var(--space-4);
   }
+
+  /* Keeps the copy clear of the 48px arrows. */
+  .guia-slide__copy {
+    padding-inline: max(var(--edge-l), 80px) max(var(--edge-r), 80px);
+  }
 }
 
-/* ============================================================ F2 · HomeShopByStyle: «Compra por estilo» with the guide icons */
+/* ============================================================ F2 · HomeShopByStyle: «Compra por estilo», static cream photo cards */
 .guia-styles__list {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -511,45 +530,48 @@
 .guia-styles__tile {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  gap: var(--space-1);
+  align-items: stretch;
   min-height: var(--tap);
-  padding: var(--space-1) 0;
-  border-radius: var(--radius-control);
+  overflow: hidden;
+  border-radius: var(--radius-tile);
+  background: var(--color-surface-tile);
   color: var(--color-ink);
   text-decoration: none;
 }
 
 .guia-styles__tile:focus-visible {
   outline: 2px solid var(--color-ink);
-  outline-offset: -2px;
+  outline-offset: 2px;
 }
 
-.guia-styles__icon {
-  width: clamp(44px, 13vw, 64px);
-  height: clamp(44px, 13vw, 64px);
-  object-fit: contain;
+.guia-styles__photo {
+  display: block;
+  width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: cover;
 }
 
 .guia-styles__label {
-  font-family: var(--font-sans);
+  padding: 0 var(--space-1) var(--space-2);
+  font-family: var(--font-serif);
   font-size: 12px;
   line-height: 1.2;
+  text-align: center;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (min-width: 768px) {
   .guia-styles__list {
     gap: var(--space-4);
-    max-width: 760px;
-  }
-
-  .guia-styles__icon {
-    width: 80px;
-    height: 80px;
+    max-width: 1000px;
+    margin-inline: auto;
   }
 
   .guia-styles__label {
-    font-size: 14px;
+    font-size: 15px;
   }
 }
 
@@ -624,7 +646,7 @@
 
 /* ============================================================ F2 · «Colecciones»: the three photo cards of monetta.mx's earlier home */
 .guia-collections__track {
-  --card-w: min(62vw, 300px);
+  --card-w: min(56vw, 270px);
   display: flex;
   gap: var(--space-3);
   /* A scroller clips what overflows it: the block padding keeps the cards' shadow whole and the negative margins keep the
@@ -713,11 +735,14 @@
   outline-offset: 2px;
 }
 
+/* From tablet up each card takes 90% of a third of the row; the row stays centred. */
 @media (min-width: 768px) {
   .guia-collections__track {
+    --collections-gap: var(--space-5);
     display: grid;
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: var(--space-5);
+    grid-template-columns: repeat(3, calc((100% - 2 * var(--collections-gap)) * 0.3));
+    justify-content: center;
+    gap: var(--collections-gap);
     max-width: 960px;
     margin: 0 auto;
     padding: var(--space-2) var(--gutter) var(--space-5);
@@ -725,21 +750,11 @@
   }
 }
 
-/* XL home groups: 1168 usable pixels = three ~371px cards + two 28px gaps. Heading and cards share one left edge. */
+/* XL home groups: headings share the page container's left edge with every other Home section; the rows stay centred. */
 @media (min-width: 1280px) {
-  .guia-styles,
-  .guia-collections > .container {
-    max-width: 1264px;
-  }
-
   .guia-styles__list {
-    max-width: 960px;
+    max-width: 1160px;
     gap: 24px;
-  }
-
-  .guia-styles__icon {
-    width: 104px;
-    height: 104px;
   }
 
   .guia-styles__label {
@@ -747,8 +762,8 @@
   }
 
   .guia-collections__track {
+    --collections-gap: 28px;
     max-width: 1168px;
-    gap: 28px;
     padding-inline: 0;
   }
 
@@ -897,39 +912,152 @@
 }
 
 .guia-register__inner {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  max-width: 560px;
+  display: grid;
+  gap: var(--space-5);
+  max-width: 1168px;
   margin: 0 auto;
-  padding: var(--space-5) var(--edge-r) var(--space-5) var(--edge-l);
-  text-align: center;
+  padding: var(--space-6) var(--edge-r) var(--space-6) var(--edge-l);
 }
 
 .guia-register__title {
   margin: 0;
-  font-family: var(--font-serif);
-  font-size: var(--type-section-title-size);
+  font-family: var(--font-guide-serif);
+  font-size: clamp(34px, 4.4vw, 54px);
+  font-weight: 500;
+  line-height: 1.02;
+  color: var(--color-ink);
+}
+
+.guia-register__accent {
+  display: block;
+  font-style: italic;
   font-weight: 400;
-  line-height: 1.15;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+  color: var(--color-accent-text);
 }
 
 .guia-register__body {
-  margin: 0;
+  max-width: 40ch;
+  margin: var(--space-2) 0 0;
+  font-size: 16px;
+  line-height: 1.45;
   color: var(--color-ink-muted);
 }
 
-.guia-register__action {
-  margin-top: var(--space-2);
+.guia-register__form {
+  margin: 0;
 }
 
-.guia-register__payments {
-  margin: 0;
-  font-size: 13px;
+/* One pill: the field's light ground with the brown button set into its end. */
+.guia-register__field {
+  display: flex;
+  align-items: center;
+  min-height: 56px;
+  border-radius: var(--radius-pill);
+  background: rgb(255 255 255 / 0.72);
+  box-shadow: var(--shadow-card);
+}
+
+.guia-register__field:focus-within {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.guia-register__input {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 56px;
+  padding: 0 var(--space-3) 0 var(--space-5);
+  border: 0;
+  background: none;
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  font-size: 16px;
+  outline: none;
+}
+
+.guia-register__input::placeholder {
   color: var(--color-ink-muted);
+  opacity: 1;
+}
+
+.guia-register__submit {
+  display: inline-flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-1);
+  min-height: 56px;
+  padding: 0 var(--space-4) 0 var(--space-5);
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--color-action-primary);
+  color: var(--color-on-action-primary);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-decoration: none;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: filter var(--dur-snap) var(--ease);
+}
+
+.guia-register__submit:hover {
+  filter: brightness(0.92);
+}
+
+.guia-register__submit--link {
+  justify-self: start;
+}
+
+.guia-register__submit--link:focus-visible {
+  outline: 2px solid var(--color-ink);
+  outline-offset: 2px;
+}
+
+.guia-register__status,
+.guia-register__error {
+  margin: var(--space-2) 0 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.guia-register__status {
+  margin-top: 0;
+  font-family: var(--font-guide-serif);
+  font-size: 24px;
+  font-style: italic;
+  color: var(--color-accent-text);
+}
+
+.guia-register__error {
+  padding-left: var(--space-5);
+  color: var(--color-sale);
+}
+
+@media (max-width: 419.98px) {
+  .guia-register__input {
+    padding-left: var(--space-4);
+  }
+
+  .guia-register__submit {
+    padding: 0 var(--space-3) 0 var(--space-4);
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+}
+
+@media (min-width: 900px) {
+  .guia-register__inner {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 480px);
+    align-items: center;
+    gap: var(--space-6);
+    padding-block: var(--space-7);
+  }
+
+  .guia-register__submit--link {
+    justify-self: end;
+  }
 }
 
 /* ============================================================ F2 · Header: the guide's category row; the menu button at every width */
@@ -948,7 +1076,86 @@
   }
 }
 
+/* The menu glyph (12px inside its 48px target) and the wordmark start on the content's left edge, and the wordmark is
+   a size up (24 -> 28px on phones, 32 -> 38px from tablet). Phones already line up. */
+.wordmark img {
+  height: 28px;
+}
+
+@media (min-width: 768px) {
+  .site-header__menu {
+    margin-inline-start: -4px;
+  }
+
+  .wordmark img {
+    height: 38px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .site-header__menu {
+    margin-inline-start: -12px;
+  }
+}
+
+/* Collections alone grow to 1680px on XL screens (monetta-app-alignment.css); their header follows so both share an edge. */
+@media (min-width: 1280px) {
+  .mw[data-template^='collection'] .site-header__bar {
+    max-width: 1680px;
+    padding-inline: 48px;
+  }
+}
+
 /* ============================================================ F2 · Menu drawer (slide 30; monetta_side_menu.dart) */
+/* The drawer scrolls when it outgrows the screen; its blocks keep the logo's 20px inset. */
+.overlay--drawer-left .menu {
+  overflow-y: auto;
+  padding-bottom: calc(var(--space-3) + var(--safe-bottom));
+}
+
+.menu__identity,
+.menu .guia-menu,
+.menu .guia-share,
+.menu .guia-social--drawer {
+  margin-inline: 20px;
+}
+
+/* Rows, avatar and banner follow the screen height so the whole drawer fits without scrolling on phones (640px tall and up). */
+.overlay--drawer-left .menu {
+  --menu-row: clamp(40px, 6.4dvh, 56px);
+}
+
+.menu .guia-menu__row {
+  min-height: var(--menu-row);
+}
+
+.menu .guia-identity {
+  min-height: var(--menu-row);
+}
+
+.menu .guia-identity__avatar {
+  width: clamp(40px, 6.4dvh, 52px);
+  height: clamp(40px, 6.4dvh, 52px);
+}
+
+.menu .guia-share {
+  min-height: clamp(96px, 15dvh, 150px);
+  margin-block: clamp(8px, 1.6dvh, 16px) var(--space-2);
+}
+
+.menu .guia-share__copy {
+  min-height: clamp(96px, 15dvh, 150px);
+  padding-block: var(--space-2);
+}
+
+.menu .guia-share__script {
+  font-size: clamp(38px, 6.4dvh, 52px);
+}
+
+.menu .guia-social--drawer {
+  padding-block: var(--space-2);
+}
+
 .menu__identity {
   padding: var(--space-2) 0 var(--space-3);
   border-bottom: 0.5px solid var(--color-hairline);
@@ -1183,15 +1390,26 @@ img.guia-menu__icon {
   }
 }
 
+/* The pills and «Ordenar por» share one row from tablet up; on phones the pills scroll and the sort sits under them, right. */
+.guia-pills-bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-1) var(--space-4);
+  margin: var(--space-2) 0 var(--space-3);
+}
+
 .guia-pills {
-  margin-top: var(--space-2);
+  flex: 1 1 100%;
+  min-width: 0;
 }
 
 .guia-pills__list {
   display: flex;
   gap: var(--space-1);
-  margin: 0;
-  padding: 0;
+  /* Room above and below for the lifted, shadowed chosen pill; a scroller would clip it otherwise. */
+  margin: -6px 0;
+  padding: 6px 0;
   list-style: none;
   overflow-x: auto;
   scrollbar-width: none;
@@ -1230,6 +1448,53 @@ img.guia-menu__icon {
   color: var(--color-on-action-primary);
 }
 
+/* Under the pointer a pill lifts and grows a little, as a card does (lift and shadow). drop-shadow follows the 40px pill,
+   not its transparent 48px target. */
+.guia-pill {
+  transition:
+    transform var(--dur-snap) var(--ease),
+    filter var(--dur-snap) var(--ease);
+}
+
+@media (hover: hover) {
+  .guia-pill:hover {
+    transform: translateY(-2px) scale(1.06);
+    filter: drop-shadow(0 4px 8px rgb(61 43 28 / 0.18));
+  }
+}
+
+/* The same hover on the header's category row, the menu drawer's rows and the Home's «Compra por estilo» and «Colecciones»
+   cards. Text-only items lift and grow; the cards also take the shadow. Wide items grow less so they stay in their place. */
+.site-nav__link,
+.guia-menu__row,
+.guia-styles__tile,
+.guia-collection-card {
+  transition:
+    transform var(--dur-snap) var(--ease),
+    filter var(--dur-snap) var(--ease),
+    box-shadow var(--dur-snap) var(--ease);
+}
+
+@media (hover: hover) {
+  .site-nav__link:hover {
+    transform: translateY(-2px) scale(1.06);
+  }
+
+  .guia-menu__row:hover {
+    transform: translateY(-2px) scale(1.03);
+  }
+
+  .guia-styles__tile:hover {
+    transform: translateY(-2px) scale(1.06);
+    filter: drop-shadow(0 4px 8px rgb(61 43 28 / 0.18));
+  }
+
+  .guia-collection-card:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 10px 24px rgb(61 43 28 / 0.14);
+  }
+}
+
 .guia-pill--icon {
   padding: 0;
 }
@@ -1256,36 +1521,26 @@ img.guia-menu__icon {
   outline-offset: -2px;
 }
 
-.guia-listing-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--space-2);
-  margin: var(--space-2) 0 var(--space-3);
-}
-
-.guia-listing-bar__count {
-  margin: 0;
-  font-size: 13px;
-  color: var(--color-ink-muted);
-}
-
 .guia-sort {
   display: flex;
+  flex: none;
   align-items: center;
-  gap: 4px;
+  gap: var(--space-1);
   min-width: 0;
+  margin-left: auto;
+  font-family: var(--font-guide-serif);
+  font-size: 16px;
+  font-weight: 500;
+  color: var(--color-ink);
 }
 
 .guia-sort__label {
-  font-size: 13px;
-  color: var(--color-ink);
   white-space: nowrap;
 }
 
 .guia-sort__select {
   min-width: 0;
-  max-width: 46vw;
+  max-width: 52vw;
   min-height: var(--tap);
   padding: 0 24px 0 6px;
   border: 0;
@@ -1293,10 +1548,12 @@ img.guia-menu__icon {
   background: transparent url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' width='16' height='16'%3E%3Cpath fill='%23211B16' d='M7 10l5 5 5-5z'/%3E%3C/svg%3E") no-repeat right 4px center;
   color: var(--color-ink);
   font: inherit;
-  font-size: 13px;
-  font-weight: 600;
+  font-weight: 700;
   appearance: none;
   text-overflow: ellipsis;
+  cursor: pointer;
+  /* As wide as the chosen option, not the longest one, so the pills keep the room (browsers without it keep the old width). */
+  field-sizing: content;
 }
 
 .guia-sort__select:focus-visible {
@@ -1305,15 +1562,8 @@ img.guia-menu__icon {
 }
 
 @media (min-width: 768px) {
-  .guia-pills__list {
-    flex-wrap: wrap;
-    overflow: visible;
-  }
-
-  .guia-listing-bar__count,
-  .guia-sort__label,
-  .guia-sort__select {
-    font-size: 14px;
+  .guia-pills {
+    flex: 1 1 0;
   }
 
   .guia-sort__select {
@@ -1662,21 +1912,6 @@ img.guia-menu__icon {
   margin: 0;
   font-size: 13px;
   color: var(--color-ink-muted);
-}
-
-@media (min-width: 1024px) {
-  #quick-view .overlay__panel {
-    width: min(880px, 92vw);
-  }
-
-  .quick-view__grid {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-    gap: var(--space-5);
-  }
-
-  .quick-view__photo {
-    max-height: 60dvh;
-  }
 }
 
 

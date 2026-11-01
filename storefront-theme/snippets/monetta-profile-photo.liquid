@@ -1,0 +1,26 @@
+{%- doc -%}
+  The signed-in customer's profile photo as a data URL, or nothing. The app saves it in the customer metafield
+  monetta.profile_photo (multi_line_text_field, a small base64 JPEG or PNG, at most 60 000 characters;
+  lib/data/customer_auth/customer_profile.dart). The value is merchant-editable text, so anything that is not a plain
+  base64 image data URL is dropped before it reaches a style or src attribute.
+{%- enddoc -%}
+{%- liquid
+  if customer
+    assign photo_value = customer.metafields.monetta.profile_photo.value | strip_newlines | strip
+    assign photo_jpeg = photo_value | slice: 0, 23
+    assign photo_png = photo_value | slice: 0, 22
+    assign photo_ok = false
+    if photo_jpeg == 'data:image/jpeg;base64,' or photo_png == 'data:image/png;base64,'
+      assign photo_ok = true
+    endif
+    if photo_value.size > 60000 or photo_value.size < 30
+      assign photo_ok = false
+    endif
+    if photo_value contains '"' or photo_value contains "'" or photo_value contains ')' or photo_value contains '<' or photo_value contains ' ' or photo_value contains '\'
+      assign photo_ok = false
+    endif
+    if photo_ok
+      echo photo_value
+    endif
+  endif
+-%}

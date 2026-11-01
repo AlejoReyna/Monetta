@@ -1,0 +1,20 @@
+{%- doc -%}
+  «Ordenar por» of the guide's collection screens, set at the end of the pills row (sections/monetta-collection.liquid) in
+  the pills' serif. A plain GET form: assets/monetta-listing.js submits it when the select changes.
+
+  @param {object} filters - collection.filters, kept as hidden fields.
+  @param {object} sort_options - collection.sort_options.
+  @param {string} sort_by - Current sort value.
+  @param {string} base_url - collection.url; the form submits here.
+  @param {string} [query] - Search terms, when the listing carries them.
+{%- enddoc -%}
+<form class="guia-sort" action="{{ base_url }}" method="get" data-sort-form>
+  {% render 'monetta-hidden-filters', filters: filters, query: query %}
+  <label class="guia-sort__label" for="sort-select">Ordenar por</label>
+  <select class="guia-sort__select" id="sort-select" name="sort_by" data-sort-select>
+    {%- for option in sort_options -%}
+      <option value="{{ option.value }}"{% if option.value == sort_by %} selected{% endif %}>{% render 'monetta-label', kind: 'sort', option: option, text_only: true %}</option>
+    {%- endfor -%}
+  </select>
+  <noscript><button type="submit" class="btn btn--quiet btn--sm">Ordenar</button></noscript>
+</form>

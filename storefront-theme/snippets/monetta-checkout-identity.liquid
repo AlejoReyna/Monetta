@@ -1,0 +1,28 @@
+{%- doc -%}
+  Who pays, as the app's one-step checkout shows it (checkout_screen.dart _CheckoutIdentity). A signed-in customer is
+  recognized by Shopify's checkout through their account, so nothing is asked here. A guest pays as a guest, or signs in
+  first and comes back to the bag; Shopify's checkout then applies the store's own rule for buying without an account.
+  The photo is the --monetta-profile-photo variable the header sets from the customer metafield (monetta-profile-photo).
+{%- enddoc -%}
+{%- if customer -%}
+  {%- capture identity_photo -%}{% render 'monetta-profile-photo' %}{%- endcapture -%}
+  <div class="checkout-identity" data-checkout-identity>
+    <span class="checkout-identity__mark{% if identity_photo != blank %} checkout-identity__mark--photo{% endif %}" aria-hidden="true">
+      {%- if identity_photo == blank -%}{{ customer.first_name | strip | default: customer.email | slice: 0 | upcase | escape }}{%- endif -%}
+    </span>
+    <span class="checkout-identity__text">
+      <span class="checkout-identity__email">{{ customer.email | default: 'Tu cuenta' | escape }}</span>
+      <span class="checkout-identity__status">Conectado con Shopify</span>
+    </span>
+  </div>
+{%- else -%}
+  {%- liquid
+    assign identity_return = routes.cart_url | url_encode
+    assign identity_login = routes.root_url | append: 'customer_authentication/login?return_to=' | append: identity_return
+  -%}
+  <div class="checkout-identity" data-checkout-identity>
+    <span class="checkout-identity__mark" aria-hidden="true">{% render 'monetta-nav-glyph', name: 'account', size: 20 %}</span>
+    <span class="checkout-identity__text">Comprando como invitado</span>
+    <a class="checkout-identity__connect" href="{{ identity_login }}">Iniciar sesión</a>
+  </div>
+{%- endif -%}

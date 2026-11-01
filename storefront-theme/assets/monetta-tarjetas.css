@@ -319,11 +319,14 @@
   padding: 14px 20px 20px;
 }
 
+/* The thumbnails belong to the gallery (photo + thumbnails), so wide screens can set the gallery beside the details. */
 .mw .quick-view__thumbs {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 8px;
-  margin-bottom: 14px;
+  margin: 0;
+  padding: 14px 20px 0;
+  list-style: none;
 }
 
 .mw .quick-view__thumb {
@@ -705,5 +708,37 @@
 @media (min-width: 768px) {
   .mw .rail--recs .rail__track {
     --rail-item: calc((100% - 5 * 16px) / 6);
+  }
+}
+
+/* Desktop: one column of photo and details is taller than a laptop window, so the same card sets the gallery on the left
+   and the details on the right; «‹» and «×» take the card's top corners. Phones and tablets keep the single column. */
+@media (min-width: 900px) {
+  .mw .overlay--preview .overlay__panel {
+    width: min(900px, 100%);
+  }
+
+  .mw .quick-view {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    align-items: start;
+  }
+
+  .mw .quick-view__media {
+    position: static;
+  }
+
+  .mw .quick-view__gallery {
+    padding-bottom: 20px;
+  }
+
+  .mw .quick-view__thumbs {
+    padding-inline: 16px;
+  }
+
+  .mw .quick-view__body {
+    align-self: center;
+    padding: 56px 32px 28px;
   }
 }

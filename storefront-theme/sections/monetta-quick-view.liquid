@@ -15,6 +15,7 @@
   assign image = current.featured_image | default: product.featured_image
 -%}
 <div class="quick-view" data-quick-view-root data-product-title="{{ product.title | escape }}">
+  <div class="quick-view__gallery">
   <div class="quick-view__media">
     {%- if image -%}
       <img class="quick-view__photo" data-quick-view-photo src="{{ image | image_url: width: 900 }}" width="{{ image.width }}" height="{{ image.height }}" alt="{{ image.alt | default: product.title | escape }}">
@@ -24,14 +25,15 @@
       <button type="button" class="round-button quick-view__close" data-overlay-close aria-label="Cerrar vista previa">{% render 'monetta-icon', name: 'close', size: 24 %}</button>
     </div>
   </div>
+  {%- if product.images.size > 1 -%}
+    <ul class="quick-view__thumbs" role="list">
+      {%- for thumb in product.images limit: 4 -%}
+        <li><button type="button" class="quick-view__thumb" data-quick-view-thumb="{{ thumb | image_url: width: 900 }}" data-image-id="{{ thumb.id }}" aria-label="Ver foto {{ forloop.index }} de {{ product.images.size }}"{% if thumb.id == image.id %} aria-current="true"{% endif %}><img src="{{ thumb | image_url: width: 200 }}" width="80" height="80" alt="" loading="lazy"></button></li>
+      {%- endfor -%}
+    </ul>
+  {%- endif -%}
+  </div>
   <div class="quick-view__body">
-    {%- if product.images.size > 1 -%}
-      <ul class="quick-view__thumbs" role="list">
-        {%- for thumb in product.images limit: 4 -%}
-          <li><button type="button" class="quick-view__thumb" data-quick-view-thumb="{{ thumb | image_url: width: 900 }}" data-image-id="{{ thumb.id }}" aria-label="Ver foto {{ forloop.index }} de {{ product.images.size }}"{% if thumb.id == image.id %} aria-current="true"{% endif %}><img src="{{ thumb | image_url: width: 200 }}" width="80" height="80" alt="" loading="lazy"></button></li>
-        {%- endfor -%}
-      </ul>
-    {%- endif -%}
     {%- if brand != blank -%}<p class="quick-view__brand">{{ brand | escape }}</p>{%- endif -%}
     <h2 class="quick-view__name" id="quick-view-title">{{ product.title | escape }}</h2>
     <p class="quick-view__price" data-quick-view-price>

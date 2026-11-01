@@ -1,6 +1,6 @@
 // Guide components that need a script. The home carousel (HomeEditorialBanner in PR #33): swipe through scroll snap,
-// indicator dots that follow the visible slide, previous/next buttons from 1024 px, no autoplay and no timers, as in
-// the app. A slide reached with Tab is brought fully into view. «Colecciones» on phones opens on its middle card. The search
+// indicator dots that follow the visible slide, previous/next buttons from 1024 px, and a 5 s autoplay that loops (as
+// the app). A slide reached with Tab is brought fully into view. «Colecciones» on phones opens on its first card. The search
 // screen's «Búsquedas recientes» (slide 05):
 // the last five searches, kept in this browser only, each one removable. The preview (the client's 29 Oct reference): tapping a
 // card loads sections/monetta-quick-view.liquid with the card's variant chosen; a modified click still opens the product page
@@ -31,18 +31,90 @@
       const index = slides.findIndex((slide) => slide.contains(event.target));
       if (index >= 0 && index !== current()) show(index);
     });
+    initAutoplay(root, track, slides, current, show);
   }
 
-  // «Colecciones» on phones opens on its middle card, as monetta.mx's earlier home did. Only the scroller moves, never the page.
+  // Autoplay: one slide every 5 s, looping. It waits while a mouse is over the carousel or focus is inside it, and while the
+  // tab or the carousel is out of view; a swipe or an arrow restarts the count. Off with reduced motion.
+  function initAutoplay(root, track, slides, current, show) {
+    if (slides.length < 2 || reduceMotion()) return;
+    const delay = 5000;
+    let timer = 0;
+    let hovered = false;
+    let focused = false;
+    let visible = true;
+    const stop = () => {
+      window.clearTimeout(timer);
+      timer = 0;
+    };
+    const start = () => {
+      stop();
+      if (hovered || focused || !visible || document.hidden || reduceMotion()) return;
+      timer = window.setTimeout(() => {
+        show(current() + 1);
+        start();
+      }, delay);
+    };
+    root.addEventListener('pointerenter', (event) => {
+      if (event.pointerType !== 'mouse') return;
+      hovered = true;
+      stop();
+    });
+    root.addEventListener('pointerleave', (event) => {
+      if (event.pointerType !== 'mouse') return;
+      hovered = false;
+      start();
+    });
+    // Keyboard focus only: a mouse click leaves focus on an arrow, and that alone should not hold the carousel.
+    root.addEventListener('focusin', (event) => {
+      if (!event.target.matches(':focus-visible')) return;
+      focused = true;
+      stop();
+    });
+    root.addEventListener('focusout', (event) => {
+      if (root.contains(event.relatedTarget)) return;
+      focused = false;
+      start();
+    });
+    track.addEventListener('pointerdown', start, { passive: true });
+    root.querySelectorAll('[data-guia-prev], [data-guia-next]').forEach((button) => button.addEventListener('click', start));
+    document.addEventListener('visibilitychange', start);
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver(([entry]) => {
+        visible = entry.isIntersecting;
+        start();
+      }).observe(root);
+    }
+    start();
+  }
+
+  // «Colecciones» on phones always opens on its first card, as the app does: the track's inline padding centres it at
+  // scrollLeft 0, so a scroll position the browser restores (back/forward) is reset. Only the scroller moves, never the page.
   function initCollections(track) {
     if (track.dataset.guiaReady) return;
     track.dataset.guiaReady = 'true';
-    const items = track.children;
-    if (items.length < 3 || track.scrollWidth <= track.clientWidth) return;
-    const middle = items[Math.floor(items.length / 2)];
-    const card = middle.getBoundingClientRect();
-    const box = track.getBoundingClientRect();
-    track.scrollLeft += card.left + card.width / 2 - (box.left + box.width / 2);
+    if (track.scrollWidth <= track.clientWidth) return;
+    track.scrollLeft = 0;
+  }
+
+  // «Colecciones» cards appear one by one, once, the first time the row scrolls into view. The card inside each item moves, so
+  // the phone scroller's own focus scale on the item is left alone. Cards stay visible without JS/animation support or with reduced motion.
+  function initCollectionsReveal(track) {
+    if (track.dataset.guiaRevealReady) return;
+    track.dataset.guiaRevealReady = 'true';
+    if (reduceMotion() || !('IntersectionObserver' in window) || typeof track.animate !== 'function') return;
+    const observer = new IntersectionObserver((entries) => {
+      if (!entries.some((entry) => entry.isIntersecting)) return;
+      observer.disconnect();
+      if (reduceMotion() || track.contains(document.activeElement)) return;
+      const animations = [...track.querySelectorAll('.guia-collection-card')].map((card, index) => card.animate(
+        [{ opacity: 0, transform: 'translateY(24px)' }, { opacity: 1, transform: 'translateY(0)' }],
+        { duration: 420, delay: index * 120, easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fill: 'backwards' },
+      ));
+      const reveal = () => animations.forEach((animation) => animation.cancel());
+      track.addEventListener('focusin', reveal, { once: true });
+    }, { threshold: 0.2, rootMargin: '0px 0px -48px 0px' });
+    observer.observe(track);
   }
 
   // Reveal the Home invitation once on arrival. Content stays visible without JS/animation support or with reduced motion.
@@ -257,6 +329,7 @@
   const bind = (scope = document) => {
     scope.querySelectorAll('[data-guia-carousel]').forEach(initCarousel);
     scope.querySelectorAll('[data-guia-collections]').forEach(initCollections);
+    scope.querySelectorAll('[data-guia-collections]').forEach(initCollectionsReveal);
     scope.querySelectorAll('.guia-register').forEach(initRegister);
     scope.querySelectorAll('[data-guia-recent]').forEach(initRecent);
     scope.querySelectorAll('[data-guia-copy]').forEach(initCopy);
