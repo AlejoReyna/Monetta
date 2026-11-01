@@ -1,0 +1,1024 @@
+{
+  "checks": [
+    {
+      "name": "home 1280 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 1280 collection alignment and scale",
+      "pass": true
+    },
+    {
+      "name": "home 1280 styles scale and alignment",
+      "pass": true
+    },
+    {
+      "name": "home 1440 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 1440 collection alignment and scale",
+      "pass": true
+    },
+    {
+      "name": "home 1440 styles scale and alignment",
+      "pass": true
+    },
+    {
+      "name": "home 1536 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 1536 collection alignment and scale",
+      "pass": true
+    },
+    {
+      "name": "home 1536 styles scale and alignment",
+      "pass": true
+    },
+    {
+      "name": "home 1920 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 1920 collection alignment and scale",
+      "pass": true
+    },
+    {
+      "name": "home 1920 styles scale and alignment",
+      "pass": true
+    },
+    {
+      "name": "home 2560 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 2560 collection alignment and scale",
+      "pass": true
+    },
+    {
+      "name": "home 2560 styles scale and alignment",
+      "pass": true
+    },
+    {
+      "name": "home 375 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 375 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "home 768 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 768 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "home 1024 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 1024 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "home 1279 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 1279 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "home 1439 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "home 1439 collection alignment and scale",
+      "pass": true
+    },
+    {
+      "name": "home 1439 styles scale and alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 columns",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 128.46875
+      }
+    },
+    {
+      "name": "carteras 1280 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 3 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 3 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 3 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1280 row 3 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 columns",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "carteras 1440 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1440 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 columns",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "carteras 1536 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1536 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 columns",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "carteras 1920 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1920 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 columns",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "carteras 2560 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 2560 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 375 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 375 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "carteras 768 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 768 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "carteras 1024 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 1024 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "carteras 1279 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 1279 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 columns",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "carteras 1439 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 3 name alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 3 price alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 3 button alignment",
+      "pass": true
+    },
+    {
+      "name": "carteras 1439 row 3 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 columns",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 128.46875
+      }
+    },
+    {
+      "name": "bolsas 1280 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 3 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 3 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 3 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1280 row 3 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 columns",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "bolsas 1440 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1440 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 columns",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "bolsas 1536 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1536 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 columns",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "bolsas 1920 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1920 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 columns",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "bolsas 2560 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 2560 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 375 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 375 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "bolsas 768 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 768 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1024 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1024 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1279 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1279 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 columns",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "bolsas 1439 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 3 name alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 3 price alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 3 button alignment",
+      "pass": true
+    },
+    {
+      "name": "bolsas 1439 row 3 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 columns",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "relojes 1440 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1440 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 columns",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 earlier products",
+      "pass": true,
+      "detail": {
+        "earlier": 172
+      }
+    },
+    {
+      "name": "relojes 1920 row 1 name alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 row 1 price alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 row 1 button alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 row 1 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 row 2 name alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 row 2 price alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 row 2 button alignment",
+      "pass": true
+    },
+    {
+      "name": "relojes 1920 row 2 card bottoms",
+      "pass": true
+    },
+    {
+      "name": "relojes 375 no horizontal overflow or broken images",
+      "pass": true
+    },
+    {
+      "name": "relojes 375 unchanged geometry",
+      "pass": true
+    },
+    {
+      "name": "sorting retains Carteras product type",
+      "pass": true
+    },
+    {
+      "name": "filter preserves sort and product type",
+      "pass": true
+    },
+    {
+      "name": "remove filter preserves type and sort",
+      "pass": true
+    },
+    {
+      "name": "pagination appends and preserves sort",
+      "pass": true
+    },
+    {
+      "name": "card destination",
+      "pass": true
+    },
+    {
+      "name": "category navigation",
+      "pass": true
+    },
+    {
+      "name": "no-sidebar listing stays four columns at 1280 (DOM simulation)",
+      "pass": true
+    },
+    {
+      "name": "keyboard action focus visible and unobscured",
+      "pass": true,
+      "detail": {
+        "tag": "BUTTON",
+        "top": 377,
+        "bottom": 425,
+        "outline": "3px",
+        "style": "solid",
+        "hit": true,
+        "reserve": 122
+      }
+    },
+    {
+      "name": "sidebar sticky below header",
+      "pass": true
+    },
+    {
+      "name": "synthetic one/two-line titles, sale/Desde prices and delivery align",
+      "pass": true,
+      "detail": [
+        {
+          "price": 663.6875,
+          "button": 742.484375,
+          "bottom": 758.484375
+        },
+        {
+          "price": 663.6875,
+          "button": 742.484375,
+          "bottom": 758.484375
+        },
+        {
+          "price": 663.6875,
+          "button": 742.484375,
+          "bottom": 758.484375
+        },
+        {
+          "price": 663.6875,
+          "button": 742.484375,
+          "bottom": 758.484375
+        }
+      ]
+    },
+    {
+      "name": "watch quick view opens",
+      "pass": true
+    },
+    {
+      "name": "quick view closes and restores focus",
+      "pass": true
+    },
+    {
+      "name": "mobile collections opens centered on middle card",
+      "pass": true,
+      "detail": {
+        "center": 0.5
+      }
+    },
+    {
+      "name": "mobile collections scrolls to first card",
+      "pass": true
+    },
+    {
+      "name": "mobile carousel keyboard focus visible",
+      "pass": true
+    },
+    {
+      "name": "high density listing receives adequate candidate",
+      "pass": true,
+      "detail": {
+        "url": "http://127.0.0.1:9292/cdn/shop/files/1B163121-4D31-4A1C-9FB7-24435729CADD.png?v=1791964004&width=720",
+        "slot": 330.328125,
+        "width": 720,
+        "sizes": "(min-width: 1680px) 299px, (min-width: 1440px) calc((100vw - 484px) / 4), (min-width: 1280px) calc((100vw - 448px) / 3), (min-width: 1200px) 260px, (min-width: 768px) 33vw, 50vw"
+      }
+    },
+    {
+      "name": "compact rails keep 600px ceiling",
+      "pass": true
+    },
+    {
+      "name": "no cart mutation requests",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "no page JavaScript errors",
+      "pass": true,
+      "detail": []
+    }
+  ],
+  "errors": [],
+  "mutations": [],
+  "passed": 233,
+  "failed": 0
+}

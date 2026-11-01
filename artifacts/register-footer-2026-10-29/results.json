@@ -1,0 +1,136 @@
+{
+  "checks": [
+    {
+      "name": "1440 no entrance before arrival",
+      "pass": true
+    },
+    {
+      "name": "1440 invitation touches footer",
+      "pass": true,
+      "detail": {
+        "gap": 0,
+        "register": {
+          "top": 3824.8125,
+          "bottom": 4037.25
+        },
+        "footer": {
+          "top": 4037.25
+        },
+        "overflow": 0,
+        "theme": 192576585762
+      }
+    },
+    {
+      "name": "1440 no overflow",
+      "pass": true
+    },
+    {
+      "name": "1440 title and button animate on arrival",
+      "pass": true
+    },
+    {
+      "name": "1440 content visible after entrance",
+      "pass": true
+    },
+    {
+      "name": "1440 entrance plays once",
+      "pass": true
+    },
+    {
+      "name": "1440 keyboard focus cancels hiding/transforms",
+      "pass": true
+    },
+    {
+      "name": "1440 account destination retained",
+      "pass": true
+    },
+    {
+      "name": "1440 reduced-motion change cancels entrance",
+      "pass": true
+    },
+    {
+      "name": "1440 reduced-motion arrival is immediate",
+      "pass": true
+    },
+    {
+      "name": "reordered Home sections retain default footer gap",
+      "pass": true
+    },
+    {
+      "name": "collection footer spacing unchanged",
+      "pass": true
+    },
+    {
+      "name": "existing quick view still opens",
+      "pass": true
+    },
+    {
+      "name": "1440 no JavaScript errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "375 no entrance before arrival",
+      "pass": true
+    },
+    {
+      "name": "375 invitation touches footer",
+      "pass": true,
+      "detail": {
+        "gap": 0,
+        "register": {
+          "top": 2179,
+          "bottom": 2383.375
+        },
+        "footer": {
+          "top": 2383.375
+        },
+        "overflow": 0,
+        "theme": 192576585762
+      }
+    },
+    {
+      "name": "375 no overflow",
+      "pass": true
+    },
+    {
+      "name": "375 title and button animate on arrival",
+      "pass": true
+    },
+    {
+      "name": "375 content visible after entrance",
+      "pass": true
+    },
+    {
+      "name": "375 entrance plays once",
+      "pass": true
+    },
+    {
+      "name": "375 keyboard focus cancels hiding/transforms",
+      "pass": true
+    },
+    {
+      "name": "375 account destination retained",
+      "pass": true
+    },
+    {
+      "name": "375 reduced-motion change cancels entrance",
+      "pass": true
+    },
+    {
+      "name": "375 reduced-motion arrival is immediate",
+      "pass": true
+    },
+    {
+      "name": "375 no JavaScript errors",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "without JS registration visible and joined to footer",
+      "pass": true
+    }
+  ],
+  "passed": 26,
+  "failed": 0
+}

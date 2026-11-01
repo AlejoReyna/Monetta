@@ -1,0 +1,36 @@
+{
+  "register": {
+    "top": 3824.8125,
+    "bottom": 4037.25,
+    "height": 212.4375,
+    "margin": "0px",
+    "padding": "0px"
+  },
+  "main": {
+    "top": 122,
+    "bottom": 4037.25,
+    "height": 3915.25,
+    "margin": "0px",
+    "padding": "0px"
+  },
+  "footer": {
+    "top": 4133.25,
+    "bottom": 4388.171875,
+    "height": 254.921875,
+    "margin": "96px 0px 0px",
+    "padding": "48px 0px 28px"
+  },
+  "theme": {
+    "name": "Monetta buscador predictivo borrador sin public...",
+    "id": 192576585762,
+    "schema_name": "Atelier",
+    "schema_version": "3.5.0",
+    "theme_store_id": null,
+    "role": "unpublished",
+    "handle": "null",
+    "style": {
+      "id": null,
+      "handle": null
+    }
+  }
+}

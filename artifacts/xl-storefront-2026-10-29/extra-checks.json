@@ -1,0 +1,41 @@
+{
+  "checks": [
+    {
+      "name": "ultrawide baseline pending images resolve after decode",
+      "pass": true,
+      "detail": []
+    },
+    {
+      "name": "replayed baseline CSS retains original collection geometry",
+      "pass": true,
+      "detail": {
+        "w": 960,
+        "y": 1041.296875
+      }
+    },
+    {
+      "name": "mobile listing source keeps 600 ceiling",
+      "pass": true
+    },
+    {
+      "name": "mobile drawer applies filter and sort preserving category",
+      "pass": true
+    },
+    {
+      "name": "clear all URL preserves automatic query and sorting",
+      "pass": true
+    },
+    {
+      "name": "mobile clear all preserves category and sort",
+      "pass": true
+    },
+    {
+      "name": "Bolsas tagged pagination preserves category",
+      "pass": true
+    },
+    {
+      "name": "vendor form preserves Coach context",
+      "pass": true
+    }
+  ]
+}

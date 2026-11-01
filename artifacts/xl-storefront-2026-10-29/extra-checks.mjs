@@ -1,0 +1,28 @@
+import {createRequire} from 'node:module';import {readFileSync,writeFileSync} from 'node:fs';import path from 'node:path';
+const require=createRequire(path.resolve('design-prototype/package.json'));const {chromium}=require('playwright-core');
+const dir=path.resolve('artifacts/xl-storefront-2026-10-29');const base='http://127.0.0.1:9292';const checks=[];
+const check=(name,pass,detail)=>{checks.push({name,pass:!!pass,detail});console.log(`${pass?'PASS':'FAIL'} ${name} ${detail?JSON.stringify(detail):''}`)};
+const browser=await chromium.launch({executablePath:'/Applications/Brave Browser.app/Contents/MacOS/Brave Browser',headless:true});
+async function ready(page){await page.locator('.mw').waitFor();await page.evaluate(async()=>{await document.fonts.ready;const imgs=[...document.images];imgs.forEach(i=>i.loading='eager');await Promise.race([Promise.all(imgs.map(i=>i.decode().catch(()=>{}))),new Promise(r=>setTimeout(r,15000))])})}
+try{
+ // Recheck the ultrawide Home baseline with the two exact CSS snapshots pulled before any edits. HTML changes affect listings only.
+ const baseline=await browser.newContext({viewport:{width:2560,height:1440},deviceScaleFactor:1,reducedMotion:'reduce'});
+ await baseline.route('**/*',async route=>{const name=new URL(route.request().url()).pathname.split('/').pop();if(['monetta-app-alignment.css','monetta-guia.css'].includes(name))return route.fulfill({contentType:'text/css',body:readFileSync(`${dir}/baseline-theme/assets/${name}`)});return route.continue()});
+ const bp=await baseline.newPage();await bp.goto(base+'/?pb=0');await ready(bp);
+ const broken=await bp.evaluate(()=>[...document.images].filter(i=>i.getClientRects().length&&(!i.complete||!i.naturalWidth)).map(i=>i.src));check('ultrawide baseline pending images resolve after decode',!broken.length,broken);
+ const before=JSON.parse(readFileSync(`${dir}/measurements-before.json`));const original=before.find(x=>x.page==='home'&&x.width===2560);
+ const geometry=await bp.locator('.guia-collections__track').evaluate(e=>({w:e.getBoundingClientRect().width,y:e.getBoundingClientRect().top+scrollY}));check('replayed baseline CSS retains original collection geometry',Math.abs(geometry.w-original.collections.w)<.1&&Math.abs(geometry.y-original.collections.y)<.1,geometry);
+ writeFileSync(`${dir}/baseline-ultrawide-recheck.json`,JSON.stringify({method:'Original pre-edit staging CSS snapshots served by read-only browser request interception; current Home HTML has no listing-only additions. Decode completed at final viewport.',broken,geometry},null,2));
+ for(const [view,y] of [['top',0],['styles',Number(JSON.parse(readFileSync(`${dir}/scrolls.json`))['home-2560x1440-styles'])],['collections',Number(JSON.parse(readFileSync(`${dir}/scrolls.json`))['home-2560x1440-collections'])]]){await bp.evaluate(y=>scrollTo(0,y),y);await bp.screenshot({path:`${dir}/before/home-2560x1440-${view}-y${y}.png`})}
+ original.broken=broken;original.recheck='baseline-ultrawide-recheck.json';writeFileSync(`${dir}/measurements-before.json`,JSON.stringify(before,null,2));await baseline.close();
+ const ctx=await browser.newContext({viewport:{width:375,height:812},deviceScaleFactor:3,reducedMotion:'reduce'});const page=await ctx.newPage();
+ await page.goto(base+'/collections/types?q=Cartera&pb=0');await ready(page);
+ check('mobile listing source keeps 600 ceiling',await page.locator('[data-grid] img').first().evaluate(e=>!e.srcset.includes('720w')&&!e.srcset.includes('900w')&&new URL(e.currentSrc).searchParams.get('width')<=600));
+ await page.locator('[data-open-dialog="filters-drawer"]').first().click();await page.locator('#filters-drawer[open]').waitFor();
+ await page.locator('#filters-drawer input[value="price-descending"]').check();await page.locator('#filters-drawer input[type="checkbox"]:not(:disabled)').first().check();await page.locator('[data-apply-filters]').click();await page.waitForURL('**/*filter.v.availability=1*');
+ check('mobile drawer applies filter and sort preserving category',page.url().includes('q=Cartera')&&page.url().includes('sort_by=price-descending')&&/CARTERAS/i.test(await page.locator('h1').innerText()));
+ const clear=page.locator('.active-chips a').filter({hasText:'Limpiar todo'});const clearUrl=new URL(await clear.getAttribute('href'),base);check('clear all URL preserves automatic query and sorting',clearUrl.searchParams.get('q')==='Cartera'&&clearUrl.searchParams.get('sort_by')==='price-descending');await clear.click();await page.waitForURL(u=>!u.searchParams.has('filter.v.availability'));check('mobile clear all preserves category and sort',page.url().includes('q=Cartera')&&page.url().includes('sort_by=price-descending')&&/CARTERAS/i.test(await page.locator('h1').innerText()));
+ await page.goto(base+'/collections/all/bolsa?pb=0');await ready(page);const n=await page.locator('[data-grid]>li').count();await page.locator('[data-more]').click();await page.waitForFunction(n=>document.querySelectorAll('[data-grid]>li').length>n,n);check('Bolsas tagged pagination preserves category',page.url().includes('/collections/all/bolsa')&&await page.locator('[data-grid]>li').count()>n);
+ await page.setViewportSize({width:1440,height:900});await page.goto(base+'/collections/vendors?q=Coach&pb=0');await page.locator('[data-sort-select]').selectOption('price-ascending');await page.waitForURL('**/*sort_by=price-ascending*');check('vendor form preserves Coach context',page.url().includes('q=Coach')&&/COACH/i.test(await page.locator('h1').innerText()));
+ await ctx.close();
+}catch(e){check('extra harness completion',false,e.stack)}finally{writeFileSync(`${dir}/extra-checks.json`,JSON.stringify({checks},null,2));await browser.close()}

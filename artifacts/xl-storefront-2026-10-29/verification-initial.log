@@ -1,0 +1,220 @@
+PASS home 1280 no horizontal overflow or broken images 
+PASS home 1280 collection alignment and scale 
+PASS home 1280 styles scale and alignment 
+PASS home 1440 no horizontal overflow or broken images 
+PASS home 1440 collection alignment and scale 
+PASS home 1440 styles scale and alignment 
+PASS home 1536 no horizontal overflow or broken images 
+PASS home 1536 collection alignment and scale 
+PASS home 1536 styles scale and alignment 
+PASS home 1920 no horizontal overflow or broken images 
+PASS home 1920 collection alignment and scale 
+PASS home 1920 styles scale and alignment 
+FAIL home 2560 no horizontal overflow or broken images 
+PASS home 2560 collection alignment and scale 
+PASS home 2560 styles scale and alignment 
+PASS home 375 no horizontal overflow or broken images 
+PASS home 375 unchanged geometry 
+PASS home 768 no horizontal overflow or broken images 
+PASS home 768 unchanged geometry 
+PASS home 1024 no horizontal overflow or broken images 
+PASS home 1024 unchanged geometry 
+PASS home 1279 no horizontal overflow or broken images 
+PASS home 1279 unchanged geometry 
+PASS home 1439 no horizontal overflow or broken images 
+PASS home 1439 collection alignment and scale 
+PASS home 1439 styles scale and alignment 
+PASS carteras 1280 no horizontal overflow or broken images 
+PASS carteras 1280 columns 
+PASS carteras 1280 earlier products {"earlier":128.46875}
+PASS carteras 1280 row 1 name alignment 
+PASS carteras 1280 row 1 price alignment 
+PASS carteras 1280 row 1 button alignment 
+PASS carteras 1280 row 1 card bottoms 
+PASS carteras 1280 row 2 name alignment 
+PASS carteras 1280 row 2 price alignment 
+PASS carteras 1280 row 2 button alignment 
+PASS carteras 1280 row 2 card bottoms 
+PASS carteras 1280 row 3 name alignment 
+PASS carteras 1280 row 3 price alignment 
+PASS carteras 1280 row 3 button alignment 
+PASS carteras 1280 row 3 card bottoms 
+PASS carteras 1440 no horizontal overflow or broken images 
+PASS carteras 1440 columns 
+PASS carteras 1440 earlier products {"earlier":172}
+PASS carteras 1440 row 1 name alignment 
+PASS carteras 1440 row 1 price alignment 
+PASS carteras 1440 row 1 button alignment 
+PASS carteras 1440 row 1 card bottoms 
+PASS carteras 1440 row 2 name alignment 
+PASS carteras 1440 row 2 price alignment 
+PASS carteras 1440 row 2 button alignment 
+PASS carteras 1440 row 2 card bottoms 
+PASS carteras 1536 no horizontal overflow or broken images 
+PASS carteras 1536 columns 
+PASS carteras 1536 earlier products {"earlier":172}
+PASS carteras 1536 row 1 name alignment 
+PASS carteras 1536 row 1 price alignment 
+PASS carteras 1536 row 1 button alignment 
+PASS carteras 1536 row 1 card bottoms 
+PASS carteras 1536 row 2 name alignment 
+PASS carteras 1536 row 2 price alignment 
+PASS carteras 1536 row 2 button alignment 
+PASS carteras 1536 row 2 card bottoms 
+PASS carteras 1920 no horizontal overflow or broken images 
+PASS carteras 1920 columns 
+PASS carteras 1920 earlier products {"earlier":172}
+PASS carteras 1920 row 1 name alignment 
+PASS carteras 1920 row 1 price alignment 
+PASS carteras 1920 row 1 button alignment 
+PASS carteras 1920 row 1 card bottoms 
+PASS carteras 1920 row 2 name alignment 
+PASS carteras 1920 row 2 price alignment 
+PASS carteras 1920 row 2 button alignment 
+PASS carteras 1920 row 2 card bottoms 
+PASS carteras 2560 no horizontal overflow or broken images 
+PASS carteras 2560 columns 
+PASS carteras 2560 earlier products {"earlier":172}
+PASS carteras 2560 row 1 name alignment 
+PASS carteras 2560 row 1 price alignment 
+PASS carteras 2560 row 1 button alignment 
+PASS carteras 2560 row 1 card bottoms 
+PASS carteras 2560 row 2 name alignment 
+PASS carteras 2560 row 2 price alignment 
+PASS carteras 2560 row 2 button alignment 
+PASS carteras 2560 row 2 card bottoms 
+PASS carteras 375 no horizontal overflow or broken images 
+PASS carteras 375 unchanged geometry 
+PASS carteras 768 no horizontal overflow or broken images 
+PASS carteras 768 unchanged geometry 
+PASS carteras 1024 no horizontal overflow or broken images 
+PASS carteras 1024 unchanged geometry 
+PASS carteras 1279 no horizontal overflow or broken images 
+PASS carteras 1279 unchanged geometry 
+PASS carteras 1439 no horizontal overflow or broken images 
+PASS carteras 1439 columns 
+PASS carteras 1439 earlier products {"earlier":172}
+PASS carteras 1439 row 1 name alignment 
+PASS carteras 1439 row 1 price alignment 
+PASS carteras 1439 row 1 button alignment 
+PASS carteras 1439 row 1 card bottoms 
+PASS carteras 1439 row 2 name alignment 
+PASS carteras 1439 row 2 price alignment 
+PASS carteras 1439 row 2 button alignment 
+PASS carteras 1439 row 2 card bottoms 
+PASS carteras 1439 row 3 name alignment 
+PASS carteras 1439 row 3 price alignment 
+PASS carteras 1439 row 3 button alignment 
+PASS carteras 1439 row 3 card bottoms 
+PASS bolsas 1280 no horizontal overflow or broken images 
+PASS bolsas 1280 columns 
+PASS bolsas 1280 earlier products {"earlier":128.46875}
+PASS bolsas 1280 row 1 name alignment 
+PASS bolsas 1280 row 1 price alignment 
+PASS bolsas 1280 row 1 button alignment 
+PASS bolsas 1280 row 1 card bottoms 
+PASS bolsas 1280 row 2 name alignment 
+PASS bolsas 1280 row 2 price alignment 
+PASS bolsas 1280 row 2 button alignment 
+PASS bolsas 1280 row 2 card bottoms 
+PASS bolsas 1280 row 3 name alignment 
+PASS bolsas 1280 row 3 price alignment 
+PASS bolsas 1280 row 3 button alignment 
+PASS bolsas 1280 row 3 card bottoms 
+PASS bolsas 1440 no horizontal overflow or broken images 
+PASS bolsas 1440 columns 
+PASS bolsas 1440 earlier products {"earlier":172}
+PASS bolsas 1440 row 1 name alignment 
+PASS bolsas 1440 row 1 price alignment 
+PASS bolsas 1440 row 1 button alignment 
+PASS bolsas 1440 row 1 card bottoms 
+PASS bolsas 1440 row 2 name alignment 
+PASS bolsas 1440 row 2 price alignment 
+PASS bolsas 1440 row 2 button alignment 
+PASS bolsas 1440 row 2 card bottoms 
+PASS bolsas 1536 no horizontal overflow or broken images 
+PASS bolsas 1536 columns 
+PASS bolsas 1536 earlier products {"earlier":172}
+PASS bolsas 1536 row 1 name alignment 
+PASS bolsas 1536 row 1 price alignment 
+PASS bolsas 1536 row 1 button alignment 
+PASS bolsas 1536 row 1 card bottoms 
+PASS bolsas 1536 row 2 name alignment 
+PASS bolsas 1536 row 2 price alignment 
+PASS bolsas 1536 row 2 button alignment 
+PASS bolsas 1536 row 2 card bottoms 
+PASS bolsas 1920 no horizontal overflow or broken images 
+PASS bolsas 1920 columns 
+PASS bolsas 1920 earlier products {"earlier":172}
+PASS bolsas 1920 row 1 name alignment 
+PASS bolsas 1920 row 1 price alignment 
+PASS bolsas 1920 row 1 button alignment 
+PASS bolsas 1920 row 1 card bottoms 
+PASS bolsas 1920 row 2 name alignment 
+PASS bolsas 1920 row 2 price alignment 
+PASS bolsas 1920 row 2 button alignment 
+PASS bolsas 1920 row 2 card bottoms 
+PASS bolsas 2560 no horizontal overflow or broken images 
+PASS bolsas 2560 columns 
+PASS bolsas 2560 earlier products {"earlier":172}
+PASS bolsas 2560 row 1 name alignment 
+PASS bolsas 2560 row 1 price alignment 
+PASS bolsas 2560 row 1 button alignment 
+PASS bolsas 2560 row 1 card bottoms 
+PASS bolsas 2560 row 2 name alignment 
+PASS bolsas 2560 row 2 price alignment 
+PASS bolsas 2560 row 2 button alignment 
+PASS bolsas 2560 row 2 card bottoms 
+PASS bolsas 375 no horizontal overflow or broken images 
+PASS bolsas 375 unchanged geometry 
+PASS bolsas 768 no horizontal overflow or broken images 
+PASS bolsas 768 unchanged geometry 
+PASS bolsas 1024 no horizontal overflow or broken images 
+PASS bolsas 1024 unchanged geometry 
+PASS bolsas 1279 no horizontal overflow or broken images 
+PASS bolsas 1279 unchanged geometry 
+PASS bolsas 1439 no horizontal overflow or broken images 
+PASS bolsas 1439 columns 
+PASS bolsas 1439 earlier products {"earlier":172}
+PASS bolsas 1439 row 1 name alignment 
+PASS bolsas 1439 row 1 price alignment 
+PASS bolsas 1439 row 1 button alignment 
+PASS bolsas 1439 row 1 card bottoms 
+PASS bolsas 1439 row 2 name alignment 
+PASS bolsas 1439 row 2 price alignment 
+PASS bolsas 1439 row 2 button alignment 
+PASS bolsas 1439 row 2 card bottoms 
+PASS bolsas 1439 row 3 name alignment 
+PASS bolsas 1439 row 3 price alignment 
+PASS bolsas 1439 row 3 button alignment 
+PASS bolsas 1439 row 3 card bottoms 
+PASS relojes 1440 no horizontal overflow or broken images 
+PASS relojes 1440 columns 
+PASS relojes 1440 earlier products {"earlier":172}
+PASS relojes 1440 row 1 name alignment 
+PASS relojes 1440 row 1 price alignment 
+PASS relojes 1440 row 1 button alignment 
+PASS relojes 1440 row 1 card bottoms 
+PASS relojes 1440 row 2 name alignment 
+PASS relojes 1440 row 2 price alignment 
+PASS relojes 1440 row 2 button alignment 
+PASS relojes 1440 row 2 card bottoms 
+PASS relojes 1920 no horizontal overflow or broken images 
+PASS relojes 1920 columns 
+PASS relojes 1920 earlier products {"earlier":172}
+PASS relojes 1920 row 1 name alignment 
+PASS relojes 1920 row 1 price alignment 
+PASS relojes 1920 row 1 button alignment 
+PASS relojes 1920 row 1 card bottoms 
+PASS relojes 1920 row 2 name alignment 
+PASS relojes 1920 row 2 price alignment 
+PASS relojes 1920 row 2 button alignment 
+PASS relojes 1920 row 2 card bottoms 
+PASS relojes 375 no horizontal overflow or broken images 
+PASS relojes 375 unchanged geometry 
+FAIL sorting retains Carteras product type 
+locator.check: Timeout 30000ms exceeded.
+Call log:
+[2m  - waiting for locator('.filter-sidebar input[type=checkbox]:not(:disabled)').first()[22m
+
+    at /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/home-busqueda/artifacts/xl-storefront-2026-10-29/verify.mjs:44:84

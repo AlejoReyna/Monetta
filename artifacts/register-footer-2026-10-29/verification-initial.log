@@ -1,0 +1,12 @@
+PASS 1440 no entrance before arrival 
+PASS 1440 invitation touches footer {
+  gap: 0,
+  register: { top: 3824.8125, bottom: 4037.25 },
+  footer: { top: 4037.25 },
+  overflow: 0,
+  theme: 192576585762
+}
+PASS 1440 no overflow 
+FAIL harness completed page.waitForFunction: Timeout 30000ms exceeded.
+    at arrive (/Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/home-busqueda/artifacts/register-footer-2026-10-29/verify.mjs:7:205)
+    at async file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/home-busqueda/artifacts/register-footer-2026-10-29/verify.mjs:14:3

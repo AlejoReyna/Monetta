@@ -1,0 +1,23 @@
+ok   16.07:1 (min 4.5)  ink on canvas — body copy on the page ground
+ok   14.31:1 (min 4.5)  ink on surfaceWarm — headings on campaign and service panels
+ok   14.77:1 (min 4.5)  ink on surfaceTile — tile labels
+ok   15.40:1 (min 4.5)  ink on bar — header icons and title
+ok    5.23:1 (min 4.5)  inkMuted on canvas — supporting copy
+ok    4.66:1 (min 4.5)  inkMuted on surfaceWarm — supporting copy on panels
+ok    4.81:1 (min 4.5)  inkMuted on surfaceTile — supporting copy on tiles
+ok    5.01:1 (min 4.5)  inkMuted on bar — muted copy in bars
+ok    6.99:1 (min 4.5)  onActionPrimary on actionPrimary — purchase button label
+ok   15.15:1 (min 4.5)  onActionDark on actionDark — dark pill label
+ok    5.67:1 (min 4.5)  accentText on canvas — accent links and kickers
+ok    5.05:1 (min 4.5)  accentText on surfaceWarm — accent labels on panels
+ok    5.43:1 (min 4.5)  accentText on bar — active navigation label
+ok    4.76:1 (min 4.5)  navigationActive on bar — active navigation label
+ok   15.40:1 (min 4.5)  navigationInactive on bar — inactive navigation label
+ok    3.24:1 (min 3)  navigationActive on navigationInactive — active vs inactive: selection also carries weight and a rule, but a colour-only reading must still hold (NAV-03)
+ok    6.43:1 (min 4.5)  sale on canvas — sale price
+ok    5.31:1 (min 4.5)  sale on saleSurface — discount and stock chips
+ok    4.53:1 (min 4.5)  success on successSurface — success chips
+ok    4.03:1 (min 3)  borderControl on canvas — outlined control boundary (WCAG 1.4.11)
+ok    4.28:1 (min 3)  borderControl on surface — outlined control boundary on raised surface
+ok    2.32:1 (min 1)  gold on canvas — decorative mark only; never text. Listed so its ratio is on record
+tokens: outputs are current and every contrast pair passes

@@ -1,0 +1,338 @@
+[
+  {
+    "name": "1440 home: header category row is still there",
+    "pass": true,
+    "detail": [
+      "Bolsas",
+      "Carteras",
+      "Relojes",
+      "Perfumes",
+      "Marcas",
+      "Mayoreo"
+    ]
+  },
+  {
+    "name": "1440 Bolsas: arrival leaves the search unfocused and the predictive panel closed",
+    "pass": true,
+    "detail": {
+      "path": "/collections/all/bolsa",
+      "active": "BODY",
+      "panelOpen": false
+    }
+  },
+  {
+    "name": "1440 Bolsas: no header category row on the collection",
+    "pass": true,
+    "detail": []
+  },
+  {
+    "name": "1440 Bolsas: pills Bolsas,Carteras,Accesorios,Relojes,Perfumes,Marcas,Mayoreo, current Bolsas",
+    "pass": true,
+    "detail": {
+      "path": "/collections/all/bolsa",
+      "pills": [
+        "Bolsas",
+        "Carteras",
+        "Accesorios",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ],
+      "current": "Bolsas"
+    }
+  },
+  {
+    "name": "1440 Carteras: arrival leaves the search unfocused and the predictive panel closed",
+    "pass": true,
+    "detail": {
+      "path": "/collections/types?q=Cartera",
+      "active": "BODY",
+      "panelOpen": false
+    }
+  },
+  {
+    "name": "1440 Carteras: no header category row on the collection",
+    "pass": true,
+    "detail": []
+  },
+  {
+    "name": "1440 Carteras: pills Bolsas,Carteras,Accesorios,Relojes,Perfumes,Marcas,Mayoreo, current Carteras",
+    "pass": true,
+    "detail": {
+      "path": "/collections/types?q=Cartera",
+      "pills": [
+        "Bolsas",
+        "Carteras",
+        "Accesorios",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ],
+      "current": "Carteras"
+    }
+  },
+  {
+    "name": "1440 Relojes: arrival leaves the search unfocused and the predictive panel closed",
+    "pass": true,
+    "detail": {
+      "path": "/collections/types?q=Reloj",
+      "active": "BODY",
+      "panelOpen": false
+    }
+  },
+  {
+    "name": "1440 Relojes: no header category row on the collection",
+    "pass": true,
+    "detail": []
+  },
+  {
+    "name": "1440 Relojes: pills Bolsas,Carteras,Accesorios,Relojes,Perfumes,Marcas,Mayoreo, current Relojes",
+    "pass": true,
+    "detail": {
+      "path": "/collections/types?q=Reloj",
+      "pills": [
+        "Bolsas",
+        "Carteras",
+        "Accesorios",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ],
+      "current": "Relojes"
+    }
+  },
+  {
+    "name": "1440 Perfumes: arrival leaves the search unfocused and the predictive panel closed",
+    "pass": true,
+    "detail": {
+      "path": "/collections/all",
+      "active": "BODY",
+      "panelOpen": false
+    }
+  },
+  {
+    "name": "1440 Perfumes: no header category row on the collection",
+    "pass": true,
+    "detail": []
+  },
+  {
+    "name": "1440 Perfumes: pills Bolsas,Carteras,Accesorios,Relojes,Perfumes,Marcas,Mayoreo, current none (staging redirects it to /collections/all)",
+    "pass": true,
+    "detail": {
+      "path": "/collections/all",
+      "pills": [
+        "Bolsas",
+        "Carteras",
+        "Accesorios",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ],
+      "current": null
+    }
+  },
+  {
+    "name": "1440 Marcas: arrival leaves the search unfocused and the predictive panel closed",
+    "pass": true,
+    "detail": {
+      "path": "/collections",
+      "active": "BODY",
+      "panelOpen": false
+    }
+  },
+  {
+    "name": "1440 Marcas: not a collection, keeps the header category row",
+    "pass": true,
+    "detail": {
+      "template": "list-collections",
+      "nav": [
+        "Bolsas",
+        "Carteras",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ]
+    }
+  },
+  {
+    "name": "1440 Mayoreo: arrival leaves the search unfocused and the predictive panel closed",
+    "pass": true,
+    "detail": {
+      "path": "/pages/contact?view=guia-mayoreo",
+      "active": "BODY",
+      "panelOpen": false
+    }
+  },
+  {
+    "name": "1440 Mayoreo: not a collection, keeps the header category row",
+    "pass": true,
+    "detail": {
+      "template": "page",
+      "nav": [
+        "Bolsas",
+        "Carteras",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ]
+    }
+  },
+  {
+    "name": "1440 pills share the header row destinations",
+    "pass": true,
+    "detail": {
+      "navLinks": {
+        "Bolsas": "/collections/all/bolsa",
+        "Carteras": "/collections/types?q=Cartera",
+        "Relojes": "/collections/types?q=Reloj",
+        "Perfumes": "/collections/all/perfume",
+        "Marcas": "/collections",
+        "Mayoreo": "/pages/contact?view=guia-mayoreo"
+      },
+      "pillLinks": {
+        "Bolsas": "/collections/all/bolsa",
+        "Carteras": "/collections/types?q=Cartera",
+        "Accesorios": "/collections/all/accessory",
+        "Relojes": "/collections/types?q=Reloj",
+        "Perfumes": "/collections/all/perfume",
+        "Marcas": "/collections",
+        "Mayoreo": "/pages/contact?view=guia-mayoreo"
+      }
+    }
+  },
+  {
+    "name": "1440 «Perfumes» pill destination answers 200",
+    "pass": true,
+    "detail": {
+      "href": "/collections/all/perfume",
+      "status": 200
+    }
+  },
+  {
+    "name": "1440 «Marcas» pill destination answers 200",
+    "pass": true,
+    "detail": {
+      "href": "/collections",
+      "status": 200
+    }
+  },
+  {
+    "name": "1440 «Mayoreo» pill destination answers 200",
+    "pass": true,
+    "detail": {
+      "href": "/pages/contact?view=guia-mayoreo",
+      "status": 200
+    }
+  },
+  {
+    "name": "1440 pill Carteras: panel closed, current Carteras",
+    "pass": true,
+    "detail": {
+      "path": "/collections/types?q=Cartera",
+      "template": "collection",
+      "siteNav": [],
+      "pills": [
+        "Bolsas",
+        "Carteras",
+        "Accesorios",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ],
+      "current": "Carteras",
+      "active": "BODY",
+      "panelOpen": false,
+      "expanded": "false",
+      "overflow": 0
+    }
+  },
+  {
+    "name": "1440 Coach: current pill Marcas, panel closed",
+    "pass": true,
+    "detail": {
+      "current": "Marcas",
+      "panelOpen": false
+    }
+  },
+  {
+    "name": "1440 collection: clicking the search field still opens recent searches",
+    "pass": true,
+    "detail": {
+      "panelOpen": true,
+      "expanded": "true"
+    }
+  },
+  {
+    "name": "1440 /search: empty search still focuses its field",
+    "pass": true,
+    "detail": {
+      "active": "header-search-input"
+    }
+  },
+  {
+    "name": "1200 Bolsas scrolled: sidebar sticks 16px under the header",
+    "pass": true,
+    "detail": {
+      "sticky": "sticky",
+      "sidebarTop": 89,
+      "chromeBottom": 73,
+      "reserve": 73
+    }
+  },
+  {
+    "name": "1440 Bolsas scrolled: sidebar sticks 16px under the header",
+    "pass": true,
+    "detail": {
+      "sticky": "sticky",
+      "sidebarTop": 89,
+      "chromeBottom": 73,
+      "reserve": 73
+    }
+  },
+  {
+    "name": "390 Relojes: pills Bolsas,Carteras,Accesorios,Relojes,Perfumes,Marcas,Mayoreo, no page overflow, no input focused",
+    "pass": true,
+    "detail": {
+      "pills": [
+        "Bolsas",
+        "Carteras",
+        "Accesorios",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ],
+      "overflow": 0,
+      "focused": false
+    }
+  },
+  {
+    "name": "768 Relojes: pills Bolsas,Carteras,Accesorios,Relojes,Perfumes,Marcas,Mayoreo, no page overflow, no input focused",
+    "pass": true,
+    "detail": {
+      "pills": [
+        "Bolsas",
+        "Carteras",
+        "Accesorios",
+        "Relojes",
+        "Perfumes",
+        "Marcas",
+        "Mayoreo"
+      ],
+      "overflow": 0,
+      "focused": false
+    }
+  },
+  {
+    "name": "no page JavaScript errors",
+    "pass": true,
+    "detail": []
+  }
+]

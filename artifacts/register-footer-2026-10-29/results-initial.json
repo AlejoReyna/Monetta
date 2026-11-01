@@ -1,0 +1,35 @@
+{
+  "checks": [
+    {
+      "name": "1440 no entrance before arrival",
+      "pass": true
+    },
+    {
+      "name": "1440 invitation touches footer",
+      "pass": true,
+      "detail": {
+        "gap": 0,
+        "register": {
+          "top": 3824.8125,
+          "bottom": 4037.25
+        },
+        "footer": {
+          "top": 4037.25
+        },
+        "overflow": 0,
+        "theme": 192576585762
+      }
+    },
+    {
+      "name": "1440 no overflow",
+      "pass": true
+    },
+    {
+      "name": "harness completed",
+      "pass": false,
+      "detail": "page.waitForFunction: Timeout 30000ms exceeded.\n    at arrive (/Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/home-busqueda/artifacts/register-footer-2026-10-29/verify.mjs:7:205)\n    at async file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/home-busqueda/artifacts/register-footer-2026-10-29/verify.mjs:14:3"
+    }
+  ],
+  "passed": 3,
+  "failed": 1
+}

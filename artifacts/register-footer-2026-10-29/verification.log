@@ -1,0 +1,38 @@
+PASS 1440 no entrance before arrival 
+PASS 1440 invitation touches footer {
+  gap: 0,
+  register: { top: 3824.8125, bottom: 4037.25 },
+  footer: { top: 4037.25 },
+  overflow: 0,
+  theme: 192576585762
+}
+PASS 1440 no overflow 
+PASS 1440 title and button animate on arrival 
+PASS 1440 content visible after entrance 
+PASS 1440 entrance plays once 
+PASS 1440 keyboard focus cancels hiding/transforms 
+PASS 1440 account destination retained 
+PASS 1440 reduced-motion change cancels entrance 
+PASS 1440 reduced-motion arrival is immediate 
+PASS reordered Home sections retain default footer gap 
+PASS collection footer spacing unchanged 
+PASS existing quick view still opens 
+PASS 1440 no JavaScript errors []
+PASS 375 no entrance before arrival 
+PASS 375 invitation touches footer {
+  gap: 0,
+  register: { top: 2179, bottom: 2383.375 },
+  footer: { top: 2383.375 },
+  overflow: 0,
+  theme: 192576585762
+}
+PASS 375 no overflow 
+PASS 375 title and button animate on arrival 
+PASS 375 content visible after entrance 
+PASS 375 entrance plays once 
+PASS 375 keyboard focus cancels hiding/transforms 
+PASS 375 account destination retained 
+PASS 375 reduced-motion change cancels entrance 
+PASS 375 reduced-motion arrival is immediate 
+PASS 375 no JavaScript errors []
+PASS without JS registration visible and joined to footer 

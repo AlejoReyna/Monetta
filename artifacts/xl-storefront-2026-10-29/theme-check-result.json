@@ -1,0 +1,6 @@
+{
+  "comparison": "Exact JSON finding-by-finding equality against the pre-edit run on this worktree",
+  "identical": true,
+  "errors": 187,
+  "warnings": 64
+}

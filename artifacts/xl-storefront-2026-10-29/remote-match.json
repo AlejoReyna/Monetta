@@ -1,0 +1,26 @@
+[
+  {
+    "file": "snippets/monetta-card.liquid",
+    "match": true
+  },
+  {
+    "file": "snippets/monetta-results.liquid",
+    "match": true
+  },
+  {
+    "file": "sections/monetta-collection.liquid",
+    "match": true
+  },
+  {
+    "file": "sections/monetta-guia-home.liquid",
+    "match": true
+  },
+  {
+    "file": "assets/monetta-app-alignment.css",
+    "match": true
+  },
+  {
+    "file": "assets/monetta-guia.css",
+    "match": true
+  }
+]

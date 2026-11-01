@@ -1,0 +1,33 @@
+{
+  "head": "231cc8c66ca4b45f95c1935c4f81fee67af57380",
+  "branch": "",
+  "worktree": "/Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/home-busqueda",
+  "changedFiles": [
+    "docs/web-redesign/DESIGN_SPEC.md",
+    "storefront-theme/assets/monetta-app-alignment.css",
+    "storefront-theme/assets/monetta-guia.css",
+    "storefront-theme/sections/monetta-collection.liquid",
+    "storefront-theme/snippets/monetta-card.liquid",
+    "storefront-theme/snippets/monetta-results.liquid"
+  ],
+  "originalUntracked": [
+    "docs/web-redesign/XL_STOREFRONT_HANDOFF_2026-10-29.md"
+  ],
+  "localPreview": "http://127.0.0.1:9292",
+  "stagingPreview": "https://monetta-staging.myshopify.com/?preview_theme_id=192576585762&pb=0",
+  "upload": "shopify theme dev to existing unpublished draft, restricted to six paths; five theme files modified",
+  "viewportMethod": "Playwright setViewportSize, Brave headless, scale 1 / zoom 100%, DPR 1 (separate DPR2 and DPR3 image checks)",
+  "hashes": {
+    "docs/web-redesign/DESIGN_SPEC.md": "48e5f26528fc8a74346000bbadbb884f883eed87aa34558aee63bcf3297b9315",
+    "storefront-theme/assets/monetta-app-alignment.css": "528b39a8cd107316cb825da951dd2f7539c3ffe12aca8ff25521e55a465f921b",
+    "storefront-theme/assets/monetta-guia.css": "3ab43e12f4977d84794b30aa417b52a2cb75f17a82dcfe22ef8957e488bdcf00",
+    "storefront-theme/sections/monetta-collection.liquid": "d1e49161b55d713faf49df0a73d0917b75cf4baac54ecd55edde21cfd108ad6d",
+    "storefront-theme/snippets/monetta-card.liquid": "fba1a4a6b17b05ea0737ec613494443ae11c4f1815ac301b7fb1001128f33fd8",
+    "storefront-theme/snippets/monetta-results.liquid": "2412cd213753064fa71358c46aefea23d98f612a7b5f28e6d4b3a83cda62b108"
+  },
+  "checks": {
+    "main": 233,
+    "extra": 8,
+    "newThemeCheckFindings": 0
+  }
+}
