@@ -63,7 +63,6 @@ class NotificationConfig {
         String.fromEnvironment('FIREBASE_ANDROID_APP_ID');
     const iosFirebaseApiKey = String.fromEnvironment('FIREBASE_IOS_API_KEY');
     const iosFirebaseAppId = String.fromEnvironment('FIREBASE_IOS_APP_ID');
-    const appEnvironment = String.fromEnvironment('APP_ENV');
     final rawBaseUrl =
         notificationBaseUrl.isEmpty ? fallbackBaseUrl : notificationBaseUrl;
     final platform = targetPlatform ?? defaultTargetPlatform;
@@ -89,9 +88,7 @@ class NotificationConfig {
           const String.fromEnvironment('FIREBASE_MESSAGING_SENDER_ID'),
       firebaseStorageBucket:
           const String.fromEnvironment('FIREBASE_STORAGE_BUCKET'),
-      iosBundleId: appEnvironment == 'staging'
-          ? 'mx.monetta.monettaApp.staging'
-          : 'mx.monetta.monettaApp',
+      iosBundleId: 'mx.monetta.monettaApp',
       timezone: const String.fromEnvironment(
         'NOTIFICATIONS_TIMEZONE',
         defaultValue: 'America/Monterrey',
