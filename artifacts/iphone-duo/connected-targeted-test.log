@@ -1,0 +1,104 @@
+00:00 +0: loading /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart
+00:00 +0: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart: active regions exclude controls; inactive division does not reserve space
+00:00 +1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/platform/system_layout_context_test.dart: native listener delivers current snapshots and cancels on disposal (variant: TargetPlatform.iOS)
+00:04 +2: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: (setUpAll)
+00:04 +2: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: same product/variant/gallery/sections survive repeated reflow
+
+Warning: A call to tap() with finder "Found 1 widget with key [<'product-gallery-next'>]: [
+  SizedBox-[<'product-gallery-next'>](width: 48.0, height: 48.0, renderObject: RenderConstrainedBox#6e56a relayoutBoundary=up3),
+]" derived an Offset (Offset(285.2, 203.7)) that would not hit test on the specified widget.
+Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+The finder corresponds to this RenderBox: RenderConstrainedBox#6e56a relayoutBoundary=up3
+The hit test result at that offset is: HitTestResult(HitTestEntry<HitTestTarget>#34d70(TextSpan(inherit: false, color: Color(alpha: 1.0000, red: 0.1294, green: 0.1059, blue: 0.0863, colorSpace: ColorSpace.sRGB), family: MaterialIcons, size: 19.0, height: 1.0x, leadingDistribution: even, "")), RenderParagraph#24465@Offset(13.5, 13.2), RenderPositionedBox#07e22@Offset(24.0, 23.7), RenderConstrainedBox#d36bb@Offset(24.0, 23.7), RenderExcludeSemantics#9aa2c@Offset(24.0, 23.7), RenderSemanticsAnnotations#65b0a@Offset(24.0, 23.7), RenderConstrainedBox#4cbfa@Offset(24.0, 23.7), RenderMouseRegion#bfdf9@Offset(24.0, 23.7), RenderSemanticsAnnotations#42814@Offset(24.0, 23.7), RenderPointerListener#bcf9b@Offset(24.0, 23.7), _RenderExclusiveMouseRegion#b92e1@Offset(24.0, 23.7), RenderSemanticsAnnotations#6a339@Offset(24.0, 23.7), _RenderLayoutSurrogateProxyBox#2493d@Offset(24.0, 23.7), RenderPointerListener#80103@Offset(24.0, 23.7), RenderSemanticsAnnotations#98cd4@Offset(24.0, 23.7), RenderMouseRegion#54577@Offset(24.0, 23.7), RenderSemanticsAnnotations#bf2b6@Offset(24.0, 23.7), _RenderInkFeatures#b0315@Offset(24.0, 23.7), RenderCustomPaint#75345@Offset(24.0, 23.7), RenderPhysicalShape#68536@Offset(24.0, 23.7), RenderPositionedBox#4af4e@Offset(28.0, 27.7), RenderConstrainedBox#832f1@Offset(28.0, 27.7), RenderSemanticsAnnotations#b6a34@Offset(28.0, 27.7), RenderFlex#fd1bf@Offset(28.0, 139.7), RenderStack#3b01f@Offset(208.4, 147.7), RenderAspectRatio#b2a60@Offset(208.4, 147.7), _RenderColoredBox#c7ab5@Offset(208.4, 147.7), RenderConstrainedBox#7ab42@Offset(208.4, 147.7), RenderFlex#6476d@Offset(285.2, 147.7), RenderConstrainedBox#9ab7e@Offset(285.2, 147.7), RenderWrap#83a72@Offset(285.2, 147.7), RenderRepaintBoundary#fe660@Offset(285.2, 147.7), RenderIndexedSemantics#44e9d@Offset(285.2, 147.7), RenderSliverList@(mainAxis: 147.72500000000002, crossAxis: 285.18), RenderSliverPadding@(mainAxis: 147.72500000000002, crossAxis: 285.18), RenderViewport#504c1@Offset(285.2, 147.7), RenderIgnorePointer#2caa7@Offset(285.2, 147.7), RenderSemanticsAnnotations#8589e@Offset(285.2, 147.7), RenderPointerListener#78014@Offset(285.2, 147.7), RenderSemanticsGestureHandler#c57b9@Offset(285.2, 147.7), RenderPointerListener#fd4f0@Offset(285.2, 147.7), _RenderScrollSemantics#e9df9@Offset(285.2, 147.7), RenderClipRect#5b081@Offset(285.2, 147.7), RenderPadding#7fd47@Offset(285.2, 147.7), RenderIgnorePointer#3563c@Offset(285.2, 147.7), _RenderLayoutBuilder#be712@Offset(285.2, 147.7), RenderIgnorePointer#9fda6@Offset(285.2, 147.7), _RenderLayoutBuilder#1e454@Offset(285.2, 147.7), RenderPadding#51d06@Offset(285.2, 147.7), RenderFlex#4802f@Offset(285.2, 147.7), RenderStack#97bfe@Offset(285.2, 147.7), RenderIgnorePointer#43ce4@Offset(285.2, 147.7), _RenderLayoutBuilder#e7ac9@Offset(285.2, 147.7), RenderCustomMultiChildLayoutBox#69d3c@Offset(285.2, 203.7), _RenderInkFeatures#b4dbd@Offset(285.2, 203.7), RenderPhysicalModel#d0400@Offset(285.2, 203.7), RenderSemanticsAnnotations#c17c9@Offset(285.2, 203.7), RenderRepaintBoundary#dc317@Offset(285.2, 203.7), RenderIgnorePointer#982c3@Offset(285.2, 203.7), RenderAnimatedOpacity#e93be@Offset(285.2, 203.7), RenderAnimatedOpacity#9f6f5@Offset(285.2, 203.7), _RenderColoredBox#0b8b9@Offset(285.2, 203.7), RenderAnimatedOpacity#809cf@Offset(285.2, 203.7), RenderIgnorePointer#b5ed9@Offset(285.2, 203.7), RenderAnimatedOpacity#f0707@Offset(285.2, 203.7), RenderRepaintBoundary#55465@Offset(285.2, 203.7), RenderSemanticsAnnotations#b5ef9@Offset(285.2, 203.7), RenderOffstage#cde3f@Offset(285.2, 203.7), RenderSemanticsAnnotations#bd776@Offset(285.2, 203.7), _RenderTheater#b59aa@Offset(285.2, 203.7), RenderAbsorbPointer#5c835@Offset(285.2, 203.7), RenderPointerListener#b48c6@Offset(285.2, 203.7), RenderSemanticsAnnotations#83cef@Offset(285.2, 203.7), RenderCustomPaint#68574@Offset(285.2, 203.7), RenderSemanticsAnnotations#54b6a@Offset(285.2, 203.7), RenderSemanticsAnnotations#2d8da@Offset(285.2, 203.7), RenderSemanticsAnnotations#52364@Offset(285.2, 203.7), RenderTapRegionSurface#42a19@Offset(285.2, 203.7), RenderSemanticsAnnotations#3c101@Offset(285.2, 203.7), RenderSemanticsAnnotations#77db8@Offset(285.2, 203.7), HitTestEntry<HitTestTarget>#fdc4b(_ReusableRenderView#f119f), HitTestEntry<HitTestTarget>#29881(<AutomatedTestWidgetsFlutterBinding>))
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+#3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart:80:18)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+To silence this warning, pass "warnIfMissed: false" to "tap()".
+To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+The following TestFailure was thrown running a test:
+Expected: <1>
+  Actual: <0>
+
+When the exception was thrown, this was the stack:
+#4      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart:103:7)
+<asynchronous suspension>
+#5      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#6      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+<asynchronous suspension>
+(elided one frame from package:stack_trace)
+
+This was caught by the test expectation on the following line:
+  file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart line 103
+The test description was:
+  same product/variant/gallery/sections survive repeated reflow
+════════════════════════════════════════════════════════════════════════════════════════════════════
+00:07 +2 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x1.0
+00:07 +2 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: same product/variant/gallery/sections survive repeated reflow [E]
+  Test failed. See exception logs above.
+  The test description was: same product/variant/gallery/sections survive repeated reflow
+  
+Warning: At least one test in this suite creates an HttpClient. When running a test suite that uses
+TestWidgetsFlutterBinding, all HTTP requests will return status code 400, and no network request
+will actually be made. Any test expecting a real network connection and status code will fail.
+To test code that needs an HttpClient, provide your own HttpClient implementation to the code under
+test, so that your test can consistently provide a testable response to the code under test.
+00:07 +3 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: resizing an in-flight add issues exactly one exact-variant mutation
+00:08 +4 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x1.0
+00:08 +5 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: browse expands, collapses and Back restores the source selection
+00:09 +6 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: browse expands, collapses and Back restores the source selection
+00:09 +7 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x1.0
+00:09 +8 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 320 wide x1.0
+00:09 +9 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 320 wide x2.0
+00:10 +10 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 320 wide x2.0
+00:10 +11 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 320 wide x2.0
+00:10 +12 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 320 wide x2.0
+00:11 +13 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 320 wide x2.0
+00:11 +14 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x1.0
+00:11 +15 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x1.0
+00:11 +16 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 390 wide x1.0
+00:12 +17 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x1.0
+00:12 +18 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 390 wide x1.0
+00:12 +19 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 390 wide x2.0
+00:12 +20 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 390 wide x2.0
+00:13 +21 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 390 wide x2.0
+00:13 +22 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 390 wide x2.0
+00:13 +23 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 390 wide x2.0
+00:13 +24 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 430 wide x1.0
+00:14 +25 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x1.0
+00:14 +26 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x1.0
+00:14 +27 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x1.0
+00:15 +28 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 430 wide x1.0
+00:15 +29 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 430 wide x2.0
+00:15 +30 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 430 wide x2.0
+00:15 +31 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 430 wide x2.0
+00:16 +32 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 430 wide x2.0
+00:16 +33 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 430 wide x2.0
+00:16 +34 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x1.0
+00:16 +35 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x1.0
+00:17 +36 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x1.0
+00:17 +37 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x1.0
+00:17 +38 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 768 wide x1.0
+00:17 +39 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, one variant, 768 wide x2.0
+00:17 +40 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, several variants, 768 wide x2.0
+00:18 +41 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, long name, 768 wide x2.0
+00:18 +42 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha Monetta, sold out, 768 wide x2.0
+00:18 +43 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: RESP-02 ficha externa, long name, 768 wide x2.0
+00:18 +44 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 back, heart, bag, dock button and secondary actions are named 48 px buttons
+00:19 +45 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: A11Y-01 A11Y-01 the reading order is header, content, dock
+00:19 +46 -1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/product_layout_responsive_test.dart: (tearDownAll)
+00:19 +46 -1: Some tests failed.
+
+Failing tests:
+  /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: same product/variant/gallery/sections survive repeated reflow

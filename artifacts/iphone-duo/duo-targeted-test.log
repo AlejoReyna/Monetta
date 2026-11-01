@@ -1,0 +1,98 @@
+00:00 +0: loading /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart
+00:00 +0: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: (setUpAll)
+00:00 +0: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/navigation/duo_navigation_test.dart: fallback glyphs reflow at the full requested text size
+00:00 +1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: synthetic fold, camera, asymmetric insets and keyboard keep actions usable
+00:00 +1: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/navigation/duo_navigation_test.dart: short large-text windows expose every destination through overflow
+
+Warning: A call to tap() with finder "Found 1 widget with text "Inicio": [
+  Text("Inicio", dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery, _ScrollableScope]),
+]" derived an Offset (Offset(170.0, 84.0)) that would not hit test on the specified widget.
+Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+The finder corresponds to this RenderBox: RenderParagraph#6a4ba relayoutBoundary=up40
+The hit test result at that offset is: HitTestResult(RenderPointerListener#c08a2@Offset(160.0, 68.0), RenderSemanticsAnnotations#924bf@Offset(160.0, 68.0), RenderMouseRegion#fdd7b@Offset(160.0, 68.0), RenderSemanticsAnnotations#69f47@Offset(160.0, 68.0), RenderSemanticsAnnotations#c3e90@Offset(160.0, 68.0), RenderMergeSemantics#cb712@Offset(160.0, 68.0), RenderAnimatedOpacity#ed534@Offset(160.0, 68.0), _RenderMenuItem#528f9@Offset(160.0, 68.0), RenderListBody#ad05a@Offset(160.0, 68.0), RenderPadding#3d2c0@Offset(160.0, 76.0), _RenderSingleChildViewport#0958e@Offset(160.0, 76.0), RenderIgnorePointer#e5ae6@Offset(160.0, 76.0), RenderSemanticsAnnotations#e5d1e@Offset(160.0, 76.0), RenderPointerListener#840ab@Offset(160.0, 76.0), RenderSemanticsGestureHandler#88a08@Offset(160.0, 76.0), RenderPointerListener#92c15@Offset(160.0, 76.0), _RenderScrollSemantics#d8c52@Offset(160.0, 76.0), RenderClipRect#8970e@Offset(160.0, 76.0), RenderSemanticsAnnotations#aaee8@Offset(160.0, 76.0), RenderIntrinsicWidth#7d570@Offset(160.0, 76.0), RenderConstrainedBox#c058e@Offset(160.0, 76.0), RenderPositionedBox#cd838@Offset(160.0, 76.0), _RenderInkFeatures#67f83@Offset(160.0, 76.0), RenderCustomPaint#e87b0@Offset(160.0, 76.0), RenderPhysicalShape#37473@Offset(160.0, 76.0), RenderAnimatedOpacity#0a5a5@Offset(160.0, 76.0), RenderCustomSingleChildLayoutBox#4b015@Offset(170.0, 84.0), _RenderLayoutBuilder#151dd@Offset(170.0, 84.0), RenderRepaintBoundary#1c090@Offset(170.0, 84.0), RenderIgnorePointer#75130@Offset(170.0, 84.0), RenderRepaintBoundary#7854f@Offset(170.0, 84.0), RenderSemanticsAnnotations#8e6d0@Offset(170.0, 84.0), RenderOffstage#fd91b@Offset(170.0, 84.0), RenderSemanticsAnnotations#9a192@Offset(170.0, 84.0), _RenderTheater#52c97@Offset(170.0, 84.0), RenderAbsorbPointer#73b39@Offset(170.0, 84.0), RenderPointerListener#1d2aa@Offset(170.0, 84.0), RenderSemanticsAnnotations#92220@Offset(170.0, 84.0), RenderCustomPaint#3e5d4@Offset(170.0, 84.0), RenderSemanticsAnnotations#c9ee7@Offset(170.0, 84.0), RenderSemanticsAnnotations#ab3e8@Offset(170.0, 84.0), RenderSemanticsAnnotations#59173@Offset(170.0, 84.0), RenderTapRegionSurface#1ee52@Offset(170.0, 84.0), RenderSemanticsAnnotations#51aa6@Offset(170.0, 84.0), RenderSemanticsAnnotations#9d1c4@Offset(170.0, 84.0), HitTestEntry<HitTestTarget>#0054e(_ReusableRenderView#7d60b), HitTestEntry<HitTestTarget>#b76f1(<AutomatedTestWidgetsFlutterBinding>))
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+#3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/navigation/duo_navigation_test.dart:89:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+To silence this warning, pass "warnIfMissed: false" to "tap()".
+To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+
+
+Warning: A call to tap() with finder "Found 1 widget with text "Catálogo": [
+  Text("Catálogo", dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery, _ScrollableScope]),
+]" derived an Offset (Offset(170.0, 160.0)) that would not hit test on the specified widget.
+Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+The finder corresponds to this RenderBox: RenderParagraph#6b4d7 relayoutBoundary=up40
+The hit test result at that offset is: HitTestResult(RenderPointerListener#3313d@Offset(160.0, 68.0), RenderSemanticsAnnotations#f4226@Offset(160.0, 68.0), RenderMouseRegion#91310@Offset(160.0, 68.0), RenderSemanticsAnnotations#f899e@Offset(160.0, 68.0), RenderSemanticsAnnotations#3dfc8@Offset(160.0, 68.0), RenderMergeSemantics#92830@Offset(160.0, 68.0), RenderAnimatedOpacity#2489d@Offset(160.0, 68.0), _RenderMenuItem#35579@Offset(160.0, 68.0), RenderListBody#77293@Offset(160.0, 204.0), RenderPadding#67714@Offset(160.0, 212.0), _RenderSingleChildViewport#16c20@Offset(160.0, 152.0), RenderIgnorePointer#948d3@Offset(160.0, 152.0), RenderSemanticsAnnotations#c3a47@Offset(160.0, 152.0), RenderPointerListener#5332b@Offset(160.0, 152.0), RenderSemanticsGestureHandler#dd8fd@Offset(160.0, 152.0), RenderPointerListener#ba666@Offset(160.0, 152.0), _RenderScrollSemantics#3201c@Offset(160.0, 152.0), RenderClipRect#bf233@Offset(160.0, 152.0), RenderSemanticsAnnotations#454bf@Offset(160.0, 152.0), RenderIntrinsicWidth#22243@Offset(160.0, 152.0), RenderConstrainedBox#2c721@Offset(160.0, 152.0), RenderPositionedBox#3a12b@Offset(160.0, 152.0), _RenderInkFeatures#f3c6d@Offset(160.0, 152.0), RenderCustomPaint#80552@Offset(160.0, 152.0), RenderPhysicalShape#67a6a@Offset(160.0, 152.0), RenderAnimatedOpacity#34371@Offset(160.0, 152.0), RenderCustomSingleChildLayoutBox#35161@Offset(170.0, 160.0), _RenderLayoutBuilder#58400@Offset(170.0, 160.0), RenderRepaintBoundary#92dc3@Offset(170.0, 160.0), RenderIgnorePointer#e3c9e@Offset(170.0, 160.0), RenderRepaintBoundary#57dc5@Offset(170.0, 160.0), RenderSemanticsAnnotations#51a22@Offset(170.0, 160.0), RenderOffstage#87f25@Offset(170.0, 160.0), RenderSemanticsAnnotations#66311@Offset(170.0, 160.0), _RenderTheater#52c97@Offset(170.0, 160.0), RenderAbsorbPointer#73b39@Offset(170.0, 160.0), RenderPointerListener#1d2aa@Offset(170.0, 160.0), RenderSemanticsAnnotations#92220@Offset(170.0, 160.0), RenderCustomPaint#3e5d4@Offset(170.0, 160.0), RenderSemanticsAnnotations#c9ee7@Offset(170.0, 160.0), RenderSemanticsAnnotations#ab3e8@Offset(170.0, 160.0), RenderSemanticsAnnotations#59173@Offset(170.0, 160.0), RenderTapRegionSurface#1ee52@Offset(170.0, 160.0), RenderSemanticsAnnotations#51aa6@Offset(170.0, 160.0), RenderSemanticsAnnotations#9d1c4@Offset(170.0, 160.0), HitTestEntry<HitTestTarget>#af96b(_ReusableRenderView#7d60b), HitTestEntry<HitTestTarget>#61f15(<AutomatedTestWidgetsFlutterBinding>))
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+#3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/navigation/duo_navigation_test.dart:89:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+To silence this warning, pass "warnIfMissed: false" to "tap()".
+To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+
+
+Warning: A call to tap() with finder "Found 1 widget with text "Carrito (2)": [
+  Text("Carrito (2)", dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery, _ScrollableScope]),
+]" derived an Offset (Offset(170.0, 160.0)) that would not hit test on the specified widget.
+Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+The finder corresponds to this RenderBox: RenderParagraph#cba27 relayoutBoundary=up40
+The hit test result at that offset is: HitTestResult(RenderPointerListener#7126f@Offset(160.0, 98.0), RenderSemanticsAnnotations#52fcd@Offset(160.0, 98.0), RenderMouseRegion#89e2a@Offset(160.0, 98.0), RenderSemanticsAnnotations#ef3c5@Offset(160.0, 98.0), RenderSemanticsAnnotations#00c5a@Offset(160.0, 98.0), RenderMergeSemantics#2781b@Offset(160.0, 98.0), RenderAnimatedOpacity#ebe4a@Offset(160.0, 98.0), _RenderMenuItem#5f56c@Offset(160.0, 98.0), RenderListBody#285a7@Offset(160.0, 370.0), RenderPadding#21692@Offset(160.0, 378.0), _RenderSingleChildViewport#1c769@Offset(160.0, 152.0), RenderIgnorePointer#f2924@Offset(160.0, 152.0), RenderSemanticsAnnotations#e8a38@Offset(160.0, 152.0), RenderPointerListener#78fbb@Offset(160.0, 152.0), RenderSemanticsGestureHandler#99bbd@Offset(160.0, 152.0), RenderPointerListener#1a95b@Offset(160.0, 152.0), _RenderScrollSemantics#c96ab@Offset(160.0, 152.0), RenderClipRect#0b870@Offset(160.0, 152.0), RenderSemanticsAnnotations#9d133@Offset(160.0, 152.0), RenderIntrinsicWidth#97e37@Offset(160.0, 152.0), RenderConstrainedBox#06f9e@Offset(160.0, 152.0), RenderPositionedBox#0bcc0@Offset(160.0, 152.0), _RenderInkFeatures#d8199@Offset(160.0, 152.0), RenderCustomPaint#94e3d@Offset(160.0, 152.0), RenderPhysicalShape#77bf2@Offset(160.0, 152.0), RenderAnimatedOpacity#8c7c8@Offset(160.0, 152.0), RenderCustomSingleChildLayoutBox#f169d@Offset(170.0, 160.0), _RenderLayoutBuilder#59fac@Offset(170.0, 160.0), RenderRepaintBoundary#d7549@Offset(170.0, 160.0), RenderIgnorePointer#7fcff@Offset(170.0, 160.0), RenderRepaintBoundary#ee968@Offset(170.0, 160.0), RenderSemanticsAnnotations#acef0@Offset(170.0, 160.0), RenderOffstage#2e4d0@Offset(170.0, 160.0), RenderSemanticsAnnotations#33044@Offset(170.0, 160.0), _RenderTheater#52c97@Offset(170.0, 160.0), RenderAbsorbPointer#73b39@Offset(170.0, 160.0), RenderPointerListener#1d2aa@Offset(170.0, 160.0), RenderSemanticsAnnotations#92220@Offset(170.0, 160.0), RenderCustomPaint#3e5d4@Offset(170.0, 160.0), RenderSemanticsAnnotations#c9ee7@Offset(170.0, 160.0), RenderSemanticsAnnotations#ab3e8@Offset(170.0, 160.0), RenderSemanticsAnnotations#59173@Offset(170.0, 160.0), RenderTapRegionSurface#1ee52@Offset(170.0, 160.0), RenderSemanticsAnnotations#51aa6@Offset(170.0, 160.0), RenderSemanticsAnnotations#9d1c4@Offset(170.0, 160.0), HitTestEntry<HitTestTarget>#dc509(_ReusableRenderView#7d60b), HitTestEntry<HitTestTarget>#52af1(<AutomatedTestWidgetsFlutterBinding>))
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+#3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/navigation/duo_navigation_test.dart:89:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+To silence this warning, pass "warnIfMissed: false" to "tap()".
+To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+
+
+Warning: A call to tap() with finder "Found 1 widget with text "Cuenta": [
+  Text("Cuenta", dependencies: [DefaultSelectionStyle, DefaultTextStyle, MediaQuery, _ScrollableScope]),
+]" derived an Offset (Offset(170.0, 236.0)) that would not hit test on the specified widget.
+Maybe the widget is actually off-screen, or another widget is obscuring it, or the widget cannot receive pointer events.
+The finder corresponds to this RenderBox: RenderParagraph#50e50 relayoutBoundary=up40
+The hit test result at that offset is: HitTestResult(RenderPointerListener#85da3@Offset(160.0, 68.0), RenderSemanticsAnnotations#4edb1@Offset(160.0, 68.0), RenderMouseRegion#35784@Offset(160.0, 68.0), RenderSemanticsAnnotations#ef6e4@Offset(160.0, 68.0), RenderSemanticsAnnotations#4d877@Offset(160.0, 68.0), RenderMergeSemantics#d7d9f@Offset(160.0, 68.0), RenderAnimatedOpacity#2515f@Offset(160.0, 68.0), _RenderMenuItem#fbb86@Offset(160.0, 68.0), RenderListBody#88a85@Offset(160.0, 536.0), RenderPadding#5fce4@Offset(160.0, 544.0), _RenderSingleChildViewport#db40a@Offset(160.0, 228.0), RenderIgnorePointer#e6005@Offset(160.0, 228.0), RenderSemanticsAnnotations#c19ad@Offset(160.0, 228.0), RenderPointerListener#a5e28@Offset(160.0, 228.0), RenderSemanticsGestureHandler#4b8e2@Offset(160.0, 228.0), RenderPointerListener#1e41c@Offset(160.0, 228.0), _RenderScrollSemantics#b50ed@Offset(160.0, 228.0), RenderClipRect#db686@Offset(160.0, 228.0), RenderSemanticsAnnotations#6278e@Offset(160.0, 228.0), RenderIntrinsicWidth#f8d7b@Offset(160.0, 228.0), RenderConstrainedBox#8df0e@Offset(160.0, 228.0), RenderPositionedBox#f3a58@Offset(160.0, 228.0), _RenderInkFeatures#cf35f@Offset(160.0, 228.0), RenderCustomPaint#d66a1@Offset(160.0, 228.0), RenderPhysicalShape#7b8cb@Offset(160.0, 228.0), RenderAnimatedOpacity#123de@Offset(160.0, 228.0), RenderCustomSingleChildLayoutBox#32704@Offset(170.0, 236.0), _RenderLayoutBuilder#9b014@Offset(170.0, 236.0), RenderRepaintBoundary#3039c@Offset(170.0, 236.0), RenderIgnorePointer#3eb8d@Offset(170.0, 236.0), RenderRepaintBoundary#4245b@Offset(170.0, 236.0), RenderSemanticsAnnotations#ae49d@Offset(170.0, 236.0), RenderOffstage#3dd7d@Offset(170.0, 236.0), RenderSemanticsAnnotations#70ea4@Offset(170.0, 236.0), _RenderTheater#52c97@Offset(170.0, 236.0), RenderAbsorbPointer#73b39@Offset(170.0, 236.0), RenderPointerListener#1d2aa@Offset(170.0, 236.0), RenderSemanticsAnnotations#92220@Offset(170.0, 236.0), RenderCustomPaint#3e5d4@Offset(170.0, 236.0), RenderSemanticsAnnotations#c9ee7@Offset(170.0, 236.0), RenderSemanticsAnnotations#ab3e8@Offset(170.0, 236.0), RenderSemanticsAnnotations#59173@Offset(170.0, 236.0), RenderTapRegionSurface#1ee52@Offset(170.0, 236.0), RenderSemanticsAnnotations#51aa6@Offset(170.0, 236.0), RenderSemanticsAnnotations#9d1c4@Offset(170.0, 236.0), HitTestEntry<HitTestTarget>#cac4e(_ReusableRenderView#7d60b), HitTestEntry<HitTestTarget>#adde7(<AutomatedTestWidgetsFlutterBinding>))
+#0      WidgetController._getElementPoint (package:flutter_test/src/controller.dart:2165:25)
+#1      WidgetController.getCenter (package:flutter_test/src/controller.dart:1947:12)
+#2      WidgetController.tap (package:flutter_test/src/controller.dart:1080:7)
+#3      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/navigation/duo_navigation_test.dart:89:20)
+<asynchronous suspension>
+#4      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#6      StackZoneSpecification._registerCallback.<anonymous closure> (package:stack_trace/src/stack_zone_specification.dart:114:42)
+<asynchronous suspension>
+To silence this warning, pass "warnIfMissed: false" to "tap()".
+To make this warning fatal, set WidgetController.hitTestWarningShouldBeFatal to true.
+
+00:00 +2: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: synthetic fold, camera, asymmetric insets and keyboard keep actions usable
+00:00 +3: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: synthetic fold, camera, asymmetric insets and keyboard keep actions usable
+00:01 +4: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: same product/variant/gallery/sections survive repeated reflow
+00:01 +5: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: an unselected collection preserves its visible result ID across column changes
+00:02 +6: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: resizing an in-flight add issues exactly one exact-variant mutation
+00:02 +7: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: browse expands, collapses and Back restores the source selection
+00:02 +8: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: real collection keeps filter/sort drafts and applied results through reflow
+00:03 +9: /Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/test/features/product/duo_continuity_test.dart: (tearDownAll)
+00:03 +9: All tests passed!

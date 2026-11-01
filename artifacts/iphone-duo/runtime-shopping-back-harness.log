@@ -1,0 +1,77 @@
+The following plugins do not support Swift Package Manager for ios:
+  - flutter_secure_storage
+This will become an error in a future version of Flutter. Please contact the plugin maintainers to request Swift Package Manager adoption.
+Running Xcode build...                                          
+Xcode build done.                                           145.3s
+VMServiceFlutterDriver: Connecting to Flutter application at http://127.0.0.1:8189/h_wJmkrVx78=/
+VMServiceFlutterDriver: Isolate found with number: 1331334816171787
+VMServiceFlutterDriver: Isolate 1331334816171787 is runnable.
+VMServiceFlutterDriver: Isolate is paused at start.
+VMServiceFlutterDriver: Attempting to resume isolate
+flutter: 00:00 +0: offline shopping continues through actual Duo runtime poses
+VMServiceFlutterDriver: Connected to Flutter application.
+VMServiceFlutterDriver: request_data message is taking a long time to complete...
+flutter: DUO_STAGE:outer
+flutter: DUO_GEOMETRY:{"stage":"outer","size":[466.0,678.0],"barEdge":"right","divisions":[]}
+flutter: DUO_CAPTURE:01-actual-duo-outer-inicio
+flutter: DUO_CAPTURE:02-actual-duo-outer-product
+flutter: DUO_STAGE:open-landscape
+flutter: DUO_GEOMETRY:{"stage":"open-landscape","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":false,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: DUO_CAPTURE:03-actual-duo-landscape-browse-detail
+flutter: DUO_CAPTURE:04-actual-duo-landscape-direct-product
+flutter: DUO_STAGE:partial-fold
+flutter: DUO_GEOMETRY:{"stage":"partial-fold","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":true,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: DUO_CAPTURE:05-actual-duo-partial-fold-product
+flutter: DUO_STAGE:open-flat
+flutter: DUO_GEOMETRY:{"stage":"open-flat","size":[951.0,669.0],"barEdge":"right","divisions":[{"active":false,"frame":[455.5,0.0,40.0,669.0]}]}
+flutter: ══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞════════════════════════════════════════════════════
+flutter: The following StateError was thrown running a test:
+flutter: Bad state: Too many elements
+flutter:
+flutter: When the exception was thrown, this was the stack:
+flutter: #0      Iterable.single (dart:core/iterable.dart:696:24)
+flutter: #1      WidgetController.state (package:flutter_test/src/controller.dart:932:42)
+flutter: #2      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:217:21)
+flutter: <asynchronous suspension>
+flutter: #3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+flutter: <asynchronous suspension>
+flutter: #4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+flutter: <asynchronous suspension>
+flutter: #5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+flutter: <asynchronous suspension>
+flutter:
+flutter: The test description was:
+flutter:   offline shopping continues through actual Duo runtime poses
+flutter: ════════════════════════════════════════════════════════════════════════════════════════════════════
+flutter: 03:51 +0: offline shopping continues through actual Duo runtime poses [E]
+flutter:   Test failed. See exception logs above.
+  The test description was: offline shopping continues through actual Duo runtime poses
+flutter:
+flutter: 03:51 +0 -1: (tearDownAll)
+flutter: 03:52 +1 -1: Some tests failed.
+Failure Details:
+Failure in method: offline shopping continues through actual Duo runtime poses
+══╡ EXCEPTION CAUGHT BY FLUTTER TEST FRAMEWORK ╞═════════════════
+The following StateError was thrown running a test:
+Bad state: Too many elements
+
+When the exception was thrown, this was the stack:
+#0      Iterable.single (dart:core/iterable.dart:696:24)
+#1      WidgetController.state (package:flutter_test/src/controller.dart:932:42)
+#2      main.<anonymous closure> (file:///Users/alexis_reyna/MyCode/Monetta/.claude/worktrees/iphone-duo/integration_test/duo_shopping_task_test.dart:217:21)
+<asynchronous suspension>
+#3      testWidgets.<anonymous closure>.<anonymous closure> (package:flutter_test/src/widget_tester.dart:192:15)
+<asynchronous suspension>
+#4      TestWidgetsFlutterBinding._runTestBody (package:flutter_test/src/binding.dart:1952:5)
+<asynchronous suspension>
+#5      TestWidgetsFlutterBinding._createTestCompletionHandler.<anonymous closure> (package:flutter_test/src/binding.dart:1706:12)
+<asynchronous suspension>
+
+The test description was:
+  offline shopping continues through actual Duo runtime poses
+═════════════════════════════════════════════════════════════════
+
+end of failure 1
+
+
+

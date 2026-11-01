@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="es-MX">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="shopify-api-key" content="{{SHOPIFY_API_KEY}}">
+  <!-- App Bridge must load first and synchronously; it supplies the session token. -->
+  <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
+  <title>Avisos Monetta</title>
+  <link rel="stylesheet" href="/shopify/app/panel.css">
+  <script src="/shopify/app/panel.js" defer></script>
+</head>
+<body>
+  <main class="page">
+    <header class="page-header">
+      <div>
+        <h1>Avisos push</h1>
+        <p class="subtle">Envía notificaciones a la app de Monetta.</p>
+      </div>
+      <span id="environment" class="badge" hidden></span>
+    </header>
+
+    <div id="status" class="banner" role="status" aria-live="polite" hidden></div>
+
+    <section id="loading" class="card">
+      <p class="subtle">Cargando…</p>
+    </section>
+
+    <section id="denied" class="card" hidden>
+      <h2>Sin acceso a avisos</h2>
+      <p>Tu usuario de Shopify todavía no puede enviar notificaciones.</p>
+      <p>Pide a quien opera el servidor que agregue este ID de staff a
+        <code>OWNER_SHOPIFY_STAFF_IDS</code> o a <code>admin_principals</code>:</p>
+      <p class="staff-id"><code id="staff-id"></code></p>
+    </section>
+
+    <div id="panel" hidden>
+      <section class="card">
+        <h2>Alcance</h2>
+        <dl class="stats">
+          <div><dt>Dispositivos activos</dt><dd id="stat-active">–</dd></div>
+          <div><dt>Con permiso</dt><dd id="stat-granted">–</dd></div>
+          <div><dt>Con perfil de gustos</dt><dd id="stat-profiles">–</dd></div>
+          <div><dt>En cola</dt><dd id="stat-queued">–</dd></div>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2>Nuevo aviso</h2>
+        <form id="compose" novalidate>
+          <fieldset id="compose-fields">
+            <label class="field">
+              <span>Título <small class="counter" data-for="title"></small></span>
+              <input id="title" name="title" maxlength="80" required autocomplete="off">
+            </label>
+            <label class="field">
+              <span>Mensaje <small class="counter" data-for="body"></small></span>
+              <textarea id="body" name="body" maxlength="180" rows="3" required></textarea>
+            </label>
+            <label class="field">
+              <span>Imagen (opcional, URL https)</span>
+              <input id="image-url" name="imageUrl" type="url" inputmode="url" placeholder="https://cdn.shopify.com/…" autocomplete="off">
+            </label>
+
+            <div class="row">
+              <label class="field">
+                <span>Tipo de aviso</span>
+                <select id="purpose" name="purpose">
+                  <option value="announcements">Anuncio</option>
+                  <option value="personalized_offers">Oferta personalizada</option>
+                  <option value="product_alerts">Alerta de producto</option>
+                </select>
+                <small class="subtle">Sólo lo reciben quienes aceptaron este tipo de aviso.</small>
+              </label>
+              <label class="field">
+                <span>Audiencia</span>
+                <select id="segment" name="segment">
+                  <option value="all">Todas las personas con permiso</option>
+                  <option value="high_intent">Alta intención de compra</option>
+                  <option value="brand">Les gusta una marca</option>
+                  <option value="category">Les gusta una categoría</option>
+                </select>
+              </label>
+            </div>
+
+            <div class="row" id="trait-row" hidden>
+              <label class="field">
+                <span id="trait-label">Marca</span>
+                <input id="trait" name="trait" maxlength="80" autocomplete="off" placeholder="coach">
+              </label>
+              <label class="field narrow">
+                <span>Afinidad mínima</span>
+                <input id="minimum-score" name="minimumScore" type="number" min="1" max="100" value="60">
+              </label>
+            </div>
+
+            <div class="row">
+              <label class="field">
+                <span>Al tocar, abre</span>
+                <select id="route" name="route">
+                  <option value="home">Inicio</option>
+                  <option value="product">Un producto</option>
+                  <option value="collection">Una colección</option>
+                  <option value="wishlist">Favoritos</option>
+                  <option value="orders">Pedidos</option>
+                </select>
+              </label>
+              <label class="field" id="route-product-field" hidden>
+                <span>Producto (ID o URL de Shopify Admin)</span>
+                <input id="route-product" name="routeProduct" autocomplete="off" placeholder="https://admin.shopify.com/store/…/products/123">
+              </label>
+              <label class="field" id="route-collection-field" hidden>
+                <span>Handle de la colección</span>
+                <input id="route-collection" name="routeCollection" maxlength="120" autocomplete="off" placeholder="monetta-todays-picks">
+              </label>
+            </div>
+          </fieldset>
+
+          <div class="actions">
+            <button type="submit" id="create" class="primary">Calcular audiencia</button>
+          </div>
+        </form>
+      </section>
+
+      <section id="review" class="card review" hidden>
+        <h2>Revisar y enviar</h2>
+        <p class="eligible"><strong id="eligible-count">0</strong> <span id="eligible-label">dispositivos</span> lo recibirían ahora.</p>
+        <div class="preview-notification">
+          <strong id="review-title"></strong>
+          <span id="review-body"></span>
+        </div>
+
+        <div class="row">
+          <label class="field">
+            <span>Device ID de prueba</span>
+            <input id="test-device" autocomplete="off" placeholder="ID de instalación de tu teléfono">
+          </label>
+          <div class="field align-end">
+            <button type="button" id="send-test">Enviar prueba</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <label class="field">
+            <span>Programar (hora local)</span>
+            <input id="schedule-at" type="datetime-local">
+          </label>
+          <div class="field align-end">
+            <button type="button" id="schedule">Programar</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <button type="button" id="discard">Editar</button>
+          <button type="button" id="send-now" class="primary">Enviar ahora</button>
+        </div>
+        <div id="confirm-send" class="confirm" hidden>
+          <p id="confirm-text"></p>
+          <div class="actions">
+            <button type="button" id="confirm-back">Volver</button>
+            <button type="button" id="confirm-go" class="critical">Confirmar envío</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-header">
+          <h2>Envíos recientes</h2>
+          <button type="button" id="refresh">Actualizar</button>
+        </div>
+        <p id="campaigns-empty" class="subtle">Todavía no hay envíos.</p>
+        <div class="table-wrap">
+          <table id="campaigns" hidden>
+            <thead>
+              <tr>
+                <th scope="col">Aviso</th>
+                <th scope="col">Estado</th>
+                <th scope="col">Fecha</th>
+                <th scope="col" class="num">Audiencia</th>
+                <th scope="col" class="num">Entregados</th>
+                <th scope="col" class="num">Abiertos</th>
+                <th scope="col" class="num">Fallidos</th>
+                <th scope="col"><span class="visually-hidden">Acciones</span></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+</body>
+</html>

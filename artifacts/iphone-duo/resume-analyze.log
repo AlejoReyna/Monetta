@@ -1,0 +1,9 @@
+Analyzing iphone-duo...                                         
+
+   info • Missing a required trailing comma. Try adding a trailing comma • integration_test/duo_shopping_task_test.dart:101:15 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • integration_test/duo_shopping_task_test.dart:103:65 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/checkout/checkout_screen.dart:1317:74 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/checkout/checkout_screen.dart:1375:74 • require_trailing_commas
+   info • Missing a required trailing comma. Try adding a trailing comma • lib/features/navigation/monetta_bottom_navigation.dart:102:63 • require_trailing_commas
+
+5 issues found. (ran in 5.0s)
