@@ -42,6 +42,7 @@ import 'data/admin/admin_client.dart';
 import 'data/customer_auth/customer_account_config.dart';
 import 'data/customer_auth/customer_auth_gateway.dart';
 import 'data/customer_auth/customer_identity.dart';
+import 'data/customer_auth/customer_profile.dart';
 import 'data/customer_auth/customer_orders.dart';
 import 'data/customer_auth/customer_session_repository.dart';
 import 'data/customer_auth/device_identity.dart';
@@ -546,6 +547,7 @@ class _MonettaAppState extends State<MonettaApp> {
   /// before that future completes, and since a build without Customer Account
   /// credentials never creates one at all).
   HttpCustomerIdentityService? _customerIdentityService;
+  HttpCustomerProfileService? _customerProfileService;
   HttpCustomerOrdersService? _customerOrdersService;
   HttpAdminClient? _adminClient;
   bool _adminCapListenerAttached = false;
@@ -671,6 +673,9 @@ class _MonettaAppState extends State<MonettaApp> {
         config: customerConfig,
       );
       _customerIdentityService = identityService;
+      _customerProfileService = HttpCustomerProfileService(
+        config: customerConfig,
+      );
       final ordersService = HttpCustomerOrdersService(
         config: customerConfig,
       );
@@ -714,6 +719,7 @@ class _MonettaAppState extends State<MonettaApp> {
         customerOrders: _customerOrdersService,
       ),
       deviceId: deviceId,
+      profileService: _customerProfileService,
       onAccountScopeChanged: (accountId) async {
         await _store.setAccountScope(accountId);
         await SearchHistory.instance.setScope(accountId);
@@ -846,6 +852,7 @@ class _MonettaAppState extends State<MonettaApp> {
     }
     _storefrontTransport?.close();
     _customerIdentityService?.close();
+    _customerProfileService?.close();
     _customerOrdersService?.close();
     _adminClient?.close();
     _admin?.dispose();

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:monetta_app/app/account_controller.dart';
@@ -10,6 +11,7 @@ import 'package:monetta_app/data/accounts_orders/system_account_session_reposito
 import 'package:monetta_app/data/customer_auth/customer_account_config.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_error.dart';
 import 'package:monetta_app/data/customer_auth/customer_auth_gateway.dart';
+import 'package:monetta_app/data/customer_auth/customer_profile.dart';
 import 'package:monetta_app/data/customer_auth/customer_session_repository.dart';
 import 'package:monetta_app/data/customer_auth/jwt.dart';
 import 'package:monetta_app/data/customer_auth/secure_token_store.dart';
@@ -197,6 +199,7 @@ void main() {
     Object? loginError,
     CustomerAuthGateway? gateway,
     _FakeSystemClient? systemClient,
+    CustomerProfileService? profileService,
   }) {
     final sessionRepo = CustomerSessionRepository(
       authGateway:
@@ -240,6 +243,7 @@ void main() {
             )
           : CustomerAccountConfig.fromEnvironment(),
       deviceId: 'dev-1',
+      profileService: profileService,
     );
   }
 
@@ -622,6 +626,381 @@ void main() {
     expect(controller.ordersStatus, OrderHistoryStatus.unavailable);
     expect(controller.orders, isEmpty);
   });
+
+  group('Shopify profile', () {
+    final jpeg = Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0, 1, 2, 3]);
+
+    Future<(AccountController, _FakeProfileService)> signedIn({
+      _FakeGateway? gateway,
+    }) async {
+      final service = _FakeProfileService();
+      final controller = buildController(
+        gateway: gateway,
+        profileService: service,
+      );
+      await controller.login();
+      expect(controller.isSignedIn, isTrue);
+      return (controller, service);
+    }
+
+    test('loadProfile fetches with the Customer Account token', () async {
+      final (controller, service) = await signedIn();
+
+      await controller.loadProfile();
+
+      expect(controller.canEditProfile, isTrue);
+      expect(service.calls, ['fetch']);
+      expect(service.tokens.single, 'access');
+      expect(controller.profile?.firstName, 'Ana');
+      expect(controller.profileLoading, isFalse);
+    });
+
+    test('a failed load leaves the profile empty and does not throw', () async {
+      final (controller, service) = await signedIn();
+      service.failure = const CustomerAuthException(
+        CustomerAuthErrorKind.offline,
+      );
+
+      await controller.loadProfile();
+
+      expect(controller.profile, isNull);
+      expect(controller.profileLoading, isFalse);
+    });
+
+    test('legacy Monetta accounts cannot edit or load a profile', () async {
+      final service = _FakeProfileService();
+      final controller = buildController(
+        systemClient: _FakeSystemClient(),
+        profileService: service,
+      );
+      await controller.loginWithSystemAccount(
+        email: 'legacy@example.com',
+        password: 'secret',
+      );
+      expect(controller.account?.authProvider, 'monetta');
+
+      expect(controller.canEditProfile, isFalse);
+      await controller.loadProfile();
+      final outcome = await controller.saveProfile(firstName: 'Nuevo');
+
+      expect(service.calls, isEmpty);
+      expect(outcome.status, ProfileSaveStatus.failed);
+    });
+
+    test('a controller without the service cannot edit', () async {
+      final controller = buildController();
+      await controller.login();
+      expect(controller.canEditProfile, isFalse);
+    });
+
+    test('saving a name updates the profile and Accounts.displayName',
+        () async {
+      final (controller, service) = await signedIn();
+      await controller.loadProfile();
+      service.reportedDisplayName = 'Lucía Ruiz';
+      final before = controller.account!;
+
+      final outcome = await controller.saveProfile(firstName: '  Lucía ');
+
+      expect(outcome.status, ProfileSaveStatus.saved);
+      expect(service.calls, ['fetch', 'updateFirstName']);
+      expect(service.lastFirstName, 'Lucía');
+      expect(controller.profile?.firstName, 'Lucía');
+      expect(controller.profile?.displayName, 'Lucía Ruiz');
+      expect(controller.account?.displayName, 'Lucía Ruiz');
+      // Every other column is carried over untouched.
+      final stored = await accountStore.byLocalId(before.localAccountId);
+      expect(stored?.displayName, 'Lucía Ruiz');
+      expect(stored?.email, before.email);
+      expect(stored?.shopifyCustomerId, before.shopifyCustomerId);
+      expect(stored?.authProvider, 'shopify');
+      expect(stored?.createdAt, before.createdAt);
+      expect(controller.profileSaving, isFalse);
+    });
+
+    test('saving a photo sends only the photo and keeps it in memory',
+        () async {
+      final (controller, service) = await signedIn();
+      await controller.loadProfile();
+
+      final outcome = await controller.saveProfile(photoJpeg: jpeg);
+
+      expect(outcome.isSaved, isTrue);
+      expect(service.calls, ['fetch', 'setPhoto']);
+      expect(service.lastCustomerId, 'gid://shopify/Customer/1');
+      expect(service.lastDataUrl, profilePhotoDataUrl(jpeg));
+      expect(controller.profilePhotoBytes, jpeg);
+      // The photo is never written to the local database.
+      final stored = await accountStore.byLocalId(
+        controller.account!.localAccountId,
+      );
+      expect(stored.toString(), isNot(contains('data:image')));
+    });
+
+    test('removing the photo calls removePhoto and clears it', () async {
+      final (controller, service) = await signedIn();
+      service.profile = CustomerProfile(
+        shopifyCustomerId: 'gid://shopify/Customer/1',
+        firstName: 'Ana',
+        photoDataUrl: profilePhotoDataUrl(jpeg),
+      );
+      await controller.loadProfile();
+      expect(controller.profilePhotoBytes, jpeg);
+
+      final outcome = await controller.saveProfile(removePhoto: true);
+
+      expect(outcome.isSaved, isTrue);
+      expect(service.calls.last, 'removePhoto');
+      expect(controller.profile?.photoDataUrl, isNull);
+      expect(controller.profilePhotoBytes, isNull);
+    });
+
+    test('works before the profile loaded, using the stored customer id',
+        () async {
+      final (controller, service) = await signedIn();
+
+      final outcome = await controller.saveProfile(photoJpeg: jpeg);
+
+      expect(outcome.isSaved, isTrue);
+      expect(service.lastCustomerId, 'gid://shopify/Customer/1');
+      expect(controller.profile?.shopifyCustomerId, 'gid://shopify/Customer/1');
+    });
+
+    test('maps failures to typed outcomes with Spanish messages', () async {
+      final (controller, service) = await signedIn();
+
+      service.failure = const ProfilePhotoTooLargeException(61000);
+      var outcome = await controller.saveProfile(photoJpeg: jpeg);
+      expect(outcome.status, ProfileSaveStatus.tooLarge);
+      expect(outcome.message, 'La foto es demasiado grande. Elige otra.');
+
+      service.failure = const CustomerAuthException(
+        CustomerAuthErrorKind.offline,
+      );
+      outcome = await controller.saveProfile(photoJpeg: jpeg);
+      expect(outcome.status, ProfileSaveStatus.failed);
+      expect(
+        outcome.message,
+        'Sin conexión. Revisa tu internet e inténtalo de nuevo.',
+      );
+
+      service.failure = const CustomerAuthException(
+        CustomerAuthErrorKind.sessionExpired,
+      );
+      outcome = await controller.saveProfile(photoJpeg: jpeg);
+      expect(outcome.status, ProfileSaveStatus.sessionExpired);
+      expect(outcome.message, 'Tu sesión terminó. Inicia sesión de nuevo.');
+
+      service.failure = const CustomerAuthException(
+        CustomerAuthErrorKind.server,
+        debugDetail: 'customer metafieldsSet userErrors: ACCESS_DENIED',
+      );
+      outcome = await controller.saveProfile(photoJpeg: jpeg);
+      expect(outcome.status, ProfileSaveStatus.failed);
+      expect(
+        outcome.message,
+        'No pudimos guardar tu perfil. Inténtalo de nuevo.',
+      );
+
+      service.failure = StateError('boom');
+      outcome = await controller.saveProfile(photoJpeg: jpeg);
+      expect(outcome.status, ProfileSaveStatus.failed);
+      expect(controller.profileSaving, isFalse);
+    });
+
+    test('a name that saved stays applied when the photo then fails', () async {
+      final inner = _FakeProfileService()..reportedDisplayName = 'Lucía';
+      final controller = buildController(profileService: _FailOnPhoto(inner));
+      await controller.login();
+      await controller.loadProfile();
+
+      final outcome = await controller.saveProfile(
+        firstName: 'Lucía',
+        photoJpeg: jpeg,
+      );
+
+      expect(outcome.status, ProfileSaveStatus.failed);
+      expect(controller.profile?.firstName, 'Lucía');
+      expect(controller.account?.displayName, 'Lucía');
+      expect(controller.profile?.photoDataUrl, isNull);
+    });
+
+    test('a late load for account A is discarded after switching to B',
+        () async {
+      final gateway = _FakeGateway();
+      final (controller, service) = await signedIn(gateway: gateway);
+      final accountA = controller.account!.localAccountId;
+      service.gate = Completer<void>();
+      service.profile = const CustomerProfile(
+        shopifyCustomerId: 'gid://shopify/Customer/1',
+        firstName: 'Ana',
+      );
+
+      final pending = controller.loadProfile();
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      expect(service.calls, ['fetch']);
+
+      gateway.customerId = 'gid://shopify/Customer/2';
+      gateway.email = 'b@b.com';
+      await controller.login();
+      expect(controller.account?.localAccountId, isNot(accountA));
+      expect(controller.profile, isNull);
+
+      service.gate!.complete();
+      await pending;
+
+      expect(controller.profile, isNull);
+      expect(controller.profileLoading, isFalse);
+    });
+
+    test('a late save for account A is discarded after switching to B',
+        () async {
+      final gateway = _FakeGateway();
+      final (controller, service) = await signedIn(gateway: gateway);
+      final accountA = controller.account!.localAccountId;
+      final before = controller.account!.displayName;
+      service.gate = Completer<void>();
+
+      final pending = controller.saveProfile(firstName: 'Lucía');
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      expect(service.calls, ['updateFirstName']);
+
+      gateway.customerId = 'gid://shopify/Customer/2';
+      gateway.email = 'b@b.com';
+      await controller.login();
+      final accountB = controller.account!;
+      expect(accountB.localAccountId, isNot(accountA));
+
+      service.gate!.complete();
+      final outcome = await pending;
+
+      expect(outcome.status, ProfileSaveStatus.discarded);
+      expect(controller.profile, isNull);
+      expect(controller.profileSaving, isFalse);
+      expect(controller.account?.localAccountId, accountB.localAccountId);
+      expect(controller.account?.displayName, accountB.displayName);
+      // A's stored name was not touched by the discarded save either.
+      expect((await accountStore.byLocalId(accountA))?.displayName, before);
+    });
+
+    test('logout clears the profile and orphans a save in flight', () async {
+      final (controller, service) = await signedIn();
+      await controller.loadProfile();
+      expect(controller.profile, isNotNull);
+
+      service.gate = Completer<void>();
+      final pending = controller.saveProfile(photoJpeg: jpeg);
+      await Future<void>.delayed(Duration.zero);
+      await Future<void>.delayed(Duration.zero);
+      await controller.logout();
+
+      expect(controller.profile, isNull);
+      expect(controller.profilePhotoBytes, isNull);
+      expect(controller.canEditProfile, isFalse);
+
+      service.gate!.complete();
+      final outcome = await pending;
+      expect(outcome.status, ProfileSaveStatus.discarded);
+      expect(controller.profile, isNull);
+    });
+
+    test('logging in again as the same account keeps the loaded profile',
+        () async {
+      final (controller, _) = await signedIn();
+      await controller.loadProfile();
+      final loaded = controller.profile;
+
+      await controller.login();
+
+      expect(controller.profile, same(loaded));
+    });
+  });
+}
+
+/// Delegates to [inner] except that setting a photo fails.
+class _FailOnPhoto implements CustomerProfileService {
+  _FailOnPhoto(this.inner);
+
+  final _FakeProfileService inner;
+
+  @override
+  Future<CustomerProfile> fetch(String accessToken) => inner.fetch(accessToken);
+
+  @override
+  Future<String?> updateFirstName(String accessToken, String firstName) =>
+      inner.updateFirstName(accessToken, firstName);
+
+  @override
+  Future<void> setPhoto(
+    String accessToken,
+    String customerId,
+    String dataUrl,
+  ) async =>
+      throw const CustomerAuthException(CustomerAuthErrorKind.server);
+
+  @override
+  Future<void> removePhoto(String accessToken, String customerId) =>
+      inner.removePhoto(accessToken, customerId);
+}
+
+/// Records every call and can hold the next one open so a test can switch
+/// accounts while a request is in flight.
+class _FakeProfileService implements CustomerProfileService {
+  CustomerProfile profile = const CustomerProfile(
+    shopifyCustomerId: 'gid://shopify/Customer/1',
+    firstName: 'Ana',
+    lastName: 'Ruiz',
+    displayName: 'Ana Ruiz',
+  );
+  Object? failure;
+  Completer<void>? gate;
+  String? reportedDisplayName;
+  final calls = <String>[];
+  final tokens = <String>[];
+  String? lastFirstName;
+  String? lastDataUrl;
+  String? lastCustomerId;
+
+  Future<void> _enter(String call, String token) async {
+    calls.add(call);
+    tokens.add(token);
+    final held = gate;
+    if (held != null) await held.future;
+    final error = failure;
+    if (error != null) throw error;
+  }
+
+  @override
+  Future<CustomerProfile> fetch(String accessToken) async {
+    await _enter('fetch', accessToken);
+    return profile;
+  }
+
+  @override
+  Future<String?> updateFirstName(String accessToken, String firstName) async {
+    await _enter('updateFirstName', accessToken);
+    lastFirstName = firstName;
+    return reportedDisplayName;
+  }
+
+  @override
+  Future<void> setPhoto(
+    String accessToken,
+    String customerId,
+    String dataUrl,
+  ) async {
+    await _enter('setPhoto', accessToken);
+    lastCustomerId = customerId;
+    lastDataUrl = dataUrl;
+  }
+
+  @override
+  Future<void> removePhoto(String accessToken, String customerId) async {
+    await _enter('removePhoto', accessToken);
+    lastCustomerId = customerId;
+  }
 }
 
 class _GatedCaa implements CustomerOrdersService {
