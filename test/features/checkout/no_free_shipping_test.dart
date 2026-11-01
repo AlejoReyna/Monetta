@@ -190,59 +190,16 @@ void main() {
 
     for (final bagCase in _cases) {
       testWidgets(
-        'SHIP-03 contact step shows no delivery amount and a calculated '
+        'SHIP-03 checkout shows no delivery amount and a calculated '
         'total (${bagCase.name})',
         (tester) async {
           _setSurface(tester, const Size(390, 2400));
           final store = await _storeWithBag(bagCase);
           await pumpCheckout(tester, store);
 
-          expect(find.text('¿Cómo te contactamos?'), findsOneWidget);
-          _expectNoFreeShippingCopy(tester);
-
-          final option = _valuesOfRow(
-            find.byType(Scaffold).first,
-            'Envío estándar',
-          );
-          expect(option, contains('SE CALCULA EN SHOPIFY'));
-          for (final text in option) {
-            expect(text, isNot(contains(r'$')), reason: 'no invented amount');
-            expect(text, isNot(contains('ESTIMADO')));
-            expect(text.toUpperCase(), isNot(contains('GRATIS')));
-          }
-          expectTotals(bagCase);
-        },
-      );
-
-      testWidgets(
-        'SHIP-03 review step shows no estimated shipping and a calculated '
-        'total (${bagCase.name})',
-        (tester) async {
-          _setSurface(tester, const Size(390, 2400));
-          final store = await _storeWithBag(bagCase);
-          await pumpCheckout(tester, store);
-
-          final fields = find.byType(TextFormField);
-          await tester.enterText(fields.at(0), 'buyer@example.invalid');
-          await tester.enterText(fields.at(1), '8112345678');
-          await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-          await tester.tap(find.text('REVISAR PEDIDO'));
-          await tester.pumpAndSettle();
-
-          expect(find.text('Todo listo'), findsOneWidget);
+          expect(find.byKey(const ValueKey('checkout-pay-button')), findsOne);
           _expectNoFreeShippingCopy(tester);
           expect(find.textContaining('Estimado previo'), findsNothing);
-
-          // The block title is upper-cased by _ReviewBlock.
-          final method = _valuesOfRow(
-            find.byType(Scaffold).first,
-            'MÉTODO DE ENVÍO',
-          );
-          expect(method, hasLength(1));
-          expect(method.single, isNot(contains(r'$')));
-          expect(method.single, isNot(contains('Estimado previo')));
-          expect(method.single.toLowerCase(), isNot(contains('gratis')));
-
           expectTotals(bagCase);
         },
       );

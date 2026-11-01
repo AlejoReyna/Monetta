@@ -180,12 +180,16 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.byType(CategoriesScreen), findsOneWidget);
     await _pop(tester);
-    // Guide v2: the menu no longer links Categorías, Mayoreo or Contacto
-    // (Mayoreo and Contacto are reached from Cuenta).
+    // Guide v2: the menu no longer links Categorías or Contacto (Contacto is
+    // reached from Cuenta). Mayoreo is listed, as in the theme's menu.
     await tester.tap(find.byKey(const Key('home-menu-button')));
     await tester.pumpAndSettle();
     final menu = find.byKey(const Key('monetta-side-menu'));
-    for (final label in ['Categorías', 'Mayoreo', 'Contacto']) {
+    expect(
+      find.descendant(of: menu, matching: find.text('Mayoreo')),
+      findsOneWidget,
+    );
+    for (final label in ['Categorías', 'Contacto']) {
       expect(
         find.descendant(of: menu, matching: find.text(label)),
         findsNothing,

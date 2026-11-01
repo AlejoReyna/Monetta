@@ -102,7 +102,7 @@ void main() {
     expect(find.byType(MonettaImage), findsOneWidget);
   });
 
-  testWidgets('review lists no invented payment methods', (tester) async {
+  testWidgets('checkout lists no invented payment methods', (tester) async {
     final store = await _loadedStore();
     await store.addToBag(store.products.firstWhere((item) => item.isInStock));
 
@@ -116,14 +116,8 @@ void main() {
     );
     await tester.pump();
 
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'buyer@example.invalid');
-    await tester.enterText(fields.at(1), '8112345678');
-    await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-    await tester.tap(find.text('REVISAR PEDIDO'));
-    await tester.pumpAndSettle();
-
-    expect(find.byKey(const ValueKey('payment-hosted-notice')), findsOneWidget);
+    // The method is chosen in Shopify's checkout; here only one line says so.
+    expect(find.text('Pagos seguros con Shopify.'), findsOneWidget);
     expect(find.textContaining('Tarjeta de crédito'), findsNothing);
     expect(find.textContaining('PayPal'), findsNothing);
     expect(find.textContaining('Mercado Pago'), findsNothing);
@@ -150,14 +144,10 @@ void main() {
     );
     await tester.pump();
 
-    final fields = find.byType(TextFormField);
-    await tester.enterText(fields.at(0), 'buyer@example.invalid');
-    await tester.enterText(fields.at(1), '8112345678');
-    await tester.ensureVisible(find.text('REVISAR PEDIDO'));
-    await tester.tap(find.text('REVISAR PEDIDO'));
+    final pay = find.byKey(const ValueKey('checkout-pay-button'));
+    await tester.ensureVisible(pay);
     await tester.pumpAndSettle();
-    await tester.ensureVisible(find.text('CONTINUAR AL PAGO SEGURO'));
-    await tester.tap(find.text('CONTINUAR AL PAGO SEGURO'));
+    await tester.tap(pay);
     await tester.pumpAndSettle();
 
     expect(store.bagQuantity, 1);

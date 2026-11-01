@@ -16,6 +16,7 @@ class ClientGuideEditorial extends StatelessWidget {
     this.action,
     this.overlaySide,
     this.titleAccent,
+    this.height,
     super.key,
   });
   final String title;
@@ -29,6 +30,10 @@ class ClientGuideEditorial extends StatelessWidget {
 
   /// Word set under [title] in the italic accent face (guide: «mayoreo»).
   final String? titleAccent;
+
+  /// Fixed height of the overlay layout. The copy is scaled down to fit it, so
+  /// narrow banners (two side by side) never overflow, even at large text.
+  final double? height;
 
   @override
   Widget build(BuildContext context) {
@@ -135,6 +140,61 @@ class ClientGuideEditorial extends StatelessWidget {
           height: 1.05,
           letterSpacing: titleSize * 0.02,
         );
+        final fixedHeight = height;
+        final copy = SizedBox(
+          width: width * (large ? 0.7 : 0.5),
+          child: Padding(
+            padding: EdgeInsets.symmetric(
+              horizontal: MonettaTokens.space[1],
+              vertical: gutter,
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                Text.rich(
+                  TextSpan(
+                    text: title,
+                    style: titleStyle,
+                    children: [
+                      if (titleAccent != null) ...[
+                        const TextSpan(text: '\n'),
+                        TextSpan(
+                          text: titleAccent,
+                          style: guideAccentStyle(
+                            context,
+                            size: titleSize * 2.0,
+                            color: palette.ink,
+                            underline: true,
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                SizedBox(height: MonettaTokens.space[2]),
+                Text(
+                  subtitle,
+                  textAlign: TextAlign.center,
+                  style: guideSerifItalicStyle(
+                    context,
+                    size: (width * 0.039).clamp(13.0, 19.0),
+                    color: palette.ink,
+                    weight: FontWeight.w500,
+                  ),
+                ),
+                if (action != null) ...[
+                  SizedBox(height: MonettaTokens.space[2]),
+                  ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 200),
+                    child: action!,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        );
         return Stack(
           children: [
             Positioned.fill(
@@ -145,67 +205,24 @@ class ClientGuideEditorial extends StatelessWidget {
               ),
             ),
             Positioned.fill(child: GuideScrim(textSide: side)),
-            ConstrainedBox(
-              constraints: BoxConstraints(minHeight: width / 2.3),
-              child: Align(
-                alignment:
-                    onRight ? Alignment.centerRight : Alignment.centerLeft,
-                child: SizedBox(
-                  width: width * (large ? 0.7 : 0.5),
-                  child: Padding(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: MonettaTokens.space[1],
-                      vertical: gutter,
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text.rich(
-                          TextSpan(
-                            text: title,
-                            style: titleStyle,
-                            children: [
-                              if (titleAccent != null) ...[
-                                const TextSpan(text: '\n'),
-                                TextSpan(
-                                  text: titleAccent,
-                                  style: guideAccentStyle(
-                                    context,
-                                    size: titleSize * 2.0,
-                                    color: palette.ink,
-                                    underline: true,
-                                  ),
-                                ),
-                              ],
-                            ],
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                        SizedBox(height: MonettaTokens.space[2]),
-                        Text(
-                          subtitle,
-                          textAlign: TextAlign.center,
-                          style: guideSerifItalicStyle(
-                            context,
-                            size: (width * 0.039).clamp(13.0, 19.0),
-                            color: palette.ink,
-                            weight: FontWeight.w500,
-                          ),
-                        ),
-                        if (action != null) ...[
-                          SizedBox(height: MonettaTokens.space[2]),
-                          ConstrainedBox(
-                            constraints: const BoxConstraints(maxWidth: 200),
-                            child: action!,
-                          ),
-                        ],
-                      ],
-                    ),
-                  ),
+            if (fixedHeight != null)
+              SizedBox(
+                height: fixedHeight,
+                child: Align(
+                  alignment:
+                      onRight ? Alignment.centerRight : Alignment.centerLeft,
+                  child: FittedBox(fit: BoxFit.scaleDown, child: copy),
+                ),
+              )
+            else
+              ConstrainedBox(
+                constraints: BoxConstraints(minHeight: width / 2.3),
+                child: Align(
+                  alignment:
+                      onRight ? Alignment.centerRight : Alignment.centerLeft,
+                  child: copy,
                 ),
               ),
-            ),
           ],
         );
       },

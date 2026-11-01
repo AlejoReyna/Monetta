@@ -61,7 +61,6 @@ const List<HomeSectionId> _kBoutiqueSectionOrder = <HomeSectionId>[
   HomeSectionId.collections,
   HomeSectionId.brands,
   HomeSectionId.newProducts,
-  HomeSectionId.about,
   HomeSectionId.social,
   HomeSectionId.testimonials,
 ];
@@ -525,7 +524,11 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     final order = isBundledDefault ? _kBoutiqueSectionOrder : configured;
     return <HomeSectionId>[
       for (final section in order)
-        if (_isSectionEnabled(section, storefront)) section,
+        // «Más sobre Monetta» no longer lives on Inicio (the theme dropped
+        // it); the story stays reachable from the footer's «Nuestra historia».
+        if (section != HomeSectionId.about &&
+            _isSectionEnabled(section, storefront))
+          section,
     ];
   }
 
@@ -585,12 +588,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
               brands: guideBrandsFor(content.brands),
               onSeeAll: () => unawaited(openCategories(context)),
             ),
-          HomeSectionId.about => _AboutMonettaSection(
-              content: editorial.about,
-              imageUrl: content.aboutImageUrl,
-              onOpen: _openAbout,
-              onOpenPartner: _openPartner,
-            ),
+          // Filtered out by `_resolveSectionOrder`; never built on Inicio.
+          HomeSectionId.about => const SizedBox.shrink(),
           HomeSectionId.social => _SocialSection(
               links: content.socialLinks,
               onOpen: _openExternal,
@@ -1325,112 +1324,6 @@ class _BrandsSectionState extends State<_BrandsSection>
   }
 }
 
-class _AboutMonettaSection extends StatelessWidget {
-  const _AboutMonettaSection({
-    required this.content,
-    required this.imageUrl,
-    required this.onOpen,
-    required this.onOpenPartner,
-  });
-
-  final AboutMonettaContent content;
-  final String? imageUrl;
-  final VoidCallback onOpen;
-  final VoidCallback onOpenPartner;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const BoutiqueSectionHeader(title: 'Más sobre Monetta'),
-        MonettaCardLift(
-          mouseCursor: MouseCursor.defer,
-          child: Container(
-            key: const ValueKey('home-about-card'),
-            width: double.infinity,
-            decoration: BoxDecoration(
-              borderRadius: BoutiqueRadius.card,
-              border: Border.all(color: context.boutique.hairline),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: LayoutBuilder(
-              builder: (context, constraints) {
-                final wide = constraints.maxWidth >= 720;
-                final image = SizedBox(
-                  key: const ValueKey('home-about-image'),
-                  height: 360,
-                  width: double.infinity,
-                  child: _HomeImage(
-                    imageUrl: imageUrl,
-                    fallbackAsset: 'assets/images/home_about.webp',
-                    fit: BoxFit.cover,
-                  ),
-                );
-                final copy = Padding(
-                  key: const ValueKey('home-about-monetta'),
-                  padding: EdgeInsets.all(wide ? 36 : 24),
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'BIENVENID@',
-                        style: display(
-                          wide ? 31 : 27,
-                          color: context.monettaColors.accent,
-                        ),
-                      ),
-                      const SizedBox(height: 14),
-                      Text(content.headline, style: display(wide ? 27 : 23)),
-                      const SizedBox(height: 14),
-                      Text(
-                        content.body,
-                        style: sans(
-                          size: 13,
-                          color: context.monettaColors.contentMuted,
-                          height: 1.55,
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      Wrap(
-                        spacing: 26,
-                        runSpacing: 18,
-                        children: [
-                          UnderlineLink(
-                            label: 'Conoce nuestra historia',
-                            onTap: onOpen,
-                          ),
-                          UnderlineLink(
-                            key: const ValueKey('home-open-partner'),
-                            label: 'Vende con Monetta',
-                            onTap: onOpenPartner,
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-                );
-                if (!wide) return Column(children: [image, copy]);
-                return SizedBox(
-                  height: 360,
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.stretch,
-                    children: [
-                      Expanded(child: image),
-                      Expanded(child: copy),
-                    ],
-                  ),
-                );
-              },
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
 class _SocialSection extends StatelessWidget {
   const _SocialSection({required this.links, required this.onOpen});
 
@@ -1522,12 +1415,10 @@ class _HomeImage extends StatelessWidget {
   const _HomeImage({
     required this.imageUrl,
     required this.fallbackAsset,
-    this.fit = BoxFit.cover,
   });
 
   final String? imageUrl;
   final String fallbackAsset;
-  final BoxFit fit;
 
   @override
   Widget build(BuildContext context) {
@@ -1535,7 +1426,7 @@ class _HomeImage extends StatelessWidget {
       fallbackAsset,
       width: double.infinity,
       height: double.infinity,
-      fit: fit,
+      fit: BoxFit.cover,
       filterQuality: FilterQuality.medium,
     );
     final url = imageUrl;
@@ -1545,7 +1436,7 @@ class _HomeImage extends StatelessWidget {
       sizedUrl,
       width: double.infinity,
       height: double.infinity,
-      fit: fit,
+      fit: BoxFit.cover,
       filterQuality: FilterQuality.medium,
       // Home artwork is displayed in rails/cards, not full-screen. Keep
       // oversized Shopify originals from being decoded on the UI thread.
